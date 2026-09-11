@@ -7,7 +7,6 @@ import {
   Toast,
   closeMainWindow,
   getPreferenceValues,
-  open,
   popToRoot,
   showToast,
 } from "@raycast/api";
@@ -18,7 +17,7 @@ import { useSearchPages } from "./hooks";
 import { getPageIcon } from "./utils/notion";
 import { NoteStyle, addNote, describeAddNoteError, getDateTitle } from "./utils/notion/notes";
 import { notionService } from "./utils/notion/oauth";
-import { urlForPreferredMethod } from "./utils/openPage";
+import { urlForPreferredMethod, openPageUrl } from "./utils/openPage";
 
 type AddNoteValues = {
   note: string;
@@ -60,7 +59,7 @@ function AddNote(props: LaunchProps<{ arguments: Arguments.AddNote }>) {
           message: `${notes_page_name} › ${dateTitle}`,
           primaryAction: {
             title: "Open Page",
-            onAction: () => open(urlForPreferredMethod(pageUrl(datePageId), open_in), open_in),
+            onAction: () => openPageUrl(urlForPreferredMethod(pageUrl(datePageId), open_in), open_in),
           },
         });
       } catch (err) {

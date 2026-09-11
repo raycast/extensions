@@ -1,4 +1,15 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Clipboard, Color, getPreferenceValues } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  Clipboard,
+  Color,
+  getPreferenceValues,
+  Keyboard,
+} from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { listItems, getTotp, checkAuth } from "./lib/pass-cli";
 import { Item, PassCliError, PassCliErrorType } from "./lib/types";
@@ -182,7 +193,7 @@ export default function Command() {
                 <Action
                   title="Refresh Codes"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={refreshTotpCodes}
                 />
               </ActionPanel>

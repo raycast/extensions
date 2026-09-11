@@ -29,10 +29,29 @@
       "mode": "view"
     },
     {
+      "name": "top-sources",
+      "title": "Top Sources",
+      "description": "View top traffic sources for a Kobbe site.",
+      "mode": "view"
+    },
+    {
       "name": "revenue",
       "title": "Revenue",
       "description": "View revenue for a Kobbe site.",
       "mode": "view"
+    },
+    {
+      "name": "setup-health",
+      "title": "Setup Health",
+      "description": "Check tracker and revenue webhook status for a Kobbe site.",
+      "mode": "view"
+    },
+    {
+      "name": "live-visitors",
+      "title": "Live Visitors",
+      "description": "Show visitors currently online in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
   "preferences": [
@@ -50,6 +69,24 @@
       "type": "textfield",
       "required": true,
       "default": "https://app.kobbe.io"
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What pressing Enter on a site does.",
+      "type": "dropdown",
+      "required": false,
+      "default": "open-dashboard",
+      "data": [
+        {
+          "title": "Open Dashboard in Browser",
+          "value": "open-dashboard"
+        },
+        {
+          "title": "View Overview in Raycast",
+          "value": "view-overview"
+        }
+      ]
     },
     {
       "name": "defaultRange",
@@ -91,6 +128,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.3.0",
     "react": "19.0.0"
   },
   "devDependencies": {

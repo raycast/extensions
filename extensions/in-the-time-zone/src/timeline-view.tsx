@@ -17,6 +17,7 @@ export interface TimelineViewProps {
   onClearBase: () => Promise<void>;
   scrubMinutes: number;
   optionScrubMinutes: number;
+  timeFormat: string;
 }
 
 export function TimelineView(props: TimelineViewProps) {
@@ -30,6 +31,7 @@ export function TimelineView(props: TimelineViewProps) {
     onClearBase,
     scrubMinutes,
     optionScrubMinutes,
+    timeFormat,
   } = props;
 
   function formatScrubTitle(minutes: number): string {
@@ -52,8 +54,9 @@ export function TimelineView(props: TimelineViewProps) {
       baseISO,
       baseCityId,
       selectedZoneIds,
+      timeFormat,
     });
-  }, [baseISO, baseCityId, selectedZoneIds]);
+  }, [baseISO, baseCityId, selectedZoneIds, timeFormat]);
 
   const citySunTimes = useMemo(() => {
     const date = new Date(baseISO);
@@ -63,12 +66,12 @@ export function TimelineView(props: TimelineViewProps) {
       const timezone = getTimezone(zoneId);
 
       if (city && city.lat && city.lng) {
-        const sunTimes = getSunTimes(city.lat, city.lng, date, timezone);
+        const sunTimes = getSunTimes(city.lat, city.lng, date, timezone, timeFormat);
         return { zoneId, cityName, sunrise: sunTimes.sunrise, sunset: sunTimes.sunset };
       }
       return { zoneId, cityName, sunrise: "—", sunset: "—" };
     });
-  }, [baseISO, selectedZoneIds]);
+  }, [baseISO, selectedZoneIds, timeFormat]);
 
   return (
     <Detail

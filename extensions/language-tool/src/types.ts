@@ -65,3 +65,10 @@ export interface Match {
 export interface Replacement {
   value?: string;
 }
+
+/**
+ * Corrections the user has accepted: index of the match in the response, mapped
+ * to the replacement chosen for it. A match can offer several replacements, so
+ * the choice has to be stored alongside the index.
+ */
+export type AppliedCorrections = Map<number, string>;

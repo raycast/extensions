@@ -107,7 +107,7 @@ export default function Model() {
   return (
     <List
       isShowingDetail // always show detail view, since the default model is always selected
-      isLoading={models.isLoading || models.isFetching}
+      isLoading={models.isLoading}
       filtering={false}
       throttle={false}
       selectedItemId={selectedModelId || undefined}
@@ -120,7 +120,7 @@ export default function Model() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      {models.isFetching ? (
+      {models.isLoading ? (
         <List.EmptyView />
       ) : (
         <>

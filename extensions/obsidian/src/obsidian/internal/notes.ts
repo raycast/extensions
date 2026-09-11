@@ -9,6 +9,8 @@ export interface Note {
   path: string;
   lastModified: Date;
   bookmarked: boolean;
+  createdAt?: Date;
+  fileSize?: number;
 }
 
 export interface NoteWithContent extends Note {

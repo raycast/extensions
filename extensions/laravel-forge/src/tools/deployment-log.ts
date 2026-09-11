@@ -1,28 +1,29 @@
 import { Site } from "../api/Site";
-import { findSite, tail } from "./helpers";
+import { dropOnMiss, locateSite } from "../lib/coordinates";
+import { tail } from "./helpers";
 
 type Input = {
   /**
-   * Name of the site, as shown in Forge (for example "example.com").
+   * A site id from list-sites, for example 2882133.
    */
-  site: string;
+  siteId: number;
   /**
-   * Id of a specific deployment. Leave empty for the most recent deployment.
+   * Id of one deployment. Leave empty for the latest.
    */
   deploymentId?: number;
 };
 
-export default async function tool({ site, deploymentId }: Input) {
-  const { site: found, server, token } = await findSite(site);
-  const target = { orgSlug: server.org_slug, serverId: server.id, siteId: found.id, token };
+export default async function tool({ siteId, deploymentId }: Input) {
+  const at = await locateSite(siteId);
+  const target = { orgSlug: at.org, serverId: at.serverId, siteId, token: at.account.token };
 
   let deployment = deploymentId;
   if (!deployment) {
-    const [latest] = await Site.getDeploymentHistory(target);
-    if (!latest) return { site: found.name, log: "", note: "This site has no deployments yet." };
+    const [latest] = await dropOnMiss("site", siteId, () => Site.getDeploymentHistory(target));
+    if (!latest) return { siteId, log: "", note: "This site has no deployments yet." };
     deployment = latest.id;
   }
 
-  const log = await Site.getDeploymentOutput({ ...target, deploymentId: deployment });
-  return { site: found.name, deploymentId: deployment, log: tail(log) };
+  const log = await dropOnMiss("site", siteId, () => Site.getDeploymentOutput({ ...target, deploymentId: deployment }));
+  return { siteId, deploymentId: deployment, log: tail(log) };
 }

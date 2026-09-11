@@ -36,3 +36,14 @@ export type RequestCardPayload = {
 };
 
 export type RequestCardResult = { success: true } | { success: false; error: string };
+
+/**
+ * What "Search Word from Screenshot" got out of a screen capture. Mirrors the
+ * `ScreenOcrOutcome` struct in `swift/Sources/InohOcr/InohOcr.swift`.
+ */
+export type ScreenOcrOutcome =
+  | { status: "recognized"; text: string }
+  | { status: "cancelled" }
+  | { status: "noTextFound" }
+  | { status: "blankCapture" }
+  | { status: "failed"; errorMessage: string };

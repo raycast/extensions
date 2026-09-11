@@ -1,8 +1,6 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Model, ModelHook, ReasoningEffort } from "../type";
-import { getConfiguration, useChatGPT } from "./useChatGPT";
-import { useProxy } from "./useProxy";
 
 type StoredModel = Partial<Model> & Pick<Model, "id">;
 
@@ -56,62 +54,7 @@ function normalizeModels(models: Record<string, StoredModel>): Record<string, Mo
 export function useModel(): ModelHook {
   const [data, setData] = useState<Record<string, Model>>({});
   const [isLoading, setLoading] = useState<boolean>(true);
-  const [isFetching, setFetching] = useState<boolean>(true);
-  const gpt = useChatGPT();
-  const proxy = useProxy();
-  const { useAzure, isCustomModel } = getConfiguration();
-  const [option, setOption] = useState<Model["option"][]>(["gpt-5-nano", "gpt-5.2-chat-latest"]);
   const isInitialMount = useRef(true);
-
-  useEffect(() => {
-    if (isCustomModel) {
-      // If choose to use custom model, we don't need to fetch models from the API
-      setFetching(false);
-      return;
-    }
-    if (!useAzure) {
-      gpt.models
-        .list({ httpAgent: proxy })
-        .then((res) => {
-          let models = res.data;
-          // some provider return text/plain content type
-          // and the sdk `defaultParseResponse` simply return `text`
-          if (models.length === 0) {
-            try {
-              const body = JSON.parse((res as unknown as { body: string }).body);
-              models = body.data;
-            } catch {
-              // ignore try to parse it
-            }
-          }
-          setOption(models.map((x) => x.id));
-        })
-        .catch(async (err) => {
-          console.error(err);
-          if (!(err instanceof Error || err.message)) {
-            return;
-          }
-          await showToast(
-            err.message.includes("401")
-              ? {
-                  title: "Could not authenticate to API",
-                  message: "Please ensure that your API token is valid",
-                  style: Toast.Style.Failure,
-                }
-              : {
-                  title: "Error",
-                  message: err.message,
-                  style: Toast.Style.Failure,
-                },
-          );
-        })
-        .finally(() => {
-          setFetching(false);
-        });
-    } else {
-      setFetching(false);
-    }
-  }, [gpt]);
 
   useEffect(() => {
     (async () => {
@@ -217,7 +160,7 @@ export function useModel(): ModelHook {
   );
 
   return useMemo(
-    () => ({ data, isLoading, option, add, update, remove, clear, setModels, isFetching }),
-    [data, isLoading, option, add, update, remove, clear, setModels, isFetching],
+    () => ({ data, isLoading, add, update, remove, clear, setModels }),
+    [data, isLoading, add, update, remove, clear, setModels],
   );
 }

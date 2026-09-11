@@ -6,6 +6,26 @@ Preferences are configured in the [manifest](../information/manifest.md#preferen
 
 Required preferences need to be set by the user before a command opens. They are a great way to make sure that the user of your extension has everything set up properly.
 
+## Help for Required Preferences
+
+Add an optional `help.md` file to the root of your extension, next to `package.json`, to explain how to fill in required preferences. Raycast renders its Markdown beside the setup form when a command or tool needs required preferences that haven't been set. The same help file is used throughout the extension, so include any instructions needed for both shared and command-specific preferences.
+
+For example, a `help.md` file for an extension that requires an API key could contain:
+
+```markdown
+# Set Up Your API Key
+
+1. Sign in to your account on the service's website.
+2. Open **Settings → API Keys** and create a key with read access.
+3. Copy the key into the **API Key** preference, then continue.
+
+Only read access is needed to search your account's data.
+```
+
+No manifest configuration or API call is needed. The CLI includes the file in the extension build as `HELP.md` and watches it for changes during `ray develop`. The filename is case-insensitive when building; `help.md`, `Help.md`, and `HELP.md` are all supported.
+
+Keep this file focused on setup steps, such as obtaining credentials or enabling a setting in another application. Use `README.md` for the extension's general documentation. When help content is available, the setup form displays it in place of the **About this Extension** link to the README.
+
 ## API Reference
 
 ### getPreferenceValues

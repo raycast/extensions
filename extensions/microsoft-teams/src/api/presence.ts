@@ -2,13 +2,7 @@ import { bodyOf, failIfNotOk, get, post } from "./api";
 import { showHUD } from "@raycast/api";
 
 export type Availability =
-  | "Available"
-  | "Busy"
-  | "DoNotDisturb"
-  | "BeRightBack"
-  | "Away"
-  | "Offline"
-  | "PresenceUnknown";
+  "Available" | "Busy" | "DoNotDisturb" | "BeRightBack" | "Away" | "Offline" | "PresenceUnknown";
 type Activity = "Available" | "Busy" | "DoNotDisturb" | "BeRightBack" | "Away" | "OffWork" | "Unknown";
 
 function activityFor(availability: Availability): Activity {
@@ -81,11 +75,14 @@ export async function getAvailability() {
   return presence.availability;
 }
 
-export async function setAvailability(availability?: Availability) {
+export async function setAvailability(availability?: Availability, showFeedback = true) {
   if (availability) {
     await setPreferredPresence(availability);
   } else {
     await clearPreferredPresence();
+  }
+  if (!showFeedback) {
+    return;
   }
   switch (availability) {
     case undefined:

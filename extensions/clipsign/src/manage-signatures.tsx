@@ -40,8 +40,12 @@ export default function ManageSignatures() {
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (ok) {
-      await deleteSignature(sig.id);
-      showToast(Toast.Style.Success, "Signature deleted");
+      try {
+        await deleteSignature(sig.id);
+        showToast(Toast.Style.Success, "Signature deleted");
+      } catch (error) {
+        showFailureToast(error, { title: `Failed to delete "${sig.name}"` });
+      }
       await load();
     }
   };

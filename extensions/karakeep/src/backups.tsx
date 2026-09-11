@@ -6,6 +6,7 @@ import { fetchCreateBackup, fetchDeleteBackup, fetchGetAllBackups, fetchGetBacku
 import { useTranslation } from "./hooks/useTranslation";
 import { connectionGuard } from "./components/ConnectionErrorView";
 import { handleFetchError } from "./utils/fetchError";
+import { isAuthError } from "./utils/apiError";
 import { useLiveData } from "./hooks/useLiveData";
 import { formatBytes } from "./utils/formatting";
 import { attachCopyDetail, runWithToast } from "./utils/toast";
@@ -35,7 +36,11 @@ export default function Backups() {
   // Poll while any backup is pending
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
-    if (hasPending) {
+    // `!isAuthError(error)`: a 401 never resolves itself, so a pending backup
+    // would otherwise poll every few seconds forever behind the auth screen,
+    // firing a failure toast on each tick. A connection error is NOT excluded —
+    // polling is exactly how that one recovers.
+    if (hasPending && !isAuthError(error)) {
       log.log("Starting backup status polling", { intervalMs: POLL_INTERVAL_MS });
       intervalRef.current = setInterval(() => {
         log.log("Polling for backup status update");
@@ -54,7 +59,7 @@ export default function Backups() {
         intervalRef.current = null;
       }
     };
-  }, [hasPending, revalidate]);
+  }, [hasPending, error, revalidate]);
 
   // Show a toast when a backup transitions to failure
   const prevBackupsRef = useRef<typeof backups>([]);
@@ -92,16 +97,22 @@ export default function Backups() {
   }, [backups, t]);
 
   async function handleCreate() {
-    await runWithToast({
+    // The sentinel exists so the caller can tell success from failure at all:
+    // runWithToast swallows a failure into `undefined`, and an action returning
+    // void resolves to `undefined` on BOTH paths.
+    const created = await runWithToast({
       loading: { title: t("backups.toast.create.loading") },
       success: { title: t("backups.toast.create.success") },
       failure: { title: t("backups.toast.create.error") },
       action: async () => {
         await fetchCreateBackup();
         log.info("Backup created");
+        return true;
       },
     });
-    await revalidate();
+    // Refreshing after a REJECTED mutation fires a second auth toast over the
+    // one runWithToast just showed, and swaps the view for the auth screen.
+    if (created) await revalidate();
   }
 
   async function handleDelete(id: string) {
@@ -111,16 +122,17 @@ export default function Backups() {
         message: t("backups.deleteConfirm"),
       })
     ) {
-      await runWithToast({
+      const deleted = await runWithToast({
         loading: { title: t("backups.toast.delete.loading") },
         success: { title: t("backups.toast.delete.success") },
         failure: { title: t("backups.toast.delete.error") },
         action: async () => {
           await fetchDeleteBackup(id);
           log.info("Backup deleted", { backupId: id });
+          return true;
         },
       });
-      await revalidate();
+      if (deleted) await revalidate();
     }
   }
 

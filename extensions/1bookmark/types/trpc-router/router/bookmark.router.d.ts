@@ -55,8 +55,8 @@ export declare const bookmarkRouter: import("@trpc/server").TRPCBuiltRouter<{
             description: string;
             spaceId: string;
             name: string;
-            url: string;
             tags: string[];
+            url: string;
         };
         output: {
             description: string | null;
@@ -64,8 +64,10 @@ export declare const bookmarkRouter: import("@trpc/server").TRPCBuiltRouter<{
             id: string;
             createdAt: Date;
             name: string;
-            url: string;
+            updatedAt: Date;
             tags: string[];
+            deletedAt: Date | null;
+            url: string;
             faviconUrl: string | null;
             faviconAttemptedAt: Date | null;
             faviconAttemptCount: number;
@@ -74,8 +76,6 @@ export declare const bookmarkRouter: import("@trpc/server").TRPCBuiltRouter<{
             previewImageAttemptCount: number;
             author: string;
             authorEmail: string;
-            deletedAt: Date | null;
-            updatedAt: Date;
         };
         meta: object;
     }>;
@@ -253,8 +253,8 @@ export declare const bookmarkRouter: import("@trpc/server").TRPCBuiltRouter<{
             id: string;
             description?: string | undefined;
             name?: string | undefined;
-            url?: string | undefined;
             tags?: string[] | undefined;
+            url?: string | undefined;
         };
         output: {
             description: string | null;
@@ -262,8 +262,10 @@ export declare const bookmarkRouter: import("@trpc/server").TRPCBuiltRouter<{
             id: string;
             createdAt: Date;
             name: string;
-            url: string;
+            updatedAt: Date;
             tags: string[];
+            deletedAt: Date | null;
+            url: string;
             faviconUrl: string | null;
             faviconAttemptedAt: Date | null;
             faviconAttemptCount: number;
@@ -272,8 +274,6 @@ export declare const bookmarkRouter: import("@trpc/server").TRPCBuiltRouter<{
             previewImageAttemptCount: number;
             author: string;
             authorEmail: string;
-            deletedAt: Date | null;
-            updatedAt: Date;
         };
         meta: object;
     }>;
@@ -300,15 +300,20 @@ export declare const bookmarkRouter: import("@trpc/server").TRPCBuiltRouter<{
     import: import("@trpc/server").TRPCMutationProcedure<{
         input: {
             spaceId: string;
-            tags: string[];
             bookmarks: {
                 name: string;
                 url: string;
                 description?: string | undefined;
             }[];
+            tags: string[];
             browserName: string;
+            duplicateStrategy?: "skip" | "overwrite" | undefined;
         };
-        output: void;
+        output: {
+            imported: number;
+            overwritten: number;
+            skipped: number;
+        };
         meta: object;
     }>;
 }>>;

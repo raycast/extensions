@@ -35,7 +35,7 @@ function Body(props: { spaceId: string; keyToEdit: KeyToEdit; value: string }) {
   const { pop } = useNavigation();
   const update = trpc.space.update.useMutation();
 
-  // image 필드는 이모지 1개 또는 URL만 허용. 다른 필드는 기존처럼 자유 입력.
+  // The image field only allows a single emoji or a URL. Other fields accept free-form input as before.
   const isIconField = keyToEdit === "image" || keyToEdit === "myImage";
 
   const validate = (v: string): boolean => {

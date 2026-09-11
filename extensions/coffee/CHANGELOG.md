@@ -1,5 +1,15 @@
 # Coffee Changelog
 
+## [Enhancement] - 2026-08-30
+
+- Add reason to `Caffeinate Status`, showing 4 types, examples: 
+  - `Caffeinate Until`: until 2:00 PM
+  - `Caffeinate For ...`: 42m left
+  - `Caffeinate While`: while Slack is running
+  - `Schedule Caffeination`: schedule: Mondays from 11:00 to 15:00
+- Add `Decaffeinate pauses running schedules` preference
+- Add app icons to `Caffeinate While` command
+
 ## [Windows support] - 2026-08-25
 
 - Add support for Windows platform

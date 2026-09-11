@@ -4,14 +4,18 @@ import {
   Icon,
   Action,
   Keyboard,
+  Form,
   getPreferenceValues,
   Clipboard,
   closeMainWindow,
   showHUD,
   open,
+  useNavigation,
 } from "@raycast/api";
 import { dirname, join } from "path";
 import { RefData, Preferences, resolveHome, MAX_RENDER_RESULTS } from "./zoteroApi";
+import { LibraryRef, itemIdentity, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
+import type { CollectionOption } from "./collections";
 import { useVisitedUrls } from "./useVisitedUrls";
 import {
   exportRef,
@@ -21,12 +25,16 @@ import {
   exportPandocKey,
   exportPandocKeyPaste,
 } from "./clipboard";
-import { useState } from "react";
 import CollectionDropdown from "./CollectionDropdown";
 
 type Props = {
   sectionNames: string[];
-  collections: string[];
+  collections: CollectionOption[];
+  selectedCollection: string;
+  onCollectionChange: (value: string) => void;
+  groupLibraries: LibraryRef[];
+  includedGroups: number[];
+  onSaveGroups: (ids: number[]) => void;
   queryResults: RefData[][];
   isLoading: boolean;
   onSearchTextChange?: (text: string) => void;
@@ -147,7 +155,7 @@ function getItemDoi(item: RefData): string {
 }
 
 function getItemZotUrl(item: RefData): string {
-  return `zotero://select/items/${item.library ? item.library : 0}_${item.key}`;
+  return zoteroSelectUri(item);
 }
 
 function getItemIcon(item: RefData): string {
@@ -182,10 +190,16 @@ function getItemDetail(item: RefData): string {
   const publicationDate = getItemPublicationDate(item);
   const pdfKey = item.attachment?.key;
 
-  return `## ${pdfKey ? `[${title}](zotero://open-pdf/library/items/${pdfKey})` : title}
+  return `## ${pdfKey ? `[${title}](${zoteroOpenPdfUri(item, pdfKey)})` : title}
 
   ---
-
+${
+  item.libraryType === "group" && item.libraryName
+    ? `
+**Library:** ${item.libraryName}
+`
+    : ""
+}
 ${creators ? formatAuthors(item) : ""}
 
 ${publicationTitle ? "**Publication:** " + publicationTitle : ""}
@@ -221,13 +235,17 @@ ${
 export const View = ({
   sectionNames,
   collections,
+  selectedCollection,
+  onCollectionChange,
+  groupLibraries,
+  includedGroups,
+  onSaveGroups,
   queryResults,
   isLoading,
   onSearchTextChange,
   throttle,
 }: Props): JSX.Element => {
   const [urls, onOpen] = useVisitedUrls();
-  const [collection, setCollection] = useState<string>("All");
   const preferences: Preferences = getPreferenceValues();
   return (
     <List
@@ -238,7 +256,9 @@ export const View = ({
       }}
       throttle={throttle}
       searchBarPlaceholder="Search Zotero..."
-      searchBarAccessory={<CollectionDropdown onSelection={setCollection} collections={collections} />}
+      searchBarAccessory={
+        <CollectionDropdown value={selectedCollection} onSelection={onCollectionChange} options={collections} />
+      }
     >
       {sectionNames.map((sectionName, sectionIndex) => (
         <List.Section
@@ -250,97 +270,171 @@ export const View = ({
               : `${queryResults[sectionIndex].length}`
           }
         >
-          {queryResults[sectionIndex]
-            .filter((item) => item.collection?.includes(collection) || collection == "All")
-            .map((item) => {
-              const attachmentFilePath = resolveAttachmentPath(item, preferences.zotero_path);
-              return (
-                <List.Item
-                  key={item.key}
-                  id={`${item.id}`}
-                  title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
-                  icon={getItemIcon(item)}
-                  detail={<List.Item.Detail markdown={getItemDetail(item)} />}
-                  actions={
-                    <ActionPanel>
-                      {item.attachment?.key && item.attachment.key !== `` && (
-                        <Action.OpenInBrowser
-                          icon={Icon.ArrowRightCircleFilled}
-                          title="Open PDF"
-                          url={`zotero://open-pdf/library/items/${item.attachment.key}`}
-                          onOpen={onOpen}
-                        />
-                      )}
-                      {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
-                        <Action
-                          icon={Icon.ArrowRightCircleFilled}
-                          title="Open PDF in System Viewer"
-                          onAction={async () => {
-                            try {
-                              await open(attachmentFilePath);
-                              closeMainWindow();
-                            } catch {
-                              await showHUD("Failed to open attachment");
-                            }
-                          }}
-                        />
-                      )}
+          {queryResults[sectionIndex].map((item) => {
+            const attachmentFilePath = resolveAttachmentPath(item, preferences.zotero_path);
+            return (
+              <List.Item
+                key={itemIdentity(item)}
+                id={itemIdentity(item)}
+                title={
+                  item.title +
+                  (item.libraryType === "group" && item.libraryName ? ` · ${item.libraryName}` : "") +
+                  (urls.includes(item.url) ? " (visited)" : "")
+                }
+                icon={getItemIcon(item)}
+                accessories={
+                  item.libraryType === "group" && item.libraryName
+                    ? [{ icon: Icon.TwoPeople, tooltip: item.libraryName }]
+                    : undefined
+                }
+                detail={<List.Item.Detail markdown={getItemDetail(item)} />}
+                actions={
+                  <ActionPanel>
+                    {item.attachment?.key && item.attachment.key !== `` && (
                       <Action.OpenInBrowser
-                        icon={Icon.Link}
-                        title="Open in Zotero"
-                        url={`zotero://select/items/${item.library ? item.library : 0}_${item.key}`}
+                        icon={Icon.ArrowRightCircleFilled}
+                        title="Open PDF"
+                        url={zoteroOpenPdfUri(item, item.attachment.key)}
                         onOpen={onOpen}
                       />
-                      {getURL(item) !== "" && (
-                        <Action.OpenInBrowser
-                          title="Open Original Link"
-                          url={getURL(item)}
-                          shortcut={openExtLinkCommandShortcut}
-                          onOpen={onOpen}
+                    )}
+                    {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
+                      <Action
+                        icon={Icon.ArrowRightCircleFilled}
+                        title="Open PDF in System Viewer"
+                        onAction={async () => {
+                          try {
+                            await open(attachmentFilePath);
+                            closeMainWindow();
+                          } catch {
+                            await showHUD("Failed to open attachment");
+                          }
+                        }}
+                      />
+                    )}
+                    <Action.OpenInBrowser
+                      icon={Icon.Link}
+                      title="Open in Zotero"
+                      url={zoteroSelectUri(item)}
+                      onOpen={onOpen}
+                    />
+                    {getURL(item) !== "" && (
+                      <Action.OpenInBrowser
+                        title="Open Original Link"
+                        url={getURL(item)}
+                        shortcut={openExtLinkCommandShortcut}
+                        onOpen={onOpen}
+                      />
+                    )}
+
+                    {preferences.use_bibtex && item.citekey && (
+                      <Action.CopyToClipboard
+                        title="Copy Bibtex Citation Key"
+                        content={item.citekey}
+                        shortcut={copyRefCommandShortcut}
+                      />
+                    )}
+                    {preferences.use_bibtex && item.citekey && <RefCopyToClipboardAction selected={item.citekey} />}
+                    {preferences.use_bibtex && item.citekey && <BibCopyToClipboardAction selected={item.citekey} />}
+                    {preferences.use_bibtex && item.citekey && <PandocCopyAction selected={item.citekey} />}
+                    {preferences.use_bibtex && item.citekey && <RefPasteAction selected={item.citekey} />}
+                    {preferences.use_bibtex && item.citekey && <BibPasteAction selected={item.citekey} />}
+                    {preferences.use_bibtex && item.citekey && <PandocPasteAction selected={item.citekey} />}
+
+                    <ActionPanel.Section>
+                      {item.attachment && item.attachment.key && item.attachment.key !== `` && (
+                        <PDFURLCopyToClipboardAction itemURL={zoteroOpenPdfUri(item, item.attachment.key)} />
+                      )}
+                      {getURL(item) !== "" && <URLCopyToClipboardAction itemURL={getURL(item)} />}
+                      {getItemTitle(item) !== "" && <TitleCopyToClipboardAction itemTitle={getItemTitle(item)} />}
+                      {getItemAuthors(item) !== "" && <AuthorsCopyToClipboardAction authors={getItemAuthors(item)} />}
+                      {getItemZotUrl(item) && <ZoteroUrlCopyToClipboard zotUrl={getItemZotUrl(item)} />}
+                      {getItemDoi(item) !== "" && <DoiCopyToClipboardAction itemDoi={getItemDoi(item)} />}
+                      {attachmentFilePath && (
+                        <PDFPathCopyToClipboardAction
+                          pdfPath={preferences.quote_pdf_path ? `"${attachmentFilePath}"` : attachmentFilePath}
                         />
                       )}
-
-                      {preferences.use_bibtex && item.citekey && (
-                        <Action.CopyToClipboard
-                          title="Copy Bibtex Citation Key"
-                          content={item.citekey}
-                          shortcut={copyRefCommandShortcut}
-                        />
-                      )}
-                      {preferences.use_bibtex && item.citekey && <RefCopyToClipboardAction selected={item.citekey} />}
-                      {preferences.use_bibtex && item.citekey && <BibCopyToClipboardAction selected={item.citekey} />}
-                      {preferences.use_bibtex && item.citekey && <PandocCopyAction selected={item.citekey} />}
-                      {preferences.use_bibtex && item.citekey && <RefPasteAction selected={item.citekey} />}
-                      {preferences.use_bibtex && item.citekey && <BibPasteAction selected={item.citekey} />}
-                      {preferences.use_bibtex && item.citekey && <PandocPasteAction selected={item.citekey} />}
-
-                      <ActionPanel.Section>
-                        {item.attachment && item.attachment.key && item.attachment.key !== `` && (
-                          <PDFURLCopyToClipboardAction
-                            itemURL={`zotero://open-pdf/library/items/${item.attachment.key}`}
-                          />
-                        )}
-                        {getURL(item) !== "" && <URLCopyToClipboardAction itemURL={getURL(item)} />}
-                        {getItemTitle(item) !== "" && <TitleCopyToClipboardAction itemTitle={getItemTitle(item)} />}
-                        {getItemAuthors(item) !== "" && <AuthorsCopyToClipboardAction authors={getItemAuthors(item)} />}
-                        {getItemZotUrl(item) && <ZoteroUrlCopyToClipboard zotUrl={getItemZotUrl(item)} />}
-                        {getItemDoi(item) !== "" && <DoiCopyToClipboardAction itemDoi={getItemDoi(item)} />}
-                        {attachmentFilePath && (
-                          <PDFPathCopyToClipboardAction
-                            pdfPath={preferences.quote_pdf_path ? `"${attachmentFilePath}"` : attachmentFilePath}
-                          />
-                        )}
-                      </ActionPanel.Section>
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <ConfigureGroupLibrariesAction
+                        groupLibraries={groupLibraries}
+                        includedGroups={includedGroups}
+                        onSave={onSaveGroups}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       ))}
     </List>
   );
 };
+
+const configureGroupsShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "l" };
+
+function ConfigureGroupLibrariesAction({
+  groupLibraries,
+  includedGroups,
+  onSave,
+}: {
+  groupLibraries: LibraryRef[];
+  includedGroups: number[];
+  onSave: (ids: number[]) => void;
+}) {
+  const { push } = useNavigation();
+  if (groupLibraries.length === 0) {
+    return null;
+  }
+  return (
+    <Action
+      icon={Icon.TwoPeople}
+      title="Configure Group Libraries"
+      shortcut={configureGroupsShortcut}
+      onAction={() =>
+        push(<GroupLibrariesForm groupLibraries={groupLibraries} includedGroups={includedGroups} onSave={onSave} />)
+      }
+    />
+  );
+}
+
+function GroupLibrariesForm({
+  groupLibraries,
+  includedGroups,
+  onSave,
+}: {
+  groupLibraries: LibraryRef[];
+  includedGroups: number[];
+  onSave: (ids: number[]) => void;
+}) {
+  const { pop } = useNavigation();
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Save"
+            icon={Icon.Check}
+            onSubmit={(values: { groups: string[] }) => {
+              onSave((values.groups ?? []).map(Number).filter((n) => !Number.isNaN(n)));
+              pop();
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text="Choose which group libraries to include in search. Your personal library is always searched; group libraries are opt-in." />
+      <Form.TagPicker id="groups" title="Group Libraries" defaultValue={includedGroups.map(String)}>
+        {groupLibraries.map((l) => (
+          <Form.TagPicker.Item key={l.id} value={String(l.id)} title={l.name} icon={Icon.TwoPeople} />
+        ))}
+      </Form.TagPicker>
+    </Form>
+  );
+}
 
 function URLCopyToClipboardAction({ itemURL }: { itemURL: string }) {
   return (

@@ -20,7 +20,10 @@ export default async function tool(input: Input) {
   const target = parseFutureDate(input.dateTime);
   const durationSeconds = Math.ceil((target.getTime() - Date.now()) / 1000);
 
-  await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${durationSeconds}`);
+  await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${durationSeconds}`, {
+    kind: "until",
+    until: target.toISOString(),
+  });
 
   return {
     caffeinated: true,

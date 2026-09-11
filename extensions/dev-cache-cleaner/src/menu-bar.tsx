@@ -1,4 +1,4 @@
-import { Icon, MenuBarExtra, open } from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { CATEGORY_META } from "./types";
 import type { ScanCategory, ScanResult } from "./types";
@@ -57,12 +57,20 @@ export default function CacheStatusMenuBar() {
         <MenuBarExtra.Item
           title="Scan & Clean..."
           icon={Icon.MagnifyingGlass}
-          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Undolog/dev-cache-cleaner/scan-caches`)}
+          onAction={() => {
+            launchCommand({ name: "scan-caches", type: LaunchType.UserInitiated }).catch(() =>
+              showHUD("Could not open Scan & Clean"),
+            );
+          }}
         />
         <MenuBarExtra.Item
           title="Clean Safe Caches"
           icon={Icon.Trash}
-          onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Undolog/dev-cache-cleaner/clean-safe-caches`)}
+          onAction={() => {
+            launchCommand({ name: "clean-safe-caches", type: LaunchType.UserInitiated }).catch(() =>
+              showHUD("Could not open Clean Safe Caches"),
+            );
+          }}
         />
       </MenuBarExtra.Section>
       {results.length === 0 && !isLoading ? (

@@ -2,11 +2,7 @@ import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
 import { openHistoryTab, openNewTab, setActiveTab } from "../actions";
 import { HistoryEntry, Tab } from "../interfaces";
 
-export const NewTabAction = NewTabActionComponent;
-export const HistoryItemAction = HistoryItemActionComponent;
-export const TabListItemAction = TabListItemActionComponent;
-
-function NewTabActionComponent({ query }: { query?: string }) {
+export function NewTabAction({ query }: { query?: string }) {
   return (
     <ActionPanel title="New Tab">
       <ActionPanel.Item onAction={() => openNewTab(query)} title={query ? `Search "${query}"` : "Open Empty Tab"} />
@@ -14,7 +10,7 @@ function NewTabActionComponent({ query }: { query?: string }) {
   );
 }
 
-function HistoryItemActionComponent({ entry: { title, url } }: { entry: HistoryEntry }) {
+export function HistoryItemAction({ entry: { title, url } }: { entry: HistoryEntry }) {
   return (
     <ActionPanel title={title}>
       <MozillaFirefoxHistoryTab url={url} />
@@ -24,7 +20,7 @@ function HistoryItemActionComponent({ entry: { title, url } }: { entry: HistoryE
   );
 }
 
-function TabListItemActionComponent(props: { tab: Tab }) {
+export function TabListItemAction(props: { tab: Tab }) {
   return (
     <ActionPanel title={props.tab.title}>
       <MozillaFirefoxGoToTab tab={props.tab} />
@@ -42,9 +38,5 @@ function MozillaFirefoxGoToTab(props: { tab: Tab }) {
 }
 
 function MozillaFirefoxHistoryTab({ url }: { url: string }) {
-  async function handleAction() {
-    await openHistoryTab(url);
-    await closeMainWindow();
-  }
-  return <ActionPanel.Item title="Open in Firefox" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <ActionPanel.Item title="Open in Firefox" icon={{ source: Icon.Eye }} onAction={() => openHistoryTab(url)} />;
 }

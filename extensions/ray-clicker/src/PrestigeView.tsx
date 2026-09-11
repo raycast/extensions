@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, Color, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color, showToast, Toast, Keyboard } from "@raycast/api";
 import { useState, useMemo, useEffect } from "react";
 import { formatNumber, calculatePrestigePoints } from "./utils";
 import { GameState } from "./types";
@@ -249,7 +249,7 @@ export function PrestigeView({ gameState, onPurchasePrestigeUpgrade, onPrestige 
                               title={"Purchase Upgrade"}
                               onAction={() => handlePurchase(upgrade)}
                               icon={Icon.Star}
-                              shortcut={{ modifiers: ["cmd"], key: "e" }}
+                              shortcut={Keyboard.Shortcut.Common.Edit}
                             />
                           )}
                         </ActionPanel>

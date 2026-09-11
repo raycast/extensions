@@ -1,5 +1,15 @@
 # Link Commands Changelog
 
+## [Surface Routers] - 2026-08-30
+
+### Added
+
+- **Desktop App** on the create form — pick the native app for a service and the command becomes a surface router: it opens the app where the app is installed and the URL where it is not, so one command serves machines that differ in what they have. It takes no argument, which is what keeps it hotkey-able: Raycast raises the launcher to render an argument field, and an optional argument still prompts — it only permits an empty answer. Offered only for URL targets without a `{query}`, since `open -a` takes no query and a folder has no web surface to fall back to.
+
+### Changed
+
+- The detail pane lists a dropdown argument's choices rather than its placeholder. A dropdown's choices are what it actually tells you — a placeholder names the axis but not what you can pick along it.
+
 ## [Initial Version] - 2026-08-21
 
 ### Added

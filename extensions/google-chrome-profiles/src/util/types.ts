@@ -29,6 +29,12 @@ export type GoogleChromeInfoCacheProfile = {
    */
   gaia_name?: string;
   /**
+   * The Google account's given (first) name, eg: `Steve`. This — not `name`
+   * or `gaia_name` — is what Chrome's Profiles menu bar item actually shows
+   * for a signed-in profile: `${gaia_given_name} (${name})`, eg "Steve (Work)".
+   */
+  gaia_given_name?: string;
+  /**
    * The email of the user Google account, eg: `steve.jobs@gmail.com`.
    */
   user_name?: string;
@@ -43,6 +49,16 @@ export type Profile = {
    * The folder name where the Chrome profile is stored.
    */
   directory: string;
+  /**
+   * The Google account's given (first) name, eg: `Steve`, if this profile is
+   * signed in. Kept separate from `ga` below (rather than nested in it)
+   * because it's the one piece needed to match Chrome's Profiles menu bar
+   * item — which shows `${givenName} (${profile name})` for a signed-in
+   * profile, eg "Steve (Work)", not the profile's own name — and unlike the
+   * rest of the account info it's carried across the Quicklink/deeplink
+   * command (`open-profile.tsx`), which has no use for the avatar/email.
+   */
+  givenName?: string;
   /**
    * The Google Account if the user has sync the profile with a google account.
    */

@@ -1,9 +1,7 @@
 import fs from "fs";
 import os from "os";
-import fetch from "cross-fetch";
 import { knownPos } from "../constants";
 import { DefItem, LanguageCode, DefsBody } from "../types";
-import { Icon } from "@raycast/api";
 import { EngineHookProps } from "./types";
 const baseUrl = "https://translate.google.com";
 interface Dict {
@@ -33,7 +31,7 @@ type GooglResult = {
     {
       translit?: string;
       src_translit: string;
-    }
+    },
   ];
   src: LanguageCode;
   alternative_translations: AlterTrans[];
@@ -53,7 +51,7 @@ const prepareRequestUrl = () => {
     "&dt=ex", // dict
     "&dt=at", // alternative_translations
   ].join("");
-  return (_query: string): RequestInfo => publicUrl;
+  return (): string => publicUrl;
 };
 
 const getOpts = (query: string, to: LanguageCode, apiKey?: string, from?: string): RequestInit => {
@@ -146,11 +144,13 @@ const parseTTS = async (query: string, transCode: LanguageCode, data: GooglResul
     return new URLSearchParams(urlParams).toString();
   };
   let response = await fetch(`${baseUrl}/translate_tts?${ttsParams(src, trans.orig)}`);
+  if (!response.ok) throw new Error(`Failed to load source speech (${response.status})`);
   const ttsSrc = await response.arrayBuffer();
   const srcPath = `${os.tmpdir()}/raycast-dictionary-source.mp3`;
   await fs.promises.writeFile(srcPath, Buffer.from(ttsSrc));
 
   response = await fetch(`${baseUrl}/translate_tts?${ttsParams(transCode, trans.trans)}`);
+  if (!response.ok) throw new Error(`Failed to load translated speech (${response.status})`);
   const ttsTrans = await response.arrayBuffer();
   const transPath = `${os.tmpdir()}/raycast-dictionary-trans.mp3`;
   await fs.promises.writeFile(transPath, Buffer.from(ttsTrans));

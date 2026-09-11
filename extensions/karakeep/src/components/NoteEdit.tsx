@@ -62,7 +62,7 @@ export function NoteEdit({ bookmark, onRefresh }: NoteEditProps) {
 
       // Note text is expensive to lose — pre-flight before writing, reusing the
       // toast already on screen. See the create forms for the same pattern.
-      if ((await ensureReachable(values.content, toast)) === "unreachable") return;
+      if ((await ensureReachable(values.content, toast)) !== "ok") return;
 
       try {
         await fetchUpdateBookmark(bookmark.id, {

@@ -1,8 +1,8 @@
-import { TelegramClient } from "telegram";
-import { StringSession } from "telegram/sessions";
+import { TelegramClient, Rich } from "teleproto";
+import { StringSession } from "teleproto/sessions";
 import { LocalStorage, environment } from "@raycast/api";
-import { Api } from "telegram/tl";
-import { computeCheck } from "telegram/Password";
+import { Api } from "teleproto/tl";
+import { computeCheck } from "teleproto/Password";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -43,6 +43,8 @@ export interface MessageMedia {
 export interface SavedMessage {
   id: number;
   text: string;
+  /** Rendered Markdown, set only for rich messages (layer 228+). */
+  markdown?: string;
   date: Date;
   media?: MessageMedia;
 }
@@ -50,6 +52,8 @@ export interface SavedMessage {
 export interface ChatMessage {
   id: number;
   text: string;
+  /** Rendered Markdown, set only for rich messages (layer 228+). */
+  markdown?: string;
   date: Date;
   media?: MessageMedia;
   senderId?: string;
@@ -326,6 +330,101 @@ async function downloadProfilePhoto(
   return undefined;
 }
 
+/**
+ * Works out who authored a message, and their id.
+ *
+ * Telegram fills this in three different ways, and only one of them sets `fromId`:
+ * group members set `fromId` to a user, channel posts and anonymous group admins set
+ * it to a channel, and both broadcast posts and private chats may omit it entirely --
+ * in which case the author is whatever the message is attached to.
+ *
+ * Kept free of network calls so the attribution rules can be unit tested.
+ */
+export function resolveMessageAuthor(
+  msg: Api.Message,
+  chatEntity?: Api.User | Api.Chat | Api.Channel,
+): { senderId?: string; entity?: Api.User | Api.Channel } {
+  if (msg.fromId instanceof Api.PeerUser) {
+    // Prefer the entity the library already attached to the message: it comes from the
+    // users map on the same response. client.getEntity() needs a populated entity cache,
+    // and StringSession does not persist one, so in a fresh Raycast command process it
+    // throws "Could not find the input entity" for anyone we have not just fetched.
+    return {
+      senderId: msg.fromId.userId.toString(),
+      entity: msg.sender instanceof Api.User ? msg.sender : undefined,
+    };
+  }
+
+  if (msg.fromId instanceof Api.PeerChannel) {
+    return {
+      senderId: msg.fromId.channelId.toString(),
+      entity: msg.sender instanceof Api.Channel ? msg.sender : undefined,
+    };
+  }
+
+  if (!msg.fromId) {
+    const author = msg.sender ?? chatEntity;
+    if (author instanceof Api.Channel || author instanceof Api.User) {
+      return { senderId: author.id.toString(), entity: author };
+    }
+  }
+
+  return {};
+}
+
+/**
+ * Reads a message's text.
+ *
+ * Bots can send rich messages (layer 228), whose content lives in `richMessage`
+ * as a block tree rather than in the flat `message` string. Older clients are not
+ * shown these at all -- the server substitutes messageMediaUnsupported -- so any
+ * code that only reads `msg.message` silently loses every rich message.
+ */
+function renderMessageContent(msg: Api.Message): { text: string; markdown?: string } {
+  if (msg.message) {
+    return { text: msg.message };
+  }
+
+  if (msg.richMessage) {
+    const plain = Rich.toPlainText(msg.richMessage);
+    return {
+      // List titles are single-line, so collapse the block structure for display.
+      text: plain.replace(/\s+/g, " ").trim(),
+      markdown: Rich.toMarkdown(msg.richMessage),
+    };
+  }
+
+  return { text: "" };
+}
+
+/** True when a message carries anything worth rendering. */
+function hasRenderableContent(msg: Api.Message): boolean {
+  return Boolean(msg.message || msg.media || msg.richMessage);
+}
+
+/** Display name and avatar for a user, matching how getChats titles a private chat. */
+async function describeUser(
+  client: TelegramClient,
+  user: Api.User,
+  skipPhotoDownload: boolean,
+): Promise<{ name: string; photo?: string }> {
+  let name = user.firstName || "";
+  if (user.lastName) name += ` ${user.lastName}`;
+
+  if (user.deleted) {
+    name = "Deleted Account";
+  } else if (!name.trim()) {
+    name = "Unknown User";
+  }
+
+  let photo: string | undefined;
+  if (!skipPhotoDownload && user.photo && "photoId" in user.photo) {
+    photo = await downloadProfilePhoto(client, user, user.id.toString(), "profile");
+  }
+
+  return { name, photo };
+}
+
 function parseMessageMedia(msg: Api.Message): MessageMedia | undefined {
   if (!msg.media) return undefined;
 
@@ -434,9 +533,12 @@ async function processSavedMessage(
     }
   }
 
+  const { text, markdown } = renderMessageContent(msg);
+
   return {
     id: msg.id,
-    text: msg.message || "",
+    text,
+    markdown,
     date: new Date(msg.date * 1000),
     media,
   };
@@ -455,53 +557,39 @@ async function processChatMessage(
     if (filePath && media) media.filePath = filePath;
   }
 
-  let senderId: string | undefined;
   let senderName: string | undefined;
   let senderPhoto: string | undefined;
 
-  // Try to get sender info from fromId
-  if (msg.fromId && msg.fromId instanceof Api.PeerUser) {
-    senderId = msg.fromId.userId.toString();
+  const { senderId, entity } = resolveMessageAuthor(msg, chatEntity);
+
+  // Fall back to a lookup only when the response did not carry the user with it.
+  let author = entity;
+  if (!author && msg.fromId instanceof Api.PeerUser) {
     try {
       const user = await client.getEntity(msg.fromId.userId);
-      if (user instanceof Api.User) {
-        senderName = user.firstName || "";
-        if (user.lastName) senderName += ` ${user.lastName}`;
-
-        if (user.deleted) {
-          senderName = "Deleted Account";
-        } else if (!senderName.trim()) {
-          senderName = "Unknown User";
-        }
-
-        if (!skipMediaDownload && user.photo && "photoId" in user.photo) {
-          senderPhoto = await downloadProfilePhoto(client, user, user.id.toString(), "profile");
-        }
-      }
+      if (user instanceof Api.User) author = user;
     } catch (error) {
-      console.error("Failed to get sender info:", error);
-      senderName = "Unknown User";
-    }
-  } else if (!msg.fromId && chatEntity instanceof Api.User) {
-    // For private chats, if there's no fromId, assume it's from the chat partner
-    senderId = chatEntity.id.toString();
-    senderName = chatEntity.firstName || "";
-    if (chatEntity.lastName) senderName += ` ${chatEntity.lastName}`;
-
-    if (chatEntity.deleted) {
-      senderName = "Deleted Account";
-    } else if (!senderName.trim()) {
-      senderName = "Unknown User";
-    }
-
-    if (!skipMediaDownload && chatEntity.photo && "photoId" in chatEntity.photo) {
-      senderPhoto = await downloadProfilePhoto(client, chatEntity, chatEntity.id.toString(), "profile");
+      console.error(`Failed to resolve sender ${senderId}:`, error);
     }
   }
 
+  if (author instanceof Api.User) {
+    const { name, photo } = await describeUser(client, author, skipMediaDownload);
+    senderName = name;
+    senderPhoto = photo;
+  } else if (author instanceof Api.Channel) {
+    senderName = author.title;
+    if (!skipMediaDownload && author.photo && "photoId" in author.photo) {
+      senderPhoto = await downloadProfilePhoto(client, author, author.id.toString(), "channel");
+    }
+  }
+
+  const { text, markdown } = renderMessageContent(msg);
+
   return {
     id: msg.id,
-    text: msg.message || "",
+    text,
+    markdown,
     date: new Date(msg.date * 1000),
     media,
     senderId,
@@ -529,7 +617,7 @@ export async function getSavedMessages(options: GetSavedMessagesOptions): Promis
     search: searchQuery || undefined,
   });
 
-  const filteredMessages = messages.filter((msg) => msg.message || msg.media);
+  const filteredMessages = messages.filter(hasRenderableContent);
 
   const processedMessages = await Promise.all(
     filteredMessages.map((msg) => processSavedMessage(client, msg, skipMediaDownload)),
@@ -552,7 +640,7 @@ export async function getChatMessages(options: GetMessagesOptions): Promise<Chat
     search: searchQuery || undefined,
   });
 
-  const filteredMessages = messages.filter((msg) => msg.message || msg.media);
+  const filteredMessages = messages.filter(hasRenderableContent);
 
   // Get the chat entity to know who the chat partner is
   const entity = await client.getEntity(chatId);

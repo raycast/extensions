@@ -1,162 +1,81 @@
 import { environment, showToast, Toast } from "@raycast/api";
-import path from "path";
-import fs from "fs";
-import afs from "fs/promises";
-import { createHash } from "crypto";
-import { createReadStream } from "fs";
-import { execFile } from "child_process";
-import { promisify } from "util";
+import fs from "node:fs";
+import afs from "node:fs/promises";
+import path from "node:path";
+import { PASS_CLI_VERSION, resolveArtifact } from "./core/artifact";
+import { installArtifact } from "./core/installer";
 
-const execFileAsync = promisify(execFile);
-
-const CLI_VERSION = "1.4.1";
-
-interface CliPlatformInfo {
-  filename: string;
-  sha256: string;
-}
-
-const CLI_PLATFORMS: Record<string, CliPlatformInfo> = {
-  "darwin-arm64": {
-    filename: "pass-cli-macos-aarch64",
-    sha256: "7019050f490d8289c045eca39a6abf3fd480f6bcc3fa7807831241b4ec13d7f1",
-  },
-  "darwin-x64": {
-    filename: "pass-cli-macos-x86_64",
-    sha256: "ceffa547d14af8ea5acf0963f11ef0d60ee0bd37fd7ed34a4c70ef86d82ad035",
-  },
-};
-
-function getPlatformKey(): string {
-  const platform = process.platform;
-  const arch = process.arch;
-  return `${platform}-${arch}`;
-}
+let installPromise: Promise<string> | undefined;
 
 export function passCliDirectory(): string {
-  return path.join(environment.supportPath, "cli");
+  return path.join(environment.supportPath, "cli", PASS_CLI_VERSION);
 }
 
 export function passCliFilepath(): string {
-  return path.join(passCliDirectory(), "pass-cli");
+  const artifact = resolveArtifact(process.platform, process.arch);
+  return path.join(passCliDirectory(), artifact.binaryName);
 }
 
 export function isCliInstalled(): boolean {
-  return fs.existsSync(passCliFilepath());
+  const artifact = resolveArtifact(process.platform, process.arch);
+  return artifact.requiredFiles.every((file) => fs.existsSync(path.join(passCliDirectory(), file)));
 }
 
-export async function ensureCli(): Promise<string> {
-  const cli = passCliFilepath();
-
-  if (fs.existsSync(cli)) {
-    console.log("pass-cli already installed at:", cli);
-    return cli;
-  }
-
+async function installCli(artifact: ReturnType<typeof resolveArtifact>): Promise<string> {
   const installToast = await showToast({
     style: Toast.Style.Animated,
     title: "Installing Proton Pass CLI",
     message: "Downloading binary...",
   });
 
-  const platformKey = getPlatformKey();
-  const platformInfo = CLI_PLATFORMS[platformKey];
-
-  if (!platformInfo) {
-    throw new Error(
-      `Unsupported platform: ${platformKey}. Supported platforms: ${Object.keys(CLI_PLATFORMS).join(", ")}`,
-    );
-  }
-
-  const binaryUrl = `https://proton.me/download/pass-cli/${CLI_VERSION}/${platformInfo.filename}`;
-  const dir = passCliDirectory();
-  const tempDir = path.join(environment.supportPath, ".tmp");
-
-  console.log(`Downloading pass-cli from: ${binaryUrl}`);
-
-  const downloadedFile = path.join(tempDir, "pass-cli");
-
   try {
-    await afs.mkdir(tempDir, { recursive: true });
-    const response = await fetch(binaryUrl);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status} ${response.statusText}`);
-    }
-    const buffer = Buffer.from(await response.arrayBuffer());
-    await afs.writeFile(downloadedFile, buffer);
-    installToast.message = "Download complete. Verifying binary...";
-  } catch (error) {
-    installToast.style = Toast.Style.Failure;
-    installToast.title = "Failed to Install Proton Pass CLI";
-    installToast.message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Could not download pass-cli: ${error instanceof Error ? error.message : String(error)}`);
-  }
-
-  try {
-    const fileHash = await new Promise<string>((resolve, reject) => {
-      const hash = createHash("sha256");
-      const stream = createReadStream(downloadedFile);
-      stream.on("data", (data) => hash.update(data));
-      stream.on("end", () => resolve(hash.digest("hex")));
-      stream.on("error", reject);
+    const installed = await installArtifact({
+      artifact,
+      download: async (url) => {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status} ${response.statusText}`);
+        installToast.message = "Download complete. Verifying and installing...";
+        return Buffer.from(await response.arrayBuffer());
+      },
+      destDir: passCliDirectory(),
+      tmpDir: path.join(environment.supportPath, ".tmp"),
+      platform: process.platform,
     });
-    console.log(`Downloaded file hash: ${fileHash}`);
-    console.log(`Expected hash: ${platformInfo.sha256}`);
 
-    if (fileHash !== platformInfo.sha256) {
-      throw new Error(`SHA256 hash mismatch. Expected: ${platformInfo.sha256}, Got: ${fileHash}`);
-    }
-
-    installToast.message = "Installing binary...";
-    await afs.mkdir(dir, { recursive: true });
-    await afs.copyFile(downloadedFile, cli);
+    console.log("pass-cli installed successfully at:", installed);
+    installToast.style = Toast.Style.Success;
+    installToast.title = "Proton Pass CLI Ready";
+    installToast.message = "Download and installation complete.";
+    return installed;
   } catch (error) {
     installToast.style = Toast.Style.Failure;
     installToast.title = "Failed to Install Proton Pass CLI";
     installToast.message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Could not verify pass-cli: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(`Could not install pass-cli: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+export async function ensureCli(): Promise<string> {
+  const artifact = resolveArtifact(process.platform, process.arch);
+  const cli = path.join(passCliDirectory(), artifact.binaryName);
+  if (isCliInstalled()) {
+    console.log("pass-cli already installed at:", cli);
+    return cli;
+  }
+
+  const currentInstall = installPromise ?? installCli(artifact);
+  installPromise = currentInstall;
+  try {
+    return await currentInstall;
   } finally {
-    try {
-      await afs.rm(tempDir, { recursive: true });
-    } catch {
-      // Ignore cleanup errors
-    }
+    if (installPromise === currentInstall) installPromise = undefined;
   }
-
-  try {
-    await afs.chmod(cli, "755");
-  } catch (error) {
-    try {
-      await afs.rm(cli);
-    } catch {
-      // Ignore cleanup errors
-    }
-    installToast.style = Toast.Style.Failure;
-    installToast.title = "Failed to Install Proton Pass CLI";
-    installToast.message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Could not set permissions on pass-cli: ${error instanceof Error ? error.message : String(error)}`);
-  }
-
-  // Remove macOS quarantine attribute — downloaded binaries are quarantined by
-  // Gatekeeper and will fail to execute without this step.
-  try {
-    await execFileAsync("/usr/bin/xattr", ["-d", "com.apple.quarantine", cli]);
-  } catch {
-    // Attribute may not be present; ignore.
-  }
-
-  console.log("pass-cli installed successfully at:", cli);
-  installToast.style = Toast.Style.Success;
-  installToast.title = "Proton Pass CLI Ready";
-  installToast.message = "Download and installation complete.";
-  return cli;
 }
 
 export async function clearCliCache(): Promise<void> {
   try {
-    const dir = passCliDirectory();
-    await afs.rm(dir, { recursive: true });
+    await afs.rm(path.join(environment.supportPath, "cli"), { recursive: true });
   } catch {
-    // Ignore errors if directory doesn't exist
+    // Ignore errors if directory doesn't exist.
   }
 }

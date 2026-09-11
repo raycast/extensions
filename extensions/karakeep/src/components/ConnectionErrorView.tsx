@@ -1,6 +1,18 @@
-import { Action, ActionPanel, Clipboard, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Icon,
+  Keyboard,
+  List,
+  getPreferenceValues,
+  openExtensionPreferences,
+  popToRoot,
+} from "@raycast/api";
+import { useCallback } from "react";
 import { useConnectionRecovery } from "../hooks/useConnectionRecovery";
-import { describeConnectionError } from "../utils/connection";
+import { isAuthError } from "../utils/apiError";
+import { describeConnectionError, probeApi } from "../utils/connection";
 import { shouldGuard } from "../utils/guard";
 import { useTranslation } from "../hooks/useTranslation";
 
@@ -29,8 +41,88 @@ export function connectionGuard(error: unknown, hasLiveData: boolean, onRetry: (
   // over an error screen that has nothing to filter.
   return (
     <List>
-      <ConnectionErrorView error={error} onRetry={onRetry} />
+      {/* A rejected API key is a different problem with a different fix: the
+          server is up, there is nothing to start, and Docker recovery would be
+          both wasted work and the wrong story. Branch to its own screen rather
+          than teaching the recovery view a second personality. */}
+      {isAuthError(error) ? (
+        <AuthErrorView onRetry={onRetry} />
+      ) : (
+        <ConnectionErrorView error={error} onRetry={onRetry} />
+      )}
     </List>
+  );
+}
+
+/**
+ * Shown in place of a list when Karakeep rejects the API key.
+ *
+ * Same shape as the recovery screen, opposite emphasis: nothing here is
+ * retryable until the user changes something, so Extension Settings takes the
+ * primary slot and Try Again steps down to second.
+ */
+export function AuthErrorView({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation();
+  const { apiUrl } = getPreferenceValues<Preferences>();
+
+  // Try Again must RE-PROBE, not merely revalidate. Once a key has been
+  // rejected the fetch layer short-circuits every request without touching the
+  // network, so a plain revalidate can only reproduce the same 401 — a retry
+  // button that cannot succeed. probeApi bypasses that latch (it owns it), so a
+  // key corrected in Settings is picked up here without relaunching.
+  const retry = useCallback(async () => {
+    await probeApi(apiUrl);
+    onRetry();
+  }, [apiUrl, onRetry]);
+
+  // Open Settings, then CLOSE the command.
+  //
+  // Raycast snapshots preferences for the lifetime of a command run:
+  // getPreferenceValues() keeps returning the key the command launched with, so
+  // a key corrected in Settings is invisible until the command is relaunched.
+  // Verified 2026-08-27 from a live session — after fixing the key, Try Again
+  // still short-circuited on the rejected-key latch with no request leaving the
+  // machine, and only relaunching the command worked.
+  //
+  // Leaving the user on a dead screen that cannot recover is the worst option,
+  // so popping to root makes the relaunch the obvious next step instead of
+  // something they have to work out for themselves. Safe HERE specifically:
+  // this is a list view with nothing typed to lose. The forms deliberately do
+  // NOT do this — see OpenSettingsAction.
+  const openSettings = useCallback(async () => {
+    await openExtensionPreferences();
+    await popToRoot();
+  }, []);
+
+  return (
+    <List.EmptyView
+      icon={Icon.Key}
+      title={t("connection.unauthorized")}
+      description={t("connection.unauthorizedDescription")}
+      actions={
+        <ActionPanel>
+          <Action
+            title={t("connection.openSettings")}
+            icon={Icon.Gear}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "," },
+              Windows: { modifiers: ["ctrl", "shift"], key: "," },
+            }}
+            onAction={openSettings}
+          />
+          {/* Kept, but it can only help when the KEY is unchanged and the server
+              was refusing it for some other reason — a restart mid-request, a
+              token re-provisioned server-side. It cannot pick up a key edited in
+              Settings, because this command run cannot see one. */}
+          <Action
+            title={t("connection.tryAgain")}
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={retry}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }
 

@@ -79,6 +79,9 @@ function AnswerView({ question }: { question: string }) {
       actions={
         <ActionPanel>
           {data?.answer ? <Action.CopyToClipboard title="Copy Answer" content={data.answer} /> : null}
+          {data?.answer_value ? (
+            <Action.CopyToClipboard title="Copy Value" content={data.answer_value} concealed />
+          ) : null}
           {sources.length ? (
             <ActionPanel.Section title="Sources">
               {sources.map((s) => (

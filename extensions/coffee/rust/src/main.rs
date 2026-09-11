@@ -9,8 +9,8 @@ use windows::Win32::System::Power::{
     SetThreadExecutionState, ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED, EXECUTION_STATE,
 };
 use windows::Win32::System::Threading::{
-    GetExitCodeProcess, GetProcessTimes, OpenProcess, TerminateProcess, PROCESS_QUERY_LIMITED_INFORMATION,
-    PROCESS_TERMINATE,
+    GetExitCodeProcess, GetProcessTimes, OpenProcess, QueryFullProcessImageNameW, TerminateProcess,
+    PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_TERMINATE,
 };
 
 const STILL_ACTIVE: u32 = 259;
@@ -185,6 +185,26 @@ fn pid_matches_worker(pid: u32, expected_ticks: u64) -> bool {
     process_creation_ticks(pid).is_some_and(|ticks| ticks == expected_ticks)
 }
 
+/// The full path of the executable backing `pid`, or `None` when it cannot be
+/// queried (e.g. an elevated process). Used by the picker to show app icons.
+fn process_image_path(pid: u32) -> Option<String> {
+    let handle = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid) };
+    let Ok(handle) = handle else {
+        return None;
+    };
+    let mut buf = [0u16; 1024];
+    let mut len = buf.len() as u32;
+    let ok = unsafe {
+        QueryFullProcessImageNameW(handle, PROCESS_NAME_WIN32, windows::core::PWSTR(buf.as_mut_ptr()), &mut len)
+    }
+    .is_ok();
+    unsafe { let _ = CloseHandle(handle); }
+    if !ok || len == 0 {
+        return None;
+    }
+    Some(String::from_utf16_lossy(&buf[..len as usize]))
+}
+
 /// Whether the tracked window is still open, on-screen, and owned by the
 /// originating process. Treats a window that was closed or hidden (e.g. an app
 /// minimized to the system tray) as gone so the worker releases the execution
@@ -314,18 +334,39 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
 }
 
 /// Bridge: stop the keep-awake worker and release the execution state.
+/// Returns true when a worker was running and successfully terminated, or
+/// false when there was no running worker to stop. Propagates an error if a
+/// running worker could not be terminated.
 #[raycast]
-fn stop_caffeinate() -> Result<(), String> {
+fn stop_caffeinate() -> Result<bool, String> {
     let _ = write_stop_flag();
-    if let Some(state) = read_stored_state()? {
-        // Only terminate the worker if the recorded PID is still that worker;
-        // a reused PID must not be killed.
-        if pid_matches_worker(state.pid, state.start_ticks) {
-            let _ = terminate_process(state.pid);
+    let state = read_stored_state()?;
+    let had_worker = match &state {
+        Some(s) if pid_matches_worker(s.pid, s.start_ticks) => true,
+        _ => false,
+    };
+    if had_worker {
+        let pid = state.as_ref().unwrap().pid;
+        if !terminate_process(pid) {
+            // The terminate call failed; give the worker a brief moment to exit
+            // on its own via the stop flag, then confirm it is gone.
+            for _ in 0..50 {
+                std::thread::sleep(Duration::from_millis(2));
+                match read_stored_state()? {
+                    Some(cur) if pid_matches_worker(cur.pid, cur.start_ticks) => {}
+                    _ => break,
+                }
+            }
+            if let Some(cur) = read_stored_state()? {
+                if pid_matches_worker(cur.pid, cur.start_ticks) {
+                    // Preserve tracking state so a later stop can retry.
+                    return Err("failed to terminate caffeination worker".to_string());
+                }
+            }
         }
     }
     let _ = clear_state();
-    Ok(())
+    Ok(had_worker)
 }
 
 /// Bridge: report whether a keep-awake worker is currently running.
@@ -376,6 +417,7 @@ struct ProcessInfo {
     name: String,
     pid: u32,
     window_handle: usize,
+    path: Option<String>,
 }
 
 /// Bridge: list running applications that have a visible window, so the user
@@ -592,6 +634,7 @@ fn list_processes() -> Result<Vec<ProcessInfo>, String> {
                         name,
                         pid: entry.th32ProcessID,
                         window_handle: hwnd.0 as usize,
+                        path: process_image_path(entry.th32ProcessID),
                     });
                 }
                 if unsafe { Process32NextW(snapshot, &mut entry) }.is_err() {

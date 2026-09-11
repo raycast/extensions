@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { CONTENT_TYPE_ICONS, CONTENT_TYPE_LABELS } from "../schemas";
 import { notraUrl } from "../utils";
 import type { Post } from "../types";
@@ -33,7 +33,7 @@ export function PostListItem({ post, onPostMutated }: { post: Post; onPostMutate
           <Action.OpenInBrowser icon={Icon.Globe} title="View on Notra" url={notraUrl(`/content/${post.id}`)} />
           <Action.CopyToClipboard
             content={notraUrl(`/content/${post.id}`)}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
             title="Copy Link"
           />
         </ActionPanel>

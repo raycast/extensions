@@ -45,9 +45,9 @@
     {
       "name": "accessToken",
       "title": "Access Token",
-      "description": "Access Token for the Super Productivity Local REST API",
+      "description": "Access Token for the Super Productivity Local REST API (optional)",
       "type": "password",
-      "required": true,
+      "required": false,
       "placeholder": "xXX...XXX"
     }
   ],
@@ -191,7 +191,8 @@
   ],
   "title": "Super Productivity",
   "author": "pvnkmnk",
-  "contributors": ["xmok"],
+  "contributors": ["xmok",
+    "Man17"],
   "platforms": [
     "macOS",
     "Windows"

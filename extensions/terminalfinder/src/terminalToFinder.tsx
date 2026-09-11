@@ -9,6 +9,9 @@ export default async () => {
       end if
   
       tell application "Terminal"
+      if (count of windows) is 0 then
+          error "No Terminal window open"
+      end if
       do script "open -a Finder ./" in first window
       end tell
   `;

@@ -1,14 +1,13 @@
-import { Form, ActionPanel, Action } from "@raycast/api";
-import { exec } from "child_process";
+import { Form, ActionPanel, Action, open } from "@raycast/api";
+import { buildUpnoteUrl } from "./upnote-url";
 
 type Values = {
   notebook: string;
 };
 
 export default function Command() {
-  function handleSubmit(values: Values) {
-    const cmd = `open 'upnote://x-callback-url/notebook/new?title=${values.notebook}'`;
-    exec(cmd);
+  async function handleSubmit(values: Values) {
+    await open(buildUpnoteUrl("notebook/new", { title: values.notebook }));
   }
 
   return (

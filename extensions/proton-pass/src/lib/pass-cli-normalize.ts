@@ -10,7 +10,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function normalizeVaultRole(value: unknown): VaultRole {
+function normalizeVaultRole(value: unknown): VaultRole | undefined {
   const raw = trimOrUndefined(value)?.toLowerCase();
   switch (raw) {
     case "owner":
@@ -19,7 +19,7 @@ function normalizeVaultRole(value: unknown): VaultRole {
     case "viewer":
       return raw;
     default:
-      return "viewer";
+      return undefined;
   }
 }
 
@@ -31,7 +31,12 @@ export function normalizeVault(raw: unknown): Vault {
   const shareId = trimOrUndefined(raw.share_id ?? raw.shareId ?? raw.shareID ?? raw.id);
   const name = trimOrUndefined(raw.name);
   const itemCountValue = raw.itemCount ?? raw.item_count ?? raw.items_count ?? raw.itemsCount;
-  const itemCount = typeof itemCountValue === "number" ? itemCountValue : Number(itemCountValue ?? 0);
+  const itemCount =
+    itemCountValue === undefined
+      ? undefined
+      : typeof itemCountValue === "number"
+        ? itemCountValue
+        : Number(itemCountValue);
   const role = normalizeVaultRole(raw.role);
 
   if (!shareId || !name) {
@@ -41,7 +46,7 @@ export function normalizeVault(raw: unknown): Vault {
   return {
     shareId,
     name,
-    itemCount: Number.isFinite(itemCount) ? itemCount : 0,
+    itemCount: itemCount !== undefined && Number.isFinite(itemCount) ? itemCount : undefined,
     role,
   };
 }

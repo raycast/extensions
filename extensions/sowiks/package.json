@@ -1,0 +1,219 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sowiks",
+  "title": "Sowiks: Screenshot & Recording",
+  "description": "Take screenshots and screen recordings with Sowiks \u2014 area, window, fullscreen and scrolling capture, OCR text, video and GIF recording, annotation and cloud sharing, straight from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "Holiney",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "Sowiks",
+      "description": "Select an area of the screen to capture",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "snip",
+        "grab",
+        "crop",
+        "region"
+      ]
+    },
+    {
+      "name": "capture-fixed-size",
+      "title": "Capture Fixed Size",
+      "subtitle": "Sowiks",
+      "description": "Capture an area at a preset size",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "fixed size",
+        "exact size"
+      ]
+    },
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "Sowiks",
+      "description": "Capture the entire screen",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "full screen",
+        "whole screen"
+      ]
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "Sowiks",
+      "description": "Pick a window and capture it",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "window",
+        "app screenshot"
+      ]
+    },
+    {
+      "name": "capture-text",
+      "title": "Capture Text",
+      "subtitle": "Sowiks",
+      "description": "Recognize text on screen with OCR",
+      "mode": "no-view",
+      "keywords": [
+        "ocr",
+        "copy text",
+        "text recognition",
+        "read text"
+      ]
+    },
+    {
+      "name": "capture-scrolling",
+      "title": "Scrolling Capture",
+      "subtitle": "Sowiks",
+      "description": "Capture content that extends past the screen",
+      "mode": "no-view",
+      "keywords": [
+        "scrolling screenshot",
+        "long screenshot",
+        "full page"
+      ]
+    },
+    {
+      "name": "self-timer",
+      "title": "Capture with Self-Timer",
+      "subtitle": "Sowiks",
+      "description": "Capture an area after a countdown",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "timer",
+        "delayed capture"
+      ]
+    },
+    {
+      "name": "capture-collection",
+      "title": "Capture Collection",
+      "subtitle": "Sowiks",
+      "description": "Capture several shots into one collection",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "multiple",
+        "batch"
+      ]
+    },
+    {
+      "name": "record-screen",
+      "title": "Toggle Screen Recording",
+      "subtitle": "Sowiks",
+      "description": "Start or stop a screen recording",
+      "mode": "no-view",
+      "keywords": [
+        "screen recording",
+        "screencast",
+        "video",
+        "gif"
+      ]
+    },
+    {
+      "name": "pause-recording",
+      "title": "Pause or Resume Recording",
+      "subtitle": "Sowiks",
+      "description": "Pause or resume the recording in progress",
+      "mode": "no-view",
+      "keywords": [
+        "screen recording",
+        "pause",
+        "resume"
+      ]
+    },
+    {
+      "name": "unpin-all",
+      "title": "Unpin All",
+      "subtitle": "Sowiks",
+      "description": "Close every pinned screenshot",
+      "mode": "no-view",
+      "keywords": [
+        "screenshot",
+        "pins",
+        "close all"
+      ]
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Sowiks",
+      "description": "Open Sowiks settings",
+      "mode": "no-view",
+      "keywords": [
+        "preferences",
+        "settings"
+      ]
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Dashboard",
+      "subtitle": "Sowiks",
+      "description": "Open your Sowiks cloud dashboard in the browser",
+      "mode": "no-view",
+      "keywords": [
+        "screenshots",
+        "history",
+        "cloud"
+      ]
+    },
+    {
+      "name": "manage-integrations",
+      "title": "Manage Integrations",
+      "subtitle": "Sowiks",
+      "description": "Manage connected sites on sowiks.com",
+      "mode": "no-view",
+      "keywords": [
+        "integrations",
+        "connected sites"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.1",
+    "eslint": "^9.19.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "screenshot",
+    "screen capture",
+    "screen recording",
+    "screencast",
+    "scrolling screenshot",
+    "ocr",
+    "snip",
+    "grab screen",
+    "annotate",
+    "capture",
+    "record screen",
+    "share screenshot"
+  ]
+}
