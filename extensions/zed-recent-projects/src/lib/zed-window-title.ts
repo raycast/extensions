@@ -11,6 +11,31 @@
 
 const TITLE_SEPARATORS = [" — ", " – ", " - ", " | "] as const;
 
+const EXTENSIONLESS_FILENAMES = new Set([
+  "authors",
+  "brewfile",
+  "changelog",
+  "containerfile",
+  "contributors",
+  "copying",
+  "dockerfile",
+  "gemfile",
+  "install",
+  "jenkinsfile",
+  "justfile",
+  "licence",
+  "license",
+  "makefile",
+  "news",
+  "notice",
+  "podfile",
+  "procfile",
+  "rakefile",
+  "readme",
+  "todo",
+  "vagrantfile",
+]);
+
 function normalizeSegment(segment: string): string {
   return segment.replace(/[↗↙]+/g, "").trim();
 }
@@ -22,19 +47,30 @@ function isUnambiguousSeparator(separator: (typeof TITLE_SEPARATORS)[number]): b
 /**
  * The other half of a `{file} - {project}` title. ` - ` also appears inside
  * folder names, so a short title like `project` must not match `my - project`.
+ * Extensionless files (README, Makefile) are still treated as the file side.
  */
 function looksLikeCompositeSide(side: string): boolean {
   const value = normalizeSegment(side);
   if (!value) {
     return false;
   }
-  if (/\.[A-Za-z0-9]{1,16}$/.test(value)) {
-    return true;
+  // Leftover from a hyphenated project name (`README - my` before `project`).
+  if (value.includes(" - ")) {
+    return false;
   }
   if (value.includes("/") || value.includes("\\")) {
     return true;
   }
-  return /^(untitled|welcome)$/i.test(value);
+  if (/\.[A-Za-z0-9]{1,16}$/.test(value)) {
+    return true;
+  }
+  if (/^(untitled|welcome)$/i.test(value)) {
+    return true;
+  }
+  if (EXTENSIONLESS_FILENAMES.has(value.toLowerCase())) {
+    return true;
+  }
+  return /^[A-Z][A-Z0-9._-]*$/.test(value) && value.length > 1;
 }
 
 function windowTitleHasProjectTitle(
@@ -44,11 +80,11 @@ function windowTitleHasProjectTitle(
 ): boolean {
   if (windowTitle.endsWith(separator + projectTitle)) {
     const prefix = windowTitle.slice(0, windowTitle.length - separator.length - projectTitle.length);
-    return isUnambiguousSeparator(separator) || looksLikeCompositeSide(prefix);
+    return isUnambiguousSeparator(separator) || projectTitle.includes(separator) || looksLikeCompositeSide(prefix);
   }
   if (windowTitle.startsWith(projectTitle + separator)) {
     const suffix = windowTitle.slice(projectTitle.length + separator.length);
-    return isUnambiguousSeparator(separator) || looksLikeCompositeSide(suffix);
+    return isUnambiguousSeparator(separator) || projectTitle.includes(separator) || looksLikeCompositeSide(suffix);
   }
   return false;
 }

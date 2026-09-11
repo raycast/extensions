@@ -46,6 +46,20 @@ describe("windowTitleMatchesProject", () => {
     expect(windowTitleMatchesProject("main.ts — my - project", "project")).toBe(false);
     expect(windowTitleMatchesProject("main.ts - my - project", "project")).toBe(false);
     expect(windowTitleMatchesProject("my - project", "project")).toBe(false);
+    expect(windowTitleMatchesProject("README - my - project", "project")).toBe(false);
+  });
+
+  it("matches a hyphenated project name when an extensionless file is active", () => {
+    expect(windowTitleMatchesProject("README - my - project", "my - project")).toBe(true);
+    expect(windowTitleMatchesProject("Makefile - my - project", "my - project")).toBe(true);
+    expect(windowTitleMatchesProject("LICENSE - my - project", "my - project")).toBe(true);
+    expect(windowTitleMatchesProject("my - project - README", "my - project")).toBe(true);
+  });
+
+  it("matches extensionless files with a simple project name", () => {
+    expect(windowTitleMatchesProject("README - foo", "foo")).toBe(true);
+    expect(windowTitleMatchesProject("Makefile - foo", "foo")).toBe(true);
+    expect(windowTitleMatchesProject("foo - Dockerfile", "foo")).toBe(true);
   });
 });
 
@@ -81,6 +95,9 @@ describe("findUniqueMatchingWindowTitle", () => {
   it("matches a unique window whose project name contains a separator", () => {
     expect(findUniqueMatchingWindowTitle(["main.ts — my - project", "main.ts — other"], "my - project")).toBe(
       "main.ts — my - project",
+    );
+    expect(findUniqueMatchingWindowTitle(["README - my - project", "README - other"], "my - project")).toBe(
+      "README - my - project",
     );
   });
 
