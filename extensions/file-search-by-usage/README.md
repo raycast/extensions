@@ -6,6 +6,8 @@ File Search by Usage finds files and folders across your Mac and cloud drives. I
 
 Speed matters most when you need a file you work with often. The extension searches history and cached locations first, so you can open a matching result without waiting for a whole-disk search.
 
+The extension combines its own caches with macOS Spotlight and direct folder reads. It does not use Raycast File Search's private index or build a complete index of your disk.
+
 **You do not need to wait for the search to finish.** As soon as the item you want appears, select it and press `⏎` to open it. To browse inside a folder in the extension, select it and press `⌥⌘↓`; you can then search within that folder. Both actions work while more results are still arriving.
 
 ### What happens during an Everywhere search
@@ -21,9 +23,11 @@ Inside a folder, the list contains only its direct children, with or without a q
 
 Changing the query or entering another folder cancels the previous search. Otherwise, search keeps collecting matches until its sources finish or a safety limit is reached. Selecting a row, using Quick Look, or showing details does not interrupt it. Collection continues whether you scroll or not. You can open an item or enter a folder at any stage—there is no need to wait for the green status indicator.
 
-Folder navigation uses one search screen, with no saved folder history. Changing folders releases the previous results and clears the search field. **⌥⌘↑** goes to the parent folder and selects the folder you just left. To return to Everywhere, leave the command and open it again. Raycast's back button leaves the command; Escape keeps Raycast's usual behavior for clearing text or leaving the command.
+Folder navigation keeps only the active results, with no saved folder history. Changing folders releases the previous results and clears the search field. **⌥⌘↑** goes to the parent folder and requests selection of the folder you just left, if it is among the results allowed by the current filters and limits. Press **⌘⇧H** or choose **Return to Start** in Actions to return to Everywhere with an empty query, the initial results list, and its first result selected. Your sort, type filter, and hidden-file choice stay unchanged.
 
-Setup continues while you navigate. Closing the command or choosing Stop Setup cancels the run. Any progress already saved is kept; you can run setup again from Actions.
+Raycast's back button has a different purpose: it returns to a lightweight, empty start screen with no results or type/sort menu. Type there to start an Everywhere search after a short pause, or press Return to search immediately. Return with an empty field shows pinned items, recent files, and places. Search actions, including setup and the hidden-file toggle, are available again in that results view—even when it has no matches. Escape uses Raycast's normal back behavior; depending on your settings, it may clear search text first. Going back again from the empty start screen leaves the command.
+
+Setup continues while you navigate, including while the empty start screen is visible. To access Stop Setup from that screen, press Return to reopen the results view, then open Actions. Closing the command or choosing Stop Setup cancels the run. Any progress already saved is kept; you can run setup again from Actions.
 
 ### Limits for broad searches
 
@@ -48,7 +52,7 @@ Setup is optional. Ordinary Spotlight search works from the first launch and doe
 
 Choose **Set Up Search** to build an initial cache. The main-view prompt stays available until you start a setup run; simply opening the extension or cancelling the confirmation does not dismiss it. After that run finishes or stops, setup is available from **Actions (⌘K) → Set Up Search**, even if the results were partial. After confirmation, setup imports recent files, then indexes Google Drive shortcuts and shared-folder contents that Spotlight cannot find. The recent-file step uses documents opened in the last seven days within your home folder, along with their parent folders and immediate contents.
 
-You can keep searching during setup. On the starting screen, its progress row shows the current scan, items found, elapsed time, and the time allowed for that step. The message updates every second, even while a cloud provider is slow; it does not guess a completion percentage. In Actions, choose **Skip Recent Files** or **Skip Google Drive** before starting, or **Stop Setup** while it runs. Incomplete steps remain available to retry there, without bringing back the main prompt. If no unfinished steps remain, **Set Up Search** offers to refresh both sources after confirmation. The standalone **Populate from Recent Files** and **Index Google Drive** commands remain available later.
+You can keep searching during setup. In Everywhere with an empty query, its progress row shows the current scan, items found, elapsed time, and the time allowed for that step. The message updates every second, even while a cloud provider is slow; it does not guess a completion percentage. In Actions, choose **Skip Recent Files** or **Skip Google Drive** before starting, or **Stop Setup** while it runs. Incomplete steps remain available to retry there, without bringing back the main prompt. If no unfinished steps remain, **Set Up Search** offers to refresh both sources after confirmation. The standalone **Populate from Recent Files** and **Index Google Drive** commands remain available later.
 
 During setup, the import considers up to 500 recent documents and scans up to 50 parent folders, with up to 500 nearby entries per folder. The recent-file cache holds up to 10,000 entries within a 16 MB storage allowance. These are maximums; the time limit or an unreadable folder can stop a scan sooner.
 
@@ -59,6 +63,8 @@ If an imported file is slow to check, its cached entry remains searchable while 
 If macOS blocks access to protected folders, check Raycast's permissions under System Settings › Privacy & Security, including **Full Disk Access**. Permission changes do not make offline cloud files available or add missing files to Spotlight's index.
 
 If you use Google Drive shortcuts or shared folders, run **Index Google Drive** whenever those folders change, or if you skipped it during setup. A cold or network-backed drive can make indexing take longer. Setup allows up to one minute for recent files, including up to 15 seconds for last-opened metadata, and ten minutes each for Drive shortcuts and shared-folder contents. Item and depth limits still apply. If a scan stops at a limit, the final message names it; saved results remain searchable.
+
+The standalone commands use shorter scans: **Populate from Recent Files** allows 15 seconds, up to 200 documents, 20 parent folders, and 200 nearby entries per folder, with 3,000 entries per scan. **Index Google Drive** allows four minutes for shortcuts and two minutes for shared-folder contents. The **Index Google Drive** action inside search allows only 20 seconds per scan. Use **Set Up Search** for the longer budgets; indexing is never scheduled automatically.
 
 ## Searching
 
@@ -106,7 +112,9 @@ Filters can appear anywhere in a name query and can be combined. For example, `f
 
 For a whole-disk extension search, include a name term such as `foo ext:txt`. A filter by itself narrows the folder or results already in memory; it does not launch an unrestricted whole-disk search.
 
-Hidden files are controlled by the **Show hidden files** preference and by dot-prefixed queries. A bare `.` shows hidden entries and `-d .` shows hidden folders. In Everywhere, `.foo bar` can search inside a hidden `.foo` folder in your home directory without relying on Spotlight. Inside a folder, these queries still filter only direct children.
+The **Show hidden files** preference sets the default visibility. Press **⇧⌘.** or choose **Toggle Hidden Files** in Actions to show or hide dot-prefixed files and folders for the current command run. This choice follows you between folders; reopening the command restores the preference. The toggle also works in a results view with no matches, but not on the lightweight start screen.
+
+Dot-prefixed queries include hidden matches regardless of the toggle. A bare `.` shows hidden entries and `-d .` shows hidden folders. In Everywhere, `.foo bar` can search inside a hidden `.foo` folder in your home directory without relying on Spotlight. Inside a folder, these queries still filter only direct children. You can also open an explicitly typed hidden path with the path bar. Showing hidden files does not make Spotlight index them; use dot-prefixed queries or browse the folder when Spotlight cannot find them.
 
 Whole-disk Spotlight search begins when the longest name term has at least three characters. Inside a folder, the extension filters direct children immediately; it does not launch a recursive Spotlight search. Immediate history and cached results do not wait for Spotlight.
 
@@ -116,7 +124,9 @@ Open folder listings refresh automatically when files change. Cloud drives may t
 
 Results arrive in one list even though they come from different sources. As the [search phases](#what-happens-during-an-everywhere-search) progress, newly found items join the list and usage information can change their order. The list may move several times before the search finishes; this is expected.
 
-On startup and when entering a folder, the highlight stays on the first result as items arrive. Once you select another item or type a query, the extension stops keeping the highlight at the top. Your selection then follows the same file if the list reorders. Going up selects the folder you just left.
+On startup, folder entry, and each new query, the extension selects the top item from the initial memory-ranked list after it appears. Inside a folder, directly read children also count as fast results. Memory can arrive one file at a time, so while those checks are pending the extension allows up to 200 ms for the initial list to fill in; it selects sooner if those checks finish. If only Spotlight results are available, it waits 200 ms from their first appearance before requesting selection of the current top item. Memory results available by that deadline take priority; later batches do not restart the timer. This does not wait for the whole search or let slow cached-file checks postpone selection indefinitely.
+
+Once chosen, the highlight stays with that item as results reorder instead of repeatedly jumping to the top. You can move selection normally, including during the short Spotlight wait. A new query starts a new initial selection. If the list loses its selection or the automatically selected item disappears, the extension requests focus again after results arrive. Going up requests the folder you just left rather than the first result; filters, unreadable folders, and collection limits can prevent that folder from appearing.
 
 The section header tells you whether more work is pending:
 
@@ -127,7 +137,7 @@ The section header tells you whether more work is pending:
 
 The single-line section heading combines a shortened location, result count, and status. While work is pending or incomplete, it names the applicable stages: memory, folder, Spotlight, and ranking. Spotlight includes both the ordinary and broader fuzzy passes when applicable. Google Drive index notices identify whether shortcut or shared-folder indexing reached its time, depth, or item limit. An older partial index reports only that it stopped early until the next indexing run. You can open an existing result with `⏎` or enter a folder with `⌥⌘↓` without waiting for green.
 
-Paths returned by Spotlight are cached. A later search for the same item can often find it in the immediate pass.
+The extension remembers a bounded subset of Spotlight results, adding up to 300 paths per completed search to a cache of up to 20,000 paths. A later search for a remembered item can often find it in the immediate pass.
 
 ## Ranking
 
@@ -177,11 +187,13 @@ Dropbox, OneDrive, and iCloud Drive normally expose shared folders as regular di
 | `⏎`         | Open the selected item                     |
 | `⌥⌘↓`       | Navigate into the selected folder          |
 | `⌥⌘↑`       | Go to the parent folder                    |
+| `⌘⇧H`       | Return to Everywhere with an empty query   |
 | `esc`       | Raycast's usual clear-text / back behavior |
 | `⌘[` / `⌘]` | Previous / next search                     |
 | `⌘Y`        | Quick Look                                 |
-| `⌘⇧O`       | Open With…                                 |
-| `⌘⇧F`       | Show in Finder                             |
+| `⌘O`        | Open With…                                 |
+| `⌘↩`        | Show in Finder                             |
+| `⇧⌘.`       | Toggle hidden files for this command run   |
 | `⌘.`        | Pin or unpin                               |
 | `⌘I`        | Show or hide details                       |
 | `⌘P`        | Open the type and sort menu                |
@@ -192,10 +204,11 @@ Dropbox, OneDrive, and iCloud Drive normally expose shared folders as regular di
 | `⌘⇧I`       | Index Google Drive                         |
 | `⌘R`        | Refresh                                    |
 | `⌘⌥R`       | Reset usage ranking for the selected item  |
+| `⌃X`        | Move the selected item to Trash            |
 
 Raycast reserves `⌥↑` / `⌥↓` for paging and `⌘↑` / `⌘↓` for moving between sections, so search history uses brackets instead.
 
-The following actions deliberately have no shortcut: **Move to Trash**, **Clear All Rankings…**, and **Delete All Data and Cache…**. Moving a file uses the macOS Trash and can be undone there. The two data-clearing actions ask for confirmation and do not modify your files.
+**Clear All Rankings…** and **Delete All Data and Cache…** deliberately have no shortcut. These actions ask for confirmation and do not modify your files. **Move to Trash** uses `⌃X`, matching Raycast File Search; it moves the selected item to the macOS Trash and can be undone there.
 
 ## Privacy and stored data
 

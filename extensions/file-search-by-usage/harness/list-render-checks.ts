@@ -17,7 +17,10 @@ export async function listRenderChecks(
   const headingStart = source.indexOf("  const scopeLabel =");
   const sectionStart = source.lastIndexOf("<List.Section");
   const headingCode = transformSync(
-    source.slice(headingStart, source.indexOf("  const { selectedId")) +
+    source.slice(
+      headingStart,
+      source.indexOf("  // Prefer the best fast result"),
+    ) +
       "\nreturn (" +
       source.slice(sectionStart, source.indexOf(">", sectionStart) + 1) +
       "</List.Section>);",
@@ -67,7 +70,7 @@ export async function listRenderChecks(
     ),
     "shortening the header preserves search caveats",
   );
-  const start = source.indexOf("  const { selectedId");
+  const start = source.indexOf("  // Prefer the best fast result");
   const end = source.indexOf("\n  const rowHandlers", start);
   const resetStart = source.indexOf("  // Reset row IDs for a new query;");
   const reset = source.slice(
@@ -75,9 +78,10 @@ export async function listRenderChecks(
     source.indexOf("  const onSearchTextChange", resetStart),
   );
   const code = transformSync(
-    `return function View({ rows, initialSelectionPath, query = "", restorationRevision = 0 }) {
+    `return function View({ rows, instantRows = rows, rankingReady = true, searchActive = true, directoryPending = false, initialSelectionPath, query = "", restorationRevision = 0 }) {
     const [generation, setGeneration] = useState(0);
     const parsed = { normalized: query }, dir = undefined;
+    const backgroundPending = false, cachedPending = false, recentFiles = { pending: false };
     ${reset}
     ${source.slice(start, end)}
     return <List entries={renderedRows}
@@ -85,6 +89,19 @@ export async function listRenderChecks(
   }`,
     { loader: "tsx", jsxFactory: "React.createElement" },
   ).code;
+  const commits: { paths: string[]; selectedId: string | null }[] = [];
+  function ObservedList(props: {
+    entries: { entry: { path: string } }[];
+    selectedId: string | null;
+  }) {
+    React.useLayoutEffect(() => {
+      commits.push({
+        paths: props.entries.map(({ entry }) => entry.path),
+        selectedId: props.selectedId,
+      });
+    });
+    return React.createElement("list", props);
+  }
   const View = new Function(
     "React",
     "useState",
@@ -105,7 +122,7 @@ export async function listRenderChecks(
     React.useEffect,
     useFolderSelection,
     rowIdForEntry,
-    "list",
+    ObservedList,
     LIVE_RENDERED_RESULTS,
     displayRows,
   );
@@ -165,7 +182,7 @@ export async function listRenderChecks(
     await act(() => list().onSelectionChange("1:/foo/bar0"));
     assert(
       list().selectedId === "1:/foo/bar0",
-      "startup acknowledgement keeps focus at the top during initial loading",
+      "startup acknowledgement preserves the initial memory target",
     );
     await act(() =>
       renderer!.update(
@@ -173,8 +190,8 @@ export async function listRenderChecks(
       ),
     );
     assert(
-      list().selectedId === "1:/foo/bar1999",
-      "startup focus follows the first result after delayed reranking",
+      list().selectedId === "1:/foo/bar0",
+      "startup focus remains on the memory target after delayed reranking",
     );
     await act(() => list().onSelectionChange("1:/foo/bar1999"));
     await act(() => renderer!.update(React.createElement(View, { rows })));
@@ -221,6 +238,180 @@ export async function listRenderChecks(
           (row: (typeof rows)[number]) => row.entry.path === "/foo/bar1999",
         ),
       "parent-folder focus admits its target without rendering all intervening rows",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "memory",
+          rows,
+          instantRows: rows.slice(4),
+          rankingReady: false,
+        }),
+      ),
+    );
+    assert(
+      list().selectedId === null,
+      "the browser does not request focus before ranking data allows rows to render",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "memory",
+          rows,
+          instantRows: rows.slice(4),
+        }),
+      ),
+    );
+    assert(
+      list().selectedId === "1:/foo/bar4",
+      "the browser selects the highest-ranked admitted memory item, not the top Spotlight item",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "parent-loading",
+          rows,
+          initialSelectionPath: "/foo/bar1999",
+          rankingReady: false,
+        }),
+      ),
+    );
+    assert(
+      list().selectedId === null,
+      "parent selection also waits for its rows to be rendered",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "parent-loading",
+          rows,
+          initialSelectionPath: "/foo/bar1999",
+        }),
+      ),
+    );
+    assert(
+      list().selectedId === "1:/foo/bar1999",
+      "the restored parent target takes priority over the top memory item once rows render",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "offscreen-memory",
+          rows,
+          instantRows: [],
+          rankingReady: false,
+        }),
+      ),
+    );
+    await act(() => list().onSelectionChange("1:/foo/bar0"));
+    commits.length = 0;
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "offscreen-memory",
+          rows,
+          instantRows: [rows[1999]],
+        }),
+      ),
+    );
+    const focused = commits.findIndex(
+      (commit) => commit.selectedId === "1:/foo/bar1999",
+    );
+    assert(
+      focused > 0 &&
+        commits
+          .slice(0, focused)
+          .some(
+            (commit) =>
+              commit.paths.includes("/foo/bar1999") &&
+              commit.selectedId === null,
+          ),
+      "an offscreen memory target is rendered in an earlier commit than its focus request",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "late-parent",
+          rows: rows.slice(0, 1),
+          initialSelectionPath: "/foo/bar1999",
+        }),
+      ),
+    );
+    await act(() => list().onSelectionChange("1:/foo/bar0"));
+    commits.length = 0;
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "late-parent",
+          rows,
+          initialSelectionPath: "/foo/bar1999",
+        }),
+      ),
+    );
+    const parentFocused = commits.findIndex(
+      (commit) => commit.selectedId === "1:/foo/bar1999",
+    );
+    assert(
+      parentFocused > 0 &&
+        commits
+          .slice(0, parentFocused)
+          .some(
+            (commit) =>
+              commit.paths.includes("/foo/bar1999") &&
+              commit.selectedId === null,
+          ),
+      "a late parent target is also rendered before requesting focus despite an intermediate native selection",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "directory-batch",
+          rows: [rows[72]],
+          directoryPending: true,
+        }),
+      ),
+    );
+    assert(
+      list().selectedId === null,
+      "the browser waits for an initial directory batch instead of latching the first enumerated file",
+    );
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "directory-batch",
+          rows,
+        }),
+      ),
+    );
+    assert(
+      list().selectedId === "1:/foo/bar0",
+      "finishing the directory batch selects its ranked top item",
+    );
+    function LaggingDirectory({ finished }: { finished: boolean }) {
+      const [entries, setEntries] = React.useState([rows[72]]);
+      React.useEffect(() => {
+        if (finished) setEntries(rows);
+      }, [finished]);
+      return React.createElement(View, {
+        rows: entries,
+        directoryPending: !finished,
+      });
+    }
+    await act(() =>
+      renderer!.update(
+        React.createElement(LaggingDirectory, { finished: false }),
+      ),
+    );
+    commits.length = 0;
+    await act(() =>
+      renderer!.update(
+        React.createElement(LaggingDirectory, { finished: true }),
+      ),
+    );
+    assert(
+      list().selectedId === "1:/foo/bar0" &&
+        !commits.some((commit) => commit.selectedId === "1:/foo/bar72"),
+      "a directory publication queued by an effect updates the target before the first focus request",
     );
   } finally {
     if (renderer) await act(() => renderer!.unmount());

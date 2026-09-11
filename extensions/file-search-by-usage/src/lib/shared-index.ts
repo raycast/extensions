@@ -2,7 +2,8 @@ import { Cache } from "@raycast/api";
 import { SharedIndex } from "./shared-scan";
 
 /** Bulk cache for the Google Drive shared-folder index. */
-const cache = new Cache({ namespace: "shared-folders", capacity: 8_000_000 });
+const CAPACITY = 8_000_000;
+const cache = new Cache({ namespace: "shared-folders", capacity: CAPACITY });
 const KEY = "index";
 
 const EMPTY: SharedIndex = {
@@ -34,10 +35,12 @@ export function clearSharedIndexCache(): number {
 
 export function saveSharedIndex(index: SharedIndex): boolean {
   try {
-    cache.set(KEY, JSON.stringify(index));
+    const raw = JSON.stringify(index);
+    // Cache.set evicts oversized values without throwing, including the old index.
+    if (Buffer.byteLength(raw, "utf8") > CAPACITY) return false;
+    cache.set(KEY, raw);
     return true;
   } catch {
-    // Preserve the existing index if the replacement exceeds capacity.
     return false;
   }
 }

@@ -7,6 +7,7 @@ import { displayPath } from "../lib/read-dir";
 import { SetupActions, SetupActionsProps } from "./setup-actions";
 import { NavigationActions } from "./navigation-actions";
 import { SearchHistoryActions } from "./search-history-actions";
+import { HiddenFilesAction } from "./hidden-files-action";
 
 export type RowHandlers = {
   /** Opens a file in its default app or a folder in Finder. */
@@ -15,6 +16,7 @@ export type RowHandlers = {
   onDescend: (entry: Entry) => void;
   /** Navigates to the parent; undefined at the filesystem root or global scope. */
   onUp?: () => void;
+  onReturnToStart?: () => void;
   /** Cycles query history with ⌘[ and ⌘]. */
   onHistoryBack: () => void;
   onHistoryForward: () => void;
@@ -24,6 +26,7 @@ export type RowHandlers = {
   /** Reindexes Google Drive shortcuts and shared-folder contents. */
   onReindexShortcuts: () => void;
   onToggleDetail: () => void;
+  onToggleHidden: () => void;
   onRefresh: () => void;
   onResetRanking: (entry: Entry) => void;
   onClearAllRankings: () => void;
@@ -205,7 +208,10 @@ function RowActions({
             onAction={() => handlers.onDescend(entry)}
           />
         )}
-        <NavigationActions onUp={handlers.onUp} />
+        <NavigationActions
+          onUp={handlers.onUp}
+          onReturnToStart={handlers.onReturnToStart}
+        />
         <Action.ToggleQuickLook
           title="Quick Look"
           shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
@@ -213,6 +219,7 @@ function RowActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Search">
+        <HiddenFilesAction onToggle={handlers.onToggleHidden} />
         <SearchHistoryActions
           onHistoryBack={handlers.onHistoryBack}
           onHistoryForward={handlers.onHistoryForward}
@@ -222,11 +229,11 @@ function RowActions({
       <ActionPanel.Section title="This Item">
         <Action.ShowInFinder
           path={entry.path}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          shortcut={{ modifiers: ["cmd"], key: "return" }}
         />
         <Action.OpenWith
           path={entry.path}
-          shortcut={Keyboard.Shortcut.Common.OpenWith}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
         <Action
           title={pinned ? "Unpin" : "Pin"}
@@ -308,6 +315,7 @@ function RowActions({
         />
         <Action.Trash
           paths={[entry.path]}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onTrash={() => handlers.onRefresh()}
         />
       </ActionPanel.Section>

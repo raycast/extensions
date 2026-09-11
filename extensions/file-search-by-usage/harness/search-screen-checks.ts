@@ -14,6 +14,8 @@ export async function searchScreenChecks(
   let setQuery: (text: string) => void;
   let refresh: () => void;
   let mounts = 0;
+  let queryRenders = 0;
+  let renderedQuery = "";
   function NativeList(props: List.Props) {
     // Raycast's input hook batches its event counter with the consumer callback.
     const [eventCount, setEventCount] = React.useState(0);
@@ -44,20 +46,24 @@ export async function searchScreenChecks(
   );
   const { SearchScreen, SearchScreenView, SearchScreenContent } =
     screenModule.exports;
-  const screen = new SearchScreen();
-  function Results() {
-    const [query, updateQuery] = React.useState("");
+  let screen = new SearchScreen();
+  function Results({ frameId = 0 }: { frameId?: number }) {
+    const query = React.useSyncExternalStore(
+      screen.subscribe,
+      screen.getSearchText,
+    );
     const [revision, setRevision] = React.useState(0);
-    setQuery = updateQuery;
+    queryRenders++;
+    renderedQuery = query;
+    setQuery = (text) => screen.setSearchText(frameId, text);
     refresh = () => setRevision((value) => value + 1);
     return React.createElement(SearchScreenContent, {
       screen,
-      frameId: 0,
+      frameId,
       searchText: query,
       isLoading: revision % 2 === 0,
       onSearchTextChange: (text: string) => {
         queries.push(text);
-        updateQuery(text);
       },
     });
   }
@@ -111,6 +117,77 @@ export async function searchScreenChecks(
     assert(
       commits.length === 0 && mounts === 1,
       "result refreshes neither rewrite the input nor remount the native List",
+    );
+    const pendingResults = screen.getSnapshot();
+    await act(() => input("foobar", 10));
+    commits.length = 0;
+    const rendersBefore = queryRenders;
+    await act(() => screen.publish(0, { ...pendingResults, isLoading: false }));
+    assert(
+      screen.getSnapshot().searchText === "foobar" &&
+        commits.every((commit) => commit.text === "foobar"),
+      "results prepared before a keystroke cannot overwrite newer input",
+    );
+    assert(
+      queryRenders === rendersBefore && renderedQuery === "foobar",
+      "result-only publications do not rerender the query consumer",
+    );
+    commits.length = 0;
+    await act(() => {
+      for (const [index, text] of [
+        "g",
+        "gr",
+        "gra",
+        "gran",
+        "grant",
+        "grants",
+        "grant",
+        "grants",
+      ].entries()) {
+        input(text, index + 11);
+        screen.publish(0, pendingResults);
+      }
+      refresh();
+    });
+    assert(
+      screen.getSearchText() === "grants" &&
+        renderedQuery === "grants" &&
+        commits.every((commit) => commit.text === "grants"),
+      "rapid typing and backspace survive repeated stale result publications",
+    );
+    await act(() => renderer!.unmount());
+    const previousScreen = screen;
+    screen = new SearchScreen(1);
+    await act(() => screen.onSearchTextChange("bar"));
+    await act(() => screen.publish(1, { searchText: "", isLoading: false }));
+    assert(
+      screen.getSnapshot().searchText === "bar",
+      "typing before a new folder's results mount survives their first publication",
+    );
+    await act(
+      () =>
+        (renderer = create(
+          React.createElement(
+            React.Fragment,
+            null,
+            React.createElement(SearchScreenView, { screen }),
+            React.createElement(Results, { key: 1, frameId: 1 }),
+          ),
+        )),
+    );
+    assert(
+      renderedQuery === "bar" && mounts === 2,
+      "a new route starts with text typed before its results mount",
+    );
+    await act(() => screen.setSearchText(0, "obsolete"));
+    assert(
+      screen.getSearchText() === "bar",
+      "programmatic edits from a previous folder cannot reset the active query",
+    );
+    previousScreen.onSearchTextChange("obsolete");
+    assert(
+      screen.getSearchText() === "bar",
+      "a discarded route cannot change the new route's query",
     );
   } finally {
     if (renderer) await act(() => renderer!.unmount());

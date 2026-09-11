@@ -22,6 +22,12 @@ export class FolderNavigation {
     return this.isCurrent(fromId) && this.current.dir !== target;
   }
 
+  reset(fromId: number): FolderFrame | undefined {
+    if (!this.isCurrent(fromId)) return;
+    this.frame = { id: this.current.id + 1 };
+    return this.current;
+  }
+
   navigate(
     fromId: number,
     target: string,
@@ -31,7 +37,7 @@ export class FolderNavigation {
     this.frame = { id: this.current.id + 1, dir: target, selectedPath };
     traceNavigation("folder-changed", {
       frameId: this.current.id,
-      nativeScreens: 1,
+      activeSearchViews: 1,
     });
     return this.current;
   }

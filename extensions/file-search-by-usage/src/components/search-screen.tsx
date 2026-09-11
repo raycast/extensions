@@ -1,9 +1,14 @@
 import { List } from "@raycast/api";
 import { useLayoutEffect, useSyncExternalStore } from "react";
 
-/** Holds only the active list; publishing does not rerender the search owner. */
+/** Owns query text independently of the active result view's publications. */
 export class SearchScreen {
-  private frameId = 0;
+  constructor(
+    private frameId = 0,
+    private searchText = "",
+  ) {
+    this.props.searchText = searchText;
+  }
   private props: List.Props = {
     filtering: false,
     isLoading: true,
@@ -12,6 +17,7 @@ export class SearchScreen {
   private listeners = new Set<() => void>();
 
   getSnapshot = (): List.Props => this.props;
+  getSearchText = (): string => this.searchText;
   subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
     return () => {
@@ -22,24 +28,33 @@ export class SearchScreen {
   onSearchTextChange = (text: string): void => {
     const onChange = this.props.onSearchTextChange;
     // Raycast must receive the new text in the same commit as its input counter.
-    if (text !== this.props.searchText)
-      this.publish(this.frameId, { ...this.props, searchText: text });
+    this.setSearchText(this.frameId, text);
     onChange?.(text);
   };
 
-  begin(frameId: number, searchText: string): void {
-    this.frameId = frameId;
-    this.publish(frameId, { filtering: false, isLoading: true, searchText });
+  setSearchText(frameId: number, searchText: string): void {
+    if (frameId !== this.frameId || searchText === this.getSearchText()) return;
+    this.searchText = searchText;
+    this.update({ ...this.props, searchText });
   }
 
   publish(frameId: number, props: List.Props): void {
     if (frameId !== this.frameId) return;
+    this.update({ ...props, searchText: this.getSearchText() });
+  }
+
+  clear(frameId: number): void {
+    // Release rows and callbacks, but preserve the small query across effect replay.
+    if (frameId === this.frameId) this.update({});
+  }
+
+  private update(props: List.Props): void {
     this.props = props;
     for (const listener of this.listeners) listener();
   }
 }
 
-/** The native List keeps its identity across all folder transitions. */
+/** Preserve the native input instance while this location's results update. */
 export function SearchScreenView({ screen }: { screen: SearchScreen }) {
   return (
     <List
@@ -49,7 +64,7 @@ export function SearchScreenView({ screen }: { screen: SearchScreen }) {
   );
 }
 
-/** A replaceable result view publishes into the persistent native List. */
+/** Publish results into this route's input owner, without rewriting its query. */
 export function SearchScreenContent({
   screen,
   frameId,
@@ -58,7 +73,7 @@ export function SearchScreenContent({
   screen: SearchScreen;
   frameId: number;
 }) {
-  useLayoutEffect(() => () => screen.publish(frameId, {}), [screen, frameId]);
+  useLayoutEffect(() => () => screen.clear(frameId), [screen, frameId]);
   useLayoutEffect(() => {
     screen.publish(frameId, props);
   });

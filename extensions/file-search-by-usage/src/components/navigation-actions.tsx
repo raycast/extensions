@@ -1,14 +1,30 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
 
-/** Parent navigation is available on both empty and populated lists. */
-export function NavigationActions({ onUp }: { onUp?: () => void }) {
-  if (!onUp) return null;
+export function NavigationActions({
+  onUp,
+  onReturnToStart,
+}: {
+  onUp?: () => void;
+  onReturnToStart?: () => void;
+}) {
   return (
-    <Action
-      title="Go to Parent Folder"
-      icon={Icon.ChevronLeft}
-      shortcut={Keyboard.Shortcut.Common.MoveUp}
-      onAction={onUp}
-    />
+    <>
+      {onUp && (
+        <Action
+          title="Go to Parent Folder"
+          icon={Icon.ChevronLeft}
+          shortcut={Keyboard.Shortcut.Common.MoveUp}
+          onAction={onUp}
+        />
+      )}
+      {onReturnToStart && (
+        <Action
+          title="Return to Start"
+          icon={Icon.House}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+          onAction={onReturnToStart}
+        />
+      )}
+    </>
   );
 }

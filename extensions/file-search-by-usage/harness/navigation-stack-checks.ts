@@ -16,12 +16,15 @@ export async function navigationStackChecks(
   ).code;
   function fixture(startDir?: string) {
     const navigation = new FolderNavigation(startDir);
-    function callbacks() {
+    function callbacks(searchText = "") {
       const scopeController = new AbortController();
       let active = true;
       const deps = {
         navigation,
         frameId: navigation.current.id,
+        dir: navigation.current.dir,
+        searchText,
+        onReturnToStart: (id: number) => navigation.reset(id),
         useCallback: (run: unknown) => run,
         scopeController,
         setSearchActive: (value: boolean) => {
@@ -32,9 +35,10 @@ export async function navigationStackChecks(
       };
       const result = new Function(
         ...Object.keys(deps),
-        code + "\nreturn { navigate };",
+        code + "\nreturn { navigate, returnToStart };",
       )(...Object.values(deps)) as {
         navigate: (dir: string, selected?: string) => void;
+        returnToStart: () => void;
       };
       return { ...result, scopeController, active: () => active };
     }
@@ -101,5 +105,28 @@ export async function navigationStackChecks(
     scoped.navigation.current.dir === "/foo" &&
       scoped.navigation.current.selectedPath === "/foo/bar",
     "parent navigation works for a scoped command start",
+  );
+  const reset = scoped.callbacks("bar");
+  reset.returnToStart();
+  assert(
+    scoped.navigation.current.dir === undefined &&
+      scoped.navigation.current.selectedPath === undefined &&
+      reset.scopeController.signal.aborted &&
+      !reset.active(),
+    "returning to start clears the folder and selection and cancels old work",
+  );
+  const resetId = scoped.navigation.current.id;
+  reset.returnToStart();
+  scoped.callbacks().returnToStart();
+  assert(
+    scoped.navigation.current.id === resetId,
+    "stale resets and resets at the empty start screen are ignored",
+  );
+  const globalQuery = scoped.callbacks("bar");
+  globalQuery.returnToStart();
+  assert(
+    scoped.navigation.current.id === resetId + 1 &&
+      globalQuery.scopeController.signal.aborted,
+    "returning from a global query starts a fresh result view",
   );
 }

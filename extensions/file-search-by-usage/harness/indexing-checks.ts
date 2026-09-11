@@ -176,6 +176,9 @@ function loadCommand(supportPath: string) {
     }
   ).default;
   return {
+    sharedIndex: load(
+      path.resolve("src/lib/shared-index.ts"),
+    ) as typeof import("../src/lib/shared-index"),
     access: load(
       path.resolve("src/lib/storage-lock.ts"),
     ) as typeof import("../src/lib/storage-lock"),
@@ -895,6 +898,50 @@ export async function indexingChecks(
         (await largerCache.setup!.loadSearchSetup()).recents,
       "a cache exceeding its byte allowance preserves previous results and cannot complete setup",
     );
+    const sharedCapacity = loadCommand(path.join(root, "shared-capacity"));
+    const savedShared = { ...sharedCapacity.shared, paths: ["/previous"] };
+    sharedCapacity.sharedIndex.saveSharedIndex(savedShared);
+    // Below the limit in JS characters, above it in UTF-8 bytes.
+    const oversizedShared = {
+      ...savedShared,
+      paths: Array.from(
+        { length: 40_000 },
+        (_, i) => "/cloud/" + "é".repeat(110) + i,
+      ),
+    };
+    assert(
+      !sharedCapacity.sharedIndex.saveSharedIndex(oversizedShared),
+      "an oversized UTF-8 shared index reports a failed save",
+    );
+    assert(
+      sharedCapacity.sharedIndex.loadSharedIndex().paths[0] === "/previous",
+      "an oversized shared index cannot evict the previous saved index",
+    );
+    Object.assign(sharedCapacity.shared, oversizedShared);
+    const oversizedRefresh = sharedCapacity.command();
+    await flush();
+    sharedCapacity.scans[0](good);
+    await oversizedRefresh;
+    assert(
+      sharedCapacity.toasts.at(-1)?.style === "failure" &&
+        !sharedCapacity.storage.has("google-drive-setup"),
+      "an oversized shared index cannot report indexing success or complete setup",
+    );
+    const boundaryShared = { ...savedShared, paths: [""] };
+    const overhead = Buffer.byteLength(JSON.stringify(boundaryShared), "utf8");
+    boundaryShared.paths[0] = "a".repeat(8_000_000 - overhead);
+    assert(
+      sharedCapacity.sharedIndex.saveSharedIndex(boundaryShared) &&
+        sharedCapacity.sharedIndex.loadSharedIndex().paths[0] ===
+          boundaryShared.paths[0],
+      "a shared index exactly at the byte limit is saved and readable",
+    );
+    assert(
+      sharedCapacity.sharedIndex.saveSharedIndex(savedShared) &&
+        sharedCapacity.sharedIndex.loadSharedIndex().paths[0] === "/previous",
+      "a smaller shared index can still replace a full cache",
+    );
+
     for (const reason of ["time-limit", "depth-limit", "item-limit"] as const) {
       const bounded = loadCommand(path.join(root, reason));
       bounded.storage.set("shortcuts", JSON.stringify(good));

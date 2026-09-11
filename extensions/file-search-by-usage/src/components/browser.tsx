@@ -22,6 +22,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import os from "node:os";
 import path from "node:path";
@@ -97,7 +98,13 @@ import { useCachedEntries } from "./use-cached-entries";
 import { useStandardPlaces } from "./use-standard-places";
 import { useFolderSelection } from "./use-folder-selection";
 import { FolderNavigation } from "../lib/folder-navigation";
+import {
+  NativeSearchNavigation,
+  SearchFrame,
+  NavigationActions as FrameActions,
+} from "./native-search-navigation";
 import { NavigationActions } from "./navigation-actions";
+import { HiddenFilesAction } from "./hidden-files-action";
 import { SearchHistoryActions } from "./search-history-actions";
 import { SearchOptions } from "./search-options";
 import { useEventHandles } from "./use-event-handles";
@@ -138,18 +145,22 @@ type Ranked = RankedEntry & { score: ScoreParts };
 function BrowserView({
   dir: rawDir,
   initialSelectionPath,
-  initialSearchText,
   screen,
   onNavigate,
+  onReturnToStart,
   navigation,
   frameId,
   setup,
   reloadKey,
   setReloadKey,
+  includeHidden,
+  onToggleHidden,
 }: Props & {
+  includeHidden: boolean;
+  onToggleHidden: () => void;
   initialSelectionPath?: string;
-  initialSearchText: string;
   screen: SearchScreen;
+  onReturnToStart: (fromId: number) => void;
   onNavigate: (
     fromId: number,
     target: string,
@@ -165,7 +176,14 @@ function BrowserView({
   const prefs = getPreferenceValues<Preferences>();
   const event = useEventHandles();
 
-  const [searchText, setSearchText] = useState(initialSearchText);
+  const searchText = useSyncExternalStore(
+    screen.subscribe,
+    screen.getSearchText,
+  );
+  const setSearchText = useCallback(
+    (text: string) => screen.setSearchText(frameId, text),
+    [screen, frameId],
+  );
   const [children, setChildren] = useState<Entry[]>([]);
   const [found, setFound] = useState<Entry[]>([]);
   const [visitLog, setVisitLog] = useState<VisitLog>({ tick: 0, items: {} });
@@ -195,9 +213,6 @@ function BrowserView({
   const [folderMetaError, setFolderMetaError] = useState<string>();
   const [folderMetaPartial, setFolderMetaPartial] = useState<string>();
 
-  /** Prevents history navigation from resetting its own cursor. */
-  const programmaticEdit = useRef(false);
-
   const query = searchText.trim();
   /** A leading / or ~/ activates the path bar in global mode. */
   const pathQuery = useMemo(
@@ -211,7 +226,7 @@ function BrowserView({
     [searchText, typeFilter],
   );
   // Dot-prefixed queries temporarily include hidden entries.
-  const showHidden = prefs.showHidden || parsed.hidden;
+  const showHidden = includeHidden || parsed.hidden;
   const scopeController = useMemo(
     () => new AbortController(),
     [dir, showHidden, reloadKey, searchActive],
@@ -239,6 +254,16 @@ function BrowserView({
     },
     [scopeController, navigation, frameId, onNavigate],
   );
+  const returnToStart = useCallback(() => {
+    if (
+      !navigation.isCurrent(frameId) ||
+      (dir === undefined && searchText === "")
+    )
+      return;
+    scopeController.abort();
+    setSearchActive(false);
+    onReturnToStart(frameId);
+  }, [navigation, frameId, dir, searchText, scopeController, onReturnToStart]);
   const scopeCandidates = useMemo(() => (dir ? [{ path: dir }] : []), [dir]);
   const scopeCache = useCachedEntries(
     scopeCandidates,
@@ -967,6 +992,8 @@ function BrowserView({
       const byPath = new Map<string, Entry>();
       for (const entry of sources) {
         if (exclude?.has(entry.path)) continue;
+        // Path-bar listings filter separately and allow explicitly typed paths.
+        if (!showHidden && !pathQuery && entry.name.startsWith(".")) continue;
         if (dir) {
           // Every source must respect the folder boundary, including late results.
           if (
@@ -1050,6 +1077,7 @@ function BrowserView({
       dir,
       canonicalDir,
       compare,
+      showHidden,
     ],
   );
 
@@ -1144,22 +1172,25 @@ function BrowserView({
     };
   }, [query, minQuery, pathQuery]);
 
+  // SearchScreen updates text directly; only native input resets the history cursor.
   const setQueryProgrammatically = useCallback(
     (next: string) => {
       if (next.trim() !== query || queryController.signal.aborted) {
         queryController.abort();
         setQueryRevision((revision) => revision + 1);
       }
-      programmaticEdit.current = true;
       setSearchText(next);
     },
-    [query, queryController],
+    [query, queryController, setSearchText],
   );
 
   const parent = dir ? path.dirname(dir) : undefined;
 
   const handlers: RowHandlers = useMemo(
     () => ({
+      onToggleHidden,
+      onReturnToStart:
+        dir !== undefined || searchText !== "" ? returnToStart : undefined,
       onOpen: async (entry) => {
         // Persist ranking signals before the command closes.
         const generation = dataGeneration();
@@ -1267,7 +1298,13 @@ function BrowserView({
           );
           if (replaceShared) {
             assertOwned();
-            saveSharedIndex(shared);
+            if (!saveSharedIndex(shared)) {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Google Drive index could not be saved";
+              toast.message =
+                "The shared-folder cache could not be updated. Try indexing again.";
+              return;
+            }
           }
           if (!shared.available) {
             toast.style = Toast.Style.Failure;
@@ -1354,6 +1391,9 @@ function BrowserView({
       commitSearch,
       setQueryProgrammatically,
       navigate,
+      onToggleHidden,
+      returnToStart,
+      searchText,
     ],
   );
 
@@ -1368,11 +1408,10 @@ function BrowserView({
         queryController.abort();
         setQueryRevision((revision) => revision + 1);
       }
-      if (programmaticEdit.current) programmaticEdit.current = false;
-      else setHistoryIndex(-1);
+      setHistoryIndex(-1);
       setSearchText(next);
     },
-    [query, queryController],
+    [query, queryController, setSearchText],
   );
 
   const rankingReady = !isLoading;
@@ -1487,9 +1526,27 @@ function BrowserView({
     .join(" · ")
     .replace(/\s+/gu, " ");
 
+  // Prefer the best fast result still admitted by the combined result cap.
+  const admittedPaths = new Set(rows.map(({ entry }) => entry.path));
+  const firstMemoryPath = instantRows.find(({ entry }) =>
+    admittedPaths.has(entry.path),
+  )?.entry.path;
   const { selectedId, retainedPath, getSelectedPath, onSelectionChange } =
-    useFolderSelection(initialSelectionPath, rows, generation, query, 0, true);
-  const retainedSelectionPath = getSelectedPath() ?? retainedPath;
+    useFolderSelection(initialSelectionPath, rows, generation, query, 0, true, {
+      source:
+        !rankingReady || !searchActive
+          ? "waiting"
+          : firstMemoryPath
+            ? "memory"
+            : "spotlight",
+      path: firstMemoryPath,
+      memoryPending:
+        backgroundPending ||
+        cachedPending ||
+        recentFiles.pending ||
+        directoryPending,
+    });
+  const retainedSelectionPath = retainedPath ?? getSelectedPath();
   const renderedRows = useMemo(
     () => displayRows(rows, retainedSelectionPath),
     [rows, retainedSelectionPath],
@@ -1564,7 +1621,11 @@ function BrowserView({
       frameId={frameId}
       actions={
         <ActionPanel>
-          <NavigationActions onUp={rowHandlers.onUp} />
+          <NavigationActions
+            onUp={rowHandlers.onUp}
+            onReturnToStart={rowHandlers.onReturnToStart}
+          />
+          <HiddenFilesAction onToggle={rowHandlers.onToggleHidden} />
           <SetupActions {...setupActions} />
         </ActionPanel>
       }
@@ -1591,7 +1652,6 @@ function BrowserView({
           });
         onSelectionChange(id);
       })}
-      searchText={searchText}
       onSearchTextChange={event("query", onSearchTextChange)}
       searchBarPlaceholder={
         dir
@@ -1643,8 +1703,12 @@ function BrowserView({
               }
               actions={
                 <ActionPanel>
-                  <NavigationActions onUp={rowHandlers.onUp} />
                   <SetupActions {...setupActions} />
+                  <NavigationActions
+                    onUp={rowHandlers.onUp}
+                    onReturnToStart={rowHandlers.onReturnToStart}
+                  />
+                  <HiddenFilesAction onToggle={rowHandlers.onToggleHidden} />
                 </ActionPanel>
               }
             />
@@ -1701,7 +1765,11 @@ function BrowserView({
           }
           actions={
             <ActionPanel>
-              <NavigationActions onUp={rowHandlers.onUp} />
+              <NavigationActions
+                onUp={rowHandlers.onUp}
+                onReturnToStart={rowHandlers.onReturnToStart}
+              />
+              <HiddenFilesAction onToggle={rowHandlers.onToggleHidden} />
               <SetupActions {...setupActions} />
               <SearchHistoryActions
                 onHistoryBack={rowHandlers.onHistoryBack}
@@ -1758,57 +1826,79 @@ function BrowserView({
   );
 }
 
-/** One native screen owns setup and the active folder, without folder history. */
+/** A native route owns its input, result arrays and selection for one location. */
+function BrowserFrame({
+  frame,
+  navigation,
+  actions,
+  ...session
+}: {
+  frame: SearchFrame;
+  navigation: FolderNavigation;
+  actions: FrameActions;
+  includeHidden: boolean;
+  onToggleHidden: () => void;
+  setup: SearchSetup;
+  reloadKey: number;
+  setReloadKey: Dispatch<SetStateAction<number>>;
+}) {
+  const [screen] = useState(
+    () => new SearchScreen(frame.id, frame.initialQuery),
+  );
+  return (
+    <>
+      <SearchScreenView screen={screen} />
+      <BrowserView
+        {...session}
+        {...actions}
+        screen={screen}
+        navigation={navigation}
+        frameId={frame.id}
+        dir={frame.dir}
+        initialSelectionPath={frame.selectedPath}
+      />
+    </>
+  );
+}
+
+/** Only session settings and setup survive replacement of a native route. */
 export function Browser(props: Props) {
   enableNavigationDiagnostics(environment.isDevelopment);
+  const [includeHidden, setIncludeHidden] = useState(
+    () => getPreferenceValues<Preferences>().showHidden,
+  );
+  const onToggleHidden = useCallback(
+    () => setIncludeHidden((hidden) => !hidden),
+    [],
+  );
   const [navigation] = useState(
     () =>
       new FolderNavigation(
         props.dir === undefined ? undefined : normalizeDir(props.dir),
       ),
   );
-  const [frame, setFrame] = useState(() => navigation.current);
-  const [screen] = useState(() => new SearchScreen());
   const [reloadKey, setReloadKey] = useState(0);
   const refreshAfterSetup = useCallback(
     () => setReloadKey((key) => key + 1),
     [],
   );
   const setup = useSearchSetup(reloadKey, refreshAfterSetup);
-  useEffect(() => {
-    traceNavigation("native-screen-mounted", { nativeScreens: 1 });
-    return () => {
-      traceNavigation("native-screen-unmounted", { nativeScreens: 0 });
-    };
-  }, [screen, navigation]);
-  const onNavigate = useCallback(
-    (fromId: number, target: string, selectedPath: string | undefined) => {
-      const next = navigation.navigate(fromId, target, selectedPath);
-      if (next) {
-        screen.begin(next.id, "");
-        setFrame(next);
-      }
-    },
-    [navigation, screen],
-  );
-
-  // Replacing this body runs every search cleanup and releases its result arrays.
-  return (
-    <>
-      <SearchScreenView screen={screen} />
-      <BrowserView
-        key={frame.id}
-        dir={frame.dir}
+  const renderFrame = useCallback(
+    (frame: SearchFrame, actions: FrameActions) => (
+      <BrowserFrame
+        frame={frame}
         navigation={navigation}
-        frameId={frame.id}
-        initialSearchText=""
-        screen={screen}
-        initialSelectionPath={frame.selectedPath}
-        onNavigate={onNavigate}
+        actions={actions}
+        includeHidden={includeHidden}
+        onToggleHidden={onToggleHidden}
         setup={setup}
         reloadKey={reloadKey}
         setReloadKey={setReloadKey}
       />
-    </>
+    ),
+    [navigation, includeHidden, onToggleHidden, setup, reloadKey],
+  );
+  return (
+    <NativeSearchNavigation navigation={navigation} renderFrame={renderFrame} />
   );
 }

@@ -3,6 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Search local and cloud files and folders in one usage-ranked list.
+- Match Raycast File Search shortcuts for Show in Finder, Open With, and Move to Trash; add a hidden-file toggle on `⇧⌘.` for the current command run.
 - Add All Types, Directory, and File filters alongside independent, remembered sort choices in the top-right dropdown.
 - Show history, pins, cached results, and indexed Google Drive locations immediately, then merge delayed Spotlight results.
 - Keep live search collecting results until its sources finish, a memory safety limit is reached, or the query or folder changes, without interrupting previews or selection.
@@ -10,8 +11,11 @@
 - Limit the displayed list to 100 rows and build action menus and details only for the selected item to reduce memory use.
 - Keep search active on first launch, reopening, and rapid edits back to the same query, without requiring setup to refresh it.
 - Synchronize typed text with Raycast's input updates to prevent stale queries from overwriting the search bar.
-- Keep the first item highlighted as startup and folder results arrive, wait for Raycast's new rows before selecting, and preserve user selection and parent-navigation focus.
+- Keep query text independent of incoming results so rapid typing is not overwritten by older updates or folder initialization.
+- Keep the first item highlighted as startup and folder results arrive, request focus after publishing rows, and recover missing selection without requiring a native selection event.
+- Ignore intermediate automatic selections until the current first row is acknowledged; preserve subsequent user selection and parent-navigation focus.
 - Use a compact single-line location and status heading.
+- Add Return to Start (`⌘⇧H`) in Actions to clear the query and folder without leaving the command or growing the screen stack.
 - Retrieve fuzzy alphanumeric filename matches in a second Spotlight pass, including files not yet in the cache.
 - Stream results and keep healthy reads moving past stalled files; collection continues independently of scrolling.
 - Offer an optional first-run import of recent documents and nearby files, without changing recorded usage.
@@ -20,7 +24,8 @@
 - Expand recent-file setup to 500 documents, 50 parent folders, 500 neighbors per folder, and a 10,000-entry cache.
 - Coordinate deletion with pending history and cache writes; bound recent-file reads across retries and retain cached results when metadata stalls.
 - Navigate folders with `⌥⌘↓` and `⌥⌘↑`, or type an absolute or home-relative path.
-- Use one native search screen without saved folder history; release each previous result view and keep setup running across navigation.
+- Use native navigation with a lightweight root and one active search route, without saved folder history; release each previous result view and keep setup running across navigation.
+- Return to the empty start screen with native Back; preserve typed queries when restarting search, including during development-mode effect replay.
 - Detach native control callbacks when results are discarded so development tools cannot retain their index arrays.
 - Filter with `-d`, `-f`, `ext:`, `after:`, `before:`, `size:`, and dot-prefixed hidden-file queries.
 - Learn query-to-item shortcuts and allow frequently used folders to be pinned.

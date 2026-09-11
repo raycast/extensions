@@ -19,6 +19,7 @@ export async function folderSelectionChecks(
   }));
   let current: ReturnType<typeof useFolderSelection>;
   let renders = 0;
+  const selectionCommits: (string | null)[] = [];
   function View({
     entries,
     query = "",
@@ -40,6 +41,9 @@ export async function folderSelectionChecks(
       query,
       restorationRevision,
     );
+    React.useLayoutEffect(() => {
+      selectionCommits.push(current.selectedId);
+    });
     return null;
   }
   const globals = globalThis as typeof globalThis & {
@@ -49,9 +53,18 @@ export async function folderSelectionChecks(
   globals.IS_REACT_ACT_ENVIRONMENT = true;
   let renderer: ReactTestRenderer | undefined;
   try {
-    function FreshFolder({ entries }: { entries: typeof rows }) {
+    function FreshFolder({
+      entries,
+      generation = 1,
+    }: {
+      entries: typeof rows;
+      generation?: number;
+    }) {
       renders++;
-      current = useFolderSelection(undefined, entries, 1, "", 0, true);
+      current = useFolderSelection(undefined, entries, generation, "", 0, true);
+      React.useLayoutEffect(() => {
+        selectionCommits.push(current.selectedId);
+      });
       return null;
     }
     await act(() => {
@@ -62,8 +75,8 @@ export async function folderSelectionChecks(
       renderer!.update(React.createElement(FreshFolder, { entries: rows })),
     );
     assert(
-      current!.selectedId === null,
-      "first-row focus waits for Raycast to register the new folder's items",
+      current!.selectedId === "1:/foo/bar0",
+      "a populated folder requests its first row even without a native selection event",
     );
     await act(() => current.onSelectionChange("1:/foo/bar4"));
     assert(
@@ -85,16 +98,10 @@ export async function folderSelectionChecks(
       ),
     );
     assert(
-      current!.selectedId === "1:/foo/bar249" &&
-        current!.getSelectedPath() === "/foo/bar249",
-      "acknowledging an early first row does not strand focus below later results",
+      current!.selectedId === "1:/foo/bar0" &&
+        current!.getSelectedPath() === "/foo/bar0",
+      "later ranking changes keep the initial memory selection instead of chasing the top row",
     );
-    await act(() => current.onSelectionChange("1:/foo/bar0"));
-    assert(
-      current!.selectedId === "1:/foo/bar249",
-      "a delayed report of the previously requested row does not cancel top focus",
-    );
-    await act(() => current.onSelectionChange("1:/foo/bar249"));
     await act(() => current.onSelectionChange("1:/foo/bar248"));
     const beforeRefresh = renders;
     await act(() => current.onSelectionChange("1:/foo/bar248"));
@@ -113,6 +120,36 @@ export async function folderSelectionChecks(
       current!.selectedId === null,
       "later folder updates do not repeatedly force selection to the top",
     );
+    await act(() => current.onSelectionChange(null));
+    assert(
+      current!.selectedId === "1:/foo/bar1" &&
+        current!.getSelectedPath() === "/foo/bar1",
+      "losing native selection in a nonempty list recovers a usable first row",
+    );
+    await act(() => current.onSelectionChange("1:/foo/bar1"));
+    await act(() => current.onSelectionChange("1:/foo/bar2"));
+    await act(() =>
+      renderer!.update(React.createElement(FreshFolder, { entries: [] })),
+    );
+    await act(() => current.onSelectionChange(null));
+    await act(() =>
+      renderer!.update(React.createElement(FreshFolder, { entries: rows })),
+    );
+    assert(
+      current!.selectedId === "1:/foo/bar0",
+      "an empty refresh rearms selection before the same folder is repopulated",
+    );
+    await act(() => current.onSelectionChange("1:/foo/bar0"));
+    await act(() =>
+      renderer!.update(
+        React.createElement(FreshFolder, { entries: rows, generation: 2 }),
+      ),
+    );
+    await act(() => current.onSelectionChange("2:/foo/bar12"));
+    assert(
+      current!.selectedId === "2:/foo/bar0",
+      "acknowledging the same path under an old row ID does not release a new focus request",
+    );
     await act(() => renderer!.unmount());
     await act(() => {
       renderer = create(React.createElement(View, { entries: [] }));
@@ -122,10 +159,16 @@ export async function folderSelectionChecks(
       renderer!.update(React.createElement(View, { entries: rows })),
     );
     assert(
-      current!.selectedId === null,
-      "restored folder focus also waits until native rows are registered",
+      current!.selectedId === "1:/foo/bar249",
+      "parent-folder focus does not depend on receiving a native selection event",
     );
+    selectionCommits.length = 0;
     await act(() => current.onSelectionChange("1:/foo/bar0"));
+    assert(
+      selectionCommits.includes(null) &&
+        selectionCommits.at(-1) === "1:/foo/bar249",
+      "parent selection is reissued after a late automatic selection of an intermediate cached row",
+    );
     assert(
       current!.selectedId === "1:/foo/bar249",
       "the folder just left is selected when it arrives, even beyond the first page",
@@ -285,6 +328,313 @@ export async function folderSelectionChecks(
       current!.getSelectedPath() === "/foo/bar1",
       "a user selection wins over a pending restored folder before navigation",
     );
+    await act(() => renderer!.unmount());
+
+    // Drive only the selection timer; no filesystem or Spotlight work is mocked.
+    const realSetTimeout = globalThis.setTimeout;
+    const realClearTimeout = globalThis.clearTimeout;
+    let now = 0;
+    let timerId = 0;
+    const timers = new Map<number, { at: number; run: () => void }>();
+    globalThis.setTimeout = ((run: () => void, delay = 0) => {
+      const id = ++timerId;
+      timers.set(id, { at: now + delay, run });
+      return id;
+    }) as unknown as typeof setTimeout;
+    globalThis.clearTimeout = ((id: number) => {
+      timers.delete(id);
+    }) as unknown as typeof clearTimeout;
+    const advance = async (ms: number) => {
+      await act(() => {
+        now += ms;
+        for (const [id, timer] of [...timers]) {
+          if (timer.at > now) continue;
+          timers.delete(id);
+          timer.run();
+        }
+      });
+    };
+    function TimedFolder({
+      entries = rows,
+      query = "foo",
+      source = "spotlight",
+      memoryPath,
+      memoryPending = false,
+    }: {
+      entries?: typeof rows;
+      query?: string;
+      source?: "memory" | "spotlight" | "waiting";
+      memoryPath?: string;
+      memoryPending?: boolean;
+    }) {
+      current = useFolderSelection(undefined, entries, 1, query, 0, true, {
+        source,
+        path: memoryPath,
+        memoryPending,
+      });
+      return null;
+    }
+    try {
+      await act(() => {
+        renderer = create(
+          React.createElement(TimedFolder, { source: "waiting" }),
+        );
+      });
+      assert(
+        current!.selectedId === null,
+        "selection waits until ranking data and rendered rows are ready",
+      );
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            source: "memory",
+            memoryPath: "/foo/bar4",
+          }),
+        ),
+      );
+      assert(
+        current!.selectedId === "1:/foo/bar4",
+        "the first usable memory batch selects its own top item, even in mixed results",
+      );
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            source: "memory",
+            memoryPath: "/foo/bar8",
+            entries: [...rows].reverse(),
+          }),
+        ),
+      );
+      assert(
+        current!.selectedId === "1:/foo/bar4",
+        "later memory batches do not change the chosen initial target",
+      );
+      await act(() => current.onSelectionChange("1:/foo/bar12"));
+      assert(
+        current!.selectedId === "1:/foo/bar4",
+        "rearming an unacknowledged memory request keeps its original target after reranking",
+      );
+      await act(() => current.onSelectionChange("1:/foo/bar4"));
+      await act(() => current.onSelectionChange("1:/foo/bar5"));
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            source: "memory",
+            memoryPath: "/foo/bar0",
+          }),
+        ),
+      );
+      assert(
+        current!.selectedId === null &&
+          current!.getSelectedPath() === "/foo/bar5",
+        "memory updates preserve a manual selection",
+      );
+
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, { query: "bar", entries: [] }),
+        ),
+      );
+      await advance(300);
+      await act(() =>
+        renderer!.update(React.createElement(TimedFolder, { query: "bar" })),
+      );
+      assert(
+        current!.selectedId === null,
+        "Spotlight delay starts when results appear, not when typing begins",
+      );
+      await advance(199);
+      assert(
+        current!.selectedId === null,
+        "Spotlight-only results do not force selection before 200 ms",
+      );
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            query: "bar",
+            entries: [...rows].reverse(),
+          }),
+        ),
+      );
+      await advance(1);
+      assert(
+        current!.selectedId === "1:/foo/bar249",
+        "at 200 ms select the latest top Spotlight row without restarting the timer on batches",
+      );
+      await act(() =>
+        renderer!.update(React.createElement(TimedFolder, { query: "bar" })),
+      );
+      assert(
+        current!.selectedId === "1:/foo/bar249",
+        "later Spotlight results keep the selected item stable",
+      );
+
+      await act(() =>
+        renderer!.update(React.createElement(TimedFolder, { query: "baz" })),
+      );
+      await advance(100);
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            query: "baz",
+            source: "memory",
+            memoryPath: "/foo/bar8",
+          }),
+        ),
+      );
+      assert(
+        current!.selectedId === "1:/foo/bar8",
+        "memory arriving during the Spotlight delay wins immediately",
+      );
+      await advance(200);
+      assert(
+        current!.selectedId === "1:/foo/bar8",
+        "the cancelled Spotlight timer cannot overwrite the memory selection",
+      );
+
+      await act(() =>
+        renderer!.update(React.createElement(TimedFolder, { query: "old" })),
+      );
+      await advance(150);
+      await act(() =>
+        renderer!.update(React.createElement(TimedFolder, { query: "new" })),
+      );
+      await advance(50);
+      assert(
+        current!.selectedId === null,
+        "rapid typing cancels the previous query's selection timer",
+      );
+      await advance(150);
+      assert(
+        current!.selectedId === "1:/foo/bar0",
+        "a new query receives its own initial selection",
+      );
+
+      await act(() =>
+        renderer!.update(React.createElement(TimedFolder, { query: "manual" })),
+      );
+      await act(() => current.onSelectionChange("1:/foo/bar0"));
+      await act(() => current.onSelectionChange("1:/foo/bar2"));
+      await advance(200);
+      assert(
+        current!.selectedId === null &&
+          current!.getSelectedPath() === "/foo/bar2",
+        "moving selection during the settling delay cancels automatic selection",
+      );
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            query: "removed",
+            source: "memory",
+            memoryPath: "/foo/bar8",
+          }),
+        ),
+      );
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            query: "removed",
+            source: "memory",
+            entries: rows.filter(({ entry }) => entry.path !== "/foo/bar8"),
+          }),
+        ),
+      );
+      assert(
+        current!.selectedId === "1:/foo/bar0",
+        "removing the initially selected item recovers focus on an available memory result",
+      );
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            query: "batch",
+            source: "memory",
+            entries: rows.slice(0, 1),
+            memoryPending: true,
+          }),
+        ),
+      );
+      assert(
+        current!.selectedId === null,
+        "a lone early memory result waits for the initial memory batch",
+      );
+      await advance(50);
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            query: "batch",
+            source: "memory",
+            memoryPath: "/foo/bar4",
+          }),
+        ),
+      );
+      assert(
+        current!.selectedId === "1:/foo/bar4",
+        "finishing the initial memory batch selects its best item without using the full delay",
+      );
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            query: "slow-memory",
+            source: "memory",
+            memoryPending: true,
+          }),
+        ),
+      );
+      await advance(199);
+      assert(
+        current!.selectedId === null,
+        "memory collection receives a bounded settling window",
+      );
+      await advance(1);
+      assert(
+        current!.selectedId === "1:/foo/bar0",
+        "slow memory checks cannot postpone initial selection beyond 200 ms of usable results",
+      );
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, { query: "revisited" }),
+        ),
+      );
+      await act(() => current.onSelectionChange("1:/foo/bar0"));
+      await advance(200);
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, {
+            query: "intermediate",
+            entries: [],
+          }),
+        ),
+      );
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, { query: "revisited" }),
+        ),
+      );
+      await act(() => current.onSelectionChange("1:/foo/bar9"));
+      await advance(200);
+      assert(
+        current!.selectedId === "1:/foo/bar0",
+        "revisiting a query does not mistake an old selection for new manual navigation",
+      );
+      await act(() =>
+        renderer!.update(
+          React.createElement(TimedFolder, { query: "closing" }),
+        ),
+      );
+      assert(
+        timers.size === 1,
+        "a Spotlight-only query owns just one settling timer",
+      );
+      await act(() => renderer!.unmount());
+      assert(
+        timers.size === 0,
+        "unmounting releases outstanding selection timers",
+      );
+    } finally {
+      await act(() => renderer!.unmount());
+      globalThis.setTimeout = realSetTimeout;
+      globalThis.clearTimeout = realClearTimeout;
+    }
   } finally {
     if (renderer) await act(() => renderer!.unmount());
     globals.IS_REACT_ACT_ENVIRONMENT = previous;

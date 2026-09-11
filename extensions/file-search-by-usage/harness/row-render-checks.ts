@@ -56,6 +56,7 @@ export async function rowRenderChecks(
     Keyboard: {
       Shortcut: {
         Common: {
+          Open: { modifiers: ["cmd"], key: "o" },
           MoveDown: { modifiers: ["cmd", "opt"], key: "arrowDown" },
           MoveUp: { modifiers: ["cmd", "opt"], key: "arrowUp" },
           CopyName: { modifiers: ["cmd", "opt"], key: "c" },
@@ -104,6 +105,8 @@ export async function rowRenderChecks(
     onUp: () => calls.push("up"),
     onHistoryBack: () => calls.push("previous"),
     onHistoryForward: () => calls.push("next"),
+    onToggleHidden: () => calls.push("hidden"),
+    onReturnToStart: (() => calls.push("start")) as (() => void) | undefined,
   };
   const setupActions = {
     setup: { recents: true, drive: true, hasRun: true },
@@ -172,6 +175,23 @@ export async function rowRenderChecks(
     const actions = renderer!.root.findAllByType("action");
     const action = (title: string) =>
       actions.find((item) => item.props.title === title)!;
+    const hiddenAction = action("Toggle Hidden Files");
+    const returnAction = action("Return to Start");
+    returnAction?.props.onAction();
+    assert(
+      calls.pop() === "start" &&
+        returnAction?.props.shortcut?.key === "h" &&
+        returnAction?.props.shortcut?.modifiers.join() === "cmd,shift",
+      "Return to Start registers Command-Shift-H and dispatches the reset",
+    );
+    hiddenAction?.props.onAction();
+    assert(
+      calls.pop() === "hidden" &&
+        hiddenAction?.props.shortcut.modifiers.slice().sort().join() ===
+          "cmd,shift" &&
+        hiddenAction?.props.shortcut.key === ".",
+      "Toggle Hidden Files uses shift-command-period and invokes its handler",
+    );
     assert(
       !action("Back to Previous Folder") &&
         !actions.some(
@@ -222,6 +242,18 @@ export async function rowRenderChecks(
         renderer!.root.findByType("action-finder").props.path === "/foo/bar499",
       "Open With and Show in Finder follow the selected path",
     );
+    for (const [type, modifiers, key] of [
+      ["action-finder", "cmd", "return"],
+      ["action-openwith", "cmd", "o"],
+      ["action-trash", "ctrl", "x"],
+    ]) {
+      const props = renderer!.root.findByType(type).props;
+      assert(
+        props.shortcut?.modifiers.join() === modifiers &&
+          props.shortcut?.key === key,
+        `${type} registers the Raycast File Search shortcut`,
+      );
+    }
     assert(
       renderer!.root
         .findAllByType("metadata-label")
@@ -230,6 +262,14 @@ export async function rowRenderChecks(
             item.props.title === "Path" && item.props.text === "/foo/bar499",
         ),
       "deferred details show the selected file",
+    );
+    handlers.onReturnToStart = undefined;
+    await act(() => renderer!.update(rows()));
+    assert(
+      !renderer!.root
+        .findAllByType("action")
+        .some((item) => item.props.title === "Return to Start"),
+      "the initial search screen does not offer a redundant reset action",
     );
   } finally {
     if (renderer) await act(() => renderer!.unmount());

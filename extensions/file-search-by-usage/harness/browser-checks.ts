@@ -28,6 +28,28 @@ export async function browserChecks(
   await navigationMemoryChecks(assert);
   await navigationStackChecks(assert);
   const source = fs.readFileSync("src/components/browser.tsx", "utf8");
+  const visibilityCode = source.slice(
+    source.indexOf("  const showHidden ="),
+    source.indexOf("  const scopeController ="),
+  );
+  const visibility = new Function(
+    "prefs",
+    "includeHidden",
+    "parsed",
+    visibilityCode + "\nreturn showHidden;",
+  );
+  assert(
+    !visibility({ showHidden: true }, false, { hidden: false }),
+    "session visibility can override the saved show-hidden preference",
+  );
+  assert(
+    visibility({ showHidden: false }, true, { hidden: false }),
+    "session visibility enables hidden discovery",
+  );
+  assert(
+    visibility({ showHidden: false }, false, { hidden: true }),
+    "dot-prefixed queries still request hidden matches",
+  );
   const setupActionsFile = "src/components/setup-actions.tsx";
   if (!fs.existsSync(setupActionsFile)) {
     assert(
@@ -122,6 +144,101 @@ export async function browserChecks(
         partialActions.some((node) => node.props.title === "Skip Recent Files"),
       "unfinished sources can still be skipped from Actions after the main prompt disappears",
     );
+
+    // Exercise the setup row's real action composition, not SetupActions alone:
+    // placing an unrelated action before it changes what Return invokes.
+    const loadActionComponent = (file: string, name: string) => {
+      const loaded = { exports: {} as Record<string, unknown> };
+      const code = transformSync(fs.readFileSync(file, "utf8"), {
+        loader: "tsx",
+        format: "cjs",
+        jsxFactory: "element",
+        jsxFragment: "fragment",
+      }).code;
+      new Function("require", "module", "exports", "element", "fragment", code)(
+        () => ({
+          Action: "action",
+          Icon: {},
+          Keyboard: { Shortcut: { Common: { MoveUp: {} } } },
+        }),
+        loaded,
+        loaded.exports,
+        element,
+        "fragment",
+      );
+      return loaded.exports[name];
+    };
+    const setupRowStart = source.indexOf('id="search-setup"');
+    const panelStart = source.indexOf("<ActionPanel>", setupRowStart);
+    const panelEnd = source.indexOf("</ActionPanel>", panelStart);
+    const panelCode = transformSync(
+      `return (${source.slice(panelStart, panelEnd + "</ActionPanel>".length)});`,
+      { loader: "tsx", jsxFactory: "element" },
+    ).code;
+    const render = (node: ActionNode): ActionNode[] =>
+      !node || typeof node !== "object"
+        ? []
+        : typeof node.type === "function"
+          ? render(node.type(node.props))
+          : [node, ...node.children.flatMap(render)];
+    for (const importing of [false, true]) {
+      let started = false;
+      let stopped = false;
+      let toggled = false;
+      const panel = new Function(
+        "element",
+        "ActionPanel",
+        "SetupActions",
+        "NavigationActions",
+        "HiddenFilesAction",
+        "setupActions",
+        "rowHandlers",
+        panelCode,
+      )(
+        element,
+        "panel",
+        renderedModule.exports.SetupActions,
+        loadActionComponent(
+          "src/components/navigation-actions.tsx",
+          "NavigationActions",
+        ),
+        loadActionComponent(
+          "src/components/hidden-files-action.tsx",
+          "HiddenFilesAction",
+        ),
+        {
+          ...props,
+          importing,
+          start: () => {
+            started = true;
+          },
+          cancel: () => {
+            stopped = true;
+          },
+        },
+        {
+          onToggleHidden: () => {
+            toggled = true;
+          },
+        },
+      );
+      const rowActions = render(panel).filter((node) => node.type === "action");
+      (rowActions[0]?.props.onAction as (() => void) | undefined)?.();
+      assert(
+        (importing ? stopped && !started : started && !stopped) && !toggled,
+        importing
+          ? "Return on the running setup row stops setup, not hidden-file visibility"
+          : "Return on Set Up Search starts setup, not hidden-file visibility",
+      );
+      const toggle = rowActions.find(
+        (node) => node.props.title === "Toggle Hidden Files",
+      );
+      (toggle?.props.onAction as (() => void) | undefined)?.();
+      assert(
+        toggled,
+        "the setup row retains the hidden-files action as a secondary option",
+      );
+    }
   }
   const inputCode = transformSync(
     source.slice(
@@ -136,7 +253,6 @@ export async function browserChecks(
     useCallback: (run: unknown) => run,
     query: "foo",
     queryController: inputController,
-    programmaticEdit: { current: false },
     setHistoryIndex: () => {},
     setQueryRevision: () => {},
     setSearchText: (next: string) => {
@@ -156,6 +272,120 @@ export async function browserChecks(
   assert(
     inputController.signal.aborted && typed === "bar",
     "editing the query cancels obsolete work before rendering the replacement",
+  );
+  const programmaticCode = transformSync(
+    source.slice(
+      source.indexOf("  const setQueryProgrammatically ="),
+      source.indexOf("  const parent ="),
+    ),
+    { loader: "ts" },
+  ).code;
+  let historyIndex = 0;
+  const historyDependencies = {
+    ...inputDependencies,
+    queryController: new AbortController(),
+    setHistoryIndex: (index: number) => {
+      historyIndex = index;
+    },
+  };
+  const historyInput = new Function(
+    ...Object.keys(historyDependencies),
+    programmaticCode +
+      inputCode +
+      "\nreturn { recall: setQueryProgrammatically, edit: onSearchTextChange };",
+  )(...Object.values(historyDependencies));
+  historyInput.recall("recent");
+  assert(historyIndex === 0, "recalling history retains its cursor");
+  historyInput.edit("recentx");
+  assert(
+    historyIndex === -1,
+    "the first edit after recalling history resets its cursor",
+  );
+  const historyBackCode = transformSync(
+    `return ({${source.slice(source.indexOf("      onHistoryBack:"), source.indexOf("      onHistoryForward:"))}}).onHistoryBack;`,
+    { loader: "ts" },
+  ).code;
+  new Function(
+    "history",
+    "historyIndex",
+    "setHistoryIndex",
+    "setQueryProgrammatically",
+    "showToast",
+    "Toast",
+    historyBackCode,
+  )(
+    ["recent"],
+    historyIndex,
+    historyDependencies.setHistoryIndex,
+    historyInput.recall,
+    () => {},
+    { Style: { Failure: "failure" } },
+  )();
+  assert(
+    typed === "recent" && historyIndex === 0,
+    "History Back after an edit recalls the newest search, even with only one entry",
+  );
+
+  const refreshCode = transformSync(
+    `return ({${source.slice(source.indexOf("      onReindexShortcuts:"), source.indexOf("      onToggleDetail:"))}}).onReindexShortcuts;`,
+    { loader: "ts" },
+  ).code;
+  const refreshToast = { style: "", title: "", message: "" };
+  let displayedShared = ["/previous"];
+  let canSaveShared = false;
+  const refreshDependencies = {
+    withIndexingLock: async (
+      work: (assertOwned: () => void) => Promise<void>,
+    ) => work(() => {}),
+    showToast: async (options: object) => Object.assign(refreshToast, options),
+    Toast: {
+      Style: { Animated: "animated", Failure: "failure", Success: "success" },
+    },
+    loadShortcutIndex: async () => ({ shortcuts: [], partial: false }),
+    scanShortcuts: async () => ({
+      shortcuts: [],
+      available: true,
+      partial: false,
+    }),
+    shouldReplaceIndex: () => true,
+    saveShortcutIndex: async () => {},
+    setShortcuts: () => {},
+    setShortcutsScannedAt: () => {},
+    loadSharedIndex: () => ({
+      paths: ["/previous"],
+      available: true,
+      partial: false,
+    }),
+    scanSharedFolders: async () => ({
+      paths: ["/unsaved"],
+      available: true,
+      partial: false,
+    }),
+    saveSharedIndex: () => canSaveShared,
+    setSharedIndex: (paths: string[]) => {
+      displayedShared = paths;
+    },
+    setDriveIndexMessage: () => {},
+    driveIndexCaveat: () => undefined,
+  };
+  await new Function(...Object.keys(refreshDependencies), refreshCode)(
+    ...Object.values(refreshDependencies),
+  )();
+  assert(
+    refreshToast.style === "failure",
+    "refresh reports shared-index save failures instead of success",
+  );
+  assert(
+    displayedShared[0] === "/previous",
+    "refresh keeps displayed saved results when the shared index cannot be saved",
+  );
+  canSaveShared = true;
+  await new Function(...Object.keys(refreshDependencies), refreshCode)(
+    ...Object.values(refreshDependencies),
+  )();
+  assert(
+    refreshToast.style === "success" && displayedShared[0] === "/unsaved",
+    "a successful refresh still publishes the newly saved shared index",
   );
   let target: { dir?: string; initialSelectionPath?: string } = {};
   const upStart = source.indexOf("      onUp:");
@@ -264,6 +494,7 @@ export async function browserChecks(
     ),
     { loader: "ts" },
   ).code;
+  const spotlightSignals: AbortSignal[] = [];
   const lifecycleDependencies = {
     ...discoveryDependencies,
     useEffect: React.useEffect,
@@ -271,20 +502,21 @@ export async function browserChecks(
     useState: React.useState,
     useCallback: React.useCallback,
     createElement: React.createElement,
-    programmaticEdit: { current: false },
     setHistoryIndex: () => {},
     searchPathResult: async (
       query: string,
       opts: Parameters<typeof runSpotlightSearch>[1],
-    ) =>
-      runSpotlightSearch(query, opts, async (args) => {
+    ) => {
+      if (opts.signal) spotlightSignals.push(opts.signal);
+      return runSpotlightSearch(query, opts, async (args) => {
         if (args.includes("-name"))
           return args.at(-1) === "foo_bar" ? "/foo/foo_bar\0" : "";
         return args.at(-1) ===
           'kMDItemFSName == "*f*"cd && kMDItemFSName == "*o*"cd && kMDItemFSName == "*b*"cd'
           ? "/foo/foo_bar\0/foo/bof.txt\0"
           : "";
-      }),
+      });
+    },
   };
   const historyInputCode = transformSync(
     source.slice(
@@ -300,8 +532,10 @@ export async function browserChecks(
       const [reloadKey, setReloadKey] = useState(0);
       const [found, setFound] = useState([]);
       const [searching, setSearching] = useState(false);
+      const [includeHidden, setIncludeHidden] = useState(false);
       const query = searchText.trim();
       const parsed = parseQuery(searchText);
+      ${visibilityCode}
       ${lifecycleCode}
       ${inputCode}
       ${historyInputCode}
@@ -310,6 +544,7 @@ export async function browserChecks(
         change: onSearchTextChange,
         historyChange: setQueryProgrammatically,
         refresh: () => setReloadKey(key => key + 1),
+        setHidden: setIncludeHidden,
         found, searching, signal: queryController.signal
       });
     };`,
@@ -394,6 +629,22 @@ export async function browserChecks(
     assert(
       currentSearch().props.found.length === 1,
       "reopening the extension does not require another setup run",
+    );
+    const beforeToggle = spotlightSignals.at(-1)!;
+    await act(() => currentSearch().props.setHidden(true));
+    await settle();
+    assert(
+      beforeToggle.aborted &&
+        !currentSearch().props.signal.aborted &&
+        currentSearch().props.found.length === 1,
+      "changing hidden visibility cancels obsolete discovery and reruns the current query",
+    );
+    const unchangedVisibility = currentSearch().props.signal;
+    await act(() => currentSearch().props.setHidden(true));
+    assert(
+      currentSearch().props.signal === unchangedVisibility &&
+        !unchangedVisibility.aborted,
+      "unchanged effective visibility does not cancel the live search",
     );
   } finally {
     await act(() => renderer?.unmount());
@@ -711,6 +962,7 @@ export async function browserChecks(
     visits: {},
     tick: 0,
     compare: () => 0,
+    showHidden: false,
   };
   const rank = new Function(
     ...Object.keys(rankDependencies),
@@ -758,6 +1010,35 @@ export async function browserChecks(
     rankCode + "\nreturn rankSources;",
   )(...Object.values(browsingDependencies)) as typeof rank;
   const browsed = browse([...entries, canonicalChild]);
+  const hiddenEntry = { ...entries[0], path: "/foo/.bar", name: ".bar" };
+  assert(
+    browse([entries[0], hiddenEntry]).length === 1,
+    "hiding files removes cached hidden rows as well as fresh directory entries",
+  );
+  const visibleDependencies = { ...browsingDependencies, showHidden: true };
+  const browseHidden = new Function(
+    ...Object.keys(visibleDependencies),
+    rankCode + "\nreturn rankSources;",
+  )(...Object.values(visibleDependencies)) as typeof rank;
+  assert(
+    browseHidden([entries[0], hiddenEntry]).length === 2,
+    "showing hidden files keeps both hidden and ordinary cached rows",
+  );
+  const typedHiddenDependencies = {
+    ...rankDependencies,
+    dir: undefined,
+    pathQuery: { dir: "/foo", prefix: ".bar" },
+    effectiveQuery: ".bar",
+    parsed: queryTools.parseQuery("/foo/.bar"),
+  };
+  const rankTypedHidden = new Function(
+    ...Object.keys(typedHiddenDependencies),
+    rankCode + "\nreturn rankSources;",
+  )(...Object.values(typedHiddenDependencies)) as typeof rank;
+  assert(
+    rankTypedHidden([hiddenEntry])[0]?.entry.path === "/foo/.bar",
+    "an explicitly typed hidden path stays accessible with the toggle off",
+  );
   for (const type of ["all", "directory", "file"] as const) {
     for (const pathBar of [false, true]) {
       const dependencies = {
