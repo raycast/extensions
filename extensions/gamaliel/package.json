@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gamaliel",
+  "title": "Bible Q&A",
+  "description": "Ask a biblical question. Gamaliel reads the relevant passages first, then answers with scripture links.",
+  "icon": "gamaliel-logo.png",
+  "author": "cirne",
+  "categories": ["Productivity", "Web"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gamaliel-ai/gamaliel-raycast.git"
+  },
+  "platforms": ["macOS", "Windows"],
+  "keywords": ["bible", "scripture", "biblical", "faith", "gamaliel"],
+  "commands": [
+    {
+      "name": "ask-gamaliel",
+      "title": "Bible Q&A",
+      "subtitle": "Gamaliel",
+      "description": "Ask a question and get a biblical answer with scripture links.",
+      "icon": "gamaliel-logo.png",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "theology",
+      "type": "dropdown",
+      "title": "Theology",
+      "description": "Theological perspective used for answers.",
+      "required": false,
+      "default": "default",
+      "data": [
+        { "title": "General Christian", "value": "default" },
+        { "title": "Anglican (Communion)", "value": "anglican" },
+        { "title": "Baptist", "value": "baptist" },
+        { "title": "Catholic", "value": "catholic" },
+        { "title": "Charismatic", "value": "charismatic" },
+        { "title": "Eastern Orthodox", "value": "eastern_orthodox" },
+        { "title": "Lutheran", "value": "lutheran" },
+        { "title": "Reformed", "value": "reformed" },
+        { "title": "Wesleyan/Methodist", "value": "wesleyan" }
+      ]
+    },
+    {
+      "name": "profile",
+      "type": "dropdown",
+      "title": "Profile",
+      "description": "Experience level used to shape the answer.",
+      "required": false,
+      "default": "universal_explorer",
+      "data": [
+        { "title": "Curious Explorer", "value": "curious_explorer" },
+        { "title": "Universal Explorer", "value": "universal_explorer" },
+        { "title": "Spiritual Seeker", "value": "spiritual_seeker" },
+        { "title": "New Believer", "value": "new_believer" },
+        { "title": "Growing Christian", "value": "growing_christian" },
+        { "title": "Mature Believer", "value": "mature_believer" },
+        { "title": "Biblical Scholar", "value": "biblical_scholar" }
+      ]
+    },
+    {
+      "name": "bibleId",
+      "type": "dropdown",
+      "title": "Bible Translation",
+      "description": "Translation used for scripture in answers.",
+      "required": false,
+      "default": "eng-us-niv",
+      "data": [
+        { "title": "English — NIV", "value": "eng-us-niv" },
+        { "title": "English — KJV", "value": "eng-kjv" },
+        { "title": "English — ESV", "value": "eng-esv" },
+        { "title": "English — WEB", "value": "eng-web" },
+        { "title": "Español — NVI", "value": "spa-niv-2022" },
+        { "title": "Português — NVI", "value": "por-niv-23" },
+        { "title": "한국어 — 현대인", "value": "kor-niv-1985" },
+        { "title": "العربية — الحياة", "value": "arb-onav-2012" },
+        { "title": "Українська — ВНПУ", "value": "ukr-onpu-2022" }
+      ]
+    },
+    {
+      "name": "maxWords",
+      "type": "dropdown",
+      "title": "Max Words",
+      "description": "Maximum answer length in words.",
+      "required": false,
+      "default": "300",
+      "data": [
+        { "title": "150", "value": "150" },
+        { "title": "300", "value": "300" },
+        { "title": "500", "value": "500" },
+        { "title": "800", "value": "800" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
