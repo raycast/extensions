@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Raycast build output and generated types
+dist/
+raycast-env.d.ts
+
+# System
+.DS_Store
+
+# Raycast supports npm only; a pnpm lock file makes `ray validate` fail
+pnpm-lock.yaml
+pnpm-workspace.yaml
