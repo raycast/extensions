@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "version": "1.0.0",
   "name": "better-json",
-  "title": "Better JSON",
+  "title": "Better JSON Inspector",
   "main": "src/better-json.tsx",
   "types": "src/better-json.tsx",
   "files": [
@@ -16,15 +16,16 @@
   "keywords": [
     "raycast",
     "json",
-    "json-parser",
-    "json-formatter",
+    "json-inspector",
+    "json-browser",
+    "nested-json",
     "developer-tools"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/XiaoDaiGua-Ray/better-json.git"
   },
-  "description": "Format, inspect, and convert JSON from Raycast.",
+  "description": "Browse, search, decode, and extract nested JSON.",
   "icon": "better-json-icon.png",
   "author": "xiaodaiguaray",
   "platforms": [
@@ -41,8 +42,8 @@
   "commands": [
     {
       "name": "better-json",
-      "title": "Better JSON",
-      "description": "Format, inspect, and convert JSON.",
+      "title": "Inspect JSON",
+      "description": "Browse, search, decode, and extract nested JSON.",
       "mode": "view",
       "preferences": [
         {
