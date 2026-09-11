@@ -1,6 +1,6 @@
 # Folder Scope Changelog
 
-## Initial Version - {PR_MERGE_DATE}
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Search text instantly inside the files of your active Finder folder.
 - Finder-aware directory detection: selection, frontmost window, or configurable fallback.
