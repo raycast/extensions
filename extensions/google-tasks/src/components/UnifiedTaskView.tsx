@@ -91,6 +91,7 @@ export default function UnifiedTaskView() {
   const [sort, setSort] = useState(myOrder);
   const loadVersion = useRef(0);
   const hasLoadedView = useRef(false);
+  const loadMoreInFlight = useRef(false);
   const load = useCallback(async (nextSelection?: string, forceReconnect = false) => {
     const version = ++loadVersion.current;
     try {
@@ -228,7 +229,8 @@ export default function UnifiedTaskView() {
   );
   const loadMoreCompletedTasks = useCallback(async () => {
     const listsWithMore = lists.filter((list) => completedPageTokens[list.id]);
-    if (listsWithMore.length === 0 || isLoading) return;
+    if (listsWithMore.length === 0 || isLoading || loadMoreInFlight.current) return;
+    loadMoreInFlight.current = true;
     const version = loadVersion.current;
 
     try {
@@ -258,6 +260,7 @@ export default function UnifiedTaskView() {
       console.error(error);
       showToast({ style: Toast.Style.Failure, title: "Could not load more completed tasks", message: String(error) });
     } finally {
+      loadMoreInFlight.current = false;
       if (version === loadVersion.current) setIsLoading(false);
     }
   }, [completedPageTokens, isLoading, lists]);
