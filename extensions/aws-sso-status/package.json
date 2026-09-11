@@ -137,7 +137,7 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "test": "tsx --test tests/*.test.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "ray build && tsc --noEmit",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
