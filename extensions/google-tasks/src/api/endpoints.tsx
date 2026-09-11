@@ -1,97 +1,72 @@
-import fetch from "node-fetch";
-import { Task, TaskForm } from "../types";
+import { EditableTask, Task, TaskForm, TaskList } from "../types";
 import { isCompleted } from "../utils";
 import { client } from "./oauth";
 
-// API
+const apiUrl = "https://tasks.googleapis.com/tasks/v1";
 
-export async function fetchLists(): Promise<{ id: string; title: string }[]> {
-  const response = await fetch("https://tasks.googleapis.com/tasks/v1/users/@me/lists", {
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${apiUrl}${path}`, {
+    ...init,
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+      ...init?.headers,
     },
   });
   if (!response.ok) {
-    console.error("fetch items error:", await response.text());
-    throw new Error(response.statusText);
+    throw new Error((await response.text()) || response.statusText);
   }
-  const json = (await response.json()) as {
-    items: { id: string; title: string }[];
-  };
-  return json.items.map((item) => ({ id: item.id, title: item.title }));
+  return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
+}
+
+export async function fetchLists(): Promise<TaskList[]> {
+  const lists: TaskList[] = [];
+  let pageToken: string | undefined;
+
+  do {
+    const params = new URLSearchParams({ maxResults: "1000" });
+    if (pageToken) params.append("pageToken", pageToken);
+    const json = await request<{ items?: TaskList[]; nextPageToken?: string }>(`/users/@me/lists?${params.toString()}`);
+    lists.push(...(json.items ?? []));
+    pageToken = json.nextPageToken;
+  } while (pageToken);
+
+  return lists;
 }
 
 export async function fetchList(tasklist: string, showCompleted = false): Promise<Task[]> {
-  const params = new URLSearchParams();
-  params.append("showHidden", "true");
-  params.append("maxResults", "100");
-  if (showCompleted) {
-    params.append("showCompleted", "true");
-  } else {
-    params.append("showCompleted", "false");
-  }
-  const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks?` + params.toString(), {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
-    },
+  const tasks: Task[] = [];
+  let pageToken: string | undefined;
+
+  do {
+    const page = await fetchListPage(tasklist, showCompleted, pageToken, 100);
+    tasks.push(...page.tasks);
+    pageToken = page.nextPageToken;
+  } while (pageToken);
+
+  return tasks;
+}
+
+export async function fetchListPage(
+  tasklist: string,
+  showCompleted: boolean,
+  pageToken?: string,
+  maxResults = 25,
+): Promise<{ tasks: Task[]; nextPageToken?: string }> {
+  const params = new URLSearchParams({
+    showHidden: "true",
+    maxResults: String(maxResults),
+    showCompleted: String(showCompleted),
   });
-  if (!response.ok) {
-    console.error("fetch items error:", await response.text());
-    throw new Error(response.statusText);
-  }
-  const json = (await response.json()) as {
-    items: Task[];
-  };
-  const sortedTasks = json.items
-    .map((item) => ({
-      id: item.id,
-      title: item.title,
-      status: item.status,
-      due: item.due,
-      completed: item.completed,
-      parent: item.parent,
-      notes: item.notes,
-    }))
-    .sort((a, b) => {
-      // First sort completed tasks by completion date (most recent first)
-      if (a.status === "completed" && b.status === "completed") {
-        const completedDateA = a.completed ? new Date(a.completed) : null;
-        const completedDateB = b.completed ? new Date(b.completed) : null;
-        return (completedDateB?.getTime() ?? 0) - (completedDateA?.getTime() ?? 0);
-      }
-
-      // Then handle non-completed tasks with due dates
-      const dueDateA = a.due !== undefined ? new Date(a.due) : null;
-      const dueDateB = b.due !== undefined ? new Date(b.due) : null;
-
-      if (dueDateA && dueDateB) {
-        return dueDateA.getTime() - dueDateB.getTime();
-      } else if (dueDateA) {
-        return -1; // A has a due date, B does not. A comes before B.
-      } else if (dueDateB) {
-        return 1; // B has a due date, A does not. B comes before A.
-      } else {
-        return 0; // Both A and B do not have due dates. Order remains unchanged.
-      }
-    });
-
-  return sortedTasks;
+  if (pageToken) params.append("pageToken", pageToken);
+  const json = await request<{ items?: Task[]; nextPageToken?: string }>(
+    `/lists/${tasklist}/tasks?${params.toString()}`,
+  );
+  return { tasks: json.items ?? [], nextPageToken: json.nextPageToken };
 }
 
 export async function deleteTask(tasklist: string, id: string): Promise<void> {
-  const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
-    },
-  });
-  if (!response.ok) {
-    console.error("fetch items error:", await response.text());
-    throw new Error(response.statusText);
-  }
+  await request<void>(`/lists/${tasklist}/tasks/${id}`, { method: "DELETE" });
 }
 
 function serializeTaskDueDate<T extends { due?: string | Date | null }>(task: T): T {
@@ -111,52 +86,26 @@ function serializeTaskDueDate<T extends { due?: string | Date | null }>(task: T)
 
 export async function createTask(tasklist: string, task: TaskForm): Promise<void> {
   const payload = serializeTaskDueDate(task);
-  const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks`, {
+  await request(`/lists/${tasklist}/tasks`, {
     method: "POST",
     body: JSON.stringify(payload),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
-    },
   });
-  if (!response.ok) {
-    console.error("fetch items error:", await response.text());
-    throw new Error(response.statusText);
-  }
 }
-export async function editTask(tasklist: string, task: Task): Promise<void> {
-  const payload = serializeTaskDueDate(task);
-  const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks/${task.id}`, {
+export async function editTask(tasklist: string, task: EditableTask): Promise<void> {
+  const payload = serializeTaskDueDate({ title: task.title, notes: task.notes, due: task.due });
+  await request(`/lists/${tasklist}/tasks/${task.id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
-    },
   });
-  if (!response.ok) {
-    console.error("fetch items error:", await response.text());
-    throw new Error(response.statusText);
-  }
 }
 
-export async function toggleTask(tasklist: string, task: Task): Promise<void> {
-  const payload: { status: string } = { status: "" };
-  if (isCompleted(task)) {
-    payload["status"] = "needsAction";
-  } else {
-    payload["status"] = "completed";
-  }
-  const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks/${task.id}`, {
+export async function setTaskStatus(tasklist: string, task: Task, status: "needsAction" | "completed"): Promise<void> {
+  await request(`/lists/${tasklist}/tasks/${task.id}`, {
     method: "PATCH",
-    body: JSON.stringify(payload),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
-    },
+    body: JSON.stringify({ status }),
   });
-  if (!response.ok) {
-    console.error("fetch items error:", await response.text());
-    throw new Error(response.statusText);
-  }
+}
+
+export function toggleTask(tasklist: string, task: Task): Promise<void> {
+  return setTaskStatus(tasklist, task, isCompleted(task) ? "needsAction" : "completed");
 }

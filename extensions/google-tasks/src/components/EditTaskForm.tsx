@@ -1,16 +1,16 @@
 import { Form, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
 import { useCallback } from "react";
-import { Task } from "../types";
+import { EditableTask, Task } from "../types";
 
 export default function EditTaskForm(props: {
   listId: string;
   task: Task;
-  onEdit: (listId: string, task: Task) => void;
+  onEdit: (listId: string, task: EditableTask) => void;
 }) {
   const { pop } = useNavigation();
 
   const handleSubmit = useCallback(
-    (values: { title: string; notes: string; due: string }) => {
+    (values: { title: string; notes: string; due: Date | null }) => {
       props.onEdit(props.listId, {
         ...props.task,
         title: values.title,
@@ -19,7 +19,7 @@ export default function EditTaskForm(props: {
       });
       pop();
     },
-    [props.onEdit, pop],
+    [props.listId, props.onEdit, props.task, pop],
   );
 
   return (

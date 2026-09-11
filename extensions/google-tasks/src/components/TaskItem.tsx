@@ -1,71 +1,52 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { Task, TaskForm } from "../types";
-import { getChildren, getIcon } from "../utils";
-import CreateTaskForm from "./CreateTaskForm";
-import EditTaskForm from "./EditTaskForm";
+import { Color, Icon, List } from "@raycast/api";
+import { ReactNode } from "react";
+import { TaskWithList } from "../types";
+import { dueDay, getIcon, todayValue } from "../utils";
 
 export default function TaskItem(props: {
-  listId: string;
-  tasks: Task[];
-  task: Task;
-  onToggle: () => void;
-  onDelete: () => void;
-  onCreate: (listId: string, task: TaskForm) => Promise<void>;
-  onEdit: (listId: string, task: Task) => void;
+  tasks: TaskWithList[];
+  task: TaskWithList;
+  showListTitle: boolean;
+  actions: ReactNode;
 }) {
+  const children = props.tasks.filter((task) => task.listId === props.task.listId && task.parent === props.task.id);
+  const due = dueDay(props.task.due);
+  const today = todayValue();
+  const dueDate = due ? new Date(`${due}T00:00:00`) : undefined;
+  const dueLabel = dueDate?.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const dueText = due && due < today ? `Overdue · ${dueLabel}` : due === today ? "Today" : dueLabel;
+  const dueColor = due && due < today ? Color.Red : due === today ? Color.Orange : Color.SecondaryText;
+  const listTitle = props.showListTitle ? props.task.listTitle : undefined;
+
   return (
     <List.Item
-      key={props.task.id}
       icon={getIcon(props.task)}
-      id={props.task.id}
+      id={`${props.task.listId}-${props.task.id}`}
       title={props.task.title}
       accessories={[
-        {
-          date: props.task.due === undefined ? null : new Date(props.task.due),
-        },
+        ...(listTitle ? [{ text: { value: listTitle, color: Color.SecondaryText } }] : []),
+        ...(dueText ? [{ text: { value: dueText, color: dueColor }, icon: Icon.Calendar }] : []),
       ]}
       detail={
         <List.Item.Detail
-          markdown={`# ${props.task.title}
-      \n\n${props.task.notes || ""}`}
+          markdown={props.task.notes || "No details."}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title={props.task.due === undefined ? "" : new Date(props.task.due).toLocaleDateString()}
-                icon={Icon.Calendar}
-              />
-              <List.Item.Detail.Metadata.Separator />
-              {getChildren(props.task, props.tasks).map((child) => {
-                return <List.Item.Detail.Metadata.Label title={child.title} icon={getIcon(child)} />;
-              })}
+              {listTitle ? <List.Item.Detail.Metadata.Label title="List" text={listTitle} /> : null}
+              {dueText ? <List.Item.Detail.Metadata.Label title="Due" text={dueText} icon={Icon.Calendar} /> : null}
+              {children.map((child) => (
+                <List.Item.Detail.Metadata.Label
+                  key={child.id}
+                  title="Subtask"
+                  text={child.title}
+                  icon={getIcon(child)}
+                />
+              ))}
             </List.Item.Detail.Metadata>
           }
         />
       }
-      actions={
-        <ActionPanel>
-          <Action title="Complete Task" icon={Icon.CheckCircle} onAction={props.onToggle} />
-          <Action
-            title="Delete Task"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-            onAction={props.onDelete}
-          />
-          <Action.Push
-            title="Create Task"
-            icon={Icon.NewDocument}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            target={<CreateTaskForm listId={props.listId} onCreate={props.onCreate} />}
-          />
-          <Action.Push
-            title="Edit Task"
-            icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-            target={<EditTaskForm listId={props.listId} task={props.task} onEdit={props.onEdit} />}
-          />
-        </ActionPanel>
-      }
+      actions={props.actions}
     />
   );
 }
