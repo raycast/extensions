@@ -1,6 +1,6 @@
 # Digger Changelog
 
-## [Well-Known files, Theme colors, and resource exports] - {PR_MERGE_DATE}
+## [Well-Known files, Theme colors, and resource exports] - 2026-09-11
 
 ### Added
 
