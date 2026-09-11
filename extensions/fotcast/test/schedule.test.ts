@@ -155,6 +155,26 @@ test("pairSubstitutions falls back to unpaired lines without swap data", () => {
   ]);
 });
 
+test("pairSubstitutions keeps unpaired subs when swap data is only partial", () => {
+  // 62' has a complete swap pair; 72' doesn't (e.g. a malformed matchFacts
+  // entry) but is still present in the roster's own subIn/subOut times.
+  const swaps = [{ time: 62, swap: [{ id: "in-1" }, { id: "out-1" }] }];
+  const ins = [
+    { time: 62, id: "in-1" },
+    { time: 72, id: "in-2" },
+  ];
+  const outs = [
+    { time: 62, id: "out-1" },
+    { time: 72, id: "out-2" },
+  ];
+  const lines = pairSubstitutions(swaps, ins, outs);
+  assert.deepEqual(lines, [
+    { time: 62, inId: "in-1", outId: "out-1" },
+    { time: 72, id: "in-2", direction: "in" },
+    { time: 72, id: "out-2", direction: "out" },
+  ]);
+});
+
 test("statusOf", () => {
   const byId = new Map(leagues.flatMap((l) => l.matches).map((m) => [m.id, m]));
   const state = (id: number) => statusOf(byId.get(id)!);

@@ -61,8 +61,9 @@ export function isFavoriteLeague(
 }
 
 // A team's substitution row, ready to render. Prefers matchFacts' true
-// [in, out] swap pairing; falls back to each side's own subIn/subOut minute,
-// unpaired, when swap data is missing rather than guessing a pairing.
+// [in, out] swap pairing per substitution; any sub without a complete swap
+// pair falls back to its own subIn/subOut minute, unpaired, rather than
+// guessing a pairing or dropping it when swap data is only partial.
 type SubLine =
   | { time: number; inId: string; outId: string }
   | { time: number; direction: "in" | "out"; id: string };
@@ -73,19 +74,23 @@ export function pairSubstitutions(
   outs: { time: number; id: string }[],
 ): SubLine[] {
   const paired = swaps.filter((e) => e.swap?.length === 2);
-  if (paired.length) {
-    return paired
-      .sort((a, b) => a.time - b.time)
-      .map((e) => ({
-        time: e.time,
-        inId: e.swap![0].id,
-        outId: e.swap![1].id,
-      }));
-  }
-  return [
-    ...ins.map((e) => ({ ...e, direction: "in" as const })),
-    ...outs.map((e) => ({ ...e, direction: "out" as const })),
-  ].sort((a, b) => a.time - b.time);
+  const pairedIds = new Set(paired.flatMap((e) => e.swap!.map((r) => r.id)));
+
+  const pairedLines: SubLine[] = paired.map((e) => ({
+    time: e.time,
+    inId: e.swap![0].id,
+    outId: e.swap![1].id,
+  }));
+  const unpairedLines: SubLine[] = [
+    ...ins
+      .filter((e) => !pairedIds.has(e.id))
+      .map((e) => ({ ...e, direction: "in" as const })),
+    ...outs
+      .filter((e) => !pairedIds.has(e.id))
+      .map((e) => ({ ...e, direction: "out" as const })),
+  ];
+
+  return [...pairedLines, ...unpairedLines].sort((a, b) => a.time - b.time);
 }
 
 export type SectionMatch = { match: Match; league: MatchDayLeague };
