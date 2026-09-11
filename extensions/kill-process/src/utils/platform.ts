@@ -285,6 +285,15 @@ export function parseProcessLine(line: string): Partial<Process> | null {
 }
 
 /**
+ * Win32_Process reports some paths in extended-length form. The UNC prefix has to be
+ * turned back into a leading double backslash rather than stripped, or the path stops
+ * pointing anywhere and Restart kills a process it cannot relaunch.
+ */
+export function normalizeWindowsPath(path: string): string {
+  return path.replace(/^\\\\\?\\UNC\\/i, "\\\\").replace(/^\\\\\?\\(?=[A-Za-z]:\\)/, "");
+}
+
+/**
  * Parse Windows process list JSON output
  */
 export function parseWindowsProcesses(output: string): Partial<Process>[] {
@@ -298,7 +307,7 @@ export function parseWindowsProcesses(output: string): Partial<Process>[] {
         pid: proc.ppid ?? 0,
         cpu: proc.cpu,
         mem: proc.mem,
-        path: (proc.path || "").replace(/^\\\\\?\\/, ""),
+        path: normalizeWindowsPath(proc.path || ""),
         processName: proc.name || "",
       }),
     );
