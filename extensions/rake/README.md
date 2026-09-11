@@ -39,6 +39,7 @@ Ensure that Raycast's `PATH` includes the executable directories required by you
 
 A toast shows progress and whether the task succeeded or failed.
 On success, the toast displays standard output, falling back to standard error or `Done` if no output is available.
+For long output, only the final portion is retained for the toast, with an omission notice; output volume does not stop the task.
 
 Use **Reload Tasks** or `⌘R` from a task's action panel after changing your tasks.
 If the task list is empty, reopen the command to reload it.
@@ -68,6 +69,7 @@ Then open **Run Rake Task**.
 ```sh
 npm run dev      # Start Raycast development mode
 npm run build    # Compile and type-check into dist/
+npm test         # Run parser and subprocess tests without Raycast or GUI interaction
 npm run lint     # Validate the manifest, icon, source code, and formatting
 npm run fix-lint # Fix supported lint and formatting issues
 ```

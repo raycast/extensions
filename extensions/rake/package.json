@@ -35,6 +35,7 @@
   "scripts": {
     "dev": "ray develop",
     "build": "ray build -e dist -o dist",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "prepublishOnly": "node -e \"console.error('Use npm run publish to submit this extension to the Raycast Store.'); process.exit(1)\"",

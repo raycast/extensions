@@ -1,21 +1,12 @@
 import { Action, ActionPanel, Form, Keyboard, List, Toast, showToast } from "@raycast/api";
-import { execFile } from "node:child_process";
 import { homedir } from "node:os";
-import { promisify } from "node:util";
 import { useEffect, useState } from "react";
+import { parseRakeTaskLine, runProcess, type RakeTask } from "./rake-utils";
 
-const execFileAsync = promisify(execFile);
-
-type RakeTask = {
-  name: string;
-  args: string[];
-  description: string;
-};
-
-async function rake(...args: string[]) {
-  return execFileAsync("rake", args, {
+async function rake(args: string[], onStdoutLine?: (line: string) => void) {
+  return runProcess("rake", args, {
     cwd: homedir(),
-    encoding: "utf8",
+    onStdoutLine,
   });
 }
 
@@ -26,7 +17,7 @@ async function runTask(invocation: string) {
   });
 
   try {
-    const { stdout, stderr } = await rake(invocation);
+    const { stdout, stderr } = await rake([invocation]);
 
     toast.style = Toast.Style.Success;
     toast.title = `rake ${invocation}`;
@@ -74,24 +65,11 @@ export default function Command() {
     setIsLoading(true);
 
     try {
-      const { stdout } = await rake("-T");
-
-      const tasks = stdout
-        .split("\n")
-        .map((line): RakeTask | null => {
-          const match = line.match(/^rake\s+([^\s[]+)(?:\[([^\]]*)\])?(?:\s+#\s*(.*))?$/);
-
-          if (!match) {
-            return null;
-          }
-
-          return {
-            name: match[1],
-            args: match[2] ? match[2].split(",").map((arg) => arg.trim()) : [],
-            description: match[3] ?? "",
-          };
-        })
-        .filter((task): task is RakeTask => task !== null);
+      const tasks: RakeTask[] = [];
+      await rake(["-T"], (line) => {
+        const task = parseRakeTaskLine(line);
+        if (task) tasks.push(task);
+      });
 
       setTasks(tasks);
     } catch (error) {
