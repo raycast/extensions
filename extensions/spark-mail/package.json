@@ -5,12 +5,16 @@
   "description": "Search, browse, read, and compose Spark email from Raycast via the Spark CLI.",
   "icon": "icon.png",
   "author": "keito4",
+  "contributors": [
+    "artistro08"
+  ],
   "categories": [
     "Productivity",
     "Communication"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "preferences": [
@@ -19,8 +23,8 @@
       "type": "textfield",
       "required": false,
       "title": "Spark CLI Path",
-      "description": "Absolute path to the spark binary. Leave blank to auto-detect on PATH (/usr/local/bin, /opt/homebrew/bin). Find it with `which spark`.",
-      "placeholder": "/usr/local/bin/spark"
+      "description": "Absolute path to the spark binary. Leave blank to auto-detect on PATH (macOS: /usr/local/bin, /opt/homebrew/bin; Windows: the Spark Desktop install folder). Find it with `which spark` (macOS) or `where.exe spark` (Windows).",
+      "placeholder": "/usr/local/bin/spark or C:\\...\\SparkCore.bundle\\spark.exe"
     }
   ],
   "commands": [
@@ -62,11 +66,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.5"
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "eslint": "^9.0.0",

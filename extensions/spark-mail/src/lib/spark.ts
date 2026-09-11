@@ -1,30 +1,49 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
+import { delimiter, join } from "node:path";
 import { promisify } from "node:util";
 import { getPreferenceValues } from "@raycast/api";
 
 const execFileAsync = promisify(execFile);
 
+const IS_WINDOWS = process.platform === "win32";
+
+/** Binary name per platform. */
+const SPARK_BIN = IS_WINDOWS ? "spark.exe" : "spark";
+
 /**
  * Raycast's Node runtime has a minimal PATH, so a bare `spark` often won't
- * resolve. Prepend the common install dirs (Homebrew + /usr/local) before the
- * inherited PATH. (Pattern borrowed from the colima extension.)
+ * resolve. Prepend the common install dirs before the inherited PATH:
+ * Homebrew + /usr/local on macOS, the Spark Desktop bundle dir on Windows.
+ * (Pattern borrowed from the colima extension.)
  */
-const BASE_PATH = [
-  "/opt/homebrew/bin",
-  "/usr/local/bin",
-  "/usr/bin",
-  "/bin",
-  process.env.PATH ?? "",
-].join(":");
+const DEFAULT_DIRS = IS_WINDOWS
+  ? [
+      join(
+        process.env.LOCALAPPDATA ?? "",
+        "Programs",
+        "SparkDesktop",
+        "resources",
+        "app.asar.unpacked",
+        "node_modules",
+        "@readdle",
+        "sparkcore-win",
+        "bin",
+        "Release",
+        "SparkCore.bundle",
+      ),
+    ]
+  : ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin"];
+
+const BASE_PATH = [...DEFAULT_DIRS, process.env.PATH ?? ""].join(delimiter);
 
 const CLI_ENV: NodeJS.ProcessEnv = { ...process.env, PATH: BASE_PATH };
 
 /** Look for a `spark` executable in each directory on BASE_PATH. */
 function resolveSparkOnPath(): string | null {
-  for (const dir of BASE_PATH.split(":")) {
+  for (const dir of BASE_PATH.split(delimiter)) {
     if (!dir) continue;
-    const candidate = `${dir}/spark`;
+    const candidate = join(dir, SPARK_BIN);
     if (existsSync(candidate)) return candidate;
   }
   return null;
@@ -46,6 +65,9 @@ export function isSparkInstalled(): boolean {
   return resolveSparkOnPath() !== null;
 }
 
+/** Shell command that prints the `spark` binary location on this platform. */
+export const FIND_SPARK_CMD = IS_WINDOWS ? "where.exe spark" : "which spark";
+
 /** A user-facing error whose message is already safe to show in a toast. */
 export class SparkError extends Error {}
 
@@ -65,7 +87,7 @@ export async function runSpark(
       timeout,
       maxBuffer: 16 * 1024 * 1024,
     });
-    return stdout;
+    return stdout.replace(/\r\n/g, "\n");
   } catch (error) {
     const err = error as NodeJS.ErrnoException & {
       stdout?: string;
@@ -73,11 +95,15 @@ export async function runSpark(
     };
     if (err.code === "ENOENT") {
       throw new SparkError(
-        "Spark CLI not found. Set its path in extension preferences (`which spark`).",
+        `Spark CLI not found. Set its path in extension preferences (\`${FIND_SPARK_CMD}\`).`,
       );
     }
     const detail = (err.stderr || err.stdout || err.message || "").trim();
-    if (/not connect|not running|launch spark|no.*instance/i.test(detail)) {
+    if (
+      /not connect|not running|launch spark|no.*instance|can't access|cannot access/i.test(
+        detail,
+      )
+    ) {
       throw new SparkError(
         "Spark Desktop isn't running. Launch the Spark app and try again.",
       );
@@ -172,7 +198,7 @@ const DIVIDER = /^\s*─{5,}\s*$/;
  * (sender names, subjects) survive intact.
  */
 export function parseEmailTable(stdout: string): EmailRow[] {
-  const lines = stdout.split("\n");
+  const lines = stdout.split(/\r?\n/);
   const headerIdx = lines.findIndex(
     (l) => l.includes("ID") && l.includes("Subject") && l.includes("From"),
   );
@@ -221,7 +247,7 @@ export function parseEmailTable(stdout: string): EmailRow[] {
  */
 export function parseRecords(stdout: string): RecordsResult {
   const chunks = stdout
-    .split("\n")
+    .split(/\r?\n/)
     .reduce<string[][]>(
       (acc, line) => {
         if (DIVIDER.test(line)) {
@@ -237,7 +263,7 @@ export function parseRecords(stdout: string): RecordsResult {
     .filter(Boolean);
 
   const parseChunk = (chunk: string): ParsedRecord => {
-    const lines = chunk.split("\n");
+    const lines = chunk.split(/\r?\n/);
     const headers: Record<string, string> = {};
     let i = 0;
     for (; i < lines.length; i++) {
@@ -269,7 +295,7 @@ export function parseRecords(stdout: string): RecordsResult {
  */
 export function parseAccounts(stdout: string): Account[] {
   const accounts: Account[] = [];
-  for (const line of stdout.split("\n")) {
+  for (const line of stdout.split(/\r?\n/)) {
     const m = line.match(/^Email Account:\s*(\S+).*?\(Access:\s*([^)]+)\)/);
     if (m) accounts.push({ email: m[1], access: m[2].trim() });
   }
@@ -283,7 +309,7 @@ export interface Contact {
 
 /** Parse the two-column `Name | Email` table from `spark contacts`. */
 export function parseContacts(stdout: string): Contact[] {
-  const lines = stdout.split("\n");
+  const lines = stdout.split(/\r?\n/);
   const hi = lines.findIndex((l) => l.includes("Name") && l.includes("Email"));
   if (hi === -1) return [];
   const nameStart = lines[hi].indexOf("Name");
@@ -315,7 +341,7 @@ const EVENT_TIME = /^\s*(\d{1,2}:\d{2}\s*[–-].*|All day|All Day)\s*$/;
  * a time-range line and then indented metadata.
  */
 export function parseEvents(stdout: string): CalendarEvent[] {
-  const lines = stdout.split("\n");
+  const lines = stdout.split(/\r?\n/);
   const events: CalendarEvent[] = [];
   let day = "";
   for (let i = 0; i < lines.length; i++) {
@@ -375,7 +401,7 @@ export interface FolderGroup {
 export function parseFolders(stdout: string): FolderGroup[] {
   const groups: FolderGroup[] = [];
   let current: FolderGroup | undefined;
-  for (const line of stdout.split("\n")) {
+  for (const line of stdout.split(/\r?\n/)) {
     if (!line.trim()) continue;
     if (/^\s*-{3,}\s*$/.test(line)) continue;
     if (!/^\s/.test(line)) {
@@ -409,7 +435,7 @@ export interface Attachment {
  * line once downloaded. Deduplicated across the per-message repeats.
  */
 export function parseAttachments(stdout: string): Attachment[] {
-  const lines = stdout.split("\n");
+  const lines = stdout.split(/\r?\n/);
   const seen = new Set<string>();
   const out: Attachment[] = [];
   let inAttach = false;
@@ -437,8 +463,17 @@ export function parseAttachments(stdout: string): Attachment[] {
   return out;
 }
 
-/** Clean a Spark deep link printed by `thread` so `open()` accepts it. */
+/**
+ * Clean a Spark deep link printed by `thread` so `open()` accepts it. The CLI
+ * line-wraps the token: macOS emits raw whitespace, Windows emits it
+ * URL-encoded (`%0D%0A`), so strip both.
+ */
 export function cleanLink(link?: string): string | undefined {
   if (!link) return undefined;
-  return link.replace(/\s+/g, "").trim() || undefined;
+  return (
+    link
+      .replace(/\s+/g, "")
+      .replace(/%0[DA]/gi, "")
+      .trim() || undefined
+  );
 }
