@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "heed",
+  "title": "Heed",
+  "description": "Move keyboard focus between windows and turn focus follows mouse on and off: Hyprland's movefocus and follow_mouse for macOS.",
+  "icon": "icon.png",
+  "author": "rbstp",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "keywords": [
+    "focus",
+    "window",
+    "focus follows mouse",
+    "mouse",
+    "cursor",
+    "hyprland"
+  ],
+  "commands": [
+    {
+      "name": "focus-next",
+      "title": "Focus Next Window",
+      "subtitle": "Heed",
+      "description": "Move keyboard focus to the next visible window, screen by screen from left to right.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-previous",
+      "title": "Focus Previous Window",
+      "subtitle": "Heed",
+      "description": "Move keyboard focus to the previous visible window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-left",
+      "title": "Focus Window Left",
+      "subtitle": "Heed",
+      "description": "Move keyboard focus to the nearest window to the left.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-right",
+      "title": "Focus Window Right",
+      "subtitle": "Heed",
+      "description": "Move keyboard focus to the nearest window to the right.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-up",
+      "title": "Focus Window Above",
+      "subtitle": "Heed",
+      "description": "Move keyboard focus to the nearest window above.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-down",
+      "title": "Focus Window Below",
+      "subtitle": "Heed",
+      "description": "Move keyboard focus to the nearest window below.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-window",
+      "title": "Focus Window",
+      "subtitle": "Heed",
+      "description": "Every visible window by name, in Heed's spatial order. Pick one to focus it.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Focus Follows Mouse",
+      "subtitle": "Heed",
+      "description": "Turn Heed's pointer focus on or off.",
+      "mode": "no-view"
+    },
+    {
+      "name": "enable",
+      "title": "Turn on Focus Follows Mouse",
+      "subtitle": "Heed",
+      "description": "Turn Heed's pointer focus on.",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable",
+      "title": "Turn off Focus Follows Mouse",
+      "subtitle": "Heed",
+      "description": "Turn Heed's pointer focus off.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.0",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
