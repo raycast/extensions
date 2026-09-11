@@ -1,6 +1,6 @@
 # Phone Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-11
 
 - Search macOS Contacts and dial the highlighted contact with `↩`.
 - Argument support: `Call <name>` at the Raycast root auto-dials when there is a single match.

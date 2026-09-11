@@ -73,9 +73,18 @@
       "default": "tel",
       "required": false,
       "data": [
-        { "title": "Call (Phone)", "value": "tel" },
-        { "title": "FaceTime Audio", "value": "facetime-audio" },
-        { "title": "FaceTime Video", "value": "facetime" }
+        {
+          "title": "Call (Phone)",
+          "value": "tel"
+        },
+        {
+          "title": "FaceTime Audio",
+          "value": "facetime-audio"
+        },
+        {
+          "title": "FaceTime Video",
+          "value": "facetime"
+        }
       ]
     }
   ],
@@ -98,5 +107,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
