@@ -1,5 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "1.0.0",
   "name": "gh-release",
   "title": "GitHub Release",
   "description": "Cut a GitHub release on any of your repos — picks the next semver tag and generates the changelog.",

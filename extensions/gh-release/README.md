@@ -15,7 +15,11 @@ It reuses whatever credentials `gh` already holds and stores no tokens of its ow
 
 ## Preferences
 
-**GitHub Owner** — a user or organization whose repos you want listed. Leave it blank to list your own. Archived repos are always excluded, and the list is capped at 100 repos, most recently pushed first.
+**GitHub Owner** — optional filter. Leave it blank to list every repo you can release, or set a user or organization to narrow the list to theirs.
+
+By default the extension lists repos you have **push access** to, across your own account, your organizations, and anything you've been added to as a collaborator. Push access is the filter that matters, since it's what creating a release requires — a repo you can see but not push to is not a repo you can release, so it's left out.
+
+Archived repos are always excluded, the list is ordered by most recent push, and it's capped at 100 repos.
 
 ## How the next tag is picked
 

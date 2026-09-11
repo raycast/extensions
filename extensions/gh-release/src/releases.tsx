@@ -10,6 +10,7 @@ import {
   getPreferenceValues,
   Keyboard,
   open,
+  openExtensionPreferences,
   showToast,
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
@@ -38,8 +39,18 @@ type Repo = {
   nameWithOwner: string;
   description: string | null;
   pushedAt: string;
-  isArchived: boolean;
 };
+
+// ponytail: `gh repo list <owner>` only returns repos that owner *owns*, which is
+// empty for org-based accounts. Releasing needs push access, so ask for that instead.
+// ponytail: 100 repos, no pagination — add --paginate if someone hits the ceiling
+const LIST_ARGS = [
+  "api",
+  "user/repos?affiliation=owner,organization_member,collaborator&sort=pushed&per_page=100",
+  "--jq",
+  "[.[] | select(.archived == false) | select(.permissions.push) |" +
+    " {nameWithOwner: .full_name, description, pushedAt: .pushed_at}]",
+];
 
 async function latestTag(repo: string): Promise<string> {
   try {
@@ -126,39 +137,41 @@ async function release(repo: string, bump: Bump) {
   }
 }
 
+function PreferencesAction() {
+  return (
+    <ActionPanel>
+      <Action
+        title="Change GitHub Owner"
+        icon={Icon.Gear}
+        onAction={openExtensionPreferences}
+      />
+    </ActionPanel>
+  );
+}
+
 export default function Command() {
   const owner = getPreferenceValues<{ owner?: string }>().owner?.trim() ?? "";
 
-  const { isLoading, data, revalidate, error } = useExec(
-    GH,
-    [
-      "repo",
-      "list",
-      // ponytail: bare `gh repo list` already means "my repos"
-      ...(owner ? [owner] : []),
-      "--limit",
-      "100",
-      "--no-archived",
-      "--json",
-      "nameWithOwner,description,pushedAt,isArchived",
-    ],
-    {
-      parseOutput: ({ stdout }) =>
-        (JSON.parse(stdout || "[]") as Repo[])
-          .filter((r) => !r.isArchived)
-          .sort((a, b) => b.pushedAt.localeCompare(a.pushedAt)),
-      failureToastOptions: {
-        title: owner ? `Could not list ${owner} repos` : "Could not list repos",
-        message: "Is the gh CLI installed and logged in?",
-      },
+  const { isLoading, data, revalidate, error } = useExec(GH, LIST_ARGS, {
+    parseOutput: ({ stdout }) =>
+      (JSON.parse(stdout || "[]") as Repo[])
+        .filter(
+          (r) =>
+            !owner ||
+            r.nameWithOwner.split("/")[0].toLowerCase() === owner.toLowerCase(),
+        )
+        .sort((a, b) => b.pushedAt.localeCompare(a.pushedAt)),
+    failureToastOptions: {
+      title: "Could not list repos",
+      message: "Is the gh CLI installed and logged in?",
     },
-  );
+  });
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder={
-        owner ? `Search ${owner} repos…` : "Search your repos…"
+        owner ? `Search ${owner} repos…` : "Search repos you can release…"
       }
     >
       {error ? (
@@ -166,6 +179,7 @@ export default function Command() {
           icon={Icon.Warning}
           title="Could not reach GitHub"
           description="Install the gh CLI, then run: gh auth login"
+          actions={<PreferencesAction />}
         />
       ) : null}
       {!error && !isLoading && data?.length === 0 ? (
@@ -174,16 +188,18 @@ export default function Command() {
           title="No repos found"
           description={
             owner
-              ? `${owner} has no unarchived repos you can see. Check the GitHub Owner preference.`
-              : "You have no unarchived repos. Set the GitHub Owner preference to list someone else's."
+              ? `You have no push access to any unarchived ${owner} repo. Clear the GitHub Owner preference to see every repo you can release.`
+              : "Your gh login has no push access to any unarchived repo."
           }
+          actions={<PreferencesAction />}
         />
       ) : null}
       {(data ?? []).map((repo) => (
         <List.Item
           key={repo.nameWithOwner}
           icon={{ source: Icon.Rocket, tintColor: Color.PrimaryText }}
-          title={repo.nameWithOwner.split("/")[1]}
+          // ponytail: unfiltered, the list spans many owners — the bare name is ambiguous
+          title={owner ? repo.nameWithOwner.split("/")[1] : repo.nameWithOwner}
           subtitle={repo.description ?? undefined}
           accessories={[
             { date: new Date(repo.pushedAt), tooltip: "Last push" },
