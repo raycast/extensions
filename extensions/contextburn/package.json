@@ -5,7 +5,10 @@
   "description": "Run efficiency of your Claude Code sessions: what share of paid tokens became model output, and how much was re-reading context already sent.",
   "icon": "extension-icon.png",
   "author": "arsentev-ai",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -19,7 +22,7 @@
   "preferences": [
     {
       "name": "command",
-      "title": "contextburn CLI",
+      "title": "Contextburn CLI",
       "description": "Path to the contextburn command (pip install contextburn).",
       "type": "textfield",
       "required": false,
@@ -27,7 +30,7 @@
     },
     {
       "name": "hours",
-      "title": "Window (hours)",
+      "title": "Window (Hours)",
       "description": "How many hours back to measure.",
       "type": "textfield",
       "required": false,

@@ -16,8 +16,6 @@ type Efficiency = {
   hours: number;
 };
 
-type Preferences = { command?: string; hours?: string };
-
 // Raycast does not inherit the login shell PATH, so add the usual pip install locations.
 const PATH = [
   `${homedir()}/.local/bin`,
@@ -36,19 +34,42 @@ export default function Command() {
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    execFile(command, ["--efficiency", hours], { env: { ...process.env, PATH }, timeout: 60000 }, (err, stdout) => {
-      if (err) {
-        setError(
-          "The contextburn CLI was not found. Install it with `pip install contextburn`, or set its path in preferences.",
-        );
-        return;
-      }
-      try {
-        setData(JSON.parse(stdout));
-      } catch {
-        setError("contextburn returned output that is not JSON.");
-      }
-    });
+    execFile(
+      command,
+      ["--efficiency", hours],
+      { env: { ...process.env, PATH }, timeout: 60000 },
+      (err, stdout, stderr) => {
+        if (err) {
+          const notFound = (err as NodeJS.ErrnoException).code === "ENOENT";
+          setError(
+            notFound
+              ? "The contextburn CLI was not found. Install it with `pip install contextburn`, or set its path in preferences."
+              : `contextburn failed: ${(stderr || err.message).trim().slice(0, 500)}`,
+          );
+          return;
+        }
+        try {
+          const parsed = JSON.parse(stdout) as Partial<Efficiency>;
+          const numeric: (keyof Efficiency)[] = [
+            "sessions",
+            "tokens_total",
+            "useful_share_tokens",
+            "reread_share_tokens",
+            "useful_share_cost",
+            "paid_tokens_per_useful_token",
+            "cost_usd",
+            "hours",
+          ];
+          if (numeric.some((k) => typeof parsed[k] !== "number")) {
+            setError("contextburn returned JSON in an unexpected shape. Update the CLI: `pip install -U contextburn`.");
+            return;
+          }
+          setData(parsed as Efficiency);
+        } catch {
+          setError("contextburn returned output that is not JSON.");
+        }
+      },
+    );
   }, [command, hours]);
 
   if (error) return <Detail markdown={`# contextburn\n\n${error}`} />;
