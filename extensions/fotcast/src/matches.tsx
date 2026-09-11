@@ -26,6 +26,7 @@ import {
   buildSections,
   dateKey,
   dayLabel,
+  favoriteLeagueEntry,
   hasFavoriteTeam,
   leagueTitle,
   shiftDay,
@@ -59,12 +60,13 @@ function title(m: Match): string {
   return `${m.home.name} vs ${m.away.name}`;
 }
 
-// Finished-match badge colour, judged from the favorite club's side: green
-// win, red loss, grey draw. Grey too when neither or both clubs are favorites.
+// Finished-match badge colour: green win, red loss, grey draw. Judged from
+// your club's side when exactly one favorite is playing, else the home side.
 function resultColor(m: Match, isTeam: (id: number) => boolean): Color {
   const homeFav = isTeam(m.home.id);
-  if (homeFav === isTeam(m.away.id)) return Color.SecondaryText;
-  const margin = (m.home.score - m.away.score) * (homeFav ? 1 : -1);
+  const awayFav = isTeam(m.away.id);
+  const fromHome = homeFav === awayFav || homeFav;
+  const margin = (m.home.score - m.away.score) * (fromHome ? 1 : -1);
   if (margin > 0) return Color.Green;
   if (margin < 0) return Color.Red;
   return Color.SecondaryText;
@@ -178,7 +180,7 @@ function MatchRow({
   revalidate,
 }: RowProps) {
   const { match, league } = item;
-  const { isTeam, isLeague, toggleTeam, toggleLeague } = favs;
+  const { favorites, isTeam, toggleTeam, toggleLeague } = favs;
 
   async function toggle(on: boolean, name: string, run: () => Promise<void>) {
     await run();
@@ -208,7 +210,11 @@ function MatchRow({
     );
   };
 
-  const leagueFav = isLeague(league.primaryId);
+  // Match buildSections' favorite check (primaryId or parentLeagueId) so a
+  // league favorited by parent ID doesn't show "Favorite" here and create a
+  // duplicate entry keyed by primaryId when toggled.
+  const favLeagueEntry = favoriteLeagueEntry(league, favorites);
+  const leagueFav = favLeagueEntry != null;
 
   return (
     <List.Item
@@ -242,7 +248,7 @@ function MatchRow({
               onAction={() =>
                 toggle(leagueFav, league.name, () =>
                   toggleLeague({
-                    id: league.primaryId,
+                    id: favLeagueEntry?.id ?? league.primaryId,
                     name: league.name,
                     ccode: league.ccode,
                   }),

@@ -43,13 +43,49 @@ export function hasFavoriteTeam(m: Match, favs: Favorites): boolean {
   return favs.teams.some((t) => t.id === m.home.id || t.id === m.away.id);
 }
 
+/** The stored favorite backing this league, by primaryId or parentLeagueId. */
+export function favoriteLeagueEntry(
+  league: MatchDayLeague,
+  favs: Favorites,
+): Favorites["leagues"][number] | undefined {
+  return favs.leagues.find(
+    (l) => l.id === league.primaryId || l.id === league.parentLeagueId,
+  );
+}
+
 export function isFavoriteLeague(
   league: MatchDayLeague,
   favs: Favorites,
 ): boolean {
-  return favs.leagues.some(
-    (l) => l.id === league.primaryId || l.id === league.parentLeagueId,
-  );
+  return favoriteLeagueEntry(league, favs) != null;
+}
+
+// A team's substitution row, ready to render. Prefers matchFacts' true
+// [in, out] swap pairing; falls back to each side's own subIn/subOut minute,
+// unpaired, when swap data is missing rather than guessing a pairing.
+export type SubLine =
+  | { time: number; inId: string; outId: string }
+  | { time: number; direction: "in" | "out"; id: string };
+
+export function pairSubstitutions(
+  swaps: { time: number; swap?: { id: string }[] }[],
+  ins: { time: number; id: string }[],
+  outs: { time: number; id: string }[],
+): SubLine[] {
+  const paired = swaps.filter((e) => e.swap?.length === 2);
+  if (paired.length) {
+    return paired
+      .sort((a, b) => a.time - b.time)
+      .map((e) => ({
+        time: e.time,
+        inId: e.swap![0].id,
+        outId: e.swap![1].id,
+      }));
+  }
+  return [
+    ...ins.map((e) => ({ ...e, direction: "in" as const })),
+    ...outs.map((e) => ({ ...e, direction: "out" as const })),
+  ].sort((a, b) => a.time - b.time);
 }
 
 export function isFavoriteMatch(

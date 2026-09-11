@@ -24,7 +24,7 @@ import {
   type MatchDetails,
   type MatchEvent,
 } from "./fotmob";
-import { statusOf } from "./schedule";
+import { pairSubstitutions, statusOf } from "./schedule";
 
 const xml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -223,24 +223,31 @@ function teamSheet(team: LineupTeam): string[] {
   });
 }
 
-// "62' ▲ Mercan ▼ Elmaz", ins and outs paired by minute in order.
-// ponytail: same-minute multi-subs pair by list order, which can cross wires.
-function subLines(team: LineupTeam): string[] {
-  const all = [...(team.starters ?? []), ...(team.subs ?? [])];
+// "62' ▲ Mercan ▼ Elmaz". `swaps` are this team's Substitution events from
+// matchFacts; pairSubstitutions prefers their true [in, out] pairing and
+// falls back to unpaired subIn/subOut lines when that data is missing.
+function subLines(team: LineupTeam, swaps: MatchEvent[]): string[] {
+  const roster = [...(team.starters ?? []), ...(team.subs ?? [])];
+  const byId = new Map(roster.map((p) => [String(p.id), p]));
+  const swapNames = new Map(
+    swaps.flatMap((e) => e.swap?.map((r) => [r.id, r.name] as const) ?? []),
+  );
+  const name = (id: string) => {
+    const p = byId.get(id);
+    return p ? lastName(p) : (swapNames.get(id)?.split(" ").pop() ?? "");
+  };
   const at = (type: "subIn" | "subOut") =>
-    all
-      .flatMap((p) =>
-        (p.performance?.substitutionEvents ?? [])
-          .filter((e) => e.type === type)
-          .map((e) => ({ time: e.time, name: lastName(p) })),
-      )
-      .sort((a, b) => a.time - b.time);
-  const ins = at("subIn");
-  const outs = at("subOut");
-  return ins.map((i, k) => {
-    const o = outs[k];
-    return `${i.time}' <tspan fill="#34C759">▲</tspan> ${xml(i.name)}${o ? ` <tspan fill="${RED}">▼</tspan> ${xml(o.name)}` : ""}`;
-  });
+    roster.flatMap((p) =>
+      (p.performance?.substitutionEvents ?? [])
+        .filter((e) => e.type === type)
+        .map((e) => ({ time: e.time, id: String(p.id) })),
+    );
+
+  return pairSubstitutions(swaps, at("subIn"), at("subOut")).map((line) =>
+    "outId" in line
+      ? `${line.time}' <tspan fill="#34C759">▲</tspan> ${xml(name(line.inId))} <tspan fill="${RED}">▼</tspan> ${xml(name(line.outId))}`
+      : `${line.time}' <tspan fill="${line.direction === "in" ? "#34C759" : RED}">${line.direction === "in" ? "▲" : "▼"}</tspan> ${xml(name(line.id))}`,
+  );
 }
 
 // FotMob-style rating pills: 9+ blue, 7–8.9 green, 6–6.9 orange, below red.
@@ -324,6 +331,7 @@ function scoreboard(
   m: Match,
   details: MatchDetails | undefined,
   events: MatchEvent[],
+  subs: MatchEvent[],
   crests: { home?: string; away?: string },
 ): string {
   const dark = environment.appearance === "dark";
@@ -352,7 +360,21 @@ function scoreboard(
         ? pitch(home, away, y, t, dark)
         : columns(teamSheet(home), teamSheet(away), y, t, 12),
     );
-    push(columns(subLines(home), subLines(away), y, t, 12));
+    push(
+      columns(
+        subLines(
+          home,
+          subs.filter((e) => e.isHome),
+        ),
+        subLines(
+          away,
+          subs.filter((e) => !e.isHome),
+        ),
+        y,
+        t,
+        12,
+      ),
+    );
     push(ratings(home, away, y, t));
   }
 
@@ -435,9 +457,11 @@ export function MatchDetailView({
     return () => clearInterval(timer);
   }, [live, revalidate]);
 
-  const events = (details?.content?.matchFacts?.events?.events ?? [])
+  const rawEvents = details?.content?.matchFacts?.events?.events ?? [];
+  const events = rawEvents
     .filter((e) => e.type === "Goal" || isRed(e))
     .sort((a, b) => a.time - b.time);
+  const subs = rawEvents.filter((e) => e.type === "Substitution");
   const info = details?.content?.matchFacts?.infoBox;
   const tournament = info?.Tournament;
   const stadium = info?.Stadium;
@@ -451,7 +475,7 @@ export function MatchDetailView({
     <Detail
       isLoading={isLoading}
       navigationTitle={`${match.home.name} vs ${match.away.name}`}
-      markdown={scoreboard(match, details, events, data?.crests ?? {})}
+      markdown={scoreboard(match, details, events, subs, data?.crests ?? {})}
       metadata={
         <Detail.Metadata>
           <Label

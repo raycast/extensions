@@ -95,6 +95,8 @@ export type MatchEvent = {
   ownGoal?: boolean | null;
   isPenalty?: boolean;
   goalDescriptionKey?: string | null;
+  /** Substitution events only: [playerIn, playerOut]. */
+  swap?: { id: string; name: string }[];
 };
 
 export type LineupPlayer = {

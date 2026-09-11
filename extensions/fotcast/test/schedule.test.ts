@@ -4,7 +4,13 @@ import { join } from "node:path";
 import { test } from "node:test";
 import type { MatchDayLeague } from "../src/fotmob.ts";
 import type { Favorites } from "../src/store.ts";
-import { buildSections, isFavoriteMatch, statusOf } from "../src/schedule.ts";
+import {
+  buildSections,
+  favoriteLeagueEntry,
+  isFavoriteMatch,
+  pairSubstitutions,
+  statusOf,
+} from "../src/schedule.ts";
 
 const leagues: MatchDayLeague[] = JSON.parse(
   readFileSync(
@@ -84,6 +90,68 @@ test("teams before leagues, ★ Teams sorted by kickoff", () => {
     times,
     [...times].sort((a, b) => a - b),
   );
+});
+
+test("favoriteLeagueEntry matches by parentLeagueId, not just primaryId", () => {
+  const group: MatchDayLeague = {
+    id: 1001,
+    primaryId: 1001,
+    parentLeagueId: 42,
+    name: "Champions League · Group A",
+    ccode: "INT",
+    internalRank: 0,
+    simpleLeague: false,
+    matches: [],
+  };
+  const favs: Favorites = {
+    teams: [],
+    leagues: [{ id: 42, name: "Champions League" }],
+  };
+  const entry = favoriteLeagueEntry(group, favs);
+  assert.equal(entry?.id, 42);
+
+  // Once matched, toggling should target the stored entry's id (42), not
+  // primaryId (1001) — otherwise the row creates a duplicate favorite.
+  assert.notEqual(entry?.id, group.primaryId);
+  assert.equal(favoriteLeagueEntry(group, NO_FAVS), undefined);
+});
+
+test("pairSubstitutions prefers swap pairing over list order", () => {
+  // Same-minute double sub where starter order and bench order differ:
+  // index-pairing would cross Elmaz with Aydın instead of Mercan.
+  const swaps = [
+    { time: 62, swap: [{ id: "in-1" }, { id: "out-1" }] },
+    { time: 72, swap: [{ id: "in-2" }, { id: "out-2" }] },
+    { time: 72, swap: [{ id: "in-3" }, { id: "out-3" }] },
+  ];
+  const ins = [
+    { time: 72, id: "in-3" },
+    { time: 62, id: "in-1" },
+    { time: 72, id: "in-2" },
+  ];
+  const outs = [
+    { time: 72, id: "out-2" },
+    { time: 62, id: "out-1" },
+    { time: 72, id: "out-3" },
+  ];
+  const lines = pairSubstitutions(swaps, ins, outs);
+  assert.deepEqual(lines, [
+    { time: 62, inId: "in-1", outId: "out-1" },
+    { time: 72, inId: "in-2", outId: "out-2" },
+    { time: 72, inId: "in-3", outId: "out-3" },
+  ]);
+});
+
+test("pairSubstitutions falls back to unpaired lines without swap data", () => {
+  const lines = pairSubstitutions(
+    [],
+    [{ time: 62, id: "in-1" }],
+    [{ time: 60, id: "out-1" }],
+  );
+  assert.deepEqual(lines, [
+    { time: 60, id: "out-1", direction: "out" },
+    { time: 62, id: "in-1", direction: "in" },
+  ]);
 });
 
 test("statusOf", () => {
