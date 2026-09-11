@@ -223,7 +223,11 @@ export default function Command() {
                   <ActionPanel.Section title="Download Queue">
                     <Action
                       title={queued ? "Remove from Queue" : "Add to Queue"}
-                      icon={queued ? Icon.BookmarkFilled : Icon.Bookmark}
+                      icon={
+                        queued
+                          ? { source: Icon.Bookmark, tintColor: Color.Blue }
+                          : Icon.Bookmark
+                      }
                       shortcut={{ modifiers: ["cmd"], key: "b" }}
                       onAction={() => toggleQueued(book)}
                     />
