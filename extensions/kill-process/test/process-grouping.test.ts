@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import { groupRelatedProcesses } from "../src/utils/process-grouping";
+import { createWindowsGroupKeyResolver, groupRelatedProcesses } from "../src/utils/process-grouping";
 import { Process } from "../src/types";
 
 const process = (overrides: Partial<Process>): Process => ({
@@ -69,4 +69,43 @@ test("groups app helpers into the main app process", () => {
   assert.deepEqual(notion.childProcessIds, [101, 102]);
 
   assert.ok(grouped.some((item) => item.processName === "ssh"));
+});
+
+const SPOTIFY = String.raw`C:\Users\me\AppData\Roaming\Spotify\Spotify.exe`;
+const NODE = String.raw`C:\Program Files\nodejs\node.exe`;
+
+test("windows groups an app with the helpers it spawned", () => {
+  const processes = [
+    process({ id: 500, pid: 42, path: SPOTIFY, processName: "Spotify" }),
+    process({ id: 501, pid: 500, path: SPOTIFY, processName: "Spotify" }),
+    process({ id: 502, pid: 501, path: SPOTIFY, processName: "Spotify" }),
+  ];
+  const resolve = createWindowsGroupKeyResolver(processes);
+  const keys = processes.map(resolve);
+
+  assert.equal(new Set(keys).size, 1);
+  assert.ok(keys[0]?.endsWith("#500"));
+});
+
+test("windows keeps unrelated instances of the same executable apart", () => {
+  const processes = [
+    process({ id: 600, pid: 10, path: NODE, processName: "node" }),
+    process({ id: 601, pid: 11, path: NODE, processName: "node" }),
+    process({ id: 602, pid: 12, path: NODE, processName: "node" }),
+  ];
+  const resolve = createWindowsGroupKeyResolver(processes);
+
+  assert.equal(new Set(processes.map(resolve)).size, 3);
+});
+
+test("windows ignores processes with no path and survives a parent cycle", () => {
+  const processes = [
+    process({ id: 700, pid: 701, path: NODE, processName: "node" }),
+    process({ id: 701, pid: 700, path: NODE, processName: "node" }),
+    process({ id: 702, pid: 0, path: "", processName: "protected" }),
+  ];
+  const resolve = createWindowsGroupKeyResolver(processes);
+
+  assert.equal(resolve(processes[2]), undefined);
+  assert.ok(resolve(processes[0]));
 });

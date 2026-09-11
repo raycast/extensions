@@ -2,10 +2,43 @@ import { Process } from "../types";
 import { isWindows } from "./platform";
 
 function getOuterAppBundlePath(path: string): string | undefined {
-  if (isWindows) {
-    return path ? path.toLowerCase() : undefined;
-  }
   return path.match(/^(.+?\.app)(?:\/|$)/)?.[1];
+}
+
+/**
+ * Windows has no app bundle to group by, and the executable alone is not enough:
+ * unrelated node.exe or cmd.exe instances would merge into one entry. A group is
+ * a process plus the descendants running the same executable, so the key is the
+ * topmost ancestor still running it.
+ */
+export function createWindowsGroupKeyResolver(processes: Process[]): (process: Process) => string | undefined {
+  const processesById = new Map(processes.map((process) => [process.id, process]));
+
+  return (process) => {
+    if (!process.path) {
+      return undefined;
+    }
+
+    const executable = process.path.toLowerCase();
+    const visited = new Set([process.id]);
+    let root = process;
+
+    for (;;) {
+      const parent = processesById.get(root.pid);
+      if (!parent || visited.has(parent.id) || parent.path.toLowerCase() !== executable) {
+        return `${executable}#${root.id}`;
+      }
+
+      visited.add(parent.id);
+      root = parent;
+    }
+  };
+}
+
+function createGroupKeyResolver(processes: Process[]): (process: Process) => string | undefined {
+  const resolveWindowsGroupKey = createWindowsGroupKeyResolver(processes);
+
+  return (process) => getOuterAppBundlePath(process.path) ?? (isWindows ? resolveWindowsGroupKey(process) : undefined);
 }
 
 function getAppNameFromBundlePath(bundlePath: string, processes: Process[]): string {
@@ -45,9 +78,10 @@ function aggregateAppProcesses(bundlePath: string, processes: Process[]): Proces
 export function groupRelatedProcesses(processes: Process[]): Process[] {
   const appGroups = new Map<string, Process[]>();
   const ungroupedProcesses: Process[] = [];
+  const getGroupKey = createGroupKeyResolver(processes);
 
   for (const process of processes) {
-    const bundlePath = getOuterAppBundlePath(process.path);
+    const bundlePath = getGroupKey(process);
     if (!bundlePath) {
       ungroupedProcesses.push(process);
       continue;
