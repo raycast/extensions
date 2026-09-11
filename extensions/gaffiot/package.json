@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gaffiot",
+  "title": "Gaffiot Latin-French Dictionary",
+  "description": "Look up Latin words in the Gaffiot 2016 Latin-French dictionary (G. Gréco et al.), offline",
+  "icon": "icon.png",
+  "author": "davidyannick",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Documentation",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Gaffiot",
+      "subtitle": "Latin → French",
+      "description": "Look up a Latin word in the Gaffiot 2016 (72,000 entries, offline)",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Latin word",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "latin",
+        "dictionary",
+        "french",
+        "dictionnaire",
+        "latin-français"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "maxResults",
+      "type": "dropdown",
+      "required": false,
+      "title": "Maximum Results",
+      "description": "Maximum number of entries shown in the list",
+      "default": "60",
+      "data": [
+        {
+          "title": "30",
+          "value": "30"
+        },
+        {
+          "title": "60",
+          "value": "60"
+        },
+        {
+          "title": "120",
+          "value": "120"
+        }
+      ]
+    },
+    {
+      "name": "showDetail",
+      "type": "checkbox",
+      "required": false,
+      "title": "Detail Panel",
+      "description": "Show the detail panel when the command opens (toggle with ⌘D)",
+      "label": "Show the entry in the detail panel on launch",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.3",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.16.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "notice": "node scripts/build-notice.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
