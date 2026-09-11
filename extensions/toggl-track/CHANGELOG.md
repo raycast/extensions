@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Fix Negative Running Durations] - {PR_MERGE_DATE}
+
+- Clamped elapsed-time calculations for the running entry to zero, so a start time in the future no longer renders a garbled negative duration in the list and menu bar, or subtracts from today's total
+
 ## [Fix Duplicate Billable Checkbox] - 2026-09-11
 
 - Fixed two `Billable` checkboxes rendering with the same `billable` form ID when a billable project is selected in a premium workspace — they are now a single checkbox, shown whenever either condition applies
