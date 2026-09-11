@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Bulk Download] - 2026-09-11
+
+### Added
+
+- Select multiple books in Search Books and download them all at once with Download Selected
+- Add to Queue action to save books for later without downloading immediately
+- New Download Queue command to review, bulk-download, and manage saved books, even across Raycast restarts
+- Downloaded queue items are marked Downloaded and kept until manually cleared or removed
+
 ## [1.0.0] - 2026-09-10
 
 ### Added

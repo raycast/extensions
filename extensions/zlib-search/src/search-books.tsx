@@ -7,36 +7,19 @@ import {
   Toast,
   getPreferenceValues,
   Icon,
+  Color,
 } from "@raycast/api";
-import { useExec } from "@raycast/utils";
-import { execFile } from "child_process";
-import { promisify } from "util";
-import { existsSync } from "fs";
-
-const execFileAsync = promisify(execFile);
-
-const ZLIB_PATH_CANDIDATES = ["/opt/homebrew/bin/zlib", "/usr/local/bin/zlib"];
-
-function resolveZlibPath(configuredPath: string): string {
-  if (configuredPath) return configuredPath;
-  return ZLIB_PATH_CANDIDATES.find((path) => existsSync(path)) ?? "zlib";
-}
-
-function truncate(text: string, max = 40): string {
-  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
-}
-
-interface Book {
-  id: string;
-  hash?: string;
-  url: string;
-  name: string;
-  authors?: string[];
-  year?: string;
-  extension?: string;
-  size?: string;
-  rating?: string;
-}
+import { useExec, useLocalStorage } from "@raycast/utils";
+import {
+  Book,
+  QueueItem,
+  QUEUE_STORAGE_KEY,
+  buildExecEnv,
+  downloadBook,
+  resolveZlibPath,
+  runBulkDownload,
+  truncate,
+} from "./lib/zlib";
 
 interface SearchResult {
   books: Book[];
@@ -48,12 +31,20 @@ const EMPTY_RESULT: SearchResult = { books: [], page: 0, total_pages: 0 };
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  // Keyed by id but storing the full Book, not just the id: a book selected
+  // in an earlier search no longer appears in `books` once the user searches
+  // again, so resolving selections against the current results would lose it.
+  const [selectedBooks, setSelectedBooks] = useState<Map<string, Book>>(
+    new Map(),
+  );
   const prefs = getPreferenceValues<Preferences>();
   const zlibPath = resolveZlibPath(prefs.zlibPath);
   const downloadDir = prefs.downloadDir || "~/Downloads";
+  const execEnv = buildExecEnv(prefs.zlibDomain);
 
-  const execEnv: NodeJS.ProcessEnv = { ...process.env };
-  if (prefs.zlibDomain) execEnv.ZLIB_DOMAIN = prefs.zlibDomain;
+  const { value: queue = [], setValue: setQueue } = useLocalStorage<
+    QueueItem[]
+  >(QUEUE_STORAGE_KEY, []);
 
   const { isLoading, data } = useExec(
     zlibPath,
@@ -81,6 +72,7 @@ export default function Command() {
   );
 
   const books = data?.books ?? [];
+  const isQueued = (id: string) => queue.some((item) => item.id === id);
 
   async function handleDownload(book: Book) {
     const toast = await showToast({
@@ -96,11 +88,7 @@ export default function Command() {
     }, 1000);
 
     try {
-      await execFileAsync(
-        zlibPath,
-        ["download", book.id, "--dir", downloadDir],
-        { env: execEnv },
-      );
+      await downloadBook(zlibPath, book, downloadDir, execEnv);
       toast.style = Toast.Style.Success;
       toast.title = "Downloaded";
       toast.message = book.name;
@@ -111,6 +99,50 @@ export default function Command() {
     } finally {
       clearInterval(elapsedTimer);
     }
+  }
+
+  function toggleSelected(book: Book) {
+    setSelectedBooks((prev) => {
+      const next = new Map(prev);
+      if (next.has(book.id)) next.delete(book.id);
+      else next.set(book.id, book);
+      return next;
+    });
+  }
+
+  async function toggleQueued(book: Book) {
+    if (isQueued(book.id)) {
+      await setQueue(queue.filter((item) => item.id !== book.id));
+      await showToast({ title: "Removed from queue", message: book.name });
+    } else {
+      const entry: QueueItem = {
+        ...book,
+        downloaded: false,
+        queuedAt: Date.now(),
+      };
+      await setQueue([...queue, entry]);
+      await showToast({ title: "Added to queue", message: book.name });
+    }
+  }
+
+  async function handleDownloadSelected() {
+    const selected = Array.from(selectedBooks.values());
+    if (selected.length === 0) return;
+
+    const results = await runBulkDownload(selected, {
+      zlibPath,
+      downloadDir,
+      execEnv,
+    });
+
+    // Keep failed downloads selected (with their full data) so the user can
+    // retry; clear the rest.
+    const failed = new Map(
+      results
+        .filter((r) => !r.success)
+        .map((r) => [r.book.id, r.book] as const),
+    );
+    setSelectedBooks(failed);
   }
 
   return (
@@ -132,37 +164,79 @@ export default function Command() {
           description={`No books found for "${searchText}"`}
         />
       ) : (
-        books.map((book, i) => (
-          <List.Item
-            key={`${book.id}-${i}`}
-            title={book.name}
-            subtitle={book.authors?.join(", ") ?? ""}
-            accessories={[
-              book.extension ? { tag: book.extension } : {},
-              book.size ? { text: book.size } : {},
-              book.year ? { text: book.year } : {},
-            ]}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Download"
-                  icon={Icon.Download}
-                  onAction={() => handleDownload(book)}
-                />
-                {book.url ? (
-                  <Action.OpenInBrowser
-                    url={book.url}
-                    title="Open in Browser"
-                  />
-                ) : null}
-                <Action.CopyToClipboard
-                  title="Copy to Clipboard"
-                  content={book.id}
-                />
-              </ActionPanel>
-            }
-          />
-        ))
+        books.map((book, i) => {
+          const selected = selectedBooks.has(book.id);
+          const queued = isQueued(book.id);
+          return (
+            <List.Item
+              key={`${book.id}-${i}`}
+              title={book.name}
+              subtitle={book.authors?.join(", ") ?? ""}
+              icon={
+                selected
+                  ? { source: Icon.CheckCircle, tintColor: Color.Blue }
+                  : Icon.Circle
+              }
+              accessories={[
+                queued
+                  ? { icon: Icon.Bookmark, tooltip: "In download queue" }
+                  : {},
+                book.extension ? { tag: book.extension } : {},
+                book.size ? { text: book.size } : {},
+                book.year ? { text: book.year } : {},
+              ]}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action
+                      title="Download"
+                      icon={Icon.Download}
+                      onAction={() => handleDownload(book)}
+                    />
+                    {book.url ? (
+                      <Action.OpenInBrowser
+                        url={book.url}
+                        title="Open in Browser"
+                      />
+                    ) : null}
+                    <Action.CopyToClipboard
+                      title="Copy to Clipboard"
+                      content={book.id}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Selection">
+                    <Action
+                      title={selected ? "Deselect" : "Select"}
+                      icon={selected ? Icon.Circle : Icon.CheckCircle}
+                      shortcut={{ modifiers: ["cmd"], key: "s" }}
+                      onAction={() => toggleSelected(book)}
+                    />
+                    {selectedBooks.size > 0 ? (
+                      <Action
+                        title={`Download Selected (${selectedBooks.size})`}
+                        icon={Icon.Tray}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                        onAction={handleDownloadSelected}
+                      />
+                    ) : null}
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Download Queue">
+                    <Action
+                      title={queued ? "Remove from Queue" : "Add to Queue"}
+                      icon={
+                        queued
+                          ? { source: Icon.Bookmark, tintColor: Color.Blue }
+                          : Icon.Bookmark
+                      }
+                      shortcut={{ modifiers: ["cmd"], key: "b" }}
+                      onAction={() => toggleQueued(book)}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })
       )}
     </List>
   );
