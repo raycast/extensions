@@ -2,11 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "where-is-my-cursor",
   "title": "Where Is My Cursor?",
-  "description": "Visual aid to find cursor, specially useful when utilizing more than 1 monitor.",
+  "description": "Visual aid to find cursor, especially useful when utilizing more than 1 monitor.",
   "icon": "extension-icon.png",
   "author": "luciodaou",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
   "license": "MIT",
-  "permissions": ["execute"],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "where-is-my-cursor",
@@ -44,9 +50,8 @@
       "mode": "view"
     }
   ],
-
   "dependencies": {
-    "@raycast/api": "^1.102.3",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
