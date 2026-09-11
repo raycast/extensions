@@ -132,14 +132,15 @@ export async function fetchUsage(): Promise<FetchUsageResult> {
     const stored = await getStoredTokens();
     let profile: AccountProfile | null = stored?.profile ?? null;
 
-    if (stored && stored.profile === undefined) {
+    if (!profile || !profile.plan || profile.plan.toLowerCase() === "unknown") {
       try {
-        profile = await fetchProfile(token);
-        if (profile) {
+        const freshProfile = await fetchProfile(token);
+        if (freshProfile && stored) {
+          profile = freshProfile;
           await saveStoredTokens({
             ...stored,
-            plan: profile.plan,
-            profile,
+            plan: freshProfile.plan ?? stored.plan,
+            profile: freshProfile,
           });
         }
       } catch {
