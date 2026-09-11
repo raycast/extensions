@@ -12,7 +12,8 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
-import { formatHerdrError, stoppedSessionOf } from "./herdr";
+import { useCachedPromise } from "@raycast/utils";
+import { formatHerdrError, getSessions, stoppedSessionOf } from "./herdr";
 import { shortcuts } from "./shortcuts";
 import { launchHerdrInTerminal, type LaunchResult } from "./terminal";
 import type { AgentStatus, TabInfo } from "./types";
@@ -108,26 +109,35 @@ export function ManageSessionsAction({ title = "Manage Sessions…" }: { title?:
 }
 
 // Reads never start a session, so a Stopped Selected Session is shown as such;
-// attaching through the terminal is the only way to start it from here.
+// attaching through the terminal is the only way to start it from here. Herdr
+// reports a session that does not exist the same way, and `herdr --session`
+// would create it, so the start action is offered only for a listed session.
 function SessionStoppedView({ session, onRetry }: { session: string; onRetry?: () => void }) {
-  const markdown = `# Session “${session}” is stopped\n\nAttach to start it in your terminal, or choose another session for Raycast to control.`;
+  const sessions = useCachedPromise(getSessions, [], { keepPreviousData: true });
+  const missing = sessions.data !== undefined && !sessions.data.some((item) => item.name === session);
+  const markdown = missing
+    ? `# Session “${session}” was not found\n\nIt may have been deleted, or the Default Session preference may be misspelled. Choose another session for Raycast to control.`
+    : `# Session “${session}” is stopped\n\nAttach to start it in your terminal, or choose another session for Raycast to control.`;
   return (
     <Detail
+      isLoading={sessions.isLoading}
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
-            title="Start and Attach in Terminal"
-            icon={Icon.Terminal}
-            onAction={async () => {
-              const succeeded = await runAction(
-                "Starting session",
-                () => launchHerdrInTerminal(["session", "attach", session], { includeSession: false }),
-                { success: "Terminal Opened" },
-              );
-              if (succeeded) await closeMainWindow({ clearRootSearch: true });
-            }}
-          />
+          {missing ? null : (
+            <Action
+              title="Start and Attach in Terminal"
+              icon={Icon.Terminal}
+              onAction={async () => {
+                const succeeded = await runAction(
+                  "Starting session",
+                  () => launchHerdrInTerminal(["session", "attach", session], { includeSession: false }),
+                  { success: "Terminal Opened" },
+                );
+                if (succeeded) await closeMainWindow({ clearRootSearch: true });
+              }}
+            />
+          )}
           <ManageSessionsAction title="Choose Another Session" />
           {onRetry ? (
             <Action title="Try Again" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={onRetry} />

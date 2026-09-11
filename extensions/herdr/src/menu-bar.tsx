@@ -7,9 +7,10 @@ import {
   openExtensionPreferences,
   showHUD,
 } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
 import { agentIcon, agentName } from "./lib/agent-appearance";
-import { focusResource, formatHerdrError, getAgentTarget, stoppedSessionOf } from "./lib/herdr";
+import { focusResource, formatHerdrError, getAgentTarget, getSessions, stoppedSessionOf } from "./lib/herdr";
 import { getHerdrPreferences } from "./lib/preferences";
 import { launchHerdrInTerminal, revealFocusedHerdr } from "./lib/terminal";
 import type { AgentInfo, AgentStatus, HerdrSnapshot } from "./lib/types";
@@ -92,6 +93,13 @@ export default function Command() {
             : undefined;
   const leadingCount = leadingStatus ? groups.get(leadingStatus)?.length : undefined;
   const stoppedSession = stoppedSessionOf(snapshot.error);
+  // Herdr reports a missing session as not running too, and starting it would
+  // create it, so the session list is consulted only while one reads as stopped.
+  const sessions = useCachedPromise(getSessions, [], { execute: Boolean(stoppedSession), keepPreviousData: true });
+  const stoppedSessionMissing =
+    stoppedSession !== undefined &&
+    sessions.data !== undefined &&
+    !sessions.data.some((item) => item.name === stoppedSession);
 
   if (!visible) return null;
 
@@ -121,12 +129,18 @@ export default function Command() {
       {snapshot.error ? (
         <MenuBarExtra.Item
           title={
-            stoppedSession
-              ? `Session “${stoppedSession}” Is Stopped — Start and Attach`
-              : "Herdr Unavailable — Open Herdr"
+            stoppedSessionMissing
+              ? `Session “${stoppedSession}” Not Found — Manage Sessions…`
+              : stoppedSession
+                ? `Session “${stoppedSession}” Is Stopped — Start and Attach`
+                : "Herdr Unavailable — Open Herdr"
           }
           icon={stoppedSession ? Icon.Circle : Icon.ExclamationMark}
-          onAction={() => void openHerdr()}
+          onAction={() =>
+            void (stoppedSessionMissing
+              ? launchCommand({ name: "sessions", type: LaunchType.UserInitiated })
+              : openHerdr())
+          }
         />
       ) : null}
 

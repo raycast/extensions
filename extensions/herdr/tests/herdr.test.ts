@@ -113,6 +113,31 @@ describe("runHerdr", () => {
     expect((failure as HerdrError).message).toContain("tmp-b");
   });
 
+  // Herdr 0.9 answers a stopped session with its own JSON error envelope on
+  // stderr instead of the raw refused-connection text older versions print.
+  // Both shapes must read as a Stopped session, or the Stopped view is lost.
+  it("reports a Stopped session from Herdr 0.9's server_not_running envelope", async () => {
+    storage.set("selectedSession", "tmp-b");
+    mockExecFileFailure(
+      '{"id":"cli:api:snapshot","error":{"code":"server_not_running","message":"no herdr server is running at /x/tmp-b/herdr.sock; run `herdr session attach tmp-b` to start or attach it"}}\n',
+    );
+
+    const failure = await runHerdr(["api", "snapshot"]).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(HerdrError);
+    expect(failure).toMatchObject({ code: "session_not_running", session: "tmp-b" });
+  });
+
+  // Commands that span sessions carry no session, so the same envelope is an
+  // ordinary failure there rather than a Stopped session.
+  it("does not call a sessionless command's server_not_running a Stopped session", async () => {
+    mockExecFileFailure('{"id":"cli:session:stop","error":{"code":"server_not_running","message":"not running"}}\n');
+
+    const failure = await runHerdr(["session", "stop", "tmp-b", "--json"], { session: "" }).catch(
+      (error: unknown) => error,
+    );
+    expect(failure).toMatchObject({ code: "server_not_running" });
+  });
+
   // A session that does not exist answers NotFound, not ConnectionRefused.
   // Calling that "stopped" offered to start it, and `herdr --session` creates
   // a session it cannot find, so a typo would silently make a new one.

@@ -101,12 +101,19 @@ function extractCliError(stderr: string): HerdrError | undefined {
   return undefined;
 }
 
-// Read commands never start a server, so a Stopped session's socket refuses the
-// connection. Only that answer counts: a missing socket path (NotFound) means
-// the session does not exist, and calling that "stopped" would offer to start
-// it, creating a session under a name the user mistyped.
+// Read commands never start a server. Herdr 0.9 answers a Stopped session with
+// a `server_not_running` error envelope; older versions print the raw refused
+// connection, and only that text counts there, since a missing socket path
+// (NotFound) meant the session did not exist. Herdr 0.9 reports both cases
+// alike, so the Stopped views check `session list` before offering to start.
+const STOPPED_SESSION_CODE = "server_not_running";
+
 function isStoppedSessionStderr(stderr: string): boolean {
   return /ConnectionRefused|Connection refused/.test(stderr);
+}
+
+function stoppedSessionError(session: string, detail: string): HerdrError {
+  return new HerdrError(`Herdr session “${session}” is stopped`, "session_not_running", detail, session);
 }
 
 export async function runHerdr(args: string[], options: RunOptions = {}): Promise<string> {
@@ -129,18 +136,19 @@ export async function runHerdr(args: string[], options: RunOptions = {}): Promis
       },
       (error, stdout, stderr) => {
         const cliError = extractCliError(stderr);
-        if (cliError) return reject(cliError);
+        if (cliError) {
+          if (session && cliError.code === STOPPED_SESSION_CODE)
+            return reject(stoppedSessionError(session, cliError.detail ?? ""));
+          return reject(cliError);
+        }
         if (error) {
           const detail = stderr.trim() || stdout.trim() || error.message;
           const timedOut = "killed" in error && error.killed;
           // Read from stderr alone, and only when the command ran to
           // completion: `pane read` puts raw terminal text on stdout, which can
           // quote a refused connection of its own.
-          if (session && !timedOut && isStoppedSessionStderr(stderr)) {
-            return reject(
-              new HerdrError(`Herdr session “${session}” is stopped`, "session_not_running", detail, session),
-            );
-          }
+          if (session && !timedOut && isStoppedSessionStderr(stderr))
+            return reject(stoppedSessionError(session, detail));
           return reject(
             new HerdrError(
               timedOut ? "The Herdr command timed out" : "Unable to run the Herdr command",
