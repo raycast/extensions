@@ -1151,6 +1151,22 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "neither",
+    title: "Neither",
+    description:
+      "Project context your AI can query through MCP. Use selected notes and documents in Cursor or Claude Desktop, retrieve related context, and inspect the source evidence. Local stdio · Node 20+.",
+    icon: Icon.MemoryStick,
+    homepage: "https://www.neither.online/start/?product=dev",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@neitherai/mcp-server@latest"],
+      env: {
+        NEITHER_API_KEY: "YOUR_WORKSPACE_KEY",
+        NEITHER_API_BASE: "https://api.neither.online",
+      },
+    },
+  },
+  {
     name: "nika",
     title: "Nika",
     description:
