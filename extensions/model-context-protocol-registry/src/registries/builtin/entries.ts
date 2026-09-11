@@ -1270,4 +1270,17 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       args: ["-y", "@gitdealflow/mcp-signal@latest"],
     },
   },
+
+  {
+    name: "vibe-prospecting",
+    title: "Vibe Prospecting",
+    description:
+      "Power your chat with live B2B data to create lead lists, research companies, enrich contacts, personalize outreach, and inspect business signals, technology stacks, events, and website changes.",
+    icon: "https://raw.githubusercontent.com/explorium-ai/vibeprospecting-plugin/main/assets/icon.png",
+    homepage: "https://vibeprospecting.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://vibeprospecting.explorium.ai/mcp"],
+    },
+  },
 ];
