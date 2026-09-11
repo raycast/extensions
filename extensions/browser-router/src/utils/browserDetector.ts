@@ -147,21 +147,26 @@ function getBrowsersFromRegistry(): Map<string, string> {
 }
 
 export async function detectInstalledProfiles(): Promise<BrowserProfile[]> {
-  const possibleLocalAppDatas = [
-    process.env.LOCALAPPDATA,
-    process.env.USERPROFILE ? path.join(process.env.USERPROFILE, "AppData", "Local") : "",
-    path.join(os.homedir(), "AppData", "Local"),
-  ].filter(Boolean) as string[];
+  const home = os.homedir();
+  const realLocalAppData = path.join(home, "AppData", "Local");
+  const realAppData = path.join(home, "AppData", "Roaming");
 
-  const possibleAppDatas = [
-    process.env.APPDATA,
-    process.env.USERPROFILE ? path.join(process.env.USERPROFILE, "AppData", "Roaming") : "",
-    path.join(os.homedir(), "AppData", "Roaming"),
-  ].filter(Boolean) as string[];
-
+  // Prefer genuine user home AppData over temporary/redirected package sandbox directories
   const localAppData =
-    possibleLocalAppDatas.find((p) => fs.existsSync(p)) || path.join(os.homedir(), "AppData", "Local");
-  const appData = possibleAppDatas.find((p) => fs.existsSync(p)) || path.join(os.homedir(), "AppData", "Roaming");
+    (fs.existsSync(realLocalAppData) ? realLocalAppData : undefined) ||
+    (process.env.LOCALAPPDATA && fs.existsSync(process.env.LOCALAPPDATA) ? process.env.LOCALAPPDATA : undefined) ||
+    (process.env.USERPROFILE && fs.existsSync(path.join(process.env.USERPROFILE, "AppData", "Local"))
+      ? path.join(process.env.USERPROFILE, "AppData", "Local")
+      : undefined) ||
+    realLocalAppData;
+
+  const appData =
+    (fs.existsSync(realAppData) ? realAppData : undefined) ||
+    (process.env.APPDATA && fs.existsSync(process.env.APPDATA) ? process.env.APPDATA : undefined) ||
+    (process.env.USERPROFILE && fs.existsSync(path.join(process.env.USERPROFILE, "AppData", "Roaming"))
+      ? path.join(process.env.USERPROFILE, "AppData", "Roaming")
+      : undefined) ||
+    realAppData;
   const programFiles = process.env.ProgramFiles || "C:\\Program Files";
   const programFilesX86 = process.env["ProgramFiles(x86)"] || "C:\\Program Files (x86)";
 

@@ -268,14 +268,17 @@ An instantaneous regex-free tokenizer classifies user input in real time:
 | Shortcut | Action | Scope |
 | :--- | :--- | :--- |
 | <kbd>↵ Enter</kbd> | **Launch in Selected Browser & Profile** | Profile List |
-| <kbd>Tab</kbd> | **Focus Search Argument from Root Search** | Raycast Root |
-| <kbd>Ctrl</kbd> + <kbd>H</kbd> | **Open Quick Start / User Manual** | Global |
-| <kbd>Ctrl</kbd> + <kbd>R</kbd> | **Rename Profile (Local Nickname)** | Profile Item |
-| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> | **Reset Profile Name to Default** | Profile Item |
-| <kbd>Ctrl</kbd> + <kbd>A</kbd> | **Add Custom Profile / Portable Directory** | Profile List |
-| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>D</kbd> | **Delete Custom Profile** | Custom Item |
-| <kbd>Ctrl</kbd> + <kbd>F</kbd> | **Send Feedback / Report Bug** | Global |
+| <kbd>Ctrl</kbd> + <kbd>↵ Enter</kbd> | **Open in Incognito / InPrivate** | Profile List |
+| <kbd>Tab</kbd> | **Toggle Filter / Search Query Mode** | Profile List |
+| <kbd>Ctrl</kbd> + <kbd>F</kbd> | **Pin / Unpin Favorite Profile** | Profile Item |
+| <kbd>Ctrl</kbd> + <kbd>E</kbd> | **Rename Profile (Local Nickname)** | Profile Item |
+| <kbd>Ctrl</kbd> + <kbd>N</kbd> | **Add Custom Profile / Portable Browser** | Profile List |
+| <kbd>Ctrl</kbd> + <kbd>Backspace</kbd> | **Delete Custom Profile** | Custom Item |
+| <kbd>Ctrl</kbd> + <kbd>H</kbd> | **Open User Manual & Guide** | Global |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> | **Send Feedback / Report Bug** | Global |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd> | **Clear Active Search Query** | Profile List |
 | <kbd>Ctrl</kbd> + <kbd>C</kbd> | **Copy Target Destination URL** | Profile Item |
+| <kbd>Ctrl</kbd> + <kbd>R</kbd> | **Refresh Browsers & Profiles** | Global |
 | <kbd>Ctrl</kbd> + <kbd>,</kbd> | **Open Extension Preferences** | Global |
 
 <br />

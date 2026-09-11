@@ -24,9 +24,7 @@ export async function launchBrowserProfile(
     const args: string[] = [];
 
     if (profile.browserId === "firefox") {
-      if (incognito) {
-        args.push("-private-window");
-      } else if (
+      if (
         profile.profileDirectory &&
         profile.profileDirectory !== "default" &&
         profile.profileDirectory !== "Default"
@@ -37,56 +35,68 @@ export async function launchBrowserProfile(
           args.push("-P", profile.profileDirectory);
         }
       }
+      if (incognito) {
+        args.push("-private-window");
+      }
       if (targetUrl) {
         args.push(targetUrl);
       }
     } else {
       // Chromium browsers (Chrome, Edge, Brave, Vivaldi, Arc, Opera, etc.)
       if (incognito) {
-        // Incognito / InPrivate sessions are ephemeral and must never target or lock on-disk profile directories.
-        // Omitting --profile-directory and --user-data-dir ensures the user's active persistent session and cookies
-        // are never evicted or logged out when launching an incognito window.
         if (profile.browserId === "edge") {
           args.push("--inprivate");
         } else {
           args.push("--incognito");
         }
-      } else {
-        // Normal profile mode: target specific profile directory.
-        // For Brave, Vivaldi, Arc, Opera, and custom profiles, passing --user-data-dir
-        // ensures the browser locates its specific data folder and prevents MSIX container virtualization.
-        // Chrome and Edge are specifically EXCLUDED from --user-data-dir:
-        // 1. Chrome's singleton process model treats explicit --user-data-dir as a profile boundary mismatch, evicting active sign-in sessions.
-        // 2. Edge's Startup Boost background service holds an exclusive lock on its User Data directory, causing hangs.
-        if (
-          profile.browserId === "brave" ||
-          profile.browserId === "vivaldi" ||
-          profile.browserId === "arc" ||
-          profile.browserId === "opera" ||
-          profile.isCustom
-        ) {
-          let udd = profile.userDataDir;
-          if (!udd && process.platform === "win32") {
-            const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local");
-            const appData = process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming");
-            if (profile.browserId === "brave") {
-              udd = path.join(localAppData, "BraveSoftware", "Brave-Browser", "User Data");
-            } else if (profile.browserId === "vivaldi") {
-              udd = path.join(localAppData, "Vivaldi", "User Data");
-            } else if (profile.browserId === "arc") {
-              udd = path.join(localAppData, "Arc", "User Data");
-            } else if (profile.browserId === "opera") {
-              udd = path.join(appData, "Opera Software", "Opera Stable");
-            }
-          }
-          if (udd) {
-            args.push(`--user-data-dir=${udd}`);
-          }
-        }
+      }
 
-        if (profile.profileDirectory && profile.profileDirectory !== "default-no-arg") {
-          args.push(`--profile-directory=${profile.profileDirectory}`);
+      // Resolve custom profile directory and user-data-dir
+      let udd = profile.userDataDir;
+      let profileDir = profile.profileDirectory;
+
+      // If profileDir is an absolute path or contains directory separators, extract user-data root and subfolder
+      if (profileDir && (path.isAbsolute(profileDir) || profileDir.includes("\\") || profileDir.includes("/"))) {
+        if (!udd) {
+          udd = path.dirname(profileDir);
         }
+        profileDir = path.basename(profileDir);
+      }
+
+      // For Brave, Vivaldi, Arc, Opera, and custom profiles, passing --user-data-dir
+      // ensures the browser locates its specific data folder and prevents MSIX container virtualization.
+      // Chrome and Edge standard profiles are specifically EXCLUDED from --user-data-dir:
+      // 1. Chrome's singleton process model treats explicit --user-data-dir as a profile boundary mismatch, evicting active sign-in sessions.
+      // 2. Edge's Startup Boost background service holds an exclusive lock on its User Data directory, causing hangs.
+      if (
+        profile.browserId === "brave" ||
+        profile.browserId === "vivaldi" ||
+        profile.browserId === "arc" ||
+        profile.browserId === "opera" ||
+        profile.isCustom
+      ) {
+        if (!udd && process.platform === "win32") {
+          const home = os.homedir();
+          const localAppData = path.join(home, "AppData", "Local");
+          const appData = path.join(home, "AppData", "Roaming");
+          if (profile.browserId === "brave") {
+            udd = path.join(localAppData, "BraveSoftware", "Brave-Browser", "User Data");
+          } else if (profile.browserId === "vivaldi") {
+            udd = path.join(localAppData, "Vivaldi", "User Data");
+          } else if (profile.browserId === "arc") {
+            udd = path.join(localAppData, "Arc", "User Data");
+          } else if (profile.browserId === "opera") {
+            udd = path.join(appData, "Opera Software", "Opera Stable");
+          }
+        }
+        if (udd) {
+          args.push(`--user-data-dir=${udd}`);
+        }
+      }
+
+      // Target selected profile directory in both normal and incognito launches
+      if (profileDir && profileDir !== "default-no-arg") {
+        args.push(`--profile-directory=${profileDir}`);
       }
 
       if (targetUrl) {

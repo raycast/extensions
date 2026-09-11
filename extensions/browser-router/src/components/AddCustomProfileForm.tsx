@@ -1,4 +1,5 @@
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
+import path from "path";
 import { useState } from "react";
 import { saveCustomProfile } from "../utils/storage";
 
@@ -13,6 +14,7 @@ export function AddCustomProfileForm({ onProfileAdded }: AddCustomProfileFormPro
   const [profileName, setProfileName] = useState("");
   const [executablePath, setExecutablePath] = useState("");
   const [profileDirectory, setProfileDirectory] = useState("");
+  const [userDataDir, setUserDataDir] = useState("");
 
   const [browserNameError, setBrowserNameError] = useState<string | undefined>();
   const [executableError, setExecutableError] = useState<string | undefined>();
@@ -51,6 +53,18 @@ export function AddCustomProfileForm({ onProfileAdded }: AddCustomProfileFormPro
     if (hasError) return;
 
     const isFirefox = browserType === "firefox";
+    let cleanedProfileDir = profileDirectory.trim() || (isFirefox ? "default" : "Default");
+    let cleanedUserDataDir = userDataDir.trim() ? userDataDir.trim().replace(/^"|"$/g, "") : undefined;
+
+    // If user entered an absolute path for profile directory and omitted userDataDir, auto-split
+    if (
+      !cleanedUserDataDir &&
+      !isFirefox &&
+      (path.isAbsolute(cleanedProfileDir) || cleanedProfileDir.includes("\\") || cleanedProfileDir.includes("/"))
+    ) {
+      cleanedUserDataDir = path.dirname(cleanedProfileDir);
+      cleanedProfileDir = path.basename(cleanedProfileDir);
+    }
 
     const id = "custom_" + Date.now();
     await saveCustomProfile({
@@ -58,7 +72,8 @@ export function AddCustomProfileForm({ onProfileAdded }: AddCustomProfileFormPro
       browserName: browserName.trim(),
       profileName: profileName.trim() || "Default",
       executablePath: executablePath.trim().replace(/^"|"$/g, ""),
-      profileDirectory: profileDirectory.trim() || (isFirefox ? "default" : "Default"),
+      profileDirectory: cleanedProfileDir,
+      userDataDir: cleanedUserDataDir,
       browserType: isFirefox ? "firefox" : "chromium",
       browserId: isFirefox ? "firefox" : "custom",
     });
@@ -124,9 +139,17 @@ export function AddCustomProfileForm({ onProfileAdded }: AddCustomProfileFormPro
       <Form.TextField
         id="profileDirectory"
         title="Profile Name / Directory"
-        placeholder="e.g. default-release, or custom profile path"
+        placeholder="e.g. Profile 1, Default, or custom profile folder"
         value={profileDirectory}
         onChange={setProfileDirectory}
+      />
+
+      <Form.TextField
+        id="userDataDir"
+        title="User Data Directory (Optional)"
+        placeholder="e.g. D:\PortableBrowsers\Data (For portable/custom data roots)"
+        value={userDataDir}
+        onChange={setUserDataDir}
       />
     </Form>
   );

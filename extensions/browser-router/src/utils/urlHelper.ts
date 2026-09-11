@@ -12,13 +12,18 @@ export function isLikelyUrl(input: string): boolean {
     return true;
   }
 
-  // Windows absolute file path (e.g. C:\Users\... or D:/docs/...)
-  if (/^[a-zA-Z]:[/\\][^\s]+/i.test(trimmed)) {
+  // Windows absolute file path (supports spaces, e.g. C:\Users\... or C:\Program Files\...)
+  if (/^[a-zA-Z]:[/\\]/i.test(trimmed)) {
     return true;
   }
 
   // Localhost with optional port / path
   if (/^localhost(:\d+)?(\/.*)?$/i.test(trimmed)) {
+    return true;
+  }
+
+  // IPv6 localhost with optional port / path (e.g. [::1], [::1]:3000, ::1, ::1:8080)
+  if (/^(\[::1\]|::1)(:\d+)?(\/.*)?$/i.test(trimmed)) {
     return true;
   }
 
@@ -47,10 +52,18 @@ export function buildTargetUrl(input: string, searchEngine: string = "google", c
     if (/^(https?|ftp|file|chrome|edge|brave|vivaldi|arc):\/\/|^about:/i.test(trimmed)) {
       return trimmed;
     }
-    // Windows local drive path -> file:/// URL
+    // Windows local drive path -> file:/// URL (encodes spaces safely)
     if (/^[a-zA-Z]:[/\\]/i.test(trimmed)) {
       const normalized = trimmed.replace(/\\/g, "/");
-      return `file:///${normalized}`;
+      return encodeURI(`file:///${normalized}`);
+    }
+    // IPv6 localhost -> http://[::1]
+    if (/^(\[::1\]|::1)/i.test(trimmed)) {
+      if (trimmed.startsWith("::1")) {
+        const rest = trimmed.slice(3);
+        return `http://[::1]${rest}`;
+      }
+      return `http://${trimmed}`;
     }
     // Localhost or IPv4 -> http://
     if (/^localhost/i.test(trimmed) || /^(\d{1,3}\.){3}\d{1,3}/.test(trimmed)) {
