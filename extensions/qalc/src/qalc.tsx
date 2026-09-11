@@ -286,7 +286,10 @@ Press \`Enter\` to open settings or \`Alt\` \`Enter\` to try searching again.
 function Qalc404Windows(props: { rerender: () => void }) {
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
+  const [lock, setLock] = useState(false);
   async function install() {
+    if (lock) return;
+    setLock(true);
     try {
       setErr("");
       setMsg("Connecting...");
@@ -333,6 +336,7 @@ function Qalc404Windows(props: { rerender: () => void }) {
     } catch (e: unknown) {
       setErr((e as Error)?.message ?? "");
     }
+    setLock(false);
   }
   let message = "You are seing this because you ran the extension for the first time.";
   if (msg) message += "\n\n" + msg;
