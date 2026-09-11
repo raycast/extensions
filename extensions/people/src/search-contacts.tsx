@@ -12,19 +12,10 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+import OpenPeople from "./open-people";
+import { requestPeople } from "./people-client";
 
-const apiBaseURL = "http://127.0.0.1:47631/v2";
-
-type LauncherPreferences = { integrationAccessKey: string };
-
-function authenticatedRequest(signal: AbortSignal) {
-  const { integrationAccessKey } = getPreferenceValues<LauncherPreferences>();
-  return {
-    signal,
-    cache: "no-store" as const,
-    headers: { Authorization: `Bearer ${integrationAccessKey}` },
-  };
-}
+type LauncherPreferences = { integrationAccessKey?: string };
 
 type Contact = {
   id: string;
@@ -73,18 +64,27 @@ export default function SearchContacts() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(false);
   const [available, setAvailable] = useState(true);
+  const [retry, setRetry] = useState(0);
+  const { integrationAccessKey = "" } =
+    getPreferenceValues<LauncherPreferences>();
 
   useEffect(() => {
+    if (!integrationAccessKey.trim()) {
+      setLoading(false);
+      return;
+    }
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          `${apiBaseURL}/search?q=${encodeURIComponent(query)}`,
-          authenticatedRequest(controller.signal),
+        const response = await requestPeople(
+          `/search?q=${encodeURIComponent(query)}`,
+          integrationAccessKey,
+          controller.signal,
         );
         if (!response.ok) throw new Error(String(response.status));
         const value = (await response.json()) as SearchResponse;
+        controller.signal.throwIfAborted();
         if (value.version !== 2)
           throw new Error("Unsupported People integration API");
         setContacts(value.contacts.slice(0, 50));
@@ -95,14 +95,14 @@ export default function SearchContacts() {
           setAvailable(false);
         }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }, 80);
     return () => {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [query]);
+  }, [query, retry, integrationAccessKey]);
 
   return (
     <List
@@ -111,16 +111,30 @@ export default function SearchContacts() {
       throttle={false}
       searchBarPlaceholder="Search People…"
     >
-      {!available ? (
+      {!integrationAccessKey.trim() || !available || contacts.length === 0 ? (
         <List.EmptyView
           icon={Icon.Person}
-          title="People is unavailable"
-          description="Open the app and confirm the Raycast access key in extension preferences."
+          title={
+            !integrationAccessKey.trim()
+              ? "Connect Raycast to People"
+              : loading
+                ? "Searching People…"
+                : !available
+                  ? "People is unavailable"
+                  : "No contacts found"
+          }
+          description={
+            !integrationAccessKey.trim() || !available
+              ? "Open People → Settings → General → Launcher Access and copy your Raycast key into extension preferences."
+              : "Try another search or open People to manage your contacts."
+          }
           actions={
             <ActionPanel>
+              <Action title="Open People" onAction={OpenPeople} />
               <Action
-                title="Open People"
-                onAction={() => open("contactsplus://")}
+                title="Retry Search"
+                icon={Icon.ArrowClockwise}
+                onAction={() => setRetry((value) => value + 1)}
               />
               <Action
                 title="Open Extension Preferences"
@@ -201,6 +215,7 @@ function ContactFields({ contact: summary }: { contact: Contact }) {
   const [contact, setContact] = useState<ContactDetail>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -208,12 +223,16 @@ function ContactFields({ contact: summary }: { contact: Contact }) {
       setLoading(true);
       setError(false);
       try {
-        const response = await fetch(
-          `${apiBaseURL}/contact?id=${encodeURIComponent(summary.id)}`,
-          authenticatedRequest(controller.signal),
+        const { integrationAccessKey = "" } =
+          getPreferenceValues<LauncherPreferences>();
+        const response = await requestPeople(
+          `/contact?id=${encodeURIComponent(summary.id)}`,
+          integrationAccessKey,
+          controller.signal,
         );
         if (!response.ok) throw new Error(String(response.status));
         const value = (await response.json()) as ContactResponse;
+        controller.signal.throwIfAborted();
         if (value.version !== 2)
           throw new Error("Unsupported People integration API");
         setContact(value.contact);
@@ -225,7 +244,7 @@ function ContactFields({ contact: summary }: { contact: Contact }) {
     }
     void loadContact();
     return () => controller.abort();
-  }, [summary.id]);
+  }, [summary.id, retry]);
 
   const sections = contact
     ? [...new Set(contact.fields.map((field) => field.section))]
@@ -245,7 +264,12 @@ function ContactFields({ contact: summary }: { contact: Contact }) {
           description="Open the app and confirm the Raycast access key in extension preferences."
           actions={
             <ActionPanel>
-              <Action title="Open People" onAction={() => open(summary.url)} />
+              <Action title="Open People" onAction={OpenPeople} />
+              <Action
+                title="Retry Loading Contact"
+                icon={Icon.ArrowClockwise}
+                onAction={() => setRetry((value) => value + 1)}
+              />
               <Action
                 title="Open Extension Preferences"
                 icon={Icon.Gear}

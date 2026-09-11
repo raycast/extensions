@@ -18,14 +18,15 @@
       "title": "Raycast Access Key",
       "description": "Copy this key from People → Settings → General → Launcher Access.",
       "type": "password",
-      "required": true,
+      "required": false,
       "placeholder": "Paste the Raycast access key"
     }
   ],
   "scripts": {
     "dev": "ray develop",
     "build": "ray build",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
   },
   "dependencies": {
     "@raycast/api": "^2.2.0",
@@ -39,6 +40,18 @@
     "typescript": "^5.8.0"
   },
   "commands": [
+    {
+      "name": "open-people",
+      "title": "Open People",
+      "description": "Launch People or bring its window to the front, even before setting up an access key",
+      "subtitle": "People",
+      "mode": "no-view",
+      "keywords": [
+        "launch",
+        "start",
+        "contacts"
+      ]
+    },
     {
       "name": "search-contacts",
       "title": "Search People",

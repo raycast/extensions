@@ -1,5 +1,11 @@
 # People Changelog
 
+## [Launch People from Raycast] - {PR_MERGE_DATE}
+
+- Open People directly from Raycast, including before an access key is configured
+- Automatically start People when searching while the app is closed
+- Retry searches and contact details after resolving a connection problem
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Search People by name, company, email address, or phone number
