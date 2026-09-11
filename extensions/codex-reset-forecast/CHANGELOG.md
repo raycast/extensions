@@ -1,6 +1,6 @@
 # Codex Reset Forecast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-11
 
 - View the 24-hour and 48-hour Codex reset likelihood and explanation from codexreset.org.
 - Browse searchable reset records, original sources, announcements, compensation, and banked resets.
