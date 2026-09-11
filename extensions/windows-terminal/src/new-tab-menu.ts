@@ -138,20 +138,11 @@ function parsePattern(pattern: string): AltNode {
   // call stack.
   let groupDepth = 0;
   const MAX_GROUP_DEPTH = 100;
-  // Under (?i) a class or predicate also admits a character's single-code-point case variants —
-  // an approximation of ICU closing the set over case. Only single code points: "ß" uppercases to
-  // "SS", and testing that against [A-Z] would wrongly admit ß.
-  const isSingle = (s: string) => Array.from(s).length === 1;
-  const foldCase = (test: (ch: string) => boolean) => {
-    if (!ignoreCase) return test;
-    return (ch: string) => {
-      if (test(ch) || test(simpleFold(ch))) return true;
-      const lower = ch.toLowerCase();
-      const upper = ch.toUpperCase();
-      return (isSingle(lower) && test(lower)) || (isSingle(upper) && test(upper));
-    };
-  };
-  const charAtom = (test: (ch: string) => boolean): AtomNode => ({ kind: "char", test: foldCase(test) });
+  // \d, \w, \s and their negations — sets already closed over case, so (?i) changes nothing.
+  const charAtom = (test: (ch: string) => boolean): AtomNode => ({ kind: "char", test });
+  // A code point spelled for a native RegExp source with the `u` flag, so a class member that's
+  // special there ("]", "\", "-", "^") needs no escaping of its own — see parseClass.
+  const codePointEscape = (code: number) => `\\u{${code.toString(16)}}`;
   // A literal character. Under (?i) it compares simple case folds, one code point to one — unless
   // parseSeq finds it in a run of two or more, which switches the run to full folding.
   const literalAtom = (c: string): AtomNode => {
@@ -353,6 +344,8 @@ function parsePattern(pattern: string): AltNode {
       i++;
     }
     const tests: ((ch: string) => boolean)[] = [];
+    // Literal members and ranges, as code points, for the case-insensitive path below.
+    const members: string[] = [];
     while (i < n && peek() !== "]") {
       // ICU reads an unescaped "[" inside a set as a nested set ([[:alpha:]], [a-z[0-9]]) and "&&"
       // as set intersection ([a-z&&[^m]]). Neither is implemented; reading them as literals would
@@ -378,19 +371,28 @@ function parsePattern(pattern: string): AltNode {
         // A descending range like [z-a] can never match anything; real regex engines reject it
         // as malformed rather than silently compiling a predicate that's always false.
         if (high < low) return fail(`character range "${start}-${end}" out of order`);
+        members.push(`${codePointEscape(low)}-${codePointEscape(high)}`);
         tests.push((ch) => {
           const code = ch.codePointAt(0)!;
           return code >= low && code <= high;
         });
       } else {
+        members.push(codePointEscape(start.codePointAt(0)!));
         tests.push((ch) => ch === start);
       }
     }
     if (peek() !== "]") return fail("unbalanced bracket");
     i++;
-    // Case folding has to happen inside the negation, not around it: (?i)[^a] means "neither a
-    // nor A", so folding the finished (already negated) test would let it match "A".
-    const member = foldCase((ch) => tests.some((test) => test(ch)));
+    // Under (?i), ICU closes the set over case: a character is in if any member shares its simple
+    // case fold, so [A-Z] gains a-z, ſ, and K (Kelvin) — but not ı, whose fold is itself — and
+    // [ſ] gains s and S. Deriving that from toUpperCase/toLowerCase gets ı and ſ wrong; the
+    // native RegExp with the `i` and `u` flags implements exactly it (Canonicalize on both
+    // sides), so the literal and range members are handed to one. The regex is a one-character
+    // class against one character — nothing for it to backtrack over. \d, \w, \s and their
+    // negations are already closed over case and stay as predicates. Folding sits inside the
+    // negation, not around it: (?i)[^a] means "neither a nor A".
+    const native = ignoreCase && members.length > 0 ? new RegExp(`^[${members.join("")}]$`, "iu") : null;
+    const member = (ch: string) => (native !== null && native.test(ch)) || tests.some((test) => test(ch));
     return { kind: "char", test: (ch) => negate !== member(ch) };
   }
 

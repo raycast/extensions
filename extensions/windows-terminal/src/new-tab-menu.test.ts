@@ -221,9 +221,22 @@ describe("buildProfileMatcher", () => {
     // ĳ has no expansion in CaseFolding.txt: it's Ĳ's fold, not "ij".
     assert.equal(matches("(?i)ĳ", "Ĳ"), true);
     assert.equal(matches("(?i)ij", "ĳ"), false);
-    // A class admits single-code-point case variants only; ß's uppercase "SS" doesn't put it in [A-Z].
+    // A class is closed over simple case folding, as ICU closes the set: [A-Z] takes a-z, ſ (folds
+    // to s), and K (Kelvin, folds to k) — but not ı, whose fold is itself, nor ß, whose fold "ss"
+    // is no single member. [ſ] takes s and S the same way.
     assert.equal(matches("(?i)[a-z]+", "STRASSE"), true);
     assert.equal(matches("(?i)[a-z]+", "straße"), false);
+    assert.equal(matches("(?i)[A-Z]+", "ı"), false);
+    assert.equal(matches("(?i)[A-Z]", "ſ"), true);
+    assert.equal(matches("(?i)[A-Z]", String.fromCodePoint(0x212a)), true);
+    assert.equal(matches("(?i)[ſ]", "S"), true);
+    assert.equal(matches("(?i)[ſ]", "s"), true);
+    assert.equal(matches("(?i)[ẞ]", "ß"), true);
+    assert.equal(matches("(?i)[ß]", "S"), false);
+    assert.equal(matches("(?i)[^a]", "A"), false);
+    assert.equal(matches("(?i)[\\da-f]+", "1F"), true);
+    assert.equal(matches("(?i)[\\]\\\\-]+", "]\\-"), true);
+    assert.equal(matches("[A-Z]", "a"), false);
     // Case-sensitive matching is untouched.
     assert.equal(matches("straße", "STRASSE"), false);
     assert.equal(matches("ss", "ß"), false);
