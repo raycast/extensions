@@ -1,4 +1,4 @@
-import { BrowserExtension, environment } from "@raycast/api";
+import { BrowserExtension, environment, getFrontmostApplication } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export interface TabInfo {
@@ -141,24 +141,14 @@ export async function activeTabsFromBrowserExtension(): Promise<TabInfo[]> {
   }
 }
 
-export async function allTabsFromBrowserExtension(): Promise<TabInfo[]> {
-  if (!environment.canAccess(BrowserExtension)) return [];
-  try {
-    const tabs = await BrowserExtension.getTabs();
-    return tabs
-      .filter((tab) => Boolean(tab.url))
-      .map((tab) => ({ url: tab.url, title: tab.title ?? "", source: "Browser Extension" }));
-  } catch {
-    return [];
-  }
-}
-
 /**
- * Visible applications, front to back. Used to find the browser the user
- * looked at most recently, which is not always the frontmost app: pasting a
- * link into Teams means the browser sits one layer behind it.
+ * Known browsers that are currently running, in no particular order.
+ *
+ * macOS does not expose a reliable "most recently used" ordering: the System
+ * Events process list is not sorted by window layer, so it must not be read as
+ * if it were. Order is therefore never used to break a tie.
  */
-async function browsersByLayer(): Promise<string[]> {
+async function runningBrowsers(): Promise<string[]> {
   if (!isMac()) return [];
   try {
     const raw = await runAppleScript(
@@ -168,10 +158,40 @@ async function browsersByLayer(): Promise<string[]> {
     return raw
       .split(",")
       .map((name) => name.trim())
-      .filter((name) => name && name !== "Raycast" && isKnownBrowser(name));
+      .filter((name) => name && isKnownBrowser(name));
   } catch {
     return [];
   }
+}
+
+/** The app in front, which is the one exact signal macOS does give us. */
+async function frontmostBrowser(): Promise<string | undefined> {
+  if (!isMac()) return undefined;
+  try {
+    let app = await getFrontmostApplication();
+    if (app.name === "Raycast") {
+      // Raycast can still own the menu bar right after a command starts.
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      app = await getFrontmostApplication();
+    }
+    return isKnownBrowser(app.name) ? app.name : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Every browser that currently has a readable tab, the frontmost one first. */
+async function tabsFromRunningBrowsers(): Promise<TabInfo[]> {
+  const front = await frontmostBrowser();
+  const names = await runningBrowsers();
+  const ordered = front ? [front, ...names.filter((name) => name !== front)] : names;
+
+  const tabs: TabInfo[] = [];
+  for (const appName of ordered) {
+    const tab = await tabFromAppleScript(appName);
+    if (tab) tabs.push(tab);
+  }
+  return tabs;
 }
 
 export interface LookupOptions {
@@ -188,13 +208,16 @@ export class NoTabError extends Error {
   }
 }
 
-/** Several browser windows claim an active tab and none of them can be ruled out. */
+/** More than one browser or window could be meant, and none can be ruled out. */
 export class AmbiguousTabError extends Error {
   readonly candidates: TabInfo[];
 
-  constructor(candidates: TabInfo[]) {
+  constructor(candidates: TabInfo[], reason: "windows" | "browsers") {
+    const names = [...new Set(candidates.map((tab) => tab.source))].join(", ");
     super(
-      `${candidates.length} browser windows report an active tab, and the browser extension does not say which one has the focus. Pick the site yourself, or set a preferred browser in the extension preferences.`,
+      reason === "browsers"
+        ? `${names} are all open and none of them is in front, and macOS does not say which one you used last. Pick the site yourself, or set a preferred browser in the extension preferences.`
+        : `${candidates.length} browser windows report an active tab, and the browser extension does not say which one has the focus. Pick the site yourself, or set a preferred browser in the extension preferences.`,
     );
     this.name = "AmbiguousTabError";
     this.candidates = candidates;
@@ -223,10 +246,17 @@ export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
       const tab = await tabFromAppleScript(options.preferredBrowser);
       if (tab) return tab;
     } else {
-      // Front to back, so the browser closest to the front wins.
-      for (const appName of await browsersByLayer()) {
-        const tab = await tabFromAppleScript(appName);
-        if (tab) return tab;
+      const tabs = await tabsFromRunningBrowsers();
+      // One browser, or one in front: unambiguous. Several with none in front:
+      // ask rather than pick an arbitrary one.
+      if (tabs.length === 1) return tabs[0];
+      if (tabs.length > 1) {
+        const front = await frontmostBrowser();
+        if (front) {
+          const tab = tabs.find((candidate) => candidate.source === front);
+          if (tab) return tab;
+        }
+        throw new AmbiguousTabError(tabs, "browsers");
       }
     }
   }
@@ -234,7 +264,7 @@ export async function getActiveTab(options: LookupOptions): Promise<TabInfo> {
   if (useExtension) {
     const candidates = await activeTabsFromBrowserExtension();
     if (candidates.length === 1) return candidates[0];
-    if (candidates.length > 1) throw new AmbiguousTabError(candidates);
+    if (candidates.length > 1) throw new AmbiguousTabError(candidates, "windows");
   }
 
   throw new NoTabError(noTabMessage(options));
@@ -250,24 +280,44 @@ export async function getTabCandidates(options: LookupOptions): Promise<TabInfo[
   }
 }
 
+/**
+ * Every tab of one browser window.
+ *
+ * AppleScript only on purpose: `BrowserExtension.getTabs()` returns the tabs of
+ * every window at once and carries no window identity, so using it here would
+ * quietly mix in tabs the user cannot see.
+ */
 export async function getAllTabs(options: LookupOptions): Promise<TabInfo[]> {
-  const useAppleScript = options.browserSource !== "extension" && isMac();
-  const useExtension = options.browserSource !== "applescript";
-
-  if (useAppleScript) {
-    const names =
-      options.preferredBrowser && isKnownBrowser(options.preferredBrowser)
-        ? [options.preferredBrowser]
-        : await browsersByLayer();
-    for (const appName of names) {
-      const tabs = await allTabsFromAppleScript(appName);
-      if (tabs.length > 0) return tabs;
-    }
+  if (!isMac() || options.browserSource === "extension") {
+    throw new NoTabError(
+      "Copying a whole window needs AppleScript, because the browser extension does not say which window a tab belongs to. Use a browser that supports AppleScript, or copy tabs one at a time.",
+    );
   }
 
-  if (useExtension) {
-    const tabs = await allTabsFromBrowserExtension();
+  if (options.preferredBrowser && isKnownBrowser(options.preferredBrowser)) {
+    const tabs = await allTabsFromAppleScript(options.preferredBrowser);
     if (tabs.length > 0) return tabs;
+    throw new NoTabError(noTabMessage(options));
+  }
+
+  const front = await frontmostBrowser();
+  if (front) {
+    const tabs = await allTabsFromAppleScript(front);
+    if (tabs.length > 0) return tabs;
+  }
+
+  const windows: TabInfo[][] = [];
+  for (const appName of await runningBrowsers()) {
+    const tabs = await allTabsFromAppleScript(appName);
+    if (tabs.length > 0) windows.push(tabs);
+  }
+
+  if (windows.length === 1) return windows[0];
+  if (windows.length > 1) {
+    throw new AmbiguousTabError(
+      windows.map((tabs) => tabs[0]),
+      "browsers",
+    );
   }
 
   throw new NoTabError(noTabMessage(options));
