@@ -1,6 +1,6 @@
 # Project Folders Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-11
 
 - Search project folders under a configurable `YYYY/` root
 - Open a project grid with Asana, Google Drive, Frame.io, Magic Link Machine, and subfolders
