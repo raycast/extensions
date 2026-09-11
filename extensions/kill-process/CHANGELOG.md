@@ -1,5 +1,9 @@
 # Kill Process Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed truncated memory values in the process list by formatting accessories compactly (binary units without spaces, e.g. `100MiB` instead of `105 MB`, one decimal for CPU)
+
 ## [Improvements] - 2026-06-25
 
 - App grouping is now enabled by default and groups processes by `.app` bundle path for more accurate CPU and memory totals (fixes #25095)
