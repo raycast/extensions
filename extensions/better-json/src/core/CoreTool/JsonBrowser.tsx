@@ -66,7 +66,7 @@ export default function JsonBrowser({ document, scope, navigation }: Props) {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedId, setSelectedId] = useState<string | null>(current.id);
-  const [showMetadata, setShowMetadata] = useState(getPreferenceValues<{ showMetadata: boolean }>().showMetadata);
+  const [showMetadata, setShowMetadata] = useState(getPreferenceValues<Preferences.BetterJson>().showMetadata);
   const [isLoading, setIsLoading] = useState(false);
   const requestVersion = useRef(0);
   const active = useRef(true);

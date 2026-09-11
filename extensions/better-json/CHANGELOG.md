@@ -1,6 +1,6 @@
 # Better JSON Changelog
 
-## [Automatic Deep Deserialization and New Icon] - 2026-09-08
+## [Automatic Deep Deserialization and New Icon] - {PR_MERGE_DATE}
 
 - Keep the JSON input's native red validation state and error message; document Raycast's fixed label and error placement.
 - Automatically deserialize nested and repeatedly escaped JSON at every depth while preserving ordinary numeric and boolean strings.
@@ -9,7 +9,7 @@
 - Use iterative decoding and preview generation to support deeply nested JSON beyond the JavaScript call stack; keep the original input available.
 - Replace the old extension icon with a custom 512×512 PNG featuring JSON braces and a data node.
 
-## [Faster Input and Hierarchical Browsing] - 2026-09-08
+## [Faster Input and Hierarchical Browsing] - {PR_MERGE_DATE}
 
 - Open valid clipboard JSON directly, restore unfinished drafts first, and preserve original data types by default.
 - Browse objects and arrays one level at a time with native back navigation and paged children.
@@ -19,7 +19,7 @@
 - Save unfinished edits locally, show inline parse errors, and unwind old navigation pages before replacing a document.
 - Add regression tests for parsing, clipboard/draft entry, search limits, paths, and navigation replacement.
 
-## [Raycast v2 Compatibility] - 2026-09-08
+## [Raycast v2 Compatibility] - {PR_MERGE_DATE}
 
 - Updated `@raycast/api` and its CLI to `^2.2.0` for Raycast v2.
 - Declared the CLI's Node.js requirement of 22.22.2 or later.
