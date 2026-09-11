@@ -2,12 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gatus-status",
   "title": "Gatus Status",
-  "description": "Get quick information about a Gatus monitoring access",
+  "description": "Obtain rapid details about monitored probes by Gatus.io solution.",
   "icon": "gatus-logo.png",
   "author": "romain_lajeunesse",
-  "platforms": [
-    "macOS"
-  ],
+  "platforms": ["macOS", "Windows"],
   "categories": ["Developer Tools"],
   "license": "MIT",
   "commands": [
@@ -32,7 +30,7 @@
       "name": "authToken",
       "type": "password",
       "required": false,
-      "title": "Bearer Token (optionnel)",
+      "title": "Bearer Token (optional)",
       "description": "If auth is needed"
     }
   ],
@@ -53,7 +51,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

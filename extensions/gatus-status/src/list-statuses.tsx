@@ -9,7 +9,7 @@ interface Preferences {
 }
 
 interface GatusResult {
-  status: number;
+  status?: number;
   duration: number; // nanoseconds
   success: boolean;
   timestamp: string;
@@ -20,6 +20,12 @@ interface GatusEndpoint {
   key: string;
   group?: string;
   results: GatusResult[];
+}
+
+function getSubtitle(lastResult?: GatusResult): string {
+  if (!lastResult) return "No data";
+  if (lastResult.status) return `HTTP ${lastResult.status}`;
+  return lastResult.success ? "OK" : "Failed";
 }
 
 export default function Command() {
@@ -49,13 +55,13 @@ export default function Command() {
 
   const groups = new Map<string, GatusEndpoint[]>();
   (data ?? []).forEach((endpoint) => {
-    const groupName = endpoint.group || "Without groupe";
+    const groupName = endpoint.group || "Without group";
     if (!groups.has(groupName)) groups.set(groupName, []);
     groups.get(groupName)!.push(endpoint);
   });
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Endpoint seeking...">
+    <List isLoading={isLoading} searchBarPlaceholder="Searching endpoints">
       {[...groups.entries()].map(([groupName, endpoints]) => (
         <List.Section title={groupName} key={groupName}>
           {endpoints.map((endpoint) => {
@@ -70,7 +76,7 @@ export default function Command() {
                   tintColor: isUp ? Color.Green : Color.Red,
                 }}
                 title={endpoint.name}
-                subtitle={lastResult ? `HTTP ${lastResult.status}` : "No data"}
+                subtitle={getSubtitle(lastResult)}
                 accessories={[
                   {
                     tag: {
@@ -82,7 +88,7 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <Action.Push
-                      title="See Détails"
+                      title="See Details"
                       icon={Icon.Sidebar}
                       target={
                         <EndpointDetail
@@ -93,7 +99,7 @@ export default function Command() {
                         />
                       }
                     />
-                    <Action title="Rafraîchir" icon={Icon.ArrowClockwise} onAction={revalidate} />
+                    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
                   </ActionPanel>
                 }
               />
