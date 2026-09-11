@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Fix Update All Skills Timing Out] - {PR_MERGE_DATE}
+## [Fix Update All Skills Timing Out] - 2026-09-11
 
 - Allow `add`, `remove`, and `update` up to 5 minutes instead of 30 seconds, so "Update All Skills" no longer fails with a bare "Command failed: npx -y skills@latest update -g -y" once checking every installed skill's source takes longer than that
 - Report that the `skills` CLI timed out, including whatever it printed before being stopped, instead of only the command that failed
