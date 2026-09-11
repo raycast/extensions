@@ -37,6 +37,7 @@ import {
   findUnresolvedVariables,
   resolveDeepLink,
 } from "./deep-link-utils.js";
+import { fallbackTarget, normalizeTarget } from "./target-utils.js";
 
 const executeFile = promisify(execFile);
 const commandOptions = { timeout: 60_000, maxBuffer: 1024 * 1024 } as const;
@@ -58,9 +59,7 @@ export default function SearchDeepLinks() {
   const [error, setError] = useState<string>();
   const [storageConfiguration, setStorageConfiguration] = useState<StorageConfiguration>();
   const [targetDevices, setTargetDevices] = useState<TargetDevice[]>([]);
-  const [selectedTarget, setSelectedTarget] = useState(
-    preferences.target?.trim() || defaultTarget(preferences.platform),
-  );
+  const [selectedTarget, setSelectedTarget] = useState(fallbackTarget(preferences.platform, preferences.target));
   const [targetDiscoveryError, setTargetDiscoveryError] = useState<string>();
 
   async function load() {
@@ -104,7 +103,7 @@ export default function SearchDeepLinks() {
         ) {
           return currentTarget;
         }
-        return devices[0]?.id || preferences.target?.trim() || defaultTarget(preferences.platform);
+        return devices[0]?.id || fallbackTarget(preferences.platform, preferences.target);
       });
     } catch (discoveryError) {
       const message = commandError(discoveryError);
@@ -117,7 +116,7 @@ export default function SearchDeepLinks() {
   }
 
   useEffect(() => {
-    setSelectedTarget(preferences.target?.trim() || defaultTarget(preferences.platform));
+    setSelectedTarget(fallbackTarget(preferences.platform, preferences.target));
     void loadTargetDevices();
   }, [preferences.platform, preferences.target]);
 
@@ -314,7 +313,10 @@ async function openURL(
   preferences: Preferences.SearchDeepLinks,
   selectedTarget?: string,
 ): Promise<void> {
-  const target = selectedTarget?.trim() || preferences.target?.trim();
+  const target =
+    normalizeTarget(preferences.platform, selectedTarget) ??
+    normalizeTarget(preferences.platform, preferences.target) ??
+    fallbackTarget(preferences.platform);
 
   switch (preferences.platform) {
     case "ios":
@@ -421,10 +423,6 @@ function environmentByPreference(
   return environments.find(
     (environment) => environment.name.localeCompare(normalizedPreference, undefined, { sensitivity: "accent" }) === 0,
   );
-}
-
-function defaultTarget(platform: Preferences.SearchDeepLinks["platform"]): string | undefined {
-  return platform === "ios" ? "booted" : undefined;
 }
 
 function targetName(selectedTarget: string | undefined, devices: TargetDevice[]): string | undefined {
