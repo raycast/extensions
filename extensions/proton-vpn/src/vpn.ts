@@ -113,9 +113,3 @@ export async function waitForState(
   }
   return state;
 }
-
-export async function connectAndWait(): Promise<VpnState> {
-  const service = await getService();
-  await start(service.id);
-  return waitForState(service.id, ["Connected", "Disconnected"]);
-}

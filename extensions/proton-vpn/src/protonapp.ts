@@ -9,6 +9,7 @@ import {
 } from "./transition";
 import {
   exportPrefsXml,
+  getDataKeyAsJson,
   getIdentity,
   getPreparedServer,
   PreparedServer,
@@ -131,17 +132,33 @@ async function refreshMenuBar(): Promise<void> {
   }
 }
 
-/** Track a transition while `work` runs, and refresh the menu bar around it. */
+/**
+ * Track a transition while `work` runs, and refresh the menu bar around it.
+ * Every operation quits, relaunches, or reconfigures the same app, so two of
+ * them must not overlap. A second command stops with a clear message instead
+ * of interleaving its writes with the first one.
+ */
 async function withTransition<T>(
-  transition: Omit<Transition, "startedAt">,
+  transition: Omit<Transition, "startedAt" | "id">,
   work: () => Promise<T>,
 ): Promise<T> {
-  await setTransition(transition);
+  if (await getTransition()) {
+    // The command that stored this can have been terminated early, so trust
+    // the real VPN state over the stored flag before we refuse to start.
+    const stillRunning = await reconcileTransition(await getRichStatus());
+    if (stillRunning) {
+      throw new Error(
+        "Another Proton VPN operation is running. Wait for it to finish.",
+      );
+    }
+  }
+
+  const id = await setTransition(transition);
   await refreshMenuBar();
   try {
     return await work();
   } finally {
-    await clearTransition();
+    await clearTransition(id);
     await refreshMenuBar();
   }
 }
@@ -203,12 +220,21 @@ export async function connectToCountry(
 async function connectToCountryImpl(
   countryCode?: string,
 ): Promise<SwitchResult> {
-  const identity = await getIdentity();
+  const prefsBefore = await exportPrefsXml();
+  const identity = await getIdentity(prefsBefore);
   if (countryCode && identity.tier < 1) {
     throw new Error(
       "A paid Proton VPN plan is necessary for country selection.",
     );
   }
+
+  // The key holds every profile the user saved. Keep them all and replace
+  // only our own entry, so a country switch never deletes their profiles.
+  const profilesKey = `profiles_${identity.userId}`;
+  const saved = getDataKeyAsJson<RaycastProfile[]>(prefsBefore, profilesKey);
+  const otherProfiles = Array.isArray(saved)
+    ? saved.filter((profile) => profile?.id !== PROFILE_ID)
+    : [];
 
   const service = await getService();
 
@@ -218,7 +244,8 @@ async function connectToCountryImpl(
   await waitForState(service.id, ["Disconnected"], 15000);
 
   await writeInt("profileCacheVersion", 2);
-  await writeDataJson(`profiles_${identity.userId}`, [
+  await writeDataJson(profilesKey, [
+    ...otherProfiles,
     buildProfile(countryCode, identity.tier),
   ]);
   await writeBool("AutoConnect", true);
@@ -286,6 +313,12 @@ export async function reconnectLastServer(): Promise<void> {
 async function reconnectLastServerImpl(): Promise<void> {
   const service = await getService();
   await start(service.id);
+
+  // The service still reports Disconnected for a moment after `start`, so
+  // wait for the transition to begin. Otherwise Disconnected reads as a
+  // failure before the connection had a chance to start.
+  await waitForState(service.id, ["Connecting", "Connected"], 5000);
+
   const state = await waitForState(
     service.id,
     ["Connected", "Disconnected"],
