@@ -204,7 +204,12 @@ function boundedJson(value: unknown, spaces: number, limit: number): { content: 
 export function truncateLabel(value: string, limit = MAX_LABEL_CHARACTERS): string {
   if (value.length <= limit) return value;
   // Copy the short prefix so a display label never retains a much larger string.
-  return value.slice(0, limit - 1).split("").join("") + "…";
+  return (
+    value
+      .slice(0, limit - 1)
+      .split("")
+      .join("") + "…"
+  );
 }
 
 export function jsonPathPreview(path: string): { text: string; markdown: string; truncated: boolean } {

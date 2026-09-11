@@ -94,10 +94,7 @@ export default function JsonBrowser({ document, scope, navigation }: Props) {
     [document, query, typeFilter, searching],
   );
   const childPager = useMemo(() => createChildPager(current), [current]);
-  const children = useMemo(
-    () => (searching ? [] : childPager(visibleCount)),
-    [childPager, visibleCount, searching],
-  );
+  const children = useMemo(() => (searching ? [] : childPager(visibleCount)), [childPager, visibleCount, searching]);
   const nodes = searching ? matches.slice(0, visibleCount) : [current, ...children];
   const selected = nodes.find((node) => node.id === selectedId) ?? nodes[0];
   const limitedSearch = document.tree.truncated
