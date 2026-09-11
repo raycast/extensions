@@ -35,6 +35,19 @@ describe("windowTitleMatchesProject", () => {
     expect(windowTitleMatchesProject("foo", "")).toBe(false);
     expect(windowTitleMatchesProject("", "foo")).toBe(false);
   });
+
+  it("keeps a project name that contains a title separator", () => {
+    expect(windowTitleMatchesProject("main.ts — my - project", "my - project")).toBe(true);
+    expect(windowTitleMatchesProject("my - project — main.ts", "my - project")).toBe(true);
+    expect(windowTitleMatchesProject("main.ts - my - project", "my - project")).toBe(true);
+    expect(windowTitleMatchesProject("my - project - main.ts", "my - project")).toBe(true);
+  });
+
+  it("does not treat the suffix of a hyphenated project name as that project", () => {
+    expect(windowTitleMatchesProject("main.ts — my - project", "project")).toBe(false);
+    expect(windowTitleMatchesProject("main.ts - my - project", "project")).toBe(false);
+    expect(windowTitleMatchesProject("my - project", "project")).toBe(false);
+  });
 });
 
 describe("windowTitleContainsProjectPath", () => {
@@ -64,6 +77,12 @@ describe("findUniqueMatchingWindowTitle", () => {
     const windows = ["index.ts — web", "index.ts — website"];
     expect(findUniqueMatchingWindowTitle(windows, "web")).toBe("index.ts — web");
     expect(findUniqueMatchingWindowTitle(windows, "website")).toBe("index.ts — website");
+  });
+
+  it("matches a unique window whose project name contains a separator", () => {
+    expect(findUniqueMatchingWindowTitle(["main.ts — my - project", "main.ts — other"], "my - project")).toBe(
+      "main.ts — my - project",
+    );
   });
 
   it("prefers a unique path match over a shared basename", () => {

@@ -5,14 +5,52 @@
  * `{filename} — {project}` (the separator is configurable). A first-hit
  * substring match can therefore raise the wrong window (two folders named
  * "foo", or "web" vs "website") and suppress the CLI fallback. These helpers
- * only accept an exact title or an exact title segment, and only when that
- * match is unique.
+ * only accept an exact title or a separator-bounded title, and only when that
+ * match is unique. Project names that themselves contain ` - ` are kept intact.
  */
 
-const TITLE_SEPARATORS = / — | – | - |\s+\|\s+/;
+const TITLE_SEPARATORS = [" — ", " – ", " - ", " | "] as const;
 
 function normalizeSegment(segment: string): string {
   return segment.replace(/[↗↙]+/g, "").trim();
+}
+
+function isUnambiguousSeparator(separator: (typeof TITLE_SEPARATORS)[number]): boolean {
+  return separator !== " - ";
+}
+
+/**
+ * The other half of a `{file} - {project}` title. ` - ` also appears inside
+ * folder names, so a short title like `project` must not match `my - project`.
+ */
+function looksLikeCompositeSide(side: string): boolean {
+  const value = normalizeSegment(side);
+  if (!value) {
+    return false;
+  }
+  if (/\.[A-Za-z0-9]{1,16}$/.test(value)) {
+    return true;
+  }
+  if (value.includes("/") || value.includes("\\")) {
+    return true;
+  }
+  return /^(untitled|welcome)$/i.test(value);
+}
+
+function windowTitleHasProjectTitle(
+  windowTitle: string,
+  projectTitle: string,
+  separator: (typeof TITLE_SEPARATORS)[number],
+): boolean {
+  if (windowTitle.endsWith(separator + projectTitle)) {
+    const prefix = windowTitle.slice(0, windowTitle.length - separator.length - projectTitle.length);
+    return isUnambiguousSeparator(separator) || looksLikeCompositeSide(prefix);
+  }
+  if (windowTitle.startsWith(projectTitle + separator)) {
+    const suffix = windowTitle.slice(projectTitle.length + separator.length);
+    return isUnambiguousSeparator(separator) || looksLikeCompositeSide(suffix);
+  }
+  return false;
 }
 
 function isPathBoundary(char: string | undefined): boolean {
@@ -53,8 +91,7 @@ export function windowTitleMatchesProject(windowTitle: string, projectTitle: str
     return true;
   }
 
-  const segments = name.split(TITLE_SEPARATORS).map(normalizeSegment).filter(Boolean);
-  return segments.includes(title);
+  return TITLE_SEPARATORS.some((separator) => windowTitleHasProjectTitle(name, title, separator));
 }
 
 /**
