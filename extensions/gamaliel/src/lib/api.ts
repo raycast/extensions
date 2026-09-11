@@ -1,5 +1,5 @@
 import { resolveBibleId } from "./translations";
-import type { ChatCompletionChunk, ChatMessage, Preferences } from "./types";
+import type { ChatCompletionChunk, ChatMessage } from "./types";
 
 const API_URL = "https://api.gamaliel.ai/v1/chat/completions";
 const DEFAULT_MODEL = "gpt-5.6-luna";
@@ -15,7 +15,12 @@ export function canAskFollowUp(messages: ChatMessage[]): boolean {
 
 export async function streamAnswer(
   messages: ChatMessage[],
-  preferences: Preferences,
+  preferences: {
+    theology: string;
+    profile: string;
+    bibleId: string;
+    maxWords?: string;
+  },
   onUpdate: (markdown: string) => void,
 ): Promise<string> {
   if (countUserMessages(messages) > MAX_USER_MESSAGES) {

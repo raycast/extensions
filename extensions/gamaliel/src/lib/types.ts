@@ -5,13 +5,6 @@ export interface ChatMessage {
   content: string;
 }
 
-export interface Preferences {
-  theology: string;
-  profile: string;
-  bibleId: string;
-  maxWords?: string;
-}
-
 export interface ScriptureLink {
   label: string;
   url: string;

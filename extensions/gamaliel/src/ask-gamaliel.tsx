@@ -9,10 +9,10 @@ import {
   translationLabel,
   translationsByLanguage,
 } from "./lib/translations";
-import type { ChatMessage, Preferences } from "./lib/types";
+import type { ChatMessage } from "./lib/types";
 
 export default function Command() {
-  const preferences = useMemo(() => getPreferenceValues<Preferences>(), []);
+  const preferences = useMemo(() => getPreferenceValues<Preferences.AskGamaliel>(), []);
   const [bibleId, setBibleId] = useState(() => resolveBibleId(preferences.bibleId));
   const requestPreferences = useMemo(() => ({ ...preferences, bibleId }), [bibleId, preferences]);
   const [searchText, setSearchText] = useState("");
@@ -56,9 +56,16 @@ export default function Command() {
         });
         if (!cancelled) {
           setAnswer(content);
+          setMessages((previous) => {
+            if (previous[previous.length - 1] !== last) {
+              return previous;
+            }
+            return [...previous, { role: "assistant", content }];
+          });
         }
       } catch (caught) {
         if (!cancelled) {
+          setAnswer("");
           const message = caught instanceof Error ? caught.message : "Unknown error";
           setError(message);
           await showToast({ style: Toast.Style.Failure, title: "Gamaliel request failed", message });
@@ -93,16 +100,13 @@ export default function Command() {
 
     setMessages((previous) => {
       const last = previous[previous.length - 1];
-      if (last?.role === "user" && last.content === question && !answer) {
-        return previous;
+      if (last?.role === "user") {
+        if (last.content === question) {
+          return previous;
+        }
+        return [...previous.slice(0, -1), { role: "user", content: question }];
       }
-
-      const next = [...previous];
-      if (answer.trim()) {
-        next.push({ role: "assistant", content: answer });
-      }
-      next.push({ role: "user", content: question });
-      return next;
+      return [...previous, { role: "user", content: question }];
     });
     setGeneration((value) => value + 1);
     setShowAnswer(true);
