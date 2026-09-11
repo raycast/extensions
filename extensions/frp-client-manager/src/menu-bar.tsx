@@ -57,7 +57,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       isLoading={isLoading}
-      icon={{ source: "menu-icon.png" }}
+      icon={{ source: "menu-icon.png", tintColor: Color.PrimaryText }}
       title={title}
       tooltip={
         running ? `frpc running, ${online} proxies online` : "frpc stopped"
