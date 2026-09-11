@@ -72,8 +72,10 @@ The extension is also an AI Extension. Mention it in Raycast AI Chat with
 
 The AI can list a day's tasks and channels, add tasks (with notes, a channel,
 planned time, subtasks, or a pasted link), edit, complete, reschedule, and
-delete tasks, add subtasks, and start or stop timers. Anything that changes an
-existing task asks you to confirm first, and deleting is marked as destructive.
+delete tasks, add subtasks, and start or stop timers. Editing, completing,
+rescheduling, or deleting a task asks you to confirm first, and deleting is
+marked as destructive. Adding tasks or subtasks and starting or stopping a
+timer run straight away.
 
 ## Time input
 
