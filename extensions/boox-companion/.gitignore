@@ -1,0 +1,7 @@
+/node_modules
+/dist
+/.raycast
+/native/.build
+raycast-env.d.ts
+.DS_Store
+*.log

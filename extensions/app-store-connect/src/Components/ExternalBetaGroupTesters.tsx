@@ -35,42 +35,38 @@ export default function ExternalBetaGroupTesters({ group, app, didUpdateNewTeste
     const added: BetaTester[] = [];
     const emails = testers.map((id) => allUsers?.find((user) => user.id === id)?.attributes.username);
     const response = await fetchAppStoreConnect(`/betaTesters?filter[email]=${emails.join(",")}`, "GET");
-    if (response) {
-      const json = await response.json();
-      const parsed = betaTestersSchema.safeParse(json.data);
-      if (parsed.data) {
-        for (const betaTester of parsed.data) {
-          try {
-            const response = await fetchAppStoreConnect(`/betaTesters`, "POST", {
-              data: {
-                type: "betaTesters",
-                attributes: {
-                  firstName: betaTester.attributes.firstName,
-                  lastName: betaTester.attributes.lastName,
-                  email: betaTester.attributes.email,
-                },
-                relationships: {
-                  betaGroups: {
-                    data: [
-                      {
-                        type: "betaGroups",
-                        id: group.id,
-                      },
-                    ],
-                  },
+    const json = await response.json();
+    const parsed = betaTestersSchema.safeParse(json.data);
+    if (parsed.data) {
+      for (const betaTester of parsed.data) {
+        try {
+          const response = await fetchAppStoreConnect(`/betaTesters`, "POST", {
+            data: {
+              type: "betaTesters",
+              attributes: {
+                firstName: betaTester.attributes.firstName,
+                lastName: betaTester.attributes.lastName,
+                email: betaTester.attributes.email,
+              },
+              relationships: {
+                betaGroups: {
+                  data: [
+                    {
+                      type: "betaGroups",
+                      id: group.id,
+                    },
+                  ],
                 },
               },
-            });
-            if (response) {
-              const json = await response.json();
-              const parsed = betaTesterSchema.safeParse(json.data);
-              if (parsed.data) {
-                added.push(parsed.data);
-              }
-            }
-          } catch (error) {
-            presentError(error);
+            },
+          });
+          const json = await response.json();
+          const parsed = betaTesterSchema.safeParse(json.data);
+          if (parsed.data) {
+            added.push(parsed.data);
           }
+        } catch (error) {
+          presentError(error);
         }
       }
     }
@@ -106,19 +102,10 @@ export default function ExternalBetaGroupTesters({ group, app, didUpdateNewTeste
           const response = await fetchAppStoreConnect(`/betaTesters`, "POST", {
             data: userToAdd,
           });
-          if (response && response.ok) {
-            const json = await response.json();
-            addedUsers.push({
-              type: "betaTesters",
-              id: json.data.id,
-              attributes: {
-                firstName: json.data.attributes.firstName,
-                lastName: json.data.attributes.lastName,
-                email: json.data.attributes.email,
-                inviteType: json.data.inviteType,
-                state: json.data.state,
-              },
-            } as BetaTester);
+          const json = await response.json();
+          const addedUser = betaTesterSchema.safeParse(json.data);
+          if (addedUser.success) {
+            addedUsers.push(addedUser.data);
           }
         }
       } catch (error) {
@@ -162,19 +149,10 @@ export default function ExternalBetaGroupTesters({ group, app, didUpdateNewTeste
           const response = await fetchAppStoreConnect(`/betaTesters`, "POST", {
             data: userToAdd,
           });
-          if (response && response.ok) {
-            const json = await response.json();
-            addedUsers.push({
-              type: "betaTesters",
-              id: json.data.id,
-              attributes: {
-                firstName: json.data.attributes.firstName,
-                lastName: json.data.attributes.lastName,
-                email: json.data.attributes.email,
-                inviteType: json.data.inviteType,
-                state: json.data.state,
-              },
-            } as BetaTester);
+          const json = await response.json();
+          const addedUser = betaTesterSchema.safeParse(json.data);
+          if (addedUser.success) {
+            addedUsers.push(addedUser.data);
           }
         }
       } catch (error) {
@@ -188,36 +166,44 @@ export default function ExternalBetaGroupTesters({ group, app, didUpdateNewTeste
     onSubmit(values) {
       setSubmitIsLoading(true);
       (async () => {
-        let added: BetaTester[] = [];
-        const errors: string[] = [];
-        const addedExisting = await addRemoveExternalTesters(values.testers);
-        if (Array.isArray(addedExisting)) {
-          added = addedExisting;
-        } else if (typeof addedExisting === "string") {
-          errors.push(addedExisting);
-        }
-        const addedNew = await addNewUsers(values.externalTesters);
-        if (Array.isArray(addedNew)) {
-          added = added.concat(addedNew);
-        } else if (typeof addedNew === "string") {
-          errors.push(addedNew);
-        }
-        const addedFromCSV = await addFromCSV(values.csvFile);
-        if (Array.isArray(addedFromCSV)) {
-          added = added.concat(addedFromCSV);
-        } else if (typeof addedFromCSV === "string") {
-          errors.push(addedFromCSV);
-        }
-        setSubmitIsLoading(false);
-        if (added.length > 0) {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Success!",
-            message: added.length === 1 ? "Added tester" : "Added testers",
-          });
-          if (allUsers) {
-            didUpdateNewTesters(added);
+        // This handler is fire-and-forget, so an escaping rejection would leave
+        // submitIsLoading stuck true — a spinner that never resolves — and surface
+        // nothing to the user. Everything below runs inside try/catch/finally.
+        try {
+          let added: BetaTester[] = [];
+          const errors: string[] = [];
+          const addedExisting = await addRemoveExternalTesters(values.testers);
+          if (Array.isArray(addedExisting)) {
+            added = addedExisting;
+          } else if (typeof addedExisting === "string") {
+            errors.push(addedExisting);
           }
+          const addedNew = await addNewUsers(values.externalTesters);
+          if (Array.isArray(addedNew)) {
+            added = added.concat(addedNew);
+          } else if (typeof addedNew === "string") {
+            errors.push(addedNew);
+          }
+          const addedFromCSV = await addFromCSV(values.csvFile);
+          if (Array.isArray(addedFromCSV)) {
+            added = added.concat(addedFromCSV);
+          } else if (typeof addedFromCSV === "string") {
+            errors.push(addedFromCSV);
+          }
+          if (added.length > 0) {
+            showToast({
+              style: Toast.Style.Success,
+              title: added.length === 1 ? "Tester Added" : "Testers Added",
+              message: `${added.length} added to ${group.attributes.name}`,
+            });
+            if (allUsers) {
+              didUpdateNewTesters(added);
+            }
+          }
+        } catch (error) {
+          presentError(error);
+        } finally {
+          setSubmitIsLoading(false);
         }
       })();
     },

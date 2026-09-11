@@ -9,6 +9,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { deleteBrandIdentity, getNotraRequestInit, NOTRA_API_URL, updateBrandIdentity } from "../lib/notra";
@@ -146,22 +147,15 @@ export function BrandIdentityDetail({
             <ActionPanel.Section>
               <Action.Push
                 icon={Icon.Pencil}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
                 target={<EditBrandIdentityForm brandIdentity={bi} onUpdated={handleRefresh} />}
                 title="Edit Brand Identity"
               />
-              {!bi.isDefault && (
-                <Action
-                  icon={Icon.Star}
-                  onAction={handleSetDefault}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                  title="Set as Default"
-                />
-              )}
+              {!bi.isDefault && <Action icon={Icon.Star} onAction={handleSetDefault} title="Set as Default" />}
               <Action
                 icon={Icon.Trash}
                 onAction={handleDelete}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
                 title="Delete Brand Identity"
               />
@@ -169,7 +163,7 @@ export function BrandIdentityDetail({
             <ActionPanel.Section>
               <Action.OpenInBrowser
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.OpenWith}
                 title="View on Notra"
                 url={notraUrl("/settings/brand")}
               />
@@ -177,7 +171,7 @@ export function BrandIdentityDetail({
               <Action
                 icon={Icon.ArrowClockwise}
                 onAction={() => revalidate()}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 title="Refresh"
               />
             </ActionPanel.Section>

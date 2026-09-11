@@ -62,7 +62,15 @@ export default function Command() {
   }
 
   if (error) {
-    return <List.EmptyView title="Error" description="Failed to fetch favorites. Please try again." />;
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.XMarkCircle}
+          title="Error"
+          description={error instanceof Error ? error.message : "Failed to fetch favorites. Please try again."}
+        />
+      </List>
+    );
   }
 
   return (

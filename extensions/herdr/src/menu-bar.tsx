@@ -1,11 +1,19 @@
-import { Icon, Keyboard, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences } from "@raycast/api";
+import {
+  Icon,
+  Keyboard,
+  LaunchType,
+  MenuBarExtra,
+  launchCommand,
+  openExtensionPreferences,
+  showHUD,
+} from "@raycast/api";
 import { useHerdrSnapshot } from "./hooks/use-herdr-snapshot";
 import { agentIcon, agentName } from "./lib/agent-appearance";
-import { focusResource, getAgentTarget } from "./lib/herdr";
+import { focusResource, formatHerdrError, getAgentTarget } from "./lib/herdr";
 import { getHerdrPreferences } from "./lib/preferences";
 import { launchHerdrInTerminal, revealFocusedHerdr } from "./lib/terminal";
 import type { AgentInfo, AgentStatus, HerdrSnapshot } from "./lib/types";
-import { runAction, statusIcon, statusTitle } from "./lib/ui";
+import { statusIcon, statusTitle } from "./lib/ui";
 
 const DISPLAYED_STATUSES: AgentStatus[] = ["blocked", "done", "working", "unknown"];
 
@@ -17,19 +25,30 @@ function agentLocation(agent: AgentInfo, snapshot: HerdrSnapshot): string {
   );
 }
 
-async function focusAgent(agent: AgentInfo): Promise<void> {
-  await runAction(
-    `Focusing ${agentName(agent)}`,
-    async () => {
-      await focusResource("agent", getAgentTarget(agent));
-      await revealFocusedHerdr();
-    },
-    { success: `Focused ${agentName(agent)}` },
-  );
+// Clicking an item unloads the menu bar command, so a toast held open across the
+// work would never be resolved. A HUD expires on its own. Reporting is
+// best-effort for the same reason: an unloaded command cannot show one either.
+async function reportFailure(error: unknown): Promise<void> {
+  const formatted = formatHerdrError(error);
+  const title = formatted.message ? `${formatted.title}: ${formatted.message}` : formatted.title;
+  await showHUD(title).catch(() => undefined);
 }
 
-function openHerdr(): Promise<boolean> {
-  return runAction("Opening Herdr", () => launchHerdrInTerminal(), { success: "Herdr Opened" });
+async function focusAgent(agent: AgentInfo): Promise<void> {
+  try {
+    await focusResource("agent", getAgentTarget(agent));
+    await revealFocusedHerdr();
+  } catch (error) {
+    await reportFailure(error);
+  }
+}
+
+async function openHerdr(): Promise<void> {
+  try {
+    await launchHerdrInTerminal();
+  } catch (error) {
+    await reportFailure(error);
+  }
 }
 
 function AgentItem({ agent, snapshot }: { agent: AgentInfo; snapshot: HerdrSnapshot }) {

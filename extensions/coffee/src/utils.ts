@@ -10,7 +10,47 @@ type Updates = {
   status: boolean;
 };
 
-export async function startCaffeinate(updates: Updates, hudMessage?: string, additionalArgs?: string) {
+export type CaffeinationReason =
+  | { kind: "while"; appName: string }
+  | { kind: "for"; endsAt: string }
+  | { kind: "until"; until: string }
+  | { kind: "schedule"; day: string; from: string; to: string };
+
+const CAFFEINATION_REASON_KEY = "caffeinationReason";
+
+async function setCaffeinationReason(reason?: CaffeinationReason) {
+  if (!reason) {
+    await LocalStorage.removeItem(CAFFEINATION_REASON_KEY);
+    return;
+  }
+  await LocalStorage.setItem(CAFFEINATION_REASON_KEY, JSON.stringify(reason));
+}
+
+export async function getCaffeinationReason(): Promise<CaffeinationReason | undefined> {
+  try {
+    const raw = await LocalStorage.getItem<string>(CAFFEINATION_REASON_KEY);
+    if (!raw) return undefined;
+    const reason = JSON.parse(raw) as CaffeinationReason;
+    const validWhile = reason.kind === "while" && typeof reason.appName === "string";
+    const validFor = reason.kind === "for" && typeof reason.endsAt === "string";
+    const validUntil = reason.kind === "until" && typeof reason.until === "string";
+    const validSchedule =
+      reason.kind === "schedule" &&
+      typeof reason.day === "string" &&
+      typeof reason.from === "string" &&
+      typeof reason.to === "string";
+    return validWhile || validFor || validUntil || validSchedule ? reason : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function startCaffeinate(
+  updates: Updates,
+  hudMessage?: string,
+  additionalArgs?: string,
+  reason?: CaffeinationReason,
+) {
   if (hudMessage) {
     await showHUD(hudMessage);
   }
@@ -24,18 +64,41 @@ export async function startCaffeinate(updates: Updates, hudMessage?: string, add
     child.unref();
   }
 
+  await setCaffeinationReason(reason);
   await update(updates, true);
 }
 
-export async function stopCaffeinate(updates: Updates, hudMessage?: string) {
+export async function stopCaffeinate(
+  updates: Updates,
+  hudMessage?: string,
+  options?: { pauseRunningSchedule?: boolean },
+) {
   if (hudMessage) {
     await showHUD(hudMessage);
   }
-  if (process.platform === "win32") {
-    await windowsStopCaffeinate();
-  } else {
-    execSync("/usr/bin/killall caffeinate || true");
+  let pausedSchedule: Schedule | undefined;
+  if (options?.pauseRunningSchedule) {
+    const schedule = await getSchedule();
+    if (schedule && isTodaysSchedule(schedule) && schedule.IsRunning) {
+      pausedSchedule = schedule;
+      await changeScheduleState("decaffeinate", schedule);
+    }
   }
+  try {
+    if (process.platform === "win32") {
+      await windowsStopCaffeinate();
+    } else {
+      execSync("/usr/bin/killall caffeinate || true");
+    }
+  } catch (e) {
+    if (pausedSchedule) {
+      pausedSchedule.IsManuallyDecafed = false;
+      pausedSchedule.IsRunning = true;
+      await LocalStorage.setItem(pausedSchedule.day, JSON.stringify(pausedSchedule));
+    }
+    throw e;
+  }
+  await setCaffeinationReason(undefined);
   await update(updates, false);
 }
 

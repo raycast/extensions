@@ -14,7 +14,7 @@ import {
   Cache,
 } from "@raycast/api";
 import { useCachedPromise, usePromise, executeSQL } from "@raycast/utils";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Transcript } from "./types";
 import {
   getAppName,
@@ -140,6 +140,103 @@ export default function Command() {
     [searchText, appFilter, showArchived, minDuration, sortOrder],
   );
 
+  const allTranscripts = useMemo(() => data ?? [], [data]);
+  // Memoized because the list re-renders on every page load; regrouping a few
+  // hundred rows and rebuilding their detail panes is not free.
+  const groups = useMemo(
+    () => groupTranscriptsByDate(allTranscripts),
+    [allTranscripts],
+  );
+  // Sections always render Today -> Yesterday -> ... -> Older whatever the SQL
+  // ORDER BY is, so data[0] is only the top row under "Newest First". Under
+  // "Oldest First" it lands in Older, the last section.
+  const firstRenderedId = groups[0]?.transcripts[0]?.transcriptEntityId;
+
+  // `useCachedPromise` paints last run's results before the fresh query lands, so
+  // Raycast anchors the selection to whatever was on top back then. Anything
+  // dictated since is prepended above it and the highlight ends up buried. Pin the
+  // selection to the first rendered row once this query's own results arrive.
+  //
+  // The pin has to follow a full loading cycle rather than just `!isLoading`:
+  // when the query changes there is one render where queryKey is already new but
+  // isLoading and data still belong to the previous query, and pinning there
+  // anchors to a row that may not even be in the new results.
+  const [pinnedId, setPinnedId] = useState<string | null>(null);
+  const queryKey = [
+    searchText,
+    appFilter,
+    sortOrder,
+    showArchived,
+    minDuration,
+  ].join("\u0000");
+  const pinRef = useRef<{ key: string; phase: "armed" | "loading" | "pinned" }>(
+    {
+      key: queryKey,
+      phase: "armed",
+    },
+  );
+  const selectionRef = useRef<string | null>(null);
+  const userMovedRef = useRef(false);
+  if (pinRef.current.key !== queryKey) {
+    pinRef.current = { key: queryKey, phase: "armed" };
+    userMovedRef.current = false;
+  }
+
+  // Refs only, never state. This fires on every arrow-key press, and setting
+  // state here would re-render the whole list -- regrouping every loaded row and
+  // rebuilding each one's detail pane -- on each keystroke. While the fresh query
+  // is in flight the rendered rows are frozen, so any change during that window
+  // is the user navigating rather than Raycast reconciling.
+  const handleSelectionChange = useCallback((id: string | null) => {
+    if (
+      pinRef.current.phase === "loading" &&
+      selectionRef.current !== null &&
+      id !== selectionRef.current
+    ) {
+      userMovedRef.current = true;
+    }
+    selectionRef.current = id;
+  }, []);
+
+  useEffect(() => {
+    const pin = pinRef.current;
+    if (isLoading) {
+      if (pin.phase === "armed") pin.phase = "loading";
+      return;
+    }
+    if (pin.phase !== "loading" || !firstRenderedId) return;
+    pin.phase = "pinned";
+    // The user already picked a row while the query was running; leave it be.
+    if (userMovedRef.current) return;
+    setPinnedId(firstRenderedId);
+  }, [isLoading, queryKey, firstRenderedId]);
+
+  // Hand selection back to Raycast once the pin has been applied. Staying
+  // controlled would re-assert the pinned row on later re-renders (paging in
+  // another 50 transcripts would bounce the highlight back to the top).
+  useEffect(() => {
+    if (pinnedId === null) return;
+    const timer = setTimeout(() => setPinnedId(null), 150);
+    return () => clearTimeout(timer);
+  }, [pinnedId]);
+
+  // Only re-arm when the archived row actually leaves the list and it was the
+  // one selected -- otherwise its id dangles. With Show Archived on the row
+  // stays put, and archiving a row you were not sitting on leaves the selection
+  // valid either way; re-arming in those cases would jump you to the top for no
+  // reason.
+  const handleArchived = useCallback(
+    (archivedId: string) => {
+      if (!showArchived && archivedId === selectionRef.current) {
+        pinRef.current = { key: pinRef.current.key, phase: "armed" };
+        userMovedRef.current = false;
+        setPinnedId(null);
+      }
+      revalidate();
+    },
+    [revalidate, showArchived],
+  );
+
   const { data: uniqueAppsData } = useCachedPromise(
     (archived: boolean) => {
       const archiveCondition = archived
@@ -195,12 +292,11 @@ export default function Command() {
     return map;
   }, [installedApps, winRegistryMap]);
 
-  const allTranscripts = data ?? [];
-  const groups = groupTranscriptsByDate(allTranscripts);
-
   return (
     <List
       isLoading={isLoading}
+      selectedItemId={pinnedId ?? undefined}
+      onSelectionChange={handleSelectionChange}
       searchBarPlaceholder="Search transcripts..."
       onSearchTextChange={setSearchText}
       throttle
@@ -240,7 +336,7 @@ export default function Command() {
               appPathMap={appPathMap}
               primaryAction={primaryAction}
               confirmBeforeArchive={confirmBeforeArchive}
-              onArchive={revalidate}
+              onArchive={handleArchived}
             />
           ))}
         </List.Section>
@@ -271,7 +367,7 @@ function TranscriptListItem({
   appPathMap: Map<string, string>;
   primaryAction: string;
   confirmBeforeArchive: boolean;
-  onArchive: () => void;
+  onArchive: (archivedId: string) => void;
 }) {
   const displayText = getDisplayText(transcript);
   const appName = getAppName(transcript.app);
@@ -305,7 +401,7 @@ function TranscriptListItem({
     await writeSQL(
       `UPDATE History SET isArchived = 1 WHERE transcriptEntityId = '${escaped}'`,
     );
-    onArchive();
+    onArchive(transcript.transcriptEntityId);
     await showToast({
       style: Toast.Style.Success,
       title: "Transcript archived",
@@ -315,7 +411,7 @@ function TranscriptListItem({
           await writeSQL(
             `UPDATE History SET isArchived = 0 WHERE transcriptEntityId = '${escaped}'`,
           );
-          onArchive();
+          onArchive(transcript.transcriptEntityId);
           await toast.hide();
         },
       },
@@ -327,6 +423,7 @@ function TranscriptListItem({
 
   return (
     <List.Item
+      id={transcript.transcriptEntityId}
       icon={appIcon}
       title={truncatedTitle}
       detail={

@@ -4,6 +4,9 @@ import { loadAccounts } from "../accounts/storage.ts";
 import { resolveAihubmixAccessKey } from "../aihubmix/auth.ts";
 import { fetchAihubmixUsage } from "../aihubmix/fetcher.ts";
 import type { AihubmixError, AihubmixUsage } from "../aihubmix/types.ts";
+import { checkAmpCredentials } from "../amp/auth.ts";
+import { checkAntigravityCredentials } from "../antigravity/credential-check.ts";
+import { checkGrokCredentials } from "../grok/auth.ts";
 import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
@@ -19,7 +22,8 @@ import { buildCodexAccountCandidates } from "../codex/accounts.ts";
 import { listCodexOAuthAccounts, parseAdditionalCodexHomes } from "../codex/auth.ts";
 import { fetchCodexUsage } from "../codex/fetcher.ts";
 import type { CodexError, CodexUsage } from "../codex/types.ts";
-import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "../copilot/auth.ts";
+import { buildCopilotAccountCandidates } from "../copilot/accounts.ts";
+import { resolveCopilotAuthTokens } from "../copilot/auth.ts";
 import { fetchCopilotUsage } from "../copilot/fetcher.ts";
 import type { CopilotError, CopilotUsage } from "../copilot/types.ts";
 import { fetchCursorUsage, resolveCursorCredential } from "../cursor/fetcher.ts";
@@ -42,8 +46,11 @@ import type { MiniMaxError, MiniMaxUsage } from "../minimax/types.ts";
 import { resolveMinimaxCNAuthTokens } from "../minimaxcn/auth.ts";
 import { fetchMinimaxCNUsage } from "../minimaxcn/fetcher.ts";
 import type { MinimaxCNError, MinimaxCNUsage } from "../minimaxcn/types.ts";
-import { fetchOpencodegoUsage } from "../opencode-go/fetcher.ts";
+import { fetchOpencodegoUsage, OPENCODEGO_OPENCODE_KEY } from "../opencode-go/fetcher.ts";
 import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
+import { resolveOpenRouterApiKey } from "../openrouter/auth.ts";
+import { fetchOpenRouterUsage } from "../openrouter/fetcher.ts";
+import type { OpenRouterError, OpenRouterUsage } from "../openrouter/types.ts";
 import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher.ts";
 import type { SyntheticError, SyntheticUsage } from "../synthetic/types.ts";
 import { resolveZaiAuthTokens } from "../zai/auth.ts";
@@ -72,8 +79,8 @@ type SharedPrefs = {
   zaiApiToken?: string;
   minimaxApiToken?: string;
   minimaxcnApiToken?: string;
-  opencodegoWorkspaceId?: string;
-  opencodegoAuthCookie?: string;
+  opencodegoApiKey?: string;
+  openrouterApiKey?: string;
 };
 
 function prefValue(key: keyof SharedPrefs): string {
@@ -101,11 +108,19 @@ export const useAihubmixUsage = createUsageHook<AihubmixUsage, AihubmixError>({
 
 export const useAmpUsage = createUsageHook<AmpUsage, AmpError>({
   agentId: "amp",
+  credentials: {
+    check: checkAmpCredentials,
+    error: (message) => ({ type: "unknown", message }),
+  },
   fetcher: fetchAmpUsage,
 });
 
 export const useAntigravityUsage = createUsageHook<AntigravityUsage, AntigravityError>({
   agentId: "antigravity",
+  credentials: {
+    check: checkAntigravityCredentials,
+    error: (message) => ({ type: "unknown", message }),
+  },
   fetcher: () => fetchAntigravityUsage(),
 });
 
@@ -119,35 +134,26 @@ export const useClaudeUsage = createUsageHook<ClaudeUsage, ClaudeError>({
   },
 });
 
-async function resolveCopilotTokens() {
-  return resolveCopilotAuthTokens({ preferenceToken: prefValue("copilotAuthToken") });
-}
-
-export const useCopilotUsage = createUsageHook<CopilotUsage, CopilotError>({
+export const useCopilotAccounts = createAccountsHook<
+  CopilotUsage,
+  CopilotError,
+  ReturnType<typeof buildCopilotAccountCandidates>[number]
+>({
   agentId: "copilot",
-  resolveAuthKey: async () => {
-    const { primaryToken, preferenceToken } = await resolveCopilotTokens();
-    return `${primaryToken ?? ""}\n${preferenceToken ?? ""}`;
+  getAccounts: async () => {
+    const { cliToken, githubToken, ghToken } = await resolveCopilotAuthTokens();
+    return buildCopilotAccountCandidates({
+      manualAccounts: await loadAccounts("copilot"),
+      preferenceToken: prefValue("copilotAuthToken"),
+      cliToken,
+      githubToken,
+      ghToken,
+    });
   },
-  fetcher: async () => {
-    const { primaryToken, localToken, preferenceToken } = await resolveCopilotTokens();
-    if (!primaryToken) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message: "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add a token in extension settings (Cmd+,).",
-        },
-      };
-    }
-    let result = await fetchCopilotUsage(primaryToken);
-    if (
-      preferenceToken &&
-      shouldFallbackToPreferenceToken({ localToken, preferenceToken, errorType: result.error?.type })
-    ) {
-      result = await fetchCopilotUsage(preferenceToken);
-    }
-    return result;
+  fetcher: (account) => fetchCopilotUsage(account.token),
+  noAccountsError: {
+    type: "not_configured",
+    message: "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add an account via Manage Accounts.",
   },
 });
 
@@ -203,6 +209,10 @@ export const useGeminiUsage = createUsageHook<GeminiUsage, GeminiError>({
 
 export const useGrokUsage = createUsageHook<GrokUsage, GrokError>({
   agentId: "grok",
+  credentials: {
+    check: checkGrokCredentials,
+    error: (message) => ({ type: "unknown", message }),
+  },
   fetcher: fetchGrokUsage,
 });
 
@@ -254,39 +264,38 @@ export const useMinimaxCNUsage = createUsageHook<MinimaxCNUsage, MinimaxCNError>
 
 export const useOpencodegoUsage = createUsageHook<OpencodegoUsage, OpencodegoError>({
   agentId: "opencode-go",
-  resolveAuthKey: async () => `${prefValue("opencodegoWorkspaceId")}\n${prefValue("opencodegoAuthCookie")}`,
+  resolveAuthKey: async () => prefValue("opencodegoApiKey") || readOpencodeAuthToken(OPENCODEGO_OPENCODE_KEY) || "",
   fetcher: async () => {
-    const workspaceId = prefValue("opencodegoWorkspaceId");
-    const authCookie = prefValue("opencodegoAuthCookie");
-    if (!workspaceId && !authCookie) {
+    const apiKey = prefValue("opencodegoApiKey") || readOpencodeAuthToken(OPENCODEGO_OPENCODE_KEY);
+    if (!apiKey) {
       return {
         usage: null,
         error: {
           type: "not_configured",
           message:
-            "OpenCode Go workspace ID and auth cookie not configured. Please add them in extension settings (Cmd+,).",
+            "OpenCode Zen API key not found. Login via OpenCode (`opencode auth login`) or paste your API key in extension settings (Cmd+,).",
         },
       };
     }
-    if (!workspaceId) {
+    return fetchOpencodegoUsage(apiKey);
+  },
+});
+
+export const useOpenRouterUsage = createUsageHook<OpenRouterUsage, OpenRouterError>({
+  agentId: "openrouter",
+  resolveAuthKey: async () => (await resolveOpenRouterApiKey(prefValue("openrouterApiKey"))) ?? "",
+  fetcher: async (apiKey) => {
+    if (!apiKey) {
       return {
         usage: null,
         error: {
           type: "not_configured",
-          message: "OpenCode Go workspace ID not configured. Please add it in extension settings (Cmd+,).",
+          message:
+            "OpenRouter API key not configured. Add it in extension settings (Cmd+,), log in through OpenCode, or set OPENROUTER_API_KEY in your shell.",
         },
       };
     }
-    if (!authCookie) {
-      return {
-        usage: null,
-        error: {
-          type: "not_configured",
-          message: "OpenCode Go auth cookie not configured. Please add it in extension settings (Cmd+,).",
-        },
-      };
-    }
-    return fetchOpencodegoUsage(workspaceId, authCookie);
+    return fetchOpenRouterUsage(apiKey);
   },
 });
 

@@ -1,5 +1,21 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Contracko MCP Server] - 2026-09-11
+
+Add Contracko to the community registry for contract review, document search, and renewal tracking. Connects to the remote OAuth MCP server through `mcp-remote`.
+
+## [Add Kyma API MCP Server] - 2026-09-10
+
+Add Kyma API to the community registry: hosted MCP server for one endpoint across open and frontier models, with measured per-model uptime, public usage rankings, and a spend-capped chat tool. OAuth 2.1 sign-in via the `@kyma-api/mcp-server` stdio bridge.
+
+## [Add Hermoso MCP Server] - 2026-09-08
+
+Add Hermoso to the official registry: an AI ad studio for marketers. Research winning ads across the Meta, Google and LinkedIn ad libraries and organic social, generate finished on-brand image and video ads, publish and schedule to your own channels, and build and manage paid campaigns across the major ad platforms. Remote Streamable HTTP server with OAuth sign-in through an `mcp-remote` bridge, no API key.
+
+## [Add Stellary MCP Server] - 2026-09-02
+
+Add Stellary to the community registry: AI-native project piloting and project management (open beta). Remote Streamable HTTP MCP server via mcp-remote; Bearer PAT required.
+
 ## [Refresh plori MCP Server] - 2026-08-24
 
 Refresh plori's description for its current persistent-environment positioning and support for runs, human input, scheduling, connections, and workflows.

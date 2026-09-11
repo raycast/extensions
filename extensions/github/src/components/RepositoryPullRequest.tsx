@@ -1,10 +1,11 @@
 import { Color, List } from "@raycast/api";
-import { MutatePromise, useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import type { JSX } from "react";
 import { useState } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { PullRequestFieldsFragment } from "../generated/graphql";
+import { uniqueById } from "../helpers";
 import { PR_DEFAULT_SORT_QUERY } from "../helpers/pull-request";
 
 import PullRequestListItem from "./PullRequestListItem";
@@ -87,6 +88,7 @@ export function RepositoryPullRequestList(props: { repo: string }): JSX.Element 
     },
     [props.repo, searchText, sortQuery, statusQuery],
   );
+  const pullRequests = uniqueById(data ?? []);
 
   return (
     <List
@@ -97,13 +99,13 @@ export function RepositoryPullRequestList(props: { repo: string }): JSX.Element 
       pagination={pagination}
       searchBarAccessory={<PullRequestStatusDropdown value={statusFilter} onChange={setStatusFilter} />}
     >
-      <List.Section title="Pull Requests" subtitle={`${data?.length ?? 0}`}>
-        {data?.map((d) => (
+      <List.Section title="Pull Requests" subtitle={`${pullRequests.length}`}>
+        {pullRequests.map((d) => (
           <PullRequestListItem
             key={d.id}
             showAuthor
             pullRequest={d}
-            mutateList={mutateList as MutatePromise<PullRequestFieldsFragment[] | undefined>}
+            mutateList={mutateList}
             sortQuery={sortQuery}
             setSortQuery={setSortQuery}
           />

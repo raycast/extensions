@@ -62,6 +62,8 @@ interface DataFeedsAPIDetailProps {
 }
 
 function DataFeedsAPIDetail({ data, hasJsonLd, isChallengePage }: DataFeedsAPIDetailProps) {
+  const hostMetadata = data.hostMetadata;
+  const hostMetaStatus = data.lookups?.hostMeta;
   const { dataFeeds, metadata, botProtection } = data;
   const deniedMessage = getDeniedAccessMessage(botProtection?.provider);
 
@@ -171,6 +173,45 @@ function DataFeedsAPIDetail({ data, hasJsonLd, isChallengePage }: DataFeedsAPIDe
           )}
           {hasJsonLd && metadata!.jsonLd!.length > 3 && (
             <List.Item.Detail.Metadata.Label title="" text={`...and ${metadata!.jsonLd!.length - 3} more`} />
+          )}
+
+          {/* host-meta was fetched and cached but rendered nowhere, so its data
+              was invisible even on success and its failures could only ever
+              appear in a banner. It belongs here: /.well-known/host-meta is a
+              machine-readable discovery document, same shape of thing as the
+              feeds above. */}
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Host Metadata"
+            icon={
+              hostMetaStatus === "unavailable"
+                ? { source: Icon.QuestionMarkCircle, tintColor: Color.Orange }
+                : hostMetadata?.available
+                  ? { source: Icon.Check, tintColor: Color.Green }
+                  : { source: Icon.Xmark, tintColor: Color.Red }
+            }
+          />
+          {hostMetaStatus === "unavailable" ? (
+            <List.Item.Detail.Metadata.Label title="" text="Couldn't check" />
+          ) : hostMetadata?.available ? (
+            <>
+              {hostMetadata.format && (
+                <List.Item.Detail.Metadata.Label title="Format" text={hostMetadata.format.toUpperCase()} />
+              )}
+              {hostMetadata.links?.slice(0, 3).map((link, i) => (
+                <List.Item.Detail.Metadata.Label
+                  key={i}
+                  title={truncateText(link.rel, 40)}
+                  text={truncateText(link.href ?? link.template ?? link.title ?? "", 50)}
+                />
+              ))}
+              {hostMetadata.links && hostMetadata.links.length > 3 && (
+                <List.Item.Detail.Metadata.Label title="" text={`...and ${hostMetadata.links.length - 3} more`} />
+              )}
+              {!hostMetadata.links?.length && <List.Item.Detail.Metadata.Label title="" text="No links declared" />}
+            </>
+          ) : (
+            <List.Item.Detail.Metadata.Label title="" text="No host-meta published" />
           )}
         </List.Item.Detail.Metadata>
       }

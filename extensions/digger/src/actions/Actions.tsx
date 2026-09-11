@@ -30,7 +30,7 @@ export function Actions({ data, url, onRefresh, sectionActions }: ActionsProps) 
         <ExternalActions url={url} />
       </ActionPanel.Section>
 
-      <ActionPanel.Section title="Cache">
+      <ActionPanel.Section>
         <CacheActions onRefresh={onRefresh} />
       </ActionPanel.Section>
     </ActionPanel>

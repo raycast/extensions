@@ -86,7 +86,7 @@
     "@raycast/utils": "^2.2.4",
     "date-fns": "^4.1.0",
     "lodash": "^4.18.1",
-    "pm2": "^7.0.1",
+    "pm2": "^7.0.4",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {

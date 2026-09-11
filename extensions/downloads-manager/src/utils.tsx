@@ -406,6 +406,10 @@ export async function getDeletionBehavior(): Promise<DeletionBehavior> {
   return preferences.deletionBehavior as DeletionBehavior;
 }
 
+export async function getShowDeletingFilenameBehavior(): Promise<boolean> {
+  return preferences.showDeletingFilename;
+}
+
 export async function toggleDeletionBehavior() {
   const currentDeletionBehavior = await getDeletionBehavior();
   const nextDeletionBehavior = currentDeletionBehavior === "trash" ? "permaDel" : "trash";

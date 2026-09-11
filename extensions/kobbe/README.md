@@ -1,6 +1,6 @@
 # Kobbe for Raycast
 
-Inspect Kobbe analytics from Raycast. Search your sites, view overview metrics, check top pages, and review revenue without opening the dashboard.
+Inspect Kobbe analytics from Raycast. Search your sites, view overview metrics, check top pages and sources, review revenue, and keep live visitor counts in your menu bar without opening the dashboard.
 
 ## Setup
 
@@ -20,13 +20,17 @@ Then open a Kobbe command in Raycast and set the extension preferences:
 - API Token: your `kbpat...` token
 - Kobbe Base URL: `https://app.kobbe.io`
 - Default Range: usually `Last 7 days`
+- Primary Action: what Enter does on a site — open the dashboard in the browser (default) or view the overview in Raycast
 
 ## Commands
 
 - Search Sites: list your Kobbe sites and open the dashboard.
-- Site Overview: view traffic, engagement, revenue, and top pages.
+- Site Overview: view live, traffic, engagement, revenue, top pages, and top sources with a range switcher.
 - Top Pages: inspect the highest-traffic pages for a site.
+- Top Sources: inspect where traffic comes from.
 - Revenue: view revenue totals with page and source context.
+- Setup Health: check tracker installation and revenue webhook status.
+- Live Visitors: show visitors currently online across your sites in the menu bar.
 
 ## Security
 

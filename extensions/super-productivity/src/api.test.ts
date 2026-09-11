@@ -92,7 +92,7 @@ beforeEach(() => {
 });
 
 describe("request authentication", () => {
-  it("sends Authorization Bearer header with the access token", async () => {
+  it("sends Authorization Bearer header when access token is set", async () => {
     mockFetch.mockResolvedValue(okResponse({ server: "SP", rendererReady: true }));
 
     await checkHealth();
@@ -100,12 +100,23 @@ describe("request authentication", () => {
     expect(mockFetch).toHaveBeenCalledWith(
       "http://test:3876/health",
       expect.objectContaining({
-        headers: {
+        headers: expect.objectContaining({
           Authorization: `Bearer ${mockPreferences.accessToken}`,
           "Content-Type": "application/json",
-        },
+        }),
       }),
     );
+  });
+
+  it("omits Authorization header when access token is empty", async () => {
+    mockPreferences.accessToken = "";
+    mockFetch.mockResolvedValue(okResponse({ server: "SP", rendererReady: true }));
+
+    await checkHealth();
+
+    const headers = mockFetch.mock.calls[0][1].headers as Record<string, string>;
+    expect(headers["Authorization"]).toBeUndefined();
+    expect(headers["Content-Type"]).toBe("application/json");
   });
 });
 

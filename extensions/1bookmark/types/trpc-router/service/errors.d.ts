@@ -5,3 +5,7 @@ export declare class BookmarkUrlDuplicateError extends Error {
 export declare class BookmarkImportStaleError extends Error {
     constructor();
 }
+export declare class TagNameDuplicateError extends Error {
+    readonly tagName: string;
+    constructor(tagName: string);
+}

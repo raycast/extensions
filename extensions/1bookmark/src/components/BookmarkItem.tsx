@@ -29,7 +29,7 @@ export const BookmarkItem = (props: {
     return [...tags.slice(0, 2), `+${tags.length - 2}`];
   }, [tags]);
 
-  // Detail 표시 중에는 accessories를 숨겨 좁은 list 컬럼에서 스페이스 확보.
+  // Hide accessories while the detail is shown to free up space in the narrow list column.
   const accessories = isShowingDetail
     ? undefined
     : [
@@ -39,6 +39,7 @@ export const BookmarkItem = (props: {
 
   return (
     <List.Item
+      id={bookmark.id}
       icon={icon}
       title={name}
       subtitle={isShowingDetail ? undefined : url.replace(/^https?:\/\//, "")}

@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   allAccountRowsSucceeded,
+  cacheReadTtl,
   hashAuthKey,
   hashAccountAuthKeys,
   isPayloadFresh,
@@ -148,4 +149,19 @@ test("stripAccountTokens removes tokens before persisting account rows", () => {
     { accountId: "b", label: "Home", usage: null, error: { type: "x", message: "y" }, isOpenCodeActive: false },
   ]);
   assert.equal(JSON.stringify(stripped).includes("sk-secret"), false);
+});
+
+test("view reuses old cache while background refresh respects its configured interval", () => {
+  const old = payload({ timestamp: NOW - 600_000 });
+  assert.equal(isPayloadFresh(old, NOW, cacheReadTtl(180_000, 60_000, false), old.authHash), true);
+  assert.equal(isPayloadFresh(old, NOW, cacheReadTtl(180_000, 60_000, true), old.authHash), false);
+  assert.equal(isPayloadFresh(old, NOW, cacheReadTtl(180_000, 900_000, true), old.authHash), true);
+  assert.equal(isPayloadFresh(old, NOW, cacheReadTtl(0, 60_000, false), old.authHash), false);
+  assert.equal(isPayloadFresh(old, NOW, cacheReadTtl(180_000, 60_000, false), "changed"), false);
+});
+
+test("invalid background intervals fall back to one minute", () => {
+  for (const interval of [NaN, Infinity, 0, -1, 1000]) {
+    assert.equal(cacheReadTtl(180_000, interval, true), 60_000);
+  }
 });

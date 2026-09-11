@@ -1,5 +1,11 @@
 # Home Assistant Changelog
 
+## [Entity Customization] - 2026-08-29
+
+- Add local rename, hide, and favorite actions for entities in list commands
+- Add Entity Settings command to manage hidden entities, custom display names, and favorites
+- Add Save as Quicklink action to create Raycast quicklinks for entity list commands
+
 ## [Add contributor] - 2026-08-10
 
 - Add mattiacolombomc to the contributors list

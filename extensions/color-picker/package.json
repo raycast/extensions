@@ -85,6 +85,12 @@
       ]
     },
     {
+      "name": "favorite-colors",
+      "title": "Favorite Colors",
+      "description": "View and use your favorite colors",
+      "mode": "view"
+    },
+    {
       "name": "generate-colors",
       "title": "Generate Colors",
       "description": "Generate colors using AI",

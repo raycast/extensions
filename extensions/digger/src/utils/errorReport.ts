@@ -75,17 +75,18 @@ export interface ErrorReportInput {
   message: string;
   /** The URL being dug, if known. */
   url?: string;
-  /** Underlying causes. In practice this is one entry; see the note below. */
+  /** Underlying causes. One for a main-fetch failure, more when auxiliary
+   *  lookups also failed. */
   causes?: { description: string; message: string }[];
 }
 
 /**
  * The block a user pastes into a bug report.
  *
- * A total failure yields exactly ONE cause — `addFetchError` is only ever called
- * for the "main" category — so a single cause renders as one `Cause:` line
- * rather than a plural heading over a list of one. The list form is retained for
- * the day the other FetchCategory values actually report.
+ * One cause renders as a single `Cause:` line rather than a plural heading over
+ * a list of one; two or more use the list form. Both shapes occur: a main-fetch
+ * failure yields one, while auxiliary lookups (DNS, certificate, Wayback,
+ * host-meta) report their own categories and can arrive together.
  */
 export function buildErrorReport({ errorType, message, url, causes = [] }: ErrorReportInput): string {
   const title = getErrorTitle(errorType);

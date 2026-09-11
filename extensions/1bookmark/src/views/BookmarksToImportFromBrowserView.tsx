@@ -30,6 +30,18 @@ import { resolveSpaceIconUrl } from "../utils/space-icon.util";
 
 // To prevent Error: Worker terminated due to reaching memory limit: JS heap out of memory
 const LIMIT_AT_ONCE = 100;
+const GUARDED_URL_PREFIX = "onebookmark:blocked/";
+
+function matchesImportedUrl(storedUrl: string, browserUrl: string): boolean {
+  if (storedUrl === browserUrl) return true;
+  if (!storedUrl.startsWith(GUARDED_URL_PREFIX)) return false;
+
+  try {
+    return decodeURIComponent(storedUrl.slice(GUARDED_URL_PREFIX.length)) === browserUrl;
+  } catch {
+    return false;
+  }
+}
 
 interface Props {
   selectedBrowser: string;
@@ -153,7 +165,7 @@ function Body(props: Props) {
     if (!existingBookmarks.data) return undefined;
     if (!allBookmarks) return undefined;
 
-    return allBookmarks.filter((b) => !existingBookmarks.data.some((eb) => eb.url === b.url));
+    return allBookmarks.filter((b) => !existingBookmarks.data.some((eb) => matchesImportedUrl(eb.url, b.url)));
   }, [existingBookmarks.data, allBookmarks]);
 
   const preparedBookmarks = useMemo(() => {

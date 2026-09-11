@@ -66,7 +66,7 @@ async function saveFile(content: string, filename: string, extension: string): P
       message: fullFilename,
       primaryAction: {
         // showInFinder is macOS-only; on Windows it fails and the action does nothing.
-        title: isMacOS ? "Reveal in Finder" : "Show in Folder",
+        title: isMacOS ? "Show in Finder" : "Show in Explorer",
         onAction: async () => {
           if (isMacOS) {
             await showInFinder(filepath);

@@ -38,38 +38,34 @@ export default function InternalBetaGroupTesters({ group, app, didUpdateNewTeste
           const added: BetaTester[] = [];
           const emails = values.testers.map((id) => allUsers?.find((user) => user.id === id)?.attributes.username);
           const response = await fetchAppStoreConnect(`/betaTesters?filter[email]=${emails.join(",")}`, "GET");
-          if (response) {
-            const json = await response.json();
-            const parsed = betaTestersSchema.safeParse(json.data);
-            if (parsed.data) {
-              for (const betaTester of parsed.data) {
-                const response = await fetchAppStoreConnect(`/betaTesters`, "POST", {
-                  data: {
-                    type: "betaTesters",
-                    attributes: {
-                      firstName: betaTester.attributes.firstName,
-                      lastName: betaTester.attributes.lastName,
-                      email: betaTester.attributes.email,
-                    },
-                    relationships: {
-                      betaGroups: {
-                        data: [
-                          {
-                            type: "betaGroups",
-                            id: group.id,
-                          },
-                        ],
-                      },
+          const json = await response.json();
+          const parsed = betaTestersSchema.safeParse(json.data);
+          if (parsed.data) {
+            for (const betaTester of parsed.data) {
+              const response = await fetchAppStoreConnect(`/betaTesters`, "POST", {
+                data: {
+                  type: "betaTesters",
+                  attributes: {
+                    firstName: betaTester.attributes.firstName,
+                    lastName: betaTester.attributes.lastName,
+                    email: betaTester.attributes.email,
+                  },
+                  relationships: {
+                    betaGroups: {
+                      data: [
+                        {
+                          type: "betaGroups",
+                          id: group.id,
+                        },
+                      ],
                     },
                   },
-                });
-                if (response) {
-                  const json = await response.json();
-                  const parsed = betaTesterSchema.safeParse(json.data);
-                  if (parsed.data) {
-                    added.push(parsed.data);
-                  }
-                }
+                },
+              });
+              const json = await response.json();
+              const parsed = betaTesterSchema.safeParse(json.data);
+              if (parsed.data) {
+                added.push(parsed.data);
               }
             }
           }
@@ -77,8 +73,8 @@ export default function InternalBetaGroupTesters({ group, app, didUpdateNewTeste
           if (added.length > 0) {
             showToast({
               style: Toast.Style.Success,
-              title: "Success!",
-              message: values.testers.length === 1 ? "Added tester" : "Added testers",
+              title: values.testers.length === 1 ? "Tester Added" : "Testers Added",
+              message: `${values.testers.length} added to ${group.attributes.name}`,
             });
             if (allUsers) {
               didUpdateNewTesters(added);

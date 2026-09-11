@@ -107,6 +107,8 @@ export default function main() {
 
   const versionChanged = async (value: string) => {
     const version = availableVersions.find((v) => v.version === value);
+    if (!version) return;
+
     setSelectedVersion(version);
     await LocalStorage.setItem("version", JSON.stringify(version));
   };

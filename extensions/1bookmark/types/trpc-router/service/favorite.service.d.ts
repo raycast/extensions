@@ -18,8 +18,10 @@ export declare class FavoriteService {
             id: string;
             createdAt: Date;
             name: string;
-            url: string;
+            updatedAt: Date;
             tags: string[];
+            deletedAt: Date | null;
+            url: string;
             faviconUrl: string | null;
             faviconAttemptedAt: Date | null;
             faviconAttemptCount: number;
@@ -28,8 +30,6 @@ export declare class FavoriteService {
             previewImageAttemptCount: number;
             author: string;
             authorEmail: string;
-            deletedAt: Date | null;
-            updatedAt: Date;
         };
     } & {
         createdAt: Date;

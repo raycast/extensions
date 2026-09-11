@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [Squash commits checkbox in MR create form] - 2026-09-11
+
+- Add "Squash commits when merge request is accepted" checkbox to the MR create and edit forms
+- Fix boolean form values being dropped on submit
+
 ## [Simplified authentication] - 2026-08-12
 
 - Remove the `Sign out of GitLab` command. Raycast adds a logout option to the extension preferences once you have signed in with OAuth

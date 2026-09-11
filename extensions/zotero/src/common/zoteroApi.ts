@@ -1,19 +1,30 @@
 import { stat, readFile, writeFile, copyFile, rename } from "fs/promises";
-import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, environment, showToast, Toast, LocalStorage } from "@raycast/api";
+import type { LibraryRef } from "./library";
+import { USER_LIBRARY_NAME } from "./library";
+import type { CollectionRef } from "./collections";
+import { collectionId } from "./collections";
 import * as utils from "./utils";
 import { existsSync, readFileSync, rmSync } from "fs";
 import { execFileSync } from "child_process";
-import Fuse from "fuse.js";
+import { rankResults } from "./search";
 import initSqlJs, { Database as SqlJsDatabase } from "sql.js";
 import path = require("path");
 
 export interface Preferences {
   zotero_path: string;
   use_bibtex?: boolean;
+  bibtex_search?: boolean;
   bibtex_path?: string;
   csl_style?: string;
   cache_period?: string;
   quote_pdf_path?: boolean;
+}
+
+// citekey is populated (and thus searchable) when the user either exports
+// BibTeX or explicitly opts into bibtex-key search.
+function bibtexEnabled(p: Preferences): boolean {
+  return !!(p.use_bibtex || p.bibtex_search);
 }
 
 export interface RefData {
@@ -22,12 +33,25 @@ export interface RefData {
   modified?: Date;
   key?: string;
   library?: number;
+  // "user" for the personal library, "group" for a group library. Absent in
+  // caches built before group-library support (treated as personal).
+  libraryType?: "user" | "group";
+  // Online group id (groups.groupID), used to build zotero:// URIs for group
+  // items. Only present for group-library items.
+  groupID?: number;
+  // Human-readable library name ("My Library" or the group's name).
+  libraryName?: string;
   type?: string;
   citekey?: string;
   tags?: string[];
   notes?: string[];
   attachment?: Attachment;
+  // Human-readable collection names (for display).
   collection?: string[];
+  // Library-qualified collection ids (`collectionId(library, key)`), used for
+  // filtering. Distinct collections that share a name or a bare key across
+  // libraries stay independent.
+  collectionKeys?: string[];
   [key: string]: any;
 }
 
@@ -138,13 +162,26 @@ ORDER BY "index" ASC
 `;
 
 const ALL_COLLECTIONS_SQL = `
-SELECT DISTINCT collections.collectionName AS name
+SELECT  collections.collectionName AS name,
+        collections.key AS key,
+        collections.libraryID AS library
     FROM collections
+`;
+
+const LIBRARIES_SQL = `
+SELECT  libraries.libraryID AS id,
+        libraries.type AS type,
+        groups.groupID AS groupID,
+        groups.name AS name
+    FROM libraries
+    LEFT JOIN groups
+        ON libraries.libraryID = groups.libraryID
 `;
 
 const COLLECTIONS_SQL = `
 SELECT  collections.collectionName AS name,
-        collections.key AS key
+        collections.key AS key,
+        collections.libraryID AS library
     FROM collections
     LEFT JOIN collectionItems
         ON collections.collectionID = collectionItems.collectionID
@@ -158,7 +195,12 @@ WHERE itemNotes.parentItemID = :id
 `;
 
 const cachePath = utils.cachePath("zotero.json");
-const CACHE_VERSION = 3;
+const CACHE_VERSION = 7;
+
+// LocalStorage key holding the JSON array of group libraryIDs the user opted
+// into searching. The personal library is always searched; group libraries are
+// opt-in (default none) so a paper shared to a group no longer double-lists.
+const INCLUDED_GROUPS_KEY = "included_group_libraries";
 
 export function resolveHome(filepath: string): string {
   if (filepath[0] === "~") {
@@ -203,6 +245,8 @@ const SLIM_TABLES = [
   "collections",
   "collectionItems",
   "itemNotes",
+  "libraries",
+  "groups",
 ];
 
 // CREATE TABLE ... AS SELECT copies rows but not indexes, so re-create the
@@ -343,12 +387,63 @@ async function openBibtexDb(): Promise<[SqlJsDatabase, boolean] | null> {
   return [new SQL.Database(db), isBBTUpdated];
 }
 
-export const getCollections = async (): Promise<string[]> => {
+// Read every library (personal + groups) from an open database into a map keyed
+// by local libraryID.
+function readLibraries(db: SqlJsDatabase): Map<number, LibraryRef> {
+  const map = new Map<number, LibraryRef>();
+  const st = db.prepare(LIBRARIES_SQL);
+  while (st.step()) {
+    const row = st.getAsObject();
+    const id = row.id as number;
+    const isGroup = row.type === "group";
+    map.set(id, {
+      id,
+      type: isGroup ? "group" : "user",
+      name: isGroup ? (row.name as string) ?? `Group ${row.groupID ?? id}` : USER_LIBRARY_NAME,
+      groupID: isGroup ? (row.groupID as number) : undefined,
+    });
+  }
+  st.free();
+  return map;
+}
+
+// All libraries (personal + groups) in the database. Used by the UI to offer the
+// group libraries the user can opt into searching.
+export const getLibraries = async (): Promise<LibraryRef[]> => {
+  const db = await openDb();
+  const libs = [...readLibraries(db).values()];
+  db.close();
+  return libs;
+};
+
+export const getGroupLibraries = async (): Promise<LibraryRef[]> => {
+  return (await getLibraries()).filter((l) => l.type === "group");
+};
+
+// The set of group libraryIDs the user opted into searching (personal library is
+// always included; groups default to none).
+export const getIncludedGroupLibraries = async (): Promise<number[]> => {
+  const raw = await LocalStorage.getItem<string>(INCLUDED_GROUPS_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(Number).filter((n) => !Number.isNaN(n)) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const setIncludedGroupLibraries = async (ids: number[]): Promise<void> => {
+  await LocalStorage.setItem(INCLUDED_GROUPS_KEY, JSON.stringify(ids));
+};
+
+export const getCollections = async (): Promise<CollectionRef[]> => {
   const db = await openDb();
   const st = db.prepare(ALL_COLLECTIONS_SQL);
-  const cols = [];
+  const cols: CollectionRef[] = [];
   while (st.step()) {
-    cols.push(st.getAsObject().name);
+    const r = st.getAsObject();
+    cols.push({ key: r.key as string, name: r.name as string, library: r.library as number });
   }
   st.free();
   db.close();
@@ -378,6 +473,7 @@ function getData(): Promise<RefData[]> {
 async function getDataImpl(): Promise<RefData[]> {
   const db = await openDb();
   const preferences: Preferences = getPreferenceValues();
+  const libraries = readLibraries(db);
 
   const st = db.prepare(INVALID_TYPES_SQL);
   const invalid_ids = [];
@@ -464,19 +560,34 @@ async function getDataImpl(): Promise<RefData[]> {
     const st6 = db.prepare(COLLECTIONS_SQL);
     st6.bind({ ":id": row.id });
 
-    const clt = [];
+    const cltNames = [];
+    const cltKeys = [];
     while (st6.step()) {
-      clt.push(st6.getAsObject().name);
+      const o = st6.getAsObject();
+      cltNames.push(o.name);
+      // Qualify by libraryID so collections sharing a key across libraries stay
+      // distinct (see collectionId).
+      cltKeys.push(collectionId(o.library as number, o.key as string));
     }
 
     st6.free();
 
-    if (clt.length > 0) {
-      row.collection = clt;
+    if (cltNames.length > 0) {
+      row.collection = cltNames;
+      row.collectionKeys = cltKeys;
     }
 
-    if (preferences.use_bibtex) {
+    if (bibtexEnabled(preferences)) {
       row.citekey = row.citationKey || (await getBibtexKey(row.key, row.library));
+    }
+
+    const lib = libraries.get(row.library as number);
+    if (lib) {
+      row.libraryType = lib.type;
+      row.libraryName = lib.name;
+      if (lib.groupID != null) {
+        row.groupID = lib.groupID;
+      }
     }
 
     rows.push(row);
@@ -488,24 +599,6 @@ async function getDataImpl(): Promise<RefData[]> {
   return rows;
 }
 
-const parseQuery = (q: string) => {
-  const queryItems = q.split(" ");
-  const qs = queryItems.filter((c) => !c.startsWith("."));
-  const ts = queryItems.filter((c) => c.startsWith("."));
-
-  let qss = "";
-  if (qs.length > 0) {
-    qss = qs.join(" ");
-  }
-
-  let tss = [];
-  if (ts.length > 0) {
-    tss = ts.map((x) => x.substring(1));
-  }
-
-  return { qss, tss };
-};
-
 // Cap how many results are rendered at once. Raycast renders every List item
 // with a full detail markdown and ~15-20 actions; rendering the whole library
 // (empty query) or a broad-query result of hundreds/thousands grows the
@@ -514,7 +607,7 @@ const parseQuery = (q: string) => {
 // 100 is far more than a user scans and keeps the render footprint bounded.
 export const MAX_RENDER_RESULTS = 100;
 
-export const searchResources = async (q: string): Promise<RefData[]> => {
+export const searchResources = async (q: string, collection?: string): Promise<RefData[]> => {
   const preferences: Preferences = getPreferenceValues();
 
   async function updateCache(): Promise<RefData[]> {
@@ -531,6 +624,7 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
         version: CACHE_VERSION,
         zotero_path: preferences.zotero_path,
         use_bibtex: preferences.use_bibtex,
+        bibtex_search: preferences.bibtex_search,
         data: data,
       };
       try {
@@ -570,7 +664,8 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
         if (
           fData.version === CACHE_VERSION &&
           fData.zotero_path === preferences.zotero_path &&
-          fData.use_bibtex === preferences.use_bibtex
+          fData.use_bibtex === preferences.use_bibtex &&
+          fData.bibtex_search === preferences.bibtex_search
         ) {
           return fData.data;
         } else {
@@ -608,73 +703,27 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     return ret;
   }
 
-  ret.sort(function (a, b) {
-    return +new Date(b.added) - +new Date(a.added);
+  // Collection scoping happens here (before the render cap) so choosing a
+  // collection narrows the whole library, not just the first MAX_RENDER_RESULTS
+  // rows a broad query already surfaced.
+  const collections = collection && collection !== "All" ? [collection] : undefined;
+
+  // Library scoping: always search the personal library; add only the group
+  // libraries the user opted into. This is what keeps a paper shared to a group
+  // from double-listing by default.
+  const includedGroups = new Set(await getIncludedGroupLibraries());
+  const allowedLibraries = new Set<number>();
+  for (const it of ret) {
+    if (it.library == null) continue;
+    if (it.libraryType !== "group" || includedGroups.has(it.library)) {
+      allowedLibraries.add(it.library);
+    }
+  }
+
+  return rankResults(ret, q, {
+    bibtexSearch: !!preferences.bibtex_search,
+    collections,
+    libraries: [...allowedLibraries],
+    limit: MAX_RENDER_RESULTS,
   });
-
-  const { qss, tss } = parseQuery(q);
-
-  if (!qss.trim() && tss.length < 1) {
-    return ret.slice(0, MAX_RENDER_RESULTS);
-  }
-
-  const options = {
-    isCaseSensitive: false,
-    includeScore: false,
-    shouldSort: true,
-    includeMatches: false,
-    findAllMatches: true,
-    minMatchCharLength: 3,
-    threshold: 0.1,
-    ignoreLocation: true,
-    keys: [
-      {
-        name: "title",
-        weight: 10,
-      },
-      {
-        name: "abstractNote",
-        weight: 5,
-      },
-      {
-        name: "notes",
-        weight: 6,
-      },
-      {
-        name: "tags",
-        weight: 15,
-      },
-      {
-        name: "date",
-        weight: 3,
-      },
-      {
-        name: "creators",
-        weight: 4,
-      },
-      {
-        name: "DOI",
-        weight: 10,
-      },
-    ],
-  };
-
-  const query: Fuse.Expression = {
-    $and: qss
-      .split(" ")
-      .map((k) => k.trim())
-      .filter(Boolean)
-      .map((z) => ({
-        $or: options.keys.map((x) => Object.fromEntries(new Map([[x.name, z.replace(/\+/gi, " ")]]))),
-      })),
-  };
-
-  if (tss.length > 0) {
-    query["$and"].push({ $and: tss.map((x) => ({ tags: x.replace(/\+/gi, " ") })) });
-  }
-
-  return new Fuse(ret, options)
-    .search(query)
-    .slice(0, MAX_RENDER_RESULTS)
-    .map((x) => x.item);
 };

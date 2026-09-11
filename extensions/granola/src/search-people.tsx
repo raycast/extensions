@@ -11,7 +11,11 @@ import { mapColorToHex } from "./utils/iconMapper";
 
 type SortOption = PeopleSortOption;
 
-export default function Command() {
+import { withGranolaAuth } from "./utils/withGranolaAuth";
+
+export default withGranolaAuth(Command);
+
+function Command() {
   const { people, isLoading, hasError, error } = usePeople();
   const [sortBy, setSortBy] = useState<SortOption>("last-meeting");
 

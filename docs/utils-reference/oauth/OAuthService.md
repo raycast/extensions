@@ -149,6 +149,13 @@ OAuthService.linear: (options: ProviderOptions) => OAuthService
 
 ```tsx
 const linear = OAuthService.linear({ scope: "read write" });
+
+// A second, independent login (e.g. another Linear workspace):
+const secondWorkspace = OAuthService.linear({
+  scope: "read write",
+  providerId: "linear-workspace-2",
+  extraParameters: { prompt: "consent" },
+});
 ```
 
 #### Slack
@@ -209,6 +216,8 @@ const zoom = OAuthService.zoom({
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | clientId<mark style="color:red;">\*</mark>     | The app's client ID                                                                                                                | `string`                                     |
 | scope<mark style="color:red;">\*</mark>        | The scope of the access requested from the provider                                                                                | `string` \| `Array<string>`                  |
+| providerId                              | The provider ID used to namespace the token storage of the internally-constructed `OAuth.PKCEClient`. Defaults to the service's name (e.g. `linear`). Override it to keep several independent logins for the same provider (e.g. one per workspace). | `string`                                     |
+| extraParameters                         | Extra parameters for the authorization request, merged over the provider's defaults (caller wins)                                  | `Record<string, string>`                     |
 | authorizeUrl<mark style="color:red;">\*</mark> | The URL to start the OAuth flow                                                                                                    | `string`                                     |
 | tokenUrl<mark style="color:red;">\*</mark>     | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |
 | refreshTokenUrl                                | The URL to refresh the access token if applicable                                                                                  | `string`                                     |
@@ -223,6 +232,8 @@ const zoom = OAuthService.zoom({
 | Property Name                           | Description                                                                                                                        | Type                                         |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | scope<mark style="color:red;">\*</mark> | The scope of the access requested from the provider                                                                                | `string` \| `Array<string>`                  |
+| providerId                              | The provider ID used to namespace the token storage of the internally-constructed `OAuth.PKCEClient`. Defaults to the service's name (e.g. `linear`). Override it to keep several independent logins for the same provider (e.g. one per workspace). | `string`                                     |
+| extraParameters                         | Extra parameters for the authorization request, merged over the provider's defaults (caller wins)                                  | `Record<string, string>`                     |
 | clientId                                | The app's client ID                                                                                                                | `string`                                     |
 | authorizeUrl                            | The URL to start the OAuth flow                                                                                                    | `string`                                     |
 | tokenUrl                                | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |

@@ -70,6 +70,95 @@ export async function getTabs() {
   return response ? (JSON.parse(response) as Tab[]) : undefined;
 }
 
+export async function getTabsWithSpaceInfo(): Promise<Tab[] | undefined> {
+  await ensureArcIsRunning();
+
+  let response: string | undefined;
+  try {
+    response = await runAppleScript(`
+      on escape_value(this_text)
+        set AppleScript's text item delimiters to "\\\\"
+        set the item_list to every text item of this_text
+        set AppleScript's text item delimiters to "\\\\\\\\"
+        set this_text to the item_list as string
+        set AppleScript's text item delimiters to "\\""
+        set the item_list to every text item of this_text
+        set AppleScript's text item delimiters to "\\\\\\""
+        set this_text to the item_list as string
+        set AppleScript's text item delimiters to ""
+        return this_text
+      end escape_value
+
+      set _tabs to ""
+      set _spaces to "{"
+      set _space_index to 1
+      set _first to true
+
+      tell application "Arc"
+        tell first window
+          set _all_tabs to properties of every tab
+          set _tabs_count to count of _all_tabs
+
+          repeat with i from 1 to _tabs_count
+            set _tab to item i of _all_tabs
+            set _title to my escape_value(get title of _tab)
+            set _url to get URL of _tab
+            set _id to get id of _tab
+            set _location to get location of _tab
+
+            if i > 1 then
+              set _tabs to (_tabs & ",\\n")
+            end if
+            set _tabs to (_tabs & "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"id\\": \\"" & _id & "\\", \\"location\\": \\"" & _location & "\\" }")
+          end repeat
+
+          repeat with _space in spaces
+            set _space_title to get title of _space
+            if _space_title is "" then
+              set _space_title to "Space " & _space_index
+            end if
+            set _space_title to my escape_value(_space_title)
+
+            repeat with _tab in every tab of _space
+              set _tab_id to get id of _tab
+
+              if not _first then
+                set _spaces to (_spaces & ",")
+              end if
+              set _spaces to (_spaces & "\\"" & _tab_id & "\\": \\"" & _space_title & "\\"")
+              set _first to false
+            end repeat
+
+            set _space_index to _space_index + 1
+          end repeat
+        end tell
+      end tell
+
+      return "{ \\"tabs\\": [\\n" & _tabs & "\\n], \\"spaces\\": " & _spaces & "} }"
+    `);
+  } catch (e) {
+    console.error("getTabsWithSpaceInfo AppleScript failed, falling back to getTabs():", e);
+    return getTabs();
+  }
+
+  if (!response) {
+    console.error("getTabsWithSpaceInfo received empty response, falling back to getTabs()");
+    return getTabs();
+  }
+
+  try {
+    const parsed = JSON.parse(response) as { tabs: Tab[]; spaces: Record<string, string> };
+
+    return parsed.tabs.map((tab) => ({
+      ...tab,
+      spaceName: parsed.spaces[tab.id],
+    }));
+  } catch (e) {
+    console.error("getTabsWithSpaceInfo failed to parse response, falling back to getTabs():", e);
+    return getTabs();
+  }
+}
+
 export async function findTab(url: string) {
   const response = await runAppleScript(`
   on escape_value(this_text)

@@ -4,14 +4,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { useBrewSearch, isInstalled } from "./hooks/useBrewSearch";
+import { usePopularityRanks } from "./hooks/usePopularityRanks";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { FormulaList } from "./components/list";
-
-interface SearchPreferences {
-  showMetadataPanel?: boolean;
-}
 
 /**
  * Format a number with commas (e.g., 8081 -> "8,081")
@@ -23,7 +21,25 @@ function formatNumber(num: number): string {
 export default function SearchView(props: LaunchProps<{ arguments: Arguments.Search }>) {
   const [searchText, setSearchText] = useState(props.arguments.search ?? "");
   const [filter, setFilter] = useState(InstallableFilterType.all);
-  const { showMetadataPanel } = getPreferenceValues<SearchPreferences>();
+  const [sortByPopularity, setSortByPopularity] = useCachedState("sort-by-popularity", false);
+  const [showDescription, setShowDescription] = useCachedState("show-description", true);
+  const { showMetadataPanel } = getPreferenceValues<Preferences.Search>();
+  // The preference is the default; the action toggles it for this session.
+  const [showDetails, setShowDetails] = useState(showMetadataPanel);
+
+  // Install rankings for the whole index, loaded only when the sort is on.
+  const {
+    isLoading: isLoadingRanks,
+    data: ranks,
+    revalidate: revalidateRanks,
+    version: ranksVersion,
+  } = usePopularityRanks(sortByPopularity);
+
+  // The toggle is on well before the ~3MB download lands. Until it does, the
+  // list is still relevance-ordered, so only the *applied* state may describe
+  // the ordering — the action title still reflects the toggle, since that is
+  // what pressing it does next.
+  const sortApplied = sortByPopularity && ranks != undefined;
 
   const { isLoading: isLoadingInstalled, data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
 
@@ -39,6 +55,9 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
   } = useBrewSearch({
     searchText,
     installed,
+    ranks: sortByPopularity ? ranks : undefined,
+    ranksVersion,
+    onCacheCleared: revalidateRanks,
   });
 
   const formulae = filter != InstallableFilterType.casks ? (results?.formulae ?? []) : [];
@@ -127,15 +146,20 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
       formulae={formulae}
       casks={casks}
       searchText={searchText}
-      searchBarPlaceholder={placeholder(filter)}
+      searchBarPlaceholder={placeholder(filter, sortApplied)}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
-      isLoading={(isLoadingInstalled && !installed) || isLoadingSearch}
+      isLoading={(isLoadingInstalled && !installed) || isLoadingSearch || isLoadingRanks}
       onSearchTextChange={(searchText) => setSearchText(searchText.trim())}
       filtering={false}
       isInstalled={isInstalledCallback}
       onAction={() => revalidateInstalled()}
       dataFetched={loadingState.phase === "complete"}
-      showMetadataPanel={showMetadataPanel}
+      showMetadataPanel={showDetails}
+      onToggleSidebar={() => setShowDetails((current) => !current)}
+      showDescription={showDescription}
+      onToggleDescription={() => setShowDescription((current) => !current)}
+      sortByPopularity={sortByPopularity}
+      onToggleSort={() => setSortByPopularity((current) => !current)}
     />
   );
 }

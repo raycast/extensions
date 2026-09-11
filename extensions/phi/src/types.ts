@@ -2,6 +2,7 @@ import { isAbsolute } from "node:path";
 
 export const PHI_SCHEMA_VERSION = 1;
 export const PHI_API_VERSION = 1;
+export const PHI_SCRIPTING_API_V2 = 2;
 
 export type ApplicationChannel = "stable" | "canary";
 

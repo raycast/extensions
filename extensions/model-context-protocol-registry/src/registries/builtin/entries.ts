@@ -219,6 +219,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "hermoso",
+    title: "Hermoso",
+    description:
+      "Hermoso is an AI ad studio for marketers. Research the ads already winning in any market (the Meta, Google and LinkedIn ad libraries plus organic TikTok, Instagram, YouTube, Reddit and Threads), generate finished on-brand image and video ads, publish and schedule to your own social channels, and build and manage paid campaigns on Meta, Google, TikTok, LinkedIn, Reddit, Pinterest, X and Microsoft. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
+    homepage: "https://hermoso.ai/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?src=raycast"],
+    },
+  },
+  {
     name: "kagimcp",
     title: "Kagi Search",
     description: "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
@@ -1007,6 +1019,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "contracko",
+    title: "Contracko",
+    description:
+      "AI contract management. Review contracts for risks and obligations, extract dates, parties and values, search inside documents, and track renewal deadlines. Connects to the remote Contracko MCP server over OAuth 2.1.",
+    icon: "https://app.contracko.com/mcp/icon-512.png",
+    homepage: "https://contracko.com/docs/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.contracko.com/mcp"],
+    },
+  },
+  {
     name: "discord",
     title: "Discord",
     description:
@@ -1065,6 +1089,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "iterm-mcp"],
+    },
+  },
+  {
+    name: "kyma",
+    title: "Kyma API",
+    description:
+      "Kyma API's hosted MCP server: browse the live model catalog and pricing, check measured per-model uptime and public usage rankings, view your own credits and spend, and chat through a tool guarded by a spend cap you set. OAuth 2.1 sign-in, no key pasted into the client.",
+    icon: "https://raw.githubusercontent.com/kyma-api/kyma-mcp-plugin/main/assets/logo-400.png",
+    homepage: "https://kymaapi.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@kyma-api/mcp-server"],
     },
   },
   {
@@ -1152,6 +1188,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         PAPERLESS_URL: "http://your-paperless-instance:8000",
         PAPERLESS_API_KEY: "your-api-token",
       },
+    },
+  },
+  {
+    name: "stellary",
+    title: "Stellary",
+    description:
+      "AI-native project piloting and project management (open beta). Connect your AI assistant to Stellary workspaces through the hosted Streamable HTTP MCP server. Bearer PAT required.",
+    icon: "https://raw.githubusercontent.com/Anymfah/stellary-mcp/main/assets/logo-400.png",
+    homepage: "https://stellary.co/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.stellary.co/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {

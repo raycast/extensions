@@ -51,40 +51,47 @@ function getUserShell(): string {
 }
 
 /**
- * Executes a command with a clean environment using `env -i` and a login shell.
- * This ensures child processes don't inherit Raycast's environment variables.
+ * Builds the `env -i ...` argv for running `command args` inside an
+ * interactive login shell. Pulled out of `execWithCleanEnv` so the flags
+ * (`-ilc`, not just `-lc`) are unit-testable without spawning a real shell.
  *
- * The approach:
- * 1. `env -i` starts with an empty environment
- * 2. Only HOME is passed (required for login shell to find profile files)
- * 3. A POSIX-compatible login shell (zsh or bash) sources the user's profile,
- *    then execs the target command directly — avoiding shell-escaping issues
- *    with non-POSIX shells like fish, nushell, etc.
+ * Login-only (`-l`) is not enough: zsh only sources `~/.zshrc` for
+ * *interactive* shells, and that's where most users actually set PATH (nvm,
+ * pyenv, oh-my-zsh, manual edits) rather than in `~/.zprofile`. So we run
+ * login *and* interactive (`-i`), matching what a normal terminal - and Zed
+ * itself when launched from Finder - resolves.
  *
- * This gives the command the same environment as a fresh terminal window.
+ * Non-POSIX shells (fish, nushell, elvish, xonsh, pwsh, ...) don't accept
+ * the POSIX-style quoted command built here, so the caller should pass
+ * `/bin/zsh` instead of the user's actual shell in that case. The user's
+ * profile still gets sourced, just by a POSIX shell instead of their own.
  */
-export async function execWithCleanEnv(command: string, args: string[]): Promise<void> {
-  const userShell = getUserShell();
-
-  // Non-POSIX shells (fish, nushell, elvish, xonsh, pwsh, ...) don't accept
-  // the POSIX-style quoted command we build below, so fall back to /bin/zsh
-  // for the -lc invocation. The user's profile still gets sourced, just by a
-  // POSIX shell instead of their interactive shell.
-  const posixShell = isPosixShell(userShell) ? userShell : "/bin/zsh";
-
+export function buildCleanEnvArgs(command: string, args: string[], posixShell: string, home: string): string[] {
   const escapedArgs = args.map(shellEscape).join(" ");
   const shellCommand = `${shellEscape(command)} ${escapedArgs}`;
 
-  // Use env -i to start with empty environment, then login shell for user's profile
-  // -l = login shell (sources profile), -c = execute command
-  await execFilePromise("env", [
+  return [
     "-i",
-    `HOME=${process.env.HOME || homedir()}`,
+    `HOME=${home}`,
     `USER=${userInfo().username}`,
     posixShell,
-    "-lc",
+    // -i = interactive shell (sources rc), -l = login shell (sources profile), -c = execute command
+    "-ilc",
     shellCommand,
-  ]);
+  ];
+}
+
+/**
+ * Executes a command with a clean environment using `env -i` and an
+ * interactive login shell (see `buildCleanEnvArgs`).
+ * This ensures child processes don't inherit Raycast's environment variables,
+ * while still resolving the user's PATH the same way a fresh terminal does.
+ */
+export async function execWithCleanEnv(command: string, args: string[]): Promise<void> {
+  const userShell = getUserShell();
+  const posixShell = isPosixShell(userShell) ? userShell : "/bin/zsh";
+
+  await execFilePromise("env", buildCleanEnvArgs(command, args, posixShell, process.env.HOME || homedir()));
 }
 
 export function exists(p: string) {

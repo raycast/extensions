@@ -1,3 +1,4 @@
+import { isAuthError } from "./apiError";
 import { isConnectionError } from "./connection";
 
 /**
@@ -19,5 +20,10 @@ import { isConnectionError } from "./connection";
  * the server is up.
  */
 export function shouldGuard(error: unknown, hasLiveData: boolean): boolean {
+  // A rejected API key ignores `hasLiveData` on purpose. That latch exists so a
+  // TRANSIENT failure leaves good rows on screen; a 401 is not transient — every
+  // later request fails the same way, and rows restored from the cache would be
+  // presenting a stale snapshot as the live account.
+  if (isAuthError(error)) return true;
   return isConnectionError(error) && !hasLiveData;
 }

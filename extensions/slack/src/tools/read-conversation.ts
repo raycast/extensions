@@ -1,9 +1,10 @@
 import { getSlackWebClient } from "../shared/client/WebClient";
+import { formatSlackFiles } from "../shared/utils";
 import { withSlackClient } from "../shared/withSlackClient";
 
 type Input = {
   /**
-   * A Slack conversation ID, user ID, or message permalink. Conversation IDs start with C, D, or G. User IDs start with U or W.
+   * A Slack conversation ID, user ID, or message permalink. Conversation IDs start with C, D, or G. User IDs start with U or W. Passing a user ID opens or finds the DM and returns its D-prefixed channel ID; use that channel ID with Upload Files.
    */
   conversation: string;
   /**
@@ -130,6 +131,7 @@ function formatMessage(message: {
   ts?: string;
   thread_ts?: string;
   reply_count?: number;
+  files?: { id?: string; name?: string; title?: string; mimetype?: string; filetype?: string; size?: number }[];
 }) {
   return {
     text: message.text,
@@ -138,6 +140,7 @@ function formatMessage(message: {
     threadTs: message.thread_ts,
     replyCount: message.reply_count,
     date: message.ts ? new Date(Number.parseFloat(message.ts) * 1000).toISOString() : undefined,
+    files: formatSlackFiles(message.files),
   };
 }
 

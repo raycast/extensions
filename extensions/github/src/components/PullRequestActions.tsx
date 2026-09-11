@@ -21,10 +21,10 @@ import {
   PullRequestMergeMethod,
   UserFieldsFragment,
 } from "../generated/graphql";
+import { RevalidateList } from "../helpers";
 import { getErrorMessage } from "../helpers/errors";
 import { getMergeMethodTitle, PR_SORT_TYPES_TO_QUERIES } from "../helpers/pull-request";
 import { getGitHubUser } from "../helpers/users";
-import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import AddPullRequestReview from "./AddPullRequestReview";
 import CheckoutPullRequestForm from "./CheckoutPullRequestForm";
@@ -40,10 +40,7 @@ export type PullRequest =
 type PullRequestActionsProps = {
   pullRequest: PullRequest;
   viewer?: UserFieldsFragment;
-  mutateList?:
-    | MutatePromise<PullRequestFieldsFragment[] | undefined>
-    | MutatePromise<PullRequestFieldsFragment[]>
-    | ReturnType<typeof useMyPullRequests>["mutate"];
+  mutateList?: RevalidateList;
   mutateDetail?: MutatePromise<PullRequest>;
   children?: React.ReactNode;
 };

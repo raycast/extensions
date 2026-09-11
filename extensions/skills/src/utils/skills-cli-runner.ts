@@ -16,8 +16,19 @@ let bunxResolutionFailed = false;
 
 const SKILLS_CLI_LOCK_TARGET = join(environment.supportPath, "skills-cli");
 
+/**
+ * `list` only reads local state. `add`, `remove` and `update` fetch every
+ * involved skill from its git source, and "update all" does so for each
+ * installed skill in turn, so it easily outgrows a 30-second budget.
+ */
+const READ_ONLY_TIMEOUT_MS = 30_000;
+const MUTATING_TIMEOUT_MS = 5 * 60_000;
+
 type ExecFailure = Error & {
-  code?: string | number;
+  cmd?: string;
+  code?: string | number | null;
+  killed?: boolean;
+  signal?: NodeJS.Signals | null;
   stdout?: string | Buffer;
   stderr?: string | Buffer;
 };
@@ -98,38 +109,53 @@ async function withCrossProcessSkillsCliLock<T>(run: () => Promise<T>): Promise<
 }
 
 async function runSkillsCliCommand(args: string[], readOnly: boolean): Promise<string> {
+  const timeoutMs = readOnly ? READ_ONLY_TIMEOUT_MS : MUTATING_TIMEOUT_MS;
+
   const customNpxPath = getCustomNpxPath();
   if (customNpxPath) {
     await validateCustomNpxPath(customNpxPath);
     try {
-      return await executeSkillsCli("npx", args, customNpxPath);
+      return await executeSkillsCli("npx", args, timeoutMs, customNpxPath);
     } catch (error) {
-      throw normalizeCliError(error, customNpxPath);
+      throw normalizeCliError(error, customNpxPath, timeoutMs);
     }
   }
 
   if (!bunxResolutionFailed) {
     try {
-      return await executeSkillsCli("bunx", args);
+      return await executeSkillsCli("bunx", args, timeoutMs);
     } catch (error) {
       if (isNpxCommandResolutionFailure(error, "bunx")) {
         bunxResolutionFailed = true;
-      } else if (!readOnly || hasDiagnosticOutput(error)) {
-        // Either the command may have changed state, or bunx said what went
-        // wrong — in both cases retrying through npx is not the right move.
-        throw normalizeCliError(error, "bunx");
+      } else if (!canRetryThroughNpx(error, readOnly)) {
+        throw normalizeCliError(error, "bunx", timeoutMs);
       }
     }
   }
 
   try {
-    return await executeSkillsCli("npx", args);
+    return await executeSkillsCli("npx", args, timeoutMs);
   } catch (npxError) {
-    throw normalizeCliError(npxError, "npx");
+    throw normalizeCliError(npxError, "npx", timeoutMs);
   }
 }
 
-async function executeSkillsCli(runner: PackageRunner, args: string[], executable: string = runner): Promise<string> {
+/**
+ * Retrying through npx is only worth it when bunx failed without saying why.
+ * A mutating command may already have changed state, a failure with output has
+ * already explained itself, and a timeout means bunx works but the command is
+ * slow — running it again would only double the wait.
+ */
+function canRetryThroughNpx(error: unknown, readOnly: boolean): boolean {
+  return readOnly && !hasDiagnosticOutput(error) && !isTimeoutFailure(error);
+}
+
+async function executeSkillsCli(
+  runner: PackageRunner,
+  args: string[],
+  timeoutMs: number,
+  executable: string = runner,
+): Promise<string> {
   const execOptions = await getExecOptions();
   const env = {
     ...execOptions.env,
@@ -139,6 +165,7 @@ async function executeSkillsCli(runner: PackageRunner, args: string[], executabl
   const { stdout } = await execFileAsync(executable, getRunnerArgs(runner, args), {
     ...execOptions,
     env,
+    timeout: timeoutMs,
     shell: isWindows,
   });
   return stdout.toString();
@@ -171,34 +198,55 @@ function hasDiagnosticOutput(error: unknown): boolean {
   return extractCliOutput(error).length > 0;
 }
 
-function normalizeCliError(error: unknown, npxCommand: string): Error {
+/**
+ * `execFile` reports a hit timeout only as "Command failed: …" with the child
+ * killed by the default signal — no exit code, no explanation.
+ */
+function isTimeoutFailure(error: unknown): boolean {
+  const failure = error as ExecFailure | undefined;
+  return failure?.killed === true && failure.signal === "SIGTERM" && failure.code == null;
+}
+
+function formatTimeout(timeoutMs: number): string {
+  return timeoutMs >= 60_000 ? `${timeoutMs / 60_000} minutes` : `${timeoutMs / 1000} seconds`;
+}
+
+function normalizeCliError(error: unknown, npxCommand: string, timeoutMs: number): Error {
   if (isNpxCommandResolutionFailure(error, npxCommand)) {
     return new NpxResolutionError(
       "Unable to find a working bunx or npx command. Install Bun, or install Node.js/npm. If you need to force a custom npx executable, set it in the extension configuration under 'Custom npx Path'.",
     );
   }
 
-  if (error instanceof Error) {
-    return withCliOutput(error);
+  if (!(error instanceof Error)) {
+    return new Error("Failed to execute the skills CLI command.");
   }
 
-  return new Error("Failed to execute the skills CLI command.");
+  if (isTimeoutFailure(error)) {
+    const command = (error as ExecFailure).cmd ?? npxCommand;
+    return withCliOutput(
+      error,
+      `The skills CLI did not finish within ${formatTimeout(timeoutMs)}. Check your network connection and try again.\nCommand: ${command}`,
+    );
+  }
+
+  return withCliOutput(error);
 }
 
 /**
  * `execFile` folds stderr into the rejection message but drops stdout, which is
  * where this CLI reports its failures. Without it the user only sees the command
- * that failed, never the reason.
+ * that failed, never the reason. The detailed error gets its own stack so the
+ * reason also reaches the logs Raycast copies from the failure toast.
  */
-function withCliOutput(error: Error): Error {
+function withCliOutput(error: Error, message: string = error.message): Error {
   const output = extractCliOutput(error);
-  if (!output || error.message.includes(output)) return error;
+  if (!output || message.includes(output)) {
+    return message === error.message ? error : new Error(message, { cause: error });
+  }
 
   const truncated = output.length > MAX_CLI_OUTPUT_CHARS ? `…${output.slice(-MAX_CLI_OUTPUT_CHARS)}` : output;
-  const detailedError = new Error(`${error.message.trim()}\n${truncated}`, { cause: error });
-  detailedError.name = error.name;
-  detailedError.stack = error.stack;
-  return detailedError;
+  return new Error(`${message.trim()}\n${truncated}`, { cause: error });
 }
 
 async function validateCustomNpxPath(customNpxPath: string): Promise<void> {

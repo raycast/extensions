@@ -2,7 +2,9 @@
 
 import type { Image } from "@raycast/api";
 import { Color, Icon } from "@raycast/api";
+import { getAvatarIcon, getFavicon } from "@raycast/utils";
 
+import type { ProviderIconConfig, ProviderIconName } from "@/ai-providers/types";
 import { LingueeListItemType } from "@/providers/dictionary/linguee/types";
 import { YoudaoDictionaryListItemType } from "@/providers/dictionary/youdao/types";
 import { DictionaryType } from "@/types/api";
@@ -22,10 +24,18 @@ export const playSoundIconGray: Image.ImageLike = {
   tintColor: { light: "gray", dark: "lightgray" },
 };
 
+export const raycastAIIcon: Image.ImageLike = {
+  source: Icon.RaycastLogoNeg,
+  tintColor: "#FF6363",
+};
+
 /**
  * Return the corresponding ImageLike based on the query and display types.
  */
 export function getListItemIcon(item: ListDisplayItem): Image.ImageLike {
+  if (item.serviceIcon) {
+    return getProviderIcon(item.serviceIcon, item.serviceLabel ?? item.queryType.toString());
+  }
   if (item.queryType === DictionaryType.Linguee) {
     return getLingueeListItemIcon(item.displayType);
   }
@@ -34,6 +44,34 @@ export function getListItemIcon(item: ListDisplayItem): Image.ImageLike {
   }
   return getQueryTypeIcon(item.queryType);
 }
+
+export function getProviderIcon(icon: ProviderIconConfig, name: string): Image.ImageLike {
+  switch (icon.kind) {
+    case "preset":
+      if (icon.name === "raycast") return raycastAIIcon;
+      return { source: providerIconAssets[icon.name], fallback: getAvatarIcon(name) };
+    case "remote":
+      return icon.url.startsWith("https://")
+        ? { source: icon.url, fallback: getAvatarIcon(name) }
+        : getAvatarIcon(name);
+    case "favicon":
+      return icon.website ? getFavicon(icon.website, { fallback: getAvatarIcon(name) }) : getAvatarIcon(name);
+    case "initials":
+      return getAvatarIcon(name);
+  }
+}
+
+const providerIconAssets: Record<Exclude<ProviderIconName, "raycast">, string> = {
+  openai: "OpenAI Translate.png",
+  gemini: "Gemini Translate.png",
+  deepseek: "provider-icons/deepseek.svg",
+  openrouter: "provider-icons/openrouter.svg",
+  siliconflow: "provider-icons/siliconflow.svg",
+  zhipu: "provider-icons/zhipu.svg",
+  kimi: "provider-icons/kimi.svg",
+  minimax: "provider-icons/minimax.svg",
+  mimo: "provider-icons/mimo.svg",
+};
 
 /**
  * Get ImageLike based on LingueeDisplayType.

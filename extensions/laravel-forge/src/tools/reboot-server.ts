@@ -1,33 +1,31 @@
 import { Tool } from "@raycast/api";
 import { Server } from "../api/Server";
-import { nameList, sitesOnServer, targetServer } from "./helpers";
+import { serverRecord } from "../lib/records";
+import { siteNames, sitesOn } from "./sites-on-server";
+import { nameList } from "./helpers";
 
 type Input = {
   /**
-   * Name of the server to reboot, as shown in Forge. Leave empty if you only know a site that runs on it.
+   * A server id from list-servers, for example 678350.
    */
-  server?: string;
-  /**
-   * Name of a site on the server, used when the server itself was not named.
-   */
-  site?: string;
+  serverId: number;
 };
 
-export const confirmation: Tool.Confirmation<Input> = async ({ server, site }) => {
-  const { server: found } = await targetServer({ server, site });
-  const sites = await sitesOnServer(found);
+export const confirmation: Tool.Confirmation<Input> = async ({ serverId }) => {
+  const at = await serverRecord(serverId);
+  const sites = await sitesOn({ ...at, serverId });
   return {
-    message: `Reboot ${found.name}? Every site on it goes down until it comes back.`,
+    message: `Reboot ${at.server.name}? Every site on it goes down until it comes back.`,
     info: [
-      { name: `Sites going down (${sites.length})`, value: nameList(sites) },
-      { name: "Provider", value: [found.provider, found.region].filter(Boolean).join(" · ") || "unknown" },
-      { name: "IP address", value: found.ip_address ?? "unknown" },
+      { name: `Sites going down (${sites.length})`, value: nameList(siteNames(sites)) },
+      { name: "Provider", value: [at.server.provider, at.server.region].filter(Boolean).join(", ") || "unknown" },
+      { name: "IP address", value: at.server.ip_address ?? "unknown" },
     ],
   };
 };
 
-export default async function tool({ server, site }: Input) {
-  const { server: found, token } = await targetServer({ server, site });
-  await Server.runAction({ server: found, token, action: "reboot" });
-  return { server: found.name, action: "reboot", started: true };
+export default async function tool({ serverId }: Input) {
+  const { server, account } = await serverRecord(serverId);
+  await Server.runAction({ server, token: account.token, action: "reboot" });
+  return { server: server.name, serverId, action: "reboot", started: true };
 }

@@ -35,7 +35,7 @@ export function Body() {
     trpc.spaceAuth.listAuthRequiredSpaceIds.useQuery(undefined, {
       enabled: !!sessionToken,
     });
-  const { data, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
+  const { data, isError, isFetching, isFetched, refetch: refetchBookmarks } = useMyBookmarks();
   const [rankingEntries, setRankingEntries] = useCachedState<RankingEntries>(CACHED_KEY_RANKING_ENTRIES, {});
   const [isShowingDetail, setIsShowingDetail] = useCachedState<boolean>(CACHED_KEY_SHOWING_DETAIL, false);
 
@@ -48,7 +48,8 @@ export function Body() {
     await Promise.all([refetchBookmarks(), me.refetch(), refetchAuthRequiredSpaceIds()]);
   }, [refetchBookmarks, me.refetch, refetchAuthRequiredSpaceIds]);
 
-  // favicon이 비어있는 북마크를 백그라운드에서 resolve & 서버에 보고 (로컬 캐시도 동시 업데이트).
+  // Resolve favicons for bookmarks that lack one in the background and report them to the server
+  // (the local cache is updated at the same time).
   useFaviconBackfill(data);
 
   const selectedTags = useMemo(() => {
@@ -79,6 +80,21 @@ export function Body() {
     untaggedBookmarks: preparedData.untaggedBookmarks,
     rankingEntries,
   });
+
+  // Raycast List keeps the previously selected item (by id) even when the items are reordered,
+  // so while typing "o" → "ok" a non-top item can stay selected after the ranking changes.
+  // Select the first result whenever the keyword changes, but respect manual moves within the same keyword.
+  const firstItemId = searchedTaggedList[0]?.id ?? searchedUntaggedList[0]?.id;
+  const [selection, setSelection] = useState<{ keyword: string; itemId?: string }>({ keyword: "" });
+  const selectedItemId = selection.keyword === keyword ? selection.itemId : firstItemId;
+  const handleSelectionChange = useCallback(
+    (itemId: string | null) => {
+      // null can arrive transiently while the list is being updated; ignore it.
+      if (itemId === null) return;
+      setSelection({ keyword, itemId });
+    },
+    [keyword],
+  );
 
   const { hasSpaceFilter, hasCreatorFilter, hasTagFilter } = filteredData;
   const hasFilter = hasSpaceFilter || hasCreatorFilter || hasTagFilter;
@@ -111,6 +127,26 @@ export function Body() {
   }
 
   if (!data) {
+    // No usable cache and the request failed (e.g. offline): show a retry state instead of
+    // an indefinite loading indicator.
+    if (isError) {
+      return (
+        <List>
+          <List.EmptyView
+            icon={Icon.WifiDisabled}
+            title="Could not load bookmarks"
+            description="Check your internet connection and try again."
+            actions={
+              <ActionPanel>
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={refetch} />
+                <RequiredActions refetch={refetch} />
+              </ActionPanel>
+            }
+          />
+        </List>
+      );
+    }
+
     return <List isLoading={true} />;
   }
 
@@ -164,6 +200,8 @@ export function Body() {
       searchBarAccessory={me.data && enabledSpaceIds && <BookmarkFilter spaceIds={enabledSpaceIds} me={me.data} />}
       searchText={keyword}
       onSearchTextChange={setKeyword}
+      selectedItemId={selectedItemId}
+      onSelectionChange={handleSelectionChange}
     >
       {/* Display search results */}
       {searchedTaggedList.length > 0 && (

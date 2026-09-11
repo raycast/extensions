@@ -1,5 +1,9 @@
 # Terminal Finder Changelog
 
+## [Fix Crash With No Terminal Window] - 2026-09-11
+
+- Show a friendly error instead of crashing when Terminal is running with no open windows (ref: [Issue #30965](https://github.com/raycast/extensions/issues/30965))
+
 ## [Bugfix] - 2026-05-27
 
 - Show a helpful recovery message when cmux reports a broken automation socket.
