@@ -40,28 +40,44 @@ export async function getMyTimeEntries<Meta extends boolean = false>({
   return sorted;
 }
 
-export async function getRunningTimeEntry() {
-  // Toggl POST/PATCH endpoints return tags:null while GET returns tags:[].
-  // Normalize on read so stale cache entries with null tags don't crash downstream .map() calls.
-  const normalize = (e: TimeEntry): TimeEntry => ({ ...e, tags: e.tags ?? [] });
+// Toggl POST/PATCH endpoints return tags:null while GET returns tags:[].
+// Normalize on read so stale cache entries with null tags don't crash downstream .map() calls.
+const normalizeTimeEntry = (e: TimeEntry): TimeEntry => ({ ...e, tags: e.tags ?? [] });
 
-  const cached = cacheHelper.get<TimeEntry>("runningTimeEntry");
-  if (cached) return normalize(cached);
-
-  if (cacheOnly) {
-    const stale = cacheHelper.getRaw<TimeEntry>("runningTimeEntry");
-    if (stale) return normalize(stale);
-    return null;
-  }
-
+async function getRunningTimeEntryFromApi() {
   const result = await get<TimeEntry | null>("/me/time_entries/current");
   if (result) {
-    cacheHelper.set("runningTimeEntry", normalize(result));
+    cacheHelper.set("runningTimeEntry", normalizeTimeEntry(result));
   }
   if (extensionUpdateScript) {
     runTrigger(extensionUpdateScript, result);
   }
-  return result ? normalize(result) : result;
+  return result ? normalizeTimeEntry(result) : result;
+}
+
+export async function getRunningTimeEntry() {
+  const cached = cacheHelper.get<TimeEntry>("runningTimeEntry");
+  if (cached) return normalizeTimeEntry(cached);
+
+  if (cacheOnly) {
+    const stale = cacheHelper.getRaw<TimeEntry>("runningTimeEntry");
+    if (stale) return normalizeTimeEntry(stale);
+    return null;
+  }
+
+  return getRunningTimeEntryFromApi();
+}
+
+/**
+ * Read the running entry straight from the API, bypassing the cache-only rules
+ * that Low Data Mode (and the menu bar) apply.
+ *
+ * For user-initiated one-shot actions that must not act on cached state at all —
+ * currently the Quickstop Timer command, where a stale entry would mean stopping
+ * the wrong timer.
+ */
+export async function refetchRunningTimeEntry() {
+  return getRunningTimeEntryFromApi();
 }
 
 type CreateTimeEntryParameters = {
