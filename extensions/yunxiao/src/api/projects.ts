@@ -8,7 +8,7 @@
  * （x-page、x-per-page、x-total、x-next-page）。
  */
 
-import { buildProjectPath, resolveCredentials, request } from "./client";
+import { buildProjectPath, fetchAllPages, resolveCredentials, requestWithHeaders } from "./client";
 import type { Project } from "./types";
 
 export interface ListProjectsOptions {
@@ -25,13 +25,14 @@ export interface ListProjectsOptions {
  * 列出当前 organization 下的项目。
  *
  * SearchProjects 返回裸数组 [Project,...]，无需 .items / .projects 包装。
+ * 响应头携带分页信息（x-next-page / x-total-pages），这里自动翻页拉取全部项目，
+ * 避免组织项目数超过一页时后面的项目被静默丢弃。
  */
 export async function listProjects(opts: ListProjectsOptions = {}): Promise<Project[]> {
     const creds = resolveCredentials();
 
     const path = buildProjectPath(creds, "projects:search");
     const perPage = clampPerPage(opts.perPage ?? 50);
-    const page = Math.max(1, Math.floor(opts.page ?? 1));
 
     // 构造 conditions：如果给了 keyword，按 name 模糊匹配
     const conditions: Array<Array<unknown>> = [];
@@ -46,23 +47,29 @@ export async function listProjects(opts: ListProjectsOptions = {}): Promise<Proj
             },
         ]);
     }
-    const body: Record<string, unknown> = {
-        page,
-        perPage,
-        orderBy: "gmtCreate",
-        sort: "desc",
-    };
-    if (conditions.length > 0) {
-        body.conditions = JSON.stringify({ conditionGroups: conditions });
+
+    if (opts.page !== undefined) {
+        const page = Math.max(1, Math.floor(opts.page));
+        const body: Record<string, unknown> = { page, perPage, orderBy: "gmtCreate", sort: "desc" };
+        if (conditions.length > 0) {
+            body.conditions = JSON.stringify({ conditionGroups: conditions });
+        }
+        const { data } = await requestWithHeaders<Project[]>(path, { method: "POST", body, signal: opts.signal });
+        return Array.isArray(data) ? data : [];
     }
 
-    const data = await request<Project[]>(path, {
-        method: "POST",
-        body,
-        signal: opts.signal,
+    return fetchAllPages<Project>(async (page) => {
+        const body: Record<string, unknown> = { page, perPage, orderBy: "gmtCreate", sort: "desc" };
+        if (conditions.length > 0) {
+            body.conditions = JSON.stringify({ conditionGroups: conditions });
+        }
+        const { data, headers } = await requestWithHeaders<Project[]>(path, {
+            method: "POST",
+            body,
+            signal: opts.signal,
+        });
+        return { items: Array.isArray(data) ? data : [], headers };
     });
-    // SearchProjects 返回裸数组
-    return Array.isArray(data) ? data : [];
 }
 
 function clampPerPage(n: number): number {

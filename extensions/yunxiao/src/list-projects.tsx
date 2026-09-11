@@ -412,7 +412,6 @@ function WorkitemsView({ projectId, projectName }: WorkitemsViewProps) {
                 const result = await listWorkitems({
                     projectId,
                     category,
-                    page: 1,
                     perPage: 200,
                     signal: controller.signal,
                 });

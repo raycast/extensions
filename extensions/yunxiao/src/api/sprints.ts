@@ -17,7 +17,7 @@
  * x-next-page、x-total-pages）携带，本扩展一次拉一页。
  */
 
-import { buildProjectPath, resolveCredentials, request } from "./client";
+import { buildProjectPath, fetchAllPages, resolveCredentials, requestWithHeaders } from "./client";
 import { normalizeSprints } from "./sprints-normalize";
 import type { Sprint } from "./types";
 
@@ -57,8 +57,8 @@ function statusQueryValue(status: SprintStatus | SprintStatus[] | null | undefin
 /**
  * 列出项目下的迭代。
  *
- * 默认每页 50 条（官方上限 200）。常规组织一次拉完即覆盖；
- * 如需分页可显式传 perPage / page。
+ * 默认每页 50 条（官方上限 200）。未显式指定 page 时自动翻页拉取全部迭代，
+ * 避免项目迭代数超过一页时后面的迭代被静默丢弃；显式传 page 时仅拉取该页。
  */
 export async function searchSprints(opts: SearchSprintsOptions): Promise<Sprint[]> {
     const creds = resolveCredentials();
@@ -67,19 +67,29 @@ export async function searchSprints(opts: SearchSprintsOptions): Promise<Sprint[
 
     const path = `${buildProjectPath(creds, `projects/${encodeURIComponent(projectId)}/sprints`)}`;
     const perPage = clampPerPage(opts.perPage ?? 50);
-    const page = Math.max(1, Math.floor(opts.page ?? 1));
 
-    const query: Record<string, string | number | undefined | null> = {
-        page,
+    const baseQuery = {
         perPage,
         status: statusQueryValue(opts.status),
         name: opts.name ?? undefined,
     };
 
-    const data = await request<unknown>(path, {
-        method: "GET",
-        query,
-        signal: opts.signal,
+    if (opts.page !== undefined) {
+        const page = Math.max(1, Math.floor(opts.page));
+        const { data } = await requestWithHeaders<unknown>(path, {
+            method: "GET",
+            query: { ...baseQuery, page },
+            signal: opts.signal,
+        });
+        return normalizeSprints(data);
+    }
+
+    return fetchAllPages<Sprint>(async (page) => {
+        const { data, headers } = await requestWithHeaders<unknown>(path, {
+            method: "GET",
+            query: { ...baseQuery, page },
+            signal: opts.signal,
+        });
+        return { items: normalizeSprints(data), headers };
     });
-    return normalizeSprints(data);
 }

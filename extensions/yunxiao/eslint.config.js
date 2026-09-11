@@ -1,3 +1,4 @@
+import { defineConfig } from "eslint/config";
 import raycastConfig from "@raycast/eslint-config";
 
 /**
@@ -16,9 +17,9 @@ function flatten(input) {
     return out;
 }
 
-export default [
+export default defineConfig([
     {
         ignores: ["node_modules/**", ".omc/**", ".claude/**", ".idea/**", "dist/**"],
     },
     ...flatten(raycastConfig),
-];
+]);

@@ -8,7 +8,7 @@
  * 列工作项走 POST `:search`，单条走 GET + spaceId 查询参数。
  */
 
-import { buildProjectPath, resolveCredentials, request } from "./client";
+import { buildProjectPath, fetchAllPages, resolveCredentials, requestWithHeaders } from "./client";
 import { WORKITEM_CATEGORIES, type PaginatedResult, type Workitem, type WorkitemCategory } from "./types";
 
 const MAX_RESULTS = 50;
@@ -29,6 +29,9 @@ export interface ListWorkitemsOptions {
  *
  * SearchWorkitems 返回裸数组；category 多值用逗号分隔。
  * 「全部」直接传 `Req,Bug,Task,Risk,Request,Topic`，避免 API 报「工作项类型不能为空」400。
+ *
+ * 未显式指定 page 时自动翻页拉取全部工作项，避免工作项数超过一页时后面的条目
+ * 被静默丢弃；显式传 page 时仅拉取该页。
  */
 export async function listWorkitems(opts: ListWorkitemsOptions): Promise<PaginatedResult<Workitem>> {
     const creds = resolveCredentials();
@@ -38,43 +41,56 @@ export async function listWorkitems(opts: ListWorkitemsOptions): Promise<Paginat
     }
 
     const perPage = clampPerPage(opts.perPage ?? MAX_RESULTS);
-    const page = Math.max(1, Math.floor(opts.page ?? 1));
     // 「全部」/未指定类别时按官方支持的多值语法一次性传入，避免 API 报「工作项类型不能为空」。
     const category = opts.category && opts.category !== "All" ? opts.category : WORKITEM_CATEGORIES.join(",");
 
     const path = buildProjectPath(creds, "workitems:search");
-    const body: Record<string, unknown> = {
-        spaceId: projectId,
-        spaceType: "Project",
-        page,
-        perPage,
-        conditions: JSON.stringify({
-            conditionGroups: [
-                [
-                    {
-                        fieldIdentifier: "statusStage",
-                        operator: "CONTAINS",
-                        value: ["1", "6", "2", "7", "11", "12", "13"],
-                        toValue: null,
-                        className: "statusStage",
-                        format: "multiList",
-                    },
+    const buildBody = (page: number): Record<string, unknown> => {
+        const body: Record<string, unknown> = {
+            spaceId: projectId,
+            spaceType: "Project",
+            page,
+            perPage,
+            conditions: JSON.stringify({
+                conditionGroups: [
+                    [
+                        {
+                            fieldIdentifier: "statusStage",
+                            operator: "CONTAINS",
+                            value: ["1", "6", "2", "7", "11", "12", "13"],
+                            toValue: null,
+                            className: "statusStage",
+                            format: "multiList",
+                        },
+                    ],
                 ],
-            ],
-        }),
-        orderBy: "gmtCreate",
-        sort: "desc",
+            }),
+            orderBy: "gmtCreate",
+            sort: "desc",
+        };
+        if (category) body.category = category;
+        return body;
     };
-    if (category) body.category = category;
 
-    const data = await request<Workitem[]>(path, {
-        method: "POST",
-        body,
-        signal: opts.signal,
+    if (opts.page !== undefined) {
+        const page = Math.max(1, Math.floor(opts.page));
+        const { data } = await requestWithHeaders<Workitem[]>(path, {
+            method: "POST",
+            body: buildBody(page),
+            signal: opts.signal,
+        });
+        return { items: Array.isArray(data) ? data : [] };
+    }
+
+    const items = await fetchAllPages<Workitem>(async (page) => {
+        const { data, headers } = await requestWithHeaders<Workitem[]>(path, {
+            method: "POST",
+            body: buildBody(page),
+            signal: opts.signal,
+        });
+        return { items: Array.isArray(data) ? data : [], headers };
     });
-    return {
-        items: Array.isArray(data) ? data : [],
-    };
+    return { items };
 }
 
 function clampPerPage(n: number): number {

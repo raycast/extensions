@@ -19,7 +19,7 @@
  * 状态过滤值：TODO / DOING / DONE（多选用逗号分隔，如 DOING,DONE）。
  */
 
-import { buildProjectPath, resolveCredentials, request } from "./client";
+import { buildProjectPath, fetchAllPages, resolveCredentials, requestWithHeaders } from "./client";
 import { normalizeTestPlans } from "./testplans-normalize";
 import type { TestPlan } from "./types";
 
@@ -61,17 +61,15 @@ function statusQueryValue(status: TestPlanStatus | TestPlanStatus[] | null | und
 /**
  * 列出测试计划。
  *
- * 默认每页 200 条（官方上限 1000）。常规组织一次拉完即覆盖。
- * 如需分页可显式传 perPage / page。
+ * 默认每页 200 条（官方上限 1000）。未显式指定 page 时自动翻页拉取全部测试计划，
+ * 避免测试计划数超过一页时后面的计划被静默丢弃；显式传 page 时仅拉取该页。
  */
 export async function listTestPlans(opts: ListTestPlansOptions = {}): Promise<TestPlan[]> {
     const creds = resolveCredentials();
     const path = buildProjectPath(creds, "testPlan/list");
     const perPage = clampPerPage(opts.perPage ?? 200);
-    const page = Math.max(1, Math.floor(opts.page ?? 1));
 
-    const query: Record<string, string | number | undefined | null> = {
-        page,
+    const baseQuery = {
         perPage,
         sprintIdentifier: opts.sprintIdentifier ?? undefined,
         projectIdentifier: opts.projectId ?? undefined,
@@ -79,10 +77,22 @@ export async function listTestPlans(opts: ListTestPlansOptions = {}): Promise<Te
         name: opts.name ?? undefined,
     };
 
-    const data = await request<unknown>(path, {
-        method: "POST",
-        query,
-        signal: opts.signal,
+    if (opts.page !== undefined) {
+        const page = Math.max(1, Math.floor(opts.page));
+        const { data } = await requestWithHeaders<unknown>(path, {
+            method: "POST",
+            query: { ...baseQuery, page },
+            signal: opts.signal,
+        });
+        return normalizeTestPlans(data);
+    }
+
+    return fetchAllPages<TestPlan>(async (page) => {
+        const { data, headers } = await requestWithHeaders<unknown>(path, {
+            method: "POST",
+            query: { ...baseQuery, page },
+            signal: opts.signal,
+        });
+        return { items: normalizeTestPlans(data), headers };
     });
-    return normalizeTestPlans(data);
 }
