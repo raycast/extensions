@@ -2,18 +2,23 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gatus-status",
   "title": "Gatus Status",
-  "description": "Obtain rapid details about monitored probes by Gatus.io solution.",
+  "description": "View the status of endpoints monitored by your Gatus instance.",
   "icon": "gatus-logo.png",
   "author": "romain_lajeunesse",
-  "platforms": ["macOS", "Windows"],
-  "categories": ["Developer Tools"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "list-statuses",
       "title": "Gatus Statuses",
       "subtitle": "Gatus",
-      "description": "Displays your monitored endpoints status",
+      "description": "View the status of your monitored Gatus endpoints.",
       "mode": "view"
     }
   ],
