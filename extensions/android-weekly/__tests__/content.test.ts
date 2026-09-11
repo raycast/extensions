@@ -1,5 +1,10 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { decode, formatDate, parseArchive, parseArticles, toArticleMarkdown, toIssueMarkdown } from "../src/content";
+
+// npm test always runs from the extension root, so fixtures resolve from cwd
+const fixture = (name: string) => readFileSync(join(process.cwd(), "__tests__/fixtures", name), "utf8");
 
 describe("decode", () => {
   it("decodes named entities", () => {
@@ -71,6 +76,22 @@ Real article<span class="main-url" style="color: #333;">
   });
 });
 
+describe("real-page fixtures (review fix)", () => {
+  it("parses verbatim archive markup", () => {
+    const html = fixture("archive.html");
+    const issues = parseArchive(html);
+    expect(issues).toHaveLength(2);
+    expect(issues[0].number).toBe("743");
+    expect(issues[0].date).toBe("2026-09-06");
+  });
+  it("parses verbatim issue markup, skipping the house ad", () => {
+    const html = fixture("issue.html");
+    const articles = parseArticles(html);
+    expect(articles).toHaveLength(1);
+    expect(articles[0].title).toBe("Android's Restore Credentials API, Explained From Zero");
+    expect(articles[0].section).toBe("Articles & Tutorials");
+  });
+});
 describe("markdown builders", () => {
   it("escapes brackets so titles can't inject markdown (review fix)", () => {
     const md = toArticleMarkdown({ title: "A [hack](http://evil)", url: "https://example.com", description: "d [x]", section: "News" });
