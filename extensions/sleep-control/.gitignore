@@ -3,3 +3,5 @@ dist/
 raycast-env.d.ts
 .DS_Store
 *.log
+verification/
+STORE-SUBMISSION.md

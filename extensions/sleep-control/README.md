@@ -39,7 +39,7 @@ Choose **Allow Sleep** and remove quick switching before uninstalling. Removing 
 
 Allow sleep before putting your Mac in a bag. macOS critical-battery and thermal protection can take precedence over sleep prevention.
 
-A physical closed-lid test has not yet been completed for this release, and behavior across Mac models has not been verified. The extension reads back the macOS setting after a change; that check does not prove that hardware will remain awake in every situation.
+On the validation Mac (Apple M4), a 31-second runtime check recorded uninterrupted execution with the lid closed, AC power connected, and sleep prevention enabled. Closed-lid operation on battery and behavior across other Mac models have not been verified. The extension also reads back the macOS setting after every change.
 
 ## Development and publication
 
