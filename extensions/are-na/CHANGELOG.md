@@ -8,7 +8,7 @@
 - Expanded AI tools with block creation and editing, channel editing, connections, user browsing, and sampled channel digests.
 - Added content type filters to AI search, channel descriptions during creation, and Are.na URL support for lookups and destinations.
 - My Channels now loads beyond the first 100 results; AI lists expose pagination and long block details identify truncated text.
-- Fixed text block edits and prevented nested channels from showing block deletion actions.
+- Fixed text block edits and prevented nested channels from showing block deletion actions, while keeping Remove from This Channel available for nested connections.
 
 ## [Updates] - 2026-04-23
 
