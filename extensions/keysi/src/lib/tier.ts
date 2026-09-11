@@ -20,7 +20,7 @@ export interface TierStatus {
   known: boolean;
 }
 
-export function readTier(path: string = TIER_FILE): TierStatus {
+export function readTier(path: string = TIER_FILE, now: Date = new Date()): TierStatus {
   let contents: string;
   try {
     contents = readFileSync(path, "utf8");
@@ -31,8 +31,24 @@ export function readTier(path: string = TIER_FILE): TierStatus {
     return { unlocked: false, known: false };
   }
   try {
-    const parsed = JSON.parse(contents) as { unlocked?: unknown };
-    return { unlocked: parsed.unlocked === true, known: true };
+    const parsed = JSON.parse(contents) as { unlocked?: unknown; proUntil?: unknown };
+    if (parsed.unlocked !== true) return { unlocked: false, known: true };
+
+    // The file is only rewritten while Keysi runs, and Keysi is a menu-bar
+    // agent people leave quit for weeks. Without this, a trial that ran out
+    // in the meantime still reads as unlocked forever — to the one command
+    // the app never gets asked about. `proUntil` is Keysi's own statement of
+    // when Pro lapses; honouring it is what lets this expire on its own.
+    //
+    // Absent for a perpetual license, which genuinely has no deadline.
+    // Unparseable is treated as absent rather than as expired: locking a
+    // paying customer out over a malformed date would be the worse mistake,
+    // and the app still refuses anything that has teeth.
+    const deadline = typeof parsed.proUntil === "string" ? Date.parse(parsed.proUntil) : NaN;
+    if (!Number.isNaN(deadline) && now.getTime() >= deadline) {
+      return { unlocked: false, known: true };
+    }
+    return { unlocked: true, known: true };
   } catch {
     // The file exists but is unreadable, so Keysi *has* run and this is a
     // corrupt or partially-written file rather than a fresh machine.

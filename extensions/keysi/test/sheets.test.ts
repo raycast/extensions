@@ -103,3 +103,15 @@ test("resolve picks the first tag in sorted order when there is no English", () 
 test("resolve on an empty map is empty rather than undefined", () => {
   assert.equal(resolve({}), "");
 });
+
+/**
+ * Every row remembers the file it came from, which is what lets a row offer
+ * to open the sheet that produced it — the fastest route from "this is
+ * wrong" to fixing it.
+ */
+test("rows carry the file they came from", { skip }, () => {
+  const rows = flatten(readSheetsIn(REPO_SHEETS));
+  assert.ok(rows.every((r) => r.sourcePath?.endsWith(".json")), "a row lost its source file");
+  const vim = rows.find((r) => r.sheetId === "vim");
+  assert.ok(vim?.sourcePath?.endsWith("vim.json"), vim?.sourcePath);
+});

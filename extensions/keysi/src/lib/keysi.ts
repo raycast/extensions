@@ -35,3 +35,11 @@ export const showShortcuts = (query?: string) => (query ? run("show", { q: query
 export const startPractice = () => run("practice");
 
 export const showProgress = () => run("progress");
+
+/**
+ * Opens Settings ▸ License.
+ *
+ * The one command here Keysi does not gate — it is the way out of a locked
+ * state, which is exactly when this extension needs to offer it.
+ */
+export const showLicenseSettings = () => run("license");

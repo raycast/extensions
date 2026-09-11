@@ -19,11 +19,24 @@ export interface SheetGroup {
   items: SheetItem[];
 }
 
+export interface SheetMatch {
+  bundleIDs?: string[];
+  processNames?: string[];
+}
+
 export interface Sheet {
   id: string;
   name: LocalizedText;
-  match?: { bundleIDs?: string[]; processNames?: string[] };
+  match?: SheetMatch;
+  /** Higher wins when several sheets match the same app. Defaults to 0. */
+  priority?: number;
   groups: SheetGroup[];
+  /**
+   * Where this sheet was read from. Not part of Keysi's format — added on
+   * load so a row can offer to open the file that produced it, which is the
+   * fastest route from "this is wrong" to fixing it.
+   */
+  sourcePath?: string;
 }
 
 /** One flattened row, which is what the command actually renders. */
@@ -34,6 +47,8 @@ export interface Shortcut {
   sheetId: string;
   sheetName: string;
   group: string;
+  /** The file this row came from, when it is known. */
+  sourcePath?: string;
 }
 
 /**
@@ -99,9 +114,10 @@ export function readSheetsIn(dir: string): Sheet[] {
   for (const name of names) {
     if (!name.toLowerCase().endsWith(".json")) continue;
     try {
-      const parsed = JSON.parse(readFileSync(join(dir, name), "utf8")) as Sheet;
+      const path = join(dir, name);
+      const parsed = JSON.parse(readFileSync(path, "utf8")) as Sheet;
       if (parsed && typeof parsed.id === "string" && Array.isArray(parsed.groups)) {
-        sheets.push(parsed);
+        sheets.push({ ...parsed, sourcePath: path });
       }
     } catch {
       // One malformed file must not take the whole list down. Keysi itself
@@ -148,9 +164,74 @@ export function flatten(sheets: Sheet[]): Shortcut[] {
           sheetId: sheet.id,
           sheetName,
           group: groupTitle,
+          sourcePath: sheet.sourcePath,
         });
       }
     }
   }
   return rows;
+}
+
+/**
+ * The app a sheet is about, in the only terms a Raycast extension can learn
+ * them: `getFrontmostApplication()` gives a bundle id, a name and a path,
+ * and nothing else.
+ */
+export interface TargetApp {
+  bundleId?: string;
+  name?: string;
+  path?: string;
+}
+
+/**
+ * Launchers, which are not what the user was doing.
+ *
+ * The same three `TargetAppFilter.launcherBundleIDs` excludes on Keysi's
+ * side, and for the same reason: they are `LSUIElement` agents, which reads
+ * like "invisible to activation" and is not. Whether `getFrontmostApplication()`
+ * reports Raycast itself or the app behind it is Raycast's business and has
+ * changed before; this makes the answer not matter, because the only thing
+ * riding on it is which section floats to the top.
+ */
+export const LAUNCHER_BUNDLE_IDS = ["com.raycast.macos", "com.runningwithcrayons.Alfred", "at.obdev.LaunchBar"];
+
+/**
+ * The sheets that are about `app`, best first.
+ *
+ * Mirrors `CustomSheetStore.matching` — bundle id or process name, sorted by
+ * priority descending — so a sheet that wins in Keysi's overlay wins here.
+ *
+ * The process-name half is weaker here than it is there, and deliberately
+ * not faked. Keysi reads the processes running *inside* the frontmost
+ * terminal, which is how its Vim and tmux sheets appear when you are in
+ * Ghostty; an extension cannot see that. What is left is the app's own name
+ * and bundle path, which catches an editor literally called `nvim` and
+ * misses tmux inside Terminal. Matching on "it's a terminal, so probably
+ * Vim" would be guessing, and guessing wrong reorders someone's list for no
+ * reason they can see.
+ */
+export function matching(sheets: Sheet[], app: TargetApp | undefined): Sheet[] {
+  if (!app) return [];
+  if (app.bundleId && LAUNCHER_BUNDLE_IDS.includes(app.bundleId)) return [];
+
+  const names = new Set(
+    [
+      app.name,
+      app.path
+        ?.split("/")
+        .pop()
+        ?.replace(/\.app$/i, ""),
+    ]
+      .filter((n): n is string => typeof n === "string" && n.length > 0)
+      .map((n) => n.toLowerCase()),
+  );
+
+  return sheets
+    .filter((sheet) => {
+      const match = sheet.match;
+      if (!match) return false;
+      if (app.bundleId && (match.bundleIDs ?? []).includes(app.bundleId)) return true;
+      return (match.processNames ?? []).some((process) => names.has(process.toLowerCase()));
+    })
+    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 }

@@ -174,3 +174,56 @@ test("any screenshot present is 2000x1250", async (t) => {
     assert.deepEqual(pngSize(join(dir, shot)), { width: 2000, height: 1250 }, shot);
   }
 });
+
+/**
+ * Every command is part of Keysi Pro, and every command has to say so
+ * before it does anything.
+ *
+ * A source check rather than a behavioural one, because the thing that goes
+ * wrong is not a broken gate — it is a *new command* added next to the
+ * others without one. Three of the four are refused by the app as well, so
+ * the check they carry is the explanation rather than the lock; the fourth,
+ * `search-sheets`, never talks to Keysi at all, which is exactly why it
+ * cannot be the one that forgets.
+ */
+test("every command checks the tier before doing anything", () => {
+  for (const command of commands) {
+    const path = [`${command.name}.tsx`, `${command.name}.ts`]
+      .map((file) => join(ROOT, "src", file))
+      .find((candidate) => existsSync(candidate));
+    assert.ok(path, `no src file for command "${command.name}"`);
+    const source = readFileSync(path, "utf8");
+    assert.match(source, /readTier\(/, `${command.name} never reads the tier`);
+    assert.match(
+      source,
+      /<Locked|showLockedToast\(/,
+      `${command.name} reads the tier but never shows a locked state`,
+    );
+  }
+});
+
+/**
+ * Arguments are part of the manifest schema, and a malformed one fails at
+ * store review rather than at build time.
+ */
+test("command arguments are shaped the way the schema requires", () => {
+  const types = ["text", "password", "dropdown"];
+  for (const command of commands) {
+    const args = (command as { arguments?: { name: string; type: string; placeholder?: string }[] }).arguments ?? [];
+    assert.ok(args.length <= 3, `${command.name} declares more than three arguments`);
+    for (const argument of args) {
+      assert.ok(argument.name?.length > 0, `${command.name} has an unnamed argument`);
+      assert.ok(types.includes(argument.type), `${command.name}: argument type "${argument.type}"`);
+      assert.ok(argument.placeholder && argument.placeholder.length > 0, `${command.name}: no placeholder`);
+    }
+  }
+});
+
+test("preferences carry the title and description the store shows", () => {
+  const preferences = (manifest.preferences ?? []) as { name: string; type: string; title?: string; description?: string }[];
+  for (const preference of preferences) {
+    assert.ok(preference.name?.length > 0, "an unnamed preference");
+    assert.ok(preference.title && preference.title.length > 0, `${preference.name} has no title`);
+    assert.ok(preference.description && preference.description.length > 0, `${preference.name} has no description`);
+  }
+});

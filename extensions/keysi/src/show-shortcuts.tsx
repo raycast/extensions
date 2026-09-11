@@ -1,32 +1,21 @@
-import { open, showToast, Toast } from "@raycast/api";
+import { LaunchProps } from "@raycast/api";
 import { showShortcuts } from "./lib/keysi";
+import { showLockedToast } from "./lib/locked";
 import { readTier } from "./lib/tier";
 
 /**
  * Show Shortcuts.
  *
- * Keysi refuses this over `keysi://` too, and opens its License settings
- * when it does — so the check here is not the lock, it is the explanation.
- * Without it the only feedback would be Keysi's Settings window appearing
- * for no stated reason.
+ * The optional argument is what makes this worth more than Keysi's own
+ * hotkey: `⌘-space keysi save` lands on the Save row of whatever app you
+ * were in, without ever seeing the full panel.
  */
-export default async function Command() {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.ShowShortcuts }>) {
   const tier = readTier();
   if (!tier.unlocked) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: tier.known ? "Keysi Pro required" : "Keysi isn't set up yet",
-      message: tier.known
-        ? "Raycast commands are part of Keysi Pro, a one-time purchase. Keysi itself stays free."
-        : "Install Keysi from keysi.io and open it once.",
-      primaryAction: {
-        title: "Open keysi.io",
-        onAction: () => {
-          void open("https://keysi.io");
-        },
-      },
-    });
+    await showLockedToast(tier);
     return;
   }
-  await showShortcuts();
+  const query = (props.fallbackText ?? props.arguments?.query ?? "").trim();
+  await showShortcuts(query.length > 0 ? query : undefined);
 }

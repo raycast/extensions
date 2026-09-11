@@ -57,3 +57,48 @@ test("truthy-but-not-true values do not unlock", () => {
 test("a file with no unlocked key is locked", () => {
   assert.equal(readTier(fileWith('{"tier":"pro"}')).unlocked, false);
 });
+
+/**
+ * The deadline Keysi publishes with the file. It only rewrites this while
+ * it runs — and it is a menu-bar agent people leave quit for weeks — so
+ * without honouring `proUntil` a trial that lapsed in the meantime reads as
+ * unlocked forever, to the one command the app never gets asked about.
+ */
+test("a deadline in the future stays unlocked", () => {
+  const later = new Date(Date.now() + 86_400_000).toISOString();
+  assert.deepEqual(readTier(fileWith(`{"unlocked":true,"proUntil":"${later}"}`)), {
+    unlocked: true,
+    known: true,
+  });
+});
+
+test("a deadline that has passed locks, and knows Keysi has run", () => {
+  const earlier = new Date(Date.now() - 1000).toISOString();
+  assert.deepEqual(readTier(fileWith(`{"unlocked":true,"proUntil":"${earlier}"}`)), {
+    unlocked: false,
+    known: true,
+  });
+});
+
+/** The boundary itself is expiry, matching `AccessManager.computeLevel`. */
+test("the deadline instant is expired, not the last unlocked moment", () => {
+  const now = new Date("2026-01-01T00:00:00.000Z");
+  const path = fileWith('{"unlocked":true,"proUntil":"2026-01-01T00:00:00.000Z"}');
+  assert.equal(readTier(path, now).unlocked, false);
+  assert.equal(readTier(path, new Date(now.getTime() - 1)).unlocked, true);
+});
+
+/** A perpetual license genuinely has no deadline; Keysi omits the key. */
+test("no deadline means no expiry", () => {
+  assert.equal(readTier(fileWith('{"unlocked":true,"tier":"pro"}')).unlocked, true);
+});
+
+/**
+ * Locking a paying customer out over a malformed date would be the worse
+ * mistake, and everything with teeth is still enforced inside the app.
+ */
+test("an unparseable deadline is ignored rather than treated as expired", () => {
+  for (const value of ['"soon"', "123", "null", "{}"]) {
+    assert.equal(readTier(fileWith(`{"unlocked":true,"proUntil":${value}}`)).unlocked, true, `value ${value}`);
+  }
+});

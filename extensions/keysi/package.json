@@ -19,21 +19,67 @@
       "title": "Search Cheat Sheets",
       "subtitle": "Keysi",
       "description": "Search Vim, tmux and your own cheat sheets without leaving the keyboard.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "cheatsheet",
+        "vim",
+        "tmux",
+        "shortcut",
+        "keybinding"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "shortcut",
+          "required": false
+        }
+      ]
     },
     {
       "name": "show-shortcuts",
       "title": "Show Shortcuts",
       "subtitle": "Keysi",
       "description": "Open Keysi's panel for the app you were just in.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "menu",
+        "keybinding",
+        "overlay",
+        "panel"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "search",
+          "required": false
+        }
+      ]
     },
     {
       "name": "practice",
       "title": "Practice Shortcuts",
       "subtitle": "Keysi",
       "description": "Open Keysi's drill for the shortcuts you keep missing.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "drill",
+        "learn",
+        "train"
+      ]
+    },
+    {
+      "name": "progress",
+      "title": "Show Progress",
+      "subtitle": "Keysi",
+      "description": "Open Keysi's recap of the shortcuts you've learned.",
+      "mode": "no-view",
+      "keywords": [
+        "stats",
+        "recap",
+        "learned"
+      ]
     }
   ],
   "dependencies": {
@@ -55,5 +101,14 @@
     "fix-lint": "ray lint --fix",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "keysiApp",
+      "type": "appPicker",
+      "required": false,
+      "title": "Keysi Application",
+      "description": "Where Keysi is installed. Only needed if it isn't in /Applications or ~/Applications \u2014 the bundled cheat sheets are read out of the app bundle."
+    }
+  ]
 }
