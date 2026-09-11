@@ -1,6 +1,6 @@
 # Menubar Weather Changelog
 
-## [Fix Type Error When Showing Feels-Like Temperature] - {PR_MERGE_DATE}
+## [Fix Type Error When Showing Feels-Like Temperature] - 2026-09-11
 
 - Fix the menu bar command crashing with a "Cannot read properties of undefined (reading 'apparent_temperature')" type error when the temperature display is set to "Feels like" and the latest weather data is incomplete (e.g. a failed or partial API response); it now falls back to the current temperature and skips unavailable readings instead of failing.
 - Invalid or error responses from the weather API are no longer cached.
