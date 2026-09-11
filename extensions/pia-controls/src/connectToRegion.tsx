@@ -3,7 +3,7 @@ import { Icon, List } from "@raycast/api";
 import { useSetup } from "./hooks/useSetup";
 import { useStatus } from "./hooks/useStatus";
 import { useFavorites, useRecents, useRegions } from "./hooks/useRegions";
-import { connectToRegion, toggleVpn } from "./lib/actions";
+import { connectToRegion, disconnectVpn } from "./lib/actions";
 import { AUTO_REGION_ENTRY } from "./lib/regions";
 import { ConnectionStatus } from "./components/ConnectionStatus";
 import { RegionListItem } from "./components/RegionListItem";
@@ -15,7 +15,7 @@ export default function Command() {
   const cliPath = setup.stage === "ready" ? setup.cliPath : undefined;
 
   const { status, isLoading: statusLoading, refresh } = useStatus(cliPath);
-  const { regions, byId, isLoading: regionsLoading } = useRegions();
+  const { regions, byId, isLoading: regionsLoading } = useRegions(cliPath);
   const { favorites, toggle: toggleFavorite } = useFavorites();
   const recents = useRecents();
 
@@ -53,7 +53,7 @@ export default function Command() {
       appPath={setup.appPath}
       onConnect={() => connectToRegion(region)}
       onToggleFavorite={() => toggleFavorite(region.id)}
-      onDisconnect={toggleVpn}
+      onDisconnect={disconnectVpn}
       onSettingChanged={() => void refresh(true)}
     />
   );
@@ -66,7 +66,6 @@ export default function Command() {
           region={currentRegion}
           appPath={setup.appPath}
           cliPath={cliPath}
-          onToggle={toggleVpn}
           onSettingChanged={() => void refresh(true)}
         />
       </List.Section>

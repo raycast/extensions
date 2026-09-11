@@ -1,13 +1,14 @@
 import { useMemo } from "react";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
-import { fetchRegions, FAVORITES_KEY, RECENTS_KEY } from "../lib/regions";
+import { loadRegions, FAVORITES_KEY, RECENTS_KEY } from "../lib/regions";
 import { Region } from "../types";
 
-export function useRegions() {
-  const { data, isLoading } = useCachedPromise(fetchRegions, [], {
-    keepPreviousData: true,
-    initialData: [] as Region[],
-  });
+export function useRegions(cliPath: string | undefined) {
+  const { data, isLoading } = useCachedPromise(
+    async (path: string | undefined): Promise<Region[]> => (path ? loadRegions(path) : []),
+    [cliPath],
+    { keepPreviousData: true, initialData: [] as Region[] },
+  );
 
   const regions = data ?? [];
   const byId = useMemo(() => {

@@ -1,6 +1,6 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { detectSetup, readStatus } from "./lib/pia";
-import { fetchRegions } from "./lib/regions";
+import { loadRegions } from "./lib/regions";
 
 export default async function Command() {
   await closeMainWindow({ clearRootSearch: true });
@@ -26,7 +26,7 @@ export default async function Command() {
   // Prefer PIA's catalog name ("US New York") over the raw region id.
   let regionLabel = status.regionId ?? "";
   try {
-    const regions = await fetchRegions();
+    const regions = await loadRegions(setup.cliPath);
     regionLabel = regions.find((r) => r.id === status.regionId)?.name ?? regionLabel;
   } catch {
     // Offline: the region id is still a reasonable label.

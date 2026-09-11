@@ -109,6 +109,15 @@ export async function readConnectionState(cliPath: string): Promise<ConnectionSt
   return parseState(await get(cliPath, "connectionstate"));
 }
 
+/** The authoritative list of region ids piactl will accept. */
+export async function listRegionIds(cliPath: string): Promise<string[]> {
+  const out = await piactl(cliPath, ["get", "regions"], 8000);
+  return out
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
+
 export async function setRegion(cliPath: string, regionId: string): Promise<void> {
   if (!isValidRegionId(regionId)) {
     throw new Error(`Refusing to select malformed region "${regionId}"`);

@@ -1,4 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { connectCurrent, disconnectVpn } from "../lib/actions";
+import { isActive } from "../lib/pia";
 import { flagAsset } from "../lib/regions";
 import { ConnectionState, Region, VpnStatus } from "../types";
 import { SettingsActions } from "./SettingsActions";
@@ -8,7 +10,6 @@ interface Props {
   region?: Region;
   appPath?: string;
   cliPath?: string;
-  onToggle: () => void;
   onSettingChanged: () => void;
 }
 
@@ -60,10 +61,13 @@ function forwardedPort(value: string | undefined): string | undefined {
   return value && /^\d+$/.test(value) ? value : undefined;
 }
 
-export function ConnectionStatus({ status, region, appPath, cliPath, onToggle, onSettingChanged }: Props) {
+export function ConnectionStatus({ status, region, appPath, cliPath, onSettingChanged }: Props) {
   const label = stateLabel(status.state);
   const isConnected = status.state === "Connected";
   const isUnknown = status.state === "Unknown";
+  // Tied to isActive so the label and the callback can never disagree: while
+  // connecting, the action disconnects, and it must say so.
+  const disconnects = isActive(status.state);
   const regionName = region?.name ?? status.regionId;
 
   const icon =
@@ -130,9 +134,9 @@ export function ConnectionStatus({ status, region, appPath, cliPath, onToggle, o
           {/* Hidden when unreadable: the label would have to guess a direction. */}
           {!isUnknown && (
             <Action
-              title={isConnected ? "Disconnect" : "Connect"}
-              icon={isConnected ? Icon.XMarkCircle : Icon.Bolt}
-              onAction={onToggle}
+              title={disconnects ? "Disconnect" : "Connect"}
+              icon={disconnects ? Icon.XMarkCircle : Icon.Bolt}
+              onAction={disconnects ? disconnectVpn : connectCurrent}
             />
           )}
           {isConnected && status.vpnIp && (
