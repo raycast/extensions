@@ -5,7 +5,10 @@
   "description": "Quickly share your Calendly meeting links",
   "icon": "logo.png",
   "author": "eluce2",
-  "contributors": ["eric_dumesnil"],
+  "contributors": [
+    "eric_dumesnil",
+    "0xdhrv"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -14,13 +17,71 @@
       "subtitle": "Calendly",
       "description": "Copy Meeting URL",
       "mode": "view"
+    },
+    {
+      "name": "upcoming-meetings",
+      "title": "Upcoming Meetings",
+      "subtitle": "Calendly",
+      "description": "Browse upcoming Calendly meetings, join calls, reschedule, or cancel with confirmation",
+      "mode": "view"
+    },
+    {
+      "name": "event-types",
+      "title": "Event Types",
+      "subtitle": "Calendly",
+      "description": "Browse active Calendly event types, share scheduling links, and check availability",
+      "mode": "view"
+    },
+    {
+      "name": "book-meeting",
+      "title": "Book Meeting",
+      "subtitle": "Calendly",
+      "description": "Book an invitee into a verified available Calendly time slot with confirmation",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-meetings",
+      "title": "List Meetings",
+      "description": "List the authenticated user's Calendly meetings in a date range, defaulting to active meetings in the next 30 days"
+    },
+    {
+      "name": "get-meeting",
+      "title": "Get Meeting",
+      "description": "Get a Calendly meeting and its invitees, including reschedule and cancel URLs, using a meeting URI or UUID from List Meetings"
+    },
+    {
+      "name": "list-event-types",
+      "title": "List Event Types",
+      "description": "List the authenticated user's active Calendly event types with their URIs, durations, locations, and scheduling URLs"
+    },
+    {
+      "name": "get-available-times",
+      "title": "Find Available Times",
+      "description": "Find available start times for a Calendly event type in a date range of at most 7 days. Use this before booking a meeting"
+    },
+    {
+      "name": "create-single-use-link",
+      "title": "Create Single-Use Link",
+      "description": "Create a single-use Calendly scheduling link for an event type with confirmation"
+    },
+    {
+      "name": "book-meeting",
+      "title": "Book Meeting",
+      "description": "Book an invitee into a Calendly start time returned by Find Available Times, rechecking availability and requiring confirmation"
+    },
+    {
+      "name": "cancel-meeting",
+      "title": "Cancel Meeting",
+      "description": "Cancel a Calendly meeting and notify its invitees, with destructive confirmation and an optional cancellation reason"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.2",
-    "@raycast/utils": "^1.3.1",
-    "axios": "^0.30.3",
-    "moment": "^2.29.1"
+    "@raycast/api": "^2.1.2",
+    "@raycast/utils": "^2.3.0",
+    "axios": "^1.20.0",
+    "moment": "^2.30.1"
   },
   "preferences": [
     {
@@ -44,18 +105,25 @@
     }
   ],
   "devDependencies": {
-    "@types/lodash": "^4.14.175",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/lodash": "^4.17.25",
+    "@types/node": "^22.19.17",
+    "@typescript-eslint/eslint-plugin": "^8.68.0",
+    "@typescript-eslint/parser": "^8.68.0",
+    "eslint": "^10.9.1",
+    "eslint-config-prettier": "^10.1.8",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

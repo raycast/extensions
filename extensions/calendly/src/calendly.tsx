@@ -10,6 +10,7 @@ import {
   Action,
   Clipboard,
   Image,
+  Keyboard,
 } from "@raycast/api";
 import {
   Preferences,
@@ -37,7 +38,7 @@ export default function Calendly() {
       <Action
         title="Refresh Data"
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={async () => {
           const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing..." });
           revalidate();
