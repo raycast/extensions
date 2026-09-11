@@ -2,11 +2,11 @@
 
 ## [Focus Existing Window for Open Projects] - {PR_MERGE_DATE}
 
-- Add an opt-in "Focus Already-Open Projects" preference (macOS only, off by default): when enabled, selecting an already-open project raises its existing Zed window instead of invoking the CLI, which creates a new window on recent Zed versions.
+- Add an opt-in "Focus Already-Open Projects" preference (macOS only, off by default): when enabled, selecting an already-open project raises its existing Zed window instead of invoking the CLI, which creates a new window on recent Zed versions. Focus and close only target a window when the project title (or path) uniquely matches, so duplicate or overlapping names fall back to the CLI instead of raising the wrong workspace.
 
 ## [Fix Missing PATH Entries from ~/.zshrc] - 2026-09-10
 
-- Fix `PATH` (and other rc-file-only env vars) not being visible to processes spawned by Zed (e.g. external formatters) when launched via this extension. The clean-env shell invocation now runs login *and* interactive (`-ilc`) instead of just login (`-lc`), so `~/.zshrc`/`~/.bashrc`, not just profile files, get sourced.
+- Fix `PATH` (and other rc-file-only env vars) not being visible to processes spawned by Zed (e.g. external formatters) when launched via this extension. The clean-env shell invocation now runs login _and_ interactive (`-ilc`) instead of just login (`-lc`), so `~/.zshrc`/`~/.bashrc`, not just profile files, get sourced.
 
 ## [Fix Project Launch in Raycast 2] - 2026-08-15
 

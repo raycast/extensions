@@ -11,11 +11,11 @@ The Zed database is located at:
 
 Where `{version}` corresponds to the Zed build:
 
-| Build        | Version Folder |
-| ------------ | -------------- |
-| Zed          | `0-stable`     |
-| Zed Preview  | `0-preview`    |
-| Zed Dev      | `0-dev`        |
+| Build       | Version Folder |
+| ----------- | -------------- |
+| Zed         | `0-stable`     |
+| Zed Preview | `0-preview`    |
+| Zed Dev     | `0-dev`        |
 
 ## Schema Version
 
@@ -97,16 +97,16 @@ CREATE TABLE remote_connections (
 );
 ```
 
-| Column         | Type    | Description                                         |
-| -------------- | ------- | --------------------------------------------------- |
-| `id`           | INTEGER | Unique connection identifier                        |
-| `kind`         | TEXT    | Connection type: `"ssh"` or `"wsl"`                 |
-| `host`         | TEXT    | Hostname for SSH connections                        |
-| `port`         | INTEGER | Port number (optional)                              |
-| `user`         | TEXT    | Username for connection                             |
-| `distro`       | TEXT    | WSL distribution name (for WSL connections)         |
-| `name`         | TEXT    | User-friendly connection name (optional)            |
-| `container_id` | TEXT    | Dev container identifier (for container connections)|
+| Column         | Type    | Description                                          |
+| -------------- | ------- | ---------------------------------------------------- |
+| `id`           | INTEGER | Unique connection identifier                         |
+| `kind`         | TEXT    | Connection type: `"ssh"` or `"wsl"`                  |
+| `host`         | TEXT    | Hostname for SSH connections                         |
+| `port`         | INTEGER | Port number (optional)                               |
+| `user`         | TEXT    | Username for connection                              |
+| `distro`       | TEXT    | WSL distribution name (for WSL connections)          |
+| `name`         | TEXT    | User-friendly connection name (optional)             |
+| `container_id` | TEXT    | Dev container identifier (for container connections) |
 
 ## Multi-Folder Workspaces
 
