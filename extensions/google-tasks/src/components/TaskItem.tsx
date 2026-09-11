@@ -13,7 +13,7 @@ export default function TaskItem(props: {
   const due = dueDay(props.task.due);
   const today = todayValue();
   const dueDate = due ? new Date(`${due}T00:00:00`) : undefined;
-  const dueLabel = dueDate?.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const dueLabel = dueDate?.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   const dueText = due && due < today ? `Overdue · ${dueLabel}` : due === today ? "Today" : dueLabel;
   const dueColor = due && due < today ? Color.Red : due === today ? Color.Orange : Color.SecondaryText;
   const listTitle = props.showListTitle ? props.task.listTitle : undefined;

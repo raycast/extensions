@@ -228,8 +228,8 @@ export default function UnifiedTaskView() {
   );
   const loadMoreCompletedTasks = useCallback(async () => {
     const listsWithMore = lists.filter((list) => completedPageTokens[list.id]);
-    if (listsWithMore.length === 0) return;
-    const version = ++loadVersion.current;
+    if (listsWithMore.length === 0 || isLoading) return;
+    const version = loadVersion.current;
 
     try {
       setIsLoading(true);
@@ -260,7 +260,7 @@ export default function UnifiedTaskView() {
     } finally {
       if (version === loadVersion.current) setIsLoading(false);
     }
-  }, [completedPageTokens, lists]);
+  }, [completedPageTokens, isLoading, lists]);
 
   const visibleTasks = sortTasks(
     tasks.filter((task) => {
