@@ -1234,36 +1234,30 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       },
     },
   },
-{
-  name: "site-spec",
-  title: "Site Spec",
-  description:
-    "Website audit and repair. Tools: audit_site, fix_issue, compile_spec, list_checks. 40 checks across SEO, accessibility, privacy, structured data and AI searchability, each finding returned with the file and the fix. No API key required.",
-  icon: "https://github.com/ariaxhan.png",
-  homepage: "https://github.com/ariaxhan/site-spec",
-  configuration: {
-    command: "npx",
-    args: ["-y", "site-spec-mcp"],
+  {
+    name: "site-spec",
+    title: "Site Spec",
+    description:
+      "Website audit and repair. Tools: audit_site, fix_issue, compile_spec, list_checks. 40 checks across SEO, accessibility, privacy, structured data and AI searchability, each finding returned with the file and the fix. No API key required.",
+    icon: "https://github.com/ariaxhan.png",
+    homepage: "https://github.com/ariaxhan/site-spec",
+    configuration: {
+      command: "npx",
+      args: ["-y", "site-spec-mcp"],
+    },
   },
-},
-{
-  name: "stellary",
-  title: "Stellary",
-  description:
-    "AI-native project piloting and project management (open beta). Connect your AI assistant to Stellary workspaces through the hosted Streamable HTTP MCP server. Bearer PAT required.",
-  icon: "https://raw.githubusercontent.com/Anymfah/stellary-mcp/main/assets/logo-400.png",
-  homepage: "https://stellary.co/docs/mcp/",
-  configuration: {
-    command: "npx",
-    args: [
-      "-y",
-      "mcp-remote",
-      "https://api.stellary.co/mcp",
-      "--header",
-      "Authorization: Bearer YOUR_API_KEY",
-    ],
+  {
+    name: "stellary",
+    title: "Stellary",
+    description:
+      "AI-native project piloting and project management (open beta). Connect your AI assistant to Stellary workspaces through the hosted Streamable HTTP MCP server. Bearer PAT required.",
+    icon: "https://raw.githubusercontent.com/Anymfah/stellary-mcp/main/assets/logo-400.png",
+    homepage: "https://stellary.co/docs/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.stellary.co/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
+    },
   },
-},
   {
     name: "vc-deal-flow-signal",
     title: "VC Deal Flow Signal",
