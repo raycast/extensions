@@ -212,6 +212,15 @@ describe("buildProfileMatcher", () => {
     assert.equal(matches("(?i)s", "ß"), false);
     assert.equal(matches("(?i)ß+", "ẞß"), true);
     assert.equal(matches("(?i)ß+", "ss"), false);
+    // Dotless ı uppercases to I but, per CaseFolding.txt, never folds to i — ICU keeps them apart.
+    assert.equal(matches("(?i)i", "ı"), false);
+    assert.equal(matches("(?i)ı", "I"), false);
+    assert.equal(matches("(?i)ıı", "II"), false);
+    assert.equal(matches("(?i)ı", "ı"), true);
+    assert.equal(matches("(?i)I", "i"), true);
+    // ĳ has no expansion in CaseFolding.txt: it's Ĳ's fold, not "ij".
+    assert.equal(matches("(?i)ĳ", "Ĳ"), true);
+    assert.equal(matches("(?i)ij", "ĳ"), false);
     // A class admits single-code-point case variants only; ß's uppercase "SS" doesn't put it in [A-Z].
     assert.equal(matches("(?i)[a-z]+", "STRASSE"), true);
     assert.equal(matches("(?i)[a-z]+", "straße"), false);

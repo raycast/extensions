@@ -82,11 +82,17 @@ const isLineTerminator = (ch: string) => LINE_TERMINATORS.has(ch.codePointAt(0)!
 // Case folding, for (?i). ICU compares case-insensitively by folding both sides, and *full*
 // folding can change a string's length — "ß" folds to "ss" — which is how (?i)straße matches
 // "STRASSE" and (?i)ss matches "ß". JavaScript has no fold function; upper-then-lower, repeated to
-// a fixed point, reaches the same canonical form for every case variant ("ß" and "ẞ" both end at
-// "ss", "ﬁ" at "fi", "ſ" at "s").
+// a fixed point, reaches the same canonical form as Unicode's CaseFolding.txt for every case
+// variant ("ß" and "ẞ" both end at "ss", "ﬁ" at "fi", "ſ" at "s") with one exception: dotless "ı"
+// uppercases to "I", but CaseFolding.txt deliberately leaves it unfolded so it stays distinct from
+// "i" outside Turkic locales, as ICU does — so it's excluded here.
+function caseMap(s: string): string {
+  return s === "ı" ? s : s.toUpperCase().toLowerCase();
+}
+
 function fullFold(s: string): string {
   for (let round = 0; round < 3; round++) {
-    const folded = s.toUpperCase().toLowerCase();
+    const folded = caseMap(s);
     if (folded === s) return s;
     s = folded;
   }
@@ -97,7 +103,7 @@ function fullFold(s: string): string {
 // "ß", "ſ" becomes "s", but "ß" stays "ß". ICU uses it for a lone case-insensitive literal — see
 // the literal-run rule in parseSeq.
 function simpleFold(ch: string): string {
-  const folded = ch.toUpperCase().toLowerCase();
+  const folded = caseMap(ch);
   return Array.from(folded).length === 1 ? folded : ch;
 }
 
