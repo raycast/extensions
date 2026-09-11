@@ -175,7 +175,6 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, supp
       isAutoLoadText: false,
       isAutoFullInput: false,
       isAutoTTS: false,
-      isCustomModel: true,
       useProxy: false,
       useAzure: false,
       ...preferenceOverrides,

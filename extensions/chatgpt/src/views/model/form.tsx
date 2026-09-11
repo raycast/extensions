@@ -33,6 +33,7 @@ export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (mode
     },
     validation: {
       name: FormValidation.Required,
+      option: FormValidation.Required,
       temperature: validateTemperature,
     },
     initialValues: {
@@ -82,7 +83,7 @@ export const ModelForm = (props: { model?: Model; name?: string; onSaved?: (mode
   return (
     <Form
       navigationTitle={model ? "Edit Model" : "Create Model"}
-      isLoading={models.isFetching}
+      isLoading={models.isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" icon={Icon.SaveDocument} onSubmit={handleSubmit} />

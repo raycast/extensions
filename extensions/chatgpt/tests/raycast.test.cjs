@@ -41,6 +41,21 @@ async function change(app, id, next) {
   await app.callback(target.onChange, { value: next, eventCount: ++eventCount });
   await app.waitFor((tree) => value(tree, id) === next, `field ${id}=${next}`);
 }
+async function chooseCustomModel(app, id, searchText) {
+  const target = field(app.tree, id);
+  assert.equal(target.kind, "Dropdown");
+  assert.equal(target.filteringEnabled, true);
+  await app.callback(target.onSearchTextChange, { value: searchText, eventCount: ++eventCount });
+  const modelId = searchText.trim();
+  await app.waitFor(
+    (tree) =>
+      field(tree, id).menu.sections.flatMap((section) => section.items).some(
+        (item) => item.id === modelId && item.title === `Use "${modelId}"`,
+      ),
+    `manual model choice ${modelId}`,
+  );
+  await change(app, id, modelId);
+}
 async function submit(app, title) {
   const fields = body(app.tree).items.filter((item) => item.value !== undefined);
   await action(app, title, Object.fromEntries(fields.map((item) => [item.id, { value: item.value.value }])));
@@ -48,14 +63,21 @@ async function submit(app, title) {
 async function back(app) {
   await app.callback(app.tree.navigationStack.onPop);
 }
-async function provider(t) {
+async function provider(t, modelStatus = 200) {
   const requests = [];
   const modelRequests = [];
   const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && req.url === "/v1/models") {
       modelRequests.push(req.url);
+      res.statusCode = modelStatus;
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ data: [{ id: "remote-one" }, { id: "remote-two" }] }));
+      res.end(
+        JSON.stringify(
+          modelStatus === 200
+            ? { data: [{ id: "remote-one" }, { id: "remote-two" }] }
+            : { error: { message: "Model discovery is not supported" } },
+        ),
+      );
       return;
     }
     let text = "";
@@ -87,13 +109,16 @@ async function createDirectCommand(app, name) {
 }
 
 test(
-  "AI Commands creates an independent command without a user preset, validates it and runs its own settings",
+  "AI Commands creates an independent command after model discovery fails, validates it and runs its own settings",
   native,
   async (t) => {
-    const api = await provider(t);
+    const api = await provider(t, 404);
     const app = await launch("search-ai-command", {}, api.prefs);
     t.after(app.close);
     await createDirectCommand(app, "Independent rewrite");
+    await app.waitFor(() =>
+      app.methods.some((method) => method.method === "showToast" && method.params.title === "Could not load models"),
+    );
     const previousModels = JSON.parse(app.storage.get(CATALOG_STORAGE_KEY)).models;
     assert.equal(value(app.tree, "configurationMode"), "independent");
     assert.equal(field(app.tree, "baseModelId"), undefined);
@@ -121,7 +146,7 @@ test(
     assert.equal(field(app.tree, "name").error, "Enter a command name", "unrelated validation remains visible");
     await change(app, "configurationMode", "independent");
     await change(app, "name", "Independent rewrite");
-    await change(app, "model", "solo-v1");
+    await chooseCustomModel(app, "model", "  solo-v1  ");
     await change(app, "temperature", "0");
     await change(app, "prompt", "");
     await change(app, "enableReasoningEffortChange", true);
@@ -157,7 +182,7 @@ test(
 
 test("an independent command can select a model fetched from the configured endpoint", native, async (t) => {
   const api = await provider(t);
-  const app = await launch("search-ai-command", {}, { ...api.prefs, isCustomModel: false });
+  const app = await launch("search-ai-command", {}, api.prefs);
   t.after(app.close);
   await createDirectCommand(app, "Remote rewrite");
   await app.waitFor((tree) =>
@@ -271,6 +296,9 @@ test(
     await action(app, "Create AI Command from This Model");
     await app.waitFor(page("Create AI Command"));
     assert.equal(value(app.tree, "configurationMode"), "inherit");
+    await app.waitFor((tree) => !field(tree, "model").isLoading);
+    assert.equal(value(app.tree, "model"), writer.option, "remote options do not replace the inherited model ID");
+    assert.match(field(app.tree, "model").info, /Inherited from Writer/);
     await change(app, "name", "Local overrides");
     await action(app, "Edit Base Model");
     await app.waitFor(page("Edit Model"));
@@ -289,7 +317,8 @@ test(
       "overridePrompt",
     ])
       assert.equal(field(app.tree, flag), undefined, "settings are editable without override checkboxes");
-    await change(app, "model", "command-v1");
+    await chooseCustomModel(app, "model", "command-v1");
+    assert.match(field(app.tree, "model").info, /Customized/);
     await change(app, "temperature", "0.9");
     await change(app, "enableReasoningEffortChange", false);
     await change(app, "vision", true);
@@ -297,7 +326,7 @@ test(
     await change(app, "prompt", "Command instructions");
     await action(app, "Edit Base Model");
     await app.waitFor(page("Edit Model"));
-    await change(app, "option", "writer-v2");
+    await chooseCustomModel(app, "option", "writer-v2");
     await change(app, "temperature", "0.6");
     await change(app, "reasoningEffort", "low");
     await change(app, "vision", true);
@@ -343,10 +372,11 @@ test(
     assert.equal(value(app.tree, "prompt"), "Command instructions");
     await action(app, "Restore All Inherited Settings");
     await app.waitFor((tree) => value(tree, "model") === "writer-v2");
-    await change(app, "model", "temporary-model");
+    await chooseCustomModel(app, "model", "temporary-model");
     await action(app, "Reset Model to Base");
     await app.waitFor((tree) => value(tree, "model") === "writer-v2");
     assert.equal(value(app.tree, "model"), "writer-v2", "restoring inheritance uses the latest base value");
+    assert.match(field(app.tree, "model").info, /Inherited from Writer/);
     await change(app, "configurationMode", "independent");
     assert.equal(value(app.tree, "model"), "writer-v2");
     assert.equal(value(app.tree, "temperature"), "0.6");
@@ -619,13 +649,14 @@ test("Ask without an explicit preset restores the last model across separate com
 });
 
 test("creating an ordinary model returns to Models with the new preset selected", native, async (t) => {
-  const app = await launch("model", fixture);
+  const api = await provider(t);
+  const app = await launch("model", fixture, api.prefs);
   t.after(app.close);
   await app.waitFor(page("Models"));
   await action(app, "Create Model");
   await app.waitFor(page("Create Model"));
   await change(app, "name", "Research");
-  await change(app, "option", "research-model");
+  await chooseCustomModel(app, "option", "research-model");
   await submit(app, "Submit");
   await app.waitFor(page("Models"));
   const saved = Object.values(JSON.parse(app.storage.get(CATALOG_STORAGE_KEY)).models).find(

@@ -1,5 +1,17 @@
 Model and command management checks
 
+Upstream merge scope:
+
+| Changed behavior | Decision | Conditions / stop boundary | Layer |
+| ---------------- | -------- | -------------------------- | ----- |
+| Shared remote/manual model picker | update-existing | Select a remote ID for an independent command; select a typed ID after discovery fails and observe it in the saved command and API request; create an ordinary preset through the same picker | Raycast runtime integration |
+| Inherited model selection | update-existing | Preserve inherited/custom help text, keep the base ID when absent from remote options, customize through the searchable picker, then reset to the latest base ID | Raycast runtime integration |
+| Model discovery response and option handling | existing-test-enough | Keep the upstream parser and option tests for malformed responses, custom IDs, deduplication and saved IDs | Unit |
+| Catalog, navigation and migration | existing-test-enough | Existing management tests continue to verify persistence, dependency protection, draft retention and selection; merging must not restore the old separate model store | Store + runtime integration |
+| Changelog, dependency lockfile and test script merge | no-test | Preserve both release entries, retain upstream dependencies, and use one test script that discovers both suites; validate with install, build and lint | Build checks |
+
+Merge validation: **PASS**. All 41 tests pass with no skips; the extension build, typecheck and lint pass. Four automated mutations in temporary copies were detected by the affected runtime tests: removing inherited help text, ignoring model search input, dropping the selection callback, and discarding remote options. The tests continue to use a local HTTP provider and isolated storage.
+
 Independent command configuration scope:
 
 The direct-edit UI updates the existing inherited-command runtime tests: fields show live effective values without override checkboxes or a duplicate summary; edits customize only that field; reset-one preserves other overrides and reset-all restores the base. Same-value native callbacks must preserve inheritance. After a base reasoning-effort change, customizing its enabled state must retain the latest effort, including while the effort field is hidden. These are observed through real form events, saved flags, visible values and actual requests; the old checkbox interactions are retired, not the underlying inheritance contract.
@@ -59,7 +71,7 @@ Review follow-up scope:
 | Existing Quicklinks            | test            | Serialized launch context selects a legacy command; the request preserves its settings and Continue selects its command model                     | Runtime integration |
 | Ask draft lifecycle            | update-existing | Returning from full input before submission preserves selected text; submitting clears Ask's controlled input; later rounds also clear it         | Runtime integration |
 
-Local validation: 31 tests pass with no skips on the installed Raycast desktop runtime. Typecheck, extension build and lint pass.
+Local validation: 41 tests pass with no skips on the installed Raycast desktop runtime, including the upstream model-picker tests. Typecheck, extension build and lint pass.
 
 Three semantic mutations were run in temporary copies of the repository and all failed their targeted tests: removing independent mode from built-ins, dropping retention of missing referenced bases during import, and removing Ask's controlled draft clear. The working tree was not modified by these checks.
 

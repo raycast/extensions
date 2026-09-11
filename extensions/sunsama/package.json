@@ -105,6 +105,199 @@
       "icon": "extension-icon.png"
     }
   ],
+  "tools": [
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "List the tasks on a day (today by default) with their ids, planned and tracked time, channel, notes, and subtasks"
+    },
+    {
+      "name": "get-channels",
+      "title": "Get Channels",
+      "description": "List every channel and category in the workspace, so a task can be filed under the right name"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Add a task to a day, optionally with notes, a channel, planned time, subtasks, or a link to Trello, GitHub, Todoist, ClickUp, and more"
+    },
+    {
+      "name": "complete-task",
+      "title": "Complete Task",
+      "description": "Mark a task as completed"
+    },
+    {
+      "name": "reschedule-task",
+      "title": "Reschedule Task",
+      "description": "Move a task to another day, or to the backlog"
+    },
+    {
+      "name": "edit-task",
+      "title": "Edit Task",
+      "description": "Change a task's title, notes, planned time, or channel"
+    },
+    {
+      "name": "add-subtasks",
+      "title": "Add Subtasks",
+      "description": "Add subtasks to an existing task"
+    },
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Start the timer on a task or one of its subtasks"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "description": "Stop the running timer"
+    },
+    {
+      "name": "delete-task",
+      "title": "Delete Task",
+      "description": "Delete a task permanently"
+    }
+  ],
+  "ai": {
+    "instructions": "Sunsama is a daily planner: every task lives on a day (YYYY-MM-DD, in the user's local timezone) or in the backlog. Tasks belong to at most one channel (a project or area, like 'Work' or 'Client X'); categories group channels. Planned time and tracked time are in minutes. Every tool that changes a task needs its id, so call get-tasks for the right day first and match the task by title. Only call get-channels when the user names a channel and you need its exact spelling. 'Today', 'tomorrow' and weekday names resolve against the current date. A pasted link (Trello card, GitHub issue, Todoist task, ...) should go in create-task's url, not the title — Sunsama titles the task from the item.",
+    "evals": [
+      {
+        "input": "@sunsama what's on my plate today?",
+        "mocks": {
+          "get-tasks": {
+            "day": "2026-09-10",
+            "tasks": [
+              {
+                "id": "t1",
+                "title": "Write release notes",
+                "completed": false,
+                "plannedMinutes": 45,
+                "trackedMinutes": 0,
+                "channel": "Product",
+                "timerRunning": false,
+                "subtasks": []
+              },
+              {
+                "id": "t2",
+                "title": "Review PR #12",
+                "completed": true,
+                "plannedMinutes": 30,
+                "trackedMinutes": 25,
+                "channel": "Engineering",
+                "timerRunning": false,
+                "subtasks": []
+              }
+            ]
+          }
+        },
+        "expected": [
+          { "callsTool": "get-tasks" },
+          { "includes": "Write release notes" }
+        ]
+      },
+      {
+        "input": "@sunsama add a task to call the dentist tomorrow, 15 minutes",
+        "mocks": {
+          "create-task": {
+            "id": "t3",
+            "title": "Call the dentist"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-task",
+              "arguments": {
+                "title": { "includes": "dentist" },
+                "timeEstimate": 15
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@sunsama mark 'Write release notes' as done",
+        "mocks": {
+          "get-tasks": {
+            "day": "2026-09-10",
+            "tasks": [
+              {
+                "id": "t1",
+                "title": "Write release notes",
+                "completed": false,
+                "trackedMinutes": 0,
+                "timerRunning": false,
+                "subtasks": []
+              }
+            ]
+          },
+          "complete-task": { "completed": true }
+        },
+        "expected": [
+          { "callsTool": "get-tasks" },
+          {
+            "callsTool": {
+              "name": "complete-task",
+              "arguments": { "taskId": "t1" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@sunsama start the timer on Write release notes",
+        "mocks": {
+          "get-tasks": {
+            "day": "2026-09-10",
+            "tasks": [
+              {
+                "id": "t1",
+                "title": "Write release notes",
+                "completed": false,
+                "trackedMinutes": 0,
+                "timerRunning": false,
+                "subtasks": []
+              }
+            ]
+          },
+          "start-timer": { "running": true }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "start-timer",
+              "arguments": { "taskId": "t1" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@sunsama push Write release notes to Monday",
+        "mocks": {
+          "get-tasks": {
+            "day": "2026-09-10",
+            "tasks": [
+              {
+                "id": "t1",
+                "title": "Write release notes",
+                "completed": false,
+                "trackedMinutes": 0,
+                "timerRunning": false,
+                "subtasks": []
+              }
+            ]
+          },
+          "reschedule-task": { "movedTo": "2026-09-14" }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "reschedule-task",
+              "arguments": { "taskId": "t1" }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "workspaceUrl",

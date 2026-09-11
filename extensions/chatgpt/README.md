@@ -74,7 +74,13 @@ By default, reasoning effort override is disabled. When it is enabled and set to
 
 ### Custom Models
 
-Modify the preferences properties to configure the API Endpoint and use custom models.
+Enable `Use API Endpoint` and set `API Endpoint` in preferences to use a compatible API provider.
+
+When creating or editing a Model or AI Command, the `Model` dropdown loads model IDs from the configured API.
+Search and select an available model, or type any model ID and select `Use "your-model-id"` to use it.
+Manual entry is always available, including when the API cannot list models. There is no separate `Custom model` preference.
+Previously saved model IDs remain selectable even if they are missing from the API response.
+Azure continues to skip model discovery; enter the model ID manually.
 
 # How to use
 
