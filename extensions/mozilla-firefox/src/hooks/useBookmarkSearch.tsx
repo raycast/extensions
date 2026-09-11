@@ -1,80 +1,31 @@
-import { promises, existsSync, readdirSync } from "fs";
-import { ReactElement, useEffect, useState } from "react";
-import { HistoryEntry, SearchResult } from "../interfaces";
-import { getBookmarksDirectoryPath, decodeLZ4 } from "../util";
-import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
-import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
+import { ReactElement } from "react";
+import { existsSync } from "fs";
+import { useSQL } from "@raycast/utils";
+import { SearchResult, HistoryEntry } from "../interfaces";
+import { getHistoryDbPath, searchWhereClause } from "../util";
+import { NotInstalledError } from "../components";
 
-interface FirefoxBookmarkNode {
-  type: string;
-  id: number;
-  title: string;
-  uri?: string;
-  dateAdded: Date;
-  children?: FirefoxBookmarkNode[];
-}
+// Bookmarks live in the same places.sqlite as the history (moz_bookmarks.type = 1 → bookmark).
+const getBookmarkQuery = (query?: string) =>
+  `SELECT b.id AS id, p.url AS url, b.title AS title,
+          datetime(b.dateAdded/1000000,'unixepoch','localtime') AS lastVisited
+   FROM moz_bookmarks b
+   JOIN moz_places p ON b.fk = p.id
+   WHERE b.type = 1
+   ${searchWhereClause(query, "b.title", "p.url")}
+   ORDER BY b.dateAdded DESC LIMIT 100;`;
 
-function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: FirefoxBookmarkNode): HistoryEntry[] {
-  const bookmarks: HistoryEntry[] = [];
-  if (bookmarkDirectory.type === "text/x-moz-place-container" && bookmarkDirectory.children) {
-    bookmarkDirectory.children.forEach((child: FirefoxBookmarkNode) => {
-      const bookmarkEntries = extractBookmarkFromBookmarkDirectory(child);
-      bookmarks.push(...bookmarkEntries);
-    });
-  } else if (bookmarkDirectory.type === "text/x-moz-place" && bookmarkDirectory.uri) {
-    bookmarks.push({
-      id: bookmarkDirectory.id,
-      title: bookmarkDirectory.title,
-      url: bookmarkDirectory.uri,
-      lastVisited: bookmarkDirectory.dateAdded,
-    });
+export function useBookmarkSearch(query: string | undefined): SearchResult<HistoryEntry> {
+  const dbPath = getHistoryDbPath();
+  const dbExists = existsSync(dbPath);
+
+  const { isLoading, data, permissionView } = useSQL<HistoryEntry>(dbPath, getBookmarkQuery(query), {
+    execute: dbExists,
+  });
+
+  if (!dbExists) {
+    return { data: [], isLoading: false, errorView: <NotInstalledError /> };
   }
-  return bookmarks;
-}
 
-async function extractBookmarks(): Promise<HistoryEntry[]> {
-  const bookmarksPath = getBookmarksDirectoryPath();
-  if (!existsSync(bookmarksPath)) {
-    throw new Error(NO_BOOKMARKS_MESSAGE);
-  }
-  const files = readdirSync(bookmarksPath);
-  if (files.length === 0) {
-    throw new Error(NO_BOOKMARKS_MESSAGE);
-  }
-  const fileBuffer = await promises.readFile(`${bookmarksPath}/${files[files.length - 1]}`);
-  const rawBookmarks = decodeLZ4(fileBuffer);
-
-  return extractBookmarkFromBookmarkDirectory(rawBookmarks);
-}
-
-export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
-  const [data, setData] = useState<HistoryEntry[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [errorView, setErrorView] = useState<ReactElement>();
-
-  useEffect(() => {
-    extractBookmarks()
-      .then((bookmarks) => {
-        setData(
-          bookmarks.filter(
-            (bookmark) =>
-              bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-              bookmark.url.toLowerCase().includes(query?.toLowerCase() || ""),
-          ),
-        );
-        setIsLoading(false);
-      })
-      .catch((e) => {
-        if (e.message === NOT_INSTALLED_MESSAGE) {
-          setErrorView(<NotInstalledError />);
-        } else if (e.message === NO_BOOKMARKS_MESSAGE) {
-          setErrorView(<NoBookmarksError />);
-        } else {
-          setErrorView(<UnknownError message={e.message} />);
-        }
-        setIsLoading(false);
-      });
-  }, [query]);
-
-  return { errorView, isLoading, data };
+  return { data, isLoading, errorView: permissionView as ReactElement };
 }
