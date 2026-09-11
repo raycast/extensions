@@ -73,7 +73,6 @@ export async function readStatus(cliPath: string): Promise<VpnStatus> {
     get(cliPath, "allowlan"),
   ]);
 
-  // Unreadable fields stay undefined; a default here would be shown as fact.
   return {
     state: parseState(state),
     regionId,
@@ -149,11 +148,10 @@ export async function waitForState(
 }
 
 /**
- * Confirms a connect issued while a tunnel was already up. Switching regions
- * goes Connected -> DisconnectingToReconnect -> Connected, so a bare
- * "Connected" poll would match the pre-switch reading. Reconnecting to the
- * region already in use never leaves Connected, so that case is a success;
- * never reading successfully is not.
+ * Confirms a connect issued while a tunnel was already up. A bare "Connected"
+ * poll would match the pre-switch reading, so the transition must be observed.
+ * Staying Connected means the region was already active; never reading
+ * successfully means nothing was confirmed.
  */
 export async function waitForReconnect(
   cliPath: string,
@@ -186,10 +184,7 @@ export function isActive(state: ConnectionState): boolean {
   );
 }
 
-/**
- * Gates on piactl rather than on the app living at a fixed path: PIA can be
- * installed anywhere while its CLI helper is still on PATH.
- */
+/** Gates on piactl, not a fixed app path: PIA can be installed anywhere. */
 export async function detectSetup(): Promise<SetupState> {
   const cliPath = findCliPath();
   const appPath = (cliPath && appPathFromCli(cliPath)) ?? (existsSync(PIA_APP_PATH) ? PIA_APP_PATH : undefined);

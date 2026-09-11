@@ -3,17 +3,12 @@ import { listRegionIds } from "./pia";
 import { AUTO_REGION, Region } from "../types";
 
 /**
- * Recents and favorites come back from local storage, so ids are re-checked
- * before reaching piactl. Deliberately permissive about the shape: PIA builds
- * ids by lowercasing a display name and replacing only whitespace, so they can
- * contain dots and non-ASCII letters (`dedicated-sweden-000.000.000.000`).
- * Arguments are passed via execFile, so this guards against malformed stored
- * values rather than against shell syntax.
+ * Ids from local storage are re-checked before reaching piactl. Permissive by
+ * design: PIA replaces only whitespace, so ids may contain dots and non-ASCII
+ * letters (`dedicated-sweden-000.000.000.000`).
  */
 export function isValidRegionId(id: string): boolean {
   if (id.length === 0 || id.length > 128) return false;
-  // Reject whitespace and control characters; everything else PIA may produce
-  // is allowed through.
   for (const ch of id) {
     const code = ch.codePointAt(0) ?? 0;
     if (code <= 0x20 || code === 0x7f) return false;
@@ -85,11 +80,7 @@ interface CachedCatalog {
   entries: [string, RegionMetadata][];
 }
 
-/**
- * PIA's catalog id and the id piactl accepts are not the same scheme, and the
- * display name does not always slugify to the accepted id either. Index each
- * entry under both candidates so metadata attaches wherever it lines up.
- */
+/** Catalog ids and piactl ids use different schemes, so index under both. */
 function indexCatalog(body: string): Map<string, RegionMetadata> {
   const payload = JSON.parse(body.split("\n")[0]) as { regions?: ApiRegion[] };
   if (!Array.isArray(payload.regions)) {
@@ -152,9 +143,8 @@ async function loadCatalog(): Promise<Map<string, RegionMetadata>> {
 }
 
 /**
- * `piactl get regions` is the only authoritative list of ids PIA will accept,
- * so it drives the result and the catalog only decorates it. Regions the
- * catalog does not cover still appear, without a flag or tags.
+ * `piactl get regions` is the only authoritative list of ids PIA accepts, so it
+ * drives the result and the catalog only decorates it.
  */
 export async function loadRegions(cliPath: string): Promise<Region[]> {
   const ids = (await listRegionIds(cliPath)).filter((id) => id !== AUTO_REGION && isValidRegionId(id));
