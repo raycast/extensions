@@ -1,5 +1,13 @@
 # Skills Changelog
 
+## [Fix Commands Waiting Forever Behind Each Other] - {PR_MERGE_DATE}
+
+- Stop a second command from waiting indefinitely behind a running one: opening Manage Skills during "Update All Skills" now either gets its turn or reports that another skills command is still running, instead of showing an empty list and spinning for minutes
+- Fail immediately on a permanent problem such as a support directory that cannot be written, which was previously retried forever
+- Keep a lost lock from taking down the command that is running, and stop a failed lock release from replacing the real error
+- Give read-only commands room for the initial download of the `skills` CLI, so an ordinary first run on a slow connection no longer fails
+- Say whether a timed-out command never started, meaning the CLI itself was still downloading, or started and then ran long, instead of giving one message for both
+
 ## [Fix Update All Skills Timing Out] - 2026-09-11
 
 - Allow `add`, `remove`, and `update` up to 5 minutes instead of 30 seconds, so "Update All Skills" no longer fails with a bare "Command failed: npx -y skills@latest update -g -y" once checking every installed skill's source takes longer than that

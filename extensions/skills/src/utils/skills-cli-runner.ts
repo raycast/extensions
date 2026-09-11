@@ -17,12 +17,24 @@ let bunxResolutionFailed = false;
 const SKILLS_CLI_LOCK_TARGET = join(environment.supportPath, "skills-cli");
 
 /**
- * `list` only reads local state. `add`, `remove` and `update` fetch every
- * involved skill from its git source, and "update all" does so for each
- * installed skill in turn, so it easily outgrows a 30-second budget.
+ * Every run starts by resolving `skills@latest`, which downloads roughly 8 MB
+ * on a cold cache, so even read-only `list` needs room for that download on a
+ * slow connection. `add`, `remove` and `update` then fetch every involved skill
+ * from its git source, and "update all" does so for each installed skill in
+ * turn, which is what outgrew the original 30-second budget.
  */
-const READ_ONLY_TIMEOUT_MS = 30_000;
+const READ_ONLY_TIMEOUT_MS = 2 * 60_000;
 const MUTATING_TIMEOUT_MS = 5 * 60_000;
+
+/**
+ * How long a command waits for its turn when another one holds the CLI. A
+ * legitimate holder can occupy it for a whole mutating timeout, so the wait has
+ * to outlast that; past it the holder is not coming back, and waiting longer is
+ * indistinguishable from a hang.
+ */
+const CLI_TURN_TIMEOUT_MS = MUTATING_TIMEOUT_MS + 30_000;
+
+const LOCK_RETRY_INTERVAL_MS = 100;
 
 type ExecFailure = Error & {
   cmd?: string;
@@ -44,6 +56,17 @@ export class NpxResolutionError extends Error {
 
 export function isNpxResolutionError(error: unknown): boolean {
   return error instanceof NpxResolutionError;
+}
+
+export class SkillsCliBusyError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "SkillsCliBusyError";
+  }
+}
+
+export function isSkillsCliBusyError(error: unknown): boolean {
+  return error instanceof SkillsCliBusyError;
 }
 
 export class InvalidCustomNpxPathError extends Error {
@@ -82,29 +105,111 @@ export async function runSkillsCli(args: string[], options: RunSkillsCliOptions 
 }
 
 export async function withSkillsCliLock<T>(run: (runLocked: SkillsCliRunner) => Promise<T>): Promise<T> {
-  return enqueueSkillsCliRun(() =>
-    withCrossProcessSkillsCliLock(() =>
-      run((args, options = {}) => runSkillsCliCommand(args, options.readOnly ?? false)),
-    ),
+  const turnDeadline = Date.now() + CLI_TURN_TIMEOUT_MS;
+  return enqueueSkillsCliRun(
+    () =>
+      withCrossProcessSkillsCliLock(
+        () => run((args, options = {}) => runSkillsCliCommand(args, options.readOnly ?? false)),
+        turnDeadline,
+      ),
+    turnDeadline,
   );
 }
 
-async function enqueueSkillsCliRun<T>(run: () => Promise<T>): Promise<T> {
-  const runAfterPending = pendingSkillsCliRun.then(run, run);
-  pendingSkillsCliRun = runAfterPending.catch(() => undefined);
-  return runAfterPending;
+function skillsCliBusyError(): SkillsCliBusyError {
+  return new SkillsCliBusyError("Another skills command is still running. Wait for it to finish and try again.");
 }
 
-async function withCrossProcessSkillsCliLock<T>(run: () => Promise<T>): Promise<T> {
-  await mkdir(environment.supportPath, { recursive: true });
-  await writeFile(SKILLS_CLI_LOCK_TARGET, "", { flag: "a" });
-  const release = await lockfile.lock(SKILLS_CLI_LOCK_TARGET, {
-    retries: { forever: true, factor: 1, minTimeout: 100, maxTimeout: 100, randomize: true },
-  });
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+async function enqueueSkillsCliRun<T>(run: () => Promise<T>, turnDeadline: number): Promise<T> {
+  // Claim the next place in the chain synchronously, so two callers can never
+  // wake up on the same predecessor and run at once.
+  const predecessor = pendingSkillsCliRun;
+  let releasePlace: () => void = () => {};
+  pendingSkillsCliRun = new Promise<void>((resolve) => (releasePlace = resolve));
+
+  try {
+    await waitForTurn(predecessor, turnDeadline);
+  } catch (error) {
+    // This run never started, so whoever is next still has to wait for the
+    // predecessor rather than for us.
+    predecessor.then(releasePlace, releasePlace);
+    throw error;
+  }
+
   try {
     return await run();
   } finally {
+    releasePlace();
+  }
+}
+
+async function waitForTurn(predecessor: Promise<unknown>, turnDeadline: number): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      predecessor.catch(() => undefined),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(skillsCliBusyError()), Math.max(0, turnDeadline - Date.now()));
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function withCrossProcessSkillsCliLock<T>(run: () => Promise<T>, turnDeadline: number): Promise<T> {
+  await mkdir(environment.supportPath, { recursive: true });
+  await writeFile(SKILLS_CLI_LOCK_TARGET, "", { flag: "a" });
+  const release = await acquireSkillsCliLock(turnDeadline);
+  try {
+    return await run();
+  } finally {
+    await releaseSkillsCliLock(release);
+  }
+}
+
+/**
+ * Retries only while the lock is genuinely held by someone else. The previous
+ * `retries: forever` also retried permanent failures such as a support
+ * directory we cannot write to, which could never succeed.
+ */
+async function acquireSkillsCliLock(turnDeadline: number): Promise<() => Promise<void>> {
+  for (;;) {
+    try {
+      return await lockfile.lock(SKILLS_CLI_LOCK_TARGET, {
+        retries: 0,
+        onCompromised: reportCompromisedLock,
+      });
+    } catch (error) {
+      if (!isLockHeldError(error)) throw error;
+      if (Date.now() >= turnDeadline) throw skillsCliBusyError();
+      await delay(LOCK_RETRY_INTERVAL_MS);
+    }
+  }
+}
+
+function isLockHeldError(error: unknown): boolean {
+  return (error as { code?: string } | undefined)?.code === "ELOCKED";
+}
+
+/**
+ * The default handler throws from a timer callback, which takes the whole
+ * command down with it. Our CLI run is already in flight by then, and killing
+ * it mid-change is worse than finishing it, so record it and carry on.
+ */
+function reportCompromisedLock(error: Error): void {
+  console.error("[skills] Lost the skills CLI lock while a command was running:", error);
+}
+
+async function releaseSkillsCliLock(release: () => Promise<void>): Promise<void> {
+  try {
     await release();
+  } catch (error) {
+    // A lock that was compromised is already gone, so releasing it fails. That
+    // must never replace whatever error the command itself produced.
+    console.error("[skills] Failed to release the skills CLI lock:", error);
   }
 }
 
@@ -208,7 +313,26 @@ function isTimeoutFailure(error: unknown): boolean {
 }
 
 function formatTimeout(timeoutMs: number): string {
-  return timeoutMs >= 60_000 ? `${timeoutMs / 60_000} minutes` : `${timeoutMs / 1000} seconds`;
+  return timeoutMs >= 60_000 ? pluralize(timeoutMs / 60_000, "minute") : pluralize(timeoutMs / 1000, "second");
+}
+
+function pluralize(value: number, unit: string): string {
+  return `${value} ${unit}${value === 1 ? "" : "s"}`;
+}
+
+/**
+ * The two ways a run can time out need different things from the user. Nothing
+ * printed means `bunx`/`npx` never finished downloading the `skills` package,
+ * which a proxied registry can cause; output means the CLI was running and its
+ * own fetches from skill sources are what took too long.
+ */
+function describeTimeout(error: Error, npxCommand: string, timeoutMs: number): string {
+  const command = (error as ExecFailure).cmd ?? npxCommand;
+  const budget = formatTimeout(timeoutMs);
+  const explanation = hasDiagnosticOutput(error)
+    ? `The skills CLI started but did not finish within ${budget} while fetching skills from their sources. Check your network connection and try again.`
+    : `The skills CLI produced no output within ${budget}, so downloading it most likely ran long. Check your network connection, or set a custom package registry if you install packages through a corporate proxy.`;
+  return `${explanation}\nCommand: ${command}`;
 }
 
 function normalizeCliError(error: unknown, npxCommand: string, timeoutMs: number): Error {
@@ -223,11 +347,7 @@ function normalizeCliError(error: unknown, npxCommand: string, timeoutMs: number
   }
 
   if (isTimeoutFailure(error)) {
-    const command = (error as ExecFailure).cmd ?? npxCommand;
-    return withCliOutput(
-      error,
-      `The skills CLI did not finish within ${formatTimeout(timeoutMs)}. Check your network connection and try again.\nCommand: ${command}`,
-    );
+    return withCliOutput(error, describeTimeout(error, npxCommand, timeoutMs));
   }
 
   return withCliOutput(error);
