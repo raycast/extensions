@@ -78,4 +78,4 @@ buffer
 mutedeck
 nocal
 openqr
-donebear
+done-bear
