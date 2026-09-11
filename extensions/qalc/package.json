@@ -9,6 +9,10 @@
     "Data",
     "Productivity"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "commands": [
     {
