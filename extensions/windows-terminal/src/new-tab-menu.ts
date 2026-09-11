@@ -304,10 +304,18 @@ function parsePattern(pattern: string): AltNode {
         const endAtom = parseClassAtom();
         if ("predicate" in endAtom) return fail("a character class can't end a range");
         const end = endAtom.literal;
+        // Compared as code points, not as strings: JavaScript orders strings by UTF-16 code unit,
+        // which puts every astral character (lead surrogate D800–DBFF) below U+E000–U+FFFF, so a
+        // range like [ｿ-🚀] would read as descending and [a-￿] would admit 🚀.
+        const low = start.codePointAt(0)!;
+        const high = end.codePointAt(0)!;
         // A descending range like [z-a] can never match anything; real regex engines reject it
         // as malformed rather than silently compiling a predicate that's always false.
-        if (end < start) return fail(`character range "${start}-${end}" out of order`);
-        tests.push((ch) => ch >= start && ch <= end);
+        if (high < low) return fail(`character range "${start}-${end}" out of order`);
+        tests.push((ch) => {
+          const code = ch.codePointAt(0)!;
+          return code >= low && code <= high;
+        });
       } else {
         tests.push((ch) => ch === start);
       }

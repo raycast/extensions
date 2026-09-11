@@ -195,6 +195,12 @@ describe("buildProfileMatcher", () => {
     assert.equal(matches("🚀+", "🚀🚀"), true);
     assert.equal(matches("[^a]", "🚀"), true);
     assert.equal(matches("[🚀-🚂]", "🚁"), true);
+    // Ranges compare code points, not UTF-16 strings: [ｿ-🚀] (U+FF7F to U+1F680) is ascending,
+    // and [a-￿] (up to U+FFFF) stops short of the astral 🚀.
+    assert.equal(matches("[ｿ-🚀]+", "ｿ🚀"), true);
+    assert.equal(matches("[a-￿]", "🚀"), false);
+    assert.equal(matches("[a-￿]", "ｿ"), true);
+    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "[🚀-ｿ]" }), null);
   });
 
   it("doesn't let . match a line terminator, like ICU without its DOTALL flag", () => {
