@@ -1,6 +1,6 @@
 # Toothpick Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-09-11
 
 - Added Windows support for connecting, disconnecting, toggling, and refreshing Bluetooth headphones and speakers.
 - Windows connections turn Bluetooth on when needed and give the device you chose priority over automatic reconnections.
