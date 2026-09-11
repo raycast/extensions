@@ -313,7 +313,11 @@ export async function parseFrpcToml(configPath: string): Promise<FrpcConfig> {
   // templates is not valid TOML on disk. Expand the two documented idioms
   // (parseNumberRangePair loops and .Envs lookups) so templated configs can
   // still be displayed.
-  const rendered = text.includes("{{") ? renderFrpcTemplate(text) : text;
+  let rendered = text;
+  if (text.includes("{{")) {
+    const env = await frpcEnvVars();
+    rendered = renderFrpcTemplate(text, env);
+  }
   const parsed: unknown = parseToml(rendered);
   if (!isRecord(parsed)) {
     throw new Error("frpc.toml did not parse to a table");
@@ -731,12 +735,16 @@ export async function loadStatusDashboard(): Promise<StatusDashboard> {
     fetchAdminStatus(),
     parseFrpcToml(configPath).catch(() => undefined),
   ]);
-  const counts = adminStatus
-    ? countOnline(adminStatus)
-    : {
-        online: 0,
-        total: config ? config.proxies.length + config.visitors.length : 0,
-      };
+  // The admin status response covers proxies only; add configured visitors
+  // so the total is consistent whether or not the API is reachable.
+  const visitorCount = config?.visitors.length ?? 0;
+  const runtimeCounts = adminStatus ? countOnline(adminStatus) : undefined;
+  const counts = runtimeCounts
+    ? {
+        online: runtimeCounts.online,
+        total: runtimeCounts.total + visitorCount,
+      }
+    : { online: 0, total: (config?.proxies.length ?? 0) + visitorCount };
   const update = await checkForUpdates(version ?? "");
   const serverAddress = config
     ? `${config.serverAddr}:${config.serverPort}`
@@ -982,18 +990,50 @@ function toProxyConfig(value: unknown): ProxyConfig | undefined {
   return config;
 }
 
-function renderFrpcTemplate(text: string): string {
+function parseNumberList(spec: string): number[] | undefined {
+  const numbers: number[] = [];
+  for (const segment of spec.split(",")) {
+    const trimmed = segment.trim();
+    const range = trimmed.match(/^(\d+)-(\d+)$/);
+    if (range) {
+      const start = Number(range[1]);
+      const end = Number(range[2]);
+      if (end < start || end - start > 1000) {
+        return undefined;
+      }
+      for (let i = start; i <= end; i++) {
+        numbers.push(i);
+      }
+      continue;
+    }
+    if (/^\d+$/.test(trimmed)) {
+      numbers.push(Number(trimmed));
+      continue;
+    }
+    return undefined;
+  }
+  return numbers;
+}
+
+function renderFrpcTemplate(
+  text: string,
+  env: Record<string, string | undefined> = process.env,
+): string {
   const rangeRe =
-    /{{-?\s*range\s+\$\w+\s*,\s*\$(\w+)\s*:=\s*parseNumberRangePair\s+"(\d+)-(\d+)"\s+"(\d+)-(\d+)"\s*-?}}([\s\S]*?){{-?\s*end\s*-?}}/g;
+    /{{-?\s*range\s+\$\w+\s*,\s*\$(\w+)\s*:=\s*parseNumberRangePair\s+"([0-9,\s-]+)"\s+"([0-9,\s-]+)"\s*-?}}([\s\S]*?){{-?\s*end\s*-?}}/g;
   const expanded = text.replace(
     rangeRe,
-    (match, varName: string, a1, a2, b1, b2, body: string) => {
-      const startA = Number(a1);
-      const endA = Number(a2);
-      const startB = Number(b1);
-      const endB = Number(b2);
-      const count = Math.min(endA - startA, endB - startB) + 1;
-      if (!Number.isFinite(count) || count <= 0 || count > 1000) {
+    (match, varName: string, specA: string, specB: string, body: string) => {
+      const listA = parseNumberList(specA);
+      const listB = parseNumberList(specB);
+      // frp requires both sides to expand to the same number of ports.
+      if (
+        !listA ||
+        !listB ||
+        listA.length !== listB.length ||
+        listA.length === 0 ||
+        listA.length > 1000
+      ) {
         return match;
       }
       const valueRe = new RegExp(
@@ -1001,9 +1041,9 @@ function renderFrpcTemplate(text: string): string {
         "g",
       );
       let out = "";
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < listA.length; i++) {
         out += body.replace(valueRe, (_m, which: string) =>
-          String(which === "First" ? startA + i : startB + i),
+          String(which === "First" ? listA[i] : listB[i]),
         );
       }
       return out;
@@ -1011,8 +1051,43 @@ function renderFrpcTemplate(text: string): string {
   );
   return expanded.replace(
     /{{-?\s*\.Envs\.(\w+)\s*-?}}/g,
-    (_m, name: string) => process.env[name] ?? "",
+    (_m, name: string) => env[name] ?? "",
   );
+}
+
+async function frpcEnvVars(): Promise<Record<string, string | undefined>> {
+  // frpc typically runs under launchd, whose environment differs from
+  // Raycast's. Overlay the LaunchAgent's EnvironmentVariables so .Envs
+  // lookups resolve to the values the running service actually sees.
+  const prefs = getPrefs();
+  if (!prefs.launchdLabel) {
+    return process.env;
+  }
+  const plistPath = getPlistPath(prefs.launchdLabel);
+  if (!existsSync(plistPath)) {
+    return process.env;
+  }
+  try {
+    const { stdout } = await execFile(
+      "/usr/bin/plutil",
+      ["-extract", "EnvironmentVariables", "json", "-o", "-", plistPath],
+      { timeout: 3000 },
+    );
+    const parsed: unknown = JSON.parse(stdout);
+    if (!isRecord(parsed)) {
+      return process.env;
+    }
+    const merged: Record<string, string | undefined> = { ...process.env };
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === "string") {
+        merged[key] = value;
+      }
+    }
+    return merged;
+  } catch {
+    // the plist has no EnvironmentVariables key
+    return process.env;
+  }
 }
 
 function toVisitorConfig(value: unknown): ProxyConfig | undefined {
