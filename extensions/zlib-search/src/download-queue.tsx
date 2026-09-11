@@ -77,12 +77,23 @@ export default function Command() {
 
   async function handleDownloadAllPending() {
     if (pending.length === 0) return;
+
+    // Track our own running copy instead of calling markDownloaded (which
+    // closes over the `queue` from this render) for every result: since
+    // runBulkDownload awaits between items but this function's closure never
+    // sees a fresh `queue`, successive markDownloaded calls would each start
+    // from the same stale array and overwrite each other's updates.
+    let latestQueue = queue;
     await runBulkDownload(pending, {
       zlibPath,
       downloadDir,
       execEnv,
       onEachResult: (result) => {
-        if (result.success) markDownloaded(result.book.id);
+        if (!result.success) return;
+        latestQueue = latestQueue.map((item) =>
+          item.id === result.book.id ? { ...item, downloaded: true } : item,
+        );
+        setQueue(latestQueue);
       },
     });
   }

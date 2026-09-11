@@ -31,7 +31,12 @@ const EMPTY_RESULT: SearchResult = { books: [], page: 0, total_pages: 0 };
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  // Keyed by id but storing the full Book, not just the id: a book selected
+  // in an earlier search no longer appears in `books` once the user searches
+  // again, so resolving selections against the current results would lose it.
+  const [selectedBooks, setSelectedBooks] = useState<Map<string, Book>>(
+    new Map(),
+  );
   const prefs = getPreferenceValues<Preferences>();
   const zlibPath = resolveZlibPath(prefs.zlibPath);
   const downloadDir = prefs.downloadDir || "~/Downloads";
@@ -96,11 +101,11 @@ export default function Command() {
     }
   }
 
-  function toggleSelected(id: string) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+  function toggleSelected(book: Book) {
+    setSelectedBooks((prev) => {
+      const next = new Map(prev);
+      if (next.has(book.id)) next.delete(book.id);
+      else next.set(book.id, book);
       return next;
     });
   }
@@ -121,7 +126,7 @@ export default function Command() {
   }
 
   async function handleDownloadSelected() {
-    const selected = books.filter((book) => selectedIds.has(book.id));
+    const selected = Array.from(selectedBooks.values());
     if (selected.length === 0) return;
 
     const results = await runBulkDownload(selected, {
@@ -130,11 +135,14 @@ export default function Command() {
       execEnv,
     });
 
-    // Keep failed downloads selected so the user can retry; clear the rest.
-    const failedIds = new Set(
-      results.filter((r) => !r.success).map((r) => r.book.id),
+    // Keep failed downloads selected (with their full data) so the user can
+    // retry; clear the rest.
+    const failed = new Map(
+      results
+        .filter((r) => !r.success)
+        .map((r) => [r.book.id, r.book] as const),
     );
-    setSelectedIds(failedIds);
+    setSelectedBooks(failed);
   }
 
   return (
@@ -157,7 +165,7 @@ export default function Command() {
         />
       ) : (
         books.map((book, i) => {
-          const selected = selectedIds.has(book.id);
+          const selected = selectedBooks.has(book.id);
           const queued = isQueued(book.id);
           return (
             <List.Item
@@ -201,11 +209,11 @@ export default function Command() {
                       title={selected ? "Deselect" : "Select"}
                       icon={selected ? Icon.Circle : Icon.CheckCircle}
                       shortcut={{ modifiers: ["cmd"], key: "s" }}
-                      onAction={() => toggleSelected(book.id)}
+                      onAction={() => toggleSelected(book)}
                     />
-                    {selectedIds.size > 0 ? (
+                    {selectedBooks.size > 0 ? (
                       <Action
-                        title={`Download Selected (${selectedIds.size})`}
+                        title={`Download Selected (${selectedBooks.size})`}
                         icon={Icon.Tray}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                         onAction={handleDownloadSelected}
