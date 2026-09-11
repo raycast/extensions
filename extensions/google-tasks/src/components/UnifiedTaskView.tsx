@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, List, LocalStorage, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, List, LocalStorage, Toast, showToast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as google from "../api/oauth";
 import {
@@ -30,6 +30,10 @@ const date = "date";
 const undoDurationMs = 5000;
 const manualOrderTitle = "Manual order";
 const scheduledDateTitle = "Scheduled date";
+
+function shortcut(key: Keyboard.KeyEquivalent): Keyboard.Shortcut {
+  return { macOS: { modifiers: ["cmd"], key }, Windows: { modifiers: ["ctrl"], key } };
+}
 
 function sectionTitle(task: TaskWithList): string {
   const due = dueDay(task.due);
@@ -311,21 +315,20 @@ export default function UnifiedTaskView() {
         <Action.Push
           title="Edit Task"
           icon={Icon.Pencil}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
           target={<EditTaskForm listId={task.listId} task={task} onEdit={handleEdit} />}
         />
       ) : null}
       <Action
         title={isShowingDetails ? "Hide Details" : "Show Details"}
         icon={isShowingDetails ? Icon.EyeDisabled : Icon.Eye}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        shortcut={shortcut("d")}
         onAction={() => setIsShowingDetails((value) => !value)}
       />
       {lastCompletedTask ? (
         <Action
           title="Undo Last Completion"
           icon={Icon.ArrowCounterClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "z" }}
+          shortcut={shortcut("z")}
           onAction={() => void handleUndoCompletion()}
         />
       ) : null}
@@ -334,7 +337,7 @@ export default function UnifiedTaskView() {
           title="Delete Task"
           icon={Icon.Trash}
           style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          shortcut={shortcut("backspace")}
           onAction={() => handleDelete(task)}
         />
       ) : null}
@@ -349,7 +352,7 @@ export default function UnifiedTaskView() {
       <Action.Push
         title="Create Task"
         icon={Icon.NewDocument}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        shortcut={shortcut("n")}
         target={
           <CreateTaskForm
             listId={lists.some((list) => list.id === selection) ? selection : undefined}
@@ -358,12 +361,7 @@ export default function UnifiedTaskView() {
           />
         }
       />
-      <Action
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
-        onAction={() => void refresh()}
-      />
+      <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcut("r")} onAction={() => void refresh()} />
     </ActionPanel>
   );
 
