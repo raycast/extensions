@@ -40,7 +40,7 @@ export async function switchToSession(
       ? ({ status: "unavailable", reason: `“${target}” is already the selected session` } as const)
       : await locateTerminalPaneClients(previous);
 
-  // Spawn before signalling, so a single-tab window is never closed under the new Client.
+  // Spawn before signaling, so a single-tab window is never closed under the new Client.
   await launchHerdrInTerminal(["session", "attach", target], {
     includeSession: false,
     windowId: location.status === "found" ? location.windowId : undefined,

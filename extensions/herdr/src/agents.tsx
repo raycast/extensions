@@ -18,9 +18,12 @@ export default function Command() {
 
   return (
     <List
-      navigationTitle={snapshot.session ? `Manage Agents · ${snapshot.session}` : undefined}
       isLoading={snapshot.isLoading}
-      searchBarPlaceholder="Search agents, names, projects, paths…"
+      searchBarPlaceholder={
+        snapshot.session
+          ? `Search agents, names, projects, paths in ${snapshot.session}…`
+          : "Search agents, names, projects, paths…"
+      }
       actions={
         <ActionPanel>
           <ManageSessionsAction />

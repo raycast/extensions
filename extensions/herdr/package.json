@@ -5,6 +5,9 @@
   "description": "Control Herdr workspaces and coding agents from Raycast",
   "icon": "extension-icon.png",
   "author": "vlades",
+  "contributors": [
+    "xhaoxu"
+  ],
   "type": "module",
   "license": "MIT",
   "platforms": [
