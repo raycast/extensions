@@ -1,6 +1,6 @@
 # Terminal Finder Changelog
 
-## [Fix Crash With No Terminal Window] - {PR_MERGE_DATE}
+## [Fix Crash With No Terminal Window] - 2026-09-11
 
 - Show a friendly error instead of crashing when Terminal is running with no open windows (ref: [Issue #30965](https://github.com/raycast/extensions/issues/30965))
 
