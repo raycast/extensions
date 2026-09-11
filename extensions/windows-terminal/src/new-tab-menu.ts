@@ -32,13 +32,15 @@ export interface NewTabMenuEntry {
 // buildProfileMatcher, so the caller can tell "this profile doesn't match" from "this pattern
 // couldn't be evaluated" and say so instead of quietly dropping profiles from the menu.
 type AtomNode =
-  | { kind: "char"; test: (ch: string) => boolean }
+  // `literal` is set only for a literal character under (?i) — the one case parseSeq's literal-run
+  // rule looks at; it then sets `fullFold` on every literal in a run and `endsRun` on the last.
+  | { kind: "char"; test: (ch: string) => boolean; literal?: string; fullFold?: boolean; endsRun?: boolean }
   | { kind: "any" }
   | { kind: "group"; alt: AltNode }
   | { kind: "start" }
   | { kind: "end" }
   | { kind: "boundary"; negate: boolean };
-type QuantNode = { atom: AtomNode; min: number; max: number; greedy: boolean };
+type QuantNode = { atom: AtomNode; min: number; max: number; greedy: boolean; quantified: boolean };
 type SeqNode = { atoms: QuantNode[] };
 type AltNode = { options: SeqNode[] };
 
@@ -65,17 +67,39 @@ const UNROLL_THRESHOLD = 20;
 
 // ICU's character classes, not JavaScript's ASCII-only ones — Windows Terminal matches with ICU,
 // where \w covers letters, marks, decimal digits, and connector punctuation in any script
-// ("Développement"), \d any script's decimal digits ("١٢٣"), \s is [\t\n\f\r\p{Z}], and \b is
-// defined in terms of that \w ("\bÉquipe\b"). Values and patterns are walked by code point, not
-// UTF-16 code unit, so "." consumes all of "🚀" — and, as in ICU without its DOTALL flag, "."
-// stops at a line terminator.
+// ("Développement"), \d any script's decimal digits ("١٢٣"), \s is \p{White_Space} (so vertical
+// tab and next line count, unlike JavaScript's \s), and \b is defined in terms of that \w
+// ("\bÉquipe\b"). Values and patterns are walked by code point, not UTF-16 code unit, so "."
+// consumes all of "🚀" — and, as in ICU without its DOTALL flag, "." stops at a line terminator.
 const isWordChar = (ch: string) => /[\p{Alphabetic}\p{M}\p{Nd}\p{Pc}\p{Join_Control}]/u.test(ch);
 const isDigit = (ch: string) => /\p{Nd}/u.test(ch);
-const isSpace = (ch: string) => /[\t\n\f\r\p{Z}]/u.test(ch);
+const isSpace = (ch: string) => /\p{White_Space}/u.test(ch);
 // U+000A-U+000D, U+0085, U+2028, U+2029 — ICU's line terminators (spelled as code points: U+2028/9 are
 // line separators, and a literal one would end the regex line it sits on).
 const LINE_TERMINATORS = new Set([0x0a, 0x0b, 0x0c, 0x0d, 0x85, 0x2028, 0x2029]);
 const isLineTerminator = (ch: string) => LINE_TERMINATORS.has(ch.codePointAt(0)!);
+
+// Case folding, for (?i). ICU compares case-insensitively by folding both sides, and *full*
+// folding can change a string's length — "ß" folds to "ss" — which is how (?i)straße matches
+// "STRASSE" and (?i)ss matches "ß". JavaScript has no fold function; upper-then-lower, repeated to
+// a fixed point, reaches the same canonical form for every case variant ("ß" and "ẞ" both end at
+// "ss", "ﬁ" at "fi", "ſ" at "s").
+function fullFold(s: string): string {
+  for (let round = 0; round < 3; round++) {
+    const folded = s.toUpperCase().toLowerCase();
+    if (folded === s) return s;
+    s = folded;
+  }
+  return s;
+}
+
+// *Simple* folding maps one code point to one code point and leaves the rest alone: "ẞ" becomes
+// "ß", "ſ" becomes "s", but "ß" stays "ß". ICU uses it for a lone case-insensitive literal — see
+// the literal-run rule in parseSeq.
+function simpleFold(ch: string): string {
+  const folded = ch.toUpperCase().toLowerCase();
+  return Array.from(folded).length === 1 ? folded : ch;
+}
 
 // Parses the subset of ICU regex syntax (the flavor Windows Terminal itself matches with) that
 // matchProfiles patterns actually use: literals, `.`, escapes (`\d\w\s` and their negations, `\.`
@@ -97,8 +121,9 @@ function parsePattern(pattern: string): AltNode {
   };
 
   // Set by (?i) and restored when the enclosing group closes, mirroring ICU: the flag runs from
-  // where it appears to the end of that group, subsequent `|` branches included. It's applied as
-  // each character test is built, so the compiled program needs no notion of case at all.
+  // where it appears to the end of that group, subsequent `|` branches included. Classes and lone
+  // literals apply it as their character test is built; a run of literals compiles to CharFoldInst
+  // instead (see parseSeq), the one place the compiled program knows about case.
   let ignoreCase = false;
   // parseAtom recurses into parseAlt for every "(" — this bounds that recursion, since the parser
   // (unlike matchFull's explicit-stack VM) has no other stack-safety guard. Nothing near this depth
@@ -107,11 +132,27 @@ function parsePattern(pattern: string): AltNode {
   // call stack.
   let groupDepth = 0;
   const MAX_GROUP_DEPTH = 100;
+  // Under (?i) a class or predicate also admits a character's single-code-point case variants —
+  // an approximation of ICU closing the set over case. Only single code points: "ß" uppercases to
+  // "SS", and testing that against [A-Z] would wrongly admit ß.
+  const isSingle = (s: string) => Array.from(s).length === 1;
   const foldCase = (test: (ch: string) => boolean) => {
     if (!ignoreCase) return test;
-    return (ch: string) => test(ch) || test(ch.toLowerCase()) || test(ch.toUpperCase());
+    return (ch: string) => {
+      if (test(ch) || test(simpleFold(ch))) return true;
+      const lower = ch.toLowerCase();
+      const upper = ch.toUpperCase();
+      return (isSingle(lower) && test(lower)) || (isSingle(upper) && test(upper));
+    };
   };
   const charAtom = (test: (ch: string) => boolean): AtomNode => ({ kind: "char", test: foldCase(test) });
+  // A literal character. Under (?i) it compares simple case folds, one code point to one — unless
+  // parseSeq finds it in a run of two or more, which switches the run to full folding.
+  const literalAtom = (c: string): AtomNode => {
+    if (!ignoreCase) return { kind: "char", test: (ch) => ch === c };
+    const folded = simpleFold(c);
+    return { kind: "char", test: (ch) => simpleFold(ch) === folded, literal: c };
+  };
 
   function parseAlt(): AltNode {
     const options = [parseSeq()];
@@ -125,6 +166,25 @@ function parsePattern(pattern: string): AltNode {
   function parseSeq(): SeqNode {
     const atoms: QuantNode[] = [];
     while (i < n && peek() !== "|" && peek() !== ")") atoms.push(parseQuant());
+    // ICU's case-insensitive literal rule: a run of two or more adjacent, unquantified literal
+    // characters is matched as one string under *full* case folding — (?i)straße matches "STRASSE"
+    // and (?i)ss matches "ß" — while a lone literal, or one a quantifier applies to, compares
+    // single code points under *simple* folding: (?i)ß matches "ẞ" but not "SS". A quantifier,
+    // group, class, escape class, or anchor ends a run.
+    let run: QuantNode[] = [];
+    const closeRun = () => {
+      if (run.length >= 2) {
+        for (const q of run) if (q.atom.kind === "char") q.atom.fullFold = true;
+        const last = run[run.length - 1].atom;
+        if (last.kind === "char") last.endsRun = true;
+      }
+      run = [];
+    };
+    for (const q of atoms) {
+      if (q.atom.kind === "char" && q.atom.literal !== undefined && !q.quantified) run.push(q);
+      else closeRun();
+    }
+    closeRun();
     return { atoms };
   }
 
@@ -181,7 +241,7 @@ function parsePattern(pattern: string): AltNode {
       greedy = false;
       i++;
     }
-    return { atom, min, max, greedy };
+    return { atom, min, max, greedy, quantified };
   }
 
   function parseAtom(): AtomNode {
@@ -231,7 +291,7 @@ function parsePattern(pattern: string): AltNode {
       return parseEscape();
     }
     i++;
-    return charAtom((ch) => ch === c);
+    return literalAtom(c);
   }
 
   const escapePredicates: Record<string, (ch: string) => boolean> = {
@@ -256,7 +316,7 @@ function parsePattern(pattern: string): AltNode {
     // implement (\A, \p{...}, a backreference). Reject the pattern rather than matching it as a
     // literal, which would silently match the wrong profiles.
     if (/[A-Za-z0-9]/.test(c)) return unsupported(`escape "\\${c}" not implemented`);
-    return charAtom((ch) => ch === c);
+    return literalAtom(c);
   }
 
   // Reads one position inside a class: either a literal character (plain, or an escaped one like
@@ -339,6 +399,10 @@ function parsePattern(pattern: string): AltNode {
 // successor slots ("patch list", in Thompson's original terms) still waiting to be pointed at
 // whatever comes next.
 type CharInst = { op: "char"; test: (ch: string) => boolean; next?: Inst };
+// One code point of a fully case-folded literal run (see parseSeq). It consumes one unit of the
+// input character's own full fold rather than the character itself, so "ß" (folding to "ss") can
+// satisfy two of these in a row; `last` marks the run's final unit — see matchFull.
+type CharFoldInst = { op: "charFold"; unit: string; last: boolean; next?: Inst };
 type AnyInst = { op: "any"; next?: Inst };
 type StartInst = { op: "start"; next?: Inst };
 type EndInst = { op: "end"; next?: Inst };
@@ -355,6 +419,7 @@ type RepeatInst = { op: "repeat"; min: number; max: number; bodyStart: Inst; nex
 type IncrementInst = { op: "increment"; repeat: RepeatInst };
 type Inst =
   | CharInst
+  | CharFoldInst
   | AnyInst
   | StartInst
   | EndInst
@@ -366,7 +431,10 @@ type Inst =
   | IncrementInst;
 
 type PatchSlot =
-  | { inst: CharInst | AnyInst | StartInst | EndInst | BoundaryInst | NopInst | SplitInst | RepeatInst; slot: "next" }
+  | {
+      inst: CharInst | CharFoldInst | AnyInst | StartInst | EndInst | BoundaryInst | NopInst | SplitInst | RepeatInst;
+      slot: "next";
+    }
   | { inst: SplitInst; slot: "next2" };
 type Frag = { start: Inst; out: PatchSlot[] };
 // /Thompson NFA instruction types
@@ -414,6 +482,15 @@ function concatAll(frags: Frag[]): Frag {
 function compileAtom(atom: AtomNode): Frag {
   if (atom.kind === "group") return compileAlt(atom.alt);
   if (atom.kind === "char") {
+    if (atom.fullFold) {
+      const units = Array.from(fullFold(atom.literal!));
+      const frags = units.map((unit, index): Frag => {
+        const last = atom.endsRun === true && index === units.length - 1;
+        const inst: CharFoldInst = newInst({ op: "charFold", unit, last });
+        return { start: inst, out: [{ inst, slot: "next" }] };
+      });
+      return concatAll(frags);
+    }
     const inst: CharInst = newInst({ op: "char", test: atom.test });
     return { start: inst, out: [{ inst, slot: "next" }] };
   }
@@ -736,6 +813,13 @@ function matchFull(prog: Inst, str: string): boolean {
     const next: Thread[] = [];
     const visited = newVisited();
     const ch = chars[pos];
+    // What a fully case-folded literal run (CharFoldInst) sees in place of `ch`: usually one unit,
+    // but "ß" is two ("ss"). A run consumes them one at a time, staying on this input character in
+    // between, so the character is walked in as many rounds as it has units. Everything else
+    // (`char`, `any`) consumes the character itself, in the first round. Mirroring ICU, a run that
+    // ends partway through a character's units fails — (?i)ss doesn't match "sß" — and nothing but
+    // the run's own next unit can pick up mid-character.
+    const units = Array.from(fullFold(ch));
     // Lowest count first, so a thread that dominates (see VisitedState.lowestSettled) is always
     // queued before the ones it makes redundant. The closure explores a body's first alternative
     // first, and for something like (a|aa){21,4000} that's the higher-count path — left in that
@@ -743,13 +827,38 @@ function matchFull(prog: Inst, str: string): boolean {
     // perfectly ordinary long value. Counts only ever grow by one per `increment` or reset to
     // zero on exit, so sorting here keeps that dominance order through the whole step.
     current.sort((a, b) => a.lo - b.lo);
-    for (const thread of current) {
-      spend(budget);
-      const { inst, lo, hi, countFor } = thread;
-      if (inst.op === "char" && inst.test(ch))
+    let atUnit = current;
+    for (let unit = 0; unit < units.length; unit++) {
+      const isLastUnit = unit === units.length - 1;
+      const between: Thread[] = [];
+      const betweenVisited = newVisited();
+      for (const thread of atUnit) {
+        spend(budget);
+        const { inst, lo, hi, countFor } = thread;
+        if (inst.op === "charFold") {
+          if (inst.unit !== units[unit]) continue;
+          if (!isLastUnit) {
+            if (inst.last) continue;
+            // The run's next unit, past the `nop` concatAll leaves between literals.
+            let following: Inst = inst.next!;
+            while (following.op === "nop") following = following.next!;
+            if (following.op !== "charFold") continue;
+            const kept = visit(betweenVisited, { inst: following, lo, hi, countFor });
+            if (kept) enqueue(between, betweenVisited, kept);
+            continue;
+          }
+        } else if (unit > 0) {
+          continue;
+        } else if (inst.op === "char") {
+          if (!inst.test(ch)) continue;
+        } else if (inst.op === "any") {
+          if (isLineTerminator(ch)) continue;
+        } else {
+          continue;
+        }
         addThread(next, visited, { inst: inst.next!, lo, hi, countFor }, pos + 1, chars, budget);
-      else if (inst.op === "any" && !isLineTerminator(ch))
-        addThread(next, visited, { inst: inst.next!, lo, hi, countFor }, pos + 1, chars, budget);
+      }
+      atUnit = between;
     }
     current = next;
   }

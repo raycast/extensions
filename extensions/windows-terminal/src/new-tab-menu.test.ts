@@ -184,7 +184,40 @@ describe("buildProfileMatcher", () => {
     assert.equal(matches("\\D+", "١٢٣"), false);
     assert.equal(matches("\\W+", "Développement"), false);
     assert.equal(matches("a\\sb", "a b"), true);
+    // \s is \p{White_Space}: vertical tab and next line count, the byte order mark doesn't.
+    assert.equal(matches("a\\sb", "a" + String.fromCodePoint(0x0b) + "b"), true);
+    assert.equal(matches("a\\sb", "a" + String.fromCodePoint(0x85) + "b"), true);
+    assert.equal(matches("a\\sb", "a" + String.fromCodePoint(0xfeff) + "b"), false);
     assert.equal(matches("(?i)équipe", "ÉQUIPE"), true);
+  });
+
+  it("folds case like ICU under (?i), where a literal run can change length", () => {
+    const matches = (pattern: string, name: string) =>
+      buildProfileMatcher({ type: "matchProfiles", name: pattern })!({ ...powershell, name });
+    // Two or more adjacent literals fold fully, so ß and SS are the same string.
+    assert.equal(matches("(?i)straße", "STRASSE"), true);
+    assert.equal(matches("(?i)straße", "Straße"), true);
+    assert.equal(matches("(?i)strasse", "STRAẞE"), true);
+    assert.equal(matches("(?i)ss", "ß"), true);
+    assert.equal(matches("(?i)ssx", "ßx"), true);
+    assert.equal(matches("(?i)sss", "ßs"), true);
+    // A run can't end partway through a folded character: ß is two units, and "ss" against "sß"
+    // would take only the first of them.
+    assert.equal(matches("(?i)ss", "sß"), false);
+    assert.equal(matches("(?i)ss", "ßs"), false);
+    // A lone literal, or one under a quantifier, folds simply — one code point to one — so ß is ẞ
+    // but never SS.
+    assert.equal(matches("(?i)ß", "ẞ"), true);
+    assert.equal(matches("(?i)ß", "SS"), false);
+    assert.equal(matches("(?i)s", "ß"), false);
+    assert.equal(matches("(?i)ß+", "ẞß"), true);
+    assert.equal(matches("(?i)ß+", "ss"), false);
+    // A class admits single-code-point case variants only; ß's uppercase "SS" doesn't put it in [A-Z].
+    assert.equal(matches("(?i)[a-z]+", "STRASSE"), true);
+    assert.equal(matches("(?i)[a-z]+", "straße"), false);
+    // Case-sensitive matching is untouched.
+    assert.equal(matches("straße", "STRASSE"), false);
+    assert.equal(matches("ss", "ß"), false);
   });
 
   it("matches by code point, so one . consumes a whole emoji", () => {
