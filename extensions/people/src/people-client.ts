@@ -25,7 +25,6 @@ export async function requestPeople(
     signal.throwIfAborted();
     return fetch(`${apiBaseURL}${path}`, {
       signal: AbortSignal.any([signal, AbortSignal.timeout(1000)]),
-      cache: "no-store",
       headers: { Authorization: `Bearer ${accessKey}` },
     });
   };

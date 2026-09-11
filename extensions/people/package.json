@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "people",
   "title": "People",
   "version": "2.0.0",
@@ -24,13 +25,12 @@
   ],
   "scripts": {
     "dev": "ray develop",
-    "build": "ray build",
+    "build": "ray build && tsc --noEmit",
     "lint": "ray lint",
     "test": "node --experimental-strip-types --test tests/*.test.mjs"
   },
   "dependencies": {
-    "@raycast/api": "^2.2.0",
-    "@raycast/utils": "^2.3.1"
+    "@raycast/api": "^2.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

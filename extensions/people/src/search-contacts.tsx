@@ -15,8 +15,6 @@ import { useEffect, useState } from "react";
 import OpenPeople from "./open-people";
 import { requestPeople } from "./people-client";
 
-type LauncherPreferences = { integrationAccessKey?: string };
-
 type Contact = {
   id: string;
   name: string;
@@ -65,8 +63,7 @@ export default function SearchContacts() {
   const [loading, setLoading] = useState(false);
   const [available, setAvailable] = useState(true);
   const [retry, setRetry] = useState(0);
-  const { integrationAccessKey = "" } =
-    getPreferenceValues<LauncherPreferences>();
+  const { integrationAccessKey = "" } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     if (!integrationAccessKey.trim()) {
@@ -224,7 +221,7 @@ function ContactFields({ contact: summary }: { contact: Contact }) {
       setError(false);
       try {
         const { integrationAccessKey = "" } =
-          getPreferenceValues<LauncherPreferences>();
+          getPreferenceValues<Preferences>();
         const response = await requestPeople(
           `/contact?id=${encodeURIComponent(summary.id)}`,
           integrationAccessKey,

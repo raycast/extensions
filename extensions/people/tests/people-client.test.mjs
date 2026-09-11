@@ -27,7 +27,6 @@ test("a running app receives the key without a launch", async (t) => {
   t.mock.method(globalThis, "fetch", async (url, options) => {
     assert.equal(url, "http://127.0.0.1:47631/v2/search?q=Ada");
     assert.equal(options.headers.Authorization, "Bearer test-key");
-    assert.equal(options.cache, "no-store");
     return expected;
   });
   const launch = t.mock.fn();
