@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Icon, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import { SETTINGS_URL } from "../utils/constants";
 
 type ItemActionPanelProps = {
@@ -12,25 +12,6 @@ export function ItemActionPanel({
   onSignOut,
   copyContent,
 }: ItemActionPanelProps) {
-  const handleSignOutWithConfirmation = async () => {
-    const confirmed = await confirmAlert({
-      title: "Sign Out of Claude",
-      message:
-        "Are you sure you want to sign out? You will need to re-authenticate to view your usage.",
-      primaryAction: {
-        title: "Sign Out",
-        style: Alert.ActionStyle.Destructive,
-      },
-      dismissAction: {
-        title: "Cancel",
-      },
-    });
-
-    if (confirmed) {
-      await onSignOut();
-    }
-  };
-
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -62,7 +43,7 @@ export function ItemActionPanel({
           title="Sign Out…"
           icon={Icon.Logout}
           style={Action.Style.Destructive}
-          onAction={handleSignOutWithConfirmation}
+          onAction={onSignOut}
         />
       </ActionPanel.Section>
     </ActionPanel>

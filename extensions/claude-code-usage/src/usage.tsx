@@ -4,7 +4,6 @@ import {
   Icon,
   LaunchType,
   MenuBarExtra,
-  environment,
   getPreferenceValues,
   launchCommand,
   open,
@@ -60,8 +59,7 @@ export default function Command() {
   const intervalMs = Math.max(1, Number(refreshInterval) || 2) * 60_000;
   const cached = getCachedUsage();
   const isStale = !cached || Date.now() - cached.fetchedAt >= intervalMs;
-  const shouldFetch =
-    environment.launchType === LaunchType.Background ? isStale : !cached;
+  const shouldFetch = isStale;
   const { data, isLoading, hasTokens, refresh } = useClaudeUsage(shouldFetch);
 
   if (hasTokens === false) {

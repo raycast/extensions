@@ -42,22 +42,28 @@ export default function Command(
   const hasTriggeredAutoSignIn = useRef(false);
 
   const handleRefresh = useCallback(async () => {
-    const toast = await showToast({
+    await showToast({
       style: Toast.Style.Animated,
       title: "Refreshing usage…",
     });
     try {
       const success = await refresh();
       if (success) {
-        toast.style = Toast.Style.Success;
-        toast.title = "Usage refreshed";
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Usage refreshed",
+        });
       } else {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Could not refresh usage";
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Could not refresh usage",
+        });
       }
     } catch {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not refresh usage";
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not refresh usage",
+      });
     }
   }, [refresh]);
 

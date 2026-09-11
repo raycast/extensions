@@ -21,31 +21,54 @@ import {
   saveStoredTokens,
 } from "./oauth";
 
-function toMajorUnits(money: RawMoney | null | undefined): number | null {
+export function toMajorUnits(
+  money: RawMoney | null | undefined,
+): number | null {
   if (
     !money ||
+    typeof money !== "object" ||
+    typeof money.amount_minor !== "number" ||
+    typeof money.exponent !== "number" ||
     !Number.isFinite(money.amount_minor) ||
-    !Number.isFinite(money.exponent)
+    !Number.isFinite(money.exponent) ||
+    money.exponent < 0 ||
+    money.exponent > 10 ||
+    !Number.isInteger(money.exponent)
   ) {
     return null;
   }
-  return money.amount_minor / 10 ** money.exponent;
+  const result = money.amount_minor / 10 ** money.exponent;
+  return Number.isFinite(result) ? result : null;
 }
 
-function parseResetsAt(raw: string | number | null | undefined): number | null {
+export function parseResetsAt(
+  raw: string | number | null | undefined,
+): number | null {
   if (raw === null || raw === undefined) return null;
   if (typeof raw === "number") {
     if (!Number.isFinite(raw) || raw <= 0) return null;
     return raw < 1e11 ? Math.round(raw * 1000) : Math.round(raw);
   }
   if (typeof raw === "string") {
-    const parsed = Date.parse(raw);
-    return Number.isNaN(parsed) ? null : parsed;
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+
+    if (/^\d+(\.\d+)?$/.test(trimmed)) {
+      const numeric = Number(trimmed);
+      if (Number.isFinite(numeric) && numeric > 0) {
+        return numeric < 1e11
+          ? Math.round(numeric * 1000)
+          : Math.round(numeric);
+      }
+    }
+
+    const parsed = Date.parse(trimmed);
+    return Number.isNaN(parsed) || parsed <= 0 ? null : parsed;
   }
   return null;
 }
 
-function parseWindow(
+export function parseWindow(
   raw: RawRateLimitWindow | null | undefined,
 ): RateLimitWindow | null {
   if (
@@ -109,14 +132,18 @@ export async function fetchUsage(): Promise<FetchUsageResult> {
     const stored = await getStoredTokens();
     let profile: AccountProfile | null = stored?.profile ?? null;
 
-    if (!profile || !profile.plan || profile.plan.toLowerCase() === "unknown") {
-      profile = await fetchProfile(token);
-      if (profile && stored) {
-        await saveStoredTokens({
-          ...stored,
-          plan: profile.plan,
-          profile,
-        });
+    if (stored && stored.profile === undefined) {
+      try {
+        profile = await fetchProfile(token);
+        if (profile) {
+          await saveStoredTokens({
+            ...stored,
+            plan: profile.plan,
+            profile,
+          });
+        }
+      } catch {
+        // Ignore profile fetch failure during usage refresh
       }
     }
 
