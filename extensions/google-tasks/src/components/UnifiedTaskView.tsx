@@ -300,13 +300,6 @@ export default function UnifiedTaskView() {
   );
   const actions = (task?: TaskWithList) => (
     <ActionPanel>
-      {lastCompletedTask ? (
-        <Action
-          title="Undo Last Completion"
-          icon={Icon.ArrowCounterClockwise}
-          onAction={() => void handleUndoCompletion()}
-        />
-      ) : null}
       {task ? (
         <Action
           title={isCompleted(task) ? "Reopen Task" : "Complete Task"}
@@ -314,27 +307,36 @@ export default function UnifiedTaskView() {
           onAction={() => handleToggle(task)}
         />
       ) : null}
+      {task ? (
+        <Action.Push
+          title="Edit Task"
+          icon={Icon.Pencil}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          target={<EditTaskForm listId={task.listId} task={task} onEdit={handleEdit} />}
+        />
+      ) : null}
       <Action
         title={isShowingDetails ? "Hide Details" : "Show Details"}
         icon={isShowingDetails ? Icon.EyeDisabled : Icon.Eye}
+        shortcut={{ modifiers: ["cmd"], key: "d" }}
         onAction={() => setIsShowingDetails((value) => !value)}
       />
+      {lastCompletedTask ? (
+        <Action
+          title="Undo Last Completion"
+          icon={Icon.ArrowCounterClockwise}
+          shortcut={{ modifiers: ["cmd"], key: "z" }}
+          onAction={() => void handleUndoCompletion()}
+        />
+      ) : null}
       {task ? (
-        <>
-          <Action.Push
-            title="Edit Task"
-            icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-            target={<EditTaskForm listId={task.listId} task={task} onEdit={handleEdit} />}
-          />
-          <Action
-            title="Delete Task"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-            onAction={() => handleDelete(task)}
-          />
-        </>
+        <Action
+          title="Delete Task"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          onAction={() => handleDelete(task)}
+        />
       ) : null}
       {selection === completed && Object.keys(completedPageTokens).length > 0 ? (
         <Action
