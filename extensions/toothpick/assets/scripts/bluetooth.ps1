@@ -6,9 +6,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$null = Add-Type -AssemblyName System.Runtime.WindowsRuntime
 
-Add-Type -TypeDefinition @'
+$null = Add-Type -TypeDefinition @'
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -323,7 +323,7 @@ function Get-PairedBluetoothDevices {
       controllable = $audio
       category = $category
     }
-  } | Sort-Object name, macAddress -Unique)
+  } | Sort-Object macAddress -Unique | Sort-Object name)
 }
 
 function Get-ConnectionState {
