@@ -1,6 +1,6 @@
 # Google Tasks Changelog
 
-## [Improve Google Tasks] - {PR_MERGE_DATE}
+## [Improve Google Tasks] - 2026-09-11
 
 - Browse tasks across every list by date, completion status, or individual task list.
 - Sort tasks by Google order or scheduled date, and open task details without leaving the list.
