@@ -1,5 +1,8 @@
 # Everything Search Changelog
 
+## [Fix] - 2026-09-11
+- Fixed `Show in Explorer` opening the containing folder without selecting the file
+
 ## [Added SDK support for ARM64] - 2026-03-02
 - Added support for the Everything SDK on ARM64 architecture.
 

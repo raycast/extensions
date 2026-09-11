@@ -408,9 +408,18 @@ export async function getTask(taskId: string): Promise<Task | null> {
   return t ? projectTask(t) : null;
 }
 
-/** Creates the task and returns its final title, which the server sets from a
- * linked item when no title was given. */
-export async function createTask(input: CreateTaskInput): Promise<string> {
+export interface CreatedTask {
+  id?: string;
+  title: string;
+  /** Set when the server assigned a channel we didn't pass — the linked
+   * item's board already maps to one, and channel prediction filled it in. */
+  channel?: string;
+}
+
+/** Creates the task and returns its final title (the server sets one from a
+ * linked item when no title was given) and, for a linked task created with no
+ * channel, whichever channel Sunsama's own prediction assigned. */
+export async function createTask(input: CreateTaskInput): Promise<CreatedTask> {
   const args: Record<string, unknown> = {
     day: input.day,
     position: input.position ?? "top",
@@ -426,18 +435,23 @@ export async function createTask(input: CreateTaskInput): Promise<string> {
     args.subtasks = input.subtasks.map((s) => ({ title: s.title }));
 
   const text = await callTool("create_task", args);
-  // Best-effort: pull the created title out of the JSON reply for the HUD.
+  // Best-effort: pull the created title/channel out of the JSON reply.
   try {
     const parsed = JSON.parse(text) as {
-      task?: { title?: string };
+      task?: { _id?: string; title?: string; channel?: string };
+      _id?: string;
       title?: string;
+      channel?: string;
     };
+    const id = parsed.task?._id ?? parsed._id;
     const title = parsed.task?.title ?? parsed.title;
-    if (title) return title;
+    const channel = parsed.task?.channel ?? parsed.channel;
+    if (title)
+      return { id, title, channel: input.channel ? undefined : channel };
   } catch {
     // non-JSON reply — fall through
   }
-  return input.title?.trim() || input.url || "New task";
+  return { title: input.title?.trim() || input.url || "New task" };
 }
 
 export async function completeTask(taskId: string): Promise<void> {

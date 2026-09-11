@@ -3,8 +3,8 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { Command, CommandContentSource, CommandHook } from "../../type";
 
-import { getConfiguration } from "../../hooks/useChatGPT";
-import { useModel } from "../../hooks/useModel";
+import { useModelOptions } from "../../hooks/useModelOptions";
+import { ModelPicker } from "../model/model-picker";
 
 export const CommandForm = (props: {
   cmd?: Command;
@@ -13,9 +13,8 @@ export const CommandForm = (props: {
   use: { commands: CommandHook };
 }) => {
   const { use, cmd } = props;
-  const models = useModel();
+  const modelOptions = useModelOptions();
   const navigation = useNavigation();
-  const { isCustomModel } = getConfiguration();
 
   const { handleSubmit, itemProps } = useForm<Command>({
     onSubmit: async (command) => {
@@ -46,6 +45,7 @@ export const CommandForm = (props: {
     },
     validation: {
       name: FormValidation.Required,
+      model: FormValidation.Required,
       temperature: (value) => {
         if (value !== undefined && value !== null) {
           const numValue = Number(value);
@@ -88,15 +88,7 @@ export const CommandForm = (props: {
         info="Concrete tasks, such as fixing grammar, require less creativity, while open-ended questions, such as generating ideas, require more."
         {...itemProps.temperature}
       />
-      {isCustomModel ? (
-        <Form.TextField title="Model" placeholder="Custom model" {...itemProps.model} />
-      ) : (
-        <Form.Dropdown title="Model" placeholder="Choose model" {...itemProps.model}>
-          {models.option.map((option) => (
-            <Form.Dropdown.Item value={option} title={option} key={option} />
-          ))}
-        </Form.Dropdown>
-      )}
+      <ModelPicker models={modelOptions.options} isLoading={modelOptions.isLoading} {...itemProps.model} />
 
       <Form.Separator />
       <Form.Dropdown

@@ -107,8 +107,8 @@
   ],
   "dependencies": {
     "@danielxceron/youtube-transcript": "^1.2.3",
-    "@raycast/api": "^1.104.16",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^2.3.1",
     "@types/turndown": "^5.0.5",
     "archiver": "^7.0.1",
     "turndown": "^7.2.0"
@@ -123,12 +123,19 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
+    "test": "node --test tests/*.test.cjs",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "ray publish"
+  },
+  "overrides": {
+    "minimatch@9.0.3": "9.0.9",
+    "@raycast/api": {
+      "esbuild": "^0.28.1"
+    }
   },
   "platforms": [
     "macOS",

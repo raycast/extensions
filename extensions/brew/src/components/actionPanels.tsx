@@ -36,6 +36,9 @@ const SortByPopularityAction = (props: { sortByPopularity: boolean; onToggleSort
   <Action
     title={props.sortByPopularity ? "Sort by Relevance" : "Sort by Popularity"}
     icon={props.sortByPopularity ? Icon.Text : Icon.LineChart}
+    // ⌘⇧P is free: Keyboard.Shortcut.Common.Pin is ⌘. on macOS (read from the
+    // Raycast 2.2.0.0 runtime), so the Pin action in this panel does not collide.
+    // The API docs say ⌘⇧P and are wrong — see raycast/extensions#30879.
     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
     onAction={props.onToggleSort}
   />
@@ -167,6 +170,7 @@ export function CaskActionPanel(props: {
             />
           )}
           <Action.ShowInFinder path={brewInstallPath(cask)} />
+          <Actions.PinAction item={cask} kind="cask" onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -194,23 +198,29 @@ export function CaskActionPanel(props: {
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Actions.FormulaUninstallAction formula={cask} onAction={props.onAction} />
-          <Action.CopyToClipboard
-            title="Copy Uninstall Command"
-            content={brewUninstallCommand(cask)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-          />
-          <Action
-            title={`Run Uninstall in ${terminalName}`}
-            icon={terminalIcon}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-            onAction={() => runCommandInTerminal(brewUninstallCommand(cask))}
-          />
+          {/* A pinned package cannot be uninstalled without --force, which the
+              command builder does not add — so no command is offered to paste. */}
+          {!cask.pinned && (
+            <>
+              <Action.CopyToClipboard
+                title="Copy Uninstall Command"
+                content={brewUninstallCommand(cask)}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              />
+              <Action
+                title={`Run Uninstall in ${terminalName}`}
+                icon={terminalIcon}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                onAction={() => runCommandInTerminal(brewUninstallCommand(cask))}
+              />
+            </>
+          )}
         </ActionPanel.Section>
 
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
-          <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
+          {cask.tap && <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />}
         </ActionPanel.Section>
 
         <ViewSection
@@ -241,7 +251,7 @@ export function CaskActionPanel(props: {
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
-          <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
+          {cask.tap && <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />}
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={brewInstallCommand(cask)}
@@ -354,7 +364,7 @@ export function FormulaActionPanel(props: {
             />
           )}
           <Action.ShowInFinder path={brewInstallPath(formula)} />
-          <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
+          <Actions.PinAction item={formula} kind="formula" onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -382,18 +392,24 @@ export function FormulaActionPanel(props: {
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Actions.FormulaUninstallAction formula={formula} onAction={props.onAction} />
-          <Action.CopyToClipboard
-            title="Copy Uninstall Command"
-            content={brewUninstallCommand(formula)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-          />
-          <Action
-            title={`Run Uninstall in ${terminalName}`}
-            style={Action.Style.Destructive}
-            icon={terminalIcon}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-            onAction={() => runCommandInTerminal(brewUninstallCommand(formula))}
-          />
+          {/* A pinned package cannot be uninstalled without --force, which the
+              command builder does not add — so no command is offered to paste. */}
+          {!formula.pinned && (
+            <>
+              <Action.CopyToClipboard
+                title="Copy Uninstall Command"
+                content={brewUninstallCommand(formula)}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              />
+              <Action
+                title={`Run Uninstall in ${terminalName}`}
+                style={Action.Style.Destructive}
+                icon={terminalIcon}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                onAction={() => runCommandInTerminal(brewUninstallCommand(formula))}
+              />
+            </>
+          )}
         </ActionPanel.Section>
 
         <ViewSection
@@ -501,13 +517,21 @@ export function FormulaActionPanel(props: {
 
 interface OutdatedActionProps {
   outdated: OutdatedCask | OutdatedFormula;
+  /**
+   * Which kind this is, stated rather than sniffed. Both kinds report `pinned`,
+   * so a value guard cannot separate them, and `isCask()` depends on the
+   * synthetic `token` from `normalizeOutdatedResults` having been applied.
+   */
+  isCask: boolean;
+  /**
+   * Effective pin state. The payload's own `pinned` can be a stale snapshot
+   * from an in-flight fetch, and the review view tracks the live value in its
+   * pin overrides — so every guard here reads this, not the payload.
+   */
+  pinned?: boolean;
   /** Called when the upgrade starts or finishes, e.g. to show its status in a list */
   onUpgrade?: (status: UpgradePackageStatus) => void;
   onAction: (result: boolean) => void;
-}
-
-function isPinable(o: OutdatedCask | OutdatedFormula): o is OutdatedFormula {
-  return (o as OutdatedFormula).pinned != undefined;
 }
 
 /**
@@ -527,6 +551,7 @@ export function OutdatedUpgradeAction(props: OutdatedActionProps) {
   return (
     <Actions.FormulaUpgradeAction
       formula={props.outdated}
+      pinned={props.pinned ?? props.outdated.pinned === true}
       onStart={() => props.onUpgrade?.("upgrading")}
       onSkip={() => props.onUpgrade?.("skipped")}
       onAction={onUpgradeAction}
@@ -553,19 +578,34 @@ export function OutdatedActionSections(
      * otherwise share the panel.
      */
     omitPin?: boolean;
+    /**
+     * Omit the upgrade COMMAND actions (copy / run in terminal). For a pinned
+     * package: brew refuses an explicitly named pinned package outright
+     * (cmd/upgrade.rb, cask/upgrade.rb), so handing the user
+     * `brew upgrade --cask docker` to paste is handing them a command that
+     * cannot succeed until they unpin.
+     */
+    omitUpgradeCommand?: boolean;
   },
 ) {
   const { outdated } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
+  const pinned = props.pinned ?? outdated.pinned === true;
 
   return (
     <>
       <ActionPanel.Section>
         {!props.omitUpgrade && (
-          <OutdatedUpgradeAction outdated={outdated} onUpgrade={props.onUpgrade} onAction={props.onAction} />
+          <OutdatedUpgradeAction
+            outdated={outdated}
+            isCask={props.isCask}
+            pinned={pinned}
+            onUpgrade={props.onUpgrade}
+            onAction={props.onAction}
+          />
         )}
-        {!props.omitPin && isPinable(outdated) && (
-          <Actions.FormulaPinAction formula={outdated} onAction={props.onAction} />
+        {!props.omitPin && (
+          <Actions.PinAction item={outdated} kind={props.isCask ? "cask" : "formula"} onAction={props.onAction} />
         )}
         <Action
           title="Refresh"
@@ -574,33 +614,43 @@ export function OutdatedActionSections(
           onAction={() => props.onAction(true)}
         />
       </ActionPanel.Section>
+      {!(props.omitUpgradeCommand ?? pinned) && (
+        <ActionPanel.Section>
+          <Action.CopyToClipboard
+            title="Copy Upgrade Command"
+            content={brewUpgradeCommand(outdated)}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          />
+          <Action
+            title={`Run Upgrade in ${terminalName}`}
+            icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+            onAction={() => runCommandInTerminal(brewUpgradeCommand(outdated))}
+          />
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section>
-        <Action.CopyToClipboard
-          title="Copy Upgrade Command"
-          content={brewUpgradeCommand(outdated)}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-        />
-        <Action
-          title={`Run Upgrade in ${terminalName}`}
-          icon={terminalIcon}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-          onAction={() => runCommandInTerminal(brewUpgradeCommand(outdated))}
-        />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Actions.FormulaUninstallAction formula={outdated} onAction={props.onAction} />
-        <Action.CopyToClipboard
-          title="Copy Uninstall Command"
-          content={brewUninstallCommand(outdated)}
-          shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
-        />
-        <Action
-          title={`Run Uninstall in ${terminalName}`}
-          icon={terminalIcon}
-          style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-          onAction={() => runCommandInTerminal(brewUninstallCommand(outdated))}
-        />
+        <Actions.FormulaUninstallAction formula={outdated} pinned={pinned} onAction={props.onAction} />
+        {/* brew refuses to uninstall a pinned package without --force, and the
+            command builder does not add it — so a pinned row is offered no
+            uninstall command it could paste. The action above handles it, with
+            an explicit unpin confirmation. */}
+        {!pinned && (
+          <>
+            <Action.CopyToClipboard
+              title="Copy Uninstall Command"
+              content={brewUninstallCommand(outdated)}
+              shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+            />
+            <Action
+              title={`Run Uninstall in ${terminalName}`}
+              icon={terminalIcon}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              onAction={() => runCommandInTerminal(brewUninstallCommand(outdated))}
+            />
+          </>
+        )}
       </ActionPanel.Section>
     </>
   );
@@ -615,13 +665,21 @@ export function OutdatedActionPanel(
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <OutdatedUpgradeAction outdated={props.outdated} onUpgrade={props.onUpgrade} onAction={props.onAction} />
+        <OutdatedUpgradeAction
+          outdated={props.outdated}
+          isCask={props.isCask}
+          pinned={props.pinned}
+          onUpgrade={props.onUpgrade}
+          onAction={props.onAction}
+        />
         <Actions.FormulaUpgradeAllAction onUpgradeAll={props.onUpgradeAll} onAction={props.onAction} />
       </ActionPanel.Section>
       <OutdatedActionSections
         outdated={props.outdated}
+        isCask={props.isCask}
         onUpgrade={props.onUpgrade}
         onAction={props.onAction}
+        pinned={props.pinned}
         omitUpgrade
       />
     </ActionPanel>
@@ -633,7 +691,15 @@ export function OutdatedActionPanel(
  *
  * Other brew actions are omitted, since Homebrew does not support concurrent processes.
  */
-export function UpgradingActionPanel(props: { outdated: OutdatedCask | OutdatedFormula; onCancel: () => void }) {
+export function UpgradingActionPanel(props: {
+  outdated: OutdatedCask | OutdatedFormula;
+  /** Effective pin state; the payload's own value may be a stale snapshot. */
+  pinned?: boolean;
+  onCancel: () => void;
+}) {
+  // A pinned row is skipped by the run, and brew refuses a named pinned
+  // package — so it gets no upgrade command to copy.
+  const pinned = props.pinned ?? props.outdated.pinned === true;
   return (
     <ActionPanel>
       <Action
@@ -642,11 +708,13 @@ export function UpgradingActionPanel(props: { outdated: OutdatedCask | OutdatedF
         style={Action.Style.Destructive}
         onAction={props.onCancel}
       />
-      <Action.CopyToClipboard
-        title="Copy Upgrade Command"
-        content={brewUpgradeCommand(props.outdated)}
-        shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-      />
+      {!pinned && (
+        <Action.CopyToClipboard
+          title="Copy Upgrade Command"
+          content={brewUpgradeCommand(props.outdated)}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+        />
+      )}
     </ActionPanel>
   );
 }

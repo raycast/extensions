@@ -219,6 +219,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "hermoso",
+    title: "Hermoso",
+    description:
+      "Hermoso is an AI ad studio for marketers. Research the ads already winning in any market (the Meta, Google and LinkedIn ad libraries plus organic TikTok, Instagram, YouTube, Reddit and Threads), generate finished on-brand image and video ads, publish and schedule to your own social channels, and build and manage paid campaigns on Meta, Google, TikTok, LinkedIn, Reddit, Pinterest, X and Microsoft. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://raw.githubusercontent.com/hermoso-ai/hermoso/main/assets/logo.png",
+    homepage: "https://hermoso.ai/mcp/",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.hermoso.ai/mcp?src=raycast"],
+    },
+  },
+  {
     name: "kagimcp",
     title: "Kagi Search",
     description: "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
@@ -1077,6 +1089,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "iterm-mcp"],
+    },
+  },
+  {
+    name: "kyma",
+    title: "Kyma API",
+    description:
+      "Kyma API's hosted MCP server: browse the live model catalog and pricing, check measured per-model uptime and public usage rankings, view your own credits and spend, and chat through a tool guarded by a spend cap you set. OAuth 2.1 sign-in, no key pasted into the client.",
+    icon: "https://raw.githubusercontent.com/kyma-api/kyma-mcp-plugin/main/assets/logo-400.png",
+    homepage: "https://kymaapi.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@kyma-api/mcp-server"],
     },
   },
   {

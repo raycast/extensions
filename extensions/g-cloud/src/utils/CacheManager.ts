@@ -26,7 +26,7 @@ export const CACHE_TTL = {
 };
 
 export type ResourceType =
-  "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "cloudfunctions" | "logs";
+  "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "cloudfunctions" | "cloudsql" | "logs";
 
 export interface RecentResource {
   id: string;
@@ -46,6 +46,7 @@ export interface ServiceCounts {
   secrets: number;
   cloudrun: number;
   cloudfunctions: number;
+  cloudsql: number;
   cloudbuild: number;
   timestamp: number;
 }

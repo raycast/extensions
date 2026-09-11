@@ -90,6 +90,7 @@ export function useBrewUpgrade(): BrewUpgrade {
       // Progress is reported via the toast: only the package status is reflected in the list
       let total = 0;
       let finished = 0;
+      let inRun = new Set<string>();
 
       try {
         const summary = await brewUpgradeOutdated({
@@ -107,6 +108,10 @@ export function useBrewUpgrade(): BrewUpgrade {
                 break;
               case "start":
                 total = event.packages.length;
+                // The counter denominator. Pinned packages are reported as
+                // skipped but were filtered out before the run, so they are not
+                // in here — count only what the run actually attempts.
+                inRun = new Set(event.packages.map(upgradeKey));
                 setOutdated(event.outdated);
                 break;
               case "prefetch":
@@ -122,7 +127,10 @@ export function useBrewUpgrade(): BrewUpgrade {
                   if (event.status === "upgrading") {
                     toast.updateTitle(`Upgrading ${event.package.name} (${finished + 1}/${total})`);
                     toast.updateMessage("");
-                  } else if (event.status !== "skipped") {
+                  } else if (inRun.has(upgradeKey(event.package))) {
+                    // Terminal status for a package this run attempted. A runtime
+                    // decline counts; a pinned skip does not, because it was never
+                    // in the denominator.
                     finished += 1;
                   }
                   setState(upgradeKey(event.package), { status: event.status, message: event.message });

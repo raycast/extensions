@@ -1,7 +1,3 @@
-import type { useFetch } from "@raycast/utils";
-
-export type FetchOptions<T> = Parameters<typeof useFetch<T>>[1];
-
 export type PveServer = {
   id: string;
   name: string;

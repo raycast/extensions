@@ -163,7 +163,7 @@ const valid_keys = [
   "build_dependencies",
   "installed",
   "keg_only",
-  "linked_key",
+  "linked_keg",
   "pinned",
 ];
 

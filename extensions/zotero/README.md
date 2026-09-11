@@ -30,6 +30,7 @@ Preferences related to these features are:
   A default of 10 minutes is Used.
 
 - **Whether to use Better BibTex Citation**: If you use the [Better BibTex zotero extension](https://retorque.re/zotero-better-bibtex/), you can enable this flag to copy Better BibTex citation keys for any reference.
+- **Search by BibTeX Citation Key**: If you use the Better BibTex zotero extension, you can enable this flag to search references by citation key. With it on, typing a citation key like `smith2020quantum` returns that reference. It only needs the Better BibTex plugin, so you can use it without setting up the CSL JSON file for copy and paste.
 - **Better Bibtex CSL JSON File**: Path where you save your auto-updating CSL JSON file. **PLEASE
   NOTE THAT THIS IS MUST IF YOU WANT TO USE THESE FEATURES**. Please see the following screencast
   to setup this properly. You will need to update this entry to the path you chose to save this CSL
@@ -73,12 +74,18 @@ Preferences related to these features are:
 
 ## Features
 
-On launching the application, you will get and empty view. The results will only show up when you
-type any search query. To speedup queries, sqlite query results are cached locally for 10 minutes.
+On launching the application, the most recent references are shown, and results update as you
+type. To speedup queries, sqlite query results are cached locally for 10 minutes.
 Additionally, This cache is valid in those 10 minutes, only if your database has not changed since.
 Please note that the cache will become invalid if you update preferences.
 
 ![Empty View](media/empty_view.png)
+
+Search is fuzzy: each query term matches scattered letters in order in the title, tags, authors,
+DOI, and collection names, so typing `qsim` finds "Quantum Simulation". Abstracts and notes are
+matched as contiguous text, so a phrase from them must appear as-is. Results are ranked by how
+well they match. At most 100 results are shown at a time; when a query matches 100 or more, the
+section subtitle says "Top 100 — refine your search to see more".
 
 This extension supports different types of searches. Here are some common examples:
 
@@ -114,10 +121,17 @@ search for references with ALL of the queried tags (Examples 7 and 10).
 If you want to search for ANY of the tags, you should not prefix it with "." character. For example
 in queries 9 and 10, AAA will be searched in tags in only OR/ANY sense.
 
+You can also filter the results to a single collection using the dropdown next to the search bar.
+It lists collections from your personal library and the group libraries you have included.
+Collections are matched by library and key, so two collections with the same name stay separate,
+and the dropdown labels them so you can tell them apart. The filter is applied to the whole
+library before the 100-result limit.
+
 This extension support a few sub commands.
 
 - link to the reference in your zotero app (default)
 - link to the PDF of your reference in zotero app or default PDF Reader
+- copy the PDF file path of your reference to the clipboard
 - open original link to open URL in default browser
 - Copy BibTex citation key to the clipboard
 - copy reference using CSA style to the clipboard
@@ -127,3 +141,14 @@ This extension support a few sub commands.
 
 Please note that in case a reference has multiple PDF files associated with it, the primary (oldest)
 PDF file will be opened, matching Zotero's native behavior.
+
+## Group libraries
+
+By default, only your personal library is searched, so a reference shared to a group does not
+show up twice. To include groups, use the "Configure Group Libraries" action (`⌘L`) on any
+reference. It shows up when your library has at least one group, and opens a list where you pick
+which groups to include. Your personal library is always searched.
+
+References from a group library show the group name after the title, for example
+"Title · Group Name", and a `**Library:**` line in the detail view. The "Open in Zotero"
+action opens them in the Zotero app.

@@ -1,11 +1,12 @@
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // getPreferenceValues is imported by the module under test — stub it before the
 // module is loaded so every call returns a controllable value.
 vi.mock("@raycast/api", () => ({
-  getPreferenceValues: vi.fn(() => ({ profileDirectorySuffix: "default-release" })),
+  getPreferenceValues: vi.fn(() => ({ profileDirectorySuffix: "default-release", browserApp: "Firefox" })),
 }));
 
 import { getPreferenceValues } from "@raycast/api";
@@ -19,7 +20,8 @@ import { getBookmarksDirectoryPath, getHistoryDbPath } from "../index";
 
 const PROFILES_BASE = "/fake-home/Library/Application Support/Firefox/Profiles";
 
-const setPrefs = (suffix: string) => vi.mocked(getPreferenceValues).mockReturnValue({ profileDirectorySuffix: suffix });
+const setPrefs = (suffix: string, browserApp = "Firefox") =>
+  vi.mocked(getPreferenceValues).mockReturnValue({ profileDirectorySuffix: suffix, browserApp });
 
 const mockProfiles = (entries: string[]) => vi.spyOn(fs, "readdirSync").mockReturnValue(entries as never);
 
@@ -34,13 +36,16 @@ const mockStatIsDir = (dirs: string[]) =>
 // ---------------------------------------------------------------------------
 
 describe("getProfileName (via getHistoryDbPath)", () => {
+  const originalPlatform = process.platform;
   const originalHome = process.env.HOME;
 
   beforeEach(() => {
+    Object.defineProperty(process, "platform", { value: "darwin", configurable: true });
     process.env.HOME = "/fake-home";
   });
 
   afterEach(() => {
+    Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
     process.env.HOME = originalHome;
     vi.restoreAllMocks();
   });
@@ -172,6 +177,108 @@ describe("getProfileName (via getHistoryDbPath)", () => {
     expect(result).toBe(path.join(PROFILES_BASE, "good.profile", "places.sqlite"));
   });
 
+  // --- browserApp variant selection -----------------------------------------
+  // These tests verify that selecting a non-release variant always reads from
+  // that variant's own profile, even when a release profile is also present on
+  // disk and the suffix preference has not been customised.
+
+  it("selects the nightly profile when browserApp is Firefox Nightly", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release", "def.default-nightly"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE, "def.default-nightly", "places.sqlite"));
+  });
+
+  it("selects the ESR profile when browserApp is Firefox ESR", () => {
+    setPrefs("default-release", "Firefox ESR");
+    mockProfiles(["abc.default-release", "def.default-esr"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE, "def.default-esr", "places.sqlite"));
+  });
+
+  it("selects the dev-edition profile when browserApp is Firefox Developer Edition", () => {
+    setPrefs("default-release", "Firefox Developer Edition");
+    mockProfiles(["abc.default-release", "def.dev-edition-default"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE, "def.dev-edition-default", "places.sqlite"));
+  });
+
+  it("explicit custom suffix overrides browserApp variant selection", () => {
+    setPrefs("my-custom-profile", "Firefox Nightly");
+    mockProfiles(["abc.default-nightly", "def.my-custom-profile"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE, "def.my-custom-profile", "places.sqlite"));
+  });
+
+  // --- Variant fallback isolation -------------------------------------------
+  // When the user selects a non-release variant but its profile is absent, the
+  // release profile must NOT be used — it belongs to a different installation.
+
+  it("does not fall back to the release profile when Firefox Nightly has no nightly profile", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
+
+    const result = getHistoryDbPath();
+
+    // Both abc.default-release (variant-specific suffix) and xyz.default (legacy release profile)
+    // are excluded from the catch-all for non-release variants; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE, "places.sqlite"));
+  });
+
+  it("does not fall back to the release profile when Firefox ESR has no ESR profile", () => {
+    setPrefs("default-release", "Firefox ESR");
+    mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
+
+    const result = getHistoryDbPath();
+
+    // Both abc.default-release and xyz.default are excluded; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE, "places.sqlite"));
+  });
+
+  it("does not fall back to the release profile when Firefox Developer Edition has no dev profile", () => {
+    setPrefs("default-release", "Firefox Developer Edition");
+    mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
+
+    const result = getHistoryDbPath();
+
+    // Both abc.default-release and xyz.default are excluded; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE, "places.sqlite"));
+  });
+
+  it("falls back to catch-all excluding other-variant profiles when non-release has no matching or default profile", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release", "real.profile"]);
+    mockStatIsDir(["abc.default-release", "real.profile"]);
+
+    const result = getHistoryDbPath();
+
+    // .default-release belongs to the release variant and must be excluded from
+    // the catch-all when a non-release variant is selected; "real.profile" is picked.
+    expect(result).toBe(path.join(PROFILES_BASE, "real.profile", "places.sqlite"));
+  });
+
+  it("returns empty when non-release variant has no matching profile and only other-variant directories exist", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release"]);
+    mockStatIsDir(["abc.default-release"]);
+
+    const result = getHistoryDbPath();
+
+    // No valid profile for Nightly — safer to return empty than silently read release data.
+    expect(result).toBe(path.join(PROFILES_BASE, "places.sqlite"));
+  });
+
   // --- Public API surface (bookmarks path delegates to same logic) ----------
 
   it("getBookmarksDirectoryPath uses the same profile resolution", () => {
@@ -181,5 +288,219 @@ describe("getProfileName (via getHistoryDbPath)", () => {
     const result = getBookmarksDirectoryPath();
 
     expect(result).toBe(path.join(PROFILES_BASE, "abc123.default-release", "bookmarkbackups"));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Windows platform tests
+// ---------------------------------------------------------------------------
+
+describe("getProfileName on Windows (via getHistoryDbPath)", () => {
+  const originalPlatform = process.platform;
+  const originalHome = process.env.HOME;
+  const originalAppData = process.env.APPDATA;
+
+  const PROFILES_BASE_WIN = path.join("C:\\Users\\test\\AppData\\Roaming", "Mozilla", "Firefox", "Profiles");
+
+  beforeEach(() => {
+    Object.defineProperty(process, "platform", { value: "win32", configurable: true });
+    process.env.APPDATA = "C:\\Users\\test\\AppData\\Roaming";
+    // Unset HOME so we can confirm the Windows branch doesn't rely on it
+    delete process.env.HOME;
+  });
+
+  afterEach(() => {
+    Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
+    process.env.HOME = originalHome;
+    process.env.APPDATA = originalAppData;
+    vi.restoreAllMocks();
+  });
+
+  it("resolves the profile path from APPDATA on Windows", () => {
+    setPrefs("default-release");
+    mockProfiles(["abc123.default-release"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc123.default-release", "places.sqlite"));
+  });
+
+  it("falls back to os.homedir() when APPDATA is not set on Windows", () => {
+    delete process.env.APPDATA;
+    vi.spyOn(os, "homedir").mockReturnValue("C:\\Users\\test");
+    setPrefs("default-release");
+    mockProfiles(["abc123.default-release"]);
+
+    const result = getHistoryDbPath();
+
+    const fallbackBase = path.join("C:\\Users\\test", "AppData", "Roaming", "Mozilla", "Firefox", "Profiles");
+    expect(result).toBe(path.join(fallbackBase, "abc123.default-release", "places.sqlite"));
+  });
+
+  it("falls back to .default-release on Windows when custom suffix doesn't match", () => {
+    setPrefs("nonexistent");
+    mockProfiles(["abc.default-release", "def.default-nightly"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc.default-release", "places.sqlite"));
+  });
+
+  it("falls back to .default-nightly on Windows when only nightly profile is present", () => {
+    setPrefs("nonexistent");
+    mockProfiles(["abc123.default-nightly"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc123.default-nightly", "places.sqlite"));
+  });
+
+  it("falls back to .default-esr on Windows when only ESR profile is present", () => {
+    setPrefs("nonexistent");
+    mockProfiles(["abc123.default-esr"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc123.default-esr", "places.sqlite"));
+  });
+
+  // --- browserApp variant selection (Windows) --------------------------------
+
+  it("selects the nightly profile when browserApp is Firefox Nightly on Windows", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release", "def.default-nightly"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "def.default-nightly", "places.sqlite"));
+  });
+
+  it("selects the ESR profile when browserApp is Firefox ESR on Windows", () => {
+    setPrefs("default-release", "Firefox ESR");
+    mockProfiles(["abc.default-release", "def.default-esr"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "def.default-esr", "places.sqlite"));
+  });
+
+  it("selects the dev-edition profile when browserApp is Firefox Developer Edition on Windows", () => {
+    setPrefs("default-release", "Firefox Developer Edition");
+    mockProfiles(["abc.default-release", "def.dev-edition-default"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "def.dev-edition-default", "places.sqlite"));
+  });
+
+  // --- Variant fallback isolation (Windows) ----------------------------------
+
+  it("does not fall back to the release profile when Firefox Nightly has no nightly profile on Windows", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
+
+    const result = getHistoryDbPath();
+
+    // Both abc.default-release (variant-specific suffix) and xyz.default (legacy release profile)
+    // are excluded from the catch-all for non-release variants; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
+  });
+
+  it("does not fall back to the release profile when Firefox ESR has no ESR profile on Windows", () => {
+    setPrefs("default-release", "Firefox ESR");
+    mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
+
+    const result = getHistoryDbPath();
+
+    // Both abc.default-release and xyz.default are excluded; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
+  });
+
+  it("does not fall back to the release profile when Firefox Developer Edition has no dev profile on Windows", () => {
+    setPrefs("default-release", "Firefox Developer Edition");
+    mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
+
+    const result = getHistoryDbPath();
+
+    // Both abc.default-release and xyz.default are excluded; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
+  });
+
+  it("falls back to catch-all excluding other-variant profiles when non-release has no matching or default profile on Windows", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release", "real.profile"]);
+    mockStatIsDir(["abc.default-release", "real.profile"]);
+
+    const result = getHistoryDbPath();
+
+    // .default-release belongs to the release variant and must be excluded from
+    // the catch-all when a non-release variant is selected; "real.profile" is picked.
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "real.profile", "places.sqlite"));
+  });
+
+  it("returns empty when non-release variant has no matching profile and only other-variant directories exist on Windows", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release"]);
+    mockStatIsDir(["abc.default-release"]);
+
+    const result = getHistoryDbPath();
+
+    // No valid profile for Nightly — safer to return empty than silently read release data.
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
+  });
+
+  it("getBookmarksDirectoryPath uses APPDATA on Windows", () => {
+    setPrefs("default-release");
+    mockProfiles(["abc123.default-release"]);
+
+    const result = getBookmarksDirectoryPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc123.default-release", "bookmarkbackups"));
+  });
+
+  it("returns an empty path segment when the Profiles directory does not exist on Windows", () => {
+    setPrefs("default-release");
+    vi.spyOn(fs, "readdirSync").mockImplementation(() => {
+      throw new Error("ENOENT: no such file or directory");
+    });
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
+  });
+
+  it("returns an empty path segment when the Profiles directory is empty on Windows", () => {
+    setPrefs("nonexistent");
+    mockProfiles([]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
+  });
+
+  it("returns an empty path segment when all entries are non-profile files on Windows", () => {
+    setPrefs("nonexistent");
+    mockProfiles(["installs.ini", "profiles.ini"]);
+    vi.spyOn(fs, "statSync").mockReturnValue({ isDirectory: () => false } as fs.Stats);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
+  });
+
+  it("skips a catch-all candidate when statSync throws on Windows (e.g. a dangling symlink)", () => {
+    setPrefs("nonexistent");
+    mockProfiles(["broken-link", "good.profile"]);
+    vi.spyOn(fs, "statSync").mockImplementation((filePath) => {
+      if (String(filePath).endsWith("broken-link")) throw new Error("ENOENT");
+      return { isDirectory: () => true } as fs.Stats;
+    });
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "good.profile", "places.sqlite"));
   });
 });
