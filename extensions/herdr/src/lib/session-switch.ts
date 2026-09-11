@@ -28,23 +28,36 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/** The pids of the Clients of `session` that own a Terminal Pane right now. */
+async function terminalPaneClientPids(session: string): Promise<Set<string>> {
+  const located = await locateTerminalPaneClients(session);
+  return new Set(located.status === "found" ? located.clients.map((client) => client.pid) : []);
+}
+
 /**
  * Waits until a Client of `session` owns a Terminal Pane. A spawn only proves
  * the Terminal Application ran the command: Herdr can still exit afterwards, on
  * a protocol mismatch or a refused nested launch, so nothing is detached until a
  * Client is actually there. "unverifiable" is a terminal that cannot list its
  * panes, which is also a terminal where no detach is possible.
+ *
+ * Clients in `ignorePids` do not count. A Client of the target can already be
+ * open while Reveal still reports it as unavailable, on a listing that timed out
+ * or a pane it could not activate, and such a Client says nothing about the
+ * process just spawned. Passing no set accepts any Client, which is right when
+ * nothing will be detached on the strength of it.
  */
 async function confirmClientAttached(
   session: string,
+  ignorePids: Set<string> | undefined,
   timeoutMs: number,
   pollMs: number,
 ): Promise<"attached" | "unverifiable" | "missing"> {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const located = await locateTerminalPaneClients(session);
-    if (located.status === "found") return "attached";
     if (located.status === "unavailable") return "unverifiable";
+    if (located.status === "found" && located.clients.some((client) => !ignorePids?.has(client.pid))) return "attached";
     if (Date.now() >= deadline) return "missing";
     await delay(pollMs);
   }
@@ -56,8 +69,9 @@ async function confirmClientAttached(
  * the Client's normal quit path; the previous Session's server and everything
  * running in it are untouched.
  *
- * Nothing is selected or detached until the new Client is discoverable, so a
- * switch that fails leaves the user with the Client and the Session they had.
+ * Nothing is selected or detached until a Client that was not already there is
+ * discoverable, so a switch that fails leaves the user with the Client and the
+ * Session they had.
  * Only the Clients sharing the Terminal Window the replacement went into are
  * detached: one replacement cannot stand in for Clients in other windows, and
  * signaling those would close windows the user still wanted.
@@ -78,6 +92,10 @@ export async function switchToSession(target: string, options: SwitchOptions = {
       ? ({ status: "unavailable", reason: `“${target}” is already the selected session` } as const)
       : await locateTerminalPaneClients(previous);
 
+  // Recorded before the launch, and only when Clients are at stake: the switch
+  // then knows which Clients of the target it must not mistake for the new one.
+  const alreadyOpen = location.status === "found" ? await terminalPaneClientPids(target) : undefined;
+
   await launchHerdrInTerminal(["session", "attach", target], {
     includeSession: false,
     windowId: location.status === "found" ? location.windowId : undefined,
@@ -86,6 +104,7 @@ export async function switchToSession(target: string, options: SwitchOptions = {
 
   const confirmation = await confirmClientAttached(
     target,
+    alreadyOpen,
     options.confirmTimeoutMs ?? CONFIRM_TIMEOUT_MS,
     options.confirmPollMs ?? CONFIRM_POLL_MS,
   );

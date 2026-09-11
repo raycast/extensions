@@ -41,6 +41,8 @@ interface Fixture {
   spawnResult?: string | Error;
   /** What the spawned Client adds to the process list and pane listing. */
   spawned?: { processes?: Process[]; panes?: Pane[] };
+  /** Reveal finds the pane but cannot activate it, so it reports unavailable. */
+  activateFails?: boolean;
 }
 
 const events: string[] = [];
@@ -52,8 +54,8 @@ const kill = vi.fn((pid: number) => {
 // so the test drives the real lookup, launch, and switch wiring end to end.
 function mockSystem(fixture: Fixture) {
   let spawned = false;
-  const processes = () => [...fixture.processes, ...(spawned ? fixture.spawned?.processes ?? [] : [])];
-  const panes = () => [...fixture.panes, ...(spawned ? fixture.spawned?.panes ?? [] : [])];
+  const processes = () => [...fixture.processes, ...(spawned ? (fixture.spawned?.processes ?? []) : [])];
+  const panes = () => [...fixture.panes, ...(spawned ? (fixture.spawned?.panes ?? []) : [])];
 
   vi.mocked(execFile).mockImplementation(((
     path: string,
@@ -65,13 +67,28 @@ function mockSystem(fixture: Fixture) {
     if (path.endsWith("pgrep")) {
       events.push("pgrep");
       if (processes().length === 0) return callback(Object.assign(new Error("no match"), { code: 1 }), "", "");
-      return respond(processes().map((process) => process.pid).join("\n"));
+      return respond(
+        processes()
+          .map((process) => process.pid)
+          .join("\n"),
+      );
     }
     if (path === "/bin/ps") {
       events.push("ps");
       // The one column set both lookups use: pid, tty, then the whole argv.
-      expect(args).toEqual(["-p", processes().map((process) => process.pid).join(","), "-o", "pid=,tty=,args="]);
-      return respond(processes().map((process) => `${process.pid} ${process.tty} ${process.args}`).join("\n"));
+      expect(args).toEqual([
+        "-p",
+        processes()
+          .map((process) => process.pid)
+          .join(","),
+        "-o",
+        "pid=,tty=,args=",
+      ]);
+      return respond(
+        processes()
+          .map((process) => `${process.pid} ${process.tty} ${process.args}`)
+          .join("\n"),
+      );
     }
     if (path.endsWith("wezterm")) {
       events.push(`wezterm ${args[1]}${args[1] === "spawn" ? ` ${args.slice(2).join(" ")}` : ""}`);
@@ -82,6 +99,7 @@ function mockSystem(fixture: Fixture) {
         spawned = true;
         return respond(result);
       }
+      if (args[1] === "activate-pane" && fixture.activateFails) return callback(new Error("activate failed"), "", "");
       return respond("");
     }
     if (path === "/usr/bin/open") {
@@ -163,7 +181,11 @@ describe("switchToSession", () => {
   });
 
   it("attaches alongside and says so when the previous session has no client in a terminal pane", async () => {
-    mockSystem({ processes: [], panes: [{ window_id: 9, pane_id: 1, tty_name: "/dev/ttys009" }], spawned: spawnedTarget });
+    mockSystem({
+      processes: [],
+      panes: [{ window_id: 9, pane_id: 1, tty_name: "/dev/ttys009" }],
+      spawned: spawnedTarget,
+    });
 
     const result = await switchToSession("tmp-b", switchOptions(kill));
 
@@ -233,7 +255,11 @@ describe("switchToSession", () => {
   // Regression: a terminal that cannot list its panes was reported as "no
   // client is open", a claim the extension never checked.
   it("reports that the terminal cannot list panes rather than claiming no client", async () => {
-    preferences.terminalApplication = { bundleId: "net.kovidgoyal.kitty", name: "kitty", path: "/Applications/kitty.app" };
+    preferences.terminalApplication = {
+      bundleId: "net.kovidgoyal.kitty",
+      name: "kitty",
+      path: "/Applications/kitty.app",
+    };
     mockSystem({ processes: [previousClient], panes: [], spawned: spawnedTarget });
 
     const result = await switchToSession("tmp-b", switchOptions(kill));
@@ -302,5 +328,55 @@ describe("switchToSession detach scope", () => {
 
     expect(result).toMatchObject({ outcome: "attached", detached: 2 });
     expect(result.skipped).toBeUndefined();
+  });
+});
+
+// Regression: any Client of the target counted as proof that the launch worked.
+// Reveal reports "unavailable" on a transient failure, such as a listing that
+// timed out or a pane it could not activate, even while a Client of the target
+// sits in a pane; the switch then detached the previous Clients on the strength
+// of a Client that predated the launch.
+describe("switchToSession replacement identity", () => {
+  const strayTarget: Process = { pid: "901", tty: "ttys090", args: `${binary} session attach tmp-b` };
+  const strayPane = { window_id: 9, pane_id: 90, tty_name: "/dev/ttys090" };
+
+  it("does not accept a client that predates the launch as the replacement", async () => {
+    mockSystem({
+      processes: [previousClient, strayTarget],
+      panes: [previousPane, strayPane],
+      activateFails: true,
+    });
+
+    await expect(switchToSession("tmp-b", switchOptions(kill))).rejects.toThrow(/tmp-b/);
+    expect(kill).not.toHaveBeenCalled();
+    expect(storage.get("selectedSession")).toBe("tmp-a");
+  });
+
+  it("detaches once a client that was not already there appears", async () => {
+    const replacement: Process = { pid: "902", tty: "ttys091", args: `${binary} session attach tmp-b` };
+    mockSystem({
+      processes: [previousClient, strayTarget],
+      panes: [previousPane, strayPane],
+      activateFails: true,
+      spawned: { processes: [replacement], panes: [{ window_id: 3, pane_id: 78, tty_name: "/dev/ttys091" }] },
+    });
+
+    const result = await switchToSession("tmp-b", switchOptions(kill));
+
+    expect(result).toMatchObject({ outcome: "attached", detached: 1 });
+    expect(kill).toHaveBeenCalledWith(101, "SIGTERM");
+    expect(storage.get("selectedSession")).toBe("tmp-b");
+  });
+
+  // With nothing to detach, an existing Client of the target is a fine reason to
+  // select it: the Session is on screen either way and no Client is signaled.
+  it("still selects the target when there is nothing to detach", async () => {
+    mockSystem({ processes: [strayTarget], panes: [strayPane], activateFails: true });
+
+    const result = await switchToSession("tmp-b", switchOptions(kill));
+
+    expect(result).toMatchObject({ outcome: "attached", detached: 0 });
+    expect(storage.get("selectedSession")).toBe("tmp-b");
+    expect(kill).not.toHaveBeenCalled();
   });
 });
