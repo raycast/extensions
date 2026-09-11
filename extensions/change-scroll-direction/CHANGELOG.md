@@ -1,6 +1,6 @@
 # Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-09-11
 
 - Switch from System Settings UI automation to the `setSwipeScrollDirection` function the Trackpad pane itself calls, so the change applies instantly without opening System Settings.
 - Drop the Accessibility permission requirement and the per-macOS-version AppleScripts.
