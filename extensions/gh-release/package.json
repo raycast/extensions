@@ -8,6 +8,9 @@
   "categories": [
     "Developer Tools"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -22,7 +25,7 @@
     {
       "name": "owner",
       "title": "GitHub Owner",
-      "description": "User or organization whose repos are listed",
+      "description": "User or organization whose repos are listed. Leave blank to list your own.",
       "type": "textfield",
       "required": false
     }
@@ -42,6 +45,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "check": "node --experimental-strip-types --no-warnings scripts/version.check.ts",
     "publish": "ray publish"
   }

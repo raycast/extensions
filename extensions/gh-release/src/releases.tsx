@@ -68,6 +68,16 @@ async function release(repo: string, bump: Bump) {
   const tag = nextTag(last, bump);
   await checking.hide();
 
+  // ponytail: refuse rather than guess — bumping "nightly" would look like a regression
+  if (!tag) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Latest release "${last}" isn't semver`,
+      message: "Tag this one manually, then Raycast can take over",
+    });
+    return;
+  }
+
   const confirmed = await confirmAlert({
     title: `Create ${tag}?`,
     message: `${repo}\nPrevious release: ${last || "none"}`,
@@ -104,7 +114,6 @@ async function release(repo: string, bump: Bump) {
         title: "Open Release",
         onAction: () => open(url),
       };
-      await open(url);
     }
   } catch (err) {
     toast.style = Toast.Style.Failure;
@@ -118,14 +127,15 @@ async function release(repo: string, bump: Bump) {
 }
 
 export default function Command() {
-  const { owner } = getPreferenceValues<{ owner: string }>();
+  const owner = getPreferenceValues<{ owner?: string }>().owner?.trim() ?? "";
 
   const { isLoading, data, revalidate, error } = useExec(
     GH,
     [
       "repo",
       "list",
-      owner,
+      // ponytail: bare `gh repo list` already means "my repos"
+      ...(owner ? [owner] : []),
       "--limit",
       "100",
       "--no-archived",
@@ -138,19 +148,35 @@ export default function Command() {
           .filter((r) => !r.isArchived)
           .sort((a, b) => b.pushedAt.localeCompare(a.pushedAt)),
       failureToastOptions: {
-        title: `Could not list ${owner} repos`,
+        title: owner ? `Could not list ${owner} repos` : "Could not list repos",
         message: "Is the gh CLI installed and logged in?",
       },
     },
   );
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={`Search ${owner} repos…`}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={
+        owner ? `Search ${owner} repos…` : "Search your repos…"
+      }
+    >
       {error ? (
         <List.EmptyView
           icon={Icon.Warning}
           title="Could not reach GitHub"
-          description={`Run: gh auth login`}
+          description="Install the gh CLI, then run: gh auth login"
+        />
+      ) : null}
+      {!error && !isLoading && data?.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No repos found"
+          description={
+            owner
+              ? `${owner} has no unarchived repos you can see. Check the GitHub Owner preference.`
+              : "You have no unarchived repos. Set the GitHub Owner preference to list someone else's."
+          }
         />
       ) : null}
       {(data ?? []).map((repo) => (

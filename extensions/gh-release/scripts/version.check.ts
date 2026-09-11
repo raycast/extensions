@@ -7,5 +7,7 @@ assert.equal(nextTag("v4.0.25", "major"), "v5.0.0");
 assert.equal(nextTag("1.2.3", "patch"), "1.2.4");       // no v prefix preserved
 assert.equal(nextTag("v2.9.9", "minor"), "v2.10.0");    // no decimal rollover
 assert.equal(nextTag("", "patch"), "v0.0.1");           // repo with no releases
-assert.equal(nextTag("nightly", "patch"), "v0.0.1");    // non-semver tag
+assert.equal(nextTag("   ", "patch"), "v0.0.1");        // whitespace counts as none
+assert.equal(nextTag("nightly", "patch"), null);        // refuse non-semver
+assert.equal(nextTag("release-2024", "major"), null);
 console.log("version.check ok");
