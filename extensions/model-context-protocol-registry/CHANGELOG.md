@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Pixelesq MCP Server] - {PR_MERGE_DATE}
+
+Add Pixelesq to the official registry: build and manage a Pixelesq website (pages, sections, content, SEO and analytics) with every edit saved as a draft until you publish. Remote Streamable HTTP server at https://mcp.pixelesq.app/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
 ## [Add Metabrain, AgentMailKit and Site Spec MCP Servers] - 2026-09-11
 
 Add three community servers. Metabrain gives coding agents persistent memory in a local SQLite file (learn, recall, verdict, hypotheses, start_brief, stats, capture_error). AgentMailKit runs email sends as named jobs with a preview step and dry_run defaulting to true (list_jobs, run_job, preview_job, list_plugins). Site Spec audits and repairs a website across 40 SEO, accessibility, privacy, structured data and AI searchability checks (audit_site, fix_issue, compile_spec, list_checks). All three are local stdio servers that need no API key.
