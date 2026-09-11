@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix Agent Focus Not Switching Workspace] - {PR_MERGE_DATE}
+
+- Fix "Focus Agent Needing Attention" and other agent-focus actions not switching the visible Herdr workspace after herdr v0.9.0. `agent focus` now resolves the agent's pane and routes through pane focus, which correctly switches workspace.
+
 ## [Fix Stuck Menu Bar Toast] - 2026-08-29
 
 - Report menu bar failures with a HUD instead of a toast held open across the action. Clicking an item unloads the menu bar command, which left the toast on screen with nothing to resolve it.
