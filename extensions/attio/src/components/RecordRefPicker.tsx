@@ -3,6 +3,7 @@ import { Form } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { searchRecords } from "../api/endpoints";
 import type { Attribute } from "../api/types";
+import { useRecordTitles } from "../hooks/useRecordTitles";
 import { cacheNs } from "../hooks/useSelf";
 
 /** Dropdown values are strings; ":" can't appear in an object slug, so this encoding is unambiguous. */
@@ -34,10 +35,19 @@ export default function RecordRefPicker(props: {
     [cacheNs, text, props.allowedSlugs.join(",")],
     { keepPreviousData: true },
   );
+  // A restored draft arrives as an encoded ref with no matching item (search
+  // hasn't run yet) — resolve its title so the dropdown shows a name instead
+  // of blanking out while still submitting the saved relationship.
+  const orphan =
+    props.value && props.value !== props.initial?.value && props.value !== picked?.value && props.value.includes(":")
+      ? props.value
+      : "";
+  const { titleFor } = useRecordTitles(orphan ? [decodeRef(orphan)] : []);
   const items = new Map<string, string>();
   if (props.initial) items.set(props.initial.value, props.initial.title);
   if (picked) items.set(picked.value, picked.title);
   for (const h of hits ?? []) items.set(encodeRef(h.object_slug, h.id.record_id), h.record_text);
+  if (orphan && !items.has(orphan)) items.set(orphan, titleFor(decodeRef(orphan).target_record_id)?.title ?? orphan);
   return (
     <Form.Dropdown
       id={props.attr.api_slug}
