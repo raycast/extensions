@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Contracko MCP Server] - {PR_MERGE_DATE}
+## [Add Contracko MCP Server] - 2026-09-11
 
 Add Contracko to the community registry for contract review, document search, and renewal tracking. Connects to the remote OAuth MCP server through `mcp-remote`.
 
