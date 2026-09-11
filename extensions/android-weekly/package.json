@@ -5,7 +5,7 @@
   "description": "Browse Android Weekly issues and read the latest articles",
   "icon": "extension-icon.png",
   "author": "mibrahimdev",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": ["News"],
   "license": "MIT",
   "platforms": ["macOS"],
   "commands": [
