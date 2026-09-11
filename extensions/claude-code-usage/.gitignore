@@ -1,0 +1,45 @@
+# Raycast
+raycast-env.d.ts
+dist/
+build/
+.build/
+.raycast-swift-build/
+.swiftpm/
+compiled_raycast_swift/
+compiled_raycast_rust/
+
+# Dependencies
+node_modules/
+jspm_packages/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment variables & secrets
+.env
+.env*.local
+.env.json
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Editors & IDEs
+.vscode/
+.idea/
+*.iml
+.cursor/
+*.sublime-workspace
+*.sublime-project
+
+# TypeScript cache
+*.tsbuildinfo
