@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Metabrain, AgentMailKit and Site Spec MCP Servers] - 2026-09-11
+
+Add three community servers. Metabrain gives coding agents persistent memory in a local SQLite file (learn, recall, verdict, hypotheses, start_brief, stats, capture_error). AgentMailKit runs email sends as named jobs with a preview step and dry_run defaulting to true (list_jobs, run_job, preview_job, list_plugins). Site Spec audits and repairs a website across 40 SEO, accessibility, privacy, structured data and AI searchability checks (audit_site, fix_issue, compile_spec, list_checks). All three are local stdio servers that need no API key.
+
 ## [Add Neither MCP Server] - 2026-09-11
 
 Add Neither to the community registry: project context your AI can query through MCP (selected notes/documents in Cursor or Claude Desktop, related context, source evidence). Local stdio via `npx -y @neitherai/mcp-server@latest`; requires `NEITHER_API_KEY`.
