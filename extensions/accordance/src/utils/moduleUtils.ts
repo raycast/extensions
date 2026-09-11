@@ -65,6 +65,13 @@ export async function fetchModules(preferredModule: string): Promise<ModuleFetch
     `;
 
     const stdout = await runAppleScript(appleScript);
+
+    // The AppleScript handler reports failures as "Error: ..." output; treat that as
+    // a rejected call so the error text is never parsed or cached as a module list.
+    if (stdout.trim().startsWith("Error:")) {
+      throw new Error(stdout.trim());
+    }
+
     const modules = stdout.trim().split(", ");
 
     // Cache the modules with timestamp
