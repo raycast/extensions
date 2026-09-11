@@ -1,4 +1,5 @@
 import { YoutubeTranscript } from "@danielxceron/youtube-transcript";
+import { diagnostic } from "./diagnostics";
 
 export interface TranscriptEntry {
   text: string;
@@ -77,6 +78,7 @@ export async function fetchYouTubeTranscript(url: string, signal?: AbortSignal):
     : null;
 
   try {
+    diagnostic("youtube.transcript_started");
     const transcriptData = (await (abortPromise
       ? Promise.race([YoutubeTranscript.fetchTranscript(videoId), abortPromise])
       : YoutubeTranscript.fetchTranscript(videoId))) as TranscriptEntry[];
@@ -96,12 +98,14 @@ export async function fetchYouTubeTranscript(url: string, signal?: AbortSignal):
       throw new Error("Transcript is empty");
     }
 
+    diagnostic("youtube.transcript_ok");
     return {
       transcript,
       videoId,
       title: `YouTube Video ${videoId}`, // We could enhance this to fetch actual title if needed
     };
   } catch (error) {
+    diagnostic("youtube.transcript_failed", { code: signal?.aborted ? "cancelled" : "provider_error" });
     if (signal?.aborted) {
       throw new Error("Transcript fetch cancelled");
     }

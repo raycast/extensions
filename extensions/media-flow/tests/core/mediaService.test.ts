@@ -23,14 +23,7 @@ const mc = mediaControlProvider as unknown as {
 };
 
 function src(partial: Partial<MediaSource>): MediaSource {
-  return {
-    id: "x",
-    appName: "X",
-    title: "T",
-    isPlaying: false,
-    origin: "applescript",
-    ...partial,
-  };
+  return { id: "x", appName: "X", title: "T", isPlaying: false, origin: "applescript", ...partial };
 }
 
 function provider(
@@ -74,44 +67,25 @@ describe("getMediaSources", () => {
       provider(
         "spotify",
         ["com.spotify.client"],
-        src({
-          id: "com.spotify.client",
-          bundleId: "com.spotify.client",
-          title: "Fresh",
-          position: 10,
-        }),
+        src({ id: "com.spotify.client", bundleId: "com.spotify.client", title: "Fresh", position: 10 }),
       ),
     );
     const { sources, engineAvailable } = await getMediaSources();
     expect(engineAvailable).toBe(true);
     expect(sources).toHaveLength(1);
-    expect(sources[0]).toMatchObject({
-      title: "Fresh",
-      position: 10,
-      artworkPath: "/tmp/a.jpg",
-      isPlaying: true,
-    });
+    expect(sources[0]).toMatchObject({ title: "Fresh", position: 10, artworkPath: "/tmp/a.jpg", isPlaying: true });
   });
 
   it("keeps distinct sources separate, playing first", async () => {
     mc.isAvailable.mockResolvedValue(true);
     mc.getSource.mockResolvedValue(
-      src({
-        id: "com.apple.Music",
-        bundleId: "com.apple.Music",
-        isPlaying: false,
-        origin: "media-remote",
-      }),
+      src({ id: "com.apple.Music", bundleId: "com.apple.Music", isPlaying: false, origin: "media-remote" }),
     );
     registerProvider(
       provider(
         "spotify",
         ["com.spotify.client"],
-        src({
-          id: "com.spotify.client",
-          bundleId: "com.spotify.client",
-          isPlaying: true,
-        }),
+        src({ id: "com.spotify.client", bundleId: "com.spotify.client", isPlaying: true }),
       ),
     );
     const { sources } = await getMediaSources();
@@ -132,11 +106,7 @@ describe("getMediaSources", () => {
     const fb = provider(
       "browser-chrome",
       ["com.google.Chrome"],
-      src({
-        id: "browser-chrome",
-        bundleId: "com.google.Chrome",
-        title: "WrongTab",
-      }),
+      src({ id: "browser-chrome", bundleId: "com.google.Chrome", title: "WrongTab" }),
     );
     fb.fallbackOnly = true;
     registerProvider(fb);
@@ -150,11 +120,7 @@ describe("getMediaSources", () => {
     const fb = provider(
       "browser-chrome",
       ["com.google.Chrome"],
-      src({
-        id: "browser-chrome",
-        bundleId: "com.google.Chrome",
-        title: "TabTitle",
-      }),
+      src({ id: "browser-chrome", bundleId: "com.google.Chrome", title: "TabTitle" }),
     );
     fb.fallbackOnly = true;
     registerProvider(fb);
@@ -174,23 +140,13 @@ describe("getMediaSources", () => {
   it("keeps primary field when provider merges an explicitly undefined value", async () => {
     mc.isAvailable.mockResolvedValue(true);
     mc.getSource.mockResolvedValue(
-      src({
-        id: "com.spotify.client",
-        bundleId: "com.spotify.client",
-        artist: "Real Artist",
-        origin: "media-remote",
-      }),
+      src({ id: "com.spotify.client", bundleId: "com.spotify.client", artist: "Real Artist", origin: "media-remote" }),
     );
     registerProvider(
       provider(
         "spotify",
         ["com.spotify.client"],
-        src({
-          id: "com.spotify.client",
-          bundleId: "com.spotify.client",
-          title: "Fresh",
-          artist: undefined,
-        }),
+        src({ id: "com.spotify.client", bundleId: "com.spotify.client", title: "Fresh", artist: undefined }),
       ),
     );
     const { sources } = await getMediaSources();

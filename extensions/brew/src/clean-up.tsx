@@ -10,7 +10,7 @@ export default async (): Promise<void> => {
       cancelable: true,
     });
     await brewCleanup(preferences.withoutThreshold, handle.abort?.signal);
-    showToast(Toast.Style.Success, "Cleaning completed");
+    await showToast({ style: Toast.Style.Success, title: "Cleaning completed" });
   } catch (err) {
     await showBrewFailureToast("Cleaning failed", ensureError(err));
     await wait(3000);

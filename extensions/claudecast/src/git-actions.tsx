@@ -11,7 +11,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import {
   executePrompt,
@@ -25,10 +25,13 @@ import {
   addRecentProject,
 } from "./lib/project-discovery";
 import { launchClaudeCode } from "./lib/terminal";
+import { shortcut } from "./lib/shortcuts";
+import { isWindows } from "./lib/platform";
+import { getWindowsEnvironment } from "./lib/windows-runtime";
 
-const execPromise = promisify(exec);
+const execFilePromise = promisify(execFile);
 
-// Enum for explicit change requirements (more robust than string matching)
+// Explicit values keep behavior independent from action-title wording.
 type ChangeRequirement = "staged" | "unstaged" | "any" | "none";
 
 interface GitAction {
@@ -37,7 +40,7 @@ interface GitAction {
   subtitle: string;
   icon: Icon;
   prompt: string;
-  gitCommand: string;
+  gitArgs: string[];
   /** What type of changes this action requires */
   changeRequirement: ChangeRequirement;
   tintColor?: Color;
@@ -51,7 +54,7 @@ const GIT_ACTIONS: GitAction[] = [
     icon: Icon.MagnifyingGlass,
     prompt:
       "Review these staged changes. Look for bugs, potential issues, code quality concerns, and suggest improvements. Be specific about file names and line numbers.",
-    gitCommand: "git diff --staged",
+    gitArgs: ["diff", "--staged"],
     changeRequirement: "staged",
     tintColor: Color.Blue,
   },
@@ -73,7 +76,7 @@ Rules:
 - Be specific about what changed and why
 
 Return ONLY the commit message, nothing else.`,
-    gitCommand: "git diff --staged",
+    gitArgs: ["diff", "--staged"],
     changeRequirement: "staged",
     tintColor: Color.Green,
   },
@@ -84,7 +87,7 @@ Return ONLY the commit message, nothing else.`,
     icon: Icon.QuestionMark,
     prompt:
       "Explain these changes in plain English. What was changed, why it might have been changed, and what effect it has. Be concise but thorough.",
-    gitCommand: "git diff HEAD~1",
+    gitArgs: ["diff", "HEAD~1"],
     changeRequirement: "none",
     tintColor: Color.Purple,
   },
@@ -95,7 +98,7 @@ Return ONLY the commit message, nothing else.`,
     icon: Icon.Eye,
     prompt:
       "Review these unstaged changes. Identify any issues, suggest improvements, and note anything that looks incomplete or problematic.",
-    gitCommand: "git diff",
+    gitArgs: ["diff"],
     changeRequirement: "unstaged",
     tintColor: Color.Orange,
   },
@@ -106,7 +109,7 @@ Return ONLY the commit message, nothing else.`,
     icon: Icon.List,
     prompt:
       "Summarize all the changes on this branch compared to main. Group by feature/area, highlight key changes, and provide a high-level overview suitable for a PR description.",
-    gitCommand: "git diff main...HEAD",
+    gitArgs: ["diff", "main...HEAD"],
     changeRequirement: "none",
     tintColor: Color.Yellow,
   },
@@ -194,7 +197,7 @@ function ProjectPickerItem({ project }: { project: Project }) {
           <Action.CopyToClipboard
             title="Copy Project Path"
             content={project.path}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={shortcut.copy}
           />
         </ActionPanel>
       }
@@ -319,15 +322,18 @@ function GitActionItem({
       });
 
       // Get the git diff
-      const { stdout: diff } = await execPromise(action.gitCommand, {
+      const env = isWindows() ? await getWindowsEnvironment() : process.env;
+      const { stdout: diff } = await execFilePromise("git", action.gitArgs, {
         cwd: projectPath,
+        env,
+        windowsHide: true,
       });
 
       if (!diff.trim() && action.changeRequirement !== "none") {
         await showToast({
           style: Toast.Style.Failure,
           title: "No changes found",
-          message: `${action.gitCommand} returned empty`,
+          message: `git ${action.gitArgs.join(" ")} returned empty`,
         });
         setIsExecuting(false);
         return;
@@ -400,7 +406,7 @@ function GitActionItem({
           <Action
             title="Open Full Session"
             icon={Icon.Terminal}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={shortcut.open}
             onAction={async () => {
               await launchClaudeCode({ projectPath });
               await popToRoot();
@@ -431,10 +437,11 @@ function GitActionResult({
         title: "Creating commit...",
       });
 
-      // Escape the message for shell
-      const escapedMessage = result.result.replace(/'/g, "'\\''");
-      await execPromise(`git commit -m '${escapedMessage}'`, {
+      const env = isWindows() ? await getWindowsEnvironment() : process.env;
+      await execFilePromise("git", ["commit", "-m", result.result], {
         cwd: projectPath,
+        env,
+        windowsHide: true,
       });
 
       await showToast({ style: Toast.Style.Success, title: "Commit created!" });
@@ -475,20 +482,20 @@ function GitActionResult({
             <Action.CopyToClipboard
               title="Copy Result"
               content={result.result}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={shortcut.copy}
             />
             {isCommitMessage && (
               <Action
                 title="Create Commit"
                 icon={Icon.Checkmark}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                shortcut={shortcut.primary("return")}
                 onAction={handleCommit}
               />
             )}
             <Action.Paste
               title="Paste Result"
               content={result.result}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              shortcut={shortcut.primaryShift("v")}
             />
           </ActionPanel.Section>
 
@@ -496,13 +503,13 @@ function GitActionResult({
             <Action
               title="Back to Actions"
               icon={Icon.ArrowLeft}
-              shortcut={{ modifiers: ["cmd"], key: "[" }}
+              shortcut={shortcut.primary("[")}
               onAction={pop}
             />
             <Action
               title="Continue in Terminal"
               icon={Icon.Terminal}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              shortcut={shortcut.primary("t")}
               onAction={async () => {
                 await launchClaudeCode({
                   projectPath,
@@ -525,19 +532,30 @@ async function checkGitStatus(projectPath: string): Promise<{
   isGitRepo: boolean;
 }> {
   try {
+    const env = isWindows() ? await getWindowsEnvironment() : process.env;
     // Check if it's a git repo
-    await execPromise("git rev-parse --git-dir", { cwd: projectPath });
+    await execFilePromise("git", ["rev-parse", "--git-dir"], {
+      cwd: projectPath,
+      env,
+      windowsHide: true,
+    });
 
     const [staged, unstaged, branch] = await Promise.all([
-      execPromise("git diff --staged --stat", { cwd: projectPath }).catch(
-        () => ({ stdout: "" }),
-      ),
-      execPromise("git diff --stat", { cwd: projectPath }).catch(() => ({
-        stdout: "",
-      })),
-      execPromise("git branch --show-current", { cwd: projectPath }).catch(
-        () => ({ stdout: "" }),
-      ),
+      execFilePromise("git", ["diff", "--staged", "--stat"], {
+        cwd: projectPath,
+        env,
+        windowsHide: true,
+      }).catch(() => ({ stdout: "" })),
+      execFilePromise("git", ["diff", "--stat"], {
+        cwd: projectPath,
+        env,
+        windowsHide: true,
+      }).catch(() => ({ stdout: "" })),
+      execFilePromise("git", ["branch", "--show-current"], {
+        cwd: projectPath,
+        env,
+        windowsHide: true,
+      }).catch(() => ({ stdout: "" })),
     ]);
 
     return {

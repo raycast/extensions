@@ -23,6 +23,7 @@ import {
   iconForWorkspace,
   listVisibility,
 } from "../lib/listIconCatalog";
+import { mentionToken } from "../lib/descriptionMarkup";
 import { crossShortcut, isMacOS } from "../lib/platform";
 import { composeSpeakable, speakText, stopSpeaking } from "../lib/tts";
 import { EntryEditForm } from "./EntryEditForm";
@@ -237,7 +238,14 @@ export function EntrySearchRow({
                     id: entry.id,
                     entry: entry.entry,
                     definition: entry.definition,
-                    description: entry.description,
+                    // The RAW description (mention tokens intact), not
+                    // the stripped display copy this row renders: the
+                    // form PATCHes its field back verbatim, so seeding
+                    // it with the stripped copy would silently rewrite
+                    // every [label](#id) mention to its bare label on
+                    // save. Fallback covers a cached pre-20261018
+                    // response during a server deploy.
+                    description: entry.descriptionRaw ?? entry.description,
                     type: entry.type,
                     listName: entry.listName,
                     tags: entry.tags,
@@ -293,6 +301,18 @@ export function EntrySearchRow({
             title="Copy Definition"
             content={entry.definition}
             shortcut={crossShortcut(["cmd"], ".")}
+          />
+          {/* Copy the entry's mention token, the plain-text form the
+              web's @-mention picker inserts into descriptions. Raycast
+              forms can't host an inline @ popup (no keystroke or
+              cursor APIs on Form.TextArea), so the mention flow is
+              clipboard-shaped instead: copy the token here, paste it
+              at the caret in a description field. The web read view
+              renders it as a link to this entry. */}
+          <Action.CopyToClipboard
+            title="Copy as Mention"
+            content={mentionToken(entry.entry, entry.id)}
+            shortcut={crossShortcut(["cmd", "shift"], "m")}
           />
           {/* TTS via macOS's built-in `say`. Two granularities: Cmd+T
               speaks the full payload (term + definition + description),

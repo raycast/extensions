@@ -18,7 +18,7 @@ import {
   requestTimelineServer,
 } from "./plex-request";
 import { getMetadataByKeyForTimeline, getMetadataByRatingKey } from "./plex-library";
-import type { MusicTrack, PlayQueueInfo, PlayableItem, TimelineInfo } from "./types";
+import type { MusicAlbum, MusicTrack, PlayQueueInfo, PlayableItem, TimelineInfo } from "./types";
 
 interface ServerIdentity {
   machineIdentifier: string;
@@ -196,7 +196,9 @@ export async function getPlayQueueForTimeline(
   }
 }
 
-async function createPlayQueue(item: PlayableItem): Promise<PlayQueueInfo> {
+// `startKey` picks the item to start from inside a library container. It is ignored for playlists,
+// which are addressed by `playlistID` instead.
+async function createPlayQueue(item: PlayableItem, startKey?: string): Promise<PlayQueueInfo> {
   const identity = await getServerIdentity();
   const params = new URLSearchParams({
     type: "audio",
@@ -209,7 +211,7 @@ async function createPlayQueue(item: PlayableItem): Promise<PlayQueueInfo> {
     params.set("playlistID", item.ratingKey);
   } else {
     params.set("uri", buildPlayableUri(identity.machineIdentifier, item));
-    params.set("key", item.key);
+    params.set("key", startKey ?? item.key);
   }
 
   const container = await requestServer(`/playQueues?${params.toString()}`, {
@@ -218,14 +220,17 @@ async function createPlayQueue(item: PlayableItem): Promise<PlayQueueInfo> {
   return parsePlayQueue(container);
 }
 
-async function startPlayQueue(queue: PlayQueueInfo): Promise<void> {
+async function startPlayQueue(queue: PlayQueueInfo, startKey?: string): Promise<void> {
   const config = await requireServerConfig();
   const identity = await getServerIdentity();
-  const selectedKey = queue.selectedKey ?? queue.items[0]?.key;
 
-  if (!selectedKey) {
+  if (queue.items.length === 0) {
     throw new Error("The created play queue did not include a playable track.");
   }
+
+  // The response only carries a window of the queue, and parsePlayQueue falls back to the first item when
+  // the selected one is outside it, so the key the caller asked for takes precedence.
+  const selectedKey = startKey ?? queue.selectedKey ?? queue.items[0].key;
 
   await requestPlayer("/player/playback/playMedia", {
     machineIdentifier: identity.machineIdentifier,
@@ -351,6 +356,11 @@ async function createExplicitQueueFromTimeline(
 export async function playItem(item: PlayableItem): Promise<void> {
   const queue = await createPlayQueue(item);
   await startPlayQueue(queue);
+}
+
+export async function playAlbumFromTrack(album: MusicAlbum, track: MusicTrack): Promise<void> {
+  const queue = await createPlayQueue(album, track.key);
+  await startPlayQueue(queue, track.key);
 }
 
 export async function queueItem(item: PlayableItem): Promise<void> {

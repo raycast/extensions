@@ -1,12 +1,9 @@
+import { withXAuth } from "./v2/lib/with_x_auth";
 import { ReactElement } from "react";
-import { useV2 } from "./common";
-import { UserList } from "./v1/components/user_search";
 import { SearchUserListV2 } from "./v2/components/user_search";
 
-export default function UserSearchRoot(): ReactElement {
-  if (useV2()) {
-    return <SearchUserListV2 />;
-  } else {
-    return <UserList />;
-  }
+function UserSearchRoot(): ReactElement {
+  return <SearchUserListV2 />;
 }
+
+export default withXAuth(UserSearchRoot);

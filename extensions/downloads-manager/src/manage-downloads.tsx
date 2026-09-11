@@ -3,6 +3,8 @@ import {
   Action,
   Alert,
   confirmAlert,
+  getFrontmostApplication,
+  getPreferenceValues,
   Grid,
   Icon,
   Keyboard,
@@ -10,10 +12,8 @@ import {
   LocalStorage,
   showToast,
   Toast,
-  trash,
 } from "@raycast/api";
 import { showFailureToast, useCachedState, usePromise } from "@raycast/utils";
-import { PathLike } from "fs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   defaultDownloadsLayout,
@@ -28,6 +28,7 @@ import {
   Download,
   formatFileSize,
   getFileType,
+  moveToTrash,
 } from "./utils";
 
 function FilePreviewDetail({ download, isSelected }: { download: Download; isSelected: boolean }) {
@@ -98,6 +99,15 @@ const PAGE_SIZE = 100;
 const MOVE_TO_TRASH_CONFIRMATION_KEY = "manage-downloads-move-to-trash-confirmed";
 
 function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: string }) {
+  const { primaryAction = "open" } = getPreferenceValues<Preferences.ManageDownloads>();
+  const { data: frontmostApplication } = usePromise(async () => {
+    try {
+      return await getFrontmostApplication();
+    } catch {
+      // Pasting still works when the focused application's name is unavailable.
+      return undefined;
+    }
+  });
   const [downloads, setDownloads] = useState<Download[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
@@ -146,7 +156,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     }
   }, [isLoading, hasMore, nextOffset, loadNextPage]);
 
-  function handleTrash(paths: PathLike | PathLike[]) {
+  function handleTrash(paths: string | string[]) {
     setDownloads((downloads: Download[]) =>
       downloads.filter((download: Download) =>
         Array.isArray(paths) ? !paths.includes(download.path) : paths !== download.path,
@@ -154,7 +164,7 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     );
   }
 
-  async function handleMoveToTrash(paths: PathLike | PathLike[]) {
+  async function handleMoveToTrash(paths: string | string[]) {
     const hasConfirmedMoveToTrash = await LocalStorage.getItem<boolean>(MOVE_TO_TRASH_CONFIRMATION_KEY);
     let shouldTrash = hasConfirmedMoveToTrash ?? false;
 
@@ -182,8 +192,18 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     }
 
     try {
-      await trash(paths);
-      handleTrash(paths);
+      const { trashedPaths, failedPaths } = await moveToTrash(paths);
+      handleTrash(trashedPaths);
+
+      if (failedPaths.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Some Items Could Not Be Moved to Trash",
+          message: `${failedPaths.length} item${failedPaths.length === 1 ? "" : "s"} could not be moved`,
+        });
+        return;
+      }
+
       await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
     } catch (error) {
       await showFailureToast(error, { title: "Move to Trash Failed" });
@@ -199,72 +219,96 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
     setIsShowingDetail((prev: boolean) => !prev);
   }, []);
 
-  const actions = (download: Download) => (
-    <ActionPanel>
-      <ActionPanel.Section>
-        {download.isDirectory ? (
-          <Action.Push title="Open Directory" target={<Command currentFolderPath={download.path} />} />
-        ) : (
-          <Action.Open title="Open File" target={download.path} />
-        )}
-        <Action.ShowInFinder path={download.path} />
-        <Action.CopyToClipboard
-          title="Copy File"
-          content={{ file: download.path }}
-          shortcut={Keyboard.Shortcut.Common.Copy}
-        />
-        <Action.CopyToClipboard
-          title="Copy Path"
-          content={download.path}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "." },
-            Windows: { modifiers: ["ctrl", "shift"], key: "." },
-          }}
-        />
-        <Action
-          title="Reload Downloads"
-          icon={Icon.RotateAntiClockwise}
-          shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={handleReload}
-        />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action.OpenWith path={download.path} shortcut={Keyboard.Shortcut.Common.OpenWith} />
-        <Action.ToggleQuickLook shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
-        <Action
-          title="Toggle Layout"
-          icon={downloadsLayout === "list" ? Icon.AppWindowGrid3x3 : Icon.AppWindowList}
-          shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
-          onAction={() => setDownloadsLayout(downloadsLayout === "list" ? "grid" : "list")}
-        />
-        <Action
-          title="Toggle Detail View"
-          icon={isShowingDetail ? Icon.EyeDisabled : Icon.Eye}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "l" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "l" },
-          }}
-          onAction={toggleDetailView}
-        />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action
-          title="Delete Download"
-          icon={Icon.Trash}
-          shortcut={Keyboard.Shortcut.Common.Remove}
-          style={Action.Style.Destructive}
-          onAction={() => handleMoveToTrash(download.path)}
-        />
-        <Action
-          title="Delete All Downloads"
-          icon={Icon.Trash}
-          shortcut={Keyboard.Shortcut.Common.RemoveAll}
-          style={Action.Style.Destructive}
-          onAction={() => handleMoveToTrash(downloads.map((d: Download) => d.path))}
-        />
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
+  const actions = (download: Download) => {
+    const openAction = download.isDirectory ? (
+      <Action.Push
+        title="Open Directory"
+        target={<Command currentFolderPath={download.path} />}
+        shortcut={Keyboard.Shortcut.Common.Open}
+      />
+    ) : (
+      <Action.Open title="Open File" target={download.path} shortcut={Keyboard.Shortcut.Common.Open} />
+    );
+    const copyAction = (
+      <Action.CopyToClipboard
+        title="Copy to Clipboard"
+        content={{ file: download.path }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
+      />
+    );
+
+    return (
+      <ActionPanel title={download.file}>
+        <ActionPanel.Section>
+          {primaryAction === "copy" ? copyAction : openAction}
+          <Action.Paste
+            title={frontmostApplication ? `Paste to ${frontmostApplication.name}` : "Paste to Focused App"}
+            content={{ file: download.path }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "return" },
+              Windows: { modifiers: ["ctrl"], key: "return" },
+            }}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          {primaryAction === "copy" ? openAction : copyAction}
+          <Action.OpenWith path={download.path} shortcut={Keyboard.Shortcut.Common.OpenWith} />
+          <Action.ToggleQuickLook shortcut={Keyboard.Shortcut.Common.ToggleQuickLook} />
+          <Action.ShowInFinder
+            path={download.path}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "opt"], key: "o" },
+              Windows: { modifiers: ["ctrl", "alt"], key: "o" },
+            }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Path"
+            content={download.path}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action
+            title="Reload Downloads"
+            icon={Icon.RotateAntiClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={handleReload}
+          />
+          <Action
+            title="Toggle Layout"
+            icon={downloadsLayout === "list" ? Icon.AppWindowGrid3x3 : Icon.AppWindowList}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
+            onAction={() => setDownloadsLayout(downloadsLayout === "list" ? "grid" : "list")}
+          />
+          <Action
+            title="Toggle Detail View"
+            icon={isShowingDetail ? Icon.EyeDisabled : Icon.Eye}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "l" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+            }}
+            onAction={toggleDetailView}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          <Action
+            title="Delete Download"
+            icon={Icon.Trash}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+            style={Action.Style.Destructive}
+            onAction={() => handleMoveToTrash(download.path)}
+          />
+          <Action
+            title="Delete All Downloads"
+            icon={Icon.Trash}
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
+            style={Action.Style.Destructive}
+            onAction={() => handleMoveToTrash(downloads.map((d: Download) => d.path))}
+          />
+        </ActionPanel.Section>
+      </ActionPanel>
+    );
+  };
 
   const emptyViewProps = {
     icon: { fileIcon: downloadsFolder },

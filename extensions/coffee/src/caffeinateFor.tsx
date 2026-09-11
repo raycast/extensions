@@ -1,5 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
-import { startCaffeinate } from "./utils";
+import { startCaffeinate, deviceName } from "./utils";
 
 export default async function Command(props: { arguments: Arguments.CaffeinateFor }) {
   const { hours, minutes, seconds } = props.arguments;
@@ -25,7 +25,8 @@ export default async function Command(props: { arguments: Arguments.CaffeinateFo
 
   await startCaffeinate(
     { menubar: true, status: true },
-    `Caffeinating your Mac for ${formattedTime}`,
+    `Caffeinating your ${deviceName()} for ${formattedTime}`,
     `-t ${totalSeconds}`,
+    { kind: "for", endsAt: new Date(Date.now() + totalSeconds * 1000).toISOString() },
   );
 }

@@ -23,76 +23,158 @@
       "description": "Attio Access Token"
     },
     {
-      "name": "workspace_slug",
-      "title": "Workspace Slug",
-      "placeholder": "attio",
-      "type": "textfield",
-      "required": true,
-      "description": "Attio Workspace Slug"
+      "name": "verboseLogging",
+      "type": "checkbox",
+      "required": false,
+      "title": "Verbose Logging",
+      "label": "Enable extra diagnostics in the console",
+      "description": "Show detailed logs in the console for debugging.",
+      "default": false
     }
   ],
   "commands": [
     {
       "name": "lists",
-      "title": "Lists",
-      "description": "Modify and add Lists in your workspace",
-      "mode": "view"
+      "title": "Search Lists",
+      "description": "Browse the Lists in your workspace",
+      "mode": "view",
+      "keywords": [
+        "crm",
+        "attio"
+      ]
     },
     {
       "name": "members-and-teams",
       "title": "Members and Teams",
-      "description": "Manage workspace members and teams, set access levels, and invite new users",
-      "mode": "view"
+      "description": "Browse workspace members and their access levels",
+      "mode": "view",
+      "keywords": [
+        "team"
+      ]
     },
     {
       "name": "notes",
-      "title": "Notes",
+      "title": "Search Notes",
       "description": "List Workspace Notes",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "crm",
+        "note"
+      ]
     },
     {
       "name": "objects",
-      "title": "Objects",
+      "title": "View Objects",
       "description": "List Workspace Objects",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "crm",
+        "records",
+        "companies",
+        "people",
+        "deals"
+      ]
+    },
+    {
+      "name": "people",
+      "title": "Search People",
+      "description": "Browse and edit People in your workspace",
+      "mode": "view",
+      "keywords": [
+        "crm",
+        "contacts"
+      ]
+    },
+    {
+      "name": "companies",
+      "title": "Search Companies",
+      "description": "Browse and edit Companies in your workspace",
+      "mode": "view",
+      "keywords": [
+        "crm",
+        "orgs"
+      ]
+    },
+    {
+      "name": "deals",
+      "title": "Search Deals",
+      "description": "Browse and edit Deals in your workspace",
+      "mode": "view",
+      "keywords": [
+        "crm",
+        "pipeline"
+      ]
     },
     {
       "name": "tasks",
-      "title": "Tasks",
+      "title": "Search Tasks",
       "description": "List Workspace Tasks",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "todo",
+        "crm"
+      ]
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Tasks",
+      "description": "Browse tasks assigned to you",
+      "mode": "view",
+      "keywords": [
+        "todo",
+        "mine",
+        "assigned"
+      ]
     },
     {
       "name": "webhooks",
-      "title": "Webhooks",
-      "description": "List Workspace Webhooks",
-      "mode": "view"
+      "title": "Manage Webhooks",
+      "description": "Configure webhooks and webhook events",
+      "mode": "view",
+      "keywords": [
+        "integrations"
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
+    "@chrismessina/raycast-kit": "^0.1.4",
+    "@chrismessina/raycast-logger": "^1.5.0",
+    "@raycast/api": "^1.104.25",
     "@raycast/utils": "^2.2.2",
-    "attio-js": "^0.1.1",
     "date-fns": "^4.1.0"
   },
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "madge": "^8.0.0",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "tsx": "^4.23.13",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "ray build",
+    "check:cycles": "madge --circular --extensions ts,tsx src",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "pretest": "npm run check:cycles",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "types": "tsx scripts/gen-types.ts",
+    "types:fetch": "tsx scripts/fetch-spec.ts"
   },
   "overrides": {
     "brace-expansion": "5.0.9",
     "js-yaml@4": "4.3.1"
-  }
+  },
+  "contributors": [
+    "chrismessina"
+  ]
 }

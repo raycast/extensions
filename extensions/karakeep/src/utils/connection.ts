@@ -7,6 +7,7 @@
  * Everything here exists to pull that out so callers can distinguish "the server
  * said no" from "there was no server".
  */
+import { clearRejectedKey, markKeyRejected } from "./apiError";
 import { getApiConfig } from "./config";
 
 /** Node/undici cause codes that mean the request never reached a server. */
@@ -122,6 +123,67 @@ export async function isApiReachable(apiUrl: string, timeoutMs = 3_000): Promise
     return true;
   } catch {
     return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** What one probe request can tell us about the configured instance. */
+type ApiProbeResult = "ok" | "unauthorized" | "unreachable";
+
+/**
+ * Is the server there, AND is our key good — in a single request.
+ *
+ * `isApiReachable` deliberately answers only the first half, which is right for
+ * "can I attempt a write" but is what let a bad key cascade: the probe passed,
+ * every gate opened, and each view then fired its own doomed request and its own
+ * toast. A wrong key produced "Couldn't load lists HTTP 401" over a bookmarks
+ * command the user never asked to load lists for.
+ *
+ * `/api/v1/users/me` because it is the cheapest authenticated route Karakeep
+ * has — it answers 401 for a bad, missing or expired bearer and carries no
+ * payload worth fetching. Verified against a live instance: bad key → 401 with
+ * the plain-text body `Unauthorized`.
+ *
+ * Fails OPEN on anything that is not a 401. An older instance without this route
+ * answers 404, and a 404 must not lock the user out of an extension whose key is
+ * perfectly good — only an explicit 401 is treated as a rejected key.
+ */
+export async function probeApi(apiUrl: string, timeoutMs = 3_000): Promise<ApiProbeResult> {
+  // Read the config OUTSIDE the request try/catch. getApiConfig throws when the
+  // key is blank, and swallowing that into "unreachable" would tell a first-run
+  // user Karakeep isn't running — pointing them at Docker when the fix is to
+  // paste a key into Settings. No key is a credential problem, not a network one.
+  let apiKey: string;
+  try {
+    ({ apiKey } = await getApiConfig());
+  } catch {
+    return "unauthorized";
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(new URL("/api/v1/users/me", apiUrl).toString(), {
+      headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
+      signal: controller.signal,
+    });
+
+    // This probe OWNS the rejected-key latch, and that is what keeps the latch
+    // from being a trap. Once a key is latched the fetch layer short-circuits
+    // every request without touching the network, so nothing routed through it
+    // can ever produce the success that would clear it — a key that starts
+    // working again (an interleaved 401 during a restart, a token re-provisioned
+    // server-side) would stay locked out for the rest of the run. probeApi does
+    // not go through that layer, so it is always able to ask the server again.
+    if (response.status === 401) {
+      markKeyRejected(apiKey);
+      return "unauthorized";
+    }
+    clearRejectedKey(apiKey);
+    return "ok";
+  } catch {
+    return "unreachable";
   } finally {
     clearTimeout(timer);
   }

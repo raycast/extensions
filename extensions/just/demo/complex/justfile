@@ -1,0 +1,16 @@
+# List available recipes
+[private]
+default:
+  @just --list --unsorted
+
+# Show the project layout, skipping non-source files
+[group('inspect')]
+tree:
+  #!/usr/bin/env bash
+  cd "$(git rev-parse --show-toplevel)"
+  find . -type d \( -name node_modules -o -name .git \) -prune -o -print
+
+# Show the last N commits
+[group('inspect')]
+log count="5":
+  git log --format="%h %s%n%b---" -{{count}}

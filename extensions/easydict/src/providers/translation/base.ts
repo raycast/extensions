@@ -18,14 +18,18 @@ type TranslationGenerator<T> = AsyncGenerator<StreamChunk, TranslationResult<T>,
 export abstract class BaseTranslateProvider<T = unknown> {
   abstract type: TranslationType;
 
+  protected get logLabel(): string {
+    return this.type;
+  }
+
   public async *request(queryWordInfo: QueryInput, options?: RequestOptions): TranslationGenerator<T> {
-    const timer = createTimer(this.type);
+    const timer = createTimer(this.logLabel);
     try {
       const result = yield* this.performTranslate(queryWordInfo, options);
       timer.done(result.translations.join(", "));
       return result;
     } catch (error) {
-      const requestError = handleRequestError(this.type, error, options?.signal);
+      const requestError = handleRequestError(this.type, error, options?.signal, this.logLabel);
       if (!(requestError instanceof CancelledError)) {
         timer.fail();
       }

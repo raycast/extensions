@@ -1,4 +1,7 @@
+import { InstanceActions } from "@/lib/components/InstanceActions";
+import { useInstance } from "@/lib/hooks/useInstance";
 import { removeQueueItem, useQueue } from "@/lib/hooks/useSonarrAPI";
+import type { InstanceState } from "@/lib/types/instance";
 import type { QueueItem } from "@/lib/types/queue";
 import {
   formatAirDate,
@@ -6,6 +9,7 @@ import {
   formatEpisodeNumber,
   formatFileSize,
   formatTimeLeft,
+  getSearchPlaceholder,
   getSeriesPoster,
 } from "@/lib/utils/formatting";
 import { Shortcuts } from "@/lib/utils/shortcuts";
@@ -14,7 +18,8 @@ import { useEffect, useMemo, useState } from "react";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { data, isLoading, mutate } = useQueue();
+  const instanceState = useInstance();
+  const { data, isLoading, mutate } = useQueue(instanceState.instance);
 
   const filteredData = useMemo<QueueItem[]>(() => {
     const queueItems = data?.records || [];
@@ -43,10 +48,19 @@ export default function Command() {
     return () => clearInterval(interval);
   }, [hasActiveDownloads, mutate]);
 
+  // Also reachable with an empty list: without it, switching back out of an
+  // instance that returned nothing would mean quitting the command.
+  const instancePanel = (
+    <ActionPanel>
+      <InstanceActions state={instanceState} />
+    </ActionPanel>
+  );
+
   return (
     <List
-      searchBarPlaceholder="Search downloads..."
-      isLoading={isLoading}
+      actions={instancePanel}
+      searchBarPlaceholder={getSearchPlaceholder(instanceState, "Search downloads")}
+      isLoading={isLoading || instanceState.isLoading}
       isShowingDetail
       filtering={false}
       onSearchTextChange={setSearchText}
@@ -56,18 +70,27 @@ export default function Command() {
           title={searchText ? "No Results" : "Queue is Empty"}
           description={searchText ? "No downloads match your search" : "No active downloads or queued episodes"}
           icon={Icon.Download}
+          actions={instancePanel}
         />
       )}
       <List.Section title="Download Queue" subtitle={`${filteredData.length} items`}>
         {filteredData.map((item) => (
-          <QueueListItem key={item.id} item={item} onRefresh={mutate} />
+          <QueueListItem key={item.id} item={item} onRefresh={mutate} instanceState={instanceState} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function QueueListItem({ item, onRefresh }: { item: QueueItem; onRefresh: () => void }) {
+function QueueListItem({
+  item,
+  onRefresh,
+  instanceState,
+}: {
+  item: QueueItem;
+  onRefresh: () => void;
+  instanceState: InstanceState;
+}) {
   const progress = formatDownloadProgress(item.sizeleft, item.size);
   const progressText = `${Math.round(progress)}%`;
   const poster = item.series ? getSeriesPoster(item.series.images) : undefined;
@@ -167,7 +190,7 @@ function QueueListItem({ item, onRefresh }: { item: QueueItem; onRefresh: () => 
 
     if (confirmed) {
       try {
-        await removeQueueItem(item.id, blocklist);
+        await removeQueueItem(instanceState.instance, item.id, blocklist);
         onRefresh();
       } catch {
         // Error toast already shown by removeQueueItem()
@@ -222,6 +245,8 @@ function QueueListItem({ item, onRefresh }: { item: QueueItem; onRefresh: () => 
               shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
+
+          <InstanceActions state={instanceState} />
         </ActionPanel>
       }
     />

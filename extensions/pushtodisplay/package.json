@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pushtodisplay",
+  "title": "PushToDisplay",
+  "description": "Send real-time updates to your PushToDisplay boards",
+  "icon": "command-icon.png",
+  "author": "pushtodisplay",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "send-update",
+      "title": "Send Update",
+      "description": "Send a styled update to one of your display boards",
+      "mode": "view"
+    },
+    {
+      "name": "quick-send",
+      "title": "Quick Send",
+      "description": "Send a quick message to your default board",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Message to display",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultBoardId",
+      "title": "Default Board ID",
+      "description": "Board used by Quick Send. Find the Board ID in the PushToDisplay app or web portal. Leave unset to use your account's default board.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g. 5f8c2b1a-..."
+    },
+    {
+      "name": "defaultPanelId",
+      "title": "Default Panel",
+      "description": "Panel used by Quick Send (1-4). Leave unset to use the panel default.",
+      "type": "dropdown",
+      "required": false,
+      "default": "",
+      "data": [
+        {
+          "title": "Not set",
+          "value": ""
+        },
+        {
+          "title": "Panel 1",
+          "value": "1"
+        },
+        {
+          "title": "Panel 2",
+          "value": "2"
+        },
+        {
+          "title": "Panel 3",
+          "value": "3"
+        },
+        {
+          "title": "Panel 4",
+          "value": "4"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

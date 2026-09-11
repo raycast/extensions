@@ -1,5 +1,23 @@
 # Obsidian Changelog
 
+## [Added contributor] - 2026-09-07
+
+## [Fix Misleading Required Plugin Message] - 2026-09-06
+
+- Name the core plugin a command actually needs instead of always naming Daily Notes, so Open Workspace now asks for Workspaces
+- Drop the core plugin sentence from the Append Task message, which only needs Advanced URI
+- Retitle the screen to "Required plugins missing", since Advanced URI is often already installed
+
+## [Fix Open Note on Creation] - 2026-08-27
+
+- Open the created note in Obsidian before the command window closes, so the "Open on creation" preference works reliably
+
+## [Exact Content Match Navigation] - 2026-08-27
+
+- Show each exact content occurrence as a separate result with highlighted context and line and column information
+- Open Obsidian at the selected occurrence using the official Obsidian CLI
+- Exclude fuzzy-only candidates without a literal title, path, or content match
+
 ## [Fix Plugin Configuration Permission Errors] - 2026-08-19
 
 - Prevent plugin checks from crashing when Obsidian configuration files cannot be read

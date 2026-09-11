@@ -1,15 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 import { readFile } from "fs/promises";
+import { buildWorkItemsWiql } from "./wiql";
 
 export function parseList(s: string | undefined): string[] {
   return (s ?? "")
     .split(",")
     .map((x) => x.trim())
     .filter(Boolean);
-}
-
-function quoteList(values: string[]): string {
-  return values.map((v) => `'${v.replace(/'/g, "''")}'`).join(", ");
 }
 
 export interface WorkItem {
@@ -76,6 +73,11 @@ export interface WorkItemFilters {
   states?: string[];
   /** When set, filter to specific work item types. Empty/undefined = all types. */
   types?: string[];
+  /**
+   * Restrict to items assigned to the current user. Defaults to true.
+   * When false, a bounding filter (project/states/types) is required.
+   */
+  assignedToMe?: boolean;
 }
 
 /**
@@ -88,26 +90,14 @@ export interface WorkItemFilters {
 export async function getMyWorkItems(filters: WorkItemFilters = {}): Promise<WorkItem[]> {
   const { headers, org } = getAuth();
   const project = filters.project?.trim() || undefined;
-  const states = filters.states ?? [];
-  const types = filters.types ?? [];
-
-  // WIQL is scoped per-project if @project clause is included; otherwise org-wide
-  const projectClause = project ? `AND [System.TeamProject] = '${project.replace(/'/g, "''")}'` : "";
-  const stateClause = states.length
-    ? `AND [System.State] IN (${quoteList(states)})`
-    : `AND [System.State] NOT IN ('Closed', 'Removed', 'Done')`;
-  const typeClause = types.length ? `AND [System.WorkItemType] IN (${quoteList(types)})` : "";
 
   const wiql = {
-    query: `
-      SELECT [System.Id]
-      FROM WorkItems
-      WHERE [System.AssignedTo] = @Me
-        ${stateClause}
-        ${typeClause}
-        ${projectClause}
-      ORDER BY [System.ChangedDate] DESC
-    `,
+    query: buildWorkItemsWiql({
+      project,
+      states: filters.states,
+      types: filters.types,
+      assignedToMe: filters.assignedToMe,
+    }),
   };
 
   const wiqlUrl = project

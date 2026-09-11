@@ -37,10 +37,11 @@
       "name": "search-web",
       "title": "Search Aside",
       "subtitle": "Aside",
-      "description": "Search pinned tabs, other open tabs, browser history, and the web from one bar.",
+      "description": "Search open tabs, bookmarks, browser history, and the web from one bar.",
       "mode": "view",
       "keywords": [
         "google",
+        "bookmarks",
         "history",
         "tabs",
         "url"

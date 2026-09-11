@@ -1,5 +1,11 @@
 # Jira Changelog
 
+## [Fixed team field on issue creation] - 2026-08-25
+
+- Fixed the Team field showing up under "Unknown fields" (and not rendering as a dropdown) on the create-issue form for sites using the newer Atlassian Teams field (`atlassian-team`), so a team can now be selected and set on new issues
+- Added support for both Team field types: the Atlassian Teams platform field (`atlassian-team`) and the Advanced Roadmaps Team field (`rm-teams-custom-field-team`), both sent as a plain-string Team ID (an `{ id }` object is silently dropped)
+- Added unit tests for custom field value handling (run with `npm test` via Node's built-in `node:test` runner)
+
 ## [Fix Jira HTML response errors] - 2026-06-29
 
 - Fixed Jira requests crashing with `Unexpected token '<'` when Jira returns an HTML login, redirect, or SSO page instead of JSON (#23569, #23474, #23413, #23367).

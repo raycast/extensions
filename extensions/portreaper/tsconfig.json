@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    // TS7 移除了 node10（旧写法 module=commonjs + moduleResolution=node），
+    // node16 是它的受支持替代：本包无 "type": "module"，故 node16 仍按 CommonJS
+    // 解析与产出，与 `ray build` 的 bundle 形态一致。两个选项必须成对设置。
+    // 本配置只用于 tsc --noEmit 类型检查，真正的打包由 ray build 负责。
+    "module": "node16",
+    "target": "ES2022",
+    "moduleResolution": "node16",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    // TS7 起 @types 不再自动包含（主仓库 tsconfig.json 有同款注记）。扩展整体
+    // 跑在 Node 里（child_process/fs/crypto + fetch/Buffer 全局），故全项目注入。
+    "types": ["node"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true
+  },
+  // raycast-env.d.ts 由 `ray build` 从 package.json 的 preferences 生成，
+  // 提供全局 `Preferences` 类型。纳入编译范围后，偏好项的类型就无需手写镜像
+  // —— 改了 package.json 而忘记改类型，tsc 会直接报错。
+  "include": ["src/**/*", "raycast-env.d.ts"]
+}

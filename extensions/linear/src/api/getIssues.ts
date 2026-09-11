@@ -182,7 +182,7 @@ export async function getLastUpdatedIssues(after?: string) {
   return { issues: data?.issues.nodes, pageInfo: data?.issues.pageInfo };
 }
 
-export async function searchIssues(query: string, after?: string) {
+export async function searchIssues(query: string, after?: string, first = 25) {
   const { graphQLClient } = getLinearClient();
   const { data } = await graphQLClient.rawRequest<
     { searchIssues: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
@@ -201,21 +201,21 @@ export async function searchIssues(query: string, after?: string) {
         }
       }
     `,
-    { term: query, after, first: 25, includeArchived: false },
+    { term: query, after, first, includeArchived: false },
   );
 
   return { issues: data?.searchIssues.nodes, pageInfo: data?.searchIssues.pageInfo };
 }
 
-export async function filterIssues(filter: string, after?: string) {
+export async function filterIssues(filter: string, after?: string, first = 25) {
   const { graphQLClient } = getLinearClient();
   const { data } = await graphQLClient.rawRequest<
     { issues: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
-    { filter: string; after?: string }
+    { filter: string; after?: string; first?: number }
   >(
     `
-      query($filter: IssueFilter!, $after: String) {
-        issues(first: 25, filter: $filter, after: $after${getCompletedIssuesFilter()}) {
+      query($filter: IssueFilter!, $after: String, $first: Int) {
+        issues(first: $first, filter: $filter, after: $after${getCompletedIssuesFilter()}) {
           nodes {
             ${IssueFragment}
           }
@@ -226,7 +226,7 @@ export async function filterIssues(filter: string, after?: string) {
         }
       }
     `,
-    { filter: JSON.parse(filter), after },
+    { filter: JSON.parse(filter), after, first },
   );
 
   return { issues: data?.issues.nodes, pageInfo: data?.issues.pageInfo };

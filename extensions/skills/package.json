@@ -109,6 +109,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.16",
     "@raycast/utils": "^2.2.4",
+    "proper-lockfile": "^4.1.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "semver": "^7.7.3"
@@ -116,6 +117,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^25.2.3",
+    "@types/proper-lockfile": "^4.1.4",
     "@types/react": "^19.2.13",
     "@types/semver": "^7.7.1",
     "eslint": "^10.0.0",

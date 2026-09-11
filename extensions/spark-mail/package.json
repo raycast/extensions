@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spark-mail",
+  "title": "Spark Mail",
+  "description": "Search, browse, read, and compose Spark email from Raycast via the Spark CLI.",
+  "icon": "icon.png",
+  "author": "keito4",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "sparkPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Spark CLI Path",
+      "description": "Absolute path to the spark binary. Leave blank to auto-detect on PATH (/usr/local/bin, /opt/homebrew/bin). Find it with `which spark`.",
+      "placeholder": "/usr/local/bin/spark"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Mail",
+      "description": "Hybrid keyword + semantic search across your Spark mailbox.",
+      "mode": "view"
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "description": "Browse your unified inbox with smart views and load-more.",
+      "mode": "view"
+    },
+    {
+      "name": "calendar",
+      "title": "Calendar",
+      "description": "View your Spark calendar agenda for today, tomorrow, or this week.",
+      "mode": "view"
+    },
+    {
+      "name": "contacts",
+      "title": "Search Contacts",
+      "description": "Look up contacts by name or email and find their messages.",
+      "mode": "view"
+    },
+    {
+      "name": "folders",
+      "title": "Browse Folders",
+      "description": "Browse folders and labels, then drill into their emails.",
+      "mode": "view"
+    },
+    {
+      "name": "compose",
+      "title": "Compose Email",
+      "description": "Draft a new email in Spark (requires Triage access).",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

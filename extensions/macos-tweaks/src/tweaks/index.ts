@@ -3,6 +3,7 @@ import { finderTweaks } from "./finder";
 import { dockTweaks } from "./dock";
 import { screenshotsTweaks } from "./screenshots";
 import { desktopTweaks } from "./desktop";
+import { windowsTweaks } from "./windows";
 import { animationsTweaks } from "./animations";
 import { keyboardTweaks } from "./keyboard";
 import { trackpadTweaks } from "./trackpad";
@@ -19,6 +20,7 @@ export const ALL_TWEAKS: TweakDefinition[] = [
   ...dockTweaks,
   ...screenshotsTweaks,
   ...desktopTweaks,
+  ...windowsTweaks,
   ...animationsTweaks,
   ...keyboardTweaks,
   ...trackpadTweaks,

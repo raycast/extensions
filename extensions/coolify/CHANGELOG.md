@@ -1,5 +1,10 @@
 # Coolify Changelog
 
+## [Deployment History] - 2026-08-29
+
+- Added Search Deployments to search recent deployment history across applications.
+- Added Menu Bar Deployments to view recent deployments from the menu bar.
+
 ## [Resources Enhancements] - 2026-07-17
 
 - In `Resources`:

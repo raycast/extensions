@@ -1,10 +1,10 @@
 # Ray Clicker
 
-A simple idle clicker game for Raycast with upgrade, made as a learning exercise for Raycast extensions development.
+A simple idle clicker game for Raycast with upgrades, made as a learning exercise for Raycast extensions development.
 
 ## Features
 
-- Active, Idle, and Efficiency upgrade trees, raycast/productivty themed
+- Active, Idle, and Efficiency upgrade trees, Raycast/productivity themed
 - Buy max, cost reductions, milestones, and auto-clicker
 - Prestige loop with permanent bonuses and UI estimate
 - Golden Command random bonus with optional toast
@@ -12,9 +12,11 @@ A simple idle clicker game for Raycast with upgrade, made as a learning exercise
 
 ## Requirements
 
-- Raycast 1.37+
-- Node.js 18+
+- Current Raycast for macOS or Windows
+- Node.js 22.22.2 or newer for development
 - npm (with package-lock.json committed)
+
+Use Command shortcuts on macOS and Control shortcuts on Windows. Progress is saved locally. When you reopen the game, you receive 50% of idle income earned while away.
 
 ## Development
 
@@ -38,7 +40,7 @@ A simple idle clicker game for Raycast with upgrade, made as a learning exercise
 
 - Author uses Raycast username: `JonathanRReed`
 - License: MIT
-- API: using latest @raycast/api via npx for build/lint
+- API: build and lint use the version recorded in package-lock.json
 - Categories: `Fun`
 - Icon: `assets/icon.png` (512x512 PNG). Ensure high contrast in light/dark.
 - No external analytics, no keychain usage

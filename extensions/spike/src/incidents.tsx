@@ -112,13 +112,15 @@ export default function Command() {
     () => async (options: { page: number }) => {
       const response = await api.incidents.getOpenIncidents(options.page + 1, 20);
 
-      const combinedData = [
-        ...response.NACK_Incidents.map((incident: Incident) => ({ ...incident, type: "NACK" as const })),
-        ...response.ACK_Incidents.map((incident: Incident) => ({ ...incident, type: "ACK" as const })),
-      ];
+      // The API returns a single flat `incidents` array whose rows carry their
+      // own status. It used to repeat the open rows under NACK_Incidents /
+      // ACK_Incidents as well; those buckets were dropped from the response.
+      const openIncidents: Incident[] = (response.incidents ?? []).filter(
+        (incident: Incident) => incident.status === "NACK" || incident.status === "ACK",
+      );
 
       return {
-        data: combinedData,
+        data: openIncidents,
         hasMore: response.pagination.total > (options.page + 1) * 20,
       };
     },
@@ -181,7 +183,15 @@ export default function Command() {
   }, [paginatedData]);
 
   if (error) {
-    return <List.EmptyView title="Error" description="Failed to fetch incidents. Please try again." />;
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.XMarkCircle}
+          title="Error"
+          description={error instanceof Error ? error.message : "Failed to fetch incidents. Please try again."}
+        />
+      </List>
+    );
   }
 
   return (

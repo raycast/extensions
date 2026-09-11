@@ -9,8 +9,9 @@ import {
   Form,
   popToRoot,
   getPreferenceValues,
+  open,
 } from "@raycast/api";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { existsSync } from "fs";
 import { ensureClaudeInstalled } from "./lib/claude-cli";
 import {
@@ -21,14 +22,38 @@ import {
   getGitInfo,
   Project,
 } from "./lib/project-discovery";
-import { launchClaudeCode, openTerminalWithCommand } from "./lib/terminal";
-import type { PermissionMode } from "./lib/session-parser";
+import {
+  launchClaudeCode,
+  openTerminalAtPath,
+  openWslTerminalAtPath,
+} from "./lib/terminal";
+import { shortcut } from "./lib/shortcuts";
 
 // Type for batched git info
 type GitInfoMap = Record<
   string,
   { branch: string; hasChanges: boolean; remote?: string } | null
 >;
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  mapper: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let nextIndex = 0;
+  const workers = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (nextIndex < items.length) {
+        const index = nextIndex++;
+        results[index] = await mapper(items[index]);
+      }
+    },
+  );
+  await Promise.all(workers);
+  return results;
+}
 
 export default function LaunchProject() {
   const [isLoading, setIsLoading] = useState(true);
@@ -37,40 +62,62 @@ export default function LaunchProject() {
   const [all, setAll] = useState<Project[]>([]);
   const [searchText, setSearchText] = useState("");
   const [gitInfoMap, setGitInfoMap] = useState<GitInfoMap>({});
+  const loadSequence = useRef(0);
 
   const loadProjects = useCallback(async () => {
+    const sequence = ++loadSequence.current;
     setIsLoading(true);
-    const projects = await getAllProjects();
-    setFavorites(projects.favorites);
-    setRecent(projects.recent);
-    setAll(projects.all);
-    setIsLoading(false);
+    try {
+      const projects = await getAllProjects();
+      if (sequence !== loadSequence.current) return;
+      setFavorites(projects.favorites);
+      setRecent(projects.recent);
+      setAll(projects.all);
 
-    // Batch load git info for all projects
-    const allProjects = [
-      ...projects.favorites,
-      ...projects.recent,
-      ...projects.all,
-    ];
-    const uniquePaths = [...new Set(allProjects.map((p) => p.path))];
-
-    // Load git info in parallel with error handling
-    const gitInfoEntries = await Promise.all(
-      uniquePaths.map(async (projectPath) => {
-        try {
-          const info = await getGitInfo(projectPath);
-          return [projectPath, info] as const;
-        } catch {
-          return [projectPath, null] as const;
-        }
-      }),
-    );
-
-    setGitInfoMap(Object.fromEntries(gitInfoEntries));
+      const allProjects = [
+        ...projects.favorites,
+        ...projects.recent,
+        ...projects.all,
+      ];
+      const uniqueProjects = [
+        ...new Map(
+          allProjects.map((project) => [project.path, project]),
+        ).values(),
+      ];
+      const gitInfoEntries = await mapWithConcurrency(
+        uniqueProjects,
+        4,
+        async (project) => {
+          if (project.wsl) return [project.path, null] as const;
+          try {
+            const info = await getGitInfo(project.path);
+            return [project.path, info] as const;
+          } catch {
+            return [project.path, null] as const;
+          }
+        },
+      );
+      if (sequence === loadSequence.current) {
+        setGitInfoMap(Object.fromEntries(gitInfoEntries));
+      }
+    } catch (error) {
+      if (sequence === loadSequence.current) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Projects Could Not Be Loaded",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    } finally {
+      if (sequence === loadSequence.current) setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    loadProjects();
+    void loadProjects();
+    return () => {
+      loadSequence.current++;
+    };
   }, [loadProjects]);
 
   // Memoize filtered lists to avoid recalculating on every render
@@ -173,6 +220,42 @@ export default function LaunchProject() {
   );
 }
 
+async function ensureProjectCanLaunch(project: Project): Promise<boolean> {
+  if (!existsSync(project.path)) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Project Path No Longer Exists",
+      message: project.path,
+    });
+    return false;
+  }
+  if (project.wsl) {
+    if (project.wsl.claudeExecutable) return true;
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Claude Code Is Missing in WSL",
+      message: `Install Claude Code Inside ${project.wsl.distribution}`,
+    });
+    return false;
+  }
+  return ensureClaudeInstalled();
+}
+
+async function runProjectLaunch(
+  failureTitle: string,
+  action: () => Promise<boolean>,
+): Promise<void> {
+  try {
+    if (await action()) await popToRoot();
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: failureTitle,
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
 function ProjectItem({
   project,
   gitInfo,
@@ -186,6 +269,12 @@ function ProjectItem({
   onToggleFavorite: () => void;
 }) {
   const accessories: List.Item.Accessory[] = [];
+
+  if (project.wsl) {
+    accessories.push({
+      tag: { value: `WSL ${project.wsl.distribution}`, color: Color.Purple },
+    });
+  }
 
   if (project.sessionCount && project.sessionCount > 0) {
     accessories.push({
@@ -212,50 +301,53 @@ function ProjectItem({
   }
 
   async function handleLaunch() {
-    if (!(await ensureClaudeInstalled())) return;
-    if (!existsSync(project.path)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Project path no longer exists",
-        message: project.path,
+    await runProjectLaunch("New Session Could Not Be Launched", async () => {
+      if (!(await ensureProjectCanLaunch(project))) return false;
+      const prefs = getPreferenceValues<Preferences.LaunchProject>();
+      await addRecentProject(project.path);
+      await launchClaudeCode({
+        projectPath: project.path,
+        permissionMode: prefs.permissionMode || "default",
+        model: prefs.model || undefined,
+        wsl: project.wsl,
       });
-      return;
-    }
-    const prefs = getPreferenceValues<Preferences.LaunchProject>();
-    const permissionMode = (prefs.permissionMode ||
-      "default") as PermissionMode;
-    const model = prefs.model || undefined;
-    await addRecentProject(project.path);
-    await launchClaudeCode({
-      projectPath: project.path,
-      permissionMode,
-      model,
+      return true;
     });
-    await popToRoot();
   }
 
   async function handleContinue() {
-    if (!(await ensureClaudeInstalled())) return;
-    if (!existsSync(project.path)) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Project path no longer exists",
-        message: project.path,
+    await runProjectLaunch("Session Could Not Be Continued", async () => {
+      if (!(await ensureProjectCanLaunch(project))) return false;
+      const prefs = getPreferenceValues<Preferences.LaunchProject>();
+      await addRecentProject(project.path);
+      await launchClaudeCode({
+        projectPath: project.path,
+        continueSession: true,
+        permissionMode: prefs.permissionMode || "default",
+        model: prefs.model || undefined,
+        wsl: project.wsl,
       });
-      return;
-    }
-    const prefs = getPreferenceValues<Preferences.LaunchProject>();
-    const permissionMode = (prefs.permissionMode ||
-      "default") as PermissionMode;
-    const model = prefs.model || undefined;
-    await addRecentProject(project.path);
-    await launchClaudeCode({
-      projectPath: project.path,
-      continueSession: true,
-      permissionMode,
-      model,
+      return true;
     });
-    await popToRoot();
+  }
+
+  async function handleWorktreeLaunch() {
+    await runProjectLaunch(
+      "Worktree Session Could Not Be Launched",
+      async () => {
+        if (!(await ensureProjectCanLaunch(project))) return false;
+        const prefs = getPreferenceValues<Preferences.LaunchProject>();
+        await addRecentProject(project.path);
+        await launchClaudeCode({
+          projectPath: project.path,
+          worktree: true,
+          permissionMode: prefs.permissionMode || "default",
+          model: prefs.model || undefined,
+          wsl: project.wsl,
+        });
+        return true;
+      },
+    );
   }
 
   return (
@@ -276,16 +368,23 @@ function ProjectItem({
               icon={Icon.Plus}
               onAction={handleLaunch}
             />
+            {gitInfo && (
+              <Action
+                title="New Worktree Session"
+                icon={Icon.Tree}
+                onAction={handleWorktreeLaunch}
+              />
+            )}
             <Action
               title="Continue Last Session"
               icon={Icon.ArrowRight}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={shortcut.refresh}
               onAction={handleContinue}
             />
             <Action.Push
               title="Continue with Prompt"
               icon={Icon.Message}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              shortcut={shortcut.primaryShift("p")}
               target={<ContinueWithPromptForm project={project} />}
             />
           </ActionPanel.Section>
@@ -294,9 +393,9 @@ function ProjectItem({
             <Action
               title="Open in VS Code"
               icon={Icon.Code}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={shortcut.open}
               onAction={async () => {
-                await openTerminalWithCommand(`code "${project.path}"`);
+                await open(project.path, "Visual Studio Code");
                 await popToRoot();
               }}
             />
@@ -306,9 +405,13 @@ function ProjectItem({
             <Action
               title="Open in Terminal"
               icon={Icon.Terminal}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+              shortcut={shortcut.primaryShift("t")}
               onAction={async () => {
-                await openTerminalWithCommand(`cd "${project.path}" && $SHELL`);
+                if (project.wsl) {
+                  await openWslTerminalAtPath(project.wsl);
+                } else {
+                  await openTerminalAtPath(project.path);
+                }
                 await popToRoot();
               }}
             />
@@ -322,13 +425,13 @@ function ProjectItem({
                   : "Add to Favorites"
               }
               icon={project.isFavorite ? Icon.StarDisabled : Icon.Star}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={shortcut.primary("f")}
               onAction={onToggleFavorite}
             />
             <Action.CopyToClipboard
               title="Copy Path"
               content={project.path}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={shortcut.copyPath}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -344,35 +447,34 @@ function ContinueWithPromptForm({ project }: { project: Project }) {
     if (!values.prompt.trim()) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Please enter a prompt",
+        title: "Enter a Prompt",
       });
       return;
     }
 
-    if (!(await ensureClaudeInstalled())) return;
-    if (!existsSync(project.path)) {
+    try {
+      if (!(await ensureProjectCanLaunch(project))) return;
+      const prefs = getPreferenceValues<Preferences.LaunchProject>();
+      const model = prefs.model || undefined;
+      setIsLoading(true);
+      await addRecentProject(project.path);
+      await launchClaudeCode({
+        projectPath: project.path,
+        continueSession: true,
+        prompt: values.prompt,
+        permissionMode: prefs.permissionMode || "default",
+        model,
+        wsl: project.wsl,
+      });
+      await popToRoot();
+    } catch (error) {
+      setIsLoading(false);
       await showToast({
         style: Toast.Style.Failure,
-        title: "Project path no longer exists",
-        message: project.path,
+        title: "Session Could Not Be Continued",
+        message: error instanceof Error ? error.message : String(error),
       });
-      return;
     }
-
-    const prefs = getPreferenceValues<Preferences.LaunchProject>();
-    const permissionMode = (prefs.permissionMode ||
-      "default") as PermissionMode;
-    const model = prefs.model || undefined;
-    setIsLoading(true);
-    await addRecentProject(project.path);
-    await launchClaudeCode({
-      projectPath: project.path,
-      continueSession: true,
-      prompt: values.prompt,
-      permissionMode,
-      model,
-    });
-    await popToRoot();
   }
 
   return (

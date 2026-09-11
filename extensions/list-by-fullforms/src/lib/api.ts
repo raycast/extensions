@@ -99,6 +99,14 @@ export interface SearchEntryResult {
   entry: string;
   definition: string;
   description: string;
+  // The description exactly as stored, mention tokens ([label](#id))
+  // intact, from list-repo migration 20261018000000. `description`
+  // above is the mention-STRIPPED display copy; render that one, but
+  // EDIT this one: the edit form must round-trip the raw text or
+  // saving an edit silently rewrites every mention token to its bare
+  // label. Optional because a cached pre-migration response can lack
+  // it across a server deploy; editors fall back to `description`.
+  descriptionRaw?: string;
   type: string;
   listId: number;
   listName: string;
@@ -111,6 +119,22 @@ export interface SearchEntryResult {
   myNote: string | null;
   isStarred: boolean;
   tags: string[];
+}
+
+// One entry row from /api/v1/recent (api_recent_entries_for_token):
+// the caller's own most-recently-created entries, newest first. Since
+// list-repo migration 20261017000000 the row is the full search-row
+// shape plus createdAt, deliberately, so the Search command's
+// "Recently Added" empty-query section can render these through
+// EntrySearchRow with no re-joining. If SearchEntryResult widens
+// again, the recent RPC must follow (it copies the search RPC's field
+// expressions verbatim).
+export interface RecentEntryResult extends SearchEntryResult {
+  createdAt: string;
+}
+
+export interface RecentEntriesResponse {
+  entries: RecentEntryResult[];
 }
 
 const DEFAULT_BASE = "https://list.fullforms.com";
@@ -158,7 +182,7 @@ export async function apiFetch<T>(
 
   if (res.status === 401) {
     throw new Error(
-      "Token invalid or revoked. Open extension preferences and paste a fresh one from list.fullforms.com/account.",
+      "Token invalid or revoked. Open extension preferences and paste a fresh one from list.fullforms.com/account?token_client=raycast.",
     );
   }
   if (res.status === 429) {

@@ -1,5 +1,4 @@
-import { IssuePriorityValue, User } from "@linear/sdk";
-import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
+import { IssuePriorityValue, LinearClient, User } from "@linear/sdk";
 import {
   Action,
   Icon,
@@ -14,6 +13,8 @@ import {
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { useState } from "react";
+
+type IssueUpdateInput = Parameters<LinearClient["updateIssue"]>[1];
 
 import { IssueResult, IssueDetailResult, Attachment } from "../../api/getIssues";
 import { getLinearClient } from "../../api/linearClient";

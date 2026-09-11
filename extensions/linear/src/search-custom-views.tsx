@@ -65,7 +65,7 @@ function CustomViewList() {
         return (
           <List.Item
             key={view.id}
-            icon={getIcon({ icon: view.icon, color: view.color, fallbackIcon: Icon.Layers })}
+            icon={getIcon({ icon: view.icon ?? undefined, color: view.color ?? undefined, fallbackIcon: Icon.Layers })}
             title={view.name}
             accessories={accessories}
             actions={

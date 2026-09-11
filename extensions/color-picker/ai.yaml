@@ -1,0 +1,123 @@
+instructions: |
+  Use convert-color when the user wants a color converted to a specific format. Pass CSS color values exactly as supplied and use one of the tool's supported format values.
+  Use name-color when the user asks what a color is called or wants the nearest named colors.
+  Use list-saved-colors for questions about Color Picker history, recent colors, or favorites. Use filter "favorites" only when the user specifically asks for favorites.
+  Use save-colors only when the user explicitly asks to save colors to history or favorites. Pass multiple CSS color values as one semicolon-separated string. Set favorite to true when the user asks to favorite or favourite colors; otherwise omit it. The tool asks for confirmation before changing Color Picker history. Invoke it directly and let the tool confirmation obtain approval; do not ask for an additional chat confirmation.
+  Use analyze-contrast when the user asks about contrast, readability, or WCAG accessibility for a foreground and background color.
+  Use generate-color-scale to create an 11-step 50-950 scale from one opaque base color. The scale uses OKLCH interpolation and keeps the base color at 500.
+  Use format-palette when the user wants colors formatted as JSON, CSS variables, or CSS classes. Pass multiple colors as one semicolon-separated string and set format to json, css-variables, or css-classes.
+  Raycast AI can devise a palette from a natural-language description. Call save-colors after generating it only when the user also asks to save it.
+  Never claim that a color was picked from the screen or extracted from an image because these tools cannot inspect the screen or selected files.
+evals:
+  - input: "@color-picker Convert #FF6363 to OKLCH."
+    mocks:
+      convert-color:
+        input: "#FF6363"
+        format: "oklch"
+        color: "oklch(69.87% 0.1902 23.468)"
+    expected:
+      - callsTool:
+          name: "convert-color"
+          arguments:
+            color: "#FF6363"
+            format: "oklch"
+  - input: "@color-picker What is the closest name for #663399?"
+    mocks:
+      name-color:
+        color: "#663399"
+        names:
+          - name: "Rebecca Purple"
+            hex: "#663399"
+            distance: 0
+    expected:
+      - callsTool:
+          name: "name-color"
+          arguments:
+            color: "#663399"
+  - input: "@color-picker Show my 5 most recent favorite colors."
+    mocks:
+      list-saved-colors:
+        filter: "favorites"
+        totalCount: 1
+        colors:
+          - color: "#663399"
+            title: "Brand purple"
+            isFavorite: true
+            savedAt: "2026-08-26T09:00:00.000Z"
+    expected:
+      - callsTool:
+          name: "list-saved-colors"
+          arguments:
+            filter: "favorites"
+            limit: 5
+  - input: "@color-picker Save #FF6363 and #66D3BB to my color history."
+    mocks:
+      save-colors:
+        savedCount: 2
+        colors: ["#FF6363", "#66D3BB"]
+        favorite: false
+        message: "Added 2 colors to Color Picker history."
+    expected:
+      - callsTool:
+          name: "save-colors"
+          arguments:
+            colors:
+              matches: "^#FF6363;\\s*#66D3BB$"
+  - input: "@color-picker Add #E6E6E7 to my favourites."
+    mocks:
+      save-colors:
+        savedCount: 1
+        colors: ["#E6E6E7"]
+        favorite: true
+        message: "Added 1 color to Color Picker favorites."
+    expected:
+      - callsTool:
+          name: "save-colors"
+          arguments:
+            colors: "#E6E6E7"
+            favorite: true
+  - input: "@color-picker Does #777777 text on #FFFFFF pass WCAG AA contrast?"
+    mocks:
+      analyze-contrast:
+        foreground: "#777777"
+        background: "#FFFFFF"
+        ratio: 4.48
+        passes:
+          aaNormalText: false
+          aaLargeText: true
+          aaaNormalText: false
+          aaaLargeText: false
+          nonText: true
+    expected:
+      - callsTool:
+          name: "analyze-contrast"
+          arguments:
+            foreground: "#777777"
+            background: "#FFFFFF"
+  - input: "@color-picker Generate a 50-950 color scale from #FF6363."
+    mocks:
+      generate-color-scale:
+        baseColor: "#FF6363"
+        colorSpace: "oklch"
+        scale:
+          - label: 50
+            color: "#FFFFFF"
+          - label: 500
+            color: "#FF6363"
+          - label: 950
+            color: "#000000"
+    expected:
+      - callsTool:
+          name: "generate-color-scale"
+          arguments:
+            color: "#FF6363"
+  - input: "@color-picker Format #FF6363 and #66D3BB as CSS variables."
+    mocks:
+      format-palette: ":root {\n  --color-1: #FF6363;\n  --color-2: #66D3BB;\n}"
+    expected:
+      - callsTool:
+          name: "format-palette"
+          arguments:
+            colors:
+              matches: "^#FF6363;\\s*#66D3BB$"
+            format: "css-variables"
