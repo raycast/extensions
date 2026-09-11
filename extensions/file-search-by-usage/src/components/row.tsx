@@ -200,6 +200,22 @@ function RowActions({
           icon={entry.isDirectory ? Icon.Finder : Icon.ArrowRight}
           onAction={() => handlers.onOpen(entry)}
         />
+        {/* Raycast assigns Command-Return to the second action. */}
+        <Action.ShowInFinder
+          path={entry.path}
+          shortcut={{ modifiers: ["cmd"], key: "return" }}
+        />
+        <Action.ToggleQuickLook
+          title="Quick Look"
+          shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+        />
+        <Action.OpenWith
+          path={entry.path}
+          shortcut={Keyboard.Shortcut.Common.Open}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Navigation">
         {entry.isDirectory && (
           <Action
             title="Navigate into Folder"
@@ -212,10 +228,6 @@ function RowActions({
           onUp={handlers.onUp}
           onReturnToStart={handlers.onReturnToStart}
         />
-        <Action.ToggleQuickLook
-          title="Quick Look"
-          shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-        />
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Search">
@@ -227,14 +239,6 @@ function RowActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section title="This Item">
-        <Action.ShowInFinder
-          path={entry.path}
-          shortcut={{ modifiers: ["cmd"], key: "return" }}
-        />
-        <Action.OpenWith
-          path={entry.path}
-          shortcut={Keyboard.Shortcut.Common.Open}
-        />
         <Action
           title={pinned ? "Unpin" : "Pin"}
           icon={pinned ? Icon.PinDisabled : Icon.Pin}

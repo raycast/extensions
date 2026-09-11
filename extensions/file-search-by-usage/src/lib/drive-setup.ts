@@ -13,8 +13,8 @@ import { withIndexingLock } from "./indexing-lock";
 import { setupProgress } from "./setup-progress";
 import {
   driveIndexCaveat,
-  shouldReplaceIndex,
-  shouldSaveCheckpoint,
+  refreshShortcutIndex,
+  refreshSharedIndex,
 } from "./index-refresh";
 
 export const DRIVE_SETUP_KEY = "google-drive-setup";
@@ -49,7 +49,23 @@ export async function indexGoogleDriveLocked(
       })
     : undefined;
 
-  const previousShortcuts = await loadShortcutIndex();
+  let activeShortcuts = await loadShortcutIndex();
+  let activeShared = loadSharedIndex();
+  const storageError = new Error("Google Drive index could not be saved");
+  const saveShortcuts = async (incoming: typeof activeShortcuts) => {
+    const updated = refreshShortcutIndex(activeShortcuts, incoming);
+    if (updated === activeShortcuts) return;
+    assertOwned();
+    if (!(await saveShortcutIndex(updated))) throw storageError;
+    activeShortcuts = updated;
+  };
+  const saveShared = (incoming: typeof activeShared) => {
+    const updated = refreshSharedIndex(activeShared, incoming);
+    if (updated === activeShared) return;
+    assertOwned();
+    if (!saveSharedIndex(updated)) throw storageError;
+    activeShared = updated;
+  };
   const finish = <T extends string>(result: T) => {
     options.onSummary?.(
       toast
@@ -69,10 +85,7 @@ export async function indexGoogleDriveLocked(
       budgetMs: options.budgetMs,
       onProgress: async (partial) => {
         if (options.signal?.aborted) return;
-        if (shouldSaveCheckpoint(previousShortcuts.shortcuts.length)) {
-          assertOwned();
-          await saveShortcutIndex(partial);
-        }
+        await saveShortcuts(partial);
         progress.update(`${partial.shortcuts.length} shortcuts found`);
       },
     });
@@ -86,18 +99,7 @@ export async function indexGoogleDriveLocked(
       return "cancelled" as const;
     };
     if (options.signal?.aborted) return stopped();
-    const replaceShortcuts = shouldReplaceIndex(
-      previousShortcuts.shortcuts.length,
-      shortcuts.shortcuts.length,
-      shortcuts.available,
-      shortcuts.partial,
-      previousShortcuts.partial,
-    );
-    if (replaceShortcuts) {
-      assertOwned();
-      await saveShortcutIndex(shortcuts);
-    }
-    if (!shortcuts.available) {
+    if (!shortcuts.available || shortcuts.error) {
       if (toast) {
         toast.style = Toast.Style.Failure;
         toast.title = "Google Drive is unavailable";
@@ -105,43 +107,20 @@ export async function indexGoogleDriveLocked(
       }
       return finish("unavailable");
     }
+    await saveShortcuts(shortcuts);
 
-    const previousShared = loadSharedIndex();
     progress.phase("Google Drive shared folders", options.budgetMs ?? 120_000);
     const shared = await scanSharedFolders({
       signal: options.signal,
       budgetMs: options.budgetMs,
       onProgress: (partial) => {
         if (options.signal?.aborted) return;
-        if (shouldSaveCheckpoint(previousShared.paths.length)) {
-          assertOwned();
-          saveSharedIndex(partial);
-        }
+        saveShared(partial);
         progress.update(`${partial.paths.length} items found`);
       },
     });
     if (options.signal?.aborted) return stopped();
-    const replaceShared = shouldReplaceIndex(
-      previousShared.paths.length,
-      shared.paths.length,
-      shared.available,
-      shared.partial,
-      previousShared.partial,
-    );
-    if (replaceShared) {
-      assertOwned();
-      if (!saveSharedIndex(shared)) {
-        if (toast) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Google Drive index could not be saved";
-          toast.message =
-            "The shared-folder cache could not be updated. Previous saved results were kept; setup remains available to retry.";
-        }
-        return finish("storage-error");
-      }
-    }
-
-    if (!shared.available) {
+    if (!shared.available || shared.error) {
       if (toast) {
         toast.style = Toast.Style.Failure;
         toast.title = "Google Drive shared folders are unavailable";
@@ -149,6 +128,7 @@ export async function indexGoogleDriveLocked(
       }
       return finish("unavailable");
     }
+    saveShared(shared);
 
     const complete = !shortcuts.partial && !shared.partial;
     assertOwned();
@@ -156,23 +136,21 @@ export async function indexGoogleDriveLocked(
     if (toast) {
       const indexCaveat = driveIndexCaveat(shortcuts, shared);
       toast.style = Toast.Style.Success;
-      if (!replaceShortcuts || !replaceShared) {
-        const kept = [
-          !replaceShortcuts && "shortcut",
-          !replaceShared && "shared-folder",
-        ]
-          .filter(Boolean)
-          .join(" and ");
-        toast.title = "Google Drive refresh incomplete";
-        toast.message = `Previous ${kept} index kept. ${indexCaveat}.`;
-      } else {
-        toast.title = `Indexed ${shared.paths.length} items in shared folders`;
-        toast.message = indexCaveat
-          ? `${shortcuts.shortcuts.length} shortcuts. ${indexCaveat}.`
-          : `${shortcuts.shortcuts.length} shortcuts. All searchable by name now.`;
-      }
+      toast.title = `Indexed ${activeShared.paths.length} items in shared folders`;
+      toast.message = indexCaveat
+        ? `${activeShortcuts.shortcuts.length} shortcuts. Partial results merged with saved paths. ${indexCaveat}.`
+        : `${activeShortcuts.shortcuts.length} shortcuts. All searchable by name now.`;
     }
     return finish(complete ? "complete" : "partial");
+  } catch (error) {
+    if (error !== storageError) throw error;
+    if (toast) {
+      toast.style = Toast.Style.Failure;
+      toast.title = storageError.message;
+      toast.message =
+        "The index is too large or storage failed. Previous saved results were kept; setup remains available to retry.";
+    }
+    return finish("storage-error");
   } finally {
     progress.stop();
   }

@@ -4,7 +4,11 @@ import path from "node:path";
 import * as queryTools from "../src/lib/query";
 import { scoreEntry } from "../src/lib/score";
 import { entryStoragePath } from "../src/lib/entry-identity";
-import { shouldReplaceIndex } from "../src/lib/index-refresh";
+import {
+  driveIndexCaveat,
+  refreshShortcutIndex,
+  refreshSharedIndex,
+} from "../src/lib/index-refresh";
 import { relativeDepth } from "../src/lib/read-dir";
 import { Entry } from "../src/lib/types";
 import { createRecentValidator } from "../src/lib/recent-validation";
@@ -348,8 +352,9 @@ export async function browserChecks(
       available: true,
       partial: false,
     }),
-    shouldReplaceIndex,
-    saveShortcutIndex: async () => {},
+    refreshShortcutIndex,
+    refreshSharedIndex,
+    saveShortcutIndex: async () => true,
     setShortcuts: () => {},
     setShortcutsScannedAt: () => {},
     loadSharedIndex: () => ({
@@ -404,25 +409,30 @@ export async function browserChecks(
   let sharedWrites = 0;
   let displayedShortcuts: unknown;
   let displayedTimestamp: number | undefined;
+  let savedShortcutPaths: string[] = [];
+  let savedSharedPaths: string[] = [];
   const partialRefreshDependencies = {
     ...refreshDependencies,
     loadShortcutIndex: async () => previousShortcuts,
     scanShortcuts: async () => ({
       ...previousShortcuts,
-      shortcuts: [],
+      shortcuts: [{ path: "/new", name: "new", target: "/new-target" }],
       scannedAt: 2,
     }),
     loadSharedIndex: () => previousShared,
     scanSharedFolders: async () => ({
       ...previousShared,
-      paths: ["/previous"],
+      paths: ["/new"],
       scannedAt: 2,
     }),
-    saveShortcutIndex: async () => {
+    saveShortcutIndex: async (index: typeof previousShortcuts) => {
       shortcutWrites++;
+      savedShortcutPaths = index.shortcuts.map((item) => item.path);
+      return true;
     },
-    saveSharedIndex: () => {
+    saveSharedIndex: (index: typeof previousShared) => {
       sharedWrites++;
+      savedSharedPaths = index.paths;
       return true;
     },
     setShortcuts: (shortcuts: unknown) => {
@@ -436,17 +446,67 @@ export async function browserChecks(
     ...Object.values(partialRefreshDependencies),
   )();
   assert(
-    shortcutWrites === 0 &&
-      sharedWrites === 0 &&
-      displayedShortcuts === previousShortcuts.shortcuts &&
-      displayedTimestamp === 1 &&
-      displayedShared === previousShared.paths,
-    "short action-panel refresh preserves richer partial indexes in storage and display",
+    shortcutWrites === 1 &&
+      sharedWrites === 1 &&
+      savedShortcutPaths.join(",") === "/shortcut,/new" &&
+      savedSharedPaths.join(",") === "/previous,/other,/new" &&
+      JSON.stringify(displayedShortcuts) ===
+        JSON.stringify([
+          ...previousShortcuts.shortcuts,
+          { path: "/new", name: "new", target: "/new-target" },
+        ]) &&
+      displayedTimestamp === 2 &&
+      displayedShared.join(",") === "/previous,/other,/new",
+    "short action-panel refresh merges disjoint partial paths into storage and display",
   );
   assert(
-    /kept/i.test(refreshToast.message),
-    "short action-panel refresh reports retained partial indexes",
+    /2 shortcuts/.test(refreshToast.message) &&
+      /3 items/.test(refreshToast.title),
+    "short action-panel refresh reports counts from the merged indexes",
   );
+  const beforeFailedRefresh = displayedShortcuts;
+  const saveFailedDependencies = {
+    ...partialRefreshDependencies,
+    saveShortcutIndex: async () => false,
+  };
+  await new Function(...Object.keys(saveFailedDependencies), refreshCode)(
+    ...Object.values(saveFailedDependencies),
+  )();
+  assert(
+    refreshToast.style === "failure" &&
+      displayedShortcuts === beforeFailedRefresh &&
+      sharedWrites === 1,
+    "action-panel shortcut save failures preserve the displayed index and stop before updating shared paths",
+  );
+  for (const unavailable of [true, false]) {
+    let notice: string | undefined;
+    const failedSharedDependencies = {
+      ...partialRefreshDependencies,
+      driveIndexCaveat,
+      loadShortcutIndex: async () => ({ ...previousShortcuts, partial: false }),
+      scanShortcuts: async () => ({
+        ...previousShortcuts,
+        partialReason: "time-limit" as const,
+      }),
+      loadSharedIndex: () => ({ ...previousShared, partial: false }),
+      scanSharedFolders: async () => ({
+        ...previousShared,
+        available: !unavailable,
+      }),
+      saveSharedIndex: () => false,
+      setDriveIndexMessage: (message: string | undefined) => {
+        notice = message;
+      },
+    };
+    await new Function(...Object.keys(failedSharedDependencies), refreshCode)(
+      ...Object.values(failedSharedDependencies),
+    )();
+    assert(
+      refreshToast.style === "failure" &&
+        notice === "Google Drive shortcut indexing stopped at the time limit",
+      `${unavailable ? "unavailable" : "unsaved"} shared refresh still publishes the saved shortcut index's new completeness notice`,
+    );
+  }
   let target: { dir?: string; initialSelectionPath?: string } = {};
   const upStart = source.indexOf("      onUp:");
   const upEnd = source.indexOf("      onHistoryBack:", upStart);

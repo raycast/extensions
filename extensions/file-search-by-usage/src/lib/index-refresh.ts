@@ -1,3 +1,6 @@
+import type { ShortcutIndex } from "./drive-shortcuts";
+import type { SharedIndex } from "./shared-scan";
+
 export type IndexPartialReason = "time-limit" | "depth-limit" | "item-limit";
 
 type PartialIndex = {
@@ -40,22 +43,29 @@ export function driveIndexCaveat(
   return [shortcutMessage, sharedMessage].filter(Boolean).join(" · ");
 }
 
-/** Partial scans cannot replace complete indexes or shrink saved partial ones. */
-export function shouldReplaceIndex(
-  existingCount: number,
-  incomingCount: number,
-  sourceAvailable: boolean,
-  sourcePartial = false,
-  existingPartial = false,
-): boolean {
-  return (
-    existingCount === 0 ||
-    (sourceAvailable &&
-      (!sourcePartial || (existingPartial && incomingCount >= existingCount)))
+/** Partial scans prove presence, not absence. New observations win by path. */
+export function refreshShortcutIndex(
+  previous: ShortcutIndex,
+  incoming: ShortcutIndex,
+): ShortcutIndex {
+  if (!incoming.available || incoming.error) return previous;
+  if (!incoming.partial) return incoming;
+  const shortcuts = new Map(
+    previous.shortcuts.map((item) => [item.path, item]),
   );
+  for (const item of incoming.shortcuts) shortcuts.set(item.path, item);
+  return { ...incoming, shortcuts: [...shortcuts.values()] };
 }
 
-/** Saves partial progress only when there is no useful index to protect. */
-export function shouldSaveCheckpoint(existingCount: number): boolean {
-  return existingCount === 0;
+/** Only a complete, readable scan may remove saved paths. */
+export function refreshSharedIndex(
+  previous: SharedIndex,
+  incoming: SharedIndex,
+): SharedIndex {
+  if (!incoming.available || incoming.error) return previous;
+  if (!incoming.partial) return incoming;
+  return {
+    ...incoming,
+    paths: [...new Set([...previous.paths, ...incoming.paths])],
+  };
 }

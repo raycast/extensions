@@ -79,8 +79,8 @@ import { Entry, Visit, Visits } from "../src/lib/types";
 import { entryStoragePath, rowIdForEntry } from "../src/lib/entry-identity";
 import {
   driveIndexCaveat,
-  shouldReplaceIndex,
-  shouldSaveCheckpoint,
+  refreshShortcutIndex,
+  refreshSharedIndex,
 } from "../src/lib/index-refresh";
 
 let failures = 0;
@@ -518,46 +518,96 @@ async function main() {
     indexCommand !== undefined && indexCommand.interval === undefined,
     "Google Drive indexing runs only when the user starts it",
   );
-  assert(
-    !shouldReplaceIndex(12, 20, false),
-    "an unavailable refresh does not replace an existing index",
-  );
-  assert(
-    shouldReplaceIndex(12, 0, true),
-    "an available refresh can replace an existing index",
-  );
-  for (const [
-    existing,
-    incoming,
-    available,
-    partial,
-    savedPartial,
-    expected,
-  ] of [
-    [12, 0, true, true, true, false],
-    [12, 11, true, true, true, false],
-    [12, 12, true, true, true, true],
-    [12, 13, true, true, true, true],
-    [12, 13, true, true, false, false],
-    [12, 13, false, true, true, false],
-    [12, 0, true, false, true, true],
-    [0, 1, true, true, false, true],
-  ] as const) {
+  for (const savedPartial of [false, true]) {
+    const previous = {
+      paths: ["/old", "/overlap"],
+      scannedAt: 1,
+      available: true,
+      partial: savedPartial,
+    };
+    for (const paths of [
+      [],
+      ["/new"],
+      ["/new", "/overlap"],
+      ["/new", "/overlap", "/more"],
+    ]) {
+      const incoming = { paths, scannedAt: 2, available: true, partial: true };
+      const merged = refreshSharedIndex(previous, incoming);
+      assert(
+        merged.paths.includes("/old") &&
+          merged.paths.includes("/overlap") &&
+          paths.every((p) => merged.paths.includes(p)) &&
+          new Set(merged.paths).size === merged.paths.length &&
+          merged.partial &&
+          merged.scannedAt === 2,
+        `partial scans union paths regardless of count or previous completeness (${paths.length}, ${savedPartial})`,
+      );
+      assert(
+        previous.paths.join(",") === "/old,/overlap",
+        "merging does not mutate the previous index",
+      );
+    }
+    const complete = { ...previous, paths: [], scannedAt: 2, partial: false };
     assert(
-      shouldReplaceIndex(
-        existing,
-        incoming,
-        available,
-        partial,
-        savedPartial,
-      ) === expected,
-      `index replacement preserves partial coverage (${existing} → ${incoming}, available=${available}, partial=${partial}, savedPartial=${savedPartial})`,
+      refreshSharedIndex(previous, complete) === complete,
+      "complete empty scans remove stale paths",
+    );
+    for (const failed of [
+      { ...complete, available: false },
+      { ...complete, error: "read failed" },
+    ]) {
+      assert(
+        refreshSharedIndex(previous, failed) === previous,
+        "failed scans preserve the saved index and metadata",
+      );
+    }
+  }
+  const oldShortcuts = {
+    shortcuts: [
+      { path: "/old", name: "old", target: "/target" },
+      { path: "/changed", name: "changed", target: "/old-target" },
+    ],
+    scannedAt: 1,
+    available: true,
+    partial: false,
+  };
+  const newShortcuts = {
+    ...oldShortcuts,
+    scannedAt: 2,
+    partial: true,
+    shortcuts: [
+      { path: "/changed", name: "renamed", target: "/new-target" },
+      { path: "/alias", name: "alias", target: "/target" },
+    ],
+  };
+  const mergedShortcuts = refreshShortcutIndex(oldShortcuts, newShortcuts);
+  assert(
+    JSON.stringify(mergedShortcuts.shortcuts) ===
+      JSON.stringify([
+        { path: "/old", name: "old", target: "/target" },
+        { path: "/changed", name: "renamed", target: "/new-target" },
+        { path: "/alias", name: "alias", target: "/target" },
+      ]),
+    "shortcut unions deduplicate by visible path, update targets, and keep distinct aliases",
+  );
+  assert(
+    oldShortcuts.shortcuts[1].target === "/old-target",
+    "shortcut merging leaves saved objects untouched",
+  );
+  const emptyShortcuts = { ...newShortcuts, shortcuts: [], partial: false };
+  assert(
+    refreshShortcutIndex(oldShortcuts, emptyShortcuts) === emptyShortcuts,
+    "complete shortcut scans can remove stale paths",
+  );
+  for (const failed of [
+    { ...newShortcuts, available: false },
+    { ...newShortcuts, error: "read failed" },
+  ]) {
+    assert(
+      refreshShortcutIndex(oldShortcuts, failed) === oldShortcuts,
+      "failed shortcut scans preserve the saved index",
     );
   }
-  assert(
-    !shouldSaveCheckpoint(12) && shouldSaveCheckpoint(0),
-    "partial checkpoints cannot overwrite a useful existing index",
-  );
   const syntheticCloud = fs.mkdtempSync(path.join(os.tmpdir(), "cloud-index-"));
   const missingCloud = path.join(syntheticCloud, "missing");
   assert(

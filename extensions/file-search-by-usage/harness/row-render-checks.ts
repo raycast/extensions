@@ -9,6 +9,7 @@ export async function rowRenderChecks(
   assert: (ok: boolean, label: string) => void,
 ) {
   let selected = "row-0";
+  let isDirectory = true;
   let menuElements = 0;
   let detailElements = 0;
   const component = (name: string) =>
@@ -126,7 +127,7 @@ export async function rowRenderChecks(
           entry: {
             path: `/foo/bar${i}`,
             name: `bar${i}`,
-            isDirectory: true,
+            isDirectory,
             size: 0,
             mtimeMs: 0,
             birthtimeMs: 0,
@@ -173,6 +174,31 @@ export async function rowRenderChecks(
       "changing selection does not build 500 menus or detail panels",
     );
     const actions = renderer!.root.findAllByType("action");
+    const checkPrimaryActions = () => {
+      const ordered = renderer!.root.findAll(
+        (item) =>
+          typeof item.type === "string" &&
+          [
+            "action",
+            "action-finder",
+            "action-quicklook",
+            "action-openwith",
+            "action-copy",
+            "action-trash",
+          ].includes(item.type),
+      );
+      assert(
+        ordered[0]?.props.title === (isDirectory ? "Open in Finder" : "Open") &&
+          ordered
+            .slice(0, 4)
+            .map((item) => item.type)
+            .join(",") ===
+            "action,action-finder,action-quicklook,action-openwith" &&
+          ordered[1]?.props.path === "/foo/bar499",
+        `${isDirectory ? "folder" : "file"} menu reserves the secondary Command-Return action for Show in Finder and follows File Search order`,
+      );
+    };
+    checkPrimaryActions();
     const action = (title: string) =>
       actions.find((item) => item.props.title === title)!;
     const hiddenAction = action("Toggle Hidden Files");
@@ -263,6 +289,9 @@ export async function rowRenderChecks(
         ),
       "deferred details show the selected file",
     );
+    isDirectory = false;
+    await act(() => renderer!.update(rows()));
+    checkPrimaryActions();
     handlers.onReturnToStart = undefined;
     await act(() => renderer!.update(rows()));
     assert(

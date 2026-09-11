@@ -172,7 +172,9 @@ Browsing one of those folders reads its direct children, so changes can appear b
 
 If Google Drive is offline, unmounted, or becomes unreadable during an indexing run, the extension keeps the previous index and reports that the refresh failed.
 
-If a refresh reaches its time, depth, or item limit, a previous complete, non-empty index is kept. An existing partial index is also kept if the new partial scan found fewer entries. The notice explains which index was kept and why the refresh stopped. Partial scans can populate an empty index or replace a partial index with at least as many entries. A complete scan can remove stale paths, even if it finds fewer entries.
+If a refresh reaches its time, depth, or item limit, newly found paths are merged into the saved index without removing earlier paths. The notice reports the merged counts and why the scan stopped. A complete, readable scan replaces the index and removes stale paths, even if it finds nothing. An unavailable or failed scan leaves saved results intact, including any successful checkpoints already saved during that run. Deleted paths may remain indexed until a complete scan: a partial scan cannot tell whether an unseen path is gone.
+
+Each Google Drive index has an 8 MB storage limit. If a merge or replacement cannot be saved, the extension keeps the last saved index and reports a save failure instead of silently dropping paths.
 
 Only one indexing run can be active at a time, including runs started from the action panel. A second request leaves the current run alone. After a crash, a retry can recover a lock older than ten minutes only if its owner process is confirmed to have stopped. If it remains busy after restarting Raycast, see lock recovery in [DEVELOPMENT.md](DEVELOPMENT.md).
 
@@ -185,14 +187,14 @@ Dropbox, OneDrive, and iCloud Drive normally expose shared folders as regular di
 | Shortcut    | Action                                     |
 | ----------- | ------------------------------------------ |
 | `⏎`         | Open the selected item                     |
+| `⌘↩`        | Show in Finder                             |
+| `⌘Y`        | Quick Look                                 |
+| `⌘O`        | Open With…                                 |
 | `⌥⌘↓`       | Navigate into the selected folder          |
 | `⌥⌘↑`       | Go to the parent folder                    |
 | `⌘⇧H`       | Return to Everywhere with an empty query   |
 | `esc`       | Raycast's usual clear-text / back behavior |
 | `⌘[` / `⌘]` | Previous / next search                     |
-| `⌘Y`        | Quick Look                                 |
-| `⌘O`        | Open With…                                 |
-| `⌘↩`        | Show in Finder                             |
 | `⇧⌘.`       | Toggle hidden files for this command run   |
 | `⌘.`        | Pin or unpin                               |
 | `⌘I`        | Show or hide details                       |

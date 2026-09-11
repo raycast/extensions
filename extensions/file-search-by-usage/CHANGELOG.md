@@ -4,6 +4,7 @@
 
 - Search local and cloud files and folders in one usage-ranked list.
 - Match Raycast File Search shortcuts for Show in Finder, Open With, and Move to Trash; add a hidden-file toggle on `⇧⌘.` for the current command run.
+- Order the first four actions as Open, Show in Finder, Quick Look, and Open With, keeping Show in Finder in Raycast's secondary `⌘↩` position.
 - Add All Types, Directory, and File filters alongside independent, remembered sort choices in the top-right dropdown.
 - Show history, pins, cached results, and indexed Google Drive locations immediately, then merge delayed Spotlight results.
 - Keep live search collecting results until its sources finish, a memory safety limit is reached, or the query or folder changes, without interrupting previews or selection.
@@ -34,7 +35,8 @@
 - Report unreadable folders and Spotlight failures without discarding existing results.
 - Keep valid usage metadata when one item cannot be read, and report the result as partial.
 - Keep the previous Google Drive index when the drive is offline or unmounted.
-- Keep complete Google Drive indexes when a refresh reaches a scan limit.
+- Merge partial Google Drive scans and readable checkpoints with saved paths; only a complete, readable scan replaces the index and removes stale paths.
+- Reject oversized Google Drive index saves without truncating or discarding previously saved paths.
 - Prevent overlapping manual indexing runs from replacing each other's results.
 - Prevent indexing from restoring data after deletion completes.
 - Refresh open folders asynchronously and cancel obsolete Spotlight queries.

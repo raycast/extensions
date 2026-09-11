@@ -4,7 +4,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { buildSync, transformSync } from "esbuild";
-import type { ShortcutIndex } from "../src/lib/drive-shortcuts";
+import type { Shortcut, ShortcutIndex } from "../src/lib/drive-shortcuts";
 import type { SharedIndex } from "../src/lib/shared-scan";
 import type { RecentScan } from "../src/lib/recent-files";
 
@@ -29,6 +29,8 @@ function loadCommand(supportPath: string) {
   };
   const scans: ((index: ShortcutIndex) => void)[] = [];
   const failures: ((error: Error) => void)[] = [];
+  const shortcutProgress: ShortcutIndex[] = [];
+  const sharedProgress: SharedIndex[] = [];
   const recentScans: ((result: RecentScan) => void)[] = [];
   const scanOptions: {
     recent: Parameters<
@@ -121,12 +123,19 @@ function loadCommand(supportPath: string) {
         };
       if (id.endsWith("/drive-shortcuts"))
         return {
-          scanShortcuts: (options: (typeof scanOptions.shortcuts)[number]) => {
+          scanShortcuts: async (
+            options: (typeof scanOptions.shortcuts)[number],
+          ) => {
             scanOptions.shortcuts.push(options);
-            return new Promise<ShortcutIndex>((resolve, reject) => {
-              scans.push(resolve);
-              failures.push(reject);
-            });
+            const result = await new Promise<ShortcutIndex>(
+              (resolve, reject) => {
+                scans.push(resolve);
+                failures.push(reject);
+              },
+            );
+            for (const checkpoint of shortcutProgress)
+              await options?.onProgress?.(checkpoint);
+            return result;
           },
         };
       if (id.endsWith("/shared-scan"))
@@ -135,6 +144,8 @@ function loadCommand(supportPath: string) {
             options: (typeof scanOptions.shared)[number],
           ) => {
             scanOptions.shared.push(options);
+            for (const checkpoint of sharedProgress)
+              await options?.onProgress?.(checkpoint);
             return shared;
           },
         };
@@ -176,6 +187,12 @@ function loadCommand(supportPath: string) {
     }
   ).default;
   return {
+    driveSetup: load(
+      path.resolve("src/lib/drive-setup.ts"),
+    ) as typeof import("../src/lib/drive-setup"),
+    shortcutIndex: load(
+      path.resolve("src/lib/shortcut-index.ts"),
+    ) as typeof import("../src/lib/shortcut-index"),
     sharedIndex: load(
       path.resolve("src/lib/shared-index.ts"),
     ) as typeof import("../src/lib/shared-index"),
@@ -201,6 +218,8 @@ function loadCommand(supportPath: string) {
     clearing,
     scans,
     failures,
+    shortcutProgress,
+    sharedProgress,
     toasts,
     recents,
     recentScans,
@@ -980,8 +999,8 @@ export async function indexingChecks(
         `${reason} refresh preserves a complete shared-folder index`,
       );
       assert(
-        bounded.toasts.some((t) => /kept/i.test(t.message ?? "")),
-        `${reason} refresh explains that saved indexes were kept`,
+        bounded.toasts.some((t) => /merged/i.test(t.message ?? "")),
+        `${reason} refresh explains that partial discoveries were merged`,
       );
     }
 
@@ -1013,13 +1032,265 @@ export async function indexingChecks(
       });
       await refresh;
       assert(
-        shrinking.storage.get("shortcuts") === savedShortcuts &&
-          shrinking.caches.get("shared-folders")!.get("index") === savedShared,
-        `${reason} refresh keeps richer partial indexes and their saved metadata`,
+        JSON.parse(shrinking.storage.get("shortcuts")!).shortcuts.length ===
+          1 &&
+          JSON.parse(
+            shrinking.caches.get("shared-folders")!.get("index")!,
+          ).paths.join(",") === "/foo/bar,/foo/baz" &&
+          JSON.parse(shrinking.storage.get("shortcuts")!).scannedAt === 2,
+        `${reason} refresh preserves paths and updates the partial scan metadata`,
       );
       assert(
-        shrinking.toasts.some((t) => /kept/i.test(t.message ?? "")),
-        `${reason} refresh explains that richer partial indexes were kept`,
+        shrinking.toasts.some((t) => /merged/i.test(t.message ?? "")),
+        `${reason} refresh explains that partial discoveries were merged`,
+      );
+    }
+
+    const disjoint = loadCommand(path.join(root, "disjoint"));
+    disjoint.storage.set(
+      "shortcuts",
+      JSON.stringify({ ...good, partial: true }),
+    );
+    disjoint.caches.get("shared-folders")!.set(
+      "index",
+      JSON.stringify({
+        paths: ["/old"],
+        scannedAt: 1,
+        available: true,
+        partial: true,
+      }),
+    );
+    Object.assign(disjoint.shared, { paths: ["/new"], partial: true });
+    const disjointRefresh = disjoint.command();
+    await flush();
+    disjoint.scans[0]({
+      ...good,
+      partial: true,
+      shortcuts: [{ path: "/new", name: "new", target: "/target" }],
+    });
+    await disjointRefresh;
+    assert(
+      JSON.stringify(
+        JSON.parse(disjoint.storage.get("shortcuts")!).shortcuts.map(
+          (s: Shortcut) => s.path,
+        ),
+      ) === '["/foo","/new"]' &&
+        JSON.stringify(
+          JSON.parse(disjoint.caches.get("shared-folders")!.get("index")!)
+            .paths,
+        ) === '["/old","/new"]',
+      "equal-sized disjoint partial scans merge both indexes without losing saved paths",
+    );
+
+    for (const outcome of ["partial", "complete", "unavailable"] as const) {
+      const checkpointed = loadCommand(
+        path.join(root, `checkpoint-${outcome}`),
+      );
+      checkpointed.storage.set("shortcuts", JSON.stringify(good));
+      checkpointed.caches
+        .get("shared-folders")!
+        .set(
+          "index",
+          JSON.stringify({ ...checkpointed.shared, paths: ["/old"] }),
+        );
+      checkpointed.shortcutProgress.push(
+        {
+          ...good,
+          partial: true,
+          shortcuts: [
+            { path: "/checkpoint", name: "checkpoint", target: "/target" },
+          ],
+        },
+        {
+          ...good,
+          partial: true,
+          available: false,
+          shortcuts: [{ path: "/failed", name: "failed", target: "/target" }],
+        },
+      );
+      checkpointed.sharedProgress.push(
+        { ...checkpointed.shared, partial: true, paths: ["/checkpoint"] },
+        {
+          ...checkpointed.shared,
+          partial: true,
+          error: "read failed",
+          paths: ["/failed"],
+        },
+      );
+      Object.assign(checkpointed.shared, {
+        paths: ["/final"],
+        partial: outcome !== "complete",
+        available: outcome !== "unavailable",
+      });
+      const running = checkpointed.command();
+      await flush();
+      checkpointed.scans[0]({
+        ...good,
+        partial: outcome !== "complete",
+        shortcuts: [{ path: "/final", name: "final", target: "/target" }],
+      });
+      await running;
+      const shortcuts = JSON.parse(checkpointed.storage.get("shortcuts")!)
+        .shortcuts.map((s: Shortcut) => s.path)
+        .join(",");
+      const paths = checkpointed.sharedIndex.loadSharedIndex().paths.join(",");
+      assert(
+        shortcuts ===
+          (outcome === "complete" ? "/final" : "/foo,/checkpoint,/final"),
+        `${outcome} shortcut scan merges successful checkpoints, ignores failed ones, and only complete scans remove paths`,
+      );
+      assert(
+        paths ===
+          (outcome === "complete"
+            ? "/final"
+            : outcome === "partial"
+              ? "/old,/checkpoint,/final"
+              : "/old,/checkpoint"),
+        `${outcome} shared scan respects the last successfully saved checkpoint`,
+      );
+    }
+
+    for (const seeded of [false, true]) {
+      for (const failure of ["unavailable", "error", "throw"] as const) {
+        const failed = loadCommand(
+          path.join(root, `failed-${seeded}-${failure}`),
+        );
+        if (seeded) failed.storage.set("shortcuts", JSON.stringify(good));
+        const before = failed.storage.get("shortcuts");
+        const running = failed.command();
+        await flush();
+        if (failure === "throw")
+          failed.failures[0](new Error("provider failed"));
+        else
+          failed.scans[0]({
+            ...good,
+            available: failure !== "unavailable",
+            error: failure === "error" ? "read failed" : undefined,
+          });
+        await running;
+        assert(
+          failed.storage.get("shortcuts") === before &&
+            !failed.storage.has("google-drive-setup") &&
+            failed.scanOptions.shared.length === 0,
+          `${failure} shortcut scan leaves ${seeded ? "saved" : "empty"} storage unchanged and cannot complete setup`,
+        );
+      }
+    }
+
+    const cancelled = loadCommand(path.join(root, "checkpoint-cancelled"));
+    cancelled.storage.set("shortcuts", JSON.stringify(good));
+    const controller = new AbortController();
+    const cancelRun = cancelled.driveSetup.indexGoogleDrive({
+      signal: controller.signal,
+    });
+    await flush();
+    await cancelled.scanOptions.shortcuts[0]?.onProgress?.({
+      ...good,
+      partial: true,
+      shortcuts: [
+        { path: "/checkpoint", name: "checkpoint", target: "/target" },
+      ],
+    });
+    controller.abort();
+    await cancelled.scanOptions.shortcuts[0]?.onProgress?.({
+      ...good,
+      partial: true,
+      shortcuts: [{ path: "/late", name: "late", target: "/target" }],
+    });
+    cancelled.scans[0]({ ...good, shortcuts: [] });
+    assert(
+      (await cancelRun) === "cancelled" &&
+        JSON.parse(cancelled.storage.get("shortcuts")!)
+          .shortcuts.map((s: Shortcut) => s.path)
+          .join(",") === "/foo,/checkpoint",
+      "cancellation retains merged checkpoints and blocks late checkpoint and final writes",
+    );
+
+    for (const checkpoint of [false, true]) {
+      const oversized = loadCommand(
+        path.join(root, `union-capacity-${checkpoint}`),
+      );
+      const saved = {
+        ...good,
+        partial: true,
+        shortcuts: [
+          { path: "/" + "a".repeat(4_000_000), name: "old", target: "/target" },
+        ],
+      };
+      assert(
+        await oversized.shortcutIndex.saveShortcutIndex(saved),
+        "a bounded shortcut index fits before merging",
+      );
+      const incoming = {
+        ...good,
+        partial: true,
+        shortcuts: [
+          { path: "/" + "b".repeat(4_000_000), name: "new", target: "/target" },
+        ],
+      };
+      if (checkpoint) oversized.shortcutProgress.push(incoming);
+      const running = oversized.command();
+      await flush();
+      oversized.scans[0](checkpoint ? good : incoming);
+      await running;
+      assert(
+        oversized.storage.get("shortcuts") === JSON.stringify(saved) &&
+          oversized.toasts.at(-1)?.style === "failure" &&
+          !oversized.storage.has("google-drive-setup"),
+        `${checkpoint ? "checkpoint" : "final"} shortcut union exceeding its byte limit preserves the saved index and reports failure`,
+      );
+    }
+    const shortcutCapacity = loadCommand(path.join(root, "shortcut-capacity"));
+    await shortcutCapacity.shortcutIndex.saveShortcutIndex(good);
+    assert(
+      !(await shortcutCapacity.shortcutIndex.saveShortcutIndex({
+        ...good,
+        shortcuts: [
+          { path: "é".repeat(4_000_000), name: "large", target: "/target" },
+        ],
+      })) && shortcutCapacity.storage.get("shortcuts") === JSON.stringify(good),
+      "shortcut capacity counts UTF-8 bytes and rejects oversized writes without changing storage",
+    );
+    shortcutCapacity.writing.before = async (key) => {
+      if (key === "shortcuts") throw new Error("storage failed");
+    };
+    assert(
+      !(await shortcutCapacity.shortcutIndex.saveShortcutIndex({
+        ...good,
+        shortcuts: [],
+      })) && shortcutCapacity.storage.get("shortcuts") === JSON.stringify(good),
+      "shortcut storage failures return failure and leave the prior index intact",
+    );
+
+    for (const checkpoint of [false, true]) {
+      const sharedUnion = loadCommand(
+        path.join(root, `shared-union-capacity-${checkpoint}`),
+      );
+      const savedUnion = {
+        ...sharedUnion.shared,
+        partial: true,
+        paths: ["a".repeat(4_000_000)],
+      };
+      assert(
+        sharedUnion.sharedIndex.saveSharedIndex(savedUnion),
+        "shared paths fit before merging",
+      );
+      Object.assign(sharedUnion.shared, {
+        partial: true,
+        paths: ["b".repeat(4_000_000)],
+      });
+      if (checkpoint)
+        sharedUnion.sharedProgress.push({ ...sharedUnion.shared });
+      const sharedUnionRun = sharedUnion.command();
+      await flush();
+      sharedUnion.scans[0](good);
+      await sharedUnionRun;
+      assert(
+        sharedUnion.sharedIndex.loadSharedIndex().paths[0] ===
+          savedUnion.paths[0] &&
+          sharedUnion.toasts.at(-1)?.style === "failure" &&
+          !sharedUnion.storage.has("google-drive-setup"),
+        `oversized shared ${checkpoint ? "checkpoint" : "final"} union preserves saved paths instead of evicting or truncating them`,
       );
     }
 
