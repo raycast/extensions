@@ -3,25 +3,39 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-const DEFAULTS_BIN = "/usr/bin/defaults";
 const OSASCRIPT_BIN = "/usr/bin/osascript";
 
-const SCROLL_DIRECTION_KEY = "com.apple.swipescrolldirection";
 const PREFERENCE_PANES_SUPPORT = "/System/Library/PrivateFrameworks/PreferencePanesSupport.framework";
 
+function preferencePanesScript(...lines: string[]): string {
+  return [`ObjC.import("Foundation")`, `$.NSBundle.bundleWithPath("${PREFERENCE_PANES_SUPPORT}").load`, ...lines].join(
+    ";\n",
+  );
+}
+
+async function runPreferencePanesScript(body: string): Promise<string> {
+  const { stdout } = await execFileAsync(OSASCRIPT_BIN, ["-l", "JavaScript", "-e", body]);
+  return stdout;
+}
+
 /**
- * Reads the global scroll direction preference.
+ * Reads the live scroll direction from the same framework the Trackpad pane uses.
  *
  * @returns Whether natural scrolling is currently on
+ * @throws An error when the script fails to run or returns an unexpected value
  */
 export async function isNaturalScrollingOn(): Promise<boolean> {
-  try {
-    const { stdout } = await execFileAsync(DEFAULTS_BIN, ["read", "-g", SCROLL_DIRECTION_KEY]);
-    return stdout.trim() === "1";
-  } catch {
-    // The key is absent on a fresh account, where macOS behaves as if it were on.
+  const stdout = await runPreferencePanesScript(
+    preferencePanesScript(`ObjC.bindFunction("swipeScrollDirection", ["bool", []])`, `$.swipeScrollDirection()`),
+  );
+  const value = stdout.trim();
+  if (value === "true") {
     return true;
   }
+  if (value === "false") {
+    return false;
+  }
+  throw new Error(`Unexpected scroll direction value: ${value}`);
 }
 
 /**
@@ -37,12 +51,10 @@ export async function isNaturalScrollingOn(): Promise<boolean> {
  * @throws An error when the script fails to run
  */
 export async function setNaturalScrolling(enabled: boolean): Promise<void> {
-  const script = [
-    `ObjC.import("Foundation")`,
-    `$.NSBundle.bundleWithPath("${PREFERENCE_PANES_SUPPORT}").load`,
-    `ObjC.bindFunction("setSwipeScrollDirection", ["void", ["bool"]])`,
-    `$.setSwipeScrollDirection(${enabled})`,
-  ].join(";\n");
-
-  await execFileAsync(OSASCRIPT_BIN, ["-l", "JavaScript", "-e", script]);
+  await runPreferencePanesScript(
+    preferencePanesScript(
+      `ObjC.bindFunction("setSwipeScrollDirection", ["void", ["bool"]])`,
+      `$.setSwipeScrollDirection(${enabled})`,
+    ),
+  );
 }

@@ -19,24 +19,41 @@ beforeEach(() => {
   execFileMock.mockReset();
 });
 
+function osascriptSource(): string {
+  const [, args] = execFileMock.mock.calls[0];
+  return args[3];
+}
+
 describe("isNaturalScrollingOn", () => {
-  it("reports natural scrolling as on when the preference reads 1", async () => {
-    execFileMock.mockResolvedValue({ stdout: "1\n", stderr: "" });
+  it("reports natural scrolling as on when swipeScrollDirection is true", async () => {
+    execFileMock.mockResolvedValue({ stdout: "true\n", stderr: "" });
 
     await expect(isNaturalScrollingOn()).resolves.toBe(true);
-    expect(execFileMock).toHaveBeenCalledWith("/usr/bin/defaults", ["read", "-g", "com.apple.swipescrolldirection"]);
+
+    const [bin, args] = execFileMock.mock.calls[0];
+    expect(bin).toBe("/usr/bin/osascript");
+    expect(args.slice(0, 3)).toEqual(["-l", "JavaScript", "-e"]);
+    expect(osascriptSource()).toContain("PreferencePanesSupport.framework");
+    expect(osascriptSource()).toContain('ObjC.bindFunction("swipeScrollDirection", ["bool", []])');
+    expect(osascriptSource()).toContain("$.swipeScrollDirection()");
   });
 
-  it("reports natural scrolling as off when the preference reads 0", async () => {
-    execFileMock.mockResolvedValue({ stdout: "0\n", stderr: "" });
+  it("reports natural scrolling as off when swipeScrollDirection is false", async () => {
+    execFileMock.mockResolvedValue({ stdout: "false\n", stderr: "" });
 
     await expect(isNaturalScrollingOn()).resolves.toBe(false);
   });
 
-  it("falls back to on when the preference is missing, matching a fresh macOS account", async () => {
-    execFileMock.mockRejectedValue(new Error("The domain/default pair does not exist"));
+  it("propagates a failing script so the command can report it", async () => {
+    execFileMock.mockRejectedValue(new Error("osascript failed"));
 
-    await expect(isNaturalScrollingOn()).resolves.toBe(true);
+    await expect(isNaturalScrollingOn()).rejects.toThrow("osascript failed");
+  });
+
+  it("rejects an unexpected value instead of guessing the current state", async () => {
+    execFileMock.mockResolvedValue({ stdout: "\n", stderr: "" });
+
+    await expect(isNaturalScrollingOn()).rejects.toThrow("Unexpected scroll direction value:");
   });
 });
 
