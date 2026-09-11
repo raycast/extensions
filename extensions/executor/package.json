@@ -1,0 +1,360 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "executor",
+  "title": "Executor",
+  "description": "Run connected tools, automate with Raycast AI, and manage your Executor workspaces",
+  "version": "0.2.0",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "author": "jerichosequitin",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "icon": "extension_icon.png",
+  "commands": [
+    {
+      "name": "search-tools",
+      "title": "Search Tools",
+      "subtitle": "Executor",
+      "description": "Find connected tools, fill in native input forms, review calls, and inspect results",
+      "mode": "view"
+    },
+    {
+      "name": "integrations",
+      "title": "Browse Integrations",
+      "subtitle": "Executor",
+      "description": "Browse your integrations and jump into their tools or open their settings in Executor",
+      "mode": "view"
+    },
+    {
+      "name": "connections",
+      "title": "Manage Connections",
+      "subtitle": "Executor",
+      "description": "Inspect recorded health, reconnect accounts, edit labels, and resync connection tools",
+      "mode": "view"
+    },
+    {
+      "name": "artifacts",
+      "title": "Browse Artifacts",
+      "subtitle": "Executor",
+      "description": "Browse, edit, and delete saved Executor artifacts",
+      "mode": "view"
+    },
+    {
+      "name": "saved-tools",
+      "title": "Saved Tools",
+      "subtitle": "Executor",
+      "description": "Run favorite tools and reuse saved input presets",
+      "mode": "view"
+    },
+    {
+      "name": "add-connection",
+      "title": "Add Connection",
+      "subtitle": "Executor",
+      "description": "Add an Executor connection with native credential entry or provider authorization.",
+      "mode": "view"
+    },
+    {
+      "name": "add-integration",
+      "title": "Add Integration",
+      "subtitle": "Executor",
+      "description": "Search the integration catalog or add a custom MCP, OpenAPI, or GraphQL endpoint",
+      "mode": "view"
+    },
+    {
+      "name": "policies",
+      "title": "Manage Policies",
+      "subtitle": "Executor",
+      "description": "Search, create, edit, and remove tool policies with explicit scope and action review",
+      "mode": "view"
+    },
+    {
+      "name": "approvals",
+      "title": "Review Approvals",
+      "subtitle": "Executor",
+      "description": "Review current server terms for pauses started through this extension",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Executor Status",
+      "subtitle": "Executor",
+      "description": "View recorded connection health and extension approvals from the menu bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "disabledByDefault": true
+    },
+    {
+      "name": "workspaces",
+      "title": "Manage Workspaces",
+      "subtitle": "Executor",
+      "description": "Add, edit, verify, or switch Executor workspaces",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "Default Workspace API Key",
+      "description": "Optional existing workspace key. Use Manage Workspaces to add more organizations with separate keys."
+    },
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Server URL",
+      "description": "Origin of the Executor server. Use http://127.0.0.1:4788 for the local daemon or your own host when self-hosting. Defaults to https://executor.sh.",
+      "default": "https://executor.sh",
+      "placeholder": "https://executor.sh"
+    },
+    {
+      "name": "defaultOwner",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Connection Visibility",
+      "description": "Show personal connections, workspace connections, or both within the default workspace.",
+      "default": "all",
+      "data": [
+        {
+          "title": "Both",
+          "value": "all"
+        },
+        {
+          "title": "Personal",
+          "value": "user"
+        },
+        {
+          "title": "Workspace",
+          "value": "org"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.0",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "bun test"
+  },
+  "tools": [
+    {
+      "name": "update-integration",
+      "title": "Update Integration Details",
+      "description": "Update an integration's display name or description with explicit workspace and change confirmation; use this management tool instead of execute-code"
+    },
+    {
+      "name": "discover-tools",
+      "title": "Discover Tools",
+      "description": "Find tools for a standalone catalog lookup; for multi-step tasks prefer discovery inside execute-code"
+    },
+    {
+      "name": "describe-tool",
+      "title": "Describe Tool",
+      "description": "Inspect one tool schema; for multiple schemas prefer batching tools.describe.tool inside execute-code"
+    },
+    {
+      "name": "call-tool",
+      "title": "Call Tool",
+      "description": "Run one already-described tool with reviewed JSON arguments; prefer execute-code for multi-call workflows"
+    },
+    {
+      "name": "execute-code",
+      "title": "Execute Code",
+      "description": "Preferred for multi-step connected-service work: batch discovery, inspect schemas, compose calls, paginate, and summarize results in Executor's TypeScript code mode"
+    },
+    {
+      "name": "resume-execution",
+      "title": "Resume Execution",
+      "description": "Continue, decline, or cancel an exact paused execution after reviewing fresh server terms"
+    },
+    {
+      "name": "list-integrations",
+      "title": "List Integrations",
+      "description": "List configured Executor integrations"
+    },
+    {
+      "name": "list-connections",
+      "title": "List Connections",
+      "description": "Inspect connected accounts and reported health for an integration"
+    },
+    {
+      "name": "list-artifacts",
+      "title": "List Artifacts",
+      "description": "Find reusable saved Executor artifacts"
+    },
+    {
+      "name": "get-artifact",
+      "title": "Get Artifact",
+      "description": "Retrieve a saved artifact, its source, and connection bindings"
+    },
+    {
+      "name": "list-workspaces",
+      "title": "List Workspaces",
+      "description": "List configured Executor workspace identities before selecting a target for AI tools"
+    },
+    {
+      "name": "list-policies",
+      "title": "List Policies",
+      "description": "Read current tool policies with exact IDs, scopes, and review fingerprints"
+    },
+    {
+      "name": "manage-policy",
+      "title": "Manage Policy",
+      "description": "Create, update, or delete an explicitly requested tool policy with current rule review"
+    },
+    {
+      "name": "manage-workspace",
+      "title": "Manage Workspace",
+      "description": "Rename or update a local workspace name and connection filter, switch, verify, or remove a profile."
+    },
+    {
+      "name": "open-executor-view",
+      "title": "Open Executor View",
+      "description": "Open native commands, preferences, or private workspace credential setup"
+    },
+    {
+      "name": "open-executor-page",
+      "title": "Open Executor Page",
+      "description": "Open an exact workspace console page or artifact in the browser"
+    },
+    {
+      "name": "list-approvals",
+      "title": "List Approvals",
+      "description": "List local references to paused executions started through this extension"
+    },
+    {
+      "name": "get-approval",
+      "title": "Get Approval",
+      "description": "Read fresh server terms and the fingerprint for one exact paused execution"
+    },
+    {
+      "name": "get-status",
+      "title": "Get Status",
+      "description": "Read recorded connection health and local approval counts without probing providers"
+    },
+    {
+      "name": "rename-artifact",
+      "title": "Update Artifact Details",
+      "description": "Update an artifact title or description. Omitted fields stay unchanged; an empty description clears it."
+    },
+    {
+      "name": "delete-artifact",
+      "title": "Delete Artifact",
+      "description": "Permanently delete one exact saved Executor artifact with explicit workspace and target confirmation"
+    },
+    {
+      "name": "list-saved-tools",
+      "title": "List Saved Tools",
+      "description": "List workspace-scoped local Executor favorites and saved input presets"
+    },
+    {
+      "name": "get-saved-tool",
+      "title": "Get Saved Tool",
+      "description": "Read one exact local Executor favorite or saved input preset"
+    },
+    {
+      "name": "save-favorite",
+      "title": "Save Favorite",
+      "description": "Save one exact Executor tool as a workspace-scoped local favorite"
+    },
+    {
+      "name": "save-tool-preset",
+      "title": "Save Tool Preset",
+      "description": "Save reviewed inputs for one exact Executor tool as a workspace-scoped local preset"
+    },
+    {
+      "name": "update-saved-tool",
+      "title": "Update Saved Tool",
+      "description": "Update the title or inputs of one exact local favorite or preset"
+    },
+    {
+      "name": "remove-saved-tool",
+      "title": "Remove Saved Tool",
+      "description": "Remove one exact local Executor favorite or preset"
+    },
+    {
+      "name": "execute-saved-preset",
+      "title": "Execute Saved Preset",
+      "description": "Run an unchanged reviewed preset with Executor policy and pause handling"
+    },
+    {
+      "name": "update-connection",
+      "title": "Update Connection Details",
+      "description": "Update one exact connection label or description with change confirmation"
+    },
+    {
+      "name": "check-connection-health",
+      "title": "Check Connection Health",
+      "description": "Run and persist a fresh health check for one exact connection"
+    },
+    {
+      "name": "resync-connection",
+      "title": "Resync Connection Tools",
+      "description": "Resync tools for one exact connection with explicit confirmation"
+    },
+    {
+      "name": "reconnect-connection",
+      "title": "Reconnect Connection",
+      "description": "Reconnect one exact connection through guarded OAuth or secure browser handoff"
+    },
+    {
+      "name": "add-connection",
+      "title": "Add Connection",
+      "description": "Open native connection setup for an exact workspace and integration. Credentials are entered privately in Raycast; provider authorization may open in a browser."
+    },
+    {
+      "name": "search-integration-catalog",
+      "title": "Search Integration Catalog",
+      "description": "Search the public integration catalog with bounded pagination and type filters"
+    },
+    {
+      "name": "prepare-integration-setup",
+      "title": "Prepare Integration Setup",
+      "description": "Open native Raycast integration setup for a catalog item or custom endpoint in the exact workspace"
+    },
+    {
+      "name": "create-integration",
+      "title": "Add Integration",
+      "description": "Create and verify a remote MCP, OpenAPI, or GraphQL integration directly. Declare authentication without credentials; connect an account separately."
+    },
+    {
+      "name": "output-action",
+      "title": "Copy or Export Output",
+      "description": "Copy requested text or formatted JSON, or export JSON to the private exports directory"
+    },
+    {
+      "name": "delete-integration",
+      "title": "Delete Integration",
+      "description": "Permanently delete a removable integration and its connections/tools with explicit workspace confirmation"
+    },
+    {
+      "name": "delete-connection",
+      "title": "Delete Connection",
+      "description": "Permanently delete one exact connection with confirmation; keep its integration and other connections"
+    }
+  ],
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "9.0.9"
+    }
+  }
+}

@@ -1,0 +1,158 @@
+instructions: |
+  Use delete-connection or delete-integration only when the user explicitly requests that deletion. Read list-connections or list-integrations first and use the exact returned target and canonical workspace ID. Removing one connection must never be escalated to deleting its integration. Integration deletion also removes its connections and tools; respect canRemove and server permissions. Neither operation is undoable or automatically retried. For an uncertain result, read current state before deciding the next step. These are management APIs, not execute-code tools.
+  To edit an Executor integration's display name or description, use update-integration with the exact slug from list-integrations and a canonical workspaceId. This management operation uses the same API as the native Edit Integration Details form and is not a sandbox tool. Do not attempt it through execute-code or use fetch. Only include fields the user asked to change; omit unchanged fields, and pass an empty description only to explicitly clear it. Raycast confirmation shows the target and proposed changes. Executor API permissions apply; this operation does not run through sandbox execution policies. Never use it as a fallback for a policy denial, and never retry an uncertain update automatically. Use list-integrations to reconcile an uncertain result.
+  Executor is a code-first API orchestration extension. Prefer execute-code for connected-service tasks involving multiple calls, searches, records, pagination, filtering, aggregation, or more than one service in the same workspace. Do not turn these workflows into a long sequence of discover-tools, describe-tool, and call-tool invocations.
+  Use the smallest number of bounded code-mode runs needed: batch discovery and schema inspection, then execute the schema-informed workflow and return only the useful results. Standalone catalog tools remain appropriate for simple requests to list integrations, inspect connections, or browse artifacts. call-tool is appropriate for one already-described operation.
+  Call list-workspaces when the conversation does not already contain current workspace IDs, or when the configured profiles change. Resolve the requested workspace; if ambiguous, ask instead of assuming the active profile. Keep the returned workspace ID with every result and use that exact ID for later reads, calls, confirmations, and paused-execution continuations. Workspace IDs bind a server and credential profile; never substitute another profile.
+  Read-only tools accept a unique profile alias such as personal or work in workspaceId; list-workspaces returns available aliases. Use only aliases actually configured, never infer an organization from a nickname. Aliases are case-insensitive normalized profile names and may change after renaming. Use the canonical workspace.id returned by the read for subsequent operations. Read-only tools accept workspaceId optionally when only one profile exists. If multiple profiles exist, omitting it fails with instructions to call list-workspaces. All write, execution, clipboard/export, and workspace-specific view tools require an exact canonical workspaceId. Read-only aliases never authorize a write. Ordinary AI tools do not change the active workspace preference. Only an explicitly requested manage-workspace switch changes that preference.
+  Discover exact addresses and inspect unfamiliar schemas before calling providers. In code mode, use tools.search and tools.describe.tool inside execute-code; separate discover-tools and describe-tool calls are not prerequisites. Never guess an address, arguments, account, or response fields. Return schemas to the model when their shapes are needed to write the next run; do not select and call the first search result blindly.
+  Batch independent searches, descriptions, and authorized read calls with Promise.all or Promise.allSettled, using small bounded batches. Keep dependent operations and writes sequential. Use provider-side filters and bounded pagination; report partial coverage instead of implying an exhaustive answer. Reuse known schemas and verified target identities within the same workflow, rechecking when workspace, connection, credentials, or evidence changes.
+  Code mode reduces model round trips; it does not grant permission for additional operations. Keep code within the user's request, preserve Raycast confirmation and Executor policy gates, and never automatically retry a write after an uncertain result.
+  Pass call-tool arguments as a JSON object string and preserve the exact keys from the described input schema.
+  Read-only catalog, connection, and artifact tools do not change Executor or connected services.
+  Extension management tools are separate from the sandbox catalog. Do not try to call these Raycast tool names through tools.* in execute-code. Use Execute Code for composed provider work, and the named management tools for native-command equivalents.
+  For policy requests expressed by tool or integration name, resolve the target with discover-tools or list-integrations first. Use an exact discovered tool address without its optional tools. prefix for one tool, the exact integration slug plus .* only when the user wants every tool in that integration, and * only when every tool is explicitly requested. Do not ask the user to compose an address that discovery can resolve.
+  Use list-policies before manage-policy. For update/delete, pass the policy ID, owner, and policyFingerprint from the same current result. A stale fingerprint requires a fresh read and review. Create/update/delete policies only when the user explicitly requests that policy change; never loosen, remove, or replace a policy to complete another operation that was blocked or paused. Show scope, pattern, action, wildcard impact, and deletion effects. Executor API permissions and rule precedence remain authoritative.
+  Connection tools use the exact owner, integration slug, and connection name from list-connections. Use update-connection for label/description changes, check-connection-health for an explicitly requested fresh probe, resync-connection for tool refresh, and reconnect-connection for reconnection. Omitted metadata remains unchanged. For add-connection, use a listed integration's authentication template. add-connection opens native Raycast setup with the exact workspace, integration, scope, and authentication selected. Credentials are entered privately in Raycast; OAuth consent or unsupported setup may open in a browser. Never put credentials in tool arguments or chat. A user_action_required result is pending until the user completes the form. A browser_action_required result is pending; give the user the URL, wait for completion, then verify through list-connections or list-integrations. Preserve returned execution pauses and use resume-execution only after an explicit decision. Do not automatically start health probes or resyncs during ordinary status reads.
+  Search available integrations with search-integration-catalog using service names, kind, and bounded pages. Pasted endpoints belong in prepare-integration-setup, not public catalog search. Use an exact returned domain, kind, and optional slug for catalog setup, or a credential-free custom endpoint. prepare-integration-setup opens the native Raycast form and remains pending until submitted. For a requested creation with enough configuration, use create-integration directly: it validates, adds once, and verifies the integration. It accepts declarative authentication metadata, never credential values. Connect an account separately with add-connection. After an uncertain creation response, check list-integrations before retrying. Never put keys, passwords, tokens, or signed URLs in endpoints or labels.
+  Use list-artifacts/get-artifact to resolve exact artifacts; rename-artifact edits title and/or description; omitted fields stay unchanged and an empty description clears it. Supply expectedUpdatedAt from a fresh artifact read when available. rename-artifact and delete-artifact require explicit user intent and confirmation. Sources, bindings, and links are available through get-artifact; interactive artifacts open in Executor. Do not create or delete an artifact merely to retrieve or open it.
+  Use list-saved-tools/get-saved-tool for local favorites and presets. Save a tool with save-favorite; save explicit reusable input JSON with save-tool-preset. Avoid storing passwords, tokens, or unrelated private data. Use the same current savedToolId and savedToolFingerprint for update-saved-tool, remove-saved-tool, or execute-saved-preset; changed presets must be read and reviewed again before execution. Favorites have no arguments; use call-tool with reviewed arguments. Keep local saved-tool and workspace mutations sequential to avoid conflicting read/modify/write operations.
+  Use manage-workspace only for explicit rename, update, switch, verify, or remove requests. Use update to edit the local display name or defaultOwner connection filter. Removing a local profile does not revoke the server key or delete its organization. Add profiles through open-executor-view with view add-workspace; the user enters credentials privately in Raycast. Open preferences there for preference-backed credentials. Never ask the user to paste an API key into chat. Native command views can be opened with open-executor-view, while open-executor-page opens exact console pages in the selected workspace.
+  Use get-status for recorded health and local approval counts, list-approvals for references started through this extension, and get-approval for one execution's fresh server terms and pauseFingerprint. This is not a global approval inbox across all clients. Only resume-execution can accept, decline, or cancel a reviewed pause, after the user's explicit decision.
+  Use output-action only when the user asks to copy or export selected content. Copy JSON and export JSON pretty-print it; never include unrelated records. File exports go to the extension's private exports directory, with no arbitrary destination input. To inspect or export the full execution envelope, request includeFullResponse on call-tool, execute-code, execute-saved-preset, or resume-execution; keep the default compact for ordinary tasks. Never rerun a write just to obtain a different output format.
+  call-tool and execute-code require Raycast confirmation and keep Executor server policies active. A completed sandbox request may still report an upstream tool error, so inspect isError and result.
+  In execute-code, discover tools with `await tools.search({ query, limit })`, which returns `{ items }`. Get an exact schema with `await tools.describe.tool({ path })`. Call a discovered path with `await tools[path](args)`, where path is the returned address without a leading `tools.`. Executor tool calls return `{ ok, data }` or `{ ok, error }`; inspect `ok` before using the result.
+  These instructions provide the extension's code-mode guide; there is no separate Executor skills tool to call here. Provider tools such as Linear's agent skills are unrelated. Read live tool schemas, rather than searching provider catalogs for Executor documentation.
+  The tools object is a lazy proxy: never enumerate it with Object.keys, spread, or for-in. Use tools.search instead, narrowing by namespace when known. Search returns total, hasMore, and nextOffset alongside items; follow only the bounded pages needed. Descriptions provide inputTypeScript, outputTypeScript, and typeScriptDefinitions. If a description returns tool_not_found, inspect its suggestions rather than retrying the same path. Observed output shapes may be incomplete; use optional access for undeclared fields.
+  The sandbox has no fetch, Buffer, atob, btoa, TextDecoder, or TextEncoder. Use tools for API access; do not attempt network or byte-conversion fallbacks. Ordinary TypeScript annotations are supported, but enum and decorators are not. HTTP-backed tools expose status and headers beside data in result.http; inspect those headers when the provider uses Link pagination. Return compact ordinary structured data through this extension, and do not assume MCP image or resource rendering is available in Raycast.
+  For example, after choosing a workspace, discover two capabilities in one execute-code run: `const queries = ["calendar events", "unread email"]; return await Promise.all(queries.map(async (query) => ({ query, ...await tools.search({ query, limit: 5 }) })));`. Next, batch descriptions of only the relevant returned paths with `return await Promise.all(paths.map((path) => tools.describe.tool({ path })));`, defining paths from the actual search results. Once schemas and target accounts are known, combine the requested independent reads, inspect each result's ok flag, and return compact data with source IDs or links. Do not return entire catalogs or unrelated records.
+  Every workspace-scoped result includes sanitized workspace metadata. A paused result also has server-provided interaction terms, an executionId, and a pauseFingerprint. Show those terms to the user. Never invent, infer, or automatically accept a decision. Call resume-execution only with the same workspaceId, executionId, and pauseFingerprint after the user chooses accept, decline, or cancel. Include contentJson only when the server requests fields. If the workspace, pause, or terms are unavailable or changed, stop instead of rerunning the original call.
+  For a browser interaction, wait until the user explicitly says the browser step is complete before calling resume-execution with accept.
+
+evals:
+  - input: "@executor Find the available GitHub issue tools"
+    mocks:
+      list-workspaces:
+        activeWorkspaceId: ws_personal
+        workspaces:
+          - id: ws_personal
+            name: Personal
+            server: https://executor.test
+      discover-tools:
+        workspace:
+          id: ws_personal
+          name: Personal
+          server: https://executor.test
+        returned: 1
+        totalMatched: 1
+        truncated: false
+        tools:
+          - address: github.user.default.issues_list
+            owner: user
+            integration: github
+            connection: default
+            name: issues_list
+            pluginId: openapi
+            description: List issues from GitHub
+    expected:
+      - callsTool: list-workspaces
+      - callsTool: discover-tools
+    usedAsExample: true
+  - input: "@executor Which integrations are configured?"
+    mocks:
+      list-workspaces:
+        activeWorkspaceId: ws_personal
+        workspaces:
+          - id: ws_personal
+            name: Personal
+            server: https://executor.test
+      list-integrations:
+        workspace:
+          id: ws_personal
+          name: Personal
+          server: https://executor.test
+        integrations:
+          - slug: github
+            name: GitHub
+            description: GitHub API
+            kind: openapi
+            canRemove: true
+            canRefresh: true
+            authMethods: []
+    expected:
+      - callsTool: list-workspaces
+      - callsTool: list-integrations
+    usedAsExample: true
+  - input: "@executor Find GitHub issue tools for the right account"
+    mocks:
+      list-workspaces:
+        activeWorkspaceId: ws_personal
+        workspaces:
+          - id: ws_personal
+            name: Personal
+            server: https://executor.example
+          - id: ws_company
+            name: Company
+            server: https://company.executor.example
+            organization: example-company
+    expected:
+      - callsTool: list-workspaces
+    usedAsExample: true
+
+  - input: "@executor In my Personal workspace, summarize tomorrow's calendar and my unread Gmail messages. Use bounded reads and do not change anything."
+    mocks:
+      list-workspaces:
+        activeWorkspaceId: ws_personal
+        workspaces:
+          - id: ws_personal
+            name: Personal
+            server: https://executor.test
+      execute-code:
+        workspace:
+          id: ws_personal
+          name: Personal
+          server: https://executor.test
+        status: completed
+        isError: false
+        result:
+          calendar: []
+          unreadMessages: []
+    expected:
+      - callsTool: list-workspaces
+      - callsTool: execute-code
+    usedAsExample: true
+
+  - input: '@executor In Personal, change the GitHub integration description to "Personal GitHub repositories". Keep its name unchanged.'
+    mocks:
+      list-workspaces:
+        workspaces:
+          - id: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            name: Personal
+            server: https://executor.test
+      list-integrations:
+        workspace:
+          id: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          name: Personal
+        integrations:
+          - slug: github
+            name: GitHub
+            description: GitHub API
+            kind: openapi
+      update-integration:
+        workspace:
+          id: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          name: Personal
+        integration:
+          slug: github
+          name: GitHub
+          description: Personal GitHub repositories
+    expected:
+      - callsTool: list-integrations
+      - callsTool:
+          name: update-integration
+          arguments:
+            integration: github
+            description: Personal GitHub repositories
+      - not:
+          callsTool: execute-code
+    usedAsExample: true
