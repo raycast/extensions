@@ -9,7 +9,7 @@ export default function SleepMenuBar() {
   const [busy, setBusy] = useState(false);
   const look = presentation(data, Boolean(error));
   const known = data !== undefined && !error;
-  const { showLabel } = getPreferenceValues<{ showLabel: boolean }>();
+  const { showLabel } = getPreferenceValues<Preferences.MenuBar>();
 
   async function toggle() {
     if (!known || busy) return;
