@@ -26,7 +26,6 @@ import {
   dayLabel,
   favoriteLeagueEntry,
   hasFavoriteTeam,
-  leagueTitle,
   shiftDay,
   sortLeagues,
   statusOf,
@@ -334,7 +333,9 @@ export default function Command() {
             {dropdownLeagues.map((l) => (
               <List.Dropdown.Item
                 key={l.primaryId}
-                title={leagueTitle(l)}
+                // One option per competition (primaryId), so it's named for
+                // the competition, not whichever of its groups was kept.
+                title={l.parentLeagueName || l.name}
                 value={`league:${l.primaryId}`}
                 icon={leagueLogo(l.primaryId)}
               />
