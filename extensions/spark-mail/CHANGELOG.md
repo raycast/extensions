@@ -1,6 +1,6 @@
 # Spark Mail Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-11
 
 Based on the extension by Vir Khanna ([@v-khanna](https://github.com/v-khanna)) from [raycast/extensions#28483](https://github.com/raycast/extensions/pull/28483), reused under the MIT license.
 
