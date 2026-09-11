@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Fix Duplicate Billable Checkbox] - {PR_MERGE_DATE}
+## [Fix Duplicate Billable Checkbox] - 2026-09-11
 
 - Fixed two `Billable` checkboxes rendering with the same `billable` form ID when a billable project is selected in a premium workspace — they are now a single checkbox, shown whenever either condition applies
 
