@@ -1,7 +1,6 @@
 import {
   Color,
   Icon,
-  Image,
   LaunchType,
   MenuBarExtra,
   Toast,
@@ -58,11 +57,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       isLoading={isLoading}
-      icon={{
-        source: "menu-icon.png",
-        tintColor: running ? Color.Green : Color.SecondaryText,
-        mask: Image.Mask.Circle,
-      }}
+      icon={{ source: "menu-icon.png" }}
       title={title}
       tooltip={
         running ? `frpc running, ${online} proxies online` : "frpc stopped"
@@ -87,7 +82,7 @@ export default function Command() {
         <MenuBarExtra.Item title={`Version: ${data?.version ?? "unknown"}`} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Proxies">
-        {(data?.proxies.slice(0, 10) ?? []).map((proxy) => (
+        {(data?.proxies ?? []).map((proxy) => (
           <MenuBarExtra.Item
             key={proxy.name}
             title={`${proxy.name}: ${proxy.status}${proxy.err ? ` (${proxy.err})` : ""}`}

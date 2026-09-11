@@ -994,11 +994,13 @@ function parseNumberList(spec: string): number[] | undefined {
   const numbers: number[] = [];
   for (const segment of spec.split(",")) {
     const trimmed = segment.trim();
-    const range = trimmed.match(/^(\d+)-(\d+)$/);
+    // frpc tolerates whitespace around the hyphen.
+    const range = trimmed.match(/^(\d+)\s*-\s*(\d+)$/);
     if (range) {
       const start = Number(range[1]);
       const end = Number(range[2]);
-      if (end < start || end - start > 1000) {
+      // Ports cap at 65535, so a valid range never exceeds that span.
+      if (end < start || end > 65535) {
         return undefined;
       }
       for (let i = start; i <= end; i++) {
@@ -1031,8 +1033,7 @@ function renderFrpcTemplate(
         !listA ||
         !listB ||
         listA.length !== listB.length ||
-        listA.length === 0 ||
-        listA.length > 1000
+        listA.length === 0
       ) {
         return match;
       }
