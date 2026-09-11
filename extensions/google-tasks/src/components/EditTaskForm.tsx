@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
 import { useCallback } from "react";
 import { EditableTask, Task } from "../types";
+import { dueDay } from "../utils";
 
 export default function EditTaskForm(props: {
   listId: string;
@@ -8,6 +9,8 @@ export default function EditTaskForm(props: {
   onEdit: (listId: string, task: EditableTask) => void;
 }) {
   const { pop } = useNavigation();
+
+  const due = dueDay(props.task.due);
 
   const handleSubmit = useCallback(
     (values: { title: string; notes: string; due: Date | null }) => {
@@ -35,7 +38,8 @@ export default function EditTaskForm(props: {
       <Form.DatePicker
         id="due"
         title="Due Date"
-        defaultValue={props.task.due === undefined ? undefined : new Date(props.task.due)}
+        type={Form.DatePicker.Type.Date}
+        defaultValue={due ? new Date(`${due}T00:00:00`) : undefined}
       />
     </Form>
   );

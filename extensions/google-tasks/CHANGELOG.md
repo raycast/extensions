@@ -7,6 +7,7 @@
 - Create several tasks in a row, remember the last task list, and undo recent completions.
 - Recover from cancelled or expired Google sign-in without leaving the command.
 - Search, create, update, complete, reopen, and delete tasks from Raycast AI Chat.
+- Keep due dates on the selected calendar day in timezones behind UTC.
 
 ## [Fix] - 2026-06-26
 

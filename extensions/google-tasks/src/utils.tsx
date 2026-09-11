@@ -20,10 +20,8 @@ export function todayValue(): string {
 
 export function getIcon(task: Task): { source: Icon; tintColor?: Color } {
   const completed = isCompleted(task);
-  const dueDate = task.due ? new Date(task.due) : undefined;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  if (!completed && dueDate && dueDate < today) {
+  const due = dueDay(task.due);
+  if (!completed && due && due < todayValue()) {
     return { source: Icon.Circle, tintColor: Color.Red };
   }
   if (completed) {
