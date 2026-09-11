@@ -80,6 +80,10 @@ export async function clearState(): Promise<void> {
 }
 
 export async function startTimer(totalMinutes: number, breakMinutes: number): Promise<TimerState> {
+  if (!Number.isFinite(totalMinutes) || totalMinutes <= 0 || !Number.isFinite(breakMinutes) || breakMinutes < 0) {
+    throw new Error("Invalid timer duration");
+  }
+
   const startTime = Date.now();
   const endTime = startTime + (totalMinutes + breakMinutes) * 60_000;
   const state: TimerState = {
@@ -134,14 +138,4 @@ export function formatDuration(ms: number): string {
   const seconds = abs % 60;
   const text = `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   return negative ? `-${text}` : text;
-}
-
-/** Formats a duration (ms) as e.g. "1h 30m", used for input summaries. */
-export function formatDurationShort(ms: number): string {
-  const totalMinutes = Math.round(ms / 60_000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  if (hours === 0) return `${minutes}m`;
-  if (minutes === 0) return `${hours}h`;
-  return `${hours}h ${minutes}m`;
 }

@@ -1,13 +1,23 @@
 import { useEffect, useState } from "react";
-import { Icon, MenuBarExtra, launchCommand, LaunchType, Color } from "@raycast/api";
 import {
-  getState,
-  stopTimer,
-  resumeTimer,
+  Alert,
+  Color,
+  confirmAlert,
+  Icon,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import {
   clearState,
-  getRemainingMs,
   formatClock,
   formatDuration,
+  getRemainingMs,
+  getState,
+  resumeTimer,
+  stopTimer,
   TimerState,
 } from "./timer";
 
@@ -21,6 +31,12 @@ export default function Command() {
   useEffect(() => {
     getState()
       .then(setState)
+      .catch(() => {
+        void showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load timer state",
+        });
+      })
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -32,23 +48,58 @@ export default function Command() {
 
   async function handleStop() {
     if (!state) return;
-    const updated = await stopTimer(state);
-    setState(updated);
+    try {
+      const updated = await stopTimer(state);
+      setState(updated);
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to stop timer",
+      });
+    }
   }
 
   async function handleResume() {
     if (!state) return;
-    const updated = await resumeTimer(state);
-    setState(updated);
+    try {
+      const updated = await resumeTimer(state);
+      setState(updated);
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to resume timer",
+      });
+    }
   }
 
   async function handleReset() {
-    await clearState();
-    setState(undefined);
+    const confirmed = await confirmAlert({
+      title: "Reset Timer?",
+      message: "This clears the current timer.",
+      primaryAction: { title: "Reset", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
+    try {
+      await clearState();
+      setState(undefined);
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to reset timer",
+      });
+    }
   }
 
   async function handleStartNew() {
-    await launchCommand({ name: "start-timer", type: LaunchType.UserInitiated });
+    try {
+      await launchCommand({ name: "start-timer", type: LaunchType.UserInitiated });
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to open Start Work Timer",
+      });
+    }
   }
 
   if (!state) {
@@ -97,7 +148,7 @@ export default function Command() {
           <MenuBarExtra.Item title="Resume Timer" icon={Icon.Play} onAction={handleResume} />
         )}
         <MenuBarExtra.Item title="Start New Timer…" icon={Icon.Repeat} onAction={handleStartNew} />
-        <MenuBarExtra.Item title="Reset" icon={Icon.Trash} onAction={handleReset} />
+        <MenuBarExtra.Item title="Reset Timer" icon={Icon.Trash} onAction={handleReset} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

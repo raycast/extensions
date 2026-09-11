@@ -5,8 +5,18 @@
   "description": "Track your working hours: set a total work time and break length, then watch a live countdown in the macOS menu bar.",
   "icon": "icon.png",
   "author": "FL0R1AN",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity"
+  ],
+  "keywords": [
+    "timer",
+    "countdown",
+    "work hours",
+    "timesheet",
+    "break"
   ],
   "license": "MIT",
   "commands": [
@@ -31,10 +41,10 @@
     "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.19.17",
     "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
+    "eslint": "^10.10.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
