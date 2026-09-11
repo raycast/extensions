@@ -80,14 +80,14 @@
     },
     {
       "name": "enable",
-      "title": "Turn on Focus Follows Mouse",
+      "title": "Enable Focus Follows Mouse",
       "subtitle": "Heed",
       "description": "Turn Heed's pointer focus on.",
       "mode": "no-view"
     },
     {
       "name": "disable",
-      "title": "Turn off Focus Follows Mouse",
+      "title": "Disable Focus Follows Mouse",
       "subtitle": "Heed",
       "description": "Turn Heed's pointer focus off.",
       "mode": "no-view"

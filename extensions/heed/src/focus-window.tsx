@@ -49,9 +49,7 @@ export default function FocusWindow() {
         }
         setBinary(`${heed.path}/Contents/MacOS/Heed`);
         setIcons(
-          Object.fromEntries(
-            apps.filter((app) => app.bundleId).map((app) => [app.bundleId as string, app.path]),
-          ),
+          Object.fromEntries(apps.filter((app) => app.bundleId).map((app) => [app.bundleId as string, app.path])),
         );
       })
       .catch((error: Error) => setMissing(error.message));
@@ -88,15 +86,9 @@ export default function FocusWindow() {
         windows.map((window) => (
           <List.Item
             key={window.id}
-            icon={
-              window.bundleID && icons[window.bundleID]
-                ? { fileIcon: icons[window.bundleID] }
-                : Icon.AppWindow
-            }
+            icon={window.bundleID && icons[window.bundleID] ? { fileIcon: icons[window.bundleID] } : Icon.AppWindow}
             title={window.title?.trim() || window.app}
-            subtitle={
-              window.title?.trim() && window.title.trim() !== window.app ? window.app : undefined
-            }
+            subtitle={window.title?.trim() && window.title.trim() !== window.app ? window.app : undefined}
             accessories={[
               ...(window.frontmost ? [{ tag: "front", tooltip: "Was in front" }] : []),
               {
@@ -107,11 +99,7 @@ export default function FocusWindow() {
             ]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Focus Window"
-                  icon={Icon.Center}
-                  onAction={() => tell(`focus/id/${window.id}`)}
-                />
+                <Action title="Focus Window" icon={Icon.Center} onAction={() => tell(`focus/id/${window.id}`)} />
                 <Action.CopyToClipboard title="Copy Title" content={window.title ?? window.app} />
                 <Action
                   title="Refresh"

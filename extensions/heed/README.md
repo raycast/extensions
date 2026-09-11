@@ -14,7 +14,7 @@ way to get those combinations back: Raycast owns the hotkey, Heed claims nothing
 | Focus Next / Previous Window | Step through the visible windows, screen by screen from left to right, then left to right within each screen. |
 | Focus Window Left / Right / Above / Below | Move to the nearest window in that direction. Sharing a row or column beats being closer, and the edge is a dead end rather than a wrap. |
 | Focus Window | Every visible window by name, in that same order, with the app it belongs to and its size. Pick one to focus it. |
-| Toggle / Turn on / Turn off Focus Follows Mouse | Heed's pointer focus, without reaching for the menu bar. |
+| Toggle / Enable / Disable Focus Follows Mouse | Heed's pointer focus, without reaching for the menu bar. |
 
 Assign a Raycast hotkey to any of them, then free the combination Heed holds, for example:
 
