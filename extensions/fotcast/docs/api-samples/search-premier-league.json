@@ -1,0 +1,40 @@
+{
+  "took": 2,
+  "total": 3,
+  "leagueSuggest": [
+    {
+      "text": "premier league",
+      "offset": 0,
+      "length": 14,
+      "options": [
+        {
+          "text": "Premier League|47",
+          "score": 301131.0,
+          "payload": {
+            "matchDate": "0001-01-01T00:00:00",
+            "id": "47",
+            "countryCode": "ENG"
+          }
+        },
+        {
+          "text": "Premier League|519",
+          "score": 300132.0,
+          "payload": {
+            "matchDate": "0001-01-01T00:00:00",
+            "id": "519",
+            "countryCode": "EGY"
+          }
+        },
+        {
+          "text": "Premier League|9066",
+          "score": 300114.0,
+          "payload": {
+            "matchDate": "0001-01-01T00:00:00",
+            "id": "9066",
+            "countryCode": "TAN"
+          }
+        }
+      ]
+    }
+  ]
+}
