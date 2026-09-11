@@ -52,6 +52,16 @@ export interface WMMove {
 
 export class AccessibilityError extends Error {}
 
+// 权限类错误码。文案会跟随系统语言本地化（中文系统报的是「不允许辅助访问」），
+// 正则匹配英文原文并不可靠，一律以错误码为准：
+//   -25211 errAXAPIDisabled  未授「辅助功能」
+//   -1743  errAEEventNotPermitted  未授「自动化」
+const PERMISSION_ERRNOS = [-25211, -1743];
+
+function isPermissionErrno(errno: unknown): boolean {
+  return typeof errno === "number" && PERMISSION_ERRNOS.includes(errno);
+}
+
 async function runJXA(script: string, arg?: string): Promise<string> {
   const args = ["-l", "JavaScript", "-e", script];
   if (arg !== undefined) args.push(arg);
@@ -60,7 +70,8 @@ async function runJXA(script: string, arg?: string): Promise<string> {
     return stdout.trim();
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    if (/assistive access|not authorized|1002|-25211/i.test(msg)) {
+    // osascript 整体失败时错误码会出现在 stderr 尾部，形如 "… (-25211)"
+    if (PERMISSION_ERRNOS.some((n) => msg.includes(`(${n})`)) || /assistive access|not authorized/i.test(msg)) {
       throw new AccessibilityError(msg);
     }
     throw error;
@@ -127,68 +138,143 @@ export async function getState(): Promise<WMState> {
   return JSON.parse(await runJXA(LIST_SCRIPT)) as WMState;
 }
 
+// CG 窗口与 AX 窗口是两套互不相通的列表，只能靠 pid + 四维坐标对上。
+// 探测和移动两个脚本用同一套匹配规则，避免「探测认可的窗口移动时却对不上」。
+// 匹配用「最近优先」而不是「第一个落在容差内」：macOS 新窗口 cascade 偏移约
+// 20px，小于容差 40，逐个取首个命中会让层叠的同 app 窗口互相错配、交换槽位。
+// 先枚举全部候选对，按四维距离全局升序锁定，层叠时也能对上。
+const MATCH_HELPER = `
+const TOL = 40;
+function matchGroup(group, positions, sizes) {
+  const pairs = [];
+  for (let g = 0; g < group.length; g++) {
+    const m = group[g];
+    for (let i = 0; i < positions.length; i++) {
+      const p = positions[i], s = sizes[i];
+      const dx = p[0]-m.cx, dy = p[1]-m.cy, dw = s[0]-m.cw, dh = s[1]-m.ch;
+      if (Math.abs(dx)<=TOL && Math.abs(dy)<=TOL && Math.abs(dw)<=TOL && Math.abs(dh)<=TOL) {
+        pairs.push({ g: g, i: i, dist: dx*dx + dy*dy + dw*dw + dh*dh });
+      }
+    }
+  }
+  pairs.sort((a, b) => a.dist - b.dist);
+  const usedWindow = {}, usedMove = {};
+  const matched = [];
+  for (const pr of pairs) {
+    if (usedWindow[pr.i] || usedMove[pr.g]) continue;
+    usedWindow[pr.i] = true;
+    usedMove[pr.g] = true;
+    matched.push(pr);
+  }
+  const unmatched = [];
+  for (let g = 0; g < group.length; g++) if (!usedMove[g]) unmatched.push(g);
+  return { matched: matched, unmatched: unmatched };
+}
+// 按 pid 取 System Events 进程。进程列表在读 unixId 之后可能变动，索引会指向
+// 另一个 app，所以寻址后必须再核对一次 pid——四维坐标匹配挡不住这种串台：
+// 同屏窗口本就常常层叠在一起，别家窗口落进 40pt 容差内完全可能。
+function procForPid(se, pidIndex, pid) {
+  const idx = pidIndex[pid];
+  if (idx === undefined) throw new Error('pid gone');
+  const proc = se.processes[idx];
+  if (proc.unixId() !== Number(pid)) throw new Error('pid moved');
+  return proc;
+}
+function groupByPid(items) {
+  const byPid = {};
+  for (const m of items) (byPid[m.pid] = byPid[m.pid] || []).push(m);
+  return byPid;
+}
+// 一次拿全部进程的 pid 建索引，之后按索引寻址。不要用 whose({unixId})：
+// 那是过滤查询，System Events 在 specifier 每次求值时都会重跑一遍全进程
+// 匹配（实测每 app 约 58ms，之后每次 .windows 访问还要再付一次），而
+// unixId() 一次往返就拿到全部 128 个进程、只要 34ms。实测读开销 910→426ms。
+// 索引寻址同时规避了物化引用按进程名寻址、同名多进程指错窗口的老坑。
+function pidIndexOf(se) {
+  const allPids = se.processes.unixId();
+  const pidIndex = {};
+  for (let i = 0; i < allPids.length; i++) pidIndex[allPids[i]] = i;
+  return pidIndex;
+}
+`;
+
+// 可平铺性探测。CG 列表里混着改不了大小的窗口——固定尺寸的工具窗、对话框、
+// 面板——它们一旦进网格就会占掉一个槽位、随后设置失败，网格缺一块。
+// AX 的 AXSize settable 就是官方 WindowManagement API 里 resizable 的来源，
+// 用它把这些窗口在布局计算之前挑出去。AXPosition 不查：实测连不可 resize 的
+// 窗口也几乎总是可移动的，多查一轮只是白付一次往返。
+const PROBE_SCRIPT = `
+${MATCH_HELPER}
+function run(argv) {
+  const items = JSON.parse(argv[0]);
+  const se = Application('System Events');
+  const pidIndex = pidIndexOf(se);
+  const byPid = groupByPid(items);
+  const tileable = [];
+  let permissionErrno = 0;
+  for (const pid of Object.keys(byPid)) {
+    const group = byPid[pid];
+    let positions, sizes, settable;
+    try {
+      const proc = procForPid(se, pidIndex, pid);
+      positions = proc.windows.position();
+      sizes = proc.windows.size();
+      settable = proc.windows.attributes.byName('AXSize').settable();
+    } catch (e) {
+      if (!permissionErrno && e.errorNumber) permissionErrno = e.errorNumber;
+      continue; // 探测不到就当作不可平铺，移动阶段本来也会失败
+    }
+    const res = matchGroup(group, positions, sizes);
+    for (const pr of res.matched) if (settable[pr.i] === true) tileable.push(group[pr.g].id);
+  }
+  return JSON.stringify({ tileable: tileable, permissionErrno: permissionErrno });
+}
+`;
+
+// 返回候选里真正能被平铺的窗口 id。AX 里对不上号或不可 resize 的一律剔除，
+// 它们进网格只会占一个空槽。
+export async function getTileable(windows: WMWindow[]): Promise<Set<string>> {
+  if (windows.length === 0) return new Set();
+  const items = windows.map((w) => ({ id: w.id, pid: w.pid, cx: w.x, cy: w.y, cw: w.width, ch: w.height }));
+  const raw = await runJXA(PROBE_SCRIPT, JSON.stringify(items));
+  const { tileable, permissionErrno } = JSON.parse(raw) as { tileable: string[]; permissionErrno: number };
+  // 一个窗口都探测不到、且原因是权限，就别再往下走到布局阶段，直接把授权引导抛出去
+  if (tileable.length === 0 && isPermissionErrno(permissionErrno)) {
+    throw new AccessibilityError(`Accessibility probe denied (${permissionErrno})`);
+  }
+  return new Set(tileable);
+}
+
 // 全部窗口在一个 osascript 进程里处理。不要改成「每 app 一个进程并行」：
 // System Events 是单进程，所有 Apple Event 都在它那里排队串行执行，多开
 // osascript 只多付冷启动和 CPU 竞争——实测 6 个 app 从 1271ms 退化到 1797ms。
 const APPLY_SCRIPT = `
+${MATCH_HELPER}
 function run(argv) {
   const moves = JSON.parse(argv[0]);
   const se = Application('System Events');
-  const TOL = 40;
   const failed = [];
-  // 一次拿全部进程的 pid 建索引，之后按索引寻址。不要用 whose({unixId})：
-  // 那是过滤查询，System Events 在 specifier 每次求值时都会重跑一遍全进程
-  // 匹配（实测每 app 约 58ms，之后每次 .windows 访问还要再付一次），而
-  // unixId() 一次往返就拿到全部 128 个进程、只要 34ms。实测读开销 910→426ms。
-  // 索引寻址同时规避了物化引用按进程名寻址、同名多进程指错窗口的老坑。
-  const allPids = se.processes.unixId();
-  const pidIndex = {};
-  for (let i = 0; i < allPids.length; i++) pidIndex[allPids[i]] = i;
-  const byPid = {};
-  for (const m of moves) (byPid[m.pid] = byPid[m.pid] || []).push(m);
+  let permissionErrno = 0;
+  const pidIndex = pidIndexOf(se);
+  const byPid = groupByPid(moves);
   for (const pid of Object.keys(byPid)) {
     const group = byPid[pid];
     let proc, positions, sizes;
     try {
-      const idx = pidIndex[pid];
-      if (idx === undefined) throw new Error('pid gone');
-      proc = se.processes[idx];
-      // 批量取坐标：一次 Apple Event，比逐窗口快得多。进程列表若在这几百
-      // 毫秒里变动会让索引错位，但随后的四维坐标匹配自然对不上、记为
-      // failed，不会误移动别人的窗口——匹配本身就是安全网
+      proc = procForPid(se, pidIndex, pid);
+      // 批量取坐标：一次 Apple Event，比逐窗口快得多
       positions = proc.windows.position();
       sizes = proc.windows.size();
     } catch (e) {
+      if (!permissionErrno && e.errorNumber) permissionErrno = e.errorNumber;
       for (const m of group) failed.push(m.id);
       continue;
     }
-    // 先全部完成匹配再移动，避免移动后的坐标干扰后续匹配。
-    // 匹配用「最近优先」而不是「第一个落在容差内」：macOS 新窗口 cascade
-    // 偏移约 20px，小于容差 40，逐个取首个命中会让层叠的同 app 窗口互相错配、
-    // 交换槽位。先枚举全部候选对，按四维距离全局升序锁定，层叠时也能对上。
-    const pairs = [];
-    for (let g = 0; g < group.length; g++) {
-      const m = group[g];
-      for (let i = 0; i < positions.length; i++) {
-        const p = positions[i], s = sizes[i];
-        const dx = p[0]-m.cx, dy = p[1]-m.cy, dw = s[0]-m.cw, dh = s[1]-m.ch;
-        if (Math.abs(dx)<=TOL && Math.abs(dy)<=TOL && Math.abs(dw)<=TOL && Math.abs(dh)<=TOL) {
-          pairs.push({ g: g, i: i, dist: dx*dx + dy*dy + dw*dw + dh*dh });
-        }
-      }
-    }
-    pairs.sort((a, b) => a.dist - b.dist);
-    const usedWindow = {}, usedMove = {};
-    const matched = [];
-    for (const pr of pairs) {
-      if (usedWindow[pr.i] || usedMove[pr.g]) continue;
-      usedWindow[pr.i] = true;
-      usedMove[pr.g] = true;
-      matched.push(pr);
-    }
-    for (let g = 0; g < group.length; g++) if (!usedMove[g]) failed.push(group[g].id);
+    // 先全部完成匹配再移动，避免移动后的坐标干扰后续匹配
+    const res = matchGroup(group, positions, sizes);
+    for (const g of res.unmatched) failed.push(group[g].id);
     // 按原顺序移动，保持与调用方给出的槽位顺序一致
-    matched.sort((a, b) => a.g - b.g);
+    const matched = res.matched.slice().sort((a, b) => a.g - b.g);
     for (const pr of matched) {
       const i = pr.i, m = group[pr.g];
       // 已经在目标位置的窗口不必再写：省一次往返，也省一次多余的重绘
@@ -205,14 +291,24 @@ function run(argv) {
         w.size = [m.width, m.height];
         w.position = [m.x, m.y];
         if (m.width > m.cw || m.height > m.ch) w.size = [m.width, m.height];
-      } catch (e) { failed.push(m.id); }
+      } catch (e) {
+        if (!permissionErrno && e.errorNumber) permissionErrno = e.errorNumber;
+        failed.push(m.id);
+      }
     }
   }
-  return JSON.stringify({ failed });
+  return JSON.stringify({ failed: failed, permissionErrno: permissionErrno });
 }
 `;
 
 export async function applyMoves(moves: WMMove[]): Promise<{ failed: string[] }> {
   if (moves.length === 0) return { failed: [] };
-  return JSON.parse(await runJXA(APPLY_SCRIPT, JSON.stringify(moves))) as { failed: string[] };
+  const raw = await runJXA(APPLY_SCRIPT, JSON.stringify(moves));
+  const { failed, permissionErrno } = JSON.parse(raw) as { failed: string[]; permissionErrno: number };
+  // 脚本内部的 try/catch 会把权限错误吞成普通失败，osascript 本身照样退出 0。
+  // 全军覆没且原因是权限时，把它还原成 AccessibilityError，授权引导才弹得出来。
+  if (failed.length === moves.length && isPermissionErrno(permissionErrno)) {
+    throw new AccessibilityError(`Accessibility denied (${permissionErrno})`);
+  }
+  return { failed };
 }

@@ -1,5 +1,5 @@
 import { Cache, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
-import { AccessibilityError, applyMoves, getState, WMMove, WMScreen, WMWindow } from "./wm";
+import { AccessibilityError, applyMoves, getState, getTileable, WMMove, WMScreen, WMWindow } from "./wm";
 
 type LayoutGrid = number[][];
 
@@ -306,10 +306,12 @@ export async function runTile(scope: "app" | "all") {
     let targetWindows: WMWindow[];
 
     if (scope === "all") {
-      targetWindows = onActiveScreen
-        .filter((w) => !isRaycastWindow(w) && !isExcluded(w))
-        .sort(byWindowId)
-        .slice(0, MAX_WINDOWS);
+      const candidates = onActiveScreen.filter((w) => !isRaycastWindow(w) && !isExcluded(w)).sort(byWindowId);
+      // Drop what Accessibility won't resize (fixed-size utility windows, dialogs)
+      // before the layout is computed, or they take a grid slot and leave a hole
+      // in it when the resize is refused.
+      const tileable = await getTileable(candidates);
+      targetWindows = candidates.filter((w) => tileable.has(w.id)).slice(0, MAX_WINDOWS);
 
       if (targetWindows.length === 0) {
         toast.style = Toast.Style.Failure;
@@ -340,10 +342,11 @@ export async function runTile(scope: "app" | "all") {
       }
 
       const targetLower = targetAppName.toLowerCase();
-      targetWindows = onActiveScreen
+      const candidates = onActiveScreen
         .filter((w) => w.appName.toLowerCase() === targetLower && !isExcluded(w))
-        .sort(byWindowId)
-        .slice(0, MAX_WINDOWS);
+        .sort(byWindowId);
+      const tileable = await getTileable(candidates);
+      targetWindows = candidates.filter((w) => tileable.has(w.id)).slice(0, MAX_WINDOWS);
 
       if (targetWindows.length === 0) {
         toast.style = Toast.Style.Failure;
