@@ -65,6 +65,20 @@ export async function fetchListPage(
   return { tasks: json.items ?? [], nextPageToken: json.nextPageToken };
 }
 
+export async function fetchCompletedPage(
+  tasklist: string,
+  pageToken?: string,
+): Promise<{ tasks: Task[]; nextPageToken?: string }> {
+  const tasks: Task[] = [];
+  let token = pageToken;
+  do {
+    const page = await fetchListPage(tasklist, true, token, 100);
+    tasks.push(...page.tasks.filter(isCompleted));
+    token = page.nextPageToken;
+  } while (token && tasks.length < 25);
+  return { tasks, nextPageToken: token };
+}
+
 export async function deleteTask(tasklist: string, id: string): Promise<void> {
   await request<void>(`/lists/${tasklist}/tasks/${id}`, { method: "DELETE" });
 }

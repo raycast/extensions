@@ -11,16 +11,13 @@ type Input = {
    * The list id from search-tasks. Never invent a list id.
    */
   listId: string;
-  /**
-   * Optional title shown in the confirmation dialog.
-   */
-  taskTitle?: string;
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const task = await requireTask(input.listId, input.taskId);
   return {
     style: Action.Style.Destructive,
-    message: 'Delete "' + (input.taskTitle || input.taskId) + '"? This cannot be undone from the extension.',
+    message: 'Delete "' + task.title + '"? This cannot be undone from the extension.',
   };
 };
 

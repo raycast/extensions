@@ -1,10 +1,6 @@
 import { environment, getPreferenceValues, launchCommand, LaunchType, OAuth, popToRoot } from "@raycast/api";
 import { setTimeout as delay } from "node:timers/promises";
 
-interface Preferences {
-  clientId?: string;
-}
-
 export type AuthorizationErrorDetails = {
   message: string;
   needsPreferences: boolean;
@@ -28,7 +24,7 @@ export const client = createClient();
 // Authorization
 
 function getClientId(): string {
-  const clientId = getPreferenceValues<Preferences>().clientId?.trim();
+  const clientId = getPreferenceValues().clientId?.trim();
   if (!clientId) {
     throw new OAuthConfigurationError("Add your Google OAuth Client ID in the extension preferences.");
   }

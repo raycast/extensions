@@ -5,8 +5,8 @@ import {
   createTask,
   deleteTask,
   editTask,
+  fetchCompletedPage,
   fetchList,
-  fetchListPage,
   fetchLists,
   setTaskStatus,
   toggleTask,
@@ -110,7 +110,7 @@ export default function UnifiedTaskView() {
       const fetchedTasks = await Promise.all(
         fetchedLists.map(async (list) => {
           const page = showCompleted
-            ? await fetchListPage(list.id, true)
+            ? await fetchCompletedPage(list.id)
             : { tasks: await fetchList(list.id), nextPageToken: undefined };
           return { list, page };
         }),
@@ -229,15 +229,17 @@ export default function UnifiedTaskView() {
   const loadMoreCompletedTasks = useCallback(async () => {
     const listsWithMore = lists.filter((list) => completedPageTokens[list.id]);
     if (listsWithMore.length === 0) return;
+    const version = ++loadVersion.current;
 
     try {
       setIsLoading(true);
       const pages = await Promise.all(
         listsWithMore.map(async (list) => ({
           list,
-          page: await fetchListPage(list.id, true, completedPageTokens[list.id]),
+          page: await fetchCompletedPage(list.id, completedPageTokens[list.id]),
         })),
       );
+      if (version !== loadVersion.current) return;
       setTasks((current) =>
         sortByCompletion([
           ...current,
@@ -252,10 +254,11 @@ export default function UnifiedTaskView() {
         ),
       );
     } catch (error) {
+      if (version !== loadVersion.current) return;
       console.error(error);
       showToast({ style: Toast.Style.Failure, title: "Could not load more completed tasks", message: String(error) });
     } finally {
-      setIsLoading(false);
+      if (version === loadVersion.current) setIsLoading(false);
     }
   }, [completedPageTokens, lists]);
 
