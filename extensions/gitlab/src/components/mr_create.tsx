@@ -319,6 +319,7 @@ interface MREditFormValues {
   labels: string[];
   milestone_id: string;
   remove_source_branch: boolean;
+  squash: boolean;
   is_draft: boolean;
 }
 
@@ -366,6 +367,7 @@ export function MREditForm(props: { mr: MergeRequest; onUpdated?: () => void }) 
   const [sourceBranch, setSourceBranch] = useState(props.mr.source_branch);
   const [targetBranch, setTargetBranch] = useState(props.mr.target_branch);
   const [removeBranch, setRemoveBranch] = useState(props.mr.force_remove_source_branch ?? false);
+  const [squash, setSquash] = useState(props.mr.squash_on_merge ?? false);
 
   function handleDraftChange(value: boolean) {
     setIsDraft(value);
@@ -484,6 +486,14 @@ export function MREditForm(props: { mr: MergeRequest; onUpdated?: () => void }) 
         value={removeBranch}
         onChange={setRemoveBranch}
       />
+      {(project?.squash_option === "default_on" || project?.squash_option === "default_off") && (
+        <Form.Checkbox
+          id="squash"
+          label="Squash commits when merge request is accepted"
+          value={squash}
+          onChange={setSquash}
+        />
+      )}
     </Form>
   );
 }

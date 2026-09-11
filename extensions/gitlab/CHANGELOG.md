@@ -2,7 +2,7 @@
 
 ## [Squash commits checkbox in MR create form] - {PR_MERGE_DATE}
 
-- Add "Squash commits when merge request is accepted" checkbox to the MR create form
+- Add "Squash commits when merge request is accepted" checkbox to the MR create and edit forms
 - Fix boolean form values being dropped on submit
 
 ## [Simplified authentication] - 2026-08-12
