@@ -126,17 +126,27 @@ export default function SleepControls(props: LaunchProps<{ launchContext: { perm
           accessories={[
             {
               tag: {
-                value: data?.quickSwitchingInstalled ? "Set Up" : "Optional",
-                color: data?.quickSwitchingInstalled ? Color.Green : Color.SecondaryText,
+                value: !known
+                  ? error
+                    ? "Unavailable"
+                    : "Checking"
+                  : data.quickSwitchingInstalled
+                    ? "Set Up"
+                    : "Optional",
+                color: known && data.quickSwitchingInstalled ? Color.Green : Color.SecondaryText,
               },
             },
           ]}
           detail={
             <List.Item.Detail
               markdown={
-                data?.quickSwitchingInstalled
-                  ? "# Ready to Switch\n\nThe sleep-toggle permission is installed. Changing sleep won’t normally need another password. Your Mac’s security policy may still require approval.\n\nOnly the two exact sleep commands are allowed. Other administrator commands keep their existing permissions.\n\nYou can remove this permission here at any time. Removing it leaves your sleep setting unchanged."
-                  : "# One Approval. Quick Switching.\n\nEnable quick switching to change sleep without repeated password prompts.\n\nmacOS will ask for administrator approval in a native dialog. Your password is never stored by Sleep Control.\n\nPermission covers only allowing or preventing sleep. It applies to your macOS account, including other apps running as you.\n\n**Prefer normal approval?** Leave this off. The sleep toggle still works using the macOS administrator dialog."
+                !known
+                  ? error
+                    ? "# Permission Status Unavailable\n\nPress ⌘R to check your Mac again."
+                    : "# Checking Permissions…"
+                  : data.quickSwitchingInstalled
+                    ? "# Ready to Switch\n\nThe sleep-toggle permission is installed. Changing sleep won’t normally need another password. Your Mac’s security policy may still require approval.\n\nOnly the two exact sleep commands are allowed. Other administrator commands keep their existing permissions.\n\nYou can remove this permission here at any time. Removing it leaves your sleep setting unchanged."
+                    : "# One Approval. Quick Switching.\n\nEnable quick switching to change sleep without repeated password prompts.\n\nmacOS will ask for administrator approval in a native dialog. Your password is never stored by Sleep Control.\n\nPermission covers only allowing or preventing sleep. It applies to your macOS account, including other apps running as you.\n\n**Prefer normal approval?** Leave this off. The sleep toggle still works using the macOS administrator dialog."
               }
             />
           }

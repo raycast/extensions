@@ -41,9 +41,11 @@ export default function SleepMenuBar() {
         />
         <MenuBarExtra.Item
           title={
-            known && data.disabled
-              ? "Lid open or closed · battery or charger"
-              : "Your Mac follows its normal sleep settings"
+            !known
+              ? "Refresh to check your Mac’s sleep setting"
+              : data.disabled
+                ? "Lid open or closed · battery or charger"
+                : "Your Mac follows its normal sleep settings"
           }
         />
       </MenuBarExtra.Section>
@@ -54,7 +56,13 @@ export default function SleepMenuBar() {
           onAction={() => launchCommand({ name: "controls", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item
-          title={data?.quickSwitchingInstalled ? "Quick Switching Set Up" : "Set Up Quick Switching…"}
+          title={
+            !known
+              ? "Manage Quick Switching…"
+              : data.quickSwitchingInstalled
+                ? "Quick Switching Set Up"
+                : "Set Up Quick Switching…"
+          }
           icon={Icon.Lock}
           onAction={() =>
             launchCommand({ name: "controls", type: LaunchType.UserInitiated, context: { permissions: true } })
