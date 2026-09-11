@@ -5,21 +5,71 @@ import { existsSync } from "node:fs";
 import { flatten, loadSheets, readSheetsIn, resolve } from "../src/lib/sheets.ts";
 
 /**
- * Run against the real sheet files in the repo, not fixtures — the format is
- * defined by Keysi's Swift side and these tests exist to catch it drifting
- * away from what this extension expects.
+ * Two sources, deliberately.
  *
- * That only works inside Keysi's own repository. When this extension is
- * vendored into `raycast/extensions` the directory does not come with it, so
- * these skip rather than fail — a red test in someone else's monorepo over a
- * path that cannot exist there is noise, and it was flagged in review. The
- * checks still run where they are meaningful, which is here.
+ * `FIXTURES` is committed alongside these tests, so the core assertions —
+ * parsing, flattening, id uniqueness, user-sheet precedence — run everywhere,
+ * including inside `raycast/extensions` where this extension is vendored
+ * without Keysi's app resources. An earlier version of this file skipped
+ * those tests there, which review correctly rejected: it traded a false
+ * failure for no coverage at all.
+ *
+ * `REPO_SHEETS` is Keysi's real shipped sheets. The format is defined by the
+ * Swift side, so the tests that read it exist to catch that drifting away
+ * from what this extension expects — genuinely impossible outside Keysi's own
+ * repository, and the only ones still guarded.
  */
+const FIXTURES = join(import.meta.dirname, "fixtures", "builtin");
+const USER_FIXTURES = join(import.meta.dirname, "fixtures", "user");
 const REPO_SHEETS = join(import.meta.dirname, "..", "..", "Keysi", "Resources", "BuiltinSheets");
-const inKeysiRepo = existsSync(REPO_SHEETS);
-const skip = inKeysiRepo ? false : "not in the Keysi repo — bundled sheets are not vendored with the extension";
+const skip = existsSync(REPO_SHEETS)
+  ? false
+  : "only meaningful in the Keysi repo — the app's shipped sheets are not vendored with the extension";
 
-test("reads every bundled sheet", { skip }, () => {
+test("reads the fixture sheets", () => {
+  assert.deepEqual(
+    readSheetsIn(FIXTURES).map((s) => s.id).sort(),
+    ["tmux", "vim"],
+  );
+});
+
+/** readSheetsIn promises one bad file will not take the list down. */
+test("a malformed sheet is skipped rather than fatal", () => {
+  // fixtures/builtin holds broken.json alongside the two valid sheets.
+  assert.equal(readSheetsIn(FIXTURES).length, 2);
+});
+
+test("flattens fixtures into rows that all have a title", () => {
+  const rows = flatten(readSheetsIn(FIXTURES));
+  assert.equal(rows.length, 3);
+  assert.ok(rows.every((r) => r.title.length > 0));
+  assert.ok(rows.every((r) => r.sheetName.length > 0));
+});
+
+/** A bare string name is the other branch of LocalizedText. */
+test("a sheet named with a bare string resolves", () => {
+  const tmux = flatten(readSheetsIn(FIXTURES)).filter((r) => r.sheetId === "tmux");
+  assert.equal(tmux[0].sheetName, "tmux");
+});
+
+test("fixture row ids are unique", () => {
+  const rows = flatten(readSheetsIn(FIXTURES));
+  assert.equal(new Set(rows.map((r) => r.id)).size, rows.length);
+});
+
+test("a user sheet shadows a built-in of the same id", () => {
+  const sheets = loadSheets([FIXTURES], USER_FIXTURES);
+  assert.equal(sheets.length, 2, "vim appears once, not twice");
+  const vim = sheets.find((s) => s.id === "vim");
+  assert.equal(resolve(vim.name), "Vim (mine)");
+});
+
+test("keys survive flattening for a raw sheet", () => {
+  const rows = flatten(readSheetsIn(FIXTURES));
+  assert.ok(rows.some((r) => r.keys === "Ctrl-b %"));
+});
+
+test("Keysi's shipped sheets still match the format this reader expects", { skip }, () => {
   const sheets = readSheetsIn(REPO_SHEETS);
   const ids = sheets.map((s) => s.id).sort();
   assert.deepEqual(ids, ["figma", "slack", "tmux", "vim"]);
@@ -29,7 +79,7 @@ test("a missing directory is empty, not an error", () => {
   assert.deepEqual(readSheetsIn("/nope/not/here"), []);
 });
 
-test("flattens bundled sheets into rows that all have a title", { skip }, () => {
+test("Keysi's shipped sheets flatten into titled rows", { skip }, () => {
   const rows = flatten(readSheetsIn(REPO_SHEETS));
   // Deliberately not an exact count — the sheets are content and will grow.
   // What must hold is that every sheet contributed and no row came out blank,

@@ -1,0 +1,41 @@
+{
+  "id": "vim",
+  "name": {
+    "en": "Vim",
+    "de": "Vim (Editor)"
+  },
+  "match": {
+    "bundleIDs": [],
+    "processNames": [
+      "vim",
+      "nvim"
+    ]
+  },
+  "mode": "replace",
+  "priority": 50,
+  "groups": [
+    {
+      "title": {
+        "en": "Windows & splits",
+        "de": "Fenster & Teilungen"
+      },
+      "items": [
+        {
+          "title": {
+            "en": "Split horizontally",
+            "de": "Horizontal teilen"
+          },
+          "keys": ":sp",
+          "raw": true
+        },
+        {
+          "title": {
+            "en": "Split vertically"
+          },
+          "keys": ":vs",
+          "raw": true
+        }
+      ]
+    }
+  ]
+}
