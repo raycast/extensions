@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Back-date a New Timer] - {PR_MERGE_DATE}
+
+- Added a "Start Time" option to the new time entry form to start a timer as of 5, 10 or 15 minutes ago, or a custom number of minutes, for when you remember to start tracking after you began working
+
 ## [Fix Duplicate Billable Checkbox] - 2026-09-11
 
 - Fixed two `Billable` checkboxes rendering with the same `billable` form ID when a billable project is selected in a premium workspace — they are now a single checkbox, shown whenever either condition applies
