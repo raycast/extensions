@@ -5,6 +5,7 @@
 - Added Windows support: finds `spark.exe` in the Spark Desktop install folder or on `PATH`, handles CRLF output, and cleans URL-encoded line breaks out of Spark deep links
 - "Show Attachments in Finder" now uses the built-in action, so it reads "Show in Explorer" on Windows
 - Recognises the "can't access your Spark Desktop application" error and shows the "Spark Desktop isn't running" hint
+- Added `npm test` (Node's built-in test runner) covering CLI discovery per platform, CRLF parsing, and deep-link cleanup
 
 ## [Initial Version] - 2026-09-11
 
