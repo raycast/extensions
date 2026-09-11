@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+import { isValidTimestamp, resolveTimerEndTime } from "./duration";
 
 export const STORAGE_KEY = "punch-clock-state";
 
@@ -28,15 +29,15 @@ function normalizeState(value: unknown): TimerState | undefined {
   if (
     !isFiniteNumber(candidate.totalMinutes) ||
     !isFiniteNumber(candidate.breakMinutes) ||
-    !isFiniteNumber(candidate.startTime) ||
-    !isFiniteNumber(candidate.endTime)
+    !isValidTimestamp(candidate.startTime) ||
+    !isValidTimestamp(candidate.endTime)
   ) {
     return undefined;
   }
 
   const stoppedTime =
-    candidate.stoppedTime === null ? null : isFiniteNumber(candidate.stoppedTime) ? candidate.stoppedTime : undefined;
-  // stoppedTime must be either null or a finite number; anything else (e.g.
+    candidate.stoppedTime === null ? null : isValidTimestamp(candidate.stoppedTime) ? candidate.stoppedTime : undefined;
+  // stoppedTime must be either null or a valid timestamp; anything else (e.g.
   // a stringified value from corrupted storage) makes the state untrustworthy.
   if (stoppedTime === undefined && candidate.stoppedTime !== undefined) return undefined;
 
@@ -80,12 +81,8 @@ export async function clearState(): Promise<void> {
 }
 
 export async function startTimer(totalMinutes: number, breakMinutes: number): Promise<TimerState> {
-  if (!Number.isFinite(totalMinutes) || totalMinutes <= 0 || !Number.isFinite(breakMinutes) || breakMinutes < 0) {
-    throw new Error("Invalid timer duration");
-  }
-
   const startTime = Date.now();
-  const endTime = startTime + (totalMinutes + breakMinutes) * 60_000;
+  const endTime = resolveTimerEndTime(startTime, totalMinutes, breakMinutes);
   const state: TimerState = {
     totalMinutes,
     breakMinutes,

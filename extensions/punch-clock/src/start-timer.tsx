@@ -1,21 +1,13 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { parseWholeNumber, validateBreakMinutes, validateHours, validateMinutes } from "./duration";
 import { formatClock, getState, startTimer, TimerState } from "./timer";
 
 interface FormValues {
   hours: string;
   minutes: string;
   breakMinutes: string;
-}
-
-function parseWholeNumber(value: string | undefined): number | undefined {
-  const trimmed = (value ?? "").trim();
-  if (trimmed === "") return 0;
-  if (!/^\d+$/.test(trimmed)) return undefined;
-  const parsed = Number(trimmed);
-  if (!Number.isSafeInteger(parsed) || parsed < 0) return undefined;
-  return parsed;
 }
 
 export default function StartTimer() {
@@ -46,17 +38,9 @@ export default function StartTimer() {
       breakMinutes: "30",
     },
     validation: {
-      hours: (value) => {
-        if (parseWholeNumber(value) === undefined) return "Enter a whole number of hours";
-      },
-      minutes: (value) => {
-        const minutes = parseWholeNumber(value);
-        if (minutes === undefined) return "Enter a whole number of minutes";
-        if (minutes > 59) return "Minutes must be between 0 and 59";
-      },
-      breakMinutes: (value) => {
-        if (parseWholeNumber(value) === undefined) return "Enter a whole number of minutes";
-      },
+      hours: validateHours,
+      minutes: validateMinutes,
+      breakMinutes: validateBreakMinutes,
     },
     async onSubmit(values) {
       const hours = parseWholeNumber(values.hours) ?? 0;

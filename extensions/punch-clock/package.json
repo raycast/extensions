@@ -53,6 +53,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --test tests/*.test.ts",
     "publish": "npx @raycast/api@latest publish"
   }
 }
