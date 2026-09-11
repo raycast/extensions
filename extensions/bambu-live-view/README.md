@@ -36,15 +36,19 @@ The IP address and access code are kept in Raycast's encrypted local storage for
 - Press **q** in the window to close it, or run **Toggle Live View** again.
 - Size (small 320×180, medium 480×270, large 640×360), screen corner and window title are in the extension's preferences (Raycast Settings → Extensions → Bambu Live View, or **Window Size & Position…** in the setup command's action panel).
 
-Under the hood it runs:
+Under the hood it runs roughly:
 
 ```sh
-mpv --ontop --no-border --no-audio --rtsp-transport=tcp --profile=low-latency \
-    --autofit=480x270 --geometry=99%:2% \
-    "rtsps://bblp:ACCESS_CODE@PRINTER_IP:322/streaming/live/1"
+echo "rtsps://bblp:ACCESS_CODE@PRINTER_IP:322/streaming/live/1" | \
+  mpv --ontop --no-border --no-audio --rtsp-transport=tcp --profile=low-latency \
+      --autofit=480x270 --geometry=99%:2% \
+      --input-ipc-server="$TMPDIR/raycast-bambu-live-view.sock" --playlist=-
 ```
 
-The mpv process ID is stored in the extension's support folder, and it's only closed if that PID still belongs to an mpv process playing a Bambu stream — nothing else is ever killed.
+- The stream URL (which contains the access code) is piped in on stdin, so it never appears in the process list.
+- "Live view opened" is only shown once mpv reports the stream actually loaded. A wrong access code shows **Access code rejected** instead.
+- The extension only ever closes an mpv it started itself (identified by its private IPC socket), and closes it by asking mpv to quit over that socket.
+- Starting twice at once (e.g. a double-pressed hotkey) opens one window, not two.
 
 ## Troubleshooting
 

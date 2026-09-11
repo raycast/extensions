@@ -1,8 +1,10 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { PrinterConfig, streamUrl } from "./config";
+import { ipcRequest, waitForPlayback } from "./mpv-ipc";
 
 /**
  * Raycast runs commands with a minimal PATH that doesn't include Homebrew,
@@ -51,7 +53,16 @@ const CORNERS: Record<Preferences["corner"], string> = {
   "bottom-left": "1%:98%",
 };
 
-function mpvArgs(config: PrinterConfig): string[] {
+/**
+ * The IPC socket doubles as the viewer's identity: only an mpv launched by this extension has it in its
+ * arguments. It lives in the per-user temp dir because Unix socket paths are limited to 104 bytes.
+ */
+const socketPath = () => path.join(os.tmpdir(), "raycast-bambu-live-view.sock");
+
+/** How long mpv gets to open the stream before we give up. */
+const STARTUP_TIMEOUT_MS = 15_000;
+
+function mpvArgs(): string[] {
   const prefs = getPreferenceValues<Preferences>();
   const title = prefs.windowTitle?.trim() || "Bambu Live View";
   return [
@@ -65,7 +76,10 @@ function mpvArgs(config: PrinterConfig): string[] {
     `--geometry=${CORNERS[prefs.corner] ?? CORNERS["top-right"]}`,
     // An explicit title also keeps the stream URL (which contains the access code) out of the window title.
     `--title=${title}`,
-    streamUrl(config),
+    `--input-ipc-server=${socketPath()}`,
+    // The stream URL contains the access code, so it's piped in on stdin rather than passed as an
+    // argument, where any process could read it with `ps`.
+    "--playlist=-",
   ];
 }
 
@@ -100,13 +114,14 @@ function psField(pid: number, field: "comm" | "args"): string | undefined {
 }
 
 /**
- * Only trust the stored PID if it still belongs to an mpv process playing a
- * Bambu stream — PIDs get reused, and we must never kill an unrelated process.
+ * Only trust the stored PID if it's an mpv process started by this extension (identified by our IPC
+ * socket in its arguments) — PIDs get reused, and we must never kill an unrelated process, including
+ * another mpv playing the same printer.
  */
 function isOurViewer(pid: number): boolean {
   const comm = psField(pid, "comm");
   if (!comm || path.basename(comm) !== "mpv") return false;
-  return psField(pid, "args")?.includes("/streaming/live/1") ?? false;
+  return psField(pid, "args")?.includes(`--input-ipc-server=${socketPath()}`) ?? false;
 }
 
 /** Returns the PID of the running live view, cleaning up a stale PID file if needed. */
@@ -118,8 +133,14 @@ export function runningViewerPid(): number | undefined {
   return undefined;
 }
 
-export function stopViewer(pid: number) {
+/** Asks our mpv to quit over IPC, falling back to SIGTERM if it doesn't answer. */
+export async function stopViewer(pid: number) {
   try {
+    const ipcPid = await ipcRequest(socketPath(), ["get_property", "pid"]);
+    if (ipcPid === pid) {
+      await ipcRequest(socketPath(), ["quit"]);
+      return;
+    }
     process.kill(pid, "SIGTERM");
   } catch (error) {
     // Already exited between the check and the kill — nothing to do.
@@ -129,18 +150,33 @@ export function stopViewer(pid: number) {
   }
 }
 
-export function startViewer(mpvPath: string, config: PrinterConfig): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(mpvPath, mpvArgs(config), { detached: true, stdio: "ignore" });
+/**
+ * Starts mpv and resolves once the stream is actually playing. Rejects with a StartupError if the printer
+ * rejects the access code, mpv exits, or the stream doesn't open in time.
+ */
+export async function startViewer(mpvPath: string, config: PrinterConfig): Promise<void> {
+  fs.rmSync(socketPath(), { force: true });
+  const child = spawn(mpvPath, mpvArgs(), { detached: true, stdio: ["pipe", "ignore", "ignore"] });
+
+  await new Promise<void>((resolve, reject) => {
     child.once("error", reject);
-    child.once("spawn", () => {
-      child.unref();
-      if (child.pid === undefined) {
-        reject(new Error("mpv did not start"));
-        return;
-      }
-      writePid(child.pid);
-      resolve(child.pid);
-    });
+    child.once("spawn", resolve);
   });
+  child.stdin?.end(`${streamUrl(config)}\n`);
+  if (child.pid === undefined) throw new Error("mpv did not start");
+  writePid(child.pid);
+
+  try {
+    await waitForPlayback(child, socketPath(), STARTUP_TIMEOUT_MS);
+  } catch (error) {
+    try {
+      process.kill(child.pid, "SIGTERM");
+    } catch {
+      // Already exited.
+    }
+    clearPid();
+    throw error;
+  } finally {
+    child.unref();
+  }
 }
