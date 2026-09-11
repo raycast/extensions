@@ -1,7 +1,6 @@
 import fse from "fs-extra";
 import { homedir } from "os";
-import { Cache, Toast, environment, open, showHUD, showInFinder, showToast } from "@raycast/api";
-import { copyFileByPath } from "@/utils/applescript-utils";
+import { Cache, Clipboard, Toast, environment, open, showHUD, showInFinder, showToast } from "@raycast/api";
 import { fetchArrayBuffer } from "@/utils/fetch";
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -14,7 +13,7 @@ export async function downloadAndCopyImage(url: string) {
   const filePath = selectedPath.endsWith("/") ? `${selectedPath}placeholder.jpg` : `${selectedPath}/placeholder.jpg`;
 
   fse.writeFileSync(filePath, Buffer.from(await fetchArrayBuffer(url)));
-  await copyFileByPath(filePath);
+  await Clipboard.copy({ file: filePath });
   await toast.hide();
   await showHUD("Image copied to clipboard");
 }

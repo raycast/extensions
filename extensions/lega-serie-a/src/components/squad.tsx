@@ -5,50 +5,35 @@ import {
   Grid,
   Icon,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { getSquad } from "../api";
-import { SquadGroup, Squad } from "../types";
+import { Squad } from "../types";
+import { getFlagEmoji, positionMap } from "../utils";
 import Player from "./player";
-
-const positionMap = new Map<string, string>([
-  ["P", "Goalkeeper"],
-  ["D", "Defender"],
-  ["C", "Midfielder"],
-  ["A", "Striker"],
-]);
 
 const { language } = getPreferenceValues();
 
 export default function ClubSquad(props: {
   team_name: string;
   season: string;
+  netco_id: string;
 }) {
-  const [playerGroups, setPlayerGroups] = useState<SquadGroup | undefined>();
-  const [loading, setLoading] = useState<boolean>(false);
-  useEffect(() => {
-    setLoading(true);
-    setPlayerGroups(undefined);
-
-    getSquad(props.team_name, props.season).then((data) => {
-      setPlayerGroups(data);
-      setLoading(false);
-    });
-  }, []);
+  const { data: positions, isLoading } = usePromise(getSquad, [props.netco_id]);
 
   return (
     <Grid
       throttle
       navigationTitle={`Squad | ${props.team_name} | Club`}
-      isLoading={loading}
+      isLoading={isLoading}
     >
-      {playerGroups &&
-        Object.entries(playerGroups).map(([code, members]) => {
+      {positions &&
+        Object.entries(positions).map(([code, players]) => {
           const position =
-            language === "en" ? positionMap.get(code) : members[0].role;
+            language === "en" ? positionMap.get(code) : players[0].role;
 
           return (
             <Grid.Section title={position} key={code}>
-              {members.map((member: Squad) => {
+              {players.map((member: Squad) => {
                 return (
                   <Grid.Item
                     key={member.player_id}
@@ -57,6 +42,7 @@ export default function ClubSquad(props: {
                       source: member.medium_shot,
                       fallback: "player_placeholder.png",
                     }}
+                    accessory={{ icon: getFlagEmoji(member.nationality) }}
                     actions={
                       <ActionPanel>
                         <Action.Push

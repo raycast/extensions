@@ -156,6 +156,17 @@ export interface User {
   };
 }
 
+export interface Environment {
+  id: string;
+  attributes: {
+    name: string;
+    code: string;
+    isolationStrategy: "ISOLATED" | "SHARED";
+    created: string;
+    updated: string;
+  };
+}
+
 export interface Result<T> {
   data: T;
 }

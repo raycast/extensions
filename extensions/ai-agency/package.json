@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-agency",
+  "title": "AI Agency",
+  "description": "Browse AI Agency agents by division, view specialties and copy prompts.",
+  "icon": "ai-agency.png",
+  "author": "marcin-91",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ai-agency",
+      "title": "AI Agency",
+      "subtitle": "AI Agency agents browser",
+      "description": "Browse AI Agency agents by division, view specialties and copy prompts.",
+      "icon": "ai-agency.png",
+      "keywords": [
+        "agents",
+        "prompts",
+        "github"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "refresh-agents",
+      "title": "Refresh AI Agency Agents",
+      "subtitle": "Download latest agents from GitHub",
+      "description": "Refresh the cached AI Agency agents from the GitHub repository.",
+      "icon": "ai-agency.png",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

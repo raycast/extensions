@@ -1,4 +1,4 @@
-import { Icon, Image } from "@raycast/api";
+import { Icon, type Image } from "@raycast/api";
 import { getPreferenceValues } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 

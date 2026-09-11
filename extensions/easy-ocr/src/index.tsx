@@ -46,13 +46,17 @@ export default async function main() {
     if (
       autodetectLanguage?.languageCode &&
       utils.isValidLanguage(autodetectLanguage?.languageCode) &&
+      (await utils.isInstalledLanguage(autodetectLanguage?.languageCode)) &&
       autodetectLanguage?.languageCode !== defaultLangCode
     ) {
-      text = await tesseractOcr(filePath, autodetectLanguage?.languageCode);
-      text = utils.handleNewLines(text);
+      try {
+        text = await tesseractOcr(filePath, autodetectLanguage?.languageCode);
+        text = utils.handleNewLines(text);
+        languageUsed = autodetectLanguage?.languageName ?? languageUsed;
+      } catch {
+        // Keep the first OCR result when the autodetected language cannot be loaded by Tesseract.
+      }
     }
-
-    languageUsed = autodetectLanguage?.languageName ?? languageUsed;
 
     await Clipboard.copy(text);
     await showToast({

@@ -1,9 +1,6 @@
-import { CACHE_KEYS } from "#/config/constants";
-import { Worktree, type Project } from "#/config/types";
-import { updateCache } from "#/helpers/cache";
+import type { Worktree } from "#/config/types";
 import { isExistingDirectory } from "#/helpers/file";
 import { checkIfBranchNameIsValid, fetch, getRemoteBranches, renameWorktree, shouldPushWorktree } from "#/helpers/git";
-import { getPreferences } from "#/helpers/raycast";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import path from "node:path";
@@ -32,7 +29,6 @@ const RenameForm = ({ worktree, revalidateProjects }: RenameWorktreeProps) => {
   const worktreePath = worktree.path;
   const currentName = path.basename(worktreePath);
   const projectPath = path.dirname(worktreePath);
-  const projectName = path.basename(projectPath);
 
   const { handleSubmit, itemProps, setValidationError } = useForm<{ newName: string }>({
     onSubmit: async (values) => {
@@ -88,28 +84,7 @@ const RenameForm = ({ worktree, revalidateProjects }: RenameWorktreeProps) => {
         toast.title = "";
         toast.message = `Successfully renamed to "${values.newName}"`;
 
-        if (getPreferences().enableWorktreeCaching) {
-          await updateCache<Project[]>({
-            key: CACHE_KEYS.WORKTREES,
-            updater: (projects) => {
-              if (!projects) return;
-
-              const foundProject = projects.find((project) => project.name === projectName);
-              if (!foundProject) return;
-
-              const foundWorktree = foundProject.worktrees.find((wt) => wt.id === worktree.id);
-              if (!foundWorktree) return;
-
-              foundWorktree.id = path.join(foundProject.fullPath, values.newName);
-              foundWorktree.path = path.join(foundProject.fullPath, values.newName);
-              foundWorktree.branch = values.newName;
-
-              return projects;
-            },
-          });
-
-          revalidateProjects();
-        }
+        revalidateProjects();
 
         toast.hide();
 

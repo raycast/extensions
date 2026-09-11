@@ -10,7 +10,7 @@ export const ModelListView = ({
   title: string;
   models: Model[];
   selectedModel: string | null;
-  actionPanel: (model: Model) => JSX.Element;
+  actionPanel: (model: Model) => React.JSX.Element;
 }) => (
   <List.Section title={title} subtitle={models.length.toLocaleString()}>
     {models.map((model) => (
@@ -26,7 +26,7 @@ export const ModelListItem = ({
 }: {
   model: Model;
   selectedModel: string | null;
-  actionPanel: (model: Model) => JSX.Element;
+  actionPanel: (model: Model) => React.JSX.Element;
 }) => {
   return (
     <List.Item
@@ -57,6 +57,10 @@ const ModelDetailView = (props: { model: Model; markdown?: string | null | undef
             title="Temperature"
             text={model.temperature.toLocaleString()}
             icon={icons[Math.min(Math.floor(t / 0.5), 3)]}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Reasoning"
+            text={model.enableReasoningEffortChange ? model.reasoningEffort : "disabled"}
           />
           <List.Item.Detail.Metadata.Label title="Vision capabilities" text={model.vision ? "Enable" : "Disable"} />
           <List.Item.Detail.Metadata.Separator />

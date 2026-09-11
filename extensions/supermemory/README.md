@@ -1,6 +1,10 @@
+<p align="center">
+    <img src="./assets/extension-icon.png" width="150" height="150" />
+</p>
+
 # Raycast Extension for Supermemory
 
-A Raycast extension that lets you add memories and search through your Supermemory collection directly from Raycast.
+A Raycast extension that lets you add memories and search through your [Supermemory](https://supermemory.ai/) collection directly from Raycast.
 
 ## Setup
 
@@ -27,6 +31,7 @@ A Raycast extension that lets you add memories and search through your Supermemo
 
 - `Add Memory` - Add a new memory to your collection
 - `Search Memories` - Search through your existing memories
+- `Search Projects` - Search through your existing projects
 
 ## Authentication
 

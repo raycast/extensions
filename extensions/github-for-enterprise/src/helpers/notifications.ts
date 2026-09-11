@@ -14,7 +14,19 @@ function generateNotificationReferrerId(notificationId: string, userId: string) 
 }
 
 export function generateGitHubUrl(url: string, notificationId: string, userId?: string, comment = "") {
-  let newUrl: string = url.replace("/api/v3/repos", "");
+  let newUrl: string = url;
+
+  // Handle both GitHub Enterprise Cloud (subdomain) and Server (path-based) API patterns:
+  // GHEC: https://api.ghe.com/repos/org/repo/... -> https://ghe.com/org/repo/...
+  // GHES: https://ghe.com/api/v3/repos/org/repo/... -> https://ghe.com/org/repo/...
+
+  // First, handle GHEC subdomain pattern (api.domain.com -> domain.com)
+  newUrl = newUrl.replace(/^(https?:\/\/)api\./, "$1");
+
+  // Then, handle path-based patterns:
+  // - GHES: /api/v3/repos -> empty
+  // - GHEC: /repos/ -> / (after subdomain removal)
+  newUrl = newUrl.replace("/api/v3/repos", "").replace("/repos/", "/");
 
   if (newUrl.indexOf("/pulls/") !== -1) {
     newUrl = newUrl.replace("/pulls/", "/pull/");

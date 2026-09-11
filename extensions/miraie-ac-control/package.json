@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "miraie-ac-control",
+  "title": "MirAIe AC Control",
+  "description": "Control Panasonic MirAIe air conditioners from Raycast.",
+  "icon": "extension_icon.png",
+  "author": "ayush_saini",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "panasonic",
+    "miraie",
+    "ac",
+    "air conditioner",
+    "hvac",
+    "smart home",
+    "menu bar"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-devices",
+      "title": "View Devices",
+      "description": "View and control your Panasonic MirAIe air conditioners",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Control",
+      "description": "Control your Panasonic MirAIe air conditioners from the menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Mobile Number / Email",
+      "description": "Your MirAIe account mobile number or email address",
+      "placeholder": "e.g., +91xxxxxxxxxx or user@email.com"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Your MirAIe account password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12",
+    "date-fns": "^4.1.0",
+    "mqtt": "^5.15.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.2.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

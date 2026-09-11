@@ -1,8 +1,8 @@
 import { jest } from "@jest/globals";
 import { searchWord, getDailyWord, getRandomWord, ApiError } from "./rae";
 
-// Set longer timeout for API calls
-jest.setTimeout(10000);
+// Set longer timeout for API calls (allows for rate-limit retries)
+jest.setTimeout(30000);
 
 // Tests are skipped to avoid hitting the real API during CI/CD
 describe("RAE API", () => {
@@ -86,6 +86,64 @@ describe("RAE API", () => {
         word: expect.any(String),
         meanings: expect.any(Array),
       });
+    });
+  });
+
+  describe("rate limiting", () => {
+    const wordPayload = {
+      ok: true,
+      data: { word: "casa", meanings: [], suggestions: [] },
+      suggestions: [],
+    };
+
+    function newTestRateLimitedFetch(retryAfterHeader: string) {
+      return jest
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ ok: false, error: "RATE_LIMIT_EXCEEDED", suggestions: [] }), {
+            status: 429,
+            headers: { "retry-after": retryAfterHeader },
+          }),
+        )
+        .mockResolvedValueOnce(new Response(JSON.stringify(wordPayload), { status: 200 }));
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date("2026-07-23T00:00:00Z"));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      jest.restoreAllMocks();
+    });
+
+    it("waits the number of seconds given in retry-after before retrying", async () => {
+      const fetchSpy = newTestRateLimitedFetch("5");
+
+      const promise = searchWord("casa");
+      await jest.advanceTimersByTimeAsync(4_000);
+      const callsBeforeDeadline = fetchSpy.mock.calls.length;
+      await jest.advanceTimersByTimeAsync(2_000);
+      const result = await promise;
+
+      expect(callsBeforeDeadline).toBe(1);
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(result.word).toBe("casa");
+    });
+
+    it("honors retry-after given as an HTTP date", async () => {
+      const fetchSpy = newTestRateLimitedFetch(new Date(Date.now() + 10_000).toUTCString());
+
+      const promise = searchWord("casa");
+      await jest.advanceTimersByTimeAsync(8_000);
+      const callsBeforeDeadline = fetchSpy.mock.calls.length;
+      await jest.advanceTimersByTimeAsync(3_000);
+      const result = await promise;
+
+      expect(callsBeforeDeadline).toBe(1);
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(result.word).toBe("casa");
     });
   });
 });

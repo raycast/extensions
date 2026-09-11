@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid, List } from "@raycast/api";
+import { Action, ActionPanel, Grid, List, Keyboard } from "@raycast/api";
 import { useState } from "react";
 
 import { PageItem } from "./components/page-item";
@@ -30,7 +30,7 @@ export default function SearchPage(props: { arguments: { title: string } }) {
         <ActionPanel>
           <Action.OpenInBrowser
             title="Search in Browser"
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.Open}
             url={`https://${language}.wikipedia.org/w/index.php?fulltext=1&profile=advanced&search=${search}&title=Special%3ASearch&ns0=1`}
           />
         </ActionPanel>

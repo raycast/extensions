@@ -9,7 +9,10 @@ const ActionOpenParentalGuide = ({ imdbID }: Props) => (
   <Action.OpenInBrowser
     url={`https://www.imdb.com/title/${imdbID}/parentalguide`}
     title="Open Parental Guide"
-    shortcut={{ modifiers: ['shift', 'cmd'], key: 'p' }}
+    shortcut={{
+      macOS: { modifiers: ['shift', 'cmd'], key: 'p' },
+      Windows: { modifiers: ['shift', 'ctrl'], key: 'p' },
+    }}
     icon={Icon.SpeechBubbleImportant}
   />
 );

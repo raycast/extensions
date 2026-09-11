@@ -1,5 +1,10 @@
 import { VoiceSettings } from "./types";
 
+export interface VoiceSettingsPreferences {
+  stability: string;
+  similarityBoost: string;
+}
+
 /**
  * Validates and normalizes playback speed
  * Ensures speed is between 0.5 and 2.0, defaulting to 1.0 if invalid
@@ -18,7 +23,7 @@ export function validatePlaybackSpeed(speed: string): string {
  * @param preferences - User-configured preferences from Raycast
  * @returns Normalized voice settings
  */
-export function prepareVoiceSettings(preferences: Preferences.SpeakSelected): VoiceSettings {
+export function prepareVoiceSettings(preferences: VoiceSettingsPreferences): VoiceSettings {
   return {
     stability: Math.min(1, Math.max(0, parseFloat(preferences.stability) || 0.5)),
     similarity_boost: Math.min(1, Math.max(0, parseFloat(preferences.similarityBoost) || 0.75)),

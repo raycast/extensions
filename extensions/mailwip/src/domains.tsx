@@ -4,6 +4,7 @@ import {
   Alert,
   Form,
   Icon,
+  Keyboard,
   List,
   Toast,
   confirmAlert,
@@ -23,22 +24,25 @@ export default function Domains() {
   async function confirmAndDelete(domain: string) {
     if (
       await confirmAlert({
+        icon: getFavicon(`https://${domain}`, { fallback: Icon.Trash }),
         title: `Delete '${domain}'?`,
         message: "This will delete the domain from Mailwip Account (if it exists) as well as locally.",
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      setIsLoading(true);
-      const updatedDomains = cachedDomains.filter((item) => item !== domain);
-      setCachedDomains([...updatedDomains]);
-
-      const response = await deleteDomains({ domains: [domain] });
-      if (!("errors" in response)) {
-        showToast(Toast.Style.Success, response.message);
-      } else {
-        push(<ErrorComponent error={response.errors} />);
+      try {
+        setIsLoading(true);
+        const toast = await showToast(Toast.Style.Animated, "Deleting domain", domain);
+        const result = await deleteDomains({ domains: [domain] });
+        const updatedDomains = cachedDomains.filter((item) => item !== domain);
+        setCachedDomains([...updatedDomains]);
+        toast.style = Toast.Style.Success;
+        toast.title = result.message;
+      } catch (error) {
+        push(<ErrorComponent error={String(error)} />);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
   }
 
@@ -48,37 +52,41 @@ export default function Domains() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action title="Add New Local Domain" icon={Icon.PlusCircle} onAction={() => push(<AddLocalDomain />)} />
+          <Action.Push
+            title="Add New Local Domain"
+            icon={Icon.PlusCircle}
+            target={<AddLocalDomain />}
+            shortcut={Keyboard.Shortcut.Common.New}
+          />
         </ActionPanel>
       }
     >
       <List.Section title={`${cachedDomains.length} ${cachedDomains.length === 1 ? "domain" : "domains"}`}>
-        {!isLoading &&
-          cachedDomains.map((domain) => (
-            <List.Item
-              key={domain}
-              title={domain}
-              icon={getFavicon(`https://${domain}`)}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Delete Domain From Mailwip"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    onAction={() => confirmAndDelete(domain)}
+        {cachedDomains.map((domain) => (
+          <List.Item
+            key={domain}
+            title={domain}
+            icon={getFavicon(`https://${domain}`)}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Delete Domain from Mailwip"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={() => confirmAndDelete(domain)}
+                />
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Add New Local Domain"
+                    icon={Icon.PlusCircle}
+                    target={<AddLocalDomain />}
+                    shortcut={Keyboard.Shortcut.Common.New}
                   />
-                  <ActionPanel.Section>
-                    <Action
-                      title="Add New Local Domain"
-                      icon={Icon.PlusCircle}
-                      onAction={() => push(<AddLocalDomain />)}
-                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          ))}
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
     </List>
   );
@@ -87,13 +95,15 @@ export default function Domains() {
 function AddLocalDomain() {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  const [cachedDomains, setCachedDomains] = useCachedState<string[]>("domains", []);
+  const [, setCachedDomains] = useCachedState<string[]>("domains", []);
 
   const { handleSubmit, itemProps } = useForm<{ domain: string }>({
     async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Adding domain locally", values.domain);
       setIsLoading(true);
-      setCachedDomains([...cachedDomains, values.domain]);
-      showToast(Toast.Style.Success, `${values.domain} added locally`);
+      setCachedDomains((prev) => [...prev, values.domain]);
+      toast.style = Toast.Style.Success;
+      toast.title = "Domain added locally";
       setIsLoading(false);
       pop();
     },

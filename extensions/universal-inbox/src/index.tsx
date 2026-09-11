@@ -1,10 +1,14 @@
+import { GoogleCalendarNotificationListItem } from "./integrations/google-calendar/listitem/GoogleCalendarNotificationListItem";
+import { GoogleDriveNotificationListItem } from "./integrations/google-drive/listitem/GoogleDriveNotificationListItem";
 import { Action, ActionPanel, Detail, Icon, List, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { GoogleMailNotificationListItem } from "./integrations/google-mail/listitem/GoogleMailNotificationListItem";
+import { TickTickNotificationListItem } from "./integrations/ticktick/listitem/TickTickNotificationListItem";
 import { TodoistNotificationListItem } from "./integrations/todoist/listitem/TodoistNotificationListItem";
-import { GithubNotificationListItem } from "./integrations/github/listitem/GithubNotificationListItem";
 import { LinearNotificationListItem } from "./integrations/linear/listitem/LinearNotificationListItem";
+import { GithubNotificationListItem } from "./integrations/github/listitem/GithubNotificationListItem";
 import { SlackNotificationListItem } from "./integrations/slack/listitem/SlackNotificationListItem";
 import { Notification, NotificationListItemProps, NotificationSourceKind } from "./notification";
+import { APINotificationListItem } from "./integrations/api/listitem/APINotificationListItem";
 import { NotificationActions } from "./action/NotificationActions";
 import { Page, UniversalInboxPreferences } from "./types";
 import { useFetch } from "@raycast/utils";
@@ -78,6 +82,14 @@ function NotificationListItem({ notification, mutate }: NotificationListItemProp
       return <SlackNotificationListItem notification={notification} mutate={mutate} />;
     case NotificationSourceKind.Todoist:
       return <TodoistNotificationListItem notification={notification} mutate={mutate} />;
+    case NotificationSourceKind.TickTick:
+      return <TickTickNotificationListItem notification={notification} mutate={mutate} />;
+    case NotificationSourceKind.GoogleCalendar:
+      return <GoogleCalendarNotificationListItem notification={notification} mutate={mutate} />;
+    case NotificationSourceKind.GoogleDrive:
+      return <GoogleDriveNotificationListItem notification={notification} mutate={mutate} />;
+    case NotificationSourceKind.API:
+      return <APINotificationListItem notification={notification} mutate={mutate} />;
     default:
       return <DefaultNotificationListItem notification={notification} mutate={mutate} />;
   }
@@ -115,6 +127,10 @@ function NotificationKindDropdown({ value, onNotificationKindChange }: Notificat
         <List.Dropdown.Item key="GoogleMail" title="Google Mail" value="GoogleMail" />
         <List.Dropdown.Item key="Slack" title="Slack" value="Slack" />
         <List.Dropdown.Item key="Todoist" title="Todoist" value="Todoist" />
+        <List.Dropdown.Item key="TickTick" title="TickTick" value="TickTick" />
+        <List.Dropdown.Item key="GoogleCalendar" title="Google Calendar" value="GoogleCalendar" />
+        <List.Dropdown.Item key="GoogleDrive" title="Google Drive" value="GoogleDrive" />
+        <List.Dropdown.Item key="API" title="API" value="API" />
       </List.Dropdown.Section>
     </List.Dropdown>
   );

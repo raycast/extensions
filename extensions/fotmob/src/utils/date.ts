@@ -11,10 +11,22 @@ export function prettyDate(date: string) {
   yesterday.setDate(yesterday.getDate() - 1);
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const dayOfWeek = new Date(date).toLocaleDateString("en-US", { weekday: "short" });
-  const monthDay = new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const monthDayYear = new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  const time = new Date(date).toLocaleTimeString("en-US", { hour: "numeric", minute: "numeric" });
+  const dayOfWeek = new Date(date).toLocaleDateString("en-US", {
+    weekday: "short",
+  });
+  const monthDay = new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+  const monthDayYear = new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const time = new Date(date).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+  });
   if (isSameDay(today, date)) {
     return `${time}, today`;
   }

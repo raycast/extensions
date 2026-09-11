@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-code-config-switcher",
+  "title": "Claude Code Switcher",
+  "description": "Quickly switch between different Claude Code configurations and manage provider profiles",
+  "icon": "icon.png",
+  "author": "lavatorywang",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Profiles",
+      "description": "View and switch between Claude Code configuration profiles",
+      "mode": "view"
+    },
+    {
+      "name": "switch-profile",
+      "title": "Switch Profile",
+      "description": "Quickly switch to a different profile",
+      "mode": "view"
+    },
+    {
+      "name": "manage-mcp",
+      "title": "Manage MCP Servers",
+      "description": "Configure Model Context Protocol servers",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "configPath",
+      "title": "Config File Path",
+      "description": "Path to Claude Code settings.json file",
+      "type": "textfield",
+      "required": false,
+      "default": "~/.claude/settings.json",
+      "placeholder": "~/.claude/settings.json"
+    },
+    {
+      "name": "autoBackup",
+      "title": "Auto Backup",
+      "description": "Automatically backup config before switching",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Create backup before switching profiles"
+    },
+    {
+      "name": "confirmSwitch",
+      "title": "Confirm Switch",
+      "description": "Ask for confirmation before switching profiles",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show confirmation dialog"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

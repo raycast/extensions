@@ -1,30 +1,41 @@
 import { getSelectedText, LaunchProps, showToast, Toast, List, LocalStorage } from "@raycast/api";
 import { ColorConvertListItem } from "./components/ColorConvert";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function ConvertColor(props: LaunchProps) {
   const [colorText, setColorText] = useState<string | null>(props.arguments.text || null);
   const [lastConvertedColorFormat, setLastConvertedColorFormat] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(true);
+  // For Windows since strict mode causes useEffect to run twice,
+  // we need to make sure it only runs once to avoid flicker.
+  // Can be removed once strict mode option is added in Windows.
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    async function getLastConvertedColorFormat() {
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
+    async function getLastFormatAndText() {
+      setIsLoading(true);
       const lastFormat = await LocalStorage.getItem<string>("lastConvertedColorFormat");
       setLastConvertedColorFormat(lastFormat);
-    }
 
-    getLastConvertedColorFormat();
-
-    if (!colorText) {
-      getSelectedText()
-        .then(setColorText)
-        .catch(async () => {
+      if (!colorText) {
+        try {
+          const selectedText = await getSelectedText();
+          setColorText(selectedText);
+        } catch {
           await showToast({
             style: Toast.Style.Failure,
             title: "No text found.",
             message: "Select a color in any app, or provide it as an argument, then try again.",
           });
-        });
+        }
+      }
+      setIsLoading(false);
     }
+
+    getLastFormatAndText();
   }, []);
 
   const format = [
@@ -50,15 +61,16 @@ export default function ConvertColor(props: LaunchProps) {
     }
   }
 
-  if (!colorText) {
-    return <List isLoading={true} />;
-  }
-
   return (
-    <List>
-      {format.map((item) => (
-        <ColorConvertListItem key={item.value} text={colorText} title={item.title} value={item.value} />
-      ))}
+    <List isLoading={isLoading} searchBarPlaceholder="Search color formats...">
+      {colorText &&
+        format.map((item) => (
+          <ColorConvertListItem key={item.value} text={colorText} title={item.title} value={item.value} />
+        ))}
+      <List.EmptyView
+        title="No color found"
+        description="Select a valid color in any app, or provide it as an argument, then try again."
+      />
     </List>
   );
 }

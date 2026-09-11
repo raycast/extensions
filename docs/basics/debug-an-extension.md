@@ -20,7 +20,7 @@ const error = new Error("Boom 💥");
 console.error(error); // Prints: Boom 💥
 ```
 
-For more, checkout the [Node.js documentation](https://nodejs.org/dist/latest-v16.x/docs/api/console.html).
+For more, checkout the [Node.js documentation](https://nodejs.org/docs/latest-v22.x/api/console.html).
 
 We automatically disable console logging for store extensions.
 

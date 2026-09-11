@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-zabbix",
+  "title": "Zabbix",
+  "description": "Manage Zabbix Problems, Hosts, Triggers and Latest Data directly from Raycast. Perform common monitoring and maintenance tasks without opening a browser.",
+  "icon": "icon.png",
+  "author": "massimiliano_pasquini",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MassimilianoPasquini97/raycast_zabbix.git"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "mode": "view",
+      "name": "problems",
+      "title": "Problems",
+      "description": "Show Zabbix Problems"
+    },
+    {
+      "mode": "view",
+      "name": "hosts",
+      "title": "Hosts",
+      "description": "Show Zabbix Hosts"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.9.3"
+  }
+}

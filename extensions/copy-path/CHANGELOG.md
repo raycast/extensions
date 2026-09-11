@@ -1,5 +1,17 @@
 # Copy Path Changelog
 
+## [Update extension icon] - 2026-08-08
+
+- Updated the extension icon with a clear `~/` path mark designed to remain legible at Raycast's UI sizes.
+
+## [Fix VS Code active file copy] - 2026-05-28
+
+- Fixed copying the active file path from VS Code when AppleScript document lookup stalls.
+
+## [Support QSpace Pro] - 2026-05-11
+
+- Support copying selected item paths and the current location from QSpace Pro.
+
 ## [Fix browser support] - 2025-08-28
 
 - Fix support for browsers.

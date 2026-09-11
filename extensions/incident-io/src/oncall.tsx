@@ -7,19 +7,23 @@ interface Preferences {
 }
 
 interface User {
-  id: string;
-  name: string;
-  email: string;
+  id?: string;
+  name?: string;
+  email?: string;
 }
 
 interface CurrentShift {
-  user: User;
+  user?: User | null;
 }
 
 interface Schedule {
   id: string;
   name: string;
-  current_shifts: CurrentShift[];
+  current_shifts?: CurrentShift[] | null;
+}
+
+function isString(value: string | undefined): value is string {
+  return Boolean(value);
 }
 
 export default function CurrentOnCallCommand() {
@@ -59,8 +63,21 @@ export default function CurrentOnCallCommand() {
     fetchSchedules();
   }, [preferences.apiKey]);
 
+  function getCurrentShifts(schedule: Schedule): CurrentShift[] {
+    return Array.isArray(schedule.current_shifts) ? schedule.current_shifts : [];
+  }
+
+  function getCurrentResponderEmails(schedule: Schedule): string[] {
+    return getCurrentShifts(schedule)
+      .map((shift) => shift.user?.email)
+      .filter(isString);
+  }
+
   function getCurrentResponders(schedule: Schedule): string {
-    const responders = schedule.current_shifts.map((shift) => shift.user.name);
+    const responders = getCurrentShifts(schedule)
+      .map((shift) => shift.user?.name || shift.user?.email)
+      .filter(isString);
+
     return responders.length > 0 ? responders.join(", ") : "No one currently on-call";
   }
 
@@ -68,18 +85,17 @@ export default function CurrentOnCallCommand() {
     <List isLoading={loading} searchBarPlaceholder="Search schedules...">
       {schedules.map((schedule) => {
         const currentResponders = getCurrentResponders(schedule);
+        const currentResponderEmails = getCurrentResponderEmails(schedule);
+
         return (
           <List.Item
             key={schedule.id}
             title={schedule.name}
             subtitle={`On-call: ${currentResponders}`}
             actions={
-              schedule.current_shifts.length > 0 && (
+              currentResponderEmails.length > 0 && (
                 <ActionPanel>
-                  <Action.CopyToClipboard
-                    title="Copy On-Call Email(s)"
-                    content={schedule.current_shifts.map((shift) => shift.user.email).join(", ")}
-                  />
+                  <Action.CopyToClipboard title="Copy On-Call Email(s)" content={currentResponderEmails.join(", ")} />
                 </ActionPanel>
               )
             }

@@ -1,14 +1,43 @@
-import { exec } from "child_process";
+import { getDefaultApplication } from "@raycast/api";
 
-export function getMacOSDefaultBrowser() {
-  return new Promise<string>((resolve, reject) => {
-    const command = `defaults read ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure | awk -F'"' '/http;/{print window[(NR)-1]}{window[NR]=$2}'`;
-    exec(command, (error, stdout) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(stdout.trim() as string);
-      }
-    });
-  });
+import { BrowserApplication, getBrowserIdForApplication, listAvailableBrowsers } from "../hooks/useAvailableBrowsers";
+
+export async function getDefaultBrowserId(availableBrowsers?: BrowserApplication[]) {
+  const resolvedBrowsers = availableBrowsers ?? (await listAvailableBrowsers());
+
+  if (resolvedBrowsers.length === 0) {
+    return "";
+  }
+
+  if (resolvedBrowsers.length === 1) {
+    return resolvedBrowsers[0].browserId;
+  }
+
+  try {
+    const defaultApplication = await getDefaultApplication("https://raycast.com");
+    const browserId = getBrowserIdForApplication(defaultApplication);
+
+    if (browserId) {
+      return browserId;
+    }
+  } catch {
+    // Fall back to the first available browser if the system default cannot be resolved.
+  }
+
+  return resolvedBrowsers[0].browserId;
+}
+
+export async function getInitialBrowserSelection(availableBrowsers?: BrowserApplication[]) {
+  const resolvedBrowsers = availableBrowsers ?? (await listAvailableBrowsers());
+
+  if (resolvedBrowsers.length === 0) {
+    return [];
+  }
+
+  if (process.platform === "win32") {
+    return resolvedBrowsers.map((browser) => browser.browserId);
+  }
+
+  const defaultBrowserId = await getDefaultBrowserId(resolvedBrowsers);
+  return defaultBrowserId ? [defaultBrowserId] : [];
 }

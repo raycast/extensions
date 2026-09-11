@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { nanoid } from 'nanoid';
 import { CalendarEvent } from './types';
 import { getEndDate, getStartDate, preprocessQuery } from './dates';
+import { adjustDateForTimezone, extractTimezone } from './timezones';
 import osascript from 'osascript-tag';
 import Sherlock from 'sherlockjs';
 
@@ -45,7 +46,9 @@ export function useCalendar() {
         }
         query = query.replace(/@(?:\(([^)]+)\)|([^@\s]+))/, '');
 
-        const preprocessedQuery = preprocessQuery(query);
+        const { query: queryWithoutTz, timezone } = extractTimezone(query);
+
+        const preprocessedQuery = preprocessQuery(queryWithoutTz);
 
         const parsedEvent = Sherlock.parse(preprocessedQuery);
 
@@ -53,6 +56,7 @@ export function useCalendar() {
           ...parsedEvent,
           location: location,
           id: nanoid(),
+          timezone: timezone,
         };
 
         if (!event.startDate) {
@@ -61,6 +65,11 @@ export function useCalendar() {
 
         if (!event.endDate) {
           event.endDate = getEndDate(event.startDate);
+        }
+
+        if (timezone) {
+          event.startDate = adjustDateForTimezone(event.startDate, timezone);
+          event.endDate = adjustDateForTimezone(event.endDate, timezone);
         }
 
         setResults([event]);

@@ -10,7 +10,20 @@ This is a Raycast extension for [Oracle Cloud](https://cloud.oracle.com/). With 
     - View *Objects*
         - Delete *Object*
         - Upload *Object*
-* View **NoSQL Database** *Tables*
+- View **NoSQL Database** *Tables*
+- View **KMS** *Vaults*
+    - Create *Vault*
+    - View *Secrets*
+        - Create *Secret*
+        - View *Versions*
+            - View *Bundle*
+- View **Email** *Delivery*
+    - View *Email Domains*
+        - Create *Email Domain*
+        - Delete *Email Domain*
+    - View *Approved Senders*
+        - Create *Approved Sender*
+        - Delete *Approved Sender*
 
 ## 🚀 Getting Started
 

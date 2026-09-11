@@ -50,10 +50,10 @@
     "eslint-plugin-prettier": "^5.5.3",
     "eslint-plugin-react": "^7.37.5",
     "jsdom": "^26.1.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "prettier": "^3.5.3",
     "puppeteer": "^24.15.0",
-    "sharp": "^0.34.3",
+    "sharp": "^0.35.3",
     "typescript": "^5.8.2"
   },
   "scripts": {
@@ -63,5 +63,17 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "ws": "^8.21.0",
+    "js-yaml@4": "4.3.1",
+    "sharp": "^0.35.3",
+    "ip-address": "10.5.0"
   }
 }

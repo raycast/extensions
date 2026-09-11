@@ -15,7 +15,7 @@ AI Extensions aren't available on Windows for now.
 
 ## AI APIs
 
-Use our [AI APIs](../api-reference/ai.md) to generate content such as summaries, translations, and more. For example, the [Notion extension](https://raycast.com/notion/notion) uses `AI.ask(...)` as part of it's Quick Capture command to generate a summary of a website.
+Use our [AI APIs](../api-reference/ai.md) to generate content such as summaries, translations, and more. For example, the [Notion extension](https://raycast.com/notion/notion) uses `AI.ask(...)` as part of its Quick Capture command to generate a summary of a website.
 
 ## AI Extensions
 

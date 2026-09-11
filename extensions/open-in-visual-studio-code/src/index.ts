@@ -1,48 +1,40 @@
-import { getApplications, getPreferenceValues, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
-
-interface OpenVSCodePreferences {
-  VSCodeVariant: string;
-}
-
-/**
- * Gets the selected Finder window.
- * @throws — An error when Finder is not the frontmost application.
- * @returns A Promise that resolves with the selected Finder window's path.
- */
-const getSelectedFinderWindow = (): Promise<string> => {
-  const appleScript = `
-  if application "Finder" is running and frontmost of application "Finder" then
-    tell app "Finder"
-      set finderWindow to window 1
-      set finderWindowPath to (POSIX path of (target of finderWindow as alias))
-      return finderWindowPath
-    end tell
-  else 
-    error "Could not get the selected Finder window"
-  end if
- `;
-  return new Promise((resolve, reject) => {
-    const child = exec(`osascript -e '${appleScript}'`, (error, stdout, stderr) => {
-      if (error || stderr) reject(Error("Could not get the selected Finder window"));
-      resolve(stdout.trim());
-    });
-
-    child.on("close", () => {
-      child.kill();
-    });
-  });
-};
+import {
+  Application,
+  getApplications,
+  getPreferenceValues,
+  getSelectedFinderItems,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { getCurrentExplorerPath, getSelectedFileExplorerItems, getSelectedFinderWindow, isMac } from "./utils";
 
 export default async () => {
-  const preferences = getPreferenceValues<OpenVSCodePreferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const applications = await getApplications();
-  const vscodeApplication = applications.find((app) => app.bundleId === preferences.VSCodeVariant);
+  let vscodeApplication: Application | undefined;
+
+  const appNameMap = {
+    "com.microsoft.VSCode": "Visual Studio Code",
+    "com.microsoft.VSCodeInsiders": "Visual Studio Code - Insiders",
+    "com.vscodium": "VSCodium",
+    "com.todesktop.230313mzl4w4u92": "Cursor",
+  };
+
+  const appName = appNameMap[preferences.VSCodeVariant];
+
+  if (isMac) {
+    vscodeApplication = applications.find((app) => app.bundleId === preferences.VSCodeVariant);
+  } else {
+    if (appName) {
+      vscodeApplication = applications.find((app) => app.name.includes(appName));
+    }
+  }
 
   if (!vscodeApplication) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Visual Studio Code is not installed",
+      title: `${appName || "Code Editor"} is not installed`,
       primaryAction: {
         title: "Install Visual Studio Code",
         onAction: () => open("https://code.visualstudio.com/download"),
@@ -56,20 +48,25 @@ export default async () => {
   }
 
   try {
-    const selectedFinderItems = await getSelectedFinderItems();
-    if (selectedFinderItems.length) {
-      for (const finderItem of selectedFinderItems) {
-        await open(finderItem.path, vscodeApplication);
+    const selectedFileManagerItems = await (isMac ? getSelectedFinderItems() : getSelectedFileExplorerItems());
+
+    if (selectedFileManagerItems.length) {
+      for (const fileManagerItem of selectedFileManagerItems) {
+        await open(fileManagerItem.path, vscodeApplication);
       }
       return;
     }
-    const selectedFinderWindow = await getSelectedFinderWindow();
-    await open(selectedFinderWindow, vscodeApplication);
-    return;
-  } catch (error: any) {
+
+    const activeFileManagerPath = await (isMac ? getSelectedFinderWindow() : getCurrentExplorerPath());
+
+    if (!activeFileManagerPath) throw new Error();
+
+    await open(activeFileManagerPath, vscodeApplication);
+  } catch {
+    const fileManagerName = isMac ? "Finder" : "File Explorer";
     await showToast({
       style: Toast.Style.Failure,
-      title: "No Finder items or window selected",
+      title: `No ${fileManagerName} items or window selected`,
     });
   }
 };

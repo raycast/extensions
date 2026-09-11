@@ -1,5 +1,9 @@
 # WeChat Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [New Feature] - 2025-04-04
 
 - Manage WeChatTweak directly from Raycast

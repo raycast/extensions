@@ -1,4 +1,5 @@
 import { ActionPanel, List } from "@raycast/api";
+import type { Image } from "@raycast/api";
 import { Enhet } from "../types";
 import { formatAddress } from "../utils/format";
 import { getEntityIcon, isFavorite, getFavoriteEntity } from "../utils/entity";
@@ -9,6 +10,7 @@ interface SearchResultsProps {
   entities: Enhet[];
   favoriteIds: Set<string>;
   favoriteById: Map<string, Enhet>;
+  getSearchFavicon: (orgNumber: string) => Image.ImageLike | undefined;
   onViewDetails: (entity: Enhet) => void;
   onAddFavorite: (entity: Enhet) => void;
   onRemoveFavorite: (entity: Enhet) => void;
@@ -21,6 +23,7 @@ export default function SearchResults({
   entities,
   favoriteIds,
   favoriteById,
+  getSearchFavicon,
   onViewDetails,
   onAddFavorite,
   onRemoveFavorite,
@@ -28,6 +31,16 @@ export default function SearchResults({
   onResetToFavicon,
   onRefreshFavicon,
 }: SearchResultsProps) {
+  const displayItems = entities.map((entity) => {
+    const addressString = formatAddress(entity.forretningsadresse);
+    const alreadyFavorite = isFavorite(entity, favoriteIds);
+    const fav = getFavoriteEntity(entity, favoriteById);
+    const searchFavicon = getSearchFavicon(entity.organisasjonsnummer);
+    const itemIcon = getEntityIcon(fav || entity, searchFavicon);
+
+    return { entity, addressString, alreadyFavorite, fav, itemIcon };
+  });
+
   if (entities.length === 0) {
     return (
       <List.Section title="Search Results">
@@ -47,12 +60,7 @@ export default function SearchResults({
 
   return (
     <List.Section title="Results">
-      {entities.map((entity) => {
-        const addressString = formatAddress(entity.forretningsadresse);
-        const alreadyFavorite = isFavorite(entity, favoriteIds);
-        const fav = getFavoriteEntity(entity, favoriteById);
-        const itemIcon = getEntityIcon(fav || entity);
-
+      {displayItems.map(({ entity, addressString, alreadyFavorite, fav, itemIcon }) => {
         return (
           <List.Item
             key={entity.organisasjonsnummer}
@@ -62,18 +70,7 @@ export default function SearchResults({
             accessories={addressString ? [{ text: addressString }] : []}
             actions={
               <ActionPanel>
-                <EntityActions
-                  entity={entity}
-                  addressString={addressString}
-                  onViewDetails={onViewDetails}
-                  onCopyOrgNumber={() => {
-                    // Show success toast - clipboard is handled by Action.CopyToClipboard
-                  }}
-                  onCopyAddress={() => {
-                    // Show success toast - clipboard is handled by Action.CopyToClipboard
-                  }}
-                  onOpenInBrowser={() => {}}
-                />
+                <EntityActions entity={entity} addressString={addressString} onViewDetails={onViewDetails} />
                 <SearchResultActions
                   entity={entity}
                   isFavorite={alreadyFavorite}

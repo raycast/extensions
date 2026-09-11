@@ -1,5 +1,4 @@
 import { getApiKey } from "./key";
-import fetch from "node-fetch";
 import { API_URL, getHeaders } from "../config";
 
 export interface emailObject {

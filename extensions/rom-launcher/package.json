@@ -1,0 +1,153 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rom-launcher",
+  "title": "ROM Launcher",
+  "categories": ["Applications"],
+  "description": "Launch your retro game collection with cover art, achievements, and play stats - supports RetroArch, MAME, DuckStation, and more.",
+  "icon": "rllogo.png",
+  "author": "glct26",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Browse ROMs",
+      "description": "View your game library, check achievements, and launch games",
+      "mode": "view"
+    },
+    {
+      "name": "manage-libraries",
+      "title": "Manage Libraries",
+      "description": "Add and configure ROM folders and emulator cores",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "retroarchPath",
+      "title": "RetroArch Executable",
+      "description": "Select the RetroArch application or executable file.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "coresPath",
+      "type": "directory",
+      "required": false,
+      "title": "RetroArch Cores Directory",
+      "description": "Select the folder containing libretro cores (Leave empty if using default Windows folder structure)"
+    },
+    {
+      "name": "mamePath",
+      "title": "MAME Executable",
+      "description": "Select the standalone MAME executable file.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "openEmuPath",
+      "title": "OpenEmu App",
+      "description": "Select the OpenEmu.app file (macOS only).",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "duckstationPath",
+      "title": "DuckStation Executable",
+      "description": "Select the standalone DuckStation application or executable file.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "dolphinPath",
+      "title": "Dolphin Executable",
+      "description": "Select the standalone Dolphin application or executable file.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "pcsx2Path",
+      "title": "PCSX2 Executable",
+      "description": "Select the standalone PCSX2 executable file.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "ppssppPath",
+      "title": "PPSSPP Executable",
+      "description": "Select the standalone PPSSPP executable file.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "showDetails",
+      "title": "View Options",
+      "label": "Show Game Details",
+      "description": "Show cover arts and game details in a side panel. Disabling saves bandwidth.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "retroAchievementsUsername",
+      "title": "RetroAchievements Username",
+      "description": "Your RetroAchievements.org username (optional).",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "retroAchievementsApiKey",
+      "title": "RetroAchievements API Key",
+      "description": "Your RetroAchievements.org Web API Key (optional).",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "updateInterval",
+      "title": "Database Update Frequency",
+      "description": "How often to update the background ROM database (approx. 5-10 MB per sync).",
+      "type": "dropdown",
+      "default": "monthly",
+      "required": false,
+      "data": [
+        { "title": "Daily", "value": "daily" },
+        { "title": "Weekly", "value": "weekly" },
+        { "title": "Monthly", "value": "monthly" },
+        { "title": "Never (Manual Only)", "value": "never" }
+      ]
+    },
+    {
+      "name": "customDatabaseUrl",
+      "title": "Custom Database URL",
+      "description": "Optional: Override the default database URL with your own JSON link.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "screenshots": [
+    { "path": "metadata/1.png", "title": "Manage Libraries" },
+    { "path": "metadata/2.png", "title": "Game Details" },
+    { "path": "metadata/3.png", "title": "Filters" },
+    { "path": "metadata/4.png", "title": "Achievement Details" },
+    { "path": "metadata/5.png", "title": "Add Library" },
+    { "path": "metadata/6.png", "title": "Searching" },
+    { "path": "metadata/7.png", "title": "Achievements List" }
+  ],
+  "platforms": ["macOS", "Windows"]
+}

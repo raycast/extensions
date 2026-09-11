@@ -1,6 +1,6 @@
-import { EnvProps } from "./../types";
+import { EnvProps } from "@src/types";
 import { useContext } from "react";
-import { EnvironmentContext } from "../contexts";
+import { EnvironmentContext } from "@src/contexts";
 
 export const useEnvContext = (): EnvProps => {
   const context = useContext(EnvironmentContext);

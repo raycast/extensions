@@ -96,7 +96,7 @@ export default function Watch() {
   }, [baseUrl]);
 
   function openDashboard() {
-    open("raycast://extensions/Olli0103/fronius-inverter/dashboard");
+    open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Olli0103/fronius-inverter/dashboard`);
   }
 
   // Build a minimal list for the menu bar.

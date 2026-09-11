@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon } from '@raycast/api';
+import { getPreferenceValues, Icon, Color } from '@raycast/api';
 import { DeployStatus, ServiceResponse } from './service';
 
 export function getKey() {
@@ -51,16 +51,25 @@ export function getDeployUrl(service: ServiceResponse, id: string) {
   return `${serviceUrl}/deploys/${id}`;
 }
 
-export function getDeployStatusIcon(status: DeployStatus): Icon | undefined {
+export function getDeployStatusIcon(status: DeployStatus): Icon {
   switch (status) {
+    case 'created':
+    case 'queued':
+      return Icon.Clock;
+    case 'build_in_progress':
+    case 'update_in_progress':
+    case 'pre_deploy_in_progress':
+      return Icon.ArrowClockwise;
     case 'live':
       return Icon.Checkmark;
     case 'deactivated':
-      return Icon.Circle;
+      return Icon.CircleDisabled;
     case 'canceled':
-      return Icon.Dot;
-    case 'build_failed':
       return Icon.XMarkCircle;
+    case 'build_failed':
+    case 'update_failed':
+    case 'pre_deploy_failed':
+      return Icon.ExclamationMark;
   }
 }
 
@@ -99,17 +108,62 @@ export function formatServiceType(service: ServiceResponse): string {
 
 export function formatDeployStatus(status: DeployStatus): string {
   switch (status) {
+    case 'created':
+      return 'Created';
+    case 'queued':
+      return 'Queued';
+    case 'build_in_progress':
+    case 'update_in_progress':
+      return 'Deploying...';
+    case 'pre_deploy_in_progress':
+      return 'Pre-deploy...';
     case 'live':
-      return 'live';
+      return 'Deployed';
     case 'deactivated':
-      return 'succeeded';
+      return 'Deactivated';
     case 'canceled':
-      return 'canceled';
+      return 'Canceled';
     case 'build_failed':
-      return 'failed';
+      return 'Build Failed';
+    case 'update_failed':
+      return 'Update Failed';
+    case 'pre_deploy_failed':
+      return 'Pre-deploy Failed';
+  }
+}
+
+export function getDeployStatusColor(status: DeployStatus): Color {
+  switch (status) {
+    case 'created':
+    case 'queued':
+      return Color.SecondaryText;
+    case 'build_in_progress':
+    case 'update_in_progress':
+    case 'pre_deploy_in_progress':
+      return Color.Blue;
+    case 'live':
+      return Color.Green;
+    case 'deactivated':
+      return Color.SecondaryText;
+    case 'canceled':
+      return Color.Orange;
+    case 'build_failed':
+    case 'update_failed':
+    case 'pre_deploy_failed':
+      return Color.Red;
   }
 }
 
 export function formatCommit(commit: string): string {
   return commit.split('\n')[0];
+}
+
+export function isDeployInProgress(status: DeployStatus): boolean {
+  return (
+    status === 'created' ||
+    status === 'queued' ||
+    status === 'build_in_progress' ||
+    status === 'update_in_progress' ||
+    status === 'pre_deploy_in_progress'
+  );
 }

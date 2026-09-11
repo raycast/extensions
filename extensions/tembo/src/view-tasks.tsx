@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { temboAPI, TEMBO_UI_BASE, type Issue } from "./api";
 import {
@@ -12,49 +12,53 @@ import {
 
 type FilterType = "all" | "active" | "recently-done" | "queued" | "open" | "closed" | "merged" | "failed";
 
-async function fetchIssues(): Promise<Issue[]> {
-  try {
-    const issues = await temboAPI.getIssues({
-      pageSize: 50,
-    });
-
-    issues.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    return issues;
-  } catch (error) {
-    console.error("Failed to fetch tasks:", error);
-
-    if (error instanceof Error && error.message.includes("401")) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Authentication Failed",
-        message: "Please check your API key in the extension preferences",
-      });
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load tasks",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-
-    return [];
-  }
-}
+const cache = new Cache();
+const ISSUES_CACHE_KEY = "tasks";
 
 export default function ViewTasks() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [issues, setIssues] = useState<Issue[]>([]);
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
+  const [issues, setIssues] = useState<Issue[]>(() => {
+    const cachedData = cache.get(ISSUES_CACHE_KEY);
+    return cachedData ? JSON.parse(cachedData) : [];
+  });
+
   useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      const data = await fetchIssues();
-      setIssues(data);
-      setIsLoading(false);
-    })();
+    const fetchIssues = async () => {
+      try {
+        setIsLoading(true);
+        const fetchedIssues = await temboAPI.getIssues({
+          pageSize: 30,
+        });
+
+        fetchedIssues.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        setIssues(fetchedIssues);
+        cache.set(ISSUES_CACHE_KEY, JSON.stringify(fetchedIssues));
+      } catch (error) {
+        console.error("Failed to fetch tasks:", error);
+
+        if (error instanceof Error && error.message.includes("401")) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Authentication Failed",
+            message: "Please check your API key in the extension preferences",
+          });
+        } else {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to load tasks",
+            message: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchIssues();
   }, []);
 
   const getFilteredIssues = (issues: Issue[], filter: FilterType) => {

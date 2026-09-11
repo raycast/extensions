@@ -1,5 +1,13 @@
 # Changelog
 
+## [Fix GitLab Nested Group URLs] - 2026-08-12
+
+- Preserve the complete repository path when opening GitLab projects in nested groups.
+
+## [1.1.4] - 2026-03-17
+
+- Add Windows support for opening projects in editor and terminal
+
 ## [1.1.3] - 2025-02-24
 
 - Stop transferring environment variables to opened applications

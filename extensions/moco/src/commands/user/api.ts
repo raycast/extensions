@@ -9,7 +9,7 @@ const userSchema = z.object({
 });
 
 const preferences = getPreferenceValues<Preferences>();
-axios.defaults.baseURL = `https:/${preferences.url_prefix}.mocoapp.com/api/v1`;
+axios.defaults.baseURL = `https://${preferences.url_prefix}.mocoapp.com/api/v1`;
 
 export const fetchUser = async (): Promise<User> => {
   const { data } = await axios.get("/session", {

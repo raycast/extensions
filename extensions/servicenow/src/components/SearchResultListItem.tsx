@@ -6,14 +6,15 @@ import ResultActions from "./ResultActions";
 import Actions from "./Actions";
 
 import { Data, Field, Record } from "../types";
-import useInstances from "../hooks/useInstances";
 import FavoriteForm from "./FavoriteForm";
+import { expandKeywords } from "../utils/expandKeywords";
 
 export default function SearchResultListItem({
   result,
   icon,
   label,
   fields,
+  instanceUrl,
   favoriteId,
   revalidateSearchResults,
   addUrlToFavorites,
@@ -24,21 +25,16 @@ export default function SearchResultListItem({
   icon: Action.Props["icon"];
   label: string;
   fields: Field[];
+  instanceUrl: string;
   favoriteId: string;
   revalidateSearchResults: () => void;
   addUrlToFavorites: (title: string, url: string, groupId?: string, revalidate?: () => void) => void;
   removeFromFavorites: (id: string, title: string, isGroup: boolean, revalidate?: () => void) => Promise<void>;
   revalidateFavorites: () => void;
 }) {
-  const { selectedInstance } = useInstances();
-
-  const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
-
   const dataKeys = keys(result.data);
   const accessories: List.Item.Accessory[] = [];
-  const title = result.metadata.title?.split(/\s|\n/);
-  const description = result.metadata.description?.split(/\s|\n/);
-  let keywords = [label, ...(title ?? []), ...(description ?? [])];
+  let keywords = expandKeywords(label, result.metadata.title, result.metadata.description);
 
   let name;
   if (result.table == "u_documate_page" || result.table == "u_documate_workspace") {
@@ -50,7 +46,7 @@ export default function SearchResultListItem({
       tintColor: dataIcon ? null : Color.SecondaryText,
     };
 
-    keywords = keywords.concat((result.data.u_workspace?.display ?? "").split(/\s|\n/));
+    keywords = keywords.concat(expandKeywords(result.data.u_workspace?.display));
     accessories.push({
       tag: {
         value: result.data.u_workspace?.display,
@@ -95,7 +91,7 @@ export default function SearchResultListItem({
       const dataKeyResult = result.data[dataKey as keyof Data];
       if (dataKey && dataKeyResult && dataKeyResult.display) {
         const value = dataKeyResult.display;
-        keywords = keywords.concat(value.split(/\s|\n/));
+        keywords = keywords.concat(expandKeywords(value));
         accessories.push({
           tag: {
             value,

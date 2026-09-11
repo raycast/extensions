@@ -7,7 +7,7 @@ import { getNextReminder } from "./utils/getNextReminder";
 import { Reminder } from "./types/reminder";
 import { buildException } from "./utils/buildException";
 
-const addReminderDeeplink = `raycast://extensions/comoser/simple-reminder/index`;
+const addReminderDeeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/comoser/simple-reminder/index`;
 const raycastApplication = { name: "Raycast", path: "/Applications/Raycast.app" };
 const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
 const MAX_TOPIC_LENGTH = 30;

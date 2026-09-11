@@ -76,11 +76,11 @@ export class NodeModuleService {
       const globPattern = "**/node_modules";
       return await fg(globPattern, {
         cwd: rootFolder,
-        deep: scanDepth,
+        ...(scanDepth !== -1 && { deep: scanDepth }),
         onlyDirectories: true,
         absolute: true,
         stats: true,
-        ignore: ["**/node_modules/*"],
+        ignore: ["**/node_modules/**/node_modules"],
         dot: true,
         followSymbolicLinks: false,
         unique: true,

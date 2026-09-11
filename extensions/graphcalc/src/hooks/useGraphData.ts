@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { evaluate } from "mathjs";
 import { showToast, Toast, Color, LocalStorage } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import {
   parseExpression,
   percentile,
@@ -86,13 +87,8 @@ export function useGraphData(expression: string) {
         });
       } catch (error) {
         setResult(null);
-        setError("Invalid expression. Please check the syntax.");
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Calculation Error",
-          message:
-            "The expression could not be evaluated. Please check the syntax.",
-        });
+        setError("Invalid expression. Please check the syntax and try again.");
+        showFailureToast(error, { title: "Calculation Error" });
       }
     };
 
@@ -142,13 +138,8 @@ export function useGraphData(expression: string) {
       } catch (error) {
         console.error("Error in handleComplexExpression:", error);
         setResult(null);
-        setError("Invalid expression. Please check the syntax.");
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Evaluation Error",
-          message:
-            "The expression could not be evaluated. Please check the syntax.",
-        });
+        setError("Invalid expression. Please check the syntax and try again.");
+        showFailureToast(error, { title: "Evaluation Error" });
       } finally {
         closeGeneratingToast();
       }
@@ -181,13 +172,8 @@ export function useGraphData(expression: string) {
       setError(null);
     } catch (error) {
       console.error("Error updating dataSegments:", error);
-      setError("Invalid expression. Please check the syntax.");
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Evaluation Error",
-        message:
-          "The expression could not be evaluated. Please check the syntax.",
-      });
+      setError("Invalid expression. Please check the syntax and try again.");
+      showFailureToast(error, { title: "Evaluation Error" });
     }
   }, [xMin, xMax, yMin, yMax, expression]);
 

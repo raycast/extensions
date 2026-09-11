@@ -73,7 +73,7 @@ export const createEpisodeMarkdown = (episode: TraktEpisodeListItem, show?: Trak
 
 export const createMovieMetadata = (
   movie: TraktMovieBaseItem | TraktMovieListItem | TraktMovieHistoryListItem,
-): JSX.Element => {
+): Detail.Props["metadata"] => {
   const movieData = "movie" in movie ? movie.movie : movie;
   const baseFields = getMovieMetadataFields(movieData);
   return (
@@ -120,7 +120,10 @@ export const createMovieMetadata = (
   );
 };
 
-export const createEpisodeMetadata = (episode: TraktEpisodeListItem, show: TraktShowBaseItem): JSX.Element => {
+export const createEpisodeMetadata = (
+  episode: TraktEpisodeListItem,
+  show: TraktShowBaseItem,
+): Detail.Props["metadata"] => {
   const episodeFields = getEpisodeMetadataFields(episode);
   const showFields = getShowMetadataFields(show);
   return (

@@ -1,6 +1,6 @@
-import { LaunchProps, Toast, showToast, getPreferenceValues } from "@raycast/api";
-import { getInstagramStoryURL, handleDownload } from "./download-media";
+import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { homedir } from "os";
+import { getInstagramStoryURL, handleDownload, mediaExtensionAndId, showErrorToast } from "./download-media";
 
 export default async function Command({
   arguments: { instagramUrl },
@@ -11,11 +11,7 @@ export default async function Command({
   const downloadFolder = mediaDownloadPath || `${homedir()}/Downloads`;
 
   if (!instagramUrl.includes("instagram.com")) {
-    await showToast({
-      title: "Error",
-      message: "Invalid URL provided. Please provide a valid instagram URL",
-      style: Toast.Style.Failure,
-    });
+    await showErrorToast("Error", "Invalid URL provided. Please provide a valid instagram URL");
     return;
   }
 
@@ -24,60 +20,61 @@ export default async function Command({
     const pathParts = parsedUrl.pathname.replace(/^\/+|\/+$/g, "").split("/");
 
     if ((pathParts.length !== 2 && pathParts.length !== 3) || pathParts[0] !== "stories") {
-      await showToast({
-        title: "Error",
-        message: "Invalid Instagram story URL format.",
-        style: Toast.Style.Failure,
-      });
+      await showErrorToast("Error", "Invalid Instagram story URL format.");
       return;
     } else if (instagramUrl.includes("highlights")) {
-      await showToast({
-        title: "Error",
-        message: "Please use the highlight story command to download highlight stories.",
-        style: Toast.Style.Failure,
-      });
+      await showErrorToast("Error", "Please use the highlight story command to download highlight stories.");
       return;
     }
-
-    const username = pathParts[1];
 
     await showToast({
       title: "Fetching Story",
       style: Toast.Style.Animated,
     });
 
-    const instagramStories = await getInstagramStoryURL(username);
+    const instagramStories = await getInstagramStoryURL(instagramUrl);
 
-    if (!instagramStories) {
-      throw new Error("No story found at the provided URL");
+    if (instagramStories === null) {
+      // Helper already showed a failure toast.
+      return;
     }
 
-    let storyUrl = "";
-    if (pathParts.length === 2) {
-      storyUrl = instagramStories[0];
-    } else {
-      for (const story of instagramStories) {
-        if (story.includes(pathParts[2])) {
-          storyUrl = story;
-          break;
-        }
-      }
+    if (instagramStories.length === 0) {
+      await showErrorToast("Error", "No story found at the provided URL");
+      return;
     }
+
+    const requestedStoryId = pathParts[2];
+    const storyUrl = requestedStoryId ? findRequestedStoryUrl(instagramStories, requestedStoryId) : instagramStories[0];
 
     if (!storyUrl) {
-      throw new Error("No story found at the provided URL");
+      await showErrorToast(
+        "Error",
+        requestedStoryId
+          ? "Could not match the requested story. Please try the profile story URL instead."
+          : "No story found at the provided URL",
+      );
+      return;
     }
 
-    const mediaExtension = storyUrl.includes(".jpg") ? ".jpg" : ".mp4";
-    const fileId = storyUrl.includes(".jpg")
-      ? storyUrl.split(".jpg")[0].split("/").pop()
-      : storyUrl.split(".mp4")[0].split("/").pop();
-    await handleDownload(storyUrl, fileId || "instagram-story", downloadFolder, mediaExtension);
+    const { ext, fileId } = mediaExtensionAndId(storyUrl);
+    await handleDownload(storyUrl, fileId || "instagram-story", downloadFolder, ext);
   } catch (error) {
-    await showToast({
-      title: "Error",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-      style: Toast.Style.Failure,
-    });
+    const message = error instanceof Error ? error.message : "Unknown error occurred";
+    await showErrorToast("Error", message);
+  }
+}
+
+function findRequestedStoryUrl(storyUrls: string[], storyId: string) {
+  return storyUrls.find((story) => storyMatchesRequestedId(story, storyId));
+}
+
+function storyMatchesRequestedId(storyUrl: string, storyId: string) {
+  if (storyUrl.includes(storyId)) return true;
+
+  try {
+    return decodeURIComponent(storyUrl).includes(storyId);
+  } catch {
+    return false;
   }
 }

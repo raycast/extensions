@@ -1,5 +1,12 @@
 # Pins Changelog
 
+## [1.10.0 - Group Quicklinks and URL Workflows] - 2026-08-14
+
+- Added a no-view command for opening all pins in a group.
+- Added actions to create a Quicklink or copy a deeplink for a group.
+- Added an optional preferred browser per group, with per-pin application settings taking precedence.
+- Added fast bulk import for newline-separated URLs into a selected group.
+
 ## [1.9.0 - Pin Aliases & Per-Group Display Setting] - 2024-07-21
 
 - Added setting for pin aliases.

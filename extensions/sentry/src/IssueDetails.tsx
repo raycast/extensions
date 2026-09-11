@@ -96,7 +96,9 @@ function formatException(lastEvent?: Event) {
     return "";
   }
 
-  const exception = lastEvent.entries.find((entry) => entry.type === "threads") as Exception | undefined;
+  const exception = lastEvent.entries.find((entry) => entry.type === "exception" || entry.type === "threads") as
+    | Exception
+    | undefined;
   if (!exception) {
     return "";
   }
@@ -106,7 +108,12 @@ function formatException(lastEvent?: Event) {
     return "";
   }
 
-  const fomattedException = lastException.stacktrace.frames
+  const frames = lastException.stacktrace?.frames;
+  if (!frames?.length) {
+    return "";
+  }
+
+  const fomattedException = frames
     .filter((frame) => frame.inApp)
     .map((frame) => `- ${frame.function} _(${frame.filename}:${frame.lineNo})_`)
     .reverse()

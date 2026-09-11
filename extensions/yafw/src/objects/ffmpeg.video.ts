@@ -68,4 +68,29 @@ export class FfmpegVideo implements Video {
       await new FsFile(path.join(sourceDirPath, "transforms.trf")).remove();
     }
   };
+
+  trim: Video["trim"] = async (options) => {
+    const { startTime, endTime, duration } = options;
+
+    const videoPath = this.file.path();
+    const sourceDirPath = path.dirname(videoPath);
+    const extension = this.file.extension();
+    const targetVideoPath = path.join(sourceDirPath, this.file.nextName({ extension }));
+
+    // Put -ss before -i for faster seeking with -c copy
+    const inputOptions: (string | undefined)[] = [`-ss ${startTime}`];
+
+    const params: (string | undefined)[] = [
+      duration ? `-t ${duration}` : undefined,
+      endTime ? `-to ${endTime}` : undefined,
+      "-c copy",
+    ];
+
+    await this.ffmpeg.exec({
+      input: videoPath,
+      inputOptions: inputOptions.filter((param) => param != null),
+      params: params.filter((param) => param != null),
+      output: targetVideoPath,
+    });
+  };
 }

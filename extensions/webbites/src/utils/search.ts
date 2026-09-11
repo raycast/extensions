@@ -1,49 +1,36 @@
 // utils/search.ts - Refactored
 
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, openExtensionPreferences } from "@raycast/api";
 import { getSimpleCurrentUser } from "./userHelpers";
 import { showFailureToast } from "@raycast/utils";
-import axios from "axios";
 import { SearchOptions, SearchResult } from "../types";
+import { API_ENDPOINTS, BACKEND_API_URL } from "./env";
+// import { generateKey } from "./auth";
 
 // Constants
 const SESSION_TOKEN_KEY = "webbites_session_token";
-const API_URL = "https://api.webbites.io/search";
+const API_URL = `${BACKEND_API_URL}${API_ENDPOINTS.SEARCH}`;
 
 /**
  * Performs a search request to the WebBites API
  * @param options Search options including term, filters, sorting, and pagination
  * @returns Promise resolving to search results
  */
-export const search = async (
-  options: SearchOptions = {},
-): Promise<SearchResult> => {
+export const search = async (options: SearchOptions = {}): Promise<SearchResult> => {
   try {
     // Extract and set default options
-    const {
-      searchTerm,
-      orderBy = "relevance",
-      page = 0,
-      hitsPerPage = 20,
-    } = options;
+    const { searchTerm, orderBy = "relevance", page = 0, hitsPerPage = 20 } = options;
 
     // Get authentication information
     const { userId, sessionToken } = await getAuthInfo();
 
     // Make the search request
-    const response = await makeSearchRequest(
-      searchTerm || "",
-      userId,
-      sessionToken,
-      orderBy,
-      page,
-      hitsPerPage,
-    );
-
-    return response.data.search;
+    const response = await makeSearchRequest(searchTerm || "", userId, sessionToken, orderBy, page, hitsPerPage);
+    const data = await response.json();
+    return data.search as SearchResult;
   } catch (error) {
-    console.error("Search error:", error);
-    handleSearchError(error as Error);
+    console.error("Search error 1:", error);
+    await handleSearchError(error as Error);
     throw error;
   }
 };
@@ -89,8 +76,16 @@ const getAuthInfo = async (): Promise<{
  * @param page Page number
  * @param hitsPerPage Items per page
  * @param filters Additional filters
- * @returns Axios response
+ * @returns Fetch Response
  */
+class HttpError extends Error {
+  response: Response;
+  constructor(response: Response) {
+    super(`Request failed with status ${response.status}`);
+    this.name = "HttpError";
+    this.response = response;
+  }
+}
 const makeSearchRequest = async (
   query: string,
   userId: string | null,
@@ -99,51 +94,82 @@ const makeSearchRequest = async (
   page: number,
   hitsPerPage: number,
 ) => {
-  return await axios({
-    method: "post",
-    url: API_URL,
+  const response = await fetch(API_URL, {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Parse-Session-Token": sessionToken,
+      Authorization: `Bearer ${sessionToken}`,
     },
-    data: {
+    body: JSON.stringify({
       query,
       acl: userId,
       orderBy,
       page,
       hitsPerPage,
       filters: null,
-    },
+    }),
   });
+
+  if (!response.ok) {
+    throw new HttpError(response);
+  }
+  return response;
 };
 
 /**
  * Handle search errors
  * @param error Error object
  */
-const handleSearchError = (error: Error) => {
-  if (axios.isAxiosError(error) && error.response) {
-    console.error(
-      "Server responded with:",
-      error.response.status,
-      error.response.data,
-    );
+const handleSearchError = async (error: unknown) => {
+  const err = error as { response?: Response };
+  const response = err?.response;
 
-    // Show appropriate error message based on status code
-    if (error.response.status === 401) {
-      showFailureToast(error, {
-        title: "Authentication failed",
+  if (response instanceof Response) {
+    console.error("Server responded with:", response.status);
+
+    let errorData: { message?: string } | null = null;
+    try {
+      // Clone before parsing to avoid locking the body
+      errorData = await response.clone().json();
+    } catch {
+      // Ignore JSON parse errors
+    }
+
+    if (response.status === 401) {
+      // try {
+      //   const { sessionToken } = await getAuthInfo();
+      //   const key = await generateKey(sessionToken);
+      //   console.log("Generated new key:", key);
+      // } catch (e) {
+      //   console.error("Key generation failed:", e);
+      // }
+      showFailureToast(error as Error, {
+        title: "Session expired",
+        message: "Your session has expired. Please re-enter your credentials to continue.",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: async () => {
+            // Clear session token and user data to force fresh login
+            await LocalStorage.removeItem(SESSION_TOKEN_KEY);
+            await LocalStorage.removeItem("webbites_user_data");
+            openExtensionPreferences();
+          },
+        },
       });
-    } else if (error.response.status === 429) {
-      showFailureToast(error, {
+    } else if (response.status === 429) {
+      showFailureToast(error as Error, {
         title: "Too many requests",
         message: "Please try again later",
       });
     } else {
-      showFailureToast(error, {
+      showFailureToast(error as Error, {
         title: "Search failed",
-        message: error.response.data?.message || "Please try again",
+        message: errorData?.message || `HTTP ${response.status}: ${response.statusText}`,
       });
     }
+  } else {
+    showFailureToast(error as Error, {
+      title: "Search failed",
+    });
   }
 };

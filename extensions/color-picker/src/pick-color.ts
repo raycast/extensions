@@ -2,17 +2,25 @@ import { Clipboard, closeMainWindow, launchCommand, LaunchType, getPreferenceVal
 import { showFailureToast } from "@raycast/utils";
 import { callbackLaunchCommand } from "raycast-cross-extension";
 import colorNamer from "color-namer";
-import { pickColor } from "swift:../swift/color-picker";
-import { addToHistory } from "./history";
-import { Color, PickColorCommandLaunchProps } from "./types";
-import { getFormattedColor, getColorByProximity } from "./utils";
+import { addToHistory } from "./lib/history";
+import { Color, PickColorCommandLaunchProps } from "./lib/types";
+import { getFormattedColor, getColorByProximity, isMac } from "./lib/utils";
 
-export default async function command(props: PickColorCommandLaunchProps) {
+export default async function Command(props: PickColorCommandLaunchProps) {
   const { showColorName } = getPreferenceValues<Preferences.PickColor>();
   await closeMainWindow();
 
   try {
-    const pickedColor = (await pickColor()) as Color | undefined;
+    let pickColor: () => Promise<Color | undefined | null>;
+    if (isMac) {
+      const { pickColor: pickColorSwift } = await import("swift:../swift/color-picker");
+      pickColor = pickColorSwift;
+    } else {
+      const { pick_color: pickColorRust } = await import("rust:../rust/color-picker");
+      pickColor = pickColorRust as () => Promise<Color | undefined | null>;
+    }
+
+    const pickedColor = (await pickColor()) as Color | undefined | null;
     if (!pickedColor) {
       return;
     }
@@ -47,11 +55,13 @@ export default async function command(props: PickColorCommandLaunchProps) {
       }
     }
 
-    try {
-      await launchCommand({ name: "menu-bar", type: LaunchType.Background });
-    } catch (e) {
-      if (!(e instanceof Error && e.message.includes("must be activated"))) {
-        await showFailureToast(e);
+    if (isMac) {
+      try {
+        await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+      } catch (e) {
+        if (!(e instanceof Error && e.message.includes("must be activated"))) {
+          await showFailureToast(e);
+        }
       }
     }
 

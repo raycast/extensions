@@ -1,10 +1,10 @@
 instructions: |
   You are an AI assistant for @ Profile, a Raycast extension for quickly opening profiles on social apps. 
-  
+
   CRITICAL: You have TWO main tools available:
   1. `open` tool - for opening profiles on social apps
   2. `history` tool - for retrieving profile history and recent activity
-  
+
   ALWAYS use the appropriate tool based on the user's request. When a user asks to open a profile or mentions social media handles, follow these guidelines:
 
   # Primary Function
@@ -29,7 +29,7 @@ instructions: |
   - threads, x, github, instagram, raycast, facebook, reddit, youtube
   - Custom apps may also be available
   - Note: linkedin and tiktok may be disabled in some configurations
-  
+
   # app handling:
   - Convert "twitter" to "x"
   - Remove @ symbols from profiles before calling the tool
@@ -42,17 +42,26 @@ instructions: |
   - When users ask about profile history, recent activity, or browsing history
   - NEVER try to search the web or use other tools for history queries
   - ALWAYS call the history tool first before providing any response about profile history
-  
+
   ### History tool parameters:
+  - `action`: One of `list`, `star`, `unstar`, `list_starred` (optional, defaults to `list`)
+    - `list`: Return recent history (existing behavior)
+    - `star`: Star a specific app+profile pair (requires `profile` + `app`)
+    - `unstar`: Unstar a specific app+profile pair (requires `profile` + `app`)
+    - `list_starred`: Return starred app+profile pairs (optional `app`, optional `limit`)
+  - `profile`: Required for `star` and `unstar` actions
   - `app`: Filter by specific app name (optional, lowercase) - use this when user mentions a specific app
   - `limit`: Number of results to return (optional, defaults to 10)
-  
+
   ### Examples of when to use history tool:
   - "What profiles have I opened on Threads recently?" → Call history tool with app: "threads"
   - "What profiles have I opened recently?" → Call history tool with no app filter
   - "Show me my recent profile history" → Call history tool
   - "What profile sounds like chrissy?" → Call history tool and search the results
-  
+  - "Star @chris on instagram" → Call history tool with `action: "star"`, `profile: "chris"`, `app: "instagram"`
+  - "Unstar chris on bluesky" → Call history tool with `action: "unstar"`, `profile: "chris"`, `app: "bluesky"`
+  - "Show my starred profiles" → Call history tool with `action: "list_starred"`
+
   ### Important: For fuzzy matching queries, FIRST call the history tool to get the data, then analyze the results
 
   # Response Guidelines
@@ -61,11 +70,12 @@ instructions: |
   - If app is unclear, ask for clarification
   - Use the exact profile name and app as provided by the user
   - For history queries, reference past profile visits and provide helpful summaries
+  - For star/unstar requests, always treat stars as app+profile specific (not global by profile)
 
 evals:
   - input: "@at-profile open raycast on instagram"
     mocks:
-      open: "Successfully called \"open\""
+      open: 'Successfully called "open"'
     expected:
       - callsTool:
           name: "open"
@@ -75,7 +85,7 @@ evals:
 
   - input: "@at-profile open chrismessina on x"
     mocks:
-      open: "Successfully called \"open\""
+      open: 'Successfully called "open"'
     expected:
       - callsTool:
           name: "open"
@@ -84,54 +94,54 @@ evals:
             app: "x"
 
   # Extended evals for new functionality
-  
+
   # Opening profile with stored profile suggestion
   - input: "@at-profile open testuser1 on threads"
     mocks:
-      open: "Successfully called \"open\""
+      open: 'Successfully called "open"'
     expected:
       - callsTool:
           name: "open"
           arguments:
             profile: "testuser1"
             app: "threads"
-            
+
   # Opening profile with profile from history
   - input: "@at-profile open demoaccount on github"
     mocks:
-      open: "Successfully called \"open\""
+      open: 'Successfully called "open"'
     expected:
       - callsTool:
           name: "open"
           arguments:
             profile: "demoaccount"
             app: "github"
-            
+
   # Disabled app should not be available (linkedin disabled in test-settings)
   - input: "@at-profile open chrismessina on linkedin"
     mocks:
       open: "App 'linkedin' not found or not enabled"
     expected:
       - includes: "not available"
-              
+
   # TikTok is also disabled in test-settings
   - input: "@at-profile open user on tiktok"
     mocks:
       open: "App 'tiktok' not found or not enabled"
     expected:
       - includes: "not available"
-              
+
   # Custom app from test-settings should work
   - input: "@at-profile open testuser on testplatform"
     mocks:
-      open: "Successfully called \"open\""
+      open: 'Successfully called "open"'
     expected:
       - callsTool:
           name: "open"
           arguments:
             profile: "testuser"
             app: "testplatform"
-            
+
   # Adding Threads to social apps (custom CRUD example)
   - input: "@at-profile Add Threads to the list of social apps"
     mocks:
@@ -142,14 +152,14 @@ evals:
           - includes: "add"
           - includes: "can't"
           - includes: "unable"
-      
+
   # Request for custom app that doesn't exist
   - input: "@at-profile open user on mastodon"
     mocks:
       open: "App 'mastodon' not found or not enabled"
     expected:
       - includes: "not available"
-      
+
   # History query: recently opened Threads profiles
   - input: "@at-profile What profiles have I opened on Threads recently?"
     mocks:
@@ -177,7 +187,11 @@ evals:
           name: "history"
           arguments:
             app: "linkedin"
-      - includes: "No profiles were recently opened on LinkedIn"
+      - or:
+          - includes: "No profiles were recently opened on LinkedIn"
+          - includes: "haven't opened any profiles on LinkedIn recently"
+          - includes: "No profiles have been opened recently on LinkedIn"
+          - includes: "No profiles have been recently opened on LinkedIn."
 
   # History query: general history without app filter
   - input: "@at-profile What profiles have I opened recently?"
@@ -187,15 +201,80 @@ evals:
       - callsTool:
           name: "history"
           arguments: {}
+
+  # Star a specific app+profile pair
+  - input: "@at-profile Star @chris on instagram"
+    mocks:
+      history: "Starred @chris on Instagram."
+    expected:
+      - callsTool:
+          name: "history"
+          arguments:
+            action: "star"
+            profile: "chris"
+            app: "instagram"
       - or:
-          - includes: "chrismessina"
-          - includes: "raycastapp"
-          - includes: "johndoe"
+          - includes: "Starred @chris on Instagram"
+          - includes: "starred @chris on Instagram"
+          - includes: "starred on Instagram"
+          - includes: "has been starred on Instagram"
+          - includes: "I have starred the profile @chris on Instagram for you."
+          - includes: 'I have starred the profile "chris" on Instagram.'
+
+  # Unstar a specific app+profile pair
+  - input: "@at-profile Unstar chris on bluesky"
+    mocks:
+      history: "Unstarred @chris on Bluesky."
+    expected:
+      - callsTool:
+          name: "history"
+          arguments:
+            action: "unstar"
+            profile: "chris"
+            app: "bluesky"
       - or:
-          - includes: "recently"
-          - includes: "recent"
-          - includes: "ago"
-          
+          - includes: "Unstarred @chris on Bluesky"
+          - includes: "unstarred @chris on Bluesky"
+          - includes: "unstarred on Bluesky"
+          - includes: "has been unstarred on Bluesky"
+          - includes: "Unstarred **chris** on Bluesky"
+          - includes: "I have unstarred the profile @chris on Bluesky for you."
+          - includes: 'I have unstarred the profile "chris" on Bluesky.'
+
+  # List all starred profiles
+  - input: "@at-profile Show my starred profiles"
+    mocks:
+      history: "Starred profiles:\n\n• chris on Instagram (2 hours ago)\n• chris on Bluesky (1 day ago)"
+    expected:
+      - callsTool:
+          name: "history"
+          arguments:
+            action: "list_starred"
+      - or:
+          - includes: "Starred profiles"
+          - includes: "chris on Instagram"
+          - includes: "chris on Bluesky"
+
+  # List starred profiles filtered by app
+  - input: "@at-profile Show my starred profiles on instagram"
+    mocks:
+      history: "Starred profiles on instagram:\n\n• chris on Instagram (2 hours ago)"
+    expected:
+      - callsTool:
+          name: "history"
+          arguments:
+            action: "list_starred"
+            app: "instagram"
+      - or:
+          - includes: "Starred @chris on Instagram"
+          - includes: "starred @chris on Instagram"
+          - includes: "starred on Instagram"
+          - includes: "has been starred on Instagram"
+          - includes: "Your starred profile on Instagram is:"
+          - includes: "Here are your starred profiles on Instagram:"
+          - includes: "I have starred the profile @chris on Instagram for you."
+          - includes: 'I have starred the profile "chris" on Instagram.'
+
   # History query: fuzzy matching for profile
   - input: "@at-profile What profile did I open recently that sounds like chrissy?"
     mocks:

@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { Registry } from '@scaleway/sdk'
+import type { Registryv1 } from '@scaleway/sdk'
 import { getNamespaceUrl } from './urls'
 
 type NamespaceActionProps = {
-  namespace: Registry.v1.Namespace
+  namespace: Registryv1.Namespace
   toggleIsDetailOpen: () => void
 }
 

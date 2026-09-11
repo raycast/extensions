@@ -9,7 +9,8 @@
     "sxn",
     "jasonshanks",
     "guide",
-    "janwvjaarsveld"
+    "janwvjaarsveld",
+    "mattiacolombomc"
   ],
   "categories": [
     "Developer Tools"
@@ -32,12 +33,26 @@
       "name": "create_new_session",
       "title": "Create New Session",
       "description": "Create New Tmux Session",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "sessionName",
+          "placeholder": "Session Name",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "manage_tmux_windows",
       "title": "Manage Tmux Windows",
       "description": "Manage Tmux Windows that user can switch or delete any tmux window from here",
+      "mode": "view"
+    },
+    {
+      "name": "search_session_output",
+      "title": "Search Session Output",
+      "description": "Search commands and printed output across the scrollback of all tmux sessions",
       "mode": "view"
     }
   ],
@@ -49,19 +64,45 @@
       "placeholder": "Select a directory",
       "type": "directory",
       "required": false
+    },
+    {
+      "name": "defaultStartupCommand",
+      "description": "Command executed inside newly created sessions, e.g. a dev server or an AI coding agent",
+      "title": "New Session Startup Command",
+      "placeholder": "e.g. claude or npm run dev",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "createFolderByDefault",
+      "description": "Pre-check 'Create New Folder' in the Create New Session form",
+      "label": "Create New Folder by Default",
+      "title": "New Session Folder",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "openAfterCreate",
+      "description": "Make opening the new session in a terminal tab/window the default submit action of Create New Session",
+      "label": "Open in Terminal After Create",
+      "title": "After Creating a Session",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
+    "@raycast/api": "^1.104.23",
     "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
+    "@types/react": "^19.2.17",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "react": "^18.2.0",
+    "react": "^19.2.8",
     "typescript": "^5.4.5"
   },
   "scripts": {
@@ -70,5 +111,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

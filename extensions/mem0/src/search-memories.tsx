@@ -1,7 +1,6 @@
-import { Form, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Detail, getPreferenceValues, Keyboard, Icon } from "@raycast/api";
 import { useState } from "react";
-import fetch from "node-fetch";
-import { showFailureToast } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 
 const API_URL = "https://api.mem0.ai/v1/memories/search/";
 
@@ -18,11 +17,6 @@ interface SearchResult {
 
 interface SearchResponse {
   results: SearchResult[];
-}
-
-interface Preferences {
-  mem0ApiKey: string;
-  defaultUserId: string;
 }
 
 export default function Command() {
@@ -64,7 +58,7 @@ export default function Command() {
         title: "Search completed",
         message: `Found ${data.results.length} results`,
       });
-    } catch (error) {
+    } catch {
       showFailureToast("Search failed", {
         primaryAction: {
           title: "Retry",
@@ -76,6 +70,13 @@ export default function Command() {
     }
   }
 
+  const { handleSubmit: handleFormSubmit, itemProps } = useForm<{ query: string }>({
+    onSubmit: handleSubmit,
+    validation: {
+      query: FormValidation.Required,
+    },
+  });
+
   if (showResults) {
     return (
       <Detail
@@ -86,13 +87,9 @@ export default function Command() {
             <Action.CopyToClipboard
               title="Copy Results"
               content={searchResults}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
-            <Action
-              title="New Search"
-              onAction={() => setShowResults(false)}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-            />
+            <Action title="New Search" onAction={() => setShowResults(false)} shortcut={Keyboard.Shortcut.Common.New} />
           </ActionPanel>
         }
       />
@@ -104,11 +101,16 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Search Memories" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.MagnifyingGlass} title="Search Memories" onSubmit={handleFormSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="query" title="Search Query" placeholder="What would you like to search for?" autoFocus />
+      <Form.TextField
+        title="Search Query"
+        placeholder="What would you like to search for?"
+        autoFocus
+        {...itemProps.query}
+      />
     </Form>
   );
 }

@@ -25,7 +25,7 @@ export const getLogin = () =>
           Promise.all([
             LocalStorage.setItem("githubLogin", login),
             LocalStorage.setItem("githubAPITokenLastValue", githubAPIToken),
-          ]).then(() => login)
+          ]).then(() => login),
         )
         .then(login => {
           console.debug(`getLogin: resolve=octokit login=${login}`);

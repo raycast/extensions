@@ -1,13 +1,13 @@
 import { Color, Icon, List } from '@raycast/api'
-import type { Container } from '@scaleway/sdk'
+import type { Containerv1beta1 } from '@scaleway/sdk'
 import { getContainerStatusIcon } from './status'
 
 type ContainerDetailProps = {
-  container: Container.v1beta1.Container
-  namespaces?: Container.v1beta1.Namespace[]
+  container: Containerv1beta1.Container
+  namespaces?: Containerv1beta1.Namespace[]
 }
 
-export const getPrivacyAccessory = (privacy: Container.v1beta1.ContainerPrivacy) => {
+export const getPrivacyAccessory = (privacy: Containerv1beta1.ContainerPrivacy) => {
   switch (privacy) {
     case 'public':
       return { icon: { source: Icon.LockUnlocked, tintColor: Color.Green }, tooltip: 'Public' }
@@ -20,10 +20,10 @@ export const getPrivacyAccessory = (privacy: Container.v1beta1.ContainerPrivacy)
   }
 }
 
-export const getImageName = (container: Container.v1beta1.Container) =>
+export const getImageName = (container: Containerv1beta1.Container) =>
   container.registryImage.split('/').pop()
 
-export const getRegistryName = (container: Container.v1beta1.Container) =>
+export const getRegistryName = (container: Containerv1beta1.Container) =>
   container.registryImage.substring(0, container.registryImage.lastIndexOf('/'))
 
 export const ContainerDetail = ({ container, namespaces }: ContainerDetailProps) => {

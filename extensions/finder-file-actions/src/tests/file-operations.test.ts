@@ -207,7 +207,7 @@ describe("File Operations", () => {
       // Create 100 small files
       const fileCount = 100;
       const filePromises = Array.from({ length: fileCount }, (_, i) =>
-        fs.writeFile(path.join(largeDir, `file${i}.txt`), `content ${i}`)
+        fs.writeFile(path.join(largeDir, `file${i}.txt`), `content ${i}`),
       );
       await Promise.all(filePromises);
 
@@ -223,7 +223,7 @@ describe("File Operations", () => {
           const destPath = path.join(largeDest, fileName);
           return fsAsync.copyFile(sourcePath, destPath);
         },
-        { concurrency: 10 }
+        { concurrency: 10 },
       );
 
       // Verify all copies were successful

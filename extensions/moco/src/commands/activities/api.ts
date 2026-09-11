@@ -10,7 +10,7 @@ import { Customer } from "../customers/types";
 import { User } from "../user/types";
 
 const preferences = getPreferenceValues<Preferences>();
-axios.defaults.baseURL = `https:/${preferences.url_prefix}.mocoapp.com/api/v1`;
+axios.defaults.baseURL = `https://${preferences.url_prefix}.mocoapp.com/api/v1`;
 
 const activitySchema = z.array(
   z.object({

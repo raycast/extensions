@@ -4,7 +4,7 @@ import { writeFile } from "fs/promises";
 import { resolve } from "path";
 import { Cache, State } from "swr";
 
-const CACHE_KEY = "swr-cache";
+const CACHE_KEY = "swr-cache-v2";
 
 export async function clearCache() {
   return await trash(resolve(environment.supportPath, CACHE_KEY));

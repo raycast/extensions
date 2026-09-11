@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { loadSingleSnippet, saveSnippetFile } from "../utils/snippets";
 import { Snippet, SnippetWithPath } from "../utils/types";

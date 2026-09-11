@@ -30,7 +30,7 @@ export default async () => {
       primaryAction: {
         title: "Open Clipboard History",
         onAction: async (toast) => {
-          await open("raycast://extensions/raycast/clipboard-history/clipboard-history");
+          await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/clipboard-history/clipboard-history`);
           toast.hide();
         },
       },

@@ -1,10 +1,10 @@
 import { Color, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { buildPostizUrl, POSTIZ_HEADERS } from "./postiz";
+import { buildPostizApiUrl, POSTIZ_HEADERS } from "./postiz";
 import { Identifier, Integration } from "./types";
 
 export default function SearchChannels() {
-  const { isLoading, data: channels } = useFetch<Integration[], Integration[]>(buildPostizUrl("integrations"), {
+  const { isLoading, data: channels } = useFetch<Integration[], Integration[]>(buildPostizApiUrl("integrations"), {
     headers: POSTIZ_HEADERS,
     initialData: [],
   });

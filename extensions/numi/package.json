@@ -5,6 +5,9 @@
   "description": "Query Numi from Raycast",
   "icon": "numi-icon.png",
   "author": "andresmorelos",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Data"
@@ -30,14 +33,35 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "calculate",
+      "title": "Calculate with Numi",
+      "description": "Evaluate a math, unit conversion, currency, percentage, or date expression using the Numi calculator. Accepts natural language such as '340 GBP to USD', '15% of 200', '3 days from now', or '(4+5)*2 in hex'."
+    }
+  ],
+  "ai": {
+    "instructions": "Numi is a natural-language calculator. Use the `calculate` tool for arithmetic, unit conversions, currency conversions, percentages, time zone and date math, and number base conversions. Pass the user's expression through as close to verbatim as possible - Numi parses natural language itself, so do not rewrite '340 GBP to USD' into a bare arithmetic expression. Currency rates come from Numi's own live data, so prefer this tool over estimating a rate yourself.",
+    "evals": [
+      {
+        "input": "@numi what is 15% of 240?"
+      },
+      {
+        "input": "@numi convert 340 GBP to USD"
+      },
+      {
+        "input": "@numi how many minutes are in 3.5 hours?"
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "max_history_elemets",
       "type": "textfield",
       "required": false,
-      "title": "Maximum number of history elements",
+      "title": "Maximum Number of History Elements",
       "placeholder": "10",
-      "description": "The number of elements to save on the history",
+      "description": "The number of elements to keep in the history",
       "default": "10"
     },
     {
@@ -46,35 +70,36 @@
       "required": false,
       "label": "Use numi-cli",
       "placeholder": "Use numi-cli",
-      "description": "Use numi-cli instead of the Numi app",
-      "default": false
+      "description": "Query numi-cli instead of the Numi app API. Keep this on: the app API is deprecated and does not work on Numi 3.34. Uncheck it only if you run an older Numi build where Alfred Integration still responds.",
+      "default": true
     },
     {
       "name": "numi_cli_binary_path",
       "type": "textfield",
       "required": false,
-      "title": "Numi CLI bin path if using numi-cli",
+      "title": "Numi CLI Bin Path",
       "placeholder": "/opt/homebrew/bin/numi-cli",
-      "description": "The path to installed numi-cli binary",
-      "default": "/opt/homebrew/bin/numi-cli"
+      "description": "Optional override for the numi-cli binary. Leave empty to auto-detect it from Homebrew or your PATH.",
+      "default": ""
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
-    "@raycast/utils": "^1.5.2"
+    "@raycast/api": "^2.0.6",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

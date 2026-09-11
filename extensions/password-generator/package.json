@@ -9,7 +9,9 @@
     "teziovsky",
     "pernielsentikaer",
     "hnsn",
-    "yusifaliyevpro"
+    "yusifaliyevpro",
+    "xmok",
+    "peduarte"
   ],
   "categories": [
     "Productivity",
@@ -41,6 +43,47 @@
           "required": false,
           "default": true,
           "label": "Remember password length"
+        },
+        {
+          "name": "rememberNumbersAndCharacters",
+          "description": "Remember to use numbers and characters between runs.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Remember numbers and characters"
+        }
+      ]
+    },
+    {
+      "name": "copy-random-password",
+      "title": "Copy Random Password",
+      "description": "Generates a random password and copies it directly to the clipboard.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "length",
+          "title": "Number of characters",
+          "description": "The number of characters in the generated password (5–64).",
+          "type": "textfield",
+          "required": false,
+          "default": "16"
+        },
+        {
+          "name": "useNumbers",
+          "description": "Include numbers in the generated password.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Options",
+          "label": "Use numbers"
+        },
+        {
+          "name": "useChars",
+          "description": "Include special characters in the generated password.",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Use special characters"
         }
       ]
     },
@@ -62,7 +105,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.6"
+    "@raycast/api": "^1.104.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -75,10 +118,11 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "pull-contributions": "npx @raycast/api@latest pull-contributions",
     "test": "bun test"

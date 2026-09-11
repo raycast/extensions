@@ -1,25 +1,95 @@
-import { List, ActionPanel, Action, Icon, Detail, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Detail, showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useMemo } from "react";
-import type { Meeting } from "./types/Types";
+import { useState, useMemo, useCallback } from "react";
+import type { Meeting, Team } from "./types/Types";
 import { getMeetingSummary, getMeetingTranscript, listTeams } from "./fathom/api";
 import { MeetingDetailActions } from "./actions/MeetingActions";
 import { useCachedMeetings } from "./hooks/useCachedMeetings";
-import { getUserFriendlyError } from "./utils/errorHandling";
+import { getUserFriendlyError, classifyError, ErrorType } from "./utils/errorHandling";
+import { hasApiKey, isApiKeyKnownInvalid } from "./fathom/auth";
+
 import { MeetingListItem } from "./components/MeetingListItem";
+import { RefreshCacheAction } from "./actions/RefreshCacheAction";
 import { getDateRanges } from "./utils/dates";
 
-export default function Command() {
+function getErrorDisplay(error: Error): { icon: Icon; title: string; description: string; isAuth: boolean } {
+  const errorType = classifyError(error);
+
+  switch (errorType) {
+    case ErrorType.API_KEY_MISSING:
+      return {
+        icon: Icon.Key,
+        title: "API Key Required",
+        description: "Please check your Fathom API Key in Extension Preferences.",
+        isAuth: true,
+      };
+    case ErrorType.API_KEY_INVALID:
+      return {
+        icon: Icon.Key,
+        title: "Invalid API Key",
+        description: "Please check your Fathom API Key in Extension Preferences.",
+        isAuth: true,
+      };
+    case ErrorType.RATE_LIMIT:
+      return {
+        icon: Icon.ExclamationMark,
+        title: "Rate Limit Exceeded",
+        description: "You've made too many requests. Please wait a moment and try again.",
+        isAuth: false,
+      };
+    default:
+      return {
+        icon: Icon.ExclamationMark,
+        title: "Failed to Load Meetings",
+        description: getUserFriendlyError(error).message,
+        isAuth: false,
+      };
+  }
+}
+
+function ErrorEmptyView(props: { error: Error; onRefresh: () => Promise<void> }) {
+  const { icon, title, description, isAuth } = getErrorDisplay(props.error);
+
+  return (
+    <List.EmptyView
+      icon={icon}
+      title={title}
+      description={description}
+      actions={
+        <ActionPanel>
+          {isAuth && <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />}
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={props.onRefresh} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function Command() {
   const [filterType, setFilterType] = useState<string>("all");
   const [searchText, setSearchText] = useState<string>("");
 
+  // Early API key check — if missing, skip all API calls and show error view
+  const apiKeyPresent = hasApiKey();
+
   const ranges = getDateRanges();
 
-  // Fetch teams for dropdown
-  const { data: teamsData } = useCachedPromise(async () => listTeams({}), [], {
-    keepPreviousData: true,
-    initialData: { items: [], nextCursor: undefined },
-  });
+  // Fetch teams for dropdown — wrapped so it never throws (returns empty on any error)
+  const { data: teamsData } = useCachedPromise(
+    async () => {
+      try {
+        return await listTeams({});
+      } catch {
+        return { items: [] as Team[], nextCursor: undefined };
+      }
+    },
+    [],
+    {
+      keepPreviousData: true,
+      initialData: { items: [] as Team[], nextCursor: undefined },
+      execute: apiKeyPresent,
+    },
+  );
 
   const teams = teamsData?.items ?? [];
 
@@ -36,95 +106,111 @@ export default function Command() {
   const {
     meetings: cachedMeetings,
     isLoading,
-    error,
+    isFetchingBackground,
+    error: meetingsError,
     searchMeetings,
     refreshCache,
+    stopFetch,
+    loadMore,
+    hasMore,
   } = useCachedMeetings({
     filter: {},
-    enableCache: true,
+    enableCache: apiKeyPresent,
   });
 
+  const loadMoreMeetings = useCallback(async () => {
+    if (!apiKeyPresent) return;
+    await loadMore();
+  }, [apiKeyPresent, loadMore]);
+
+  // Combine error sources: explicit missing key OR runtime API error
+  const error: Error | undefined = !apiKeyPresent
+    ? new Error("API_KEY_MISSING: No API key configured. Please set your Fathom API Key in Extension Preferences.")
+    : isApiKeyKnownInvalid()
+      ? new Error("API_KEY_INVALID: Invalid API Key. Please check your Fathom API Key in Extension Preferences.")
+      : meetingsError;
+
+  const sortByDate = (a: Meeting, b: Meeting) => {
+    const getTime = (meeting: Meeting): number => {
+      const dateStr = meeting.createdAt || meeting.startTimeISO;
+      if (!dateStr) return 0;
+      const time = new Date(dateStr).getTime();
+      return isNaN(time) ? 0 : time;
+    };
+
+    const dateA = getTime(a);
+    const dateB = getTime(b);
+    return dateB - dateA; // Descending (newest first)
+  };
+
   // Filter and search meetings
-  const { thisWeekMeetings, lastWeekMeetings, previousMonthMeetings, allFilteredMeetings } = useMemo(() => {
-    // Apply full-text search first
-    let allMeetings = searchText ? searchMeetings(searchText) : cachedMeetings;
+  const { thisWeekMeetings, lastWeekMeetings, previousMonthMeetings, olderMeetings, allFilteredMeetings } =
+    useMemo(() => {
+      // Apply full-text search first
+      let allMeetings = searchText ? searchMeetings(searchText) : cachedMeetings;
 
-    // Then apply team filter
-    if (filterType.startsWith("team:")) {
-      const teamName = filterType.replace("team:", "");
-      allMeetings = allMeetings.filter(
-        (meeting) => meeting.recordedByTeam === teamName || meeting.teamName === teamName,
-      );
-    }
+      // Then apply team filter
+      if (filterType.startsWith("team:")) {
+        const teamName = filterType.replace("team:", "");
+        allMeetings = allMeetings.filter(
+          (meeting) => meeting.recordedByTeam === teamName || meeting.teamName === teamName,
+        );
+      }
 
-    // Apply date filter for "all" view (for DISPLAY only, not for caching)
-    if (filterType === "all") {
-      allMeetings = allMeetings.filter((meeting) => {
+      // If searching or team-filtering, return flat chronological list across ALL meetings
+      if (searchText || filterType !== "all") {
+        const sorted = [...allMeetings].sort(sortByDate);
+        return {
+          thisWeekMeetings: [],
+          lastWeekMeetings: [],
+          previousMonthMeetings: [],
+          olderMeetings: [],
+          allFilteredMeetings: sorted,
+        };
+      }
+
+      // Default view: group by date ranges (no date restriction — shows everything)
+      const thisWeek: Meeting[] = [];
+      const lastWeek: Meeting[] = [];
+      const previousMonth: Meeting[] = [];
+      const older: Meeting[] = [];
+
+      allMeetings.forEach((meeting) => {
         const meetingDate = new Date(meeting.createdAt || meeting.startTimeISO);
         const meetingTime = meetingDate.getTime();
-        return meetingTime >= ranges.previousMonth.start.getTime() && meetingTime <= ranges.thisWeek.end.getTime();
-      });
-    }
 
-    // If filtering is active, return all meetings sorted by date (newest first)
-    if (filterType !== "all") {
-      const sorted = [...allMeetings].sort((a, b) => {
-        const dateA = new Date(a.createdAt || a.startTimeISO).getTime();
-        const dateB = new Date(b.createdAt || b.startTimeISO).getTime();
-        return dateB - dateA; // Descending (newest first)
+        if (meetingTime >= ranges.thisWeek.start.getTime() && meetingTime <= ranges.thisWeek.end.getTime()) {
+          thisWeek.push(meeting);
+        } else if (meetingTime >= ranges.lastWeek.start.getTime() && meetingTime <= ranges.lastWeek.end.getTime()) {
+          lastWeek.push(meeting);
+        } else if (
+          meetingTime >= ranges.previousMonth.start.getTime() &&
+          meetingTime <= ranges.previousMonth.end.getTime()
+        ) {
+          previousMonth.push(meeting);
+        } else {
+          older.push(meeting);
+        }
       });
+
+      thisWeek.sort(sortByDate);
+      lastWeek.sort(sortByDate);
+      previousMonth.sort(sortByDate);
+      older.sort(sortByDate);
+
       return {
-        thisWeekMeetings: [],
-        lastWeekMeetings: [],
-        previousMonthMeetings: [],
-        allFilteredMeetings: sorted,
+        thisWeekMeetings: thisWeek,
+        lastWeekMeetings: lastWeek,
+        previousMonthMeetings: previousMonth,
+        olderMeetings: older,
+        allFilteredMeetings: [],
       };
-    }
-
-    // No filter: group by date ranges
-    const thisWeek: Meeting[] = [];
-    const lastWeek: Meeting[] = [];
-    const previousMonth: Meeting[] = [];
-
-    allMeetings.forEach((meeting) => {
-      const meetingDate = new Date(meeting.createdAt || meeting.startTimeISO);
-      const meetingTime = meetingDate.getTime();
-
-      if (meetingTime >= ranges.thisWeek.start.getTime() && meetingTime <= ranges.thisWeek.end.getTime()) {
-        thisWeek.push(meeting);
-      } else if (meetingTime >= ranges.lastWeek.start.getTime() && meetingTime <= ranges.lastWeek.end.getTime()) {
-        lastWeek.push(meeting);
-      } else if (
-        meetingTime >= ranges.previousMonth.start.getTime() &&
-        meetingTime <= ranges.previousMonth.end.getTime()
-      ) {
-        previousMonth.push(meeting);
-      }
-    });
-
-    // Sort each group by date (newest first)
-    const sortByDate = (a: Meeting, b: Meeting) => {
-      const dateA = new Date(a.createdAt || a.startTimeISO).getTime();
-      const dateB = new Date(b.createdAt || b.startTimeISO).getTime();
-      return dateB - dateA; // Descending (newest first)
-    };
-
-    thisWeek.sort(sortByDate);
-    lastWeek.sort(sortByDate);
-    previousMonth.sort(sortByDate);
-
-    return {
-      thisWeekMeetings: thisWeek,
-      lastWeekMeetings: lastWeek,
-      previousMonthMeetings: previousMonth,
-      allFilteredMeetings: [],
-    };
-  }, [cachedMeetings, searchMeetings, searchText, filterType, ranges]);
+    }, [cachedMeetings, searchMeetings, searchText, filterType, ranges]);
 
   const totalMeetings =
-    filterType === "all"
-      ? thisWeekMeetings.length + lastWeekMeetings.length + previousMonthMeetings.length
-      : allFilteredMeetings.length;
+    searchText || filterType !== "all"
+      ? allFilteredMeetings.length
+      : thisWeekMeetings.length + lastWeekMeetings.length + previousMonthMeetings.length + olderMeetings.length;
 
   return (
     <List
@@ -134,11 +220,16 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       navigationTitle={filterDisplayName ? `Meetings: ${filterDisplayName}` : "Search Meetings"}
+      actions={
+        <ActionPanel>
+          <RefreshCacheAction onRefresh={refreshCache} onStop={stopFetch} isFetchingBackground={isFetchingBackground} />
+        </ActionPanel>
+      }
+      pagination={apiKeyPresent && !error ? { pageSize: 20, hasMore, onLoadMore: loadMoreMeetings } : undefined}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Team" value={filterType} onChange={setFilterType}>
-          <List.Dropdown.Item title="All Meetings" value="all" />
-
-          {teams.length > 0 && (
+        teams.length > 0 ? (
+          <List.Dropdown tooltip="Filter by Team" value={filterType} onChange={setFilterType}>
+            <List.Dropdown.Item title="All Meetings" value="all" />
             <List.Dropdown.Section title="Teams">
               {teams.map((team) => (
                 <List.Dropdown.Item
@@ -149,31 +240,12 @@ export default function Command() {
                 />
               ))}
             </List.Dropdown.Section>
-          )}
-        </List.Dropdown>
+          </List.Dropdown>
+        ) : undefined
       }
     >
       {error ? (
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title={
-            error instanceof Error && error.message.includes("Rate limit")
-              ? "Rate Limit Exceeded"
-              : "Failed to Load Meetings"
-          }
-          description={
-            error instanceof Error && error.message.includes("Rate limit")
-              ? "You've made too many requests. Please wait a moment and try again."
-              : error instanceof Error
-                ? error.message
-                : String(error)
-          }
-          actions={
-            <ActionPanel>
-              <Action title="Refresh Cache" icon={Icon.ArrowClockwise} onAction={refreshCache} />
-            </ActionPanel>
-          }
-        />
+        <ErrorEmptyView error={error} onRefresh={refreshCache} />
       ) : totalMeetings === 0 ? (
         <List.EmptyView
           icon={Icon.Calendar}
@@ -191,13 +263,23 @@ export default function Command() {
             </ActionPanel>
           }
         />
-      ) : filterType === "all" ? (
-        // Grouped view (no filter)
+      ) : allFilteredMeetings.length > 0 ? (
+        // Flat chronological list (when searching or team-filtering)
+        <List.Section
+          title={searchText ? "Search Results" : filterDisplayName || "Filtered Meetings"}
+          subtitle={`${totalMeetings} meetings`}
+        >
+          {allFilteredMeetings.map((meeting) => (
+            <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
+          ))}
+        </List.Section>
+      ) : (
+        // Grouped view (default browse)
         <>
           {thisWeekMeetings.length > 0 && (
             <List.Section title="This Week" subtitle={`${thisWeekMeetings.length} meetings`}>
               {thisWeekMeetings.map((meeting) => (
-                <MeetingListItem key={meeting.id} meeting={meeting} />
+                <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
             </List.Section>
           )}
@@ -205,7 +287,7 @@ export default function Command() {
           {lastWeekMeetings.length > 0 && (
             <List.Section title="Last Week" subtitle={`${lastWeekMeetings.length} meetings`}>
               {lastWeekMeetings.map((meeting) => (
-                <MeetingListItem key={meeting.id} meeting={meeting} />
+                <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
             </List.Section>
           )}
@@ -213,18 +295,19 @@ export default function Command() {
           {previousMonthMeetings.length > 0 && (
             <List.Section title="Previous Month" subtitle={`${previousMonthMeetings.length} meetings`}>
               {previousMonthMeetings.map((meeting) => (
-                <MeetingListItem key={meeting.id} meeting={meeting} />
+                <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
+              ))}
+            </List.Section>
+          )}
+
+          {olderMeetings.length > 0 && (
+            <List.Section title="Older" subtitle={`${olderMeetings.length} meetings`}>
+              {olderMeetings.map((meeting) => (
+                <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
             </List.Section>
           )}
         </>
-      ) : (
-        // Flat chronological list (when filtered)
-        <List.Section title={filterDisplayName || "Filtered Meetings"} subtitle={`${totalMeetings} meetings`}>
-          {allFilteredMeetings.map((meeting) => (
-            <MeetingListItem key={meeting.id} meeting={meeting} />
-          ))}
-        </List.Section>
       )}
     </List>
   );
@@ -242,7 +325,7 @@ export function MeetingSummaryDetail({ meeting, recordingId }: { meeting: Meetin
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Load Summary",
-        message: message,
+        message,
       });
     },
   });
@@ -310,7 +393,7 @@ export function MeetingTranscriptDetail({ meeting, recordingId }: { meeting: Mee
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Load Transcript",
-        message: message,
+        message,
       });
     },
   });
@@ -341,3 +424,5 @@ export function MeetingTranscriptDetail({ meeting, recordingId }: { meeting: Mee
     />
   );
 }
+
+export default Command;

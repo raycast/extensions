@@ -2,10 +2,26 @@ import { UTCDate } from "@date-fns/utc";
 import { Color, Icon } from "@raycast/api";
 import { addDays, format, isThisYear, isBefore, formatISO, isSameDay } from "date-fns";
 
-import { Location, Priority } from "./hooks/useData";
+import type { Location, Priority, Reminder } from "./hooks/useData";
 
 export function isFullDay(date: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date);
+}
+
+export function formatReminderTime(reminder?: { dueDate?: string | null } | null): string {
+  if (!reminder?.dueDate || isFullDay(reminder.dueDate)) {
+    return "";
+  }
+
+  const date = new Date(reminder.dueDate);
+  if (isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 export function getDateString(date: string) {
@@ -86,15 +102,24 @@ export function getLocationDescription(location: Location) {
 }
 
 export function truncate(str: string, maxLength = 45): string {
-  if (str.length <= maxLength) {
+  const characters = Array.from(str);
+
+  if (characters.length <= maxLength) {
     return str;
   }
 
-  return str.substring(0, maxLength) + "…";
+  return characters.slice(0, maxLength).join("") + "…";
 }
 
 export function getIntervalValidationError(interval?: string): string | undefined {
   if (!interval) return "Interval is required";
   if (isNaN(Number(interval))) return "Interval must be a number";
   if ((interval as unknown as number) < 1) return "Must be greater than 0";
+}
+
+export function getAttachedUrls(reminder: Reminder): string[] {
+  if (!reminder.attachedUrls || !Array.isArray(reminder.attachedUrls)) {
+    return [];
+  }
+  return reminder.attachedUrls.filter(Boolean);
 }

@@ -1,54 +1,127 @@
-import { useState, useEffect } from "react";
-import { Form } from "@raycast/api";
-
-const SLEEP_CYCLE_DURATION = 90; // Duration of one sleep cycle in minutes
-const FALL_ASLEEP_BUFFER = 15; // Time in minutes to fall asleep
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
+import {
+  wakeTimesForSleep,
+  formatTime,
+  formatDuration,
+  getCurrentTime,
+  parseTimeInput,
+  getSleepQuality,
+  SleepTime,
+  FALL_ASLEEP_BUFFER,
+  CYCLE_LENGTH,
+} from "./lib/sleep-utils";
 
 export default function Command() {
-  const [wakeUpTimes, setWakeUpTimes] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [showMoreUsed, setShowMoreUsed] = useState(false);
 
-  useEffect(() => {
-    calculateWakeUpTimes();
-  }, []);
+  // Use search text if provided, otherwise use current time
+  const currentTime = getCurrentTime();
+  const defaultTimeFormatted = formatTime(currentTime);
 
-  function calculateWakeUpTimes() {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
+  let sleepTime = currentTime;
+  let sleepTimeFormatted = defaultTimeFormatted;
+  let usingCustomTime = false;
 
-    const currentTimeInMinutes = currentHour * 60 + currentMinute + FALL_ASLEEP_BUFFER;
-
-    const calculatedWakeUpTimes: string[] = [];
-
-    for (let cycles = 1; cycles <= 6; cycles++) {
-      const wakeUpTimeInMinutes = (currentTimeInMinutes + cycles * SLEEP_CYCLE_DURATION) % (24 * 60);
-      const wakeUpHour = Math.floor(wakeUpTimeInMinutes / 60);
-      const wakeUpMinute = wakeUpTimeInMinutes % 60;
-
-      const formattedWakeUpTime24 = `${wakeUpHour.toString().padStart(2, "0")}:${wakeUpMinute.toString().padStart(2, "0")}`;
-      const formattedWakeUpTime12 = formatTimeTo12Hour(wakeUpHour, wakeUpMinute);
-      const recommendedText = cycles === 5 || cycles === 6 ? " (recommended)" : "";
-      calculatedWakeUpTimes.push(
-        `${formattedWakeUpTime24} (${formattedWakeUpTime12}) – ${cycles} cycle${cycles > 1 ? "s" : ""}${recommendedText}`,
-      );
+  if (searchText.trim()) {
+    const parsed = parseTimeInput(searchText);
+    if (parsed) {
+      sleepTime = parsed;
+      sleepTimeFormatted = `${parsed.hour}:${parsed.minute.toString().padStart(2, "0")} ${parsed.ampm}`;
+      usingCustomTime = true;
     }
-
-    setWakeUpTimes(calculatedWakeUpTimes);
   }
 
-  function formatTimeTo12Hour(hour: number, minute: number): string {
-    const period = hour >= 12 ? "PM" : "AM";
-    const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-    return `${hour12}:${minute.toString().padStart(2, "0")} ${period}`;
-  }
+  const handleShowMore = () => {
+    setShowMoreUsed(true);
+    showToast({
+      style: Toast.Style.Success,
+      title: "Showing More Options",
+    });
+  };
+
+  // Generate cycles: default 4 (6,5,4,3), extended adds 2 more (2,1)
+  const baseCycles = [6, 5, 4, 3];
+  const extendedCycles = showMoreUsed ? [2, 1] : [];
+  const cycles = [...baseCycles, ...extendedCycles];
+
+  const wakeTimes = wakeTimesForSleep(
+    sleepTime.hour,
+    sleepTime.minute,
+    sleepTime.ampm,
+    FALL_ASLEEP_BUFFER,
+    CYCLE_LENGTH,
+    cycles,
+  );
+
+  // Calculate fall asleep time
+  const fallAsleepMinutes =
+    ((sleepTime.hour % 12) + (sleepTime.ampm === "PM" ? 12 : 0)) * 60 + sleepTime.minute + FALL_ASLEEP_BUFFER;
+  const fallAsleepHour24 = Math.floor(fallAsleepMinutes / 60) % 24;
+  const fallAsleepMinute = fallAsleepMinutes % 60;
+  const fallAsleepAmpm = fallAsleepHour24 >= 12 ? "PM" : "AM";
+  let fallAsleepHour12 = fallAsleepHour24 % 12;
+  if (fallAsleepHour12 === 0) fallAsleepHour12 = 12;
+  const fallAsleepFormatted = `${fallAsleepHour12}:${fallAsleepMinute.toString().padStart(2, "0")} ${fallAsleepAmpm}`;
+
+  // Sort by cycles descending (best sleep first)
+  const sortedWakeTimes = [...wakeTimes].sort((a, b) => b.cycles - a.cycles);
+
+  const sectionTitle = usingCustomTime
+    ? `Going to bed at ${sleepTimeFormatted}`
+    : `Going to bed now (${sleepTimeFormatted})`;
 
   return (
-    <Form>
-      <Form.Description text="Recommended Wake Up Times:" />
-      {wakeUpTimes.map((time, index) => (
-        <Form.Description key={index} text={`• ${time}`} />
-      ))}
-      <Form.Description text="The cycle lasts approximately 90 minutes + it takes the average person 15 minutes to go to sleep. Good night!" />
-    </Form>
+    <List searchBarPlaceholder="Enter bedtime or leave blank for now..." onSearchTextChange={setSearchText} throttle>
+      <List.Section title={sectionTitle} subtitle={`Asleep by ~${fallAsleepFormatted}`}>
+        {sortedWakeTimes.map((wakeTime, index) => (
+          <WakeTimeItem key={index} wakeTime={wakeTime} />
+        ))}
+      </List.Section>
+
+      {!showMoreUsed && (
+        <List.Section>
+          <List.Item
+            icon={{ source: Icon.Plus, tintColor: Color.Purple }}
+            title="Show More Wake Times"
+            subtitle="Add shorter sleep cycle options"
+            accessories={[{ tag: "+2 more" }]}
+            actions={
+              <ActionPanel>
+                <Action title="Show More Wake Times" icon={Icon.Plus} onAction={handleShowMore} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+    </List>
+  );
+}
+
+function WakeTimeItem({ wakeTime }: { wakeTime: SleepTime }) {
+  const timeStr = formatTime(wakeTime);
+  const durationStr = formatDuration(wakeTime.totalMinutes);
+  const quality = getSleepQuality(wakeTime.cycles);
+
+  return (
+    <List.Item
+      icon={{
+        source: quality.icon,
+        tintColor: quality.color,
+      }}
+      title={timeStr}
+      subtitle={`${wakeTime.cycles} cycles · ${durationStr}`}
+      accessories={[{ tag: { value: quality.label, color: quality.color } }]}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Time" content={timeStr} />
+          <Action.CopyToClipboard
+            title="Copy Details"
+            content={`Wake up at ${timeStr} (${wakeTime.cycles} cycles, ${durationStr} of sleep)`}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }

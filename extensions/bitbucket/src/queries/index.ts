@@ -152,3 +152,138 @@ export async function getMyOpenPullRequests() {
 
   return PullRequestsResponseSchema.parse(await response.json()).values;
 }
+
+type OpenPullRequest = z.infer<typeof PullRequestsResponseSchema>["values"][number] & {
+  created_on?: string;
+};
+
+async function listAllRepositories(): Promise<Schema.Repository[]> {
+  const repos: Schema.Repository[] = [];
+  let page = "1";
+
+  for (;;) {
+    const { data } = await bitbucket.repositories.list({
+      ...defaults,
+      pagelen: 100,
+      sort: "-updated_on",
+      page,
+      fields: ["values.slug", "values.name", "values.full_name", "next"].join(","),
+    });
+
+    repos.push(...((data.values as Schema.Repository[]) ?? []));
+
+    if (!data.next) {
+      break;
+    }
+
+    const nextParams = new URLSearchParams(data.next.split("?")[1]);
+    page = nextParams.get("page") ?? String(Number(page) + 1);
+  }
+
+  return repos;
+}
+
+async function listOpenPullRequestsForRepo(repo: {
+  slug: string;
+  name?: string;
+  full_name?: string;
+}): Promise<OpenPullRequest[]> {
+  const pullRequests: OpenPullRequest[] = [];
+  let page = "1";
+
+  for (;;) {
+    const { data } = await bitbucket.pullrequests.list({
+      ...defaults,
+      repo_slug: repo.slug,
+      pagelen: 50,
+      page,
+      sort: "-created_on",
+      state: "OPEN",
+    });
+
+    for (const pr of data.values ?? []) {
+      const author = pr.author as { nickname?: string; links?: { avatar?: { href?: string } } } | undefined;
+      if (typeof pr.id !== "number" || typeof pr.title !== "string" || typeof author?.nickname !== "string") {
+        continue;
+      }
+
+      pullRequests.push({
+        id: pr.id,
+        title: pr.title,
+        comment_count: (pr.comment_count as number) ?? 0,
+        created_on: pr.created_on,
+        author: {
+          nickname: author.nickname,
+          links: {
+            avatar: {
+              href: author.links?.avatar?.href ?? "",
+            },
+          },
+        },
+        destination: {
+          repository: {
+            name: (pr.destination?.repository?.name as string) ?? repo.name ?? repo.slug,
+            full_name:
+              (pr.destination?.repository?.full_name as string) ??
+              repo.full_name ??
+              `${preferences.workspace}/${repo.slug}`,
+          },
+        },
+      });
+    }
+
+    if (!data.next) {
+      break;
+    }
+
+    const nextParams = new URLSearchParams(data.next.split("?")[1]);
+    page = nextParams.get("page") ?? String(Number(page) + 1);
+  }
+
+  return pullRequests;
+}
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = [];
+  let index = 0;
+
+  async function worker() {
+    while (index < items.length) {
+      const current = index++;
+      results[current] = await mapper(items[current]);
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()));
+  return results;
+}
+
+// Bitbucket has no workspace-wide PR endpoint; iterate repos then fetch open PRs per repo.
+export async function getAllOpenPullRequests() {
+  const repos = (await listAllRepositories()).filter(
+    (repo): repo is Schema.Repository & { slug: string } => typeof repo.slug === "string",
+  );
+
+  const perRepo = await mapWithConcurrency(repos, 10, async (repo) => {
+    try {
+      return { ok: true as const, values: await listOpenPullRequestsForRepo(repo) };
+    } catch {
+      return { ok: false as const, values: [] as OpenPullRequest[] };
+    }
+  });
+
+  const failedRepoCount = perRepo.filter((result) => !result.ok).length;
+  const all = perRepo.flatMap((result) => result.values);
+
+  all.sort((a, b) => {
+    const aTime = a.created_on ? Date.parse(a.created_on) : 0;
+    const bTime = b.created_on ? Date.parse(b.created_on) : 0;
+    return bTime - aTime;
+  });
+
+  return { values: all, failedRepoCount };
+}

@@ -1,5 +1,5 @@
 import { Ollama } from "../../ollama/ollama";
-import { OllamaApiTagsResponseModel } from "../../ollama/types";
+import { OllamaApiTagsResponseModel, ThinkingEffort } from "../../ollama/types";
 
 export interface UiServer {
   name: string;
@@ -9,5 +9,6 @@ export interface UiServer {
 export interface UiModel {
   server: UiServer;
   tag: OllamaApiTagsResponseModel;
+  thinking?: ThinkingEffort;
   keep_alive?: string;
 }

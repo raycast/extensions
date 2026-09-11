@@ -2,10 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "plexus",
   "title": "Plexus - Localhost Search",
-  "description": "Discover and manage all running Node.js development servers on your localhost with smart project detection, framework identification, and quick access.",
+  "description": "Discover and manage all running localhost web servers (Node, PHP, Python, and more) with smart project detection, framework identification, WSL support, and quick access.",
   "icon": "logo.png",
   "author": "RensHoogendam",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "contributors": [
     "diego_reis"
   ],
@@ -14,7 +14,8 @@
     "node": ">=20.15.1"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
@@ -23,6 +24,15 @@
       "subtitle": "Plexus",
       "description": "Search through the running projects in your localhost.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "browserApp",
+      "type": "appPicker",
+      "required": false,
+      "title": "Browser",
+      "description": "The browser used to open localhost links. Defaults to your system's default browser."
     }
   ],
   "dependencies": {
@@ -45,5 +55,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

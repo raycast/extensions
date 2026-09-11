@@ -1,36 +1,23 @@
 import { useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { gitlab } from "../common";
 import { Label, Project, searchData } from "../gitlabapi";
-import { useCache } from "../cache";
 import { LabelList } from "./label";
-import { showErrorToast } from "../utils";
 
 export function ProjectLabelList(props: { project: Project; navigationTitle?: string }) {
   const [searchText, setSearchText] = useState<string>();
-  const { data, error, isLoading } = useCache<Label[]>(
-    `project_${props.project.id}_labels`,
-    async () => {
-      return gitlab.getProjectLabels(props.project.id);
-    },
+  const { data, isLoading } = useCachedPromise(
+    (projectId: number) => gitlab.getProjectLabels(projectId),
+    [props.project.id],
     {
-      deps: [searchText, props.project],
-      onFilter: async (labels) => {
-        return searchData<Label[]>(labels, {
-          search: searchText || "",
-          keys: ["name"],
-          limit: 50,
-        });
-      },
+      keepPreviousData: true,
+      initialData: [],
     },
   );
 
-  if (error) {
-    showErrorToast(error, "Cannot search Project Labels");
-  }
-
   return (
     <LabelList
-      labels={data || []}
+      labels={searchData<Label[]>(data, { search: searchText || "", keys: ["name"], limit: 50 })}
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}

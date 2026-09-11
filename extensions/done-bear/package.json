@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "done-bear",
+  "private": true,
+  "description": "A local-first GTD task manager for Raycast: capture, search, and complete tasks, plan your Today list, and manage projects — synced with the Done Bear web, desktop, iOS, and CLI apps.",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "mblode",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.5.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "show-today",
+      "title": "Show Today List",
+      "subtitle": "Done Bear",
+      "description": "See and complete the tasks and to-dos you planned for today",
+      "keywords": ["today", "task", "todo", "to-do", "gtd", "agenda", "due", "plan"],
+      "mode": "view"
+    },
+    {
+      "name": "browse-tasks",
+      "title": "Browse Tasks",
+      "subtitle": "Done Bear",
+      "description": "Open Today, Inbox, Anytime, Upcoming, and Someday from one command",
+      "keywords": ["browse", "inbox", "anytime", "upcoming", "someday", "task", "todo", "gtd"],
+      "mode": "view"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "subtitle": "Done Bear",
+      "description": "Search all your tasks and to-dos across every project",
+      "keywords": ["search", "find", "task", "todo", "filter", "gtd"],
+      "mode": "view"
+    },
+    {
+      "name": "quick-add-task",
+      "title": "Create Task",
+      "subtitle": "Done Bear",
+      "description": "Create a task from one sentence with AI, then review every detail",
+      "keywords": ["quick add", "natural language", "capture", "task", "todo", "tomorrow", "deadline", "reminder"],
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Detailed Task",
+      "subtitle": "Done Bear",
+      "description": "Create a task with a description, dates, project, team, and checklist",
+      "keywords": ["create", "add", "new", "task", "todo", "details", "checklist", "project", "team"],
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "subtitle": "Done Bear",
+      "description": "Create a new project to organize your tasks",
+      "keywords": ["create", "add", "new", "project", "organize"],
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-today",
+      "title": "Show Today in Menu Bar",
+      "subtitle": "Done Bear",
+      "description": "Keep your Today task list in the macOS menu bar",
+      "keywords": ["today", "menu bar", "menubar", "task", "todo", "agenda"],
+      "mode": "menu-bar"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [],
+  "title": "Done Bear"
+}

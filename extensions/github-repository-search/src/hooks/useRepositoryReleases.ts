@@ -1,15 +1,7 @@
 import fetch from "node-fetch";
 import { Octokit } from "octokit";
 import { useEffect, useState } from "react";
-import { getPreferenceValues } from "@raycast/api";
 import type { Release, Repository, RepositoryReleasesResponse } from "@/types";
-
-const preferenceValues = getPreferenceValues();
-const octokit = new Octokit({
-  request: { fetch },
-  auth: preferenceValues["token"],
-  baseUrl: preferenceValues["baseUrl"],
-});
 
 const REPOSITORY_RELEASES_QUERY = `
 query RepositoryReleases($name: String!, $owner: String!) {
@@ -30,32 +22,56 @@ query RepositoryReleases($name: String!, $owner: String!) {
   }
 }`;
 
-export function useRepositoryReleases(repository: Repository) {
+export function useRepositoryReleases(repository: Repository, token: string, baseUrl?: string) {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!repository) {
+    if (!repository || !token) {
+      setLoading(false);
+      setReleases([]);
+      setError(null);
       return;
     }
 
+    const [owner, name] = repository.nameWithOwner.split("/");
+    if (!owner || !name) {
+      setReleases([]);
+      setLoading(false);
+      setError(new Error("Invalid repository nameWithOwner"));
+      return;
+    }
+
+    let isCanceled = false;
     setLoading(true);
     setError(null);
+    setReleases([]);
 
-    const [owner, name] = repository.nameWithOwner.split("/");
+    const octokit = new Octokit({ request: { fetch }, auth: token, baseUrl: baseUrl ?? undefined });
 
     octokit
-      .graphql<RepositoryReleasesResponse>(REPOSITORY_RELEASES_QUERY, {
-        name,
-        owner,
+      .graphql<RepositoryReleasesResponse>(REPOSITORY_RELEASES_QUERY, { name, owner })
+      .then(({ repository: repo }) => {
+        if (!isCanceled) {
+          setReleases(repo?.releases?.nodes ?? []);
+        }
       })
-      .then(({ repository }) => {
-        setReleases(repository.releases.nodes);
+      .catch((err) => {
+        if (!isCanceled) {
+          setError(err instanceof Error ? err : new Error("Failed to fetch releases"));
+        }
       })
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, [repository]);
+      .finally(() => {
+        if (!isCanceled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isCanceled = true;
+    };
+  }, [repository, token, baseUrl]);
 
   return {
     releases,

@@ -18,7 +18,7 @@ export async function getCycleCollection(params?: CollectionFunctionParams): Pro
   }
 }
 
-export async function getRecoveryCollection(params?: CollectionFunctionParams): Promise<api.PaginatedRecoveryResponse> {
+export async function getRecoveryCollection(params?: CollectionFunctionParams): Promise<api.RecoveryCollection> {
   try {
     const { whoopClient } = getWhoopClient();
     const response = await whoopClient.getRecoveryCollection(params);
@@ -48,7 +48,7 @@ export async function getSleepCollection(params?: CollectionFunctionParams): Pro
   }
 }
 
-export async function getWorkoutCollection(params?: CollectionFunctionParams): Promise<api.PaginatedWorkoutResponse> {
+export async function getWorkoutCollection(params?: CollectionFunctionParams): Promise<api.WorkoutCollection> {
   try {
     const { whoopClient } = getWhoopClient();
     const response = await whoopClient.getWorkoutCollection(params);

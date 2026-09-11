@@ -7,7 +7,7 @@ import PullRequestListItem from "./components/PullRequestListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
 import { PR_DEFAULT_SORT_QUERY } from "./helpers/pull-request";
 import { withGitHubClient } from "./helpers/withGithubClient";
-import { useMyPullRequests } from "./hooks/useMyPullRequests";
+import { SectionType, useMyPullRequests } from "./hooks/useMyPullRequests";
 import { useViewer } from "./hooks/useViewer";
 
 function MyPullRequests() {
@@ -22,6 +22,7 @@ function MyPullRequests() {
     includeReviewed,
     includeReviewRequests,
     includeRecentlyClosed,
+    includeDrafts,
     repositoryFilterMode,
     repositoryList,
   } = getPreferenceValues<Preferences.MyPullRequests>();
@@ -35,6 +36,7 @@ function MyPullRequests() {
     includeAssigned,
     includeMentioned,
     includeRecentlyClosed,
+    includeDrafts,
     includeReviewRequests,
     includeReviewed,
     filterMode: repositoryFilterMode,
@@ -54,6 +56,7 @@ function MyPullRequests() {
               return (
                 <PullRequestListItem
                   key={pullRequest.id}
+                  showAuthor={section.type !== SectionType.Open}
                   {...{ pullRequest, viewer, mutateList, sortQuery, setSortQuery }}
                 />
               );

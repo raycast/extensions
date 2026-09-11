@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { Grid } from "@raycast/api";
+import { Color, Grid } from "@raycast/api";
 import Actions from "@/actions/actions";
 import { Context } from "u/context";
 import {
@@ -88,6 +88,7 @@ export default function Watch() {
               content={{
                 value: {
                   source: SVG({ day: "" }),
+                  tintColor: Color.PrimaryText,
                 },
                 tooltip: "",
               }}
@@ -123,6 +124,7 @@ function TimeDisplay({
       content={{
         value: {
           source: SVG({ day: unit.value }),
+          tintColor: Color.PrimaryText,
         },
         tooltip: unit.tooltip,
       }}

@@ -10,7 +10,8 @@
     "madza",
     "xilopaint",
     "yug2005",
-    "ridemountainpig"
+    "ridemountainpig",
+    "0xdhrv"
   ],
   "license": "MIT",
   "commands": [
@@ -153,21 +154,21 @@
     }
   ],
   "dependencies": {
-    "@googleapis/youtube": "^29.0.0",
-    "@raycast/api": "^1.103.3",
-    "@raycast/utils": "^2.2.1",
+    "@googleapis/youtube": "^33.0.0",
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.6",
     "duration-iso-8601": "^1.1.0",
     "he": "^1.2.0",
-    "javascript-time-ago": "^2.3.10"
+    "javascript-time-ago": "^2.6.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/he": "^1.1.2",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.37.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3"
+    "@types/he": "^1.2.3",
+    "@types/node": "26.0.1",
+    "@types/react": "19.2.17",
+    "eslint": "^9.0.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",

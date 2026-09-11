@@ -1,5 +1,9 @@
 # Apple Devices Changelog
 
+## [Added new devices] - 2026-03-24
+
+- Added iPhone, iPad and Watch 2025 Lineup
+
 ## [Added new devices] - 2024-11-25
 
 - Added iPhone, iPad and Watch 2024 Lineup

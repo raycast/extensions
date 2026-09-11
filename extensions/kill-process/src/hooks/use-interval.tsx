@@ -1,9 +1,8 @@
 import { useEffect, useRef } from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = () => {};
 
-export function useInterval(callback: () => void, delay: number | null) {
+function useInterval(callback: () => void, delay: number | null) {
   const savedCallback = useRef(noop);
 
   useEffect(() => {
@@ -12,13 +11,19 @@ export function useInterval(callback: () => void, delay: number | null) {
 
   // Set up the interval.
   useEffect(() => {
-    savedCallback.current();
-    const refreshEnabled = (delay ?? 0) > 0;
-    if (refreshEnabled) {
-      const interval = Math.max(delay ?? 0, 1000);
-      const id = setInterval(() => savedCallback.current(), interval);
-      return () => clearInterval(id);
+    if (delay === null) {
+      return;
     }
+
+    savedCallback.current();
+    const refreshEnabled = delay > 0;
+    if (!refreshEnabled) {
+      return;
+    }
+
+    const interval = Math.max(delay, 1000);
+    const id = setInterval(() => savedCallback.current(), interval);
+    return () => clearInterval(id);
   }, [delay]);
 }
 

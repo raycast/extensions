@@ -2,7 +2,7 @@ import type { Score } from "@zxcvbn-ts/core";
 import { zxcvbn, zxcvbnOptions } from "@zxcvbn-ts/core";
 import { adjacencyGraphs, dictionary } from "@zxcvbn-ts/language-common";
 import * as zxcvbnEnPackage from "@zxcvbn-ts/language-en";
-import fetch from "node-fetch";
+import crypto from "node:crypto";
 import { stat, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -47,7 +47,7 @@ const getLanguage = async (lang: keyof typeof languageUrlMap) => {
   try {
     await stat(filePath);
     exists = true;
-  } catch (error) {
+  } catch {
     exists = false;
   }
 
@@ -130,4 +130,19 @@ export const scoreToText = (score: Score) => {
     default:
       return "Unknown";
   }
+};
+
+export const getPasswordSha = (password: string): string => {
+  const hash = crypto.createHash("sha1");
+  hash.update(password);
+  return hash.digest("hex").toUpperCase();
+};
+
+export const parsePwnedPasswordsResponse = async (response: Response): Promise<{ hash: string; count: number }[]> => {
+  const text = await response.text();
+
+  return text.split("\n").map((line) => {
+    const [hash, count] = line.split(":");
+    return { hash, count: parseInt(count, 10) };
+  });
 };

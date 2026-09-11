@@ -24,7 +24,7 @@
       "subtitle": "WIP",
       "description": "Show WIP Streak",
       "mode": "no-view",
-      "interval": "10s"
+      "interval": "1m"
     },
     {
       "name": "done",
@@ -44,7 +44,7 @@
   "dependencies": {
     "@raycast/api": "^1.66.2",
     "date-fns": "^3.6.0",
-    "file-type": "^19.6.0",
+    "file-type": "^21.3.4",
     "lodash.debounce": "^4.0.8",
     "mime-types": "^2.1.35",
     "node-fetch": "^3.3.2"
@@ -84,5 +84,9 @@
         }
       ]
     }
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

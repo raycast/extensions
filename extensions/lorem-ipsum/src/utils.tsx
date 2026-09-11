@@ -61,7 +61,7 @@ export const safeLoremIpsumNumberArg = async (arg: string | undefined) => {
       error: null,
       safeLoremIpsumNumber: parseableNumber,
     };
-  } catch (e) {
+  } catch {
     // generic error
     return {
       error: {

@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { getToken } from "../api";
+import { createApiKey } from "../api";
 import { localStorageKeys } from "../utils";
 
 type Input = {
@@ -21,7 +21,7 @@ type Input = {
  * This function obtains the API token by solving the challenge and storing the token in the extension's local storage.
  */
 export default async function tool({ challengeId, code }: Input) {
-  const { app_key } = await getToken(challengeId, code);
-  await LocalStorage.setItem(localStorageKeys.appKey, app_key);
+  const { api_key } = await createApiKey({ challenge_id: challengeId, code });
+  await LocalStorage.setItem(localStorageKeys.apiKey, api_key);
   return "Challenge solved successfully!";
 }

@@ -1,0 +1,63 @@
+{
+  "name": "stashit",
+  "title": "Stashit",
+  "description": "A priority queue for managing tasks with priorities",
+  "icon": "queue.png",
+  "author": "pmzi",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "stashit",
+      "title": "Add to Queue",
+      "subtitle": "Capture tasks with priority",
+      "description": "Add an item to the queue (syntax: task #queue priority)",
+      "mode": "view"
+    },
+    {
+      "name": "pop-stashit",
+      "title": "Queue Pop",
+      "subtitle": "Get highest priority task",
+      "description": "Pop the highest priority item from the queue",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queue",
+          "placeholder": "Queue name (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "view-stashit",
+      "title": "View Queue",
+      "subtitle": "Browse all tasks",
+      "description": "View all items in the priority queue",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.9",
+    "@types/react": "^19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

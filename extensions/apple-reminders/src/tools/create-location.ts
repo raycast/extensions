@@ -1,4 +1,4 @@
-import { Icon, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
 type Input = {
   /**
@@ -10,9 +10,9 @@ type Input = {
    */
   name: string;
   /**
-   * Icon to represent the location.
+   * Icon to represent the location. Only pick the value from this list: "home", "work", "gym", "store", "school", "other".
    */
-  icon: Icon;
+  icon: "home" | "work" | "gym" | "store" | "school" | "other";
   /**
    * The physical address of the location.
    */
@@ -20,7 +20,7 @@ type Input = {
   /**
    * The proximity trigger type. Only pick the value from this list: "enter", "leave".
    */
-  proximity: string;
+  proximity: "enter" | "leave";
   /**
    * The radius around the location in meters.
    */

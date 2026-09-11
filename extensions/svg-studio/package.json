@@ -1,0 +1,50 @@
+{
+  "name": "svg-studio",
+  "title": "SVG Studio",
+  "description": "Powerful SVG previewer and editor with dark mode and PNG export.",
+  "icon": "icon.png",
+  "author": "gaosunhao",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open SVG Studio",
+      "description": "Edit and Preview SVG",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "@types/react": "18.2.27"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@raycast/eslint-config"
+    ]
+  },
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": false
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

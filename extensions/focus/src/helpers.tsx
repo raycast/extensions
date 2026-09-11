@@ -1,7 +1,7 @@
 import { Toast, showToast } from "@raycast/api";
 import { getInstallStatus, isFocusRunning } from "./utils";
 
-export async function ensureFocusIsRunning() {
+export async function ensureFocusIsInstalled() {
   if (!(await getInstallStatus())) {
     await showToast({
       style: Toast.Style.Failure,
@@ -10,6 +10,11 @@ export async function ensureFocusIsRunning() {
     });
     return false;
   }
+  return true;
+}
+
+export async function ensureFocusIsRunning() {
+  if (!(await ensureFocusIsInstalled())) return false;
 
   if (!(await isFocusRunning())) {
     await showToast({

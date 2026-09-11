@@ -6,7 +6,8 @@
   "icon": "open-link.png",
   "author": "koinzhang",
   "contributors": [
-    "ViGeng"
+    "ViGeng",
+    "ridemountainpig"
   ],
   "categories": [
     "Developer Tools",
@@ -210,5 +211,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

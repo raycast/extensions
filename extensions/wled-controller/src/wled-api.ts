@@ -88,16 +88,6 @@ export interface WLEDInfo {
   ip: string;
 }
 
-export interface WLEDEffect {
-  id: number;
-  name: string;
-}
-
-export interface WLEDPalette {
-  id: number;
-  name: string;
-}
-
 export interface WLEDJson {
   state: WLEDState;
   info: WLEDInfo;
@@ -199,16 +189,6 @@ export class WLEDClient {
   }
 
   /**
-   * Set color from hex string
-   */
-  async setColorHex(hex: string, segment = 0): Promise<void> {
-    const rgb = this.hexToRgb(hex);
-    if (rgb) {
-      await this.setColor(rgb.r, rgb.g, rgb.b, segment);
-    }
-  }
-
-  /**
    * Set effect
    */
   async setEffect(effectId: number, segment = 0): Promise<void> {
@@ -220,95 +200,5 @@ export class WLEDClient {
         } as Partial<WLEDSegment>,
       ],
     });
-  }
-
-  /**
-   * Set effect speed (0-255)
-   */
-  async setEffectSpeed(speed: number, segment = 0): Promise<void> {
-    await this.setState({
-      seg: [
-        {
-          id: segment,
-          sx: Math.max(0, Math.min(255, speed)),
-        } as Partial<WLEDSegment>,
-      ],
-    });
-  }
-
-  /**
-   * Set effect intensity (0-255)
-   */
-  async setEffectIntensity(intensity: number, segment = 0): Promise<void> {
-    await this.setState({
-      seg: [
-        {
-          id: segment,
-          ix: Math.max(0, Math.min(255, intensity)),
-        } as Partial<WLEDSegment>,
-      ],
-    });
-  }
-
-  /**
-   * Set palette
-   */
-  async setPalette(paletteId: number, segment = 0): Promise<void> {
-    await this.setState({
-      seg: [
-        {
-          id: segment,
-          pal: paletteId,
-        } as Partial<WLEDSegment>,
-      ],
-    });
-  }
-
-  /**
-   * Set preset
-   */
-  async setPreset(presetId: number): Promise<void> {
-    await this.setState({ ps: presetId });
-  }
-
-  /**
-   * Helper: Convert hex to RGB
-   */
-  private hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-      ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16),
-        }
-      : null;
-  }
-
-  /**
-   * Helper: Convert RGB to hex
-   */
-  static rgbToHex(r: number, g: number, b: number): string {
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-  }
-}
-
-/**
- * Parse devices from preferences
- */
-export function parseDevices(devicesJson: string | undefined): WLEDDevice[] {
-  if (!devicesJson || devicesJson.trim() === "") {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(devicesJson);
-    if (Array.isArray(parsed)) {
-      return parsed.filter((d) => d.name && d.ip);
-    }
-    return [];
-  } catch (error) {
-    console.error("Failed to parse devices:", error);
-    return [];
   }
 }

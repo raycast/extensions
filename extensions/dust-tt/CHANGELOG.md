@@ -1,5 +1,16 @@
 # Dust.tt Changelog
 
+## [Fixes] - 2026-04-02
+
+- Fix SSE streaming: replace client library streaming with direct undici fetch to fix incompatibility with Raycast's Node.js environment.
+- Fix AbortController lifecycle causing the stream to abort mid-flight on React re-renders.
+- Fix workspace picker to fall back to user.workspaces when organizations list is empty, using the region from the JWT token.
+
+## [Fixes] - 2025-11-27
+
+- Tighten auth flow for people with multiple accounts
+- Solved a bug where people would log out but being unable to re-log in on the same account
+
 ## [Fixes] - 2025-10-14
 
 - Move gpt4 and claude3 defaults to gpt5 and claude4

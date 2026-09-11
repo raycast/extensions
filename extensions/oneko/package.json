@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "oneko",
+  "title": "Oneko",
+  "description": "Control Oneko, the desktop cat that chases your cursor.",
+  "icon": "icon.png",
+  "author": "miklw",
+  "categories": [
+    "Fun"
+  ],
+  "keywords": [
+    "cat",
+    "neko",
+    "desktop pet",
+    "cursor",
+    "sprite"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Cat",
+      "subtitle": "Oneko",
+      "description": "Show or hide the cat, starting Oneko if needed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "skin",
+      "title": "Change Skin",
+      "subtitle": "Oneko",
+      "description": "Pick the sprite the cat wears.",
+      "mode": "view"
+    },
+    {
+      "name": "speed",
+      "title": "Set Speed",
+      "subtitle": "Oneko",
+      "description": "Set how fast the cat chases the cursor.",
+      "mode": "view"
+    },
+    {
+      "name": "quit",
+      "title": "Quit Oneko",
+      "description": "Quit the Oneko app.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

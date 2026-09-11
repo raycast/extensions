@@ -1,5 +1,46 @@
 # Brand Icons Changelog
 
+## [Enhancement] - 2026-07-04
+
+- Use `process.env.RAYCAST_SCHEME` for deeplink instead of `raycast:` or `raycast-x:`
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-05-27
+
+- Add support for Raycast beta versions
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2026-04-08
+
+- Fix `raycast-tint-color` value
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2026-03-07
+
+- We reached 3400+ icons!
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-02-01
+
+- Add support for changing copy action to paste
+- Bump all dependencies to the latest
+
+## [New Feature] - 2025-12-07
+
+- Add support for shuffling icons on start
+
+## [Enhancement] - 2025-12-04
+
+- Add Windows support
+- Use default AI model for searching icons
+- Add affiliate parameter to Raycast links
+- Bump all dependencies to the latest
+
+## [Routine Maintenance] - 2025-11-03
+
+- Fix typos
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2025-10-13
 
 - Fix useEffect dependencies

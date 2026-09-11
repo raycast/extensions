@@ -1,6 +1,5 @@
-import { CACHE_KEYS, TEMP_DIR_PREFIX } from "#/config/constants";
-import { Project } from "#/config/types";
-import { formatPath, isExistingDirectory, removeDirectory } from "#/helpers/file";
+import { TEMP_DIR_PREFIX } from "#/config/constants";
+import { isExistingDirectory, removeDirectory } from "#/helpers/file";
 import { isGitCloneUrl, parseUrlSafe } from "#/helpers/general";
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
@@ -9,8 +8,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { useEffect, useRef } from "react";
 import AddCommand from "./add-worktree";
-import { updateCache } from "./helpers/cache";
-import { cloneBareRepository, parseGitRemotes, setUpBareRepositoryFetch } from "./helpers/git";
+import { cloneBareRepository, setUpBareRepositoryFetch } from "./helpers/git";
 import { getPreferences } from "./helpers/raycast";
 
 interface CloneProjectFormInputs {
@@ -59,42 +57,6 @@ export default function Command() {
         toast.style = Toast.Style.Success;
         toast.title = "Repository Cloned & Set Up";
         toast.message = "The repository has been cloned and set up";
-
-        // Update the worktree cache if enabled
-        if (preferences.enableWorktreeCaching) {
-          const pathParts = finalPath.split("/").slice(3);
-
-          const newProject: Project = {
-            id: finalPath,
-            name: pathParts.at(-1) || "",
-            displayPath: formatPath(finalPath),
-            fullPath: finalPath,
-            pathParts,
-            primaryDirectory: pathParts.at(-2) || "",
-            gitRemotes: await parseGitRemotes(finalPath),
-            worktrees: [],
-          };
-
-          await updateCache<Project[]>({
-            key: CACHE_KEYS.WORKTREES,
-            updater: (projects) => {
-              if (!projects) return;
-
-              projects.push(newProject);
-              return projects;
-            },
-          });
-        }
-
-        await updateCache<string[]>({
-          key: CACHE_KEYS.DIRECTORIES,
-          updater: (directories) => {
-            if (!directories) return;
-
-            directories.push(finalPath);
-            return directories;
-          },
-        });
 
         reset({ url: undefined, repoName: undefined });
 

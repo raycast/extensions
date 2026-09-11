@@ -37,7 +37,7 @@ export interface IconIndexEntry {
 
 // Configuration constants
 const ICON_INDEX_URL =
-  "https://raw.githubusercontent.com/selfhst/cdn/main/directory/icons.json";
+  "https://raw.githubusercontent.com/selfhst/icons/main/index.json";
 const ICON_INDEX_KEY = "iconIndex";
 const ICON_INDEX_LAST_FETCHED_KEY = "iconIndexLastFetched";
 const ICON_CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/selfhst/icons";

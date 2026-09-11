@@ -5,7 +5,7 @@ import { saleItem } from "./types";
 /*-----------------------------------*/
 /*------ PRICE FUNC
 /*-----------------------------------*/
-function price(price: "", support: "") {
+function price(price = "", support = "") {
   let support_out = "";
   if (parseInt(support) != 0) {
     support_out = " + $" + support + "";
@@ -41,7 +41,7 @@ export function SaleItem(props: { sale: saleItem; key: number; todey: boolean; i
     <List.Item
       icon={icon ?? "/"}
       title={String(title ?? "")}
-      subtitle={String(dateFormat(props.sale.sold_at, "dd.mm.yyyy")) ?? ""}
+      subtitle={dateFormat(props.sale.sold_at, "dd.mm.yyyy") ?? ""}
       accessories={accessories}
       actions={
         <ActionPanel>
@@ -62,7 +62,7 @@ export function PayoutItem(props: { sale: saleItem; key: number }) {
     <List.Item
       icon={{ source: Icon.ArrowRight, tintColor: Color.Blue }}
       title={String(props.sale.detail)}
-      subtitle={String(saleDateSt) ?? ""}
+      subtitle={saleDateSt}
       accessories={[{ text: String(props.sale.amount), icon: { source: Icon.BankNote, tintColor: Color.Blue } }]}
     />
   );
@@ -144,7 +144,7 @@ export function MetadataSale(props: { sale: saleItem }) {
     <Detail.Metadata>
       <Detail.Metadata.TagList title={props.sale.amount ? "Amount" : "Price"}>
         <Detail.Metadata.TagList.Item
-          text={`$ ${props.sale.amount ?? props.sale.price_cents / 100}`}
+          text={`$ ${props.sale.amount ?? (props.sale.price_cents ? props.sale.price_cents / 100 : "")}`}
           color={Color.Green}
         />
       </Detail.Metadata.TagList>

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mouse-cursor-toggle",
+  "title": "Mouse Cursor Toggle",
+  "description": "Hide or show the macOS mouse cursor from Raycast.",
+  "icon": "cursor.png",
+  "author": "Dhaiwat10",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-cursor",
+      "title": "Toggle Mouse Cursor",
+      "description": "Toggle the visibility of the macOS mouse cursor",
+      "mode": "no-view",
+      "keywords": [
+        "hide",
+        "show",
+        "pointer",
+        "mouse"
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.15.3",
+    "eslint": "^9.0.0",
+    "prettier": "^3.9.5",
+    "typescript": "5.8.3"
+  }
+}

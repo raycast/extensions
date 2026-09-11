@@ -36,7 +36,7 @@
     "text-search-engine": "^1.4.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "eslint": "^8.57.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
@@ -47,5 +47,11 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "build": "ray build -e dist"
+  },
+  "overrides": {
+    "js-yaml@4": "4.3.1",
+    "brace-expansion@1": "1.1.16",
+    "brace-expansion@2": "2.1.2",
+    "brace-expansion@5": "5.0.9"
   }
 }

@@ -30,7 +30,6 @@ interface FileListItemProps {
   totalPages: number;
   setCurrentPage: (page: number) => void;
   markdownDir: string;
-  loadMoreFiles: () => void;
   showCreateFileForm: () => void;
   showTagSearchList: () => void;
   selectedTag: string | null;
@@ -88,7 +87,6 @@ export function FileListItem({
   totalPages,
   setCurrentPage,
   markdownDir,
-  loadMoreFiles,
   showCreateFileForm,
   showTagSearchList,
   selectedTag,
@@ -286,12 +284,6 @@ export function FileListItem({
               icon={Icon.RotateClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={revalidate}
-            />
-            <Action
-              title="Load More Files"
-              icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-              onAction={loadMoreFiles}
             />
           </ActionPanel.Section>
 

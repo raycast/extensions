@@ -26,7 +26,7 @@ function withAccessToken<T = any>(
 Returns the wrapped component if used in a `view` command or the wrapped function if used in a `no-view` command.
 
 {% hint style="info" %}
-Note that the access token isn't injected into the wrapped component props. Instead, it's been set as a global variable that you can get with [getAccessToken](./getAccessToken.md).
+The access token isn't injected into the wrapped component or function's props. Read it synchronously with [getAccessToken](./getAccessToken.md), including from helpers and callbacks used by the authenticated command.
 {% endhint %}
 
 ## Example

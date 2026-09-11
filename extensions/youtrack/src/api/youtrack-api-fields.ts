@@ -6,6 +6,7 @@ import type {
   Project,
   ProjectCustomField,
   Schema,
+  SearchSuggestions,
   StateBundleElement,
   Tag,
   User,
@@ -81,6 +82,12 @@ export const issueWorkItemFields = withDefaultFields([
 export const commandListFields = withDefaultFields([
   { commands: ["error", "description"] },
 ]) satisfies Schema<CommandList>;
+
+export const searchSuggestionsFields = withDefaultFields([
+  {
+    suggestions: ["completionStart", "completionEnd", "description", "group", "option", "prefix", "suffix"],
+  },
+]) satisfies Schema<SearchSuggestions>;
 
 export const commentFields = withDefaultFields([
   "text",

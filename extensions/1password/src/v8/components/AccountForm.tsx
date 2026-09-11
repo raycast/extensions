@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast } from "@raycast/api";
-
-import { Items } from "./Items";
-import { Guide } from "./Guide";
-import { signIn, useAccounts } from "../utils";
 import { useState } from "react";
+
+import { signIn, useAccounts } from "../utils";
+import { Guide } from "./Guide";
+import { Items } from "./Items";
 
 export function AccountForm({ reset = false }: { reset?: boolean }) {
   const [hasAccount, setHasAccount] = useState<boolean>(false);
@@ -13,11 +13,9 @@ export function AccountForm({ reset = false }: { reset?: boolean }) {
   if (!reset || hasAccount) return <Items />;
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Sign in"
             icon={Icon.Key}
             onSubmit={async (values) => {
               const toast = await showToast({
@@ -37,20 +35,22 @@ export function AccountForm({ reset = false }: { reset?: boolean }) {
                 if (error instanceof Error) {
                   toast.message = error.message;
                   toast.primaryAction = {
-                    title: "Copy logs",
                     onAction: async (toast) => {
                       await Clipboard.copy((error as Error).message);
                       toast.hide();
                     },
+                    title: "Copy logs",
                   };
                 }
               }
             }}
+            title="Sign in"
           />
         </ActionPanel>
       }
+      isLoading={isLoading}
     >
-      <Form.Dropdown id="account" title="Account" autoFocus>
+      <Form.Dropdown autoFocus id="account" title="Account">
         {(data || []).map((account) => (
           <Form.Dropdown.Item
             key={account.account_uuid}

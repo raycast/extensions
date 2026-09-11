@@ -1,17 +1,17 @@
-import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
-import { cache, HttpService, KEY } from "./service";
+import { Action, ActionPanel, Icon, List, open } from '@raycast/api'
+import { useCachedState } from '@raycast/utils'
+import { cache, HttpService, KEY } from './service'
 
-HttpService.fetch();
+HttpService.fetch()
 export default function Command() {
-  const [items, setItems] = useCachedState<HttpService[]>(KEY);
+  const [items, setItems] = useCachedState<HttpService[]>(KEY)
 
   const set = () => {
-    setItems(HttpService.services);
-  };
+    setItems(HttpService.services)
+  }
 
-  setTimeout(set, 3 * 1000);
-  cache.subscribe(set);
+  setTimeout(set, 3 * 1000)
+  cache.subscribe(set)
 
   return (
     <List isLoading={!items} isShowingDetail={!!items?.length}>
@@ -47,7 +47,7 @@ export default function Command() {
                           onAction={
                             address.available
                               ? () => {
-                                  open(`http://${address}`);
+                                  open(`http://${address}`)
                                 }
                               : undefined
                           }
@@ -73,8 +73,8 @@ export default function Command() {
               </ActionPanel>
             }
           />
-        );
+        )
       })}
     </List>
-  );
+  )
 }

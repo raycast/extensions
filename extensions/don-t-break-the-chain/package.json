@@ -1,0 +1,177 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "don-t-break-the-chain",
+  "title": "Don't Break the Chain",
+  "description": "Keep a mini calendar in your menu bar and cross off every day you show up, so you don't break the chain.",
+  "icon": "extension-icon.png",
+  "author": "ramysamy",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chain-1",
+      "title": "Chain 1",
+      "description": "Shows a mini calendar in the menu bar and lets you cross off each day you showed up.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "chain-2",
+      "title": "Chain 2",
+      "description": "A second independent chain calendar in the menu bar.",
+      "mode": "menu-bar",
+      "disabledByDefault": true
+    },
+    {
+      "name": "chain-3",
+      "title": "Chain 3",
+      "description": "A third independent chain calendar in the menu bar.",
+      "mode": "menu-bar",
+      "disabledByDefault": true
+    },
+    {
+      "name": "chain-4",
+      "title": "Chain 4",
+      "description": "A fourth independent chain calendar in the menu bar.",
+      "mode": "menu-bar",
+      "disabledByDefault": true
+    },
+    {
+      "name": "chain-5",
+      "title": "Chain 5",
+      "description": "A fifth independent chain calendar in the menu bar.",
+      "mode": "menu-bar",
+      "disabledByDefault": true
+    },
+    {
+      "name": "export-calendar",
+      "title": "Export Calendars",
+      "description": "Writes every month of every chain to a text file, drawn just like the menu bar calendar.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "exportFolder",
+          "title": "Export Folder",
+          "description": "Where the text file is written. Defaults to your Downloads folder.",
+          "type": "directory",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "weekStart",
+      "title": "Week Starts On",
+      "description": "Which day sits in the first column of the calendar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "monday",
+      "data": [
+        {
+          "title": "Monday",
+          "value": "monday"
+        },
+        {
+          "title": "Sunday",
+          "value": "sunday"
+        },
+        {
+          "title": "Saturday",
+          "value": "saturday"
+        }
+      ]
+    },
+    {
+      "name": "cellStyle",
+      "title": "Day Style",
+      "description": "How each day is drawn on the calendar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "drawn",
+      "data": [
+        {
+          "title": "Hand-Drawn — outlined box, ✕ when done",
+          "value": "drawn"
+        },
+        {
+          "title": "Emoji — ⬜ empty, ✅ done",
+          "value": "emoji"
+        }
+      ]
+    },
+    {
+      "name": "showDayLetters",
+      "title": "Day Letters",
+      "label": "Show day letters above the calendar",
+      "description": "Draws M T W T F S S above the grid instead of leaving it bare.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "name1",
+      "title": "Chain 1 Name",
+      "description": "Shown in the menu bar tooltip and in exports. Never drawn on the calendar.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Chain 1"
+    },
+    {
+      "name": "name2",
+      "title": "Chain 2 Name",
+      "description": "Shown in the menu bar tooltip and in exports. Never drawn on the calendar.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Chain 2"
+    },
+    {
+      "name": "name3",
+      "title": "Chain 3 Name",
+      "description": "Shown in the menu bar tooltip and in exports. Never drawn on the calendar.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Chain 3"
+    },
+    {
+      "name": "name4",
+      "title": "Chain 4 Name",
+      "description": "Shown in the menu bar tooltip and in exports. Never drawn on the calendar.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Chain 4"
+    },
+    {
+      "name": "name5",
+      "title": "Chain 5 Name",
+      "description": "Shown in the menu bar tooltip and in exports. Never drawn on the calendar.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Chain 5"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

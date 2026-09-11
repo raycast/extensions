@@ -1,4 +1,3 @@
-import React from "react";
 import { Action, ActionPanel, Icon, popToRoot, showHUD } from "@raycast/api";
 import { SimplifiedAlbumObject } from "../helpers/spotify.api";
 import { FooterAction } from "./FooterAction";
@@ -8,6 +7,7 @@ import { getErrorMessage } from "../helpers/getError";
 import { addToMySavedAlbums } from "../api/addToMySavedAlbums";
 import { removeFromMySavedAlbums } from "../api/removeFromMySavedAlbums";
 import { useContainsMySavedAlbum } from "../hooks/useContainsMySavedAlbum";
+import { ShowContent } from "../shortcuts/shortcuts";
 
 type AlbumActionPanelProps = { album: SimplifiedAlbumObject };
 
@@ -20,13 +20,16 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
       <Action.Push
         icon={Icon.AppWindowList}
         title="Show Songs"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        shortcut={ShowContent}
         target={<TracksList album={album} showGoToAlbum={false} />}
       />
       <Action
         icon={isAlbumSaved ? Icon.Minus : Icon.Plus}
         title={isAlbumSaved ? "Remove from Library" : "Add to Library"}
-        shortcut={{ modifiers: ["cmd", "shift"], key: isAlbumSaved ? "d" : "s" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: isAlbumSaved ? "d" : "s" },
+          Windows: { modifiers: ["ctrl", "shift"], key: isAlbumSaved ? "d" : "s" },
+        }}
         onAction={async () => {
           try {
             if (isAlbumSaved) {

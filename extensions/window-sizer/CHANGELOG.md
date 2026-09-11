@@ -1,6 +1,26 @@
 # Window Sizer Changelog
 
+## [Improve Resize Positioning] - 2026-09-08
+
+- Shrink windows that fill the screen's usable area around their original center
+
+## [New Feature and Improvements] - 2026-07-10
+
+- Added support for editing custom sizes
+- Added aspect ratio search
+- Unified and improved action icons and shortcuts
+
+## [Fixes] - 2026-06-09
+
+- Fixed list selection behavior while preserving selected item action icons
+- Added timeout handling for unresponsive window operations
+
+## [Chore] - 2026-05-16
+
+- Updated screenshots to new Raycast
+
 ## [Chore] - 2025-09-30
+
 - Updated screenshots to macOS Tahoe
 
 ## [Chore] - 2025-06-03

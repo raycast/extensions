@@ -7,12 +7,18 @@
   "author": "huzef44",
   "contributors": [
     "anwarulislam",
-    "xilopaint"
+    "xilopaint",
+    "pernielsentikaer",
+    "chrismessina",
+    "huzef_ansari"
   ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "preferences": [
     {
       "name": "primaryLanguage",
@@ -90,8 +96,48 @@
           "value": "ar-SA"
         },
         {
-          "title": "🇸🇦 Arabic, Najdi (Saudi Arabia)",
-          "value": "ars-SA"
+          "title": "🇨🇿 Czech (Czechia)",
+          "value": "cs-CZ"
+        },
+        {
+          "title": "🇩🇰 Danish (Denmark)",
+          "value": "da-DK"
+        },
+        {
+          "title": "🇮🇩 Indonesian (Indonesia)",
+          "value": "id-ID"
+        },
+        {
+          "title": "🇲🇾 Malay (Malaysia)",
+          "value": "ms-MY"
+        },
+        {
+          "title": "🇳🇴 Norwegian Bokmål (Norway)",
+          "value": "nb-NO"
+        },
+        {
+          "title": "🇳🇱 Dutch (Netherlands)",
+          "value": "nl-NL"
+        },
+        {
+          "title": "🇳🇴 Norwegian Nynorsk (Norway)",
+          "value": "nn-NO"
+        },
+        {
+          "title": "🇵🇱 Polish (Poland)",
+          "value": "pl-PL"
+        },
+        {
+          "title": "🇷🇴 Romanian (Romania)",
+          "value": "ro-RO"
+        },
+        {
+          "title": "🇸🇪 Swedish (Sweden)",
+          "value": "sv-SE"
+        },
+        {
+          "title": "🇹🇷 Turkish (Turkey)",
+          "value": "tr-TR"
         }
       ]
     },
@@ -119,6 +165,22 @@
       "type": "checkbox",
       "required": true,
       "label": "Use language correction",
+      "default": true
+    },
+    {
+      "name": "playSound",
+      "description": "Play camera shutter sound when capturing screenshots",
+      "type": "checkbox",
+      "required": false,
+      "label": "Play sounds",
+      "default": true
+    },
+    {
+      "name": "showToast",
+      "description": "Show toast notifications for command results",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show toast messages",
       "default": true
     },
     {
@@ -173,17 +235,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.2.0",
-    "use-immer": "^0.11.0"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "24.0.13",
-    "@types/react": "19.1.8",
-    "eslint": "^8.57.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -191,8 +253,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

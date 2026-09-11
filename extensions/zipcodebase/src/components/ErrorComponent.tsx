@@ -21,8 +21,8 @@ ${Object.values(errorResponse.errors).map((errorItem) =>
   Object.entries(errorItem).map(
     ([key, val]) => `
 
-${key}: ${val}`
-  )
+${key}: ${val}`,
+  ),
 )}`}
       actions={
         <ActionPanel>

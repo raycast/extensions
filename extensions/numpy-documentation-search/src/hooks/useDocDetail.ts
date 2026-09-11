@@ -1,27 +1,94 @@
-import { useFetch } from "@raycast/utils";
+import { useCallback, useEffect, useState } from "react";
+import { loadDocDetail, type DocumentationSourceMode, type ResolvedDocumentationSource } from "../lib/docs-source";
+import type { DocDetail } from "../lib/doc-detail";
 import type { InventoryItem } from "../lib/inventory";
-import { parseDocDetail, type DocDetail } from "../lib/doc-detail";
 
 interface UseDocDetailResult {
   data?: DocDetail;
   isLoading: boolean;
   error?: Error;
   revalidate: () => void;
+  source?: ResolvedDocumentationSource;
 }
 
-export function useDocDetail(item: InventoryItem | undefined): UseDocDetailResult {
-  const { data, isLoading, error, revalidate } = useFetch<DocDetail>(item?.url ?? "", {
-    execute: Boolean(item),
-    keepPreviousData: true,
-    parseResponse: async (response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to load documentation: ${response.status} ${response.statusText}`);
-      }
+interface UseDocDetailOptions {
+  inventorySource?: ResolvedDocumentationSource;
+  item: InventoryItem | undefined;
+  localDocsDirectory?: string;
+  mode: DocumentationSourceMode;
+}
 
-      const html = await response.text();
-      return parseDocDetail(html, item!);
-    },
+export function useDocDetail(options: UseDocDetailOptions): UseDocDetailResult {
+  const [reloadToken, setReloadToken] = useState(0);
+
+  const revalidate = useCallback(() => {
+    setReloadToken((token) => token + 1);
+  }, []);
+
+  const [state, setState] = useState<UseDocDetailResult>({
+    isLoading: false,
+    revalidate,
   });
 
-  return { data, isLoading, error, revalidate };
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!options.item || !options.inventorySource) {
+      setState({
+        data: undefined,
+        error: undefined,
+        isLoading: false,
+        revalidate,
+        source: undefined,
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setState((current) => ({
+      ...current,
+      error: undefined,
+      isLoading: true,
+      revalidate,
+    }));
+
+    void loadDocDetail({
+      inventorySource: options.inventorySource,
+      item: options.item,
+      localDocsDirectory: options.localDocsDirectory,
+      mode: options.mode,
+    })
+      .then((result) => {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          data: result.data,
+          error: undefined,
+          isLoading: false,
+          revalidate,
+          source: result.source,
+        });
+      })
+      .catch((error: unknown) => {
+        if (cancelled) {
+          return;
+        }
+
+        setState((current) => ({
+          ...current,
+          error: error instanceof Error ? error : new Error(String(error)),
+          isLoading: false,
+          revalidate,
+        }));
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [options.inventorySource, options.item, options.localDocsDirectory, options.mode, reloadToken, revalidate]);
+
+  return state;
 }

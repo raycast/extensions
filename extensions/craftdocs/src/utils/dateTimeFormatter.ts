@@ -57,7 +57,7 @@ export function formatTime(date: Date, pattern: string): string {
 }
 
 /**
- * Generate Craft's internal date format for daily notes (YYYY.MM.DD)
+ * Generate Craft's internal date format for Daily Notes (YYYY.MM.DD)
  * This format is used for the day:// link and database queries
  * @param date - The date to format
  * @returns The Craft internal date format string

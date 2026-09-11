@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cold-turkey-blocker",
+  "title": "Cold Turkey Blocker",
+  "version": "1.3.2",
+  "description": "Manage Cold Turkey blocks, create them with optional initial websites and exceptions, and control starts, locks, device schedules, and breaks.",
+  "icon": "extension-icon.png",
+  "author": "nabecite",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "focus",
+    "blocker",
+    "cold turkey",
+    "distraction",
+    "website blocker"
+  ],
+  "commands": [
+    {
+      "name": "manage-blocks",
+      "title": "Manage Cold Turkey",
+      "subtitle": "Cold Turkey Blocker",
+      "description": "Search Cold Turkey blocks and start, stop, lock, edit, create, or control breaks from one contextual interface.",
+      "mode": "view",
+      "keywords": [
+        "start",
+        "stop",
+        "unlocked",
+        "lock",
+        "password",
+        "break",
+        "website",
+        "exception",
+        "add",
+        "create",
+        "device",
+        "schedule"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "executablePath",
+      "type": "textfield",
+      "required": true,
+      "title": "Cold Turkey Executable",
+      "description": "Absolute path to the Cold Turkey Blocker CLI executable.",
+      "default": {
+        "macOS": "/Applications/Cold Turkey Blocker.app/Contents/MacOS/Cold Turkey Blocker",
+        "Windows": "C:\\Program Files\\Cold Turkey\\Cold Turkey Blocker.exe"
+      }
+    },
+    {
+      "name": "commandTimeoutMs",
+      "type": "textfield",
+      "required": false,
+      "title": "CLI Timeout",
+      "description": "Maximum time in milliseconds to wait for a CLI command.",
+      "default": "15000",
+      "placeholder": "15000"
+    },
+    {
+      "name": "confirmLockingActions",
+      "type": "checkbox",
+      "required": false,
+      "title": "Safety",
+      "label": "Confirm before commands that may lock or immediately activate a device block",
+      "default": true,
+      "description": "Ask for confirmation before commands that may lock a block or immediately activate a device block."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^2.2.6",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.8.4",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "setup": "node scripts/set-author.mjs",
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/**/*.test.ts",
+    "publish": "npx @raycast/api@latest publish",
+    "ct:report": "node scripts/generate-cold-turkey-report.mjs",
+    "ct:report:status": "node scripts/generate-cold-turkey-report.mjs --status-all",
+    "ct:report:lab": "node scripts/generate-cold-turkey-report.mjs --lab",
+    "ct:report:lab-full": "node scripts/generate-cold-turkey-report.mjs --lab --include-device-blocks --include-password-lock"
+  }
+}

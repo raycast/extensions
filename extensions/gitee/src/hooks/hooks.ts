@@ -26,16 +26,17 @@ export const getUserRepos = (page: number) => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    axios({
-      method: "GET",
-      url: GET_USER_REPOS,
-      params: {
-        access_token: accessToken,
-        sort: "full_name",
-        page: page,
-        per_page: PER_PAGE,
-      },
-    })
+    axios
+      .request({
+        method: "GET",
+        url: GET_USER_REPOS,
+        params: {
+          access_token: accessToken,
+          sort: "full_name",
+          page: page,
+          per_page: PER_PAGE,
+        },
+      })
       .then((response) => {
         setRepos([...repos, ...(response.data as Repository[])]);
         setLoading(false);
@@ -65,17 +66,18 @@ export const searchRepos = (searchContent: string) => {
     }
     setLoading(true);
 
-    axios({
-      method: "GET",
-      url: SEARCH_REPOS,
-      params: {
-        access_token: accessToken,
-        q: searchContent,
-        page: 1,
-        per_page: PER_PAGE,
-        order: "desc",
-      },
-    })
+    axios
+      .request({
+        method: "GET",
+        url: SEARCH_REPOS,
+        params: {
+          access_token: accessToken,
+          q: searchContent,
+          page: 1,
+          per_page: PER_PAGE,
+          order: "desc",
+        },
+      })
       .then((response) => {
         setUserRepos(response.data as Repository[]);
         setLoading(false);
@@ -101,37 +103,40 @@ export const myIssues = (filter: string) => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    axios({
-      method: "GET",
-      url: USER_ISSUES,
-      params: {
-        access_token: accessToken,
-        filter: filter,
-        state: "open",
-        sort: "created",
-        direction: "desc",
-        page: 1,
-        per_page: PER_PAGE,
-      },
-    })
+    axios
+      .request({
+        method: "GET",
+        url: USER_ISSUES,
+        params: {
+          access_token: accessToken,
+          filter: filter,
+          state: "open",
+          sort: "created",
+          direction: "desc",
+          page: 1,
+          per_page: PER_PAGE,
+        },
+      })
       .then((response1) => {
         setOpenIssues(response1.data as Issue[]);
-        axios({
-          method: "GET",
-          url: USER_ISSUES,
-          params: {
-            access_token: accessToken,
-            filter: filter,
-            state: "progressing",
-            sort: "created",
-            direction: "desc",
-            page: 1,
-            per_page: ISSUE_PER_PAGE,
-          },
-        }).then((response2) => {
-          setProgressingIssues(response2.data as Issue[]);
-          setLoading(false);
-        });
+        axios
+          .request({
+            method: "GET",
+            url: USER_ISSUES,
+            params: {
+              access_token: accessToken,
+              filter: filter,
+              state: "progressing",
+              sort: "created",
+              direction: "desc",
+              page: 1,
+              per_page: ISSUE_PER_PAGE,
+            },
+          })
+          .then((response2) => {
+            setProgressingIssues(response2.data as Issue[]);
+            setLoading(false);
+          });
       })
       .catch((reason) => {
         setLoading(false);
@@ -154,13 +159,14 @@ export const getRepoREADME = (owner: string, repo: string) => {
   const fetchData = useCallback(async () => {
     setLoading(true);
 
-    axios({
-      method: "GET",
-      url: GET_REPO_README(owner, repo),
-      params: {
-        access_token: accessToken,
-      },
-    })
+    axios
+      .request({
+        method: "GET",
+        url: GET_REPO_README(owner, repo),
+        params: {
+          access_token: accessToken,
+        },
+      })
       .then((response) => {
         setReadme(Buffer.from((response.data as Readme).content, "base64").toString("utf-8"));
         setLoading(false);
@@ -186,16 +192,17 @@ export const getNotifications = (filter: string, refresh: number) => {
   const fetchData = useCallback(async () => {
     setLoading(true);
 
-    axios({
-      method: "GET",
-      url: NOTIFICATIONS,
-      params: {
-        access_token: accessToken,
-        type: filter,
-        page: "1",
-        per_page: NOTIFICATION_PER_PAGE,
-      },
-    })
+    axios
+      .request({
+        method: "GET",
+        url: NOTIFICATIONS,
+        params: {
+          access_token: accessToken,
+          type: filter,
+          page: "1",
+          per_page: NOTIFICATION_PER_PAGE,
+        },
+      })
       .then((response) => {
         setNotifications((response.data as NotificationResponse).list);
         setLoading(false);
@@ -215,7 +222,7 @@ export const getNotifications = (filter: string, refresh: number) => {
 };
 
 export const setNotificationRead = async (id: number) => {
-  await axios({
+  await axios.request({
     method: "PATCH",
     url: NOTIFICATIONS + "/" + id,
     params: {

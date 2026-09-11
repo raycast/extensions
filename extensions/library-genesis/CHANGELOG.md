@@ -1,5 +1,10 @@
 # Library Genesis Changelog
 
+## [Fix Download] - 2025-11-13
+
+- fix: allow downloading files again changing url structure
+- feat: don't show pages if the value is empty
+
 ## [Fix Search + Modernize] - 2025-07-30
 
 - fix: search was not working due to site changes (ref: [Issue #20481](https://github.com/raycast/extensions/issues/20481))

@@ -1,9 +1,13 @@
 import { getApplications, getPreferenceValues } from "@raycast/api";
 import fs from "fs";
-import { spawn } from "child_process";
-import { exec } from "child_process";
-import expandTilde from "expand-tilde";
+import os from "os";
 import path from "path";
+import { expandHome } from "./androidCliResolver";
+
+// The command-execution seam lives in its own raycast-free module so it can be
+// unit-tested without triggering this module's preference lookups. Re-exported
+// here so existing callers (`from "./utils"`) keep working unchanged.
+export { executeAsync, runCommand } from "./commandRunner";
 
 export async function isAndroidStudioInstalled() {
   return (await getApplications()).find((app) => {
@@ -19,11 +23,11 @@ export const emulatorPath = `ANDROID_AVD_HOME="${androidAVD()}" ${androidSDK()}/
 
 export function androidSDK() {
   const sdk = getPreferenceValues().androidSDK;
-  return sdk.replace("~", expandTilde("~"));
+  return expandHome(sdk, os.homedir());
 }
 export function androidAVD() {
   const avd = getPreferenceValues().androidAVD;
-  return avd.replace("~", expandTilde("~"));
+  return expandHome(avd, os.homedir());
 }
 
 export const adbPath = path.join(androidSDK(), "platform-tools", "adb");
@@ -46,40 +50,6 @@ export function hasReadPermission(path: string) {
     err = error;
   }
   return err != null;
-}
-
-export function runCommand(
-  cmd: string,
-  output: ((out: string) => void) | undefined,
-  error: ((error: string) => void) | undefined
-) {
-  const childProcess = spawn(cmd, [], { shell: true });
-
-  childProcess.stdout.on("data", function (data: string) {
-    if (output) {
-      output(data.toString());
-    }
-    console.log("stdout: " + data);
-  });
-
-  childProcess.stderr.on("data", function (data: string) {
-    console.log("stderr: " + data);
-    if (error) {
-      error(data.toString());
-    }
-  });
-}
-
-export async function executeAsync(cmd: string): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    exec(cmd, (err: any, stdout: string) => {
-      if (err != null) {
-        reject(err);
-        return;
-      }
-      resolve(stdout);
-    });
-  });
 }
 
 export async function setTmeoutAsync(ms: number) {

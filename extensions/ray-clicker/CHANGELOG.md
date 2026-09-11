@@ -1,12 +1,28 @@
 # Ray Clicker Changelog
 
+## [Windows support and maintenance] - 2026-09-05
+
+- Enable Windows installation and add Control shortcuts with matching hints.
+- Update the Raycast API, remove unused utilities, and refresh the dependency lockfile.
+- Remove the action that launched the unavailable menu-bar command.
+- Confirm resets from upgrade actions and clear the combo timer when closing.
+- Fix idle autosave timing and prevent closing during startup from overwriting saved progress.
+- Serialize saves so delayed autosaves cannot overwrite later actions or resets.
+- Preserve reset state when closing before its storage write finishes.
+- Start idle timing after saved progress loads to avoid counting startup time twice.
+
+## [Windows ready & package update] - 2025-12-16
+
+- Verified Windows support
+- Updated package.json dependencies
+
 ## [Stability: Render Loop Fix & Persistence Hardening] - 2025-08-26
 
 - fix: Prevent redundant renders by skipping idle tick state updates when estimated gain < 0.01; only advance `lastUpdateRef` (`src/useGameState.ts`).
 - fix: Align `lastUpdateRef` to `now` immediately after initial load to avoid an inflated first-tick delta (`src/useGameState.ts`).
 - persistence: Gate debounced/periodic autosaves and save-on-unmount on `isLoading` to prevent overwriting progress at startup (`src/useGameState.ts`).
 - cleanup: Remove Menu Bar background command and related UI; rely on 50% offline catch-up on open. Clear legacy `idle-menu-bar-active` flag (`package.json`, `src/GameView.tsx`, `src/useGameState.ts`).
-  
+
 ## [Fix: Idle Accrual Sync & Prestige fix & UX improvements] - 2025-08-22
 
 - Sync main UI state from storage when the menu bar heartbeat is active to reflect idle gains without double-counting (`src/useGameState.ts`).
@@ -90,3 +106,4 @@
 - Fix title casing for Menu Bar command in `package.json`.
 - Format changelog entries to ISO dates and correct typos throughout.
 - Add category switcher to upgrade action menu
+

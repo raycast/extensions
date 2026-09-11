@@ -1,0 +1,147 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zenmux-manager",
+  "description": "Monitor ZenMux usage, manage account links, and ask Raycast AI about ZenMux.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "test": "node scripts/verify-llm-knowledge.mjs",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "preferences": [
+    {
+      "name": "managementApiKey",
+      "title": "Platform API Key",
+      "description": "Create one from ZenMux Console > Platform API. Standard API keys are not accepted by the account endpoints.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Your ZenMux Platform API key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "usage-status",
+      "title": "ZenMux Status",
+      "description": "Show ZenMux quota and PAYG balance inline in Raycast.",
+      "mode": "no-view",
+      "interval": "2m",
+      "preferences": [
+        {
+          "name": "statusDisplay",
+          "title": "Status Display",
+          "description": "Choose what the Raycast command subtitle should show. Quota options apply only to subscribed accounts.",
+          "type": "dropdown",
+          "required": true,
+          "default": "payg-both-left",
+          "data": [
+            {
+              "title": "PAYG + Both Quotas Left",
+              "value": "payg-both-left"
+            },
+            {
+              "title": "PAYG + Both Quotas Used",
+              "value": "payg-both-used"
+            },
+            {
+              "title": "PAYG + 5-hour Left",
+              "value": "payg-5h-left"
+            },
+            {
+              "title": "PAYG + 5-hour Used",
+              "value": "payg-5h-used"
+            },
+            {
+              "title": "PAYG + 7-day Left",
+              "value": "payg-7d-left"
+            },
+            {
+              "title": "PAYG + 7-day Used",
+              "value": "payg-7d-used"
+            },
+            {
+              "title": "PAYG Only",
+              "value": "payg-only"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "show-details",
+      "title": "Show ZenMux Usage",
+      "description": "Monitor ZenMux subscription quota and PAYG credit balance.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-zenmux-account",
+      "title": "Get ZenMux Account",
+      "description": "Get the user's current ZenMux account status, subscription quota, PAYG balance, Flow rate, and useful ZenMux links.",
+      "confirmation": false
+    },
+    {
+      "name": "search-zenmux-docs",
+      "title": "Search ZenMux Docs",
+      "description": "Search curated ZenMux documentation for product features, API usage, integration setup, routing, billing, observability, and troubleshooting.",
+      "confirmation": false
+    }
+  ],
+  "ai": {
+    "instructions": "Help users with ZenMux account status, quota, PAYG balance, Flow rate, setup, API usage, routing, fallback, streaming, tool calls, billing, observability, request logs, error codes, and integrations with Cursor, Claude Code, Codex, Cline, Open WebUI, Hermes Agent, RikkaHub, Sider, Obsidian, OpenClaw, Neovate, Immersive Translate, Gemini CLI, opencode, GitHub Copilot, Cherry Studio, CC-Switch, Dify, and any other tool documented at docs.zenmux.ai.\n\nTOOL USE:\n- Use Get ZenMux Account whenever the user asks about current quota, balance, subscription status, Flow rate, reset times, Platform API setup, billing, usage, or request logs.\n- Use Search ZenMux Docs for any setup, configuration, integration, API protocol, routing, fallback, streaming, tool-calling, structured-output, error code, or documentation question. Use it before answering, even if you think you know the answer. The tool returns two tiers: `Curated answer-ready facts` (hand-verified) and `Official docs fetched over HTTPS` (selected official ZenMux markdown fetched live, or from Raycast Cache if the live fetch fails). Always read both before answering.\n\nANSWER SHAPE for setup or configuration questions:\n1. One-line direct answer (which protocol or product the user should pick).\n2. Required values verbatim from `Answer-ready facts`, `Copy-paste snippet`, or the fetched official doc excerpt (env vars, base URLs, key formats, config fields). Do not paraphrase these.\n3. Numbered setup steps when the tool returned `Setup steps`, or steps reproduced from the fetched official doc.\n4. A copy-paste code block when the tool returned one or the fetched official doc contains one.\n5. A verification step (how the user confirms it worked).\n6. Common mistakes from `Do not say` warnings.\n7. The Source URL the tool returned.\n\nTIER PRECEDENCE: When a curated entry and a fetched official doc disagree, prefer the curated entry. Fetched doc excerpts may be truncated or served from cache; if so, surface the Source URL so the user can read the rest.\n\nKEY-TYPE BOUNDARY (must follow):\n- Subscription API key (`sk-ss-v1-...`) and PAYG API key (`sk-ai-v1-...`) are model/tool integration keys.\n- Platform API key is for `/api/v1/management/*` endpoints only (account, quota, balance, generation detail, statistics).\n- Never tell users to use a Platform API Key for Cursor, Claude Code, Codex, Cline, Open WebUI, or any chat/model traffic.\n- Never tell users to use a Subscription or PAYG key for Platform endpoints.\n\nDO NOT:\n- Do not invent ZenMux endpoints, env var names, key formats, model slugs, pricing, or response field names.\n- Do not paraphrase exact values returned by the tools.\n- Do not say `weekly quota`; the 7-day window is rolling, not calendar weekly.\n- Do not show or echo the user's API keys.\n\nIF UNSURE:\nIf the tool output does not cover the question, say so plainly and point the user to the Source URL the tool returned, or to https://docs.zenmux.ai/. Do not guess.",
+    "evals": [
+      {
+        "input": "@zenmux-manager How much 5-hour quota do I have left?",
+        "mocks": {
+          "get-zenmux-account": [
+            "Current ZenMux account data:\nSubscription:\n- Plan: Pro ($20.00/month)\n- Account status: Healthy\n- Flow rate: $0.0100/Flow\n\nQuota:\n- 5-hour quota:\n  - Used: 40% (400 Flow of 1,000 Flow)\n  - Remaining: 60% (600 Flow)\n  - Resets in: 2h 15m\n- 7-day quota:\n  - Used: 20% (2,000 Flow of 10,000 Flow)\n  - Remaining: 80% (8,000 Flow)\n\nPAYG:\n- Total balance: $12.50"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-zenmux-account"
+          }
+        ]
+      },
+      {
+        "input": "@zenmux-manager How do I configure Cursor with ZenMux?",
+        "mocks": {
+          "search-zenmux-docs": [
+            "ZenMux documentation matches for: How do I configure Cursor with ZenMux?\n\n== Curated answer-ready facts ==\n1. Cursor Integration\n   Source: https://docs.zenmux.ai/best-practices/cursor\n   Answer-ready facts:\n     - Use OpenAI Compatible settings with Base URL `https://zenmux.ai/api/v1`.\n     - Use a Subscription API key (`sk-ss-v1-...`) or PAYG API key (`sk-ai-v1-...`), not a Platform API key."
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "search-zenmux-docs"
+          }
+        ]
+      }
+    ]
+  },
+  "title": "ZenMux Manager",
+  "author": "abnershang",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ]
+}

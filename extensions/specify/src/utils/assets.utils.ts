@@ -8,7 +8,7 @@ export const copyImage = async (url: string, format: string) => {
   const selectedPath = environment.supportPath;
   const filePath = selectedPath.endsWith('/') ? `${selectedPath}bitmap.${format}` : `${selectedPath}/bitmap.${format}`;
 
-  const { data } = await axios({
+  const { data } = await axios.request({
     url: url,
     method: 'GET',
     responseType: 'arraybuffer',
@@ -25,7 +25,7 @@ export const copyVector = async (url: string, format: string, name: string) => {
   const fileExists = fs.existsSync(svgPath);
 
   if (format === 'svg' && !fileExists) {
-    const { data } = await axios({
+    const { data } = await axios.request({
       url: url,
       method: 'GET',
       responseType: 'arraybuffer',
@@ -42,7 +42,7 @@ export const getDisplayableSVG = async (name: string, url: string) => {
   const slug = slugify(name);
   const svgPath = selectedPath.endsWith('/') ? `${selectedPath}${slug}.svg` : `${selectedPath}/${slug}.svg`;
 
-  const { data } = await axios({
+  const { data } = await axios.request({
     url: url,
     method: 'GET',
     responseType: 'arraybuffer',

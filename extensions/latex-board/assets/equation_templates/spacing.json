@@ -1,0 +1,11 @@
+{
+  "Spacing": {
+    "Negative Space (-3/18)": "a \\! b",
+    "Thin Space (3/18)": "a \\, b",
+    "Medium Space (4/18)": "a \\: b",
+    "Thick Space (5/18)": "a \\; b",
+    "Small Space (~6/18)": "a \\ b",
+    "Quad Space (1em)": "a \\quad b",
+    "Double Quad (2em)": "a \\qquad b"
+  }
+}

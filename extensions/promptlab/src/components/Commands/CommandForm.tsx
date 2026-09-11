@@ -490,7 +490,7 @@ export default function CommandForm(props: {
             onSubmit={handleSubmit}
           />
           {showAddPlaceholderAction ? (
-            <ActionPanel.Submenu title="Add Placeholder..." icon={Icon.Plus}>
+            <ActionPanel.Submenu title="Add Placeholder…" icon={Icon.Plus}>
               {PromptLabPlaceholders.filter(
                 (placeholder) =>
                   !placeholder.name.startsWith("textfile:") &&

@@ -98,21 +98,30 @@ export function SpaceActions({ space, mutate, isPinned, searchText }: SpaceActio
       <Action
         icon={isPinned ? Icon.StarDisabled : Icon.Star}
         title={isPinned ? "Unpin Space" : "Pin Space"}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "f" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+        }}
         onAction={handlePin}
       />
       {isPinned && (
         <>
           <Action
             icon={Icon.ArrowUp}
-            title="Move Up in Pinned" // eslint-disable-line @raycast/prefer-title-case
-            shortcut={{ modifiers: ["opt", "cmd"], key: "arrowUp" }}
+            title="Move Up in Pinned"
+            shortcut={{
+              macOS: { modifiers: ["opt", "cmd"], key: "arrowUp" },
+              Windows: { modifiers: ["alt", "ctrl"], key: "arrowUp" },
+            }}
             onAction={handleMoveUpInFavorites}
           />
           <Action
             icon={Icon.ArrowDown}
-            title="Move Down in Pinned" // eslint-disable-line @raycast/prefer-title-case
-            shortcut={{ modifiers: ["opt", "cmd"], key: "arrowDown" }}
+            title="Move Down in Pinned"
+            shortcut={{
+              macOS: { modifiers: ["opt", "cmd"], key: "arrowDown" },
+              Windows: { modifiers: ["alt", "ctrl"], key: "arrowDown" },
+            }}
             onAction={handleMoveDownInFavorites}
           />
         </>

@@ -29,9 +29,96 @@ export function getAppFavicon(app: App) {
 // LocalStorage Schema Keys
 export const STORAGE_KEYS = {
   USAGE_HISTORY: "usageHistory",
+  STARRED_HISTORY_ITEMS: "starredHistoryItems",
   APP_SETTINGS: "appSettings",
   CUSTOM_APPS: "customApps",
 } as const;
+
+function normalizeApp(app: string): string {
+  return app.trim().toLowerCase();
+}
+
+function normalizeProfile(profile: string): string {
+  const trimmed = profile.trim();
+  return (trimmed.startsWith("@") ? trimmed.slice(1) : trimmed).toLowerCase();
+}
+
+export function getHistoryPairKey(profile: string, app: string): string {
+  return `${normalizeApp(app)}::${normalizeProfile(profile)}`;
+}
+
+async function setStarredHistoryPairs(pairs: string[]): Promise<void> {
+  await LocalStorage.setItem(STORAGE_KEYS.STARRED_HISTORY_ITEMS, JSON.stringify(pairs));
+}
+
+/**
+ * Get all starred history app+profile pair keys from local storage
+ * @returns Promise<string[]> Array of normalized app+profile pair keys
+ */
+export async function getStarredHistoryPairs(): Promise<string[]> {
+  const starredJson = await LocalStorage.getItem<string>(STORAGE_KEYS.STARRED_HISTORY_ITEMS);
+  return starredJson ? JSON.parse(starredJson) : [];
+}
+
+/**
+ * Check whether a specific app+profile history pair is starred
+ * @param profile - Profile name
+ * @param app - App value/identifier
+ */
+export async function isHistoryItemStarred(profile: string, app: string): Promise<boolean> {
+  const starredPairs = await getStarredHistoryPairs();
+  const key = getHistoryPairKey(profile, app);
+  return starredPairs.includes(key);
+}
+
+/**
+ * Toggle starred state for a specific app+profile history pair
+ * @param profile - Profile name
+ * @param app - App value/identifier
+ * @returns Promise<boolean> New starred state (true when starred)
+ */
+export async function toggleStarredHistoryItem(profile: string, app: string): Promise<boolean> {
+  const starredPairs = await getStarredHistoryPairs();
+  const key = getHistoryPairKey(profile, app);
+
+  if (starredPairs.includes(key)) {
+    const filtered = starredPairs.filter((pair) => pair !== key);
+    await setStarredHistoryPairs(filtered);
+    return false;
+  }
+
+  await setStarredHistoryPairs([...starredPairs, key]);
+  return true;
+}
+
+/**
+ * Remove all starred app+profile history pairs
+ */
+export async function clearStarredHistoryItems(): Promise<void> {
+  await setStarredHistoryPairs([]);
+}
+
+/**
+ * Get starred usage history items, optionally filtered by app and limited
+ * @param app - Optional app value/name filter
+ * @param limit - Optional max number of items (most recent first)
+ */
+export async function getStarredUsageHistory(app?: string, limit?: number): Promise<UsageHistoryItem[]> {
+  const [usageHistory, starredPairs] = await Promise.all([getUsageHistory(), getStarredHistoryPairs()]);
+  const starredSet = new Set(starredPairs);
+
+  let filtered = usageHistory.filter((item) => starredSet.has(getHistoryPairKey(item.profile, item.app)));
+
+  if (app) {
+    const appLower = app.toLowerCase();
+    filtered = filtered.filter(
+      (item) => item.app.toLowerCase() === appLower || item.appName.toLowerCase().includes(appLower),
+    );
+  }
+
+  const sorted = filtered.sort((a, b) => b.timestamp - a.timestamp);
+  return limit !== undefined ? sorted.slice(0, limit) : sorted;
+}
 
 /**
  * Get all apps including custom apps, filtered by visibility settings

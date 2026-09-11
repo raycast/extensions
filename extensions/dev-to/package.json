@@ -70,11 +70,11 @@
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^20.8.10",
     "@types/node-fetch": "^2.6.2",
     "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
+    "eslint": "^8.57.1",
     "prettier": "^2.5.1",
     "react": "^18.2.0",
     "typescript": "^4.7.4"
@@ -86,5 +86,11 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "js-yaml@4": "4.3.1",
+    "brace-expansion@1": "1.1.16",
+    "brace-expansion@2": "2.1.2",
+    "brace-expansion@5": "5.0.9"
   }
 }

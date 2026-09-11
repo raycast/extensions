@@ -1,4 +1,17 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Icon } from "@raycast/api";
+import {
+  errorMessage,
+  parseAddDelivery,
+  parseDeliveries,
+  parseJson,
+  type Carrier,
+  type Delivery,
+  type Event,
+  type ParcelApiResponse,
+  type ParcelApiStatus,
+} from "./schemas";
+
+export type { Carrier, Delivery, Event, ParcelApiResponse };
 
 interface Preferences {
   apiKey: string;
@@ -7,32 +20,6 @@ interface Preferences {
 export enum FilterMode {
   ACTIVE = "active",
   RECENT = "recent",
-}
-
-export interface Event {
-  event: string;
-  date: string;
-  location?: string;
-  additional?: string;
-}
-
-export interface Delivery {
-  carrier_code: string;
-  description: string;
-  status_code: number;
-  tracking_number: string;
-  events: Event[];
-  extra_information?: string;
-  date_expected?: string;
-  date_expected_end?: string;
-  timestamp_expected?: number;
-  timestamp_expected_end?: number;
-}
-
-export interface ParcelApiResponse {
-  success: boolean;
-  error_message?: string;
-  deliveries: Delivery[];
 }
 
 // Status code descriptions
@@ -52,18 +39,21 @@ export function getStatusDescription(statusCode: number): string {
   return STATUS_DESCRIPTIONS[statusCode] || "Unknown Status";
 }
 
-// Map status codes to icons
-export const STATUS_ICONS: Record<number, string> = {
-  0: "✅",
-  1: "❄️",
-  2: "🚚",
-  3: "📦",
-  4: "🚚",
-  5: "❓",
-  6: "⚠️",
-  7: "⛔️",
-  8: "ℹ️",
+const STATUS_ICONS: Record<number, Icon> = {
+  0: Icon.CheckCircle,
+  1: Icon.Snowflake,
+  2: Icon.Lorry,
+  3: Icon.Box,
+  4: Icon.Lorry,
+  5: Icon.QuestionMark,
+  6: Icon.Warning,
+  7: Icon.ExclamationMark,
+  8: Icon.Dot,
 };
+
+export function getStatusIcon(statusCode: number): Icon {
+  return STATUS_ICONS[statusCode] || Icon.QuestionMark;
+}
 
 export function getApiKey(): string {
   const preferences = getPreferenceValues<Preferences>();
@@ -73,6 +63,10 @@ export function getApiKey(): string {
   }
 
   return preferences.apiKey;
+}
+
+function getSystemLanguage(): string {
+  return Intl.DateTimeFormat().resolvedOptions().locale.slice(0, 2);
 }
 
 export function getDeliveriesUrl(filterMode: FilterMode): string {
@@ -85,6 +79,17 @@ export function getAPIHeaders(): Record<string, string> {
   };
 }
 
+/**
+ * Build the error for a non-2xx response, preferring Parcel's own `error_message` over the HTTP status.
+ */
+export async function responseError(response: Response, fallback: string): Promise<Error> {
+  return new Error(errorMessage(await response.text()) ?? fallback);
+}
+
+export function getSupportedCarriersUrl(): string {
+  return "https://api.parcel.app/external/supported_carriers.json";
+}
+
 export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[]> {
   const url = getDeliveriesUrl(filterMode);
   const response = await fetch(url, {
@@ -92,22 +97,56 @@ export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status} (${await response.text()})`);
+    throw await responseError(response, `Failed to fetch deliveries: ${response.status} ${response.statusText}`);
   }
 
-  const data = (await response.json()) as ParcelApiResponse;
+  const data = parseDeliveries(parseJson(await response.text()));
 
   const err = getAPIError(data);
   if (err) {
     throw err;
   }
 
-  return data.deliveries;
+  return data.deliveries ?? [];
 }
 
-export function getAPIError(data: ParcelApiResponse): Error | null {
+export async function addDelivery(
+  trackingNumber: string,
+  carrierCode: string,
+  description: string,
+  confirmationNotification: boolean,
+): Promise<void> {
+  const url = "https://api.parcel.app/external/add-delivery/";
+  const response = await fetch(url, {
+    headers: {
+      ...getAPIHeaders(),
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      tracking_number: trackingNumber,
+      carrier_code: carrierCode,
+      description: description,
+      send_push_confirmation: confirmationNotification,
+      language: getSystemLanguage(),
+    }),
+  });
+
+  if (!response.ok) {
+    throw await responseError(response, `Failed to add delivery: ${response.status} ${response.statusText}`);
+  }
+
+  const data = parseAddDelivery(parseJson(await response.text()));
+
+  const err = getAPIError(data);
+  if (err) {
+    throw err;
+  }
+}
+
+export function getAPIError(data: ParcelApiStatus): Error | null {
   if (!data.success) {
-    return new Error(data?.error_message || "Unknown API error");
+    return new Error(data?.error_message || "API request failed. Please check your API key and try again.");
   }
 
   return null;

@@ -1,6 +1,5 @@
-import React from "react";
 import type { PersonDetails } from "./types";
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { STRINGS } from "./strings";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { AsyncStatus, fetchPersonDetails } from "./goodreads-api";

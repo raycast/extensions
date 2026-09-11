@@ -64,12 +64,27 @@ export type Group = {
    * How the group should be displayed in the menubar.
    */
   menubarDisplay?: GroupDisplaySetting;
+
+  /**
+   * The browser identifier to use for URL pins in this group when the pin has no application override.
+   */
+  preferredBrowser?: string;
 };
 
 /**
  * The keys of an {@link Group} object.
  */
-export const GroupKeys = ["name", "icon", "id", "parent", "sortStrategy", "iconColor", "dateCreated", "visibility"];
+export const GroupKeys = [
+  "name",
+  "icon",
+  "id",
+  "parent",
+  "sortStrategy",
+  "iconColor",
+  "dateCreated",
+  "visibility",
+  "preferredBrowser",
+];
 
 /**
  * Checks if an object is a group.

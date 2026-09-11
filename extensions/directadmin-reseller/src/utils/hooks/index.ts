@@ -6,6 +6,7 @@ import {
   GetUserConfigResponse,
   GetUserPackageInformationResponse,
 } from "../../types";
+import { Panel } from "../../types/panel";
 
 // LEGACY JSON
 export function useGetResellerIPs() {
@@ -54,13 +55,17 @@ export function useGetUserPackageInformation(packageName: string) {
   });
 }
 // DOMAINS
-export function useGetDomains() {
-  return useLegacyDirectAdmin<string[]>("SHOW_DOMAINS", {
-    animatedToastMessage: "Fetching Domains",
-    async onData(data) {
-      await showToast(Toast.Style.Success, `Fetched ${data.length} Domains`);
+export function useGetDomains(panel?: Panel) {
+  return useLegacyDirectAdmin<string[]>(
+    "SHOW_DOMAINS",
+    {
+      animatedToastMessage: "Fetching Domains",
+      async onData(data) {
+        await showToast(Toast.Style.Success, `Fetched ${data.length} Domains`);
+      },
     },
-  });
+    panel,
+  );
 }
 
 // NEW JSON

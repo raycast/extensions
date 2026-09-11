@@ -1,0 +1,117 @@
+{
+  "name": "supabase-cron-monitor",
+  "title": "Supabase Cron Monitor",
+  "description": "Monitor Supabase pg_cron jobs and run history.",
+  "version": "1.0.0",
+  "author": "adrianmarten",
+  "license": "MIT",
+  "icon": "icon.png",
+  "platforms": ["macOS"],
+  "categories": ["Developer Tools", "Productivity"],
+  "keywords": ["supabase", "cron", "pg_cron", "monitoring", "scheduler", "database", "jobs"],
+  "commands": [
+    {
+      "name": "cron-jobs",
+      "title": "Cron Jobs",
+      "description": "List Supabase pg_cron jobs and last runs",
+      "mode": "view"
+    },
+    {
+      "name": "cron-runs",
+      "title": "Cron Runs",
+      "description": "Browse recent pg_cron run history",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-cron-monitor",
+      "title": "Menubar Supabase Cron Monitor",
+      "description": "Show Supabase cron health in the menu bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "customIconUrl",
+          "description": "Custom icon URL for the menubar icon",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Icon URL",
+          "placeholder": "https://example.com/icon.png"
+        },
+        {
+          "name": "menuBarRefreshMinutes",
+          "description": "Refresh interval in minutes",
+          "type": "textfield",
+          "required": false,
+          "title": "Refresh Interval (minutes)",
+          "default": "5",
+          "placeholder": "5"
+        },
+        {
+          "name": "menuBarJobFilter",
+          "description": "Choose which jobs appear in the menu bar",
+          "type": "dropdown",
+          "required": false,
+          "title": "Job Filter",
+          "default": "all",
+          "data": [
+            { "title": "All Jobs", "value": "all" },
+            { "title": "Active Jobs", "value": "active" },
+            { "title": "Failing Jobs", "value": "failing" }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "supabaseUrl",
+      "title": "Supabase URL",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://your-project.supabase.co",
+      "description": "Project URL from Supabase settings."
+    },
+    {
+      "name": "serviceRoleKey",
+      "title": "Service Role Key",
+      "type": "password",
+      "required": true,
+      "description": "Keep this secret; Raycast stores password preferences securely."
+    },
+    {
+      "name": "autoRefreshMinutes",
+      "title": "Auto Refresh (minutes)",
+      "type": "textfield",
+      "required": false,
+      "default": "60",
+      "placeholder": "60",
+      "description": "Refresh interval in minutes."
+    },
+    {
+      "name": "runHistoryLimit",
+      "title": "Run History Limit",
+      "type": "textfield",
+      "required": false,
+      "default": "5",
+      "placeholder": "5",
+      "description": "Number of runs to show in history views."
+    }
+  ],
+  "scripts": {
+    "build": "npx ray build",
+    "dev": "npx ray develop",
+    "lint": "npx ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.73.0",
+    "@raycast/utils": "^2.2.2",
+    "@supabase/supabase-js": "^2.47.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.8.2"
+  }
+}

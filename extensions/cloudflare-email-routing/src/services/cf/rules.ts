@@ -1,7 +1,7 @@
 import { EmailRoutingRule } from "cloudflare/resources/email-routing/rules/rules";
-import { fetchWithAuth } from "../api/client";
+import { cloudflare, fetchWithAuth } from "../api/client";
 import { getApiConfig } from "../api/config";
-import { AliasRule, ParsedAliasMeta } from "../../types";
+import { AliasRule, CloudflareResponse, ParsedAliasMeta } from "../../types";
 import {
   APP_RULE_PREFIX,
   SEPARATOR,
@@ -10,6 +10,8 @@ import {
   extractDomainFromEmail,
   constructRuleName,
 } from "../../utils";
+import { Zone } from "cloudflare/resources/zones/zones";
+import { Address } from "cloudflare/resources/email-routing/addresses";
 
 // Rate limiting helper
 class RateLimiter {
@@ -52,7 +54,7 @@ export async function getAccountDomain(): Promise<string> {
   // Get zone information to extract the domain name
   const url = `https://api.cloudflare.com/client/v4/zones/${config.zoneId}`;
   const response = await fetchWithAuth(url);
-  const data = await response.json();
+  const data = (await response.json()) as CloudflareResponse<Zone>;
 
   if (!data.success) {
     throw new Error(
@@ -66,49 +68,14 @@ export async function getAccountDomain(): Promise<string> {
 
 export async function getAllRules(): Promise<EmailRoutingRule[]> {
   const config = getApiConfig();
-
-  // First, get the total count to determine how many pages we need
-  const firstPageUrl = `https://api.cloudflare.com/client/v4/zones/${config.zoneId}/email/routing/rules?per_page=50&page=1`;
-  const firstResponse = await fetchWithAuth(firstPageUrl);
-  const firstData = await firstResponse.json();
-
-  if (!firstData.success) {
-    throw new Error(
-      `Failed to fetch rules: ${firstData.errors?.map((e: { message: string }) => e.message).join(", ") || "Unknown error"}`
-    );
-  }
-
-  const totalCount = firstData.result_info?.total_count || 0;
   const perPage = 50;
-  const totalPages = Math.ceil(totalCount / perPage);
-
-  // If we only need one page, return the first page results
-  if (totalPages <= 1) {
-    return firstData.result;
+  const allRules = [];
+  // Auto-pagination: https://github.com/cloudflare/cloudflare-typescript?tab=readme-ov-file#auto-pagination
+  for await (const emailRoutingRule of cloudflare.emailRouting.rules.list(config.zoneId, {
+    per_page: perPage,
+  })) {
+    allRules.push(emailRoutingRule);
   }
-
-  // Create concurrent requests for remaining pages
-  const remainingPagePromises = [];
-  for (let page = 2; page <= totalPages; page++) {
-    const pageUrl = `https://api.cloudflare.com/client/v4/zones/${config.zoneId}/email/routing/rules?per_page=${perPage}&page=${page}`;
-    remainingPagePromises.push(fetchWithAuth(pageUrl).then((response) => response.json()));
-  }
-
-  // Wait for all remaining pages
-  const remainingPages = await Promise.all(remainingPagePromises);
-
-  // Combine all results
-  const allRules = [...firstData.result];
-
-  for (const pageData of remainingPages) {
-    if (!pageData.success) {
-      throw new Error(
-        `Failed to fetch rules: ${pageData.errors?.map((e: { message: string }) => e.message).join(", ") || "Unknown error"}`
-      );
-    }
-    allRules.push(...pageData.result);
-  }
-
   return allRules;
 }
 
@@ -118,20 +85,30 @@ export async function getUsedAliases(): Promise<AliasRule[]> {
   return appRules.map((r) => convertRuleToAlias(r));
 }
 
+export async function getAllAliases(): Promise<AliasRule[]> {
+  const allRules = await getAllRules();
+  return allRules.filter((rule) => Boolean(rule.matchers?.[0]?.value)).map((rule) => convertRuleToAlias(rule));
+}
+
 export async function getUnusedRules(): Promise<AliasRule[]> {
   const allRules = await getAllRules();
   const appRules = allRules.filter((r) => r.name?.startsWith(APP_RULE_PREFIX) && !parseRuleName(r.name).label);
   const result = appRules.map((r) => convertRuleToAlias(r));
-  result.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  result.sort((a, b) => (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0));
   return result;
 }
 
-export async function createRule(domain: string): Promise<AliasRule> {
+export async function createRule(
+  domain: string,
+  email?: string,
+  label?: string,
+  description?: string
+): Promise<AliasRule> {
   const config = getApiConfig();
 
-  const email = generateRandomEmail(domain);
+  const targetEmail = email ?? generateRandomEmail(domain);
   const timestamp = generateUniqueTimestamp();
-  const name = constructRuleName(timestamp);
+  const name = constructRuleName(timestamp, label, description);
 
   const url = `https://api.cloudflare.com/client/v4/zones/${config.zoneId}/email/routing/rules`;
   const response = await fetchWithAuth(url, {
@@ -142,7 +119,7 @@ export async function createRule(domain: string): Promise<AliasRule> {
         {
           type: "literal",
           field: "to",
-          value: email,
+          value: targetEmail,
         },
       ],
       actions: [
@@ -154,7 +131,7 @@ export async function createRule(domain: string): Promise<AliasRule> {
     }),
   });
 
-  const data = await response.json();
+  const data = (await response.json()) as CloudflareResponse<EmailRoutingRule>;
 
   if (!data.success) {
     throw new Error(
@@ -165,13 +142,13 @@ export async function createRule(domain: string): Promise<AliasRule> {
   return convertRuleToAlias(data.result);
 }
 
-export async function updateRule(id: string, label: string, description?: string): Promise<void> {
+export async function updateRule(id: string, label: string, description?: string, email?: string): Promise<AliasRule> {
   const config = getApiConfig();
 
   // Get the current rule to preserve email
   const getRuleUrl = `https://api.cloudflare.com/client/v4/zones/${config.zoneId}/email/routing/rules/${id}`;
   const getRuleResponse = await fetchWithAuth(getRuleUrl);
-  const getRuleData = await getRuleResponse.json();
+  const getRuleData = (await getRuleResponse.json()) as CloudflareResponse<EmailRoutingRule>;
 
   if (!getRuleData.success) {
     throw new Error(
@@ -184,22 +161,42 @@ export async function updateRule(id: string, label: string, description?: string
   const name = constructRuleName(timestamp, label, description);
 
   const updateUrl = `https://api.cloudflare.com/client/v4/zones/${config.zoneId}/email/routing/rules/${id}`;
+  const matchers = email
+    ? (currentRule.matchers?.map((matcher) => ({ ...matcher, value: email })) ?? [
+        {
+          type: "literal",
+          field: "to",
+          value: email,
+        },
+      ])
+    : currentRule.matchers;
+
+  if (!matchers || matchers.length === 0) {
+    throw new Error("Failed to update rule: Missing email matcher details");
+  }
+
+  if (!currentRule.actions || currentRule.actions.length === 0) {
+    throw new Error("Failed to update rule: Missing forwarding action details");
+  }
+
   const updateResponse = await fetchWithAuth(updateUrl, {
     method: "PUT",
     body: JSON.stringify({
       name,
-      matchers: currentRule.matchers,
+      matchers,
       actions: currentRule.actions,
     }),
   });
 
-  const updateData = await updateResponse.json();
+  const updateData = (await updateResponse.json()) as CloudflareResponse<EmailRoutingRule>;
 
   if (!updateData.success) {
     throw new Error(
       `Failed to update rule: ${updateData.errors?.map((e: { message: string }) => e.message).join(", ") || "Unknown error"}`
     );
   }
+
+  return convertRuleToAlias(updateData.result);
 }
 
 export async function deleteRule(id: string): Promise<void> {
@@ -209,8 +206,7 @@ export async function deleteRule(id: string): Promise<void> {
   const response = await fetchWithAuth(url, {
     method: "DELETE",
   });
-
-  const data = await response.json();
+  const data = (await response.json()) as CloudflareResponse<Address>;
 
   if (!data.success) {
     throw new Error(
@@ -277,17 +273,30 @@ export function parseRuleName(rawName: string): ParsedAliasMeta {
 }
 
 function convertRuleToAlias(rule: EmailRoutingRule): AliasRule {
-  const parsedName = parseRuleName(rule.name!);
+  const ruleName = rule.name ?? "";
+  const isManaged = ruleName.startsWith(APP_RULE_PREFIX);
+  const parsedName = isManaged
+    ? parseRuleName(ruleName)
+    : {
+        timestamp: 0,
+        label: undefined,
+        description: rule.name,
+        email: "",
+      };
+  const matcherEmail = rule.matchers?.[0]?.value;
+  const forwardEmail = rule.actions?.[0]?.value?.[0];
+  const createdAt = isManaged ? new Date(parsedName.timestamp) : undefined;
 
   return {
     id: rule.id!,
     name: {
       ...parsedName,
-      email: rule.matchers![0].value,
+      email: matcherEmail ?? "Unknown alias",
     },
-    email: rule.matchers![0].value,
-    forwardsToEmail: rule.actions![0].value[0],
-    enabled: rule.enabled!,
-    createdAt: new Date(parsedName.timestamp),
+    email: matcherEmail ?? "Unknown alias",
+    forwardsToEmail: forwardEmail ?? "Unknown destination",
+    enabled: rule.enabled ?? true,
+    createdAt,
+    isManaged,
   };
 }

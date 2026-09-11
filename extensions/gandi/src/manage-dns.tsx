@@ -6,12 +6,13 @@ import {
   confirmAlert,
   Form,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
+import { FormValidation, showFailureToast, useCachedPromise, useForm, usePromise } from "@raycast/utils";
 import { useState, useCallback } from "react";
 import * as gandiAPI from "./api";
 import { DNSRecord, GandiDomain } from "./types";
@@ -77,6 +78,7 @@ export default function ManageDNS() {
             accessories={accessories}
             actions={
               <ActionPanel>
+                {/* eslint-disable-next-line @raycast/prefer-title-case */}
                 <Action title="Manage DNS Records" icon={Icon.Network} onAction={() => selectDomain(domain)} />
                 <Action.OpenInBrowser
                   title="Open in Gandi Dashboard"
@@ -92,20 +94,25 @@ export default function ManageDNS() {
 }
 
 function DNSRecordsList({ domain }: { readonly domain: string }) {
-  const { push, pop } = useNavigation();
+  const { pop } = useNavigation();
 
-  const fetchDNSRecords = useCallback(async (d: string) => {
-    try {
-      return await gandiAPI.getDNSRecords(d);
-    } catch (error) {
-      await showFailureToast(error, {
+  const {
+    data: records,
+    isLoading,
+    revalidate,
+    mutate,
+  } = useCachedPromise(
+    async (d: string) => {
+      const records = await gandiAPI.getDNSRecords(d);
+      return records;
+    },
+    [domain],
+    {
+      failureToastOptions: {
         title: "Failed to fetch DNS records",
-      });
-      return [];
-    }
-  }, []);
-
-  const { data: records, isLoading, revalidate } = usePromise(fetchDNSRecords, [domain]);
+      },
+    },
+  );
 
   const deleteRecord = async (record: DNSRecord) => {
     const confirmed = await confirmAlert({
@@ -119,20 +126,20 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
     });
 
     if (confirmed) {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Deleting DNS record...",
+      });
       try {
-        await showToast({
-          style: Toast.Style.Animated,
-          title: "Deleting DNS record...",
+        await mutate(gandiAPI.deleteDNSRecord(domain, record.rrset_name, record.rrset_type), {
+          optimisticUpdate(data) {
+            return data?.filter((r) => r.rrset_name !== record.rrset_name && r.rrset_type !== record.rrset_type);
+          },
+          shouldRevalidateAfter: false,
         });
 
-        await gandiAPI.deleteDNSRecord(domain, record.rrset_name, record.rrset_type);
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "DNS record deleted",
-        });
-
-        revalidate();
+        toast.style = Toast.Style.Success;
+        toast.title = "DNS record deleted";
       } catch (error) {
         await showFailureToast(error, { title: "Failed to delete DNS record" });
       }
@@ -191,26 +198,18 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
       searchBarPlaceholder="Search DNS records..."
       actions={
         <ActionPanel>
-          <Action
+          <Action.Push
+            // eslint-disable-next-line @raycast/prefer-title-case
             title="Add DNS Record"
             icon={Icon.Plus}
-            onAction={() =>
-              push(
-                <AddDNSRecord
-                  domain={domain}
-                  onAdd={() => {
-                    revalidate();
-                    pop();
-                  }}
-                />,
-              )
-            }
+            target={<AddDNSRecord domain={domain} onAdd={mutate} />}
+            shortcut={Keyboard.Shortcut.Common.New}
           />
           <Action
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={() => revalidate()}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
         </ActionPanel>
       }
@@ -222,20 +221,11 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
           description="Add your first DNS record to get started"
           actions={
             <ActionPanel>
-              <Action
+              <Action.Push
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title="Add DNS Record"
                 icon={Icon.Plus}
-                onAction={() =>
-                  push(
-                    <AddDNSRecord
-                      domain={domain}
-                      onAdd={() => {
-                        revalidate();
-                        pop();
-                      }}
-                    />,
-                  )
-                }
+                target={<AddDNSRecord domain={domain} onAdd={mutate} />}
               />
             </ActionPanel>
           }
@@ -262,20 +252,18 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
             ]}
             actions={
               <ActionPanel>
-                <Action
+                <Action.Push
                   title="Edit Record"
                   icon={Icon.Pencil}
-                  onAction={() =>
-                    push(
-                      <EditDNSRecord
-                        domain={domain}
-                        record={record}
-                        onEdit={() => {
-                          revalidate();
-                          pop();
-                        }}
-                      />,
-                    )
+                  target={
+                    <EditDNSRecord
+                      domain={domain}
+                      record={record}
+                      onEdit={() => {
+                        revalidate();
+                        pop();
+                      }}
+                    />
                   }
                 />
                 <Action
@@ -287,30 +275,21 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
                 <Action.CopyToClipboard
                   title="Copy Value"
                   content={record.rrset_values.join(", ")}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
                 />
                 <ActionPanel.Section>
-                  <Action
+                  <Action.Push
+                    // eslint-disable-next-line @raycast/prefer-title-case
                     title="Add DNS Record"
                     icon={Icon.Plus}
-                    onAction={() =>
-                      push(
-                        <AddDNSRecord
-                          domain={domain}
-                          onAdd={() => {
-                            revalidate();
-                            pop();
-                          }}
-                        />,
-                      )
-                    }
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                    target={<AddDNSRecord domain={domain} onAdd={mutate} />}
+                    shortcut={Keyboard.Shortcut.Common.New}
                   />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     onAction={() => revalidate()}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
@@ -323,54 +302,55 @@ function DNSRecordsList({ domain }: { readonly domain: string }) {
 }
 
 function AddDNSRecord({ domain, onAdd }: { readonly domain: string; readonly onAdd: () => void }) {
+  const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  const [recordType, setRecordType] = useState<string>("A");
-  const [recordName, setRecordName] = useState<string>("");
-  const [recordValue, setRecordValue] = useState<string>("");
-  const [recordTTL, setRecordTTL] = useState<string>("300");
+  interface FormValues {
+    type: string;
+    name: string;
+    value: string;
+    ttl: string;
+  }
+  const { handleSubmit, itemProps, values } = useForm<FormValues>({
+    async onSubmit(values) {
+      setIsLoading(true);
+      const toast = await showToast(Toast.Style.Animated, "Creating DNS record...");
+      try {
+        await gandiAPI.createDNSRecord(domain, {
+          rrset_name: values.name || "@",
+          rrset_type: values.type,
+          rrset_values: [values.value.trim()],
+          rrset_ttl: Number.parseInt(values.ttl, 10),
+        });
 
-  const handleSubmit = async () => {
-    if (!recordValue.trim()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Please enter a record value",
-      });
-      return;
-    }
+        toast.style = Toast.Style.Success;
+        toast.title = "DNS record created";
 
-    // Validate TTL
-    const ttl = Number.parseInt(recordTTL, 10);
-    if (!Number.isFinite(ttl) || Number.isNaN(ttl) || ttl < 300) {
-      await showFailureToast(new Error("Invalid TTL. Please enter a number ≥ 300."), {
-        title: "Invalid TTL",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await gandiAPI.createDNSRecord(domain, {
-        rrset_name: recordName || "@",
-        rrset_type: recordType,
-        rrset_values: [recordValue.trim()],
-        rrset_ttl: ttl,
-      });
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "DNS record created",
-      });
-
-      onAdd();
-    } catch (error) {
-      await showFailureToast(error, { title: "Failed to create DNS record" });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        onAdd();
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to create DNS record";
+        toast.message = `${error}`;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    initialValues: {
+      type: "A",
+      ttl: "300",
+    },
+    validation: {
+      name: FormValidation.Required,
+      ttl(value) {
+        if (!value) return "The item is required";
+        const ttl = Number.parseInt(value, 10);
+        if (!Number.isFinite(ttl) || Number.isNaN(ttl) || ttl < 300) return "Invalid TTL. Please enter a number ≥ 300.";
+      },
+    },
+  });
 
   const placeholderForType = () => {
-    switch (recordType) {
+    switch (values.type) {
       case "A":
         return "192.168.1.1";
       case "AAAA":
@@ -402,7 +382,7 @@ function AddDNSRecord({ domain, onAdd }: { readonly domain: string; readonly onA
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="type" title="Record Type" value={recordType} onChange={setRecordType}>
+      <Form.Dropdown title="Record Type" {...itemProps.type}>
         <Form.Dropdown.Item value="A" title="A - IPv4 Address" />
         <Form.Dropdown.Item value="AAAA" title="AAAA - IPv6 Address" />
         <Form.Dropdown.Item value="CNAME" title="CNAME - Canonical Name" />
@@ -414,29 +394,19 @@ function AddDNSRecord({ domain, onAdd }: { readonly domain: string; readonly onA
       </Form.Dropdown>
 
       <Form.TextField
-        id="name"
         title="Record Name"
         placeholder="@ for root or subdomain (e.g., www)"
-        value={recordName}
-        onChange={setRecordName}
         info="Leave empty or use @ for the root domain"
+        {...itemProps.name}
       />
 
-      <Form.TextField
-        id="value"
-        title="Record Value"
-        placeholder={placeholderForType()}
-        value={recordValue}
-        onChange={setRecordValue}
-      />
+      <Form.TextField title="Record Value" placeholder={placeholderForType()} {...itemProps.value} />
 
       <Form.TextField
-        id="ttl"
         title="TTL (seconds)"
         placeholder="300"
-        value={recordTTL}
-        onChange={setRecordTTL}
         info="Time To Live in seconds (minimum 300)"
+        {...itemProps.ttl}
       />
     </Form>
   );

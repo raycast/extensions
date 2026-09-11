@@ -6,7 +6,7 @@ import { useAllRegionsIpsQuery } from './queries'
 export const Ips = () => {
   const clientSetting = getPreferenceUser()
 
-  const { data: ips = [], isLoading } = useAllRegionsIpsQuery({
+  const { data: ips, isLoading } = useAllRegionsIpsQuery({
     orderBy: 'created_at_asc',
     organizationId: clientSetting.defaultOrganizationId,
   })
@@ -15,7 +15,7 @@ export const Ips = () => {
 
   return (
     <List isLoading={isListLoading} isShowingDetail searchBarPlaceholder="Search Ips …">
-      {ips.map((ip) => (
+      {ips?.map((ip) => (
         <List.Item
           key={ip.id}
           title={ip.address}

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, Toast, confirmAlert, open, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import {
@@ -10,9 +10,9 @@ import {
 } from "swift:../../swift/AppleReminders";
 
 import { CreateReminderForm } from "../create-reminder";
-import { getPriorityIcon } from "../helpers";
+import { getAttachedUrls, getPriorityIcon } from "../helpers";
 import { Priority, Reminder, List as TList } from "../hooks/useData";
-import useLocations, { Location } from "../hooks/useLocations";
+import useLocations, { Location, resolveLocationIcon } from "../hooks/useLocations";
 import { ViewProps } from "../hooks/useViewReminders";
 
 import EditReminder from "./EditReminder";
@@ -27,6 +27,7 @@ type ReminderActionsProps = {
 
 export default function ReminderActions({ reminder, listId, viewProps, mutate }: ReminderActionsProps) {
   const { locations } = useLocations();
+  const attachedUrls = getAttachedUrls(reminder);
 
   async function toggleReminder() {
     async function toggle() {
@@ -63,7 +64,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           },
         },
       });
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: `Unable to mark reminder as ${reminder.isCompleted ? "incomplete" : "complete"}`,
@@ -132,7 +133,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         title: date ? "Updated due date" : "Removed due date",
         message: date ? `Now due on ${format(date, "EEEE dd MMMM")}` : "",
       });
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Unable to update due date",
@@ -215,6 +216,31 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         icon={{ fileIcon: "/System/Applications/Reminders.app" }}
         application="com.apple.reminders"
       />
+      {attachedUrls.length ? (
+        <Action
+          title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
+          icon={Icon.Link}
+          onAction={async () => {
+            let failedCount = 0;
+            for (const url of attachedUrls) {
+              try {
+                await open(url);
+              } catch (error) {
+                console.error("Failed to open URL", url, error);
+                failedCount++;
+              }
+            }
+
+            if (failedCount > 0) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: `Unable to open ${failedCount} URL${failedCount > 1 ? "s" : ""}`,
+                message: `${attachedUrls.length - failedCount} of ${attachedUrls.length} URLs opened successfully`,
+              });
+            }
+          }}
+        />
+      ) : null}
 
       <ActionPanel.Section>
         <Action.Push
@@ -247,7 +273,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
             <Action
               key={location.id}
               title={location.name}
-              icon={location.icon}
+              icon={resolveLocationIcon(location.icon)}
               onAction={() => setReminderLocation(location)}
             />
           ))}
@@ -278,7 +304,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
 
         {viewProps.groupBy ? (
           <ActionPanel.Submenu
-            title="Group By"
+            title="Group by"
             icon={Icon.AppWindowGrid3x3}
             shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
           >
@@ -297,8 +323,9 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         ) : null}
 
         <ActionPanel.Submenu
-          title="Sort By"
+          title="Sort by"
           icon={Icon.BulletPoints}
+          // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.Duplicate is ⌘D on macOS; keep the existing ⌘⇧S chord
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
         >
           {viewProps.sortBy.options.map((option) => {
@@ -316,9 +343,9 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
 
         {viewProps.orderBy ? (
           <ActionPanel.Submenu
-            title="Order By"
+            title="Order by"
             icon={viewProps.orderBy.value === "desc" ? Icon.ArrowDown : Icon.ArrowUp}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           >
             {viewProps.orderBy.options.map((option) => {
               return (
@@ -337,7 +364,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         <Action.Push
           title="Create Reminder"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
           target={<CreateReminderForm listId={listId} />}
         />
       </ActionPanel.Section>
@@ -346,6 +373,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         <Action.CopyToClipboard
           title="Copy Reminder Title"
           content={reminder.title}
+          // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.Pin is ⌘⇧P on macOS; keep the existing ⌘. chord
           shortcut={{ modifiers: ["cmd"], key: "." }}
         />
         <Action.CopyToClipboard
@@ -364,7 +392,7 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={() => mutate()}
         />
       </ActionPanel.Section>

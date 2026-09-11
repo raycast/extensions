@@ -1,7 +1,7 @@
 import { runAppleScript } from "@raycast/utils";
 import { Application, captureException, getApplications, LocalStorage, open } from "@raycast/api";
 import { BrowserSetup, Tab } from "../types/types";
-import { ARC_BUNDLE_ID, CacheKey, TEST_URL, unsupportedBrowsers } from "./constants";
+import { ARC_BUNDLE_ID, DIA_BUNDLE_ID, CacheKey, TEST_URL, unsupportedBrowsers } from "./constants";
 import { isEmpty } from "./common-utils";
 import { recentOnTop } from "../types/preferences";
 
@@ -74,8 +74,8 @@ const jumpToChromeTab = async (browser: string, tab: Tab) => {
 };
 
 export const jumpToBrowserTab = async (browser: Application, tab: Tab) => {
-  if (browser.bundleId === ARC_BUNDLE_ID) {
-    return await runAppleScriptOnArcTab(browser, tab, "select", true);
+  if (browser.bundleId === ARC_BUNDLE_ID || browser.bundleId === DIA_BUNDLE_ID) {
+    return await runAppleScriptOnArcAndDiaTab(browser, tab, "select", true);
   } else {
     const webKitRet = await jumpToWebkitTab(browser.name, tab);
     if (isEmpty(webKitRet)) {
@@ -91,7 +91,7 @@ export const jumpToBrowserTab = async (browser: Application, tab: Tab) => {
   }
 };
 
-function scriptOnArc(browser: Application, tab: Tab, action: string, activate = false) {
+function scriptOnArcAndDia(browser: Application, tab: Tab, action: string, activate = false) {
   return `
 tell application "${browser.name}"
     if (count of windows) is 0 then
@@ -116,11 +116,11 @@ end tell
     `;
 }
 
-const runAppleScriptOnArcTab = async (browser: Application, tab: Tab, action: string, activate = false) => {
+const runAppleScriptOnArcAndDiaTab = async (browser: Application, tab: Tab, action: string, activate = false) => {
   try {
-    return await runAppleScript(scriptOnArc(browser, tab, action, activate));
+    return await runAppleScript(scriptOnArcAndDia(browser, tab, action, activate));
   } catch (e) {
-    console.error(`Error runAppleScriptOnArcTab for ${browser.name}`);
+    console.error(`Error runAppleScriptOnArcAndDiaTab for ${browser.name}`);
     return String(e);
   }
 };
@@ -141,8 +141,8 @@ end tell
 
 export const closeBrowserTab = async (browser: Application, tab: Tab) => {
   try {
-    if (browser.bundleId === ARC_BUNDLE_ID) {
-      return await runAppleScriptOnArcTab(browser, tab, "close", false);
+    if (browser.bundleId === ARC_BUNDLE_ID || browser.bundleId === DIA_BUNDLE_ID) {
+      return await runAppleScriptOnArcAndDiaTab(browser, tab, "close", false);
     } else {
       return await runAppleScript(scriptCloseTab(browser.name, tab));
     }

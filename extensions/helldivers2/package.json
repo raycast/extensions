@@ -1,13 +1,20 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "helldivers2",
-  "title": "Helldivers2",
+  "title": "Helldivers 2",
   "description": "View Galactic War Status from Helldivers II",
   "icon": "command-icon.png",
   "author": "alexstrnik",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Fun",
     "Applications"
+  ],
+  "contributors": [
+    "litomore"
   ],
   "license": "MIT",
   "commands": [
@@ -37,17 +44,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.0",
-    "@raycast/utils": "^1.15.0",
-    "cross-fetch": "^4.0.0"
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.3.0",
+    "@types/react": "19.2.14",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

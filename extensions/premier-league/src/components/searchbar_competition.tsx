@@ -3,34 +3,38 @@ import { List } from "@raycast/api";
 export const competitions = [
   {
     title: "Premier League",
-    value: "1",
+    value: "8",
   },
   {
     title: "FA Cup",
-    value: "4",
+    value: "1",
   },
   {
     title: "EFL Cup",
-    value: "5",
-  },
-  {
-    title: "UEFA Champions League",
     value: "2",
   },
   {
+    title: "UEFA Champions League",
+    value: "5",
+  },
+  {
     title: "UEFA Europa League",
-    value: "3",
+    value: "6",
   },
   {
     title: "UEFA Europa Conference League",
-    value: "2247",
+    value: "1125",
+  },
+  {
+    title: "Summer Series",
+    value: "1211",
   },
 ];
 
 export default function SearchBarCompetition(props: {
   type: string;
   selected: string;
-  onSelect: React.Dispatch<React.SetStateAction<string>>;
+  onSelect: (value: string) => void;
   data: { title: string; value: string }[];
 }) {
   return (

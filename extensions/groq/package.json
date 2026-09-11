@@ -43,32 +43,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -109,32 +89,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -175,32 +135,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -241,32 +181,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -307,32 +227,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -373,32 +273,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -455,32 +335,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -538,32 +398,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -605,32 +445,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -672,32 +492,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -739,32 +539,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -806,32 +586,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -873,32 +633,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -940,32 +680,12 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct",
-              "title": "Kimi K2 Instruct 131k"
+              "value": "qwen/qwen3.6-27b",
+              "title": "Qwen 3.6 27B 131k"
             },
             {
-              "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-              "title": "Llama 4 Maverick 131k"
-            },
-            {
-              "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-              "title": "Llama 4 Scout 131k"
-            },
-            {
-              "value": "llama-3.3-70b-versatile",
-              "title": "Llama 3.3 70B 128k"
-            },
-            {
-              "value": "llama-3.1-8b-instant",
-              "title": "Llama 3.1 8B 128k"
-            },
-            {
-              "value": "deepseek-r1-distill-llama-70b",
-              "title": "DeepSeek R1 70B 128k"
-            },
-            {
-              "value": "qwen/qwen3-32b",
-              "title": "Qwen 3 32B 128K"
+              "value": "qwen/qwen3.8-27b",
+              "title": "Qwen 3.8 27B 131k"
             }
           ]
         }
@@ -987,7 +707,7 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "llama-3.3-70b-versatile",
+      "default": "openai/gpt-oss-120b",
       "data": [
         {
           "value": "openai/gpt-oss-120b",
@@ -998,32 +718,12 @@
           "title": "GPT OSS 20B 131k"
         },
         {
-          "value": "moonshotai/kimi-k2-instruct",
-          "title": "Kimi K2 Instruct 131k"
+          "value": "qwen/qwen3.6-27b",
+          "title": "Qwen 3.6 27B 131k"
         },
         {
-          "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
-          "title": "Llama 4 Maverick 131k"
-        },
-        {
-          "value": "meta-llama/llama-4-scout-17b-16e-instruct",
-          "title": "Llama 4 Scout 131k"
-        },
-        {
-          "value": "llama-3.3-70b-versatile",
-          "title": "Llama 3.3 70B 128k"
-        },
-        {
-          "value": "llama-3.1-8b-instant",
-          "title": "Llama 3.1 8B 128k"
-        },
-        {
-          "value": "deepseek-r1-distill-llama-70b",
-          "title": "DeepSeek R1 70B 128k"
-        },
-        {
-          "value": "qwen/qwen3-32b",
-          "title": "Qwen 3 32B 128K"
+          "value": "qwen/qwen3.8-27b",
+          "title": "Qwen 3.8 27B 131k"
         }
       ]
     },
@@ -1065,5 +765,11 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

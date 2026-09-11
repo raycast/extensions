@@ -1,22 +1,50 @@
-import { Action, ActionPanel, LaunchProps, List, popToRoot, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Image, LaunchProps, List, popToRoot, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { downloadLatex, getDisplayLatex } from "./api";
-import { DEFAULT_ICON, ExportType, QuickLatexArguments, makeDonwloadDir, toClipboard } from "./utils";
+import { downloadLatex, getPreviewImage, PreviewAbortSignal } from "./api";
+import { ExportType, QuickLatexArguments, makeDonwloadDir, toClipboard } from "./utils";
 
 export default function CommandWithCustoEmptyView(props: LaunchProps<{ arguments: QuickLatexArguments }>) {
   const [searchText, setSearchText] = useState(props.arguments.latex ?? "");
+  const [previewImage, setPreviewImage] = useState<Image.ImageLike>();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     makeDonwloadDir();
   }, []);
 
-  const icon = searchText == "" ? DEFAULT_ICON : getDisplayLatex(searchText);
+  useEffect(() => {
+    let isCurrent = true;
+    const abortController = new AbortController();
+    setIsLoading(true);
+
+    const timeout = setTimeout(() => {
+      getPreviewImage(searchText, abortController.signal as PreviewAbortSignal)
+        .then((image) => {
+          if (isCurrent) {
+            setPreviewImage(image);
+            setIsLoading(false);
+          }
+        })
+        .catch((error: unknown) => {
+          if (isCurrent && !(error instanceof Error && error.name === "AbortError")) {
+            setPreviewImage(undefined);
+            setIsLoading(false);
+          }
+        });
+    }, 200);
+
+    return () => {
+      isCurrent = false;
+      clearTimeout(timeout);
+      abortController.abort();
+    };
+  }, [searchText]);
 
   return (
-    <List onSearchTextChange={setSearchText} searchText={searchText}>
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchText={searchText}>
       <List.EmptyView
-        icon={icon}
+        icon={previewImage}
         actions={
           <ActionPanel>
             {Object.values(ExportType).map((exportType) => (

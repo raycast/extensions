@@ -1,31 +1,39 @@
-import { Action, Icon, getPreferenceValues, ActionPanel } from "@raycast/api";
+import { Action, Icon, ActionPanel } from "@raycast/api";
 import { SUPPORTED_BROWSERS } from "../types/browsers";
 import { openUrlInBrowser } from "../utils/openUrlInBrowser";
 
 interface OpenInBrowserSubmenuProps {
   commandPath: string; // Just the path, e.g., "settings"
-  preferences: {
-    preferredBrowser?: string; // The 'key' of the preferred browser from list item context
-  };
+  currentBrowser: string; // The 'key' of the currently selected browser
 }
 
-export function OpenInBrowserSubmenu({ commandPath, preferences: propsPreferences }: OpenInBrowserSubmenuProps) {
-  const { preferredBrowser: settingsPrefBrowserKey } = getPreferenceValues<Preferences>();
-  const effectivePrefBrowserKey = propsPreferences.preferredBrowser || settingsPrefBrowserKey;
+export function OpenInBrowserSubmenu({ commandPath, currentBrowser }: OpenInBrowserSubmenuProps) {
+  // Find the current browser object
+  const selectedBrowser = SUPPORTED_BROWSERS.find((b) => b.key === currentBrowser);
 
-  // Find the preferred browser object if it's set
-  const preferredBrowser = SUPPORTED_BROWSERS.find((b) => b.key === effectivePrefBrowserKey);
+  // Get all browsers except the current one, filtering out any without appName
+  const otherBrowsers = SUPPORTED_BROWSERS.filter(
+    (browser) => browser.key !== currentBrowser && browser.appName !== undefined,
+  );
 
-  // Get all browsers except the preferred one (if any)
-  const otherBrowsers = SUPPORTED_BROWSERS.filter((browser) => browser.key !== effectivePrefBrowserKey);
+  // Helper to build the full URL with the correct scheme
+  const getFullUrl = (browserScheme: string, path: string): string => {
+    // If the path already contains a scheme (like chrome-untrusted://), return it as-is
+    if (path.includes("://")) {
+      return path;
+    }
+    return `${browserScheme}${path}`;
+  };
 
   return (
     <ActionPanel.Submenu title="Open in…" icon={Icon.Globe}>
-      {preferredBrowser && (
+      {selectedBrowser && selectedBrowser.appName && (
         <Action
-          title={preferredBrowser.title}
+          title={selectedBrowser.title}
           icon={Icon.Compass}
-          onAction={() => openUrlInBrowser(preferredBrowser.appName!, `${preferredBrowser.scheme}${commandPath}`)}
+          onAction={() =>
+            openUrlInBrowser(selectedBrowser.appName as string, getFullUrl(selectedBrowser.scheme, commandPath))
+          }
         />
       )}
 
@@ -34,7 +42,7 @@ export function OpenInBrowserSubmenu({ commandPath, preferences: propsPreference
           key={browser.key}
           title={browser.title}
           icon={Icon.Globe}
-          onAction={() => openUrlInBrowser(browser.appName!, `${browser.scheme}${commandPath}`)}
+          onAction={() => openUrlInBrowser(browser.appName!, getFullUrl(browser.scheme, commandPath))}
         />
       ))}
     </ActionPanel.Submenu>

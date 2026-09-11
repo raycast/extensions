@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="80" fill="#0066B8"/>
+  <g transform="translate(56, 96)">
+    <!-- Container base -->
+    <rect x="40" y="120" width="320" height="200" rx="16" fill="#ffffff" opacity="0.9"/>
+    <!-- Container top -->
+    <path d="M40 136 L200 40 L360 136" stroke="#ffffff" stroke-width="20" fill="none" stroke-linejoin="round"/>
+    <!-- Feature blocks -->
+    <rect x="80" y="160" width="60" height="60" rx="8" fill="#0066B8"/>
+    <rect x="170" y="160" width="60" height="60" rx="8" fill="#0066B8"/>
+    <rect x="260" y="160" width="60" height="60" rx="8" fill="#0066B8"/>
+    <rect x="80" y="240" width="60" height="60" rx="8" fill="#0066B8"/>
+    <rect x="170" y="240" width="60" height="60" rx="8" fill="#0066B8"/>
+    <rect x="260" y="240" width="60" height="60" rx="8" fill="#0066B8" opacity="0.5"/>
+  </g>
+</svg>

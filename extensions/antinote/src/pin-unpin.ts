@@ -3,9 +3,9 @@ import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { checkAntinoteInstalled } from "./utils";
 
 export default async function main() {
-  const isInstalled = await checkAntinoteInstalled();
+  const installation = await checkAntinoteInstalled();
 
-  if (!isInstalled) {
+  if (!installation.installed) {
     return;
   }
 

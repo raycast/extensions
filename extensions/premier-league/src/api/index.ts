@@ -1,50 +1,124 @@
 import { showFailureToast } from "@raycast/utils";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
+  Club,
+  Content,
   EPLAward,
-  EPLContent,
-  EPLFixtureEvents,
-  EPLPlayer,
+  EPLCompetition,
+  EPLContentReport,
+  EPLMatchEvents,
+  EPLMatchLineups,
+  EPLMatchOfficials,
+  EPLMetadata,
+  EPLPagination,
   EPLPlayerSearch,
-  EPLStaff,
-  EPLStanding,
+  EPLPlayerStats,
+  EPLStandings,
+  EPLTeamSquad,
   Fixture,
-  FixtureEvent,
+  Hit,
+  MatchCommentary,
+  Metadata,
   Player,
-  Stat,
+  Season,
   Table,
-  Team,
+  TeamForm,
 } from "../types";
+import { competitions } from "../components/searchbar_competition";
+import { subHours } from "date-fns";
+import { getCompetitionTimestamp, isFinished } from "../utils";
 
-const endpoint = "https://footballapi.pulselive.com/football";
-const headers = {
-  Origin: "https://www.premierleague.com",
-};
+const epl = competitions[0].value;
 
-const pageSize = 50;
+const endpoint = "https://sdp-prem-prod.premier-league-prod.pulselive.com/api";
+
+const LIVE_WINDOW_HOURS = 3;
 
 interface Pagination<T> {
   data: T[];
   hasMore: boolean;
+  cursor?: string | null;
 }
 
-export const getSeasons = async (
-  comps: string = "1",
-): Promise<{ label: string; id: number }[]> => {
+const SEASON_START_MONTH = 6;
+
+const expectedSeasonId = (): string => {
+  const now = new Date();
+
+  return String(
+    now.getMonth() >= SEASON_START_MONTH
+      ? now.getFullYear()
+      : now.getFullYear() - 1,
+  );
+};
+
+const buildSeason = (seasonId: string): Season => ({
+  seasonId,
+  label: `${seasonId}/${String((Number(seasonId) + 1) % 100).padStart(2, "0")}`,
+  annotations: [],
+  qualification: [],
+  relegation: [],
+});
+
+export const getActiveSeason = async (
+  comp: string = "8",
+): Promise<string | undefined> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `${endpoint}/competitions/${comps}/compseasons`,
+    url: `${endpoint}/v2/matches`,
     params: {
-      page: 0,
-      pageSize: 100,
+      competition: comp,
+      _sort: "kickoff:desc",
+      _limit: 1,
     },
-    headers,
   };
 
   try {
-    const { data } = await axios(config);
+    const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
 
-    return data.content;
+    return data.data[0]?.season;
+  } catch {
+    return undefined;
+  }
+};
+
+export const getSeasons = async (comp: string = "8"): Promise<Season[]> => {
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `https://resources.premierleague.com/premierleague25/config/season-config/competitions/${comp}.json`,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLCompetition> = await axios(config);
+    const { seasons } = data;
+
+    if (seasons.some((s) => s.seasonId === expectedSeasonId())) {
+      return seasons;
+    }
+
+    const activeSeasonId = await getActiveSeason(comp);
+
+    if (!activeSeasonId || seasons.some((s) => s.seasonId === activeSeasonId)) {
+      return seasons;
+    }
+
+    if (!seasons.length) {
+      return [buildSeason(activeSeasonId)];
+    }
+
+    const newest = seasons.reduce(
+      (max, s) => Math.max(max, Number(s.seasonId)),
+      0,
+    );
+
+    const missing: Season[] = [];
+    for (let year = newest + 1; year <= Number(activeSeasonId); year += 1) {
+      missing.push(buildSeason(String(year)));
+    }
+
+    return [...missing, ...seasons].sort(
+      (a, b) => Number(b.seasonId) - Number(a.seasonId),
+    );
   } catch (e) {
     showFailureToast(e);
 
@@ -52,16 +126,82 @@ export const getSeasons = async (
   }
 };
 
-export const getAwards = async (compSeasons: string) => {
+export const getMatchweek = async (): Promise<number> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `${endpoint}/compseasons/${compSeasons}/awards`,
+    url: "https://resources.premierleague.com/premierleague25/config/current-gameweek.json",
+  };
+
+  try {
+    const { data } = await axios(config);
+
+    return data.matchweek;
+  } catch (e) {
+    showFailureToast(e);
+
+    return 0;
+  }
+};
+
+export const getLatestPlayedMatchweek = async (
+  season: string,
+  comp: string = "8",
+): Promise<number | undefined> => {
+  const now = getCompetitionTimestamp(new Date());
+
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v2/matches`,
     params: {
-      altIds: true,
+      competition: comp,
+      season,
+      _sort: "kickoff:desc",
+      _limit: 20,
+      [`kickoff<${now}`]: "",
     },
-    headers: {
-      ...headers,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
+
+    return data.data.find(isFinished)?.matchWeek;
+  } catch {
+    return undefined;
+  }
+};
+
+export const getUpcomingMatchweek = async (
+  season: string,
+  comp: string = "8",
+): Promise<number | undefined> => {
+  const from = getCompetitionTimestamp(subHours(new Date(), LIVE_WINDOW_HOURS));
+
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v2/matches`,
+    params: {
+      competition: comp,
+      season,
+      _sort: "kickoff:asc",
+      _limit: 20,
+      [`kickoff>${from}`]: "",
     },
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
+    const match = data.data.find((m) => !isFinished(m)) ?? data.data[0];
+
+    return match?.matchWeek;
+  } catch {
+    return undefined;
+  }
+};
+
+export const getAwards = async (season: string) => {
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `${endpoint}/v1/competitions/${epl}/seasons/${season}/awards`,
   };
 
   try {
@@ -75,27 +215,19 @@ export const getAwards = async (compSeasons: string) => {
   }
 };
 
-export const getClubs = async (compSeasons: string): Promise<Team[]> => {
+export const getClubs = async (season: string): Promise<Club[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `${endpoint}/teams`,
+    url: `${endpoint}/v1/competitions/${epl}/seasons/${season}/teams`,
     params: {
-      page: 0,
-      pageSize: 100,
-      comps: 1,
-      altIds: true,
-      compSeasons,
-    },
-    headers: {
-      ...headers,
-      account: "premierleague",
+      _limit: 60,
     },
   };
 
   try {
-    const { data }: AxiosResponse<EPLContent<Team>> = await axios(config);
+    const { data }: AxiosResponse<EPLPagination<Club>> = await axios(config);
 
-    return data.content;
+    return data.data;
   } catch (e) {
     showFailureToast(e);
 
@@ -103,52 +235,83 @@ export const getClubs = async (compSeasons: string): Promise<Team[]> => {
   }
 };
 
-export const getTeams = async (
-  season: string,
-): Promise<{ title: string; value: string }[]> => {
+export const getClubMetadata = async (
+  clubId: string,
+): Promise<Metadata | undefined> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `${endpoint}/compseasons/${season}/teams`,
-    headers,
+    url: `${endpoint}/v1/metadata/SDP_FOOTBALL_TEAM/${clubId}`,
   };
 
   try {
-    const { data }: AxiosResponse<Team[]> = await axios(config);
+    const { data }: AxiosResponse<EPLMetadata> = await axios(config);
 
-    const teams = data.map((team) => ({
-      title: team.name,
-      value: team.id.toString(),
-    }));
-
-    teams.unshift({
-      title: "All Clubs",
-      value: "-1",
-    });
-
-    return teams;
+    return data.metadata;
   } catch (e) {
     showFailureToast(e);
 
-    return [];
+    return undefined;
   }
 };
 
-export const getTables = async (seasonId: string): Promise<Table[]> => {
+export const getTeamForm = async (season: string): Promise<TeamForm[]> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `${endpoint}/standings`,
-    params: {
-      compSeasons: seasonId,
-      altIds: true,
-      detail: 2,
-      FOOTBALL_COMPETITION: 1,
-      live: true,
-    },
-    headers,
+    url: `${endpoint}/v1/competitions/${epl}/seasons/${season}/teamform`,
   };
 
   try {
-    const { data }: AxiosResponse<EPLStanding> = await axios(config);
+    const { data }: AxiosResponse<TeamForm[]> = await axios(config);
+
+    return data;
+  } catch (e) {
+    showFailureToast(e);
+
+    return [];
+  }
+};
+
+export const getTeamSquad = async (
+  season: string,
+  teamId: string,
+): Promise<EPLTeamSquad | undefined> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v2/competitions/${epl}/seasons/${season}/teams/${teamId}/squad`,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLTeamSquad> = await axios(config);
+
+    return data;
+  } catch (e) {
+    showFailureToast(e);
+
+    return undefined;
+  }
+};
+
+export const getTables = async (season: string): Promise<Table[]> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v5/competitions/${epl}/seasons/${season}/standings`,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLStandings> = await axios(config);
+
+    const teamform = await getTeamForm(season);
+
+    if (teamform) {
+      data.tables.forEach((table) => {
+        table.entries.forEach((entry) => {
+          const form = teamform.find((tf) => tf.id === entry.team.id);
+          if (form) {
+            Object.assign(entry, form);
+          }
+        });
+      });
+    }
 
     return data.tables;
   } catch (e) {
@@ -158,51 +321,36 @@ export const getTables = async (seasonId: string): Promise<Table[]> => {
   }
 };
 
-export const getFixtures = async (props: {
-  teams?: string;
-  page: number;
-  sort: string;
-  statuses: string;
-  comps: string;
-  compSeasons: string;
-}): Promise<Pagination<Fixture>> => {
-  if (props.teams === "-1") {
-    delete props.teams;
-  }
-
+export const getMatches = async (
+  props: Record<string, string | number>,
+): Promise<Pagination<Fixture>> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `${endpoint}/fixtures`,
+    url: `${endpoint}/v2/matches`,
     params: {
-      pageSize: 40,
-      altIds: true,
+      _sort: "kickoff:asc",
       ...props,
     },
-    headers,
   };
 
   try {
-    const { data }: AxiosResponse<EPLContent<Fixture>> = await axios(config);
-    const hasMore = data.pageInfo.numPages > data.pageInfo.page + 1;
+    const { data }: AxiosResponse<EPLPagination<Fixture>> = await axios(config);
+    const hasMore = data.pagination._next ? true : false;
 
-    return { data: data.content, hasMore };
+    return { data: data.data, hasMore, cursor: data.pagination._next };
   } catch (e) {
     showFailureToast(e);
 
-    return { data: [], hasMore: false };
+    return { data: [], hasMore: false, cursor: null };
   }
 };
 
-export const getFixture = async (
-  fixtureId: number,
+export const getMatch = async (
+  matchId: string,
 ): Promise<Fixture | undefined> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `${endpoint}/fixtures/${fixtureId}`,
-    params: {
-      altIds: true,
-    },
-    headers,
+    url: `${endpoint}/v2/matches/${matchId}`,
   };
 
   try {
@@ -216,109 +364,16 @@ export const getFixture = async (
   }
 };
 
-export const getMatchCommentary = async (
-  fixtureId: string,
-  page: number,
-): Promise<Pagination<FixtureEvent>> => {
+export const getMatchEvents = async (
+  matchId: string,
+): Promise<EPLMatchEvents | undefined> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `${endpoint}/fixtures/${fixtureId}/textstream/EN`,
-    params: {
-      pageSize: 40,
-      sort: "desc",
-      page,
-    },
-    headers,
+    url: `${endpoint}/v1/matches/${matchId}/events`,
   };
 
   try {
-    const { data }: AxiosResponse<EPLFixtureEvents> = await axios(config);
-    const hasMore =
-      data.events.pageInfo.numPages > data.events.pageInfo.page + 1;
-
-    return { data: data.events.content, hasMore };
-  } catch (e) {
-    showFailureToast(e);
-
-    return { data: [], hasMore: false };
-  }
-};
-
-export const getPlayers = async (
-  teams: string,
-  season: string,
-  page: number,
-): Promise<Pagination<Player>> => {
-  const params: Record<string, string | number | boolean> = {
-    pageSize,
-    compSeasons: season,
-    altIds: true,
-    page,
-    type: "player",
-    id: -1,
-    compSeasonId: season,
-  };
-
-  if (teams !== "-1") {
-    params.teams = teams;
-  }
-
-  const config: AxiosRequestConfig = {
-    method: "get",
-    url: `${endpoint}/players`,
-    params,
-    headers,
-  };
-
-  try {
-    const { data }: AxiosResponse<EPLContent<Player>> = await axios(config);
-    const hasMore = data.pageInfo.numPages > data.pageInfo.page + 1;
-
-    return { data: data.content, hasMore };
-  } catch (e) {
-    showFailureToast(e);
-
-    return { data: [], hasMore: false };
-  }
-};
-
-export const getPlayerStats = async (playerId: number): Promise<Stat[]> => {
-  const config: AxiosRequestConfig = {
-    method: "get",
-    url: `${endpoint}/stats/player/${playerId}`,
-    params: {
-      comps: 1,
-    },
-    headers,
-  };
-
-  try {
-    const { data }: AxiosResponse<EPLPlayer> = await axios(config);
-
-    return data.stats;
-  } catch (e) {
-    showFailureToast(e);
-
-    return [];
-  }
-};
-
-export const getStaffs = async (team: number, season: string) => {
-  const config: AxiosRequestConfig = {
-    method: "get",
-    url: `${endpoint}/teams/${team}/compseasons/${season}/staff`,
-    params: {
-      pageSize: 100,
-      // compSeasons: season,
-      altIds: true,
-      page: 0,
-      type: "player",
-    },
-    headers,
-  };
-
-  try {
-    const { data }: AxiosResponse<EPLStaff> = await axios(config);
+    const { data }: AxiosResponse<EPLMatchEvents> = await axios(config);
 
     return data;
   } catch (e) {
@@ -328,56 +383,182 @@ export const getStaffs = async (team: number, season: string) => {
   }
 };
 
-export const getManagers = async (compSeasons: string) => {
+export const getMatchOfficials = async (
+  matchId: string,
+): Promise<EPLMatchOfficials | undefined> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `${endpoint}/teamofficials`,
-    params: {
-      pageSize: 100,
-      compSeasons,
-      compCodeForActivePlayer: "EN_PR",
-      comps: 1,
-      altIds: true,
-      type: "manager",
-      page: 0,
-    },
-    headers,
+    url: `${endpoint}/v1/matches/${matchId}/officials`,
   };
 
   try {
-    const { data }: AxiosResponse<EPLContent<Player>> = await axios(config);
+    const { data }: AxiosResponse<EPLMatchOfficials> = await axios(config);
 
-    return data.content;
+    return data;
   } catch (e) {
     showFailureToast(e);
 
-    return [];
+    return undefined;
+  }
+};
+
+export const getMatchLineups = async (
+  matchId: string,
+): Promise<EPLMatchLineups | undefined> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v3/matches/${matchId}/lineups`,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLMatchLineups> = await axios(config);
+
+    return data;
+  } catch (e) {
+    showFailureToast(e);
+
+    return undefined;
+  }
+};
+
+export const getMatchReports = async (
+  matchId: string,
+): Promise<Content | undefined> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: "https://api.premierleague.com/content/premierleague/TEXT/en",
+    params: {
+      references: `SDP_FOOTBALL_MATCH:${matchId}`,
+      tagNames: "Match Report",
+      detail: "DETAILED",
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLContentReport> = await axios(config);
+
+    return data.content?.[0];
+  } catch (e) {
+    showFailureToast(e);
+
+    return undefined;
+  }
+};
+
+export const getMatchCommentary = async (
+  matchId: string,
+  _next: string | null = null,
+): Promise<Pagination<MatchCommentary>> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v1/matches/${matchId}/commentary`,
+    params: {
+      _limit: 40,
+      _sort: "timestamp:desc",
+      _next,
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPagination<MatchCommentary>> =
+      await axios(config);
+    const hasMore = data.pagination._next ? true : false;
+
+    return { data: data.data, hasMore, cursor: data.pagination._next };
+  } catch (e) {
+    showFailureToast(e);
+
+    return { data: [], hasMore: false, cursor: null };
+  }
+};
+
+export const getPlayers = async (props: {
+  season: string;
+  competition: string;
+  teams?: string;
+  _next?: string;
+}): Promise<Pagination<Player>> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v1/players`,
+    params: {
+      ...props,
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPagination<Player>> = await axios(config);
+    const hasMore = data.pagination._next ? true : false;
+
+    return { data: data.data, hasMore, cursor: data.pagination._next };
+  } catch (e) {
+    showFailureToast(e);
+
+    return { data: [], hasMore: false, cursor: null };
+  }
+};
+
+export const getPlayerInformation = async (
+  season: string,
+  playerId: string,
+): Promise<Player | undefined> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/v1/competitions/${epl}/seasons/${season}/playerinfo/${playerId}`,
+  };
+
+  try {
+    const { data }: AxiosResponse<Player> = await axios(config);
+
+    return data;
+  } catch (e) {
+    showFailureToast(e);
+
+    return undefined;
+  }
+};
+
+export const getPlayerStats = async (
+  season: string,
+  playerId: string,
+): Promise<EPLPlayerStats | undefined> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    // url: `${endpoint}/v1/competitions/${competition}/players/${playerId}/stats`, // seems use for overall stats
+    url: `${endpoint}/v2/competitions/${epl}/seasons/${season}/players/${playerId}/stats`,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPlayerStats> = await axios(config);
+
+    return data;
+  } catch (e) {
+    showFailureToast(e);
+
+    return undefined;
   }
 };
 
 export const getPlayersWithTerms = async (
   terms: string,
-  page: number,
-): Promise<Pagination<Player>> => {
+): Promise<Pagination<Hit>> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `https://footballapi.pulselive.com/search/PremierLeague`,
+    url: "https://api.premierleague.com/search/v2/premierleague",
     params: {
-      terms: `${terms},${terms}*`,
-      type: "player",
-      size: pageSize,
-      start: page * pageSize,
       fullObjectResponse: true,
+      fields: "first_name,last_name",
+      lang: "en",
+      size: 20,
+      type: "SDP_FOOTBALL_PLAYER",
+      terms,
     },
-    headers,
   };
 
   try {
     const { data }: AxiosResponse<EPLPlayerSearch> = await axios(config);
-    const hasMore = data.hits.found !== data.hits.start + data.hits.hit.length;
-    const players = data.hits.hit.map((h) => h.response).filter((p) => !!p);
 
-    return { data: players, hasMore };
+    return { data: data.hits, hasMore: false };
   } catch (e) {
     showFailureToast(e);
 

@@ -1,20 +1,20 @@
 import { List } from "@raycast/api";
-import data from "./data/data.json";
 import CharacterDetail from "./components/CharacterDetail";
-import { useState, useEffect } from "react";
+import type { GiftData } from "./types.d";
+import data from "./data/data.json";
+import { useMemo, useState } from "react";
 
 function getImageURL(name: string) {
   return `https://raw.githubusercontent.com/Razberrry/svwiki/main/${name}.png`;
 }
 
+const characters = (data as GiftData).characters;
+
 export default function Command() {
-  const characters: Character[] = data.characters;
-
   const [searchText, setSearchText] = useState("");
-  const [filteredCharacters, setFilteredCharacters] = useState<Character[]>(characters);
 
-  useEffect(() => {
-    setFilteredCharacters(
+  const filteredCharacters = useMemo(
+    () =>
       characters.filter(
         (character) =>
           character.name.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -23,11 +23,12 @@ export default function Command() {
           character.hates.some((gift) => gift.name.toLowerCase().includes(searchText.toLowerCase())) ||
           character.dislikes.some((gift) => gift.name.toLowerCase().includes(searchText.toLowerCase())),
       ),
-    );
-  }, [searchText, characters]);
+    [searchText],
+  );
 
   return (
     <List isShowingDetail onSearchTextChange={setSearchText} searchBarPlaceholder="Search for a character or gift...">
+      <List.EmptyView title="No characters or gifts found" description="Try a different search term." />
       {filteredCharacters.map((character) => (
         <List.Item
           key={character.name}

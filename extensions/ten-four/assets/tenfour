@@ -1,0 +1,352 @@
+#!/usr/bin/env node
+/*
+ * tenfour: "copy that." Push a clean, copyable snippet onto the Ten Four shelf.
+ *
+ * Snippets travel as data (never as rendered terminal text), so when you copy
+ * them out of Raycast you get the exact bytes: no wrapping, no stray
+ * indentation, no mangled line breaks.
+ *
+ * Two modes, picked automatically:
+ *   local  (default)      the shelf is a JSON file, ~/.ten-four.json
+ *   remote (TENFOUR_URL)  the shelf is an HTTP service (see server/), so you
+ *                         can push from another machine and copy on your Mac
+ *
+ * Usage:
+ *   tenfour "the text"                 add a snippet (label = first line)
+ *   tenfour --label "Railway URL" "…"  add with an explicit label
+ *   tenfour -l "API key" "…"           short form
+ *   echo "multi\nline" | tenfour -     read the snippet from stdin
+ *   tenfour list                       print the current shelf
+ *   tenfour clear                      empty the shelf
+ *   tenfour --version                  print version
+ *
+ * Config: TENFOUR_URL   the shelf service /shelf endpoint (enables remote mode)
+ *         TENFOUR_FILE  override the local store path
+ */
+const { execFileSync } = require("child_process");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+
+const VERSION = "2.1.0";
+const REMOTE = (process.env.TENFOUR_URL || "").replace(/\/$/, "");
+const TOKEN = process.env.TENFOUR_TOKEN || "";
+const STORE =
+  process.env.TENFOUR_FILE || path.join(os.homedir(), ".ten-four.json");
+const LOCK = `${STORE}.lock`;
+const LOCK_STALE_MS = 2000;
+const PID_ONLY_STALE_MS = 30000;
+const MAX_ITEMS = 200;
+
+function readStdin() {
+  try {
+    return fs.readFileSync(0, "utf8");
+  } catch {
+    return "";
+  }
+}
+
+function firstLine(text, max = 60) {
+  const line =
+    text
+      .replace(/\r/g, "")
+      .split("\n")
+      .find((l) => l.trim()) || text;
+  const t = line.trim();
+  return t.length > max ? t.slice(0, max - 1) + "…" : t;
+}
+
+function makeId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/* ---------- local store ---------- */
+
+function load() {
+  try {
+    const data = JSON.parse(fs.readFileSync(STORE, "utf8"));
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function save(items) {
+  fs.mkdirSync(path.dirname(STORE), { recursive: true });
+  // Write then rename, which is atomic within a directory, so the extension
+  // polling this file never catches a half-written store. Rename does not
+  // serialize read-modify-write across processes; withLock does that.
+  const tmp = `${STORE}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(items, null, 2));
+  fs.renameSync(tmp, STORE);
+}
+
+function processStartTime(pid) {
+  try {
+    return (
+      execFileSync("ps", ["-o", "lstart=", "-p", String(pid)], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim() || null
+    );
+  } catch {
+    return null;
+  }
+}
+
+function lockToken() {
+  const startedAt = processStartTime(process.pid);
+  return JSON.stringify({
+    pid: process.pid,
+    fingerprint: startedAt !== null,
+    // Do not reclaim a live lock if `ps` is temporarily unavailable.
+    pidOnly: startedAt === null,
+    startedAt,
+    token: Math.random().toString(36).slice(2),
+  });
+}
+
+function lockOwner(token) {
+  try {
+    const { pid, fingerprint, pidOnly, startedAt } = JSON.parse(token);
+    if (Number.isInteger(pid) && pid > 0) {
+      return {
+        pid,
+        fingerprint: fingerprint === true,
+        pidOnly: pidOnly === true,
+        startedAt: typeof startedAt === "string" ? startedAt : null,
+      };
+    }
+  } catch {
+    // Locks written before ownership fingerprints used the PID prefix only.
+  }
+  return {
+    pid: Number(token.split("-", 1)[0]),
+    fingerprint: false,
+    pidOnly: false,
+    startedAt: null,
+  };
+}
+
+function withLock(fn) {
+  fs.mkdirSync(path.dirname(STORE), { recursive: true });
+  for (;;) {
+    try {
+      const fd = fs.openSync(LOCK, "wx");
+      const token = lockToken();
+      fs.writeFileSync(fd, token);
+      let parsed = {};
+      try {
+        parsed = JSON.parse(token);
+      } catch {
+        // ignore malformed self-written token
+      }
+      let heartbeat;
+      if (parsed.pidOnly) {
+        const touch = () => {
+          try {
+            fs.utimesSync(LOCK, new Date(), new Date());
+          } catch {
+            // lock released
+          }
+        };
+        heartbeat = setInterval(touch, PID_ONLY_STALE_MS / 3);
+      }
+      try {
+        return fn();
+      } finally {
+        if (heartbeat) clearInterval(heartbeat);
+        fs.closeSync(fd);
+        try {
+          if (fs.readFileSync(LOCK, "utf8") === token) fs.unlinkSync(LOCK);
+        } catch {
+          // already released
+        }
+      }
+    } catch (err) {
+      if (err.code !== "EEXIST") throw err;
+      try {
+        if (Date.now() - fs.statSync(LOCK).mtimeMs > LOCK_STALE_MS) {
+          const lockStat = fs.statSync(LOCK);
+          const token = fs.readFileSync(LOCK, "utf8");
+          const owner = lockOwner(token);
+          let ownerAlive = false;
+          if (owner.pidOnly) {
+            ownerAlive =
+              Date.now() - fs.statSync(LOCK).mtimeMs <= PID_ONLY_STALE_MS;
+          } else if (Number.isInteger(owner.pid) && owner.pid > 0) {
+            try {
+              process.kill(owner.pid, 0);
+              ownerAlive =
+                owner.fingerprint &&
+                typeof owner.startedAt === "string" &&
+                processStartTime(owner.pid) === owner.startedAt;
+            } catch (error) {
+              ownerAlive =
+                error.code === "EPERM" &&
+                owner.fingerprint &&
+                typeof owner.startedAt === "string" &&
+                processStartTime(owner.pid) === owner.startedAt;
+            }
+          }
+          if (!ownerAlive) {
+            try {
+              const currentStat = fs.statSync(LOCK);
+              if (
+                currentStat.mtimeMs === lockStat.mtimeMs &&
+                fs.readFileSync(LOCK, "utf8") === token
+              ) {
+                fs.unlinkSync(LOCK);
+              }
+            } catch {
+              // lock vanished or a successor acquired it
+            }
+          }
+        }
+      } catch {
+        // lock vanished or we raced with the holder releasing it
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 20);
+    }
+  }
+}
+
+function sortItems(items) {
+  return [...items].sort((a, b) => {
+    if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+    return b.ts - a.ts;
+  });
+}
+
+// Pinned snippets are never evicted; everything else keeps the newest MAX_ITEMS.
+function truncate(items) {
+  const pinned = items.filter((it) => it.pinned);
+  const rest = items.filter((it) => !it.pinned).slice(0, MAX_ITEMS);
+  return [...pinned, ...rest].slice(0, MAX_ITEMS + pinned.length);
+}
+
+/* ---------- remote store ---------- */
+
+function validateRemoteUrl(raw) {
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new Error("TENFOUR_URL must be a valid URL");
+  }
+  const loopback = new Set(["localhost", "127.0.0.1", "::1"]);
+  if (parsed.protocol === "https:") return raw.replace(/\/$/, "");
+  if (parsed.protocol === "http:" && loopback.has(parsed.hostname)) {
+    return raw.replace(/\/$/, "");
+  }
+  throw new Error(
+    "TENFOUR_URL must use HTTPS. HTTP is only allowed for loopback testing (127.0.0.1).",
+  );
+}
+
+const REMOTE_URL = REMOTE ? validateRemoteUrl(REMOTE) : "";
+
+async function api(method, suffix = "", body) {
+  const res = await fetch(REMOTE_URL + suffix, {
+    method,
+    headers: {
+      ...(body ? { "Content-Type": "application/json" } : {}),
+      ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    let msg = `${res.status} ${res.statusText}`;
+    try {
+      const j = await res.json();
+      if (j && j.error) msg = j.error;
+    } catch {
+      // non-JSON error body; keep the status line
+    }
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
+/* ---------- one interface over both ---------- */
+
+const shelf = REMOTE
+  ? {
+      list: () => api("GET"),
+      add: (label, text, source) => api("POST", "", { label, text, source }),
+      clear: () => api("DELETE"),
+    }
+  : {
+      list: async () => sortItems(load()),
+      add: async (label, text, source) => {
+        const item = {
+          id: makeId(),
+          label: label || firstLine(text),
+          text,
+          ts: Date.now(),
+          pinned: false,
+          ...(source ? { source: String(source).slice(0, 120) } : {}),
+        };
+        withLock(() => save(truncate([item, ...load()])));
+        return item;
+      },
+      clear: async () => withLock(() => save([])),
+    };
+
+async function main() {
+  const argv = process.argv.slice(2);
+
+  if (argv[0] === "--version" || argv[0] === "-v" || argv[0] === "version") {
+    return console.log(`tenfour ${VERSION}`);
+  }
+  if (argv[0] === "list") {
+    const items = await shelf.list();
+    if (!items.length) return console.log("Ten Four shelf is empty.");
+    items.forEach((it, i) =>
+      console.log(`${i + 1}. [${it.label}] ${firstLine(it.text, 80)}`),
+    );
+    return;
+  }
+  if (argv[0] === "clear") {
+    await shelf.clear();
+    return console.log("Ten Four shelf cleared.");
+  }
+
+  // parse --label / -l, --source / -s, and gather the snippet text
+  let label = null;
+  let source = null;
+  const textParts = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--label" || a === "-l") {
+      label = argv[++i] ?? null;
+    } else if (a === "--source" || a === "-s") {
+      source = argv[++i] ?? null;
+    } else if (a === "-" || a === "--stdin") {
+      textParts.push(readStdin());
+    } else {
+      textParts.push(a);
+    }
+  }
+
+  let text = textParts.join(" ");
+  // allow: tenfour < file, but only when stdin is piped/redirected, never on
+  // an interactive TTY (where readStdin would block forever waiting on input)
+  if (!text.trim() && !process.stdin.isTTY) text = readStdin();
+  text = text.replace(/\n$/, ""); // drop one trailing newline, keep internal ones
+
+  if (!text.trim()) {
+    console.error(
+      'tenfour: nothing to add. Usage: tenfour [--label "X"] "text"  |  echo … | tenfour -',
+    );
+    process.exit(1);
+  }
+
+  const item = await shelf.add(label, text, source);
+  console.log(`📋 10-4, added to shelf: ${item.label}`);
+}
+
+main().catch((err) => {
+  console.error(`tenfour: ${err.message}`);
+  process.exit(1);
+});

@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "thesaurus-rex",
+  "title": "Thesaurus Rex",
+  "description": "Offline thesaurus: synonyms, antonyms and definitions",
+  "keywords": [
+    "thesaurus",
+    "synonyms",
+    "antonyms",
+    "dictionary",
+    "definitions",
+    "wordnet",
+    "offline",
+    "words"
+  ],
+  "icon": "icon.png",
+  "author": "invm",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "look-up-word",
+      "title": "Look up Word",
+      "description": "Synonyms, antonyms and definitions for a word",
+      "icon": "icon-look-up.png",
+      "keywords": [
+        "thesaurus",
+        "synonym",
+        "antonym",
+        "definition",
+        "word"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "search-synonyms",
+      "title": "Search Synonyms",
+      "description": "Find synonyms for a word",
+      "icon": "icon-synonyms.png",
+      "keywords": [
+        "synonym",
+        "thesaurus",
+        "similar",
+        "word"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "search-antonyms",
+      "title": "Search Antonyms",
+      "description": "Find antonyms for a word",
+      "icon": "icon-antonyms.png",
+      "keywords": [
+        "antonym",
+        "opposite",
+        "thesaurus"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "define-word",
+      "title": "Define Word",
+      "description": "Look up definitions for a word",
+      "icon": "icon-define.png",
+      "keywords": [
+        "define",
+        "definition",
+        "dictionary",
+        "meaning"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "manage-dictionaries",
+      "title": "Manage Dictionaries",
+      "description": "Download, update or delete the offline dictionaries",
+      "icon": "icon-dictionaries.png",
+      "keywords": [
+        "download",
+        "dictionary",
+        "wordnet",
+        "offline"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.9.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "icons": "node scripts/build-icons.mjs",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --experimental-strip-types --test src/*.test.ts"
+  }
+}

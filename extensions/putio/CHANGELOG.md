@@ -1,5 +1,14 @@
 # put.io Changelog
 
+## [Clearer setup documentation] - 2026-07-12
+
+- Rewrote the README with a step-by-step guide for obtaining the app-specific password and a summary of the available commands
+- Clarified the app-specific password field description in the extension preferences
+
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Refactor] - 2024-09-19
 
 - Updated file list item actions to use a new utility function that requires less network requests to get the relevant action URLs.

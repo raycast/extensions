@@ -1,15 +1,27 @@
-import { getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { Preference } from "../types";
+import { useCachedPromise } from "@raycast/utils";
+import { getAccessToken } from "../oauth";
 
-const preferences = getPreferenceValues<Preference>();
+const API_BASE_URL = "https://api.ouraring.com/v2/";
 
-export function oura(route: string) {
-  const { isLoading, data, revalidate, error } = useFetch(`https://api.ouraring.com/v2/${route}`, {
-    headers: {
-      Authorization: `Bearer ${preferences.oura_token}`,
+export function oura<T>(route: string) {
+  const { isLoading, data, revalidate, error } = useCachedPromise(
+    async (routeParam: string) => {
+      const accessToken = await getAccessToken();
+      const response = await fetch(`${API_BASE_URL}${routeParam}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(body || response.statusText);
+      }
+
+      return (await response.json()) as T;
     },
-  });
+    [route],
+  );
 
   return { isLoading, data, revalidate, error };
 }

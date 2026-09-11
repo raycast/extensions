@@ -1,13 +1,13 @@
 import { Color, Icon, List } from '@raycast/api'
-import type { Function } from '@scaleway/sdk'
+import type { Functionv1beta1 } from '@scaleway/sdk'
 import { getFunctionStatusIcon } from './status'
 
 type FunctionDetailProps = {
-  serverlessFunction: Function.v1beta1.Function
-  namespaces?: Function.v1beta1.Namespace[]
+  serverlessFunction: Functionv1beta1.Function
+  namespaces?: Functionv1beta1.Namespace[]
 }
 
-export const getPrivacyAccessory = (privacy: Function.v1beta1.FunctionPrivacy) => {
+export const getPrivacyAccessory = (privacy: Functionv1beta1.FunctionPrivacy) => {
   switch (privacy) {
     case 'public':
       return { icon: { source: Icon.LockUnlocked, tintColor: Color.Green }, tooltip: 'Public' }

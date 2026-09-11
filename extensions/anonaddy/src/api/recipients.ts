@@ -7,15 +7,9 @@ import type { Paginated, Recipient } from "./types";
 // @see https://app.addy.io/docs/#recipients-GETapi-v1-recipients
 const getAll = withCache(
   async () => {
-    const response = await fetch("recipients?filter[verified]=true");
+    const response = await fetch<Paginated<Recipient>>("recipients?filter[verified]=true");
 
-    if (response.status !== 200) {
-      throw new Error(`Failed to fetch recipients: ${response.status}`);
-    }
-
-    const body = (await response.json()) as Paginated<Recipient>;
-
-    return body.data;
+    return response.data;
   },
   // Cache for 5 minutes
   { maxAge: 5 * 60 * 1000 },

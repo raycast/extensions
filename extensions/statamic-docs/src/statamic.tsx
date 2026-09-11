@@ -23,7 +23,8 @@ type Version = {
   version: string;
   branch: string;
   url: string;
-  alpha: boolean | false;
+  alpha: boolean;
+  beta: boolean;
 };
 
 export type { Version };
@@ -106,6 +107,8 @@ export default function main() {
 
   const versionChanged = async (value: string) => {
     const version = availableVersions.find((v) => v.version === value);
+    if (!version) return;
+
     setSelectedVersion(version);
     await LocalStorage.setItem("version", JSON.stringify(version));
   };

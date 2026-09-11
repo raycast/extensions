@@ -70,7 +70,7 @@ const Program = ({ channel, program, index, onSelect: setSelectedProgramIndex, s
       key={index}
       id={index.toString()}
       title={`${getTime(program.startTime)} - ${truncate(program.name)}`}
-      icon={program.isCurrentlyLive ? Icon.Clock : ""}
+      icon={program.isCurrentlyLive ? Icon.Clock : "transparent.png"}
       actions={<Actions />}
     />
   );

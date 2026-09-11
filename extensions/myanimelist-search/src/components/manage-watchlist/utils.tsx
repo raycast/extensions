@@ -9,7 +9,7 @@ interface SetEpisodesWatchedValues {
 
 export async function getWatchlistItems(
   limit = 30,
-  offset = 0
+  offset = 0,
 ): Promise<(api.ExtendedAnime & { status: string; episodesWatched: number })[]> {
   const watchlist = await api.getDetailedWatchlist(["watching", "plan_to_watch"], limit, offset);
 
@@ -17,7 +17,7 @@ export async function getWatchlistItems(
     watchlist.map(async (item) => ({
       ...item,
       episodesWatched: await api.getAnimeEpisodesWatched(item, true),
-    }))
+    })),
   );
 
   return fetchedItems;

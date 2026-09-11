@@ -1,11 +1,24 @@
-import { LocalStorage, showToast, Toast, environment, Cache } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { NodeHtmlMarkdown, NodeHtmlMarkdownOptions } from "node-html-markdown";
-import fs from "fs/promises";
-import { Interval, Mail, Message } from "../types";
-import { getMessage } from "./api";
+import { Interval } from "../types";
 
-// Cache
-const cache = new Cache();
+const ACCOUNT_STORAGE_KEY = "account";
+
+const toToastMessage = (input: string | [string, string?]): [string, string?] => {
+  return Array.isArray(input) ? input : [input];
+};
+
+const toError = (error: unknown): Error => {
+  if (error instanceof Error) {
+    return error;
+  }
+
+  if (typeof error === "string" && error.trim().length > 0) {
+    return new Error(error);
+  }
+
+  return new Error("Something went wrong");
+};
 
 export const withToast =
   ({
@@ -23,55 +36,25 @@ export const withToast =
     try {
       await showToast(Toast.Style.Animated, loadingMessage ?? "Loading...");
       await action();
-      if (onSuccess !== undefined) {
-        await showToast(Toast.Style.Success, ...toastMsg(onSuccess()));
-      }
+      await showToast(Toast.Style.Success, ...toToastMessage(onSuccess()));
     } catch (error) {
-      if (error instanceof Error) {
-        if (onFailure !== undefined) {
-          await showToast(Toast.Style.Failure, ...toastMsg(onFailure(error)));
-        }
-      }
+      await showToast(Toast.Style.Failure, ...toToastMessage(onFailure(toError(error))));
     }
   };
 
-export const toastMsg = (input: string | [string, string?]): [string, string?] => {
-  if (Array.isArray(input)) {
-    return input;
-  }
-  return [input];
-};
-
-// Check if user Already Logged In
 export const isLoggedIn = async (): Promise<boolean> => {
-  const account = await LocalStorage.getItem<string>("account");
+  const account = await LocalStorage.getItem<string>(ACCOUNT_STORAGE_KEY);
   return account !== undefined;
 };
 
-// Remove Account
 export const removeAccount = async (): Promise<void> => {
-  await LocalStorage.removeItem("account");
+  await LocalStorage.removeItem(ACCOUNT_STORAGE_KEY);
 };
 
-// Genrate Random String
-export const generateRandomString = (): string => {
-  return Math.random().toString(36).substring(2, 15);
-};
-
-// Generate Username
-export const generateEmail = (domain: string): string => {
-  return `${generateRandomString()}@${domain}`;
-};
-
-// Generate Password
-export const generatePassword = (): string => {
-  return generateRandomString();
-};
-
-// Convert HTML to Markdown
 export const htmlToMarkdown = (html: string): string => {
   const options: NodeHtmlMarkdownOptions = {
     preferNativeParser: false,
+    indent: "  ",
     codeFence: "```",
     bulletMarker: "*",
     codeBlockStyle: "fenced",
@@ -97,20 +80,8 @@ export const htmlToMarkdown = (html: string): string => {
   return NodeHtmlMarkdown.translate(html, options);
 };
 
-// Write Message to File
-export const writeMessageToFile = async (message: Message): Promise<void> => {
-  if (!message) return;
-
-  const content = message.html ? message.html[0] : "No Content";
-
-  const path = `${environment.assetsPath}/${message.id}.html`;
-
-  await fs.writeFile(path, content, "utf-8");
-};
-
 export const timeAgo = (date: string): string => {
-  const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
-
+  const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
   const intervals: Interval[] = [
     { label: "year", seconds: 31536000 },
     { label: "month", seconds: 2592000 },
@@ -120,14 +91,13 @@ export const timeAgo = (date: string): string => {
     { label: "second", seconds: 1 },
   ];
 
-  const interval = intervals.find((i) => seconds / i.seconds >= 1);
-
-  if (interval) {
-    const value = Math.floor(seconds / interval.seconds);
-    return `${value} ${interval.label}${value > 1 ? "s" : ""} ago`;
+  const interval = intervals.find((item) => seconds / item.seconds >= 1);
+  if (!interval) {
+    return "just now";
   }
 
-  return "just now";
+  const value = Math.floor(seconds / interval.seconds);
+  return `${value} ${interval.label}${value > 1 ? "s" : ""} ago`;
 };
 
 export const handleAction = (
@@ -136,8 +106,8 @@ export const handleAction = (
   loadingMessage: string,
   successMessage: string,
   failureMessage: string,
-) => {
-  withToast({
+): void => {
+  void withToast({
     action,
     onSuccess: () => {
       onSuccess();
@@ -146,36 +116,4 @@ export const handleAction = (
     onFailure: () => failureMessage,
     loadingMessage,
   })();
-};
-
-// This function either gets the message from the cache or fetches it from the server
-export const getMessageOrUseCache = async (mail: Mail): Promise<Message | null> => {
-  const cachedMessage = cache.get(mail.id);
-  if (cachedMessage) return JSON.parse(cachedMessage);
-
-  const message = await getMessage(mail.id);
-
-  if (!message) return null;
-
-  writeMessageToFile(message);
-  cache.set(mail.id, JSON.stringify(message));
-  return message;
-};
-
-// This function checks if a message is not null
-export const isNotNull = (message: Message | null): message is Message => {
-  return message !== null;
-};
-
-export const getCacheMessage = (id: string): Message | null => {
-  const cachedMessage = cache.get(id);
-  if (cachedMessage) return JSON.parse(cachedMessage);
-  return null;
-};
-
-export const deleteMessageCache = async (id: string): Promise<void> => {
-  cache.remove(id);
-
-  // Delete File
-  await fs.unlink(`${environment.assetsPath}/${id}.html`);
 };

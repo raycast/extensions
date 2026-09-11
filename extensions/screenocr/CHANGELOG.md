@@ -1,5 +1,34 @@
 # ScreenOCR Changelog
 
+## [Fix macOS 26 (Tahoe) and macOS 27 (Golden Gate) Support] - 2026-07-23
+
+- Fixed all commands failing with "Failed to recognize text" on macOS 26 (Tahoe) and macOS 27 (Golden Gate). The system text recognition models log diagnostics to stdout, which the extension uses to return its result, corrupting the output; recognition now runs with stdout muted.
+- Fixed full-screen recognition returning no image: replaced the deprecated `CGWindowListCreateImage` with ScreenCaptureKit (`SCScreenshotManager`), capturing at native pixel resolution for better accuracy.
+- Migrated text and barcode recognition to the modern Vision Swift API (`RecognizeTextRequest` / `DetectBarcodesRequest`).
+- Raised the minimum macOS version to 15.0.
+
+## [Improvements] - 2026-07-22
+
+- Added more Apple Vision recognition languages to the primary and additional language selectors
+
+## [Improvements] - 2026-01-19
+
+- Added [cross-extension support](https://github.com/LitoMore/raycast-cross-extension-conventions) to enable OCR results to be used by other extensions
+- Added documentation to include [cross-extension usage](docs/cross-extension-usage.md)
+- Improved type safety for cross-extension callbacks by introducing `OCRResult` and `LaunchContext` types with `satisfies` validation
+- Refactored code to use early returns for improved readability
+- Modernized error handling using `@raycast/utils` while respecting user preferences
+- Updated dependencies
+
+## [Improvements] - 2026-01-17
+
+- Fix caching issues
+
+## [Improvements] - 2025-11-13
+
+- Added option to hide toast messages
+- Added option to mute shutter sound
+
 ## [Improvements] - 2025-07-13
 
 - Added support for Arabic and Najdi languages

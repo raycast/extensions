@@ -5,6 +5,9 @@
   "description": "Search and copy AI model IDs from OpenRouter to clipboard",
   "icon": "icon.png",
   "author": "jeejeeguan",
+  "contributors": [
+    "degouville"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
@@ -26,16 +29,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.4",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.2"
+    "@types/react": "19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
@@ -43,5 +46,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,5 +1,14 @@
 # Prompt Explorer Extension Changelog
 
+## [Cross-Platform Shortcuts and AI Search] - 2026-08-19
+
+- Add Windows keyboard shortcuts across all Explorer commands
+- Add an AI tool for searching public Raycast Explorer catalog items
+
+## [Windows support] - 2026-04-22
+
+- Add Windows support for the extension
+
 ## [AI Extensions updates] - 2025-03-04
 
 - Add AI Extensions to presets

@@ -1,57 +1,45 @@
-import { List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { format } from "date-fns";
-import { seasons } from "./components/season_dropdown";
-import { Match } from "./types";
-import { getChampionships, getMatches } from "./api";
+import { List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { formatDate } from "date-fns";
 import groupBy from "lodash.groupby";
-import { Championship } from "./types/coppa";
+import { useState } from "react";
+import { getChampionships, getMatches } from "./api";
 import Matchday from "./components/matchday";
+import { seasons } from "./components/season_dropdown";
 
 export default function Fixture() {
-  const [matches, setMatches] = useState<Match[]>();
-
-  const [championships, setChampionships] = useState<Championship[]>([]);
   const [championship, setChampionship] = useState<string>();
 
-  useEffect(() => {
-    getChampionships(seasons[0]).then((data) => {
-      setChampionships(data);
+  const { data: championships } = usePromise(getChampionships, [seasons[0]], {
+    onData: (data) => {
       setChampionship(data[0].id);
-    });
-  }, []);
+    },
+  });
 
-  useEffect(() => {
-    if (championship) {
-      showToast({
-        title: "Loading...",
-        style: Toast.Style.Animated,
-      });
-      getMatches(seasons[0], { championship_id: championship }).then((data) => {
-        setMatches(data);
-        showToast({
-          title: "Completed",
-          style: Toast.Style.Success,
-        });
-      });
-    }
-  }, [championship]);
+  const { data: matches, isLoading } = usePromise(
+    async (championship_id, season) => {
+      return championship
+        ? await getMatches(season, { championship_id })
+        : undefined;
+    },
+    [championship, seasons[0]],
+  );
 
   const matchday = groupBy(matches, (m) =>
-    format(new Date(m.date_time), "eeee, dd MMM yyyy"),
+    formatDate(m.date_time, "eeee, dd MMM yyyy"),
   );
 
   return (
     <List
       throttle
-      isLoading={!matches}
+      isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Championship"
           value={championship}
           onChange={setChampionship}
         >
-          {championships.map((championship) => {
+          {championships?.map((championship) => {
             return (
               <List.Dropdown.Item
                 key={championship.id}

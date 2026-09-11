@@ -30,9 +30,29 @@ export default function FormCutPaste({ initialValues, isNew, children }: FormCut
     setRegexItems((prev) => prev.map((item, idx) => (idx === index ? updatedItem : item)));
   }
 
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+
+  function validateRequired(key: string, value: string) {
+    setErrors((prev) => ({ ...prev, [key]: value ? undefined : "This field is required" }));
+  }
+
+  function clearErrorIfValid(key: string, value: string) {
+    if (errors[key] && value) setErrors((prev) => ({ ...prev, [key]: undefined }));
+  }
+
   const { handleSubmit, itemProps } = useForm<EntryCutPaste>({
     initialValues,
-    onSubmit(values) {
+    async onSubmit(values) {
+      const nextErrors: Record<string, string> = {};
+      regexItems.forEach((item) => {
+        if (!item.key) nextErrors[item.id + ":key"] = "This field is required";
+        if (!item.regex) nextErrors[item.id + ":regex"] = "This field is required";
+      });
+      if (Object.keys(nextErrors).length > 0) {
+        setErrors((prev) => ({ ...prev, ...nextErrors }));
+        return;
+      }
+
       if (isNew || !replacementEntries || replacementEntries.length < 1) {
         (replacementEntries ?? []).push({
           ...values,
@@ -58,12 +78,12 @@ export default function FormCutPaste({ initialValues, isNew, children }: FormCut
           regexItems,
         };
       }
-      setSavedItems(replacementEntries);
+      await setSavedItems(replacementEntries);
 
       showToast({
         style: Toast.Style.Success,
         title: "Success!",
-        message: `${isNew ? "New" : "Updated"} Regex Option: ${values.title} (${values.description})`,
+        message: `${isNew ? "New" : "Updated"} Regex Option: ${values.title}${values.description ? ` (${values.description})` : ""}`,
       });
 
       pop();
@@ -71,13 +91,6 @@ export default function FormCutPaste({ initialValues, isNew, children }: FormCut
     validation: {
       title: FormValidation.Required,
       output: FormValidation.Required,
-      regexItems: () => {
-        const invalidRegexItem = regexItems.find((item) => !item.key || !item.regex);
-        if (invalidRegexItem) {
-          return "Each Regex item requires both a key and a regex pattern.";
-        }
-        return undefined;
-      },
     },
   });
 
@@ -109,14 +122,24 @@ export default function FormCutPaste({ initialValues, isNew, children }: FormCut
             info="Use the Key name (e.g. KEY) without enclosing curly braces."
             placeholder="Enter key for regex item, e.g. KEY"
             value={option.key}
-            onChange={(newValue) => updateRegexItem(index, { ...option, key: newValue })}
+            error={errors[option.id + ":key"]}
+            onChange={(newValue) => {
+              updateRegexItem(index, { ...option, key: newValue });
+              clearErrorIfValid(option.id + ":key", newValue);
+            }}
+            onBlur={(event) => validateRequired(option.id + ":key", event.target.value ?? "")}
           />
           <Form.TextField
             id={"regex" + index}
             title="Regex"
             placeholder='e.g. description="(.*)"'
             value={option.regex}
-            onChange={(newValue) => updateRegexItem(index, { ...option, regex: newValue })}
+            error={errors[option.id + ":regex"]}
+            onChange={(newValue) => {
+              updateRegexItem(index, { ...option, regex: newValue });
+              clearErrorIfValid(option.id + ":regex", newValue);
+            }}
+            onBlur={(event) => validateRequired(option.id + ":regex", event.target.value ?? "")}
           />
         </Fragment>
       ))}

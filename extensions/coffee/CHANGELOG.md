@@ -1,5 +1,85 @@
 # Coffee Changelog
 
+## [Enhancement] - 2026-08-30
+
+- Add reason to `Caffeinate Status`, showing 4 types, examples: 
+  - `Caffeinate Until`: until 2:00 PM
+  - `Caffeinate For ...`: 42m left
+  - `Caffeinate While`: while Slack is running
+  - `Schedule Caffeination`: schedule: Mondays from 11:00 to 15:00
+- Add `Decaffeinate pauses running schedules` preference
+- Add app icons to `Caffeinate While` command
+
+## [Windows support] - 2026-08-25
+
+- Add support for Windows platform
+- Add app picker support to the "Caffeinate While" command on Windows
+- Stop caffeination when the selected app window closes
+- Filter out utility and system windows from the app picker
+- Use platform-neutral wording in tools, AI instructions, README, preferences, and HUDs
+
+## [Fix] - 2026-08-21
+
+- Reduced background status refreshes to once per minute.
+
+## [Fix] - 2026-08-20
+
+- Fixed future caffeination schedules not activating automatically and ensured they stop at the configured end time.
+
+## [Enhancement] - 2026-08-14
+
+- Added an "instant on" feature: when the new _Start caffeination when Raycast starts_ preference is enabled, Coffee automatically keeps your Mac awake (indefinitely) shortly after Raycast launches. Manual decaffeination persists until the next Raycast restart.
+
+## [AI Extension] - 2026-07-22
+
+- Added AI tools to caffeinate until a specific date and time.
+- Added AI tools to list, pause, resume, and delete recurring caffeination schedules.
+- Expanded AI instructions and evaluations for the new workflows.
+
+## [Enhancement] - 2026-06-28
+
+- Redesigned the menu bar dropdown: quick-pick durations (10m, 30m, 1h, 2h, 4h, 8h, 12h) and `Indefinitely`, each with a checkmark and live countdown when active.
+- Added `Until…` to the menu bar dropdown, which opens a date/time picker form.
+- Merged the picker form into the existing `Caffeinate Until` command; the typed time argument is now optional (leave empty to use the picker).
+- Clicking an active menu item now deactivates caffeination.
+
+## [Fix] - 2026-06-05
+
+- Fixed a typo in the "Caffeinate While" command description ("an certain app" → "a certain app").
+
+## [Fix] - 2026-06-02
+
+- Fixed the menu bar icon not updating immediately after caffeinating or decaffeinating.
+
+## [Add Keyboard Shortcuts] - 2026-05-16
+
+- Added a Toggle shortcut for pausing and resuming caffeination schedules.
+
+## [Fix] - 2026-03-24
+
+- Fixed zombie process accumulation by properly detaching the caffeinate process with spawn/unref
+- Folded the `-u` flag into the main caffeinate process, eliminating periodic `caffeinate -u -t 1` spawning
+- Removed stale process filter in menu bar status
+
+## [Fix] - 2026-03-22
+
+- Prevent zombie caffeinate child processes by keeping the spawned process referenced until exit.
+
+## [Fix] - 2026-03-19
+
+- Fixed zombie process accumulation caused by unreaped `caffeinate -u` child processes in the status command.
+
+## [Fix] - 2026-03-17
+
+- Fixed caffeination not preventing display sleep on macOS 26+ when running on battery power.
+
+## [Fix] - 2026-01-27
+
+- Fixed memory leak caused by zombie processes when starting caffeination.
+- Fixed argument parsing bug in `generateArgs()`.
+- Consolidated duplicate shell commands in menu bar to reduce process spawning.
+- Added proper cleanup to prevent state updates on unmounted components.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Enhancement] - 2025-03-01

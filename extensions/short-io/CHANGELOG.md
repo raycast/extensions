@@ -1,5 +1,12 @@
 # Short.io Changelog
 
+## [Windows Support & Cross-Platform Shortcuts] - 2026-08-19
+
+- Add Windows support
+- Update keyboard shortcuts to work correctly on both macOS and Windows
+- Use Raycast common shortcuts for Edit and Delete actions in Search Links
+- Update Raycast API and dependencies
+
 ## [Search Links Enhancements] - 2025-07-09
 
 - `search-links` now allows you to view links independent of default

@@ -32,6 +32,30 @@ export enum InvoiceStatus {
   VIEWED = "VIEWED",
 }
 
+export enum InvoiceSendMethod {
+  EXPORT_PDF = "EXPORT_PDF",
+  GMAIL = "GMAIL",
+  MARKED_SENT = "MARKED_SENT",
+  NOT_SENT = "NOT_SENT",
+  OUTLOOK = "OUTLOOK",
+  SHARED_LINK = "SHARED_LINK",
+  SKIPPED = "SKIPPED",
+  WAVE = "WAVE",
+  YAHOO = "YAHOO",
+}
+
+export type InvoiceItem = {
+  product: {
+    id: string;
+    name: string;
+  };
+  quantity: string;
+  unitPrice: string;
+  subtotal: {
+    value: string;
+    currency: Pick<Currency, "symbol" | "exponent">;
+  };
+};
 export type Invoice = {
   id: string;
   createdAt: string;
@@ -47,32 +71,33 @@ export type Invoice = {
   unitTitle: string;
   priceTitle: string;
   amountTitle: string;
+  lastSentAt: string | null;
+  lastSentVia: InvoiceSendMethod;
+  lastViewedAt: string | null;
   customer: {
     name: string;
   };
   dueDate: string;
   amountDue: Money;
   amountPaid: Money;
-  total: {
+  subtotal: {
     value: string;
     currency: {
       symbol: string;
     };
   };
-  items: Array<{
-    product: {
-      id: string;
-      name: string;
-    };
-    quantity: string;
-    price: string;
-    subtotal: {
-      value: string;
-      currency: {
-        symbol: string;
-      };
-    };
+  discounts: Array<{
+    name: string;
   }>;
+  discountTotal: {
+    value: string;
+    currency: Pick<Currency, "symbol">;
+  };
+  total: {
+    value: string;
+    currency: Pick<Currency, "symbol">;
+  };
+  items: Array<InvoiceItem>;
 };
 
 export type Customer = {

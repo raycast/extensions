@@ -1,0 +1,17 @@
+{
+  "Logos": {
+    "TeX Logo": " \\TeX ",
+    "LaTeX Logo": " \\LaTeX "
+  },
+  "Other Special Characters": {
+    "Aleph (Cardinality)": " \\aleph ",
+    "H-bar (Planck Constant)": " \\hbar ",
+    "Weierstrass P": " \\wp ",
+    "Real Part (Re)": " \\Re ",
+    "Imaginary Part (Im)": " \\Im ",
+    "Spade": " \\spadesuit ",
+    "Diamond": " \\diamondsuit ",
+    "Club": " \\clubsuit ",
+    "Heart": " \\heartsuit "
+  }
+}

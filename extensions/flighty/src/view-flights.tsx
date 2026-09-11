@@ -108,6 +108,11 @@ export default function () {
                                 <ActionPanel title="Flight">
                                     <Action.OpenInBrowser title="Open in Flighty" url={link} />
                                     <Action.CopyToClipboard title="Copy Link" content={link} />
+                                    <Action.CopyToClipboard
+                                        title="Copy Flight Number"
+                                        content={`${flight.airlineIata} ${flight.number}`}
+                                        shortcut={{modifiers: ['cmd'], key: '.'}}
+                                    />
                                     {flight.pnr && <Action.CopyToClipboard title="Copy Booking Code" content={flight.pnr} />}
                                 </ActionPanel>
                             }

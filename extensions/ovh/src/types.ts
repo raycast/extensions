@@ -49,3 +49,57 @@ export type DNSRecord = {
   ttl: number | null;
   zone: string;
 };
+export type DomainServiceInfo = {
+  contactAdmin: string;
+  renewalType:
+    | "automaticForcedProduct"
+    | "automaticV2012"
+    | "automaticV2014"
+    | "automaticV2016"
+    | "manual"
+    | "oneShot"
+    | "option";
+  expiration: string;
+  canDeleteAtExpiration: boolean;
+  possibleRenewPeriod: [number];
+  contactBilling: string;
+  serviceId: number;
+  domain: string;
+  engagedUpTo: string | null;
+  creation: string;
+  renew: {
+    deleteAtExpiration: boolean;
+    forced: boolean;
+    manualPayment: boolean | null;
+    period: number | null;
+    automatic: boolean;
+  } | null;
+  status: "autorenewInProgress" | "expired" | "inCreation" | "ok" | "pendingDebt" | "unPaid";
+  contactTech: string;
+};
+
+export type Notification = {
+  categories: string[];
+  contacts: Array<{
+    id: string;
+    sentAt: string;
+    status: "BOUNCED" | "DELIVERED" | "DROPPED" | "QUEUED" | "SENT";
+    to: string;
+    type: "EMAIL";
+  }>;
+
+  createdAt: string;
+  id: string;
+  priority: "HIGH" | "LOW" | "MEDIUM";
+  title: string;
+};
+
+export type ContactMean = {
+  createdAt: string;
+  default: boolean;
+  description: string;
+  email: string;
+  id: string;
+  status: "DISABLED" | "ERROR" | "TO_VALIDATE" | "VALID";
+  type: "EMAIL";
+};

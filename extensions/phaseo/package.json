@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "phaseo",
+  "version": "0.4.0",
+  "private": true,
+  "title": "Phaseo",
+  "description": "Explore Phaseo's AI model catalogue from Raycast",
+  "icon": "icon.png",
+  "author": "danielbutler1",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ],
+  "commands": [
+    {
+      "name": "models",
+      "title": "Browse Models",
+      "description": "Search and compare AI models",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Phaseo API key",
+      "placeholder": "phaseo_v1_sk_..."
+    },
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API URL",
+      "description": "Custom API URL (optional)",
+      "default": "https://api.phaseo.app/v1",
+      "placeholder": "https://api.phaseo.app/v1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "@types/react": "19.2.17",
+    "eslint": "^10.0.3",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "@raycast/eslint-config": "^2.1.1"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "fix-lint": "ray lint --fix"
+  }
+}

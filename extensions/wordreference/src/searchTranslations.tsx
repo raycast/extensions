@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Detail,
   Icon,
   LaunchProps,
   List,
@@ -11,17 +12,25 @@ import {
 import { Fragment, useEffect } from "react";
 import useInitialValues from "./hooks/initialValues";
 import usePreferences from "./hooks/preferences";
-import { useRecentSearches, useSearchTranslations } from "./hooks/translations";
+import { RecentSearch, useRecentSearches, useSearchTranslations } from "./hooks/translations";
 import PreferencesTranslationDropdown from "./preferencesTranslationDropdown";
-import { WordTranslation } from "./translationDetails";
+import {
+  WordReferenceErrorResponse,
+  getSearchErrorDescription,
+  getSearchErrorMarkdown,
+  getWordReferenceUrl,
+} from "./wordreference";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.SearchTranslations }>) {
-  const { word } = useInitialValues({ commandProps: props });
-  const { preferences, translation } = usePreferences();
-  const { searchText, setSearchText, data, isLoading } = useSearchTranslations({
+  const { preferences, setPreferences, translation } = usePreferences();
+  const { word } = useInitialValues({ commandProps: props, preferences, setPreferences });
+  const { searchText, setSearchText, data, isLoading, errorResponse } = useSearchTranslations({
     initialSearch: word,
+    translationKey: preferences.translationKey,
   });
-  const { clearRecentSearches, recentSearches, removeRecentSearch } = useRecentSearches();
+  const { clearRecentSearches, recentSearches, removeRecentSearch, addRecentSearch } = useRecentSearches();
+  const trimmedSearchText = searchText.trim();
+  const searchUrl = getWordReferenceUrl(preferences.translationKey, trimmedSearchText);
 
   useEffect(() => {
     updateCommandMetadata({ subtitle: `Translate from ${translation.from} to ${translation.to}` });
@@ -41,7 +50,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           <SettingsAction />
         </ActionPanel>
       }
-      searchBarAccessory={<PreferencesTranslationDropdown />}
+      searchBarAccessory={<PreferencesTranslationDropdown preferences={preferences} setPreferences={setPreferences} />}
       filtering={false}
       isLoading={isLoading}
       searchBarPlaceholder={`Search ${translation.from} to ${translation.to} translations...`}
@@ -49,6 +58,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
     >
       {searchText ? (
         <List.Section title="Results">
+          {errorResponse ? (
+            <List.Item
+              title="Search unavailable"
+              subtitle={getSearchErrorDescription(errorResponse.status, errorResponse.statusText)}
+              icon={Icon.Warning}
+              accessories={[{ text: `HTTP ${errorResponse.status}` }]}
+              actions={
+                <ActionPanel>
+                  <SearchErrorActions errorResponse={errorResponse} searchText={trimmedSearchText} url={searchUrl} />
+                  <SettingsAction />
+                </ActionPanel>
+              }
+            />
+          ) : null}
           {data?.map((translation, index) => (
             <List.Item
               key={index}
@@ -61,6 +84,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
                       word={translation.word}
                       lang={translation.lang}
                       translationKey={preferences.translationKey}
+                      addRecentSearch={addRecentSearch}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
@@ -73,7 +97,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
         </List.Section>
       ) : (
         <List.Section title="Recent Searches">
-          {recentSearches?.map(({ word, sourceLangKey, targetLangKey }, index) => (
+          {recentSearches.map(({ word, sourceLangKey, targetLangKey }, index) => (
             <List.Item
               key={index}
               title={word}
@@ -81,7 +105,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title={word}>
-                    <DetailActions word={word} lang={sourceLangKey} translationKey={sourceLangKey + targetLangKey} />
+                    <DetailActions
+                      word={word}
+                      lang={sourceLangKey}
+                      translationKey={sourceLangKey + targetLangKey}
+                      addRecentSearch={addRecentSearch}
+                    />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action
@@ -116,19 +145,74 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   );
 }
 
-function DetailActions({ word, lang, translationKey }: { word: string; lang: string; translationKey: string }) {
-  const { addRecentSearch } = useRecentSearches();
+function SearchErrorActions({
+  errorResponse,
+  searchText,
+  url,
+}: {
+  errorResponse: WordReferenceErrorResponse;
+  searchText: string;
+  url: string;
+}) {
+  const navigation = useNavigation();
+
+  return (
+    <Action
+      title="Show Error Details"
+      icon={Icon.Warning}
+      onAction={() => {
+        navigation.push(<SearchErrorDetail errorResponse={errorResponse} searchText={searchText} url={url} />);
+      }}
+    />
+  );
+}
+
+function SearchErrorDetail({
+  errorResponse,
+  searchText,
+  url,
+}: {
+  errorResponse: WordReferenceErrorResponse;
+  searchText: string;
+  url: string;
+}) {
+  return (
+    <Detail
+      navigationTitle="Search unavailable"
+      markdown={getSearchErrorMarkdown(errorResponse.status, errorResponse.statusText, searchText)}
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser url={url} />
+          <SettingsAction />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function DetailActions({
+  word,
+  lang,
+  translationKey,
+  addRecentSearch,
+}: {
+  word: string;
+  lang: string;
+  translationKey: string;
+  addRecentSearch: (search: RecentSearch) => void;
+}) {
   const navigation = useNavigation();
   const key = translationKey;
   const targetLangKey = key.replace(lang, "");
   const urlTranslationKey = lang + targetLangKey;
-  const url = `https://www.wordreference.com/${urlTranslationKey}/${word}`;
+  const url = getWordReferenceUrl(urlTranslationKey, word);
 
   return (
     <Fragment>
       <Action
         title="Show Translation"
-        onAction={() => {
+        onAction={async () => {
+          const { WordTranslation } = await import("./translationDetails");
           navigation.push(<WordTranslation word={word} lang={lang} baseUrl={urlTranslationKey} />);
           addRecentSearch({ word, sourceLangKey: lang, targetLangKey });
         }}

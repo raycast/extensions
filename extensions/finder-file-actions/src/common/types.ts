@@ -3,7 +3,7 @@ export interface SpotlightSearchPreferences {
   maxRecentFolders: string;
 }
 
-export interface SpotlightSearchDefinition extends Array<string> {}
+export type SpotlightSearchDefinition = string[];
 
 export interface SpotlightSearchResult {
   path: string;
@@ -18,6 +18,7 @@ export interface SpotlightSearchResult {
 }
 
 export interface PinnedFolder extends SpotlightSearchResult {
+  customName?: string;
   pinnedAt: Date;
   lastVerified: Date;
 }

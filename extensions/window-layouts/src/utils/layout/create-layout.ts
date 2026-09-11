@@ -1,12 +1,7 @@
 import { closeMainWindow, showToast, Toast, WindowManagement } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import {
-  getActiveDesktop,
-  getLayoutValidationMessage,
-  getResizableWindows,
-  getUserPreferences,
-  validateLayout,
-} from "..";
+import { getDesktopContext, getLayoutValidationMessage, getUserPreferences, validateLayout } from "..";
+import type { DesktopContext } from "../get-desktop-context";
 import type { CellDimensions, Frame, Layout } from "./types";
 
 /**
@@ -23,7 +18,7 @@ import type { CellDimensions, Frame, Layout } from "./types";
  */
 
 // Calculate the size of each cell in the grid
-function calculateCellSize({
+export function calculateCellSize({
   screenWidth,
   screenHeight,
   numberOfRows,
@@ -86,7 +81,7 @@ function updateBounds({
 }
 
 // Determine the "frame" for each window based on the layout
-function getWindowFrames({
+export function getWindowFrames({
   layout,
   cellWidth,
   cellHeight,
@@ -136,7 +131,7 @@ async function applyLayout({
   windowFrames: Record<number, Frame>;
   windowIds: string[];
   desktopId: string;
-}): Promise<void> {
+}): Promise<number> {
   if (!windowIds.length) {
     throw new Error("No window IDs provided");
   }
@@ -158,22 +153,22 @@ async function applyLayout({
       });
     });
 
-  await Promise.allSettled(updates);
+  const results = await Promise.allSettled(updates);
+  const failures = results.filter((r) => r.status === "rejected");
+  return failures.length;
 }
 
-export async function createLayout(layout: Layout): Promise<void> {
+export async function createLayout(layout: Layout, existingContext?: DesktopContext): Promise<void> {
   const toast = await showToast({
     title: "Tiling windows",
     style: Toast.Style.Animated,
   });
 
   try {
-    const windows = await getResizableWindows();
-    const activeDesktop = await getActiveDesktop();
+    const context = existingContext ?? (await getDesktopContext());
 
-    // getResizableWindows and getActiveDesktop show failure toasts if there are no windows or desktops
-    // so it's enough to just return early here
-    if (!activeDesktop || !windows?.length) {
+    if (!context) {
+      toast.hide();
       return;
     }
 
@@ -183,14 +178,15 @@ export async function createLayout(layout: Layout): Promise<void> {
       await showFailureToast("Invalid layout", {
         message: getLayoutValidationMessage(validationStatus.errors),
       });
+      toast.hide();
       return;
     }
 
-    const preferences = await getUserPreferences();
-    const gap = preferences.gap ?? 0;
+    const preferences = getUserPreferences();
+    const gap = preferences.gap;
 
-    const windowIds = windows.map((window) => window.id);
-    const { width, height } = activeDesktop.size;
+    const windowIds = context.windows.map((window) => window.id);
+    const { width, height } = context.desktop.size;
     const numberOfRows = layout.length;
     const numberOfColumns = layout[0].length;
 
@@ -204,28 +200,25 @@ export async function createLayout(layout: Layout): Promise<void> {
 
     const windowFrames = getWindowFrames({ layout, cellWidth, cellHeight, gap });
 
-    await applyLayout({ windowFrames, windowIds, desktopId: activeDesktop.id }).catch((err) => {
-      console.error("Error arranging windows:", err);
-      showFailureToast("Failed to arrange windows", {
-        message: err.message,
-      });
-    });
+    const failures = await applyLayout({ windowFrames, windowIds, desktopId: context.desktop.id });
 
     if (!preferences.keepWindowOpenAfterTiling) {
       closeMainWindow();
     }
 
-    if (!preferences.disableToasts) {
+    if (failures > 0) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `${failures} window(s) could not be arranged`;
+    } else if (!preferences.disableToasts) {
       toast.style = Toast.Style.Success;
       toast.title = "Windows arranged";
-      toast.show();
     } else {
       toast.hide();
     }
   } catch (error) {
     console.error("Error arranging windows:", error);
-    showFailureToast("Failed to arrange windows", {
-      message: error instanceof Error ? error.message : undefined,
-    });
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to arrange windows";
+    toast.message = error instanceof Error ? error.message : undefined;
   }
 }

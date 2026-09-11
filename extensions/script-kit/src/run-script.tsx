@@ -53,7 +53,7 @@ export default function listScripts(props: LaunchProps) {
                   <Action.CreateQuicklink
                     quicklink={{
                       name: script.name,
-                      link: `raycast://extensions/pomdtr/script-kit/run-script?context=${encodeURIComponent(
+                      link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/pomdtr/script-kit/run-script?context=${encodeURIComponent(
                         JSON.stringify({
                           scriptPath: script.filePath,
                         }),

@@ -21,7 +21,7 @@ type Input = {
 async function tool(input: Input) {
   const { octokit } = getGitHubClient();
 
-  const response = await octokit.activity.listNotificationsForAuthenticatedUser(input);
+  const response = await octokit.activity.listNotificationsForAuthenticatedUser({ ...input, per_page: 25 });
   return response.data;
 }
 

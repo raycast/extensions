@@ -1,0 +1,29 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# misc
+.DS_Store
+.claude
+
+# NOTE: `.github/` is deliberately NOT ignored — it carries FUNDING.yml and (once
+# the standalone mirror exists) CODEOWNERS and sync-from-upstream.yml, matching
+# the rest of the fleet. `ray publish` already excludes `.github/` from the Store
+# monorepo copy, so ignoring it here would only strip it from the mirror where it
+# is actually wanted. (Verified against the published digger/ tree, 2026-07-25.)
+
+# Internal build docs — kept locally, not shipped to the Store.
+# HANDOFF.md is addressed to the implementing agent and records assumptions that
+# were resolved during the build; shelf.md is a private parking lot for ideas.
+# docs/hook-payload.md IS shipped — the README links it as the answer to
+# "how do you know the hook works?"
+HANDOFF.md
+docs/shelf.md

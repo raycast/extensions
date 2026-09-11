@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "@bgd-labs/toolbox": "^0.0.46",
+    "@bgd-labs/toolbox": "^0.2.11",
     "@leeoniya/ufuzzy": "^1.0.18",
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.17.0"

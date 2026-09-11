@@ -36,6 +36,8 @@ export const TraktSearchSchema = TraktPaginationSchema.merge(TraktExtendedSchema
 
 export const TraktPaginationWithSortingSchema = TraktPaginationSchema.merge(TraktSortingSchema);
 
+export const TraktHistoryQuerySchema = TraktPaginationSchema.merge(TraktExtendedSchema);
+
 export const TraktUpNextQuerySchema = TraktPaginationWithSortingSchema.extend({
   include_stats: z.coerce.boolean(),
 });
@@ -91,6 +93,7 @@ export const TraktMovieListItem = z.object({
   type: z.string(),
   score: z.number(),
   plays: z.number().optional(),
+  listed_at: z.string().optional(),
   last_watched_at: z.string().optional(),
   last_updated_at: z.string().optional(),
   movie: TraktMovieBaseItem,
@@ -152,6 +155,7 @@ export const TraktShowListItem = z.object({
   type: z.string(),
   score: z.number(),
   plays: z.number().optional(),
+  listed_at: z.string().optional(),
   last_watched_at: z.string().optional(),
   last_updated_at: z.string().optional(),
   show: TraktShowBaseItem,

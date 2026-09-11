@@ -26,6 +26,7 @@ With a few options:
 
 - `initialState` is the initial value of the state if there aren't any in the Cache yet.
 - `config.cacheNamespace` is a string that can be used to namespace the key.
+- `config.cacheWriteDebounce` is a number to set if you want to debounce the cache writes. This can be useful to prevent memory pressure.
 
 ## Example
 

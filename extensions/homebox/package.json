@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "homebox",
+  "title": "HomeBox",
+  "description": "A simple home inventory management software",
+  "icon": "homebox.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "url",
+      "title": "HomeBox URL",
+      "placeholder": "https://demo.homebox.software/",
+      "type": "textfield",
+      "required": true,
+      "description": "HomeBox URL"
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "placeholder": "demo@example.com",
+      "type": "textfield",
+      "required": true,
+      "description": "Username"
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "placeholder": "demo",
+      "type": "password",
+      "required": true,
+      "description": "Password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "home",
+      "title": "Home",
+      "description": "Quick Statistics",
+      "mode": "view"
+    },
+    {
+      "name": "search-items",
+      "title": "Search Items",
+      "description": "Search and Create Items",
+      "mode": "view"
+    },
+    {
+      "name": "search-labels",
+      "title": "Search Labels",
+      "description": "Search and Create Labels",
+      "mode": "view"
+    },
+    {
+      "name": "search-locations",
+      "title": "Search Locations",
+      "description": "Search and Create Locations",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

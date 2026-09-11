@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "noteman",
+  "title": "Noteman",
+  "description": "Fast, local Markdown note-taking in Raycast",
+  "icon": "noteman-icon.png",
+  "author": "samuel_oldmark_se",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quickCapture",
+      "title": "Quick Capture",
+      "description": "Capture a note into daily notes, a new note, or an existing note",
+      "mode": "view"
+    },
+    {
+      "name": "browseNotes",
+      "title": "Browse Notes",
+      "description": "Browse, search, and manage your notes",
+      "mode": "view"
+    },
+    {
+      "name": "newNote",
+      "title": "New Note",
+      "description": "Create a new markdown note",
+      "mode": "view"
+    },
+    {
+      "name": "openToday",
+      "title": "Open Today's Note",
+      "description": "Open (or create) today's daily note",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notesFolderPath",
+      "type": "textfield",
+      "title": "Notes Folder Path",
+      "description": "Folder where Noteman stores markdown notes",
+      "placeholder": "~/Documents/Notes",
+      "default": "~/Documents/Notes",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

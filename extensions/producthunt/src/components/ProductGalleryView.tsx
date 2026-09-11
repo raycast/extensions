@@ -91,7 +91,7 @@ export function ProductGalleryView({ product, images }: ProductGalleryViewProps)
                 <Action
                   title="Back to Product Detail"
                   icon={Icon.Document}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
                   onAction={() => {
                     navigation.push(<ProductDetailView product={product} />);
                   }}

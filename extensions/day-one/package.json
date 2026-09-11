@@ -6,9 +6,13 @@
   "icon": "day-one.png",
   "author": "AntonNiklasson",
   "contributors": [
-    "bestemic"
+    "bestemic",
+    "Fizzbow"
   ],
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "add-entry",
@@ -36,5 +40,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

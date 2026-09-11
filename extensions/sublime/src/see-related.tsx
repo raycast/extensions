@@ -67,18 +67,18 @@ function RelatedCardsList({ link, text }: { link?: string; text?: string }) {
     const { cards, isLoading, pagination } = useCardsSearch(
         "",
         true,
-        async (query, restrictToLibrary, page) => {
+        async (query, restrictToLibrary, cursor) => {
             if (link) {
                 const pageInfo = await previewLink(link);
                 if (pageInfo.uuid) {
-                    return await fetchRelatedCards(pageInfo.uuid, undefined, page);
+                    return await fetchRelatedCards(pageInfo.uuid, undefined, cursor);
                 }
 
                 // If link not saved yet, search by its title
                 const pageDescription = `${pageInfo.name}\n${pageInfo.description}`.trim();
-                return await fetchRelatedCards(undefined, pageDescription, page);
+                return await fetchRelatedCards(undefined, pageDescription, cursor);
             } else {
-                return await fetchRelatedCards(undefined, text, page);
+                return await fetchRelatedCards(undefined, text, cursor);
             }
         },
         true,

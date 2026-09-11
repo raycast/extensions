@@ -37,7 +37,7 @@ export default function DomainItem({ result }: { result: DomainResult }) {
   const price = useMemo(() => {
     const currentPrice = result.aftermarket?.current_price;
     if (currentPrice) {
-      return `$${currentPrice.toLocaleString()}`;
+      return `$${(currentPrice / 100).toLocaleString()}`;
     }
     return undefined;
   }, [result.aftermarket?.current_price]);

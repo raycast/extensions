@@ -1,60 +1,31 @@
-import { showToast, Toast } from "@raycast/api";
-import { AbortError } from "node-fetch";
-import { useEffect, useRef, useState } from "react";
-import { Emote } from "../components/emote";
+import { useRef } from "react";
 import { performSearch } from "../api/bttv_api";
+import { useCachedPromise } from "@raycast/utils";
+import { LIMIT } from "../components/emote";
 
-export function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+export function useSearch(query: string) {
   const cancelRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    search("");
-    return () => {
+  const { isLoading, data, pagination } = useCachedPromise(
+    (searchText: string) => async (options) => {
+      if (searchText.length < 2) return { data: [], hasMore: false };
       cancelRef.current?.abort();
-    };
-  }, []);
-
-  async function search(searchText: string) {
-    if (searchText.length < 2) {
-      setState((oldState) => ({
-        ...oldState,
-        results: [],
-        isLoading: false,
-      }));
-      return;
-    }
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-
-    try {
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-
-      const results = await performSearch(searchText, cancelRef.current.signal);
-
-      setState((oldState) => ({
-        ...oldState,
-        results: results,
-        isLoading: false,
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
-      showToast(Toast.Style.Failure, "Error", "Emote not found");
-    }
-  }
-
+      cancelRef.current = new AbortController();
+      const results = await performSearch(searchText, cancelRef.current.signal, options.page);
+      return { data: results, hasMore: results.length === LIMIT };
+    },
+    [query],
+    {
+      abortable: cancelRef,
+      initialData: [],
+      failureToastOptions: {
+        title: "Error",
+        message: "Emote not found",
+      },
+    },
+  );
   return {
-    state: state,
-    search: search,
+    isLoading,
+    results: data,
+    pagination,
   };
-}
-
-interface SearchState {
-  results: Emote[];
-  isLoading: boolean;
 }

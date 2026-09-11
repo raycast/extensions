@@ -9,6 +9,7 @@ A Raycast extension that allows you to quickly manage time entries in your Money
 - 🔄 OAuth integration with Moneybird
 - 👥 Support for multiple customers and projects
 - 📝 Add descriptions
+- 🔂 Easily repeat previous time entries if you work one a project for multiple days
 
 ## Prerequisites
 
@@ -37,3 +38,7 @@ Use this command to add a new time entry to your Moneybird administration. You c
 ### Start Timing
 
 Quickly mark the current time as a start point for your time entry. Next time you create a time entry, it will use that as start time.
+
+## Repeat Last Time Entry
+
+Create a new time entry prefilled from the last submission but with today's date

@@ -2,9 +2,8 @@ import { Action, ActionPanel, Color, Form, Icon, List, showToast, useNavigation 
 import { useState } from "react";
 import { EMAIL_STATUS } from "./utils/constants";
 import { getEmails } from "./utils/api";
-import { FormValidation, getFavicon, useCachedState, useForm } from "@raycast/utils";
+import { FormValidation, getFavicon, showFailureToast, useCachedState, useForm } from "@raycast/utils";
 import { Email } from "./utils/types";
-import ErrorComponent from "./components/ErrorComponent";
 
 export default function Emails() {
   const { push } = useNavigation();
@@ -19,21 +18,20 @@ export default function Emails() {
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
-      setIsLoading(true);
-
-      const { domain, status, limit } = values;
-      const response = await getEmails(domain, status, Number(limit));
-      if (!("errors" in response)) {
+      try {
+        setIsLoading(true);
+        const { domain, status, limit } = values;
+        const result = await getEmails(domain, status, limit);
         await showToast({
           title: "Success",
-          message: `Fetched ${response.data.length} email${response.data.length === 1 ? "" : "s"}`,
+          message: `Fetched ${result.length} email${result.length === 1 ? "" : "s"}`,
         });
-        push(<EmailsList emails={response.data} domain={domain} status={status} />);
-      } else {
-        push(<ErrorComponent error={response.errors} />);
+        push(<EmailsList emails={result} domain={domain} status={status} />);
+      } catch (error) {
+        await showFailureToast(error);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     },
     validation: {
       domain: FormValidation.Required,
@@ -58,7 +56,7 @@ export default function Emails() {
           <Action.SubmitForm icon={Icon.Check} onSubmit={handleSubmit} />
           <Action.OpenInBrowser
             icon={Icon.Globe}
-            title="Go To API Reference"
+            title="Go to API Reference"
             url="https://mailwip.com/api/?javascript#fetch-aliases-http-response"
           />
         </ActionPanel>
@@ -110,9 +108,8 @@ ${email.body}`;
 ${email.htmlbody}`;
   }
 
-  const sectionTitle = `${domain === "all" ? "all domains" : domain} | ${emails.length} ${status} email${
-    emails.length === 1 ? "" : "s"
-  }`;
+  const sectionTitle = `${domain === "all" ? "all domains" : domain}`;
+  const sectionSubtitle = `${emails.length} ${status} email${emails.length === 1 ? "" : "s"}`;
   function getStatusTintColor(status: string) {
     if (status === "sent") return Color.Green;
     else if (status === "outgoing") return Color.Blue;
@@ -120,8 +117,8 @@ ${email.htmlbody}`;
   }
 
   return (
-    <List isShowingDetail={isShowingDetail}>
-      <List.Section title={sectionTitle}>
+    <List isShowingDetail={isShowingDetail} searchBarPlaceholder="Search email">
+      <List.Section title={sectionTitle} subtitle={sectionSubtitle}>
         {emails.map((email) => (
           <List.Item
             key={email.id}

@@ -1,30 +1,49 @@
 import { Action, ActionPanel, Icon, List, Color, showToast, Toast, confirmAlert, Alert } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { withEnvContext } from "./components";
-import { useStripeDashboard, useEnvContext } from "./hooks";
-import { STRIPE_API_VERSION } from "./enums";
+import { withProfileContext } from "@src/components";
+import { useStripeDashboard, useProfileContext } from "@src/hooks";
+import { STRIPE_API_VERSION } from "@src/enums";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
 import Stripe from "stripe";
-import { getPreferenceValues } from "@raycast/api";
 
-const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
-
-// Create Stripe clients for both environments
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-
+/**
+ * Props for the CustomerPaymentsList component.
+ */
 interface CustomerPaymentsListProps {
   customerId: string;
 }
 
+/**
+ * Customer Payments View - Displays all payments (charges) for a specific customer.
+ *
+ * Features:
+ * - Shows payment amount, date, description, and status
+ * - Displays refund status (fully refunded, partially refunded, refundable amount)
+ * - One-click refund action for eligible payments
+ * - Quick navigation to payment in Stripe Dashboard
+ * - Copy charge ID and receipt email
+ * - View receipt in browser
+ * - Auto-refreshes after refund operations
+ *
+ * Color-coded status indicators:
+ * - Green: Successful payment
+ * - Yellow: Partially refunded
+ * - Gray: Fully refunded
+ * - Red: Failed payment
+ * - Blue: Other statuses
+ *
+ * Useful for customer support when handling refund requests or reviewing payment history.
+ */
 function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
-  const { environment } = useEnvContext();
+  const { activeProfile, activeEnvironment } = useProfileContext();
   const { dashboardUrl } = useStripeDashboard();
-  const stripe = environment === "test" ? stripeTest : stripeLive;
+  const apiKey = activeEnvironment === "test" ? activeProfile?.testApiKey : activeProfile?.liveApiKey;
+  const stripe = apiKey ? new Stripe(apiKey, { apiVersion: STRIPE_API_VERSION }) : null;
 
   const { isLoading, data, revalidate } = useCachedPromise(
     async () => {
       if (!stripe) {
-        throw new Error(`Stripe ${environment} API key is not configured`);
+        throw new Error(`Stripe ${activeEnvironment} API key is not configured`);
       }
 
       // Fetch charges for this customer
@@ -46,7 +65,7 @@ function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: `Stripe ${environment} API key is not configured`,
+        message: `Stripe ${activeEnvironment} API key is not configured`,
       });
       return;
     }
@@ -191,19 +210,19 @@ function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
                       icon={Icon.ArrowCounterClockwise}
                       style={Action.Style.Destructive}
                       onAction={() => handleRefund(charge)}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={SHORTCUTS.REFUND}
                     />
                   )}
                   <Action.CopyToClipboard
                     title="Copy Charge ID"
                     content={charge.id}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={SHORTCUTS.COPY_SECONDARY}
                   />
                   {charge.receipt_email && (
                     <Action.CopyToClipboard
                       title="Copy Receipt Email"
                       content={charge.receipt_email}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                      shortcut={SHORTCUTS.COPY_EMAIL}
                     />
                   )}
                   {charge.receipt_url && (
@@ -224,4 +243,4 @@ function CustomerPaymentsList({ customerId }: CustomerPaymentsListProps) {
   );
 }
 
-export default withEnvContext(CustomerPaymentsList);
+export default withProfileContext(CustomerPaymentsList);

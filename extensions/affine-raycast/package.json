@@ -1,0 +1,95 @@
+{
+  "name": "affine",
+  "title": "Affine",
+  "type": "module",
+  "description": "Search and open AFFiNE workspaces and documents from Raycast. Uses AFFiNE GraphQL API.",
+  "icon": "icon.png",
+  "author": "yassine_souilmi",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "keywords": [
+    "affine",
+    "notes",
+    "workspace",
+    "documents"
+  ],
+  "commands": [
+    {
+      "name": "search-docs",
+      "title": "Search Affine Documents",
+      "description": "Search documents across workspaces and open in browser",
+      "mode": "view"
+    },
+    {
+      "name": "open-workspace",
+      "title": "Open Affine Workspace",
+      "description": "List workspaces and open one in browser",
+      "mode": "view"
+    },
+    {
+      "name": "open-doc",
+      "title": "Open Affine Document",
+      "description": "List documents in default workspace and open in browser",
+      "mode": "view"
+    },
+    {
+      "name": "new-doc",
+      "title": "New Affine Document",
+      "description": "Open AFFiNE in browser to create a new document",
+      "mode": "no-view"
+    },
+    {
+      "name": "setup-mcp",
+      "title": "Setup Affine AI (MCP)",
+      "description": "Instructions to add the AFFiNE MCP server so Raycast AI can read and write your docs",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "AFFiNE URL",
+      "description": "Base URL of your AFFiNE instance (e.g. https://app.affine.pro)",
+      "type": "textfield",
+      "required": true,
+      "default": "https://app.affine.pro"
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "AFFiNE API token from Settings → Integrations → MCP Server",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "workspaceId",
+      "title": "Default Workspace ID",
+      "description": "Default workspace for listing docs (optional)",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
+    "eslint": "^9.0.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

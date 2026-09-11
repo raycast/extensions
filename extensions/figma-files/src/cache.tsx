@@ -1,22 +1,80 @@
 import { LocalStorage } from "@raycast/api";
-import type { File, Node, TeamFiles } from "./types";
+import type { TeamFiles } from "./types";
+import { PROJECT_FILES_CONFIG } from "./lib/fileStorage";
 
-const PROJECT_FILES_CACHE_KEY = "PROJECT_FILES";
+// Project-level TTL configuration
+const PROJECT_TTL_MINUTES = 30;
+const PROJECT_TTL_CACHE_KEY = "PROJECT_TTLS";
+
+// Structure for project TTL data
+interface ProjectTTLData {
+  [projectId: string]: {
+    lastFetched: number;
+    expiresAt: number;
+  };
+}
+
 const PAGES_CACHE_KEY = "PAGES";
 
-export function storeFiles(teamFiles: TeamFiles[]): void {
+// Project TTL utility functions
+async function loadProjectTTLs(): Promise<ProjectTTLData> {
+  const item = await LocalStorage.getItem<string>(PROJECT_TTL_CACHE_KEY);
+  if (item) {
+    try {
+      return JSON.parse(item) as ProjectTTLData;
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
+async function saveProjectTTLs(ttlData: ProjectTTLData): Promise<void> {
+  const data = JSON.stringify(ttlData);
+  await LocalStorage.setItem(PROJECT_TTL_CACHE_KEY, data);
+}
+
+function isProjectTTLExpired(projectId: string, ttlData: ProjectTTLData): boolean {
+  const projectTTL = ttlData[projectId];
+  if (!projectTTL) return true; // No TTL data means project needs fetching
+  return Date.now() > projectTTL.expiresAt;
+}
+
+function updateProjectTTL(projectId: string, ttlData: ProjectTTLData): void {
+  const now = Date.now();
+  ttlData[projectId] = {
+    lastFetched: now,
+    expiresAt: now + PROJECT_TTL_MINUTES * 60 * 1000,
+  };
+}
+
+export async function getProjectsNeedingRefresh(projectIds: string[]): Promise<string[]> {
+  const ttlData = await loadProjectTTLs();
+  return projectIds.filter((projectId) => isProjectTTLExpired(projectId, ttlData));
+}
+
+export async function updateProjectTTLs(projectIds: string[]): Promise<void> {
+  const ttlData = await loadProjectTTLs();
+  projectIds.forEach((projectId) => updateProjectTTL(projectId, ttlData));
+  await saveProjectTTLs(ttlData);
+}
+
+export async function storeFiles(teamFiles: TeamFiles[]): Promise<void> {
   const data = JSON.stringify(teamFiles);
-  LocalStorage.setItem(PROJECT_FILES_CACHE_KEY, data);
+  await LocalStorage.setItem(PROJECT_FILES_CONFIG.storageKey, data);
 }
 
-export async function loadFiles() {
-  const data: string | undefined = await LocalStorage.getItem(PROJECT_FILES_CACHE_KEY);
-  return data !== undefined ? JSON.parse(data) : undefined;
-}
-
-export async function clearFiles(): Promise<void> {
-  LocalStorage.removeItem(PROJECT_FILES_CACHE_KEY);
-  await clearPagesCache();
+export async function loadFiles(): Promise<TeamFiles[] | undefined> {
+  const item = await LocalStorage.getItem<string>(PROJECT_FILES_CONFIG.storageKey);
+  if (item) {
+    try {
+      const parsed = JSON.parse(item) as TeamFiles[];
+      return Array.isArray(parsed) ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
 }
 
 async function clearPagesCache() {
@@ -32,12 +90,7 @@ async function clearPagesCache() {
   }
 }
 
-export function storePages(pages: Node[], file: File): void {
-  const data = JSON.stringify(pages);
-  LocalStorage.setItem(`${PAGES_CACHE_KEY}-${file.key}`, data);
-}
-
-export async function loadPages(file: File) {
-  const data: string | undefined = await LocalStorage.getItem(`${PAGES_CACHE_KEY}-${file.key}`);
-  return data !== undefined ? JSON.parse(data) : undefined;
+export async function clearFiles(): Promise<void> {
+  await LocalStorage.removeItem(PROJECT_FILES_CONFIG.storageKey);
+  await clearPagesCache();
 }

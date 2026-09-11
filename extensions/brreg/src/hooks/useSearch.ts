@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { showFailureToast } from "../utils/toast";
 import { Enhet } from "../types";
@@ -12,18 +12,25 @@ export function useSearch() {
   const [searchText, setSearchText] = useState("");
   const [entities, setEntities] = useState<Enhet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const requestIdRef = useRef(0);
 
   const trimmed = searchText.trim();
-  const isNumeric = isAllDigits(trimmed);
 
   useEffect(() => {
+    const isNumericQuery = isAllDigits(trimmed);
+    requestIdRef.current += 1;
+    const requestId = requestIdRef.current;
+    let cancelled = false;
+
     if (!trimmed) {
       setEntities([]);
+      setIsLoading(false);
       return;
     }
 
-    if (isNumeric && trimmed.length < 9) {
+    if (isNumericQuery && trimmed.length < 9) {
       setEntities([]);
+      setIsLoading(false);
       return;
     }
 
@@ -31,21 +38,27 @@ export function useSearch() {
       setIsLoading(true);
       try {
         const results = await searchEntities(trimmed);
-        setEntities(results);
+        if (!cancelled && requestId === requestIdRef.current) {
+          setEntities(results);
+        }
       } catch (error) {
-        showFailureToast("Failed to fetch legal entities", (error as { message?: string })?.message);
+        if (!cancelled && requestId === requestIdRef.current) {
+          showFailureToast("Failed to fetch legal entities", (error as { message?: string })?.message);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled && requestId === requestIdRef.current) {
+          setIsLoading(false);
+        }
       }
     }
 
-    fetchEntities();
-  }, [searchText]);
+    const debounceTimer = setTimeout(fetchEntities, 300);
 
-  const clearSearch = () => {
-    setSearchText("");
-    setEntities([]);
-  };
+    return () => {
+      cancelled = true;
+      clearTimeout(debounceTimer);
+    };
+  }, [trimmed]);
 
   return {
     // State
@@ -55,11 +68,9 @@ export function useSearch() {
 
     // Actions
     setSearchText,
-    clearSearch,
 
     // Computed values
     trimmed,
-    isNumeric,
     hasResults: entities.length > 0,
   };
 }

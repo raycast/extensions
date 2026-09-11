@@ -5,7 +5,7 @@
   "description": "Create new Quarkus project",
   "icon": "quarkus.png",
   "author": "loic_magnette",
-  "version": "0.3.1",
+  "version": "0.4.2",
   "categories": [
     "Developer Tools"
   ],
@@ -65,19 +65,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^2.2.1",
     "adm-zip": "^0.5.16"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/adm-zip": "^0.5.7",
-    "@types/node": "20.8.10",
-    "@types/node-fetch": "^2.6.12",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@types/node": "22.18.12",
+    "@types/react": "19.2.2",
+    "eslint": "^9.38.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -86,5 +85,8 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "pull-contribution": "npx @raycast/api@latest pull-contributions"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -30,7 +30,7 @@
 
 This extension brings GitHub Enterprise support to Raycast through the use of GraphQL and personal access tokens. To get started, first:
 
-- Login to your organization's GitHub instance (Eg. https://github.mycompany.com)
+- Login to your organization's GitHub instance (Eg. <https://github.mycompany.com>)
 - Click on your avatar image in the right upper corner
 - From the dropdown menu, click on `Settings`
 - On the left-hand side, click on `Developer settings`.
@@ -56,7 +56,7 @@ Launch the GitHub for Enterprise Raycast extension. You can select any command t
 
 When launching a command, you'll be presented with a configuration screen asking for three pieces of information:
 
-- `GraphQL API` (Eg. https://github.mycompany.com/api/graphql)
+- `GraphQL API` (Eg. <https://github.mycompany.com/api/graphql>)
 - `Username`
 - `Token`
 

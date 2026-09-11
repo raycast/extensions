@@ -12,6 +12,18 @@ function isValidUrl(url: string): boolean {
     if (prefs.allowFile) allowedProtocols.push("file:");
     if (prefs.allowMailto) allowedProtocols.push("mailto:");
     if (prefs.allowTel) allowedProtocols.push("tel:");
+
+    if (prefs.customSchemes) {
+      for (const raw of prefs.customSchemes.split(",")) {
+        // Accept "obsidian", "obsidian:" or "obsidian://" and normalize to "obsidian:"
+        const scheme = raw
+          .trim()
+          .toLowerCase()
+          .replace(/:?\/*$/, "");
+        if (scheme) allowedProtocols.push(`${scheme}:`);
+      }
+    }
+
     return allowedProtocols.includes(parsed.protocol);
   } catch {
     return false;

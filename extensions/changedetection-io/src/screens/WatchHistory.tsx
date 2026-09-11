@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { WatchHistoryResponse } from "@/types";
+import type { WatchHistoryResponse } from "@/types";
 import { getUrl } from "@/utils";
 import { useApi } from "@/hooks/use-api";
 

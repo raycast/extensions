@@ -1,0 +1,150 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kobbe",
+  "title": "Kobbe",
+  "description": "Inspect Kobbe analytics from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "michael_Andreuzza",
+  "license": "MIT",
+  "categories": [
+    "Data"
+  ],
+  "commands": [
+    {
+      "name": "search-sites",
+      "title": "Search Sites",
+      "description": "Search Kobbe sites and open analytics.",
+      "mode": "view"
+    },
+    {
+      "name": "site-overview",
+      "title": "Site Overview",
+      "description": "View overview metrics for a Kobbe site.",
+      "mode": "view"
+    },
+    {
+      "name": "top-pages",
+      "title": "Top Pages",
+      "description": "View top pages for a Kobbe site.",
+      "mode": "view"
+    },
+    {
+      "name": "top-sources",
+      "title": "Top Sources",
+      "description": "View top traffic sources for a Kobbe site.",
+      "mode": "view"
+    },
+    {
+      "name": "revenue",
+      "title": "Revenue",
+      "description": "View revenue for a Kobbe site.",
+      "mode": "view"
+    },
+    {
+      "name": "setup-health",
+      "title": "Setup Health",
+      "description": "Check tracker and revenue webhook status for a Kobbe site.",
+      "mode": "view"
+    },
+    {
+      "name": "live-visitors",
+      "title": "Live Visitors",
+      "description": "Show visitors currently online in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Create a token in Kobbe Settings -> Agent access.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "baseUrl",
+      "title": "Kobbe Base URL",
+      "description": "Use the default unless you self-host Kobbe.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://app.kobbe.io"
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What pressing Enter on a site does.",
+      "type": "dropdown",
+      "required": false,
+      "default": "open-dashboard",
+      "data": [
+        {
+          "title": "Open Dashboard in Browser",
+          "value": "open-dashboard"
+        },
+        {
+          "title": "View Overview in Raycast",
+          "value": "view-overview"
+        }
+      ]
+    },
+    {
+      "name": "defaultRange",
+      "title": "Default Range",
+      "description": "Default analytics range for overview commands.",
+      "type": "dropdown",
+      "required": true,
+      "default": "7d",
+      "data": [
+        {
+          "title": "Today",
+          "value": "today"
+        },
+        {
+          "title": "Last 24 hours",
+          "value": "24h"
+        },
+        {
+          "title": "Last 7 days",
+          "value": "7d"
+        },
+        {
+          "title": "Last 30 days",
+          "value": "30d"
+        },
+        {
+          "title": "All time",
+          "value": "all"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.3.0",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "19.0.10",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "@types/react": "19.0.10",
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

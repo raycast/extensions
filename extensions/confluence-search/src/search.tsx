@@ -19,7 +19,7 @@ import { useAuthorizeSite } from "./util/hooks";
 import { capitalize } from "./util/text";
 import { usePromise } from "@raycast/utils";
 
-const { searchAttachments, sort } = getPreferenceValues();
+const { searchAttachments, searchWhiteboards, sort } = getPreferenceValues();
 
 export default function Command() {
   const site = useAuthorizeSite();
@@ -33,8 +33,12 @@ export default function Command() {
       if (!site) {
         return;
       }
-      const spaces = await fetchFavouriteSpaces(site);
-      setSpaces(spaces);
+      try {
+        const spaces = await fetchFavouriteSpaces(site);
+        setSpaces(spaces);
+      } catch (error) {
+        console.error("Error fetching favourite spaces:", error);
+      }
     })();
   }, [site]);
 
@@ -125,7 +129,14 @@ async function performSearch(
 
   if (searchText) {
     const searchResults = (await fetchSearchByText(
-      { site, text: searchText, includeAttachments: searchAttachments, spaceKey, sort },
+      {
+        site,
+        text: searchText,
+        includeAttachments: searchAttachments,
+        includeWhiteboards: searchWhiteboards,
+        spaceKey,
+        sort,
+      },
       signal,
     )) as any;
     return searchResults.results.map((item: any) => mapToSearchResult(item, searchResults._links));

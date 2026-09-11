@@ -5,7 +5,7 @@
   "description": "Control Gather from Raycast",
   "icon": "command-icon.png",
   "author": "yannglt",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "categories": [
     "Communication",
     "Productivity"
@@ -61,5 +61,10 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.1",
+    "fast-uri": "3.1.5"
+  }
 }

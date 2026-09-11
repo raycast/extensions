@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Grid, ActionPanel, Action, Icon } from "@raycast/api";
 
-import { useInstanceManager } from "./hooks/useInstanceManager";
-import { useMovies } from "./hooks/useRadarrAPI";
-import { getMoviePoster } from "./utils";
-import type { Movie } from "./types";
+import { OpenPreferencesAction } from "@/lib/components/OpenPreferencesAction";
+import { useInstanceManager } from "@/lib/hooks/useInstanceManager";
+import { useMovies } from "@/lib/hooks/useRadarrAPI";
+import { getMoviePoster } from "@/lib/utils/formatting";
+import type { Movie } from "@/lib/types/movie";
 
 type AvailabilityFilter = "all" | "available" | "missing";
 
@@ -79,7 +80,7 @@ export default function UnmonitoredMovies() {
                     onAction={() => switchToInstance(instance)}
                   />
                 ))}
-                <Action.Open title="Open Preferences" target="raycast://extensions/preferences" icon={Icon.Gear} />
+                <OpenPreferencesAction />
               </ActionPanel.Section>
             )}
           </ActionPanel>
@@ -101,7 +102,7 @@ export default function UnmonitoredMovies() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.Open title="Open Preferences" target="raycast://extensions/preferences" icon={Icon.Gear} />
+              <OpenPreferencesAction />
             </ActionPanel>
           }
         />

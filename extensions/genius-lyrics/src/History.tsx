@@ -7,6 +7,7 @@ export type HistoryItem = {
   thumbnail: string;
   url: string;
   viewedAt: number;
+  songId?: number;
 };
 
 export default function History() {
@@ -31,7 +32,7 @@ export default function History() {
                   <Action.Push
                     title="Show Lyrics"
                     icon={Icon.Paragraph}
-                    target={<Lyrics url={item.url} title={item.title} />}
+                    target={<Lyrics url={item.url} title={item.title} songId={item.songId} />}
                     onPush={() => {
                       const existingIdx = history!.findIndex((i) => i.title.toLowerCase() === item.title.toLowerCase());
                       history![existingIdx] = {

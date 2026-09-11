@@ -11,19 +11,24 @@ import {
   Color,
   Alert,
   Keyboard,
+  showInFinder,
 } from "@raycast/api";
 import { usePromise, useForm, FormValidation, useCachedState, MutatePromise } from "@raycast/utils";
 import { useState } from "react";
 import { infisical } from "./infisical";
 import { Workspace } from "./types";
-import { Secret } from "@infisical/sdk";
+import { Folder, Secret } from "@infisical/sdk";
 import { OpenInInfisical } from "./components";
+import os from "os";
+import path from "path";
+import { writeFile } from "fs/promises";
 
 async function confirmAndDelete(
   secret: Secret,
   projectId: string,
   environment: string,
-  mutateSecrets: MutatePromise<Secret[], undefined>,
+  secretPath: string,
+  mutateSecrets: MutatePromise<{ folders: Folder[]; secrets: Secret[] }, undefined>,
 ) {
   const options: Alert.Options = {
     icon: { source: Icon.Trash, tintColor: Color.Red },
@@ -42,10 +47,14 @@ async function confirmAndDelete(
       infisical.secrets().deleteSecret(secret.secretKey, {
         environment,
         projectId,
+        secretPath,
       }),
       {
-        optimisticUpdate(data = []) {
-          return data.filter((s) => s.id !== secret.id);
+        optimisticUpdate(data) {
+          return {
+            folders: data?.folders ?? [],
+            secrets: (data?.secrets ?? []).filter((s) => s.id !== secret.id),
+          };
         },
         shouldRevalidateAfter: false,
       },
@@ -59,39 +68,119 @@ async function confirmAndDelete(
   }
 }
 
-export default function Secrets({ project }: { project: Workspace }) {
+function combineSecretsAsEnv(secrets: Secret[]) {
+  return secrets.map((secret) => `${secret.secretKey}=${secret.secretValue}`).join("\n");
+}
+async function saveAsEnv(secrets: Secret[], projectName: string, environment: string) {
+  const toast = await showToast(Toast.Style.Animated, "Saving");
+  const env = combineSecretsAsEnv(secrets);
+  try {
+    const file = path.join(
+      os.homedir(),
+      "Downloads",
+      `${projectName.replaceAll(" ", "-")}-${Date.now()}.env${environment === "production" ? "" : `.${environment}`}`,
+    );
+    await writeFile(file, env);
+    toast.style = Toast.Style.Success;
+    toast.title = "Saved";
+    toast.message = file;
+    toast.primaryAction = {
+      title: "Show in Finder",
+      async onAction() {
+        await showInFinder(file);
+      },
+    };
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed";
+    toast.message = `${error}`;
+  }
+}
+
+export default function Secrets({
+  project,
+  secretPath = "/",
+  initialEnvironment,
+}: {
+  project: Workspace;
+  secretPath?: string;
+  initialEnvironment?: string;
+}) {
   const [revealValues, setRevealValues] = useCachedState("reveal-secret-values", false);
-  const [environment, setEnvironment] = useState(project.environments[0].slug);
-  const {
-    isLoading,
-    data: secrets = [],
-    error,
-    mutate,
-  } = usePromise(
-    async (environment) => {
-      const res = await infisical.secrets().listSecrets({
-        projectId: project.id,
-        environment,
-      });
-      return res.secrets;
+  const [environment, setEnvironment] = useState(initialEnvironment ?? project.environments[0].slug);
+  const { isLoading, data, error, mutate } = usePromise(
+    async (environment, secretPath) => {
+      // Folders and secrets are fetched for the current path only, so each level
+      // is one step. Without this, secrets outside an environment's root folder
+      // are unreachable: listSecrets defaults to "/" and is not recursive.
+      const [folderList, secretList] = await Promise.all([
+        infisical.folders().listFolders({ projectId: project.id, environment, path: secretPath }),
+        infisical.secrets().listSecrets({ projectId: project.id, environment, secretPath }),
+      ]);
+      return { folders: folderList, secrets: secretList.secrets };
     },
-    [environment],
+    [environment, secretPath],
   );
+
+  const folders = data?.folders ?? [];
+  const secrets = data?.secrets ?? [];
+  const pathLabel = secretPath === "/" ? "" : ` ${secretPath}`;
 
   return (
     <List
-      navigationTitle={`Manage Projects / ${project?.name} / Secrets`}
+      navigationTitle={`Manage Projects / ${project?.name} / Secrets${pathLabel}`}
       isLoading={isLoading}
-      isShowingDetail
+      isShowingDetail={secrets.length > 0}
       searchBarAccessory={
-        <List.Dropdown tooltip="Environment" onChange={setEnvironment}>
+        <List.Dropdown tooltip="Environment" value={environment} onChange={setEnvironment}>
           {project.environments.map((environment) => (
             <List.Dropdown.Item key={environment.slug} title={environment.name} value={environment.slug} />
           ))}
         </List.Dropdown>
       }
     >
-      {!isLoading && !secrets.length && !error ? (
+      {folders.length > 0 && (
+        <List.Section title="Folders">
+          {folders.map((folder) => (
+            <List.Item
+              key={folder.id}
+              icon={Icon.Folder}
+              title={folder.name}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    icon={Icon.Folder}
+                    title="Open Folder"
+                    target={
+                      <Secrets
+                        project={project}
+                        secretPath={secretPath === "/" ? `/${folder.name}` : `${secretPath}/${folder.name}`}
+                        initialEnvironment={environment}
+                      />
+                    }
+                  />
+                  {/* A folder that holds only subfolders has no secret row, so without this
+                      there is no way to add a secret to the folder you are looking at. */}
+                  <Action.Push
+                    icon={Icon.Plus}
+                    title="Add Secret"
+                    target={
+                      <AddorEditSecret
+                        projectId={project.id}
+                        projectName={project.name}
+                        environment={environment}
+                        secretPath={secretPath}
+                      />
+                    }
+                    onPop={mutate}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+      {!isLoading && !folders.length && !secrets.length && !error ? (
         <List.EmptyView
           icon={Icon.Folder}
           description="Let's add some secrets"
@@ -100,7 +189,14 @@ export default function Secrets({ project }: { project: Workspace }) {
               <Action.Push
                 icon={Icon.Plus}
                 title="Add Secret"
-                target={<AddorEditSecret projectId={project.id} projectName={project.name} environment={environment} />}
+                target={
+                  <AddorEditSecret
+                    projectId={project.id}
+                    projectName={project.name}
+                    environment={environment}
+                    secretPath={secretPath}
+                  />
+                }
                 onPop={mutate}
               />
             </ActionPanel>
@@ -143,7 +239,7 @@ export default function Secrets({ project }: { project: Workspace }) {
                   title={revealValues ? "Hide Values" : "Reveal Values"}
                   onAction={() => setRevealValues((reveal) => !reveal)}
                 />
-                <Action.CopyToClipboard title="Copy Secret" content={secret.secretValue} />
+                <Action.CopyToClipboard title="Copy Secret" content={secret.secretValue} concealed />
                 <Action.Push
                   icon={Icon.Pencil}
                   title="Edit Secret"
@@ -152,6 +248,7 @@ export default function Secrets({ project }: { project: Workspace }) {
                       projectId={project.id}
                       projectName={project.name}
                       environment={environment}
+                      secretPath={secretPath}
                       initialSecret={secret}
                     />
                   }
@@ -159,9 +256,23 @@ export default function Secrets({ project }: { project: Workspace }) {
                   shortcut={Keyboard.Shortcut.Common.Edit}
                 />
                 <Action
+                  icon={Icon.SaveDocument}
+                  // eslint-disable-next-line @raycast/prefer-title-case
+                  title="Save All as .env"
+                  onAction={() => saveAsEnv(secrets, project.name, environment)}
+                  shortcut={{ macOS: { modifiers: ["cmd"], key: "s" }, Windows: { modifiers: ["ctrl"], key: "s" } }}
+                />
+                <Action.CopyToClipboard
+                  // eslint-disable-next-line @raycast/prefer-title-case
+                  title="Copy All as .env"
+                  content={combineSecretsAsEnv(secrets)}
+                  concealed
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                />
+                <Action
                   icon={Icon.Trash}
                   title="Delete Secret"
-                  onAction={() => confirmAndDelete(secret, project.id, environment, mutate)}
+                  onAction={() => confirmAndDelete(secret, project.id, environment, secretPath, mutate)}
                   shortcut={Keyboard.Shortcut.Common.Remove}
                   style={Action.Style.Destructive}
                 />
@@ -169,7 +280,12 @@ export default function Secrets({ project }: { project: Workspace }) {
                   icon={Icon.Plus}
                   title="Add Secret"
                   target={
-                    <AddorEditSecret projectId={project.id} projectName={project.name} environment={environment} />
+                    <AddorEditSecret
+                      projectId={project.id}
+                      projectName={project.name}
+                      environment={environment}
+                      secretPath={secretPath}
+                    />
                   }
                   onPop={mutate}
                   shortcut={Keyboard.Shortcut.Common.New}
@@ -188,11 +304,13 @@ function AddorEditSecret({
   projectId,
   projectName,
   environment,
+  secretPath,
   initialSecret,
 }: {
   projectId: string;
   projectName: string;
   environment: string;
+  secretPath: string;
   initialSecret?: Secret;
 }) {
   interface FormValues {
@@ -215,12 +333,14 @@ function AddorEditSecret({
             secretValue,
             projectId,
             environment,
+            secretPath,
           });
         } else {
           await infisical.secrets().createSecret(secretName, {
             secretValue,
             projectId,
             environment,
+            secretPath,
           });
         }
         toast.style = Toast.Style.Success;

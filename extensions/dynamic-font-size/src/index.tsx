@@ -1,56 +1,67 @@
 import { Form, ActionPanel, Action, showToast, Toast, Clipboard } from "@raycast/api";
-import { useState, useMemo, useCallback } from "react";
-
-// Components
-import Input from "./components/Input";
+import { useForm } from "@raycast/utils";
 
 // Lib
-import generateClamp from "./lib/generateClamp";
-import { convertValue } from "./lib/utils";
+import { computeClamp } from "./lib/generateClamp";
+import { parseNumericInput, convertBetweenUnits } from "./lib/utils";
+
+type FormValues = {
+  unit: TUnit;
+  minViewportWidth: string;
+  maxViewportWidth: string;
+  minFontSize: string;
+  maxFontSize: string;
+};
+
+/** Inline per-field validation: every field must be a positive number. */
+function positiveNumber(value?: string): string | undefined {
+  const parsed = parseNumericInput(value ?? "");
+  if (parsed === null) return "Enter a valid number";
+  if (parsed <= 0) return "Must be greater than 0";
+}
 
 export default function Command() {
-  const [unitType, setUnitType] = useState<TUnit>("px");
-  const [minViewportWidth, setMinViewportWidth] = useState("500");
-  const [maxViewportWidth, setMaxViewportWidth] = useState("1200");
-  const [minFontSize, setMinFontSize] = useState("16");
-  const [maxFontSize, setMaxFontSize] = useState("48");
-  const [clampValue, setClampValue] = useState("");
-
-  const handleUnitChange = useCallback(
-    (value: string) => {
-      if (value) {
-        const typedValue = value as TUnit;
-
-        setUnitType(typedValue);
-        setMinViewportWidth(`${convertValue(minViewportWidth, typedValue)}`);
-        setMaxViewportWidth(`${convertValue(maxViewportWidth, typedValue)}`);
-        setMinFontSize(`${convertValue(minFontSize, typedValue)}`);
-        setMaxFontSize(`${convertValue(maxFontSize, typedValue)}`);
-      }
+  const { handleSubmit, itemProps, values, setValue } = useForm<FormValues>({
+    initialValues: {
+      unit: "px",
+      minViewportWidth: "500",
+      maxViewportWidth: "1200",
+      minFontSize: "16",
+      maxFontSize: "48",
     },
-    [minViewportWidth, maxViewportWidth, minFontSize, maxFontSize],
-  );
+    validation: {
+      minViewportWidth: positiveNumber,
+      maxViewportWidth: positiveNumber,
+      minFontSize: positiveNumber,
+      maxFontSize: positiveNumber,
+    },
+    async onSubmit(formValues) {
+      const result = computeClamp(formValues);
+      if (!result.ok) {
+        // Relational errors (e.g. max <= min) are not per-field, so they surface here.
+        await showToast({ style: Toast.Style.Failure, title: "Invalid values", message: result.error });
+        return;
+      }
+      await Clipboard.copy(result.value);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Generated",
+        message: "Copied font-size to clipboard",
+      });
+    },
+  });
 
-  useMemo(() => {
-    const clampFunc = generateClamp({
-      minViewportWidth,
-      maxViewportWidth,
-      minFontSize,
-      maxFontSize,
-      unit: unitType,
-    });
+  // Switching units converts the existing values so the design stays the same.
+  function handleUnitChange(next: string) {
+    const nextUnit = next as TUnit;
+    const prevUnit = values.unit;
+    if (nextUnit === prevUnit) return;
 
-    setClampValue(clampFunc);
-  }, [minViewportWidth, maxViewportWidth, minFontSize, maxFontSize, unitType]);
-
-  async function handleSubmit() {
-    await Clipboard.copy(clampValue);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Generated",
-      message: "Copied font-size to clipboard",
-    });
+    setValue("unit", nextUnit);
+    setValue("minViewportWidth", convertBetweenUnits(values.minViewportWidth, prevUnit, nextUnit));
+    setValue("maxViewportWidth", convertBetweenUnits(values.maxViewportWidth, prevUnit, nextUnit));
+    setValue("minFontSize", convertBetweenUnits(values.minFontSize, prevUnit, nextUnit));
+    setValue("maxFontSize", convertBetweenUnits(values.maxFontSize, prevUnit, nextUnit));
   }
 
   return (
@@ -62,38 +73,14 @@ export default function Command() {
       }
     >
       <Form.Description text="Create dynamic font sizes using the 'clamp' CSS function." />
-      <Form.Dropdown id="unit" title="Measurement Unit" value={unitType} onChange={handleUnitChange}>
+      <Form.Dropdown id="unit" title="Measurement Unit" value={values.unit} onChange={handleUnitChange}>
         <Form.Dropdown.Item value="px" title="Pixels" />
         <Form.Dropdown.Item value="rem" title="REM" />
       </Form.Dropdown>
-      <Input
-        id="minViewportWidth"
-        title="Minimum Viewport Width"
-        placeholder="Enter minimum"
-        value={minViewportWidth}
-        onChange={setMinViewportWidth}
-      />
-      <Input
-        id="maxViewportWidth"
-        title="Maximum Viewport Width"
-        placeholder="Enter maximum"
-        value={maxViewportWidth}
-        onChange={setMaxViewportWidth}
-      />
-      <Input
-        id="minFontSize"
-        title="Minimum Font Size"
-        placeholder="Enter minimum"
-        value={minFontSize}
-        onChange={setMinFontSize}
-      />
-      <Input
-        id="maxFontSize"
-        title="Maximum Font Size"
-        placeholder="Enter maximum"
-        value={maxFontSize}
-        onChange={setMaxFontSize}
-      />
+      <Form.TextField title="Minimum Viewport Width" placeholder="Enter minimum" {...itemProps.minViewportWidth} />
+      <Form.TextField title="Maximum Viewport Width" placeholder="Enter maximum" {...itemProps.maxViewportWidth} />
+      <Form.TextField title="Minimum Font Size" placeholder="Enter minimum" {...itemProps.minFontSize} />
+      <Form.TextField title="Maximum Font Size" placeholder="Enter maximum" {...itemProps.maxFontSize} />
     </Form>
   );
 }

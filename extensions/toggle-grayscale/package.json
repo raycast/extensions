@@ -5,6 +5,9 @@
   "description": "Instantly toggle your Mac's Color Filters accessibility feature on/off without opening System Settings. Switch between color modes with a single command.",
   "icon": "color-filters.png",
   "author": "zcsabbagh",
+  "contributors": [
+    "artivilla"
+  ],
   "categories": [
     "System"
   ],

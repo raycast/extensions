@@ -4,6 +4,7 @@
 export type Application = {
   id: string;
   name: string;
+  image: string;
 };
 
 export type AllApplicationResponse = {
@@ -19,7 +20,7 @@ export type Category = {
   id: string;
   code: string;
   name: string;
-  categoryId: string;
+  image: string;
 };
 
 export type AllCategoryResponse = {
@@ -32,19 +33,18 @@ export type AllCategoryResponse = {
  * Preset
  */
 export type Preset = {
-  id: string;
-  title: string;
+  presetId: string;
+  applicationId: string;
+  mallSysUserId: string;
+  appIcon: string;
+  appName: string;
+  appCardBgColor: string;
+  presetTitle: string;
+  systemList: string[];
   author: string;
-  sysName: string;
-  applicationName: string;
-  softVersion: string | null;
-  info: string;
-  filePath: string;
-  filePathOss: string;
-  downloadNum: number;
-  languageName: string;
-  nameArr: string[];
-  createTime: number;
+  authorImage: string;
+  download: number;
+  upvote: number;
 };
 
 export type AllPresetResponse = {
@@ -72,4 +72,56 @@ export type searchSoftwareResponse = {
   code: number;
   msg: string | null;
   result: Software[];
+};
+
+/**
+ * Preset Detail
+ */
+export type PresetDetail = {
+  presetId: string;
+  presetTitle: string;
+  appInfo: {
+    id: string;
+    name: string;
+    image: string;
+  };
+  langInfoList: Array<{ id: string; name: string }>;
+  categoryInfoList: Array<{ id: string; name: string }>;
+  deviceInfoList: Array<{ id: string; code: string; iconPath: string | null }>;
+  systemInfoList: Array<{ id: string; code: string; iconPath: string | null }>;
+  tagList: Array<{ id: string; code: string }>;
+  content: string;
+  imageList: string;
+  fileOss: string;
+  fileS3: string;
+  author: string;
+  authorImage: string;
+  autghorIntroduction: string | null;
+  download: number;
+  upvote: number;
+  publish: boolean;
+  descType: number;
+  batchId: string | null;
+  status: number;
+};
+
+export type PresetDetailResponse = {
+  code: number;
+  msg: string | null;
+  result: PresetDetail;
+};
+
+/**
+ * All System
+ */
+export type System = {
+  id: string;
+  code: string;
+  iconPath: string | null;
+};
+
+export type AllSystemResponse = {
+  code: number;
+  msg: string | null;
+  result: System[];
 };

@@ -1,8 +1,19 @@
-import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, showHUD } from "@raycast/api";
+import { useState, useEffect } from "react";
 import type { Meeting } from "../types/Types";
 import { exportMeeting } from "../utils/export";
 import { MeetingSummaryDetail, MeetingTranscriptDetail } from "../search-meetings";
 import { MeetingActionItemsDetail } from "../view-action-items";
+import { RefreshCacheAction } from "./RefreshCacheAction";
+import { cacheManager } from "../utils/cacheManager";
+
+function useFetchingBackground() {
+  const [isFetching, setIsFetching] = useState(() => cacheManager.isFetchingBackground());
+  useEffect(() => {
+    return cacheManager.subscribeFetching(setIsFetching);
+  }, []);
+  return isFetching;
+}
 
 // Shared Copy Actions Section
 export function MeetingCopyActions(props: {
@@ -19,7 +30,7 @@ export function MeetingCopyActions(props: {
           title={additionalContent.title}
           content={additionalContent.content}
           icon={Icon.Clipboard}
-          shortcut={additionalContent.shortcut || { modifiers: ["cmd"], key: "c" }}
+          shortcut={additionalContent.shortcut || Keyboard.Shortcut.Common.Copy}
         />
       )}
       {shareUrl && (
@@ -27,7 +38,8 @@ export function MeetingCopyActions(props: {
           title="Copy Share Link"
           content={shareUrl}
           icon={Icon.Link}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
+          onCopy={() => showHUD("Share Link Copied")}
         />
       )}
       {meeting.calendarInvitees && meeting.calendarInvitees.length > 0 && (
@@ -50,14 +62,10 @@ export function MeetingOpenActions(props: { meeting: Meeting }) {
   return (
     <ActionPanel.Section title="Open">
       {meeting.url && (
-        <Action.OpenInBrowser url={meeting.url} title="Open in Fathom" shortcut={{ modifiers: ["cmd"], key: "o" }} />
+        <Action.OpenInBrowser url={meeting.url} title="Open in Fathom" shortcut={Keyboard.Shortcut.Common.Open} />
       )}
       {shareUrl && shareUrl !== meeting.url && (
-        <Action.OpenInBrowser
-          url={shareUrl}
-          title="Open Share Link"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-        />
+        <Action.OpenInBrowser url={shareUrl} title="Open Share Link" shortcut={Keyboard.Shortcut.Common.OpenWith} />
       )}
     </ActionPanel.Section>
   );
@@ -141,9 +149,10 @@ export function MeetingDetailActions(props: {
 }
 
 // Main Meeting Actions (for list view)
-export function MeetingActions(props: { meeting: Meeting }) {
-  const { meeting } = props;
+export function MeetingActions(props: { meeting: Meeting; onRefresh?: () => Promise<void> }) {
+  const { meeting, onRefresh } = props;
   const recordingId = meeting.recordingId ?? meeting.id;
+  const isFetchingBackground = useFetchingBackground();
 
   return (
     <ActionPanel>
@@ -169,6 +178,16 @@ export function MeetingActions(props: { meeting: Meeting }) {
       <MeetingCopyActions meeting={meeting} />
       <MeetingOpenActions meeting={meeting} />
       <MeetingExportActions meeting={meeting} recordingId={recordingId} />
+
+      {onRefresh && (
+        <ActionPanel.Section>
+          <RefreshCacheAction
+            onRefresh={onRefresh}
+            onStop={() => cacheManager.stopBackgroundFetch()}
+            isFetchingBackground={isFetchingBackground}
+          />
+        </ActionPanel.Section>
+      )}
     </ActionPanel>
   );
 }

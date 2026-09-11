@@ -1,4 +1,5 @@
 import { type PreferenceValues } from "@raycast/api";
+import imagePreferencesConfig from "../config/image-preferences.json";
 
 type Range<
   START extends number,
@@ -18,11 +19,6 @@ export type Percentage = Range<0, 100>;
 
 // Quality level presets (user-friendly)
 export type QualityLevel = "lowest" | "low" | "medium" | "high" | "highest";
-
-// Simple quality settings type for basic mode
-export type SimpleQualitySettings = {
-  [K in AllOutputExtension]: QualityLevel;
-};
 
 // Basic format extensions
 export const INPUT_VIDEO_EXTENSIONS = [
@@ -114,6 +110,7 @@ export const INPUT_AUDIO_EXTENSIONS = [
 export const OUTPUT_VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv", ".mpg", ".webm"] as const;
 export const OUTPUT_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".flac", ".m4a"] as const;
 export const OUTPUT_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic", ".tiff", ".avif"] as const;
+export const OUTPUT_GIF_EXTENSIONS = [".gif"] as const;
 
 export const INPUT_ALL_EXTENSIONS = [
   ...INPUT_VIDEO_EXTENSIONS,
@@ -125,6 +122,7 @@ export const OUTPUT_ALL_EXTENSIONS = [
   ...OUTPUT_VIDEO_EXTENSIONS,
   ...OUTPUT_AUDIO_EXTENSIONS,
   ...OUTPUT_IMAGE_EXTENSIONS,
+  ...OUTPUT_GIF_EXTENSIONS,
 ] as const;
 
 // =============================================================================
@@ -140,11 +138,13 @@ export type InputAudioExtension = (typeof INPUT_AUDIO_EXTENSIONS)[number];
 export type OutputVideoExtension = (typeof OUTPUT_VIDEO_EXTENSIONS)[number];
 export type OutputImageExtension = (typeof OUTPUT_IMAGE_EXTENSIONS)[number];
 export type OutputAudioExtension = (typeof OUTPUT_AUDIO_EXTENSIONS)[number];
+export type OutputGifExtension = (typeof OUTPUT_GIF_EXTENSIONS)[number];
 
-export type AllOutputExtension = (typeof OUTPUT_ALL_EXTENSIONS)[number];
-
-// =============================================================================
-// Image Quality Settings
+export type AllOutputExtension =
+  | OutputVideoExtension
+  | OutputAudioExtension
+  | OutputImageExtension
+  | OutputGifExtension;
 // =============================================================================
 
 export type ImageQuality = {
@@ -191,7 +191,51 @@ export type AudioQuality = {
 
 export const VIDEO_ENCODING_MODES = ["crf", "vbr", "vbr-2-pass"] as const;
 export type VideoEncodingMode = (typeof VIDEO_ENCODING_MODES)[number];
-export type VideoCrf = Percentage; // 0-100 for user-friendly quality (converted to FFmpeg CRF 0-51 internally)
+
+// Runtime object for video quality settings (for minimal redundancy)
+const VIDEO_QUALITY_OBJECT = {
+  ".mp4": [
+    { encodingMode: "crf", crf: 75, preset: "medium" },
+    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
+    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "", preset: "medium" },
+  ],
+  ".avi": [
+    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
+    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "" },
+  ],
+  ".mov": [{ variant: "standard" }],
+  ".mkv": [
+    { encodingMode: "crf", crf: 75, preset: "medium" },
+    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", preset: "medium" },
+    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "", preset: "medium" },
+  ],
+  ".mpg": [
+    { encodingMode: "crf", crf: 75 },
+    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
+    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "" },
+  ],
+  ".webm": [
+    { encodingMode: "crf", crf: 60, quality: "good" },
+    { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", quality: "good" },
+    { encodingMode: "vbr-2-pass", bitrate: "2000", maxBitrate: "", quality: "good" },
+  ],
+} as const;
+
+// Derive VideoQuality type from VIDEO_QUALITY_OBJECT
+export type VideoQuality = {
+  [K in keyof typeof VIDEO_QUALITY_OBJECT]: (typeof VIDEO_QUALITY_OBJECT)[K][number];
+};
+
+// Generate allowed encoding modes from VIDEO_QUALITY_OBJECT
+export const ALLOWED_VIDEO_ENCODING_MODES: Record<OutputVideoExtension, VideoEncodingMode[]> = Object.fromEntries(
+  Object.entries(VIDEO_QUALITY_OBJECT).map(([ext, arr]) => [
+    ext,
+    arr
+      .map((q) => (typeof q === "object" && "encodingMode" in q ? q.encodingMode : null))
+      .filter((m): m is VideoEncodingMode => m !== null),
+  ]),
+) as Record<OutputVideoExtension, VideoEncodingMode[]>;
+
 export const VIDEO_BITRATE = [
   "50000",
   "40000",
@@ -241,31 +285,145 @@ export type VideoControlType =
   | "quality"
   | "variant";
 
-export type VideoQuality = {
-  ".mp4":
-    | { encodingMode: "crf"; crf: VideoCrf; preset: VideoPreset }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate; preset: VideoPreset };
-  ".avi":
-    | { encodingMode: "crf"; crf: VideoCrf }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate };
-  ".mov": { variant: ProResVariant };
-  ".mkv":
-    | { encodingMode: "crf"; crf: VideoCrf; preset: VideoPreset }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate; preset: VideoPreset };
-  ".mpg":
-    | { encodingMode: "crf"; crf: VideoCrf }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate };
-  ".webm":
-    | { encodingMode: "crf"; crf: VideoCrf; quality: VP9Quality }
-    | { encodingMode: "vbr" | "vbr-2-pass"; bitrate: VideoBitrate; maxBitrate: VideoMaxBitrate; quality: VP9Quality };
+// =============================================================================
+// GIF Quality Settings
+// =============================================================================
+
+export const GIF_FPS = ["10", "15", "24", "30"] as const;
+export type GifFps = (typeof GIF_FPS)[number];
+export const GIF_WIDTH = ["original", "480", "720", "1080"] as const;
+export type GifWidth = (typeof GIF_WIDTH)[number];
+
+export type GifQuality = {
+  ".gif": { fps: GifFps; width: GifWidth; loop: boolean };
 };
 
 // =============================================================================
 // Universal Quality Type
 // =============================================================================
 
-export type QualitySettings = ImageQuality | AudioQuality | VideoQuality;
+export type QualitySettings = ImageQuality | AudioQuality | VideoQuality | GifQuality;
 export type AllControlType = VideoControlType | AudioControlType | "qualityLevel";
+
+// =============================================================================
+// Trim Options
+// =============================================================================
+
+export type TrimOptions = {
+  /** Start time string in HH:MM:SS[.mmm] or bare seconds. Empty/undefined = no trim at start. */
+  start?: string;
+  /** End time string in HH:MM:SS[.mmm] or bare seconds. Empty/undefined = no trim at end. */
+  end?: string;
+};
+
+// =============================================================================
+// Preset Type (built-in + user-defined)
+// =============================================================================
+
+export type Preset = {
+  id: string;
+  name: string;
+  builtIn?: boolean;
+  mediaType: MediaType | "gif";
+  outputFormat: AllOutputExtension;
+  quality: QualitySettings;
+  trim?: TrimOptions;
+  stripMetadata?: boolean;
+  outputDir?: string;
+  description?: string;
+};
+
+// ---------------- Video builder factory ----------------
+
+export function buildVideoQuality<K extends OutputVideoExtension>(
+  format: K,
+  overrides?: Partial<{
+    encodingMode: VideoEncodingMode;
+    crf: number;
+    bitrate: VideoBitrate;
+    maxBitrate: VideoMaxBitrate;
+    preset: VideoPreset;
+    quality: VP9Quality;
+    variant: ProResVariant;
+  }>,
+  base?: VideoQuality[K],
+): VideoQuality[K] {
+  const options = (VIDEO_QUALITY_OBJECT as Record<string, readonly unknown[]>)[format] ?? [];
+
+  // MOV (ProRes-style): only variant
+  if (format === ".mov") {
+    const fallbackVariant =
+      base && typeof base === "object" && "variant" in (base as Record<string, unknown>)
+        ? (base as Record<string, unknown>).variant
+        : ((options[0] as Record<string, unknown>)?.variant ?? PRORES_VARIANTS[0]);
+    const selected = (overrides && overrides.variant) || (fallbackVariant as ProResVariant);
+    return { variant: selected } as VideoQuality[K];
+  }
+
+  // Determine allowed modes and a sane default
+  const allowedModes: readonly VideoEncodingMode[] =
+    (ALLOWED_VIDEO_ENCODING_MODES as Record<string, readonly VideoEncodingMode[]>)[format] ??
+    (VIDEO_ENCODING_MODES as readonly VideoEncodingMode[]);
+  const baseMode =
+    base && typeof base === "object" && "encodingMode" in (base as Record<string, unknown>)
+      ? ((base as Record<string, unknown>).encodingMode as VideoEncodingMode | undefined)
+      : undefined;
+  const defaultMode = baseMode && allowedModes.includes(baseMode) ? baseMode : (allowedModes[0] ?? "crf");
+  const mode =
+    overrides && overrides.encodingMode && allowedModes.includes(overrides.encodingMode)
+      ? overrides.encodingMode
+      : (defaultMode as VideoEncodingMode);
+
+  // Find the prototype/default entry for that mode in VIDEO_QUALITY_OBJECT
+  const proto =
+    (options as readonly Record<string, unknown>[]).find((o) => (o as Record<string, unknown>).encodingMode === mode) ??
+    (options[0] as Record<string, unknown>) ??
+    {};
+
+  if (mode === "crf") {
+    const crf =
+      overrides && typeof overrides.crf === "number"
+        ? overrides.crf
+        : (((proto as Record<string, unknown>).crf as number | undefined) ??
+          (base && ((base as Record<string, unknown>).crf as number | undefined)));
+    const preset =
+      overrides && overrides.preset
+        ? overrides.preset
+        : (((proto as Record<string, unknown>).preset as VideoPreset | undefined) ??
+          (base && ((base as Record<string, unknown>).preset as VideoPreset | undefined)));
+    return { encodingMode: "crf", crf: crf as number, ...(preset ? { preset } : {}) } as VideoQuality[K];
+  }
+
+  // vbr / vbr-2-pass
+  const bitrate =
+    overrides && overrides.bitrate
+      ? overrides.bitrate
+      : (((proto as Record<string, unknown>).bitrate as VideoBitrate | undefined) ??
+        (base && ((base as Record<string, unknown>).bitrate as VideoBitrate | undefined)));
+  const maxBitrate =
+    overrides && overrides.maxBitrate
+      ? overrides.maxBitrate
+      : (((proto as Record<string, unknown>).maxBitrate as VideoMaxBitrate | undefined) ??
+        (base && ((base as Record<string, unknown>).maxBitrate as VideoMaxBitrate | undefined)));
+  const preset =
+    overrides && overrides.preset
+      ? overrides.preset
+      : (((proto as Record<string, unknown>).preset as VideoPreset | undefined) ??
+        (base && ((base as Record<string, unknown>).preset as VideoPreset | undefined)));
+  const quality =
+    overrides && overrides.quality
+      ? overrides.quality
+      : (((proto as Record<string, unknown>).quality as VP9Quality | undefined) ??
+        (base && ((base as Record<string, unknown>).quality as VP9Quality | undefined)));
+
+  const result: Record<string, unknown> = { encodingMode: mode };
+  if (bitrate) result.bitrate = bitrate;
+  if (maxBitrate !== undefined) result.maxBitrate = maxBitrate;
+  if (preset) result.preset = preset;
+  if (quality) result.quality = quality;
+
+  return result as VideoQuality[K];
+}
 
 // =============================================================================
 // Simple Quality Level Mappings
@@ -318,11 +476,11 @@ export const SIMPLE_QUALITY_MAPPINGS = {
     highest: { encodingMode: "crf", crf: 95, preset: "slower" },
   },
   ".avi": {
-    lowest: { encodingMode: "crf", crf: 30 },
-    low: { encodingMode: "crf", crf: 50 },
-    medium: { encodingMode: "crf", crf: 75 },
-    high: { encodingMode: "crf", crf: 85 },
-    highest: { encodingMode: "crf", crf: 95 },
+    lowest: { encodingMode: "vbr", bitrate: "1000", maxBitrate: "" },
+    low: { encodingMode: "vbr", bitrate: "1500", maxBitrate: "" },
+    medium: { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
+    high: { encodingMode: "vbr", bitrate: "3000", maxBitrate: "" },
+    highest: { encodingMode: "vbr", bitrate: "5000", maxBitrate: "" },
   },
   ".mov": {
     lowest: { variant: "proxy" },
@@ -382,11 +540,14 @@ export const DEFAULT_QUALITIES = {
 
   // Video defaults (CRF mode)
   ".mp4": { encodingMode: "crf", crf: 75, preset: "medium" },
-  ".avi": { encodingMode: "crf", crf: 75 },
+  ".avi": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
   ".mov": { variant: "standard" },
   ".mkv": { encodingMode: "crf", crf: 75, preset: "medium" },
   ".mpg": { encodingMode: "crf", crf: 75 },
   ".webm": { encodingMode: "crf", crf: 60, quality: "good" },
+
+  // GIF default
+  ".gif": { fps: "15", width: "original", loop: true },
 } as const;
 
 // Video VBR defaults (for when switching to VBR modes)
@@ -397,6 +558,70 @@ export const DEFAULT_VBR_QUALITIES = {
   ".mpg": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "" },
   ".webm": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", quality: "good" },
 } as const;
+
+const imagePreferenceDomains = imagePreferencesConfig.valueDomains as Record<string, string[]>;
+const percentageStep5Domain = new Set(imagePreferenceDomains.percentageStep5 ?? []);
+const webpQualityDomain = new Set(imagePreferenceDomains.webpQuality ?? []);
+const pngVariantDomain = new Set(imagePreferenceDomains.pngVariant ?? []);
+const tiffCompressionDomain = new Set(imagePreferenceDomains.tiffCompression ?? []);
+
+function parsePercentagePreference(value: unknown, fallback: Percentage): Percentage {
+  const normalized = typeof value === "string" ? value : "";
+  if (percentageStep5Domain.has(normalized)) {
+    return Number(normalized) as Percentage;
+  }
+  return fallback;
+}
+
+function toImageQualitySettings<K extends OutputImageExtension>(format: K, value: ImageQuality[K]): QualitySettings {
+  return {
+    [format]: value,
+  } as unknown as QualitySettings;
+}
+
+export function getDefaultImageQuality(format: OutputImageExtension, preferences: PreferenceValues): QualitySettings {
+  switch (format) {
+    case ".jpg": {
+      const fallback = DEFAULT_QUALITIES[".jpg"] as Percentage;
+      return toImageQualitySettings(".jpg", parsePercentagePreference(preferences.defaultJpgQuality, fallback));
+    }
+    case ".webp": {
+      const configured = typeof preferences.defaultWebpQuality === "string" ? preferences.defaultWebpQuality : "";
+      if (configured === "lossless" && webpQualityDomain.has(configured)) {
+        return toImageQualitySettings(".webp", "lossless");
+      }
+      const fallback = DEFAULT_QUALITIES[".webp"] as Percentage;
+      const value =
+        configured !== "lossless" && webpQualityDomain.has(configured) ? (Number(configured) as Percentage) : fallback;
+      return toImageQualitySettings(".webp", value);
+    }
+    case ".png": {
+      const configured = typeof preferences.defaultPngVariant === "string" ? preferences.defaultPngVariant : "";
+      const fallback = DEFAULT_QUALITIES[".png"] as ImageQuality[".png"];
+      const value = pngVariantDomain.has(configured) ? (configured as ImageQuality[".png"]) : fallback;
+      return toImageQualitySettings(".png", value);
+    }
+    case ".heic": {
+      const fallback = DEFAULT_QUALITIES[".heic"] as Percentage;
+      return toImageQualitySettings(".heic", parsePercentagePreference(preferences.defaultHeicQuality, fallback));
+    }
+    case ".tiff": {
+      const configured =
+        typeof preferences.defaultTiffCompression === "string" ? preferences.defaultTiffCompression : "";
+      const fallback = DEFAULT_QUALITIES[".tiff"] as ImageQuality[".tiff"];
+      const value = tiffCompressionDomain.has(configured) ? (configured as ImageQuality[".tiff"]) : fallback;
+      return toImageQualitySettings(".tiff", value);
+    }
+    case ".avif": {
+      const fallback = DEFAULT_QUALITIES[".avif"] as Percentage;
+      return toImageQualitySettings(".avif", parsePercentagePreference(preferences.defaultAvifQuality, fallback));
+    }
+    default: {
+      const exhaustiveCheck: never = format;
+      throw new Error(`Unsupported image format for defaults: ${String(exhaustiveCheck)}`);
+    }
+  }
+}
 
 // =============================================================================
 // Helper Functions
@@ -410,21 +635,52 @@ export function getMediaType(extension: string): MediaType | null {
   return null;
 }
 
+/**
+ * Return the "category" of an output extension, including GIF as its own bucket.
+ * Used by the converter form to choose the right UI controls.
+ */
+export type OutputCategory = "image" | "audio" | "video" | "gif";
+
+export function getOutputCategory(extension: AllOutputExtension): OutputCategory {
+  if (OUTPUT_GIF_EXTENSIONS.includes(extension as OutputGifExtension)) return "gif";
+  if (OUTPUT_IMAGE_EXTENSIONS.includes(extension as OutputImageExtension)) return "image";
+  if (OUTPUT_AUDIO_EXTENSIONS.includes(extension as OutputAudioExtension)) return "audio";
+  return "video";
+}
+
 type SimpleQualityMappingExtension = keyof typeof SIMPLE_QUALITY_MAPPINGS;
+
+function isOutputImageExtension(format: AllOutputExtension): format is OutputImageExtension {
+  return OUTPUT_IMAGE_EXTENSIONS.includes(format as OutputImageExtension);
+}
 
 export function getDefaultQuality(
   format: AllOutputExtension,
   preferences: PreferenceValues,
   qualityLevel?: QualityLevel,
 ): QualitySettings {
-  // For images or when advanced settings are enabled, use DEFAULT_QUALITIES
+  // Images use preset mapping; when advanced settings are enabled, use DEFAULT_QUALITIES.
   if (!preferences) {
     throw new Error(`fn getDefaultQuality: Provide preferences`);
   }
 
-  if (getMediaType(format) === "image" || preferences.moreConversionSettings) {
+  if (isOutputImageExtension(format)) {
+    return getDefaultImageQuality(format, preferences);
+  }
+
+  if (format === ".gif") {
+    const fpsPref = typeof preferences.defaultGifFps === "string" ? preferences.defaultGifFps : "";
+    const widthPref = typeof preferences.defaultGifWidth === "string" ? preferences.defaultGifWidth : "";
+    const fps = (GIF_FPS as readonly string[]).includes(fpsPref) ? (fpsPref as GifFps) : DEFAULT_QUALITIES[".gif"].fps;
+    const width = (GIF_WIDTH as readonly string[]).includes(widthPref)
+      ? (widthPref as GifWidth)
+      : DEFAULT_QUALITIES[".gif"].width;
+    return { ".gif": { fps, width, loop: true } } as QualitySettings;
+  }
+
+  if (preferences.moreConversionSettings) {
     return {
-      [format]: DEFAULT_QUALITIES[format],
+      [format]: DEFAULT_QUALITIES[format as Exclude<AllOutputExtension, ".gif">],
     } as QualitySettings;
   }
 

@@ -1,5 +1,10 @@
 # Bible Search Changelog
 
+## [Remember last used version] - 2025-11-04
+
+- Remember the Bible version between searches (and remove the default version setting)
+- Update dependencies
+
 ## [New option, bug fix] - 2025-10-14
 
 - Add option to show passages as separate list items

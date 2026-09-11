@@ -18,7 +18,7 @@ export default function Command() {
 
   async function loadFavorites() {
     try {
-      const [favorites, allStations] = await Promise.all([getFavorites(), fetchStations()]);
+      const [favorites, allStations] = await Promise.all([getFavorites(), fetchStations({ showErrorToast: false })]);
       const favoriteStationsList = allStations.filter((station) => favorites.includes(station.id));
       setFavoriteStations(favoriteStationsList);
     } catch (error) {
@@ -82,7 +82,7 @@ export default function Command() {
               icon={Icon.List}
               onAction={async () => {
                 await launchCommand({
-                  name: "index",
+                  name: "browse-stations",
                   type: LaunchType.UserInitiated,
                 });
               }}

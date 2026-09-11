@@ -5,18 +5,17 @@ import {
   Color,
   Icon,
   List,
+  PopToRootType,
   Toast,
-  closeMainWindow,
   confirmAlert,
-  popToRoot,
   showHUD,
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 
 import * as api from "./api";
 import EditAlias from "./edit-alias";
+import { formatAPIError } from "./error-handler";
 import useAliases from "./useAliases";
 
 const MyAliases = () => {
@@ -52,21 +51,32 @@ const MyAliases = () => {
                   title="Copy to Clipboard"
                   onAction={async () => {
                     await Clipboard.copy(alias.email);
-                    await showHUD("Alias copied");
-                    await popToRoot();
+
+                    await showHUD("Alias copied", { popToRootType: PopToRootType.Immediate });
                   }}
                 />
                 <Action
                   icon={alias.active ? Icon.XMarkCircle : Icon.CheckCircle}
                   title={alias.active ? "Deactivate" : "Activate"}
                   onAction={async () => {
+                    const toast = await showToast({
+                      style: Toast.Style.Animated,
+                      title: `${alias.active ? "Deactivating" : "Activing"} alias...`,
+                    });
+
                     try {
                       await api.alias.toggle(alias.id, !alias.active);
 
-                      await showHUD(`✅ Alias ${alias.active ? "deactivated" : "activated"}`);
-                      await closeMainWindow();
+                      toast.style = Toast.Style.Success;
+                      toast.title = `Alias ${alias.active ? "deactivated" : "activated"}`;
+
+                      revalidate();
                     } catch (error) {
-                      await showFailureToast(error, { title: "Error toggling alias" });
+                      const formattedError = formatAPIError(error, "Error toggling alias");
+
+                      toast.style = Toast.Style.Failure;
+                      toast.title = formattedError.title;
+                      toast.message = formattedError.message;
                     }
                   }}
                 />
@@ -102,9 +112,11 @@ const MyAliases = () => {
 
                         revalidate();
                       } catch (error) {
+                        const formattedError = formatAPIError(error, "Error deleting alias");
+
                         toast.style = Toast.Style.Failure;
-                        toast.title = "Error deleting alias";
-                        toast.message = (error as Error).message;
+                        toast.title = formattedError.title;
+                        toast.message = formattedError.message;
                       }
                     }
                   }}

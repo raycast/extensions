@@ -1,7 +1,8 @@
 import { Alert, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useSQL } from "@raycast/utils";
-import { DEFAULT_WORKSPACE_DB_VERSION, getZedWorkspacesQuery, queryDb } from "../lib/db";
+import { getZedWorkspacesQuery, queryDb } from "../lib/db";
 import { ZedWorkspace, Workspace, parseZedWorkspace } from "../lib/workspaces";
+import { getOpenWindowIds } from "../lib/utils";
 
 export type Workspaces = Record<string, Workspace>;
 
@@ -11,13 +12,12 @@ interface RecentWorkspaces {
   error?: Error;
   removeEntry: (id: number) => Promise<void>;
   removeAllEntries: () => Promise<void>;
+  revalidate: () => void;
 }
 
-export function useRecentWorkspaces(
-  dbPath: string,
-  dbVersion: number = DEFAULT_WORKSPACE_DB_VERSION,
-): RecentWorkspaces {
-  const { data, isLoading, error, mutate } = useSQL<ZedWorkspace>(dbPath, getZedWorkspacesQuery(dbVersion));
+export function useRecentWorkspaces(dbPath: string, dbVersion: number): RecentWorkspaces {
+  const { sessionId, windowIds } = getOpenWindowIds(dbPath);
+  const { data, isLoading, error, mutate, revalidate } = useSQL<ZedWorkspace>(dbPath, getZedWorkspacesQuery(dbVersion));
 
   async function removeEntry(id: number) {
     try {
@@ -63,18 +63,19 @@ export function useRecentWorkspaces(
             return acc;
           }
 
-          const existing = acc[workspace.uri];
-          if (existing && existing.lastOpened > workspace.lastOpened) {
-            return acc;
-          }
+          const isOpen =
+            zedWorkspace.session_id === sessionId &&
+            zedWorkspace.window_id !== null &&
+            windowIds.has(zedWorkspace.window_id);
 
-          return { ...acc, [workspace.uri]: workspace };
+          return { ...acc, [String(workspace.id)]: { ...workspace, isOpen } };
         }, {})
       : {},
     isLoading,
     error,
     removeAllEntries,
     removeEntry,
+    revalidate,
   };
 }
 

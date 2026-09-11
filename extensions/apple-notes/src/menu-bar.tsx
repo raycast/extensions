@@ -8,7 +8,7 @@ export default function Command() {
   const { data, isLoading } = useNotes();
 
   const { maxResults, openSeparately } = getPreferenceValues<Preferences.MenuBar>();
-  const max = parseInt(maxResults, 10) ?? 25;
+  const max = parseInt(maxResults, 10) || 25;
   const maxUnpinnedNotes = max - data.pinnedNotes.length;
 
   return (
@@ -34,7 +34,7 @@ export default function Command() {
           title="New Note"
           icon={Icon.Plus}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
-          onAction={() => createNote()}
+          onAction={async () => await createNote()}
         />
 
         <MenuBarExtra.Item
@@ -60,8 +60,8 @@ function NoteMenuBarItem({ note, openSeparately }: NoteMenuBarItemProps) {
     <MenuBarExtra.Item
       key={note.id}
       title={title}
-      icon="note"
-      onAction={() => (openSeparately ? openNoteSeparately(note.id) : open(getOpenNoteURL(note.UUID)))}
+      icon="notes-icon.png"
+      onAction={async () => await (openSeparately ? openNoteSeparately(note.id) : open(getOpenNoteURL(note.UUID)))}
     />
   );
 }

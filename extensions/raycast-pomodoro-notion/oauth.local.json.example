@@ -1,0 +1,5 @@
+{
+  "clientId": "paste-notion-oauth-client-id-here",
+  "authorizeUrl": "paste-raycast-pkce-proxy-authorize-url-here",
+  "tokenUrl": "paste-raycast-pkce-proxy-token-url-here"
+}

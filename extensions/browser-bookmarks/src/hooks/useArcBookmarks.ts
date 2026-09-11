@@ -36,7 +36,6 @@ type BookmarkFolder = Item & {
 type BookmarkItem = BookmarkURL | BookmarkFolder;
 
 type Space = {
-  // eslint-disable-next-line @typescript-eslint/ban-types
   containerIDs: ("pinned" | "unpinned" | (string & {}))[];
   id: string;
   title: string;
@@ -169,8 +168,20 @@ async function getArcProfiles() {
     return { profiles: [], defaultProfile: "" };
   }
 
-  const file = await read(path, "utf-8");
-  const localState = JSON.parse(file);
+  let file: string;
+  try {
+    file = await read(path, "utf-8");
+  } catch {
+    // Handle permission errors (EPERM) or other file access errors
+    return { profiles: [], defaultProfile: "" };
+  }
+
+  let localState;
+  try {
+    localState = JSON.parse(file);
+  } catch {
+    return { profiles: [], defaultProfile: "" };
+  }
 
   const profileInfoCache: Record<string, { name: string }> = localState.profile.info_cache;
   const profiles = Object.entries(profileInfoCache).map(([path, profile]) => ({

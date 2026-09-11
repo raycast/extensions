@@ -14,7 +14,8 @@
     "sergiivelykodnyi",
     "j3lte",
     "peterbrinck",
-    "r22"
+    "r22",
+    "0xdhrv"
   ],
   "pastContributors": [
     "igor9silva",
@@ -220,21 +221,20 @@
     "News"
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.14.0",
-    "dedent": "^1.5.3",
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "dedent": "^1.7.2",
     "node-fetch": "^3.3.2",
     "wikijs": "^6.4.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/debug": "^4.1.12",
-    "@types/node": "20.11.17",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.56.0",
-    "eslint-plugin-import": "^2.29.1",
-    "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/debug": "^4.1.13",
+    "@types/node": "26.2.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

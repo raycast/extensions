@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { URLSearchParams } from "node:url";
@@ -25,7 +25,9 @@ const Command = () => {
       throttle
     >
       <List.Section title="Results" subtitle={data?.length + ""}>
-        {data?.map((searchResult) => <SearchListItem key={searchResult.id} searchResult={searchResult} />)}
+        {data?.map((searchResult) => (
+          <SearchListItem key={searchResult.id} searchResult={searchResult} />
+        ))}
       </List.Section>
     </List>
   );
@@ -42,9 +44,11 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in App Store" url={searchResult.url} />
+            <Action.CopyToClipboard title="Copy ID to Clipboard" content={searchResult.id} />
             <Action.CopyToClipboard
               title="Copy URL to Clipboard"
               content={searchResult.url}
+              // eslint-disable-next-line @raycast/prefer-common-shortcut
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             {searchResult.artist ? (
@@ -52,7 +56,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
                 title="Open Author Page in App Store"
                 url={searchResult.artist}
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={Keyboard.Shortcut.Common.Open}
               />
             ) : null}
           </ActionPanel.Section>

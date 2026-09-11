@@ -11,10 +11,6 @@ export default function MonthlyHoroscope(props: LaunchProps<{ arguments: Argumen
   const params = new URLSearchParams({ sign });
   const { data, isLoading } = useFetch<MonthlyHoroscope>(API_URL + `monthly?${params}`);
 
-  const markdown =
-    generateSignMarkdown(sign) +
-    (!data
-      ? ""
-      : `## ${data.data.month} \n\n Challenging Days: ${data.data.challenging_days} \n\n Standout Days: ${data.data.standout_days} \n\n ${data.data.horoscope_data}`);
+  const markdown = generateSignMarkdown(sign) + (!data ? "" : `## ${data.data.date} \n\n ${data.data.horoscope}`);
   return <Detail isLoading={isLoading} markdown={markdown} actions={<HoroscopeActions data={data} />} />;
 }

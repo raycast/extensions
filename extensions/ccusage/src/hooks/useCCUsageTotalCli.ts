@@ -1,15 +1,36 @@
+import { useState, useEffect } from "react";
+import { Cache } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { TotalUsageResponseSchema } from "../types/usage-types";
+import { TotalUsageResponse, TotalUsageResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
+import { describeExecFailure, describeParseFailure } from "../utils/parse-diagnostics";
+import { getCcusageVersionSync } from "../utils/ccusage-version";
+import { preferences } from "../preferences";
 
-/**
- * Hook for executing `ccusage --json` command
- */
+const cache = new Cache();
+const CACHE_KEY = "ccusage-total";
+
 export const useCCUsageTotalCli = () => {
-  const result = useExec("npx", ["ccusage@latest", "--json"], {
+  const useDirectCommand = preferences.useDirectCcusageCommand;
+
+  const [initialData] = useState<TotalUsageResponse | undefined>(() => {
+    const cached = cache.get(CACHE_KEY);
+    return cached ? (JSON.parse(cached) as TotalUsageResponse) : undefined;
+  });
+
+  const command = useDirectCommand ? "ccusage" : "npx";
+  const args = useDirectCommand ? ["--json"] : ["ccusage@latest", "--json"];
+
+  const result = useExec(command, args, {
     ...getExecOptions(),
-    parseOutput: ({ stdout }) => {
+    initialData,
+    parseOutput: ({ stdout, stderr, error, exitCode, signal, timedOut }) => {
+      const failure = describeExecFailure("ccusage command", { error, exitCode, signal, timedOut, stderr });
+      if (failure) {
+        throw new Error(failure);
+      }
+
       if (!stdout) {
         throw new Error("No output received from ccusage command");
       }
@@ -17,9 +38,17 @@ export const useCCUsageTotalCli = () => {
       const parseResult = stringToJSON.pipe(TotalUsageResponseSchema).safeParse(stdout.toString());
 
       if (!parseResult.success) {
-        throw new Error(`Invalid total usage data: ${parseResult.error.message}`);
+        throw new Error(
+          describeParseFailure(
+            "Invalid total usage data",
+            stdout.toString(),
+            parseResult.error,
+            getCcusageVersionSync(),
+          ),
+        );
       }
 
+      cache.set(CACHE_KEY, JSON.stringify(parseResult.data));
       return parseResult.data;
     },
     keepPreviousData: true,
@@ -34,6 +63,12 @@ export const useCCUsageTotalCli = () => {
       },
     },
   });
+
+  const intervalMs = parseInt(preferences.usageLimitsRefreshInterval || "60", 10) * 1000;
+  useEffect(() => {
+    const id = setInterval(() => result.revalidate(), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs, result.revalidate]);
 
   return result;
 };

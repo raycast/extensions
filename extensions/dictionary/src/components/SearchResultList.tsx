@@ -26,11 +26,12 @@ const searchItem =
       const searchState = useContext(SearchContext);
       subtitle = (!searchState.isShowingDetail && origSubtitle) || undefined;
       const ttsReady = supportTTS[0] && supportTTS[0] === searchState.curTTS[0];
-      ttsReady &&
+      if (ttsReady) {
         accessories.push({
           icon: Icon.SpeechBubbleActive,
           tag: { value: `TTS available`, color: Color.Green },
         });
+      }
     }
 
     const detail = markdown && <List.Item.Detail markdown={markdown} />;
@@ -47,21 +48,26 @@ const searchItem =
   };
 const SearchDetailedItem = searchItem(true);
 const SearchItem = searchItem();
+
+const renderSearchItem = (item: DefItem, withDetail: boolean, fallbackKey: React.Key) => {
+  const { key, ...itemProps } = item;
+  const Item = withDetail ? SearchDetailedItem : SearchItem;
+  return <Item key={key ?? item.id ?? fallbackKey} {...itemProps} />;
+};
+
 const HeaderSection = (props: { headers: DefListRts }) => {
   const { headers = [] } = props;
   return (
     <>
-      {headers.map((entry) => {
+      {headers.map((entry, index) => {
         if (isDefSection(entry)) {
           return (
             <List.Section title={entry.title} key={entry.title}>
-              {entry.defItems.map((def) => (
-                <SearchDetailedItem key={def.id} {...def} />
-              ))}
+              {entry.defItems.map((def, defIndex) => renderSearchItem(def, true, `${entry.title}-${defIndex}`))}
             </List.Section>
           );
         }
-        return <SearchDetailedItem key={entry.id} {...entry} />;
+        return renderSearchItem(entry, true, index);
       })}
     </>
   );
@@ -72,21 +78,17 @@ const SearchResultList = (props: Props) => {
   return (
     <>
       {extras && <HeaderSection headers={extras} />}
-      {defs.map((entry) => {
+      {defs.map((entry, index) => {
         if (isDefSection(entry)) {
           return (
             <List.Section title={entry.title} key={entry.title}>
-              {entry.defItems.map((def) =>
-                def.markdown ? <SearchDetailedItem key={def.id} {...def} /> : <SearchItem key={def.id} {...def} />
+              {entry.defItems.map((def, defIndex) =>
+                renderSearchItem(def, Boolean(def.markdown), `${entry.title}-${defIndex}`),
               )}
             </List.Section>
           );
         }
-        return entry.markdown ? (
-          <SearchDetailedItem key={entry.id} {...entry} />
-        ) : (
-          <SearchItem key={entry.id} {...entry} />
-        );
+        return renderSearchItem(entry, Boolean(entry.markdown), index);
       })}
     </>
   );

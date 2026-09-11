@@ -12,22 +12,26 @@
     "Fun"
   ],
   "license": "MIT",
-  "commands": [{
-    "name": "index",
-    "title": "Play Simon",
-    "description": "Play a game of Simon.",
-    "mode": "view"
-  }],
-  "preferences": [{
-    "name": "enableSounds",
-    "type": "checkbox",
-    "description": "Whether or not sounds should play during gameplay.",
-    "required": false,
-    "title": "Sounds",
-    "placeholder": "Enable Sounds",
-    "label": "Play sounds during gameplay",
-    "default": true
-  }],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Play Simon",
+      "description": "Play a game of Simon.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableSounds",
+      "type": "checkbox",
+      "description": "Whether or not sounds should play during gameplay.",
+      "required": false,
+      "title": "Sounds",
+      "placeholder": "Enable Sounds",
+      "label": "Play sounds during gameplay",
+      "default": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.36.0"
   },
@@ -46,5 +50,10 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@3": "3.15.1",
+    "fast-uri": "3.1.5"
   }
 }

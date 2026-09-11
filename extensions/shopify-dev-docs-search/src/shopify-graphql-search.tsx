@@ -30,7 +30,7 @@ const Command = () => {
   const [query, setQuery] = useState<string>("");
   const { categoryOptions } = useSearchCategories(query);
   const [category, setCategory] = useState<string>("");
-  const { data, isLoading, pagination } = useSearchResults(query, category);
+  const { data, isLoading } = useSearchResults(query, category);
 
   return (
     <List
@@ -41,7 +41,6 @@ const Command = () => {
       searchBarAccessory={
         <CategoryDropdown categories={categoryOptions} onCategoryChange={(newId) => setCategory(newId)} />
       }
-      pagination={pagination}
       isShowingDetail
     >
       {data.map((item) => (
@@ -61,7 +60,7 @@ const Command = () => {
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title={item.pretty_breadcrumbs || ""} />
                   <List.Item.Detail.Metadata.Label title="Type" text={item.object_label || "N/A"} />
-                  <List.Item.Detail.Metadata.Label title="Category" text={item.content_category || "N/A"} />
+                  <List.Item.Detail.Metadata.Label title="Category" text={item.category || "N/A"} />
                   <List.Item.Detail.Metadata.Label title="API Version" text={item.version || "N/A"} />
                 </List.Item.Detail.Metadata>
               }

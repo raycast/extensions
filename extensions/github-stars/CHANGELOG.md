@@ -1,5 +1,8 @@
 # Github-Stars Changelog
 
+## [Update + refactor] - 2026-02-11
+- update dependencuies & refactor to use `useFetch`
+
 ## [Fix Something Went Wrongs] - 2023-12-17
 - Fixed the issue where description was null
 

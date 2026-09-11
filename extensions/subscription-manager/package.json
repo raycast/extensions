@@ -1,0 +1,335 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "subscription-manager",
+  "title": "Subscription Manager",
+  "description": "Track and manage all your recurring subscriptions",
+  "icon": "subscription-icon.png",
+  "author": "shivraj-roy",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Finance"
+  ],
+  "license": "MIT",
+  "screenshots": [
+    {
+      "path": "metadata/subscription-manager-1.png"
+    },
+    {
+      "path": "metadata/subscription-manager-2.png"
+    },
+    {
+      "path": "metadata/subscription-manager-3.png"
+    },
+    {
+      "path": "metadata/subscription-manager-4.png"
+    }
+  ],
+  "commands": [
+    {
+      "name": "manage-subscription",
+      "title": "Manage Subscription",
+      "description": "Calendar view with monthly billing overview",
+      "mode": "view"
+    },
+    {
+      "name": "analytics",
+      "title": "Subscription Analytics",
+      "description": "Spending breakdown and insights across your subscriptions",
+      "mode": "view"
+    },
+    {
+      "name": "add-subscription",
+      "title": "Add Subscription",
+      "description": "Add a new subscription",
+      "mode": "view"
+    },
+    {
+      "name": "subscription-list",
+      "title": "All Subscriptions",
+      "description": "View and manage all your subscriptions",
+      "mode": "view"
+    },
+    {
+      "name": "notification-background",
+      "title": "Subscription Notifications",
+      "description": "Sends reminders before your subscriptions bill",
+      "mode": "no-view",
+      "interval": "5m",
+      "platforms": [
+        "macOS"
+      ]
+    },
+    {
+      "name": "menubar",
+      "title": "Subscriptions Menubar",
+      "description": "Monthly total and upcoming bills in the menu bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "showTotalIn",
+          "title": "Show Monthly Total",
+          "description": "Where to display the monthly total",
+          "type": "dropdown",
+          "required": false,
+          "default": "dropdown",
+          "data": [
+            {
+              "title": "Beside icon",
+              "value": "title"
+            },
+            {
+              "title": "In dropdown",
+              "value": "dropdown"
+            }
+          ]
+        },
+        {
+          "name": "dropdownContent",
+          "title": "Show in Menu",
+          "description": "Content to display when opening the menubar",
+          "type": "dropdown",
+          "required": false,
+          "default": "upcoming",
+          "data": [
+            {
+              "title": "Full month",
+              "value": "full-month"
+            },
+            {
+              "title": "Upcoming only",
+              "value": "upcoming"
+            },
+            {
+              "title": "Minimal",
+              "value": "minimal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryCurrency",
+      "title": "Primary Currency",
+      "description": "Main currency for totals",
+      "type": "dropdown",
+      "required": false,
+      "default": "INR",
+      "data": [
+        {
+          "title": "🇮🇳 Indian Rupee (INR)",
+          "value": "INR"
+        },
+        {
+          "title": "🇺🇸 US Dollar (USD)",
+          "value": "USD"
+        },
+        {
+          "title": "🇪🇺 Euro (EUR)",
+          "value": "EUR"
+        },
+        {
+          "title": "🇬🇧 British Pound (GBP)",
+          "value": "GBP"
+        },
+        {
+          "title": "🇯🇵 Japanese Yen (JPY)",
+          "value": "JPY"
+        },
+        {
+          "title": "🇦🇺 Australian Dollar (AUD)",
+          "value": "AUD"
+        },
+        {
+          "title": "🇨🇦 Canadian Dollar (CAD)",
+          "value": "CAD"
+        },
+        {
+          "title": "🇸🇬 Singapore Dollar (SGD)",
+          "value": "SGD"
+        },
+        {
+          "title": "🇧🇷 Brazilian Real (BRL)",
+          "value": "BRL"
+        },
+        {
+          "title": "🇨🇭 Swiss Franc (CHF)",
+          "value": "CHF"
+        },
+        {
+          "title": "🇨🇳 Chinese Yuan (CNY)",
+          "value": "CNY"
+        },
+        {
+          "title": "🇭🇰 Hong Kong Dollar (HKD)",
+          "value": "HKD"
+        },
+        {
+          "title": "🇮🇩 Indonesian Rupiah (IDR)",
+          "value": "IDR"
+        },
+        {
+          "title": "🇰🇷 South Korean Won (KRW)",
+          "value": "KRW"
+        },
+        {
+          "title": "🇲🇽 Mexican Peso (MXN)",
+          "value": "MXN"
+        },
+        {
+          "title": "🇲🇾 Malaysian Ringgit (MYR)",
+          "value": "MYR"
+        },
+        {
+          "title": "🇳🇴 Norwegian Krone (NOK)",
+          "value": "NOK"
+        },
+        {
+          "title": "🇳🇿 New Zealand Dollar (NZD)",
+          "value": "NZD"
+        },
+        {
+          "title": "🇵🇭 Philippine Peso (PHP)",
+          "value": "PHP"
+        },
+        {
+          "title": "🇸🇪 Swedish Krona (SEK)",
+          "value": "SEK"
+        },
+        {
+          "title": "🇹🇭 Thai Baht (THB)",
+          "value": "THB"
+        },
+        {
+          "title": "🇹🇷 Turkish Lira (TRY)",
+          "value": "TRY"
+        },
+        {
+          "title": "🇿🇦 South African Rand (ZAR)",
+          "value": "ZAR"
+        }
+      ]
+    },
+    {
+      "name": "roundingEnabled",
+      "title": "Rounding",
+      "description": "Hide decimal places",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Rounding"
+    },
+    {
+      "name": "abbreviateNumbers",
+      "title": "Abbreviated Numbers",
+      "description": "Show compact format like 99.9K",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Abbreviated Numbers"
+    },
+    {
+      "name": "firstReminderDays",
+      "title": "First Reminder",
+      "description": "Days before billing date to notify",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "Disabled",
+          "value": "disabled"
+        },
+        {
+          "title": "Same day",
+          "value": "0"
+        },
+        {
+          "title": "1 day before",
+          "value": "1"
+        },
+        {
+          "title": "3 days before",
+          "value": "3"
+        },
+        {
+          "title": "7 days before",
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "name": "firstReminderTime",
+      "title": "First Reminder Time",
+      "description": "Notification time in 24h format (e.g. 09:00)",
+      "type": "textfield",
+      "required": false,
+      "default": "09:00",
+      "placeholder": "09:00"
+    },
+    {
+      "name": "secondReminderDays",
+      "title": "Second Reminder",
+      "description": "Optional second reminder before billing date",
+      "type": "dropdown",
+      "required": false,
+      "default": "disabled",
+      "data": [
+        {
+          "title": "Disabled",
+          "value": "disabled"
+        },
+        {
+          "title": "Same day",
+          "value": "0"
+        },
+        {
+          "title": "1 day before",
+          "value": "1"
+        },
+        {
+          "title": "3 days before",
+          "value": "3"
+        },
+        {
+          "title": "7 days before",
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "name": "secondReminderTime",
+      "title": "Second Reminder Time",
+      "description": "Notification time in 24h format (e.g. 18:00)",
+      "type": "textfield",
+      "required": false,
+      "default": "18:00",
+      "placeholder": "18:00"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.16",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

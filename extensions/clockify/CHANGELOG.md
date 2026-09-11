@@ -1,5 +1,49 @@
 # Clockify Changelog
 
+## [Fix time entries always being created as non-billable] - 2026-09-09
+
+- Time entries now follow the project's "billable by default" setting instead of always being created as non-billable. Clockify treats an absent `billable` field as `false` rather than inheriting it from the project, so the value is now sent explicitly.
+- Applies to starting a new timer, restarting a recent entry, and adding a completed entry with "Add Time Entry".
+
+## [Fix requests being sent to an undefined workspace] - 2026-09-09
+
+- Fixed commands failing with "User doesn't belong to Workspace" and "Timer could not be started" when the stored workspace id was missing. The id is now resolved and repaired on demand rather than read straight from `LocalStorage`, which can drop a key when several values are written concurrently.
+- Fixed the menu bar command being unable to recover from that state on its own, as it never bootstrapped the workspace id itself.
+- Added a fallback to the active workspace, and then to the first available workspace, for accounts where Clockify returns no default workspace.
+- Hardened API key validation so an unset key shows the invalid-key screen instead of failing to render.
+- The "Timer could not be started" toast now reports the reason returned by Clockify.
+
+## [Fix project selection resetting and timer failing to start] - 2026-09-08
+
+- Fixed the project dropdown resetting to the first project on every selection in both "Start New Timer" and "Add Time Entry".
+- Fixed "Timer could not be started" caused by the selected project never reaching the form values.
+- Fixed the resulting loop of task requests, which triggered Clockify rate limiting (HTTP 429).
+
+## [Fix cached workspace data] - 2026-05-15
+
+- Fixed cached projects, tags, and tasks falling back incorrectly when Clockify returns no data.
+
+## [Enhanced Menu Bar Features] - 2026-04-10
+
+- Added quick timer restart from up to 5 recent unique entries when no timer is active
+- Added today's total tracked time display per project while a timer is running
+- Updated time interval type to support active timers
+
+## [Add menu bar timer] - 2026-01-16
+
+- Added a menu bar command that shows the current timer counting up.
+- Allows stopping the timer directly from the menu bar.
+- Menu bar timer automatically updates when a timer is started or stopped from other menus.
+- Fixed timer display to update properly even when the menu bar is not focused.
+- Updated the menu bar timer to use a monospace font for better readability.
+
+## [Time Entry Management] - 2026-01-14
+
+- Add "Stop Timer at" action to stop running timer at a specific past time
+- Add "Add Time Entry" to create completed entries with start and end times
+- Add optional start time field when starting new timers
+- Fix API request format to use top-level start/end fields per Clockify API spec
+
 ## [Select Tag During Start + Modernize] - 2025-08-18
 
 - `Action` to `openExtensionPreferences` in invalid token view

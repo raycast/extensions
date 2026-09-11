@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Icon, List, LaunchProps } from "@raycast/api";
+import { useState, useEffect } from "react";
 import { Clipboard, showToast, Toast, open } from "@raycast/api";
-import { isValidURL, shortenURL, uniqueArray } from "./util";
+import { isValidURL, shortenURL } from "./util";
+import { getFavicon } from "@raycast/utils";
 
 interface Result {
   status: "init" | "shortened" | "error";
@@ -9,93 +10,80 @@ interface Result {
   shortened: string;
   errorMessage?: string;
 }
-export default function Command() {
-  const [items, setItems] = useState<Result[]>();
+
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  const { url, key, comment } = props.arguments;
+  const [result, setResult] = useState<Result | null>(null);
   const [isLoading, setLoading] = useState(false);
 
   const startShortening = async () => {
-    const toast = showToast({
+    if (!url || !isValidURL(url)) {
+      showToast(Toast.Style.Failure, "Invalid URL", "Please provide a valid URL");
+      return;
+    }
+
+    setLoading(true);
+    const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Shortening",
     });
-    const content = await Clipboard.readText();
-    const lines: Result[] = uniqueArray(content?.split("\n").filter((line) => isValidURL(line))).map((line) => {
-      return {
-        url: line.trim(),
-        shortened: "",
-        status: "init",
-      };
-    });
-    if (lines) {
-      setLoading(true);
-      for (const i in lines) {
-        lines[i].status = "shortened";
-        try {
-          const { shortened, message } = await shortenURL(lines[i].url);
-          if (shortened) {
-            lines[i].status = "shortened";
-            lines[i].shortened = shortened;
-          } else {
-            lines[i].status = "error";
-            lines[i].errorMessage = message;
-          }
-        } catch (error) {
-          lines[i].status = "error";
-          lines[i].errorMessage = (error as Error).message;
-        }
-        setItems(lines);
-      }
-      setLoading(false);
-      const resultURLs = lines
-        .map((line) => {
-          if (line.status === "shortened") {
-            return line.shortened;
-          } else {
-            return line.url;
-          }
-        })
-        .join("\n");
 
-      await Clipboard.copy(resultURLs);
-      await showToast(Toast.Style.Success, "Success", "Copied shortened URLs to clipboard");
+    try {
+      const shortLink = await shortenURL({
+        url: url.trim(),
+        slug: key?.trim(),
+        comment: comment?.trim(),
+      });
+      setResult({
+        status: "shortened",
+        url: url.trim(),
+        shortened: shortLink,
+      });
+      await Clipboard.copy(shortLink);
+      await showToast(Toast.Style.Success, "Success", "Copied shortened URL to clipboard");
+    } catch (error) {
+      const message = (error as Error).message;
+      setResult({
+        status: "error",
+        url: url.trim(),
+        shortened: "",
+        errorMessage: message,
+      });
+      await showToast(Toast.Style.Failure, "Error", message);
     }
-    (await toast).hide();
+
+    setLoading(false);
+    toast.hide();
   };
 
   useEffect(() => {
     startShortening();
   }, []);
 
-  const getIcon = (item: Result) => {
-    if (item.status === "shortened") {
-      return Icon.CheckCircle;
-    } else if (item.status === "error") {
-      return Icon.Info;
-    }
-    return Icon.Link;
-  };
-
   return (
     <List isLoading={isLoading}>
-      <List.Section title="URLs">
-        {items?.map((item, index) => (
+      <List.Section title="Result">
+        {result && (
           <List.Item
             actions={
               <ActionPanel>
                 <Action
                   title="Open URL"
-                  onAction={() => open(item.status === "shortened" ? item.shortened : item.url)}
+                  onAction={() => open(result.status === "shortened" ? result.shortened : result.url)}
                 />
+                {result.status === "shortened" && (
+                  <Action.CopyToClipboard title="Copy Shortened URL" content={result.shortened} />
+                )}
+                <Action.CopyToClipboard title="Copy Original URL" content={result.url} />
               </ActionPanel>
             }
-            icon={getIcon(item)}
-            key={index}
-            subtitle={item.status === "shortened" ? item.url : item.errorMessage}
-            title={item.status === "shortened" ? item.shortened : item.url}
+            icon={result.status === "shortened" ? getFavicon(result.url) : Icon.ExclamationMark}
+            subtitle={result.status === "shortened" ? result.url : result.errorMessage}
+            title={result.status === "shortened" ? result.shortened : result.url}
           />
-        ))}
+        )}
       </List.Section>
-      {!isLoading && <List.EmptyView icon={Icon.Clipboard} title="Your clipboard does not contain a URL." />}
+      <List.EmptyView icon={Icon.Link} title="Enter a URL to shorten" />
     </List>
   );
 }

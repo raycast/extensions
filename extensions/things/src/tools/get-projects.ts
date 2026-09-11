@@ -1,6 +1,6 @@
-import { getProjects } from '../api';
+import { getCollections } from '../api';
 
 export default async function () {
-  const projects = await getProjects();
+  const { projects } = await getCollections('projects');
   return projects;
 }

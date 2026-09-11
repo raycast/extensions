@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "opensearch",
+  "title": "OpenSearch DevTools",
+  "description": "Query and manage OpenSearch clusters — API explorer, command presets, and search, keyboard-first.",
+  "icon": "icon.png",
+  "author": "itggood2420",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "console",
+      "title": "Console",
+      "subtitle": "OpenSearch",
+      "description": "Run requests in OpenSearch Dashboards Dev Tools console syntax",
+      "mode": "view"
+    },
+    {
+      "name": "api-explorer",
+      "title": "API Explorer",
+      "subtitle": "OpenSearch",
+      "description": "Send an arbitrary request to OpenSearch and inspect the JSON response",
+      "mode": "view"
+    },
+    {
+      "name": "command-palette",
+      "title": "Command Palette",
+      "subtitle": "OpenSearch",
+      "description": "Run common OpenSearch commands such as Cluster Health or Cat Indices",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "OpenSearch",
+      "description": "Pick an index and run a search query",
+      "mode": "view"
+    },
+    {
+      "name": "query-history",
+      "title": "Query History",
+      "subtitle": "OpenSearch",
+      "description": "Browse, re-run, and favorite recent queries",
+      "mode": "view"
+    },
+    {
+      "name": "manage-connections",
+      "title": "Manage Connections",
+      "subtitle": "OpenSearch",
+      "description": "Add and edit OpenSearch cluster connections and pick the default one",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "run-query",
+      "title": "Run OpenSearch Query",
+      "description": "Send a REST request (search, cat, cluster, mapping, etc.) to the active OpenSearch connection and return the JSON response"
+    }
+  ],
+  "ai": {
+    "instructions": "You can query the user's OpenSearch cluster with the run-query tool. Requests target the active connection (the default saved connection, or the preferences fallback). Rules:\n- Paths must start with '/'.\n- List indices with `GET /_cat/indices?format=json`.\n- Read a field mapping with `GET /{index}/_mapping`.\n- Search with `GET /{index}/_search` (or POST) and a JSON body containing a `query`. Default `size` to 10 unless the user asks otherwise.\n- Cluster status: `GET /_cluster/health`. Node/cluster info: `GET /_nodes`, `GET /_cluster/stats`.\n- Only use PUT or DELETE when the user clearly asks to modify or delete data; these require confirmation.\n- Summarize responses concisely. When returning documents, highlight the key fields instead of dumping the entire raw JSON."
+  },
+  "preferences": [
+    {
+      "name": "defaultUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "OpenSearch URL",
+      "placeholder": "https://search.example.com",
+      "description": "Fallback connection used when no connection has been saved yet"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": false,
+      "title": "Username",
+      "description": "Username for the fallback connection (Basic Auth)",
+      "placeholder": "Username for the fallback connection"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": false,
+      "title": "Password",
+      "description": "Password for the fallback connection (Basic Auth)",
+      "placeholder": "Password for the fallback connection"
+    },
+    {
+      "name": "ignoreCerts",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "TLS",
+      "label": "Ignore Certificate Errors (not recommended)",
+      "description": "Skip TLS verification for self-signed certificates"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "aws4": "^1.13.2",
+    "undici": "^6.21.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/aws4": "^1.11.6",
+    "@types/node": "^22.18.6",
+    "@types/react": "^19.1.13",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

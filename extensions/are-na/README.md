@@ -6,47 +6,81 @@
 
 ---
 
-This extension allows you to interact with Are.na through raycast.
+This extension allows you to interact with Are.na from Raycast.
 
 Here is a list of features currently available with this extension.
 
 ## Features
 
+### Search Everything (New)
+
+Use **Search Everything** to query channels, blocks, and users in one command.
+You can save queries and quickly rerun recent searches.
+
 ### Search for Channels on Are.na
 
-Quickly search for Are.na channels using the Search Are.na Channels command.
+Quickly search for Are.na channels using **Find Channels** with:
+
+- pagination ("Load More")
+- sort controls
+- direct channel management actions
 
 ![Search For Channels](metadata/a1.png)
 
 ### Search for Blocks on Are.na
 
-Find specific blocks effortlessly with the Search Are.na Blocks command.
+Find specific blocks effortlessly with **Find Blocks** plus:
+
+- type filters (Text/Image/Link/Attachment/Embed)
+- pagination and sorting
+- in-place block management actions
 
 ![Search Are.na Blocks](metadata/a7.png)
 
 ### Search for Users on Are.na
 
-Locate Are.na users with the Search Are.na Users command.
+Locate Are.na users with **Find Users** and load additional pages as needed.
 
 ![Search Are.na Users](metadata/a6.png)
 
 ### Create an Are.na Channel
 
-Create new channels directly to your Are.na account using the Create Are.na Channel command.
+Create new channels directly in your Are.na account using **Create Channel**.
 
 ![Create Are.na Channel](metadata/a5.png)
 
 ### View Text and Image Blocks from Raycast
 
-Easily preview text and image blocks straight from the Raycast command bar.
+Preview text and image blocks directly from Raycast.
 
 ![View Text Block](metadata/a3.png)
 
 ![View Image Block](metadata/a2.png)
 
-### Add Blocks to Channels that are Public
+### Block Management
 
-Conveniently add blocks directly to any public channel.
+Manage block workflows directly from result/channel views:
+
+- create blocks into a channel
+- edit block title/content/description
+- connect blocks to one or more channels
+- remove a block from the current channel
+- delete blocks
+
+### Channel Management
+
+Manage channel workflows directly from Raycast:
+
+- edit title/visibility/description
+- add or remove collaborators (IDs/slugs)
+- delete channels with confirmation safeguards
+
+### Personal Workflow
+
+Two dedicated commands for account-level work:
+
+- **My Profile**: your profile snapshot
+- **My Channels**: browse channels you own/manage
 
 ![Add Block to Public Channels](metadata/a4.png)
 
@@ -54,9 +88,9 @@ Conveniently add blocks directly to any public channel.
 
 To use this extension, you will need an Are.na `accessToken`. Follow these steps:
 
-- Go to [Are.na Developer Applications](https://dev.are.na/oauth/applications/new).
+- Go to [Are.na Personal Access Tokens](https://www.are.na/settings/personal-access-tokens).
 
-- Create a new application to obtain your Personal Access Token.
+- Create a token with the `write` scope if you want channel/block mutations.
 
 - Enter this token in Raycast settings for the Are.na extension.
 

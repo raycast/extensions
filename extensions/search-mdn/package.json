@@ -9,7 +9,8 @@
     "OBQun",
     "k8scat",
     "j3lte",
-    "stelo"
+    "stelo",
+    "Sheraff"
   ],
   "categories": [
     "Productivity",
@@ -32,25 +33,67 @@
       "preferences": [
         {
           "type": "dropdown",
-          "title": "Preferred Action",
+          "title": "Default Action",
           "data": [
             {
               "title": "Read Document",
-              "value": "read"
+              "value": "preview"
             },
             {
               "title": "Open in Browser",
               "value": "open"
-            },
-            {
-              "title": "Copy to Clipboard",
-              "value": "copy"
             }
           ],
           "required": false,
-          "default": "read",
-          "name": "preferredAction",
-          "description": "Choose what you want to do with the result first"
+          "default": "preview",
+          "name": "defaultAction",
+          "description": "Choose which action appears first"
+        },
+        {
+          "type": "dropdown",
+          "title": "Language",
+          "data": [
+            {
+              "title": "English (US)",
+              "value": "en-US"
+            },
+            {
+              "title": "Español",
+              "value": "es"
+            },
+            {
+              "title": "Français",
+              "value": "fr"
+            },
+            {
+              "title": "日本語",
+              "value": "ja"
+            },
+            {
+              "title": "한국어",
+              "value": "ko"
+            },
+            {
+              "title": "Português (Brasil)",
+              "value": "pt-BR"
+            },
+            {
+              "title": "Русский",
+              "value": "ru"
+            },
+            {
+              "title": "简体中文",
+              "value": "zh-CN"
+            },
+            {
+              "title": "繁體中文",
+              "value": "zh-TW"
+            }
+          ],
+          "required": false,
+          "default": "en-US",
+          "name": "language",
+          "description": "Language used for MDN search results"
         }
       ]
     }
@@ -58,9 +101,7 @@
   "dependencies": {
     "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.16.0",
-    "gray-matter": "^4.0.3",
-    "node-fetch": "^3.3.2",
-    "url-join": "^5.0.0"
+    "gray-matter": "^4.0.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

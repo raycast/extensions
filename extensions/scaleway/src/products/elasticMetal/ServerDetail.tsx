@@ -1,10 +1,10 @@
 import { List } from '@raycast/api'
-import type { BareMetal } from '@scaleway/sdk'
+import type { Baremetalv1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 import { getServerStatusIcon } from './status'
 
 type ServerProps = {
-  server: BareMetal.v1.Server
+  server: Baremetalv1.Server
 }
 
 export const ServerDetail = ({ server }: ServerProps) => (

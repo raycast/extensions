@@ -32,6 +32,7 @@ function ActionEditBookmark(props: { bookmark: Bookmark; revalidate: () => void 
             title: bookmark.title,
             collection: bookmark.collection?.$id?.toString() ?? "-1",
             tags: bookmark.tags,
+            note: bookmark.note,
           }}
           onWillSave={() => {
             showToast(Toast.Style.Animated, "Updating Bookmark...");

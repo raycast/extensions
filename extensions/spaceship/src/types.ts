@@ -64,6 +64,11 @@ export type ResourceRecordsListCreateOrUpdateItem = (
   ttl?: number;
 };
 
+export type CheckDomainAvailabilityResult = {
+  domain: string;
+  result: "available" | "taken" | "invalidDomainName" | "tldNotSupported" | "unexpectedError";
+};
+
 export type SuccessResult<T> = {
   items: T[];
   total: number;

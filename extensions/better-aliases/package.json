@@ -1,0 +1,169 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "better-aliases",
+  "title": "Better Aliases",
+  "description": "Better Aliases - Create better aliases in Raycast",
+  "icon": "better-aliases.png",
+  "author": "alexi.build",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-alias",
+      "title": "Create Alias",
+      "subtitle": "Better Aliases",
+      "description": "Create a new alias for URLs, apps, commands, or text snippets",
+      "mode": "view"
+    },
+    {
+      "name": "expand-alias",
+      "title": "Expand Alias or Insert Snippet",
+      "subtitle": "Better Aliases",
+      "description": "Expand alias or insert snippet",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showFullAlias",
+          "title": "Show Full Alias",
+          "description": "Show full or trimmed alias",
+          "type": "checkbox",
+          "label": "Show full alias",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "search-aliases",
+      "title": "Search Aliases",
+      "subtitle": "Better Aliases",
+      "description": "Search, view, edit, and delete aliases",
+      "mode": "view"
+    },
+    {
+      "name": "open-config-folder",
+      "title": "Open Config Folder",
+      "subtitle": "Better Aliases",
+      "description": "Open the folder containing your Better Aliases configuration files in Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "view-usage-stats",
+      "title": "View Alias Usage Statistics",
+      "subtitle": "Better Aliases",
+      "description": "View usage counts for all aliases",
+      "mode": "view"
+    },
+    {
+      "name": "view-cheatsheet",
+      "title": "View Keyboard Layout or Cheatsheet",
+      "subtitle": "Better Aliases",
+      "description": "Visualize aliases in Tree View or Keyboard Layout",
+      "mode": "view"
+    },
+    {
+      "name": "insert-snippet",
+      "title": "Insert Snippet",
+      "subtitle": "Better Aliases",
+      "description": "Search and insert any alias value as text",
+      "mode": "view"
+    },
+    {
+      "name": "export-snippets",
+      "title": "Export Better Aliases as Raycast Snippets",
+      "subtitle": "Better Aliases",
+      "description": "Export Better Aliases as Raycast Snippets in JSON format",
+      "mode": "view"
+    },
+    {
+      "name": "export-quicklinks",
+      "title": "Export Better Aliases as Raycast Quicklinks",
+      "subtitle": "Better Aliases",
+      "description": "Export Better Aliases as Raycast Quicklinks in JSON format",
+      "mode": "view"
+    },
+    {
+      "name": "import-leader-key",
+      "title": "Import from Leader Key Config",
+      "subtitle": "Better Aliases",
+      "description": "Import your Leader Key configuration into Better Aliases",
+      "mode": "view"
+    },
+    {
+      "name": "export-leader-key",
+      "title": "Export to Leader Key Config",
+      "subtitle": "Better Aliases",
+      "description": "Export your Better Aliases configuration to Leader Key format",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "hideAccessories",
+      "title": "Display Options",
+      "description": "Configure how list items are displayed",
+      "type": "checkbox",
+      "label": "Show less data in list view",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "snippetPrefix",
+      "title": "Snippet Prefix",
+      "description": "Single character prefix to trigger snippet mode (text insertion instead of opening)",
+      "type": "textfield",
+      "required": false,
+      "default": ",",
+      "placeholder": "e.g., ,"
+    },
+    {
+      "name": "randomizedSnippetSeparator",
+      "title": "Randomized Snippet Separator",
+      "description": "Character or string to separate snippet values for random selection (e.g., ';;' to separate 'Hello there!;;Good morning!;;How are you today?')",
+      "type": "textfield",
+      "required": false,
+      "default": ";;",
+      "placeholder": "e.g., ;;"
+    },
+    {
+      "name": "betterAliasesConfigPath",
+      "title": "Better Aliases Config Path (optional)",
+      "description": "Override default config location. Leave empty to use Raycast's extension support folder.",
+      "type": "file",
+      "required": false,
+      "placeholder": "Default: {supportPath}/config.json"
+    },
+    {
+      "name": "leaderKeyConfigPath",
+      "title": "Leader Key Config Path (optional)",
+      "description": "Path to the leader key configuration file (defaults to ~/Library/Application Support/Leader Key/config.json)",
+      "type": "file",
+      "required": false,
+      "placeholder": "Select leader key config file"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.7",
+    "@raycast/utils": "^1.17.0",
+    "fuse.js": "^7.1.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

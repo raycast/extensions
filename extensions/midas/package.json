@@ -62,5 +62,12 @@
       "description": "Your wallet private key for transactions",
       "default": ""
     }
-  ]
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

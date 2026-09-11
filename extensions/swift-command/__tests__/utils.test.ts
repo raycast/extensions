@@ -43,7 +43,7 @@ describe('getNewArguments', () => {
   });
 
   it('should return new arguments when oldArgObjs is null', () => {
-    const result = getNewArguments(['name'], null as any);
+    const result = getNewArguments(['name'], null as unknown as Arg[]);
     expect(result).toEqual([{ name: 'name', value: '' }]);
   });
 
@@ -74,75 +74,106 @@ describe('getNewArguments', () => {
 });
 
 describe('replaceArgumentPlaceholders', () => {
-  it('should replace arguments in the string', () => {
+  it('should replace arguments in the string', async () => {
     const data = 'Hello {{name}}, you are {{age}} years old';
     const args = [
       { name: 'name', value: 'John' },
       { name: 'age', value: '30' }
     ];
-    const result = replaceArgumentPlaceholders(data, args);
+    const result = await replaceArgumentPlaceholders(data, args);
     expect(result).toBe('Hello John, you are 30 years old');
   });
 
-  it('should not replace arguments that are not in the args array', () => {
+  it('should not replace arguments that are not in the args array', async () => {
     const data = 'Hello {{name}}, welcome to {{city}}';
     const args = [{ name: 'name', value: 'Alice' }];
-    const result = replaceArgumentPlaceholders(data, args);
+    const result = await replaceArgumentPlaceholders(data, args);
     expect(result).toBe('Hello Alice, welcome to {{city}}');
   });
 
-  it('should handle empty args array', () => {
+  it('should handle empty args array', async () => {
     const data = 'Hello {{name}}';
     const args: Arg[] = [];
-    const result = replaceArgumentPlaceholders(data, args);
+    const result = await replaceArgumentPlaceholders(data, args);
     expect(result).toBe('Hello {{name}}');
   });
 
-  it('should handle multiple occurrences of the same argument', () => {
+  it('should handle multiple occurrences of the same argument', async () => {
     const data = '{{greeting}} {{name}}! {{greeting}} again, {{name}}!';
     const args = [
       { name: 'greeting', value: 'Hello' },
       { name: 'name', value: 'Bob' }
     ];
-    const result = replaceArgumentPlaceholders(data, args);
+    const result = await replaceArgumentPlaceholders(data, args);
     expect(result).toBe('Hello Bob! Hello again, Bob!');
   });
 
-  it('should return the original string if no arguments are present', () => {
+  it('should return the original string if no arguments are present', async () => {
     const data = 'This is a test string without arguments';
     const args: Arg[] = [];
-    const result = replaceArgumentPlaceholders(data, args);
+    const result = await replaceArgumentPlaceholders(data, args);
     expect(result).toBe(data);
   });
 
-  it('should not replace arguments with empty value', () => {
+  it('should not replace arguments with empty value', async () => {
     const data = 'Hello {{name}}, you are {{age}} years old';
     const args = [
       { name: 'name', value: 'John' },
       { name: 'age', value: '' }
     ];
-    const result = replaceArgumentPlaceholders(data, args);
+    const result = await replaceArgumentPlaceholders(data, args);
     expect(result).toBe('Hello John, you are {{age}} years old');
   });
 
-  it('should handle arguments with surrounding spaces', () => {
+  it('should handle arguments with surrounding spaces', async () => {
     const data = 'Hello {{ name }}, you are {{  age  }} years old';
     const args = [
       { name: 'name', value: 'John' },
       { name: 'age', value: '30' }
     ];
-    const result = replaceArgumentPlaceholders(data, args);
+    const result = await replaceArgumentPlaceholders(data, args);
     expect(result).toBe('Hello John, you are 30 years old');
   });
 
-  it('should handle arguments with mixed spacing', () => {
+  it('should handle arguments with mixed spacing', async () => {
     const data = 'Welcome {{user}}, your ID is {{ id }} and role is {{  role  }}';
     const args = [
       { name: 'user', value: 'Alice' },
       { name: 'id', value: '12345' },
       { name: 'role', value: 'admin' }
     ];
-    const result = replaceArgumentPlaceholders(data, args);
+    const result = await replaceArgumentPlaceholders(data, args);
     expect(result).toBe('Welcome Alice, your ID is 12345 and role is admin');
+  });
+
+  it('should replace clipboard argument with clipboard content', async () => {
+    const data = 'echo {{clipboard}}';
+    const args = [{ name: 'clipboard', value: '' }];
+    const result = await replaceArgumentPlaceholders(data, args);
+    expect(result).toBe('echo clipboard-test-content');
+  });
+
+  it('should replace clipboard argument along with other arguments', async () => {
+    const data = 'echo {{name}}: {{clipboard}}';
+    const args = [
+      { name: 'name', value: 'Output' },
+      { name: 'clipboard', value: '' }
+    ];
+    const result = await replaceArgumentPlaceholders(data, args);
+    expect(result).toBe('echo Output: clipboard-test-content');
+  });
+
+  it('should replace multiple clipboard occurrences with same content', async () => {
+    const data = 'echo {{clipboard}} | sed "s/old/new/g" > {{clipboard}}.bak';
+    const args = [{ name: 'clipboard', value: '' }];
+    const result = await replaceArgumentPlaceholders(data, args);
+    expect(result).toBe('echo clipboard-test-content | sed "s/old/new/g" > clipboard-test-content.bak');
+  });
+
+  it('should replace clipboard with spaces in template', async () => {
+    const data = 'process {{ clipboard }} and output {{ clipboard }}';
+    const args = [{ name: 'clipboard', value: '' }];
+    const result = await replaceArgumentPlaceholders(data, args);
+    expect(result).toBe('process clipboard-test-content and output clipboard-test-content');
   });
 });

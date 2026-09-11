@@ -36,11 +36,9 @@ function Command() {
     try {
       setIsSubmitting(true);
 
-      const containerTags = values.project ? [values.project] : undefined;
-
       await addMemory({
         content: values.content.trim(),
-        containerTags,
+        containerTag: values.project || undefined,
       });
 
       pop();

@@ -14,7 +14,12 @@
     "ridemountainpig",
     "david_ferland",
     "sjasct",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "Zheckan",
+    "Diwanshumidha",
+    "vmrjnvc",
+    "gareth_price",
+    "CaffeineCat"
   ],
   "categories": [
     "Applications",
@@ -40,6 +45,20 @@
       "subtitle": "Zen Browser",
       "description": "Open a new Zen Browser tab.",
       "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Create New Window",
+      "subtitle": "Zen Browser",
+      "description": "Open a new Zen Browser window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-private-window",
+      "title": "Create New Private Window",
+      "subtitle": "Zen Browser",
+      "description": "Open a new Zen Browser private window.",
+      "mode": "no-view"
     },
     {
       "name": "search-history",
@@ -88,6 +107,10 @@
         {
           "title": "Qwant",
           "value": "Qwant"
+        },
+        {
+          "title": "Kagi",
+          "value": "Kagi"
         }
       ]
     },
@@ -237,7 +260,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.0"
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@types/sql.js": "1.4.4",

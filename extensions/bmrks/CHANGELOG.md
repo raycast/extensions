@@ -1,5 +1,19 @@
 # bmrks Changelog
 
+## [Fix crash on command launch] - 2026-08-26
+
+- Fixed all commands crashing with "native WebSocket not found" by providing a WebSocket transport (`ws`) to the Supabase client, since Raycast's Node runtime has no global WebSocket
+
+## [Improved reliability and UX] - 2026-03-04
+
+- Fixed auth error handling for better consistency
+- Prevented duplicate bookmark submissions
+- Improved form loading states
+
+## [Improvement] - 2026-01-14
+
+- Added feature to manage groups: create and delete group.
+
 ## [Change "Delete" Shortcut] - 2025-09-24
 
 - Changed "Delete" Shortcut to `Keyboard.Shortcut.Common.Remove` (default: `ctrl`+`x`) (ref: [Issue #21681](https://github.com/raycast/extensions/issues/21681))

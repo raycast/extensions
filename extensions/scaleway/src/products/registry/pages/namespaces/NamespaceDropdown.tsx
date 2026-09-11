@@ -1,11 +1,11 @@
 import { List } from '@raycast/api'
-import type { Registry } from '@scaleway/sdk'
+import type { Registryv1 } from '@scaleway/sdk'
 import type { Dispatch, SetStateAction } from 'react'
 import { getIconFromLocality } from '../../../../helpers/locality'
 
 type NamespaceDropdownProps = {
   setSelectedNamespaceId: Dispatch<SetStateAction<string>>
-  namespaces?: Registry.v1.Namespace[]
+  namespaces?: Registryv1.Namespace[]
 }
 export const NamespaceDropdown = ({
   setSelectedNamespaceId,

@@ -27,7 +27,8 @@ export function handleError<T>(err: unknown, title: string, returnValue: T): T {
 
 export function pageMapper(notionPage: NotionObject): Page {
   const page: Page = {
-    ...notionPage,
+    object: notionPage.object === "page" ? "page" : "database",
+    id: notionPage.id,
     title: "Untitled",
     properties: {},
     created_by:

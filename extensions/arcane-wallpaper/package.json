@@ -1,0 +1,214 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "arcane-wallpaper",
+  "title": "Arcane Wallpaper",
+  "description": "Browse and set Arcane wallpapers.",
+  "icon": "extension-icon.png",
+  "author": "clins1994",
+  "categories": [
+    "Media",
+    "System",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-arcane-wallpaper",
+      "title": "Set Arcane Wallpaper",
+      "description": "Browse Arcane wallpapers and set them as your desktop wallpaper.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "layout",
+          "type": "dropdown",
+          "description": "Set the layout of the wallpaper items.",
+          "required": false,
+          "title": "Wallpaper Layout",
+          "default": "Grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ]
+        },
+        {
+          "name": "columns",
+          "type": "dropdown",
+          "description": "Set the number of columns of the wallpaper items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Wallpaper Item Columns",
+          "default": "4",
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            }
+          ]
+        },
+        {
+          "name": "applyTo",
+          "title": "Apply Wallpaper To",
+          "description": "Apply the wallpaper to which monitor. Valid only when you are using an extended monitor.",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Current Monitor",
+              "value": "current"
+            },
+            {
+              "title": "Monitor",
+              "value": "every"
+            }
+          ],
+          "required": false,
+          "default": "every"
+        },
+        {
+          "name": "picturesDirectory",
+          "title": "Wallpaper Directory",
+          "description": "The directory of wallpaper to save.",
+          "type": "directory",
+          "required": false,
+          "default": "~/Downloads"
+        }
+      ]
+    },
+    {
+      "name": "auto-switch-arcane-wallpaper",
+      "title": "Auto Switch Arcane Wallpaper",
+      "description": "Switch random Arcane wallpapers as desktop wallpaper on a schedule.",
+      "mode": "no-view",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "applyTo",
+          "title": "Apply Wallpaper To",
+          "description": "Apply the wallpaper to which monitor. Valid only when you are using an extended monitor.",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Current Monitor",
+              "value": "current"
+            },
+            {
+              "title": "Monitor",
+              "value": "every"
+            }
+          ],
+          "required": false,
+          "default": "every"
+        },
+        {
+          "name": "refreshIntervalSeconds",
+          "type": "dropdown",
+          "description": "Set the refresh interval for switching wallpapers.",
+          "required": false,
+          "title": "Refresh Interval",
+          "default": "3600",
+          "data": [
+            {
+              "title": "5 Minutes",
+              "value": "300"
+            },
+            {
+              "title": "15 Minutes",
+              "value": "900"
+            },
+            {
+              "title": "30 Minutes",
+              "value": "1800"
+            },
+            {
+              "title": "1 Hour",
+              "value": "3600"
+            },
+            {
+              "title": "2 Hour",
+              "value": "7200"
+            },
+            {
+              "title": "3 Hour",
+              "value": "10800"
+            },
+            {
+              "title": "6 Hour",
+              "value": "21600"
+            },
+            {
+              "title": "9 Hour",
+              "value": "32400"
+            },
+            {
+              "title": "12 Hour",
+              "value": "43200"
+            },
+            {
+              "title": "18 Hour",
+              "value": "64800"
+            },
+            {
+              "title": "1 Day",
+              "value": "86400"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.15.3",
+    "@types/react": "19.1.2",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

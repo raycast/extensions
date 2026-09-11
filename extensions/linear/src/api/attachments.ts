@@ -2,27 +2,79 @@ import { readFile } from "fs/promises";
 import path from "path";
 
 import { UploadFile } from "@linear/sdk";
-import { fileTypeFromFile } from "file-type";
 
 import { getLinearClient } from "./linearClient";
 
-export async function uploadFile(filePath: string) {
+const DEFAULT_CONTENT_TYPE = "application/octet-stream";
+
+const CONTENT_TYPES: Readonly<Record<string, string>> = {
+  ".apng": "image/apng",
+  ".avif": "image/avif",
+  ".bmp": "image/bmp",
+  ".csv": "text/csv",
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".gif": "image/gif",
+  ".gz": "application/gzip",
+  ".heic": "image/heic",
+  ".heif": "image/heif",
+  ".ico": "image/x-icon",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".json": "application/json",
+  ".md": "text/markdown",
+  ".mov": "video/quicktime",
+  ".mp3": "audio/mpeg",
+  ".mp4": "video/mp4",
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".ppt": "application/vnd.ms-powerpoint",
+  ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ".svg": "image/svg+xml",
+  ".tar": "application/x-tar",
+  ".tif": "image/tiff",
+  ".tiff": "image/tiff",
+  ".txt": "text/plain",
+  ".webm": "video/webm",
+  ".webp": "image/webp",
+  ".xls": "application/vnd.ms-excel",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ".zip": "application/zip",
+};
+
+function getContentType(filePath: string) {
+  return CONTENT_TYPES[path.extname(filePath).toLowerCase()] ?? DEFAULT_CONTENT_TYPE;
+}
+
+type FileUploadVariables = {
+  size: number;
+  contentType: string;
+  filename: string;
+};
+
+export type UploadedFile = {
+  assetUrl: string;
+  contentType: string;
+  name: string;
+};
+
+export async function uploadFile(filePath: string): Promise<UploadedFile> {
   const { graphQLClient } = getLinearClient();
 
   const buffer = await readFile(filePath);
-  const type = await fileTypeFromFile(filePath);
-  const file = new Blob([buffer], { type: type?.mime });
+  const contentType = getContentType(filePath);
   const name = path.basename(filePath);
 
   const { data } = await graphQLClient.rawRequest<
     {
-      fileUpload: { uploadFile: UploadFile };
+      fileUpload: { success: boolean; uploadFile?: UploadFile };
     },
-    Record<string, unknown>
+    FileUploadVariables
   >(
     `
-      mutation {
-        fileUpload(size: ${file.size}, contentType: "${file.type}", filename: "${name}") {
+      mutation FileUpload($size: Int!, $contentType: String!, $filename: String!) {
+        fileUpload(size: $size, contentType: $contentType, filename: $filename) {
+          success
           uploadFile {
             headers {
               key
@@ -34,27 +86,53 @@ export async function uploadFile(filePath: string) {
         }
       }
     `,
+    { size: buffer.byteLength, contentType, filename: name },
   );
 
-  const uploadFile = data?.fileUpload.uploadFile;
+  const upload = data?.fileUpload.uploadFile;
 
-  const authHeader = uploadFile?.headers[0];
-  const uploadUrl = uploadFile?.uploadUrl;
-
-  if (uploadUrl && authHeader?.key && authHeader?.value) {
-    const options = {
-      method: "PUT",
-      headers: {
-        [authHeader?.key]: authHeader?.value,
-        "Content-Type": file.type,
-      },
-      body: buffer,
-    };
-
-    await fetch(uploadUrl, options);
-
-    return { assetUrl: uploadFile?.assetUrl, name };
+  if (!data?.fileUpload.success || !upload) {
+    throw new Error(`Failed to request an upload URL for "${name}"`);
   }
+
+  const headers = new Headers({
+    "Content-Type": contentType,
+    "Cache-Control": "public, max-age=31536000",
+  });
+  upload.headers.forEach(({ key, value }) => headers.set(key, value));
+
+  const response = await fetch(upload.uploadUrl, {
+    method: "PUT",
+    headers,
+    body: buffer,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to upload "${name}": ${response.status} ${response.statusText}`);
+  }
+
+  return { assetUrl: upload.assetUrl, contentType, name };
+}
+
+function escapeMarkdownLabel(value: string) {
+  return value.replaceAll("\\", "\\\\").replaceAll("[", "\\[").replaceAll("]", "\\]");
+}
+
+export async function appendFileAttachments(markdown: string, attachmentPaths?: string[]) {
+  if (!attachmentPaths?.length) {
+    return markdown;
+  }
+
+  const files: UploadedFile[] = [];
+  for (const filePath of attachmentPaths) {
+    files.push(await uploadFile(filePath));
+  }
+  const attachments = files.map(({ assetUrl, contentType, name }) => {
+    const label = escapeMarkdownLabel(name);
+    return contentType.startsWith("image/") ? `![${label}](${assetUrl})` : `[${label}](${assetUrl})`;
+  });
+
+  return [markdown.trimEnd(), ...attachments].filter(Boolean).join("\n\n");
 }
 
 export type CreateAttachmentPayload = {
@@ -63,55 +141,20 @@ export type CreateAttachmentPayload = {
 };
 
 export async function createAttachment(payload: CreateAttachmentPayload) {
-  const { graphQLClient } = getLinearClient();
-
+  const { linearClient } = getLinearClient();
   const file = await uploadFile(payload.url);
+  const result = await linearClient.createAttachment({
+    issueId: payload.issueId,
+    title: file.name,
+    url: file.assetUrl,
+  });
 
-  if (!file) {
-    throw new Error("Unable to upload file");
-  }
-
-  const attachmentInput = `issueId: "${payload.issueId}", title: "${file.name}", url: "${file.assetUrl}"`;
-
-  const { data } = await graphQLClient.rawRequest<
-    { attachmentCreate: { success: boolean; attachment: { id: string } } },
-    Record<string, unknown>
-  >(
-    `
-      mutation {
-        attachmentCreate(input: { ${attachmentInput} }) {
-          success
-          attachment {
-            id
-          }
-        }
-      }
-    `,
-  );
-
-  return { success: data?.attachmentCreate.success, id: data?.attachmentCreate.attachment.id };
+  return { success: result.success, id: result.attachmentId };
 }
 
 export async function attachLinkUrl(payload: CreateAttachmentPayload) {
-  const { graphQLClient } = getLinearClient();
+  const { linearClient } = getLinearClient();
+  const result = await linearClient.attachmentLinkURL(payload.issueId, payload.url);
 
-  const attachmentInput = `issueId: "${payload.issueId}", url: "${payload.url}"`;
-
-  const { data } = await graphQLClient.rawRequest<
-    { attachmentLinkURL: { success: boolean; attachment: { id: string } } },
-    Record<string, unknown>
-  >(
-    `
-      mutation {
-        attachmentLinkURL(${attachmentInput}) {
-          success
-          attachment {
-            id
-          }
-        }
-      }
-    `,
-  );
-
-  return { success: data?.attachmentLinkURL.success, id: data?.attachmentLinkURL.attachment.id };
+  return { success: result.success, id: result.attachmentId };
 }

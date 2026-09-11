@@ -1,0 +1,273 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "saasflow",
+    "title": "SaaSFlow",
+    "description": "Track MRR, browse customers and transactions, and ask AI questions about your SaaSFlow data — without leaving Raycast.",
+    "icon": "extension-icon.png",
+    "author": "alexander.peiniger",
+    "owner": "saasflow",
+    "access": "public",
+    "license": "MIT",
+    "platforms": [
+        "macOS"
+    ],
+    "categories": [
+        "Finance",
+        "Productivity"
+    ],
+    "keywords": [
+        "saasflow",
+        "mrr",
+        "saas",
+        "metrics",
+        "finance",
+        "subscriptions"
+    ],
+    "commands": [
+        {
+            "name": "menu-bar",
+            "title": "MRR & Cash",
+            "description": "Show current MRR and cash balance in the menu bar, refreshed every 15 minutes.",
+            "mode": "menu-bar",
+            "interval": "15m",
+            "preferences": [
+                {
+                    "name": "mrrType",
+                    "title": "MRR variant",
+                    "description": "Which MRR figure to show. CMRR (committed MRR) is the default — it includes every active recurring contract, even when invoicing hasn't started yet. MRR counts only what's currently invoicing.",
+                    "type": "dropdown",
+                    "required": false,
+                    "default": "cmrr",
+                    "data": [
+                        {
+                            "title": "Committed MRR (CMRR)",
+                            "value": "cmrr"
+                        },
+                        {
+                            "title": "MRR",
+                            "value": "mrr"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "switch-company",
+            "title": "Switch Company",
+            "description": "Pick which company other SaaSFlow commands and AI tools act on.",
+            "mode": "view"
+        },
+        {
+            "name": "sign-out",
+            "title": "Sign out",
+            "description": "Clear stored SaaSFlow OAuth tokens and the active-company selection.",
+            "mode": "no-view"
+        }
+    ],
+    "tools": [
+        {
+            "name": "list-companies",
+            "title": "List Companies",
+            "description": "List the companies the signed-in user has access to."
+        },
+        {
+            "name": "get-company",
+            "title": "Get Company",
+            "description": "Get details for a specific company (name, settings, plan)."
+        },
+        {
+            "name": "list-company-users",
+            "title": "List Company Users",
+            "description": "List the users that have access to a SaaSFlow company, with their role and last-seen time."
+        },
+        {
+            "name": "list-transactions",
+            "title": "List Transactions",
+            "description": "Browse, filter, or paginate through transactions. Supports limit, offset, and accountId. Use a data-* tool for aggregations."
+        },
+        {
+            "name": "get-transaction",
+            "title": "Get Transaction",
+            "description": "Fetch the details for a single transaction by id."
+        },
+        {
+            "name": "list-customers",
+            "title": "List Customers",
+            "description": "Browse or list customers. Prefer data-customer-mrr or data-cohorts for revenue analytics across customers."
+        },
+        {
+            "name": "search",
+            "title": "Search",
+            "description": "Look something up by name when the exact id is unknown — returns hits across customers, vendors, accounts, and transactions."
+        },
+        {
+            "name": "run-data-batch",
+            "title": "Run Data Batch",
+            "description": "Run multiple slice aggregations in one round trip. Prefer a dedicated data-* tool for single aggregations."
+        },
+        {
+            "name": "data-mrr-at-date",
+            "title": "MRR at Date",
+            "description": "Use this when the user asks for total MRR (or committed MRR) on a specific date. Requires permissions: subscriptions:read."
+        },
+        {
+            "name": "data-mrr-data",
+            "title": "MRR Data",
+            "description": "Use this when the user asks how MRR has changed over time, MRR trend, or monthly recurring revenue history. Requires permissions: subscriptions:read."
+        },
+        {
+            "name": "data-monthly-data",
+            "title": "Monthly Data",
+            "description": "Use this when the user asks for month-by-month revenue, churn, new/upgrade/downgrade breakdowns, or movement summaries. Requires permissions: subscriptions:read."
+        },
+        {
+            "name": "data-customer-mrr",
+            "title": "Customer MRR",
+            "description": "Use this when the user asks for MRR broken down per customer, or which customers contribute the most MRR. Requires permissions: subscriptions:read, customers:read."
+        },
+        {
+            "name": "data-mrr-change-events",
+            "title": "MRR Change Events",
+            "description": "Use this when the user asks for individual MRR change events (new, expansion, contraction, churn) in a period. Requires permissions: subscriptions:read."
+        },
+        {
+            "name": "data-mrr-by-product",
+            "title": "MRR by Product",
+            "description": "Use this when the user asks how MRR is distributed across products or plans. Requires permissions: subscriptions:read."
+        },
+        {
+            "name": "data-analytics",
+            "title": "Analytics",
+            "description": "Use this when the user asks for summary SaaS metrics (MRR, NRR, GRR, churn, LTV, CAC) over a period. Requires permissions: financials:read."
+        },
+        {
+            "name": "data-revenue-expenses",
+            "title": "Revenue Expenses",
+            "description": "Use this when the user asks for revenue vs. expenses (P&L summary) for a period. Requires permissions: financials:read."
+        },
+        {
+            "name": "data-revenue-expenses-bar",
+            "title": "Revenue Expenses Bar",
+            "description": "Use this when the user asks for revenue/expenses charted month-over-month as bars. Requires permissions: financials:read."
+        },
+        {
+            "name": "data-revenue-expenses-by-category",
+            "title": "Revenue Expenses by Category",
+            "description": "Use this when the user asks which categories drive revenue or expenses over a period. Requires permissions: financials:read."
+        },
+        {
+            "name": "data-top-expense-vendors",
+            "title": "Top Expense Vendors",
+            "description": "Use this when the user asks for the top expense vendors over a period. Requires permissions: financials:read."
+        },
+        {
+            "name": "data-account-balance-kpis",
+            "title": "Account Balance KPIS",
+            "description": "Use this when the user asks for cash/bank account balance KPIs (current, start, end, change). Requires permissions: balances:read."
+        },
+        {
+            "name": "data-account-balance-by-account",
+            "title": "Account Balance by Account",
+            "description": "Use this when the user asks for current balances broken down per bank or cash account. Requires permissions: balances:read."
+        },
+        {
+            "name": "data-balance-time-series",
+            "title": "Balance Time Series",
+            "description": "Use this when the user asks for cash/bank balances charted over time. Requires permissions: balances:read."
+        },
+        {
+            "name": "data-balance-by-cash-type",
+            "title": "Balance by Cash Type",
+            "description": "Use this when the user asks how balances are split across cash types (operating, reserve, savings, etc.). Requires permissions: balances:read."
+        },
+        {
+            "name": "data-cash-flow-time-series",
+            "title": "Cash Flow Time Series",
+            "description": "Use this when the user asks for cash inflows and outflows over time. Requires permissions: transactions:read, balances:read."
+        },
+        {
+            "name": "data-cash-flow-by-category",
+            "title": "Cash Flow by Category",
+            "description": "Use this when the user asks which categories drive cash inflows or outflows in a period. Requires permissions: transactions:read."
+        },
+        {
+            "name": "data-profit-loss-data",
+            "title": "Profit Loss Data",
+            "description": "Use this when the user asks for a P&L statement (revenue, costs, gross/operating/net profit) for a period. Requires permissions: financials:read."
+        },
+        {
+            "name": "data-period-details",
+            "title": "Period Details",
+            "description": "Use this when the user asks for the detailed breakdown of a single period (transactions, categorizations, totals). Requires permissions: transactions:read."
+        },
+        {
+            "name": "data-cohorts",
+            "title": "Cohorts",
+            "description": "Use this when the user asks about customer retention or revenue retention by cohort. Requires permissions: subscriptions:read, customers:read."
+        },
+        {
+            "name": "data-customer-monthly-data",
+            "title": "Customer Monthly Data",
+            "description": "Use this when the user asks for one customer's month-by-month metrics or activity. Requires permissions: subscriptions:read, customers:read."
+        },
+        {
+            "name": "data-customer-changes",
+            "title": "Customer Changes",
+            "description": "Use this when the user asks which customers changed (new/upgraded/downgraded/churned) in a period. Requires permissions: subscriptions:read, customers:read."
+        },
+        {
+            "name": "data-retention-cohort-detail",
+            "title": "Retention Cohort Detail",
+            "description": "Use this when the user asks for the customer-level detail behind a specific retention cohort cell. Requires permissions: subscriptions:read, customers:read."
+        }
+    ],
+    "preferences": [
+        {
+            "name": "apiBaseUrl",
+            "title": "API base URL",
+            "description": "Override the SaaSFlow API base URL. Leave blank for production (https://api.saasflow.com).",
+            "type": "textfield",
+            "required": false,
+            "default": "https://api.saasflow.com",
+            "placeholder": "https://api.saasflow.com"
+        },
+        {
+            "name": "apiKey",
+            "title": "API key (fallback)",
+            "description": "Personal API key from the SaaSFlow dashboard. Used when OAuth isn't available; OAuth takes precedence when both are set.",
+            "type": "password",
+            "required": false,
+            "placeholder": "sf_..."
+        }
+    ],
+    "ai": {
+        "instructions": "You help the user inspect their SaaSFlow data. Prefer the most specific tool: list-companies to discover companies, get-company for a single company's metadata. If the user references a company by name, look it up with list-companies first to get its id. Format currency values with the company's reporting currency when present."
+    },
+    "type": "module",
+    "scripts": {
+        "build": "ray build",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "check-tsc": "tsc --noEmit",
+        "test": "vitest run --silent --passWithNoTests"
+    },
+    "dependencies": {
+        "@raycast/api": "^1.81.0",
+        "@raycast/utils": "^1.18.0",
+        "@saasflow/api-client": "file:./vendor/api-client"
+    },
+    "overrides": {
+        "esbuild": "0.28.1"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^2.1.1",
+        "@types/node": "^25.7.0",
+        "@types/react": "^19.2.14",
+        "eslint": "^10.0.1",
+        "prettier": "^3.8.1",
+        "react": "^19.2.0",
+        "typescript": "6.0.3",
+        "vitest": "^4.1.6"
+    }
+}

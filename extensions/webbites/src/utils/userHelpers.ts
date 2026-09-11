@@ -96,11 +96,7 @@ export const getUserData = async (): Promise<UserData | null> => {
  * @param data Request data
  * @returns Promise resolving to response data
  */
-export const makeAuthenticatedRequest = async (
-  endpoint: string,
-  method = "GET",
-  data?: Record<string, unknown>,
-) => {
+export const makeAuthenticatedRequest = async (endpoint: string, method = "GET", data?: Record<string, unknown>) => {
   try {
     const sessionToken = await LocalStorage.getItem<string>(SESSION_TOKEN_KEY);
     if (!sessionToken) {
@@ -127,9 +123,7 @@ export const makeAuthenticatedRequest = async (
         title: "Error Making Request",
         message: `API request failed: ${response.status} ${response.statusText}`,
       });
-      throw new Error(
-        `API request failed: ${response.status} ${response.statusText}`,
-      );
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
     return await response.json();

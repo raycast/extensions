@@ -1,4 +1,4 @@
-import { getMemes } from "../api";
+import { imgflipApi } from "../api";
 
 /**
  * Searches available meme templates based on a query string.
@@ -25,7 +25,7 @@ async function searchMemeTemplates(
 
   try {
     // Fetch all memes first, using cache
-    const { memes } = await getMemes();
+    const { memes } = await imgflipApi.getMemes();
 
     if (!memes || memes.length === 0) {
       console.log("Failed to fetch meme templates or list is empty.");

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "db-schema-explorer",
+  "title": "DB Schema Explorer",
+  "description": "Get database schema (tables, columns, relations) from PostgreSQL and MongoDB for AI reference and context",
+  "icon": "extension_icon.png",
+  "author": "scisaif",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-databases",
+      "title": "Manage Databases",
+      "description": "Add and manage database connections, credentials, and exclusion rules",
+      "mode": "view"
+    },
+    {
+      "name": "sync-schema",
+      "title": "Sync Schema",
+      "description": "Fetch schema from database (Postgres or MongoDB) and update local cache",
+      "mode": "view"
+    },
+    {
+      "name": "explore-tables",
+      "title": "Explore Tables",
+      "description": "Search and copy table DDL from cached schema",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
+    "mongodb": "^7.1.0",
+    "pg": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.16.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.3",
+    "@types/react": "19.2.14",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}

@@ -8,7 +8,7 @@ import {
   showToast,
 } from '@raycast/api'
 import { loadProfileFromConfigurationFile } from '@scaleway/configuration-loader'
-import type { Profile } from '@scaleway/sdk'
+import type { Profile } from '@scaleway/sdk-client'
 
 type PreferenceValues = Profile & {
   profileName?: string

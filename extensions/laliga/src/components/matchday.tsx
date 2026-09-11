@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { JSX } from "react";
 import { formatDate } from "date-fns";
 import { Match } from "../types";
 import MatchComments from "./comment";

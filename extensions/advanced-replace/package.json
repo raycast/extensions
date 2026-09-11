@@ -16,19 +16,181 @@
       "title": "Extract and Replace Text",
       "description": "Quickly perform search/replace functions using Regex.",
       "mode": "view"
+    },
+    {
+      "name": "quick-slot-1",
+      "title": "Quick Slot 1",
+      "subtitle": "Regex Replace",
+      "description": "Run the regex entry assigned to Quick Slot 1. Assign it from \"Extract and Replace Text\", then give this command a hotkey.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "resultType",
+          "title": "Result Action",
+          "description": "What to do with the transformed text.",
+          "type": "dropdown",
+          "required": false,
+          "default": "paste",
+          "data": [
+            {
+              "title": "Paste",
+              "value": "paste"
+            },
+            {
+              "title": "Copy",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quick-slot-2",
+      "title": "Quick Slot 2",
+      "subtitle": "Regex Replace",
+      "description": "Run the regex entry assigned to Quick Slot 2. Assign it from \"Extract and Replace Text\", then give this command a hotkey.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "resultType",
+          "title": "Result Action",
+          "description": "What to do with the transformed text.",
+          "type": "dropdown",
+          "required": false,
+          "default": "paste",
+          "data": [
+            {
+              "title": "Paste",
+              "value": "paste"
+            },
+            {
+              "title": "Copy",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quick-slot-3",
+      "title": "Quick Slot 3",
+      "subtitle": "Regex Replace",
+      "description": "Run the regex entry assigned to Quick Slot 3. Assign it from \"Extract and Replace Text\", then give this command a hotkey.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "resultType",
+          "title": "Result Action",
+          "description": "What to do with the transformed text.",
+          "type": "dropdown",
+          "required": false,
+          "default": "paste",
+          "data": [
+            {
+              "title": "Paste",
+              "value": "paste"
+            },
+            {
+              "title": "Copy",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quick-slot-4",
+      "title": "Quick Slot 4",
+      "subtitle": "Regex Replace",
+      "description": "Run the regex entry assigned to Quick Slot 4. Assign it from \"Extract and Replace Text\", then give this command a hotkey.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "resultType",
+          "title": "Result Action",
+          "description": "What to do with the transformed text.",
+          "type": "dropdown",
+          "required": false,
+          "default": "paste",
+          "data": [
+            {
+              "title": "Paste",
+              "value": "paste"
+            },
+            {
+              "title": "Copy",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quick-slot-5",
+      "title": "Quick Slot 5",
+      "subtitle": "Regex Replace",
+      "description": "Run the regex entry assigned to Quick Slot 5. Assign it from \"Extract and Replace Text\", then give this command a hotkey.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "resultType",
+          "title": "Result Action",
+          "description": "What to do with the transformed text.",
+          "type": "dropdown",
+          "required": false,
+          "default": "paste",
+          "data": [
+            {
+              "title": "Paste",
+              "value": "paste"
+            },
+            {
+              "title": "Copy",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quick-slot-6",
+      "title": "Quick Slot 6",
+      "subtitle": "Regex Replace",
+      "description": "Run the regex entry assigned to Quick Slot 6. Assign it from \"Extract and Replace Text\", then give this command a hotkey.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "resultType",
+          "title": "Result Action",
+          "description": "What to do with the transformed text.",
+          "type": "dropdown",
+          "required": false,
+          "default": "paste",
+          "data": [
+            {
+              "title": "Paste",
+              "value": "paste"
+            },
+            {
+              "title": "Copy",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.6",
-    "@raycast/utils": "^2.2.1",
-    "lodash": "^4.17.21",
-    "nanoid": "^5.1.5"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "lodash": "^4.18.1",
+    "nanoid": "^5.1.11"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "24.3.1",
     "eslint": "^9.35.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.4",
     "typescript": "^5.9.2"
   },
   "scripts": {
@@ -38,5 +200,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

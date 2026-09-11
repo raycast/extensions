@@ -36,7 +36,7 @@ The extension automatically detects and searches selected text from any applicat
 **Examples of recognized formats:**
 
 - `John 3:16`
-- `Rom 8:28-30 ESV`
+- `Rom 8.28-30 ESV`
 - `Psalm 23,24 (NIV)`
 - `1 Corinthians 13:4-8`
 - `Matt 5:3-12; Luke 6:20-26`
@@ -45,10 +45,9 @@ The extension automatically detects and searches selected text from any applicat
 
 ### Pro Tips
 
-- **Set a default translation**: Configure your preferred Bible version in settings
 - **Create a hotkey**: Assign a global shortcut for instant access, e.g., `Ctrl+Option+Cmd+B`
 - **Select and search**: Highlight text anywhere and launch the extension using your hotkey
-- **Quick copy**: Use `Cmd+Shift+Enter` for fast copying
+- **Quick paste**: Use `Cmd+Shift+Enter` to paste the passage directly into your current application
 
 ## 🎯 **Perfect for Every Use Case**
 

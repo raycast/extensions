@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "docuseal",
+  "title": "DocuSeal",
+  "description": "Open Source Document Signing",
+  "icon": "docuseal.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Security"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "instance_url",
+      "title": "Instance URL",
+      "placeholder": "https://api.docuseal.com",
+      "description": "DocuSeal Instance URL",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "placeholder": "xxx...XXX",
+      "description": "DocuSeal API Key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-templates",
+      "title": "Search Templates and Submissions",
+      "description": "Search Templates and Submissions",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@docuseal/api": "^1.0.21",
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

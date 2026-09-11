@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "better-screenshoot",
+  "title": "Better Screenshoot",
+  "description": "Capture your screen with a built-in editor from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "sriverogalan",
+  "license": "MIT",
+  "categories": ["Applications"],
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "Better Screenshoot",
+      "description": "Select a region to capture",
+      "icon": "capture-area.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-screen",
+      "title": "Capture Screen",
+      "subtitle": "Better Screenshoot",
+      "description": "Capture the full screen",
+      "icon": "capture-screen.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "Better Screenshoot",
+      "description": "Capture a specific window",
+      "icon": "capture-window.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-history",
+      "title": "Open History",
+      "subtitle": "Better Screenshoot",
+      "description": "Open capture history",
+      "icon": "open-history.png",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsc --noEmit"
+  }
+}

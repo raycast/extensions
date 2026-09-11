@@ -53,7 +53,7 @@ function generateValueFromUrlTemplate(urlTemplate: string): string {
       .replace(/[^a-z0-9-]/g, "") // Only allow alphanumeric and hyphens
       .replace(/-+/g, "-") // Replace multiple hyphens
       .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
-  } catch (error) {
+  } catch {
     // Fallback: create a hash-like identifier from the URL template
     return urlTemplate
       .toLowerCase()
@@ -98,7 +98,7 @@ function normalizeUrlTemplate(urlTemplate: string): string {
 
     // Put back the {profile} placeholder where our test value was
     return normalizedUrl.replace(/test/g, "{profile}");
-  } catch (error) {
+  } catch {
     // If URL parsing fails, return original for comparison
     return urlTemplate.toLowerCase().trim();
   }
@@ -168,7 +168,7 @@ async function validateCustomAppInput(
       if (!["http:", "https:"].includes(parsedUrl.protocol)) {
         errors.push("URL template must use http:// or https:// protocol");
       }
-    } catch (error) {
+    } catch {
       errors.push("URL template must be a valid URL format (e.g., https://example.com/{profile})");
     }
 

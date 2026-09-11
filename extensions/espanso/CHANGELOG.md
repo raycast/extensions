@@ -1,5 +1,78 @@
 # Espanso Changelog
 
+## [Fix trigger search and overflowing labels] - 2026-08-21
+
+### Bug Fixes
+
+- Fixed Search Matches finding nothing for a trigger whenever the match also has a label. The label took the list title *instead of* the triggers, and Raycast's built-in filter only reads the title, subtitle and keywords — so every labeled match dropped its trigger out of the search index, and only turned up when the search term happened to appear in the label prose. Triggers are now indexed as keywords alongside the label, and punctuation-heavy triggers are also split into their parts, so `email` matches `;;email.ooo`.
+- Fixed a long label overflowing the detail panel. The Label tag neither wraps nor truncates, so it ran past the panel edge; it is now cut to fit. The full label is unaffected elsewhere — it is already the match's title.
+
+## [Fix Espanso binary not being found] - 2026-08-03
+
+### Bug Fixes
+
+- Fixed all commands failing with `Failed to run 'espanso path'` when the Espanso Binary Path preference was left empty. Raycast is launched by launchd and so inherits `PATH=/usr/bin:/bin:/usr/sbin:/sbin`, which contains neither Homebrew prefix — a bare `espanso` could never resolve there. The binary is now located by probing `/opt/homebrew/bin/espanso`, `/usr/local/bin/espanso`, and the `Espanso.app` bundle, so the extension works out of the box on both Apple Silicon and Intel, and with a Homebrew-less install. Setting the preference still overrides the probe, and surrounding whitespace in it is now ignored.
+
+## [Fix Search Matches memory usage] - 2026-05-28
+
+- Reduced Search Matches memory usage by loading replacement previews only for the selected match.
+
+## [1.1.0] - 2026-04-16
+
+### What's Changed
+
+- Added "Edit Match" action (⌘E) to edit existing matches directly from Search Matches via a pre-populated form
+- Replacement text is now searchable in addition to triggers and labels
+
+## [Patch] - 2026-04-09
+
+### Bug Fixes
+
+- Fixed shell-type var preview not resolving user PATH: shell vars now run via an interactive shell (`zsh`/`bash`) so `.zshrc` is sourced. Respects the `shell:` param in Espanso YAML if specified. ANSI escape sequences from shell startup are stripped from output.
+
+## [Improvements] - 2026-04-07
+
+### New Features
+
+- **Live preview for dynamic matches**: Variables (`date`, `shell`, `script`, `echo`, `random`, `clipboard`) are evaluated and shown as real content in the detail panel — no more raw `{{varName}}` templates
+- **Image match support**: Matches using `image_path` now render the image inline in the preview; `$CONFIG` and `~` path variables are resolved automatically
+- **Re-evaluate action**: Dynamic matches expose a "Re-evaluate" action to refresh values on demand (useful for `random` or time-sensitive `shell` snippets)
+- **Lazy evaluation**: Variable expansion only runs when an item is selected, avoiding unnecessary shell executions on list load
+
+### Bug Fixes
+
+- Dynamic snippets (e.g. date matches) now paste and copy the evaluated value instead of the raw template string (fixes [#26651](https://github.com/raycast/extensions/issues/26651))
+
+## [Major Improvements] - 2026-02-02
+
+### New Features
+
+- **Profiles Support**: Organize matches by context using the `profiles/` folder structure
+  - Automatically detects matches in `profiles/work/`, `profiles/home/`, etc.
+  - New profile dropdown to filter matches by context
+  - Smart categorization that separates profiles from categories
+  - Matches outside profiles remain accessible from all contexts
+
+- **Customizable Breadcrumb Separator**: New extension setting to customize the character used for breadcrumb separation
+  - Default: `·` (middle dot)
+  - Choose from: `/`, `>`, `→`, `›`, `»`, or any custom character
+  - Applied consistently across categories, subcategories, and profiles
+
+### Improvements
+
+- **Enhanced Category Display**: Full folder hierarchy shown with breadcrumb navigation
+- **Proper Acronym Formatting**: 50+ common tech acronyms (AI, API, UI, UX, HTML, CSS, JSON, etc.) now display correctly
+- **Smart Index Handling**: When filename is "index", subcategory is hidden to avoid redundancy
+- **Better Organization**: Separated folder and filename handling in category logic
+- **TypeScript Type Checking**: Added `typecheck` script to package.json for improved code quality
+- **Dependency Updates**: Upgraded to latest versions for better performance and security
+
+### Technical Changes
+
+- Refactored category derivation logic for better maintainability
+- Added centralized `formatCategoryName` utility for consistent formatting
+- Improved breadcrumb path generation with full hierarchy support
+- Enhanced type safety across components
 
 ## [Improvements] - 2025-07-15
 

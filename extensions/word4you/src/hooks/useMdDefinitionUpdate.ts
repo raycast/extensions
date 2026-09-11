@@ -11,17 +11,22 @@ export function useMdDefinitionUpdate(onMdDefinitionUpdated?: () => Promise<void
     // First query the text to get fresh content
     const freshResult = await getMdDefinitionExplanation(text);
 
-    if (!freshResult) {
+    if (!freshResult.definition) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to get fresh content";
+      toast.message = freshResult.error || undefined;
       return;
     }
 
     toast.title = `Updating...`;
 
-    const success = await updateMdDefinitionInVocabulary(existingTimestamp, freshResult.raw_output, (message) => {
-      toast.message = message;
-    });
+    const success = await updateMdDefinitionInVocabulary(
+      existingTimestamp,
+      freshResult.definition.raw_output,
+      (message) => {
+        toast.message = message;
+      },
+    );
 
     if (success) {
       toast.style = Toast.Style.Success;

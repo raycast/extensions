@@ -11,15 +11,19 @@ const toQueryString = (query: string) => {
   return query.replaceAll(" ", "+");
 };
 
+const formatPOS = (detailStr: string) => {
+  return detailStr.replace(/(\w+)\t/, "`$1` ");
+};
+
 const toDetailMarkdown = (word: Word) => {
-  return "# " + word.word + "\n---\n" + (word.defs?.join("\n\n") || "");
+  return "# " + word.word + "\n---\n" + (word.defs?.map(formatPOS).join("\n\n") || "");
 };
 
 export default function Command() {
   const [query, setQuery] = useState("");
   const [showDetails, setShowDetails] = useState(false);
 
-  const { isLoading, data } = useFetch<Word[]>("https://www.onelook.com/api/words?md=d&ml=" + toQueryString(query), {
+  const { isLoading, data } = useFetch<Word[]>("https://api.datamuse.com/words?qe=ml&md=d&ml=" + toQueryString(query), {
     execute: !!query,
   });
 
@@ -34,7 +38,7 @@ export default function Command() {
         <List.Item
           key={index}
           title={word.word}
-          subtitle={word.defs?.[0]}
+          subtitle={word.defs?.[0] ? word.defs[0] : undefined}
           detail={<List.Item.Detail markdown={toDetailMarkdown(word)} />}
           actions={
             <ActionPanel>

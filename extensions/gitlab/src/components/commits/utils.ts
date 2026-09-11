@@ -1,42 +1,32 @@
-import { useState, useEffect } from "react";
-import { useCache } from "../../cache";
+import { useCachedPromise } from "@raycast/utils";
 import { gitlab } from "../../common";
-import { CommitStatus } from "./list";
+import { CommitStatus } from "./types";
 
 export async function getCommitStatus(projectID: number, sha: string): Promise<CommitStatus | undefined> {
   const status: CommitStatus | undefined = await gitlab
     .fetch(`projects/${projectID}/repository/commits/${sha}/statuses`)
-    .then((d) => {
-      if (d && d.length > 0) {
-        for (const s of d) {
-          if (s.status !== "success") {
-            return s;
+    .then((statuses) => {
+      if (statuses && statuses.length > 0) {
+        for (const commitStatus of statuses) {
+          if (commitStatus.status !== "success") {
+            return commitStatus;
           }
         }
-        return d[0] as CommitStatus;
+        return statuses[0] as CommitStatus;
       }
       return undefined;
     });
   return status;
 }
 
-export function useCommitStatus(projectID: number, sha?: string): { commitStatus: CommitStatus | undefined } {
-  const [commitStatus, setCommitStatus] = useState<CommitStatus | undefined>();
-  const { data } = useCache<CommitStatus | undefined>(
-    `project_commit_status_${projectID}_${sha}`,
-    async (): Promise<CommitStatus | undefined> => {
-      if (sha) {
-        return await getCommitStatus(projectID, sha);
-      }
-      return undefined;
-    },
-    {
-      deps: [projectID, sha],
-      secondsToRefetch: 30,
-    },
+export function useCommitStatus(
+  projectID: number,
+  sha?: string,
+): { commitStatus: CommitStatus | undefined; isLoading: boolean } {
+  const { data, isLoading } = useCachedPromise(
+    (projectId: number, commitSha: string) => getCommitStatus(projectId, commitSha),
+    [projectID, sha ?? ""],
+    { execute: !!sha },
   );
-  useEffect(() => {
-    setCommitStatus(data);
-  }, [data]);
-  return { commitStatus };
+  return { commitStatus: data, isLoading };
 }

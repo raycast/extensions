@@ -1,5 +1,9 @@
 # Year in Progress Changelog
 
+## [Bugfix] - 2026-03-24
+
+- Fixed user preferences (pinned items, menubar selections) resetting on extension restart
+
 ## [Bugfix] - 2025-01-02
 
 - Fix typos in "Week starts date" settings dropdown

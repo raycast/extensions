@@ -1,5 +1,9 @@
 # Zerion Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [Zerion AI Extension] - 2025-05-13
 - Analyze token stats, info and historical prices
 - Analyze wallet portfolio

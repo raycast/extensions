@@ -2,7 +2,7 @@ import * as React from "react";
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { CustomCommandCreateConfigurationParams } from "./types";
 
-const DEEP_LINK = "raycast://extensions/cyxn/query-chatgpt/query-chatgpt-execute-custom-command";
+const DEEP_LINK = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/cyxn/query-chatgpt/query-chatgpt-execute-custom-command`;
 
 function composeFullUrl({ prompt, gptUrl, withCustomQuery }: CustomCommandCreateConfigurationParams): string {
   const args = {

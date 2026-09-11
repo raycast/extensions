@@ -1,7 +1,7 @@
 import { LaunchProps } from "@raycast/api";
-import { StartOptions } from "pm2";
+import type { StartOptions } from "pm2";
 import { LaunchOptions, callbackLaunchCommand } from "raycast-cross-extension";
-import { checkIfNeedSetup, runPm2Command } from "./utils.js";
+import { runPm2Command } from "./utils.js";
 import { Pm2Command, Pm2Process, RuntimeOptions } from "./types.js";
 
 type LaunchContext = {
@@ -15,9 +15,6 @@ export default async function Api({ launchContext = {} }: LaunchProps<{ launchCo
   const { command, options, runtimeOptions, callbackLaunchOptions } = launchContext;
 
   if (command && options !== undefined) {
-    await checkIfNeedSetup();
-
-    // @ts-expect-error: The input is fine here.
     await runPm2Command(command, options, runtimeOptions);
 
     if (callbackLaunchOptions) {

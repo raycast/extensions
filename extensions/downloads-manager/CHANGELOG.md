@@ -1,5 +1,66 @@
 # Downloads Manager Changelog
 
+## [Align shortcuts with Search Screenshots] - 2026-09-09
+
+Bring Downloads Manager closer to Raycast's native Screenshots extension's "Search Screenshots" command, making common file actions and keyboard shortcuts more consistent across Raycast.
+
+- Added a Primary Action preference to copy downloads with Enter, while keeping Open as the default.
+- Added pasting the selected download to the focused app with Command+Enter on macOS or Ctrl+Enter on Windows.
+- Added Open and Reveal shortcuts and switched Copy Path to Raycast's standard platform-specific shortcut.
+- Organized the action menu consistently across list and grid layouts.
+
+## [Add toggle to show filename being deleted permanently] - 2026-08-30
+
+- Added a toggle to the preference to show/hide the latest downloaded file being permanently deleted.
+
+## [Fix download management reliability] - 2026-08-25
+
+- Fixed moving downloads to Trash on macOS when the Downloads folder is backed by iCloud Drive, including keeping the list accurate when only some selected items move successfully ([#29951](https://github.com/raycast/extensions/issues/29951), [#30503](https://github.com/raycast/extensions/issues/30503)).
+- Reduced memory usage while loading large Downloads folders and generating text previews to prevent worker out-of-memory crashes ([#24383](https://github.com/raycast/extensions/issues/24383)).
+
+## [Add Copy Path action] - 2026-05-18
+
+- Added a "Copy Path" action to the Manage Downloads command that copies the focused download's absolute path as text (shortcut: `⌘⇧.` on macOS, `Ctrl+Shift+.` on Windows).
+
+## [Upgrade Delete Latest Download Command] - 2026-04-27
+
+- Address [#26296](https://github.com/raycast/extensions/issues/26296) by upgrading Delete Latest Download Command to support background deeplinks without focusing Raycast.
+- Added Toggle Deletion Behavior command to switch between moving downloads to Trash and permanently deleting them.
+- Added faster repeated deletion from Manage Downloads after confirming a move-to-Trash action once.
+- Documented that background permanent deletion requires foreground approval while foreground permanent deletion still prompts every time, and that canceling foreground permanent deletion disables background permanent deletion until the next approval.
+
+## [Add file preview] - 2026-02-25
+
+- Added file preview in Manage Downloads: image previews (macOS only) and metadata for downloaded files.
+- Added utility functions for Quick Look previews on macOS (using ql-manage).
+- Added pagination for Manage Downloads to combat OOM crashes
+- Added preference for toggling the preview image
+- Made action preferences persist using cached states
+- Added shortcut for toggling metadata view
+- Added sub-directory navigation
+
+## [AI tools] - 2025-12-25
+
+- Added the `Get Latest Download` tool to get the path of the latest download with Raycast AI.
+- Added the `Copy Latest Download` tool to copy the latest download with Raycast AI.
+- Added the `Delete Latest Download` tool to delete latest download with Raycast AI.
+- Added the `Open Latest Download` tool to open the latest download with Raycast AI.
+- Added the `Paste Latest Download` tool to paste the latest download into the currently opened window with Raycast AI.
+- Added the `Show Latest Download` tool highlight the latest download in the downloads folder with Raycast AI.
+
+## [Add Windows support] - 2025-12-19
+
+- Added support for Windows
+
+## [Fixes] - 2025-12-10
+
+- Fixes [#23514](https://github.com/raycast/extensions/issues/23514)
+- Updated dependencies
+
+## [Add Grid layout] - 2025-12-01
+
+- Added a Grid layout to the Manage Downloads command. Comes with an Action to toggle between layouts as well as a Preference for setting the default layout
+
 ## [Add delete last downloaded item command] - 2025-06-03
 
 - Added the command `Delete Latest Download`, which deletes the latest download.

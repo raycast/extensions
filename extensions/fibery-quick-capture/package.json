@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fibery-quick-capture",
+  "title": "Fibery Quick Capture",
+  "description": "Quickly capture tasks in any Fibery database",
+  "icon": "fibery-icon.png",
+  "author": "janjezek",
+  "keywords": [
+    "fibery",
+    "task",
+    "todo",
+    "capture"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Fibery Task",
+      "description": "Quickly save a task to Fibery",
+      "icon": "fibery-icon.png",
+      "keywords": [
+        "todo",
+        "capture"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workspace",
+      "title": "Fibery Workspace",
+      "description": "Your Fibery workspace name or full URL",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "acme or https://acme.fibery.io"
+    },
+    {
+      "name": "apiToken",
+      "title": "Fibery API Token",
+      "description": "Create one from Workspace menu → API Tokens in Fibery",
+      "type": "password",
+      "required": true,
+      "placeholder": "Paste your API token"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.2",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
+}

@@ -4,8 +4,6 @@ import { Provider, Message } from "../base";
 import { Prompt } from "../prompt";
 import { TranslateQuery } from "../types";
 
-const MODEL_NAME = "gpt-3.5-turbo";
-
 export default class extends Provider {
   constructor(_: ProviderProps) {
     super(_);
@@ -36,7 +34,7 @@ export default class extends Provider {
       }\n${contentPrompt}\n`;
 
       const resp = await AI.ask(prompt, {
-        model: MODEL_NAME,
+        model: AI.Model["OpenAI_GPT-4.1"],
         creativity: "low",
         signal,
       });

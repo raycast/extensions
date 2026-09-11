@@ -1,13 +1,37 @@
 import { useState } from "react";
-import { Icon, ActionPanel, Action, confirmAlert, Color, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Icon,
+  ActionPanel,
+  Action,
+  confirmAlert,
+  Color,
+  showToast,
+  Toast,
+  useNavigation,
+  Keyboard,
+} from "@raycast/api";
 import { getAvatarIcon, MutatePromise } from "@raycast/utils";
 import { User } from "../api/users";
-import { Project, addProject, removeProject } from "../api/projects";
+import { Project, addProject, removeProject, Section, addTaskToSection } from "../api/projects";
+import { Tag, addTag, removeTag } from "../api/tags";
 import { useUsers } from "../hooks/useUsers";
 import { useProjects } from "../hooks/useProjects";
+import { useSections } from "../hooks/useSections";
+import { useTags } from "../hooks/useTags";
 import { asanaToRaycastColor } from "../helpers/colors";
 import { getErrorMessage } from "../helpers/errors";
-import { Task, updateTask, deleteTask as apiDeleteTask, CustomField, EnumValue } from "../api/tasks";
+import {
+  Task,
+  updateTask,
+  deleteTask as apiDeleteTask,
+  CustomField,
+  EnumValue,
+  removeTaskParent,
+  getSubtasks,
+} from "../api/tasks";
+import ParentTaskPicker from "./ParentTaskPicker";
+import CreateSubtaskForm from "./CreateSubtaskForm";
+import RenameTaskForm from "./RenameTaskForm";
 import { format } from "date-fns";
 import { partition } from "lodash";
 
@@ -17,6 +41,7 @@ type TaskActionProps = {
   isDetail?: boolean;
   mutateList?: MutatePromise<Task[] | undefined>;
   mutateDetail?: MutatePromise<Task>;
+  mutateSubtasks?: MutatePromise<Task[] | undefined>;
 };
 
 type MutateParams = {
@@ -25,8 +50,15 @@ type MutateParams = {
   rollbackUpdate?: <T extends Task>(task: T) => T;
 };
 
-export default function TaskActions({ task, workspace, isDetail, mutateList, mutateDetail }: TaskActionProps) {
-  const { pop } = useNavigation();
+export default function TaskActions({
+  task,
+  workspace,
+  isDetail,
+  mutateList,
+  mutateDetail,
+  mutateSubtasks,
+}: TaskActionProps) {
+  const { pop, push } = useNavigation();
 
   async function mutate({ asyncUpdate, optimisticUpdate, rollbackUpdate }: MutateParams) {
     await Promise.all([
@@ -146,8 +178,59 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
     }
   }
 
+  async function convertToTask() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Converting to task" });
+
+      const asyncUpdate = removeTaskParent(task.gid);
+
+      await mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return { ...task, parent: null };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Converted to task",
+        message: `"${task.name}" is now a top-level task`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to convert to task",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function handleConvertToSubtask() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Checking for subtasks" });
+
+      const subtasks = await getSubtasks(task.gid);
+      if (subtasks.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot convert to subtask",
+          message: "This task has subtasks. Remove them first.",
+        });
+        return;
+      }
+
+      push(<ParentTaskPicker task={task} workspace={workspace!} mutateList={mutateList} mutateDetail={mutateDetail} />);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to check subtasks",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   const openTaskInBrowserAction = (
-    <Action.OpenInBrowser url={task.permalink_url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+    <Action.OpenInBrowser url={task.permalink_url} shortcut={Keyboard.Shortcut.Common.Open} />
   );
 
   return (
@@ -163,9 +246,39 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
       {!isDetail ? openTaskInBrowserAction : null}
 
       <ActionPanel.Section>
+        {!task.parent && workspace && (
+          <Action.Push
+            title="Add Subtask"
+            icon={Icon.Plus}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "n" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+            }}
+            target={<CreateSubtaskForm parentTask={task} workspace={workspace} mutateSubtasks={mutateSubtasks} />}
+          />
+        )}
+
+        {!task.parent && workspace && (
+          <Action title="Convert to Subtask" icon={Icon.ArrowDown} onAction={handleConvertToSubtask} />
+        )}
+
+        {task.parent && <Action title="Convert to Task" icon={Icon.ArrowUp} onAction={convertToTask} />}
+
+        <Action.Push
+          title="Rename Task"
+          icon={Icon.Pencil}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "r" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+          }}
+          target={<RenameTaskForm task={task} mutateList={mutateList} mutateDetail={mutateDetail} />}
+        />
+
         <UsersSubmenu workspace={workspace} task={task} mutate={mutate} />
         <DueOnSubMenu task={task} mutate={mutate} />
         <ProjectsSubmenu workspace={workspace} task={task} mutate={mutate} />
+        <SectionsSubmenu task={task} mutate={mutate} />
+        <TagsSubmenu workspace={workspace} task={task} mutate={mutate} />
 
         {task.custom_fields &&
           task.custom_fields.length > 0 &&
@@ -179,7 +292,7 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
           style={Action.Style.Destructive}
           title="Delete Task"
           icon={Icon.Trash}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           onAction={deleteTask}
         />
       </ActionPanel.Section>
@@ -188,29 +301,35 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
         <Action.CopyToClipboard
           title="Copy Task URL"
           content={task.permalink_url}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          shortcut={Keyboard.Shortcut.Common.CopyPath}
         />
 
-        <Action.CopyToClipboard
-          title="Copy Task Name"
-          content={task.name}
-          shortcut={{ modifiers: ["cmd"], key: "." }}
-        />
+        <Action.CopyToClipboard title="Copy Task Name" content={task.name} shortcut={Keyboard.Shortcut.Common.Pin} />
 
         <Action.CopyToClipboard
           title="Copy Task Formatted URL"
           content={`[${task.name}](${task.permalink_url})`}
-          shortcut={{ modifiers: ["cmd", "ctrl"], key: "." }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "ctrl"], key: "." },
+            Windows: { modifiers: ["ctrl", "alt"], key: "." },
+          }}
         />
 
-        <Action.CopyToClipboard title="Copy Task ID" content={task.gid} shortcut={{ modifiers: ["cmd"], key: "i" }} />
+        <Action.CopyToClipboard
+          title="Copy Task ID"
+          content={task.gid}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "i" },
+            Windows: { modifiers: ["ctrl"], key: "i" },
+          }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={() => {
             if (mutateList) {
               mutateList();
@@ -234,6 +353,7 @@ type UsersSubmenuProps = {
 
 type ProjectsSubmenuProps = UsersSubmenuProps;
 type DueOnSubmenuProps = UsersSubmenuProps;
+type SectionsSubmenuProps = Omit<UsersSubmenuProps, "workspace">;
 
 function UsersSubmenu({ workspace, task, mutate }: UsersSubmenuProps) {
   const [load, setLoad] = useState(false);
@@ -270,7 +390,10 @@ function UsersSubmenu({ workspace, task, mutate }: UsersSubmenuProps) {
     <ActionPanel.Submenu
       title="Assign to"
       icon={Icon.AddPerson}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "a" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+      }}
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
@@ -335,7 +458,14 @@ function ProjectsSubmenu({ workspace, task, mutate }: ProjectsSubmenuProps) {
   });
 
   return (
-    <ActionPanel.Submenu title="Change Project" icon={Icon.Folder} shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}>
+    <ActionPanel.Submenu
+      title="Change Project"
+      icon={Icon.Folder}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "p" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+      }}
+    >
       {isLoading ? (
         <Action title="Loading…" />
       ) : (
@@ -404,7 +534,10 @@ function DueOnSubMenu({ task, mutate }: DueOnSubmenuProps) {
 
   return (
     <Action.PickDate
-      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "d" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+      }}
       icon={Icon.Calendar}
       type={Action.PickDate.Type.Date}
       title="Set Due Date…"
@@ -418,6 +551,58 @@ type CustomFieldSubmenuProps = {
   field: CustomField;
   mutate: (params: MutateParams) => void;
 };
+
+function SectionsSubmenu({ task, mutate }: SectionsSubmenuProps) {
+  const selectedProjectId = task.projects && task.projects.length === 1 ? task.projects[0].gid : undefined;
+  const { data: sections, isLoading } = useSections(selectedProjectId);
+
+  async function moveToSection(section: Section) {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Moving to section" });
+
+      const asyncUpdate = addTaskToSection(task.gid, section.gid);
+
+      mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return { ...task, assignee_section: section };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Moved to section",
+        message: section.name,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to move to section",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  if (!selectedProjectId) {
+    return null;
+  }
+
+  return (
+    <ActionPanel.Submenu title="Move to Section" icon={Icon.Tag} shortcut={Keyboard.Shortcut.Common.Duplicate}>
+      {isLoading ? (
+        <Action title="Loading…" />
+      ) : (
+        <>
+          {sections?.map((section) => {
+            return (
+              <Action key={section.gid} title={section.name} icon={Icon.List} onAction={() => moveToSection(section)} />
+            );
+          })}
+        </>
+      )}
+    </ActionPanel.Submenu>
+  );
+}
 
 function CustomFieldSubmenu({ task, mutate, field }: CustomFieldSubmenuProps) {
   async function updateField(option: EnumValue | null) {
@@ -478,6 +663,91 @@ function CustomFieldSubmenu({ task, mutate, field }: CustomFieldSubmenuProps) {
           })}
         </>
       ) : null}
+    </ActionPanel.Submenu>
+  );
+}
+
+type TagsSubmenuProps = {
+  task: Task;
+  workspace?: string;
+  mutate: (params: MutateParams) => void;
+};
+
+function TagsSubmenu({ workspace, task, mutate }: TagsSubmenuProps) {
+  const [load, setLoad] = useState(false);
+  const { data: tags, isLoading } = useTags(workspace, { execute: load });
+
+  const changeTag = async (tag: Tag, action: "add" | "remove") => {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: action === "add" ? "Adding tag" : "Removing tag",
+      });
+
+      const asyncUpdate = action === "add" ? addTag(task.gid, tag.gid) : removeTag(task.gid, tag.gid);
+
+      await mutate({
+        asyncUpdate,
+        optimisticUpdate: (task) => {
+          const newTags = action === "add" ? [...task.tags, tag] : task.tags.filter((t) => t.gid !== tag.gid);
+          return { ...task, tags: newTags };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: action === "add" ? "Added tag" : "Removed tag",
+        message:
+          action === "add" ? `"${tag.name}" added to "${task.name}"` : `"${tag.name}" removed from "${task.name}"`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to change tag",
+        message: getErrorMessage(error),
+      });
+    }
+  };
+
+  const [tagsToAdd, tagsToRemove] = partition(tags || [], (tag) => {
+    return !task.tags.find((t) => t.gid === tag.gid);
+  });
+
+  return (
+    <ActionPanel.Submenu
+      title="Change Tags"
+      icon={Icon.Tag}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "t" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "t" },
+      }}
+      onOpen={() => setLoad(true)}
+    >
+      {isLoading ? (
+        <Action title="Loading…" />
+      ) : (
+        <>
+          {tagsToAdd && tagsToAdd.length > 0 ? (
+            <ActionPanel.Submenu title="Add Tag" icon={Icon.Plus}>
+              {tagsToAdd.map((tag) => (
+                <Action key={tag.gid} title={tag.name} icon={Icon.Tag} onAction={() => changeTag(tag, "add")} />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
+
+          {tagsToRemove && tagsToRemove.length > 0 ? (
+            <ActionPanel.Submenu title="Remove Tag" icon={Icon.Minus}>
+              {tagsToRemove.map((tag) => (
+                <Action key={tag.gid} title={tag.name} icon={Icon.Tag} onAction={() => changeTag(tag, "remove")} />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
+
+          {(!tagsToAdd || tagsToAdd.length === 0) && (!tagsToRemove || tagsToRemove.length === 0) ? (
+            <Action title="No Tags Available" />
+          ) : null}
+        </>
+      )}
     </ActionPanel.Submenu>
   );
 }

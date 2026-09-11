@@ -57,5 +57,8 @@
   },
   "external": [
     "electron"
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

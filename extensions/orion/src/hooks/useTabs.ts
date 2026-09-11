@@ -7,18 +7,30 @@ async function fetchLocalTabs(): Promise<Tab[]> {
   const res = await executeJxa(`
     const orion = Application("${getOrionAppIdentifier()}");
     const tabs = [];
+    const seen = {};
     orion.windows().forEach(window => {
-      const windowTabs = window.tabs();
-      if (windowTabs) {
-        windowTabs.forEach(tab => {
-          if (!tabs.find(existingTab => existingTab.url === tab.url())) {
-            tabs.push({
-              title: tab.name(),
-              url: tab.url() || '',
-              window_id: window.id(),
-            });
-          }
-        })
+      const windowId = window.id();
+      // Orion's scripting bridge fails when reading 'URL'/'name' from the tab
+      // objects returned by window.tabs(), but bulk property access on the tab
+      // collection (window.tabs.url() / .name()) works, so read them that way.
+      let urls, names;
+      try {
+        urls = window.tabs.url();
+        names = window.tabs.name();
+      } catch (e) {
+        return;
+      }
+      const count = Math.min(urls.length, names.length);
+      for (let i = 0; i < count; i++) {
+        const url = urls[i] || '';
+        if (!seen[url]) {
+          seen[url] = true;
+          tabs.push({
+            title: names[i],
+            url: url,
+            window_id: windowId,
+          });
+        }
       }
     });
     tabs

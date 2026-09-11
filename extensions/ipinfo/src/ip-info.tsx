@@ -8,7 +8,7 @@ interface CommandArguments {
 
 export default function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
   const { ipAddress } = props.arguments;
-  const { isLoading, ipInfo, errorText } = useIpInfo(ipAddress);
+  const { isLoading, ipInfo, errorText } = useIpInfo(ipAddress.trim());
 
   if (errorText) {
     return (

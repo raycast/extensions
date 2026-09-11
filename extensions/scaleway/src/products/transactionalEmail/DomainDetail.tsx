@@ -1,10 +1,10 @@
 import { List } from '@raycast/api'
-import type { TransactionalEmail } from '@scaleway/sdk'
+import type { Temv1alpha1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 import { getDomainStatusIcon } from './status'
 
 type DomainProps = {
-  domain: TransactionalEmail.v1alpha1.Domain
+  domain: Temv1alpha1.Domain
 }
 
 export const DomainDetail = ({ domain }: DomainProps) => (

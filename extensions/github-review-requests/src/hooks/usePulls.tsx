@@ -28,7 +28,7 @@ const usePulls = () => {
         owner: owner.login,
         ...rest,
       })),
-    [updatedPulls]
+    [updatedPulls],
   );
 
   const runPullIteration = () =>

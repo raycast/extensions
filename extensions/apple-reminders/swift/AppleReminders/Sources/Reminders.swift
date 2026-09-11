@@ -12,6 +12,7 @@ struct Location: Codable {
 struct Reminder: Codable {
   let id: String
   let openUrl: String
+  let attachedUrls: [String]
   let title: String
   let notes: String
   let dueDate: String?
@@ -354,12 +355,8 @@ struct SetDueDatePayload: Decodable {
     throw RemindersError.noReminderFound
   }
 
-  // Remove all alarms, otherwise overdue reminders won't be properly updated natively
-  if let alarms = item.alarms {
-    for alarm in alarms {
-      item.removeAlarm(alarm)
-    }
-  }
+  // Preserve location-based alarms when changing the due date.
+  removeTimeBasedAlarms(from: item)
 
   if let dueDateString = payload.dueDate {
     if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
@@ -399,6 +396,14 @@ enum LocationError: Error {
   case geocodingFailed
   case invalidProximityValue
   case other(Error)
+}
+
+func removeTimeBasedAlarms(from item: EKCalendarItem) {
+  if let alarms = item.alarms {
+    for alarm in alarms where !alarm.isLocationAlarm {
+      item.removeAlarm(alarm)
+    }
+  }
 }
 
 func createLocationAlarm(address: String, proximity: String?, radius: Double?) async throws
@@ -498,12 +503,8 @@ struct UpdateReminderPayload: Decodable {
   }
 
   if payload.dueDate != nil {
-    // Remove all alarms, otherwise overdue reminders won't be properly updated natively
-    if let alarms = item.alarms {
-      for alarm in alarms {
-        item.removeAlarm(alarm)
-      }
-    }
+    // Preserve location-based alarms when changing the due date.
+    removeTimeBasedAlarms(from: item)
 
     if let dueDateString = payload.dueDate, !dueDateString.isEmpty {
       if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {

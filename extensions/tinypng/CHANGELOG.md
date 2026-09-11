@@ -1,5 +1,17 @@
 # TinyPNG Changelog
 
+## [Enhancement] - 2026-08-29
+
+- Add support for Windows platform
+- Add `Resizing Destination Folder Path` and `Save Single File Next to Original` preferences
+- Filter file selections to supported image types
+- Show image count in progress toast
+- Bump all dependencies to the latest
+
+## [New Command] - 2026-06-29
+
+- Added `Compress Images Multiple Times` to run TinyPNG compression multiple times in one command.
+
 ## [Updated dependency] - 2025-03-04
 
 - Updated `vitest` version to `^2.1.9`

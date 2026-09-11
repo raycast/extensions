@@ -1,16 +1,16 @@
 import { setTimeout } from "node:timers/promises";
 import { useEffect, useState } from "react";
 import { Action, Icon, open } from "@raycast/api";
-import { checkIfSayIsRunning, say, killRunningSay } from "mac-say";
 import { systemDefault } from "../constants.js";
-import { useSaySettings } from "../utils.js";
+import { checkIfSayIsRunning, killRunningSay, say } from "../speech.js";
+import { getConfigureSpeechTitle, getSystemSettingsUrl, useSaySettings } from "../utils.js";
 
 export const ConfigureSpokenContent = () => (
   <Action
     icon={{ source: "spoken-content.png" }}
-    title="Configure Spoken Content"
+    title={getConfigureSpeechTitle()}
     onAction={() => {
-      open("x-apple.systempreferences:com.apple.preference.universalaccess");
+      open(getSystemSettingsUrl());
     }}
   ></Action>
 );

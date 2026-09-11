@@ -807,5 +807,15 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1",
+    "@raycast/api": {
+      "@types/react": "18.3.12"
+    }
   }
 }

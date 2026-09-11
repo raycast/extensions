@@ -28,7 +28,7 @@ import {
   UpdateTypeForm,
   ViewType,
 } from "..";
-import { deleteObject, deleteProperty, deleteType, getRawObject, getRawType } from "../../api";
+import { deleteObject, deleteProperty, deleteType, getRawObject, getRawType, removeObjectsFromList } from "../../api";
 import {
   BodyFormat,
   Member,
@@ -42,6 +42,7 @@ import {
 } from "../../models";
 import {
   addPinned,
+  anytypeObjectDeeplink,
   bundledPropKeys,
   localStorageKeys,
   moveDownInPinned,
@@ -67,6 +68,9 @@ type ObjectActionsProps = {
   shouldShowSidebar?: boolean;
   onToggleSidebar?: () => void;
   searchText?: string;
+  listId?: string;
+  listName?: string;
+  listLayout?: ObjectLayout;
 };
 
 export function ObjectActions({
@@ -86,10 +90,13 @@ export function ObjectActions({
   shouldShowSidebar,
   onToggleSidebar,
   searchText,
+  listId,
+  listName,
+  listLayout,
 }: ObjectActionsProps) {
   const { pop, push } = useNavigation();
   const { primaryAction } = getPreferenceValues();
-  const objectUrl = `anytype://object?objectId=${objectId}&spaceId=${space?.id}`;
+  const objectUrl = anytypeObjectDeeplink(space?.id, objectId);
   const pinSuffixForView = isGlobalSearch
     ? localStorageKeys.suffixForGlobalSearch
     : localStorageKeys.suffixForViewsPerSpace(space?.id, viewType);
@@ -127,11 +134,11 @@ export function ObjectActions({
       }
       try {
         if (isType) {
-          await deleteType(space.id, objectId);
+          await deleteType(space?.id, objectId);
         } else if (isProperty) {
-          await deleteProperty(space.id, objectId);
+          await deleteProperty(space?.id, objectId);
         } else {
-          await deleteObject(space.id, objectId);
+          await deleteObject(space?.id, objectId);
         }
         if (mutate) {
           await Promise.all(mutate.map((m) => m()));
@@ -153,8 +160,40 @@ export function ObjectActions({
     }
   }
 
+  async function handleRemoveFromList() {
+    if (!listId || !listName) return;
+
+    const confirm = await confirmAlert({
+      title: `Remove from ${listName}`,
+      message: `Are you sure you want to remove "${title}" from ${listName}?`,
+      icon: { source: Icon.XMarkTopRightSquare, tintColor: Color.Orange },
+    });
+
+    if (confirm) {
+      try {
+        await removeObjectsFromList(space?.id, listId, [objectId]);
+        if (mutate) {
+          await Promise.all(mutate.map((m) => m()));
+        }
+        if (mutateObject) {
+          await mutateObject();
+        }
+        if (mutateViews) {
+          await mutateViews();
+        }
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Removed from list",
+          message: `"${title}" has been removed from ${listName}.`,
+        });
+      } catch (error) {
+        await showFailureToast(error, { title: `Failed to remove from ${listName}` });
+      }
+    }
+  }
+
   async function handleMoveUpInFavorites() {
-    await moveUpInPinned(space.id, objectId, pinSuffixForView);
+    await moveUpInPinned(space?.id, objectId, pinSuffixForView);
     if (mutate) {
       await Promise.all(mutate.map((m) => m()));
     }
@@ -166,7 +205,7 @@ export function ObjectActions({
   }
 
   async function handleMoveDownInFavorites() {
-    await moveDownInPinned(space.id, objectId, pinSuffixForView);
+    await moveDownInPinned(space?.id, objectId, pinSuffixForView);
     if (mutate) {
       await Promise.all(mutate.map((m) => m()));
     }
@@ -179,9 +218,9 @@ export function ObjectActions({
 
   async function handlePin() {
     if (isPinned) {
-      await removePinned(space.id, objectId, pinSuffixForView, title, getContextLabel());
+      await removePinned(space?.id, objectId, pinSuffixForView, title, getContextLabel());
     } else {
-      await addPinned(space.id, objectId, pinSuffixForView, title, getContextLabel());
+      await addPinned(space?.id, objectId, pinSuffixForView, title, getContextLabel());
     }
     if (mutate) {
       await Promise.all(mutate.map((m) => m()));
@@ -217,7 +256,7 @@ export function ObjectActions({
   //! Member management not enabled yet
   //   async function handleApproveMember(identity: string, name: string, role: UpdateMemberRole) {
   //     try {
-  //       await updateMember(space.id, identity, { status: MemberStatus.Active, role });
+  //       await updateMember(space?.id, identity, { status: MemberStatus.Active, role });
   //       if (mutate) {
   //         for (const m of mutate) {
   //           await m();
@@ -242,7 +281,7 @@ export function ObjectActions({
 
   //     if (confirm) {
   //       try {
-  //         await updateMember(space.id, identity, { status: MemberStatus.Declined });
+  //         await updateMember(space?.id, identity, { status: MemberStatus.Declined });
   //         if (mutate) {
   //           for (const m of mutate) {
   //             await m();
@@ -268,7 +307,7 @@ export function ObjectActions({
 
   //     if (confirm) {
   //       try {
-  //         await updateMember(space.id, identity, { status: MemberStatus.Removed });
+  //         await updateMember(space?.id, identity, { status: MemberStatus.Removed });
   //         if (mutate) {
   //           for (const m of mutate) {
   //             await m();
@@ -287,7 +326,7 @@ export function ObjectActions({
 
   //   async function handleChangeMemberRole(identity: string, name: string, role: UpdateMemberRole) {
   //     try {
-  //       await updateMember(space.id, identity, { status: MemberStatus.Active, role });
+  //       await updateMember(space?.id, identity, { status: MemberStatus.Active, role });
   //       if (mutate) {
   //         for (const m of mutate) {
   //           await m();
@@ -343,7 +382,7 @@ export function ObjectActions({
           <Action.Push
             icon={Icon.List}
             title="Show List"
-            target={<CollectionList space={space} listId={objectId} listName={title} />}
+            target={<CollectionList space={space} listId={objectId} listName={title} listLayout={layout} />}
           />
         )}
         {isType && (
@@ -386,10 +425,10 @@ export function ObjectActions({
             title={"Edit Object"}
             shortcut={Keyboard.Shortcut.Common.Edit}
             onAction={async () => {
-              const { object } = await getRawObject(space.id, objectId, BodyFormat.Markdown);
+              const { object } = await getRawObject(space?.id, objectId, BodyFormat.Markdown);
               push(
                 <UpdateObjectForm
-                  spaceId={space.id}
+                  spaceId={space?.id}
                   object={object}
                   mutateObjects={mutate as MutatePromise<SpaceObject[]>[]}
                   mutateObject={mutateObject}
@@ -404,8 +443,8 @@ export function ObjectActions({
             title={"Edit Type"}
             shortcut={Keyboard.Shortcut.Common.Edit}
             onAction={async () => {
-              const { type } = await getRawType(space.id, objectId);
-              push(<UpdateTypeForm spaceId={space.id} type={type} mutateTypes={mutate as MutatePromise<Type[]>[]} />);
+              const { type } = await getRawType(space?.id, objectId);
+              push(<UpdateTypeForm spaceId={space?.id} type={type} mutateTypes={mutate as MutatePromise<Type[]>[]} />);
             }}
           />
         )}
@@ -416,7 +455,7 @@ export function ObjectActions({
             shortcut={Keyboard.Shortcut.Common.Edit}
             target={
               <UpdatePropertyForm
-                spaceId={space.id}
+                spaceId={space?.id}
                 property={object as Property}
                 mutateProperties={mutate as MutatePromise<Property[]>[]}
               />
@@ -426,15 +465,18 @@ export function ObjectActions({
         {isDetailView && (
           <Action.CopyToClipboard
             title={`Copy Markdown`}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "c" },
+              Windows: { modifiers: ["ctrl"], key: "c" },
+            }}
             content={(object as SpaceObjectWithBody)?.markdown}
           />
         )}
         {!isType && !isProperty && !isMember && (
           <>
-            <ListSubmenu spaceId={space.id} objectId={objectId} />
+            <ListSubmenu spaceId={space?.id} objectId={objectId} />
             <TagSubmenu
-              spaceId={space.id}
+              spaceId={space?.id}
               object={object as SpaceObject | SpaceObjectWithBody}
               mutate={mutate}
               mutateObject={mutateObject}
@@ -452,26 +494,43 @@ export function ObjectActions({
             <Action
               icon={isPinned ? Icon.StarDisabled : Icon.Star}
               title={isPinned ? `Unpin ${getContextLabel()}` : `Pin ${getContextLabel()}`}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "f" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+              }}
               onAction={handlePin}
             />
             {isPinned && (
               <>
                 <Action
                   icon={Icon.ArrowUp}
-                  title="Move Up in Pinned" // eslint-disable-line @raycast/prefer-title-case
-                  shortcut={{ modifiers: ["opt", "cmd"], key: "arrowUp" }}
+                  title="Move Up in Pinned"
+                  shortcut={{
+                    macOS: { modifiers: ["opt", "cmd"], key: "arrowUp" },
+                    Windows: { modifiers: ["alt", "ctrl"], key: "arrowUp" },
+                  }}
                   onAction={handleMoveUpInFavorites}
                 />
                 <Action
                   icon={Icon.ArrowDown}
-                  title="Move Down in Pinned" // eslint-disable-line @raycast/prefer-title-case
-                  shortcut={{ modifiers: ["opt", "cmd"], key: "arrowDown" }}
+                  title="Move Down in Pinned"
+                  shortcut={{
+                    macOS: { modifiers: ["opt", "cmd"], key: "arrowDown" },
+                    Windows: { modifiers: ["alt", "ctrl"], key: "arrowDown" },
+                  }}
                   onAction={handleMoveDownInFavorites}
                 />
               </>
             )}
           </>
+        )}
+        {listId && listName && !isMember && listLayout !== ObjectLayout.Set && (
+          <Action
+            icon={Icon.XMarkTopRightSquare}
+            title={`Remove from ${listName}`}
+            style={Action.Style.Destructive}
+            onAction={handleRemoveFromList}
+          />
         )}
         {!isMember && (
           <Action
@@ -492,11 +551,11 @@ export function ObjectActions({
             shortcut={Keyboard.Shortcut.Common.New}
             onAction={() => {
               if (isType) {
-                push(<CreateTypeForm draftValues={{ spaceId: space.id, name: searchText }} enableDrafts={false} />);
+                push(<CreateTypeForm draftValues={{ spaceId: space?.id, name: searchText }} enableDrafts={false} />);
               } else if (isProperty) {
-                push(<CreatePropertyForm spaceId={space.id} draftValues={{ name: searchText || "" }} />);
+                push(<CreatePropertyForm spaceId={space?.id} draftValues={{ name: searchText || "" }} />);
               } else {
-                push(<CreateObjectForm draftValues={{ spaceId: space.id, name: searchText }} enableDrafts={false} />);
+                push(<CreateObjectForm draftValues={{ spaceId: space?.id, name: searchText }} enableDrafts={false} />);
               }
             }}
           />
@@ -511,7 +570,10 @@ export function ObjectActions({
           <Action
             icon={shouldShowSidebar ? Icon.EyeDisabled : Icon.Eye}
             title={shouldShowSidebar ? "Hide Sidebar" : "Show Sidebar"}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "d" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+            }}
             onAction={onToggleSidebar}
           />
         )}

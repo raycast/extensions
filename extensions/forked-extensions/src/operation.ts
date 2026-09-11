@@ -1,8 +1,21 @@
-import { Clipboard, Toast, confirmAlert, openExtensionPreferences, showToast } from "@raycast/api";
+import path from "node:path";
+import { Clipboard, LocalStorage, Toast, confirmAlert, openExtensionPreferences, showToast } from "@raycast/api";
 import * as api from "./api.js";
 import { catchError } from "./errors.js";
 import * as git from "./git.js";
-import { getCommitsText } from "./utils.js";
+import { formatRepositoryCleanupResult } from "./repository-maintenance.js";
+import type { RepositoryCleanupPreview } from "./repository-maintenance.js";
+import { getCloudSyncedPathRoot, getCommitsText, simplifyPath } from "./utils.js";
+
+/**
+ * The storage key prefix for acknowledged cloud-synced repository path warnings.
+ */
+const cloudSyncedRepositoryPathWarningStorageKey = "cloud-synced-repository-path-warning:";
+
+type SpawnOptions<T> = {
+  requiresCleanStatus?: boolean;
+  getCompletedMessage?: (result: T) => string | Toast.Options;
+};
 
 /**
  * Class to manage operations related to forked extensions.
@@ -27,7 +40,10 @@ class Operation {
    * Initializes the repository by cloning it if it doesn't exist.
    */
   init = async () => {
-    if (this.isOperating) return;
+    if (this.isOperating) {
+      await this.showOperationBusyToast();
+      return;
+    }
     try {
       this.isOperating = true;
       const gitInstalled = await git.checkIfGitIsValid();
@@ -45,11 +61,19 @@ class Operation {
         return;
       }
 
+      await git.resolveRepositoryPath();
+      const localForkedRepository = await git.getManagedForkedRepository();
+      const forkedRepository = localForkedRepository || (await api.getForkedRepository());
+      await git.resolveRepositoryPath(forkedRepository);
+
+      const shouldContinue = await this.confirmCloudSyncedRepositoryPath();
+      if (!shouldContinue) return;
+
       this.showToast({ title: "Initializing repository" });
-      const forkedRepository = await git.initRepository();
+      const initializedRepository = await git.initRepository(forkedRepository);
       await git.checkIfSparseCheckoutEnabled();
-      await git.setUpstream(forkedRepository);
-      return forkedRepository;
+      await git.setUpstream(initializedRepository);
+      return initializedRepository;
     } finally {
       this.isOperating = false;
       this.hideToast();
@@ -81,10 +105,61 @@ class Operation {
     );
 
   /**
+   * Warns once before initializing a repository inside a potentially cloud-synced location.
+   * @returns Whether the initialization should continue.
+   */
+  private confirmCloudSyncedRepositoryPath = async () => {
+    const cloudSyncedPathRoot = getCloudSyncedPathRoot(git.repositoryPath);
+    if (!cloudSyncedPathRoot) return true;
+
+    const hasRepository = await git.fileExists(path.join(git.repositoryPath, ".git"));
+    if (hasRepository) return true;
+
+    const warningKey = `${cloudSyncedRepositoryPathWarningStorageKey}${git.repositoryPath}`;
+    const acknowledgedWarning = await LocalStorage.getItem<string>(warningKey);
+    if (acknowledgedWarning === "true") return true;
+
+    return new Promise<boolean>((resolve, reject) => {
+      confirmAlert({
+        title: "Repository Path May Be Cloud-Synced",
+        message: `Your repository path ${simplifyPath(git.repositoryPath)} is inside ${cloudSyncedPathRoot}. If iCloud Drive or another cloud sync tool manages this folder, Git metadata may be duplicated or corrupted. We recommend choosing ~/Developer so the repository can be created at ~/Developer/forked-extensions instead.`,
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: catchError(async () => {
+            await openExtensionPreferences();
+            resolve(false);
+          }),
+        },
+        dismissAction: {
+          title: "Continue Anyway",
+          onAction: catchError(async () => {
+            await LocalStorage.setItem(warningKey, "true");
+            resolve(true);
+          }),
+        },
+      }).catch(reject);
+    });
+  };
+
+  /**
    * Pulls the latest changes from the remote forked repository.
    * @remarks This will checkout to main branch and merge the forked main branch into it.
    */
-  pull = async () => this.spawn(async () => git.syncFork(), "Pulling changes", "Pulled successfully");
+  pull = async () => this.spawn(async () => git.pullFork(), "Pulling changes", "Pulled successfully");
+
+  /**
+   * Cleans up and optimizes the managed repository object database.
+   * @param preview Repository statistics captured before user confirmation.
+   */
+  cleanUpRepository = async (preview: RepositoryCleanupPreview) =>
+    this.spawn(() => git.cleanUpRepository(preview), "Cleaning up repository", undefined, {
+      requiresCleanStatus: false,
+      getCompletedMessage: (result) => ({
+        title: "Repository Cleaned Up",
+        message: formatRepositoryCleanupResult(result),
+        style: Toast.Style.Success,
+      }),
+    });
 
   /**
    * Forks an extension by adding it to the sparse-checkout list.
@@ -152,6 +227,36 @@ class Operation {
     this.spawn(async () => git.sparseCheckoutRemove([extensionFolder]), "Removing extension", "Removed successfully");
 
   /**
+   * Adds a pattern to the sparse-checkout list.
+   * @param pattern The pattern of the sparse-checkout to add.
+   */
+  addSparseCheckoutPattern = async (pattern: string, onList?: () => Promise<void>) => {
+    this.spawn(
+      async () => {
+        await git.sparseCheckoutAdd([pattern]);
+        if (onList) await onList();
+      },
+      "Adding sparse-checkout pattern",
+      "Added successfully",
+    );
+  };
+
+  /**
+   * Removes a pattern from the sparse-checkout list.
+   * @param pattern The pattern of the sparse-checkout to remove.
+   */
+  removeSparseCheckoutPattern = async (pattern: string, onList?: () => Promise<void>) => {
+    this.spawn(
+      async () => {
+        await git.sparseCheckoutRemove([pattern]);
+        if (onList) await onList();
+      },
+      "Removing sparse-checkout pattern",
+      "Removed successfully",
+    );
+  };
+
+  /**
    * The singleton instance version of the the `showFailureToast` method.
    * @param error An unknown error to show in the failure toast.
    * @param options Optional toast options to customize the failure toast.
@@ -177,24 +282,30 @@ class Operation {
 
   /**
    * Executes a task with a loading toast and handles success or failure.
-   * @param task The task to execute, which returns a promise with void or string.
+   * @param task The task to execute.
    * @param loadingMessage The message to show while the task is loading.
    * @param completedMessage Optional message to show when the task completes successfully. If not provided, the string result of the task will be used. Otherwise, the toast will be hidden.
+   * @param options Optional operation behavior and result formatting.
    */
   private spawn = async <T>(
     task: () => Promise<T>,
     loadingMessage: string,
     completedMessage?: string | Toast.Options,
+    options: SpawnOptions<T> = {},
   ) => {
-    if (this.isOperating) return;
+    if (this.isOperating) {
+      await this.showOperationBusyToast();
+      return;
+    }
     try {
       this.isOperating = true;
-      await git.checkIfStatusClean();
+      if (options.requiresCleanStatus !== false) await git.checkIfStatusClean();
       this.showToast({ title: loadingMessage });
       const result = await task();
-      if (completedMessage) {
-        if (typeof completedMessage === "string") this.completeToast(completedMessage);
-        else this.showToast(completedMessage, true);
+      const resolvedCompletedMessage = options.getCompletedMessage?.(result) ?? completedMessage;
+      if (resolvedCompletedMessage) {
+        if (typeof resolvedCompletedMessage === "string") this.completeToast(resolvedCompletedMessage);
+        else this.showToast(resolvedCompletedMessage, true);
       } else if (typeof result === "string") {
         this.completeToast(result);
       } else {
@@ -237,6 +348,18 @@ class Operation {
    */
   private hideToast = async () => {
     if (this.toast.style === Toast.Style.Animated) this.toast.hide();
+  };
+
+  /**
+   * Shows a failure toast when an operation is already running.
+   */
+  private showOperationBusyToast = async () => {
+    const busyToast = new Toast({
+      title: "Operation Already Running",
+      message: "Please wait for the current Git operation to finish, then try again.",
+      style: Toast.Style.Failure,
+    });
+    await busyToast.show();
   };
 }
 

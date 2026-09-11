@@ -153,6 +153,26 @@
       ]
     },
     {
+      "name": "packTypeID",
+      "title": "Pack TypeID",
+      "description": "Convert a UUID to a packed Type ID with a suffix",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "suffix",
+          "type": "text",
+          "placeholder": "Suffix",
+          "required": true
+        },
+        {
+          "name": "uuid",
+          "type": "text",
+          "placeholder": "UUID",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "viewHistory",
       "title": "View History",
       "description": "View the UUID history",

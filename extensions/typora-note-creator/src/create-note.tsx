@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Form, showToast, Toast, popToRoot, Icon, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+  popToRoot,
+  Icon,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import { readdirSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
@@ -6,29 +16,36 @@ import { join } from "path";
 import { exec } from "child_process";
 
 function resolveNotesDir(): string {
-  const { notesDir } = getPreferenceValues<{ notesDir: string }>();
+  const { notesDir } = getPreferenceValues<Preferences.CreateNote>();
+  if (!notesDir) return "";
   return notesDir.startsWith("~") ? join(homedir(), notesDir.slice(1)) : notesDir;
 }
 
 function resolveNoteApp(): string {
-  type AppPickerValue = string | { name?: string; path?: string };
-  const { appPath } = getPreferenceValues<{ appPath: AppPickerValue }>();
-  if (typeof appPath === "string") {
-    return appPath;
-  }
-  if (appPath && typeof appPath === "object") {
-    return appPath.name || appPath.path || "Typora";
-  }
-  return "Typora";
+  const { appPath } = getPreferenceValues<Preferences.CreateNote>();
+  return appPath?.name || appPath?.path || "Typora";
 }
 
 export default function CreateNoteCommand() {
   const [templates, setTemplates] = useState<string[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const baseDir = resolveNotesDir();
+  const templateDir = baseDir ? join(baseDir, ".note-templates") : "";
 
   useEffect(() => {
-    const baseDir = resolveNotesDir();
-    const templateDir = join(baseDir, ".note-templates");
+    if (!baseDir) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Notes directory not configured",
+        message: "Open preferences to set it",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: () => openExtensionPreferences(),
+        },
+      });
+      setLoadingTemplates(false);
+      return;
+    }
 
     if (!existsSync(templateDir)) {
       mkdirSync(templateDir, { recursive: true });
@@ -46,7 +63,16 @@ export default function CreateNoteCommand() {
       return;
     }
 
-    const baseDir = resolveNotesDir();
+    if (!baseDir) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Notes directory not configured",
+        message: "Open preferences to set it",
+        primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
+      });
+      return;
+    }
+
     const folderPath = join(baseDir, folderName);
     const fileName = values.useIndex ? "index.md" : `${folderName}.md`;
     const filePath = join(folderPath, fileName);
@@ -84,15 +110,18 @@ export default function CreateNoteCommand() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Note" onSubmit={handleSubmit} icon={Icon.Document} />
-          <Action
-            title="Open Template Directory in Finder"
-            onAction={() => exec(`open "${join(resolveNotesDir(), ".note-templates")}"`)}
-            icon={Icon.Finder}
-          />
-          <Action.CopyToClipboard
-            title="Copy Template Directory Path"
-            content={join(resolveNotesDir(), ".note-templates")}
-          />
+          {baseDir ? (
+            <>
+              <Action
+                title="Open Template Directory in Finder"
+                onAction={() => exec(`open "${templateDir}"`)}
+                icon={Icon.Finder}
+              />
+              <Action.CopyToClipboard title="Copy Template Directory Path" content={templateDir} />
+            </>
+          ) : (
+            <Action title="Open Extension Preferences" onAction={() => openExtensionPreferences()} icon={Icon.Gear} />
+          )}
         </ActionPanel>
       }
       searchBarAccessory={
@@ -113,10 +142,11 @@ export default function CreateNoteCommand() {
         ))}
       </Form.Dropdown>
       <Form.Description
-        text={`The template directory is located at ".note-templates" under your notes root directory (${join(
-          resolveNotesDir(),
-          ".note-templates",
-        )}). This location is fixed and cannot be changed.`}
+        text={
+          baseDir
+            ? `The template directory is located at ".note-templates" under your notes root directory (${templateDir}). This location is fixed and cannot be changed.`
+            : `The notes directory is not configured yet. Open the extension preferences to set it.`
+        }
       />
     </Form>
   );

@@ -78,5 +78,8 @@
     "dev": "concurrently \"ray develop\" \"npm run generate -- --watch\"",
     "lint": "ray lint",
     "generate": "graphql-codegen --config codegen.ts"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -620,7 +620,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 ### ✨ New
 
-- **Fallback commands**: All commands (except menu-bar commands and commands with more than one required argument) can now be used as [fallback commands](https://manual.raycast.com/fallback-commands)! They should all work out of the box (e.g. a command that renders a List will receive `onSearchTextChange` with the fallback text on its first render, etc.) but you can customize the user experience with a new top-level prop `fallbackText`.
+- **Fallback commands**: All commands (except menu-bar commands and commands with more than one required argument) can now be used as [fallback commands](https://manual.raycast.com/v1/fallback-commands)! They should all work out of the box (e.g. a command that renders a List will receive `onSearchTextChange` with the fallback text on its first render, etc.) but you can customize the user experience with a new top-level prop `fallbackText`.
 - **List Accessories:** `date` and `text` accessories can now be colored.
 - **List Accessories:** We've added a new accessory type: `tag`.
 - **Metadata:** Label text can now also be colored.

@@ -11,7 +11,8 @@ export type RegexTrigger = {
 };
 
 export type Replacement = {
-  replace: string;
+  replace?: string;
+  image_path?: string;
 };
 
 export type Label = {
@@ -26,11 +27,31 @@ export type FilePath = {
   filePath: string;
 };
 
+export type EspansoVarParams = {
+  format?: string;
+  cmd?: string;
+  values?: string[];
+  echo?: string;
+  args?: string[];
+  [key: string]: unknown;
+};
+
+export type EspansoVar = {
+  name: string;
+  type: string;
+  params?: EspansoVarParams;
+};
+
 type BaseMatch = Replacement & (SingleTrigger | MultiTrigger | RegexTrigger);
 
-export type EspansoMatch = BaseMatch & Label & Form;
+export type EspansoMatch = BaseMatch & Label & Form & { vars?: EspansoVar[] };
 
-export type NormalizedEspansoMatch = EspansoMatch & MultiTrigger & FilePath & { category?: string };
+export type NormalizedEspansoMatch = EspansoMatch &
+  MultiTrigger &
+  FilePath & {
+    category?: string;
+    isRegex?: boolean;
+  };
 
 export type EspansoConfig = {
   config: string;
@@ -43,9 +64,17 @@ export type FormattedMatch = NormalizedEspansoMatch & {
   category: string;
   subcategory?: string;
   triggers: string[];
+  profile?: string;
 };
 
 export type CategoryDropdownProps = {
   readonly categories: string[];
   readonly onCategoryChange: (newValue: string) => void;
+  readonly separator: string;
+};
+
+export type ProfileDropdownProps = {
+  readonly profiles: string[];
+  readonly onProfileChange: (newValue: string) => void;
+  readonly separator: string;
 };

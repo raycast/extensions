@@ -51,5 +51,12 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

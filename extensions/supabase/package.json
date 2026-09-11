@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "supabase",
+  "title": "Supabase",
+  "description": "Browse and manage your Supabase projects and database branches",
+  "icon": "icon.png",
+  "author": "keito4",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "Browse Supabase projects and branches",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Supabase Access Token from https://supabase.com/dashboard/account/tokens"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.0.0",
+    "@raycast/utils": "^1.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

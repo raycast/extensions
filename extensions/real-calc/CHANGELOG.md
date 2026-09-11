@@ -1,5 +1,9 @@
 # Real Calc Changelog
 
+## [Update] - 2025-11-25
+
+- Added Windows support
+
 ## [Update] - 2025-03-05
 
 - Fixed API endpoint URL by updating from HTTP to HTTPS protocol.

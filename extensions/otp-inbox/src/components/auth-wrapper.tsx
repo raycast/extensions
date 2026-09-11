@@ -5,7 +5,7 @@ import { withAccessToken } from "@raycast/utils";
 /**
  * Makes sure that we have a authenticated gmail client available in the children
  */
-function AuthWrapper({ children }: { children: JSX.Element }) {
+function AuthWrapper({ children }: { children: React.JSX.Element }) {
   return <>{children}</>;
 }
 

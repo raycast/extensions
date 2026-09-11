@@ -5,6 +5,13 @@
   "description": "Control your WLED devices - manage devices, set colors, effects, and brightness directly from Raycast",
   "icon": "command-icon.png",
   "author": "creative-koda-lab",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "contributors": [
+    "danulqua"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -17,11 +24,25 @@
       "subtitle": "WLED Controller",
       "description": "Manage your WLED devices - control power, colors, effects, and brightness",
       "mode": "view"
+    },
+    {
+      "name": "create-scene",
+      "title": "Create WLED Scene",
+      "subtitle": "WLED Controller",
+      "description": "Save current device state as a reusable scene",
+      "mode": "view"
+    },
+    {
+      "name": "set-scene",
+      "title": "Set WLED Scene",
+      "subtitle": "WLED Controller",
+      "description": "Apply a saved scene to any WLED device",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.0.1"
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -37,8 +58,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

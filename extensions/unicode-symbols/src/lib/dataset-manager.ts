@@ -79,19 +79,7 @@ function getEnhancedChar(query: string): Character | null {
   }
 
   // Try exact character match first
-  const exactChar = getExactChar(query);
-  if (exactChar) {
-    return exactChar;
-  }
-
-  // Try case-insensitive name search
-  const lowerQuery = query.toLowerCase();
-  const nameMatch = dataset.characters.find(
-    (char) =>
-      char.n.toLowerCase().includes(lowerQuery) || char.a.some((alias) => alias.toLowerCase().includes(lowerQuery)),
-  );
-
-  return nameMatch || null;
+  return getExactChar(query);
 }
 
 /**
@@ -134,8 +122,8 @@ export function getFilteredDataset(query: string | null, filter: string | null):
 
   const fuse = new Fuse(allCharacters, {
     keys: [
-      { name: "n", weight: 0.4 }, // Name - highest priority
-      { name: "a", weight: 0.3 }, // Aliases - high priority
+      { name: "n", weight: 0.6 }, // Name - highest priority
+      { name: "a", weight: 0.4 }, // Aliases - high priority
       { name: "o", weight: 0.2 }, // Old name - medium priority
       { name: "nn", weight: 0.1 }, // Number - low priority
     ],
@@ -165,14 +153,9 @@ export function getFilteredDataset(query: string | null, filter: string | null):
     }
   }
 
-  const hasExactMatches = characters.some((char) => char.score === -1);
-  // We filter results that might come true with a score of -1 if there are more that one character. This has to do with logic regarding getting an exact character.
-  const filtered =
-    characters.length > 1 && hasExactMatches ? characters.filter((char) => char.score !== -1) : characters;
-
   return {
     selectedBlock: selectedBlock || null,
     blocks: dataset.blocks,
-    characters: filtered,
+    characters: characters,
   };
 }

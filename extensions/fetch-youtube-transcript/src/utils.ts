@@ -9,9 +9,18 @@ import { TranscriptResult } from "./interfaces";
 // Function to extract video ID from URL
 export function extractVideoId(url: string): string | null {
   const patterns = [
+    // Short links: youtu.be/<id>
     /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
-    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
+    // Watch links: youtube.com/watch?v=<id>
+    // `v` may appear at any position in the query string, e.g. the URLs produced
+    // by YouTube's own share button: watch?feature=shared&v=<id>
+    /(?:https?:\/\/)?(?:www\.|m\.|music\.)?youtube\.com\/watch\?(?:[^#]*&)?v=([a-zA-Z0-9_-]+)/,
+    // Embed links: youtube.com/embed/<id>
+    /(?:https?:\/\/)?(?:www\.|m\.|music\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
+    // Shorts: youtube.com/shorts/<id>
+    /(?:https?:\/\/)?(?:www\.|m\.|music\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/,
+    // Livestreams and their replays: youtube.com/live/<id>
+    /(?:https?:\/\/)?(?:www\.|m\.|music\.)?youtube\.com\/live\/([a-zA-Z0-9_-]+)/,
   ];
 
   for (const pattern of patterns) {
@@ -152,9 +161,11 @@ export async function getYouTubeTranscriptAsPlainText(
   // Ensure yt-dlp is installed before proceeding
   await validateYtDlpInstallation(ytDlpPath);
 
-  // Generate a unique temporary filename and output template
-  const timestamp = Date.now();
-  const baseOutputPath = path.join(os.tmpdir(), `temp_transcript_${timestamp}`);
+  // Work inside a dedicated temporary directory. `mkdtemp` is guaranteed by the OS to
+  // return a fresh, exclusively-owned directory, so concurrent calls can never collide
+  // on the output path or delete each other's file during cleanup.
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "fetch-youtube-transcript-"));
+  const baseOutputPath = path.join(tempDir, "transcript");
 
   // The VTT file will be created with the appropriate language extension
   const tempFilePath = `${baseOutputPath}.${language}.vtt`;
@@ -217,11 +228,11 @@ export async function getYouTubeTranscriptAsPlainText(
     throw new Error(`Transcript retrieval failed: ${errorMessage}`);
   } finally {
     // This block always runs, whether there's an error or not
-    // 4. Clean up: Delete the temporary VTT file if it exists
+    // 4. Clean up: remove the temporary directory and anything yt-dlp wrote into it
     try {
-      await fs.unlink(tempFilePath);
+      await fs.rm(tempDir, { recursive: true, force: true });
     } catch {
-      // Ignore if file didn't exist or couldn't be deleted
+      // Ignore if the directory didn't exist or couldn't be removed
     }
   }
 }

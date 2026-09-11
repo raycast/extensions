@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toggle-proxy",
+  "title": "Toggle Proxy",
+  "description": "Toggle SOCKS proxy, manage Xray configs, and convert VLESS URLs on macOS",
+  "icon": "extension-icon.png",
+  "author": "kaidstor",
+  "categories": [
+    "System",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar-proxy",
+      "title": "Proxy Menu Bar",
+      "subtitle": "Toggle Proxy",
+      "description": "Toggle SOCKS proxy and select Xray config from the menu bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "toggle-socks-proxy",
+      "title": "Convert VLESS URL",
+      "subtitle": "Toggle Proxy",
+      "description": "Convert a VLESS URL to an Xray JSON configuration file",
+      "mode": "view"
+    },
+    {
+      "name": "ssh-tunnel-manager",
+      "title": "Tunnel Manager",
+      "subtitle": "Toggle Proxy",
+      "description": "Create and manage SSH tunnel connections",
+      "mode": "view"
+    },
+    {
+      "name": "config-manager",
+      "title": "Config Manager",
+      "subtitle": "Toggle Proxy",
+      "description": "Browse, edit, and delete Xray configuration files",
+      "mode": "view"
+    },
+    {
+      "name": "subscription-manager",
+      "title": "Subscription Manager",
+      "subtitle": "Toggle Proxy",
+      "description": "Manage VLESS subscription URLs and update configs",
+      "mode": "view"
+    },
+    {
+      "name": "routing-rules",
+      "title": "Routing Rules",
+      "subtitle": "Toggle Proxy",
+      "description": "Customize routing rules per subscription. Overrides the rules baked into subscription configs when enabled.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "host",
+      "required": false,
+      "type": "textfield",
+      "description": "SOCKS proxy host address (e.g. 127.0.0.1)",
+      "title": "SOCKS Host"
+    },
+    {
+      "name": "port",
+      "required": false,
+      "type": "textfield",
+      "description": "SOCKS proxy port number (e.g. 1080)",
+      "title": "SOCKS Port"
+    },
+    {
+      "name": "xrayPath",
+      "required": false,
+      "type": "textfield",
+      "description": "Path to directory containing Xray binary and configs",
+      "title": "Xray Config Path",
+      "default": "~/xray"
+    },
+    {
+      "name": "defaultConfig",
+      "required": false,
+      "type": "textfield",
+      "description": "Name of the default Xray configuration file",
+      "title": "Default Config",
+      "default": "config.json"
+    },
+    {
+      "name": "networkInterface",
+      "required": false,
+      "type": "textfield",
+      "description": "Network interface for proxy settings (e.g. Wi-Fi, Ethernet)",
+      "title": "Network Interface",
+      "default": "Wi-Fi"
+    },
+    {
+      "name": "sortByPing",
+      "required": false,
+      "type": "checkbox",
+      "title": "Menu Bar",
+      "label": "Sort configs by ping (real delay)",
+      "description": "When enabled, configs in the menu bar are sorted by measured latency. Subscription configs are grouped by node.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.19.1",
+    "execa": "^9.6.0",
+    "glob": "^11.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.15.29",
+    "@types/react": "19.1.6",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

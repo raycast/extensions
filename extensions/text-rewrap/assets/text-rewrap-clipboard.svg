@@ -1,0 +1,24 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Oblong 1 -->
+    <rect x="50" y="50" width="280" height="80" rx="40" fill="#a9a9a9" />
+
+    <!-- Oblong 2 -->
+    <rect x="50" y="160" width="200" height="80" rx="40" fill="#a9a9a9" />
+
+    <!-- Oblong 3 -->
+    <rect x="50" y="270" width="350" height="80" rx="40" fill="#a9a9a9" />
+
+    <!-- Oblong 4 -->
+    <rect x="50" y="380" width="400" height="80" rx="40" fill="#a9a9a9" />
+
+    <!-- Clipboard body -->
+    <rect x="350" y="50" width="120" height="150" rx="12" fill="#e0e0e0" />
+
+    <!-- Clipboard header -->
+    <rect x="350" y="50" width="120" height="28" rx="8" fill="#a9a9a9" />
+
+    <!-- Clipboard clip -->
+    <rect x="385" y="35" width="50" height="30" rx="15" fill="#696969" />
+
+</svg>

@@ -1,32 +1,24 @@
-import { Grid } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import groupBy from "lodash.groupby";
 import { useState } from "react";
-import { getPlayers, getPlayersWithTerms, getSeasons } from "./api";
-import { PositionSection } from "./components/player";
-import { positionMap } from "./utils";
+import { getPlayersWithTerms } from "./api";
+import { getProfileImg, positions } from "./utils";
+import { PlayerProfile } from "./components/player";
 
 export default function EPLPlayer() {
   const [terms, setTerms] = useState<string>("");
-  const { data: seasons = [] } = usePromise(getSeasons);
 
   const { isLoading, data, pagination } = usePromise(
-    (terms, seasonId) =>
-      async ({ page = 0 }) => {
-        if (!terms) {
-          return seasonId
-            ? await getPlayers("-1", seasonId.toString(), page)
-            : { data: [], hasMore: false };
-        } else if (terms.length >= 3) {
-          return await getPlayersWithTerms(terms, page);
-        }
-
-        return { data: [], hasMore: false };
-      },
-    [terms, seasons[0]?.id],
+    (terms) => async () => {
+      return terms && terms.length >= 3
+        ? await getPlayersWithTerms(terms)
+        : { data: [], hasMore: false };
+    },
+    [terms],
   );
 
-  const positions = groupBy(data, "info.position");
+  const positionMap = groupBy(data, "data.otherFields.position");
 
   return (
     <Grid
@@ -37,21 +29,41 @@ export default function EPLPlayer() {
       onSearchTextChange={setTerms}
       navigationTitle="Players"
     >
-      {terms && terms.length < 3 ? (
+      {!terms || terms.length < 3 ? (
         <Grid.EmptyView
-          icon="player-missing.png"
+          icon="premier-league.svg"
           title="Please enter a search term with at least 3 characters."
         />
       ) : (
-        Object.entries(positionMap).map(([key, value]) => {
-          const players = positions[key] || [];
+        positions.map((position) => {
+          const players = positionMap[position] || [];
 
           return (
-            <Grid.Section
-              key={key}
-              title={value}
-              children={PositionSection(players)}
-            />
+            <Grid.Section key={position} title={position}>
+              {players.map((player) => {
+                return (
+                  <Grid.Item
+                    key={player.data.objectId}
+                    title={player.data.otherFields.knownName}
+                    subtitle={player.data.otherFields.teamName}
+                    keywords={[player.data.otherFields.knownName]}
+                    content={{
+                      source: getProfileImg(player.data.objectSid),
+                      fallback: "player-missing.png",
+                    }}
+                    actions={
+                      <ActionPanel>
+                        <Action.Push
+                          title="View Profile"
+                          icon={Icon.Sidebar}
+                          target={<PlayerProfile id={player.data.objectSid} />}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
+            </Grid.Section>
           );
         })
       )}

@@ -10,7 +10,7 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
 } from "@raycast/api";
-import Jimp from "jimp";
+import { Jimp, JimpMime } from "jimp";
 import pngToIco from "png-to-ico";
 import { join, dirname, basename, extname } from "path";
 import fs from "fs/promises";
@@ -49,6 +49,8 @@ const SIZES = {
 };
 
 const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png"];
+
+type IconImage = Awaited<ReturnType<typeof Jimp.read>>;
 
 export default function Command() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -100,11 +102,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Generate Icons" onSubmit={handleSubmit} />
-          <Action
-            title="Open Preferences"
-            shortcut={{ modifiers: ["cmd"], key: "," }}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
       isLoading={isProcessing}
@@ -114,7 +112,7 @@ export default function Command() {
         id="platforms"
         title="Select Platforms"
         defaultValue={defaultPlatforms}
-        info="You can set your default platforms in preferences (⌘+,)"
+        info="You can set your default platforms in preferences"
       >
         {Object.entries(PLATFORMS).map(([key, value]) => (
           <Form.TagPicker.Item key={key} value={key} title={value} />
@@ -145,7 +143,7 @@ async function processImage(imagePath: string, platforms: string[]) {
       const platformDir = join(outputDir, platform);
       await fs.mkdir(platformDir, { recursive: true });
 
-      if (platform === PLATFORMS.ico) {
+      if (platform === "ico") {
         await generateIcoIcon(image, platformDir);
       } else {
         await generatePlatformIcons(image, platform as keyof typeof SIZES, platformDir);
@@ -168,12 +166,12 @@ async function processImage(imagePath: string, platforms: string[]) {
   }
 }
 
-async function generateIcoIcon(image: Jimp, outputDir: string) {
+async function generateIcoIcon(image: IconImage, outputDir: string) {
   const sizes = SIZES.ico;
   const pngBuffers = await Promise.all(
     sizes.map(async (size) => {
-      const resized = await image.clone().resize(size, size);
-      return resized.getBufferAsync(Jimp.MIME_PNG);
+      const resized = image.clone().resize({ w: size, h: size });
+      return resized.getBuffer(JimpMime.png);
     }),
   );
 
@@ -187,13 +185,14 @@ async function generateIcoIcon(image: Jimp, outputDir: string) {
   }
 }
 
-async function generatePlatformIcons(image: Jimp, platform: keyof typeof SIZES, outputDir: string) {
+async function generatePlatformIcons(image: IconImage, platform: keyof typeof SIZES, outputDir: string) {
   const sizes = SIZES[platform];
   await Promise.all(
     sizes.map(async (size) => {
-      const resized = await image.clone().resize(size, size);
+      const resized = image.clone().resize({ w: size, h: size });
       const fileName = `icon_${size}x${size}.png`;
-      await resized.writeAsync(join(outputDir, fileName));
+      const pngBuffer = await resized.getBuffer(JimpMime.png);
+      await fs.writeFile(join(outputDir, fileName), pngBuffer);
       console.log(`Generated ${platform} icon: ${fileName}`);
     }),
   );

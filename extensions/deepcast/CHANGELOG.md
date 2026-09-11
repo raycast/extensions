@@ -1,5 +1,27 @@
 # Deepcast Changelog
 
+## [Respect Translation Action Preference] - 2026-09-10
+
+- Fix the main Translate form ignoring `On Translation Action` and always copying the translated text to the clipboard ([#30932](https://github.com/raycast/extensions/issues/30932))
+
+## [Fix Close Window Preference] - 2026-09-03
+
+- Fix `Close Raycast After Translation` preference being ignored when `On Translation Action` is not set: the `default` case in `sendTranslateRequest` was not calling `delayedCloseWindow`, so the window would close even when the preference was off ([#30609](https://github.com/raycast/extensions/issues/30609))
+- Add `clipboard` as the default value for `On Translation Action` preference so it always has a valid value
+
+## [Hyperlinks] - 2026-08-17
+
+- Preserve original HTML formatting and hyperlinks when translating copied rich text, then copy the result as rich text so it can be pasted back with ⌘V.
+
+## [Newlines] - 2025-12-16
+
+- Fixed issue where newlines in translations were not displayed correctly in the Raycast detail view because markdown requires double newlines for line breaks.
+
+## [Maintenance] - 2025-11-12
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Default Formality Configuration] - 2025-06-07
 
 - Added new "Default Formality" preference option to set a global formality level for all supported languages

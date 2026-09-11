@@ -60,7 +60,7 @@ export function StarredTimeZoneGridItem(props: {
   const keywords = timezone.timezone.toLowerCase().split("/");
   return (
     <Grid.Item
-      id={JSON.stringify({ type: "star", index: index, region: timezone })}
+      id={JSON.stringify({ type: "star", index: index, region: timezone.timezone })}
       content={{
         value: {
           source: {

@@ -16,7 +16,7 @@ _There are a few things you'll need to find and insert manually in the snippet b
 
 **FORK_URL**
 
-Open the PR and click on the incomming ref as shown below
+Open the PR and click on the incoming ref as shown below
 
 ![](../.gitbook/assets/go-to-ref.webp)
 

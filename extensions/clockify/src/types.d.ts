@@ -9,7 +9,7 @@ export interface TimeEntry {
   task: Task | undefined;
   timeInterval: {
     start: string;
-    end: string;
+    end: string | null;
   };
 }
 
@@ -19,6 +19,9 @@ export interface Project {
   description?: string;
   name: string;
   color: string;
+  // The project's "billable by default" setting. Optional so that an absent value stays
+  // distinguishable from false: callers omit the field entirely rather than sending a guess.
+  billable?: boolean;
 }
 
 export interface Task {
@@ -43,7 +46,14 @@ export interface FetcherArgs {
 export interface User {
   id: string;
   name: string;
-  defaultWorkspace: string;
+  // Not guaranteed to be present: Clockify omits/empties these for some accounts.
+  defaultWorkspace?: string;
+  activeWorkspace?: string;
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
 }
 
 export interface FetcherResponse {

@@ -1,6 +1,6 @@
 import { getSdk } from "./SearchPullRequestsWithDependencies.generated";
 import graphQLClient from "../integration/graphQLClient";
-import { PullRequestShort } from "../types";
+import { PullRequestShort, ReviewDecision } from "../types";
 
 const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestShort[]> =>
   Promise.resolve()
@@ -38,7 +38,7 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
               url,
               createdAt,
               updatedAt,
-              reviewDecision,
+              reviewDecision: reviewDecision == null ? null : (reviewDecision as string as ReviewDecision),
               repo: repository?.name,
               owner: { login: repository?.owner?.login, avatarUrl: repository?.owner?.avatarUrl },
 
@@ -52,7 +52,7 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
                         url: node.url,
                         state: node.state,
                         submittedAt: node.submittedAt,
-                      }
+                      },
                 )
                 .filter(review => review !== null),
 
@@ -64,7 +64,7 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
                         user: { login: node.author?.login, avatarUrl: node.author?.avatarUrl },
                         url: node?.url,
                         createdAt: node?.createdAt,
-                      }
+                      },
                 )
                 .filter(comment => comment !== null),
 
@@ -93,7 +93,7 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
                 .filter(value => value !== null),
             };
           })
-          .filter(pull => pull !== null) as PullRequestShort[]
+          .filter(pull => pull !== null) as PullRequestShort[],
     )
     .finally(() => console.debug(`searchPullRequestsWithDependencies done query=${query}`));
 

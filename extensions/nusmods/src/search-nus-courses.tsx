@@ -1,10 +1,9 @@
 import { Icon, List } from "@raycast/api";
 import { showFailureToast, useStreamJSON } from "@raycast/utils";
-import * as z from "@zod/mini";
 import { useCallback, useState } from "react";
+import * as z from "zod/mini";
 import { CourseSummaryList } from "./components/course";
-import { API_BASE_URL } from "./utils/constants";
-import { CourseSummary, CourseSummarySchema } from "./utils/nusmods";
+import { CourseSummary, CourseSummarySchema, getModuleListApiUrl } from "./utils/nusmods";
 
 const now = new Date();
 const currentYear = now.getFullYear();
@@ -59,7 +58,7 @@ export default function Command() {
     return parsedResult.data;
   }, []);
 
-  const { isLoading, data, error, pagination } = useStreamJSON(`${API_BASE_URL}/${acadYear}/moduleList.json`, {
+  const { isLoading, data, error, pagination } = useStreamJSON(getModuleListApiUrl(acadYear), {
     keepPreviousData: true,
     filter,
     transform,

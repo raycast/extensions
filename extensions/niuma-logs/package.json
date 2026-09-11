@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "niuma-logs",
+  "title": "Niuma Logs",
+  "description": "Every log line tells the story of a cyber workhorse.",
+  "icon": "extension-icon.png",
+  "author": "mapleeit",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Start Task",
+      "subtitle": "— New work just came in",
+      "description": "Create a new task and record it as an issue in a CNB repository.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "What should you do next?",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "complete-task",
+      "title": "Complete Task",
+      "subtitle": "— Another task completed",
+      "description": "Mark a task as completed and record it as an issue in a CNB repository.",
+      "mode": "view"
+    },
+    {
+      "name": "review-tasks",
+      "title": "Review Tasks",
+      "subtitle": "— See where the time went",
+      "description": "View all task records. This command opens a Gantt-style task board in a CNB repository to review durations and completion status.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "gitDomain",
+      "title": "Git Domain",
+      "description": "Select the Git domain.",
+      "default": "https://cnb.cool",
+      "placeholder": "https://cnb.cool",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "repo",
+      "title": "Repo",
+      "description": "Select the Git repository where tasks are stored.",
+      "placeholder": "maplemiao/my-logs",
+      "required": true
+    },
+    {
+      "name": "token",
+      "title": "Token",
+      "description": "Git API access token.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.13.2",
+    "dayjs": "^1.11.13",
+    "node-cnb": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "sync-cnb-cool": "git push cnb.cool cnbcool:main"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

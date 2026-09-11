@@ -1,6 +1,8 @@
-import { showToast, Toast, LocalStorage } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Resolution } from "../types";
+import { getCustomResolutions, setCustomResolutions as storeCustomResolutions } from "../storage/resolutionStorage";
+import { isSameResolution } from "../utils/resolution";
 
 export function useCustomResolutions() {
   const [isLoading, setIsLoading] = useState(true);
@@ -11,10 +13,7 @@ export function useCustomResolutions() {
   useEffect(() => {
     async function loadCustomResolutions() {
       try {
-        const storedResolutions = await LocalStorage.getItem<string>("custom-resolutions");
-        if (storedResolutions) {
-          setCustomResolutions(JSON.parse(storedResolutions));
-        }
+        setCustomResolutions(await getCustomResolutions());
       } catch (error) {
         console.error("Error loading custom resolutions:", error);
       } finally {
@@ -28,9 +27,9 @@ export function useCustomResolutions() {
   // Function to delete a custom resolution
   async function deleteCustomResolution(resolution: Resolution) {
     try {
-      const updatedResolutions = customResolutions.filter((r) => r.title !== resolution.title);
+      const updatedResolutions = customResolutions.filter((item) => !isSameResolution(item, resolution));
+      await storeCustomResolutions(updatedResolutions);
       setCustomResolutions(updatedResolutions);
-      await LocalStorage.setItem("custom-resolutions", JSON.stringify(updatedResolutions));
 
       // Show toast notification for successful deletion
       await showToast({

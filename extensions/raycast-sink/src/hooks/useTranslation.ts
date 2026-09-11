@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { getPreferenceValues } from "@raycast/api";
 import { translations, Language } from "../i18n";
 import { useConfig } from "./useConfig";
-import { Preferences } from "../types";
 
 export function useTranslation() {
   const { config } = useConfig();

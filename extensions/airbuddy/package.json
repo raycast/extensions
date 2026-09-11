@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "airbuddy",
+  "title": "AirBuddy",
+  "description": "Control AirBuddy from Raycast",
+  "icon": "extension-icon.png",
+  "author": "chrismessina",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Media",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-devices",
+      "title": "Devices",
+      "subtitle": "AirBuddy",
+      "description": "Browse nearby devices, batteries, and connection state.",
+      "mode": "view"
+    },
+    {
+      "name": "connect-nearest-headset",
+      "title": "Connect Nearest Headset",
+      "subtitle": "AirBuddy",
+      "description": "Connect to the headset AirBuddy considers closest.",
+      "mode": "no-view"
+    },
+    {
+      "name": "connect-favorite-headset",
+      "title": "Connect Favorite Headset",
+      "subtitle": "AirBuddy",
+      "description": "Connect to the headset starred as a favorite in AirBuddy.",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect-headset",
+      "title": "Disconnect Headset",
+      "subtitle": "AirBuddy",
+      "description": "Disconnect the currently connected headset.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-listening-mode",
+      "title": "Toggle Listening Mode",
+      "subtitle": "AirBuddy",
+      "description": "Cycle the listening mode on the current headset.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-listening-mode",
+      "title": "Set Listening Mode",
+      "subtitle": "AirBuddy",
+      "description": "Set a specific listening mode on the current headset.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-spatial-audio",
+      "title": "Toggle Spatial Audio",
+      "subtitle": "AirBuddy",
+      "description": "Toggle Spatial Audio on the current output device.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-microphone-input",
+      "title": "Toggle Microphone Input",
+      "subtitle": "AirBuddy",
+      "description": "Toggle microphone input routing for the currently connected headset.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-audio-input-lock",
+      "title": "Toggle Audio Input Lock",
+      "subtitle": "AirBuddy",
+      "description": "Toggle AirBuddy's Audio Input Lock setting.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-dashboard",
+      "title": "Show AirBuddy Dashboard",
+      "subtitle": "AirBuddy",
+      "description": "Open AirBuddy's device dashboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "cancel-device-connection",
+      "title": "Cancel Device Connection",
+      "subtitle": "AirBuddy",
+      "description": "Cancel a pending headset connection.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-desktop-widgets-floating",
+      "title": "Toggle Desktop Widgets Floating",
+      "subtitle": "AirBuddy",
+      "description": "Toggle whether AirBuddy's Desktop Widgets float above other windows.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-magic-handoff-picker",
+      "title": "Show Magic Handoff Picker",
+      "subtitle": "AirBuddy",
+      "description": "Show AirBuddy's Magic Handoff device picker.",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

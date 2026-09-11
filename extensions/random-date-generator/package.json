@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "random-date-generator",
+  "title": "Random Date Generator",
+  "description": "Generate random dates within a specified date range",
+  "icon": "icon.png",
+  "author": "yasinozmeen",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate",
+      "title": "Generate Random Date",
+      "subtitle": "Random Date",
+      "description": "Generate a random date between start and end dates",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "startDate",
+      "type": "textfield",
+      "required": true,
+      "title": "Start Date",
+      "description": "Minimum date for random generation (YYYY-MM-DD format)",
+      "placeholder": "2025-01-01",
+      "default": "2025-01-01"
+    },
+    {
+      "name": "endDate",
+      "type": "textfield",
+      "required": true,
+      "title": "End Date",
+      "description": "Maximum date for random generation (YYYY-MM-DD format)",
+      "placeholder": "2030-12-31",
+      "default": "2030-12-31"
+    },
+    {
+      "name": "dateFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Date Format",
+      "description": "Output format for the generated date",
+      "default": "DD.MM.YYYY",
+      "data": [
+        {
+          "title": "DD.MM.YYYY (31.12.2025)",
+          "value": "DD.MM.YYYY"
+        },
+        {
+          "title": "MM/DD/YYYY (12/31/2025)",
+          "value": "MM/DD/YYYY"
+        },
+        {
+          "title": "YYYY-MM-DD (2025-12-31)",
+          "value": "YYYY-MM-DD"
+        },
+        {
+          "title": "DD-MM-YYYY (31-12-2025)",
+          "value": "DD-MM-YYYY"
+        },
+        {
+          "title": "DD/MM/YYYY (31/12/2025)",
+          "value": "DD/MM/YYYY"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

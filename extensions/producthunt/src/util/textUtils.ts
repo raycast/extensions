@@ -20,6 +20,10 @@ export function cleanText(text: string | undefined | null): string {
         (_, entity: "amp" | "lt" | "gt" | "quot" | "#39") =>
           ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[entity] || _,
       )
+      // Collapse internal whitespace runs (feed content is pretty-printed with newlines/indent)
+      // and trim ends, so taglines/names don't leak markdown markers (e.g. `_tagline _`).
+      .replace(/\s+/g, " ")
+      .trim()
   );
 }
 

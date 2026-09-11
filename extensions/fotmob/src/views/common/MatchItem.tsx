@@ -11,7 +11,7 @@ export type MatchItemProps = Omit<ComponentProps<typeof List.Item>, "title"> & {
 };
 
 export default function MatchItem({ match, ...rest }: MatchItemProps) {
-  const status: "ongoing" | "finished" | "not-started" | "postponed" = (function () {
+  const status: "ongoing" | "finished" | "not-started" | "postponed" = (() => {
     if (match.status.ongoing === true) {
       return "ongoing";
     }
@@ -27,7 +27,7 @@ export default function MatchItem({ match, ...rest }: MatchItemProps) {
     return "not-started";
   })();
 
-  const result: "win" | "lose" | "draw" | "not-started" = (function () {
+  const result: "win" | "lose" | "draw" | "not-started" = (() => {
     if (match.result != null) {
       if (match.result > 0) {
         return "win";
@@ -43,7 +43,7 @@ export default function MatchItem({ match, ...rest }: MatchItemProps) {
     return "not-started";
   })();
 
-  const icon: Image = (function () {
+  const icon: Image = (() => {
     if (status === "ongoing") {
       return {
         source: Icon.PlayFilled,
@@ -84,7 +84,7 @@ export default function MatchItem({ match, ...rest }: MatchItemProps) {
     };
   })();
 
-  const title: string = (function () {
+  const title: string = (() => {
     if (status === "ongoing") {
       return `${match.status.liveTime?.short ?? "On"} | ${match.home.name} ${match.home.score} - ${match.away.score} ${
         match.away.name

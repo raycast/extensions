@@ -1,24 +1,26 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import fetch from "node-fetch";
 import crypto from "crypto";
 
 import { Favorite, FavoriteRecord, FavoritesResponse, Module } from "../types";
 import { extractPathAndParam } from "../utils/extractPathAndParam";
 import useInstances from "./useInstances";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { serviceNowFetchRaw } from "../utils/serviceNowFetch";
+import { useAuthHeader } from "./useAuthHeader";
 
 const useFavorites = () => {
-  const { selectedInstance, userId } = useInstances();
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
+  const { selectedInstance, setSelectedInstance, userId } = useInstances();
 
-  const { name: instanceName = "", username = "", password = "" } = selectedInstance || {};
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const authHeader = useAuthHeader(selectedInstance);
+  const instanceUrl = getInstanceBaseUrl({ name: selectedInstance?.name ?? "" });
 
   const {
     data: favorites,
+    error,
     revalidate: revalidateFavorites,
     isLoading,
     mutate,
@@ -27,24 +29,17 @@ const useFavorites = () => {
       return `${instanceUrl}/api/now/ui/favorite`;
     },
     {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: !!selectedInstance,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      execute: !!selectedInstance && !!authHeader,
       onError: (error) => {
-        setErrorFetching(true);
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
+        showToast({ style: Toast.Style.Failure, title: "Could Not Fetch Favorites", message: error.message });
       },
 
       mapResult(response: { result: FavoritesResponse }) {
         if (response && response.result && Object.keys(response.result).length === 0) {
-          setErrorFetching(true);
-          showToast(Toast.Style.Failure, "Could not fetch favorites");
-          return { data: [] };
+          throw new Error("Could not fetch favorites");
         }
-
-        setErrorFetching(false);
         return { data: response.result.list };
       },
       keepPreviousData: true,
@@ -109,14 +104,15 @@ const useFavorites = () => {
   ) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: text.before });
     try {
+      if (!selectedInstance) throw new Error("No instance selected");
       const response = await mutate(
-        fetch(`${instanceUrl}${request.endpoint}`, {
+        serviceNowFetchRaw(selectedInstance, request.endpoint, {
           method: request.method,
-          headers: {
-            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: request.body,
+          onRefresh: (updated) => {
+            if (selectedInstance.id === updated.id) setSelectedInstance(updated);
+          },
         }),
         {
           optimisticUpdate(data) {
@@ -234,7 +230,7 @@ const useFavorites = () => {
       {
         before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
-        failure: "Failed adding favorite group",
+        failure: "Failed to add favorite group",
       },
       updateData,
     );
@@ -268,7 +264,7 @@ const useFavorites = () => {
       {
         before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
-        failure: "Failed adding favorite",
+        failure: "Failed to add favorite",
       },
       updateData,
     );
@@ -310,7 +306,7 @@ const useFavorites = () => {
       {
         before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
-        failure: "Failed adding favorite",
+        failure: "Failed to add favorite",
       },
       updateData,
       revalidate,
@@ -343,7 +339,7 @@ const useFavorites = () => {
       {
         before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
-        failure: "Failed adding favorite group",
+        failure: "Failed to add favorite group",
       },
       updateData,
       revalidate,
@@ -374,7 +370,7 @@ const useFavorites = () => {
       {
         before: `Updating "${title}"`,
         success: `Favorites group updated`,
-        failure: "Failed updating favorites group",
+        failure: "Failed to update favorites group",
       },
       updateData,
       revalidate,
@@ -405,7 +401,7 @@ const useFavorites = () => {
       {
         before: `Updating "${title}"`,
         success: `Favorite updated`,
-        failure: "Failed updating favorite",
+        failure: "Failed to update favorite",
       },
       updateData,
       revalidate,
@@ -429,7 +425,7 @@ const useFavorites = () => {
       {
         before: `Removing ${title} from favorites`,
         success: `${title} removed from favorites`,
-        failure: "Failed removing favorite",
+        failure: `Failed to remove ${title} from favorites`,
       },
       updateData,
       revalidate,
@@ -440,7 +436,7 @@ const useFavorites = () => {
     favorites,
     favoritesGroups,
     isLoading,
-    errorFetching,
+    errorFetching: !!error,
     isInFavorites,
     isMenuInFavorites,
     revalidateFavorites,

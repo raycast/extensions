@@ -8,7 +8,7 @@
  * Complies with usage policies for external APIs
  */
 export const API_HEADERS = {
-  "User-Agent": "raycast-yr-extension/1.0 (https://github.com/kyndig/raycast-yr; contact: raycast@kynd.no)",
+  "User-Agent": "raycast-yr-extension/1.0 (https://github.com/kyndig/yr-wfc; contact: raycast@kynd.no)",
 } as const;
 
 /**
@@ -30,14 +30,8 @@ export const API_ENDPOINTS = {
  * API request configuration constants
  */
 export const API_CONFIG = {
-  // Request limits and timeouts
   NOMINATIM: {
-    ADDRESS_DETAILS: 0,
-  },
-  // Cache TTL values (in milliseconds)
-  CACHE_TTL: {
-    WEATHER: 30 * 60 * 1000, // 30 minutes
-    SUNRISE: 6 * 60 * 60 * 1000, // 6 hours
+    ADDRESS_DETAILS: 1,
   },
 } as const;
 

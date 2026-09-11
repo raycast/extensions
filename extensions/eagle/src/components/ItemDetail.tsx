@@ -1,10 +1,15 @@
-import { Detail } from "@raycast/api";
+import { Detail, ActionPanel } from "@raycast/api";
 import { useMemo } from "react";
-import { useThumbnail } from "../utils/query";
-import { Item } from "../@types/eagle";
+import { useThumbnail, useFolderMap } from "../utils/query";
+import type { Item } from "../@types/eagle";
+import { FolderNavigationActions } from "./FolderNavigationActions";
+import { MoveToTrashAction } from "./MoveToTrashAction";
+import { EditItemTagsAction } from "./EditItemTagsAction";
+import { EditItemAnnotationAction } from "./EditItemAnnotationAction";
 
 export function ItemDetail({ item }: { item: Item }) {
   const { data: thumbnail } = useThumbnail(item.id);
+  const { data: folderMap } = useFolderMap();
 
   const lastModifiedAt = useMemo(() => {
     const date = new Date(item.modificationTime);
@@ -20,13 +25,34 @@ export function ItemDetail({ item }: { item: Item }) {
     return "";
   }, [item]);
 
+  const folderNames = useMemo(() => {
+    if (!folderMap || !item.folders || item.folders.length === 0) return [];
+    return item.folders.map((folderId) => folderMap.get(folderId)).filter((name): name is string => !!name);
+  }, [item.folders, folderMap]);
+
   return (
     <Detail
       navigationTitle={item.name}
       markdown={`# ${item.name}
-  
+
   ![](${thumbnail})`}
       isLoading={!thumbnail}
+      actions={
+        <ActionPanel>
+          <FolderNavigationActions item={item} />
+          {!item.isDeleted && (
+            <>
+              <ActionPanel.Section title="Edit">
+                <EditItemTagsAction item={item} />
+                <EditItemAnnotationAction item={item} />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <MoveToTrashAction item={item} />
+              </ActionPanel.Section>
+            </>
+          )}
+        </ActionPanel>
+      }
       metadata={
         <Detail.Metadata>
           {item.palettes.length > 0 ? (
@@ -49,6 +75,14 @@ export function ItemDetail({ item }: { item: Item }) {
             <Detail.Metadata.TagList title="Tags">
               {item.tags.map((tag, index) => (
                 <Detail.Metadata.TagList.Item text={tag} key={index} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+
+          {folderNames.length > 0 && (
+            <Detail.Metadata.TagList title="Folders">
+              {folderNames.map((folderName, index) => (
+                <Detail.Metadata.TagList.Item text={folderName} key={index} />
               ))}
             </Detail.Metadata.TagList>
           )}

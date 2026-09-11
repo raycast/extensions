@@ -1,5 +1,51 @@
 # Google Chrome Changelog
 
+## [Add Search Windows Command] - 2026-08-16
+
+- Add a new Search Windows command to search and select open Google Chrome windows.
+
+## [Bugfix] - 2026-05-28
+
+- Reset stale cached profile selections so history search does not show Chrome as missing.
+
+## [Chrome Account Bookmarks] - 2026-05-20
+
+- Added support for account-synced bookmarks stored in `AccountBookmarks`
+
+## [Add History Open Action Shortcuts] - 2026-05-13
+
+- Add keyboard shortcuts for opening history items in the current or original profile.
+
+## [Fix Chrome History Search When Chrome Is Running] - 2026-05-07
+
+- Fix searching Chrome history while Chrome keeps the history database locked.
+
+## [Add Name Window Command] - 2026-03-04
+
+- Add Name Window command to name the currently active Google Chrome window.
+
+## [Fixes] - 2026-01-05
+
+- Fix infinite rendering with depth bug in new tab `Action`
+- Handle error in "new tab" `Command`
+
+## [Support for Guest Profile] - 2025-11-17
+
+- Add support for Guest profile in all commands
+- Update dependencies to latest versions
+
+## [Add Exclude Search Feature] - 2025-11-05
+
+- Add support for excluding search terms using " -" (space + dash) prefix
+- Example: "raycast -firefox" finds items containing "raycast" but not "firefox"
+- Support for searching literal "-" character using "\-" escape sequence (e.g., "foo \-bar" to find "foo-bar")
+- Works across all search functions: tabs, history, bookmarks, and search all
+- Fix SQL injection vulnerability in history search
+- Improve performance by skipping filtering when no search query is provided
+- Handle invalid URLs (e.g., javascript: protocol) gracefully to prevent crashes
+- Fix `ERR_INVALID_URL` error in Tab class methods (realFavicon, googleFavicon, urlWithoutScheme)
+- Display warning icon and helpful message for bookmarks/history with unsupported URL protocols
+
 ## [Improvements] - 2025-10-13
 
 - Fix weird issue with a constant not working (ref: [#22053](https://github.com/raycast/extensions/issues/22053), [#22026](https://github.com/raycast/extensions/issues/22026), [#21966](https://github.com/raycast/extensions/issues/21966), [#21973](https://github.com/raycast/extensions/issues/21973), [#21928](https://github.com/raycast/extensions/issues/21928))
@@ -30,14 +76,17 @@
 - Add support for entering URLs or search terms in a single input field, mimicking Chrome's Omnibox behavior.
 
 ## [Add Copy Title action for Search Tab] - 2025-04-22
+
 - Add the ability to create new incognito window.
 
 ## [Add Copy Title action for Search Tab] - 2025-02-11
+
 - Add Copy Title action for Search Tab command.
 
 ## [Add AI Tools] - 2025-02-21
 
 ## [Allow to configure profile path] - 2025-01-18
+
 - The path for your profile can be configured in the settings. This allows you to use a different profile than the default one.
 
 ## [Fix] - 2025-01-09

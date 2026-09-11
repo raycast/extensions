@@ -24,18 +24,10 @@
     {
       "name": "api_key",
       "title": "API Key",
-      "placeholder": "f9NGE...vCfA",
+      "placeholder": "xxxxx...xxxx",
       "description": "API Key from Migadu account",
       "required": true,
       "type": "password"
-    },
-    {
-      "name": "domains",
-      "title": "Domains",
-      "placeholder": "example.com,example.org",
-      "description": "Comma-separated list of domains you want to use",
-      "required": true,
-      "type": "textfield"
     }
   ],
   "commands": [
@@ -65,27 +57,37 @@
       "title": "Create Anonymous Identity (Custom Hide My Email)",
       "description": "Creates an anonymous identity for a selected mailbox and copies the email address to your clipboard. This can be used as an equivalent to Apple's Hide My Email.",
       "mode": "view"
+    },
+    {
+      "name": "domains",
+      "title": "Domains",
+      "subtitle": "Migadu",
+      "description": "View Domains in your Migadu Account",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0",
-    "@raycast/utils": "^1.16.3",
-    "node-fetch": "^3.3.1",
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^2.2.2",
     "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,10 +1,10 @@
 import { Action, ActionPanel } from "@raycast/api";
 import React from "react";
-import Parser from "rss-parser";
 import { DescriptionPane } from "./DescriptionPane";
 import { htmlToMarkdown } from "./helpers/htmlToMarkdown";
+import type { ChangelogItem } from "./types";
 
-export function Actions(props: { item: any }) {
+export function Actions(props: { item: ChangelogItem }) {
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
@@ -24,7 +24,7 @@ export function Actions(props: { item: any }) {
   );
 }
 
-export function DescriptionPaneActions(props: { item: Parser.Item }) {
+export function DescriptionPaneActions(props: { item: ChangelogItem }) {
   const updateAsMarkdown = htmlToMarkdown(props.item.content, props.item.title);
   return (
     <ActionPanel title={props.item.title}>

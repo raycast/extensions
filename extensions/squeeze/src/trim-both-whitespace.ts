@@ -1,5 +1,6 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { outputResult } from "./utils";
 
 function trimParagraphs(text: string) {
   // Split text into paragraphs by newline
@@ -23,12 +24,7 @@ export default async function Command() {
 
     const processed = trimParagraphs(text);
 
-    await Clipboard.copy(processed);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Trimmed leading & trailing whitespace per paragraph",
-    });
+    await outputResult(processed, "Trimmed leading & trailing whitespace per paragraph");
   } catch (error) {
     await showFailureToast(error, { title: "Failed to trim whitespace" });
   }

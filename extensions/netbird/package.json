@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "netbird",
+  "title": "NetBird",
+  "description": "Control your NetBird mesh network right from Raycast.",
+  "icon": "netbird-icon.png",
+  "author": "mi7chal",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Applications",
+    "System",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "connect",
+      "title": "Connect",
+      "subtitle": "NetBird",
+      "description": "Connects to NetBird and starts the background daemon.",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect",
+      "subtitle": "NetBird",
+      "description": "Disconnects from NetBird.",
+      "mode": "no-view"
+    },
+    {
+      "name": "peers",
+      "title": "Show Peers",
+      "subtitle": "NetBird",
+      "description": "View all peers in your NetBird network with detailed statuses.",
+      "mode": "view"
+    },
+    {
+      "name": "networks",
+      "title": "Show Networks",
+      "subtitle": "NetBird",
+      "description": "View and manage network routes selection.",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Show Status",
+      "subtitle": "NetBird",
+      "description": "Shows Netbird's connection status and information.",
+      "mode": "view"
+    },
+    {
+      "name": "update",
+      "title": "Update",
+      "subtitle": "NetBird",
+      "description": "Update the NetBird application.",
+      "mode": "no-view"
+    },
+    {
+      "name": "admin",
+      "title": "Open Admin Panel",
+      "subtitle": "NetBird",
+      "description": "Open the NetBird admin panel in your default web browser.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "adminUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Admin Panel URL",
+      "description": "Overwrite the default admin panel URL"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

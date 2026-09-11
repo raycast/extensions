@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "commit-sound-controls",
+  "version": "1.0.0",
+  "description": "Play custom sounds after Git commits to selected GitHub users or organizations.",
+  "title": "Commit Sounds",
+  "icon": "icon.png",
+  "author": "koushik",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "git",
+    "github",
+    "commit",
+    "audio",
+    "sound"
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.2",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.2",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "commands": [
+    {
+      "name": "add-commit-sound",
+      "title": "Add Commit Sound",
+      "description": "Upload or link audio for a GitHub account and set its volume.",
+      "mode": "view",
+      "keywords": [
+        "upload",
+        "audio",
+        "sound",
+        "git",
+        "github"
+      ]
+    },
+    {
+      "name": "commit-sound-controls",
+      "title": "Commit Sound Controls",
+      "description": "Enable, disable, test, and inspect Git post-commit sounds.",
+      "mode": "view",
+      "keywords": [
+        "git",
+        "commit",
+        "sound",
+        "producer tag"
+      ]
+    },
+    {
+      "name": "connect-github-account",
+      "title": "Connect GitHub Account",
+      "description": "Connect GitHub to prefill commit sound rules with your account.",
+      "mode": "view",
+      "keywords": [
+        "git",
+        "github",
+        "oauth",
+        "account"
+      ]
+    }
+  ]
+}

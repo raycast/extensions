@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import process from "node:process";
 import {
   AI,
   Cache,
@@ -26,6 +27,7 @@ import { IconData, LaunchContext, Release } from "./types.js";
 const cache = new Cache();
 
 export const fontUnicodeStart = 0xea01;
+export const raycastProtocol = process.env.RAYCAST_SCHEME ?? "raycast";
 
 export const {
   defaultDetailAction = "OpenWith",
@@ -34,9 +36,20 @@ export const {
   enableAiSearch,
   githubToken,
   releaseVersion,
+  shuffleOnStart,
+  usePasteInsteadOfCopy,
 } = getPreferenceValues<ExtensionPreferences>();
 
 export const hasAccessToAi = environment.canAccess(AI);
+
+export const copyOrPaste = async (content: string | number | Clipboard.Content) => {
+  if (usePasteInsteadOfCopy) {
+    Clipboard.paste(content);
+  } else {
+    Clipboard.copy(content);
+    await showHUD("Copied to Clipboard");
+  }
+};
 
 export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
   if (!launchContext) return "";
@@ -124,7 +137,9 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
               message: "Do you want to reload the command to apply updates?",
             });
             if (confirmed) {
-              open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
+              open(
+                `${raycastProtocol}://extensions/litomore/simple-icons/index` + buildDeeplinkParameters(launchContext),
+              );
             }
           } else {
             setVersion(latestVersion);
@@ -158,8 +173,7 @@ export const copySvg = async ({ version, icon, pathOnly }: { version: string; ic
   });
   if (pathOnly) svg = svg.replace(/^.+ d="([^"]+)".+$/, "$1");
   toast.style = Toast.Style.Success;
-  Clipboard.copy(svg);
-  await showHUD("Copied to Clipboard");
+  copyOrPaste(svg);
 };
 
 export const cleanAssetPack = async () => {
@@ -236,7 +250,7 @@ export const useSearch = ({ icons }: { icons: IconData[] }) => {
     "(icon slugs only, split with comma, up to 500 items, no markdown format, don't change data structure, no addition text, no spaces, do not return non-exist slugs)",
   ].join("\n");
   const execute = enableAiSearch && Boolean(searchString) && hasAccessToAi && filteredIcons.length === 0;
-  const { data, isLoading: aiIsLoading } = useAI(searchPrompt, { execute, model: AI.Model["OpenAI_GPT4o-mini"] });
+  const { data, isLoading: aiIsLoading } = useAI(searchPrompt, { execute });
   const searchResult = execute ? icons.filter((icon) => data.split(",").includes(icon.slug)) : filteredIcons;
   return { aiIsLoading, searchResult, setSearchString };
 };
@@ -263,7 +277,7 @@ export const launchSocialBadge = async (icon: IconData, version: string) => {
         "This feature requires 'Badges - shields.io' extension. Do you want to install the extension from the store?",
     });
     if (yes) {
-      await open("raycast://extensions/litomore/badges");
+      await open(`${raycastProtocol}://extensions/litomore/badges`);
     }
   }
 };

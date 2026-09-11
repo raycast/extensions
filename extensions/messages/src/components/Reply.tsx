@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 
 import { getAttachmentType, sendMessage } from "../helpers";
-import { Message } from "../hooks/useMessages";
+import type { Message } from "../types";
 
 type ReplyProps = {
   message: Message;
@@ -22,6 +22,7 @@ export default function Reply({ message, initialReply }: ReplyProps) {
           text: values.reply,
           service_name: message.service,
           group_name: message.group_name,
+          chat_guid: message.chat_guid,
         });
         pop();
       } catch (error) {

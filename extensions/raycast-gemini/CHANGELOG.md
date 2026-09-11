@@ -1,5 +1,52 @@
 # Google Gemini Changelog
 
+## [Dynamic Model Selection & Live Model List] - 2026-09-07
+
+- 🆕 Fetch the list of available models live from Google's API instead of a hardcoded dropdown, so newly released and retired models no longer require a manual extension update.
+- 🔄 Convert the per-command model dropdowns into a live model picker in AI Chat, fetched via the Gemini API.
+- ⭐ New "Set Default Model" command that lists live Google Studio models and persists your app-wide default across all commands.
+- 🗑️ Removed the static model fields from the extension Settings (the hardcoded "Default Model" dropdown and the "Custom Model" text field) — the Settings now contain no model fields. Model selection lives entirely in the dynamic "Set Default Model" command and the AI Chat picker.
+- 🧩 Moved the model picker in AI Chat into the Action Panel (⌘M submenu) so the search bar shows only one dropdown (your chats).
+- 🔎 Renamed the deprecated-model remapping helper to `normalizeModelName` and confirmed all migration targets (`gemini-3.5-flash-lite`, `gemini-3.6-flash`, `gemini-3.5-flash`) match Google's current stable model list.
+- 🧼 Auto-title chats using the latest flash-lite model from the live list, with a fallback to the default model.
+- 🐛 Fixed the broken `gemini-2.5-flash-lite` model which returned 404 for new users.
+
+## [Update Models] - 2026-09-03
+
+- 🆕 Updated model list: removed unavailable models, added Gemini 3.x models.
+
+## [AI Chat UX & Naming Improvements] - 2026-04-03
+
+- 💬 Make `Enter` send messages in AI Chat instead of copying the current answer.
+- ⚙️ Add shared `System Prompt`, default `Model`, and `Title Model` preferences for the `AI Chat` command.
+- 🆕 Remove the chat creation form and start new chats immediately from the main AI Chat view.
+- 🏷️ Automatically generate a chat title from the first user prompt with a lightweight model.
+- 🧭 Reuse the existing empty draft chat instead of creating multiple blank conversations.
+
+## [TypeScript Migration & Model Updates] - 2026-03-16
+
+- 🛠️ Migrated entire codebase from JSX to TypeScript (TSX/TS) for improved type safety.
+- ⬆️ Updated `@google/genai` SDK from ^1.37.0 to ^1.44.0.
+- 🆕 Updated model list: removed deprecated models, added Gemini 3.1 Pro.
+- 🔧 Set default model to Gemini 2.5 Flash.
+- 🐛 Fixed streaming bug in AI Chat regeneration (`result.stream` → `result`).
+
+## [Fix copy actions in AI Chat] - 2026-03-07
+
+- 🐛 Fix: enable “Copy Answer”, “Copy Prompt”, and “Copy Entire Chat (Transcript)” actions for the selected message.
+
+## [New models & SDK Migration] - 2026-01-19
+
+- 🆕 New Model: Gemini 3.0 Flash
+- 🆕 New Model: Gemini 3.0 Pro
+- 🛠️ Migrated to the official TypeScript/JavaScript SDK for Gemini and Vertex AI. (`@google/genai`)
+- ⚠️ Removed pre-Gemini 2.0 models, due to lack of support.
+
+## [Maintenance] - 2026-01-01
+
+- 🪟 Add support for Windows platform.
+- ⬆️ Bump all dependencies to the latest.
+
 ## [Update Models] - 2025-08-04
 
 - ⬆️ Update Gemini 2.5 series models from preview to production ready versions.

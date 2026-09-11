@@ -1,0 +1,70 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "securecrt-sessions",
+    "title": "SecureCRT Sessions",
+    "description": "Open saved SecureCRT sessions from Raycast",
+    "icon": "extension-icon.png",
+    "author": "leec-666",
+    "platforms": [
+        "macOS"
+    ],
+    "categories": [
+        "Developer Tools"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "open-sessions",
+            "title": "Open Sessions",
+            "subtitle": "SecureCRT",
+            "description": "Open saved SecureCRT sessions",
+            "mode": "view",
+            "preferences": [
+                {
+                    "name": "securecrtConfigPath",
+                    "type": "textfield",
+                    "required": true,
+                    "title": "SecureCRT Config Path",
+                    "description": "Path to the SecureCRT Config folder. Use auto to read SecureCRT's configured path.",
+                    "default": "auto"
+                },
+                {
+                    "name": "securecrtExecutablePath",
+                    "type": "textfield",
+                    "required": true,
+                    "title": "SecureCRT App Path",
+                    "description": "Path to the SecureCRT app or executable",
+                    "default": "/Applications/SecureCRT.app/Contents/MacOS/SecureCRT"
+                },
+                {
+                    "name": "showHostnames",
+                    "type": "checkbox",
+                    "required": true,
+                    "title": "Show Hostnames and Protocols",
+                    "label": "Show hostnames and protocols",
+                    "description": "Read session files while loading to show hostnames and protocols in the list",
+                    "default": true
+                }
+            ]
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.104.17"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^2.1.1",
+        "@types/node": "25.8.0",
+        "@types/react": "19.2.14",
+        "eslint": "^10.4.0",
+        "prettier": "^3.8.3",
+        "typescript": "^6.0.3"
+    },
+    "scripts": {
+        "build": "ray build",
+        "dev": "ray develop",
+        "lint": "ray lint",
+        "fix-lint": "ray lint --fix",
+        "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

@@ -1,11 +1,24 @@
-import { Clipboard, getSelectedText, showToast, Toast, ActionPanel, Action, Detail } from "@raycast/api";
+import {
+  Clipboard,
+  getPreferenceValues,
+  getSelectedText,
+  showToast,
+  Toast,
+  ActionPanel,
+  Action,
+  Detail,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
+import { resolveColorPreference } from "./config";
 import { generateQRCode, getQRCodePath, copyQRCodeToClipboard } from "./utils";
 import fs from "fs";
 
 export default function Common({ from }: { from: "clipboard" | "selection" }) {
   const [qrData, setQrData] = useState<string>();
   const [sourceText, setSourceText] = useState<string>("");
+
+  const { defaultColor } = getPreferenceValues<Preferences>();
+  const color = resolveColorPreference(defaultColor);
 
   useEffect(() => {
     (async () => {
@@ -20,7 +33,7 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
         return;
       }
 
-      const qrData = await generateQRCode({ URL: currentText, preview: true });
+      const qrData = await generateQRCode({ URL: currentText, preview: true, color });
       setQrData(qrData);
 
       showToast(Toast.Style.Success, "Create Success", currentText);
@@ -43,7 +56,7 @@ export default function Common({ from }: { from: "clipboard" | "selection" }) {
 
   async function handleCopy() {
     if (!sourceText) return;
-    await copyQRCodeToClipboard({ url: sourceText, format: "png-bg" });
+    await copyQRCodeToClipboard({ url: sourceText, format: "png-bg", color });
   }
 
   return (

@@ -42,6 +42,12 @@ export type Folder = {
   descendantImageCount: number;
   pinyin: string;
   extendTags: string[];
+  iconColor?: string;
+};
+
+export type Library = {
+  path: string;
+  name: string;
 };
 
 export type EagleAPIResponse<T> = {

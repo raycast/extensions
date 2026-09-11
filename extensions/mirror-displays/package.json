@@ -5,6 +5,10 @@
   "description": "Toggles mirroring of external displays quickly",
   "icon": "extension_icon.png",
   "author": "yonbergman",
+  "contributors": [
+    "leodbrs",
+    "viktor_m"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -12,14 +16,33 @@
   "commands": [
     {
       "name": "mirror-displays",
-      "title": "Toggle Mirror Displays",
-      "description": "Toggle the mirroring of external displays on and off",
+      "title": "Mirror Displays",
+      "description": "Choose which display to mirror, or turn off mirroring.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-mirroring",
+      "title": "Toggle Mirroring",
+      "description": "Turn display mirroring off if it's on, or on (using your default direction) if it's off. Bind this to a hotkey for instant toggling.",
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultToggleDirection",
+      "title": "Default Toggle Direction",
+      "description": "Which direction to mirror when Toggle Mirroring turns mirroring on.",
+      "type": "dropdown",
+      "required": false,
+      "default": "mac",
+      "data": [
+        { "title": "Mac → External", "value": "mac" },
+        { "title": "External → Mac", "value": "external" }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.88.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

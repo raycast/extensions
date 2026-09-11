@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "rita_mordio",
   "contributors": [
-    "jaeyeonling"
+    "jaeyeonling",
+    "hongmono"
   ],
   "categories": [
     "Applications"
@@ -118,5 +119,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

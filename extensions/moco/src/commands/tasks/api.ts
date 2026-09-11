@@ -16,7 +16,7 @@ const taskSchema = z.array(
 );
 
 const preferences = getPreferenceValues<Preferences>();
-axios.defaults.baseURL = `https:/${preferences.url_prefix}.mocoapp.com/api/v1`;
+axios.defaults.baseURL = `https://${preferences.url_prefix}.mocoapp.com/api/v1`;
 
 export const fetchProjectTasks = async (projectID: number): Promise<Task[]> => {
   const { data } = await axios.get(`/projects/${projectID}/tasks`, {

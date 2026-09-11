@@ -32,7 +32,7 @@ export default function Command() {
         ) {
           setSelectedImage(items[0].path);
         }
-      } catch (error) {
+      } catch {
         return;
       } finally {
         setIsLoading(false);

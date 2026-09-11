@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chinese-traditional-colors",
+  "title": "Chinese Traditional Colors",
+  "description": "Search, preview, and copy Chinese traditional colors and harmony palettes.",
+  "icon": "icon.png",
+  "author": "RaffeYang",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-colors",
+      "title": "Chinese Traditional Colors",
+      "description": "Find Chinese traditional colors by name, number, HEX, RGB, HSL, hue, or palette relationship.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultCopyFormat",
+      "title": "Default Copy Format",
+      "description": "Format copied when pressing Enter on a color.",
+      "type": "dropdown",
+      "required": false,
+      "default": "hex",
+      "data": [
+        {
+          "title": "HEX",
+          "value": "hex"
+        },
+        {
+          "title": "RGB",
+          "value": "rgb"
+        },
+        {
+          "title": "CSS RGB",
+          "value": "cssRgb"
+        },
+        {
+          "title": "HSL",
+          "value": "hsl"
+        },
+        {
+          "title": "CSS HSL",
+          "value": "cssHsl"
+        },
+        {
+          "title": "CSS Variable",
+          "value": "cssVariable"
+        },
+        {
+          "title": "JSON",
+          "value": "json"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.7.0",
+    "pinyin-pro": "^3.28.1",
+    "prettier": "^3.9.5",
+    "tsx": "^4.23.1",
+    "typescript": "^6.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "refresh-data": "node scripts/fetch-colors.mjs",
+    "test": "node --test --import tsx src/*.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

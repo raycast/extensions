@@ -1,24 +1,80 @@
 import { showFailureToast } from "@raycast/utils";
-import { execSync } from "child_process";
+import { spawnSync } from "child_process";
+export interface DockLockDisplay {
+  name: string;
+  geometry: { x: number; y: number; width: number; height: number };
+  dockVisible: boolean;
+  dockMovable: boolean;
+}
 
-export async function getDisplayNames(): Promise<string[]> {
-  try {
-    const stdout = execSync('"/Applications/DockLock Plus.app/Contents/MacOS/DockLock Plus" /displays', {
-      encoding: "utf8",
+export interface DockLockStatus {
+  dockControlMode: string;
+  displayName: string;
+  dockState: string;
+}
+
+export async function getDisplays(): Promise<DockLockDisplay[]> {
+  const result = spawnSync("/Applications/DockLock Plus.app/Contents/MacOS/DockLock Plus", ["displays", "--json"], {
+    encoding: "utf8",
+  });
+
+  if (result.status === 0 && result.stdout) {
+    try {
+      return JSON.parse(result.stdout);
+    } catch (error) {
+      await showFailureToast(error, { title: "Error parsing displays JSON" });
+      return [];
+    }
+  } else {
+    const errorMessage = result.stderr || "Unknown error";
+    console.error(errorMessage);
+    await showFailureToast(new Error(`Error fetching displays (exit code ${result.status}): ${errorMessage}`), {
+      title: "Error fetching displays",
     });
-    const names = stdout.split(/\r?\n/).filter((line) => line.trim() !== "");
-    return Array.from(new Set(names));
-  } catch (error) {
-    await showFailureToast(error, { title: "Error fetching display names" });
     return [];
   }
 }
 
+export async function getStatus(): Promise<DockLockStatus | null> {
+  const result = spawnSync("/Applications/DockLock Plus.app/Contents/MacOS/DockLock Plus", ["status", "--json"], {
+    encoding: "utf8",
+  });
+
+  if (result.status === 0 && result.stdout) {
+    try {
+      return JSON.parse(result.stdout);
+    } catch (error) {
+      await showFailureToast(error, { title: "Error parsing status JSON" });
+      return null;
+    }
+  } else {
+    const errorMessage = result.stderr || "Unknown error";
+    console.error(errorMessage);
+    await showFailureToast(new Error(`Error fetching status (exit code ${result.status}): ${errorMessage}`), {
+      title: "Error fetching status",
+    });
+    return null;
+  }
+}
+
 export function isDockLockPlusInstalled(): boolean {
+  const result = spawnSync("open", ["-Ra", "DockLock Plus"]);
+  return result.status === 0;
+}
+
+export async function isDockMovable(): Promise<boolean> {
   try {
-    execSync('open -Ra "DockLock Plus"');
+    const status = await getStatus();
+    if (status === null) {
+      return false;
+    }
+    const mode = status.dockControlMode;
+    if (mode === "follows-mouse" || mode === "follows-window") {
+      return false;
+    }
     return true;
-  } catch {
+  } catch (error) {
+    console.error(error);
     return false;
   }
 }

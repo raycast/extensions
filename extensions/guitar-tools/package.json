@@ -5,6 +5,9 @@
   "description": "A collection of tools for guitarists including a chromatic tuner.",
   "icon": "extension-icon.png",
   "author": "narghev",
+  "contributors": [
+    "guillaume_gonano"
+  ],
   "platforms": [
     "macOS"
   ],

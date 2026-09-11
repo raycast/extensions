@@ -1,14 +1,15 @@
 import { BridgeConfig } from "./types";
-import { getUsernameFromBridge } from "../helpers/hueNetworking";
+import { getBridgeIdFromCertificate, getUsernameFromBridge } from "../helpers/hueNetworking";
 
 export async function linkWithBridge(
   bridgeIpAddress: string,
-  bridgeId: string,
+  bridgeId?: string,
   bridgeUsername?: string,
 ): Promise<BridgeConfig> {
+  const id = bridgeId ?? (await getBridgeIdFromCertificate(bridgeIpAddress));
   return {
     ipAddress: bridgeIpAddress,
-    username: bridgeUsername ? bridgeUsername : await getUsernameFromBridge(bridgeIpAddress, bridgeId),
-    id: bridgeId,
+    username: bridgeUsername ? bridgeUsername : await getUsernameFromBridge(bridgeIpAddress, id),
+    id,
   };
 }

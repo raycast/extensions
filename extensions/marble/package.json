@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "marble",
+  "title": "Marble",
+  "description": "Manage your Marble content including posts, authors, categories, and tags",
+  "icon": "extension-icon.png",
+  "author": "dominikdev",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Marble API key from the workspace dashboard",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "view-posts",
+      "title": "View Posts",
+      "subtitle": "Marble",
+      "description": "List and manage your Marble posts",
+      "mode": "view"
+    },
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "subtitle": "Marble",
+      "description": "Create a new post in Marble",
+      "mode": "view"
+    },
+    {
+      "name": "view-authors",
+      "title": "View Authors",
+      "subtitle": "Marble",
+      "description": "List and manage your Marble authors",
+      "mode": "view"
+    },
+    {
+      "name": "create-author",
+      "title": "Create Author",
+      "subtitle": "Marble",
+      "description": "Create a new author in Marble",
+      "mode": "view"
+    },
+    {
+      "name": "view-categories",
+      "title": "View Categories",
+      "subtitle": "Marble",
+      "description": "List and manage your Marble categories",
+      "mode": "view"
+    },
+    {
+      "name": "create-category",
+      "title": "Create Category",
+      "subtitle": "Marble",
+      "description": "Create a new category in Marble",
+      "mode": "view"
+    },
+    {
+      "name": "view-tags",
+      "title": "View Tags",
+      "subtitle": "Marble",
+      "description": "List and manage your Marble tags",
+      "mode": "view"
+    },
+    {
+      "name": "create-tag",
+      "title": "Create Tag",
+      "subtitle": "Marble",
+      "description": "Create a new tag in Marble",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^1.17.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

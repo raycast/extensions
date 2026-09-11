@@ -1,12 +1,13 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Clipboard,
+  confirmAlert,
   environment,
   getPreferenceValues,
   Icon,
   Image,
-  LaunchProps,
   List,
   showHUD,
   showToast,
@@ -17,21 +18,35 @@ import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import {
+  BrowserConfig,
   GoogleChromeBookmarkFile,
   GoogleChromeBookmarkFolder,
   GoogleChromeBookmarkURL,
   GoogleChromeInfoCache,
   GoogleChromeLocalState,
+  getSelectedBrowser,
   Profile,
-  Preferences,
 } from "./util/types";
-import { createBookmarkListItem, matchSearchText, isValidUrl, formatAsUrl, openGoogleChrome } from "./util/util";
+import {
+  createBookmarkListItem,
+  matchSearchText,
+  isValidUrl,
+  formatAsUrl,
+  openGoogleChrome,
+  readChromeLocalState,
+  deleteChromeProfile,
+  ChromeAction,
+  ChromeTarget,
+} from "./util/util";
+import { getFavicon } from "@raycast/utils";
 
-const ProfileItem = (props: { index: number; profile: Profile }) => {
-  const { index, profile } = props;
-
-  const context = encodeURIComponent(JSON.stringify({ directory: profile.directory }));
-  const deeplink = `raycast://extensions/frouo/${environment.extensionName}/open-profile?context=${context}`;
+const ProfileItem = (props: {
+  index: number;
+  profile: Profile;
+  browser: BrowserConfig;
+  onDelete: (profile: Profile) => Promise<void>;
+}) => {
+  const { index, profile, browser } = props;
 
   return (
     <List.Item
@@ -45,21 +60,44 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
           <Action.Push
             title="Show Bookmarks"
             icon={Icon.Link}
-            target={<ListBookmarks profile={profile} />}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
+            target={<ListBookmarks profile={profile} browser={browser} />}
           />
           <Action
-            title="Open in Google Chrome"
-            icon={Icon.Globe}
+            title="Bring to Front"
+            icon={Icon.Window}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={async () => {
-              await openGoogleChrome(profile.directory, "", async () => {
-                await showHUD("Opening profile...");
-              });
+              await openGoogleChrome(
+                profile,
+                ChromeAction.Focus,
+                async () => {
+                  await showHUD("Bringing to front...");
+                },
+                browser,
+              );
             }}
           />
-          <Action.CreateQuicklink
-            title={`Create Quicklink to ${profile.name} Profile`}
-            quicklink={{ name: `Open ${profile.name} Profile`, link: deeplink }}
+          <Action
+            title="New Window"
+            icon={Icon.AppWindow}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={async () => {
+              await openGoogleChrome(
+                profile,
+                ChromeAction.NewWindow,
+                async () => {
+                  await showHUD("Opening new window...");
+                },
+                browser,
+              );
+            }}
+          />
+          <Action
+            title="Delete Profile"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+            onAction={() => props.onDelete(profile)}
           />
         </ActionPanel>
       }
@@ -67,20 +105,22 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function Command(_props: LaunchProps) {
+export default function Command() {
+  const browser = getSelectedBrowser();
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
     async function listProfiles() {
       try {
-        const path = join(homedir(), "Library/Application Support/Google/Chrome/Local State");
-        const localStateFileBuffer = await readFile(path);
-        const localStateFileText = localStateFileBuffer.toString("utf-8");
-        setLocalState(JSON.parse(localStateFileText));
+        // for google-chrome-profiles-1.png:
+        // 1. comment the code below:
+        setLocalState((await readChromeLocalState(browser)).state);
+        // 2. uncomment function _createDataSetForScreenshot1() at the bottom of the file
+        // 3. uncomment code below:
+        // setLocalState(_createDataSetForScreenshot1());
       } catch (error) {
-        setError(Error("No profile found\nIs Google Chrome installed?"));
+        setError(Error(`No profile found\nIs ${browser.appName} installed?`));
       }
     }
 
@@ -94,12 +134,43 @@ export default function Command(_props: LaunchProps) {
   const infoCache = localState?.profile.info_cache;
   const profiles = infoCache && Object.keys(infoCache).map(extractProfileFromInfoCache(infoCache));
 
+  const deleteProfile = async (profile: Profile) => {
+    if (
+      !(await confirmAlert({
+        title: `Delete “${profile.name}” profile?`,
+        message: "This permanently deletes its bookmarks, history, passwords, and other local data.",
+        primaryAction: { title: "Delete Profile", style: Alert.ActionStyle.Destructive },
+      }))
+    ) {
+      return;
+    }
+
+    try {
+      setLocalState(await deleteChromeProfile(profile, browser));
+      await showToast(Toast.Style.Success, `Deleted ${profile.name}`);
+    } catch (error) {
+      await showToast(
+        Toast.Style.Failure,
+        "Could not delete profile",
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  };
+
   return (
     <List isLoading={!profiles && !error} searchBarPlaceholder="Search Profile">
       {profiles &&
         profiles
           .sort(sortAlphabetically)
-          .map((profile, index) => <ProfileItem key={profile.directory} index={index} profile={profile} />)}
+          .map((profile, index) => (
+            <ProfileItem
+              key={profile.directory}
+              index={index}
+              profile={profile}
+              browser={browser}
+              onDelete={deleteProfile}
+            />
+          ))}
     </List>
   );
 }
@@ -116,6 +187,7 @@ const extractProfileFromInfoCache =
     return {
       directory: infoCacheKey,
       name: profile.name,
+      givenName: profile.gaia_given_name,
       ...(profile.gaia_name &&
         profile.user_name &&
         profile.last_downloaded_gaia_picture_url_with_size && {
@@ -144,7 +216,7 @@ const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): Goo
 // Components
 //-------------
 
-function ListBookmarks(props: { profile: Profile }) {
+function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
   const [bookmarkFile, setBookmarkFile] = useState<GoogleChromeBookmarkFile>();
   const [error, setError] = useState<Error>();
   const [searchText, setSearchText] = useState("");
@@ -154,7 +226,7 @@ function ListBookmarks(props: { profile: Profile }) {
     async function listBookmarks() {
       try {
         const dir = props.profile.directory;
-        const path = join(homedir(), "Library/Application Support/Google/Chrome", dir, "Bookmarks");
+        const path = join(homedir(), props.browser.dataPath, dir, "Bookmarks");
         const bookmarkFileBuffer = await readFile(path);
         const bookmarkFileText = bookmarkFileBuffer.toString("utf-8");
         setBookmarkFile(JSON.parse(bookmarkFileText));
@@ -177,30 +249,66 @@ function ListBookmarks(props: { profile: Profile }) {
 
   const bookmarks = Object.values((bookmarkFile ?? { roots: {} }).roots)
     .flatMap(extractBookmarksUrlRecursively)
-    .filter((e) => !e.url.startsWith("chrome://"))
+    .filter((e): e is Required<GoogleChromeBookmarkURL> => (e.url && isValidUrl(e.url)) == true)
     .map((b) => createBookmarkListItem(b.url, b.name))
     .filter((b) => !searchText || matchSearchText(searchText, b.url, b.title));
 
-  const tabsOnTop = [
-    searchText
-      ? (function () {
-          const searchTextAsURL = formatAsUrl(searchText);
-          if (searchText.includes(".") && isValidUrl(searchTextAsURL)) {
-            return createBookmarkListItem(searchTextAsURL, "Go to");
-          } else {
-            return createBookmarkListItem(newTabUrlWithQuery(searchText), "Search input text");
-          }
-        })()
-      : createBookmarkListItem(getPreferenceValues<Preferences>().newBlankTabURL, "Blank"),
-  ].concat(
-    clipboard
-      ? [
-          isValidUrl(clipboard)
-            ? createBookmarkListItem(clipboard, "Go to the URL in the clipboard")
-            : createBookmarkListItem(newTabUrlWithQuery(clipboard), "Search text in the clipboard"),
-        ]
-      : [],
-  );
+  const newTabItems: { target: ChromeTarget; title: string; subtitle?: string; icon: Icon }[] = searchText
+    ? (function () {
+        // Check for a valid domain pattern: at least 2 characters after the dot (e.g., google.com, google.fr)
+        if (isValidUrl(searchText)) {
+          return [
+            {
+              target: ChromeAction.openUrl(searchText),
+              title: "Go To",
+              subtitle: searchText,
+              icon: Icon.Link,
+            },
+          ];
+        } else {
+          const looksLikeUrl = /\.[a-z]{2,}/i.test(searchText);
+
+          return [
+            ...(looksLikeUrl
+              ? (function () {
+                  // the user is certainly trying to reach a URL (for example typing "github.com")
+                  const searchTextAsURL = formatAsUrl(searchText);
+                  return [
+                    {
+                      target: ChromeAction.openUrl(searchTextAsURL),
+                      title: "Go To",
+                      subtitle: searchTextAsURL,
+                      icon: Icon.Link,
+                    },
+                  ];
+                })()
+              : []),
+            {
+              target: ChromeAction.openUrl(newTabUrlWithQuery(searchText)),
+              title: "Search Text in a New Tab",
+              subtitle: searchText,
+              icon: Icon.MagnifyingGlass,
+            },
+          ];
+        }
+      })()
+    : [{ target: ChromeAction.NewTab, title: "New Tab", subtitle: undefined, icon: Icon.Plus }];
+
+  const clipboardItem: { target: ChromeTarget; title: string; subtitle?: string; icon: Icon } | null = clipboard
+    ? isValidUrl(clipboard)
+      ? {
+          target: ChromeAction.openUrl(clipboard),
+          title: "Go To the URL in the Clipboard",
+          subtitle: clipboard,
+          icon: Icon.Link,
+        }
+      : {
+          target: ChromeAction.openUrl(newTabUrlWithQuery(clipboard)),
+          title: "Search Text in the Clipboard",
+          subtitle: clipboard,
+          icon: Icon.Clipboard,
+        }
+    : null;
 
   if (error && (bookmarks?.length ?? 0) == 0) {
     showToast(Toast.Style.Failure, error.message);
@@ -209,31 +317,78 @@ function ListBookmarks(props: { profile: Profile }) {
   return (
     <List
       isLoading={!bookmarkFile && !error}
-      searchBarPlaceholder="Search Bookmark"
+      searchBarPlaceholder={`Search Bookmark in ${props.profile.name}`}
       onSearchTextChange={onSearchTextChange}
     >
-      {tabsOnTop.length > 0 && (
-        <List.Section title="New Tab">
-          {tabsOnTop.map((tab, index) => (
+      {!searchText && (
+        <List.Section>
+          <List.Item
+            title="Bring to Front"
+            icon={Icon.Window}
+            actions={
+              <ActionPanelForTarget profile={props.profile} target={ChromeAction.Focus} browser={props.browser} />
+            }
+          />
+          {newTabItems.map((tab, index) => (
             <List.Item
-              key={index}
+              key={`newtab-${index}`}
               title={tab.title}
               subtitle={tab.subtitle}
-              icon={{ source: tab.iconURL, fallback: Icon.Globe }}
-              actions={<BookmarksActionPanel profile={props.profile} url={tab.url} />}
+              icon={tab.icon}
+              actions={<ActionPanelForTarget profile={props.profile} target={tab.target} browser={props.browser} />}
+            />
+          ))}
+          <List.Item
+            title="New Window"
+            icon={Icon.Duplicate}
+            actions={
+              <ActionPanelForTarget profile={props.profile} target={ChromeAction.NewWindow} browser={props.browser} />
+            }
+          />
+          {clipboardItem && (
+            <List.Item
+              title={clipboardItem.title}
+              subtitle={clipboardItem.subtitle}
+              icon={clipboardItem.icon}
+              actions={
+                <ActionPanelForTarget profile={props.profile} target={clipboardItem.target} browser={props.browser} />
+              }
+            />
+          )}
+        </List.Section>
+      )}
+      {searchText && (
+        <List.Section>
+          {newTabItems.map((tab, index) => (
+            <List.Item
+              key={`newtab-${index}`}
+              title={tab.title}
+              subtitle={tab.subtitle}
+              icon={tab.icon}
+              actions={<ActionPanelForTarget profile={props.profile} target={tab.target} browser={props.browser} />}
             />
           ))}
         </List.Section>
       )}
-      {bookmarks && (
+      {bookmarks && bookmarks.length > 0 && (
         <List.Section title="Bookmarks">
           {bookmarks.map((b, index) => (
             <List.Item
               key={index}
               title={b.title}
               subtitle={b.subtitle}
-              icon={{ source: b.iconURL, fallback: Icon.Globe }}
-              actions={<BookmarksActionPanel profile={props.profile} url={b.url} />}
+              icon={
+                b.iconURL
+                  ? getFavicon(b.iconURL, { fallback: Icon.Globe, mask: Image.Mask.Circle })
+                  : { source: Icon.Globe, mask: Image.Mask.Circle }
+              }
+              actions={
+                <ActionPanelForTarget
+                  profile={props.profile}
+                  target={ChromeAction.openUrl(b.url)}
+                  browser={props.browser}
+                />
+              }
             />
           ))}
         </List.Section>
@@ -243,36 +398,121 @@ function ListBookmarks(props: { profile: Profile }) {
 }
 
 function newTabUrlWithQuery(searchText: string) {
-  return getPreferenceValues<Preferences>().newTabURL.replace("%query%", encodeURIComponent(searchText));
+  return getPreferenceValues<ExtensionPreferences>().newTabURL.replace("%query%", encodeURIComponent(searchText));
 }
 
-function BookmarksActionPanel(props: { profile: Profile; url: string }) {
-  const context = encodeURIComponent(JSON.stringify({ directory: props.profile.directory, url: props.url }));
-  const deeplink = `raycast://extensions/frouo/${environment.extensionName}/open-profile-url?context=${context}`;
+function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; browser: BrowserConfig }) {
+  const context = encodeURIComponent(
+    JSON.stringify({
+      directory: props.profile.directory,
+      name: props.profile.name,
+      // Carried across the deeplink so a Quicklink for a signed-in profile
+      // can match Chrome's Profiles menu without a Local State fallback
+      // read — see `openGoogleChrome`. (JSON.stringify drops it when
+      // undefined, so a local profile's deeplink stays unchanged.)
+      givenName: props.profile.givenName,
+      ...props.target,
+    }),
+  );
+  const deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/frouo/${
+    environment.extensionName
+  }/open-profile?context=${context}`;
+
+  const targetUrl = props.target.action === "openUrl" ? props.target.url : "";
+
+  const { hudMessage, quicklinkTitle, quicklinkName } = {
+    focus: {
+      hudMessage: "Bringing to front...",
+      quicklinkTitle: "Create Quicklink (Bring to Front)",
+      quicklinkName: `${props.profile.name} > Bring to Front`,
+    },
+    newTab: {
+      hudMessage: "Opening new tab...",
+      quicklinkTitle: "Create Quicklink (New Tab)",
+      quicklinkName: `${props.profile.name} > New Tab`,
+    },
+    newWindow: {
+      hudMessage: "Opening new window...",
+      quicklinkTitle: "Create Quicklink (New Window)",
+      quicklinkName: `${props.profile.name} > New Window`,
+    },
+    openUrl: {
+      hudMessage: "Opening...",
+      quicklinkTitle: "Create Quicklink (Open the URL)",
+      quicklinkName: `${props.profile.name} > Open ${targetUrl}`,
+    },
+  }[props.target.action];
+
   return (
     <ActionPanel>
       <Action
-        title="Open in Google Chrome"
+        title={`Open in ${props.browser.appName}`}
         icon={Icon.Globe}
         onAction={() => {
-          openGoogleChrome(props.profile.directory, props.url, async () => {
-            await showHUD("Opening bookmark...");
-          });
+          openGoogleChrome(
+            props.profile,
+            props.target,
+            async () => {
+              await showHUD(hudMessage);
+            },
+            props.browser,
+          );
         }}
       />
-      <Action
-        title="Open in Background"
-        icon={Icon.Globe}
-        onAction={() => {
-          openGoogleChrome(props.profile.directory, props.url, async () => {
-            await showToast(Toast.Style.Success, "Opening bookmark...");
-          });
-        }}
-      />
-      <Action.CreateQuicklink
-        title={`Create Quicklink to ${props.profile.name} Profile`}
-        quicklink={{ name: `Open ${props.profile.name} Profile`, link: deeplink }}
-      />
+      <Action.CreateQuicklink title={quicklinkTitle} quicklink={{ name: quicklinkName, link: deeplink }} />
     </ActionPanel>
   );
 }
+
+// function _createDataSetForScreenshot1() {
+//   const pictureURL =
+//     "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+//   return [
+//     {
+//       key: "Default",
+//       name: "Personal",
+//       email: "sarah@gmail.com",
+//       pictureURL,
+//     },
+//     {
+//       name: "Client - Acme Corp",
+//       email: "sarah.mitchell@acmecorp.com",
+//       pictureURL,
+//     },
+//     {
+//       name: "Freelance",
+//       email: "hello@sarahmitchell.design",
+//       pictureURL,
+//     },
+//     {
+//       name: "Side Project",
+//       email: "sarah.m.dev@outlook.com",
+//       pictureURL: "https://dummyimage.com/200x200/bf3030/ffffff&text=S",
+//     },
+//     {
+//       name: "Client - TechStart",
+//       email: "sarah@techstart.io",
+//       pictureURL,
+//     },
+//     {
+//       name: "Shopping",
+//     },
+//   ].reduce<GoogleChromeLocalState>(
+//     (prev, curr, idx) => {
+//       // ts-ignore
+//       prev.profile.info_cache[curr.key ?? `Profile ${idx}`] = {
+//         avatar_icon: "",
+//         name: curr.name,
+//         gaia_name: "xxx",
+//         last_downloaded_gaia_picture_url_with_size: curr.pictureURL,
+//         user_name: curr.email,
+//       };
+//       return prev;
+//     },
+//     {
+//       profile: {
+//         info_cache: {},
+//       },
+//     },
+//   );
+// }

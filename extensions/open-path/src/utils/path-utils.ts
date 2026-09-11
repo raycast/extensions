@@ -69,7 +69,10 @@ export const urlPathAction = async (path: string) => {
         await open(finalPath);
       }
     } else if (isDeeplink(path)) {
-      if (!path.startsWith("raycast://")) {
+      if (
+        !path.startsWith(`${process.env.RAYCAST_SCHEME ?? "raycast"}://`) &&
+        !path.startsWith("raycast://")
+      ) {
         await showHud("🔗", "Open Deeplink: " + path);
       }
       await open(path);

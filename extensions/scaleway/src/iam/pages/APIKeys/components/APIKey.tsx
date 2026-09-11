@@ -1,9 +1,9 @@
 import { List } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 import { Bearer } from './Bearer'
 
 type APIKeyProps = {
-  apiKey: IAM.v1alpha1.APIKey
+  apiKey: Iamv1alpha1.APIKey
 }
 
 export const APIkey = ({ apiKey }: APIKeyProps) => (

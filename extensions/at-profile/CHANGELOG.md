@@ -1,5 +1,13 @@
 # @ Profile Changelog
 
+## [Added starring and YouTube brand profiles] - 2026-02-16
+
+- Added starring functionality for profile history
+- Added AI tool support for starring and unstarring profiles
+- Updated action shortcut keys to align with Raycast conventions
+- Added YouTube brand profile support (@brand)
+- Updated dependencies and ESLint configuration
+
 ## [Prevent Infinite Loop in Open Profile and add Screenshots] - 2025-08-08
 
 ### Added

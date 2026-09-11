@@ -25,6 +25,7 @@ export default function Command() {
       >
         {rcmdVideos?.map((item) => (
           <Video
+            key={item.bvid}
             title={item.title}
             cover={item.pic}
             url={item.uri}

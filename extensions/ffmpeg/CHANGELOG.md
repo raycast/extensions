@@ -1,5 +1,16 @@
 # FFmpeg Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Updates] - 2025-12-08
+
+- Update dependencies to latest versions.
+- Fix linting errors.
+- Add AI tools to get help (so you can create a command yourself) and list a variety of things (formats, codecs, etc.)
+- Update fileDetail component to use proper React formatting.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Added conversion option and percentage progress] - 2023-10-17

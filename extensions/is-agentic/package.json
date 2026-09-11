@@ -1,0 +1,144 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "is-agentic",
+  "title": "Is Agentic",
+  "description": "Check how ready a website is for AI agents",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-is-agentic",
+      "title": "Check Agent Readiness",
+      "subtitle": "Is Agentic",
+      "description": "View a website's Is Agentic score and recommendations",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "https://example.com",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "view-history",
+      "title": "View Report History",
+      "subtitle": "Is Agentic",
+      "description": "Browse websites whose Is Agentic reports you viewed",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-agent-readiness",
+      "title": "Get Agent Readiness Report",
+      "description": "Get the latest completed Is Agentic score, findings, evidence, and recommendations for a public website"
+    },
+    {
+      "name": "compare-agent-readiness",
+      "title": "Compare Agent Readiness",
+      "description": "Compare latest completed Is Agentic reports for two public websites"
+    }
+  ],
+  "ai": {
+    "instructions": "Use Get Agent Readiness Report for questions about one website's agent readiness, score, evidence, or recommendations. Use Compare Agent Readiness only when the user provides two websites or explicitly requests a comparison. Reports are completed snapshots: never imply that a tool starts, refreshes, or waits for a scan. If a report is unavailable, explain that the user must start a scan on is-agentic.com and retry after it completes. Keep recommendations attributed to the report and link the report URL when useful.",
+    "evals": [
+      {
+        "input": "@is-agentic How ready is https://example.com for AI agents?",
+        "mocks": {
+          "get-agent-readiness": {
+            "url": "https://example.com",
+            "score": 72,
+            "scoreLabel": "Good foundation",
+            "issues": [
+              {
+                "name": "LLMs.txt",
+                "tier": "essential",
+                "result": "failed",
+                "recommendation": "Publish an llms.txt file."
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-agent-readiness",
+              "arguments": {
+                "url": "https://example.com"
+              }
+            }
+          },
+          {
+            "includes": "72"
+          }
+        ]
+      },
+      {
+        "input": "@is-agentic Compare the agent readiness of https://example.com and https://example.org.",
+        "mocks": {
+          "compare-agent-readiness": {
+            "first": {
+              "url": "https://example.com",
+              "score": 72,
+              "issues": []
+            },
+            "second": {
+              "url": "https://example.org",
+              "score": 85,
+              "issues": []
+            },
+            "comparison": {
+              "higherScore": "second",
+              "scoreDifference": 13,
+              "issueCountDifference": 0
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "compare-agent-readiness",
+              "arguments": {
+                "firstUrl": "https://example.com",
+                "secondUrl": "https://example.org"
+              }
+            }
+          },
+          {
+            "includes": "85"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

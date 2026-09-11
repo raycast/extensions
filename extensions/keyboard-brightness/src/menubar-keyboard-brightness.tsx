@@ -1,5 +1,4 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
-import React from "react";
 import { adjustBrightness, getSystemBrightness } from "./utils";
 import { usePromise } from "@raycast/utils";
 

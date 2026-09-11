@@ -1,0 +1,50 @@
+instructions: |
+  The Forest is an algorithm-free way to discover personal and unusual websites at https://theforest.link/.
+  Use take-a-walk when the user asks to wander, explore, discover, get lost, or visit a random Forest site. Return its URL as a clickable Markdown link and mention that the walk was saved to history. Do not call it repeatedly unless the user explicitly asks for multiple walks.
+  Use get-walk-history for past discoveries. It returns newest walks first. Never invent history entries.
+  Use clear-walk-history only when the user explicitly asks to clear or delete their walk history. Invoke the tool directly and let its confirmation UI obtain approval; do not ask for an additional chat confirmation.
+  Use plant-website only when the user explicitly asks to submit or plant a specific full website URL. Invoke it directly and let its confirmation UI obtain approval. Planting submits the URL for consideration and does not guarantee inclusion.
+  For general questions about The Forest or requests to open its homepage, link https://theforest.link/ without calling a tool.
+evals:
+  - input: "@the-forest-link Take me for a walk."
+    mocks:
+      take-a-walk:
+        url: "https://example.com/strange-corner"
+        walkedAt: "2026-08-23T17:00:00.000Z"
+        savedToHistory: true
+        message: "A new path through The Forest was found and saved to walk history."
+    expected:
+      - callsTool: "take-a-walk"
+      - includes: "https://example.com/strange-corner"
+  - input: "@the-forest-link Show my five most recent walks."
+    mocks:
+      get-walk-history:
+        walks:
+          - id: "walk-1"
+            url: "https://example.com/one"
+            walkedAt: "2026-08-23T17:00:00.000Z"
+        returnedCount: 1
+        totalCount: 1
+    expected:
+      - callsTool:
+          name: "get-walk-history"
+          arguments:
+            limit: 5
+  - input: "@the-forest-link Clear my walk history."
+    mocks:
+      clear-walk-history:
+        clearedCount: 4
+        message: "Walk history cleared."
+    expected:
+      - callsTool: "clear-walk-history"
+  - input: "@the-forest-link Plant https://example.com in The Forest."
+    mocks:
+      plant-website:
+        website: "https://example.com/"
+        submitted: true
+        message: "Website submitted. Maybe it will sprout, maybe it won't."
+    expected:
+      - callsTool:
+          name: "plant-website"
+          arguments:
+            website: "https://example.com"

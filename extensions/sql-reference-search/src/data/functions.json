@@ -1,0 +1,425 @@
+[
+  {
+    "title": "COUNT",
+    "type": "function",
+    "summary": "Count rows or non-null expression values.",
+    "syntax": {
+      "common": ["COUNT(*)", "COUNT(expression)"]
+    },
+    "examples": {
+      "common": ["SELECT COUNT(*) FROM orders;"]
+    },
+    "notes": ["COUNT(*) includes NULL rows; COUNT(expr) excludes NULLs."],
+    "aliases": ["row count"],
+    "tags": ["aggregation"],
+    "related": ["SUM", "AVG", "GROUP BY"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["expression: optional expression to count non-NULL values"]
+  },
+  {
+    "title": "SUM",
+    "type": "function",
+    "summary": "Sum numeric values across rows.",
+    "syntax": {
+      "common": ["SUM(expression)"]
+    },
+    "examples": {
+      "common": ["SELECT customer_id, SUM(total) FROM orders GROUP BY customer_id;"]
+    },
+    "notes": ["NULL inputs are ignored.", "Can overflow narrow integer types."],
+    "aliases": ["total"],
+    "tags": ["aggregation"],
+    "related": ["AVG", "COUNT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["expression: numeric expression to sum"]
+  },
+  {
+    "title": "AVG",
+    "type": "function",
+    "summary": "Return average numeric value.",
+    "syntax": {
+      "common": ["AVG(expression)"]
+    },
+    "examples": {
+      "common": ["SELECT AVG(total) FROM orders WHERE status = 'paid';"]
+    },
+    "notes": ["NULLs are ignored in averaging."],
+    "aliases": ["mean"],
+    "tags": ["aggregation"],
+    "related": ["SUM", "COUNT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["expression: numeric expression"]
+  },
+  {
+    "title": "MIN",
+    "type": "function",
+    "summary": "Return the smallest value.",
+    "syntax": {
+      "common": ["MIN(expression)"]
+    },
+    "examples": {
+      "common": ["SELECT MIN(created_at) FROM events;"]
+    },
+    "notes": ["Works with numbers, strings, and dates based on sort semantics."],
+    "aliases": ["minimum"],
+    "tags": ["aggregation"],
+    "related": ["MAX"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["expression: comparable expression"]
+  },
+  {
+    "title": "MAX",
+    "type": "function",
+    "summary": "Return the largest value.",
+    "syntax": {
+      "common": ["MAX(expression)"]
+    },
+    "examples": {
+      "common": ["SELECT MAX(created_at) FROM events;"]
+    },
+    "notes": ["Works with numbers, strings, and dates based on sort semantics."],
+    "aliases": ["maximum"],
+    "tags": ["aggregation"],
+    "related": ["MIN"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["expression: comparable expression"]
+  },
+  {
+    "title": "STRING_AGG",
+    "type": "function",
+    "summary": "Concatenate grouped string values using a separator.",
+    "syntax": {
+      "common": ["STRING_AGG(expression, separator)"],
+      "overrides": {
+        "mysql": ["GROUP_CONCAT(expression SEPARATOR separator)"],
+        "sqlite": ["GROUP_CONCAT(expression, separator)"],
+        "tsql": ["STRING_AGG(expression, separator)"]
+      }
+    },
+    "examples": {
+      "postgres": ["SELECT department, STRING_AGG(name, ', ') FROM employees GROUP BY department;"],
+      "mysql": ["SELECT department, GROUP_CONCAT(name SEPARATOR ', ') FROM employees GROUP BY department;"],
+      "sqlite": ["SELECT department, GROUP_CONCAT(name, ', ') FROM employees GROUP BY department;"],
+      "tsql": ["SELECT department, STRING_AGG(name, ', ') FROM employees GROUP BY department;"]
+    },
+    "notes": ["Function name differs by dialect."],
+    "aliases": ["group_concat", "listagg"],
+    "tags": ["aggregation", "comparison matrix"],
+    "related": ["CONCAT", "GROUP BY"],
+    "dialects": {
+      "supported": ["postgres", "mysql", "sqlite", "tsql"],
+      "notes": {
+        "mysql": "Use GROUP_CONCAT instead of STRING_AGG."
+      }
+    },
+    "parameters": ["expression: text to concatenate", "separator: delimiter between values"]
+  },
+  {
+    "title": "CONCAT",
+    "type": "function",
+    "summary": "Join strings into a single value.",
+    "syntax": {
+      "common": ["CONCAT(str1, str2, ...)"]
+    },
+    "examples": {
+      "common": ["SELECT CONCAT(first_name, ' ', last_name) FROM users;"]
+    },
+    "notes": ["NULL handling differs; COALESCE often needed for safety."],
+    "aliases": ["string join"],
+    "tags": ["string"],
+    "related": ["STRING_AGG", "COALESCE"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["strN: values to concatenate"]
+  },
+  {
+    "title": "SUBSTRING",
+    "type": "function",
+    "summary": "Extract part of a string by position and length.",
+    "syntax": {
+      "common": ["SUBSTRING(string FROM start [FOR length])"],
+      "overrides": {
+        "mysql": ["SUBSTRING(string, start, length)"],
+        "sqlite": ["SUBSTR(string, start, length)"],
+        "tsql": ["SUBSTRING(string, start, length)"]
+      }
+    },
+    "examples": {
+      "common": ["SELECT SUBSTRING(code FROM 1 FOR 3) FROM products;"],
+      "mysql": ["SELECT SUBSTRING(code, 1, 3) FROM products;"],
+      "sqlite": ["SELECT SUBSTR(code, 1, 3) FROM products;"],
+      "tsql": ["SELECT SUBSTRING(code, 1, 3) FROM products;"]
+    },
+    "notes": ["Index base and signature differ slightly across engines."],
+    "aliases": ["substr"],
+    "tags": ["string", "dialect difference"],
+    "related": ["LENGTH", "TRIM"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["string: source text", "start: 1-based start index", "length: optional segment length"]
+  },
+  {
+    "title": "LENGTH",
+    "type": "function",
+    "summary": "Return string length (or bytes depending on engine/function).",
+    "syntax": {
+      "common": ["LENGTH(string)"],
+      "overrides": {
+        "tsql": ["LEN(string)"]
+      }
+    },
+    "examples": {
+      "common": ["SELECT LENGTH(name) FROM users;"],
+      "tsql": ["SELECT LEN(name) FROM users;"]
+    },
+    "notes": ["Use byte-length functions when needed for storage-specific checks."],
+    "aliases": ["len"],
+    "tags": ["string"],
+    "related": ["SUBSTRING"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["string: source text"]
+  },
+  {
+    "title": "TRIM",
+    "type": "function",
+    "summary": "Remove leading and trailing characters from strings.",
+    "syntax": {
+      "common": ["TRIM([characters FROM] string)"]
+    },
+    "examples": {
+      "common": ["SELECT TRIM(name) FROM users;"]
+    },
+    "notes": ["Variants include LTRIM and RTRIM."],
+    "aliases": ["strip"],
+    "tags": ["string"],
+    "related": ["LOWER", "UPPER"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["characters: optional set to strip", "string: source text"]
+  },
+  {
+    "title": "LOWER",
+    "type": "function",
+    "summary": "Convert string to lowercase.",
+    "syntax": {
+      "common": ["LOWER(string)"]
+    },
+    "examples": {
+      "common": ["SELECT LOWER(email) FROM users;"]
+    },
+    "notes": ["Case conversion depends on collation and locale rules."],
+    "aliases": ["downcase"],
+    "tags": ["string"],
+    "related": ["UPPER", "ILIKE"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["string: source text"]
+  },
+  {
+    "title": "UPPER",
+    "type": "function",
+    "summary": "Convert string to uppercase.",
+    "syntax": {
+      "common": ["UPPER(string)"]
+    },
+    "examples": {
+      "common": ["SELECT UPPER(code) FROM products;"]
+    },
+    "notes": ["Case conversion depends on collation and locale rules."],
+    "aliases": ["upcase"],
+    "tags": ["string"],
+    "related": ["LOWER"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["string: source text"]
+  },
+  {
+    "title": "CURRENT_TIMESTAMP",
+    "type": "function",
+    "summary": "Return the current timestamp according to the database server.",
+    "syntax": {
+      "common": ["CURRENT_TIMESTAMP"],
+      "overrides": {
+        "mysql": ["NOW()"]
+      }
+    },
+    "examples": {
+      "common": ["SELECT CURRENT_TIMESTAMP;"],
+      "mysql": ["SELECT NOW();"]
+    },
+    "notes": ["Statement-time vs transaction-time semantics vary by engine."],
+    "aliases": ["now"],
+    "tags": ["date", "time"],
+    "related": ["DATE_TRUNC", "EXTRACT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": []
+  },
+  {
+    "title": "DATE_TRUNC",
+    "type": "function",
+    "summary": "Truncate timestamps to a given precision (day, month, etc.).",
+    "syntax": {
+      "common": ["DATE_TRUNC(unit, timestamp_expr)"],
+      "overrides": {
+        "mysql": ["DATE_FORMAT(timestamp_expr, format) /* emulate */"],
+        "sqlite": ["strftime(format, timestamp_expr) /* emulate */"],
+        "tsql": ["DATETRUNC(unit, timestamp_expr)"]
+      }
+    },
+    "examples": {
+      "postgres": ["SELECT DATE_TRUNC('day', created_at) FROM events;"],
+      "mysql": ["SELECT DATE_FORMAT(created_at, '%Y-%m-%d 00:00:00') FROM events;"],
+      "sqlite": ["SELECT strftime('%Y-%m-%d 00:00:00', created_at) FROM events;"],
+      "tsql": ["SELECT DATETRUNC(day, created_at) FROM events;"]
+    },
+    "notes": ["Available function names and units differ by dialect."],
+    "aliases": ["datetrunc"],
+    "tags": ["date", "time", "comparison matrix"],
+    "related": ["CURRENT_TIMESTAMP", "EXTRACT"],
+    "dialects": {
+      "supported": ["postgres", "mysql", "sqlite", "tsql"],
+      "notes": {
+        "mysql": "No direct DATE_TRUNC; use formatting/expression alternatives.",
+        "tsql": "Use DATETRUNC in supported SQL Server versions."
+      }
+    },
+    "parameters": ["unit: truncation grain", "timestamp_expr: value to truncate"]
+  },
+  {
+    "title": "EXTRACT",
+    "type": "function",
+    "summary": "Extract a date/time field (year, month, day, etc.) from a temporal value.",
+    "syntax": {
+      "common": ["EXTRACT(field FROM source)"]
+    },
+    "examples": {
+      "common": ["SELECT EXTRACT(YEAR FROM created_at) FROM events;"],
+      "tsql": ["SELECT DATEPART(year, created_at) FROM events;"]
+    },
+    "notes": ["In SQL Server, DATEPART is the common equivalent."],
+    "aliases": ["datepart"],
+    "tags": ["date", "time"],
+    "related": ["DATE_TRUNC", "CURRENT_TIMESTAMP"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["field: year/month/day/etc.", "source: date or timestamp expression"]
+  },
+  {
+    "title": "DATEADD / INTERVAL",
+    "type": "function",
+    "summary": "Add or subtract time units from temporal values.",
+    "syntax": {
+      "common": ["timestamp_expr + INTERVAL 'n unit'"],
+      "overrides": {
+        "mysql": ["DATE_ADD(timestamp_expr, INTERVAL n unit)"],
+        "sqlite": ["datetime(timestamp_expr, '+n unit')"],
+        "tsql": ["DATEADD(unit, n, timestamp_expr)"]
+      }
+    },
+    "examples": {
+      "postgres": ["SELECT created_at + INTERVAL '7 days' FROM events;"],
+      "mysql": ["SELECT DATE_ADD(created_at, INTERVAL 7 DAY) FROM events;"],
+      "sqlite": ["SELECT datetime(created_at, '+7 day') FROM events;"],
+      "tsql": ["SELECT DATEADD(day, 7, created_at) FROM events;"]
+    },
+    "notes": ["Date arithmetic syntax varies heavily by engine."],
+    "aliases": ["dateadd", "interval"],
+    "tags": ["date", "time", "dialect difference"],
+    "related": ["DATE_TRUNC", "EXTRACT"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["unit: date part", "n: amount", "timestamp_expr: source value"]
+  },
+  {
+    "title": "COALESCE",
+    "type": "function",
+    "summary": "Return the first non-NULL value.",
+    "syntax": {
+      "common": ["COALESCE(value1, value2, ..., fallback)"]
+    },
+    "examples": {
+      "common": ["SELECT COALESCE(phone, mobile_phone, 'n/a') FROM contacts;"]
+    },
+    "notes": ["Useful for display values and null-safe concatenation."],
+    "aliases": ["ifnull", "isnull"],
+    "tags": ["null handling"],
+    "related": ["NULLIF", "IS NULL"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["valueN: candidates in precedence order"]
+  },
+  {
+    "title": "NULLIF",
+    "type": "function",
+    "summary": "Return NULL when two expressions are equal; otherwise return first expression.",
+    "syntax": {
+      "common": ["NULLIF(expression1, expression2)"]
+    },
+    "examples": {
+      "common": ["SELECT revenue / NULLIF(cost, 0) FROM metrics;"]
+    },
+    "notes": ["Common guard against divide-by-zero."],
+    "aliases": ["null guard"],
+    "tags": ["null handling"],
+    "related": ["COALESCE"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["expression1: value to compare", "expression2: matching value"]
+  },
+  {
+    "title": "IS NULL",
+    "type": "operator",
+    "summary": "Test for NULL values.",
+    "syntax": {
+      "common": ["expression IS NULL", "expression IS NOT NULL"]
+    },
+    "examples": {
+      "common": ["SELECT * FROM users WHERE deleted_at IS NULL;"]
+    },
+    "notes": ["Do not use = NULL; SQL three-valued logic requires IS NULL."],
+    "aliases": ["null check"],
+    "tags": ["null handling", "predicate"],
+    "related": ["COALESCE", "NULLIF"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] }
+  },
+  {
+    "title": "JSON_EXTRACT",
+    "type": "function",
+    "summary": "Extract JSON value at a path.",
+    "syntax": {
+      "common": ["JSON_EXTRACT(json_doc, path)"],
+      "overrides": {
+        "postgres": ["json_doc -> path", "json_doc ->> path"],
+        "tsql": ["JSON_VALUE(json_doc, path)"]
+      }
+    },
+    "examples": {
+      "mysql": ["SELECT JSON_EXTRACT(payload, '$.status') FROM events;"],
+      "sqlite": ["SELECT json_extract(payload, '$.status') FROM events;"],
+      "postgres": ["SELECT payload->>'status' FROM events;"],
+      "tsql": ["SELECT JSON_VALUE(payload, '$.status') FROM events;"]
+    },
+    "notes": ["Extraction returns JSON or text depending on operator/function."],
+    "aliases": ["json path"],
+    "tags": ["json", "dialect difference"],
+    "related": ["JSON_VALUE", "JSON Operators"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["json_doc: JSON source", "path: JSON path expression"]
+  },
+  {
+    "title": "JSON_VALUE",
+    "type": "function",
+    "summary": "Extract scalar text value from JSON at a path.",
+    "syntax": {
+      "common": ["JSON_VALUE(json_doc, path)"],
+      "overrides": {
+        "postgres": ["json_doc ->> path"],
+        "mysql": ["JSON_UNQUOTE(JSON_EXTRACT(json_doc, path))"],
+        "sqlite": ["json_extract(json_doc, path)"]
+      }
+    },
+    "examples": {
+      "tsql": ["SELECT JSON_VALUE(payload, '$.status') FROM events;"],
+      "postgres": ["SELECT payload->>'status' FROM events;"],
+      "mysql": ["SELECT JSON_UNQUOTE(JSON_EXTRACT(payload, '$.status')) FROM events;"],
+      "sqlite": ["SELECT json_extract(payload, '$.status') FROM events;"]
+    },
+    "notes": ["T-SQL provides JSON_VALUE natively for scalar extraction."],
+    "aliases": ["json scalar"],
+    "tags": ["json", "dialect difference"],
+    "related": ["JSON_EXTRACT", "JSON Operators"],
+    "dialects": { "supported": ["postgres", "mysql", "sqlite", "tsql"] },
+    "parameters": ["json_doc: JSON source", "path: JSON path expression"]
+  }
+]

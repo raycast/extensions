@@ -1,0 +1,800 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        background-color: transparent;
+        font-family: -apple-system, Arial, sans-serif;
+      }
+      /* Full-screen dim backdrop; clicking it dismisses (handled in script). */
+      #backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: backdrop-in 0.2s ease both;
+      }
+      @keyframes backdrop-in {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      /* Centered column stacking the preview, control bar, and carousel; transparent so clicks in the gaps still dismiss. */
+      .card {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        pointer-events: none;
+      }
+      /* Frosted preview area, sized to the animation's own aspect ratio (--art-ratio, set on
+         load; square until then) — the largest such rectangle that fits the viewport. */
+      .preview {
+        pointer-events: auto;
+        --art-ratio: 1;
+        aspect-ratio: var(--art-ratio);
+        width: min(80vw, 760px, 72vh * var(--art-ratio));
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 20px;
+        overflow: hidden;
+        background-color: rgba(28, 28, 30, 0.5);
+        -webkit-backdrop-filter: blur(24px) saturate(150%);
+        backdrop-filter: blur(24px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+      }
+      .stage {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: transparent;
+      }
+      #preview-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      /* Carousel sits in the column below the control bar, a constant gap from it on any screen size. */
+      .track {
+        pointer-events: auto;
+        margin-top: 24px;
+        box-sizing: border-box;
+        max-width: min(86vw, 720px);
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        padding: 9px 10px;
+        border-radius: 12px;
+        background-color: rgba(28, 28, 30, 0.66);
+        -webkit-backdrop-filter: blur(24px) saturate(150%);
+        backdrop-filter: blur(24px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      }
+      .track[hidden] {
+        display: none;
+      }
+      .track-name {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      .track-thumbs {
+        display: flex;
+        gap: 7px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        scrollbar-width: thin;
+      }
+      .thumb {
+        flex: none;
+        width: 52px;
+        height: 52px;
+        padding: 0;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.12);
+        cursor: pointer;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        line-height: 1.1;
+        color: rgba(255, 255, 255, 0.55);
+        text-align: center;
+        word-break: break-word;
+        transition: border-color 0.12s ease;
+      }
+      .thumb:hover {
+        border-color: rgba(255, 255, 255, 0.45);
+      }
+      .thumb.active {
+        border-color: #fff;
+      }
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .controls {
+        pointer-events: auto;
+        margin-top: 10px;
+        box-sizing: border-box;
+        width: min(480px, 86vw);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 16px;
+        background-color: rgba(255, 255, 255, 0.95);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow:
+          0 6px 20px rgba(0, 0, 0, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      }
+      .controls-left {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .control-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .control-label {
+        font-size: 13px;
+        color: #555;
+      }
+      #state-machine-group {
+        display: none;
+      }
+      #state-machine-select {
+        max-width: 150px;
+        padding: 4px 6px;
+        font-size: 13px;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        border-radius: 6px;
+        background-color: #fff;
+      }
+      .icon-button {
+        flex: none;
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.06);
+        color: #333;
+        cursor: pointer;
+        transition: background-color 0.12s ease;
+      }
+      .icon-button:hover {
+        background-color: rgba(0, 0, 0, 0.12);
+      }
+      .icon-button svg {
+        width: 16px;
+        height: 16px;
+        display: block;
+        fill: currentColor;
+      }
+      .icon-button .icon-play {
+        display: none;
+      }
+      .icon-button.paused .icon-pause {
+        display: none;
+      }
+      .icon-button.paused .icon-play {
+        display: block;
+      }
+      .seeker {
+        -webkit-appearance: none;
+        appearance: none;
+        flex: 1;
+        min-width: 60px;
+        height: 4px;
+        border-radius: 2px;
+        background-color: rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+      }
+      .seeker::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: #333;
+        border: 2px solid #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+      .bg-control {
+        position: relative;
+        flex: none;
+      }
+      .bg-popover {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 10px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 999px;
+        background-color: rgba(255, 255, 255, 0.95);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow:
+          0 6px 20px rgba(0, 0, 0, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        opacity: 0;
+        transform: translateX(-50%) translateY(6px) scale(0.96);
+        transform-origin: bottom center;
+        pointer-events: none;
+        transition:
+          opacity 0.14s ease,
+          transform 0.14s ease;
+      }
+      .bg-control.open .bg-popover {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+        pointer-events: auto;
+      }
+      .bg-swatch {
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: transform 0.1s ease;
+      }
+      .bg-swatch:hover {
+        transform: scale(1.15);
+      }
+      .bg-swatch.active {
+        border-color: #333;
+      }
+      .bg-swatch.swatch-transparent {
+        background-color: #fff;
+        background-image:
+          linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
+        background-size: 10px 10px;
+        background-position:
+          0 0,
+          0 5px,
+          5px -5px,
+          -5px 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="backdrop"></div>
+    <div class="card">
+      <div class="preview">
+        <div class="stage">
+          <canvas id="preview-canvas"></canvas>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="controls-left">
+          <button id="play-toggle" class="icon-button" type="button" aria-label="Pause" title="Pause">
+            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="6" y="5" width="4" height="14" rx="1"></rect>
+              <rect x="14" y="5" width="4" height="14" rx="1"></rect>
+            </svg>
+            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5l11 7-11 7z"></path>
+            </svg>
+          </button>
+          <input id="seeker" class="seeker" type="range" min="0" max="100" value="0" step="any" aria-label="Seek" />
+          <div class="control-group" id="state-machine-group">
+            <label class="control-label" for="state-machine-select">State Machine</label>
+            <select id="state-machine-select"></select>
+          </div>
+        </div>
+        <div class="bg-control" id="bg-control">
+          <button id="bg-trigger" class="icon-button" type="button" aria-label="Background color" aria-expanded="false">
+            <svg class="fill-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M16.56 8.94L7.62 0 6.21 1.41l2.38 2.38-5.15 5.15c-.59.59-.59 1.54 0 2.12l5.5 5.5c.29.29.68.44 1.06.44s.77-.15 1.06-.44l5.5-5.5c.59-.58.59-1.53 0-2.12zM5.21 10L10 5.21 14.79 10H5.21zM19 11.5s-2 2.17-2 3.5c0 1.1.9 2 2 2s2-.9 2-2c0-1.33-2-3.5-2-3.5z"
+              ></path>
+              <path class="fill-bar" d="M0 20h24v4H0v-4z" style="fill: rgba(0, 0, 0, 0.18)"></path>
+            </svg>
+          </button>
+          <div class="bg-popover" id="bg-popover">
+            <button class="bg-swatch swatch-transparent active" data-color="transparent" title="Transparent"></button>
+            <button class="bg-swatch" style="background: #6666f6" data-color="#6666f6"></button>
+            <button class="bg-swatch" style="background: #6cade2" data-color="#6cade2"></button>
+            <button class="bg-swatch" style="background: #52a6ad" data-color="#52a6ad"></button>
+            <button class="bg-swatch" style="background: #ed7099" data-color="#ed7099"></button>
+            <button class="bg-swatch" style="background: #dfb75d" data-color="#dfb75d"></button>
+            <button class="bg-swatch" style="background: #ce5d52" data-color="#ce5d52"></button>
+            <button class="bg-swatch" style="background: #787faa" data-color="#787faa"></button>
+          </div>
+        </div>
+      </div>
+      <div class="track" id="track" hidden>
+        <div class="track-name" id="track-name"></div>
+        <div class="track-thumbs" id="track-thumbs"></div>
+      </div>
+    </div>
+
+    <script>
+      const stage = document.querySelector(".stage");
+      const bgControl = document.getElementById("bg-control");
+      const bgTrigger = document.getElementById("bg-trigger");
+      const swatches = document.querySelectorAll(".bg-popover .bg-swatch");
+
+      // The fill icon's bottom bar reflects the current background color.
+      const fillBar = bgTrigger.querySelector(".fill-bar");
+      const setTriggerColor = (color) => {
+        fillBar.style.fill = color === "transparent" ? "rgba(0, 0, 0, 0.18)" : color;
+      };
+
+      const setOpen = (open) => {
+        bgControl.classList.toggle("open", open);
+        bgTrigger.setAttribute("aria-expanded", String(open));
+      };
+
+      bgTrigger.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setOpen(!bgControl.classList.contains("open"));
+      });
+
+      swatches.forEach((swatch) => {
+        swatch.addEventListener("click", () => {
+          const color = swatch.dataset.color;
+          stage.style.backgroundColor = color;
+          swatches.forEach((s) => s.classList.remove("active"));
+          swatch.classList.add("active");
+          setTriggerColor(color);
+          setOpen(false);
+        });
+      });
+
+      // Collapse the popover when clicking anywhere outside the control.
+      document.addEventListener("click", (event) => {
+        if (!bgControl.contains(event.target)) setOpen(false);
+      });
+
+      // Clicking the dim backdrop dismisses the preview (the native side owns the window).
+      document.getElementById("backdrop").addEventListener("click", () => {
+        window.webkit?.messageHandlers?.close?.postMessage(1);
+      });
+    </script>
+
+    <script>
+      // One template renders all three formats from the native manifest: the big stage plays
+      // one file, a thumbnail track flips through the folder. Runtimes are vendored, so it's offline.
+      (async () => {
+        const preview = document.querySelector(".preview");
+        const canvas = document.getElementById("preview-canvas");
+        const playToggle = document.getElementById("play-toggle");
+        const seeker = document.getElementById("seeker");
+        const stateMachineGroup = document.getElementById("state-machine-group");
+        const stateMachineSelect = document.getElementById("state-machine-select");
+        const track = document.getElementById("track");
+        const trackName = document.getElementById("track-name");
+        const trackThumbs = document.getElementById("track-thumbs");
+
+        let items = [];
+        let current = 0;
+        let main = null; // adapter for the file on the big stage
+        let loadToken = 0; // guards against overlapping loads on rapid navigation
+
+        const setPlayingUI = (playing) => {
+          playToggle.classList.toggle("paused", !playing);
+          const label = playing ? "Pause" : "Play";
+          playToggle.setAttribute("aria-label", label);
+          playToggle.title = label;
+        };
+
+        const nextPaint = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+        // Match the box to the animation's shape once known; square otherwise.
+        const setAspect = (width, height) => {
+          if (width > 0 && height > 0) preview.style.setProperty("--art-ratio", width / height);
+        };
+        const resetAspect = () => preview.style.setProperty("--art-ratio", "1");
+
+        // Both runtimes may be needed when a folder mixes formats; load each lazily, once.
+        const loadScript = (src) =>
+          new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+
+        let riveReady;
+        let lottieReady;
+        // Rive ships a UMD bundle (global `rive`); dotLottie ships an ES
+        // module, so it is loaded via import() and its export is captured here.
+        let DotLottie;
+        const ensureRive = () =>
+          (riveReady ??= loadScript("motion://app/lib/rive.js").then(() =>
+            rive.RuntimeLoader.setWasmUrl("motion://app/lib/rive.wasm"),
+          ));
+        const ensureLottie = () =>
+          (lottieReady ??= import("motion://app/lib/dotlottie.js").then((m) => {
+            DotLottie = m.DotLottie;
+            DotLottie.setWasmUrl("motion://app/lib/dotlottie-player.wasm");
+          }));
+
+        // ---- Controls (wired once, delegating to whichever file is on the stage) ----
+        playToggle.addEventListener("click", () => main?.togglePlay());
+        seeker.addEventListener("pointerdown", () => main?.seekStart());
+        seeker.addEventListener("input", () => main?.seek(Number(seeker.value)));
+        seeker.addEventListener("change", () => main?.seekEnd());
+        stateMachineSelect.addEventListener("change", (event) => main?.selectStateMachine(event.target.value));
+
+        const resetControls = () => {
+          resetAspect();
+          seeker.style.display = "";
+          seeker.value = 0;
+          seeker.style.background = "";
+          stateMachineGroup.style.display = "none";
+          stateMachineSelect.innerHTML = "";
+        };
+
+        // ---- Big stage ----
+        async function loadMain(index) {
+          if (!items[index]) return;
+          const token = ++loadToken;
+          current = index;
+          highlightThumb();
+          if (main) {
+            main.destroy();
+            main = null;
+          }
+          resetControls();
+          const item = items[index];
+          const adapter = item.type === "arraybuffer" ? await createRiveMain(item) : await createLottieMain(item);
+          if (token !== loadToken) {
+            // A newer navigation superseded this one while it was loading.
+            adapter.destroy();
+            return;
+          }
+          main = adapter;
+        }
+
+        // Rive (.riv). State machines have no linear timeline, so the seeker is hidden;
+        // the selector always drives a machine and defaults to the first.
+        async function createRiveMain(item) {
+          await ensureRive();
+          seeker.style.display = "none";
+
+          const buffer = await (await fetch(`motion://app/data/${item.index}`)).arrayBuffer();
+          let currentStateMachine;
+          const instance = new rive.Rive({
+            buffer,
+            canvas,
+            layout: new rive.Layout({ fit: rive.Fit.Contain, alignment: rive.Alignment.Center }),
+            autoplay: true,
+            onLoad: () => {
+              // bounds is the artboard's AABB; resize the GL surface after the box reshapes.
+              const bounds = instance.bounds;
+              if (bounds) setAspect(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY);
+              requestAnimationFrame(() => instance.resizeDrawingSurfaceToCanvas());
+              updateStateMachines();
+            },
+          });
+
+          if (rive.EventType) {
+            instance.on(rive.EventType.Play, () => setPlayingUI(true));
+            instance.on(rive.EventType.Pause, () => setPlayingUI(false));
+            instance.on(rive.EventType.Stop, () => setPlayingUI(false));
+          }
+
+          const activate = () => {
+            instance.stop(instance.stateMachineNames);
+            instance.play(currentStateMachine);
+          };
+
+          function updateStateMachines() {
+            const machines = instance.stateMachineNames;
+            stateMachineGroup.style.display = machines.length ? "flex" : "none";
+            if (!machines.length) return;
+            stateMachineSelect.innerHTML = "";
+            machines.forEach((name) => {
+              const option = document.createElement("option");
+              option.value = name;
+              option.textContent = name;
+              stateMachineSelect.appendChild(option);
+            });
+            currentStateMachine = machines[0];
+            stateMachineSelect.value = currentStateMachine;
+            activate();
+          }
+
+          return {
+            togglePlay: () => (instance.isPlaying ? instance.pause() : instance.play()),
+            seek: () => {},
+            seekStart: () => {},
+            seekEnd: () => {},
+            selectStateMachine: (value) => {
+              currentStateMachine = value;
+              activate();
+            },
+            destroy: () => {
+              try {
+                instance.cleanup();
+              } catch (e) {}
+            },
+          };
+        }
+
+        // Lottie (.json) and dotLottie (.lottie), via a frame seeker.
+        async function createLottieMain(item) {
+          await ensureLottie();
+
+          const response = await fetch(`motion://app/data/${item.index}`);
+          // `data` expects a Lottie JSON string, or an ArrayBuffer for .lottie files.
+          const data = item.type === "json" ? await response.text() : await response.arrayBuffer();
+          const dotLottie = new DotLottie({ canvas, data, loop: true, autoplay: true });
+
+          let scrubbing = false;
+          let resumeAfterScrub = false;
+
+          const updateSeekerFill = () => {
+            const max = Number(seeker.max) || 1;
+            const pct = (Number(seeker.value) / max) * 100;
+            seeker.style.background = `linear-gradient(to right, #333 ${pct}%, rgba(0, 0, 0, 0.15) ${pct}%)`;
+          };
+
+          const activate = (id) => {
+            if (id) {
+              dotLottie.stateMachineLoad(id);
+              dotLottie.stateMachineStart();
+              seeker.style.display = "none";
+            } else {
+              dotLottie.stateMachineStop();
+              seeker.style.display = "";
+              dotLottie.play();
+            }
+          };
+
+          dotLottie.addEventListener("load", () => {
+            // Take the animation's own dimensions; dotLottie's canvas observer rescales the render.
+            Promise.resolve(dotLottie.animationSize?.()).then((size) => {
+              if (size) setAspect(size.width, size.height);
+            });
+            seeker.max = dotLottie.totalFrames;
+            updateSeekerFill();
+
+            const machines = dotLottie.manifest?.stateMachines ?? [];
+            stateMachineGroup.style.display = machines.length ? "flex" : "none";
+            if (machines.length) {
+              stateMachineSelect.innerHTML = "";
+              const timelineOption = document.createElement("option");
+              timelineOption.value = "";
+              timelineOption.textContent = "Timeline";
+              stateMachineSelect.appendChild(timelineOption);
+              machines.forEach(({ id, name }) => {
+                const option = document.createElement("option");
+                option.value = id;
+                option.textContent = name || id;
+                stateMachineSelect.appendChild(option);
+              });
+              // A lone state machine is the default instead of the timeline.
+              if (machines.length === 1) {
+                stateMachineSelect.value = machines[0].id;
+                activate(machines[0].id);
+              }
+            }
+          });
+
+          dotLottie.addEventListener("frame", ({ currentFrame }) => {
+            if (scrubbing) return;
+            if (dotLottie.totalFrames && Number(seeker.max) !== dotLottie.totalFrames) {
+              seeker.max = dotLottie.totalFrames;
+            }
+            seeker.value = currentFrame;
+            updateSeekerFill();
+          });
+
+          dotLottie.addEventListener("play", () => setPlayingUI(true));
+          dotLottie.addEventListener("pause", () => setPlayingUI(false));
+
+          return {
+            togglePlay: () => (dotLottie.isPlaying ? dotLottie.pause() : dotLottie.play()),
+            seek: (value) => {
+              scrubbing = true;
+              dotLottie.setFrame(value);
+              updateSeekerFill();
+            },
+            seekStart: () => {
+              resumeAfterScrub = dotLottie.isPlaying;
+              scrubbing = true;
+              dotLottie.pause();
+            },
+            seekEnd: () => {
+              scrubbing = false;
+              if (resumeAfterScrub) dotLottie.play();
+              resumeAfterScrub = false;
+            },
+            selectStateMachine: (value) => activate(value),
+            destroy: () => {
+              try {
+                dotLottie.destroy();
+              } catch (e) {}
+            },
+          };
+        }
+
+        // ---- Thumbnail track (static first-frame previews) ----
+        function highlightThumb() {
+          if (items[current]) trackName.textContent = items[current].name;
+          [...trackThumbs.children].forEach((el, i) => el.classList.toggle("active", i === current));
+          const active = trackThumbs.children[current];
+          if (active) active.scrollIntoView({ block: "nearest", inline: "center" });
+        }
+
+        async function buildTrack() {
+          trackThumbs.innerHTML = "";
+          if (items.length < 2) {
+            track.hidden = true;
+            return;
+          }
+          track.hidden = false;
+
+          items.forEach((item, i) => {
+            const button = document.createElement("button");
+            button.className = "thumb";
+            button.type = "button";
+            button.title = item.name;
+            button.textContent = item.name.replace(/\.[^.]+$/, "");
+            button.addEventListener("click", () => {
+              if (i !== current) loadMain(i);
+            });
+            trackThumbs.appendChild(button);
+          });
+          highlightThumb();
+
+          // Render thumbnails one at a time so we never hold many WASM/WebGL contexts at once.
+          for (const item of items) {
+            const button = trackThumbs.children[item.index];
+            if (!button) continue;
+            const image = await renderThumb(item);
+            if (image) {
+              button.textContent = "";
+              button.appendChild(image);
+            }
+          }
+        }
+
+        // Renders one still frame to an offscreen canvas as an <img>, then disposes the renderer.
+        // Returns null on failure/timeout so the thumb falls back to its filename label.
+        async function renderThumb(item) {
+          const off = document.createElement("canvas");
+          off.width = 108;
+          off.height = 108;
+
+          const work = (async () => {
+            if (item.type === "arraybuffer") {
+              await ensureRive();
+              // Pre-acquire the GL context with preserveDrawingBuffer so toDataURL isn't blank after compositing.
+              off.getContext("webgl2", { preserveDrawingBuffer: true });
+              const buffer = await (await fetch(`motion://app/data/${item.index}`)).arrayBuffer();
+              const instance = await new Promise((resolve, reject) => {
+                const inst = new rive.Rive({
+                  buffer,
+                  canvas: off,
+                  autoplay: true,
+                  layout: new rive.Layout({ fit: rive.Fit.Contain, alignment: rive.Alignment.Center }),
+                  onLoad: () => resolve(inst),
+                  onLoadError: reject,
+                });
+              });
+              instance.resizeDrawingSurfaceToCanvas();
+              await nextPaint();
+              const url = off.toDataURL();
+              try {
+                instance.cleanup();
+              } catch (e) {}
+              // The GL context is released below, after the timeout race, so it's freed on timeout/error too.
+              return url;
+            }
+
+            await ensureLottie();
+            const response = await fetch(`motion://app/data/${item.index}`);
+            const data = item.type === "json" ? await response.text() : await response.arrayBuffer();
+            const dotLottie = await new Promise((resolve) => {
+              const dl = new DotLottie({ canvas: off, data, autoplay: true, loop: false });
+              const onFrame = () => {
+                dl.removeEventListener("frame", onFrame);
+                resolve(dl);
+              };
+              dl.addEventListener("frame", onFrame);
+            });
+            await nextPaint();
+            const url = off.toDataURL();
+            try {
+              dotLottie.destroy();
+            } catch (e) {}
+            return url;
+          })();
+
+          // Never let one stubborn file stall the rest of the track.
+          const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 2000));
+          let url = null;
+          try {
+            url = await Promise.race([work, timeout]);
+          } catch (e) {
+            url = null;
+          }
+          // Release the GL context even on timeout/error, so a folder of .riv files can't exhaust them.
+          if (item.type === "arraybuffer") {
+            try {
+              off.getContext("webgl2")?.getExtension("WEBGL_lose_context")?.loseContext();
+            } catch (e) {}
+          }
+          if (!url || url.length < 64) return null;
+          const image = new Image();
+          image.src = url;
+          return image;
+        }
+
+        // ---- Manifest + navigation bridge ----
+        async function loadManifest() {
+          const manifest = await (await fetch("motion://app/manifest")).json();
+          items = Array.isArray(manifest.items) ? manifest.items : [];
+          current = typeof manifest.current === "number" ? manifest.current : 0;
+        }
+
+        // Step the carousel; no wrap at the ends.
+        window.__motionNav = (delta) => {
+          if (items.length < 2) return;
+          const next = current + delta;
+          if (next < 0 || next >= items.length || next === current) return;
+          loadMain(next);
+        };
+
+        // Called by the native side after the folder scan — rebuild the track, keeping the current file.
+        window.__motionRefresh = async () => {
+          const shownName = items[current]?.name;
+          await loadManifest();
+          const index = items.findIndex((it) => it.name === shownName);
+          if (index >= 0) current = index;
+          await buildTrack();
+        };
+
+        await loadManifest();
+        await loadMain(current);
+        await buildTrack();
+      })();
+    </script>
+  </body>
+</html>

@@ -69,18 +69,17 @@ const Graph: React.FC<GraphProps> = ({ expression }) => {
           : result !== null
             ? `\\[${expression} = ${result}\\]`
             : svgRendered
-              ? `\\begin{math}${expression}\\end{math}\n\n<img src="data:image/svg+xml;utf8,${encodeURIComponent(
+              ? `$$${expression}$$\n\n<img src="data:image/svg+xml;base64,${Buffer.from(
                   renderGraphToSVG(
                     expression,
                     dataSegments,
                     [xMin, xMax],
                     [yMin, yMax],
                     lineColor,
+                    environment.appearance,
                   ),
-                )}?color=${encodeURIComponent(lineColor)}&t=${
-                  environment.appearance
-                }-${lineColor}" alt="Graph" />`
-              : `\\begin{math}${expression}\\end{math}\n\n`
+                ).toString("base64")}" alt="Graph" />`
+              : `$$${expression}$$\n\n`
       }
       actions={
         !error &&

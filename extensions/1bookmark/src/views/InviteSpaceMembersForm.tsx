@@ -2,6 +2,9 @@ import { CachedQueryClientProvider } from "@/components/CachedQueryClientProvide
 import { trpc } from "@/utils/trpc.util";
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { useRef, useState } from "react";
+import { z } from "zod";
+
+const emailSchema = z.string().trim().email();
 
 function Body(props: { spaceId: string }) {
   const { spaceId } = props;
@@ -11,6 +14,16 @@ function Body(props: { spaceId: string }) {
   const invite = trpc.user.inviteMembers.useMutation();
 
   function handleSubmit() {
+    const invalid = emails.find((e) => !emailSchema.safeParse(e).success);
+    if (invalid !== undefined) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid email address",
+        message: invalid,
+      });
+      return;
+    }
+
     invite.mutate(
       { spaceId, emails },
       {

@@ -1,5 +1,14 @@
 # Kimai Changelog
 
+## [Update] - 2026-01-16
+
+- Add "Stop Active Timer" command to quickly stop running time entries
+- Add weekly and monthly hours display in menu bar dropdown
+- Add "Manage Timesheets" command to list, edit, and delete recent time entries
+- Support editing start time, end time, and duration (HH:MM format) with auto-sync between fields
+- Show running timers with green indicator in timesheets list
+- Group completed timesheets by date with daily totals
+
 ## [Update] - 2025-10-17
 
 - Allow logging time without a duration to start active/running timesheets

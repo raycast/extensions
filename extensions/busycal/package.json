@@ -1,0 +1,220 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "busycal",
+  "version": "0.1.0",
+  "title": "BusyCal",
+  "description": "Create BusyCal events and tasks, search your schedule, and find the next free slot.",
+  "icon": "busycal-icon.png",
+  "author": "beehive",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BeehiveInnovations/busycal-raycast.git"
+  },
+  "homepage": "https://www.busymac.com/docs/busycal/70624-raycast",
+  "bugs": {
+    "url": "https://github.com/BeehiveInnovations/busycal-raycast/issues"
+  },
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "keywords": [
+    "busycal",
+    "calendar",
+    "event",
+    "task",
+    "availability",
+    "schedule"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "type": "checkbox",
+      "name": "hideOnQuickAdd",
+      "title": "Quick Add",
+      "label": "Hide Raycast after quick add",
+      "description": "Hide the Raycast window after a Quick Add command succeeds.",
+      "default": true,
+      "required": false
+    },
+    {
+      "type": "dropdown",
+      "name": "defaultUpcomingDays",
+      "title": "Upcoming Horizon",
+      "description": "How many days the Upcoming command should look ahead by default.",
+      "default": "7",
+      "required": false,
+      "data": [
+        {
+          "title": "3 days",
+          "value": "3"
+        },
+        {
+          "title": "7 days",
+          "value": "7"
+        },
+        {
+          "title": "14 days",
+          "value": "14"
+        },
+        {
+          "title": "30 days",
+          "value": "30"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "name": "includeTasksInUpcoming",
+      "title": "Upcoming Results",
+      "label": "Include Tasks in Upcoming",
+      "description": "Include tasks alongside events in the Upcoming command.",
+      "default": true,
+      "required": false
+    },
+    {
+      "type": "dropdown",
+      "name": "defaultMinimumAvailabilityMinutes",
+      "title": "Availability Duration",
+      "description": "The default minimum slot length used by Find Next Available Time.",
+      "default": "30",
+      "required": false,
+      "data": [
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "45 minutes",
+          "value": "45"
+        },
+        {
+          "title": "60 minutes",
+          "value": "60"
+        },
+        {
+          "title": "90 minutes",
+          "value": "90"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "name": "defaultRespectWorkingHours",
+      "title": "Availability Scope",
+      "label": "Respect Working Hours by Default",
+      "description": "Use BusyCal's working-hours window by default when finding availability.",
+      "default": true,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "create-event",
+      "title": "Create Event",
+      "subtitle": "BusyCal",
+      "description": "Create a structured BusyCal event",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "BusyCal",
+      "description": "Create a structured BusyCal task",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add-event",
+      "title": "Quick Add Event",
+      "subtitle": "BusyCal",
+      "description": "Create a BusyCal event from natural language",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "inputText",
+          "placeholder": "Lunch tomorrow at 1pm /Work",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "busycal",
+        "quick add",
+        "event",
+        "nlp"
+      ]
+    },
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "subtitle": "BusyCal",
+      "description": "Create a BusyCal task from natural language",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "inputText",
+          "placeholder": "Finish expense report tomorrow /Work",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "busycal",
+        "quick add",
+        "task",
+        "reminder",
+        "nlp"
+      ]
+    },
+    {
+      "name": "search-items",
+      "title": "Search Items",
+      "subtitle": "BusyCal",
+      "description": "Search BusyCal events and tasks",
+      "mode": "view"
+    },
+    {
+      "name": "upcoming-items",
+      "title": "Upcoming Items",
+      "subtitle": "BusyCal",
+      "description": "Browse upcoming BusyCal events and tasks",
+      "mode": "view"
+    },
+    {
+      "name": "find-next-available",
+      "title": "Find Next Available Time",
+      "subtitle": "BusyCal",
+      "description": "Find the next free time slot from BusyCal",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.5",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nUse npm run publish for Raycast Store publishing, not npm publish.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --import tsx --test tests/*.test.ts"
+  }
+}

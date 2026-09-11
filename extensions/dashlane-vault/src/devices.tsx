@@ -39,7 +39,9 @@ function DevicesCommand() {
       navigationTitle="Manage your devices"
       searchBarPlaceholder="Search your devices"
     >
-      {data?.map((device) => <ListItemDevice key={device.deviceId} {...device} onRemove={remove} />)}
+      {data?.map((device) => (
+        <ListItemDevice key={device.deviceId} {...device} onRemove={remove} />
+      ))}
       <EmptyView isEmpty={isEmpty} isError={!!error} isLoading={isLoading} syncAction={<></>} />
     </List>
   );

@@ -1,0 +1,39 @@
+<!--
+  Synthetic fixture — NOT a real captured page.
+
+  Reproduces the STRUCTURE of a Le Monde-style hard paywall (the `--premium`
+  article wrapper and subscription barrier) so paywall detection can be tested
+  without committing anyone's actual article HTML. All prose below is placeholder.
+-->
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Placeholder Article Title — Example News</title>
+    <meta property="og:title" content="Placeholder Article Title" />
+    <meta
+      property="og:description"
+      content="A representative description of a paywalled article, long enough to stand in for the kind of summary a publisher emits for search engines while withholding the body of the story itself from non-subscribers."
+    />
+  </head>
+  <body>
+    <header class="masthead">Example News</header>
+    <main>
+      <article class="article__wrapper js-article-wrapper article__wrapper--premium">
+        <h1>Placeholder Article Title</h1>
+        <p>
+          This is the free preview paragraph that a paywalled article shows to everyone. It sets up the story
+          and then stops. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        </p>
+        <section class="article__reserved-content">
+          <p>For subscribers only</p>
+          <a class="btn btn--premium js-btn-premium">Subscribe to read the full article</a>
+          <p>Already a subscriber? Log in.</p>
+        </section>
+      </article>
+    </main>
+    <footer class="footer">
+      <a class="btn button--empty footer__subscribe-button">Subscribe</a>
+    </footer>
+  </body>
+</html>

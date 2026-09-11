@@ -10,6 +10,7 @@ type UsePlaybackStateProps = {
 export function usePlaybackState({ options }: UsePlaybackStateProps = {}) {
   const { data, error, isLoading, revalidate } = useCachedPromise(() => getPlaybackState(), [], {
     execute: options?.execute !== false,
+    keepPreviousData: true,
   });
 
   return {

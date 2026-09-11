@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sonarr",
   "title": "Sonarr",
-  "description": "View your Sonarr upcoming shows.",
+  "description": "Manage your Sonarr library, search for series, monitor downloads, and view upcoming shows.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [
-    "j3lte"
+    "j3lte",
+    "xjo_nd"
   ],
   "categories": [
     "Media",
@@ -18,16 +19,81 @@
       "name": "index",
       "title": "View Upcoming Shows",
       "subtitle": "Sonarr",
-      "description": "All upcoming shows dates",
+      "description": "View calendar of upcoming episodes with search and monitoring actions",
+      "mode": "view"
+    },
+    {
+      "name": "search-series",
+      "title": "Search Series",
+      "subtitle": "Sonarr",
+      "description": "Search and add new TV series to your Sonarr library",
+      "mode": "view"
+    },
+    {
+      "name": "series-library",
+      "title": "Series Library",
+      "subtitle": "Sonarr",
+      "description": "Browse your entire series collection with filters",
+      "mode": "view"
+    },
+    {
+      "name": "download-queue",
+      "title": "Download Queue",
+      "subtitle": "Sonarr",
+      "description": "Monitor active downloads and manage the queue",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Sonarr",
+      "description": "Review recent Sonarr activity like grabs, imports, and failures",
+      "mode": "view"
+    },
+    {
+      "name": "blocklist",
+      "title": "Blocklist",
+      "subtitle": "Sonarr",
+      "description": "Inspect blocked releases in your Sonarr instance",
+      "mode": "view"
+    },
+    {
+      "name": "missing-episodes",
+      "title": "Missing Episodes",
+      "subtitle": "Sonarr",
+      "description": "View monitored episodes without files and search for them",
+      "mode": "view"
+    },
+    {
+      "name": "unmonitored-series",
+      "title": "Unmonitored Series",
+      "subtitle": "Sonarr",
+      "description": "View series that are not being monitored",
+      "mode": "view"
+    },
+    {
+      "name": "instance-status",
+      "title": "Instance Status",
+      "subtitle": "Sonarr",
+      "description": "View connection status, system health, and quick actions for your Sonarr instance",
       "mode": "view"
     }
   ],
   "preferences": [
     {
+      "name": "instanceName",
+      "title": "Instance Name",
+      "required": false,
+      "description": "A friendly name for your primary Sonarr instance",
+      "type": "textfield",
+      "placeholder": "Main",
+      "default": "Main"
+    },
+    {
       "name": "host",
       "title": "Host",
       "required": true,
-      "description": "Hostname of the Sonarr server",
+      "description": "Hostname or IP of the Sonarr server, without the port (e.g. 192.168.0.25)",
       "type": "textfield",
       "default": "localhost"
     },
@@ -35,7 +101,7 @@
       "name": "port",
       "title": "Port",
       "required": true,
-      "description": "The port of the Sonarr server",
+      "description": "Port of the Sonarr server (e.g. 8989)",
       "type": "textfield",
       "default": "8989"
     },
@@ -43,7 +109,7 @@
       "name": "base",
       "title": "URL Base (Optional)",
       "required": false,
-      "description": "The URL Base of the Sonarr server",
+      "description": "Optional Sonarr URL base path (e.g. sonarr if your URL is /sonarr)",
       "type": "textfield",
       "default": ""
     },
@@ -70,8 +136,98 @@
       "title": "API Key",
       "required": true,
       "description": "The API key of the Sonarr server",
+      "type": "password",
+      "default": "",
+      "placeholder": "Enter your API key"
+    },
+    {
+      "name": "enableSecondaryInstance",
+      "title": "Second Instance",
+      "required": false,
+      "description": "Add a second Sonarr instance you can switch to from any command",
+      "type": "checkbox",
+      "label": "Enable second Sonarr instance",
+      "default": false
+    },
+    {
+      "name": "secondaryInstanceName",
+      "title": "Second Instance Name",
+      "required": false,
+      "description": "A friendly name for your second Sonarr instance",
+      "type": "textfield",
+      "placeholder": "Remote Server",
+      "default": ""
+    },
+    {
+      "name": "secondaryHost",
+      "title": "Second Instance Host",
+      "required": false,
+      "description": "Hostname or IP of the second Sonarr server, without the port (e.g. 192.168.0.30)",
+      "type": "textfield",
+      "placeholder": "sonarr.example.com",
+      "default": ""
+    },
+    {
+      "name": "secondaryPort",
+      "title": "Second Instance Port",
+      "required": false,
+      "description": "Port of the second Sonarr server (e.g. 8989)",
+      "type": "textfield",
+      "placeholder": "8989",
+      "default": "8989"
+    },
+    {
+      "name": "secondaryBase",
+      "title": "Second Instance URL Base (Optional)",
+      "required": false,
+      "description": "Optional URL base path of the second Sonarr server (e.g. sonarr if your URL is /sonarr)",
       "type": "textfield",
       "default": ""
+    },
+    {
+      "name": "secondaryHttp",
+      "title": "Second Instance Connection Type",
+      "required": false,
+      "description": "Change the connection type for the second Sonarr server",
+      "type": "dropdown",
+      "default": "http",
+      "data": [
+        {
+          "value": "http",
+          "title": "HTTP"
+        },
+        {
+          "value": "https",
+          "title": "HTTPS"
+        }
+      ]
+    },
+    {
+      "name": "secondaryApiKey",
+      "title": "Second Instance API Key",
+      "required": false,
+      "description": "The API key of the second Sonarr server",
+      "type": "password",
+      "placeholder": "Enter the second API key",
+      "default": ""
+    },
+    {
+      "name": "activeInstance",
+      "title": "Active Instance",
+      "required": false,
+      "description": "Which instance commands start on. Switching from a command overrides it until you change this preference again.",
+      "type": "dropdown",
+      "default": "primary",
+      "data": [
+        {
+          "value": "primary",
+          "title": "Primary Instance"
+        },
+        {
+          "value": "secondary",
+          "title": "Second Instance"
+        }
+      ]
     },
     {
       "name": "futureDays",
@@ -101,23 +257,35 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.14.1",
-    "date-fns": "^3.6.0"
+    "@raycast/api": "^2.0.5",
+    "@raycast/utils": "^2.3.0",
+    "date-fns": "^4.4.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.12.7",
-    "@types/react": "18.2.79",
-    "eslint": "^8.51.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.9.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format-check": "prettier --check \"src/**/*.{ts,tsx}\""
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "overrides": {
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9"
   }
 }

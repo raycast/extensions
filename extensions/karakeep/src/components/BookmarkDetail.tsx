@@ -1,5 +1,8 @@
-import { Action, ActionPanel, Detail, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, useNavigation, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { logger } from "@chrismessina/raycast-logger";
+
+const log = logger.child("[BookmarkDetail]");
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
 import {
   ARCHIVED_COLOR,
@@ -10,14 +13,22 @@ import {
   TAG_HUMAN_COLOR,
 } from "../constants";
 import { useConfig } from "../hooks/useConfig";
+import { useGetAllLists } from "../hooks/useGetAllLists";
+import { List as BookmarkListType } from "../types";
+import { AddToListSubmenu } from "./AddToListSubmenu";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
+import { markdownImage } from "../utils/markdown";
 import { getScreenshot } from "../utils/screenshot";
+import { runWithToast, toErrorMessage } from "../utils/toast";
 import { BookmarkEdit } from "./BookmarkEdit";
+import { NoteEdit } from "./NoteEdit";
 
 interface BookmarkDetailProps {
   bookmark: Bookmark;
   onRefresh?: () => void;
+  /** Supplied by the pushing list view, which has already fetched them. */
+  lists?: BookmarkListType[];
 }
 
 function useBookmarkImages(bookmark: Bookmark) {
@@ -27,15 +38,20 @@ function useBookmarkImages(bookmark: Bookmark) {
   });
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadImages() {
-      const newImages = { ...images };
+      const newImages = {
+        screenshot: DEFAULT_SCREENSHOT_FILENAME,
+        asset: DEFAULT_SCREENSHOT_FILENAME,
+      };
 
       const screenshot = bookmark.assets?.find((asset) => asset.assetType === "screenshot");
       if (screenshot?.id) {
         try {
           newImages.screenshot = await getScreenshot(screenshot.id);
         } catch (error) {
-          console.error("Failed to get screenshot:", error);
+          log.error("Failed to get screenshot", { screenshotId: screenshot.id, error: toErrorMessage(error) });
         }
       }
 
@@ -43,14 +59,17 @@ function useBookmarkImages(bookmark: Bookmark) {
         try {
           newImages.asset = await getScreenshot(bookmark.content.assetId);
         } catch (error) {
-          console.error("Failed to get asset image:", error);
+          log.error("Failed to get asset image", { assetId: bookmark.content.assetId, error: toErrorMessage(error) });
         }
       }
 
-      setImages(newImages);
+      if (!cancelled) setImages(newImages);
     }
 
     loadImages();
+    return () => {
+      cancelled = true;
+    };
   }, [bookmark]);
 
   return images;
@@ -60,27 +79,37 @@ function useToastHandler() {
   const { t } = useTranslation();
 
   return async (action: string, operation: () => Promise<void>) => {
-    const toast = await showToast({
-      title: t(`bookmark.toast.${action}.title`),
-      message: t(`bookmark.toast.${action}.loading`),
+    const result = await runWithToast({
+      loading: {
+        title: t(`bookmark.toast.${action}.title`),
+        message: t(`bookmark.toast.${action}.loading`),
+      },
+      success: {
+        title: t(`bookmark.toast.${action}.success`),
+      },
+      failure: {
+        title: t(`bookmark.toast.${action}.title`),
+      },
+      action: async () => {
+        await operation();
+      },
     });
 
-    try {
-      await operation();
-      toast.style = Toast.Style.Success;
-      toast.title = t(`bookmark.toast.${action}.success`);
-      return true;
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.message = String(error);
+    if (result === undefined) {
       return false;
     }
+    return true;
   };
 }
 
-export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: BookmarkDetailProps) {
+export function BookmarkDetail({ bookmark: initialBookmark, onRefresh, lists: providedLists }: BookmarkDetailProps) {
   const { pop, push } = useNavigation();
   const { config } = useConfig();
+  // `execute` off when the caller already has them: BookmarkDetail is pushed
+  // from a list view that has just fetched lists, and a second request here is
+  // both wasted and — against an unreachable server — doomed.
+  const { lists: fetchedLists, isLoading: isLoadingLists } = useGetAllLists(!providedLists);
+  const lists = providedLists ?? fetchedLists;
   const [bookmark, setBookmark] = useState<Bookmark>(initialBookmark);
   const { t } = useTranslation();
   const handleToast = useToastHandler();
@@ -98,7 +127,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
         setBookmark(latest as Bookmark);
       }
     } catch (error) {
-      console.error("Failed to fetch latest bookmark:", error);
+      log.error("Failed to fetch latest bookmark", { bookmarkId: bookmark.id, error });
     }
   }, [bookmark.id]);
 
@@ -123,6 +152,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
   };
 
   const handleDelete = async () => {
+    log.info("Deleting bookmark", { bookmarkId: bookmark.id });
     await handleToast("delete", async () => {
       await fetchDeleteBookmark(bookmark.id);
       await onRefresh?.();
@@ -136,7 +166,11 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
   };
 
   const handleEdit = async () => {
-    push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    if (bookmark.content.type === "text") {
+      push(<NoteEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    } else {
+      push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    }
   };
 
   function renderMarkdown() {
@@ -158,13 +192,19 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
 
     switch (bookmark.content.type) {
       case "link":
-        images.screenshot && parts.push(`![${bookmark.content.title}](${images.screenshot})`);
+        if (images.screenshot !== DEFAULT_SCREENSHOT_FILENAME) {
+          parts.push(markdownImage(images.screenshot, bookmark.content.title));
+        }
         addTitle(displayTitle);
         break;
 
       case "text":
-        customTitle && addTitle(displayTitle);
-        bookmark.content.text && parts.push(`\n${bookmark.content.text}`);
+        if (customTitle) {
+          addTitle(displayTitle);
+        }
+        if (bookmark.content.text) {
+          parts.push(`\n${bookmark.content.text}`);
+        }
         break;
 
       case "asset": {
@@ -172,7 +212,9 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
         const assetDisplayTitle = customTitle ? bookmark.title : fileName || t("bookmark.untitledImage");
 
         if (assetType === "image") {
-          images.asset && parts.push(`\n![${fileName}](${images.asset})`);
+          if (images.asset !== DEFAULT_SCREENSHOT_FILENAME) {
+            parts.push(`\n${markdownImage(images.asset, fileName)}`);
+          }
           addTitle(assetDisplayTitle || "");
           addFileName(fileName || "", "🖼️");
         } else if (assetType === "pdf") {
@@ -183,8 +225,12 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
       }
     }
 
-    bookmark.summary && parts.push(`\n### ${t("bookmark.sections.summary")}\n${bookmark.summary}`);
-    bookmark.note && parts.push(`\n### ${t("bookmark.sections.note")}\n${bookmark.note}`);
+    if (bookmark.summary) {
+      parts.push(`\n### ${t("bookmark.sections.summary")}\n${bookmark.summary}`);
+    }
+    if (bookmark.note) {
+      parts.push(`\n### ${t("bookmark.sections.note")}\n${bookmark.note}`);
+    }
 
     return parts.join("\n");
   }
@@ -204,7 +250,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
               <Action.CopyToClipboard
                 content={bookmark.content.url}
                 title={t("bookmark.actions.copyLink")}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
               />
             </>
           )}
@@ -236,20 +282,21 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
               title={t("bookmark.actions.aiSummary")}
               onAction={handleSummarize}
               icon={Icon.Wand}
-              shortcut={{ modifiers: ["ctrl"], key: "s" }}
+              shortcut={{ macOS: { modifiers: ["ctrl"], key: "s" }, Windows: { modifiers: ["ctrl"], key: "s" } }}
             />
           )}
+          {lists.length > 0 && <AddToListSubmenu bookmarkId={bookmark.id} lists={lists} isLoading={isLoadingLists} />}
           <Action
             title={bookmark.favourited ? t("bookmark.actions.unfavorite") : t("bookmark.actions.favorite")}
             onAction={() => handleUpdate({ favourited: !bookmark.favourited })}
             icon={bookmark.favourited ? Icon.StarCircle : Icon.Star}
-            shortcut={{ modifiers: ["ctrl"], key: "f" }}
+            shortcut={{ macOS: { modifiers: ["ctrl"], key: "f" }, Windows: { modifiers: ["ctrl"], key: "f" } }}
           />
           <Action
             title={bookmark.archived ? t("bookmark.actions.unarchive") : t("bookmark.actions.archive")}
             onAction={() => handleUpdate({ archived: !bookmark.archived })}
             icon={bookmark.archived ? Icon.BlankDocument : Icon.SaveDocument}
-            shortcut={{ modifiers: ["ctrl"], key: "a" }}
+            shortcut={{ macOS: { modifiers: ["ctrl"], key: "a" }, Windows: { modifiers: ["ctrl"], key: "a" } }}
           />
         </ActionPanel.Section>
 
@@ -258,13 +305,14 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
             title={t("bookmark.actions.edit")}
             onAction={handleEdit}
             icon={Icon.Pencil}
-            shortcut={{ modifiers: ["ctrl"], key: "e" }}
+            shortcut={Keyboard.Shortcut.Common.Edit}
           />
           <Action
             title={t("bookmark.actions.delete")}
+            style={Action.Style.Destructive}
             onAction={handleDelete}
             icon={Icon.Trash}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
           />
         </ActionPanel.Section>
       </ActionPanel>
@@ -308,6 +356,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
               key={tag.id}
               text={tag.name}
               color={tag.attachedBy === "ai" ? TAG_AI_COLOR : TAG_HUMAN_COLOR}
+              icon={tag.attachedBy === "ai" ? Icon.Wand : undefined}
             />
           ))}
         </Detail.Metadata.TagList>

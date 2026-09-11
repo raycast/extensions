@@ -110,5 +110,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }

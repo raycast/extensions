@@ -99,7 +99,7 @@ export default function ManageTmuxWindows() {
             <ActionPanel>
               <Action title="Switch to Selected Window" onAction={() => switchToWindow(window, setIsLoading)} />
               <Action
-                title="Rename this Window"
+                title="Rename This Window"
                 onAction={() => {
                   push(
                     <RenameTmux

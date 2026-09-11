@@ -10,12 +10,12 @@ import {
   Toast,
   Alert,
   getPreferenceValues,
-  openExtensionPreferences,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { ProjectInfo } from "./type";
 import { getProjects, getProjectUsage, deleteProject } from "./utils/zeabur-graphql";
 import ProjectServices from "./components/project-services";
+import ZeaburTokenUndefined from "./components/zeabur-token-undefined";
 
 export default function Command() {
   const preferences = getPreferenceValues();
@@ -77,17 +77,7 @@ export default function Command() {
   }, [sortBy, projects]);
 
   if (zeaburToken === undefined || zeaburToken === "") {
-    return (
-      <List
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      >
-        <List.EmptyView icon={Icon.Key} title="Please set Zeabur Token in the extension preferences" />
-      </List>
-    );
+    return <ZeaburTokenUndefined />;
   }
 
   return (
@@ -107,7 +97,7 @@ export default function Command() {
             key={project._id}
             title={project.name}
             icon={{
-              source: project.iconURL == "" ? "extension-icon.png" : project.iconURL,
+              source: project.iconURL === "" ? "extension-icon.png" : project.iconURL,
               fallback: "extension-icon.png",
               mask: Image.Mask.RoundedRectangle,
             }}
@@ -150,7 +140,11 @@ export default function Command() {
                 <Action.Push
                   title="View Services"
                   icon={Icon.List}
-                  target={<ProjectServices projectID={project._id} environmentID={project.environments[0]._id} />}
+                  target={
+                    project.environments[0] ? (
+                      <ProjectServices projectID={project._id} environmentID={project.environments[0]._id} />
+                    ) : undefined
+                  }
                 />
                 <Action.OpenInBrowser title="Open Project Page" url={`https://zeabur.com/projects/${project._id}`} />
                 <Action

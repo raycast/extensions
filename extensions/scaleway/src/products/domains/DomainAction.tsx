@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { Domain } from '@scaleway/sdk'
+import type { Domainv2beta1 } from '@scaleway/sdk'
 import { getDomainUrl } from './urls'
 
 type DomainActionProps = {
-  domain: Domain.v2beta1.DomainSummary
+  domain: Domainv2beta1.DomainSummary
   toggleIsDetailOpen: () => void
 }
 

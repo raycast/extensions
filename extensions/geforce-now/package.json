@@ -1,0 +1,37 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "geforce-now",
+  "title": "GeForce NOW",
+  "description": "Launch your GeForce NOW games instantly",
+  "icon": "icon.png",
+  "author": "NvIte0o0",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Fun",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "launch-game",
+      "title": "Launch GeForce NOW Games",
+      "description": "Search and launch games from your GeForce NOW library",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -16,9 +16,10 @@ import {
 import { ClientHttp2Session, constants, IncomingHttpHeaders, IncomingHttpStatusHeader, sensitiveHeaders } from "http2";
 import React from "react";
 import RateLimitedQueue from "./RateLimitedQueue";
-import StreamArray from "stream-json/streamers/StreamArray";
-import Chain from "stream-chain";
-import "../helpers/arrayExtensions";
+import StreamArray from "stream-json/streamers/stream-array.js";
+import { Duplex } from "node:stream";
+import { logError } from "../helpers/errors";
+import { mergeObjectsById, replaceItems } from "../helpers/collections";
 
 const DATA_PREFIX = "data: ";
 const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH, HTTP2_HEADER_ACCEPT } = constants;
@@ -149,8 +150,9 @@ export default class HueClient {
             // On non-200 responses, the body is an HTML page with an error message
             const errorMatch = data.match(/(?<=<div class="error">)(.*?)(?=<\/div>)/);
             if (errorMatch && errorMatch[0]) {
-              console.error({ headers: response.headers, message: errorMatch[0] });
-              return reject(`Status ${response.headers[":status"]}: ${errorMatch[0]}`);
+              const errorMessage = `Status ${response.headers[":status"]}: ${errorMatch[0]}`;
+              logError(errorMessage);
+              return reject(errorMessage);
             }
           }
 
@@ -185,7 +187,7 @@ export default class HueClient {
       [sensitiveHeaders]: ["hue-application-key"],
     });
 
-    let parser: Chain | null = null;
+    let parser: Duplex | null = null;
 
     const onParsedUpdateEvent = ({ value: updateEvent }: ParsedUpdateEvent) => {
       this.setLights?.((lights) => {
@@ -193,35 +195,35 @@ export default class HueClient {
           return resource.type === "light";
         }) as (Partial<Light> & HasId)[];
 
-        return lights.replaceItems(lightUpdates.mergeObjectsById());
+        return replaceItems(lights, mergeObjectsById(lightUpdates));
       });
 
       this.setGroupedLights?.((groupedLights) => {
         const updatedGroupedLights = updateEvent.data.filter((resource) => {
           return resource.type === "grouped_light";
         }) as (Partial<GroupedLight> & HasId)[];
-        return groupedLights.replaceItems(updatedGroupedLights);
+        return replaceItems(groupedLights, updatedGroupedLights);
       });
 
       this.setRooms?.((rooms) => {
         const updatedRooms = updateEvent.data.filter((resource) => {
           return resource.type === "room";
         }) as (Partial<Room> & HasId)[];
-        return rooms.replaceItems(updatedRooms);
+        return replaceItems(rooms, updatedRooms);
       });
 
       this.setZones?.((zones) => {
         const updatedZones = updateEvent.data.filter((resource) => {
           return resource.type === "zone";
         }) as (Partial<Zone> & HasId)[];
-        return zones.replaceItems(updatedZones);
+        return replaceItems(zones, updatedZones);
       });
 
       this.setScenes?.((scenes) => {
         const updatedScenes = updateEvent.data.filter((resource) => {
           return resource.type === "scene";
         }) as (Partial<Scene> & HasId)[];
-        return scenes.replaceItems(updatedScenes);
+        return replaceItems(scenes, updatedScenes);
       });
 
       // If the parser encounters a new JSON array, it will throw an error
@@ -253,13 +255,13 @@ export default class HueClient {
     stream.on("error", (error) => {
       parser?.end();
       stream.close();
-      console.error(error, [parser?.input]);
+      logError(error);
     });
   }
 }
 
-function createParser(parser: Chain | null, callback: (data: ParsedUpdateEvent) => void): Chain {
-  parser = StreamArray.withParser();
+function createParser(parser: Duplex | null, callback: (data: ParsedUpdateEvent) => void): Duplex {
+  parser = StreamArray.withParserAsStream();
 
   parser.on("data", (data) => {
     callback(data);

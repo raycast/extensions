@@ -1,5 +1,5 @@
 import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
-import { Issue } from "./types";
+import { Issue, Release } from "./types";
 import { getAvatarIcon } from "@raycast/utils";
 
 const { url } = getPreferenceValues();
@@ -86,4 +86,61 @@ export function getKeywords(issue: Issue) {
 
 export function getDefaultBaseUrl() {
   return url.replace(/\/$/, "") || "https://sentry.io";
+}
+
+export function formatPercent(value: number): string {
+  return `${value.toFixed(2)}%`;
+}
+
+export function getCrashFreeRate(release: Release): number | undefined {
+  return release.projects?.[0]?.healthData?.crashFreeSessions ?? undefined;
+}
+
+export function getCrashFreeIcon(rate?: number): { source: Icon; tintColor: Color } {
+  if (rate === undefined) {
+    return { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText };
+  }
+  if (rate >= 99) {
+    return { source: Icon.CheckCircle, tintColor: Color.Green };
+  }
+  if (rate >= 95) {
+    return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
+  }
+  return { source: Icon.XMarkCircle, tintColor: Color.Red };
+}
+
+export function getReleaseAccessories(release: Release): List.Item.Accessory[] {
+  const crashFreeRate = getCrashFreeRate(release);
+  const date = release.dateReleased || release.dateCreated;
+
+  return [
+    release.newGroups > 0
+      ? {
+          icon: Icon.Bug,
+          text: `${release.newGroups}`,
+          tooltip: `New Issues: ${release.newGroups}`,
+        }
+      : null,
+    crashFreeRate !== undefined
+      ? {
+          icon: getCrashFreeIcon(crashFreeRate),
+          text: formatPercent(crashFreeRate),
+          tooltip: `Crash Free Sessions: ${formatPercent(crashFreeRate)}`,
+        }
+      : null,
+    { icon: Icon.Calendar, date: new Date(date), tooltip: `Released: ${date}` },
+  ].filter(isTruthy);
+}
+
+export function getReleaseUrl(release: Release, orgSlug?: string): string {
+  if (!orgSlug) {
+    return "";
+  }
+  const baseUrl = release.baseUrl || "https://sentry.io";
+  const projectSlug = release.projects?.[0]?.slug;
+  const version = encodeURIComponent(release.version);
+  if (projectSlug) {
+    return `${baseUrl}/organizations/${orgSlug}/releases/${version}/?project=${projectSlug}`;
+  }
+  return `${baseUrl}/organizations/${orgSlug}/releases/${version}/`;
 }

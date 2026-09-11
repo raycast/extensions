@@ -5,7 +5,7 @@ export const ConversationListView = (props: {
   title: string;
   conversations: Conversation[];
   selectedConversation: string | null;
-  actionPanel: (conversation: Conversation) => JSX.Element;
+  actionPanel: (conversation: Conversation) => React.JSX.Element;
 }) => {
   const { title, conversations, selectedConversation, actionPanel } = props;
 

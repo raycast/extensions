@@ -3,6 +3,7 @@ import { GameState, INITIAL_STATE } from "./types";
 
 const GAME_STATE_KEY = "ray-clicker-state";
 const LEGACY_GAME_STATE_KEYS = ["idle-clicker-state"] as const;
+let saveQueue: Promise<void> = Promise.resolve();
 
 export async function loadGameState(): Promise<GameState> {
   try {
@@ -76,35 +77,45 @@ export async function loadGameState(): Promise<GameState> {
 }
 
 export async function saveGameState(state: GameState): Promise<void> {
+  const incomingBase = typeof state.lastUpdate === "number" ? state.lastUpdate : 0;
+  const incomingTs = Math.max(incomingBase, Date.now());
+  let serializedState: string;
+
   try {
-    // Avoid clobbering newer data in dev reloads or unmounts: compare timestamps
-    const existing = await LocalStorage.getItem(GAME_STATE_KEY);
-    let existingTs = 0;
-    if (typeof existing === "string") {
-      try {
-        const parsed = JSON.parse(existing) as Partial<GameState> & { lastUpdate?: number };
-        existingTs = typeof parsed.lastUpdate === "number" ? parsed.lastUpdate : 0;
-      } catch {
-        existingTs = 0;
-      }
-    }
-
-    const incomingBase = typeof state.lastUpdate === "number" ? state.lastUpdate : 0;
-    const incomingTs = Math.max(incomingBase, Date.now());
-    if (existingTs > incomingTs) {
-      // Existing data is newer; skip save to prevent stale overwrite
-      return;
-    }
-
-    const stateToSave = { ...state, lastUpdate: incomingTs };
-    await LocalStorage.setItem(GAME_STATE_KEY, JSON.stringify(stateToSave));
+    // Capture this exact state before waiting for earlier saves to finish.
+    serializedState = JSON.stringify({ ...state, lastUpdate: incomingTs });
   } catch (error) {
     console.error("Error saving game state:", error);
+    return;
   }
+
+  saveQueue = saveQueue.then(async () => {
+    try {
+      // Avoid clobbering newer data written by another extension process.
+      const existing = await LocalStorage.getItem(GAME_STATE_KEY);
+      let existingTs = 0;
+      if (typeof existing === "string") {
+        try {
+          const parsed = JSON.parse(existing) as Partial<GameState> & { lastUpdate?: number };
+          existingTs = typeof parsed.lastUpdate === "number" ? parsed.lastUpdate : 0;
+        } catch {
+          existingTs = 0;
+        }
+      }
+
+      if (existingTs > incomingTs) return;
+
+      await LocalStorage.setItem(GAME_STATE_KEY, serializedState);
+    } catch (error) {
+      console.error("Error saving game state:", error);
+    }
+  });
+
+  await saveQueue;
 }
 
 export async function resetGameState(): Promise<GameState> {
-  const newState = { ...INITIAL_STATE };
+  const newState = { ...INITIAL_STATE, lastUpdate: Date.now() };
   await saveGameState(newState);
   return newState;
 }

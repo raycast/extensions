@@ -36,7 +36,10 @@ export default function ProjectsList() {
               />
               <Action
                 title="Start All Containers"
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
+                shortcut={{
+                  macOS: { modifiers: ['cmd', 'shift'], key: 'r' },
+                  windows: { modifiers: ['ctrl', 'shift'], key: 'r' },
+                }}
                 icon={{ source: 'icon-startall.png', tintColor: Color.PrimaryText }}
                 onAction={withToast({
                   action: () => startProject(project),
@@ -47,7 +50,10 @@ export default function ProjectsList() {
               />
               <Action
                 title="Stop All Containers"
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
+                shortcut={{
+                  macOS: { modifiers: ['cmd', 'shift'], key: 'w' },
+                  windows: { modifiers: ['ctrl', 'shift'], key: 'w' },
+                }}
                 icon={{ source: 'icon-stopall.png', tintColor: Color.PrimaryText }}
                 onAction={withToast({
                   action: () => stopProject(project),

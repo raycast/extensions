@@ -8,6 +8,5 @@ For this extension to work, you need to set your Bring! email and password in th
 
 ## Usage
 
-When you have multiple lists in Bring! you are asked the first time you run the command to select which list to use.
-The selection is remembered for the next time you run the command.
-You can change the list selection with the alternative action "Switch to Another List" (`⌘ + L`).
+When you have multiple lists in Bring!, the first list is automatically selected and remembered across sessions.
+You can change the list selection with the alternative action "Switch to Another List" (`⌘ + P`).

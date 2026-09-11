@@ -8,6 +8,10 @@ export type NotificationResult = Pick<
   IssueNotification,
   "id" | "type" | "createdAt" | "readAt" | "reactionEmoji" | "snoozedUntilAt"
 > & {
+  title: string;
+  subtitle: string;
+  url: string;
+} & {
   comment?: Pick<Comment, "body" | "url">;
 } & {
   issue?: IssueResult;
@@ -38,6 +42,9 @@ export async function getNotifications() {
             createdAt
             readAt
             snoozedUntilAt
+            title
+            subtitle
+            url
             actor {
               displayName
               avatarUrl

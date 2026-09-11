@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "design-file-finder",
+  "title": "Design File Finder",
+  "description": "Search, sort by recency, and launch design project files (.prproj, .psd, .psb, .ai, .aep) across mounted drives.",
+  "icon": "extension-icon.png",
+  "author": "yusoufu",
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "premiere",
+    "photoshop",
+    "illustrator",
+    "after effects",
+    "adobe",
+    "design files",
+    "prproj",
+    "psd",
+    "aep"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-design-files",
+      "title": "Search Design Files",
+      "description": "Find Premiere, Photoshop, Illustrator, and After Effects files across your drives.",
+      "mode": "view"
+    },
+    {
+      "name": "new-from-template",
+      "title": "New from Template",
+      "description": "Create a new Photoshop, Illustrator, After Effects, or Premiere file from a template.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "templatesFolder",
+          "type": "directory",
+          "required": false,
+          "title": "Templates Folder",
+          "description": "Folder of starter .psd/.ai/.aep/.prproj files. Searched recursively."
+        },
+        {
+          "name": "defaultDestination",
+          "type": "directory",
+          "required": false,
+          "title": "Default Destination",
+          "description": "Optional default folder where new projects are created."
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enrichRecency",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Last Opened Dates",
+      "label": "Use Spotlight \"last opened\" on indexed drives",
+      "description": "Enriches sorting with the real last-opened date on indexed drives. Falls back to modified time when off or unavailable."
+    },
+    {
+      "name": "hideAutoSaves",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Auto-Save Files",
+      "label": "Hide Adobe auto-save backups",
+      "description": "Filters out files inside \"Auto-Save\" folders (Premiere/After Effects backup churn) so the real projects surface."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "fast-glob": "^3.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

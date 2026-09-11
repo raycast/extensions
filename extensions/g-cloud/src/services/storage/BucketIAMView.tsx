@@ -12,7 +12,6 @@ import {
   Form,
   Alert,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -214,8 +213,6 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
       }
 
       setError(`${errorTitle}: ${errorMessage}`);
-
-      showFailureToast({ title: errorTitle, message: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -432,7 +429,11 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
           errorMessage = "You don't have permission to modify IAM policies for this bucket.";
         }
 
-        showFailureToast({ title: errorTitle, message: errorMessage });
+        showToast({
+          style: Toast.Style.Failure,
+          title: errorTitle,
+          message: errorMessage,
+        });
       } finally {
         if (tempFilePath) {
           try {
@@ -459,7 +460,11 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
         errorMessage = "You don't have permission to modify IAM policies for this bucket.";
       }
 
-      showFailureToast({ title: errorTitle, message: errorMessage });
+      showToast({
+        style: Toast.Style.Failure,
+        title: errorTitle,
+        message: errorMessage,
+      });
     }
   }
 
@@ -558,7 +563,11 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
                 errorMessage = "You don't have permission to modify this bucket's IAM policy.";
               }
 
-              showFailureToast({ title: errorTitle, message: errorMessage });
+              showToast({
+                style: Toast.Style.Failure,
+                title: errorTitle,
+                message: errorMessage,
+              });
             } finally {
               if (tempFilePath) {
                 try {
@@ -588,7 +597,11 @@ export default function BucketIAMView({ projectId, gcloudPath, bucketName }: Buc
           errorMessage = "You don't have permission to modify this bucket's IAM policy.";
         }
 
-        showFailureToast({ title: errorTitle, message: errorMessage });
+        showToast({
+          style: Toast.Style.Failure,
+          title: errorTitle,
+          message: errorMessage,
+        });
       }
     }
   }

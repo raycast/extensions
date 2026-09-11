@@ -1,5 +1,58 @@
-import type { IssueTag } from "./interfaces";
-import { getTagsToAdd, prepareFavorites, isDurationValid, stripHtmlTags } from "./utils";
+import type { IssueTag, SearchSuggestion } from "./interfaces";
+import { applySearchSuggestion, getTagsToAdd, prepareFavorites, isDurationValid, stripHtmlTags } from "./utils";
+
+const searchSuggestion = (overrides: Partial<SearchSuggestion> = {}): SearchSuggestion => ({
+  completionStart: 0,
+  completionEnd: 0,
+  description: "",
+  group: "",
+  option: "State",
+  prefix: "",
+  suffix: ": ",
+  ...overrides,
+});
+
+describe("applySearchSuggestion", () => {
+  test("should insert a suggestion at the completion position", () => {
+    expect(
+      applySearchSuggestion(
+        "State: ",
+        searchSuggestion({ completionStart: 7, completionEnd: 7, option: "Open", suffix: "" }),
+      ),
+    ).toBe("State: Open");
+  });
+
+  test("should replace a partial token", () => {
+    expect(applySearchSuggestion("Stat", searchSuggestion({ completionEnd: 4 }))).toBe("State: ");
+  });
+
+  test("should apply a suggestion prefix and suffix", () => {
+    expect(
+      applySearchSuggestion(
+        "State: Veri",
+        searchSuggestion({
+          completionStart: 7,
+          completionEnd: 11,
+          option: "Verified",
+          prefix: "{",
+          suffix: "}",
+        }),
+      ),
+    ).toBe("State: {Verified}");
+  });
+
+  test("should preserve query text outside the completion range", () => {
+    const query = "project: TEST Stat created: today";
+    const completionStart = query.indexOf("Stat");
+
+    expect(
+      applySearchSuggestion(
+        query,
+        searchSuggestion({ completionStart, completionEnd: completionStart + "Stat".length, suffix: ":" }),
+      ),
+    ).toBe("project: TEST State: created: today");
+  });
+});
 
 describe("getTagsToAdd", () => {
   test("should prepare selected tags to 'IssueTag[]' before submitting issue", () => {

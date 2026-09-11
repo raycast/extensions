@@ -70,14 +70,14 @@ export interface SublimeCard {
         images: string[];
     };
 
-    urls: string[];
+    urls?: string[];
     source?: {
         name: string;
         domain: string;
         url: string; // does not include https://
     };
     domain?: string;
-    authors: string[];
+    authors?: string[];
 
     privacy?: string;
     curated_by?: {

@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast, Form, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { NetworkService, FirewallRule, VPC } from "./NetworkService";
 
 interface FirewallRulesViewProps {
@@ -43,7 +42,11 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
       } catch (error) {
         console.error("Error initializing:", error);
         loadingToast.hide();
-        showFailureToast(error instanceof Error ? error.message : "Failed to load firewall rules");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load firewall rules",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -98,7 +101,11 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
     } catch (error) {
       console.error("Error refreshing firewall rules:", error);
       loadingToast.hide();
-      showFailureToast(error instanceof Error ? error.message : "Failed to refresh firewall rules");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to refresh firewall rules",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -137,14 +144,22 @@ export default function FirewallRulesView({ projectId, gcloudPath }: FirewallRul
     };
   };
 
-  const handleCreateFirewallRule = useCallback(() => {
+  const handleCreateFirewallRule = useCallback(async () => {
     if (!service) {
-      showFailureToast("Network service is not initialized");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Network service is not initialized",
+        message: "Network service is not initialized",
+      });
       return;
     }
 
     if (vpcs.length === 0) {
-      showFailureToast("Please wait for VPC networks to be loaded");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Please wait for VPC networks to be loaded",
+        message: "VPC networks are not loaded yet",
+      });
       return;
     }
 
@@ -364,27 +379,47 @@ function CreateFirewallRuleForm({ vpcs, onRuleCreated, service }: CreateFirewall
 
   async function handleSubmit(values: FirewallRuleFormValues) {
     if (!values.name) {
-      showFailureToast("Please enter a rule name");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Please enter a rule name",
+        message: "Rule name is required",
+      });
       return;
     }
 
     if (!values.network) {
-      showFailureToast("Please select a network");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Please select a network",
+        message: "Network is required",
+      });
       return;
     }
 
     if (!values.protocol) {
-      showFailureToast("Please select a protocol");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Please select a protocol",
+        message: "Protocol is required",
+      });
       return;
     }
 
     if (values.direction === "INGRESS" && !values.sourceRanges && !values.sourceTags) {
-      showFailureToast("Please specify source ranges or source tags for ingress rules");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Please specify source ranges or source tags for ingress rules",
+        message: "Source ranges or source tags are required for ingress rules",
+      });
       return;
     }
 
     if (values.direction === "EGRESS" && !values.destinationRanges && !values.targetTags) {
-      showFailureToast("Please specify destination ranges or target tags for egress rules");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Please specify destination ranges or target tags for egress rules",
+        message: "Destination ranges or target tags are required for egress rules",
+      });
       return;
     }
 
@@ -450,7 +485,11 @@ function CreateFirewallRuleForm({ vpcs, onRuleCreated, service }: CreateFirewall
           pop();
         } catch (error) {
           console.error("Error refreshing rules:", error);
-          showFailureToast("Rule was created but the list couldn't be refreshed. Please refresh manually.");
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Rule was created but the list couldn't be refreshed",
+            message: "Please refresh manually.",
+          });
         }
       } else {
         showToast({
@@ -462,7 +501,11 @@ function CreateFirewallRuleForm({ vpcs, onRuleCreated, service }: CreateFirewall
     } catch (error) {
       console.error("Error creating firewall rule:", error);
       loadingToast.hide();
-      showFailureToast(error instanceof Error ? error.message : "Failed to create firewall rule");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to create firewall rule",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(false);
     }

@@ -5,6 +5,7 @@ export type UnknownRecord = Record<PropertyKey, unknown>;
 
 export enum StorageKey {
   OWLS = "owls",
+  INIT = "init",
 }
 
 export type StructuredValue = UnknownRecord | UnknownRecord[];

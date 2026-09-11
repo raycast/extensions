@@ -1,5 +1,5 @@
 import { z } from "zod";
-export declare const activityRouter: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+export declare const activityRouter: import("@trpc/server").TRPCBuiltRouter<{
     ctx: {
         db: import(".prisma/client").PrismaClient<{
             log: "error"[];
@@ -11,31 +11,33 @@ export declare const activityRouter: import("@trpc/server/unstable-core-do-not-i
             deviceName: string;
         } | undefined;
         headers: Headers;
-        accessToken: string;
-        refreshToken: string;
-        iat: number;
-        exp: number;
+        jti: string;
     };
     meta: object;
     errorShape: {
         data: {
             zodError: z.typeToFlattenedError<any, string> | null;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+            code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
             httpStatus: number;
             path?: string;
             stack?: string;
         };
         message: string;
-        code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+        code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
     };
     transformer: true;
-}, {
+}, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
     create: import("@trpc/server").TRPCMutationProcedure<{
         input: {
             type: "BOOKMARK_OPEN" | "BOOKMARK_COPY";
             spaceId: string;
-            data: Record<string, string>;
+            data: {
+                bookmarkId: string;
+            } & {
+                [k: string]: string;
+            };
         };
         output: void;
+        meta: object;
     }>;
-}>;
+}>>;

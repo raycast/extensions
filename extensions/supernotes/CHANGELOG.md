@@ -1,5 +1,8 @@
 # Supernotes Changelog
 
+## [Windows Support] - 2026-03-14
+- Added Windows support
+
 ## [AI Extension Support] - 2025-04-03
 - Added in a tool to search cards
 - Added in a tool to append to a card

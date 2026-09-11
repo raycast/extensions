@@ -1,9 +1,10 @@
 import { getSelectedText, closeMainWindow, showToast, Toast, Clipboard } from "@raycast/api";
-import { Parser } from "expr-eval";
+import Mexp from "math-expression-evaluator";
 import { loadPreferences, Preferences } from "./preferences";
 
 function evaluate(text: string, preferences: Preferences) {
-  let result = new Parser().evaluate(text);
+  const mexp = new Mexp();
+  let result = mexp.eval(text);
 
   if (typeof result !== "number") {
     throw new Error(result);

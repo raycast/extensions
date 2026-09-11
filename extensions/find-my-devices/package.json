@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "find-my-devices",
+  "title": "Find My Devices",
+  "description": "List your Apple Find My devices and play a sound on one device.",
+  "icon": "extension-icon.png",
+  "author": "Visual-Studio-Coder",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "find my",
+    "apple",
+    "iphone",
+    "ipad",
+    "devices",
+    "icloud",
+    "airpods",
+    "macbook",
+    "play sound"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "find-my-devices",
+      "title": "Find My Devices",
+      "description": "List your Apple Find My devices and play a sound",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "appleAccount",
+      "type": "textfield",
+      "required": true,
+      "title": "Apple Account",
+      "description": "The email address for the Apple Account that can see these devices. Do not enter a password here.",
+      "placeholder": "name@example.com"
+    },
+    {
+      "name": "includeFamily",
+      "type": "checkbox",
+      "required": false,
+      "title": "Family Devices",
+      "label": "Include devices shared by family members",
+      "description": "Request the same family device data that the Find My web app uses.",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.9.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

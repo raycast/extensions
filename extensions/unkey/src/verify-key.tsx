@@ -1,12 +1,14 @@
-import { Action, ActionPanel, Detail, Form, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { unkey } from "./unkey";
 import { V2KeysVerifyKeyRequestBody, V2KeysVerifyKeyResponseData } from "@unkey/api/dist/commonjs/models/components";
+import ErrorComponent from "./components/ErrorComponent";
 
 export default function VerifyKey() {
   const [verifyKeyResponse, setVerifyKeyResponse] = useState<V2KeysVerifyKeyResponseData>();
   const [isLoading, setIsLoading] = useState(false);
+  const { push } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<V2KeysVerifyKeyRequestBody>({
     async onSubmit(values) {
@@ -16,6 +18,7 @@ export default function VerifyKey() {
         setVerifyKeyResponse(data);
       } catch (error) {
         await showFailureToast(error);
+        push(<ErrorComponent error={error} />);
       } finally {
         setIsLoading(false);
       }

@@ -1,8 +1,15 @@
 import { closeMainWindow } from "@raycast/api";
-import { runJSInYandexMusicTab } from "./utils";
+import { runJSInYandexMusicTab, wrapJS } from "./utils";
 
 export default async () => {
-  if (await runJSInYandexMusicTab("document.querySelector('.player-controls__btn.d-like:not(.d-like_on)').click();")) {
+  if (
+    await runJSInYandexMusicTab(
+      wrapJS(`
+        const nodes = document.querySelectorAll('button[aria-label=Like]');
+        nodes[nodes.length - 1].click();
+      `)
+    )
+  ) {
     await closeMainWindow();
   }
 };

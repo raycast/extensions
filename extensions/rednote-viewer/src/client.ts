@@ -1,46 +1,39 @@
-import fs from "node:fs/promises";
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import vm from "node:vm";
-import { DetailData, HomeFeedRequest, ImageInfo, NoteItem, Sandbox, SearchRequest, Tag } from "./types.js";
+import { DetailData, HomeFeedRequest, ImageInfo, NoteItem, SearchRequest, Tag } from "./types.js";
 import { getHomeFeedApi, getMeApi, getNoteApi, searchPostApi } from "./api.js";
-import { environment, getPreferenceValues, open, openExtensionPreferences } from "@raycast/api";
+import { getPreferenceValues, open, openExtensionPreferences, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { BASE_URL, COMMON_HEADER, HOME_PAGE_SIZE, SEARCH_PAGE_SIZE } from "./constants.js";
+import { BASE_URL, HOME_PAGE_SIZE, SEARCH_PAGE_SIZE } from "./constants.js";
+import { Payload, SignUtil } from "./lib/signUtil.js";
 
 class XhsClient {
-  private sandbox: vm.Context | null = null;
   private cookie: string | null = null;
   private isCookieValid: boolean = false;
   private initPromise: Promise<boolean>;
+  private signUtil: SignUtil;
 
   constructor() {
+    this.signUtil = new SignUtil();
     this.initPromise = this.init();
   }
 
   private async init(): Promise<boolean> {
-    if (this.sandbox) return this.isCookieValid;
-
-    const sandbox: Sandbox = {
-      global,
-      console,
-      setTimeout,
-      setInterval,
-    };
-    sandbox.global = sandbox;
-    this.sandbox = vm.createContext(sandbox);
-    const rawPath = `${environment.assetsPath}/raw.min.js`;
-    const code = await fs.readFile(rawPath, "utf-8");
-    vm.runInContext(code, this.sandbox, {
-      filename: "raw.js",
-    });
-
     await this.checkCookie();
     return this.isCookieValid;
   }
 
   public ready() {
     return this.initPromise;
+  }
+
+  private getGetHeader(uri: string, cookie: string) {
+    return this.signUtil.signHeadersGet(uri, cookie, "xhs-pc-web", {}, Date.now());
+  }
+
+  private getPostHeader(uri: string, cookie: string, data: unknown) {
+    return this.signUtil.signHeadersPost(uri, cookie, "xhs-pc-web", data as Payload, Date.now());
   }
 
   private async checkCookie(): Promise<boolean> {
@@ -59,9 +52,17 @@ class XhsClient {
     }
 
     try {
-      await getMeApi(cookies);
+      const cryptoHeader = this.getGetHeader("/api/sns/web/v2/user/me", cookies);
+      const headers = {
+        Cookie: cookies,
+        ...cryptoHeader,
+      };
+      await getMeApi(headers);
       this.isCookieValid = true;
       this.cookie = cookies;
+      showToast({
+        title: "Cookie is valid",
+      });
       return true;
     } catch {
       this.isCookieValid = false;
@@ -75,10 +76,6 @@ class XhsClient {
       });
       return false;
     }
-  }
-
-  private getHeader(uri: string, data: unknown) {
-    return this.sandbox?.getXsXt(uri, data, this.cookie!);
   }
 
   private changeImageUrl(url: string) {
@@ -135,12 +132,10 @@ class XhsClient {
       xsec_token: xToken,
     };
 
-    const cryptoHeader = this.getHeader(uri, data);
+    const cryptoHeader = this.getPostHeader(uri, this.cookie!, data);
     const headers = {
-      "X-S": cryptoHeader["X-s"].toString(),
-      "X-T": cryptoHeader["X-t"].toString(),
       Cookie: this.cookie!,
-      ...COMMON_HEADER,
+      ...cryptoHeader,
     };
 
     try {
@@ -186,17 +181,13 @@ class XhsClient {
 
     const dir = details.noteId;
     const destination = path.join(os.homedir(), "Downloads", dir);
-    const destinationExists = await fs
-      .access(destination, fs.constants.R_OK | fs.constants.W_OK)
-      .then(() => true)
-      .catch(() => false);
-    if (!destinationExists) {
-      await fs.mkdir(destination, { recursive: true });
+    if (!fs.existsSync(destination)) {
+      fs.mkdirSync(destination, { recursive: true });
     }
 
     const filename = `${details.title}.md`;
     const markdownFile = path.join(destination, filename);
-    await fs.writeFile(markdownFile, markdown);
+    fs.writeFileSync(markdownFile, markdown);
 
     // TODO: download image/video if needed
     // for (const image of details.images) {
@@ -237,8 +228,10 @@ class XhsClient {
         geo: "",
         image_formats: ["jpg", "webp", "avif"],
       };
+      const cryptoHeader = this.getPostHeader("/api/sns/web/v1/search/notes", this.cookie!, data);
       const headers = {
         Cookie: this.cookie!,
+        ...cryptoHeader,
       };
 
       const res = await searchPostApi(data, headers);
@@ -285,12 +278,10 @@ class XhsClient {
         unread_note_count: 0,
       };
 
-      const cryptoHeader = this.getHeader(uri, data);
+      const cryptoHeader = this.getPostHeader(uri, this.cookie!, data);
       const headers = {
-        "X-S": cryptoHeader["X-s"].toString(),
-        "X-T": cryptoHeader["X-t"].toString(),
         Cookie: this.cookie!,
-        ...COMMON_HEADER,
+        ...cryptoHeader,
       };
 
       const res = await getHomeFeedApi(data, headers);

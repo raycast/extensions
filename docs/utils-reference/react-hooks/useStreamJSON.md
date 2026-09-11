@@ -12,6 +12,7 @@ export function useStreamJSON<T, U>(
     transform?: (item: any) => T;
     pageSize?: number;
     initialData?: U;
+    cacheWriteDebounce?: number;
     keepPreviousData?: boolean;
     execute?: boolean;
     onError?: (error: Error) => void;
@@ -38,6 +39,7 @@ With a few options:
 
 Including the [useCachedPromise](./useCachedPromise.md)'s options:
 
+- `options.cacheWriteDebounce` is the debounce time in milliseconds for writing results to the cache.
 - `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
 
 Including the [useCachedState](./useCachedState.md)'s options:

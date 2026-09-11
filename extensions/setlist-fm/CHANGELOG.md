@@ -1,5 +1,10 @@
 # setlist.fm Changelog
 
+## [🪟 Added Windows Support] - 2025-12-09
+
+Added Windows support
+Updated libraries
+
 ## [🎂 Initial Version] - 2025-05-13
 
 - Search for artists

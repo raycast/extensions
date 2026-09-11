@@ -16,6 +16,7 @@ type Commit = {
     author: string
     date: string
     dateRelative: string
+    tags: string[]
 }
 
 type CommitDetailProps = {
@@ -35,6 +36,7 @@ function CommitDetail({ project, commit }: CommitDetailProps) {
 - **Hash**: \`${commit.hash}\`
 - **Author**: ${commit.author}
 - **Date**: ${commit.date}
+${commit.tags.length > 0 ? `- **Tags**: ${commit.tags.map((tag) => `\`${tag}\``).join(', ')}` : ''}
 
 ## Changes
 \`\`\`
@@ -67,6 +69,16 @@ ${commitDiff || 'Loading...'}
     )
 }
 
+function getTagsFromDecorations(decorations: string | undefined): string[] {
+    return (
+        decorations
+            ?.split(', ')
+            .filter((decoration) => decoration.startsWith('tag: '))
+            .map((decoration) => decoration.replace(/^tag: /, ''))
+            .filter(Boolean) ?? []
+    )
+}
+
 export default function GitCommitsDetail({ project }: GitCommitsDetailProps) {
     const { push, pop } = useNavigation()
     const [selectedBranch, setSelectedBranch] = useState<string>('HEAD')
@@ -75,7 +87,7 @@ export default function GitCommitsDetail({ project }: GitCommitsDetailProps) {
     const { data: branchesData } = useExec('git', ['branch', '-a'], { cwd: project.fullPath })
 
     // Get commits for selected branch
-    const { isLoading, data: commitsData } = useExec('git', ['log', selectedBranch, '--pretty=format:%H|%h|%s|%an|%ad|%ar', '--date=local', '-50'], { cwd: project.fullPath })
+    const { isLoading, data: commitsData } = useExec('git', ['log', selectedBranch, '--decorate=short', '--pretty=format:%H%x1f%h%x1f%D%x1f%s%x1f%an%x1f%ad%x1f%ar', '--date=local', '-50'], { cwd: project.fullPath })
 
     const branches = branchesData
         ? branchesData
@@ -97,8 +109,8 @@ export default function GitCommitsDetail({ project }: GitCommitsDetailProps) {
         ? commitsData
               .split('\n')
               .map((line) => {
-                  const [hash, shortHash, message, author, date, dateRelative] = line.split('|')
-                  return { hash, shortHash, message, author, date, dateRelative }
+                  const [hash, shortHash, decorations, message, author, date, dateRelative] = line.split('\x1f')
+                  return { hash, shortHash, message, author, date, dateRelative, tags: getTagsFromDecorations(decorations) }
               })
               .filter((commit) => commit.hash && commit.message)
         : []
@@ -146,10 +158,7 @@ export default function GitCommitsDetail({ project }: GitCommitsDetailProps) {
                         key={commit.hash}
                         title={commit.message}
                         subtitle={`by ${commit.author}`}
-                        accessories={[
-                            { text: commit.shortHash, tooltip: `Full hash: ${commit.hash}` },
-                            { text: commit.dateRelative, tooltip: commit.date },
-                        ]}
+                        accessories={[...commit.tags.map((tag) => ({ text: tag, icon: Icon.Tag, tooltip: `Tag: ${tag}` })), { text: commit.shortHash, tooltip: `Full hash: ${commit.hash}` }, { text: commit.dateRelative, tooltip: commit.date }]}
                         actions={
                             <ActionPanel>
                                 <Action

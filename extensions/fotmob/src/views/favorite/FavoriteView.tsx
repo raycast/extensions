@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { useFavorite } from "@/hooks/useFavorite";
+import { launchPlayerCommand } from "@/utils/launcher/launchPlayerDetailCommand";
 import { launchTeamCommand } from "@/utils/launcher/launchTeamDetailCommand";
 import {
   buildLeagueDetailUrl,
@@ -42,7 +43,7 @@ export default function FavoriteView() {
                 />
                 <Action
                   icon={Icon.StarDisabled}
-                  title="Remove From Favorite"
+                  title="Remove from Favorite"
                   onAction={async () => {
                     await favoriteService.removeItems("team", team.id);
                     showToast({
@@ -67,7 +68,7 @@ export default function FavoriteView() {
               <ActionPanel>
                 <Action.OpenInBrowser
                   icon={Icon.Globe}
-                  title="Show Detail In Browser"
+                  title="Show Detail in Browser"
                   url={buildLeagueDetailUrl(league.id)}
                 />
                 <Action.CopyToClipboard
@@ -78,7 +79,7 @@ export default function FavoriteView() {
                 />
                 <Action
                   icon={Icon.StarDisabled}
-                  title="Remove From Favorite"
+                  title="Remove from Favorite"
                   onAction={() => favoriteService.removeItems("league", league.id)}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                 />
@@ -95,9 +96,16 @@ export default function FavoriteView() {
             title={player.name}
             actions={
               <ActionPanel>
+                <Action
+                  icon={Icon.Person}
+                  title="Show Player Details"
+                  onAction={() => {
+                    launchPlayerCommand(player.id);
+                  }}
+                />
                 <Action.OpenInBrowser
                   icon={Icon.Globe}
-                  title="Show Detail In Browser"
+                  title="Show Detail in Browser"
                   url={buildPlayerDetailUrl(player.id)}
                 />
                 <Action.CopyToClipboard
@@ -108,7 +116,7 @@ export default function FavoriteView() {
                 />
                 <Action
                   icon={Icon.StarDisabled}
-                  title="Remove From Favorite"
+                  title="Remove from Favorite"
                   onAction={() => favoriteService.removeItems("player", player.id)}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                 />

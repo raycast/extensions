@@ -1,16 +1,22 @@
-import { getPreferenceValues, List } from "@raycast/api";
-import { getInkdrop, type InkdropOption, type Note } from "../inkdrop";
+import { Color, List } from "@raycast/api";
+import { TAG_COLOR_MAP } from "../inkdrop";
+import type { Note, Tag } from "../inkdrop";
 
-export const TagMetadata = ({ note }: { note: Note }) => {
-  const { useTags } = getInkdrop(getPreferenceValues<InkdropOption>());
-  const { tags } = useTags();
-
-  // TODO: want to use `List.Item.Detail.Metadata.TagList` or `Detail.Metadata.TagList`
-  const tagLabelText = note.tags
-    .map((tagId) => {
-      const tag = tags?.find((tag) => tag._id === tagId);
-      return tag?.name;
-    })
-    .join(", ");
-  return tagLabelText.length !== 0 ? <List.Item.Detail.Metadata.Label title="Tags" text={tagLabelText} /> : null;
+export const TagMetadata = ({ note, tags }: { note: Note; tags: Tag[] | undefined }) => {
+  if (!tags) return null;
+  const matchedTags = note.tags
+    .map((tagId) => tags.find((tag) => tag._id === tagId))
+    .filter((tag): tag is Tag => Boolean(tag));
+  if (matchedTags.length === 0) return null;
+  return (
+    <List.Item.Detail.Metadata.TagList title="Tags">
+      {matchedTags.map((tag) => (
+        <List.Item.Detail.Metadata.TagList.Item
+          key={tag._id}
+          text={tag.name}
+          color={TAG_COLOR_MAP[tag.color] ?? Color.SecondaryText}
+        />
+      ))}
+    </List.Item.Detail.Metadata.TagList>
+  );
 };

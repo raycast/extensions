@@ -10,7 +10,7 @@
     {
       "name": "api_key",
       "title": "API Key",
-      "placeholder": "pw...xxx",
+      "placeholder": "xx...xxx",
       "type": "password",
       "required": true,
       "description": "Koyeb API Key"
@@ -64,5 +64,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

@@ -15,6 +15,112 @@
       "title": "Game Deals",
       "description": "Find the best game deals",
       "mode": "view"
+    },
+    {
+      "name": "search-game",
+      "title": "Search Game",
+      "description": "Search game prices on GG.deals",
+      "mode": "view",
+      "icon": "extension-icon.png",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "title": "GG.deals API Key",
+          "description": "Your GG.deals API key",
+          "type": "password",
+          "required": true
+        },
+        {
+          "name": "country",
+          "title": "Country / Region",
+          "description": "Region used to retrieve game prices",
+          "type": "dropdown",
+          "required": true,
+          "default": "BR",
+          "data": [
+            {
+              "title": "🇧🇷 Brazil",
+              "value": "BR"
+            },
+            {
+              "title": "🇺🇸 United States",
+              "value": "US"
+            },
+            {
+              "title": "🇬🇧 United Kingdom",
+              "value": "GB"
+            },
+            {
+              "title": "🇨🇦 Canada",
+              "value": "CA"
+            },
+            {
+              "title": "🇦🇷 Argentina",
+              "value": "AR"
+            },
+            {
+              "title": "🇲🇽 Mexico",
+              "value": "MX"
+            },
+            {
+              "title": "🇵🇹 Portugal",
+              "value": "PT"
+            },
+            {
+              "title": "🇪🇸 Spain",
+              "value": "ES"
+            },
+            {
+              "title": "🇫🇷 France",
+              "value": "FR"
+            },
+            {
+              "title": "🇩🇪 Germany",
+              "value": "DE"
+            },
+            {
+              "title": "🇮🇹 Italy",
+              "value": "IT"
+            },
+            {
+              "title": "🇵🇱 Poland",
+              "value": "PL"
+            },
+            {
+              "title": "🇹🇷 Turkey",
+              "value": "TR"
+            },
+            {
+              "title": "🇯🇵 Japan",
+              "value": "JP"
+            },
+            {
+              "title": "🇰🇷 South Korea",
+              "value": "KR"
+            },
+            {
+              "title": "🇦🇺 Australia",
+              "value": "AU"
+            },
+            {
+              "title": "🇨🇱 Chile",
+              "value": "CL"
+            },
+            {
+              "title": "🇨🇴 Colombia",
+              "value": "CO"
+            },
+            {
+              "title": "🇵🇪 Peru",
+              "value": "PE"
+            },
+            {
+              "title": "🇮🇳 India",
+              "value": "IN"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -38,5 +144,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

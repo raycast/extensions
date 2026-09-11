@@ -1,6 +1,5 @@
 // src/utils/useSearch.tsx
-import { removeLocalStorageItem, setLocalStorageItem, showToast, Toast } from "@raycast/api";
-import { AbortError } from "node-fetch";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useState, useRef, useEffect } from "react";
 import { getSearchResults, getSearchHistory } from "./handleResults";
 import { searchWithKagiAPI, searchWithFastGPT } from "./kagiApi";
@@ -44,11 +43,11 @@ export function useSearch(token: string, apiKey: string) {
     });
 
     await setHistory(newHistory);
-    await setLocalStorageItem(HISTORY_KEY, JSON.stringify(newHistory));
+    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
   }
 
   async function deleteAllHistory() {
-    await removeLocalStorageItem(HISTORY_KEY);
+    await LocalStorage.removeItem(HISTORY_KEY);
 
     setHistory([]);
     showToast(Toast.Style.Success, "Cleared search history");
@@ -63,7 +62,7 @@ export function useSearch(token: string, apiKey: string) {
     }
 
     newHistory?.splice(index, 1);
-    await setLocalStorageItem(HISTORY_KEY, JSON.stringify(newHistory));
+    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
     setHistory(newHistory);
     showToast(Toast.Style.Success, "Removed from history");
   }
@@ -87,7 +86,7 @@ export function useSearch(token: string, apiKey: string) {
       setIsLoading(false);
       setResults(results);
     } catch (error) {
-      if (error instanceof AbortError) {
+      if (error instanceof Error && error.name === "AbortError") {
         return;
       }
 
@@ -114,7 +113,7 @@ export function useSearch(token: string, apiKey: string) {
 
       setIsFastGPTLoading(false);
     } catch (error) {
-      if (error instanceof AbortError) {
+      if (error instanceof Error && error.name === "AbortError") {
         return;
       }
 
@@ -148,7 +147,7 @@ export function useSearch(token: string, apiKey: string) {
       setResults(results);
       return results;
     } catch (error) {
-      if (error instanceof AbortError) {
+      if (error instanceof Error && error.name === "AbortError") {
         return [];
       }
 

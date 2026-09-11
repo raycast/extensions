@@ -7,13 +7,15 @@
 This is a Raycast extension for [Postiz](https://postiz.com/) - _The All-in-One Social Media Management Tool_. With this extension you can:
 
 - Search Channels
-- Search Posts (**week**)
+- Search Posts (**v1**: week, **v2**: day,week,month)
     - Create (**draft**, **text-only**) Post
     - Delete Post
 
 ## 🚀 Getting Started
 
 1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/postiz) OR `install` via Raycast Store
+
+    <a title="Install postiz Raycast Extension" href="https://www.raycast.com/xmok/postiz"><img src="https://www.raycast.com/xmok/postiz/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
 2. **Enter your Postiz URL**:
 
@@ -38,6 +40,7 @@ This is a Raycast extension for [Postiz](https://postiz.com/) - _The All-in-One 
 Looking for more cool OSS? Try the following extensions:
 
 <a title="Install appwrite Raycast Extension" href="https://www.raycast.com/xmok/appwrite"><img src="https://www.raycast.com/xmok/appwrite/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install chatwoot Raycast Extension" href="https://www.raycast.com/xmok/chatwoot"><img src="https://www.raycast.com/xmok/chatwoot/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install neon Raycast Extension" href="https://www.raycast.com/xmok/neon"><img src="https://www.raycast.com/xmok/neon/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 <a title="Install resend Raycast Extension" href="https://www.raycast.com/xmok/resend"><img src="https://www.raycast.com/xmok/resend/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

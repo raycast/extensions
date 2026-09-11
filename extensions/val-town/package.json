@@ -2,13 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "val-town",
   "title": "Val Town",
-  "description": "View and run your vals and search others' vals",
+  "description": "Browse your vals, read their logs and traces, and allow Raycast AI to run the ones you choose",
   "icon": "command-icon.png",
   "author": "KevinBatdorf",
   "categories": [
     "Productivity",
     "Developer Tools",
-    "Fun",
     "Web"
   ],
   "license": "MIT",
@@ -17,39 +16,76 @@
       "name": "search-vals",
       "title": "Search Vals",
       "subtitle": "Val Town",
-      "description": "Search and run vals from your account and others.",
+      "description": "Browse your vals and choose which ones Raycast AI can call.",
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "list-tools",
+      "title": "List Val Town Tools",
+      "description": "The user's callable Val Town tools and the arguments each takes. Call this before running any val of theirs."
+    },
+    {
+      "name": "execute-tool",
+      "title": "Execute Val Town Tool",
+      "description": "Run one of the user's Val Town tools. Use it whenever the user's request matches a tool's description from list-tools — running them is what they are for. Never guess a name or argument."
+    },
+    {
+      "name": "get-val-info",
+      "title": "Get Val Town Val Info",
+      "description": "Read a val's files and source. Only when the source itself matters, such as debugging a failing tool."
+    },
+    {
+      "name": "read-val-blobs",
+      "title": "Read Val Town Blobs",
+      "description": "List or read a val's blob storage. Use it to answer questions about a val's stored data without running the val."
+    },
+    {
+      "name": "get-val-runs",
+      "title": "Get Val Town Runs",
+      "description": "A val's recent executions with their logs and errors, from the last hour. Use it when a run failed or the user asks what a val has been doing."
+    },
+    {
+      "name": "load-skill",
+      "title": "Load Val Town Skill",
+      "description": "Load one of the user's Val Town skills: their own guide naming which vals to call and how. Only when the user explicitly asks to load or use a skill."
+    }
+  ],
+  "ai": {
+    "instructions": "The user's vals are capabilities they set up to be used. Call list-tools, and when the request matches what a val's description says it does, call execute-tool with that val — do not ask first and do not just offer: each val's own confirmation setting already guards anything sensitive. Only a question about the collection itself, like what tools the user has, ends at list-tools. Never invent a val name or an argument."
+  },
   "preferences": [
     {
       "name": "apiToken",
       "type": "password",
       "required": true,
       "title": "Val Town API Token",
-      "description": "Your API token for Val Town.",
-      "placeholder": "API Token"
+      "description": "Create one at val.town/settings/api",
+      "placeholder": "vt_..."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0",
-    "@raycast/utils": "^1.10.0",
-    "date-fns": "^2.30.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^2.0.5",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.18",
+    "eslint": "^10.9.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
+    "build": "ray build -e dist -t release",
+    "dev": "ray develop -t release",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

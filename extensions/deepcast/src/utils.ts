@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import got, { HTTPError, RequestError } from "got";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
+import { prepareTranslationPayload, toRichClipboardContent } from "./hyperlinks";
 
 const { returnToRootState } = getPreferenceValues<Preferences>();
 function isPro(key: string) {
@@ -72,24 +73,56 @@ function gotErrorToString(error: unknown) {
 export async function getSelection() {
   try {
     return await getSelectedText();
-  } catch (error) {
+  } catch {
     return "";
+  }
+}
+
+async function readClipboard() {
+  try {
+    return await Clipboard.read();
+  } catch {
+    return { text: await Clipboard.readText(), html: undefined };
   }
 }
 
 // Get the text, matching preferences.
 // If selected text is the preferred source, it will try selected text but fallback to clipboard.
 // If clipboard is the preferred source, it will try clipboard but fallback to selected text.
+// Clipboard HTML is only used when clipboard text is the actual source, never by text matching.
 export async function readContent() {
   const preferredSource = getPreferenceValues<Preferences>().source;
-  const clipboard = await Clipboard.readText();
+  const clipboard = await readClipboard();
   const selected = await getSelection();
 
   if (preferredSource === "clipboard") {
-    return clipboard || selected;
-  } else {
-    return selected || clipboard;
+    if (clipboard.text) {
+      return { text: clipboard.text, html: clipboard.html };
+    }
+    return { text: selected || "" };
   }
+
+  if (selected) {
+    return { text: selected };
+  }
+
+  return { text: clipboard.text || "", html: clipboard.html };
+}
+
+export async function copyTranslatedText(translation: string, isHtml: boolean) {
+  if (isHtml) {
+    await Clipboard.copy(toRichClipboardContent(translation));
+    return;
+  }
+  await Clipboard.copy(translation);
+}
+
+export async function pasteTranslatedText(translation: string, isHtml: boolean) {
+  if (isHtml) {
+    await Clipboard.paste(toRichClipboardContent(translation));
+    return;
+  }
+  await Clipboard.paste(translation);
 }
 
 export async function sendTranslateRequest({
@@ -97,12 +130,14 @@ export async function sendTranslateRequest({
   sourceLanguage,
   targetLanguage,
   onTranslateAction,
+  viewInCurrentCommand,
   formality,
 }: {
   text?: string;
   sourceLanguage?: SourceLanguage;
   targetLanguage: TargetLanguage;
   onTranslateAction?: Preferences["onTranslateAction"] | "none";
+  viewInCurrentCommand?: boolean;
   formality: Formality;
 }) {
   try {
@@ -110,9 +145,10 @@ export async function sendTranslateRequest({
     const { key, closeRaycastAfterTranslation } = prefs;
     onTranslateAction ??= prefs.onTranslateAction;
 
-    const text = initialText || (await readContent());
+    const source: { text: string; html?: string } = initialText ? { text: initialText } : await readContent();
+    const { text, isHtml } = prepareTranslationPayload(source.text, source.html);
 
-    const toast = await showToast(Toast.Style.Animated, "Fetching translation...");
+    const loadingToast = await showToast(Toast.Style.Animated, "Fetching translation...");
     try {
       const {
         translations: [{ text: translation, detected_source_language: detectedSourceLanguage }],
@@ -126,16 +162,22 @@ export async function sendTranslateRequest({
             source_lang: sourceLanguage,
             target_lang: targetLanguage,
             formality,
+            ...(isHtml ? { tag_handling: "html" } : {}),
           },
         })
         .json<{ translations: { text: string; detected_source_language: SourceLanguage }[] }>();
+      await loadingToast.hide();
       switch (onTranslateAction) {
         case "clipboard":
-          await Clipboard.copy(translation);
-          await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
+          await copyTranslatedText(translation, isHtml);
+          await showToast(Toast.Style.Success, "Copied as rich text", "Paste with ⌘V");
           await delayedCloseWindow(closeRaycastAfterTranslation);
           break;
         case "view":
+          if (viewInCurrentCommand) {
+            await delayedCloseWindow(closeRaycastAfterTranslation);
+            break;
+          }
           try {
             await launchCommand({
               name: "index",
@@ -143,6 +185,7 @@ export async function sendTranslateRequest({
               context: {
                 translation,
                 sourceLanguage: detectedSourceLanguage,
+                isHtml,
               },
             });
           } catch {
@@ -156,18 +199,22 @@ export async function sendTranslateRequest({
           break;
         case "paste":
           await closeMainWindow();
-          await Clipboard.paste(translation);
+          await pasteTranslatedText(translation, isHtml);
           break;
         default:
-          toast.hide();
-          await delayedCloseWindow(closeRaycastAfterTranslation, 500);
+          await copyTranslatedText(translation, isHtml);
+          await showToast(Toast.Style.Success, "Copied as rich text", "Paste with ⌘V");
+          if (onTranslateAction !== "none") {
+            await delayedCloseWindow(closeRaycastAfterTranslation);
+          }
           break;
       }
-      return { translation, detectedSourceLanguage };
+      return { translation, detectedSourceLanguage, isHtml };
     } catch (error) {
+      await loadingToast.hide();
       await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));
     }
-  } catch (error) {
+  } catch {
     await showToast(Toast.Style.Failure, "Please select the text to be translated");
   }
 }

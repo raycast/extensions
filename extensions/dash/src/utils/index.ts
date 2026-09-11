@@ -15,7 +15,7 @@ export const getDocsetByKeyword = (docsets: Docset[], keyword: string) => {
 };
 
 export const createDeeplinkForDocset = (docset: string) => {
-  let deeplink = `raycast://extensions/${pkg.author}/dash/docset`;
+  let deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${pkg.author}/dash/docset`;
   const url = new URL(deeplink);
   url.searchParams.set(
     "arguments",

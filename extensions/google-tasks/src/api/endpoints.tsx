@@ -94,10 +94,26 @@ export async function deleteTask(tasklist: string, id: string): Promise<void> {
   }
 }
 
+function serializeTaskDueDate<T extends { due?: string | Date | null }>(task: T): T {
+  if (!(task.due instanceof Date)) {
+    return task;
+  }
+
+  const year = task.due.getFullYear();
+  const month = String(task.due.getMonth() + 1).padStart(2, "0");
+  const day = String(task.due.getDate()).padStart(2, "0");
+
+  return {
+    ...task,
+    due: `${year}-${month}-${day}T00:00:00.000Z`,
+  } as T;
+}
+
 export async function createTask(tasklist: string, task: TaskForm): Promise<void> {
+  const payload = serializeTaskDueDate(task);
   const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks`, {
     method: "POST",
-    body: JSON.stringify(task),
+    body: JSON.stringify(payload),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
@@ -109,9 +125,10 @@ export async function createTask(tasklist: string, task: TaskForm): Promise<void
   }
 }
 export async function editTask(tasklist: string, task: Task): Promise<void> {
+  const payload = serializeTaskDueDate(task);
   const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks/${task.id}`, {
     method: "PATCH",
-    body: JSON.stringify(task),
+    body: JSON.stringify(payload),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,

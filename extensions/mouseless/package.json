@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mouseless",
+  "description": "Controls the Mouseless app. Only works when using Mouseless v1.0 or later.",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "author": "NextMerge",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^5.9.3"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "show-overlay",
+      "title": "Show Overlay",
+      "subtitle": "Mouseless",
+      "description": "Runs `mouseless://show-overlay`",
+      "mode": "no-view"
+    },
+    {
+      "name": "enter-free-mode",
+      "title": "Enter Free Mode",
+      "subtitle": "Mouseless",
+      "description": "Runs `mouseless://enter-free-mode`",
+      "mode": "no-view"
+    },
+    {
+      "name": "settings",
+      "title": "Open Settings",
+      "subtitle": "Mouseless",
+      "description": "Runs `mouseless://settings`",
+      "mode": "no-view"
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "title": "Mouseless"
+}

@@ -126,7 +126,9 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
     },
   ];
   const sortOrder = prefs.newTimerInputOrder;
-  sortOrder !== "hhmmss" ? inputFields.reverse() : inputFields;
+  if (sortOrder !== "hhmmss") {
+    inputFields.reverse();
+  }
 
   return (
     <Form

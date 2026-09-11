@@ -149,15 +149,15 @@
   "dependencies": {
     "@raycast/api": "1.91.1",
     "@raycast/utils": "1.18.1",
-    "unifi-client": "^0.11.0",
-    "node-fetch": "3.3.2",
     "date-fns": "^4.1.0",
-    "fuse.js": "^7.0.0"
+    "fuse.js": "^7.0.0",
+    "node-fetch": "3.3.2",
+    "unifi-client": "^0.11.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
-    "@types/node-fetch": "3.0.2",
     "@types/node": "^20.8.10",
+    "@types/node-fetch": "3.0.2",
     "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^3.0.1",
@@ -170,5 +170,15 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "axios": "^1.18.0",
+    "minimatch": "^10.0.1",
+    "picomatch": "^4.0.4",
+    "ws": "^8.21.0",
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "fast-uri": "3.1.5"
   }
 }

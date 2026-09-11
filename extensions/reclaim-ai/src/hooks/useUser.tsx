@@ -49,6 +49,9 @@ const useUser = () => {
   return {
     currentUser,
     isLoading,
+    // Reclaim 2.0 ("Assistant") is on when this flag is set. Commands branch on
+    // this to choose between the 1.0 /tasks and 2.0 /reclaim-tasks endpoints.
+    isAssistantEnabled: !!currentUser?.features.assistant?.enabled,
   };
 };
 

@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { List, ActionPanel, Action, LaunchProps, Icon } from "@raycast/api";
 
-import { useInstanceManager } from "./hooks/useInstanceManager";
-import { searchMovies, useMovies } from "./hooks/useRadarrAPI";
-import { formatMovieTitle, getMoviePoster, getRatingDisplay, getGenresDisplay, truncateText } from "./utils";
-import type { MovieLookup } from "./types";
-import AddMovieForm from "./add-movie-form";
+import { OpenPreferencesAction } from "@/lib/components/OpenPreferencesAction";
+import { useInstanceManager } from "@/lib/hooks/useInstanceManager";
+import { searchMovies, useMovies } from "@/lib/hooks/useRadarrAPI";
+import {
+  formatMovieTitle,
+  getMoviePoster,
+  getRatingDisplay,
+  getGenresDisplay,
+  truncateText,
+} from "@/lib/utils/formatting";
+import type { MovieLookup } from "@/lib/types/movie";
+import AddMovieForm from "@/lib/components/AddMovieForm";
 
 interface Arguments {
   query?: string;
@@ -159,7 +166,7 @@ ${movie.certification ? `- **Certification:** ${movie.certification}` : ""}`}
                     onAction={() => switchToInstance(instance)}
                   />
                 ))}
-                <Action.Open title="Open Preferences" target="raycast://extensions/preferences" icon={Icon.Gear} />
+                <OpenPreferencesAction />
               </ActionPanel.Section>
             )}
           </ActionPanel>
@@ -181,7 +188,7 @@ ${movie.certification ? `- **Certification:** ${movie.certification}` : ""}`}
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.Open title="Open Preferences" target="raycast://extensions/preferences" icon={Icon.Gear} />
+              <OpenPreferencesAction />
             </ActionPanel>
           }
         />
@@ -206,7 +213,7 @@ ${movie.certification ? `- **Certification:** ${movie.certification}` : ""}`}
         }
         icon={searchText.trim() ? Icon.MagnifyingGlass : Icon.Video}
       />
-      {(searchResults || []).map(movieListItem)}contributions/merge-1755946618974
+      {(searchResults || []).map(movieListItem)}
     </List>
   );
 }

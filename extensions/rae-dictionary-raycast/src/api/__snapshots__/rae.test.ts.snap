@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`RAE API getDailyWord should fetch today's word and return its data 1`] = `
 {
@@ -52,6 +52,9 @@ exports[`RAE API searchWord should fetch and return a known word 1`] = `
           "raw": "2. interj. p. us. U. para denotar extrañeza, placentera o desagradable. U. t. repetida.",
           "synonyms": null,
           "usage": "rare",
+          "usage_notes": [
+            "U. t. repetida.",
+          ],
         },
         {
           "antonyms": null,

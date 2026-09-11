@@ -106,38 +106,49 @@ export default function Command() {
   } else {
     return (
       <List>
-        <OutboundModeActions xKey={xKey} port={port} currentOutboundMode={currentOutboundMode} />
+        <List.Section title="Mode">
+          <OutboundModeActions xKey={xKey} port={port} currentOutboundMode={currentOutboundMode} />
+        </List.Section>
 
-        {Object.keys(allPolicyGroups).length > 0 ? (
-          <ProxyPolicies
+        {Object.keys(allPolicyGroups).length > 0 && (
+          <List.Section title="Policies">
+            <ProxyPolicies
+              xKey={xKey}
+              port={port}
+              allPolicyGroups={allPolicyGroups}
+              allSelectOptions={allSelectOptions}
+            />
+          </List.Section>
+        )}
+
+        {isMacOSVersion && (
+          <List.Section title="System">
+            <SetAsSystemProxy xKey={xKey} port={port} isSystemProxyEnabled={isSystemProxyEnabled} />
+            <EnhancedMode xKey={xKey} port={port} isEnhancedModeEnabled={isEnhancedModeEnabled} />
+          </List.Section>
+        )}
+
+        <List.Section title="Capabilities">
+          <CapabilitiesActions
             xKey={xKey}
             port={port}
-            allPolicyGroups={allPolicyGroups}
-            allSelectOptions={allSelectOptions}
+            isHttpCaptureEnabled={isHttpCaptureEnabled}
+            isMitmEnabled={isMitmEnabled}
+            isRewriteEnabled={isRewriteEnabled}
+            isScriptingEnabled={isScriptingEnabled}
           />
-        ) : null}
+        </List.Section>
 
-        {isMacOSVersion && <SetAsSystemProxy xKey={xKey} port={port} isSystemProxyEnabled={isSystemProxyEnabled} />}
-
-        {isMacOSVersion && <EnhancedMode xKey={xKey} port={port} isEnhancedModeEnabled={isEnhancedModeEnabled} />}
-
-        <CapabilitiesActions
-          xKey={xKey}
-          port={port}
-          isHttpCaptureEnabled={isHttpCaptureEnabled}
-          isMitmEnabled={isMitmEnabled}
-          isRewriteEnabled={isRewriteEnabled}
-          isScriptingEnabled={isScriptingEnabled}
-        />
-
-        {allProfiles.length > 0 ? (
-          <>
+        {allProfiles.length > 0 && (
+          <List.Section title="Profile">
             <SwitchProfile xKey={xKey} port={port} allProfiles={allProfiles} currentProfile={currentProfile} />
             <ReloadProfile xKey={xKey} port={port} />
-          </>
-        ) : null}
+          </List.Section>
+        )}
 
-        <FlushDNS xKey={xKey} port={port} />
+        <List.Section title="DNS">
+          <FlushDNS xKey={xKey} port={port} />
+        </List.Section>
       </List>
     );
   }

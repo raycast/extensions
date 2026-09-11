@@ -1,5 +1,11 @@
-import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { FetcherArgs, FetcherResponse, TimeEntry } from "./types";
+import { Cache, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import uniqWith from "lodash.uniqwith";
+import { FetcherArgs, FetcherResponse, TimeEntry, Project, Task, User, Workspace } from "./types";
+import { showFailureToast } from "@raycast/utils";
+
+const cache = new Cache();
+const TIME_ENTRIES_CACHE_KEY = "clockify/timeEntries";
+const PROJECTS_CACHE_KEY = "clockify/projects";
 
 // https://clockify.me/help/getting-started/data-regions
 const getApiUrl = (region: Preferences["region"]): string => {
@@ -33,7 +39,7 @@ export async function fetcher(
     const response = await fetch(`${apiURL}${url}`, {
       headers: { "X-Api-Key": token, "Content-Type": "application/json", ...headers },
       method: method || "GET",
-      body: body ? JSON.stringify(body) : null,
+      body: body ? JSON.stringify(body) : undefined,
       ...args,
     });
 
@@ -53,11 +59,69 @@ export async function fetcher(
   }
 }
 
+/**
+ * Picks the workspace to operate on. `defaultWorkspace` is not guaranteed to be present, so fall
+ * back to the active workspace and then to the first workspace this token can see.
+ *
+ * Single implementation on purpose: both useConfig and resolveConfig need this chain, and two
+ * copies would be free to drift apart.
+ *
+ * Returns the error separately so callers can tell "this account has no workspace" apart from
+ * "the request failed"; the two need different messages.
+ */
+export async function resolveWorkspaceId(
+  user: User | undefined,
+): Promise<{ workspaceId?: string; error?: string | Error }> {
+  const fromUser = user?.defaultWorkspace || user?.activeWorkspace;
+  if (fromUser) return { workspaceId: fromUser };
+
+  const { data, error } = await fetcher(`/workspaces`);
+  if (error) return { error };
+
+  return { workspaceId: (data as Workspace[] | undefined)?.[0]?.id };
+}
+
+/**
+ * Resolves the workspace and user ids that every request needs.
+ *
+ * These are written by useConfig, but a resolved `LocalStorage.setItem` does not guarantee the key
+ * is readable yet: when several writes are issued concurrently — useConfig can bootstrap from more
+ * than one mounted component at once — a key can be lost, and callers then request
+ * /workspaces/undefined/... which Clockify rejects with "User doesn't belong to Workspace".
+ *
+ * So treat LocalStorage as a cache rather than the source of truth: if either id is missing,
+ * re-derive it from /user and repair the stored copy with sequential writes.
+ */
+export async function resolveConfig(): Promise<{ workspaceId?: string; userId?: string }> {
+  const [storedWorkspaceId, storedUserId] = await Promise.all([
+    LocalStorage.getItem<string>("workspaceId"),
+    LocalStorage.getItem<string>("userId"),
+  ]);
+
+  if (storedWorkspaceId && storedUserId) {
+    return { workspaceId: storedWorkspaceId, userId: storedUserId };
+  }
+
+  const { data } = await fetcher(`/user`);
+  const user = data as User | undefined;
+
+  const workspaceId = storedWorkspaceId || (await resolveWorkspaceId(user)).workspaceId;
+  const userId = storedUserId || user?.id;
+
+  if (workspaceId) await LocalStorage.setItem("workspaceId", workspaceId);
+  if (userId) await LocalStorage.setItem("userId", userId);
+
+  return { workspaceId, userId };
+}
+
 export function validateToken(): boolean {
   const preferences = getPreferenceValues<Preferences>();
   const token = preferences.token;
 
-  if (token.length !== 48) {
+  // Guard before reading .length: this runs inside a useState initializer, so if the preference is
+  // ever absent the throw happens during render and takes the whole command down rather than
+  // showing the recoverable invalid-key state.
+  if (!token || token.length !== 48) {
     showToast(Toast.Style.Failure, "Invalid API Key detected");
     return false;
   }
@@ -83,10 +147,348 @@ export function dateDiffToString(a: Date, b: Date): string {
   return hh + ":" + mm + ":" + ss;
 }
 
-export function showElapsedTime(entry: TimeEntry): string {
+export function getElapsedTime(entry: TimeEntry): string {
   if (entry?.timeInterval?.start) {
-    return dateDiffToString(new Date(), new Date(entry.timeInterval.start));
+    return dateDiffToString(
+      entry?.timeInterval?.end ? new Date(entry.timeInterval.end) : new Date(),
+      new Date(entry.timeInterval.start),
+    );
   }
 
   return ``;
+}
+
+// Convert a string to monospace font using Unicode characters
+export function toMonospaceFont(text: string | null): string {
+  // If text is null or undefined, return an empty string
+  if (text === null || text === undefined) {
+    return "";
+  }
+
+  // Map of regular characters to monospace Unicode characters
+  const monospaceMap: Record<string, string> = {
+    "0": "𝟶",
+    "1": "𝟷",
+    "2": "𝟸",
+    "3": "𝟹",
+    "4": "𝟺",
+    "5": "𝟻",
+    "6": "𝟼",
+    "7": "𝟽",
+    "8": "𝟾",
+    "9": "𝟿",
+    ":": ":", // Keep colon as is
+  };
+
+  return text
+    .split("")
+    .map((char) => monospaceMap[char] || char)
+    .join("");
+}
+
+export async function getTimeEntries({ onError }: { onError?: (state: boolean) => void }): Promise<TimeEntry[]> {
+  const { workspaceId, userId } = await resolveConfig();
+
+  const { data, error } = await fetcher(
+    `/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`,
+  );
+
+  if (error === "Unauthorized") {
+    onError?.(false);
+    return [];
+  }
+
+  if (data?.length) {
+    const filteredEntries: TimeEntry[] = uniqWith(
+      data,
+      (a: TimeEntry, b: TimeEntry) =>
+        a.projectId === b.projectId && a.taskId === b.taskId && a.description === b.description,
+    );
+    cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(filteredEntries));
+
+    return filteredEntries;
+  } else {
+    return [];
+  }
+}
+
+export async function stopCurrentTimer(callback?: () => void): Promise<void> {
+  showToast(Toast.Style.Animated, "Stopping…");
+
+  const { workspaceId, userId } = await resolveConfig();
+
+  const { data, error } = await fetcher(`/workspaces/${workspaceId}/user/${userId}/time-entries`, {
+    method: "PATCH",
+    body: { end: new Date().toISOString() },
+  });
+
+  if (!error && data) {
+    showToast(Toast.Style.Success, "Timer stopped");
+
+    // Update the cache directly or call the callback to refetch
+    try {
+      const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+      if (entriesString) {
+        const entries: TimeEntry[] = JSON.parse(entriesString as string);
+        if (entries && entries.length > 0) {
+          // Find and update the active entry
+          const activeEntryIndex = entries.findIndex((entry) => !entry.timeInterval.end);
+          if (activeEntryIndex !== -1) {
+            entries[activeEntryIndex].timeInterval.end = new Date().toISOString();
+            cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(entries));
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Error updating cache:", e);
+    }
+
+    // Call the callback if provided to refetch the time entries
+    if (callback) {
+      callback();
+    }
+  } else {
+    showToast(Toast.Style.Failure, "No timer running");
+  }
+}
+
+export function getCurrentlyActiveTimeEntry(): TimeEntry | null {
+  try {
+    const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+    if (!entriesString) {
+      return null;
+    }
+
+    const entries = JSON.parse(entriesString as string);
+    if (entries && entries.length > 0) {
+      const entry = entries[0];
+      if (isInProgress(entry)) {
+        return entry;
+      }
+    }
+
+    return null;
+  } catch (e) {
+    console.error("Error getting time entry from cache:", e);
+    return null;
+  }
+}
+
+export function getAllTimeEntriesFromLocalStorage(): TimeEntry[] {
+  try {
+    const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+    if (!entriesString) {
+      return [];
+    }
+
+    const entries = JSON.parse(entriesString as string);
+    return entries || [];
+  } catch (e) {
+    console.error("Error getting all time entries from LocalStorage:", e);
+    return [];
+  }
+}
+
+export async function getTodayTotalTimeForProject(projectId: string): Promise<number> {
+  try {
+    const { workspaceId, userId } = await resolveConfig();
+
+    // Get today's date range in ISO format
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Fetch today's entries from API
+    // Note: page-size=500 limits to 500 entries per day. For users with heavy tracking,
+    // this could be insufficient. Consider implementing pagination if needed.
+    // The API projectId filter doesn't work correctly, so we filter client-side.
+    const { data, error } = await fetcher(
+      `/workspaces/${workspaceId}/user/${userId}/time-entries?` +
+        `start=${today.toISOString()}&` +
+        `end=${tomorrow.toISOString()}&` +
+        `projectId=${projectId}&` +
+        `hydrated=true&` +
+        `page-size=500`,
+    );
+
+    if (error || !data) {
+      console.error("Error fetching today's entries:", error);
+      return 0;
+    }
+
+    // Filter by projectId since API parameter doesn't work correctly
+    const filteredData = data.filter((entry: TimeEntry) => entry.projectId === projectId);
+
+    let totalMs = 0;
+
+    for (const entry of filteredData) {
+      // Skip the currently running entry; its elapsed time is added live in the UI
+      if (!entry.timeInterval.end) continue;
+      const entryStart = new Date(entry.timeInterval.start);
+      const entryEnd = new Date(entry.timeInterval.end);
+      totalMs += entryEnd.getTime() - entryStart.getTime();
+    }
+
+    return totalMs;
+  } catch (e) {
+    console.error("Error calculating today's total time:", e);
+    return 0;
+  }
+}
+
+export function millisecondsToDurationString(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
+}
+
+export async function getProjects({ onError }: { onError?: (state: boolean) => void } = {}): Promise<Project[]> {
+  const { workspaceId } = await resolveConfig();
+
+  const { data, error } = await fetcher(`/workspaces/${workspaceId}/projects?page-size=1000&archived=false`);
+  if (error === "Unauthorized") {
+    onError?.(false);
+    return [];
+  }
+
+  if (data?.length) {
+    cache.set(PROJECTS_CACHE_KEY, JSON.stringify(data));
+    return data;
+  } else {
+    return [];
+  }
+}
+
+/**
+ * Looks a project up in whichever cache holds it.
+ *
+ * There are two, written by independent code paths: the forms in index.tsx cache the project list
+ * in LocalStorage under "projects", and getProjects() caches it in Cache under clockify/projects.
+ * Both are checked so that a list fetched by either path is reused. LocalStorage comes first only
+ * because the forms rewrite it on every mount, making it the more recently refreshed of the two.
+ */
+async function findCachedProject(projectId: string): Promise<Project | undefined> {
+  let stored: string | undefined;
+
+  try {
+    stored = await LocalStorage.getItem<string>("projects");
+  } catch (e) {
+    console.error("Error reading cached projects:", e);
+  }
+
+  for (const source of [stored, cache.get(PROJECTS_CACHE_KEY)]) {
+    if (!source) continue;
+
+    try {
+      const project = (JSON.parse(source) as Project[]).find((project) => project.id === projectId);
+      if (project) return project;
+    } catch (e) {
+      console.error("Error reading cached projects:", e);
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Whether a project is billable by default.
+ *
+ * Reads the cached project list and only falls back to a request, because a timer can be restarted
+ * from a recent entry before any form has loaded projects. getProjects() populates one of the
+ * caches findCachedProject() reads, so that fallback primes itself and costs one request rather
+ * than one per timer start. Returns undefined when the setting cannot be determined, which callers
+ * pass straight into the request body: JSON.stringify drops undefined, so the field is omitted and
+ * behaviour is unchanged rather than guessed at.
+ *
+ * Cache-first means a setting changed in Clockify web can be stale here until a cache is
+ * rewritten, which either form does on mount. Restarting a recent entry does not open a form, so
+ * that path can use an older value. Accepted deliberately: billability changes rarely, and always
+ * refetching would add a request to every timer start.
+ */
+export async function isProjectBillable(projectId: string): Promise<boolean | undefined> {
+  const cached = await findCachedProject(projectId);
+  if (cached) return cached.billable;
+
+  const projects = await getProjects();
+  return projects.find((project) => project.id === projectId)?.billable;
+}
+
+export async function getTasksForProject(projectId: string): Promise<Task[]> {
+  const { workspaceId } = await resolveConfig();
+  const cacheKey = `project[${projectId}]`;
+
+  const { data, error } = await fetcher(`/workspaces/${workspaceId}/projects/${projectId}/tasks?page-size=1000`);
+  if (error) {
+    showFailureToast(error, { title: "Could not fetch tasks" });
+    console.error("Error fetching tasks:", error);
+    return [];
+  }
+
+  if (data?.length) {
+    cache.set(cacheKey, JSON.stringify(data));
+    return data;
+  } else {
+    return [];
+  }
+}
+
+export async function addNewTimeEntry(
+  description: string | undefined | null,
+  projectId: string,
+  taskId: string | undefined | null,
+  tagIds: string[] = [],
+  startTime?: Date,
+): Promise<TimeEntry | null> {
+  showToast(Toast.Style.Animated, "Starting…");
+
+  const { workspaceId } = await resolveConfig();
+
+  // Clockify defaults billable to false when the field is absent; it does not fall back to the
+  // project's "billable by default" setting, so that has to be sent explicitly or every entry
+  // lands as non-billable.
+  const billable = await isProjectBillable(projectId);
+
+  const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
+    method: "POST",
+    body: {
+      start: (startTime || new Date()).toISOString(),
+      description,
+      taskId,
+      projectId,
+      tagIds,
+      billable,
+      customFieldValues: [],
+    },
+  });
+
+  if (!error && data?.id) {
+    showToast(Toast.Style.Success, "Timer is running");
+
+    // Update the cache directly
+    try {
+      const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+      if (entriesString) {
+        const entries = JSON.parse(entriesString as string);
+        // Add the new entry to the beginning of the array
+        entries.unshift(data);
+        cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(entries));
+      }
+    } catch (e) {
+      console.error("Error updating cache:", e);
+    }
+
+    return data as TimeEntry;
+  } else {
+    // Surface the reason: this toast used to be the extension's only symptom for several distinct
+    // failures, which made them very hard to tell apart.
+    showToast(Toast.Style.Failure, "Timer could not be started", error?.toString());
+    return null;
+  }
 }

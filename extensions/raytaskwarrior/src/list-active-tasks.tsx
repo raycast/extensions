@@ -6,13 +6,26 @@ import { Task } from "./types/types";
 import Details from "./components/Details";
 import AddTaskAdvanced from "./addTaskAdvanced";
 
-const ListActiveTabs = () => {
+const ListActiveTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Set<string>>(new Set([]));
 
   useEffect(() => {
-    getTasks();
-    getProjects();
+    let stop = false;
+    (async () => {
+      if (stop) {
+        return;
+      }
+      await getTasks();
+      if (stop) {
+        return;
+      }
+      await getProjects();
+    })();
+
+    return () => {
+      stop = true;
+    };
   }, []);
 
   const showCustomToast = async (title: string, style: Toast.Style, message: string) => {
@@ -44,7 +57,7 @@ const ListActiveTabs = () => {
 
   const filterByProject = async (project: string) => {
     if (project === "All") {
-      getTasks();
+      return getTasks();
     } else {
       try {
         console.log(`project changed to ${project}`);
@@ -59,7 +72,7 @@ const ListActiveTabs = () => {
 
   const markTaskAsDoneAndUpdateList = async (taskUuid: string) => {
     await markTaskAsDone(taskUuid);
-    getTasks();
+    await getTasks();
     showCustomToast("Success", Toast.Style.Success, "Task marked as done");
   };
 
@@ -69,14 +82,14 @@ const ListActiveTabs = () => {
 
   const deleteAndUpdateList = async (uuid: string) => {
     await deleteTask(uuid);
-    getTasks();
+    await getTasks();
     showCustomToast("Success", Toast.Style.Success, "Task Deleted");
   };
 
   const startOrStopTask = async (task: Task) => {
     const action = task.tags && Array.from(task.tags).includes("next") ? "-next" : "+next";
     await updateTask(task.uuid, undefined, undefined, [action]);
-    getTasks();
+    await getTasks();
   };
 
   return (
@@ -134,4 +147,4 @@ const ListActiveTabs = () => {
   );
 };
 
-export default ListActiveTabs;
+export default ListActiveTasks;

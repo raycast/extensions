@@ -13,14 +13,18 @@
     "StevenRCE0",
     "HelloImSteven",
     "tylerwince",
-    "thomaslombart",
     "xilopaint",
     "ridemountainpig",
     "teemu_suvinen",
     "juan_saldana",
     "andreaselia",
     "fhf1121",
-    "charlesharries"
+    "charlesharries",
+    "janosorcsik",
+    "bitforger"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "license": "MIT",
   "commands": [
@@ -69,7 +73,7 @@
       "name": "ai",
       "title": "AI Note",
       "subtitle": "Apple Notes",
-      "description": "Create a new note filled with AI in your Apple notes.",
+      "description": "Create a new note filled with AI in your Apple notes, or add to an existing one.",
       "mode": "no-view",
       "arguments": [
         {
@@ -82,6 +86,11 @@
           "name": "instructions",
           "type": "text",
           "placeholder": "Additional instructions"
+        },
+        {
+          "name": "note",
+          "type": "text",
+          "placeholder": "Existing note (optional)"
         }
       ]
     },
@@ -99,6 +108,15 @@
           "type": "textfield",
           "default": "25",
           "description": "The maximum number of notes to display in the menu bar",
+          "required": false
+        },
+        {
+          "name": "openSeparately",
+          "title": "Note actions",
+          "type": "checkbox",
+          "default": false,
+          "label": "Open notes in separate windows by default",
+          "description": "Pressing ⏎ will open notes in separate windows by default",
           "required": false
         }
       ]
@@ -138,10 +156,35 @@
       "name": "update-note",
       "title": "Update Note",
       "description": "Update the content of a specific note in Apple Notes."
+    },
+    {
+      "name": "append-to-note",
+      "title": "Append to Note",
+      "description": "Add content to the end of a specific note in Apple Notes, keeping its existing content."
+    },
+    {
+      "name": "delete-note",
+      "title": "Delete Note",
+      "description": "Delete a specific note in Apple Notes."
+    },
+    {
+      "name": "restore-note",
+      "title": "Restore Note",
+      "description": "Restore a previously deleted note in Apple Notes."
+    },
+    {
+      "name": "move-note",
+      "title": "Move Note",
+      "description": "Move a specific note to a different folder in Apple Notes."
+    },
+    {
+      "name": "list-folders",
+      "title": "List Folders",
+      "description": "List the available folders in Apple Notes."
     }
   ],
   "ai": {
-    "instructions": "- Always format note titles as Markdown links using the note's URL.\\n- If you can't access the Apple Notes database, tell the user he needs to give Raycast the full disk access permission in the system settings. Be detailed about the steps.",
+    "instructions": "- Always format note titles as Markdown links using the note's URL.\\n- If you can't access the Apple Notes database, tell the user he needs to give Raycast the full disk access permission in the system settings. Be detailed about the steps.\\n- When calling get-note-content, update-note, append-to-note, delete-note, or move-note from search-notes results, use the note's id field and not UUID.\\n- Use update-note to replace a note's whole content, and append-to-note to add new content while keeping what's already there.\\n- Before calling move-note, call list-folders to find a valid folder name; move-note will fail if the folder doesn't exist. If list-folders shows the folder name in more than one account, pass that account as move-note's accountName, or it will fail with a duplicate-folder error.\\n- delete-note is destructive and asks the user to confirm; if a note was deleted by mistake, restore-note can bring it back.",
     "evals": [
       {
         "input": "@apple-notes what's on my grocery list",
@@ -351,6 +394,152 @@
             }
           }
         ]
+      },
+      {
+        "input": "@apple-notes delete my grocery list note",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "grocery-list",
+              "folder": "Home",
+              "modifiedAt": "2025-01-21 13:15:50",
+              "snippet": "- Bananas - Carrots",
+              "title": "Grocery list"
+            }
+          ],
+          "delete-note": "Successfully called \"delete-note\""
+        },
+        "expected": [
+          {
+            "callsTool": "search-notes"
+          },
+          {
+            "callsTool": {
+              "name": "delete-note",
+              "arguments": {
+                "noteId": "grocery-list"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes what folders do I have in Apple Notes?",
+        "mocks": {
+          "list-folders": [
+            {
+              "account": "iCloud",
+              "folder": "Notes"
+            },
+            {
+              "account": "iCloud",
+              "folder": "Work"
+            },
+            {
+              "account": "iCloud",
+              "folder": "Recipes"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-folders"
+          },
+          {
+            "meetsCriteria": "Returns a list of 3 folders."
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes move my grocery list note to the Work folder",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "grocery-list",
+              "folder": "Home",
+              "modifiedAt": "2025-01-21 13:15:50",
+              "snippet": "- Bananas - Carrots",
+              "title": "Grocery list"
+            }
+          ],
+          "list-folders": [
+            {
+              "account": "iCloud",
+              "folder": "Home"
+            },
+            {
+              "account": "iCloud",
+              "folder": "Work"
+            }
+          ],
+          "move-note": "Successfully called \"move-note\""
+        },
+        "expected": [
+          {
+            "callsTool": "search-notes"
+          },
+          {
+            "callsTool": {
+              "name": "move-note",
+              "arguments": {
+                "noteId": "grocery-list",
+                "folderName": "Work"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes add milk to my grocery list without removing what's already there",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "grocery-list",
+              "folder": "Home",
+              "modifiedAt": "2025-01-21 13:15:50",
+              "snippet": "- Bananas - Carrots",
+              "title": "Grocery list"
+            }
+          ],
+          "append-to-note": "Successfully called \"append-to-note\""
+        },
+        "expected": [
+          {
+            "callsTool": "search-notes"
+          },
+          {
+            "callsTool": {
+              "name": "append-to-note",
+              "arguments": {
+                "noteId": "grocery-list"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@apple-notes find my work notes tagged urgent",
+        "mocks": {
+          "search-notes": [
+            {
+              "id": "project-milestones",
+              "folder": "Work",
+              "modifiedAt": "2025-01-19 16:45:22",
+              "snippet": "- Design review - User testing - Launch prep",
+              "title": "Q1 Project Milestones"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-notes",
+              "arguments": {
+                "tags": "urgent"
+              }
+            }
+          }
+        ]
       }
     ]
   },
@@ -447,26 +636,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.89.0",
-    "@raycast/utils": "^1.18.1",
-    "date-fns": "^3.6.0",
-    "lodash": "^4.17.21",
-    "node-html-markdown": "^1.3.0",
-    "pinyin-pro": "^3.26.0"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "date-fns": "^4.4.0",
+    "node-html-markdown": "^2.0.0",
+    "pinyin-pro": "^3.28.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.17.4",
-    "@types/node": "^20.12.12",
-    "@types/react": "^18.3.2",
-    "eslint": "^8.57.0",
-    "eslint-plugin-import": "^2.29.1",
-    "prettier": "3.2.5",
-    "react": "^18.3.1",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.16",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",

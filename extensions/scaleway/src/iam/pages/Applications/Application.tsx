@@ -1,8 +1,8 @@
 import { List } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 
 type ApplicationProps = {
-  application: IAM.v1alpha1.Application
+  application: Iamv1alpha1.Application
 }
 
 export const Application = ({ application }: ApplicationProps) => (

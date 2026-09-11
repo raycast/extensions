@@ -125,3 +125,47 @@ export const redeployServiceQuery = {
   query:
     "mutation RedeployService($serviceID: ObjectID!, $environmentID: ObjectID!) {\n  redeployService(serviceID: $serviceID, environmentID: $environmentID)\n}",
 };
+
+export const getServersQuery = {
+  operationName: "Servers",
+  variables: {},
+  query:
+    "query Servers {\n  servers {\n    _id\n    name\n    providerInfo {\n      icon\n      __typename\n    }\n    ...ServerCard\n    __typename\n  }\n}\n\nfragment ServerCard on Server {\n  _id\n  ip\n  sshPort\n  sshUsername\n  name\n  providerInfo {\n    code\n    console\n    homepage\n    icon\n    name\n    __typename\n  }\n  continent\n  country\n  city\n  createdAt\n  isAutoRenewDisabled\n  events {\n    message\n    time\n    severity\n    __typename\n  }\n  ...ServerPriceContext\n  __typename\n}\n\nfragment ServerPriceContext on Server {\n  _id\n  isManaged\n  __typename\n}",
+};
+
+export const getServerWithStatusQuery = {
+  operationName: "ServerWithStatus",
+  variables: {
+    serverID: "",
+  },
+  query:
+    "query ServerWithStatus($serverID: ObjectID!) {\n  server(_id: $serverID) {\n    _id\n    status {\n      isOnline\n      totalCPU\n      totalMemory\n      usedCPU\n      usedMemory\n      warnings\n      vmStatus\n      __typename\n    }\n    __typename\n  }\n}",
+};
+
+export const getAIHubTenantQuery = {
+  operationName: "GetAIHubTenant",
+  variables: {},
+  query:
+    "query GetAIHubTenant {\n  aihubTenant {\n    balance\n    keys {\n      keyID\n      alias\n      cost\n      __typename\n    }\n    providerCustomerID\n    provider\n    autoRechargeThreshold\n    autoRechargeAmount\n    __typename\n  }\n}",
+};
+
+export const getAIHubMonthlyUsageQuery = {
+  operationName: "GetAIHubMonthlyUsage",
+  variables: {
+    month: "",
+  },
+  query:
+    "query GetAIHubMonthlyUsage($month: String) {\n  aihubMonthlyUsage(month: $month) {\n    totalSpend\n    dailyUsage {\n      date\n      spend\n      __typename\n    }\n    __typename\n  }\n}",
+};
+
+export const getAIHubSpendLogsQuery = {
+  operationName: "AihubSpendLogsPaginated",
+  variables: {
+    pageSize: 25,
+    page: 1,
+    startDate: "",
+    endDate: "",
+  },
+  query:
+    "query AihubSpendLogsPaginated($pageSize: Int!, $page: Int!, $startDate: Time, $endDate: Time) {\n  aihubSpendLogsPaginated(\n    pageSize: $pageSize\n    page: $page\n    startDate: $startDate\n    endDate: $endDate\n  ) {\n    data {\n      timestamp\n      cost\n      totalTokens\n      promptTokens\n      completionTokens\n      model\n      keyAlias\n      __typename\n    }\n    total\n    page\n    pageSize\n    totalPages\n    __typename\n  }\n}",
+};

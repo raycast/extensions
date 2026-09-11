@@ -48,7 +48,7 @@
           "type": "textfield",
           "default": "500",
           "required": false
-        }, 
+        },
         {
           "name": "svgViewbox",
           "title": "SVG Viewbox",
@@ -57,7 +57,6 @@
           "default": "0 0 50 50",
           "required": false
         }
-          
       ],
       "arguments": [
         {
@@ -89,5 +88,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shodan",
+  "title": "Shodan",
+  "version": "0.1.2",
+  "description": "Search the Shodan database for internet-connected devices, view host details, and manage saved queries",
+  "icon": "extension-icon.png",
+  "author": "owanesh",
+  "license": "MIT",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Security"
+  ],
+  "keywords": [
+    "shodan",
+    "security",
+    "network",
+    "ip lookup",
+    "cybersecurity",
+    "vulnerability",
+    "scanning",
+    "iot",
+    "exploit",
+    "dns"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Shodan",
+      "subtitle": "Shodan",
+      "description": "Execute Shodan search queries and browse results",
+      "mode": "view"
+    },
+    {
+      "name": "host-lookup",
+      "title": "Host Lookup",
+      "subtitle": "Shodan",
+      "description": "Look up detailed information for an IP address",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ip",
+          "placeholder": "IP Address",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "favorites",
+      "title": "Favorite Queries",
+      "subtitle": "Shodan",
+      "description": "View and run saved Shodan queries",
+      "mode": "view"
+    },
+    {
+      "name": "presets",
+      "title": "Preset Queries",
+      "subtitle": "Shodan",
+      "description": "Browse pre-built Shodan query templates",
+      "mode": "view"
+    },
+    {
+      "name": "dns-lookup",
+      "title": "DNS Lookup",
+      "subtitle": "Shodan",
+      "description": "Resolve hostnames and perform reverse DNS lookups",
+      "mode": "view"
+    },
+    {
+      "name": "exploits",
+      "title": "Search Exploits",
+      "subtitle": "Shodan",
+      "description": "Search the Shodan exploit database",
+      "mode": "view"
+    },
+    {
+      "name": "alerts",
+      "title": "Network Alerts",
+      "subtitle": "Shodan",
+      "description": "Manage network monitoring alerts",
+      "mode": "view"
+    },
+    {
+      "name": "account",
+      "title": "Account Info",
+      "subtitle": "Shodan",
+      "description": "View API credits and account status",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Search History",
+      "subtitle": "Shodan",
+      "description": "View and re-run recent Shodan search queries",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "Shodan API Key",
+      "description": "Your Shodan API key (stored securely)",
+      "required": true,
+      "placeholder": "Enter your Shodan API key"
+    },
+    {
+      "name": "defaultResultsPerPage",
+      "type": "dropdown",
+      "title": "Results Per Page",
+      "description": "Number of results to fetch per search",
+      "required": false,
+      "default": "20",
+      "data": [
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

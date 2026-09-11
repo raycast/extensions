@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
-import { useRepoStorage } from "../../hooks/useRepo.js";
+import { useSelectedRepoStorage } from "../../hooks/useRepo.js";
 import { OpenPreferences } from "../actions/OpenPreferences.js";
 import { launchQuickGit } from "../../utils/launchCommands.js";
 
 export function ChooseDirectory() {
-  const repo = useRepoStorage();
+  const repo = useSelectedRepoStorage();
 
   const { handleSubmit, itemProps } = useForm({
     onSubmit({ newRepo }: { newRepo: string[] }) {

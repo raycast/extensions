@@ -27,6 +27,7 @@ function PastePasswordAction() {
       title={actionTitle}
       icon={Icon.Window}
       onAction={pastePassword}
+      shortcut={{ macOS: { key: "p", modifiers: ["cmd", "opt"] }, Windows: { key: "p", modifiers: ["ctrl", "alt"] } }}
       repromptDescription={`Pasting the password of <${selectedItem.name}>`}
     />
   );

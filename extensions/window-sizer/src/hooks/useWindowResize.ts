@@ -1,5 +1,6 @@
 import { showHUD, showToast, Toast, PopToRootType } from "@raycast/api";
 import { useBaseWindowResize } from "./useBaseWindowResize";
+import { isTimeoutError, TIMEOUT_ERROR_MESSAGE, TIMEOUT_ERROR_TOAST_TITLE } from "../utils/timeout";
 
 export function useWindowResize() {
   const { adjustWindowSize } = useBaseWindowResize();
@@ -25,6 +26,15 @@ export function useWindowResize() {
         });
       },
       onError: async (err) => {
+        if (isTimeoutError(err)) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: TIMEOUT_ERROR_TOAST_TITLE,
+            message: TIMEOUT_ERROR_MESSAGE,
+          });
+          return;
+        }
+
         const errorStr = String(err);
         if (
           errorStr.includes("frontmost") ||

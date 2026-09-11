@@ -1,6 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { getPreferenceValues } from "@raycast/api";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 

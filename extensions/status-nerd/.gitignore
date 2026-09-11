@@ -1,0 +1,36 @@
+# --- Raycast extension ---
+node_modules
+raycast-env.d.ts
+.raycast-swift-build
+compiled_raycast_swift
+dist
+.eslintcache
+
+# --- Secrets & runtime (extension uses Raycast prefs; legacy python uses .env) ---
+.env
+**/.env
+.status_history
+**/.status_history
+
+# --- Python (legacy/) ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Temp ---
+*.log
+*.tmp
