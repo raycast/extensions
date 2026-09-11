@@ -1,5 +1,17 @@
 Model and command management checks
 
+Review fixes scope:
+
+| Changed behavior | Decision | Conditions / stop boundary | Layer |
+| ---------------- | -------- | -------------------------- | ----- |
+| Legacy command migration | update-existing | Old built-ins and user commands retain their own settings without adding presets; original keys and existing presets remain unchanged; reset/delete do not leave generated models | Store integration |
+| Existing inheritance and imports | update-existing | Use explicit saved base relationships in fixtures; loading, importing older backups and resetting a linked built-in keep shared bases intact | Store integration |
+| Ask model memory | test | Models-to-Ask and manual dropdown/full-input changes persist; continuing an AI command or saved conversation preserves its current settings without changing the next ordinary Ask launch | Raycast runtime integration |
+
+Regression evidence: the legacy migration cases failed against the previous implementation because it generated base presets. Both command and saved-conversation continuation cases also failed because they replaced Ask's remembered model. All pass after the fixes. Full Text Input coverage includes repeated switches back to the initial selection, and command continuation includes a same-value native dropdown callback.
+
+Independent review: **PASS**, with no actionable regressions. All 43 tests pass without skips in an isolated copy. Seven mutations were detected: restoring generated-base migration, ignoring explicit base relationships, restoring unconditional cache writes, removing the same-value guard, retaining a stale form callback, skipping Models-to-Ask cache writes, and remembering conversation continuation. Native window rendering and keyboard hit testing remain outside this harness.
+
 Upstream merge scope:
 
 | Changed behavior | Decision | Conditions / stop boundary | Layer |
@@ -71,11 +83,11 @@ Review follow-up scope:
 | Existing Quicklinks            | test            | Serialized launch context selects a legacy command; the request preserves its settings and Continue selects its command model                     | Runtime integration |
 | Ask draft lifecycle            | update-existing | Returning from full input before submission preserves selected text; submitting clears Ask's controlled input; later rounds also clear it         | Runtime integration |
 
-Local validation: 41 tests pass with no skips on the installed Raycast desktop runtime, including the upstream model-picker tests. Typecheck, extension build and lint pass.
+Local validation: 43 tests pass with no skips on the installed Raycast desktop runtime, including the upstream model-picker tests. Typecheck, extension build and lint pass.
 
 Three semantic mutations were run in temporary copies of the repository and all failed their targeted tests: removing independent mode from built-ins, dropping retention of missing referenced bases during import, and removing Ask's controlled draft clear. The working tree was not modified by these checks.
 
-The previous reset-test assertion about reusing an automatically created default preset was updated: new built-in commands must be independent, while migrated commands still retain their existing bases. Reference protection remains covered by delete/clear tests; import now preserves missing referenced bases instead of rejecting the backup.
+The previous reset-test assertion about reusing an automatically created default preset was updated: both new built-ins and legacy commands without base relationships are independent. Already saved explicit base relationships remain intact. Reference protection remains covered by delete/clear tests; import preserves missing referenced bases instead of rejecting the backup.
 
 Independent configuration review: **PASS** after fixing missing command dates. The reviewer ran all 26 tests and checked mutations that reintroduce a base dependency, invert override conditions, lose false/zero/empty values or hidden form fields, skip detaching effective settings, accept invalid form fields, drop the selected remote model from requests, or reset creation time. Store/unit tests score 12/12 and runtime integration tests 11/12; no C2/C3 findings or YAGNI veto. The native harness acknowledges focus and window-shake requests without operating the real Raycast window; assertions observe validation errors and rejected saves.
 

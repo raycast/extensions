@@ -5,8 +5,9 @@
 - Create and edit AI commands in Models, including creating a command from the selected model.
 - Remove the standalone Create AI Command entry. Create commands through the Models action menu; replace shortcuts or deep links to the removed entry with Models.
 - Rename Search AI Command to AI Commands, preserving existing command shortcuts and quicklinks.
-- Let commands configure their own model settings or inherit a base model with per-setting overrides; preserve existing command settings during migration.
+- Let commands configure their own model settings or inherit a base model with per-setting overrides; migrate existing commands independently without adding presets or changing their settings.
 - Add navigation from Models to Ask and editing from Ask, retaining model selection, drafts and existing messages.
+- Keep Ask's remembered model when continuing an AI command or a saved conversation; update it only when a model is explicitly selected.
 - Keep model and command edits synchronized across open forms, and prevent removal of models still used by commands.
 
 ## [Feature] - 2026-09-11

@@ -35,6 +35,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
 
   const explicitModel = props.initialModel ?? props.conversation?.model;
   const [modelCache] = useState(() => new CacheAdapter("select_model"));
+  const rememberInitialModel = useRef(!!props.initialModel);
   const [conversation, setConversation] = useState<Conversation>(
     props.conversation ?? {
       id: uuidv4(),
@@ -58,6 +59,14 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   const { push } = useNavigation();
   const openedInitialInput = useRef(false);
   const currentModel = selectedChatModel(models.data, selectedModelId, explicitModel ?? conversation.model);
+  const currentModelId = useRef(currentModel.id);
+  currentModelId.current = currentModel.id;
+  const changeModel = (id: string) => {
+    if (id === currentModelId.current) return;
+    currentModelId.current = id;
+    setSelectedModelId(id);
+    modelCache.set(id);
+  };
   const availableModels = models.data[currentModel.id]
     ? Object.values(models.data)
     : [...Object.values(models.data), currentModel];
@@ -78,7 +87,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
           onSubmit={submitQuestion}
           models={availableModels}
           selectedModel={currentModel.id}
-          onModelChange={setSelectedModelId}
+          onModelChange={changeModel}
           isFirstCall={conversation.chats.length === 0}
         />,
       );
@@ -102,7 +111,11 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   useEffect(() => {
     if (models.isLoading) return;
     setSelectedModelId(currentModel.id);
-    modelCache.set(currentModel.id);
+    // Models -> Ask is an explicit choice. Continuing a conversation is session-local.
+    if (rememberInitialModel.current) {
+      modelCache.set(currentModel.id);
+      rememberInitialModel.current = false;
+    }
     setConversation((previous) => ({ ...previous, model: currentModel, updated_at: new Date().toISOString() }));
   }, [currentModel, models.isLoading]);
 
@@ -114,7 +127,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
         onSubmit={submitQuestion}
         models={availableModels}
         selectedModel={currentModel.id}
-        onModelChange={setSelectedModelId}
+        onModelChange={changeModel}
       />
       <EditModelAction modelId={currentModel.id} />
       <PreferencesActionSection />
@@ -141,7 +154,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
               onSubmit={submitQuestion}
               models={availableModels}
               selectedModel={currentModel.id}
-              onModelChange={setSelectedModelId}
+              onModelChange={changeModel}
             />
             <EditModelAction modelId={currentModel.id} />
             <PreferencesActionSection />
@@ -152,7 +165,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       }
       selectedItemId={chats.selectedChatId || undefined}
       searchBarAccessory={
-        <ModelDropdown models={availableModels} onModelChange={setSelectedModelId} selectedModel={currentModel.id} />
+        <ModelDropdown models={availableModels} onModelChange={changeModel} selectedModel={currentModel.id} />
       }
       // https://github.com/raycast/extensions/issues/10844
       // `onSelectionChange` may cause race condition
@@ -167,7 +180,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
         conversation={{ ...conversation, model: currentModel }}
         models={availableModels}
         selectedModel={currentModel.id}
-        onModelChange={setSelectedModelId}
+        onModelChange={changeModel}
       />
     </List>
   );

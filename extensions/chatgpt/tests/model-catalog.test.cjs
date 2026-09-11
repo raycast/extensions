@@ -79,13 +79,54 @@ test("legacy array models and commands migrate without changing their effective 
   assert.equal(migrated.prompt, legacy.prompt);
   assert.equal(migrated.vision, false);
   assert.equal(migrated.enableReasoningEffortChange, false);
-  assert.equal(snapshot.catalog.commands.rewrite.overridePrompt, true);
-  assert.notEqual(snapshot.catalog.commands.rewrite.baseModelId, "default");
+  assert.equal(snapshot.catalog.commands.rewrite.configurationMode, "independent");
+  assert.equal(snapshot.catalog.commands.rewrite.baseModelId, undefined);
+  assert.deepEqual(Object.keys(snapshot.catalog.models), ["default"]);
   assert.equal(io.values.get("models"), original.models);
   assert.equal(io.values.get("commands"), original.commands);
   const restarted = factory(io);
   await restarted.load();
   assert.deepEqual(restarted.getSnapshot().catalog, snapshot.catalog);
+});
+
+test("old built-ins and user commands migrate independently without adding or leaving behind presets", async () => {
+  const oldCommands = Object.fromEntries(
+    Object.entries(DEFAULT_COMMANDS).map(([id, cmd]) => [id, { ...cmd, configurationMode: undefined }]),
+  );
+  const firstId = Object.keys(oldCommands)[0];
+  oldCommands[firstId] = { ...oldCommands[firstId], model: "custom-builtin", temperature: "0", prompt: "" };
+  oldCommands.translate = {
+    id: "translate",
+    name: "Translate",
+    model: "translation-model",
+    temperature: "0.5",
+    prompt: "Translate to English",
+    contentSource: "clipboard",
+    isDisplayInput: false,
+  };
+  const io = storage({ models: JSON.stringify({ writer: base }), commands: JSON.stringify(oldCommands) });
+  const store = factory(io);
+  await store.load();
+  const originalModels = store.getSnapshot().catalog.models;
+  assert.deepEqual(Object.keys(originalModels).sort(), ["default", "writer"]);
+  for (const original of Object.values(oldCommands)) {
+    const saved = store.getSnapshot().catalog.commands[original.id];
+    const effective = store.getSnapshot().models[`command-${original.id}`];
+    assert.equal(saved.configurationMode, "independent");
+    assert.equal(saved.baseModelId, undefined);
+    assert.equal(effective.option, original.model);
+    assert.equal(effective.temperature, original.temperature);
+    assert.equal(effective.prompt, original.prompt);
+    assert.equal(saved.contentSource, original.contentSource);
+    assert.equal(saved.isDisplayInput, original.isDisplayInput);
+  }
+  await store.saveCommand(DEFAULT_COMMANDS[firstId]);
+  await store.removeCommand(oldCommands.translate);
+  await store.setCommands(DEFAULT_COMMANDS);
+  assert.deepEqual(store.getSnapshot().catalog.models, originalModels);
+  const restarted = factory(io);
+  await restarted.load();
+  assert.deepEqual(restarted.getSnapshot().catalog.models, originalModels);
 });
 
 test("a new command inherits all chat settings, including subsequent base model edits", async () => {
@@ -178,13 +219,10 @@ test("deleting or clearing models cannot remove referenced bases; reassignment a
 
 test("older imports preserve missing referenced bases, replace other models and ignore command projections", async () => {
   const io = storage();
-  const legacy = { ...command, baseModelId: undefined, model: "legacy-model" };
-  io.values.set("commands", JSON.stringify({ rewrite: legacy }));
-  const store = factory(io);
-  await store.load();
+  const store = await configured(io);
   await store.saveModel({ ...base, id: "unused" });
   const previous = store.getSnapshot().models["command-rewrite"];
-  const legacyBaseId = store.getSnapshot().catalog.commands.rewrite.baseModelId;
+  const baseId = store.getSnapshot().catalog.commands.rewrite.baseModelId;
   await store.importModels([
     { ...DEFAULT_MODEL, option: "imported-default" },
     { ...base, id: "imported", option: "imported-model" },
@@ -197,7 +235,7 @@ test("older imports preserve missing referenced bases, replace other models and 
   assert.equal(reloaded.getSnapshot().catalog.models["command-rewrite"], undefined);
   assert.equal(reloaded.getSnapshot().catalog.models.imported.option, "imported-model");
   assert.equal(reloaded.getSnapshot().catalog.models.default.option, "imported-default");
-  await reloaded.importModels({ [legacyBaseId]: { ...base, id: legacyBaseId, option: "updated-base" } });
+  await reloaded.importModels({ [baseId]: { ...base, id: baseId, option: "updated-base" } });
   assert.equal(reloaded.getSnapshot().models["command-rewrite"].option, "updated-base");
   await reloaded.saveModel({ ...base, id: "default", option: "customized-default" });
   await reloaded.saveCommand({ ...command, baseModelId: "default" });
@@ -248,11 +286,11 @@ test("corrupt legacy data or an invalid command reference is reported without re
   assert.equal(store.getSnapshot().catalog.commands.rewrite, undefined);
 });
 
-test("resetting a legacy command never overwrites a base used by another command", () => {
+test("legacy migration preserves existing presets even when their IDs resemble generated bases", () => {
   const legacy = { ...command, baseModelId: undefined };
   const catalog = migrateCatalog({ "base:rewrite": { ...base, id: "base:rewrite" } }, { rewrite: legacy }, timestamp);
   assert.equal(catalog.models["base:rewrite"].vision, true);
-  assert.notEqual(catalog.commands.rewrite.baseModelId, "base:rewrite");
+  assert.equal(catalog.commands.rewrite.baseModelId, undefined);
   assert.equal(mapCommandToModel(catalog.commands.rewrite, catalog.models).vision, false);
 });
 
@@ -266,15 +304,23 @@ test("explicit model and saved conversation selection win over the cached model;
   assert.equal(selectedChatModel(data, "removed", historical).prompt, "Historical preset");
 });
 
-test("resetting a migrated built-in command preserves shared bases and restores independent defaults", async () => {
+test("loading and resetting a previously linked built-in preserves shared bases and restores independent defaults", async () => {
   const defaultCommand = Object.values(DEFAULT_COMMANDS)[0];
-  const store = await configured(
-    storage({ commands: JSON.stringify({ [defaultCommand.id]: { ...defaultCommand, configurationMode: undefined } }) }),
+  const savedBase = { ...base, option: "custom-default-model" };
+  const store = factory(
+    storage({
+      [CATALOG_STORAGE_KEY]: JSON.stringify({
+        version: 1,
+        models: { default: DEFAULT_MODEL, writer: savedBase },
+        commands: {
+          [defaultCommand.id]: { ...defaultCommand, configurationMode: undefined, baseModelId: base.id },
+          rewrite: command,
+        },
+      }),
+    }),
   );
-  const oldBaseId = store.getSnapshot().catalog.commands[defaultCommand.id].baseModelId;
-  const oldBase = store.getSnapshot().catalog.models[oldBaseId];
-  await store.saveModel({ ...oldBase, option: "custom-default-model" });
-  await store.saveCommand({ ...command, baseModelId: oldBaseId });
+  await store.load();
+  assert.equal(store.getSnapshot().models[`command-${defaultCommand.id}`].option, savedBase.option);
   await store.saveCommand(defaultCommand);
   assert.equal(store.getSnapshot().models["command-rewrite"].option, "custom-default-model");
   assert.equal(store.getSnapshot().models[`command-${defaultCommand.id}`].option, defaultCommand.model);

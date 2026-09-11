@@ -36,11 +36,12 @@ export function normalizeModels(stored: StoredModel[] | Record<string, StoredMod
   return models;
 }
 
-// Legacy commands owned their chat parameters. Give each one a base preset without
-// changing any existing preset (including ones shared by other commands).
+// Legacy commands owned their chat parameters; preserve them as independent settings.
+// Commands already linked to a base keep their existing inheritance relationship.
 export function attachCommand(catalog: Catalog, command: Command, timestamp: string): Catalog {
   command = {
     ...command,
+    configurationMode: command.configurationMode ?? (command.baseModelId ? "inherit" : "independent"),
     created_at: catalog.commands[command.id]?.created_at || command.created_at || timestamp,
     updated_at: timestamp,
   };
@@ -49,40 +50,10 @@ export function attachCommand(catalog: Catalog, command: Command, timestamp: str
     delete independent.baseModelId;
     return { ...catalog, commands: { ...catalog.commands, [command.id]: independent } };
   }
-  if (command.baseModelId) {
-    if (!catalog.models[command.baseModelId]) throw new Error("Choose an existing base model for this AI command.");
-    return { ...catalog, commands: { ...catalog.commands, [command.id]: command } };
+  if (!command.baseModelId || !catalog.models[command.baseModelId]) {
+    throw new Error("Choose an existing base model for this AI command.");
   }
-  if (command.configurationMode === "inherit") throw new Error("Choose an existing base model for this AI command.");
-  const model = normalizeModel(
-    {
-      ...DEFAULT_MODEL,
-      id: `base:${command.id}`,
-      name: `${command.name} Model`,
-      option: command.model,
-      temperature: command.temperature,
-      prompt: command.prompt,
-      created_at: timestamp,
-      updated_at: timestamp,
-    },
-    timestamp,
-  );
-  let suffix = 1;
-  const samePreset = (existing: Model) =>
-    existing.name === model.name &&
-    existing.option === model.option &&
-    existing.prompt === model.prompt &&
-    existing.temperature === model.temperature &&
-    existing.vision === model.vision &&
-    existing.enableReasoningEffortChange === model.enableReasoningEffortChange &&
-    existing.reasoningEffort === model.reasoningEffort &&
-    existing.pinned === model.pinned;
-  while (catalog.models[model.id] && !samePreset(catalog.models[model.id])) model.id = `base:${command.id}:${suffix++}`;
-  return {
-    ...catalog,
-    models: { ...catalog.models, [model.id]: catalog.models[model.id] ?? model },
-    commands: { ...catalog.commands, [command.id]: { ...command, baseModelId: model.id, overridePrompt: true } },
-  };
+  return { ...catalog, commands: { ...catalog.commands, [command.id]: command } };
 }
 
 export function migrateCatalog(

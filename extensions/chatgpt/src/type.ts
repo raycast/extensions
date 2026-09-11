@@ -132,7 +132,7 @@ export type CommandHook = BaseHook<Record<string, Command>> &
 export interface ChangeModelProp {
   models: Model[];
   selectedModel: string;
-  onModelChange: Set<string>;
+  onModelChange: (id: string) => void;
 }
 
 export interface QuestionFormProps extends ChangeModelProp {

@@ -62,8 +62,9 @@ Manage chat presets and AI commands together in **Models**. Select a preset and 
 - Prompt overrides replace the base prompt; prompts are never concatenated. An empty prompt is allowed.
 - Switch an inherited command to independent configuration to copy its currently effective settings and stop following the base model. Either mode can be changed later in the command form.
 - Use **Ask with This Model** to start a conversation with the selected preset or command. In Ask, use **Edit Model** or **Edit AI Command** to update its configuration and return without losing the draft or conversation.
+- Ask remembers models selected through **Ask with This Model**, its dropdown, or Full Text Input. Continuing an AI command or a saved conversation uses that conversation's configuration without replacing the remembered model.
 - Full Text Input also supports editing the selected configuration. Subsequent requests use the saved settings.
-- Existing commands keep their original settings through dedicated base presets and prompt overrides. A model used by commands cannot be removed until those commands become independent or use another base model.
+- Existing commands migrate to independent configuration with their original settings, without creating extra model presets. Existing explicit base-model relationships are preserved. A model used by commands cannot be removed until those commands become independent or use another base model.
 - Built-in commands start with independent settings. Importing models preserves any referenced base model missing from the import file, including when restoring an older backup.
 
 **AI Commands** is available for quick execution and command management. The standalone **Create AI Command** entry has been removed; use the action menu in **Models** to create commands. Existing commands are preserved. Shortcuts or deep links to the removed entry need to be replaced with **Models**.

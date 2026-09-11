@@ -49,9 +49,9 @@ async function chooseCustomModel(app, id, searchText) {
   const modelId = searchText.trim();
   await app.waitFor(
     (tree) =>
-      field(tree, id).menu.sections.flatMap((section) => section.items).some(
-        (item) => item.id === modelId && item.title === `Use "${modelId}"`,
-      ),
+      field(tree, id)
+        .menu.sections.flatMap((section) => section.items)
+        .some((item) => item.id === modelId && item.title === `Use "${modelId}"`),
     `manual model choice ${modelId}`,
   );
   await change(app, id, modelId);
@@ -62,6 +62,26 @@ async function submit(app, title) {
 }
 async function back(app) {
   await app.callback(app.tree.navigationStack.onPop);
+}
+function cacheDirectory(t) {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const os = require("node:os");
+  const support = fs.mkdtempSync(path.join(os.tmpdir(), "chatgpt-cache-test-"));
+  t.after(() => fs.rmSync(support, { recursive: true, force: true }));
+  return support;
+}
+async function rememberWriter(support, initialStorage = fixture, prefs = {}) {
+  const app = await launch("model", initialStorage, prefs, support);
+  try {
+    await app.waitFor(page("Models"));
+    await select(app, "writer");
+    await action(app, "Ask with This Model");
+    await app.waitFor(page("Ask"));
+    return Object.fromEntries(app.storage);
+  } finally {
+    await app.close();
+  }
 }
 async function provider(t, modelStatus = 200) {
   const requests = [];
@@ -205,6 +225,7 @@ test("an independent command can select a model fetched from the configured endp
 
 test("existing command quicklinks run the migrated command and continue with its configuration", native, async (t) => {
   const api = await provider(t);
+  const support = cacheDirectory(t);
   const legacy = {
     id: "existing-quicklink",
     name: "Quicklink command",
@@ -214,13 +235,12 @@ test("existing command quicklinks run the migrated command and continue with its
     contentSource: "selectedText",
     isDisplayInput: true,
   };
-  const app = await launch(
-    "search-ai-command",
-    { commands: JSON.stringify({ [legacy.id]: legacy }) },
+  const initialStorage = await rememberWriter(
+    support,
+    { models: fixture.models, commands: JSON.stringify({ [legacy.id]: legacy }) },
     api.prefs,
-    undefined,
-    { commandId: legacy.id },
   );
+  const app = await launch("search-ai-command", initialStorage, api.prefs, support, { commandId: legacy.id });
   t.after(app.close);
   await app.waitFor((tree) => body(tree).kind === "Detail" && body(tree).markdown?.includes("Fixture answer"));
   assert.equal(api.requests.length, 1);
@@ -233,6 +253,20 @@ test("existing command quicklinks run the migrated command and continue with its
   await action(app, "Continue in Chat");
   await app.waitFor(page("Ask"));
   assert.equal(body(app.tree).searchBarAccessory.value.value, `command-${legacy.id}`);
+  await app.callback(body(app.tree).searchBarAccessory.onChange, {
+    value: `command-${legacy.id}`,
+    eventCount: ++eventCount,
+  });
+  const savedStorage = Object.fromEntries(app.storage);
+  await app.close();
+  const ordinaryAsk = await launch("ask", savedStorage, api.prefs, support);
+  t.after(ordinaryAsk.close);
+  await ordinaryAsk.waitFor(page("Ask"));
+  assert.equal(
+    body(ordinaryAsk.tree).searchBarAccessory.value.value,
+    "writer",
+    "continuing a command keeps Ask's remembered model",
+  );
 });
 
 test(
@@ -630,22 +664,66 @@ test(
 );
 
 test("Ask without an explicit preset restores the last model across separate command launches", native, async (t) => {
-  const fs = require("node:fs");
-  const path = require("node:path");
-  const os = require("node:os");
-  const support = fs.mkdtempSync(path.join(os.tmpdir(), "chatgpt-cache-test-"));
-  t.after(() => fs.rmSync(support, { recursive: true, force: true }));
-  let app = await launch("model", fixture, {}, support);
+  const support = cacheDirectory(t);
+  const savedStorage = await rememberWriter(support);
+  let app = await launch("ask", savedStorage, {}, support);
   t.after(() => app.close());
-  await app.waitFor(page("Models"));
-  await select(app, "writer");
-  await action(app, "Ask with This Model");
   await app.waitFor(page("Ask"));
-  const savedStorage = Object.fromEntries(app.storage);
+  assert.equal(body(app.tree).searchBarAccessory.value.value, "writer");
+  await app.callback(body(app.tree).searchBarAccessory.onChange, { value: "default", eventCount: ++eventCount });
+  await app.waitFor((tree) => body(tree).searchBarAccessory.value.value === "default");
   await app.close();
   app = await launch("ask", savedStorage, {}, support);
   await app.waitFor(page("Ask"));
-  assert.equal(body(app.tree).searchBarAccessory.value.value, "writer");
+  assert.equal(body(app.tree).searchBarAccessory.value.value, "default", "manual dropdown changes are remembered");
+  await action(app, "Full Text Input");
+  await app.waitFor((tree) => body(tree).kind === "Form" && field(tree, "question"));
+  await change(app, "model", "writer");
+  await change(app, "model", "default");
+  await back(app);
+  await app.waitFor(page("Ask"));
+  assert.equal(body(app.tree).searchBarAccessory.value.value, "default", "switching back updates Ask's selection");
+  await action(app, "Full Text Input");
+  await app.waitFor((tree) => body(tree).kind === "Form" && field(tree, "question"));
+  await change(app, "model", "writer");
+  await app.close();
+  app = await launch("ask", savedStorage, {}, support);
+  await app.waitFor(page("Ask"));
+  assert.equal(body(app.tree).searchBarAccessory.value.value, "writer", "manual full-input changes are remembered");
+});
+
+test("continuing a saved conversation uses its model without replacing Ask's remembered model", native, async (t) => {
+  const support = cacheDirectory(t);
+  const initialStorage = await rememberWriter(support);
+  const conversation = {
+    id: "past-conversation",
+    model: DEFAULT_MODEL,
+    chats: [{ id: "past-chat", question: "Past question", answer: "Past answer", created_at: "2026-09-10T00:00:00Z" }],
+    pinned: false,
+    created_at: "2026-09-10T00:00:00Z",
+    updated_at: "2026-09-10T00:00:00Z",
+  };
+  const app = await launch(
+    "conversation",
+    {
+      ...initialStorage,
+      conversations: JSON.stringify([conversation]),
+    },
+    {},
+    support,
+  );
+  t.after(app.close);
+  await app.waitFor((tree) => body(tree).kind === "List" && !body(tree).isLoading);
+  await select(app, conversation.id);
+  await action(app, "Continue Ask");
+  await app.waitFor(page("Ask"));
+  assert.equal(body(app.tree).searchBarAccessory.value.value, "default");
+  const savedStorage = Object.fromEntries(app.storage);
+  await app.close();
+  const ordinaryAsk = await launch("ask", savedStorage, {}, support);
+  t.after(ordinaryAsk.close);
+  await ordinaryAsk.waitFor(page("Ask"));
+  assert.equal(body(ordinaryAsk.tree).searchBarAccessory.value.value, "writer");
 });
 
 test("creating an ordinary model returns to Models with the new preset selected", native, async (t) => {
