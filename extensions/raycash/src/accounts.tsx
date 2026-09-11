@@ -6,6 +6,7 @@ import {
   List,
   LocalStorage,
   Toast,
+  openExtensionPreferences,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -190,7 +191,7 @@ export default function Command() {
     try {
       if (settings["accountOrder"])
         order = JSON.parse(settings["accountOrder"]);
-    } catch (_e) {
+    } catch {
       // ignore invalid JSON
     }
 
@@ -213,7 +214,7 @@ export default function Command() {
     let order: string[] = [];
     try {
       if (settings["orgOrder"]) order = JSON.parse(settings["orgOrder"]);
-    } catch (_e) {
+    } catch {
       // ignore invalid JSON
     }
 
@@ -239,6 +240,15 @@ export default function Command() {
           icon={Icon.Warning}
           title="Error"
           description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Extension Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
+            </ActionPanel>
+          }
         />
       ) : accounts.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.Wallet} title="No Accounts Found" />
