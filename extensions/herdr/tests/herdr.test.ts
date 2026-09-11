@@ -4,7 +4,14 @@ import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { HerdrError, focusResource, getSnapshot, resolveHerdrBinary, runHerdr } from "../src/lib/herdr";
+import {
+  HerdrError,
+  focusResource,
+  getSnapshot,
+  resolveHerdrBinary,
+  runHerdr,
+  sessionPresence,
+} from "../src/lib/herdr";
 import { storage } from "./helpers/raycast-api";
 
 vi.mock("node:fs/promises", () => ({ access: vi.fn() }));
@@ -224,5 +231,18 @@ describe("focusResource", () => {
       ["tab", "focus", "w1:t1"],
       ["pane", "layout", "--pane", "w1:p2"],
     ]);
+  });
+});
+
+// Herdr 0.9 reports a missing session exactly like a stopped one, and starting
+// an absent name creates it. Start is offered only once the session list has
+// confirmed the name; loading and a failed listing both read as unknown.
+describe("sessionPresence", () => {
+  const listed = [{ name: "tmp-a", default: false, running: false, session_dir: "/x", socket_path: "/x/s" }];
+
+  it("distinguishes a listed session from a missing one, and treats no list as unknown", () => {
+    expect(sessionPresence(listed, "tmp-a")).toBe("listed");
+    expect(sessionPresence(listed, "tmp-b")).toBe("missing");
+    expect(sessionPresence(undefined, "tmp-a")).toBe("unknown");
   });
 });

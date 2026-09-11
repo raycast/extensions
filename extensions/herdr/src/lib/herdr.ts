@@ -293,6 +293,17 @@ export function getAgentTarget(agent: { name?: string; pane_id: string }): strin
   return agent.name || agent.pane_id;
 }
 
+/**
+ * Whether `name` is among the listed Sessions. Herdr 0.9 reports a Session that
+ * does not exist exactly like a Stopped one, and `herdr --session` creates what
+ * it cannot find, so a start is offered only for a listed Session. No list yet,
+ * or a listing that failed, is unknown, and unknown never earns a start.
+ */
+export function sessionPresence(sessions: HerdrSession[] | undefined, name: string): "listed" | "missing" | "unknown" {
+  if (sessions === undefined) return "unknown";
+  return sessions.some((session) => session.name === name) ? "listed" : "missing";
+}
+
 /** The Session a failure names when its server is Stopped, so views can offer to start it. */
 export function stoppedSessionOf(error: unknown): string | undefined {
   return error instanceof HerdrError && error.code === "session_not_running" ? error.session : undefined;

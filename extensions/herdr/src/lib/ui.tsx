@@ -13,7 +13,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { formatHerdrError, getSessions, stoppedSessionOf } from "./herdr";
+import { formatHerdrError, getSessions, sessionPresence, stoppedSessionOf } from "./herdr";
 import { shortcuts } from "./shortcuts";
 import { launchHerdrInTerminal, type LaunchResult } from "./terminal";
 import type { AgentStatus, TabInfo } from "./types";
@@ -111,20 +111,24 @@ export function ManageSessionsAction({ title = "Manage Sessions…" }: { title?:
 // Reads never start a session, so a Stopped Selected Session is shown as such;
 // attaching through the terminal is the only way to start it from here. Herdr
 // reports a session that does not exist the same way, and `herdr --session`
-// would create it, so the start action is offered only for a listed session.
+// would create it, so the start action appears only once the session list has
+// confirmed the name; while the list loads, or if it fails, there is no start.
 function SessionStoppedView({ session, onRetry }: { session: string; onRetry?: () => void }) {
   const sessions = useCachedPromise(getSessions, [], { keepPreviousData: true });
-  const missing = sessions.data !== undefined && !sessions.data.some((item) => item.name === session);
-  const markdown = missing
-    ? `# Session “${session}” was not found\n\nIt may have been deleted, or the Default Session preference may be misspelled. Choose another session for Raycast to control.`
-    : `# Session “${session}” is stopped\n\nAttach to start it in your terminal, or choose another session for Raycast to control.`;
+  const presence = sessionPresence(sessions.data, session);
+  const markdown =
+    presence === "missing"
+      ? `# Session “${session}” was not found\n\nIt may have been deleted, or the Default Session preference may be misspelled. Choose another session for Raycast to control.`
+      : presence === "unknown" && sessions.error
+        ? `# Session “${session}” is stopped\n\nThe session list could not be read, so it cannot be started from here. Open Manage Sessions to start it or choose another session.`
+        : `# Session “${session}” is stopped\n\nAttach to start it in your terminal, or choose another session for Raycast to control.`;
   return (
     <Detail
       isLoading={sessions.isLoading}
       markdown={markdown}
       actions={
         <ActionPanel>
-          {missing ? null : (
+          {presence !== "listed" ? null : (
             <Action
               title="Start and Attach in Terminal"
               icon={Icon.Terminal}
