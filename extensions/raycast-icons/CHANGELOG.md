@@ -1,6 +1,6 @@
 # Raycast Icons Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-09-11
 
 - Find icons by keywords such as email, settings, flight, and attachment without an AI search.
 
