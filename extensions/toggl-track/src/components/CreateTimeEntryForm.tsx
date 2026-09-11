@@ -280,8 +280,6 @@ function CreateTimeEntryForm({
               )}
             </Form.Dropdown>
           )}
-
-          {selectedProject?.billable && <Form.Checkbox id="billable" label="" title="Billable" />}
         </>
       )}
 
@@ -295,7 +293,9 @@ function CreateTimeEntryForm({
         </Form.TagPicker>
       )}
 
-      {isWorkspacePremium && <Form.Checkbox id="billable" label="Billable" value={billable} onChange={setBillable} />}
+      {(isWorkspacePremium || selectedProject?.billable) && (
+        <Form.Checkbox id="billable" label="Billable" value={billable} onChange={setBillable} />
+      )}
     </Form>
   );
 }

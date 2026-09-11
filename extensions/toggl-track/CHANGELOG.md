@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Fix Duplicate Billable Checkbox] - {PR_MERGE_DATE}
+
+- Fixed two `Billable` checkboxes rendering with the same `billable` form ID when a billable project is selected in a premium workspace — they are now a single checkbox, shown whenever either condition applies
+
 ## [Show total duration of current project] - 2026-06-18
 
 - In the menu bar, show the total time of all time entries of the current project in addition to the total time of all entries.
