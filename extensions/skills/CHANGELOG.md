@@ -4,9 +4,9 @@
 
 - Stop a second command from waiting indefinitely behind a running one: opening Manage Skills during "Update All Skills" now either gets its turn or reports that another skills command is still running, instead of showing an empty list and spinning for minutes
 - Fail immediately on a permanent problem such as a support directory that cannot be written, which was previously retried forever
-- Keep a lost lock from taking down the command that is running, and stop a failed lock release from replacing the real error
+- Stop the running command when it loses its lock, rather than letting it keep changing the same skills another process is now free to change, and stop a failed lock release from replacing the real error
 - Give read-only commands room for the initial download of the `skills` CLI, so an ordinary first run on a slow connection no longer fails
-- Say whether a timed-out command never started, meaning the CLI itself was still downloading, or started and then ran long, instead of giving one message for both
+- Point a timed-out command at the custom package registry setup as well as the network, since a proxied registry is a common cause
 
 ## [Fix Update All Skills Timing Out] - 2026-09-11
 

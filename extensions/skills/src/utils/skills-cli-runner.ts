@@ -109,7 +109,7 @@ export async function withSkillsCliLock<T>(run: (runLocked: SkillsCliRunner) => 
   return enqueueSkillsCliRun(
     () =>
       withCrossProcessSkillsCliLock(
-        () => run((args, options = {}) => runSkillsCliCommand(args, options.readOnly ?? false)),
+        (lockLost) => run((args, options = {}) => runSkillsCliCommand(args, options.readOnly ?? false, lockLost)),
         turnDeadline,
       ),
     turnDeadline,
@@ -159,12 +159,16 @@ async function waitForTurn(predecessor: Promise<unknown>, turnDeadline: number):
   }
 }
 
-async function withCrossProcessSkillsCliLock<T>(run: () => Promise<T>, turnDeadline: number): Promise<T> {
+async function withCrossProcessSkillsCliLock<T>(
+  run: (lockLost: AbortSignal) => Promise<T>,
+  turnDeadline: number,
+): Promise<T> {
   await mkdir(environment.supportPath, { recursive: true });
   await writeFile(SKILLS_CLI_LOCK_TARGET, "", { flag: "a" });
-  const release = await acquireSkillsCliLock(turnDeadline);
+  const lockLost = new AbortController();
+  const release = await acquireSkillsCliLock(turnDeadline, lockLost);
   try {
-    return await run();
+    return await run(lockLost.signal);
   } finally {
     await releaseSkillsCliLock(release);
   }
@@ -175,12 +179,12 @@ async function withCrossProcessSkillsCliLock<T>(run: () => Promise<T>, turnDeadl
  * `retries: forever` also retried permanent failures such as a support
  * directory we cannot write to, which could never succeed.
  */
-async function acquireSkillsCliLock(turnDeadline: number): Promise<() => Promise<void>> {
+async function acquireSkillsCliLock(turnDeadline: number, lockLost: AbortController): Promise<() => Promise<void>> {
   for (;;) {
     try {
       return await lockfile.lock(SKILLS_CLI_LOCK_TARGET, {
         retries: 0,
-        onCompromised: reportCompromisedLock,
+        onCompromised: (error) => stopRunOnLostLock(error, lockLost),
       });
     } catch (error) {
       if (!isLockHeldError(error)) throw error;
@@ -195,12 +199,15 @@ function isLockHeldError(error: unknown): boolean {
 }
 
 /**
- * The default handler throws from a timer callback, which takes the whole
- * command down with it. Our CLI run is already in flight by then, and killing
- * it mid-change is worse than finishing it, so record it and carry on.
+ * Losing the lock means another process can now run its own command against the
+ * same skills and npx cache, which is the race the lock exists to prevent, so
+ * stop our run rather than let two proceed at once. The library default instead
+ * throws from a timer callback, which takes the command down without stopping
+ * the child process it spawned.
  */
-function reportCompromisedLock(error: Error): void {
+function stopRunOnLostLock(error: Error, lockLost: AbortController): void {
   console.error("[skills] Lost the skills CLI lock while a command was running:", error);
+  lockLost.abort();
 }
 
 async function releaseSkillsCliLock(release: () => Promise<void>): Promise<void> {
@@ -213,14 +220,14 @@ async function releaseSkillsCliLock(release: () => Promise<void>): Promise<void>
   }
 }
 
-async function runSkillsCliCommand(args: string[], readOnly: boolean): Promise<string> {
+async function runSkillsCliCommand(args: string[], readOnly: boolean, lockLost: AbortSignal): Promise<string> {
   const timeoutMs = readOnly ? READ_ONLY_TIMEOUT_MS : MUTATING_TIMEOUT_MS;
 
   const customNpxPath = getCustomNpxPath();
   if (customNpxPath) {
     await validateCustomNpxPath(customNpxPath);
     try {
-      return await executeSkillsCli("npx", args, timeoutMs, customNpxPath);
+      return await executeSkillsCli("npx", args, timeoutMs, lockLost, customNpxPath);
     } catch (error) {
       throw normalizeCliError(error, customNpxPath, timeoutMs);
     }
@@ -228,7 +235,7 @@ async function runSkillsCliCommand(args: string[], readOnly: boolean): Promise<s
 
   if (!bunxResolutionFailed) {
     try {
-      return await executeSkillsCli("bunx", args, timeoutMs);
+      return await executeSkillsCli("bunx", args, timeoutMs, lockLost);
     } catch (error) {
       if (isNpxCommandResolutionFailure(error, "bunx")) {
         bunxResolutionFailed = true;
@@ -239,7 +246,7 @@ async function runSkillsCliCommand(args: string[], readOnly: boolean): Promise<s
   }
 
   try {
-    return await executeSkillsCli("npx", args, timeoutMs);
+    return await executeSkillsCli("npx", args, timeoutMs, lockLost);
   } catch (npxError) {
     throw normalizeCliError(npxError, "npx", timeoutMs);
   }
@@ -248,17 +255,18 @@ async function runSkillsCliCommand(args: string[], readOnly: boolean): Promise<s
 /**
  * Retrying through npx is only worth it when bunx failed without saying why.
  * A mutating command may already have changed state, a failure with output has
- * already explained itself, and a timeout means bunx works but the command is
- * slow — running it again would only double the wait.
+ * already explained itself, a timeout means bunx works but the command is slow,
+ * and a lost lock means we must not be running at all.
  */
 function canRetryThroughNpx(error: unknown, readOnly: boolean): boolean {
-  return readOnly && !hasDiagnosticOutput(error) && !isTimeoutFailure(error);
+  return readOnly && !hasDiagnosticOutput(error) && !isTimeoutFailure(error) && !isLostLockFailure(error);
 }
 
 async function executeSkillsCli(
   runner: PackageRunner,
   args: string[],
   timeoutMs: number,
+  lockLost: AbortSignal,
   executable: string = runner,
 ): Promise<string> {
   const execOptions = await getExecOptions();
@@ -271,6 +279,7 @@ async function executeSkillsCli(
     ...execOptions,
     env,
     timeout: timeoutMs,
+    signal: lockLost,
     shell: isWindows,
   });
   return stdout.toString();
@@ -321,21 +330,21 @@ function pluralize(value: number, unit: string): string {
 }
 
 /**
- * The two ways a run can time out need different things from the user. Nothing
- * printed means `bunx`/`npx` never finished downloading the `skills` package,
- * which a proxied registry can cause; output means the CLI was running and its
- * own fetches from skill sources are what took too long.
+ * The lost-lock handler is the only thing that aborts a run, so an aborted run
+ * always means exclusive access went away underneath it.
  */
-function describeTimeout(error: Error, npxCommand: string, timeoutMs: number): string {
-  const command = (error as ExecFailure).cmd ?? npxCommand;
-  const budget = formatTimeout(timeoutMs);
-  const explanation = hasDiagnosticOutput(error)
-    ? `The skills CLI started but did not finish within ${budget} while fetching skills from their sources. Check your network connection and try again.`
-    : `The skills CLI produced no output within ${budget}, so downloading it most likely ran long. Check your network connection, or set a custom package registry if you install packages through a corporate proxy.`;
-  return `${explanation}\nCommand: ${command}`;
+function isLostLockFailure(error: unknown): boolean {
+  const failure = error as { code?: unknown; name?: unknown } | undefined;
+  return failure?.code === "ABORT_ERR" || failure?.name === "AbortError";
 }
 
 function normalizeCliError(error: unknown, npxCommand: string, timeoutMs: number): Error {
+  if (isLostLockFailure(error)) {
+    return new Error(
+      "The skills CLI lost exclusive access while running, so the command was stopped before it could finish. Try again.",
+    );
+  }
+
   if (isNpxCommandResolutionFailure(error, npxCommand)) {
     return new NpxResolutionError(
       "Unable to find a working bunx or npx command. Install Bun, or install Node.js/npm. If you need to force a custom npx executable, set it in the extension configuration under 'Custom npx Path'.",
@@ -347,7 +356,11 @@ function normalizeCliError(error: unknown, npxCommand: string, timeoutMs: number
   }
 
   if (isTimeoutFailure(error)) {
-    return withCliOutput(error, describeTimeout(error, npxCommand, timeoutMs));
+    const command = (error as ExecFailure).cmd ?? npxCommand;
+    return withCliOutput(
+      error,
+      `The skills CLI did not finish within ${formatTimeout(timeoutMs)}. Check your network connection and try again. If packages install through a corporate proxy, set a custom package registry as the extension README describes.\nCommand: ${command}`,
+    );
   }
 
   return withCliOutput(error);
