@@ -2,6 +2,7 @@ import { HerdrError } from "./herdr";
 import { resolveSession, setSelectedSession } from "./session-selection";
 import {
   focusExistingHerdrClient,
+  hasCustomTerminalLauncher,
   launchHerdrInTerminal,
   locateTerminalPaneClients,
   type LocatedClient,
@@ -33,9 +34,14 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** The pids of the Clients of `session` that own a Terminal Pane right now. */
-async function terminalPaneClientPids(session: string): Promise<Set<string>> {
+/**
+ * The pids of the Clients of `session` that own a Terminal Pane right now, or
+ * undefined when the lookup failed: an empty set would read as "none open" and
+ * let a Client that was already there pass for a new one.
+ */
+async function terminalPaneClientPids(session: string): Promise<Set<string> | undefined> {
   const located = await locateTerminalPaneClients(session);
+  if (located.status === "unavailable") return undefined;
   return new Set(located.status === "found" ? located.clients.map((client) => client.pid) : []);
 }
 
@@ -51,38 +57,44 @@ async function terminalPaneClientPids(session: string): Promise<Set<string>> {
  * to detach, a terminal that cannot list its panes cannot verify anything, and
  * the selection is allowed to proceed.
  */
+type Confirmation = { status: "attached"; client: LocatedClient } | { status: "unverifiable" } | { status: "missing" };
+
 async function confirmClientAttached(
   session: string,
   isReplacement: (client: LocatedClient) => boolean,
   strict: boolean,
   timeoutMs: number,
   pollMs: number,
-): Promise<"attached" | "unverifiable" | "missing"> {
+): Promise<Confirmation> {
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const located = await locateTerminalPaneClients(session);
-    if (located.status === "found" && located.clients.some(isReplacement)) return "attached";
-    if (located.status === "unavailable" && !strict) return "unverifiable";
-    if (Date.now() >= deadline) return "missing";
+    const client = located.status === "found" ? located.clients.find(isReplacement) : undefined;
+    if (client) return { status: "attached", client };
+    if (located.status === "unavailable" && !strict) return { status: "unverifiable" };
+    if (Date.now() >= deadline) return { status: "missing" };
     await delay(pollMs);
   }
 }
 
 /**
- * How the switch recognizes the Client its launch created. `alreadyOpen` is
- * recorded only when Clients are at stake; without it, any Client of the target
- * shows the Session is on screen and nothing will be signaled on the strength
- * of it. Otherwise WezTerm reports the pane it spawned, so the Client must sit
- * in that pane: one that appeared elsewhere, or was open before, proves nothing
- * about this launch. Without a pane id, a Client that was not open before the
- * launch counts.
+ * How the switch recognizes the Client its launch created. With no Clients at
+ * stake, any Client of the target shows the Session is on screen and nothing
+ * will be signaled on the strength of it. Otherwise WezTerm reports the pane it
+ * spawned, so the Client must sit in that pane: one that appeared elsewhere, or
+ * was open before, proves nothing about this launch. Without a pane id, a Client
+ * that was not open before the launch counts; and when the pre-launch lookup
+ * failed, nothing can tell new from old, so nothing is confirmed and nothing is
+ * detached.
  */
 function replacementTest(
+  detachPlanned: boolean,
   spawnedPaneId: string | undefined,
   alreadyOpen: Set<string> | undefined,
 ): (client: LocatedClient) => boolean {
-  if (alreadyOpen === undefined) return () => true;
+  if (!detachPlanned) return () => true;
   if (spawnedPaneId !== undefined) return (client) => client.paneId === spawnedPaneId;
+  if (alreadyOpen === undefined) return () => false;
   return (client) => !alreadyOpen.has(client.pid);
 }
 
@@ -109,11 +121,16 @@ export async function switchToSession(target: string, options: SwitchOptions = {
   }
 
   // Switching to the already Selected Session has nothing to detach: its own
-  // Clients are the ones a detach would target.
+  // Clients are the ones a detach would target. A custom launcher places the
+  // Client where the extension cannot see it, so there is nothing to confirm
+  // against and no window to reuse; the switch is an attach plus a selection.
+  const custom = hasCustomTerminalLauncher();
   const location =
     previous === target
       ? ({ status: "unavailable", reason: `“${target}” is already the selected session` } as const)
-      : await locateTerminalPaneClients(previous);
+      : custom
+        ? ({ status: "unavailable", reason: "a custom terminal launcher places the client itself" } as const)
+        : await locateTerminalPaneClients(previous);
 
   // Recorded before the launch, and only when Clients are at stake: the switch
   // then knows which Clients of the target it must not mistake for the new one.
@@ -126,14 +143,16 @@ export async function switchToSession(target: string, options: SwitchOptions = {
     wezTermListing: location.status === "found" ? location.listing : undefined,
   });
 
-  const confirmation = await confirmClientAttached(
-    target,
-    replacementTest(launched.wezTermPaneId, alreadyOpen),
-    detachPlanned,
-    options.confirmTimeoutMs ?? CONFIRM_TIMEOUT_MS,
-    options.confirmPollMs ?? CONFIRM_POLL_MS,
-  );
-  if (confirmation === "missing") {
+  const confirmation: Confirmation = custom
+    ? { status: "unverifiable" }
+    : await confirmClientAttached(
+        target,
+        replacementTest(detachPlanned, launched.wezTermPaneId, alreadyOpen),
+        detachPlanned,
+        options.confirmTimeoutMs ?? CONFIRM_TIMEOUT_MS,
+        options.confirmPollMs ?? CONFIRM_POLL_MS,
+      );
+  if (confirmation.status === "missing") {
     throw new HerdrError(
       `Could not confirm a new client of “${target}”`,
       "switch_unconfirmed",
@@ -154,13 +173,24 @@ export async function switchToSession(target: string, options: SwitchOptions = {
   if (location.status === "unavailable")
     return { outcome: "attached", previous, detached: 0, skipped: location.reason };
 
-  // WezTerm names the window the replacement reused; the other terminals cannot
-  // target a window at all, so exactly one Client is replaced there.
-  const reused = location.windowId;
-  const detachable = reused
-    ? location.clients.filter((client) => client.windowId === reused)
-    : location.clients.slice(0, 1);
+  // The detach follows the window the replacement actually went into, which on
+  // WezTerm the confirmed Client names; a launch that fell back to a new window
+  // therefore detaches nothing. The other terminals name no window, so exactly
+  // one Client is replaced there.
+  const replacementWindow = confirmation.status === "attached" ? confirmation.client.windowId : undefined;
+  const detachable =
+    replacementWindow !== undefined
+      ? location.clients.filter((client) => client.windowId === replacementWindow)
+      : location.clients.slice(0, 1);
   const untouched = location.clients.length - detachable.length;
+  if (detachable.length === 0) {
+    return {
+      outcome: "attached",
+      previous,
+      detached: 0,
+      skipped: `the new client opened in another window; ${untouched} client${untouched === 1 ? "" : "s"} of “${previous}” left attached`,
+    };
+  }
 
   let detached = 0;
   let failed = 0;

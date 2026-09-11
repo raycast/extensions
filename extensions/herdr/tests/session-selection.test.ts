@@ -141,3 +141,18 @@ describe("resolveStoredSession", () => {
     await expect(resolveStoredSession()).resolves.toBe("default");
   });
 });
+
+// Regression guard: setSelectedSession re-points the pin to the new name, and a
+// release that compared names then no-oped, leaving the pin behind after the
+// view unmounted. The release must undo its own pin whatever the name is now.
+describe("pinSession release after a selection", () => {
+  it("releases the pin even after the selection moved it", async () => {
+    const release = pinSession("tmp-a");
+    await setSelectedSession("tmp-b");
+    await expect(resolveSession()).resolves.toBe("tmp-b");
+
+    release();
+    storage.set("selectedSession", "tmp-c");
+    await expect(resolveSession()).resolves.toBe("tmp-c");
+  });
+});

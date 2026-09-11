@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { formatHerdrError, stoppedSessionOf } from "./herdr";
 import { shortcuts } from "./shortcuts";
-import { launchHerdrInTerminal } from "./terminal";
+import { launchHerdrInTerminal, type LaunchResult } from "./terminal";
 import type { AgentStatus, TabInfo } from "./types";
 export { shortcuts } from "./shortcuts";
 
@@ -65,10 +65,14 @@ export function statusIcon(status?: AgentStatus): { source: Icon; tintColor: Col
   return { source, tintColor: statusColor(status) };
 }
 
-/** Runs `action` behind a toast. A string it returns becomes the success toast's message; other results are ignored. */
+/**
+ * Runs `action` behind a toast. A string it returns becomes the success toast's
+ * message. The type stays narrow so a raw `runHerdr` result, which is CLI
+ * stdout, cannot be passed by accident.
+ */
 export async function runAction(
   title: string,
-  action: () => Promise<unknown>,
+  action: () => Promise<void | string | LaunchResult>,
   options: { success?: string; onSuccess?: () => void | Promise<void> } = {},
 ): Promise<boolean> {
   const toast = await showToast({ style: Toast.Style.Animated, title });

@@ -45,6 +45,8 @@ interface Fixture {
   activateFails?: boolean;
   /** After the spawn, the process list cannot be read: pgrep fails outright. */
   lookupFailsAfterSpawn?: boolean;
+  /** 1-based pgrep calls that fail with a timeout, to make one lookup transiently unavailable. */
+  failPgrepCalls?: number[];
 }
 
 const events: string[] = [];
@@ -56,6 +58,7 @@ const kill = vi.fn((pid: number) => {
 // so the test drives the real lookup, launch, and switch wiring end to end.
 function mockSystem(fixture: Fixture) {
   let spawned = false;
+  let pgrepCalls = 0;
   const processes = () => [...fixture.processes, ...(spawned ? (fixture.spawned?.processes ?? []) : [])];
   const panes = () => [...fixture.panes, ...(spawned ? (fixture.spawned?.panes ?? []) : [])];
 
@@ -68,6 +71,9 @@ function mockSystem(fixture: Fixture) {
     const respond = (stdout: string) => callback(null, stdout, "");
     if (path.endsWith("pgrep")) {
       events.push("pgrep");
+      pgrepCalls += 1;
+      if (fixture.failPgrepCalls?.includes(pgrepCalls))
+        return callback(Object.assign(new Error("timeout"), { killed: true }), "", "");
       if (spawned && fixture.lookupFailsAfterSpawn)
         return callback(Object.assign(new Error("timeout"), { killed: true }), "", "");
       if (processes().length === 0) return callback(Object.assign(new Error("no match"), { code: 1 }), "", "");
@@ -122,8 +128,9 @@ const wezterm = {
 };
 
 beforeEach(() => {
-  // Reset the terminal: a later test switches it, and the mutation would leak.
+  // Reset the terminal and launcher: a later test switches them, and the mutation would leak.
   preferences.terminalApplication = { ...wezterm };
+  preferences.customTerminalLauncher = undefined;
   storage.clear();
   storage.set("selectedSession", "tmp-a");
   events.length = 0;
@@ -441,5 +448,84 @@ describe("switchToSession confirmation by spawned pane", () => {
 
     expect(result).toMatchObject({ outcome: "attached", detached: 1 });
     expect(kill).toHaveBeenCalledWith(101, "SIGTERM");
+  });
+});
+
+// The detach must follow the replacement, not the plan. WezTerm's spawn into the
+// planned window can fail, and the launcher then falls back to a new window with
+// no pane id; signaling the planned window's client left the user with a window
+// gone and the replacement somewhere else.
+describe("switchToSession detach follows the replacement's window", () => {
+  it("detaches nothing when the replacement opened in another window", async () => {
+    const replacement: Process = { pid: "902", tty: "ttys091", args: `${binary} session attach tmp-b` };
+    mockSystem({
+      processes: [previousClient],
+      panes: [previousPane],
+      spawnResult: "",
+      spawned: { processes: [replacement], panes: [{ window_id: 8, pane_id: 70, tty_name: "/dev/ttys091" }] },
+    });
+
+    const result = await switchToSession("tmp-b", switchOptions(kill));
+
+    expect(result).toMatchObject({ outcome: "attached", detached: 0 });
+    expect(result.skipped).toMatch(/another window/);
+    expect(kill).not.toHaveBeenCalled();
+    expect(storage.get("selectedSession")).toBe("tmp-b");
+  });
+});
+
+// A pre-launch lookup that fails leaves the switch unable to tell a new client
+// from one that was already open. With no pane id to fall back on, nothing can
+// be confirmed, so nothing is detached.
+describe("switchToSession with an unknown pre-launch client set", () => {
+  const strayTarget: Process = { pid: "901", tty: "ttys090", args: `${binary} session attach tmp-b` };
+  const strayPane = { window_id: 9, pane_id: 90, tty_name: "/dev/ttys090" };
+
+  it("does not treat a pre-existing client as new when the pre-launch lookup failed", async () => {
+    mockSystem({
+      processes: [previousClient, strayTarget],
+      panes: [previousPane, strayPane],
+      activateFails: true,
+      // pgrep 1: reveal, 2: locate the previous clients, 3: the pre-launch snapshot of the target.
+      failPgrepCalls: [3],
+      spawnResult: "",
+    });
+
+    await expect(switchToSession("tmp-b", switchOptions(kill))).rejects.toThrow(/confirm/);
+    expect(kill).not.toHaveBeenCalled();
+    expect(storage.get("selectedSession")).toBe("tmp-a");
+  });
+
+  it("still confirms by the spawned pane when the pre-launch lookup failed", async () => {
+    mockSystem({
+      processes: [previousClient, strayTarget],
+      panes: [previousPane, strayPane],
+      activateFails: true,
+      failPgrepCalls: [3],
+      spawned: spawnedTarget,
+    });
+
+    const result = await switchToSession("tmp-b", switchOptions(kill));
+
+    expect(result).toMatchObject({ outcome: "attached", detached: 1 });
+    expect(kill).toHaveBeenCalledWith(101, "SIGTERM");
+  });
+});
+
+// A custom launcher places the client itself, somewhere the extension cannot
+// see, so a switch there is an attach plus a selection: nothing to confirm and
+// nothing to detach, and the toast says so.
+describe("switchToSession with a custom terminal launcher", () => {
+  it("attaches alongside, selects, and detaches nothing", async () => {
+    preferences.customTerminalLauncher = "term -e {herdr} {args}";
+    mockSystem({ processes: [previousClient], panes: [previousPane] });
+
+    const result = await switchToSession("tmp-b", switchOptions(kill));
+
+    expect(result).toMatchObject({ outcome: "attached", detached: 0 });
+    expect(result.skipped).toMatch(/custom/i);
+    expect(kill).not.toHaveBeenCalled();
+    expect(storage.get("selectedSession")).toBe("tmp-b");
+    expect(events.some((event) => event.startsWith("wezterm spawn"))).toBe(false);
   });
 });

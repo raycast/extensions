@@ -29,6 +29,7 @@ export function getPreferredSession(): string {
 }
 
 let pinnedSession: string | undefined;
+let pinToken = 0;
 
 /**
  * Pins the Session a view targets for as long as it is on screen, and returns
@@ -40,8 +41,11 @@ let pinnedSession: string | undefined;
  */
 export function pinSession(name: string): () => void {
   pinnedSession = name;
+  // Released by identity: a selection made while pinned moves the pin to the
+  // new name, and a release that compared names would then leave it behind.
+  const token = ++pinToken;
   return () => {
-    if (pinnedSession === name) pinnedSession = undefined;
+    if (pinToken === token) pinnedSession = undefined;
   };
 }
 

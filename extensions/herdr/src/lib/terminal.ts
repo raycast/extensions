@@ -263,6 +263,11 @@ async function wezTermPlacement(executable: string, options: LaunchOptions): Pro
   return windowId ? ["--window-id", windowId] : ["--new-window"];
 }
 
+/** A custom launcher places the Client itself, so the extension cannot say where it went. */
+export function hasCustomTerminalLauncher(): boolean {
+  return Boolean(getHerdrPreferences().customTerminalLauncher?.trim());
+}
+
 export async function launchHerdrInTerminal(args: string[] = [], options: LaunchOptions = {}): Promise<LaunchResult> {
   const binary = await resolveHerdrBinary();
   const application = selectedApplication();
