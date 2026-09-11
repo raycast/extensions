@@ -1,6 +1,6 @@
 # Browser Router Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release of Browser Router for Windows.
 - Route search queries and URLs directly from Raycast to any installed browser and profile.
