@@ -4,11 +4,10 @@ import type { SearchResult } from "./search-model";
 
 type FileAppearance = { label: string; icon: Image.ImageLike };
 
-const appearance = (
-  label: string,
-  source: Icon,
-  tintColor: Color.ColorLike,
-): FileAppearance => ({ label, icon: { source, tintColor } });
+const appearance = (label: string, source: Icon, tintColor: Color.ColorLike): FileAppearance => ({
+  label,
+  icon: { source, tintColor },
+});
 
 // Share the same visual language between search results and filter choices.
 const FILE_APPEARANCES: Record<string, FileAppearance> = {
@@ -129,9 +128,7 @@ const EXTENSIONS: Record<string, string[]> = {
 };
 
 const TYPE_BY_EXTENSION = new Map(
-  Object.entries(EXTENSIONS).flatMap(([type, extensions]) =>
-    extensions.map((extension) => [extension, type] as const),
-  ),
+  Object.entries(EXTENSIONS).flatMap(([type, extensions]) => extensions.map((extension) => [extension, type] as const)),
 );
 
 export function fileTypeAppearance(type: string): FileAppearance {
@@ -141,20 +138,14 @@ export function fileTypeAppearance(type: string): FileAppearance {
 export function resultAppearance(result: SearchResult): FileAppearance {
   // Filename search can omit file_type. Prefer original format metadata, then
   // the original path/name; never use the generated PDF/thumbnail's extension.
-  const extensions = [
-    result.file_extension,
-    extname(result.original_file),
-    extname(result.filename),
-  ];
+  const extensions = [result.file_extension, extname(result.original_file), extname(result.filename)];
   for (const candidate of extensions) {
     const extension = candidate?.trim().toLowerCase().replace(/^\./, "");
     const type = extension && TYPE_BY_EXTENSION.get(extension);
     if (type) {
       const visual = fileTypeAppearance(type);
-      if (extension === "xls" || extension === "xlsx")
-        return { ...visual, label: "Excel Spreadsheet" };
-      if (extension === "key")
-        return { ...visual, label: "Keynote Presentation" };
+      if (extension === "xls" || extension === "xlsx") return { ...visual, label: "Excel Spreadsheet" };
+      if (extension === "key") return { ...visual, label: "Keynote Presentation" };
       return visual;
     }
   }
@@ -163,7 +154,5 @@ export function resultAppearance(result: SearchResult): FileAppearance {
     video: "videos",
     note: "notes",
   };
-  return fileTypeAppearance(
-    fallbackType[result.file_type ?? ""] ?? result.file_type ?? "document",
-  );
+  return fileTypeAppearance(fallbackType[result.file_type ?? ""] ?? result.file_type ?? "document");
 }

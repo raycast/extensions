@@ -61,23 +61,12 @@ test("details preserve pages, slides, sheets, zero timestamps, transcript, and l
     most_relevant_slides: [{ slide: 4 }],
     most_relevant_sheets: [{ name: "Revenue" }],
     most_relevant_timestamps: [{ timestamp: 0 }, { timestamp: 3665 }],
-    most_relevant_audio_segments: [
-      { start: 0, end: 12, content: "Cancellation terms" },
-    ],
+    most_relevant_audio_segments: [{ start: 0, end: 12, content: "Cancellation terms" }],
     most_relevant_lines: [{ start_line: 2, end_line: 6, content: "code" }],
   };
   assert.deepEqual(
     resultMatches(result).map((match) => match.label),
-    [
-      "Page 12",
-      "Page 3",
-      "Slide 4",
-      "Sheet: Revenue",
-      "0:00",
-      "1:01:05",
-      "0:00 – 0:12",
-      "Line 2–6",
-    ],
+    ["Page 12", "Page 3", "Slide 4", "Sheet: Revenue", "0:00", "1:01:05", "0:00 – 0:12", "Line 2–6"],
   );
   assert.match(resultPlainText(result), /Cancellation terms/);
   assert.equal(formatTime(59.9), "0:59");
@@ -96,9 +85,7 @@ test("indexed content cannot insert active Markdown images, links, or HTML", () 
     ],
   };
   const markdown = resultMarkdown(result);
-  assert.ok(
-    markdown.includes("\\!\\[tracking\\]\\(https://example\\.com/image\\)"),
-  );
+  assert.ok(markdown.includes("\\!\\[tracking\\]\\(https://example\\.com/image\\)"));
   assert.ok(markdown.includes("&lt;img"));
   assert.ok(resultPlainText(result).includes("![tracking]"));
 });
@@ -106,14 +93,7 @@ test("indexed content cannot insert active Markdown images, links, or HTML", () 
 test("empty results, null match arrays, and malformed rows do not break rendering", () => {
   assert.deepEqual(parseSearchResponse({ results: [] })[0].results, []);
   assert.deepEqual(parseSearchResponse({ results: { superseded: true } }), []);
-  assert.deepEqual(
-    parseSearchResponse({ results: [null, { filename: "missing path" }] })[0]
-      .results,
-    [],
-  );
-  assert.throws(
-    () => parseSearchResponse({ unexpected: true }),
-    /unexpected result format/,
-  );
+  assert.deepEqual(parseSearchResponse({ results: [null, { filename: "missing path" }] })[0].results, []);
+  assert.throws(() => parseSearchResponse({ unexpected: true }), /unexpected result format/);
   assert.deepEqual(resultMatches({ filename: "a", original_file: "/a" }), []);
 });

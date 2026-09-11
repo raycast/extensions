@@ -43,13 +43,7 @@ export const FILE_TYPES = [
 ] as const;
 
 export function fileTypeFilters(selected: string[]): string[] {
-  return [
-    ...new Set(
-      FILE_TYPES.filter((type) => selected.includes(type.value)).flatMap(
-        (type) => [...type.filters],
-      ),
-    ),
-  ];
+  return [...new Set(FILE_TYPES.filter((type) => selected.includes(type.value)).flatMap((type) => [...type.filters]))];
 }
 
 export function fileTypeLabel(selected: string[]): string {
@@ -105,28 +99,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function parseRows(rows: unknown): SearchResult[] {
-  if (!Array.isArray(rows))
-    throw new Error(
-      "Fenn returned an unexpected result format. Update Fenn and try again.",
-    );
+  if (!Array.isArray(rows)) throw new Error("Fenn returned an unexpected result format. Update Fenn and try again.");
   return rows.filter(
     (row): row is SearchResult =>
-      isRecord(row) &&
-      typeof row.original_file === "string" &&
-      typeof row.filename === "string",
+      isRecord(row) && typeof row.original_file === "string" && typeof row.filename === "string",
   );
 }
 
 export function parseSearchResponse(payload: unknown): ResultSection[] {
-  if (!isRecord(payload))
-    throw new Error("Fenn returned an unexpected response.");
+  if (!isRecord(payload)) throw new Error("Fenn returned an unexpected response.");
   const results = payload.results;
   if (isRecord(results) && results.superseded === true) return [];
-  if (
-    isRecord(results) &&
-    results.mode === "discover" &&
-    isRecord(results.sections)
-  ) {
+  if (isRecord(results) && results.mode === "discover" && isRecord(results.sections)) {
     const sections = results.sections;
     return ["exact", "filename", "keyword", "semantic"].map((key) => ({
       key,
@@ -151,9 +135,7 @@ export function formatTime(seconds: number): string {
   const hours = Math.floor(value / 3600);
   const minutes = Math.floor((value % 3600) / 60);
   const rest = String(value % 60).padStart(2, "0");
-  return hours
-    ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}`
-    : `${minutes}:${rest}`;
+  return hours ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}` : `${minutes}:${rest}`;
 }
 
 function numeric(value: unknown): value is number {
@@ -161,45 +143,31 @@ function numeric(value: unknown): value is number {
 }
 
 export function resultTitle(result: SearchResult): string {
-  const extension =
-    result.file_extension?.trim() || extname(result.original_file);
+  const extension = result.file_extension?.trim() || extname(result.original_file);
   if (!extension) return result.filename;
   const suffix = extension.startsWith(".") ? extension : `.${extension}`;
-  return result.filename.toLowerCase().endsWith(suffix.toLowerCase())
-    ? result.filename
-    : `${result.filename}${suffix}`;
+  return result.filename.toLowerCase().endsWith(suffix.toLowerCase()) ? result.filename : `${result.filename}${suffix}`;
 }
 
 function excerptContent(content: string, result: SearchResult): string {
   // Fenn prepends the source name when indexing chunks. Remove only that
   // generated first-line header, leaving the actual excerpt untouched.
-  const names = new Set([
-    result.filename,
-    resultTitle(result),
-    basename(result.original_file),
-  ]);
-  for (const name of [...names])
-    names.add(name.slice(0, name.length - extname(name).length));
+  const names = new Set([result.filename, resultTitle(result), basename(result.original_file)]);
+  for (const name of [...names]) names.add(name.slice(0, name.length - extname(name).length));
   const firstLineEnd = content.indexOf("\n");
   if (firstLineEnd < 0) return content;
   const firstLine = content.slice(0, firstLineEnd).trim();
   for (const name of names) {
     if (!name || !firstLine.startsWith(name)) continue;
     const suffix = firstLine.slice(name.length);
-    if (
-      suffix === ":" ||
-      suffix === " (Audio):" ||
-      /^ \(Sheet: .+\):$/.test(suffix)
-    ) {
+    if (suffix === ":" || suffix === " (Audio):" || /^ \(Sheet: .+\):$/.test(suffix)) {
       return content.slice(firstLineEnd + 1).trimStart();
     }
   }
   return content;
 }
 
-export function resultMatches(
-  result: SearchResult,
-): { label: string; content?: string }[] {
+export function resultMatches(result: SearchResult): { label: string; content?: string }[] {
   const matches: { label: string; content?: string }[] = [];
   const add = (rows: unknown, label: (match: Match) => string | undefined) => {
     if (!Array.isArray(rows)) return;
@@ -209,33 +177,18 @@ export function resultMatches(
       if (text)
         matches.push({
           label: text,
-          content:
-            typeof row.content === "string"
-              ? excerptContent(row.content, result)
-              : undefined,
+          content: typeof row.content === "string" ? excerptContent(row.content, result) : undefined,
         });
     }
   };
-  add(result.most_relevant_pages, (m) =>
-    numeric(m.page) ? `Page ${m.page}` : undefined,
-  );
-  add(result.most_relevant_slides, (m) =>
-    numeric(m.slide) ? `Slide ${m.slide}` : undefined,
-  );
+  add(result.most_relevant_pages, (m) => (numeric(m.page) ? `Page ${m.page}` : undefined));
+  add(result.most_relevant_slides, (m) => (numeric(m.slide) ? `Slide ${m.slide}` : undefined));
   add(result.most_relevant_sheets, (m) =>
-    typeof m.name === "string" && m.name
-      ? `Sheet: ${m.name}`
-      : numeric(m.number)
-        ? `Sheet ${m.number}`
-        : undefined,
+    typeof m.name === "string" && m.name ? `Sheet: ${m.name}` : numeric(m.number) ? `Sheet ${m.number}` : undefined,
   );
-  add(result.most_relevant_timestamps, (m) =>
-    numeric(m.timestamp) ? formatTime(m.timestamp) : undefined,
-  );
+  add(result.most_relevant_timestamps, (m) => (numeric(m.timestamp) ? formatTime(m.timestamp) : undefined));
   add(result.most_relevant_audio_segments, (m) =>
-    numeric(m.start)
-      ? `${formatTime(m.start)}${numeric(m.end) ? ` – ${formatTime(m.end)}` : ""}`
-      : undefined,
+    numeric(m.start) ? `${formatTime(m.start)}${numeric(m.end) ? ` – ${formatTime(m.end)}` : ""}` : undefined,
   );
   add(result.most_relevant_lines, (m) =>
     numeric(m.start_line)
@@ -244,8 +197,7 @@ export function resultMatches(
   );
   add(
     result.most_relevant_email_segments,
-    (m) =>
-      `Excerpt ${numeric(m.chunk_index) ? m.chunk_index + 1 : matches.length + 1}`,
+    (m) => `Excerpt ${numeric(m.chunk_index) ? m.chunk_index + 1 : matches.length + 1}`,
   );
   return matches;
 }
@@ -253,8 +205,7 @@ export function resultMatches(
 export function generatedImageUrl(result: SearchResult): string | undefined {
   const imagePath = result.generated_file;
   if (typeof imagePath !== "string" || !isAbsolute(imagePath)) return undefined;
-  if (!/\.(png|jpe?g|webp|gif|bmp|tiff?|heic|heif|avif)$/i.test(imagePath))
-    return undefined;
+  if (!/\.(png|jpe?g|webp|gif|bmp|tiff?|heic|heif|avif)$/i.test(imagePath)) return undefined;
   // Keep previews local and encode spaces, parentheses, and other characters
   // in the indexed path before placing it in a Markdown image destination.
   const url = pathToFileURL(imagePath);
@@ -262,10 +213,7 @@ export function generatedImageUrl(result: SearchResult): string | undefined {
   return url.href;
 }
 
-export function resultMarkdown(
-  result: SearchResult,
-  previewUrl?: string,
-): string {
+export function resultMarkdown(result: SearchResult, previewUrl?: string): string {
   const matches = resultMatches(result);
   const preview = previewUrl ?? generatedImageUrl(result);
   return (
@@ -286,8 +234,6 @@ export function resultPlainText(result: SearchResult): string {
   return [
     resultTitle(result),
     result.original_file,
-    ...resultMatches(result).map(
-      (match) => `${match.label}${match.content ? `\n${match.content}` : ""}`,
-    ),
+    ...resultMatches(result).map((match) => `${match.label}${match.content ? `\n${match.content}` : ""}`),
   ].join("\n\n");
 }

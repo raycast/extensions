@@ -30,13 +30,7 @@ import {
   SearchResult,
 } from "./search-model";
 
-function FileTypePicker({
-  selected,
-  onApply,
-}: {
-  selected: string[];
-  onApply: (types: string[]) => void;
-}) {
+function FileTypePicker({ selected, onApply }: { selected: string[]; onApply: (types: string[]) => void }) {
   const [types, setTypes] = useState(selected);
   const { pop } = useNavigation();
   return (
@@ -55,12 +49,7 @@ function FileTypePicker({
       }
     >
       <Form.Description text="Choose one or more file types. Leave the selection empty to search all types." />
-      <Form.TagPicker
-        id="fileTypes"
-        title="File Types"
-        value={types}
-        onChange={setTypes}
-      >
+      <Form.TagPicker id="fileTypes" title="File Types" value={types} onChange={setTypes}>
         {FILE_TYPES.map((type) => (
           <Form.TagPicker.Item
             key={type.value}
@@ -111,29 +100,20 @@ function SearchActions({
       {setupFirst && setupActions}
       {result && (
         <ActionPanel.Section>
-          {localFile && (
-            <Action.Open title="Open File" target={result.original_file} />
-          )}
+          {localFile && <Action.Open title="Open File" target={result.original_file} />}
           <Action.CopyToClipboard
             title="Copy Match Details"
             content={resultPlainText(result)}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
-          {localFile && (
-            <Action.ShowInFinder
-              path={result.original_file}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
-            />
-          )}
+          {localFile && <Action.ShowInFinder path={result.original_file} shortcut={Keyboard.Shortcut.Common.Refresh} />}
           <Action.CopyToClipboard
             title="Copy File Path"
             content={result.original_file}
             shortcut={Keyboard.Shortcut.Common.CopyName}
           />
           <Action
-            title={
-              showMetadata ? "Hide File Information" : "Show File Information"
-            }
+            title={showMetadata ? "Hide File Information" : "Show File Information"}
             icon={Icon.Info}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
             onAction={onToggleMetadata}
@@ -164,31 +144,19 @@ function SearchActions({
       </ActionPanel.Section>
       {!setupFirst && setupActions}
       <ActionPanel.Section>
-        <Action
-          title="Extension Settings"
-          icon={Icon.Gear}
-          onAction={openExtensionPreferences}
-        />
+        <Action title="Extension Settings" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </ActionPanel.Section>
     </ActionPanel>
   );
 }
 
 export default function SearchFennCommand() {
-  const { apiToken } = getPreferenceValues<{ apiToken?: string }>();
+  const { apiToken } = getPreferenceValues<Preferences>();
   const [query, setQuery] = useState("");
-  const [savedMode, setMode] = useCachedState<string>(
-    "search-mode",
-    "discover",
-  );
+  const [savedMode, setMode] = useCachedState<string>("search-mode", "discover");
   const mode = isSearchMode(savedMode) ? savedMode : "discover";
-  const [savedFileTypes, setFileTypes] = useCachedState<string[]>(
-    "file-types",
-    [],
-  );
-  const fileTypes = savedFileTypes.filter((value) =>
-    FILE_TYPES.some((type) => type.value === value),
-  );
+  const [savedFileTypes, setFileTypes] = useCachedState<string[]>("file-types", []);
+  const fileTypes = savedFileTypes.filter((value) => FILE_TYPES.some((type) => type.value === value));
   const filterKey = JSON.stringify(fileTypes);
   const [sections, setSections] = useState<ResultSection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -210,8 +178,7 @@ export default function SearchFennCommand() {
     const text = query.trim();
     if (!text || text.length > 1000) {
       setIsLoading(false);
-      if (text.length > 1000)
-        setError(new Error("Keep your query under 1,001 characters."));
+      if (text.length > 1000) setError(new Error("Keep your query under 1,001 characters."));
       return () => controller.abort();
     }
     setIsLoading(true);
@@ -228,19 +195,13 @@ export default function SearchFennCommand() {
           apiToken,
           controller.signal,
         );
-        if (!controller.signal.aborted && requestId.current === id)
-          setSections(next);
+        if (!controller.signal.aborted && requestId.current === id) setSections(next);
       } catch (cause) {
         if (!controller.signal.aborted && requestId.current === id) {
-          setError(
-            cause instanceof Error
-              ? cause
-              : new Error("Search failed. Please retry."),
-          );
+          setError(cause instanceof Error ? cause : new Error("Search failed. Please retry."));
         }
       } finally {
-        if (!controller.signal.aborted && requestId.current === id)
-          setIsLoading(false);
+        if (!controller.signal.aborted && requestId.current === id) setIsLoading(false);
       }
     }, 400);
     return () => {
@@ -257,10 +218,7 @@ export default function SearchFennCommand() {
   }
 
   const filterLabel = fileTypeLabel(fileTypes);
-  const count = sections.reduce(
-    (sum, section) => sum + section.results.length,
-    0,
-  );
+  const count = sections.reduce((sum, section) => sum + section.results.length, 0);
   const selectedResult = sections
     .flatMap((section) =>
       section.results.map((result, index) => ({
@@ -311,11 +269,7 @@ export default function SearchFennCommand() {
           }}
         >
           {SEARCH_MODES.map((item) => (
-            <List.Dropdown.Item
-              key={item.value}
-              title={item.title}
-              value={item.value}
-            />
+            <List.Dropdown.Item key={item.value} title={item.title} value={item.value} />
           ))}
         </List.Dropdown>
       }
@@ -324,9 +278,7 @@ export default function SearchFennCommand() {
         icon={error ? Icon.ExclamationMark : "icon.png"}
         title={
           error
-            ? app === null &&
-              error instanceof FennError &&
-              ["setup", "connection"].includes(error.kind)
+            ? app === null && error instanceof FennError && ["setup", "connection"].includes(error.kind)
               ? "Install Fenn to Get Started"
               : error instanceof FennError
                 ? error.title
@@ -375,36 +327,21 @@ export default function SearchFennCommand() {
                   icon={visual.icon}
                   detail={
                     <List.Item.Detail
-                      markdown={resultMarkdown(
-                        result,
-                        result === selectedResult ? roundedPreview : undefined,
-                      )}
+                      markdown={resultMarkdown(result, result === selectedResult ? roundedPreview : undefined)}
                       metadata={
                         showMetadata ? (
                           <List.Item.Detail.Metadata>
-                            <List.Item.Detail.Metadata.Label
-                              title="Format"
-                              text={visual.label}
-                              icon={visual.icon}
-                            />
-                            <List.Item.Detail.Metadata.Label
-                              title="Path"
-                              text={result.original_file}
-                            />
+                            <List.Item.Detail.Metadata.Label title="Format" text={visual.label} icon={visual.icon} />
+                            <List.Item.Detail.Metadata.Label title="Path" text={result.original_file} />
                             <List.Item.Detail.Metadata.Label
                               title="Search Mode"
                               text={
                                 mode === "discover"
                                   ? `Discover · ${section.title}`
-                                  : SEARCH_MODES.find(
-                                      (item) => item.value === mode,
-                                    )?.title
+                                  : SEARCH_MODES.find((item) => item.value === mode)?.title
                               }
                             />
-                            <List.Item.Detail.Metadata.Label
-                              title="File Types"
-                              text={filterLabel}
-                            />
+                            <List.Item.Detail.Metadata.Label title="File Types" text={filterLabel} />
                             {matches.length > 0 && (
                               <List.Item.Detail.Metadata.Label
                                 title="Returned Matches"

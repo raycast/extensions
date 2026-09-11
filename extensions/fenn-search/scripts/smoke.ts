@@ -25,19 +25,13 @@ async function main() {
     );
     const rows = sections.flatMap((section) => section.results);
     for (const result of rows) {
-      assert.match(
-        result.original_file.toLowerCase(),
-        /\.(pdf|mp3|wav|flac|aac|aiff|ogg|m4a)$/,
-      );
+      assert.match(result.original_file.toLowerCase(), /\.(pdf|mp3|wav|flac|aac|aiff|ogg|m4a)$/);
     }
     console.log(
       JSON.stringify({
         mode: mode.value,
         files: rows.length,
-        locations: rows.reduce(
-          (sum, row) => sum + resultMatches(row).length,
-          0,
-        ),
+        locations: rows.reduce((sum, row) => sum + resultMatches(row).length, 0),
         elapsedMs: Date.now() - started,
       }),
     );

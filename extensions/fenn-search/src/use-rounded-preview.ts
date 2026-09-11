@@ -24,8 +24,7 @@ async function roundedPreviewUrl(path: string, signal: AbortSignal) {
   }[type];
   // Dimensions are raw pixels. Leave potentially rotated EXIF/HEIF images
   // to Raycast so their orientation is preserved.
-  if (!mime || !width || !height || data.includes(Buffer.from("Exif\0\0")))
-    return undefined;
+  if (!mime || !width || !height || data.includes(Buffer.from("Exif\0\0"))) return undefined;
   const displayWidth = 320;
   const displayHeight = (height / width) * displayWidth;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${displayWidth}" height="${displayHeight}" viewBox="0 0 ${displayWidth} ${displayHeight}">

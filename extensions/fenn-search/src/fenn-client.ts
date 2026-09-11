@@ -3,12 +3,7 @@ import { constants } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { FENN_MIN_VERSION } from "./fenn-config";
-import {
-  fileTypeFilters,
-  generatedImageUrl,
-  parseSearchResponse,
-  SearchMode,
-} from "./search-model";
+import { fileTypeFilters, generatedImageUrl, parseSearchResponse, SearchMode } from "./search-model";
 
 const ORIGIN = "http://127.0.0.1:5001";
 const TOKEN_PATH = join(homedir(), ".fenn", "user_preferences", "mcp_token");
@@ -70,37 +65,22 @@ export async function readToken(override?: string): Promise<string> {
   );
 }
 
-export function responseError(
-  status: number,
-  payload: Record<string, unknown>,
-  mode: SearchMode,
-): Error {
+export function responseError(status: number, payload: Record<string, unknown>, mode: SearchMode): Error {
   if (payload.index_optimization)
-    return new FennError(
-      "optimization",
-      "Fenn is optimizing its index. Wait for it to finish, then retry.",
-    );
+    return new FennError("optimization", "Fenn is optimizing its index. Wait for it to finish, then retry.");
   if (status === 401)
     return new FennError(
       "authentication",
       "Fenn could not authenticate this extension. Clear any old Fenn API Token in Extension Settings, open Fenn, then retry.",
     );
   if (status === 423)
-    return new FennError(
-      "verification",
-      "Open Fenn and wait for license verification to finish, then retry.",
-    );
+    return new FennError("verification", "Open Fenn and wait for license verification to finish, then retry.");
   if (status === 403)
     return new FennError(
       "license",
       "Open Fenn and activate your license using the key from your purchase email. Finish license verification, then retry.",
     );
-  if (
-    status === 404 ||
-    (status === 400 &&
-      mode === "discover" &&
-      String(payload.error).includes("mode"))
-  ) {
+  if (status === 404 || (status === 400 && mode === "discover" && String(payload.error).includes("mode"))) {
     return new FennError(
       "update",
       `Update Fenn to ${FENN_MIN_VERSION} or newer. Download the latest version, quit the old Fenn app, install the update, and reopen Fenn before retrying.`,
@@ -111,18 +91,10 @@ export function responseError(
       "setup",
       `Open Fenn ${FENN_MIN_VERSION} or newer and finish setup, then retry. The connection is configured automatically.`,
     );
-  return new Error(
-    typeof payload.error === "string"
-      ? payload.error
-      : `Fenn returned an error (HTTP ${status}).`,
-  );
+  return new Error(typeof payload.error === "string" ? payload.error : `Fenn returned an error (HTTP ${status}).`);
 }
 
-export async function searchFenn(
-  request: SearchRequest,
-  tokenOverride: string | undefined,
-  signal: AbortSignal,
-) {
+export async function searchFenn(request: SearchRequest, tokenOverride: string | undefined, signal: AbortSignal) {
   const token = await readToken(tokenOverride);
   signal.throwIfAborted();
   const timeout = AbortSignal.timeout(120_000);
@@ -141,9 +113,7 @@ export async function searchFenn(
   } catch (error) {
     if (signal.aborted) throw error;
     if (timeout.aborted)
-      throw new Error(
-        "Fenn took too long to respond. Wait for indexing to finish or try Keyword or Filename mode.",
-      );
+      throw new Error("Fenn took too long to respond. Wait for indexing to finish or try Keyword or Filename mode.");
     throw new FennError(
       "connection",
       `Cannot connect to Fenn. Open Fenn ${FENN_MIN_VERSION} or newer, wait for startup, and keep it running while you search. If Fenn is not installed, choose Download Fenn.`,
@@ -153,12 +123,9 @@ export async function searchFenn(
   try {
     payload = (await response.json()) as Record<string, unknown>;
   } catch {
-    throw new Error(
-      "Fenn returned an unreadable response. Update or restart Fenn and retry.",
-    );
+    throw new Error("Fenn returned an unreadable response. Update or restart Fenn and retry.");
   }
-  if (!response.ok)
-    throw responseError(response.status, payload ?? {}, request.mode);
+  if (!response.ok) throw responseError(response.status, payload ?? {}, request.mode);
   const sections = parseSearchResponse(payload);
   // Missing previews (e.g. an offline drive or cleared image cache) should
   // not leave broken image placeholders or prevent showing search details.
@@ -170,10 +137,7 @@ export async function searchFenn(
         const imagePath = result.generated_file!;
         let readable = previews.get(imagePath);
         if (!readable) {
-          readable = Promise.all([
-            stat(imagePath),
-            access(imagePath, constants.R_OK),
-          ])
+          readable = Promise.all([stat(imagePath), access(imagePath, constants.R_OK)])
             .then(([info]) => info.isFile())
             .catch(() => false);
           previews.set(imagePath, readable);

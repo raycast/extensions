@@ -12,11 +12,7 @@ import {
 } from "@raycast/api";
 import { access } from "node:fs/promises";
 import { useEffect, useState } from "react";
-import {
-  FENN_BUNDLE_ID,
-  FENN_DOWNLOAD_URL,
-  FENN_MIN_VERSION,
-} from "./fenn-config";
+import { FENN_BUNDLE_ID, FENN_DOWNLOAD_URL, FENN_MIN_VERSION } from "./fenn-config";
 
 async function findFenn(): Promise<Application | null> {
   const apps = await getApplications();
@@ -140,10 +136,7 @@ function SetupGuide({ app, needsUpdate, onRetry }: SetupActionsProps) {
   );
 }
 
-function FennLaunchActions({
-  app,
-  needsUpdate,
-}: Omit<SetupActionsProps, "onRetry">) {
+function FennLaunchActions({ app, needsUpdate }: Omit<SetupActionsProps, "onRetry">) {
   const download = (
     <Action.OpenInBrowser
       title={needsUpdate ? "Download Latest Fenn" : "Download Fenn"}
