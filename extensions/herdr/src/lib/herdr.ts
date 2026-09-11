@@ -166,6 +166,14 @@ export async function focusResource(kind: "workspace" | "tab" | "pane" | "agent"
     await focusPane(id);
     return;
   }
+  // `agent focus` moves the server's focus but leaves the attached client on
+  // the tab it is drawing, so the agent's pane is focused again through the
+  // tab-switching path. The call answers with the agent, naming that pane.
+  if (kind === "agent") {
+    const focused = await runHerdrJson<{ agent: PaneInfo }>(["agent", "focus", id]);
+    if (focused.agent?.pane_id) await focusPane(focused.agent.pane_id);
+    return;
+  }
   await runHerdr([kind, "focus", id]);
 }
 
