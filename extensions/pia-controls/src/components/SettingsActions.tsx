@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Icon, Keyboard, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { PIA_APP_PATH, setAllowLan, setProtocol, setRequestPortForward } from "../lib/pia";
+import { openPiaApp, setAllowLan, setProtocol, setRequestPortForward } from "../lib/pia";
 import { Protocol, VpnStatus } from "../types";
 
 interface Props {
@@ -33,6 +33,12 @@ async function applySetting(change: () => Promise<void>, successMessage: string,
  * Each action renders only when its value was read, since toggling an unknown
  * value would do the opposite of what the label promises.
  */
+async function openApp(appPath: string | undefined) {
+  if (!(await openPiaApp(appPath))) {
+    await showToast({ style: Toast.Style.Failure, title: "Could not open the PIA app" });
+  }
+}
+
 export function SettingsActions({ status, cliPath, appPath, onSettingChanged }: Props) {
   return (
     <ActionPanel.Section title="Settings">
@@ -84,7 +90,7 @@ export function SettingsActions({ status, cliPath, appPath, onSettingChanged }: 
         title="Open Pia App"
         icon={Icon.AppWindow}
         shortcut={Keyboard.Shortcut.Common.Open}
-        onAction={() => open(appPath ?? PIA_APP_PATH)}
+        onAction={() => openApp(appPath)}
       />
     </ActionPanel.Section>
   );

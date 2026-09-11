@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, open } from "@raycast/api";
+import { openPiaApp } from "../lib/pia";
 import { SetupStage } from "../types";
 
 interface Props {
@@ -56,7 +57,9 @@ export function SetupView({ stage, appPath }: Props) {
       markdown={`<img src="extension-icon.png" alt="PIA" height="96" />\n\n# ${title}\n\n${body}`}
       actions={
         <ActionPanel>
-          {appPath && <Action title="Open Pia App" icon={Icon.AppWindow} onAction={() => open(appPath)} />}
+          {stage !== "not-installed" && (
+            <Action title="Open Pia App" icon={Icon.AppWindow} onAction={() => void openPiaApp(appPath)} />
+          )}
           {stage === "not-installed" && (
             <Action title="Download Pia" icon={Icon.Download} onAction={() => open(DOWNLOAD_URL)} />
           )}

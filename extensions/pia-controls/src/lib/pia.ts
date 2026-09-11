@@ -42,6 +42,29 @@ async function findAppPathBySpotlight(): Promise<string | undefined> {
   }
 }
 
+/**
+ * Opens PIA by bundle identifier when its location is unknown, so this works
+ * for installs outside /Applications instead of guessing a path. Returns false
+ * rather than throwing, so callers can report a failure instead of no-opping.
+ */
+export async function openPiaApp(appPath?: string): Promise<boolean> {
+  const attempts = appPath
+    ? [
+        ["-g", appPath],
+        ["-g", "-b", PIA_BUNDLE_ID],
+      ]
+    : [["-g", "-b", PIA_BUNDLE_ID]];
+  for (const args of attempts) {
+    try {
+      await run("/usr/bin/open", args, { timeout: 5000 });
+      return true;
+    } catch {
+      continue;
+    }
+  }
+  return false;
+}
+
 async function piactl(cliPath: string, args: string[], timeout?: number) {
   return run(cliPath, args, { timeout });
 }

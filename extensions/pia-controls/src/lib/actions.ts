@@ -1,4 +1,4 @@
-import { closeMainWindow, LocalStorage, open, showHUD } from "@raycast/api";
+import { closeMainWindow, LocalStorage, showHUD } from "@raycast/api";
 import {
   connect,
   detectSetup,
@@ -9,6 +9,7 @@ import {
   setRegion,
   waitForReconnect,
   waitForState,
+  openPiaApp,
 } from "./pia";
 import { AUTO_REGION_ENTRY, RECENTS_KEY } from "./regions";
 import { Region } from "../types";
@@ -73,7 +74,7 @@ export async function connectToRegion(region: Region): Promise<void> {
 
   const setup = await detectSetup();
   if (setup.stage !== "ready" || !setup.cliPath) {
-    if (setup.appPath) void open(setup.appPath);
+    void openPiaApp(setup.appPath);
     await showHUD("PIA isn't ready — opening the app");
     return;
   }
@@ -115,7 +116,7 @@ export async function connectCurrent(): Promise<void> {
 
   const setup = await detectSetup();
   if (setup.stage !== "ready" || !setup.cliPath) {
-    if (setup.appPath) void open(setup.appPath);
+    void openPiaApp(setup.appPath);
     await showHUD("PIA isn't ready — opening the app");
     return;
   }
@@ -149,7 +150,7 @@ export async function disconnectVpn(): Promise<void> {
 
   const setup = await detectSetup();
   if (setup.stage !== "ready" || !setup.cliPath) {
-    if (setup.appPath) void open(setup.appPath);
+    void openPiaApp(setup.appPath);
     await showHUD("PIA isn't ready — opening the app");
     return;
   }
@@ -169,7 +170,7 @@ export async function toggleVpn(): Promise<void> {
 
   const setup = await detectSetup();
   if (setup.stage !== "ready" || !setup.cliPath) {
-    if (setup.appPath) void open(setup.appPath);
+    void openPiaApp(setup.appPath);
     await showHUD("PIA isn't ready — opening the app");
     return;
   }
