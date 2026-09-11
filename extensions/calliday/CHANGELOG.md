@@ -1,6 +1,6 @@
 # Calliday Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-11
 
 - Current Activity: what Calliday is tracking right now, today's total, and
   the running timer with a stop action.
