@@ -1270,7 +1270,6 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       args: ["-y", "@gitdealflow/mcp-signal@latest"],
     },
   },
-
   {
     name: "vibe-prospecting",
     title: "Vibe Prospecting",
