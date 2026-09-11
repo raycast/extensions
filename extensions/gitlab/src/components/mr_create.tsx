@@ -387,9 +387,6 @@ export function MREditForm(props: { mr: MergeRequest; onUpdated?: () => void }) 
         title: finalTitle,
       } as unknown as Record<string, unknown>);
       delete formValues.is_draft;
-      if (values.remove_source_branch === false) {
-        formValues.remove_source_branch = "false";
-      }
       await showToast({ style: Toast.Style.Animated, title: "Updating Merge Request..." });
       await gitlab.updateMR(props.mr.project_id, props.mr.iid, formValues);
       await showToast(Toast.Style.Success, "Merge Request updated", "Merge Request update successful");
