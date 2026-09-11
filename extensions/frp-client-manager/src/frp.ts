@@ -309,7 +309,12 @@ export async function restartService(): Promise<void> {
 
 export async function parseFrpcToml(configPath: string): Promise<FrpcConfig> {
   const text = await readFile(configPath, "utf8");
-  const parsed: unknown = parseToml(text);
+  // frpc renders Go template syntax before parsing TOML, so a config using
+  // templates is not valid TOML on disk. Expand the two documented idioms
+  // (parseNumberRangePair loops and .Envs lookups) so templated configs can
+  // still be displayed.
+  const rendered = text.includes("{{") ? renderFrpcTemplate(text) : text;
+  const parsed: unknown = parseToml(rendered);
   if (!isRecord(parsed)) {
     throw new Error("frpc.toml did not parse to a table");
   }
@@ -975,6 +980,39 @@ function toProxyConfig(value: unknown): ProxyConfig | undefined {
     config.remotePort = remotePort;
   }
   return config;
+}
+
+function renderFrpcTemplate(text: string): string {
+  const rangeRe =
+    /{{-?\s*range\s+\$\w+\s*,\s*\$(\w+)\s*:=\s*parseNumberRangePair\s+"(\d+)-(\d+)"\s+"(\d+)-(\d+)"\s*-?}}([\s\S]*?){{-?\s*end\s*-?}}/g;
+  const expanded = text.replace(
+    rangeRe,
+    (match, varName: string, a1, a2, b1, b2, body: string) => {
+      const startA = Number(a1);
+      const endA = Number(a2);
+      const startB = Number(b1);
+      const endB = Number(b2);
+      const count = Math.min(endA - startA, endB - startB) + 1;
+      if (!Number.isFinite(count) || count <= 0 || count > 1000) {
+        return match;
+      }
+      const valueRe = new RegExp(
+        `{{-?\\s*\\$${varName}\\.(First|Second)\\s*-?}}`,
+        "g",
+      );
+      let out = "";
+      for (let i = 0; i < count; i++) {
+        out += body.replace(valueRe, (_m, which: string) =>
+          String(which === "First" ? startA + i : startB + i),
+        );
+      }
+      return out;
+    },
+  );
+  return expanded.replace(
+    /{{-?\s*\.Envs\.(\w+)\s*-?}}/g,
+    (_m, name: string) => process.env[name] ?? "",
+  );
 }
 
 function toVisitorConfig(value: unknown): ProxyConfig | undefined {
