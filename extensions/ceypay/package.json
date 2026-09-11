@@ -5,7 +5,10 @@
   "description": "Search CeyPay documentation and API reference — accept crypto payments, settle in Sri Lankan Rupees.",
   "icon": "icon.png",
   "author": "kasuncfdo",
-  "categories": ["Documentation", "Developer Tools"],
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -60,5 +63,8 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest run"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

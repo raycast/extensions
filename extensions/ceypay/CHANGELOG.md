@@ -1,6 +1,6 @@
 # CeyPay Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-11
 
 - Search CeyPay guides, integrations, and reference pages, filtered by section
 - Read any docs page inside Raycast without opening a browser
