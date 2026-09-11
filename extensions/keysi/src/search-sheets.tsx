@@ -76,11 +76,7 @@ export default function Command() {
                       }}
                     />
                   ) : null}
-                  <Action
-                    title="Open in Keysi"
-                    icon={Icon.AppWindow}
-                    onAction={() => showShortcuts(shortcut.title)}
-                  />
+                  <Action title="Open in Keysi" icon={Icon.AppWindow} onAction={() => showShortcuts(shortcut.title)} />
                   <Action.CopyToClipboard
                     title="Copy Command Name"
                     content={shortcut.title}

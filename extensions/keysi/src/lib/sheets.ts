@@ -54,35 +54,35 @@ export const BUILTIN_SHEET_DIRS = [
 ];
 
 /**
- * Resolves a `LocalizedText` against the user's preferred languages.
+ * Picks one string out of a `LocalizedText`.
  *
- * Deliberately mirrors `LocalizedText.resolved` rather than just taking
- * `en`: someone running macOS in German who wrote a German sheet should see
- * German here too. Falls back through the base language ("pt" for "pt-BR"),
- * then English, then whatever is there — never empty, because an empty row
- * in a search list is worse than a row in the wrong language.
+ * Something has to: the sheet format allows either a bare string or a map of
+ * BCP-47 tag to string, so a map rendered directly would show
+ * "[object Object]". This is that, and nothing more.
+ *
+ * **English first, deliberately.** An earlier version read the system locale
+ * via `Intl` and matched the user's language, mirroring `LocalizedText.resolved`
+ * on Keysi's Swift side. Raycast's store guidelines say extensions support US
+ * English only and to avoid custom localization, and that rule is right here
+ * even setting the rule aside: every other string this command renders — the
+ * search placeholder, the action names, the empty state — is English, so
+ * resolving rows to German produced a half-German list rather than a German
+ * one. Keysi's own overlay still localizes properly; this is the Raycast
+ * surface and it is English.
+ *
+ * The fallback order is English, then the first tag in sorted order, so the
+ * result is deterministic rather than dependent on JSON key order. Never
+ * returns empty for a non-empty map: a blank row is unselectable in the list
+ * and unfindable by search.
  */
-export function resolve(text: LocalizedText, preferences: string[] = preferredLanguages()): string {
+export function resolve(text: LocalizedText): string {
   if (typeof text === "string") return text;
   const keys = Object.keys(text);
   if (keys.length === 0) return "";
-  for (const pref of preferences) {
-    if (text[pref]) return text[pref];
-    const base = pref.split("-")[0];
-    const match = keys.find((k) => k === base || k.split("-")[0] === base);
-    if (match && text[match]) return text[match];
-  }
-  return text["en"] ?? text[keys.sort()[0]];
-}
-
-function preferredLanguages(): string[] {
-  // Intl reports the resolved locale for this process, which on macOS
-  // follows the user's language order.
-  try {
-    return [Intl.DateTimeFormat().resolvedOptions().locale, "en"];
-  } catch {
-    return ["en"];
-  }
+  if (text["en"]) return text["en"];
+  const englishVariant = keys.sort().find((k) => k.split("-")[0] === "en");
+  if (englishVariant) return text[englishVariant];
+  return text[keys.sort()[0]] ?? "";
 }
 
 export function readSheetsIn(dir: string): Sheet[] {
@@ -117,10 +117,7 @@ export function readSheetsIn(dir: string): Sheet[] {
  * same precedence `CustomSheetStore` applies, so overriding the bundled Vim
  * sheet has the same effect in both places.
  */
-export function loadSheets(
-  builtinDirs: string[] = BUILTIN_SHEET_DIRS,
-  userDir: string = USER_SHEETS_DIR,
-): Sheet[] {
+export function loadSheets(builtinDirs: string[] = BUILTIN_SHEET_DIRS, userDir: string = USER_SHEETS_DIR): Sheet[] {
   const byId = new Map<string, Sheet>();
   for (const dir of builtinDirs) {
     for (const sheet of readSheetsIn(dir)) byId.set(sheet.id, sheet);

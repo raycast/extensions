@@ -36,8 +36,15 @@ test("a missing file is locked and unknown", () => {
   assert.deepEqual(readTier(join(dir, "nope.json")), { unlocked: false, known: false });
 });
 
-test("a corrupt file is locked and unknown rather than throwing", () => {
-  assert.deepEqual(readTier(fileWith("{not json")), { unlocked: false, known: false });
+/**
+ * A corrupt file means Keysi *has* run — so `known` stays true and the user
+ * is shown the Pro screen rather than "install Keysi first". Flagged in
+ * store review: collapsing this into `known: false` told someone who may
+ * already own Pro to go and install the app. Still locked either way; an
+ * unparseable tier file is not proof of anything.
+ */
+test("a corrupt file is locked but known, rather than throwing", () => {
+  assert.deepEqual(readTier(fileWith("{not json")), { unlocked: false, known: true });
 });
 
 /** Anything other than exactly `true` must not unlock. */

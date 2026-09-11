@@ -21,10 +21,24 @@ export interface TierStatus {
 }
 
 export function readTier(path: string = TIER_FILE): TierStatus {
+  let contents: string;
   try {
-    const parsed = JSON.parse(readFileSync(path, "utf8")) as { unlocked?: unknown };
+    contents = readFileSync(path, "utf8");
+  } catch {
+    // No file at all. The overwhelmingly likely cause is that Keysi has
+    // never been run — or is not installed — which needs different wording
+    // from "you need Pro", and `known: false` is what selects it.
+    return { unlocked: false, known: false };
+  }
+  try {
+    const parsed = JSON.parse(contents) as { unlocked?: unknown };
     return { unlocked: parsed.unlocked === true, known: true };
   } catch {
-    return { unlocked: false, known: false };
+    // The file exists but is unreadable, so Keysi *has* run and this is a
+    // corrupt or partially-written file rather than a fresh machine.
+    // Collapsing this into `known: false` told someone who may well own Pro
+    // to go install the app — which was the previous behaviour, and wrong.
+    // Locked either way: an unparseable tier file is not proof of anything.
+    return { unlocked: false, known: true };
   }
 }
