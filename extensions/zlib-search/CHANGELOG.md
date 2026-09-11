@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Bulk Download] - {PR_MERGE_DATE}
+## [Bulk Download] - 2026-09-11
 
 ### Added
 
