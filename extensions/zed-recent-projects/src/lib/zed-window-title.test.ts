@@ -61,6 +61,11 @@ describe("windowTitleMatchesProject", () => {
     expect(windowTitleMatchesProject("Makefile - foo", "foo")).toBe(true);
     expect(windowTitleMatchesProject("foo - Dockerfile", "foo")).toBe(true);
   });
+
+  it("does not treat another uppercase project name as an extensionless file", () => {
+    expect(windowTitleMatchesProject("FOO - BAR", "FOO")).toBe(false);
+    expect(windowTitleMatchesProject("FOO - BAR", "BAR")).toBe(false);
+  });
 });
 
 describe("windowTitleContainsProjectPath", () => {
@@ -119,5 +124,10 @@ describe("findUniqueMatchingWindowTitle", () => {
 
   it("does not accept /foo as matching a /foo-bar path title", () => {
     expect(findUniqueMatchingWindowTitle(["/Users/a/foo-bar/src/main.ts"], "foo", "/Users/a/foo")).toBe(null);
+  });
+
+  it("does not focus the BAR window when selecting FOO from FOO - BAR", () => {
+    expect(findUniqueMatchingWindowTitle(["FOO - BAR", "main.ts - FOO"], "FOO")).toBe("main.ts - FOO");
+    expect(findUniqueMatchingWindowTitle(["FOO - BAR"], "FOO")).toBe(null);
   });
 });

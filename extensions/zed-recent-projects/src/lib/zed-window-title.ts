@@ -67,10 +67,7 @@ function looksLikeCompositeSide(side: string): boolean {
   if (/^(untitled|welcome)$/i.test(value)) {
     return true;
   }
-  if (EXTENSIONLESS_FILENAMES.has(value.toLowerCase())) {
-    return true;
-  }
-  return /^[A-Z][A-Z0-9._-]*$/.test(value) && value.length > 1;
+  return EXTENSIONLESS_FILENAMES.has(value.toLowerCase());
 }
 
 function windowTitleHasProjectTitle(
