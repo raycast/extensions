@@ -141,7 +141,9 @@ export function MRCreateForm(props: {
     return project?.squash_option === "default_on";
   };
 
-  const [squash, setSquash] = useState<boolean | undefined>(undefined);
+  const [squash, setSquash] = useState<boolean | undefined>(() =>
+    props.draftValues?.squash !== undefined ? Boolean(props.draftValues.squash) : undefined,
+  );
 
   const { data: selectedTemplateDetail } = useCachedPromise(
     async (templateName: string): Promise<TemplateDetail | undefined> => {
