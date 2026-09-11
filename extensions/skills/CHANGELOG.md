@@ -1,5 +1,12 @@
 # Skills Changelog
 
+## [Fix Update All Skills Timing Out] - 2026-09-11
+
+- Allow `add`, `remove`, and `update` up to 5 minutes instead of 30 seconds, so "Update All Skills" no longer fails with a bare "Command failed: npx -y skills@latest update -g -y" once checking every installed skill's source takes longer than that
+- Report that the `skills` CLI timed out, including whatever it printed before being stopped, instead of only the command that failed
+- Include the CLI output in the logs copied by the failure toast's "Report Error" action, which previously carried only the original message
+- Stop retrying a timed-out `bunx` run through `npx`, which only doubled the wait
+
 ## [Serialize Concurrent CLI Commands] - 2026-08-24
 
 - Prevent simultaneous Raycast commands from racing in the shared `npx` cache and intermittently failing with `ENOTEMPTY`

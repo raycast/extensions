@@ -16,6 +16,13 @@
       "subtitle": "Z-Library",
       "description": "Search Z-Library and download books",
       "mode": "view"
+    },
+    {
+      "name": "download-queue",
+      "title": "Download Queue",
+      "subtitle": "Z-Library",
+      "description": "Review and bulk-download books you've saved for later",
+      "mode": "view"
     }
   ],
   "preferences": [

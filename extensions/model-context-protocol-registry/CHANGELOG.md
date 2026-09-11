@@ -1,5 +1,13 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Neither MCP Server] - 2026-09-11
+
+Add Neither to the community registry: project context your AI can query through MCP (selected notes/documents in Cursor or Claude Desktop, related context, source evidence). Local stdio via `npx -y @neitherai/mcp-server@latest`; requires `NEITHER_API_KEY`.
+
+## [Add Contracko MCP Server] - 2026-09-11
+
+Add Contracko to the community registry for contract review, document search, and renewal tracking. Connects to the remote OAuth MCP server through `mcp-remote`.
+
 ## [Add Kyma API MCP Server] - 2026-09-10
 
 Add Kyma API to the community registry: hosted MCP server for one endpoint across open and frontier models, with measured per-model uptime, public usage rankings, and a spend-capped chat tool. OAuth 2.1 sign-in via the `@kyma-api/mcp-server` stdio bridge.

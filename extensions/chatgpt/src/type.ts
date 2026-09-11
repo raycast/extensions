@@ -90,8 +90,6 @@ export type ModelHook = BaseHook<Record<string, Model>> &
   BaseFunctionHook<Model> & {
     setModels: PromiseFunctionWithOneArg<Record<string, Model>>;
     update: PromiseFunctionWithOneArg<Model>;
-    option: Model["option"][];
-    isFetching: boolean;
   };
 
 export interface ChatHook {

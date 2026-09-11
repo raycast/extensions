@@ -1019,6 +1019,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "contracko",
+    title: "Contracko",
+    description:
+      "AI contract management. Review contracts for risks and obligations, extract dates, parties and values, search inside documents, and track renewal deadlines. Connects to the remote Contracko MCP server over OAuth 2.1.",
+    icon: "https://app.contracko.com/mcp/icon-512.png",
+    homepage: "https://contracko.com/docs/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.contracko.com/mcp"],
+    },
+  },
+  {
     name: "discord",
     title: "Discord",
     description:
@@ -1135,6 +1147,22 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       env: {
         MONDAY_API_KEY: "your-monday-api-key",
         MONDAY_WORKSPACE_NAME: "your-monday-workspace-name",
+      },
+    },
+  },
+  {
+    name: "neither",
+    title: "Neither",
+    description:
+      "Project context your AI can query through MCP. Use selected notes and documents in Cursor or Claude Desktop, retrieve related context, and inspect the source evidence. Local stdio · Node 20+.",
+    icon: Icon.MemoryStick,
+    homepage: "https://www.neither.online/start/?product=dev",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@neitherai/mcp-server@latest"],
+      env: {
+        NEITHER_API_KEY: "YOUR_WORKSPACE_KEY",
+        NEITHER_API_BASE: "https://api.neither.online",
       },
     },
   },
