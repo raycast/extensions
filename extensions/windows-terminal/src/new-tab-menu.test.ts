@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildProfileMatcher, resolveNewTabMenuOrder } from "./new-tab-menu.ts";
+import { UnsupportedPatternError, buildProfileMatcher, resolveNewTabMenuOrder } from "./new-tab-menu.ts";
 import type { NewTabMenuEntry, Profile } from "./new-tab-menu.ts";
 
 const powershell: Profile = { guid: "{p1}", name: "PowerShell", commandline: "pwsh.exe" };
@@ -113,7 +113,10 @@ describe("buildProfileMatcher", () => {
     // ordering check (Infinity < Infinity is false) as if it were a legitimate {n,}. Checked on
     // the parsed value, not the digit-string length, so a zero-padded bound isn't wrongly
     // rejected as "too large" just for having a lot of leading zeros.
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "a{" + "9".repeat(310) + "}" }), null);
+    assert.throws(
+      () => buildProfileMatcher({ type: "matchProfiles", name: "a{" + "9".repeat(310) + "}" }),
+      UnsupportedPatternError,
+    );
     assert.notEqual(buildProfileMatcher({ type: "matchProfiles", name: "a{100000000}" }), null);
     assert.equal(
       buildProfileMatcher({ type: "matchProfiles", name: "a{0000000005,10}" })!({ ...powershell, name: "aaaaa" }),
@@ -121,9 +124,9 @@ describe("buildProfileMatcher", () => {
     );
   });
 
-  it("rejects a pattern nested too deeply instead of overflowing the call stack", () => {
+  it("reports a pattern nested too deeply instead of overflowing the call stack", () => {
     const deep = "(".repeat(5000) + "a" + ")".repeat(5000);
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: deep }), null);
+    assert.throws(() => buildProfileMatcher({ type: "matchProfiles", name: deep }), UnsupportedPatternError);
     // A realistic amount of nesting still compiles fine.
     const shallow = "(".repeat(50) + "a" + ")".repeat(50);
     assert.notEqual(buildProfileMatcher({ type: "matchProfiles", name: shallow }), null);
@@ -171,9 +174,45 @@ describe("buildProfileMatcher", () => {
     assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:(?i)power)SHELL" }), []);
   });
 
-  it("rejects an escape it doesn't implement instead of matching it as a literal", () => {
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "\\p{L}+" }), null);
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "(PowerShell)\\1" }), null);
+  it("reports an escape it doesn't implement instead of matching it as a literal", () => {
+    // These are valid for Windows Terminal, so unlike a malformed pattern (null: matches nothing
+    // there either) they're surfaced to the caller — the message names the offending pattern.
+    assert.throws(
+      () => buildProfileMatcher({ type: "matchProfiles", name: "\\p{L}+" }),
+      (error: unknown) => error instanceof UnsupportedPatternError && error.message.includes('"\\p{L}+"'),
+    );
+    assert.throws(
+      () => buildProfileMatcher({ type: "matchProfiles", name: "(PowerShell)\\1" }),
+      UnsupportedPatternError,
+    );
+    assert.throws(() => buildProfileMatcher({ type: "matchProfiles", name: "(?<=a)b" }), UnsupportedPatternError);
+    // ICU set syntax that would otherwise parse as literals — [[:alpha:]] read as "[[:alph]" then
+    // a literal "]" matched "a]" but not "a".
+    assert.throws(() => buildProfileMatcher({ type: "matchProfiles", name: "[[:alpha:]]+" }), UnsupportedPatternError);
+    assert.throws(() => buildProfileMatcher({ type: "matchProfiles", name: "[a-z&&[^m]]+" }), UnsupportedPatternError);
+    assert.throws(() => buildProfileMatcher({ type: "matchProfiles", name: "[a-z&&b]+" }), UnsupportedPatternError);
+  });
+
+  it("reports a repeat whose counts can't merge when it exhausts the budget, rather than a non-match", () => {
+    // Count ranges only merge when they're contiguous. (a|aaa) reaches counts two apart at the
+    // same position, so below `min` every one is its own thread and a long value runs the budget
+    // out. A known ceiling — but a visible one: the profile isn't silently dropped.
+    const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(a|aaa){1000,4000}" });
+    assert.throws(() => matcher!({ ...powershell, name: "a".repeat(3000) }), UnsupportedPatternError);
+    // The same body is fine once `.*` fills every count in between.
+    const filled = buildProfileMatcher({ type: "matchProfiles", name: ".*(a|aaa){1000,4000}" });
+    assert.equal(filled!({ ...powershell, name: "a".repeat(3000) }), true);
+  });
+
+  it("reports a match that exhausts the step budget instead of calling it a non-match", () => {
+    // A large quantifier inside a large quantifier unrolls the inner one (see below), so the
+    // compiled program is big and a long value keeps thousands of states live at every position.
+    // That's a limit of this engine, not a fact about the profile — so it's an error, not `false`.
+    const matcher = buildProfileMatcher({ type: "matchProfiles", commandline: "(a{0,4000}){21}" });
+    assert.throws(
+      () => matcher!({ ...powershell, commandline: "a".repeat(3000) }),
+      (error: unknown) => error instanceof UnsupportedPatternError && error.message.includes('"(a{0,4000}){21}"'),
+    );
   });
 
   it("compiles and matches a large bounded quantifier on a simple atom, not just a small one", () => {
@@ -200,16 +239,27 @@ describe("buildProfileMatcher", () => {
     assert.ok(Date.now() - start < 200, "matching took too long");
   });
 
-  it("rejects a large quantifier wrapping another large quantifier", () => {
-    // compileCountedRepeat's counter can't represent two independently-active repeats, so this
-    // falls back to being rejected (consistent with any other unsupported construct) rather than
-    // silently compiling something that would count wrong.
+  it("unrolls the inner quantifier when a large quantifier wraps another large one", () => {
+    // compileCountedRepeat's counter can't represent two independently-active repeats, so the
+    // inner one is unrolled into plain instructions instead — (a{21}){21} is 441 a's exactly, and
+    // matches with ICU, so it has to match here rather than being rejected.
+    const nestedLarge = buildProfileMatcher({ type: "matchProfiles", name: "(a{21}){21}" });
+    assert.equal(nestedLarge!({ ...powershell, name: "a".repeat(441) }), true);
+    assert.equal(nestedLarge!({ ...powershell, name: "a".repeat(440) }), false);
+    assert.equal(nestedLarge!({ ...powershell, name: "a".repeat(442) }), false);
     const start = Date.now();
-    assert.equal(buildProfileMatcher({ type: "matchProfiles", name: "((a|b){200}){200}" }), null);
+    const wide = buildProfileMatcher({ type: "matchProfiles", name: "((a|b){200}){200}" });
     assert.ok(Date.now() - start < 1000, "compiling took too long");
+    assert.equal(wide!({ ...powershell, name: "ab".repeat(20000) }), true);
+    assert.equal(wide!({ ...powershell, name: "a".repeat(39999) }), false);
+    // The unrolled body is still subject to the total program size cap.
+    assert.throws(
+      () => buildProfileMatcher({ type: "matchProfiles", name: "((a{1000}){1000}){1000}" }),
+      UnsupportedPatternError,
+    );
     // A large quantifier around plain (unquantified) content is unaffected.
     assert.deepEqual(matchedNames({ type: "matchProfiles", name: "(?:PowerShell){1,200}" }), ["PowerShell"]);
-    // A *small* quantifier inside unrolls, so it nests inside a large one just fine.
+    // A *small* quantifier inside unrolls too, as it always did.
     const nested = buildProfileMatcher({ type: "matchProfiles", name: "(a?){2,4000}" });
     assert.equal(nested!({ ...powershell, name: "a" }), true);
     assert.equal(nested!({ ...powershell, name: "a".repeat(30) }), true);
@@ -220,17 +270,34 @@ describe("buildProfileMatcher", () => {
   });
 
   it("still unrolls a small quantifier, so it can nest inside another quantifier", () => {
-    // (a?)* mixes two quantifiers, one nested in the other — only possible because both are
-    // small enough to unroll; compileCountedRepeat's single counter couldn't represent this.
+    // (a{2,5})* mixes two quantifiers, one nested in the other; both are small enough to unroll,
+    // so no counted repeat is involved at all.
     const matcher = buildProfileMatcher({ type: "matchProfiles", name: "(a{2,5})*" });
     assert.equal(matcher!({ ...powershell, name: "aaa" }), true);
     assert.equal(matcher!({ ...powershell, name: "aaaaa" + "aaa" }), true);
     assert.equal(matcher!({ ...powershell, name: "a" }), false);
   });
 
+  it("matches a large minimum reached from every position, without exhausting the budget", () => {
+    // .* can enter a{1000,4000} at every position, so at position p the repeat is live with every
+    // count from 0 to p — and below `min` none of those counts can stand in for another. Tracked
+    // one by one that's O(n × min) work and the budget runs out on a 2,000-character value; kept
+    // as one count range per thread it's linear.
+    const matcher = buildProfileMatcher({ type: "matchProfiles", commandline: ".*a{1000,4000}" });
+    const start = Date.now();
+    assert.equal(matcher!({ ...powershell, commandline: "a".repeat(2000) }), true);
+    assert.equal(matcher!({ ...powershell, commandline: "b" + "a".repeat(4000) }), true);
+    assert.equal(matcher!({ ...powershell, commandline: "a".repeat(999) }), false);
+    assert.equal(matcher!({ ...powershell, commandline: "a".repeat(4000) + "b" }), false);
+    assert.ok(Date.now() - start < 1000, "matching took too long");
+    // The same with a minimum of 3000 out of a 3900-character value.
+    const higher = buildProfileMatcher({ type: "matchProfiles", commandline: ".*a{3000,4000}" });
+    assert.equal(higher!({ ...powershell, commandline: "a".repeat(3900) }), true);
+  });
+
   it("matches a large counted repeat whose body doesn't consume a fixed number of characters", () => {
     // Different combinations of alternatives can reach the same string position after a different
-    // number of reps. Threads inside a counted repeat dedupe by their exact count, so both
+    // number of reps. Threads inside a counted repeat are tracked by their exact counts, so both
     // trajectories survive and the one that still fits under `max` gets to match.
     // A nullable alternative: one empty rep plus one consuming rep satisfies the minimum of 2.
     const nullable = buildProfileMatcher({ type: "matchProfiles", name: "(|a){2,4000}" });
@@ -319,5 +386,24 @@ describe("resolveNewTabMenuOrder", () => {
       { type: "folder", entries: [{ type: "matchProfiles", source: ".*" }] },
     ]);
     assert.deepEqual(order, ["{p1}", "{p2}", "{p3}", "{p4}"]);
+  });
+
+  it("surfaces a pattern it can't evaluate instead of returning an order with profiles missing", () => {
+    // A malformed pattern matches nothing, as in Windows Terminal, and the order still resolves.
+    const order = resolveNewTabMenuOrder(profiles, [
+      { type: "matchProfiles", name: "[" },
+      { type: "remainingProfiles" },
+    ]);
+    assert.deepEqual(order, ["{p1}", "{p2}", "{p3}", "{p4}"]);
+    // A pattern valid in Windows Terminal but unsupported here would silently move PowerShell into
+    // the remainder — so it throws for the caller to report instead.
+    assert.throws(
+      () =>
+        resolveNewTabMenuOrder(profiles, [
+          { type: "folder", entries: [{ type: "matchProfiles", name: "\\p{L}+" }] },
+          { type: "remainingProfiles" },
+        ]),
+      UnsupportedPatternError,
+    );
   });
 });

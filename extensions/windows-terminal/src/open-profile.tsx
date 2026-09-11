@@ -1,8 +1,19 @@
-import { Action, ActionPanel, Icon, Keyboard, List, closeMainWindow, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  closeMainWindow,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
-import { NewTabMenuEntry, Profile, resolveNewTabMenuOrder } from "./new-tab-menu";
+import { useEffect, useMemo } from "react";
+import { NewTabMenuEntry, Profile, UnsupportedPatternError, resolveNewTabMenuOrder } from "./new-tab-menu";
 
 interface WindowsTerminalSettings {
   profiles: {
@@ -153,8 +164,31 @@ function ProfileItem(props: { item: Profile; quake: boolean }) {
 export default function Command() {
   const { openProfilesInQuakeWindow: quake, useNewTabMenu } = getPreferenceValues<Preferences>();
 
-  const newTabMenuOrder =
-    useNewTabMenu && PROFILES.newTabMenu ? resolveNewTabMenuOrder(PROFILES.profiles.list, PROFILES.newTabMenu) : null;
+  // A matchProfiles pattern this extension can't evaluate (valid for Windows Terminal, but past
+  // what the matcher implements or affords) means the resolved order can't be trusted — so fall
+  // back to the default sections below and say which pattern, instead of quietly dropping or
+  // misplacing the profiles it would have matched.
+  const { newTabMenuOrder, unsupported } = useMemo(() => {
+    if (!useNewTabMenu || !PROFILES.newTabMenu) return { newTabMenuOrder: null, unsupported: null };
+    try {
+      return {
+        newTabMenuOrder: resolveNewTabMenuOrder(PROFILES.profiles.list, PROFILES.newTabMenu),
+        unsupported: null,
+      };
+    } catch (error) {
+      if (error instanceof UnsupportedPatternError) return { newTabMenuOrder: null, unsupported: error };
+      throw error;
+    }
+  }, [useNewTabMenu]);
+
+  useEffect(() => {
+    if (!unsupported) return;
+    showToast({
+      style: Toast.Style.Failure,
+      title: "New Tab Menu order not applied",
+      message: unsupported.message,
+    });
+  }, [unsupported]);
 
   // The New Tab Menu can interleave regular, SSH, and WSL profiles, so honoring its order means
   // one flat list instead of the three fixed, independently-ordered sections below.

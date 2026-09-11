@@ -26,6 +26,11 @@ export interface NewTabMenuEntry {
 // (dev|prod)+, still matches normally, and so does (a+)+. A large bounded quantifier, like
 // (a|b){0,4000} or (|a){2,4000}, is unbounded in practice too — compileCountedRepeat gives it a
 // counter instead of unrolling it, so the compiled size doesn't grow with the bound.
+//
+// What the engine can't do, it says so: a construct it doesn't implement, a pattern too large to
+// compile, or a match that runs past MAX_MATCH_STEPS all throw UnsupportedPatternError out of
+// buildProfileMatcher, so the caller can tell "this profile doesn't match" from "this pattern
+// couldn't be evaluated" and say so instead of quietly dropping profiles from the menu.
 type AtomNode =
   | { kind: "char"; test: (ch: string) => boolean }
   | { kind: "any" }
@@ -37,8 +42,12 @@ type QuantNode = { atom: AtomNode; min: number; max: number; greedy: boolean };
 type SeqNode = { atoms: QuantNode[] };
 type AltNode = { options: SeqNode[] };
 
+// A malformed pattern — one Windows Terminal's own regex engine would reject too, so the entry
+// matches nothing there as well.
 class RegexSyntaxError extends Error {}
-class RegexTooLargeError extends Error {}
+// A pattern that's valid for Windows Terminal but that this engine can't evaluate: a construct it
+// doesn't implement, one too large to compile, or a match that runs past MAX_MATCH_STEPS.
+export class UnsupportedPatternError extends Error {}
 
 // compileQuant unrolls a *small* {n,m} into that many copies of the atom — cheap, and it's what
 // lets a bounded quantifier nest freely inside another (e.g. (a?)*). A *large* bound instead
@@ -48,9 +57,10 @@ class RegexTooLargeError extends Error {}
 // quantifier size — e.g. an alternation with an implausible number of branches.
 const MAX_PROGRAM_SIZE = 50000;
 
-// Below this, compileQuant unrolls a {n,m} into that many literal copies (cheap, and lets it nest
-// inside another large quantifier); at or above it, compileCountedRepeat is used instead — it can't
-// nest inside another counted repeat, but the compiled size no longer scales with the bound.
+// Below this, compileQuant unrolls a {n,m} into that many literal copies (cheap); at or above it,
+// compileCountedRepeat is used instead, and the compiled size no longer scales with the bound. A
+// counted repeat can't nest inside another one, so inside its body every quantifier unrolls
+// regardless of size (see insideCountedRepeat).
 const UNROLL_THRESHOLD = 20;
 
 // Parses the subset of ICU regex syntax (the flavor Windows Terminal itself matches with) that
@@ -58,13 +68,16 @@ const UNROLL_THRESHOLD = 20;
 // etc.), the `\b`/`\B` word-boundary assertions, `[...]` classes, `(...)`/`(?:...)` groups, the
 // `(?i)`/`(?i:...)` case-insensitivity flag, `|` alternation, and `* + ? {n,m}` quantifiers (with
 // lazy `?` variants). Anything else — lookaround, backreferences, unicode property escapes — is
-// unsupported and throws, which buildProfileMatcher treats the same as a malformed pattern.
+// unsupported and throws UnsupportedPatternError; a malformed pattern throws RegexSyntaxError.
 function parsePattern(pattern: string): AltNode {
   let i = 0;
   const n = pattern.length;
   const peek = () => pattern[i];
   const fail = (msg: string): never => {
     throw new RegexSyntaxError(msg);
+  };
+  const unsupported = (msg: string): never => {
+    throw new UnsupportedPatternError(msg);
   };
 
   // Set by (?i) and restored when the enclosing group closes, mirroring ICU: the flag runs from
@@ -73,8 +86,9 @@ function parsePattern(pattern: string): AltNode {
   let ignoreCase = false;
   // parseAtom recurses into parseAlt for every "(" — this bounds that recursion, since the parser
   // (unlike matchFull's explicit-stack VM) has no other stack-safety guard. Nothing near this depth
-  // is a realistic matchProfiles pattern; it exists so a pathologically deep one fails cleanly as
-  // "malformed" like any other unsupported pattern, instead of overflowing the call stack.
+  // is a realistic matchProfiles pattern; it exists so a pathologically deep one is reported as
+  // unsupported, like any other construct past this engine's limits, instead of overflowing the
+  // call stack.
   let groupDepth = 0;
   const MAX_GROUP_DEPTH = 100;
   const foldCase = (test: (ch: string) => boolean) => {
@@ -129,7 +143,7 @@ function parsePattern(pattern: string): AltNode {
         // unbounded {n,}. Checked on the parsed value, not the digit-string length, so a
         // zero-padded bound like {0000000005,10} isn't wrongly rejected as "too large" — no real
         // matchProfiles pattern needs a bound anywhere near this size either way.
-        if (min > 1e9 || (max !== Infinity && max > 1e9)) return fail("quantifier bound too large");
+        if (min > 1e9 || (max !== Infinity && max > 1e9)) return unsupported("quantifier bound too large");
         if (max < min) return fail("quantifier bounds out of order");
         quantified = true;
         i += braces[0].length;
@@ -160,7 +174,7 @@ function parsePattern(pattern: string): AltNode {
       if (peek() === "?") {
         // "?:" plain group, "?i)" / "?-i)" a flag switch, "?i:" a flag scoped to this group.
         const modifier = /^\?(-?)(i*)([:)])/.exec(pattern.slice(i));
-        if (!modifier) return fail("unsupported group modifier");
+        if (!modifier) return unsupported("group modifier not implemented");
         const [consumed, disable, flags, delimiter] = modifier;
         if (flags === "" && delimiter === ")") return fail("empty inline flags");
         if (flags !== "") ignoreCase = disable !== "-";
@@ -169,7 +183,7 @@ function parsePattern(pattern: string): AltNode {
         // ignoreCase set for whatever follows it in the enclosing group.
         if (delimiter === ")") return { kind: "group", alt: { options: [{ atoms: [] }] } };
       }
-      if (++groupDepth > MAX_GROUP_DEPTH) return fail("pattern nested too deeply");
+      if (++groupDepth > MAX_GROUP_DEPTH) return unsupported("pattern nested too deeply");
       const alt = parseAlt();
       groupDepth--;
       if (peek() !== ")") return fail("unbalanced parenthesis");
@@ -221,7 +235,7 @@ function parsePattern(pattern: string): AltNode {
     // An escaped letter or digit that isn't one of the above is a construct this engine doesn't
     // implement (\A, \p{...}, a backreference). Reject the pattern rather than matching it as a
     // literal, which would silently match the wrong profiles.
-    if (/[A-Za-z0-9]/.test(c)) return fail(`unsupported escape "\\${c}"`);
+    if (/[A-Za-z0-9]/.test(c)) return unsupported(`escape "\\${c}" not implemented`);
     return charAtom((ch) => ch === c);
   }
 
@@ -241,7 +255,7 @@ function parsePattern(pattern: string): AltNode {
     if (esc === undefined) return fail("trailing backslash");
     const predicate = escapePredicates[esc];
     if (predicate !== undefined) return { predicate };
-    if (/[A-Za-z0-9]/.test(esc)) return fail(`unsupported escape "\\${esc}"`);
+    if (/[A-Za-z0-9]/.test(esc)) return unsupported(`escape "\\${esc}" not implemented`);
     return { literal: esc };
   }
 
@@ -254,6 +268,11 @@ function parsePattern(pattern: string): AltNode {
     }
     const tests: ((ch: string) => boolean)[] = [];
     while (i < n && peek() !== "]") {
+      // ICU reads an unescaped "[" inside a set as a nested set ([[:alpha:]], [a-z[0-9]]) and "&&"
+      // as set intersection ([a-z&&[^m]]). Neither is implemented; reading them as literals would
+      // quietly match the wrong profiles, so report them instead.
+      if (peek() === "[") return unsupported("nested character set not implemented");
+      if (pattern.startsWith("&&", i)) return unsupported("character set intersection not implemented");
       const startAtom = parseClassAtom();
       if ("predicate" in startAtom) {
         tests.push(startAtom.predicate);
@@ -300,8 +319,8 @@ type SplitInst = { op: "split"; next?: Inst; next2?: Inst };
 type NopInst = { op: "nop"; next?: Inst };
 type MatchInst = { op: "match" };
 // A counted repeat: one shared instruction, however large `max` is. `bodyStart` is entered again
-// each rep instead of being duplicated per rep — see compileCountedRepeat and the `count`/`countFor`
-// fields threads carry through addThread/matchFull.
+// each rep instead of being duplicated per rep — see compileCountedRepeat and the `lo`/`hi`/
+// `countFor` fields threads carry through addThread/matchFull.
 type RepeatInst = { op: "repeat"; min: number; max: number; bodyStart: Inst; next?: Inst };
 // The body's own exit, patched to loop back through here rather than straight to `repeat`, so the
 // matcher can tell "just finished one more rep of this repeat" apart from "entering it fresh".
@@ -331,9 +350,16 @@ type Frag = { start: Inst; out: PatchSlot[] };
 let instructionCount = 0;
 
 function newInst<T extends Inst>(inst: T): T {
-  if (++instructionCount > MAX_PROGRAM_SIZE) throw new RegexTooLargeError("pattern is too large to compile");
+  if (++instructionCount > MAX_PROGRAM_SIZE) throw new UnsupportedPatternError("pattern is too large to compile");
   return inst;
 }
+
+// True while compileCountedRepeat compiles its body. A thread carries a single counter (see
+// Thread), so it can't track two counted repeats at once — every quantifier inside the body
+// unrolls instead, whatever its size, and stays plain instructions the outer count passes through
+// untouched. That's how (a{21}){21} or ((a|b){200}){200} compile; MAX_PROGRAM_SIZE still bounds
+// how large the unrolled body can get.
+let insideCountedRepeat = false;
 
 function patch(out: PatchSlot[], target: Inst): void {
   for (const p of out) {
@@ -417,17 +443,6 @@ function usesCounter(q: QuantNode): boolean {
   return q.min > UNROLL_THRESHOLD || q.max - q.min > UNROLL_THRESHOLD;
 }
 
-// compileCountedRepeat's counter is a single (count, countFor) pair per thread, not a stack, so it
-// can't tell two active counted repeats apart — exiting the inner one resets countFor (see the
-// "repeat" case in addThread) and loses the outer count. So a large quantifier whose body contains
-// another *large* quantifier, e.g. ((a|b){200}){200}, can't go through it. A small quantifier inside
-// the body is fine: it unrolls into plain instructions that carry the thread's count through
-// untouched, so (a?){2,4000} or (a{2}){2,4000} compile and match normally.
-function hasNestedCountedRepeat(atom: AtomNode): boolean {
-  if (atom.kind !== "group") return false;
-  return atom.alt.options.some((seq) => seq.atoms.some((q) => usesCounter(q) || hasNestedCountedRepeat(q.atom)));
-}
-
 // Whether `atom` matches the empty string unconditionally — an empty alternative, or one made only
 // of optional atoms. Anchors and \b don't count: they're zero-width but conditional on position.
 function isNullable(atom: AtomNode): boolean {
@@ -438,21 +453,24 @@ function isNullable(atom: AtomNode): boolean {
 // Compiles atom{min,max} (max possibly Infinity) as one `repeat` instruction plus one copy of the
 // atom's body, instead of unrolling — see the `repeat`/`increment` handling in addThread for how a
 // thread's counter takes the place of the copies compileQuant's other branch would otherwise make.
-// The body can be anything a small quantifier could wrap — nullable alternatives like (|a),
-// differently-sized ones like (a|aa), an unrolled quantifier — because the matcher dedupes threads
-// inside a counted repeat by their exact count (see hasVisited), never by assuming reps line up
-// with string positions.
+// The body can be anything — nullable alternatives like (|a), differently-sized ones like (a|aa),
+// another quantifier (unrolled, see insideCountedRepeat) — because the matcher tracks exactly
+// which counts have reached each instruction (see Thread and VisitedState), never assuming reps
+// line up with string positions.
 function compileCountedRepeat(atom: AtomNode, min: number, max: number): Frag {
-  if (hasNestedCountedRepeat(atom)) {
-    throw new RegexTooLargeError("a quantifier this large can't wrap another quantifier this large");
-  }
   // A body that can always match empty makes `min` meaningless — any shortfall is made up with
   // empty reps at no cost — so (|a){3000,4000} accepts exactly what (|a){0,4000} does. Compiling
-  // it as the latter matters for cost, not just tidiness: below `min` every count is a distinct
-  // state (see VisitedState), and a nullable body reaches all of them at every single position.
+  // it as the latter matters for cost, not just tidiness: a nullable body climbs through every
+  // count below `min` at every single position, one closure step each.
   if (isNullable(atom)) min = 0;
   const repeat: RepeatInst = newInst({ op: "repeat", min, max, bodyStart: undefined as unknown as Inst });
-  const body = compileAtom(atom);
+  insideCountedRepeat = true;
+  let body: Frag;
+  try {
+    body = compileAtom(atom);
+  } finally {
+    insideCountedRepeat = false;
+  }
   const increment: IncrementInst = newInst({ op: "increment", repeat });
   patch(body.out, increment);
   repeat.bodyStart = body.start;
@@ -463,7 +481,7 @@ function compileCountedRepeat(atom: AtomNode, min: number, max: number): Frag {
 // record — irrelevant here, since buildProfileMatcher only ever asks "does the whole field match"
 // (see matchFull). So greedy and lazy compile identically; `q.greedy` is parsed but never consulted.
 function compileQuant(q: QuantNode): Frag {
-  if (usesCounter(q)) return compileCountedRepeat(q.atom, q.min, q.max);
+  if (!insideCountedRepeat && usesCounter(q)) return compileCountedRepeat(q.atom, q.min, q.max);
   if (q.max === Infinity) {
     if (q.min === 0) return starFrag(q.atom);
     return concat(repeatFrag(q.atom, q.min - 1), plusFrag(q.atom));
@@ -488,77 +506,124 @@ function compileAlt(alt: AltNode): Frag {
 
 function compileProgram(alt: AltNode): Inst {
   instructionCount = 0;
+  insideCountedRepeat = false;
   const frag = compileAlt(alt);
   const matchInst: MatchInst = newInst({ op: "match" });
   patch(frag.out, matchInst);
   return frag.start;
 }
 
-// A backstop, not the primary defense against slow matching — compileCountedRepeat is, since it
-// keeps a large bound's matching cost independent of the bound itself. What's left for this budget
-// to catch: several moderate constructs compounding within one pattern, or anything unforeseen.
-// It's generous — matching a large bound against a value that size measures in the tens of
+// A backstop, not the primary defense against slow matching — compileCountedRepeat and the count
+// ranges threads carry (see Thread) are, since together they keep a large bound's matching cost
+// independent of the bound itself. What's left for this budget to catch: several moderate
+// constructs compounding within one pattern, or anything unforeseen. Running out of it throws
+// UnsupportedPatternError rather than reporting "no match" — the two mean different things to the
+// menu. It's generous: matching a large bound against a value that size measures in the tens of
 // thousands of steps (see new-tab-menu.test.ts), so this is headroom, not a tight fit.
 const MAX_MATCH_STEPS = 1000000;
 type StepBudget = { remaining: number };
 
+function spend(budget: StepBudget): void {
+  if (budget.remaining-- <= 0) throw new UnsupportedPatternError("matching it takes too many steps");
+}
+
 // A live NFA thread: which instruction it's at, plus the counter compileCountedRepeat's `repeat`/
-// `increment` instructions read and write. `countFor` names which `repeat` instruction `count`
+// `increment` instructions read and write. `countFor` names which `repeat` instruction the counter
 // belongs to, as a direct reference (not an id looked up in shared state — a `matchProfiles` entry
 // compiles one program per field, and a lookup table reset by each compile would leave an earlier
 // field's threads reading another field's repeat metadata once all fields are later matched). A
 // thread not currently inside a counted repeat carries a `countFor` of null, so `repeat` treats it
 // as a fresh entry (see the "repeat" case in addThread).
-type Thread = { inst: Inst; count: number; countFor: RepeatInst | null };
+//
+// The counter is a range, `lo`..`hi` inclusive, not one number: every count in it has reached this
+// instruction at this position, and one thread stands in for all of them (see enqueue). Nothing
+// less keeps ".*a{1000,4000}" linear — the `.*` enters the repeat at every position, so at
+// position p the body is live with every count from 0 to p, and counts below `min` can't be pruned
+// against each other: a lower one still has more mandatory reps ahead, a higher one has less room
+// before `max`, so neither can stand in for the other. Kept as one range, they cost one thread —
+// when they're contiguous. A body whose alternatives differ in width by 2 or more, like (a|aaa),
+// reaches counts with gaps between them that no merge can close, so below `min` those stay
+// separate threads and the cost is back to O(length × min). That shape is what MAX_MATCH_STEPS is
+// still there to catch, and it fails visibly (see spend) rather than as a non-match.
+type Thread = { inst: Inst; lo: number; hi: number; countFor: RepeatInst | null };
 const NO_REPEAT = null;
 
-// Instructions outside any counted repeat dedupe by identity alone (`plain`) — same as before this
-// engine had a counted-repeat mechanism at all. Instructions reached *while inside* one are keyed
-// by their exact `count` too (`scoped`): the same instruction at the same position with a
-// different count is a genuinely different state, because the count decides how many more reps
-// are still mandatory (below `min`) or still allowed (up to `max`). Nothing about the body is
-// assumed — a prefix like (?:x|xa) can enter the repeat at two different positions, so two threads
-// with different counts legitimately share an instruction at every later position, and merging
-// them (as an earlier "cap the count at min" key did) silently drops the one that could still reach
-// `max`.
+// What's already been queued at the current string position. Instructions outside any counted
+// repeat dedupe by identity alone (`plain`). Instructions reached *while inside* one are keyed by
+// their exact count range too (`scoped`): the same instruction at the same position with different
+// counts is a genuinely different state, because the count decides how many more reps are still
+// mandatory (below `min`) or still allowed (up to `max`). Nothing about the body is assumed — a
+// prefix like (?:x|xa) can enter the repeat at two different positions, so two threads with
+// different counts legitimately share an instruction at every later position, and collapsing
+// them onto one key (as an earlier "cap the count at min" key did) silently drops the one that
+// could still reach `max`.
 //
-// `lowestSettled` is the one pruning that IS sound: once a thread's count is at or above `min`, a
-// lower count can do everything a higher one can (exit now, or keep going — for longer), so a
-// thread whose count is ≥ min is redundant whenever a thread at the same instruction with a count
-// in [min, count] has already been queued at this position. That's what keeps something like
-// ".*a{0,12000}" linear instead of carrying every possible count along at every position.
-type VisitedState = { plain: Set<Inst>; scoped: Map<Inst, Set<number>>; lowestSettled: Map<Inst, number> };
+// Two prunings ARE sound on top of that. `lowestSettled`: once a count is at or above `min`, a
+// lower such count can do everything a higher one can (exit now, or keep going — for longer), so
+// it records the lowest count ≥ min queued at each instruction and any count above it is dropped.
+// That's what keeps ".*a{0,12000}" from carrying every possible count along at every position.
+// `queued`: the threads already waiting at each consuming instruction, so a range that touches or
+// overlaps one of them merges into it (see enqueue) instead of queuing separately — the ranges
+// that make ".*a{1000,4000}" linear are built here, one merge per position.
+type VisitedState = {
+  plain: Set<Inst>;
+  scoped: Map<Inst, Set<string>>;
+  lowestSettled: Map<Inst, number>;
+  queued: Map<Inst, Thread[]>;
+};
 
 function newVisited(): VisitedState {
-  return { plain: new Set(), scoped: new Map(), lowestSettled: new Map() };
+  return { plain: new Set(), scoped: new Map(), lowestSettled: new Map(), queued: new Map() };
 }
 
-function hasVisited(visited: VisitedState, thread: Thread): boolean {
-  const { inst, count, countFor } = thread;
-  if (countFor === NO_REPEAT) return visited.plain.has(inst);
-  if (count >= countFor.min) {
-    const lowest = visited.lowestSettled.get(inst);
-    if (lowest !== undefined && lowest <= count) return true;
-  }
-  return visited.scoped.get(inst)?.has(count) ?? false;
-}
-
-function markVisited(visited: VisitedState, thread: Thread): void {
-  const { inst, count, countFor } = thread;
+// Records the thread at this position and returns what's left of it to explore — its range trimmed
+// of counts `lowestSettled` makes redundant — or null if it adds nothing new.
+function visit(visited: VisitedState, thread: Thread): Thread | null {
+  const { inst, countFor } = thread;
   if (countFor === NO_REPEAT) {
+    if (visited.plain.has(inst)) return null;
     visited.plain.add(inst);
-    return;
+    return thread;
+  }
+  const { lo } = thread;
+  let { hi } = thread;
+  const lowest = visited.lowestSettled.get(inst);
+  if (lowest !== undefined && lowest <= hi) {
+    if (lowest <= lo) return null;
+    hi = lowest - 1;
   }
   let seen = visited.scoped.get(inst);
   if (!seen) {
     seen = new Set();
     visited.scoped.set(inst, seen);
   }
-  seen.add(count);
-  if (count >= countFor.min) {
-    const lowest = visited.lowestSettled.get(inst);
-    if (lowest === undefined || count < lowest) visited.lowestSettled.set(inst, count);
+  const key = `${lo},${hi}`;
+  if (seen.has(key)) return null;
+  seen.add(key);
+  // Anything ≥ min in this range is at most `lowest` - 1 (trimmed above), so this only ever lowers it.
+  if (hi >= countFor.min) visited.lowestSettled.set(inst, Math.max(lo, countFor.min));
+  return { inst, lo, hi, countFor };
+}
+
+// Queues a thread at a consuming instruction for the next position, merging its count range into a
+// thread already queued there when the two touch or overlap (see VisitedState.queued). Threads
+// outside a counted repeat have nothing to merge — `plain` already dedupes them by instruction.
+function enqueue(list: Thread[], visited: VisitedState, thread: Thread): void {
+  if (thread.countFor !== NO_REPEAT) {
+    let queued = visited.queued.get(thread.inst);
+    if (!queued) {
+      queued = [];
+      visited.queued.set(thread.inst, queued);
+    }
+    const neighbor = queued.find((other) => thread.lo <= other.hi + 1 && other.lo <= thread.hi + 1);
+    if (neighbor) {
+      neighbor.lo = Math.min(neighbor.lo, thread.lo);
+      neighbor.hi = Math.max(neighbor.hi, thread.hi);
+      return;
+    }
+    queued.push(thread);
   }
+  list.push(thread);
 }
 
 // \b sits between a word character and a non-word one, counting the space off either end of the
@@ -588,43 +653,36 @@ function addThread(
 ): void {
   const stack: Thread[] = [start];
   while (stack.length > 0) {
-    if (budget.remaining-- <= 0) return;
-    const thread = stack.pop()!;
-    const inst = thread.inst;
-    if (hasVisited(visited, thread)) continue;
-    markVisited(visited, thread);
-    const { count, countFor } = thread;
+    spend(budget);
+    const thread = visit(visited, stack.pop()!);
+    if (!thread) continue;
+    const { inst, lo, hi, countFor } = thread;
     if (inst.op === "split") {
-      stack.push({ inst: inst.next2!, count, countFor }, { inst: inst.next!, count, countFor });
+      stack.push({ inst: inst.next2!, lo, hi, countFor }, { inst: inst.next!, lo, hi, countFor });
     } else if (inst.op === "nop") {
-      stack.push({ inst: inst.next!, count, countFor });
+      stack.push({ inst: inst.next!, lo, hi, countFor });
     } else if (inst.op === "start") {
-      if (pos === 0) stack.push({ inst: inst.next!, count, countFor });
+      if (pos === 0) stack.push({ inst: inst.next!, lo, hi, countFor });
     } else if (inst.op === "end") {
-      if (pos === str.length) stack.push({ inst: inst.next!, count, countFor });
+      if (pos === str.length) stack.push({ inst: inst.next!, lo, hi, countFor });
     } else if (inst.op === "boundary") {
-      if (isWordBoundary(str, pos) !== inst.negate) stack.push({ inst: inst.next!, count, countFor });
+      if (isWordBoundary(str, pos) !== inst.negate) stack.push({ inst: inst.next!, lo, hi, countFor });
     } else if (inst.op === "repeat") {
       // A thread not already inside this repeat (countFor doesn't match) is entering fresh, at 0.
-      const reps = countFor === inst ? count : 0;
-      if (reps < inst.min) {
-        // Below the minimum: another rep is mandatory, no option to stop yet.
-        stack.push({ inst: inst.bodyStart, count: reps, countFor: inst });
-      } else if (inst.max === Infinity || reps < inst.max) {
-        // Within range: try one more rep, but stopping here is also valid (mirrors optionalFrag).
-        // Exiting resets countFor to NO_REPEAT — carrying this repeat's count/countFor past
-        // `next` would let it reach a later, unrelated `repeat` instruction still tagged as
-        // "inside" this one, corrupting that instruction's own dedup key and reps count.
-        stack.push({ inst: inst.next!, count: 0, countFor: NO_REPEAT });
-        stack.push({ inst: inst.bodyStart, count: reps, countFor: inst });
-      } else {
-        // At the maximum: no more reps allowed.
-        stack.push({ inst: inst.next!, count: 0, countFor: NO_REPEAT });
-      }
+      const [from, to] = countFor === inst ? [lo, hi] : [0, 0];
+      // Any count at or above the minimum may stop here (mirrors optionalFrag). Exiting resets the
+      // counter to NO_REPEAT — carrying this repeat's counter past `next` would let it reach a
+      // later, unrelated `repeat` instruction still tagged as "inside" this one, corrupting that
+      // instruction's own dedup key and reps count.
+      if (to >= inst.min) stack.push({ inst: inst.next!, lo: 0, hi: 0, countFor: NO_REPEAT });
+      // Any count below the maximum may run the body again — and of those at or above the
+      // minimum, only the lowest is worth keeping (see VisitedState.lowestSettled).
+      const again = Math.min(to, inst.max - 1, Math.max(from, inst.min));
+      if (from <= again) stack.push({ inst: inst.bodyStart, lo: from, hi: again, countFor: inst });
     } else if (inst.op === "increment") {
-      stack.push({ inst: inst.repeat, count: count + 1, countFor: inst.repeat });
+      stack.push({ inst: inst.repeat, lo: lo + 1, hi: hi + 1, countFor: inst.repeat });
     } else {
-      list.push(thread);
+      enqueue(list, visited, thread);
     }
   }
 }
@@ -635,13 +693,13 @@ function addThread(
 // the call stack never grows with the length of `str` or with the pattern's backtracking search
 // space — a 2,000-character value and a pathological pattern like (a+)+ cost the same handful of
 // stack frames as a one-character match. Work per position is bounded by the pattern's compiled
-// size times the distinct repeat counts still alive there (see VisitedState) — for any realistic
-// pattern that's a handful — so nothing can blow up exponentially; MAX_MATCH_STEPS is a backstop
-// for what's left.
+// size times the distinct repeat count ranges still alive there (see VisitedState) — for any
+// realistic pattern that's a handful — so nothing can blow up exponentially; MAX_MATCH_STEPS is a
+// backstop for what's left, and running out of it throws rather than answering "no match".
 function matchFull(prog: Inst, str: string): boolean {
   const budget: StepBudget = { remaining: MAX_MATCH_STEPS };
   let current: Thread[] = [];
-  addThread(current, newVisited(), { inst: prog, count: 0, countFor: NO_REPEAT }, 0, str, budget);
+  addThread(current, newVisited(), { inst: prog, lo: 0, hi: 0, countFor: NO_REPEAT }, 0, str, budget);
 
   for (let pos = 0; pos < str.length; pos++) {
     if (current.length === 0) return false;
@@ -654,14 +712,14 @@ function matchFull(prog: Inst, str: string): boolean {
     // order, every count would survive at every position and the budget would run out on a
     // perfectly ordinary long value. Counts only ever grow by one per `increment` or reset to
     // zero on exit, so sorting here keeps that dominance order through the whole step.
-    current.sort((a, b) => a.count - b.count);
+    current.sort((a, b) => a.lo - b.lo);
     for (const thread of current) {
-      if (budget.remaining-- <= 0) return false;
-      const inst = thread.inst;
-      const { count, countFor } = thread;
+      spend(budget);
+      const { inst, lo, hi, countFor } = thread;
       if (inst.op === "char" && inst.test(ch))
-        addThread(next, visited, { inst: inst.next!, count, countFor }, pos + 1, str, budget);
-      else if (inst.op === "any") addThread(next, visited, { inst: inst.next!, count, countFor }, pos + 1, str, budget);
+        addThread(next, visited, { inst: inst.next!, lo, hi, countFor }, pos + 1, str, budget);
+      else if (inst.op === "any")
+        addThread(next, visited, { inst: inst.next!, lo, hi, countFor }, pos + 1, str, budget);
     }
     current = next;
   }
@@ -673,10 +731,12 @@ function matchFull(prog: Inst, str: string): boolean {
 // A matchProfiles entry matches a profile when ANY provided field (name/commandline/source)
 // fully matches that field's regex — mirrors Windows Terminal's MatchProfilesEntry. Empty profile
 // fields never match, so "source": ".*" skips local profiles and "commandline": ".*" skips
-// profiles without a command line. An entry with no patterns, a regex that is malformed or
-// unsupported, one too large to compile, or one whose match against a particular value runs past
-// MAX_MATCH_STEPS, all resolve the same way: that value doesn't match, rather than crashing or
-// matching everything.
+// profiles without a command line. An entry with no patterns, or with a malformed regex, matches
+// nothing (returns null) — Windows Terminal rejects those too. A pattern that's valid there but
+// that this engine can't evaluate is different: it throws UnsupportedPatternError, naming the
+// pattern, either here (a construct not implemented, or too large to compile) or from the returned
+// matcher (a match that runs past MAX_MATCH_STEPS), so the caller can say so rather than showing
+// an order that silently leaves profiles out.
 export function buildProfileMatcher(entry: NewTabMenuEntry): ((profile: Profile) => boolean) | null {
   const specs: { pattern: string; get: (profile: Profile) => string }[] = [];
   if (entry.name !== undefined) specs.push({ pattern: entry.name, get: (p) => p.name });
@@ -684,17 +744,36 @@ export function buildProfileMatcher(entry: NewTabMenuEntry): ((profile: Profile)
   if (entry.source !== undefined) specs.push({ pattern: entry.source, get: (p) => p.source ?? "" });
   if (specs.length === 0) return null;
 
-  let matchers: { prog: Inst; get: (profile: Profile) => string }[];
+  const unsupported = (pattern: string, error: unknown): never => {
+    if (error instanceof UnsupportedPatternError) {
+      throw new UnsupportedPatternError(`Can't evaluate the matchProfiles pattern "${pattern}": ${error.message}`);
+    }
+    throw error;
+  };
+
+  let matchers: { pattern: string; prog: Inst; get: (profile: Profile) => string }[];
   try {
-    matchers = specs.map(({ pattern, get }) => ({ prog: compileProgram(parsePattern(pattern)), get }));
-  } catch {
-    return null;
+    matchers = specs.map(({ pattern, get }) => {
+      try {
+        return { pattern, prog: compileProgram(parsePattern(pattern)), get };
+      } catch (error) {
+        return unsupported(pattern, error);
+      }
+    });
+  } catch (error) {
+    if (error instanceof RegexSyntaxError) return null;
+    throw error;
   }
 
   return (profile: Profile) =>
-    matchers.some(({ prog, get }) => {
+    matchers.some(({ pattern, prog, get }) => {
       const value = get(profile);
-      return value.length > 0 && matchFull(prog, value);
+      if (value.length === 0) return false;
+      try {
+        return matchFull(prog, value);
+      } catch (error) {
+        return unsupported(pattern, error);
+      }
     });
 }
 
@@ -703,6 +782,8 @@ export function buildProfileMatcher(entry: NewTabMenuEntry): ((profile: Profile)
 // "matchProfiles" entry anywhere (including inside folders). Pass 2 walks the tree again to
 // build the final order — "remainingProfiles" expands to profiles NOT in that pass-1 set, at
 // the position it appears, so a later explicit reference still lands after the remainder.
+// A matchProfiles pattern this extension can't evaluate throws UnsupportedPatternError out of
+// here (see buildProfileMatcher) — an order computed without it would be wrong, not just partial.
 export function resolveNewTabMenuOrder(profiles: Profile[], newTabMenu: NewTabMenuEntry[]): string[] {
   const referenced = new Set<string>();
 
