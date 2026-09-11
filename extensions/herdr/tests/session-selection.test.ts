@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { clearSelectedSessionIf, resolveSession, setSelectedSession } from "../src/lib/session-selection";
+import {
+  clearSelectedSessionIf,
+  pinSession,
+  releaseSessionPin,
+  resolveSession,
+  setSelectedSession,
+} from "../src/lib/session-selection";
+import { snapshotOfSession } from "../src/hooks/use-herdr-snapshot";
 import { storage } from "./helpers/raycast-api";
 
 vi.mock("@raycast/api", () => import("./helpers/raycast-api"));
@@ -12,6 +19,7 @@ vi.mock("../src/lib/preferences", () => ({
 beforeEach(() => {
   storage.clear();
   preferences.sessionName = undefined;
+  releaseSessionPin();
 });
 
 describe("resolveSession", () => {
@@ -55,5 +63,57 @@ describe("clearSelectedSessionIf", () => {
 
     await clearSelectedSessionIf("tmp-b");
     expect(storage.has("selectedSession")).toBe(false);
+  });
+});
+
+// A view command resolves its Session once and pins it, so an action fired from
+// that view targets the Session on screen even after another command changes
+// the stored selection.
+describe("pinSession", () => {
+  it("outranks the stored selection until it is released", async () => {
+    storage.set("selectedSession", "tmp-b");
+
+    const release = pinSession("tmp-a");
+    await expect(resolveSession()).resolves.toBe("tmp-a");
+
+    release();
+    await expect(resolveSession()).resolves.toBe("tmp-b");
+  });
+
+  it("never outranks an explicit session", async () => {
+    pinSession("tmp-a");
+
+    await expect(resolveSession("tmp-c")).resolves.toBe("tmp-c");
+    await expect(resolveSession("")).resolves.toBe("");
+  });
+
+  it("follows a selection made while it is held", async () => {
+    const release = pinSession("tmp-a");
+
+    await setSelectedSession("tmp-b");
+    await expect(resolveSession()).resolves.toBe("tmp-b");
+
+    release();
+  });
+
+  it("releases only its own pin", async () => {
+    storage.set("selectedSession", "tmp-c");
+    const stale = pinSession("tmp-a");
+    pinSession("tmp-b");
+
+    stale();
+    await expect(resolveSession()).resolves.toBe("tmp-b");
+  });
+});
+
+// Regression: the cache keeps the previous Session's data while the next loads,
+// so a view rendered one Session's resources under another Session's name.
+describe("snapshotOfSession", () => {
+  const snapshot = { workspaces: [], tabs: [], panes: [], agents: [] } as never;
+
+  it("returns the snapshot only for the session it was read from", () => {
+    expect(snapshotOfSession({ session: "tmp-a", snapshot }, "tmp-a")).toBe(snapshot);
+    expect(snapshotOfSession({ session: "tmp-a", snapshot }, "tmp-b")).toBeUndefined();
+    expect(snapshotOfSession(undefined, "tmp-a")).toBeUndefined();
   });
 });

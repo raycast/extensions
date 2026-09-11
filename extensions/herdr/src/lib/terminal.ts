@@ -21,6 +21,7 @@ import {
   selectWezTermPanes,
   selectWezTermWindow,
   type HerdrClient,
+  type WezTermMatch,
 } from "./terminal-focus";
 
 const FAST_FOCUS_TIMEOUT_MS = 450;
@@ -170,8 +171,11 @@ export async function focusExistingHerdrClient(explicitSession?: string): Promis
   return "unavailable";
 }
 
+/** A located Client, with the Terminal Window of its pane where the terminal reports one. */
+export type LocatedClient = HerdrClient & { windowId?: string };
+
 export type ClientLocation =
-  | { status: "found"; clients: HerdrClient[]; windowId?: string; listing?: string }
+  | { status: "found"; clients: LocatedClient[]; windowId?: string; listing?: string }
   | { status: "none" }
   | { status: "unavailable"; reason: string };
 
@@ -195,7 +199,7 @@ export async function locateTerminalPaneClients(session: string): Promise<Client
   if (clients.length === 0) return { status: "none" };
   const ttys = clients.map((client) => client.tty);
 
-  let paneTtys: string[] | undefined;
+  let matches: WezTermMatch[] | undefined;
   let windowId: string | undefined;
   let listing: string | undefined;
   if (kind === "wezterm") {
@@ -204,15 +208,19 @@ export async function locateTerminalPaneClients(session: string): Promise<Client
       ? await tryExecCapture(executable, ["cli", "list", "--format", "json"], FAST_FOCUS_TIMEOUT_MS)
       : undefined;
     const panes = listing ? selectWezTermPanes(listing, ttys) : undefined;
-    paneTtys = panes?.ttys;
+    matches = panes?.matches;
     windowId = panes?.windowId;
   } else {
+    // Terminal and iTerm report their ttys but no window this launcher can target.
     const script = kind === "terminal" ? buildTerminalTtyListScript() : buildITermTtyListScript();
     const output = await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
-    paneTtys = output === undefined ? undefined : parseTtyList(output);
+    matches = output === undefined ? undefined : parseTtyList(output).map((tty) => ({ tty }));
   }
-  if (paneTtys === undefined) return { status: "unavailable", reason: `${terminalName} did not list its panes` };
-  const inPanes = clients.filter((client) => paneTtys.includes(client.tty));
+  if (matches === undefined) return { status: "unavailable", reason: `${terminalName} did not list its panes` };
+  const paneWindows = new Map(matches.map((match) => [match.tty, match.windowId]));
+  const inPanes = clients
+    .filter((client) => paneWindows.has(client.tty))
+    .map((client) => ({ ...client, windowId: paneWindows.get(client.tty) }));
   return inPanes.length > 0 ? { status: "found", clients: inPanes, windowId, listing } : { status: "none" };
 }
 

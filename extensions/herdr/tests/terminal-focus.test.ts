@@ -44,6 +44,34 @@ describe("parseHerdrClientTtys", () => {
     expect(parseHerdrClientTtys(remote, "/opt/herdr", "default")).toEqual([]);
   });
 
+  // Regression: a Herdr CLI call carries the same `--session` prefix as a
+  // client. Reading one as a Client let Switch reveal its pane or SIGTERM
+  // someone's running command.
+  it("never reads a Herdr CLI call as a client", () => {
+    const calls = `
+70001 ttys010  herdr --session work pane read w1:p1 --lines 200
+70002 ttys011  herdr --session work api snapshot
+70003 ttys012  herdr session list --json
+70004 ttys013  herdr --session work agent prompt claude "go"
+70005 ttys014  herdr status --json
+`;
+    expect(parseHerdrClientTtys(calls, "/opt/herdr", "work")).toEqual([]);
+    expect(parseHerdrClients(calls, "/opt/herdr", "work")).toEqual([]);
+  });
+
+  it("reads a client that carries other global flags", () => {
+    const clients = `
+70010 ttys015  herdr --handoff --session work
+70011 ttys016  herdr --session=work
+70012 ttys017  herdr session attach work
+`;
+    expect(parseHerdrClientTtys(clients, "/opt/herdr", "work")).toEqual([
+      "/dev/ttys015",
+      "/dev/ttys016",
+      "/dev/ttys017",
+    ]);
+  });
+
   // macOS renders a truncated executable path in `comm`, so a binary path with
   // a space split the row apart. The lookup asks for pid, tty and args only.
   it("reads clients whose binary path contains a space", () => {
@@ -113,12 +141,15 @@ describe("selectWezTermPanes", () => {
     { window_id: 5, pane_id: 3, tty_name: "/dev/ttys003" },
   ]);
 
-  it("keeps only ttys that are WezTerm panes and reports the first match's window", () => {
-    expect(selectWezTermPanes(panes, ["/dev/ttys041", "/dev/ttys002", "/dev/ttys003"])).toEqual({
-      ttys: ["/dev/ttys002", "/dev/ttys003"],
-      windowId: "5",
+  it("keeps only ttys that are WezTerm panes and reports each match's window", () => {
+    expect(selectWezTermPanes(panes, ["/dev/ttys041", "/dev/ttys001", "/dev/ttys003"])).toEqual({
+      matches: [
+        { tty: "/dev/ttys001", windowId: "4" },
+        { tty: "/dev/ttys003", windowId: "5" },
+      ],
+      windowId: "4",
     });
-    expect(selectWezTermPanes(panes, ["/dev/ttys041"])).toEqual({ ttys: [], windowId: undefined });
+    expect(selectWezTermPanes(panes, ["/dev/ttys041"])).toEqual({ matches: [], windowId: undefined });
   });
 
   it("is unavailable when the listing is not a pane array", () => {

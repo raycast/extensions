@@ -13,6 +13,9 @@ export async function getSelectedSession(): Promise<string | undefined> {
 
 export async function setSelectedSession(name: string): Promise<void> {
   await LocalStorage.setItem(SELECTED_SESSION_KEY, name);
+  // A pinned command follows its own selection, so an action fired right after
+  // selecting targets the new Session rather than the pinned one.
+  if (pinnedSession !== undefined) pinnedSession = name;
 }
 
 /** Deleting the Selected Session clears the selection; stopping it does not. */
@@ -25,14 +28,36 @@ export function getPreferredSession(): string {
   return getHerdrPreferences().sessionName?.trim() || DEFAULT_SESSION;
 }
 
+let pinnedSession: string | undefined;
+
+/**
+ * Pins the Session a view targets for as long as it is on screen, and returns
+ * the release. A view resolves the Session once and shows one Session's
+ * Snapshot, while every action re-resolves independently; without the pin, a
+ * selection made in another command retargets those actions at a Session the
+ * user is not looking at. Pane and Tab ids are Session-scoped and collide
+ * across Sessions, so an action would land on a real but wrong resource.
+ */
+export function pinSession(name: string): () => void {
+  pinnedSession = name;
+  return () => {
+    if (pinnedSession === name) pinnedSession = undefined;
+  };
+}
+
+/** Drops any pin. For tests and for a command that stops showing one Session. */
+export function releaseSessionPin(): void {
+  pinnedSession = undefined;
+}
+
 /**
  * The Session a CLI call or terminal launch targets. An explicit session wins,
- * and an empty one still means "no --session flag"; then the Selected Session,
- * the Preferred Session, and Herdr's default. Every caller resolves here so a
- * future follow-terminal-focus layer has one place to slot in above the
- * stored selection.
+ * and an empty one still means "no --session flag"; then the Session pinned by
+ * the view on screen, the Selected Session, the Preferred Session, and Herdr's
+ * default. Every caller resolves here so a future follow-terminal-focus layer
+ * has one place to slot in above the stored selection.
  */
 export async function resolveSession(explicit?: string): Promise<string> {
   if (explicit !== undefined) return explicit;
-  return (await getSelectedSession()) ?? getPreferredSession();
+  return pinnedSession ?? (await getSelectedSession()) ?? getPreferredSession();
 }

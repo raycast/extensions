@@ -57,17 +57,46 @@ type ArgvSession =
   /** Not a local Client: a server, a CLI call, the remote bridge, or a remote attach. */
   | { kind: "other" };
 
+/** Herdr's global options, which a Client may carry before any subcommand. */
+const GLOBAL_FLAGS_WITH_VALUE = ["--session", "--remote", "--remote-keybindings"];
+const GLOBAL_FLAGS = ["--no-session", "--handoff", "--default-config", "--version", "-V", "--help", "-h"];
+
 /**
- * What a Herdr process's arguments say about the Session it belongs to. The
- * remote bridge (`herdr client`) and a `--remote` attach drive another host's
- * server, so neither is ever a Client of a local Session.
+ * What a Herdr process's arguments say about the Session it belongs to.
+ *
+ * A Client is `herdr` with global options only, or `herdr session attach <name>`.
+ * Anything else is a subcommand, so a CLI call such as `herdr --session work
+ * pane read` is not a Client even though it names a Session: revealing its pane
+ * or signaling it would hit the user's own running command. The remote bridge
+ * (`herdr client`) and a `--remote` attach drive another host's server, so
+ * neither is a Client of a local Session either.
  */
 function argvSession(argv: string): ArgvSession {
-  if (argv === "") return { kind: "bare" };
-  if (/(?:^|\s)--remote(?:=|\s)/.test(argv)) return { kind: "other" };
-  const session =
-    argv.match(/(?:^|\s)--session(?:=|\s+)([^\s]+)/)?.[1] ?? argv.match(/^session\s+attach\s+([^\s]+)/)?.[1];
-  return session === undefined ? { kind: "other" } : { kind: "named", session };
+  const words = argv.split(/\s+/).filter(Boolean);
+  let session: string | undefined;
+  let index = 0;
+  while (index < words.length) {
+    const word = words[index];
+    const [flag, inlineValue] = word.startsWith("--") && word.includes("=") ? word.split(/=(.*)/s) : [word, undefined];
+    if (flag === "--remote") return { kind: "other" };
+    if (GLOBAL_FLAGS_WITH_VALUE.includes(flag)) {
+      const value = inlineValue ?? words[index + 1];
+      if (flag === "--session") session = value;
+      index += inlineValue === undefined ? 2 : 1;
+      continue;
+    }
+    if (GLOBAL_FLAGS.includes(flag)) {
+      index += 1;
+      continue;
+    }
+    // The only subcommand a Client runs.
+    const attached = words
+      .slice(index)
+      .join(" ")
+      .match(/^session\s+attach\s+(\S+)$/)?.[1];
+    return attached === undefined ? { kind: "other" } : { kind: "named", session: attached };
+  }
+  return session === undefined ? { kind: "bare" } : { kind: "named", session };
 }
 
 /**
@@ -184,16 +213,29 @@ export function parseWezTermPanes(output: string): WezTermPane[] | undefined {
   return Array.isArray(panes) ? (panes as WezTermPane[]) : undefined;
 }
 
-/** The given ttys that are WezTerm panes, with the window of the first match. */
-export function selectWezTermPanes(output: string, ttys: string[]): { ttys: string[]; windowId?: string } | undefined {
+export interface WezTermMatch {
+  tty: string;
+  windowId?: string;
+}
+
+/**
+ * The given ttys that are WezTerm panes, each with its Terminal Window, plus the
+ * window of the first match. The per-match window lets a caller act on one
+ * window rather than on every pane it found.
+ */
+export function selectWezTermPanes(
+  output: string,
+  ttys: string[],
+): { matches: WezTermMatch[]; windowId?: string } | undefined {
   const panes = parseWezTermPanes(output);
   if (!panes) return undefined;
-  const matches = panes.filter((pane) => pane.tty_name && ttys.includes(pane.tty_name));
-  const windowId = matches.find((pane) => Number.isInteger(pane.window_id))?.window_id;
-  return {
-    ttys: matches.map((pane) => pane.tty_name as string),
-    windowId: windowId === undefined ? undefined : String(windowId),
-  };
+  const matches = panes
+    .filter((pane) => pane.tty_name && ttys.includes(pane.tty_name))
+    .map((pane) => ({
+      tty: pane.tty_name as string,
+      windowId: Number.isInteger(pane.window_id) ? String(pane.window_id) : undefined,
+    }));
+  return { matches, windowId: matches.find((match) => match.windowId !== undefined)?.windowId };
 }
 
 export function selectWezTermPane(output: string, ttys: string[]): string | undefined {

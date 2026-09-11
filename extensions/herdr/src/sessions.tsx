@@ -125,6 +125,24 @@ export default function Command() {
             onAction={() => switchTo(session.name)}
           />
         );
+        const newWindowAction = (
+          <Action
+            key="new-window"
+            title={session.running ? "Attach in New Window" : "Start and Attach in New Window"}
+            icon={Icon.PlusTopRightSquare}
+            shortcut={shortcuts.attachInNewWindow}
+            onAction={() => attach(session.name, { newWindow: true })}
+          />
+        );
+        const selectAction = (
+          <Action
+            key="select"
+            title="Select Session"
+            icon={Icon.Checkmark}
+            shortcut={shortcuts.selectSession}
+            onAction={() => select(session.name)}
+          />
+        );
         return (
           <List.Item
             key={session.name}
@@ -138,19 +156,10 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                {enterAction === "switch" ? [switchAction, attachAction] : [attachAction, switchAction]}
-                <Action
-                  title={session.running ? "Attach in New Window" : "Start and Attach in New Window"}
-                  icon={Icon.PlusTopRightSquare}
-                  shortcut={shortcuts.attachInNewWindow}
-                  onAction={() => attach(session.name, { newWindow: true })}
-                />
-                <Action
-                  title="Select Session"
-                  icon={Icon.Checkmark}
-                  shortcut={shortcuts.selectSession}
-                  onAction={() => select(session.name)}
-                />
+                {/* Enter keeps running Attach in Terminal, and the new actions
+                    follow the existing ones, unless the preference promotes
+                    Switch to the Enter action. */}
+                {enterAction === "switch" ? switchAction : attachAction}
                 {session.running ? (
                   <Action
                     title="Stop Session"
@@ -175,6 +184,9 @@ export default function Command() {
                 />
                 <Action.ShowInFinder path={session.session_dir} shortcut={shortcuts.copyPath} />
                 <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={refresh} />
+                {enterAction === "switch" ? attachAction : switchAction}
+                {newWindowAction}
+                {selectAction}
               </ActionPanel>
             }
           />
