@@ -92,6 +92,71 @@ test("fresh cached records skip automatic requests and a failed refresh keeps th
   store.cancel();
 });
 
+test("a cache read failure preserves the displayed snapshot and allows a successful retry", async () => {
+  const cached = snapshot(NOW - 60_000);
+  const latest = snapshot(NOW);
+  const cache = new MemoryCache();
+  cache.setSnapshot(cached);
+  const store = new ProviderStatusStore([definition(async () => latest)], cache, { now: () => NOW });
+  cache.readFailures.set("example", new Error("Cache read failed"));
+
+  const failed = await store.refreshProvider("example");
+  assert.equal(failed?.snapshot, cached);
+  assert.equal(failed?.refreshState, "failed");
+  assert.equal(failed?.refreshError, "Cache read failed");
+  assert.equal(store.getSnapshot().records.example, failed);
+  assert.equal(store.getSnapshot().isRefreshing, false);
+
+  cache.readFailures.delete("example");
+  const retried = await store.refreshProvider("example");
+  assert.equal(retried?.snapshot, latest);
+  assert.equal(retried?.refreshState, "idle");
+  assert.equal(retried?.refreshError, undefined);
+  assert.equal(store.getSnapshot().isRefreshing, false);
+  store.cancel();
+});
+
+test("a cache read failure does not stop queued providers during a bulk refresh", async () => {
+  const failedProvider = definition(async () => snapshot(NOW));
+  const healthySnapshot = { ...snapshot(NOW), providerId: "healthy" };
+  const healthyProvider = { ...failedProvider, id: "healthy", adapter: { fetch: async () => healthySnapshot } };
+  const cache = new MemoryCache();
+  const store = new ProviderStatusStore([failedProvider, healthyProvider], cache, { now: () => NOW, concurrency: 1 });
+  cache.readFailures.set("example", undefined);
+
+  const results = await store.refreshAll();
+  assert.equal(results.length, 2);
+  const { records, isRefreshing } = store.getSnapshot();
+  assert.equal(records.example?.refreshState, "failed");
+  assert.equal(records.example?.refreshError, "Could not refresh provider status");
+  assert.equal(records.healthy?.snapshot, healthySnapshot);
+  assert.equal(records.healthy?.refreshState, "idle");
+  assert.equal(isRefreshing, false);
+  store.cancel();
+});
+
+test("a superseded cache read failure cannot stop or replace a newer refresh", async () => {
+  const pending = deferred<ProviderSnapshot>();
+  const cache = new MemoryCache();
+  const store = new ProviderStatusStore([definition(() => pending.promise)], cache, { now: () => NOW });
+  cache.readFailures.set("example", new Error("Old cache failure"));
+  const older = store.refreshProvider("example");
+  cache.readFailures.delete("example");
+  const newer = store.refreshProvider("example");
+
+  assert.equal(await older, undefined);
+  assert.equal(store.getSnapshot().isRefreshing, true);
+  assert.equal(store.getSnapshot().records.example?.refreshState, "refreshing");
+  assert.equal(store.getSnapshot().records.example?.refreshError, undefined);
+  const latest = snapshot(NOW);
+  pending.resolve(latest);
+  await newer;
+  assert.equal(store.getSnapshot().records.example?.snapshot, latest);
+  assert.equal(store.getSnapshot().records.example?.refreshState, "idle");
+  assert.equal(store.getSnapshot().isRefreshing, false);
+  store.cancel();
+});
+
 test("history requests are shared between views and cancelled when their last view closes", async () => {
   const responses: Array<ReturnType<typeof deferred<ComponentHistory>>> = [];
   const signals: AbortSignal[] = [];
@@ -202,7 +267,9 @@ function snapshot(time: number): ProviderSnapshot {
 
 class MemoryCache {
   readonly snapshots = new Map<string, ProviderSnapshot>();
+  readonly readFailures = new Map<string, unknown>();
   getSnapshot(id: string) {
+    if (this.readFailures.has(id)) throw this.readFailures.get(id);
     return this.snapshots.get(id);
   }
   setSnapshot(value: ProviderSnapshot) {

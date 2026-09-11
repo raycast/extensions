@@ -166,14 +166,27 @@ export class ProviderStatusStore {
     return controller;
   }
 
-  #fetch(provider: ProviderDefinition, controller: AbortController, force: boolean) {
-    return refreshProviderStatus(provider, {
-      ...this.#options,
-      cache: this.#cache,
-      force,
-      signal: controller.signal,
-      isCurrent: () => this.#requests.get(provider.id) === controller,
-    });
+  async #fetch(
+    provider: ProviderDefinition,
+    controller: AbortController,
+    force: boolean,
+  ): Promise<ProviderStatusRecord> {
+    try {
+      return await refreshProviderStatus(provider, {
+        ...this.#options,
+        cache: this.#cache,
+        force,
+        signal: controller.signal,
+        isCurrent: () => this.#requests.get(provider.id) === controller,
+      });
+    } catch (error) {
+      // Cache reads can fail before the service reaches its own error handler.
+      return {
+        ...this.#state.records[provider.id]!,
+        refreshState: "failed",
+        refreshError: error instanceof Error && error.message ? error.message : "Could not refresh provider status",
+      };
+    }
   }
 
   #commit(results: ProviderStatusRecord[]): void {
