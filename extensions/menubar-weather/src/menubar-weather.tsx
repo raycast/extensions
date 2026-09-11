@@ -1,5 +1,5 @@
 import { Cache, Clipboard, MenuBarExtra, open, openCommandPreferences, updateCommandMetadata } from "@raycast/api";
-import { OPEN_METEO } from "./utils/axios-utils";
+import { OPEN_METEO, isValidWeatherResponse } from "./utils/axios-utils";
 import { CacheKey, getDateIcon, getMenuItem, getUnits, isoToDateTime, isoToTime, timeHour } from "./utils/common-utils";
 import { getMenuIcon, getWeatherIcon } from "./utils/icon-utils";
 import {
@@ -26,7 +26,10 @@ export default function MenubarWeather() {
       const cache = new Cache();
       const cacheStr = cache.get(CacheKey.LATEST_WEATHER);
       if (cacheStr) {
-        return JSON.parse(cacheStr) as OpenMeteoWeather;
+        const cachedWeather = JSON.parse(cacheStr) as unknown;
+        if (isValidWeatherResponse(cachedWeather)) {
+          return cachedWeather;
+        }
       }
     }
     return weatherData;
