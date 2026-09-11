@@ -4,6 +4,7 @@ import { Keyboard, Action, ActionPanel, Detail, Form, Icon, Toast, showToast, us
 import { showFailureToast } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { ExecutorError, resumeExecution } from "../lib/client";
+import { pauseFingerprint, readPaused } from "../lib/paused-execution";
 import { asJson, codeBlock } from "../lib/format";
 import {
   executionFailed,
@@ -21,7 +22,7 @@ function ResponseForm({
   submit,
 }: {
   schema: unknown;
-  submit: (content: Record<string, unknown>) => Promise<void>;
+  submit: (content: Record<string, unknown>) => Promise<boolean>;
 }) {
   const { pop } = useNavigation();
   const [text, setText] = useState("{}");
@@ -46,8 +47,7 @@ function ResponseForm({
               }
               pending.current = true;
               try {
-                await submit(content);
-                pop();
+                if (await submit(content)) pop();
               } finally {
                 pending.current = false;
               }
@@ -97,10 +97,21 @@ export function ExecutionResultView({
   const value = executionValue(result);
 
   async function resume(action: ResumeAction, content?: Record<string, unknown>) {
-    if (!paused || pending.current || unavailable) return;
+    if (!paused || pending.current || unavailable) return false;
     pending.current = true;
     setBusy(true);
     try {
+      const latest = await readPaused(paused.executionId);
+      if (latest.fingerprint !== pauseFingerprint(paused.interaction)) {
+        setResult({ status: "paused", text: latest.detail.text, structured: latest.detail.structured });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Approval Terms Changed",
+          message: "Review the updated terms before continuing.",
+        });
+        // Close any response form that still contains the previous schema and input.
+        return true;
+      }
       const next = await resumeExecution(paused.executionId, action, content);
       setResult(next);
       // Refreshing an inbox is independent of the already-completed resume request.
@@ -116,10 +127,11 @@ export function ExecutionResultView({
               ? "Tool Call Failed"
               : "Execution Finished",
       });
+      return true;
     } catch (error) {
       if (error instanceof ExecutorError && [404, 410].includes(error.status)) setUnavailable(true);
       await showFailureToast(error, { title: "Could Not Resume Execution" });
-      throw error;
+      return false;
     } finally {
       pending.current = false;
       setBusy(false);

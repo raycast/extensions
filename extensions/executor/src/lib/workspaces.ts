@@ -71,7 +71,7 @@ function validateWorkspace(value: Workspace): Workspace {
 }
 
 function legacyWorkspace(): Workspace | undefined {
-  const prefs = getPreferenceValues<{ apiKey?: string; baseUrl?: string; defaultOwner?: Workspace["defaultOwner"] }>();
+  const prefs = getPreferenceValues<Preferences>();
   if (!prefs.apiKey?.trim()) return undefined;
   const baseUrl = normalizeServerUrl(prefs.baseUrl || "https://executor.sh");
   return {

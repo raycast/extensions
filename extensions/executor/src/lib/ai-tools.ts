@@ -1,4 +1,5 @@
-import { createHash } from "node:crypto";
+import { pauseFingerprint, readPaused } from "./paused-execution";
+export { pauseFingerprint } from "./paused-execution";
 import {
   defaultOwner,
   execute,
@@ -8,7 +9,6 @@ import {
   listConnections,
   listIntegrations,
   listTools,
-  request,
   resumeExecution,
 } from "./client";
 import { consoleUrl } from "./console";
@@ -89,11 +89,6 @@ export interface ConfirmationDetails {
   info?: { name: string; value?: string }[];
 }
 
-interface PausedDetails {
-  text: string;
-  structured: unknown;
-}
-
 function nonEmpty(value: string | undefined, label: string): string {
   const trimmed = value?.trim();
   if (!trimmed) throw new Error(`${label} is required.`);
@@ -141,20 +136,6 @@ function pretty(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
-function canonicalJson(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null";
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
-  const object = value as Record<string, unknown>;
-  return `{${Object.keys(object)
-    .sort()
-    .map((key) => `${JSON.stringify(key)}:${canonicalJson(object[key])}`)
-    .join(",")}}`;
-}
-
-export function pauseFingerprint(interaction: Record<string, unknown>): string {
-  return createHash("sha256").update(canonicalJson(interaction)).digest("hex");
-}
-
 function pausedOutput(result: ExecutionResult) {
   const paused = pausedInteraction(result);
   if (!paused) throw new Error("Executor returned a pause without an exact execution identifier and server terms.");
@@ -179,16 +160,6 @@ export function executionOutput(result: ExecutionResult, includeFullResponse = f
     result: executionValue(result),
     isError: executionFailed(result),
   };
-}
-
-async function readPaused(executionId: string) {
-  const exactId = nonEmpty(executionId, "Execution ID");
-  const detail = await request<PausedDetails>(`/api/executions/${encodeURIComponent(exactId)}`);
-  const paused = pausedInteraction({ status: "paused", text: detail.text, structured: detail.structured });
-  if (!paused || paused.executionId !== exactId) {
-    throw new Error("Executor did not return matching server-stored terms for this paused execution.");
-  }
-  return { detail, interaction: paused.interaction, fingerprint: pauseFingerprint(paused.interaction) };
 }
 
 export async function readExecutorApproval(executionId: string) {

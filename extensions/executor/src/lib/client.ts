@@ -15,15 +15,9 @@ import type {
   ToolSummary,
 } from "./types";
 
-interface Preferences {
-  apiKey: string;
-  baseUrl?: string;
-  defaultOwner?: "all" | "user" | "org";
-}
-
 const DEFAULT_BASE_URL = "https://executor.sh";
 
-export function preferences(): Preferences {
+export function preferences() {
   return currentWorkspace() ?? getPreferenceValues<Preferences>();
 }
 
