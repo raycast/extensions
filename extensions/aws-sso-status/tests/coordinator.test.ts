@@ -13,7 +13,7 @@ import { loginProfile } from "../src/aws/login";
 
 const fixture = `[profile dev]\nsso_session=example\nsso_account_id=123456789012\nsso_role_name=Developer\n[profile production]\nsso_session=example\nsso_account_id=123456789012\nsso_role_name=ReadOnly\n[sso-session example]\nsso_start_url=https://example.awsapps.com/start\nsso_region=us-east-1\n`;
 const profiles = discoverProfiles(parseAwsConfig(fixture));
-const settings = { threshold: "30", menuBarStyle: "remaining" };
+const settings: Preferences = { threshold: "30", menuBarStyle: "remaining", notifyOnSignOut: false };
 function success(profile: SsoProfile): ProfileStatus {
   return {
     profile,
@@ -161,6 +161,23 @@ test("historical TTL and successful check survive failures, stale success is mar
   assert.equal(item.lastSuccessAt, good.checkedAt);
   assert.equal(item.stale, true);
   assert.equal(fromMetadata(profiles[0], good, 30, Date.now() + 180000).stale, true);
+});
+
+test("expired credential checks remain successful checks without failure backoff", () => {
+  const checkedAt = new Date().toISOString();
+  const result = recordResult(
+    {
+      profile: profiles[0],
+      status: "Expired",
+      checkedAt,
+      expiration: new Date(Date.now() - 60000).toISOString(),
+    },
+    { status: "Unknown", failures: 4, nextRetryAt: 0 },
+    1000,
+  );
+  assert.equal(result.failures, 0);
+  assert.equal(result.nextRetryAt, 61000);
+  assert.equal(result.lastSuccessAt, checkedAt);
 });
 test("persisted metadata uses an allowlist and private file permissions", () =>
   context(async (dir, store) => {

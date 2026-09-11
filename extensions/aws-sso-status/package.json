@@ -141,7 +141,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^2.2.1",
+    "@raycast/api": "^2.3.0",
     "proper-lockfile": "^4.1.2"
   },
   "devDependencies": {

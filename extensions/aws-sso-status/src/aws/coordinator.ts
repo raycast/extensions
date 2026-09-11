@@ -46,15 +46,15 @@ export function fromMetadata(
   };
 }
 export function recordResult(result: ProfileStatus, previous?: StatusMetadata, now = Date.now()): StatusMetadata {
-  const good = isUsable(result);
-  const failures = good ? 0 : (previous?.failures || 0) + 1;
+  const successfulCheck = isUsable(result) || result.status === "Expired";
+  const failures = successfulCheck ? 0 : (previous?.failures || 0) + 1;
   return {
     status: result.status,
-    expiration: result.expiration || (good ? undefined : previous?.expiration),
+    expiration: result.expiration || (successfulCheck ? undefined : previous?.expiration),
     checkedAt: result.checkedAt,
-    lastSuccessAt: good ? result.checkedAt : previous?.lastSuccessAt,
+    lastSuccessAt: successfulCheck ? result.checkedAt : previous?.lastSuccessAt,
     failures,
-    nextRetryAt: now + (good ? 60000 : result.status === "Not Signed In" ? 300000 : retryDelay(failures)),
+    nextRetryAt: now + (successfulCheck ? 60000 : result.status === "Not Signed In" ? 300000 : retryDelay(failures)),
     failureKind: result.failureKind,
   };
 }

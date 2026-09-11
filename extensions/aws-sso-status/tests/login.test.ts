@@ -7,7 +7,7 @@ import { parseAwsConfig } from "../src/aws/config";
 import { CliError } from "../src/aws/cli";
 import { loginProfile, selectLoginProfile } from "../src/aws/login";
 import { githubRepositoryUrl } from "../src/project";
-const settings = { threshold: "30", menuBarStyle: "remaining" };
+const settings: Preferences = { threshold: "30", menuBarStyle: "remaining", notifyOnSignOut: false };
 const config = parseAwsConfig(
   `[profile dev]\nsso_session=example\nsso_account_id=123456789012\nsso_role_name=DeveloperAccess\n[profile production]\nsso_session=example\nsso_account_id=123456789012\nsso_role_name=DeveloperAccess\n[sso-session example]\nsso_start_url=https://example.awsapps.com/start\nsso_region=us-east-1\n`,
 );

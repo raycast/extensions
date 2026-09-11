@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { applyPrimarySelection } from "../src/selection";
 import { menuBarTitle } from "../src/formatting";
-const settings = { threshold: "30", menuBarStyle: "remaining", primaryProfile: "dev" };
+const settings: Preferences = {
+  threshold: "30",
+  menuBarStyle: "remaining",
+  primaryProfile: "dev",
+  notifyOnSignOut: false,
+};
 test("menu selection overrides its original preference, but a later preference change wins", () => {
   const selection = { name: "production", preference: "dev" };
   assert.equal(applyPrimarySelection(settings, selection).primaryProfile, "production");

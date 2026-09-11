@@ -13,7 +13,7 @@ import { formatRemainingTime, menuBarTitle } from "../src/formatting";
 const modern = `[profile dev-test_one]\nsso_session = example\nsso_account_id = 123456789012\nsso_role_name = DeveloperAccess\nregion = ap-northeast-1\n[sso-session example]\nsso_start_url = https://example.awsapps.com/start\nsso_region = us-east-1\n`;
 const legacy = `[default]\nsso_start_url = https://example.awsapps.com/start\nsso_region = us-east-1\nsso_account_id = 123456789012\nsso_role_name = DeveloperAccess\n`;
 const profile = discoverProfiles(parseAwsConfig(modern))[0];
-const settings = { threshold: "30", menuBarStyle: "remaining" };
+const settings: Preferences = { threshold: "30", menuBarStyle: "remaining", notifyOnSignOut: false };
 test("modern session, dash and underscore names", () => {
   assert.equal(profile.name, "dev-test_one");
   assert.equal(profile.sessionName, "example");
@@ -97,7 +97,7 @@ test("menu shows only time or check/cross, without a profile prefix", () => {
   assert.equal(menuBarTitle(undefined, settings, true), "…");
   assert.equal(menuBarTitle(undefined, settings, false), "✕");
   for (const status of ["Expired", "Not Signed In", "Invalid Configuration", "AWS CLI Not Found", "Unknown"] as const) {
-    for (const menuBarStyle of ["remaining", "status"])
+    for (const menuBarStyle of ["remaining", "status"] as const)
       assert.equal(menuBarTitle({ ...item, status }, { ...settings, menuBarStyle }, false, now), "✕");
   }
   assert.equal(menuBarTitle({ ...item, status: "Checking" }, settings, false, now), "…");
