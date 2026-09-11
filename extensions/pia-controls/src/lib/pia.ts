@@ -43,17 +43,14 @@ async function findAppPathBySpotlight(): Promise<string | undefined> {
 }
 
 /**
- * Opens PIA by bundle identifier when its location is unknown, so this works
- * for installs outside /Applications instead of guessing a path. Returns false
- * rather than throwing, so callers can report a failure instead of no-opping.
+ * Launches and activates PIA, resolving it by bundle identifier when its path
+ * is unknown so installs outside /Applications work. PIA is an LSUIElement
+ * agent, so this starts it and brings it forward; its interface is a menu bar
+ * popover the user opens themselves. Returns false rather than throwing, so a
+ * failure can be reported instead of silently doing nothing.
  */
 export async function openPiaApp(appPath?: string): Promise<boolean> {
-  const attempts = appPath
-    ? [
-        ["-g", appPath],
-        ["-g", "-b", PIA_BUNDLE_ID],
-      ]
-    : [["-g", "-b", PIA_BUNDLE_ID]];
+  const attempts = appPath ? [[appPath], ["-b", PIA_BUNDLE_ID]] : [["-b", PIA_BUNDLE_ID]];
   for (const args of attempts) {
     try {
       await run("/usr/bin/open", args, { timeout: 5000 });
