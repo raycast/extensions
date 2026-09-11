@@ -354,6 +354,7 @@ export class JsonArraySplitter {
   private depth = 0;
   private inString = false;
   private escaped = false;
+  private closed = false;
   private pending = "";
 
   push(text: string, onObject: (json: string) => void): void {
@@ -370,13 +371,13 @@ export class JsonArraySplitter {
       } else if (c === "}" && --this.depth === 0) {
         onObject(this.pending + text.slice(start, i + 1));
         this.pending = "";
-      }
+      } else if (c === "]" && this.depth === 0) this.closed = true;
     }
     if (this.depth > 0) this.pending += text.slice(start);
   }
 
-  /** Un objet a été commencé sans être terminé : flux tronqué. */
-  get incomplete(): boolean {
-    return this.depth > 0;
+  /** Tableau refermé par son `]` : sinon le flux est tronqué, y compris entre deux articles. */
+  get complete(): boolean {
+    return this.closed && this.depth === 0;
   }
 }

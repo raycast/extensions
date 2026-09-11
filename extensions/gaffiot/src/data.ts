@@ -114,7 +114,7 @@ async function downloadAndConvert(
     closeSync(fd);
   }
 
-  if (splitter.incomplete || converter.index.length === 0) throw new Error("Incomplete download");
+  if (!splitter.complete || converter.index.length === 0) throw new Error("Incomplete download");
   return converter.index;
 }
 

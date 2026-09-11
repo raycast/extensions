@@ -6,11 +6,6 @@ import { Entry, Match, displayTitle, gloss, readBody, search, toMarkdown, toPlai
 import { GAFFIOT_SOURCE_URL } from "./legal";
 import { LegalAction } from "./legal-view";
 
-interface Preferences {
-  maxResults: string;
-  showDetail: boolean;
-}
-
 const ONLINE_LOOKUP = (word: string) => `https://www.lexilogos.com/latin/gaffiot.php?q=${encodeURIComponent(word)}`;
 
 const bodyCache = new Map<number, string>();
@@ -31,8 +26,9 @@ function bareTitle(entry: Entry): string {
     .normalize("NFC");
 }
 
-export default function Command(props: LaunchProps<{ arguments: { query?: string } }>) {
-  const prefs = getPreferenceValues<Preferences>();
+export default function Command(props: LaunchProps<{ arguments: Arguments.Search }>) {
+  // Types générés depuis package.json (raycast-env.d.ts)
+  const prefs = getPreferenceValues<Preferences.Search>();
   const limit = Number(prefs.maxResults) || 60;
 
   const [searchText, setSearchText] = useState(props.arguments?.query ?? props.fallbackText ?? "");
