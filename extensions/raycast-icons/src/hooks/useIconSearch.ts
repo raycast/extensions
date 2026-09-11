@@ -10,7 +10,14 @@ export function useIconSearch() {
 
   const { data: allIconNames } = useCachedPromise(async () => Object.keys(Icon).join(", "), [], { initialData: "" });
 
-  const filteredIcons = useMemo(() => filterIcons(Object.entries(Icon), searchText), [searchText]);
+  const { data: filteredIcons } = useCachedPromise(
+    async (text: string) => filterIcons(Object.entries(Icon), text),
+    [searchText],
+    {
+      initialData: Object.entries(Icon),
+      keepPreviousData: true,
+    },
+  );
 
   const prompt = `Here is a list of all available icon names: ${allIconNames}\nReturn the icon names in the list, separated by commas and with no additional text, that best match the semantic meaning of the following description: ${searchText}\nYou should return at least one icon name.`;
 
