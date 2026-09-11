@@ -52,7 +52,10 @@ export function ensureData(): Promise<true> {
 }
 
 async function install(): Promise<true> {
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading the Gaffiot" });
+  // Un outil IA s'exécute sans interface : sans toast possible, l'installation continue quand même.
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading the Gaffiot" }).catch(
+    () => ({}) as Toast,
+  );
   const tmpDat = `${DAT_PATH}.tmp`;
   try {
     mkdirSync(environment.supportPath, { recursive: true });

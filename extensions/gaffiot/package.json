@@ -37,6 +37,102 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "look-up-latin-word",
+      "title": "Look up Latin Word",
+      "description": "Look up a Latin word in the Gaffiot 2016 Latin-French dictionary and get its complete French definition, with citations of Latin authors and references"
+    }
+  ],
+  "ai": {
+    "instructions": "The Gaffiot is a Latin-French dictionary: headwords are in Latin, definitions are in French. Before calling look-up-latin-word, convert inflected forms to their dictionary form (nominative singular for nouns and adjectives, first person singular present indicative for verbs), e.g. 'amavit' -> 'amo', 'rosarum' -> 'rosa', 'tulit' -> 'fero'. If no entry is found, try other plausible dictionary forms or the returned suggestions. Base your answer on the returned entries rather than on general knowledge. When quoting a definition, quote the French text as it is; if the user writes in another language, you may add a translation, clearly presented as yours. Always credit the source as: Gaffiot 2016 (G. Gréco et al.), CC BY-NC-ND 4.0.",
+    "evals": [
+      {
+        "input": "@gaffiot What does amo mean?",
+        "mocks": {
+          "look-up-latin-word": {
+            "query": "amo",
+            "entries": [
+              {
+                "headword": "ămō",
+                "definition": "āvī, ātum, āre, tr., aimer"
+              }
+            ],
+            "source": "Gaffiot 2016 (G. Gréco et al.), CC BY-NC-ND 4.0"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "look-up-latin-word",
+              "arguments": {
+                "word": "amo"
+              }
+            }
+          },
+          {
+            "includes": "aimer"
+          }
+        ]
+      },
+      {
+        "input": "@gaffiot Que veut dire « amavit » ?",
+        "mocks": {
+          "look-up-latin-word": {
+            "query": "amo",
+            "entries": [
+              {
+                "headword": "ămō",
+                "definition": "āvī, ātum, āre, tr., aimer"
+              }
+            ],
+            "source": "Gaffiot 2016 (G. Gréco et al.), CC BY-NC-ND 4.0"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "look-up-latin-word",
+              "arguments": {
+                "word": "amo"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Explains that amavit is a perfect form of amo and gives the meaning 'aimer' (to love)"
+          }
+        ]
+      },
+      {
+        "input": "@gaffiot Traduis « rosarum »",
+        "mocks": {
+          "look-up-latin-word": {
+            "query": "rosa",
+            "entries": [
+              {
+                "headword": "rŏsa",
+                "definition": "æ, f., rose"
+              }
+            ],
+            "source": "Gaffiot 2016 (G. Gréco et al.), CC BY-NC-ND 4.0"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "look-up-latin-word",
+              "arguments": {
+                "word": "rosa"
+              }
+            }
+          },
+          {
+            "includes": "rose"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "maxResults",

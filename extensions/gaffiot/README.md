@@ -12,6 +12,10 @@ The dictionary data is **not bundled** with the extension. On first launch, the 
 - ranking: exact headword → starts with → contains (3 letters or more);
 - the dictionary doesn't lemmatize: search for `amo`, not `amavit`.
 
+## Raycast AI
+
+The extension is also an **AI Extension**: mention `@gaffiot` in Raycast AI Chat or Quick AI to have the AI look words up in the dictionary instead of answering from memory, e.g. _"@gaffiot what does amavit mean?"_. The AI converts inflected forms to their dictionary form (`amavit` → `amo`), then answers from the complete Gaffiot entry and credits the source.
+
 ## Shortcuts
 
 | Action                              | Shortcut |
