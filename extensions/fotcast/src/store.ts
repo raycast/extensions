@@ -1,3 +1,4 @@
+import { Toast, showToast } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { useRef } from "react";
 
@@ -7,6 +8,20 @@ export type Favorites = {
 };
 
 const EMPTY: Favorites = { teams: [], leagues: [] };
+
+/** Run a favorite toggle, then confirm it with a toast. */
+export async function toggleFavorite(
+  wasFavorite: boolean,
+  name: string,
+  run: () => Promise<void>,
+): Promise<void> {
+  await run();
+  await showToast({
+    style: Toast.Style.Success,
+    title: wasFavorite ? "Removed from Favorites" : "Added to Favorites",
+    message: name,
+  });
+}
 
 export function useFavorites() {
   const { value, setValue, isLoading } = useLocalStorage<Favorites>(

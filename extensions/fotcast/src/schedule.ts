@@ -3,7 +3,7 @@
 import type { Match, MatchDayLeague } from "./fotmob";
 import type { Favorites } from "./store";
 
-export type MatchState = "live" | "finished" | "cancelled" | "scheduled";
+type MatchState = "live" | "finished" | "cancelled" | "scheduled";
 export type Mode = "all" | "favorites";
 
 /** "20260910" in local time. */
@@ -63,7 +63,7 @@ export function isFavoriteLeague(
 // A team's substitution row, ready to render. Prefers matchFacts' true
 // [in, out] swap pairing; falls back to each side's own subIn/subOut minute,
 // unpaired, when swap data is missing rather than guessing a pairing.
-export type SubLine =
+type SubLine =
   | { time: number; inId: string; outId: string }
   | { time: number; direction: "in" | "out"; id: string };
 
@@ -86,14 +86,6 @@ export function pairSubstitutions(
     ...ins.map((e) => ({ ...e, direction: "in" as const })),
     ...outs.map((e) => ({ ...e, direction: "out" as const })),
   ].sort((a, b) => a.time - b.time);
-}
-
-export function isFavoriteMatch(
-  m: Match,
-  league: MatchDayLeague,
-  favs: Favorites,
-): boolean {
-  return hasFavoriteTeam(m, favs) || isFavoriteLeague(league, favs);
 }
 
 export type SectionMatch = { match: Match; league: MatchDayLeague };

@@ -7,7 +7,8 @@ import type { Favorites } from "../src/store.ts";
 import {
   buildSections,
   favoriteLeagueEntry,
-  isFavoriteMatch,
+  hasFavoriteTeam,
+  isFavoriteLeague,
   pairSubstitutions,
   statusOf,
 } from "../src/schedule.ts";
@@ -50,7 +51,7 @@ test("favorite team 9823 yields one ★ Teams match", () => {
   assert.equal(sections[0].matches.length, 1);
   const { match, league } = sections[0].matches[0];
   assert.ok(match.home.id === 9823 || match.away.id === 9823);
-  assert.ok(isFavoriteMatch(match, league, favs));
+  assert.ok(hasFavoriteTeam(match, favs) || isFavoriteLeague(league, favs));
   // still listed in its own league section, and totals are unchanged
   assert.equal(sections.length, 42);
   assert.equal(total(sections.slice(1)), 80);

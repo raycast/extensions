@@ -1,16 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  Image,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { leagueLogo, leagueUrl, search, teamCrest, teamUrl } from "./fotmob";
-import { useFavorites } from "./store";
+import { toggleFavorite, useFavorites } from "./store";
 
 type RowProps = {
   icon: Image.ImageLike;
@@ -42,16 +34,7 @@ function Row({
           <Action
             title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
             icon={isFavorite ? Icon.StarDisabled : Icon.Star}
-            onAction={async () => {
-              await onToggle();
-              await showToast({
-                style: Toast.Style.Success,
-                title: isFavorite
-                  ? "Removed from Favorites"
-                  : "Added to Favorites",
-                message: name,
-              });
-            }}
+            onAction={() => toggleFavorite(isFavorite, name, onToggle)}
           />
           <Action.OpenInBrowser title="Open in FotMob" url={url} />
         </ActionPanel>

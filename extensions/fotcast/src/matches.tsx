@@ -6,9 +6,7 @@ import {
   Keyboard,
   LaunchType,
   List,
-  Toast,
   launchCommand,
-  showToast,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -35,7 +33,7 @@ import {
   type Mode,
   type SectionMatch,
 } from "./schedule";
-import { useFavorites } from "./store";
+import { toggleFavorite, useFavorites } from "./store";
 
 // Footer: "Today · Thu, Sep 10"; a plain date label is already complete.
 function footerTitle(date: Date): string {
@@ -182,15 +180,6 @@ function MatchRow({
   const { match, league } = item;
   const { favorites, isTeam, toggleTeam, toggleLeague } = favs;
 
-  async function toggle(on: boolean, name: string, run: () => Promise<void>) {
-    await run();
-    await showToast({
-      style: Toast.Style.Success,
-      title: on ? "Removed from Favorites" : "Added to Favorites",
-      message: name,
-    });
-  }
-
   const teamAction = (team: Match["home"]) => {
     const on = isTeam(team.id);
     return (
@@ -198,7 +187,7 @@ function MatchRow({
         title={`${on ? "Unfavorite" : "Favorite"} ${team.name}`}
         icon={on ? Icon.StarDisabled : Icon.Star}
         onAction={() =>
-          toggle(on, team.name, () =>
+          toggleFavorite(on, team.name, () =>
             toggleTeam({
               id: team.id,
               name: team.name,
@@ -246,7 +235,7 @@ function MatchRow({
               title={`${leagueFav ? "Unfavorite" : "Favorite"} ${league.name}`}
               icon={leagueFav ? Icon.StarDisabled : Icon.Star}
               onAction={() =>
-                toggle(leagueFav, league.name, () =>
+                toggleFavorite(leagueFav, league.name, () =>
                   toggleLeague({
                     id: favLeagueEntry?.id ?? league.primaryId,
                     name: league.name,

@@ -3,8 +3,6 @@ import type { Image } from "@raycast/api";
 export type Team = {
   id: number;
   name: string;
-  longName: string;
-  shortName?: string;
   score: number;
 };
 
@@ -14,8 +12,6 @@ export type MatchStatus = {
   finished: boolean;
   cancelled: boolean;
   ongoing?: boolean;
-  awarded?: boolean;
-  scoreStr?: string;
   aggregatedStr?: string;
   liveTime?: {
     short: string;
@@ -24,17 +20,12 @@ export type MatchStatus = {
     addedTime: number;
   };
   reason?: { short: string; long: string; shortKey: string; longKey: string };
-  halfs?: Record<string, string>;
 };
 
 export type Match = {
   id: number;
-  leagueId: number;
   time: string;
   timeTS: number;
-  statusId: number;
-  tournamentStage: string;
-  eliminatedTeamId: number | null;
   home: Team;
   away: Team;
   status: MatchStatus;
@@ -45,28 +36,11 @@ export type MatchDayLeague = {
   primaryId: number;
   parentLeagueId?: number;
   parentLeagueName?: string | null;
-  isGroup?: boolean | null;
-  groupName?: string;
   name: string;
   ccode: string;
   internalRank: number;
   localRank?: number;
-  simpleLeague: boolean;
   matches: Match[];
-};
-
-export type LeagueRef = {
-  id: number;
-  name: string;
-  localizedName: string;
-  pageUrl: string;
-  ccode: string;
-};
-
-export type AllLeagues = {
-  popular: LeagueRef[];
-  international: { ccode: string; name: string; leagues: LeagueRef[] }[];
-  countries: { ccode: string; name: string; leagues: LeagueRef[] }[];
 };
 
 export type SearchTeam = { id: number; name: string; leagueName?: string };
@@ -140,7 +114,6 @@ export type MatchDetails = {
       } | null;
     } | null;
     lineup?: {
-      lineupType?: string;
       homeTeam?: LineupTeam | null;
       awayTeam?: LineupTeam | null;
     } | null;
@@ -176,10 +149,6 @@ export async function fetchMatches(dateKey: string): Promise<MatchDayLeague[]> {
     `https://www.fotmob.com/api/data/matches?date=${dateKey}&timezone=${encodeURIComponent(timezone)}`,
   );
   return data?.leagues ?? [];
-}
-
-export async function fetchAllLeagues(): Promise<AllLeagues> {
-  return get<AllLeagues>("https://www.fotmob.com/api/data/allLeagues");
 }
 
 /** Crest PNG as a data URI so it can be embedded in an SVG scoreboard. */
