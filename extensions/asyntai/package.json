@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "asyntai",
+  "title": "Asyntai AI Chatbot",
+  "description": "Read your website chats, leads and support tickets, and ask your own AI chatbot a question, without opening the browser.",
+  "icon": "icon.png",
+  "author": "asyntai",
+  "categories": ["Communication", "Productivity", "Web"],
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "commands": [
+    {
+      "name": "inbox",
+      "title": "Recent Chats",
+      "subtitle": "Asyntai",
+      "description": "The newest chats on your website. Open one to read the whole conversation.",
+      "mode": "view"
+    },
+    {
+      "name": "leads",
+      "title": "Leads",
+      "subtitle": "Asyntai",
+      "description": "Visitors who left an email address or a phone number in the chat.",
+      "mode": "view"
+    },
+    {
+      "name": "tickets",
+      "title": "Tickets",
+      "subtitle": "Asyntai",
+      "description": "Your support tickets, with the status and the visitor.",
+      "mode": "view"
+    },
+    {
+      "name": "ask",
+      "title": "Ask My Chatbot",
+      "subtitle": "Asyntai",
+      "description": "Ask your own AI chatbot a question and read the answer it gives your visitors.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "Question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API key",
+      "description": "Your Asyntai API key. In Asyntai open Settings, then API, and copy the key.",
+      "placeholder": "Paste the key from Settings, API"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "prepublishOnly": "echo 'Use npm run publish to send the extension to the Raycast Store.' && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
