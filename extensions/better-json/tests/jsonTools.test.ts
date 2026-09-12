@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   buildJsonTree, createChildPager, createJsonNode, formatJson, getChildPage, jsonPreview, jsonPathPreview,
   MAX_LABEL_CHARACTERS, MAX_PREVIEW_CHARACTERS, MAX_SEARCH_NODES, MAX_SEARCH_CHARACTERS, MAX_SEARCH_FIELD_CHARACTERS,
-  parseJsonDocument, searchNodes, compactJson, serializeJsonString,
+  parseJsonDocument, searchNodes, compactJson, serializeJsonString, truncateLabel,
 } from "../src/core/jsonTools";
 
 test("hierarchical browsing exposes direct children and keeps unambiguous paths", () => {
@@ -229,6 +229,65 @@ test("chunk boundaries preserve surrogate pairs, lone surrogates, and escapes", 
     const text = "a".repeat(1023) + suffix + "b".repeat(1024);
     const value = { [text]: text };
     assert.equal(jsonPreview(value).markdown, "```json\n" + JSON.stringify(value, null, 2) + "\n```");
+  }
+});
+
+test("detail preview limits preserve whole code points in values and keys", () => {
+  for (const objectKey of [false, true]) {
+    for (const offset of [-2, -1, 0]) {
+      const opening = objectKey ? '{\n  "' : '"';
+      const prefix = "a".repeat(MAX_PREVIEW_CHARACTERS - opening.length + offset);
+      const text = prefix + "😀tail";
+      const value = objectKey ? { [text]: true } : text;
+      const preview = jsonPreview(value);
+      const expected = opening + prefix + (offset === -2 ? "😀" : "");
+      assert.equal(preview.truncated, true);
+      assert.ok(preview.markdown === "```json\n" + expected + "\n…\n```");
+      assert.equal(formatJson(value), JSON.stringify(value, null, 2));
+      assert.equal(compactJson(value), JSON.stringify(value));
+    }
+  }
+  const exact = "a".repeat(MAX_PREVIEW_CHARACTERS - 4) + "😀";
+  assert.deepEqual(jsonPreview(exact), { markdown: "```json\n" + JSON.stringify(exact) + "\n```", truncated: false });
+});
+
+test("short previews preserve whole code points when reserving the ellipsis", () => {
+  for (const [length, suffix] of [[136, "😀…"], [137, "…"], [138, "…"], [139, "…"]] as const) {
+    const text = "a".repeat(length) + "😀tail";
+    const node = createJsonNode(text);
+    assert.equal(node.preview, '"' + "a".repeat(Math.min(length, 138)) + suffix);
+    assert.equal(node.value, text);
+  }
+  const exact = "a".repeat(136) + "😀";
+  assert.equal(createJsonNode(exact).preview, JSON.stringify(exact));
+});
+
+test("label limits preserve whole code points within the display budget", () => {
+  for (const [value, limit, expected] of [
+    ["a😀b", 3, "a…"],
+    ["a😀bc", 4, "a😀…"],
+    ["😀x", 1, "…"],
+    ["a😀", 3, "a😀"],
+    ["中文测试", 3, "中文…"],
+    ["plain", 4, "pla…"],
+  ] as const) {
+    assert.equal(truncateLabel(value, limit), expected);
+  }
+  const prefix = "a".repeat(MAX_LABEL_CHARACTERS - 2);
+  assert.equal(truncateLabel(prefix + "😀tail"), prefix + "…");
+});
+
+test("unusual path truncation is code-point-safe before and after escaping", () => {
+  for (const length of [MAX_LABEL_CHARACTERS - 5, MAX_LABEL_CHARACTERS - 6]) {
+    const key = "a".repeat(length) + "😀tail";
+    const node = getChildPage(createJsonNode({ [key]: true }))[0];
+    const path = jsonPathPreview(node.path);
+    assert.equal(path.truncated, true);
+    assert.equal(path.text, '$[\\"' + "a".repeat(length) + "…");
+    assert.equal(path.markdown, "` " + path.text + " `");
+    assert.ok(path.text.length <= MAX_LABEL_CHARACTERS);
+    assert.equal(node.key, key);
+    assert.equal(node.path, "$[" + JSON.stringify(key) + "]");
   }
 });
 

@@ -191,7 +191,7 @@ function boundedJson(value: unknown, spaces: number, limit: number): { content: 
   // copying still use the complete value, even beyond the search index limit.
   for (const chunk of jsonChunks(value, spaces)) {
     if (length + chunk.length > limit) {
-      chunks.push(chunk.slice(0, limit - length));
+      chunks.push(codePointSafePrefix(chunk, limit - length));
       truncated = true;
       break;
     }
@@ -201,15 +201,19 @@ function boundedJson(value: unknown, spaces: number, limit: number): { content: 
   return { content: chunks.join(""), truncated };
 }
 
+function codePointSafePrefix(value: string, limit: number): string {
+  let end = Math.max(0, Math.min(value.length, Math.floor(limit)));
+  const last = value.charCodeAt(end - 1);
+  const next = value.charCodeAt(end);
+  // Keep the UTF-16 display budget, but never retain half of a surrogate pair.
+  if (last >= 0xd800 && last <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) end--;
+  return value.slice(0, end);
+}
+
 export function truncateLabel(value: string, limit = MAX_LABEL_CHARACTERS): string {
   if (value.length <= limit) return value;
   // Copy the short prefix so a display label never retains a much larger string.
-  return (
-    value
-      .slice(0, limit - 1)
-      .split("")
-      .join("") + "…"
-  );
+  return codePointSafePrefix(value, limit - 1).split("").join("") + "…";
 }
 
 export function jsonPathPreview(path: string): { text: string; markdown: string; truncated: boolean } {
@@ -416,7 +420,7 @@ function unescapeLogString(value: string): string {
 
 function getPreview(value: unknown): string {
   const preview = boundedJson(value, 0, MAX_PREVIEW_LENGTH);
-  return preview.truncated ? preview.content.slice(0, MAX_PREVIEW_LENGTH - 1) + "…" : preview.content;
+  return preview.truncated ? codePointSafePrefix(preview.content, MAX_PREVIEW_LENGTH - 1) + "…" : preview.content;
 }
 
 function getChildrenCount(value: unknown): number {
