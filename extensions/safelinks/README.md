@@ -1,0 +1,86 @@
+# Safe Links Decoder — Raycast v2
+
+Decode rewritten email links to their real HTTP(S) destination, wrapper chain,
+registrable domain, risk flags, and metadata notes.
+
+**Decoding is local; the URL is never fetched.** No server or API key is used.
+The only action that opens a destination is the explicitly selected **Open in
+Browser** action. Offline decoding cannot check reputation or follow shorteners.
+
+## Commands
+
+- **Decode Safe Link from Clipboard** reads selected text with a clipboard
+  fallback. Empty or unusable input shows a failure toast and the input form.
+- **Decode Safe Link…** opens a textarea prefilled from the clipboard when
+  available, then displays the same result view.
+
+Actions: **Copy Real Link**, **Copy as Markdown**, **Paste Real Link**, **Open in
+Browser**, **Show Decode Chain**, and **Refresh**. Clipboard-command refresh
+re-reads selection/clipboard; input-command refresh re-decodes the submitted text.
+Risk flags carry red or yellow icons. Pasted URL content is rendered in fenced
+code blocks rather than interpreted as Markdown links or remote images.
+
+The **Copy links without tracking parameters** preference is off by default.
+When enabled, copy/Markdown/paste remove `utm_*`, `gclid`, `fbclid`, `msclkid`, and
+`mc_eid`. The displayed result and explicit browser-open action keep the exact
+decoded URL.
+
+## Develop on macOS
+
+Requires the Raycast app 2.x on macOS. From this directory:
+
+```bash
+npm ci
+npx tsc --noEmit
+npx vitest run
+npm run dev
+npm run build
+```
+
+`npm run lint` invokes Raycast's lint command. The manifest deliberately has no
+`version`, uses `platforms: ["macOS"]`, and pins `@raycast/api` to 2.3.1 (newest
+available when implemented). Commit the lockfile when updating the API.
+
+## Publish to the Raycast Store
+
+```bash
+npm run publish   # npx @raycast/api@latest publish -> PR against raycast/extensions
+```
+
+It authenticates with GitHub and opens the pull request with the extension placed
+in `extensions/safelinks/`. The `author` field must be your **Raycast account
+username** (not the GitHub login) or the review will bounce it. Store CI runs
+`npm ci`, the distribution build and `npm run lint` on Linux, so the checks in
+this README are the same gates.
+
+Screenshots are the only manual piece: open the extension with `npm run dev`,
+press the Window Capture hotkey with **Save to Metadata** and take 3–6 shots
+(2000×1250 PNG, same background, no sensitive links) — they land in
+`metadata/` and travel with the PR. `CHANGELOG.md` uses `{PR_MERGE_DATE}`, which
+the store replaces on merge.
+
+From a machine without the Raycast app, `python3
+../scripts/raycast_store_bundle.py <dir>` assembles and validates the same
+`extensions/safelinks/` folder for a manual fork-and-PR.
+
+## What was actually verified on Linux
+
+- `npm ci`: passed.
+- `npx tsc --noEmit`: passed.
+- `npx vitest run`: 61 tests passed, including all 22 authoritative fixtures.
+- One `npm run build` attempt: both command entry points compiled and TypeScript
+  definitions were generated; the command then exited **1** when trying to notify
+  Raycast. Output included `Raycast is not running` and `spawn xdg-open ENOENT`.
+
+The build command therefore did **not** pass end-to-end on Linux. Running and
+installing require the Raycast app on macOS. Native selection, clipboard, forms,
+navigation, and actions were not executed on this Linux host.
+
+The decoder, domain data and labels are standalone local copies. From the parent
+repo, run `python3 scripts/sync_extension.py` after changing shared web sources.
+Both suites read the same unmodified `../testdata/wrappers.json`; root parity
+tests check byte identity. Generate the committed 512×512 custom icons with
+`python3 scripts/make_icon.py` from the parent repo.
+
+Application code/icons: MIT. Bundled Public Suffix List: MPL-2.0, with attribution
+and source/version retained in `src/public-suffix-rules.ts`.

@@ -1,0 +1,58 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "safelinks",
+	"title": "Safe Links Decoder",
+	"description": "Reveal the destination, wrapper chain and risk flags of rewritten email links with local, offline decoding.",
+	"icon": "icon.png",
+	"author": "henry_rausch",
+	"platforms": [
+		"macOS"
+	],
+	"categories": [
+		"Security",
+		"Productivity"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "decode-clipboard",
+			"title": "Decode Safe Link from Clipboard",
+			"description": "Decode the selected text, falling back to the clipboard, without opening the link.",
+			"mode": "view"
+		},
+		{
+			"name": "decode-input",
+			"title": "Decode Safe Link…",
+			"description": "Paste a rewritten link or message to see the real destination and risk flags.",
+			"mode": "view"
+		}
+	],
+	"preferences": [
+		{
+			"name": "stripTrackingParams",
+			"type": "checkbox",
+			"title": "Copying",
+			"label": "Copy links without tracking parameters",
+			"description": "Remove utm_*, gclid, fbclid, msclkid and mc_eid from copied or pasted links. The displayed result stays exact.",
+			"required": false,
+			"default": false
+		}
+	],
+	"scripts": {
+		"build": "ray build",
+		"dev": "ray develop",
+		"lint": "ray lint",
+		"publish": "npx @raycast/api@latest publish",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@raycast/api": "2.3.1"
+	},
+	"devDependencies": {
+		"@types/node": "^22.0.0",
+		"@types/react": "^19.0.0",
+		"typescript": "^5.9.3",
+		"vitest": "5.0.0"
+	}
+}
