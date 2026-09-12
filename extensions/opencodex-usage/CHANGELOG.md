@@ -1,5 +1,9 @@
 # OpenCodex Usage Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support.
+
 ## [Initial Version] - 2026-08-13
 
 - Provider Usage command listing every connected provider with quota rings, reset times, adapter details and request/token/cost stats.
