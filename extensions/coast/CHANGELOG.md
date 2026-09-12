@@ -13,6 +13,7 @@
 - Make additional search, usage, saved-search, gallery, and related results accessible through pagination instead of silent cutoffs.
 - Expose AI result and text continuation with explicit coverage, preserving source sampling and OCR limitations.
 - Save reusable local search definitions without retaining copies of recordings.
+- Group longer action menus into exploration, opening, copying, and result controls, and separate saved-search deletion without changing primary actions or shortcuts.
 - Preserve source warnings and clarify timestamp, accessibility completeness and payload metadata.
 - Prevent OCR-to-screenshot flicker in Search previews.
 - Keep pending screenshot previews blank instead of flashing loading text or placeholder icons.

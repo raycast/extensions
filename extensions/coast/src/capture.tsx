@@ -121,68 +121,80 @@ export function CaptureActions({
 
   return (
     <ActionPanel>
-      <Action.Push
-        title="Inspect Moment"
-        icon={Icon.Eye}
-        target={<Inspector capture={capture} frames={frames} scope={scope} />}
-      />
-      <ActionPanel.Submenu
-        title="Explore Around This Moment…"
-        icon={Icon.Clock}
-      >
-        {[2, 5, 15].map((minutes) => (
-          <Action.Push
-            key={minutes}
-            title={`${minutes} Minutes Before and After`}
-            target={
-              <MomentsView
-                scope={{
-                  ...scope,
-                  tr: aroundMoment(capture.timestamp, minutes),
-                }}
-              />
-            }
-          />
-        ))}
-      </ActionPanel.Submenu>
-      <Action
-        title="Copy Evidence"
-        icon={Icon.Clipboard}
-        onAction={async () => {
-          const link = await createCoastLink(capture.timestamp);
-          await Clipboard.copy(
-            `${capture.title || capture.application}\n${readableTime(capture.timestamp, true)} · ${capture.application}\n${link}`,
-          );
-          await showHUD("Copied evidence");
-        }}
-      />
-      <Action title="Open in Coast" icon={Icon.Clock} onAction={openInCoast} />
-      {capture.url ? <Action.OpenInBrowser url={capture.url} /> : null}
-      {/* Preserve standard acronyms rather than the linter's "Ocr" / "Id" suggestions. */}
-      {/* eslint-disable @raycast/prefer-title-case */}
-      <Action.CopyToClipboard
-        title="Copy OCR Text"
-        content={capture.ocr_text || ""}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
-      />
-      {/* eslint-enable @raycast/prefer-title-case */}
-      <Action
-        title="Copy Screenshot"
-        icon={Icon.Clipboard}
-        onAction={copyScreenshot}
-      />
-      <Action
-        title="Open Screenshot"
-        icon={Icon.Image}
-        onAction={openScreenshot}
-      />
-      {/* eslint-disable @raycast/prefer-title-case */}
-      <Action.CopyToClipboard
-        title="Copy Frame ID"
-        content={String(capture.frame_id)}
-      />
-      {/* eslint-enable @raycast/prefer-title-case */}
-      {children}
+      <ActionPanel.Section title="Explore">
+        <Action.Push
+          title="Inspect Moment"
+          icon={Icon.Eye}
+          target={<Inspector capture={capture} frames={frames} scope={scope} />}
+        />
+        <ActionPanel.Submenu
+          title="Explore Around This Moment…"
+          icon={Icon.Clock}
+        >
+          {[2, 5, 15].map((minutes) => (
+            <Action.Push
+              key={minutes}
+              title={`${minutes} Minutes Before and After`}
+              target={
+                <MomentsView
+                  scope={{
+                    ...scope,
+                    tr: aroundMoment(capture.timestamp, minutes),
+                  }}
+                />
+              }
+            />
+          ))}
+        </ActionPanel.Submenu>
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Open">
+        <Action
+          title="Open in Coast"
+          icon={Icon.Clock}
+          onAction={openInCoast}
+        />
+        {capture.url ? <Action.OpenInBrowser url={capture.url} /> : null}
+        <Action
+          title="Open Screenshot"
+          icon={Icon.Image}
+          onAction={openScreenshot}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Copy">
+        <Action
+          title="Copy Evidence"
+          icon={Icon.Clipboard}
+          onAction={async () => {
+            const link = await createCoastLink(capture.timestamp);
+            await Clipboard.copy(
+              `${capture.title || capture.application}\n${readableTime(capture.timestamp, true)} · ${capture.application}\n${link}`,
+            );
+            await showHUD("Copied evidence");
+          }}
+        />
+        {/* Preserve standard acronyms rather than the linter's "Ocr" / "Id" suggestions. */}
+        {/* eslint-disable @raycast/prefer-title-case */}
+        <Action.CopyToClipboard
+          title="Copy OCR Text"
+          content={capture.ocr_text || ""}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
+        />
+        {/* eslint-enable @raycast/prefer-title-case */}
+        <Action
+          title="Copy Screenshot"
+          icon={Icon.Clipboard}
+          onAction={copyScreenshot}
+        />
+        {/* eslint-disable @raycast/prefer-title-case */}
+        <Action.CopyToClipboard
+          title="Copy Frame ID"
+          content={String(capture.frame_id)}
+        />
+        {/* eslint-enable @raycast/prefer-title-case */}
+      </ActionPanel.Section>
+      {children ? (
+        <ActionPanel.Section title="Results">{children}</ActionPanel.Section>
+      ) : null}
     </ActionPanel>
   );
 }

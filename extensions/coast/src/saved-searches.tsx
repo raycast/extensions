@@ -333,37 +333,41 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Run Saved Search"
-                target={<SavedResults search={search} />}
-              />
-              <Action.Push
-                title="Edit Saved Search…"
-                target={
-                  <SaveSearchForm initial={search} onSaved={state.retry} />
-                }
-              />
-              {add}
-              <Action
-                title="Delete Saved Search"
-                style={Action.Style.Destructive}
-                onAction={async () => {
-                  if (
-                    await confirmAlert({
-                      title: `Delete “${search.name}”?`,
-                      message:
-                        "Only this saved filter will be removed. Coast recordings are unchanged.",
-                      primaryAction: {
-                        title: "Delete",
-                        style: Alert.ActionStyle.Destructive,
-                      },
-                    })
-                  ) {
-                    await removeSearch(search.id);
-                    state.retry();
+              <ActionPanel.Section>
+                <Action.Push
+                  title="Run Saved Search"
+                  target={<SavedResults search={search} />}
+                />
+                <Action.Push
+                  title="Edit Saved Search…"
+                  target={
+                    <SaveSearchForm initial={search} onSaved={state.retry} />
                   }
-                }}
-              />
+                />
+                {add}
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action
+                  title="Delete Saved Search"
+                  style={Action.Style.Destructive}
+                  onAction={async () => {
+                    if (
+                      await confirmAlert({
+                        title: `Delete “${search.name}”?`,
+                        message:
+                          "Only this saved filter will be removed. Coast recordings are unchanged.",
+                        primaryAction: {
+                          title: "Delete",
+                          style: Alert.ActionStyle.Destructive,
+                        },
+                      })
+                    ) {
+                      await removeSearch(search.id);
+                      state.retry();
+                    }
+                  }}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
