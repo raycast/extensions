@@ -144,6 +144,8 @@ Try these prompts with your configured workspace name:
 
 ## Connection management
 
+New connections and connections whose health was cleared by reauthorization appear as Unchecked until a health check completes. Manage Connections checks these once when they appear, with manual Check Health available for retries.
+
 A confirmed expired health result or missing OAuth scopes makes reconnect the primary action. An old access-token
 expiry alone does not, because the provider may refresh the token automatically.
 

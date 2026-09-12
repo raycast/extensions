@@ -189,8 +189,9 @@ function connectionPath(connection: Pick<Connection, "owner" | "integration" | "
 
 export function checkConnectionHealth(
   connection: Pick<Connection, "owner" | "integration" | "name">,
+  signal?: AbortSignal,
 ): Promise<HealthResult> {
-  return request<HealthResult>(`${connectionPath(connection)}/health`, { method: "POST" });
+  return request<HealthResult>(`${connectionPath(connection)}/health`, { method: "POST" }, signal);
 }
 
 /** Resyncs the connection's tool list. Returns the tools now exposed by it. */

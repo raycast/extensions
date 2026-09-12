@@ -1,5 +1,7 @@
 import { DeleteExecutorItemAction } from "./components/delete-executor-item-action";
-import { workspaceTitle } from "./lib/workspaces";
+import { useEffect, useRef } from "react";
+import { createUncheckedHealthChecks } from "./lib/unchecked-health";
+import { currentWorkspace, runInWorkspace, workspaceTitle } from "./lib/workspaces";
 import { WorkspaceAction } from "./components/workspace-command";
 import { withWorkspace } from "./components/workspace-command";
 import { ConsoleAction } from "./components/console-action";
@@ -34,6 +36,8 @@ import { recordedHealthAge } from "./lib/status";
 import { ToolBrowser } from "./search-tools";
 import type { Connection, HealthStatus } from "./lib/types";
 
+const healthLabel = (status: HealthStatus) => (status === "unknown" ? "Unchecked" : titleCase(status));
+
 function statusOf(connection: Connection): HealthStatus {
   return connection.lastHealth?.status ?? "unknown";
 }
@@ -67,6 +71,28 @@ function Connections() {
   );
 
   const connections = data ?? [];
+  const healthChecks = useRef<ReturnType<typeof createUncheckedHealthChecks> | null>(null);
+  const reload = useRef(revalidate);
+  reload.current = revalidate;
+  useEffect(() => {
+    const workspace = currentWorkspace();
+    const checks = createUncheckedHealthChecks(
+      (connection, signal) => {
+        const check = () => checkConnectionHealth(connection, AbortSignal.any([signal, AbortSignal.timeout(15000)]));
+        return workspace ? runInWorkspace(workspace, check) : check();
+      },
+      async () => {
+        const refresh = () => reload.current();
+        if (workspace) runInWorkspace(workspace, refresh);
+        else refresh();
+      },
+    );
+    healthChecks.current = checks;
+    return () => checks.dispose();
+  }, []);
+  useEffect(() => {
+    void healthChecks.current?.observe(connections);
+  }, [connections]);
 
   async function onCheckHealth(connection: Connection) {
     const toast = await showToast({
@@ -76,7 +102,7 @@ function Connections() {
     try {
       const health = await checkConnectionHealth(connection);
       toast.style = health.status === "healthy" ? Toast.Style.Success : Toast.Style.Failure;
-      toast.title = `${integrationLabel(connection.integration, directory)}: ${titleCase(health.status)}`;
+      toast.title = `${integrationLabel(connection.integration, directory)}: ${healthLabel(health.status)}`;
       toast.message = health.detail ?? health.identity ?? health.reason ?? undefined;
       // The health check persists its result, so re-read the list to pick it up.
       await mutate(listConnections({ owner: defaultOwner() }), { shouldRevalidateAfter: false }).catch(() => undefined);
@@ -138,13 +164,13 @@ function Connections() {
         if (group.length === 0) return null;
 
         return (
-          <List.Section key={status} title={titleCase(status)} subtitle={`${group.length}`}>
+          <List.Section key={status} title={healthLabel(status)} subtitle={`${group.length}`}>
             {group.map((connection) => {
               const health = connection.lastHealth;
               const accessories = [
                 // The section header already names the status, so only an
                 // unhealthy connection needs it repeated on the row itself.
-                status !== "healthy"
+                status !== "healthy" && status !== "unknown"
                   ? {
                       tag: { value: titleCase(status), color: healthColor(status) },
                       tooltip:
