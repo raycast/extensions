@@ -1,6 +1,6 @@
 # Attio Changelog
 
-## [Create Records + AI Tools] - {PR_MERGE_DATE}
+## [Create Records + AI Tools] - 2026-09-12
 
 ### Create People, Companies, and Deals
 
