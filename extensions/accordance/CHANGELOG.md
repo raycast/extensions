@@ -1,6 +1,6 @@
 # Accordance Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-09-12
 
 - Fix "The variable is not defined" error on macOS 26 by wrapping AppleScript calls in an outer try block (#30988)
 
