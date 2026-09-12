@@ -3,6 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { GeoResult, filterGeoResults, geocodeName, geocodeUrl } from "../lib/api";
 import { asturiasScene, rainbowScene, raycastScene } from "../lib/cast";
+import { keys } from "../lib/platform";
 import { CastWorld } from "./CastWorld";
 import { SecretScene } from "./SecretScene";
 
@@ -156,7 +157,7 @@ export function LocationSearch(props: {
         <List.Item
           key="egg-raycast"
           icon="weather-fox-icon.png"
-          title="⌘ Space"
+          title={keys("⌘ Space", "Alt Space")}
           subtitle="Cast's favorite shortcut"
           actions={
             <ActionPanel>

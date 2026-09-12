@@ -2,6 +2,7 @@ import { environment } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { useRef } from "react";
 import { GeoResult, formatPlace } from "../lib/api";
 import { buildRadarGif } from "../lib/raster";
@@ -198,7 +199,8 @@ export function useRadar(
         const dh = Math.round((dw * 620) / 840);
         const nowcastNote = pastCount < animFrames.length ? " · nowcast after the white notch" : "";
         markdown =
-          `![Precipitation radar](${encodeURI(path)}?raycast-width=${dw}&raycast-height=${dh})\n\n` +
+          // file:// rather than a bare path so the Windows drive prefix (C:\...) survives markdown parsing.
+          `![Precipitation radar](${pathToFileURL(path).href}?raycast-width=${dw}&raycast-height=${dh})\n\n` +
           `**${escapeMarkdown(placeName)}** · \`${loopRange}\`${nowcastNote} · ${scaleLabel}\n\n` +
           `*Map © Esri · © OpenStreetMap · Radar © RainViewer*`;
       } catch (error) {

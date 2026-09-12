@@ -17,6 +17,7 @@ import { nextHours, nowHero, nowcastSteps, nowcastSummary, timeOf, yesterdayComp
 import { labelFor } from "../lib/palettes";
 import { buildNowShareSvg } from "../lib/share";
 import { renderHero, renderHourlyStrip, renderLoadingCard, renderNowcast, svgToMarkdown } from "../lib/svg";
+import { RETRY_HINT } from "../lib/platform";
 import { escapeMarkdown } from "../lib/text";
 import { styleFor } from "../lib/themes";
 
@@ -48,7 +49,7 @@ export function TodayView(props: {
           "Loading",
         );
       }
-      return `## Couldn't load the forecast\n\n${escapeMarkdown(error?.message ?? "Check your connection and try again.")}\n\nPress ⌘R to retry.`;
+      return `## Couldn't load the forecast\n\n${escapeMarkdown(error?.message ?? "Check your connection and try again.")}\n\n${RETRY_HINT}`;
     }
     const opts = nowHero(forecast, place, theme, unitSymbol);
     const hero = renderHero({ ...opts, displayWidth: HERO_WIDTH });

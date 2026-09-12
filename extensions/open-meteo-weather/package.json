@@ -6,7 +6,8 @@
   "icon": "weather-sun-icon.png",
   "author": "luarmr",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Data"

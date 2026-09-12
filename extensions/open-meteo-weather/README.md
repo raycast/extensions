@@ -2,13 +2,15 @@
 
 A visually rich weather extension for Raycast, powered by the free [Open-Meteo](https://open-meteo.com) API (no API key required).
 
+Works on macOS and Windows. Shortcuts below are written for macOS; on Windows read `⌘` and `⌃` as `Ctrl`, `⌥` as `Alt`, and `⇧` as `Shift` (so `⌘⇧C` is `Ctrl+Shift+C` and the radar's `⌃⌥=` is `Ctrl+Alt+=`), with one exception: the 7/16-day toggle is `Ctrl+Shift+D`, because `Ctrl+D` is Raycast's standard *Remove* shortcut on Windows. The menu bar command and the PNG image share actions are macOS-only; the radar GIF actions work on both.
+
 ## Commands
 
 - **Weather** — the main window, with three views (`⌘O` cycles, or pick directly from the Switch View action; your last choice is remembered):
-  - **Forecast list** — current conditions plus 7 or 16 days ahead (`⌘D` to toggle), with a detail panel per day.
+  - **Forecast list** — current conditions plus 7 or 16 days ahead (`⌘D` to toggle; `Ctrl+Shift+D` on Windows), with a detail panel per day.
   - **Today** — a full-window glance: the hero scene, a rain nowcast when relevant, a strip of the next 10 hours, and the full stats sidebar.
   - **Radar** — animated precipitation radar (RainViewer) over an Esri basemap: a looping GIF of the past hour plus a 30-minute nowcast, with a timeline bar marking where forecast frames begin. The basemap follows your theme (dark or light). Zoom with `⌃⌥=` / `⌃⌥-`, pan with `⌃⌥` + arrow keys, and reset the view with `⌘⇧.`.
-- **Weather in Menu Bar** — glanceable temperature and conditions in the menu bar, refreshed every 30 minutes, with a dropdown showing the nowcast, air quality, alerts, and the next hours.
+- **Weather in Menu Bar** (macOS) — glanceable temperature and conditions in the menu bar, refreshed every 30 minutes, with a dropdown showing the nowcast, air quality, alerts, and the next hours.
 - **Cast the Weather Fox** — the extension's mascot: an animated fox acting out your live weather in his tiny world, full-window. Every scene is pure SVG with native animation — rain falls, clouds drift, the chimney smokes, and Cast breathes, blinks, and gets up to a different activity per condition (kite flying in the wind, puddle jumping in the rain, apple picking on clear autumn days, a campfire on cold nights, cocoa on the porch during thunderstorms). He notices more than the sky: a rainbow when the sun comes out after rain, a phase-accurate moon, and smoky air keeps him indoors.
 - **Easter eggs** — a few secret scenes are hidden around the extension. Cast knows some places that aren't on any map.
 
@@ -23,7 +25,7 @@ A visually rich weather extension for Raycast, powered by the free [Open-Meteo](
 - **Moon detail** — real phase and illumination (the hero moon is drawn to match), moonrise and moonset.
 - **7 or 16-day forecast** — one item per day with its own hero scene, hourly temperature curve, rain probability and amounts, UV, and wind. Search by day name or date ("friday", "aug 29").
 - **Guided first launch** — a three-step wizard picks your city, units, and theme (with live day/night previews of each theme).
-- **Multiple locations** — press `⌘L` to add places: cities, neighborhoods ("noe valley"), or postal codes ("94114"). Qualify ambiguous names with commas — "springfield, illinois" or "soho, london". With more than one saved, a dropdown appears in the list's search bar, and from any view (including Today and Radar) `⌘⇧]` jumps to the next city and `⌘⇧L` opens the full picker. Remove the current city anytime from the action panel.
+- **Multiple locations** — press `⌘L` to add places: cities, neighborhoods ("noe valley"), or postal codes ("94114"). Qualify ambiguous names with commas — "springfield, illinois" or "soho, london". With more than one saved, a dropdown appears in the list's search bar, and from any view (including Today and Radar) `⌘⇧]` jumps to the next city and `⌘⇧L` opens the full picker. Remove the current city anytime from the action panel (`⌃X`; `Ctrl+D` on Windows).
 - **Themes** — switch anytime with `⌘T`, no settings panel needed:
   - *Atmosphere* (default) — vivid skies that follow the weather and time of day.
   - *Synthwave* — retro neon purples and pinks, always starry.

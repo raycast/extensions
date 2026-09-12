@@ -4,7 +4,7 @@
 export const W = 840;
 export const H = 490;
 export const GROUND_Y = 402;
-export const FONT = `-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif`;
+export const FONT = `-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif`;
 
 /** Fits the side detail panel of a List at Raycast's default window size. */
 export const CAST_PANEL_WIDTH = 310;
