@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Fix Commands Waiting Forever Behind Each Other] - {PR_MERGE_DATE}
+## [Fix Commands Waiting Forever Behind Each Other] - 2026-09-12
 
 - Stop a second command from waiting indefinitely behind a running one: opening Manage Skills during "Update All Skills" now either gets its turn or reports that another skills command is still running, instead of showing an empty list and spinning for minutes
 - Fail immediately on a permanent problem such as a support directory that cannot be written, which was previously retried forever
