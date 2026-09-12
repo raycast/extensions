@@ -51,7 +51,7 @@
     },
     {
       "name": "copyToClipboard",
-      "title": "",
+      "title": "Clipboard",
       "description": "Keep recognized LaTeX on the clipboard",
       "type": "checkbox",
       "label": "Copy to Clipboard",
