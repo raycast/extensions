@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Icon,
-  List,
-  popToRoot,
-  showToast,
-  Toast,
-  Keyboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, popToRoot, showToast, Toast, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { type JSX, useEffect, useState } from "react";
 
@@ -90,11 +80,7 @@ export default function RecentLaunchesList(): JSX.Element {
   }
 
   return (
-    <List
-      isLoading={entries === null}
-      navigationTitle="Recent Launches"
-      searchBarPlaceholder="Filter recent launches"
-    >
+    <List isLoading={entries === null} navigationTitle="Recent Launches" searchBarPlaceholder="Filter recent launches">
       {entries !== null && entries.length === 0 && (
         <List.EmptyView
           icon={Icon.Clock}

@@ -24,10 +24,7 @@ import { formatBytes, listProfiles, type ProfileInfo } from "./listing";
 
 export default function ProfileList(): JSX.Element {
   const preferences = getPreferences();
-  const { data, isLoading, revalidate } = usePromise(
-    async () => listProfiles(preferences.tempBaseDir),
-    [],
-  );
+  const { data, isLoading, revalidate } = usePromise(async () => listProfiles(preferences.tempBaseDir), []);
 
   useEffect(() => {
     sweepStaleProfiles()
@@ -166,8 +163,7 @@ export default function ProfileList(): JSX.Element {
 
       toast.style = Toast.Style.Success;
       toast.title = `Deleted ${idle.length} profile(s)`;
-      toast.message =
-        `Freed ${formatBytes(totalSize)}` + (inUse > 0 ? ` · ${inUse} in use skipped` : "");
+      toast.message = `Freed ${formatBytes(totalSize)}` + (inUse > 0 ? ` · ${inUse} in use skipped` : "");
       revalidate();
     } catch (error) {
       toast.hide();
@@ -230,11 +226,7 @@ export default function ProfileList(): JSX.Element {
           description="Launch TempChrome to create one."
           actions={
             <ActionPanel>
-              <Action
-                title="Launch TempChrome"
-                icon={Icon.Rocket}
-                onAction={handleQuickLaunchFromEmpty}
-              />
+              <Action title="Launch TempChrome" icon={Icon.Rocket} onAction={handleQuickLaunchFromEmpty} />
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
@@ -275,11 +267,7 @@ export default function ProfileList(): JSX.Element {
             ]}
             actions={
               <ActionPanel>
-                <Action
-                  title="Launch with This Profile"
-                  icon={Icon.Rocket}
-                  onAction={() => handleRelaunch(profile)}
-                />
+                <Action title="Launch with This Profile" icon={Icon.Rocket} onAction={() => handleRelaunch(profile)} />
                 <Action.Push
                   title="View Log"
                   icon={Icon.Document}

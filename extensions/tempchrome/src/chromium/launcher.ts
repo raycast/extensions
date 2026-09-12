@@ -19,9 +19,7 @@ export class ChromiumLaunchFailedError extends Error {
   readonly signal: NodeJS.Signals | null;
 
   constructor(exitCode: number | null, signal: NodeJS.Signals | null) {
-    super(
-      `Chromium exited within the launch grace window (exitCode=${exitCode}, signal=${signal})`,
-    );
+    super(`Chromium exited within the launch grace window (exitCode=${exitCode}, signal=${signal})`);
     this.name = "ChromiumLaunchFailedError";
     this.exitCode = exitCode;
     this.signal = signal;
@@ -76,11 +74,7 @@ export async function clearQuarantine(appBundlePath: string): Promise<void> {
   }
 }
 
-export function launchChromium(
-  binaryPath: string,
-  profileDir: string,
-  extraArgs: string[],
-): Promise<void> {
+export function launchChromium(binaryPath: string, profileDir: string, extraArgs: string[]): Promise<void> {
   const logPath = path.join(profileDir, "chrome_debug.log");
   const args = [
     ...BASE_CHROMIUM_ARGS,

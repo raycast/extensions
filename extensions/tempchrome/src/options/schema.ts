@@ -2,19 +2,19 @@
  * Single source of truth for launch options.
  *
  * Both surfaces read from here:
- *   - `Quick Launch TempChrome` — persistent preferences, generated into `package.json`'s
- *     `launch` command via `tools/sync-options-schema.ts` (the git hooks run it).
- *     Separators are filtered out here — Raycast's `preferences` array is flat.
+ *   - `Quick Launch TempChrome` — persistent preferences, mirrored into the `launch`
+ *     command's `preferences` block in `package.json`.
+ *     Separators are filtered out there — Raycast's `preferences` array is flat.
  *   - `Launch with Options` form — React form rendered by iterating this schema.
  *     Separators render as `<Form.Separator />` + `<Form.Description>` section headers.
  *
  * The two surfaces hold **independent values** — only the UI definitions and
  * the flag-mapping logic are shared.
  *
- * To add a new option: append an entry to `LAUNCH_OPTIONS_SCHEMA` and extend
- * `LaunchOptionsValues`. That's it — `bun tools/sync-options-schema.ts` regenerates the
- * manifest, the form auto-renders the new field, and `buildExtraArgs` picks
- * up the new `toArgs` mapping.
+ * To add a new option: append an entry to `LAUNCH_OPTIONS_SCHEMA`, extend
+ * `LaunchOptionsValues`, and mirror the field into the `launch` command's
+ * `preferences` block in `package.json`. The form then auto-renders the new
+ * field, and `buildExtraArgs` picks up the new `toArgs` mapping.
  *
  * `toArgs` receives the full values object as its second argument so fields
  * can express inter-field rules inline (e.g. App Mode switching Start URL

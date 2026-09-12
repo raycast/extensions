@@ -73,7 +73,10 @@ export async function listProfiles(tempBaseDir: string): Promise<ProfileInfo[]> 
           path: profilePath,
           size,
           createdAt: stats.birthtime,
-          inUse: isProfileInUse(profilePath, psLines),
+          // An unreadable process list marks every profile as in use. That only
+          // costs an extra confirmation for a single delete, while keeping the
+          // bulk "delete all idle" action from wiping a live profile.
+          inUse: psLines === null || isProfileInUse(profilePath, psLines),
           autoCleanup: profilePath in registry,
         };
       } catch (error) {

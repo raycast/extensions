@@ -5,13 +5,21 @@ import { reportError } from "../utils/reportError";
 
 const execFileAsync = promisify(execFile);
 
-export async function getChromiumProcessArgs(): Promise<string[]> {
+/**
+ * Returns one entry per running process, or `null` when `ps` could not be read.
+ *
+ * `null` and `[]` must stay distinct: an empty process list means nothing is
+ * running, while an unreadable one means nothing is known. Callers that delete
+ * profile directories treat the two oppositely, so collapsing them would let a
+ * transient `ps` failure erase a profile that Chromium still has open.
+ */
+export async function getChromiumProcessArgs(): Promise<string[] | null> {
   try {
     const { stdout } = await execFileAsync("ps", ["-wwAo", "args="]);
     return stdout.split("\n").filter((line) => line.trim().length > 0);
   } catch (error) {
     await reportError("Could not list running processes", error, { silent: true });
-    return [];
+    return null;
   }
 }
 

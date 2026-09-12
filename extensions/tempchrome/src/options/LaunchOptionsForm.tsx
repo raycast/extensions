@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-  Keyboard,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast, useNavigation, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { Fragment, type JSX, useState } from "react";
 
@@ -23,11 +13,7 @@ import {
   schemaDefaults,
 } from "./schema";
 
-function renderField(
-  field: OptionField,
-  defaults: LaunchOptionsValues,
-  index: number,
-): JSX.Element {
+function renderField(field: OptionField, defaults: LaunchOptionsValues, index: number): JSX.Element {
   const lookup = defaults as unknown as Record<string, string | boolean>;
 
   switch (field.kind) {

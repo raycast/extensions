@@ -2,3 +2,7 @@ node_modules/
 dist/
 .DS_Store
 .raycast/
+
+# The repository root .gitignore has a bare `logs` rule, which would otherwise
+# exclude this extension's src/logs source directory from git.
+!src/logs/

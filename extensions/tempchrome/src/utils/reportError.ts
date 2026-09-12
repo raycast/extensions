@@ -12,11 +12,7 @@ import { showFailureToast } from "@raycast/utils";
  *   await reportError("Could not clear Chromium quarantine attributes", error);
  *   await reportError("Log tail read failed", error, { silent: true });
  */
-export async function reportError(
-  context: string,
-  error: unknown,
-  options: { silent?: boolean } = {},
-): Promise<void> {
+export async function reportError(context: string, error: unknown, options: { silent?: boolean } = {}): Promise<void> {
   console.error(context, error);
   if (options.silent) {
     return;

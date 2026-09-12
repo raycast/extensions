@@ -1,17 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Detail,
-  Icon,
-  popToRoot,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { type JSX, useCallback, useEffect, useRef, useState } from "react";
 import {
   AbortedError,
+  BundleRestoreError,
   ChromiumRunningError,
   ExtractionError,
   InstallPathError,
@@ -49,8 +41,7 @@ const STAGE_DESCRIPTIONS: Record<InstallProgress["stage"], string> = {
   "resolve-revision": `Fetching the latest Chromium snapshot revision number from \`${SNAPSHOT_ORIGIN}\`.`,
   download: `Streaming the Chromium snapshot archive from \`${SNAPSHOT_ORIGIN}\` directly into a temporary file. Press **⌘.** at any time to cancel.`,
   extract: "Unzipping the archive into a temporary directory.",
-  preflight:
-    "Re-checking that no Chromium process is running at the target path before we swap the bundle in.",
+  preflight: "Re-checking that no Chromium process is running at the target path before we swap the bundle in.",
   swap: "Moving the newly extracted `Chromium.app` into place at the install target.",
   xattr: "Clearing macOS quarantine attributes so Chromium can launch without a Gatekeeper prompt.",
   cleanup: "Removing the temporary archive and extraction directory.",
@@ -73,15 +64,9 @@ function formatEta(seconds: number | null): string {
   return `${minutes}m ${remainingSeconds.toString().padStart(2, "0")}s`;
 }
 
-function renderProgressBar(
-  bytesDownloaded: number,
-  bytesTotal: number | null,
-  stats: DownloadStats | null,
-): string[] {
+function renderProgressBar(bytesDownloaded: number, bytesTotal: number | null, stats: DownloadStats | null): string[] {
   const speedText =
-    stats && stats.speedBytesPerSecond > 0
-      ? `${formatMegabytes(stats.speedBytesPerSecond)} MB/s`
-      : null;
+    stats && stats.speedBytesPerSecond > 0 ? `${formatMegabytes(stats.speedBytesPerSecond)} MB/s` : null;
 
   if (bytesTotal === null || bytesTotal <= 0) {
     const parts = [`**Downloaded** ${formatMegabytes(bytesDownloaded)} MB`];
@@ -125,9 +110,9 @@ function renderMarkdown(
   phase: Phase,
   errorMessage: string | null,
   errorKind: string,
+  priorBundleGone: boolean,
 ): string {
-  const revision =
-    progress && "revision" in progress && progress.revision ? progress.revision : null;
+  const revision = progress && "revision" in progress && progress.revision ? progress.revision : null;
 
   if (phase === "done") {
     const rev = revision ?? "";
@@ -159,10 +144,6 @@ function renderMarkdown(
   }
 
   if (phase === "failed") {
-    const priorBundleGone =
-      typeof errorMessage === "string" &&
-      errorMessage.startsWith("Chromium bundle at ") &&
-      errorMessage.includes(" is no longer present. ");
     const remediationLines = priorBundleGone
       ? [
           "",
@@ -222,6 +203,7 @@ function errorTitle(error: unknown): string {
   if (error instanceof ChromiumRunningError) return "Chromium is running";
   if (error instanceof NetworkError) return "Download failed";
   if (error instanceof ExtractionError) return "Extraction failed";
+  if (error instanceof BundleRestoreError) return "Install path left without Chromium";
   if (error instanceof InstallPathError) return "Could not write to install path";
   if (error instanceof AbortedError) return "Install cancelled";
   return "Install failed";
@@ -235,6 +217,7 @@ export default function InstallView(): JSX.Element {
   const [phase, setPhase] = useState<Phase>("running");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [errorKind, setErrorKind] = useState<string>("Install failed");
+  const [priorBundleGone, setPriorBundleGone] = useState(false);
 
   const lastUpdateRef = useRef<{ at: number; stage: string; percent: number }>({
     at: 0,
@@ -327,12 +310,15 @@ export default function InstallView(): JSX.Element {
         if (effectDisposed) {
           return;
         }
-        const isAbort = error instanceof AbortedError || controller.signal.aborted;
+        // Only a real AbortedError counts as a cancellation. Checking the signal
+        // as well would relabel a genuine failure as "cancelled" whenever the
+        // user had already pressed cancel, hiding the error from them.
+        const isAbort = error instanceof AbortedError;
         setPhase(isAbort ? "cancelled" : "failed");
         setErrorMessage(error instanceof Error ? error.message : String(error));
-        const wrapped = isAbort && !(error instanceof AbortedError) ? new AbortedError() : error;
-        setErrorKind(errorTitle(wrapped));
-        await showFailureToast(wrapped, { title: errorTitle(wrapped) });
+        setPriorBundleGone(error instanceof BundleRestoreError);
+        setErrorKind(errorTitle(error));
+        await showFailureToast(error, { title: errorTitle(error) });
       }
     };
 
@@ -345,8 +331,9 @@ export default function InstallView(): JSX.Element {
   }, [binaryPath, appBundlePath, handleProgress]);
 
   const handleCancel = useCallback(() => {
+    // Only request the abort. The phase is set from the actual outcome, because
+    // a cancel raised after the bundle swap cannot stop the install any more.
     abortRef.current?.abort();
-    setPhase("cancelled");
   }, []);
 
   const handleCopyErrorDetails = useCallback(async () => {
@@ -375,11 +362,11 @@ export default function InstallView(): JSX.Element {
     phase,
     errorMessage,
     errorKind,
+    priorBundleGone,
   );
   const navigationTitle = renderNavigationTitle(progress, phase);
 
-  const revision =
-    progress && "revision" in progress && progress.revision ? progress.revision : null;
+  const revision = progress && "revision" in progress && progress.revision ? progress.revision : null;
   const showDownloadMeta = progress?.stage === "download";
 
   const metadata = (
@@ -388,10 +375,7 @@ export default function InstallView(): JSX.Element {
       <Detail.Metadata.Label title="Source" text={SNAPSHOT_ORIGIN} />
       {revision ? <Detail.Metadata.Label title="Revision" text={revision} /> : null}
       <Detail.Metadata.Separator />
-      <Detail.Metadata.Label
-        title="Stage"
-        text={progress ? STAGE_LABELS[progress.stage] : "Starting"}
-      />
+      <Detail.Metadata.Label title="Stage" text={progress ? STAGE_LABELS[progress.stage] : "Starting"} />
       {showDownloadMeta && progress.bytesTotal ? (
         <Detail.Metadata.Label
           title="Downloaded"
@@ -399,16 +383,10 @@ export default function InstallView(): JSX.Element {
         />
       ) : null}
       {showDownloadMeta && !progress.bytesTotal ? (
-        <Detail.Metadata.Label
-          title="Downloaded"
-          text={`${formatMegabytes(progress.bytesDownloaded)} MB`}
-        />
+        <Detail.Metadata.Label title="Downloaded" text={`${formatMegabytes(progress.bytesDownloaded)} MB`} />
       ) : null}
       {showDownloadMeta && downloadStats && downloadStats.speedBytesPerSecond > 0 ? (
-        <Detail.Metadata.Label
-          title="Speed"
-          text={`${formatMegabytes(downloadStats.speedBytesPerSecond)} MB/s`}
-        />
+        <Detail.Metadata.Label title="Speed" text={`${formatMegabytes(downloadStats.speedBytesPerSecond)} MB/s`} />
       ) : null}
       {showDownloadMeta && downloadStats && downloadStats.etaSeconds !== null ? (
         <Detail.Metadata.Label title="ETA" text={formatEta(downloadStats.etaSeconds)} />

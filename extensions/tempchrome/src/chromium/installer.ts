@@ -60,6 +60,18 @@ export class AbortedError extends Error {
   }
 }
 
+/**
+ * Raised only when placing the new bundle failed *and* restoring the previous
+ * one failed too, so the install target is now empty. Every other swap failure
+ * rolls back and leaves the old Chromium in place.
+ */
+export class BundleRestoreError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "BundleRestoreError";
+  }
+}
+
 const SNAPSHOT_BASE_URL = "https://storage.googleapis.com/chromium-browser-snapshots";
 const PART_FILE_REGEX = /^tempchrome-install-(Mac|Mac_Arm)-(\d+)\.zip\.part$/;
 
@@ -95,11 +107,7 @@ function isAbortErrorLike(error: unknown): boolean {
   if (error instanceof Error && error.name === "AbortError") {
     return true;
   }
-  if (
-    typeof DOMException !== "undefined" &&
-    error instanceof DOMException &&
-    error.name === "AbortError"
-  ) {
+  if (typeof DOMException !== "undefined" && error instanceof DOMException && error.name === "AbortError") {
     return true;
   }
   return false;
@@ -110,9 +118,7 @@ async function ensureParentDir(appBundlePath: string): Promise<void> {
   try {
     await fs.promises.mkdir(parent, { recursive: true });
   } catch (error) {
-    throw new InstallPathError(
-      `Cannot create install target parent directory ${parent}: ${(error as Error).message}`,
-    );
+    throw new InstallPathError(`Cannot create install target parent directory ${parent}: ${(error as Error).message}`);
   }
 }
 
@@ -178,8 +184,7 @@ async function streamDownloadToFile(
 
   const totalHeader = response.headers.get("content-length");
   const bodyBytes = totalHeader ? parseInt(totalHeader, 10) || null : null;
-  const bytesTotal =
-    bodyBytes !== null && effectiveFlags === "a" ? bodyBytes + effectiveResumeBytes : bodyBytes;
+  const bytesTotal = bodyBytes !== null && effectiveFlags === "a" ? bodyBytes + effectiveResumeBytes : bodyBytes;
 
   let bytesDownloaded = effectiveResumeBytes;
   onProgress({ stage: "download", bytesDownloaded, bytesTotal, revision });
@@ -235,11 +240,7 @@ async function runUnzip(
         return;
       }
       if (code !== 0) {
-        reject(
-          new ExtractionError(
-            `unzip exited with code ${code}${stderrBuffer ? `: ${stderrBuffer.trim()}` : ""}`,
-          ),
-        );
+        reject(new ExtractionError(`unzip exited with code ${code}${stderrBuffer ? `: ${stderrBuffer.trim()}` : ""}`));
         return;
       }
       resolve();
@@ -269,15 +270,77 @@ async function runXattrClear(
         return;
       }
       if (code !== 0) {
-        void reportError(
-          "xattr clear failed (install)",
-          new Error(`xattr -cr exited with code ${code}`),
-          { silent: true },
-        );
+        void reportError("xattr clear failed (install)", new Error(`xattr -cr exited with code ${code}`), {
+          silent: true,
+        });
       }
       resolve();
     });
   });
+}
+
+async function placeBundle(sourceApp: string, appBundlePath: string): Promise<void> {
+  try {
+    await fs.promises.rename(sourceApp, appBundlePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EXDEV") {
+      throw error;
+    }
+    await fs.promises.cp(sourceApp, appBundlePath, { recursive: true, force: true });
+    await fs.promises.rm(sourceApp, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Replaces the bundle at `appBundlePath` without ever leaving the user with no
+ * Chromium. The old bundle is renamed aside first, so a failure to place the new
+ * one can put the old one back. The backup is deleted only after the new bundle
+ * is in place.
+ */
+async function swapBundle(sourceApp: string, appBundlePath: string): Promise<void> {
+  const backupPath = `${appBundlePath}.tempchrome-backup-${process.pid}`;
+  await fs.promises.rm(backupPath, { recursive: true, force: true }).catch(() => undefined);
+
+  let backupExists = false;
+  try {
+    await fs.promises.rename(appBundlePath, backupPath);
+    backupExists = true;
+  } catch (error) {
+    // A missing install target is the normal first-install case.
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw new InstallPathError(
+        `Could not move the existing bundle at ${appBundlePath} aside: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  try {
+    await placeBundle(sourceApp, appBundlePath);
+  } catch (placeError) {
+    const reason = (placeError as Error).message;
+    if (!backupExists) {
+      throw new InstallPathError(`Could not place Chromium.app at ${appBundlePath}: ${reason}`);
+    }
+    try {
+      await fs.promises.rm(appBundlePath, { recursive: true, force: true });
+      await fs.promises.rename(backupPath, appBundlePath);
+    } catch (restoreError) {
+      throw new BundleRestoreError(
+        `Could not place Chromium.app at ${appBundlePath}: ${reason}. Restoring the previous bundle from ${backupPath} also failed: ${(restoreError as Error).message}`,
+      );
+    }
+    throw new InstallPathError(
+      `Could not place Chromium.app at ${appBundlePath}: ${reason}. Your previous Chromium bundle was restored.`,
+    );
+  }
+
+  if (backupExists) {
+    await fs.promises.rm(backupPath, { recursive: true, force: true }).catch((error) => {
+      void reportError(`Could not remove the bundle backup at ${backupPath}`, error, {
+        silent: true,
+      });
+    });
+  }
 }
 
 export async function runInstall(opts: RunInstallOptions): Promise<{ revision: string }> {
@@ -356,15 +419,7 @@ export async function runInstall(opts: RunInstallOptions): Promise<{ revision: s
 
     signal.throwIfAborted();
     const zipUrl = `${SNAPSHOT_BASE_URL}/${platform}/${revision}/chrome-mac.zip`;
-    await streamDownloadToFile(
-      zipUrl,
-      partPath,
-      signal,
-      revision,
-      onProgress,
-      resumeFromBytes,
-      flags,
-    );
+    await streamDownloadToFile(zipUrl, partPath, signal, revision, onProgress, resumeFromBytes, flags);
     signal.throwIfAborted();
     await fs.promises.rename(partPath, zipPath);
     // From this point, partPath no longer exists; null it so the finally block doesn't re-delete.
@@ -400,36 +455,22 @@ export async function runInstall(opts: RunInstallOptions): Promise<{ revision: s
       throw new ChromiumRunningError();
     }
     signal.throwIfAborted();
+    // Last cancellation point. Everything below either completes the install or
+    // rolls back, so "cancelled" always means the install target was untouched.
+    // Detaching the listener keeps a late cancel from killing the `xattr` child
+    // and leaving the freshly installed bundle quarantined.
+    signal.removeEventListener("abort", abortListener);
     onProgress({ stage: "swap", revision });
-    await fs.promises.rm(appBundlePath, { recursive: true, force: true });
-    try {
-      try {
-        await fs.promises.rename(sourceApp, appBundlePath);
-      } catch (error) {
-        const code = (error as NodeJS.ErrnoException).code;
-        if (code === "EXDEV") {
-          await fs.promises.cp(sourceApp, appBundlePath, { recursive: true, force: true });
-          await fs.promises.rm(sourceApp, { recursive: true, force: true });
-        } else {
-          throw error;
-        }
-      }
-    } catch (error) {
-      throw new InstallPathError(
-        `Chromium bundle at ${appBundlePath} is no longer present. Could not place Chromium.app at ${appBundlePath}: ${(error as Error).message}`,
-      );
-    }
+    await swapBundle(sourceApp, appBundlePath);
 
     // 6. Clear quarantine
-    signal.throwIfAborted();
     onProgress({ stage: "xattr", revision });
     await runXattrClear(appBundlePath, signal, registerChild);
 
-    // 7. Cleanup
-    signal.throwIfAborted();
+    // 7. Cleanup — the finally block removes the temporary files. Doing it there
+    // keeps a failed cleanup from reporting an already-installed bundle as a
+    // failed install.
     onProgress({ stage: "cleanup", revision });
-    await fs.promises.rm(extractDir, { recursive: true, force: true });
-    await fs.promises.rm(zipPath, { force: true });
 
     onProgress({ stage: "done", revision });
     return { revision };

@@ -76,6 +76,12 @@ async function performSweep(): Promise<string[]> {
   }
 
   const psLines = await getChromiumProcessArgs();
+  if (psLines === null) {
+    // Without a process list every registered profile would look idle, and the
+    // sweep would delete the profile the user is browsing in right now. Skip
+    // this round instead; the next sweep retries.
+    return [];
+  }
   const stalePaths = registeredPaths.filter((candidate) => !isProfileInUse(candidate, psLines));
   const removed: string[] = [];
 

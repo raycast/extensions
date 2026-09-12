@@ -2,12 +2,7 @@ import * as path from "node:path";
 import { getPreferenceValues, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-import {
-  chromiumExists,
-  clearQuarantine,
-  createTempProfile,
-  launchChromium,
-} from "./chromium/launcher";
+import { chromiumExists, clearQuarantine, createTempProfile, launchChromium } from "./chromium/launcher";
 import { buildExtraArgs, type LaunchOptionsValues } from "./options/schema";
 import { getPreferences } from "./preferences";
 import { markForAutoCleanup, runSweepFireAndForget } from "./profiles/autoCleanup";
@@ -34,10 +29,7 @@ export async function launchWithValues(values: LaunchOptionsValues): Promise<boo
     }
 
     const profileId = path.basename(profileDir);
-    const parts = [
-      values.autoCleanup ? "Launched" : "Launched (persistent)",
-      `profile ${profileId}`,
-    ];
+    const parts = [values.autoCleanup ? "Launched" : "Launched (persistent)", `profile ${profileId}`];
     if (extraArgs.length > 0) {
       parts.push(`${extraArgs.length} flag${extraArgs.length === 1 ? "" : "s"}`);
     }
