@@ -4,6 +4,7 @@
 
 - Convert Track Link: convert the track Qobuz is currently on, falling back to a track link on the clipboard; when both are available, an action switches to the other one
 - Convert Track Link: accept an optional track link as a command argument, which takes precedence over both
+- Convert Track Link: a resolved Qobuz track also offers Open in Qobuz, Play Track in Qobuz, Open in Browser and Copy Qobuz Link in the Qobuz → other services direction
 - Convert Track Link: show where the input came from (clipboard or Qobuz) in the metadata
 - Convert Track Link: show the "Nothing to convert" hint when the clipboard is empty instead of a blank view
 

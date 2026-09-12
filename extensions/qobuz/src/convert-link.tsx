@@ -166,15 +166,9 @@ const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) 
   );
 
   if (data.mode === "to-qobuz" && data.track) {
-    const trackUrl = deepLink.track(data.track.id);
     return (
       <ActionPanel>
-        {data.track.album?.id && (
-          <Action.Open title="Open in Qobuz" target={appLink.album(data.track.album.id)} icon={Icon.Music} />
-        )}
-        <Action.OpenInBrowser title="Open in Browser" url={trackUrl} />
-        <Action.Open title="Play Track in Qobuz" target={appLink.track(data.track.id)} icon={Icon.Play} />
-        <Action.CopyToClipboard title="Copy Qobuz Link" content={trackUrl} />
+        <QobuzTrackActions track={data.track} />
         {switchAction}
       </ActionPanel>
     );
@@ -209,6 +203,9 @@ const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) 
         />
         {data.deezerUrl && <Action.OpenInBrowser title="Open on Deezer" url={data.deezerUrl} />}
         <Action.CopyToClipboard title="Copy Artist & Title" content={data.query} />
+        <ActionPanel.Section title="Qobuz">
+          <QobuzTrackActions track={data.track} />
+        </ActionPanel.Section>
         {switchAction}
       </ActionPanel>
     );
@@ -216,6 +213,20 @@ const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) 
 
   return undefined;
 };
+
+function QobuzTrackActions({ track }: { track: Track }) {
+  const trackUrl = deepLink.track(track.id);
+  return (
+    <>
+      {track.album?.id && (
+        <Action.Open title="Open in Qobuz" target={appLink.album(track.album.id)} icon={Icon.Music} />
+      )}
+      <Action.OpenInBrowser title="Open in Browser" url={trackUrl} />
+      <Action.Open title="Play Track in Qobuz" target={appLink.track(track.id)} icon={Icon.Play} />
+      <Action.CopyToClipboard title="Copy Qobuz Link" content={trackUrl} />
+    </>
+  );
+}
 
 const SOURCE_LABEL: Record<Source, string> = {
   argument: "Typed link",
