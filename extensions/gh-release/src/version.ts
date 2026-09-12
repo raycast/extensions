@@ -8,7 +8,8 @@ export type Bump = "patch" | "minor" | "major";
 export function nextTag(last: string, bump: Bump): string | null {
   const trimmed = last.trim();
   if (!trimmed) return "v0.0.1";
-  const m = /^(v?)(\d+)\.(\d+)\.(\d+)/.exec(trimmed);
+  // ponytail: end-anchored on purpose — "v1.4.2fix" and "v1.4.2.5" must not pass
+  const m = /^(v?)(\d+)\.(\d+)\.(\d+)$/.exec(trimmed);
   if (!m) return null;
   const prefix = m[1];
   let [major, minor, patch] = [Number(m[2]), Number(m[3]), Number(m[4])];

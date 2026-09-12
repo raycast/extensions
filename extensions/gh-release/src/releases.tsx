@@ -43,15 +43,18 @@ type Repo = {
 
 // ponytail: `gh repo list <owner>` only returns repos that owner *owns*, which is
 // empty for org-based accounts. Releasing needs push access, so ask for that instead.
-// ponytail: 100 repos, no pagination — add --paginate if someone hits the ceiling
+// --paginate is load-bearing: the owner filter runs client-side, so capping at one
+// page would hide that owner's repos rather than just trimming the tail.
 const LIST_ARGS = [
   "api",
+  "--paginate",
   "user/repos?affiliation=owner,organization_member,collaborator&sort=pushed&per_page=100",
   "--jq",
   "[.[] | select(.archived == false) | select(.permissions.push) |" +
     " {nameWithOwner: .full_name, description, pushedAt: .pushed_at}]",
 ];
 
+/** Latest release tag, or "" when the repo genuinely has none. Throws otherwise. */
 async function latestTag(repo: string): Promise<string> {
   try {
     const { stdout } = await run(GH, [
@@ -65,8 +68,14 @@ async function latestTag(repo: string): Promise<string> {
       ".tagName",
     ]);
     return stdout.trim();
-  } catch {
-    return ""; // no releases yet
+  } catch (err) {
+    // ponytail: only a real "no releases" may become empty history. Swallowing an
+    // auth or network failure here would propose v0.0.1 over an existing v4.x.
+    const detail = `${(err as { stderr?: string })?.stderr ?? ""}\n${
+      err instanceof Error ? err.message : String(err)
+    }`;
+    if (/release not found/i.test(detail)) return "";
+    throw err;
   }
 }
 
@@ -75,7 +84,22 @@ async function release(repo: string, bump: Bump) {
     style: Toast.Style.Animated,
     title: "Reading latest release…",
   });
-  const last = await latestTag(repo);
+  let last: string;
+  try {
+    last = await latestTag(repo);
+  } catch (err) {
+    await checking.hide();
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not read the latest release",
+      message: `${repo} — ${err instanceof Error ? err.message : String(err)}`
+        .split("\n")
+        .slice(-2)
+        .join(" ")
+        .slice(0, 200),
+    });
+    return;
+  }
   const tag = nextTag(last, bump);
   await checking.hide();
 
@@ -150,7 +174,7 @@ function PreferencesAction() {
 }
 
 export default function Command() {
-  const owner = getPreferenceValues<{ owner?: string }>().owner?.trim() ?? "";
+  const owner = getPreferenceValues<Preferences>().owner?.trim() ?? "";
 
   const { isLoading, data, revalidate, error } = useExec(GH, LIST_ARGS, {
     parseOutput: ({ stdout }) =>
