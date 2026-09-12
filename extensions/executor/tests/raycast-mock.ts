@@ -14,7 +14,8 @@ export const raycastState = {
 
 mock.module("@raycast/api", () => ({
   Color: {},
-  Icon: {},
+  Icon: { Plug: "plug" },
+  Image: { Mask: { RoundedRectangle: "roundedRectangle" } },
   LaunchType: { UserInitiated: "userInitiated" },
   launchCommand: async (input: unknown) => {
     raycastState.launches.push(input);

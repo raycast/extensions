@@ -112,7 +112,7 @@ export function IntegrationSetupForm({
   const advancedReason = advancedSetupReason(input);
   // OpenAPI document hosts can differ from the provider, so only use its catalog domain.
   const displayUrl = kind === "openapi" ? (catalog?.domain ? `https://${catalog.domain}` : undefined) : endpoint;
-  const providerIcon = integrationIcon(slug, new Map([[slug, { displayUrl }]]));
+  const providerIcon = integrationIcon(slug, new Map([[slug, { displayUrl, kind, logoDomain: catalog?.domain }]]));
 
   function changed() {
     validationRun.current += 1;
