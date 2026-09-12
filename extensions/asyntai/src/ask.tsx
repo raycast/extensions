@@ -18,7 +18,6 @@ function QuestionForm(props: { sessionId: string; turns: Turn[] }) {
   const { push } = useNavigation();
   return (
     <Form
-      navigationTitle="Ask My Chatbot"
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -83,7 +82,6 @@ function Answer(props: { sessionId: string; turns: Turn[]; question: string }) {
     <Detail
       isLoading={loading}
       markdown={history}
-      navigationTitle="Ask My Chatbot"
       actions={
         <ActionPanel>
           {!loading && !error ? (
