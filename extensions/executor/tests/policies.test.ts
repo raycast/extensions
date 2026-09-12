@@ -97,18 +97,18 @@ describe("policy management boundaries", () => {
   });
 
   test("extracts only exact workspace-scoped connection identities", () => {
-    expect(policyConnectionTarget("safetyculture.user.personal.users.list")).toEqual({
-      integration: "safetyculture",
+    expect(policyConnectionTarget("custom_service.user.personal.users.list")).toEqual({
+      integration: "custom_service",
       owner: "user",
       name: "personal",
     });
-    expect(policyConnectionTarget("safetyculture.org.mta.users.list")).toEqual({
-      integration: "safetyculture",
+    expect(policyConnectionTarget("custom_service.org.quality_lab.users.list")).toEqual({
+      integration: "custom_service",
       owner: "org",
-      name: "mta",
+      name: "quality_lab",
     });
-    expect(policyConnectionTarget("safetyculture.*.personal.users.list")).toBeUndefined();
-    expect(policyConnectionTarget("safetyculture.user.*.users.list")).toBeUndefined();
+    expect(policyConnectionTarget("custom_service.*.personal.users.list")).toBeUndefined();
+    expect(policyConnectionTarget("custom_service.user.*.users.list")).toBeUndefined();
   });
 
   test("maps owner and action filters without computing an effective policy", () => {

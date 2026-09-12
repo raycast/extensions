@@ -15,22 +15,22 @@ test("list summaries show readable labels instead of Markdown syntax", () => {
 
 test("field and connection labels preserve known acronyms", () => {
   expect(titleCase("allow_nsfw")).toBe("Allow NSFW");
-  expect(titleCase("mta")).toBe("MTA");
+  expect(titleCase("sdk")).toBe("SDK");
 });
 
 test("connection presentation uses the exact saved identity without repeating its scope", () => {
   const connections = [
     {
-      integration: "safetyculture",
+      integration: "custom_service",
       owner: "user" as const,
       name: "personal",
-      identityLabel: "MTA",
+      identityLabel: "QA Lab",
     },
     {
       integration: "github",
       owner: "org" as const,
       name: "personal",
-      identityLabel: "Bravas GitHub",
+      identityLabel: "Acme GitHub",
     },
     {
       integration: "github",
@@ -41,8 +41,8 @@ test("connection presentation uses the exact saved identity without repeating it
   ];
 
   expect(
-    connectionPresentation({ integration: "safetyculture", owner: "user", name: "personal" }, connections),
-  ).toEqual({ text: "MTA · Personal", tooltip: "Personal connection: MTA" });
+    connectionPresentation({ integration: "custom_service", owner: "user", name: "personal" }, connections),
+  ).toEqual({ text: "QA Lab · Personal", tooltip: "Personal connection: QA Lab" });
   expect(connectionPresentation({ integration: "github", owner: "user", name: "personal" }, connections)).toEqual({
     text: "Personal",
     tooltip: "Personal connection",

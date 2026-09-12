@@ -50,8 +50,8 @@ describe("Workspace isolation", () => {
   });
 
   test("native titles distinguish two profiles in the same organization", () => {
-    const first = { ...makeWorkspace("My Account", "first-key"), organizationSlug: "bravas" };
-    const second = { ...makeWorkspace("Shared Account", "second-key"), organizationSlug: "bravas" };
+    const first = { ...makeWorkspace("My Account", "first-key"), organizationSlug: "acme" };
+    const second = { ...makeWorkspace("Shared Account", "second-key"), organizationSlug: "acme" };
     expect(runInWorkspace(first, () => workspaceTitle("Tools"))).toBe("Tools · My Account");
     expect(runInWorkspace(second, () => workspaceTitle("Tools"))).toBe("Tools · Shared Account");
   });
@@ -83,9 +83,9 @@ describe("Workspace isolation", () => {
 
   test("switching active workspace cannot redirect an in-flight scoped request", async () => {
     const personal = makeWorkspace("Personal", "personal-key");
-    const bravas = makeWorkspace("Bravas", "bravas-key");
+    const acme = makeWorkspace("Acme", "acme-key");
     await saveWorkspace(personal);
-    await saveWorkspace(bravas);
+    await saveWorkspace(acme);
     await activateWorkspace(personal.id);
     const originalFetch = globalThis.fetch;
     const auth: string[] = [];
@@ -98,14 +98,14 @@ describe("Workspace isolation", () => {
       const frozenPersonal = await resolveWorkspace();
       await runInWorkspace(frozenPersonal, async () => {
         const cache = accountCacheKey();
-        await activateWorkspace(bravas.id);
+        await activateWorkspace(acme.id);
         await listIntegrations();
         expect(accountCacheKey()).toBe(cache);
         expect(workspaceTitle("Tools")).toContain("Personal");
       });
       await runInWorkspace(await resolveWorkspace(), listIntegrations);
-      expect(auth).toEqual(["Bearer personal-key", "Bearer bravas-key"]);
-      expect(runInWorkspace(personal, accountCacheKey)).not.toBe(runInWorkspace(bravas, accountCacheKey));
+      expect(auth).toEqual(["Bearer personal-key", "Bearer acme-key"]);
+      expect(runInWorkspace(personal, accountCacheKey)).not.toBe(runInWorkspace(acme, accountCacheKey));
     } finally {
       globalThis.fetch = originalFetch;
     }

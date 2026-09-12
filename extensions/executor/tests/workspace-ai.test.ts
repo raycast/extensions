@@ -39,11 +39,11 @@ describe("AI workspace routing", () => {
   test("resolves unique aliases for reads and returns the canonical ID", async () => {
     const personal = fixture("Personal", "https://personal.example", "personal-key");
     await saveWorkspace(personal);
-    await saveWorkspace(fixture("Bravas", "https://company.example", "company-key"));
+    await saveWorkspace(fixture("Acme", "https://company.example", "company-key"));
     const result = await inAiWorkspace({ workspaceId: " PERSONAL " }, () => ({ server: preferences().baseUrl }));
     expect(result.workspace.id).toBe(personal.id);
     expect(result.server).toBe(personal.baseUrl);
-    expect((await listAiWorkspaces()).workspaces.map((workspace) => workspace.alias)).toEqual(["personal", "bravas"]);
+    expect((await listAiWorkspaces()).workspaces.map((workspace) => workspace.alias)).toEqual(["personal", "acme"]);
   });
 
   test("rejects colliding aliases instead of selecting a workspace", async () => {

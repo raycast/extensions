@@ -131,19 +131,22 @@ const integration = (slug: string, name: string) => ({
   name,
   authMethods: [{ kind: "key", template: "key", label: "API Key" }],
 });
-const rows = [integration("alpha", "Alpha"), integration("mta", "MTA")];
+const rows = [integration("alpha", "Alpha"), integration("quality_lab", "QA Lab")];
 
-for (const props of [{ initialIntegration: "mta" }, { defaults: { integration: "mta", template: "key" } }]) {
+for (const props of [
+  { initialIntegration: "quality_lab" },
+  { defaults: { integration: "quality_lab", template: "key" } },
+]) {
   reset();
   // The old form mounted an empty picker here and its empty change erased the requested slug.
   const early = field(render(props), "integration");
   early?.props.onChange("");
   data = rows;
   let tree = render(props);
-  assert.equal(field(tree, "integration")?.props.value, "mta", "origin must survive asynchronous loading");
+  assert.equal(field(tree, "integration")?.props.value, "quality_lab", "origin must survive asynchronous loading");
   field(tree, "credential:token")?.props.onChange("synthetic-token");
   tree = render(props);
-  field(tree, "integration")?.props.onChange("mta");
+  field(tree, "integration")?.props.onChange("quality_lab");
   field(tree, "integration")?.props.onChange("");
   tree = render(props);
   assert.equal(
@@ -153,7 +156,7 @@ for (const props of [{ initialIntegration: "mta" }, { defaults: { integration: "
   );
   await tree.find((el) => el.type === "Submit")!.props.onSubmit();
   assert.deepEqual(submissions[0], {
-    target: { integration: "mta", owner: "user", template: "key", label: "" },
+    target: { integration: "quality_lab", owner: "user", template: "key", label: "" },
     values: { token: "synthetic-token" },
   });
 }
@@ -167,13 +170,13 @@ assert.equal(
   "missing target must not submit another integration",
 );
 assert.equal(field(tree, "template"), undefined);
-field(tree, "integration")?.props.onChange("mta");
-assert.equal(field(render({ initialIntegration: "deleted" }), "integration")?.props.value, "mta");
+field(tree, "integration")?.props.onChange("quality_lab");
+assert.equal(field(render({ initialIntegration: "deleted" }), "integration")?.props.value, "quality_lab");
 reset();
 data = rows;
 tree = render();
 assert.equal(field(tree, "integration")?.props.value, "", "standalone creation requires an explicit choice");
-field(tree, "integration")?.props.onChange("mta");
+field(tree, "integration")?.props.onChange("quality_lab");
 tree = render();
 field(tree, "credential:token")?.props.onChange("synthetic-token");
 tree = render();

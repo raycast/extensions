@@ -93,7 +93,6 @@ const ACRONYMS = new Set([
   "id",
   "json",
   "mcp",
-  "mta",
   "nsfw",
   "ocr",
   "pdf",

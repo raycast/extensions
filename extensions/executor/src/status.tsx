@@ -1,7 +1,7 @@
 import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences } from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
-import { integrationName, summarize, titleCase } from "./lib/format";
-import { integrationIcon } from "./lib/integrations";
+import { connectionLabel, connectionPresentation, summarize } from "./lib/format";
+import { integrationIcon, integrationLabel } from "./lib/integrations";
 import { connectionIssue, recordedHealthAge, statusConnectionTitles } from "./lib/status";
 import { activeWorkspaceId, activateWorkspace, listWorkspaces, workspaceSummary } from "./lib/workspaces";
 import { loadWorkspaceStatus } from "./lib/workspace-status";
@@ -38,18 +38,13 @@ function StatusMenu({
   const qualifiedTitle = (title: string, workspace: WorkspaceSummary) =>
     profiles.length > 1 ? `${title} (${workspace.name})` : title;
   const connectionTitles = statusConnectionTitles(
-    data.flatMap(({ workspace, snapshot }) =>
+    data.flatMap(({ workspace, snapshot, integrations = [] }) =>
       snapshot.repairConnections.slice(0, 4).map((connection) => ({
         id: `${workspace.id}/${connection.address}`,
         workspace: workspace.name,
         title: [
-          integrationName(connection.integration),
-          connection.identityLabel ||
-            (!["personal", "default"].includes(connection.name.toLowerCase()) ||
-            snapshot.repairConnections.filter((item) => item.integration === connection.integration).length > 1
-              ? titleCase(connection.name)
-              : undefined),
-          connection.owner === "org" ? "Workspace" : undefined,
+          integrationLabel(connection.integration, new Map(integrations.map((item) => [item.slug, item]))),
+          connectionPresentation(connection, snapshot.repairConnections).text,
         ]
           .filter(Boolean)
           .join(" · "),
@@ -63,7 +58,7 @@ function StatusMenu({
       tooltip={`Executor · ${profiles.length} workspaces · ${attentionCount} recorded items need attention`}
       isLoading={isLoading}
     >
-      {data.map(({ workspace, snapshot, approvals, approvalsUnavailable }) =>
+      {data.map(({ workspace, snapshot, integrations = [], approvals, approvalsUnavailable }) =>
         snapshot.needsAttention || approvals.length || snapshot.state === "unavailable" || approvalsUnavailable ? (
           <MenuBarExtra.Section key={workspace.id} title={`${workspace.name} · Needs Attention`}>
             {snapshot.state === "unavailable" ? (
@@ -80,13 +75,13 @@ function StatusMenu({
                 subtitle={`${connectionIssue(connection)} · ${recordedHealthAge(connection.lastHealth?.checkedAt)}`}
                 tooltip={[
                   `Workspace: ${workspace.name}`,
-                  `Connection: ${titleCase(connection.name)}`,
+                  `Connection: ${connectionLabel(connection)}`,
                   connection.owner === "org" ? "Workspace" : "Personal",
                   connection.lastHealth?.detail ?? connection.lastHealth?.reason,
                 ]
                   .filter(Boolean)
                   .join("\n")}
-                icon={integrationIcon(connection.integration)}
+                icon={integrationIcon(connection.integration, new Map(integrations.map((item) => [item.slug, item])))}
                 onAction={() => launch("connections", workspace.id)}
               />
             ))}

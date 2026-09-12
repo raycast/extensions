@@ -61,7 +61,7 @@ describe("integration catalog", () => {
     ).toContain("/personal/integrations/add/mcp?");
     expect(() => scopedConsoleUrl(handoff, "https://other.test", "/artifacts/a")).toThrow();
     expect(() => scopedConsoleUrl(handoff, "https://executor.sh", "//other.test")).toThrow();
-    expect(() => scopedConsoleUrl(handoff, "https://executor.sh", "/../bravas/artifacts")).toThrow();
+    expect(() => scopedConsoleUrl(handoff, "https://executor.sh", "/../other-workspace/artifacts")).toThrow();
     expect(
       scopedConsoleUrl("http://127.0.0.1:4788/integrations/executor", "http://127.0.0.1:4788", "/artifacts/a"),
     ).toBe("http://127.0.0.1:4788/artifacts/a");

@@ -6,6 +6,7 @@ beforeAll(async () => {
   ({ startOAuthReconnect } = await import("../src/lib/connection-reconnect"));
   ({ reconnectExecutorConnection } = await import("../src/lib/connection-ai"));
 });
+import { runInWorkspace, workspaceIdFor } from "../src/lib/workspaces";
 import type { Connection } from "../src/lib/types";
 
 const originalFetch = globalThis.fetch;
@@ -13,14 +14,14 @@ afterEach(() => {
   globalThis.fetch = originalFetch;
 });
 const connection: Connection = {
-  integration: "supabase",
+  integration: "custom_service",
   owner: "user",
-  name: "personal",
+  name: "quality_lab",
   template: "oauth2",
-  address: "tools.supabase.user.personal",
+  address: "tools.custom_service.user.quality_lab",
   provider: "oauth",
-  identityLabel: "Personal",
-  oauthClient: "dcr-api-supabase-com",
+  identityLabel: "QA Lab",
+  oauthClient: "dcr-auth-example-net",
   oauthClientOwner: "user",
   missingOAuthScopes: [],
 };
@@ -29,28 +30,29 @@ const method = {
   kind: "oauth",
   template: "oauth2",
   label: "OAuth",
-  oauth: { discoveryUrl: "https://mcp.supabase.com/mcp", supportsDynamicRegistration: true },
+  oauth: { discoveryUrl: "https://tools.example.net/mcp", supportsDynamicRegistration: true },
 };
 const stored = {
   owner: "user",
-  slug: "dcr-api-supabase-com",
+  slug: "dcr-auth-example-net",
   grant: "authorization_code",
   resource: "https://old.example/mcp",
   origin: { kind: "dynamic_client_registration" },
 };
 const probe = {
-  issuer: "https://api.supabase.com",
-  authorizationUrl: "https://api.supabase.com/v1/oauth/authorize",
-  tokenUrl: "https://api.supabase.com/v1/oauth/token",
-  resource: "https://mcp.supabase.com/mcp",
-  registrationEndpoint: "https://api.supabase.com/platform/oauth/apps/register",
+  issuer: "https://auth.example.net",
+  authorizationUrl: "https://auth.example.net/v1/oauth/authorize",
+  tokenUrl: "https://auth.example.net/v1/oauth/token",
+  resource: "https://tools.example.net/mcp",
+  registrationEndpoint: "https://auth.example.net/platform/oauth/apps/register",
   scopesSupported: ["projects:read"],
   tokenEndpointAuthMethodsSupported: ["client_secret_basic"],
   clientIdMetadataDocumentSupported: false,
 };
-type Call = { path: string; body?: Record<string, unknown> };
+type Call = { origin: string; path: string; body?: Record<string, unknown> };
 function fixture(
   options: {
+    connection?: Connection;
     client?: Record<string, unknown>;
     method?: Record<string, unknown>;
     probe?: Record<string, unknown>;
@@ -62,26 +64,26 @@ function fixture(
   globalThis.fetch = mock(async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = new URL(String(input)).pathname;
     const body = init?.body ? JSON.parse(String(init.body)) : undefined;
-    calls.push({ path, body });
+    calls.push({ origin: new URL(String(input)).origin, path, body });
     options.onCall?.(path);
     if (path === options.failAt) return Response.json({ message: "Denied" }, { status: 403 });
-    if (path === "/api/connections") return Response.json([connection]);
-    if (path === "/api/integrations/supabase")
-      return Response.json({ slug: "supabase", authMethods: [options.method ?? method] });
+    if (path === "/api/connections") return Response.json([options.connection ?? connection]);
+    if (path === "/api/integrations/custom_service")
+      return Response.json({ slug: "custom_service", authMethods: [options.method ?? method] });
     if (path === "/api/oauth/clients") return Response.json([options.client ?? stored]);
     if (path === "/api/oauth/probe") return Response.json(options.probe ?? probe);
-    if (path === "/api/oauth/clients/register-dynamic") return Response.json({ client: "dcr-api-supabase-com-2" });
+    if (path === "/api/oauth/clients/register-dynamic") return Response.json({ client: "dcr-auth-example-net-2" });
     if (path === "/api/oauth/start")
       return Response.json({
         status: "redirect",
-        authorizationUrl: "https://api.supabase.com/v1/oauth/authorize?state=synthetic",
+        authorizationUrl: "https://auth.example.net/v1/oauth/authorize?state=synthetic",
       });
     throw new Error(`Unexpected request: ${path}`);
   }) as typeof fetch;
   return calls;
 }
 
-test("Supabase reconnect probes, registers and starts the same connection with the server-returned client", async () => {
+test("Custom-provider reconnect probes, registers and starts the same connection with the server-returned client", async () => {
   const calls = fixture();
   const result = await startOAuthReconnect(connection);
   expect(result?.status).toBe("redirect");
@@ -92,7 +94,7 @@ test("Supabase reconnect probes, registers and starts the same connection with t
   ]);
   expect(calls.find((c) => c.path.endsWith("register-dynamic"))?.body).toEqual({
     owner: "user",
-    slug: "dcr-api-supabase-com",
+    slug: "dcr-auth-example-net",
     issuer: probe.issuer,
     registrationEndpoint: probe.registrationEndpoint,
     authorizationUrl: probe.authorizationUrl,
@@ -102,27 +104,31 @@ test("Supabase reconnect probes, registers and starts the same connection with t
     tokenEndpointAuthMethodsSupported: ["client_secret_basic"],
     clientName: "Executor",
     redirectUri: "https://executor.test/api/oauth/callback",
-    originIntegration: "supabase",
+    originIntegration: "custom_service",
   });
   expect(calls.at(-1)?.body).toEqual({
-    client: "dcr-api-supabase-com-2",
+    client: "dcr-auth-example-net-2",
     clientOwner: "user",
     owner: "user",
-    name: "personal",
-    integration: "supabase",
+    name: "quality_lab",
+    integration: "custom_service",
     template: "oauth2",
-    identityLabel: "Personal",
+    identityLabel: "QA Lab",
     redirectUri: "https://executor.test/api/oauth/callback",
   });
 });
 
 test("AI reconnect uses the same automatic route without an Executor UI handoff", async () => {
   const calls = fixture();
-  const result = await reconnectExecutorConnection({ owner: "user", integration: "supabase", connection: "personal" });
+  const result = await reconnectExecutorConnection({
+    owner: "user",
+    integration: "custom_service",
+    connection: "quality_lab",
+  });
   expect(result).toMatchObject({
     status: "browser_action_required",
     pending: true,
-    url: expect.stringContaining("https://api.supabase.com/"),
+    url: expect.stringContaining("https://auth.example.net/"),
   });
   expect(calls.filter((c) => c.path === "/api/oauth/start")).toHaveLength(1);
 });
@@ -206,4 +212,36 @@ test("closing the native view after discovery or registration stops the next sid
     expect(calls.at(-1)?.path).toBe(closeAt);
     expect(calls.some((c) => c.path === "/api/oauth/start")).toBe(false);
   }
+});
+
+test("workspace-owned reconnect keeps the configured server and saved identity", async () => {
+  const shared: Connection = {
+    ...connection,
+    owner: "org",
+    oauthClientOwner: "org",
+    name: "automation",
+    identityLabel: "QA Automation",
+  };
+  const calls = fixture({ connection: shared, client: { ...stored, owner: "org" } });
+  const workspace = {
+    id: workspaceIdFor("https://gateway.example.org", "synthetic-key"),
+    name: "Research Lab",
+    baseUrl: "https://gateway.example.org",
+    apiKey: "synthetic-key",
+    organizationSlug: "research",
+  };
+  await runInWorkspace(workspace, () => startOAuthReconnect(shared));
+  expect(calls.every((call) => call.origin === workspace.baseUrl)).toBe(true);
+  expect(calls.find((call) => call.path.endsWith("register-dynamic"))?.body).toMatchObject({
+    owner: "org",
+    redirectUri: "https://gateway.example.org/api/oauth/callback",
+  });
+  expect(calls.at(-1)?.body).toMatchObject({
+    owner: "org",
+    clientOwner: "org",
+    name: "automation",
+    identityLabel: "QA Automation",
+    integration: "custom_service",
+    redirectUri: "https://gateway.example.org/api/oauth/callback",
+  });
 });
