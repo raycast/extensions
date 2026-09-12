@@ -1,6 +1,6 @@
 # PIA Changelog
 
-## [Region Browser, Favorites and Settings] - {PR_MERGE_DATE}
+## [Region Browser, Favorites and Settings] - 2026-09-12
 
 All existing commands keep their names and shortcuts.
 
