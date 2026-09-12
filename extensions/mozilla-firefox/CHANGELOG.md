@@ -1,6 +1,6 @@
 # Mozilla Firefox Changelog
 
-## [Live Bookmarks & Search Fixes] - {PR_MERGE_DATE}
+## [Live Bookmarks & Search Fixes] - 2026-09-12
 
 - Search Bookmarks now reads live from `moz_bookmarks` in `places.sqlite` instead of the daily `bookmarkbackups` lz4 file, so new bookmarks show up immediately
 - Search History hides redirect artifacts (`hidden = 0`) and entries that were never visited
