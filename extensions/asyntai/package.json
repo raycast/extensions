@@ -51,7 +51,7 @@
       "name": "apiKey",
       "type": "password",
       "required": true,
-      "title": "API key",
+      "title": "API Key",
       "description": "Your Asyntai API key. In Asyntai open Settings, then API, and copy the key.",
       "placeholder": "Paste the key from Settings, API"
     }
