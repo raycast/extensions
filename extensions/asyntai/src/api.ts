@@ -22,11 +22,10 @@ export function newAskSession(): string {
 
 export function isOwnQuestion(sessionId: string | null | undefined): boolean {
   if (typeof sessionId !== "string") return false;
-  return [ASK_MARKER, ...OTHER_MARKERS].some((marker) => sessionId.includes(marker));
+  return [ASK_MARKER, ...OTHER_MARKERS].some((marker) => sessionId.startsWith(marker));
 }
 
-type Preferences = { apiKey: string };
-
+// `Preferences` comes from raycast-env.d.ts, generated from package.json.
 export function apiKey(): string {
   return (getPreferenceValues<Preferences>().apiKey || "").trim();
 }
@@ -147,6 +146,13 @@ export function ago(iso: string | null | undefined): string {
   const days = hours / 24;
   if (days < 30) return `${Math.floor(days)} d ago`;
   return new Date(iso).toLocaleDateString();
+}
+
+// Chat text goes into Detail markdown. A visitor could type an image link,
+// and Raycast would fetch it when the owner reads the chat. So every "![" and
+// every "<" is escaped: the text still reads the same, but nothing loads.
+export function safeMarkdown(text: string): string {
+  return text.replace(/!\[/g, "\\![").replace(/</g, "\\<");
 }
 
 export function dashboardUrl(sessionId: string): string {
