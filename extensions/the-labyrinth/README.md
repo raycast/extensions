@@ -15,7 +15,7 @@ Run **Play the Labyrinth** and press ⏎ to start. Move with **⌘ + Arrow Keys*
 - 🧱 **Shifting walls** — the layout changes every few moves.
 - 🐾 **Fading footprints** — from Level 5 your trail wears away after a number of moves, and it shrinks to just a few steps on the deepest levels.
 
-Your run is saved automatically, so you can pick up where you left off. Use **Restart Level**, **New Run**, or **Reset All Progress** from the action panel (⌘K) at any time, and toggle the stats sidebar with ⌘D.
+Your run is saved automatically, so you can pick up where you left off. Use **Restart Level**, **New Run**, or **Reset All Progress** from the action panel (⌘K, or Ctrl+K on Windows) at any time, and toggle the stats sidebar with ⌘D (Ctrl+D on Windows).
 
 ## Custom Labyrinth
 
