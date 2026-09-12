@@ -1,0 +1,207 @@
+instructions: |
+  Communication Style:
+  Use a friendly and approachable tone with emojis to make interactions more engaging.
+
+  To control Home Assistant devices:
+  1. First, use get-entities to find the entity IDs and friendly names for potential devices matching the user's request.
+  2. Identify the relevant entity IDs based on the user's request and the results from get-entities.
+  3. Use get-attributes with all the relevant entity IDs in a single call to fetch their current state and attributes.
+  4. EXCLUDE from the operation the entities that are already in the desired state (based on the attributes), and inform the user (e.g., 'the kitchen light is already on').
+  5. If a relevant entity is unique for the requested action (e.g., a single light needs turning off), INCLUDE it in the operation without asking for user consent.
+  6. If there are multiple relevant entities for the same action (e.g., two lights to turn off), ask the user to specify which device they want to control by providing a list of these entities with their current states (obtained from get-attributes).
+  7. DO NOT control multiple entities at once without asking for consent, unless the user explicitly indicates controlling all relevant entities (e.g., 'turn off the lights' or 'turn on all lights').
+  8. Once you have the user's confirmation (if needed), use run-service to execute the operation.
+
+evals:
+  - input: "@homeassistant set the bedroom light to a romantic color and brightness"
+    mocks:
+      get-entities:
+        entities:
+          - friendly_name: "Philips Hue"
+            entity_id: "light.philips_hue"
+          # Other entities might be returned
+      get-attributes:
+        entities:
+          - friendly_name: "Philips Hue"
+            state: "off"
+            entity_id: "light.philips_hue"
+            attributes:
+              min_mireds: 153
+              rgb_color: null
+              color_mode: null
+              min_color_temp_kelvin: 2000
+              hs_color: null
+              max_mireds: 500
+              max_color_temp_kelvin: 6500
+              xy_color: null
+              color_temp: null
+              friendly_name: "Philips Hue"
+              supported_features: 0
+              color_temp_kelvin: null
+              brightness: null
+              supported_color_modes:
+                - "color_temp"
+                - "hs"
+      run-service: {}
+    expected:
+      - callsTool:
+          name: "get-entities"
+          arguments: {}
+      - callsTool:
+          name: "get-attributes"
+      - callsTool:
+          name: "run-service"
+          arguments:
+            service: "turn_on"
+            "data.entity_id.0": "light.philips_hue"
+      - meetsCriteria: "Tells that the light has been set to a romantic color and brightness"
+  - input: "@homeassistant how's the temperature and humidity in the living room?"
+    mocks:
+      get-entities:
+        entities:
+          - friendly_name: "Living Room Climate Sensor Humidity"
+            entity_id: "sensor.living_room_climate_sensor_humidity"
+          - friendly_name: "Living Room Climate Sensor Temperature"
+            entity_id: "sensor.living_room_climate_sensor_temperature"
+          # Other entities might be returned
+      get-attributes:
+        entities:
+          - friendly_name: "Living Room Climate Sensor Humidity"
+            state: "70.8"
+            entity_id: "sensor.living_room_climate_sensor_humidity"
+            attributes:
+              state_class: "measurement"
+              unit_of_measurement: "%"
+              device_class: "humidity"
+              friendly_name: "Living Room Climate Sensor Humidity"
+          - friendly_name: "Living Room Climate Sensor Temperature"
+            state: "28.6"
+            entity_id: "sensor.living_room_climate_sensor_temperature"
+            attributes:
+              state_class: "measurement"
+              unit_of_measurement: "°C"
+              device_class: "temperature"
+              friendly_name: "Living Room Climate Sensor Temperature"
+    expected:
+      - callsTool:
+          name: "get-entities"
+          arguments: {}
+      - callsTool:
+          name: "get-attributes"
+      - meetsCriteria: "Returns the temperature and humidity in the living room"
+  - input: "@homeassistant turn off the air conditioners and clean the house"
+    mocks:
+      get-entities:
+        entities:
+          - entity_id: "climate.air_conditioner_1"
+            friendly_name: "Air Conditioner 1"
+          - entity_id: "climate.air_conditioner_2"
+            friendly_name: "Air Conditioner 2"
+          - entity_id: "vacuum.roomba"
+            friendly_name: "Roomba"
+      get-attributes:
+        entities:
+          - entity_id: "climate.air_conditioner_1"
+            friendly_name: "Air Conditioner 1"
+            state: "dry"
+            attributes:
+              current_temperature: 27
+              fan_mode: "low"
+              fan_modes:
+                - "low"
+                - "LOW_MID"
+                - "medium"
+                - "MID_HIGH"
+                - "high"
+                - "diffuse"
+              friendly_name: "Air Conditioner 1"
+              hvac_modes:
+                - "off"
+                - "auto"
+                - "dry"
+                - "cool"
+                - "fan_only"
+              max_temp: 30
+              min_temp: 16
+              supported_features: 425
+              swing_mode: "Off"
+              swing_modes:
+                - "Off"
+                - "Top"
+                - "MiddleTop1"
+                - "MiddleTop2"
+                - "MiddleBottom2"
+                - "MiddleBottom1"
+                - "Bottom"
+                - "Swing"
+              target_temp_step: 1
+              temperature: 25
+          - entity_id: "climate.air_conditioner_2"
+            friendly_name: "Air Conditioner 2"
+            state: "fan_only"
+            attributes:
+              current_temperature: 29
+              fan_mode: "low"
+              fan_modes:
+                - "low"
+                - "LOW_MID"
+                - "medium"
+                - "MID_HIGH"
+                - "high"
+                - "diffuse"
+              friendly_name: "Air Conditioner 2"
+              hvac_modes:
+                - "off"
+                - "dry"
+                - "cool"
+                - "fan_only"
+              max_temp: 30
+              min_temp: 16
+              supported_features: 425
+              swing_mode: "Off"
+              swing_modes:
+                - "Off"
+                - "Top"
+                - "MiddleTop1"
+                - "MiddleTop2"
+                - "MiddleBottom2"
+                - "MiddleBottom1"
+                - "Bottom"
+                - "Swing"
+              target_temp_step: 1
+              temperature: 25
+      run-service: {}
+    expected:
+      - callsTool:
+          arguments: {}
+          name: "get-entities"
+      - callsTool:
+          name: "get-attributes"
+          arguments:
+            entity_ids.0:
+              eq:
+                - "climate.air_conditioner_1"
+            entity_ids.1:
+              eq:
+                - "climate.air_conditioner_2"
+            entity_ids.2:
+              eq:
+                - "vacuum.roomba"
+      - callsTool:
+          name: "run-service"
+          arguments:
+            data.entity_id.0:
+              eq:
+                - "climate.air_conditioner_1"
+            data.entity_id.1:
+              eq:
+                - "climate.air_conditioner_2"
+            service: "turn_off"
+      - callsTool:
+          name: "run-service"
+          arguments:
+            data.entity_id.0:
+              eq:
+                - "vacuum.roomba"
+            service: "start"
+      - meetsCriteria: "Turns off the air conditioners and starts the vacuum"

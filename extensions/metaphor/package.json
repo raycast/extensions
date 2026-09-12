@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "metaphor",
+  "title": "Metaphor",
+  "description": "Search with Metaphor",
+  "icon": "command-icon.png",
+  "author": "QIanGua",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Metaphor",
+      "description": "Template for showing a static list and a detail view",
+      "mode": "view"
+    },
+    {
+      "name": "findSimilar",
+      "title": "Search Similar",
+      "description": "Template for showing similar links",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "MetaphorAPIKey",
+      "type": "password",
+      "title": "Metaphor API Token",
+      "required": true,
+      "description": "You can apply for a token in Metaphor. go to https://dashboard.metaphor.systems/"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.3",
+    "@raycast/utils": "^1.4.16",
+    "metaphor-node": "^1.0.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

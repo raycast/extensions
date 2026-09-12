@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "the-forest-link",
+  "title": "The Forest",
+  "description": "Rediscover the joy of getting lost on the web with theforest.link",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "go-to-a-random-site",
+      "title": "Go for a Walk",
+      "description": "Open a random website from The Forest",
+      "mode": "no-view"
+    },
+    {
+      "name": "view-walk-history",
+      "title": "View Walk History",
+      "description": "Revisit websites discovered on previous walks",
+      "mode": "view"
+    },
+    {
+      "name": "plant-a-website",
+      "title": "Plant a Website",
+      "description": "Submit a website to grow The Forest",
+      "mode": "view"
+    },
+    {
+      "name": "open-the-forest",
+      "title": "Open the Forest",
+      "description": "Open theforest.link in your browser",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "take-a-walk",
+      "title": "Take a Walk",
+      "description": "Finds a random website in The Forest and saves it to walk history"
+    },
+    {
+      "name": "get-walk-history",
+      "title": "Get Walk History",
+      "description": "Gets websites discovered during previous walks through The Forest"
+    },
+    {
+      "name": "clear-walk-history",
+      "title": "Clear Walk History",
+      "description": "Permanently clears all locally saved Forest walk history after confirmation"
+    },
+    {
+      "name": "plant-website",
+      "title": "Plant Website",
+      "description": "Submits a website to The Forest for consideration after confirmation"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

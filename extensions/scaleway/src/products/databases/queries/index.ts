@@ -1,0 +1,1 @@
+export { useAllRegionInstancesQuery } from './useInstancesQuery'

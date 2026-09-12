@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macos-tweaks",
+  "title": "macOS Tweaks",
+  "description": "Discover and toggle hidden macOS settings without the Terminal. Browse a curated catalog of defaults write tweaks for Finder, Dock, Screenshots, Animations, and more.",
+  "icon": "extension-icon.png",
+  "author": "Undolog",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "keywords": [
+    "macos",
+    "defaults",
+    "hidden settings",
+    "tweaks",
+    "system preferences",
+    "finder",
+    "dock",
+    "screenshots",
+    "animations",
+    "tinkertool"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-tweaks",
+      "title": "Browse Tweaks",
+      "subtitle": "macOS Tweaks",
+      "description": "Browse and toggle hidden macOS settings by category",
+      "mode": "view"
+    },
+    {
+      "name": "my-tweaks",
+      "title": "My Tweaks",
+      "subtitle": "macOS Tweaks",
+      "description": "View and manage your modified macOS settings",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Tweaks Menu Bar",
+      "subtitle": "macOS Tweaks",
+      "description": "Quick access to your modified tweaks from the menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-tweaks",
+      "title": "Search Tweaks",
+      "description": "Find the macOS settings this extension can change, with their current and default values. Use this first to get the id of a tweak before applying or resetting it."
+    },
+    {
+      "name": "get-modified-tweaks",
+      "title": "Get Modified Tweaks",
+      "description": "List every macOS setting that currently differs from its system default."
+    },
+    {
+      "name": "apply-tweak",
+      "title": "Apply Tweak",
+      "description": "Change a macOS setting to a given value. Asks the user to confirm the change first."
+    },
+    {
+      "name": "reset-tweak",
+      "title": "Reset Tweak",
+      "description": "Put a macOS setting back to its system default. Asks the user to confirm first."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.1.0",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

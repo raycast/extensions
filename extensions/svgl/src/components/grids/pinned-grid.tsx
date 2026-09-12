@@ -1,0 +1,31 @@
+import { Grid } from "@raycast/api";
+import { useSvglExtension } from "../app-context";
+import SvgAction from "../svg-action";
+import { getSvgRouteSource } from "../../utils/svg-route";
+
+const PinnedGrid = () => {
+  const { pinnedSvgIds, svgs } = useSvglExtension();
+  return (
+    <Grid.Section title="Pinned" subtitle={pinnedSvgIds.length.toString()}>
+      {svgs
+        .filter((svg) => pinnedSvgIds.includes(svg.id))
+        .sort((a, b) => pinnedSvgIds.indexOf(a.id) - pinnedSvgIds.indexOf(b.id))
+        .map((svg) => (
+          <Grid.Item
+            key={`pinned_${svg.id}`}
+            content={{
+              value: {
+                source: getSvgRouteSource(svg.route),
+              },
+              tooltip: svg.title,
+            }}
+            title={svg.title}
+            id={`pinned_${svg.id}`}
+            actions={<SvgAction svg={svg} category={svg.category?.[0] ?? svg.category} />}
+          />
+        ))}
+    </Grid.Section>
+  );
+};
+
+export default PinnedGrid;

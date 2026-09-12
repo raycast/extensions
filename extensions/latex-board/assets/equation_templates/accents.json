@@ -1,0 +1,26 @@
+{
+  "Accents": {
+    "Accent 1": "\\hat{a} ",
+    "Accent 2": "\\acute{a} ",
+    "Accent 3": "\\tilde{a} ",
+    "Accent 4": "\\bar{a} ",
+    "Accent 5": "\\dot{a} ",
+    "Accent 6": "\\check{a} ",
+    "Accent 7": "\\grave{a} ",
+    "Accent 8": "\\breve{a} ",
+    "Accent 9": "\\vec{a} ",
+    "Accent 10": "\\ddot{a} "
+  },
+  "Wide Accents": {
+    "Accent 11": "\\widehat{ABC} ",
+    "Accent 12": "\\overline{ABC} ",
+    "Accent 13": "\\overrightarrow{ABC} ",
+    "Accent 14": "\\overbrace{ABC} ",
+    "Accent 15": "\\overbrace{ABC \\cdots Z}^{26} ",
+    "Accent 16": "\\widetilde{ABC} ",
+    "Accent 17": "\\underline{ABC} ",
+    "Accent 18": "\\overleftarrow{ABC} ",
+    "Accent 19": "\\underbrace{ABC} ",
+    "Accent 20": "\\underbrace{ABC \\cdots Z}_{26} "
+  }
+}

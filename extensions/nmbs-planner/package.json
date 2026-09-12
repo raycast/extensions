@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nmbs-planner",
+  "title": "NMBS Planner",
+  "description": "Plan your trainrides with NMBS",
+  "icon": "train_icon.png",
+  "author": "Samuel3865",
+  "contributors": [
+    "0xdhrv"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "trainride",
+      "title": "Trainride",
+      "description": "Plan your trainride",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "from",
+          "placeholder": "Origin",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "to",
+          "placeholder": "Destination",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.2",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "type-check": "./node_modules/.bin/tsc -p tsconfig.json --noEmit"
+  }
+}

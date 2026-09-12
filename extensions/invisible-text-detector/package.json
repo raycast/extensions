@@ -1,0 +1,200 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "invisible-text-detector",
+  "title": "Invisible Text Detector",
+  "description": "Remove all hidden Unicode characters in your text, usually injected by LLMs.",
+  "icon": "icon.png",
+  "author": "garrett",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "open-invisible-text-detector",
+      "title": "Open Invisible Text Detector",
+      "description": "Analyze, reveal and clean invisible / Unicode characters.",
+      "mode": "view"
+    },
+    {
+      "name": "fix-invisible-characters",
+      "title": "Fix Invisible Characters",
+      "description": "Removes invisible characters from input text.",
+      "mode": "no-view"
+    },
+    {
+      "name": "analyze-clipboard-invisible-characters",
+      "title": "Analyze Clipboard for Invisible Characters",
+      "description": "Show a quick summary of invisible / Unicode characters in the clipboard or selected text.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultCleanMode",
+      "title": "Default Clean Mode (Quick Commands)",
+      "description": "Which cleaning strategy to use for the one-shot, no-view command by default.",
+      "type": "dropdown",
+      "required": false,
+      "default": "invisible",
+      "data": [
+        {
+          "title": "Only Invisible Characters",
+          "value": "invisible"
+        },
+        {
+          "title": "All Unicode Characters",
+          "value": "all"
+        }
+      ]
+    },
+    {
+      "name": "preferSelectedText",
+      "title": "Prefer Selected Text over Clipboard",
+      "description": "If enabled, commands try to use the current selection first, then fall back to the clipboard.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use selected text when available",
+      "default": true
+    },
+    {
+      "name": "actionAfterClean",
+      "title": "After Clean (Quick Commands)",
+      "description": "What to do with the cleaned text when using a no-view command.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy Cleaned Text",
+          "value": "copy"
+        },
+        {
+          "title": "Paste Cleaned Text",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "showToasts",
+      "title": "Show Summary Toasts",
+      "description": "Show a toast with a short summary after running commands.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show toast summaries",
+      "default": true
+    },
+    {
+      "name": "replaceNBSPWithSpace",
+      "title": "Replace NBSP with Space (All Unicode)",
+      "description": "Replace non-breaking spaces with regular spaces when normalizing all Unicode.",
+      "type": "checkbox",
+      "required": false,
+      "label": "NBSP → Space",
+      "default": true
+    },
+    {
+      "name": "convertSmartQuotes",
+      "title": "Convert Smart Quotes (All Unicode)",
+      "description": "Convert curly quotes to straight ASCII quotes when normalizing all Unicode.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Curly quotes → Straight quotes",
+      "default": true
+    },
+    {
+      "name": "convertDashes",
+      "title": "Convert En/Em Dashes (All Unicode)",
+      "description": "Convert en/em dashes to a regular ASCII hyphen when normalizing all Unicode.",
+      "type": "checkbox",
+      "required": false,
+      "label": "– — → -",
+      "default": true
+    },
+    {
+      "name": "replaceEllipsis",
+      "title": "Replace Ellipsis with ... (All Unicode)",
+      "description": "Replace the ellipsis character with three ASCII dots when normalizing all Unicode.",
+      "type": "checkbox",
+      "required": false,
+      "label": "… → ...",
+      "default": true
+    },
+    {
+      "name": "tabWidth",
+      "title": "Tab Width for Replacement (All Unicode)",
+      "description": "How many spaces to use when replacing tabs during normalization.",
+      "type": "textfield",
+      "required": false,
+      "default": "4"
+    },
+    {
+      "name": "collapseMultipleSpaces",
+      "title": "Collapse Multiple Spaces (All Unicode)",
+      "description": "Reduce repeated spaces to a single space after normalization.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Collapse repeated spaces",
+      "default": false
+    },
+    {
+      "name": "normalizeNFKD",
+      "title": "Normalize NFKD & Remove Combining Marks (All Unicode)",
+      "description": "Use NFKD normalization and strip combining marks when normalizing.",
+      "type": "checkbox",
+      "required": false,
+      "label": "NFKD normalize & strip marks",
+      "default": true
+    },
+    {
+      "name": "previewShowSpaces",
+      "title": "UI Preview: Show Spaces",
+      "description": "Display visual markers for spaces, tabs, and NBSP in the preview.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Reveal spaces",
+      "default": false
+    },
+    {
+      "name": "previewShowNonKeyboard",
+      "title": "UI Preview: Show Non-Keyboard Unicode",
+      "description": "Highlight visible but non-keyboard characters (smart quotes, dashes, ellipsis) in the preview.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Reveal non-keyboard characters",
+      "default": true
+    },
+    {
+      "name": "previewShowUnicodeTags",
+      "title": "UI Preview: Show [U+XXXX] Tags",
+      "description": "Append [U+XXXX] code point tags after non-ASCII characters in the preview.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show [U+XXXX] tags",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

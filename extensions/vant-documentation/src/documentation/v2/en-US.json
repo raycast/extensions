@@ -1,0 +1,570 @@
+[
+  {
+    "title": "Essentials",
+    "items": [
+      {
+        "title": "Introduction",
+        "component": "home",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/docs/markdown/home.en-US.md?ref=2.x"
+      },
+      {
+        "title": "Quickstart",
+        "component": "quickstart",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/docs/markdown/quickstart.en-US.md?ref=2.x"
+      },
+      {
+        "title": "Advanced Usage",
+        "component": "advanced-usage",
+        "describe": "Through this chapter, you can learn about some advanced usages of Vant.",
+        "version": "v2",
+        "filePath": "/docs/markdown/advanced-usage.en-US.md?ref=2.x"
+      },
+      {
+        "title": "Changelog",
+        "component": "changelog",
+        "describe": "Vant follows Semantic Versioning 2.0.0.",
+        "version": "v2",
+        "filePath": "/docs/markdown/changelog.en-US.md?ref=2.x"
+      },
+      {
+        "title": "Custom Theme",
+        "component": "theme",
+        "describe": "Vant use Less as css preprocessor，you can override the default less variables to custom theme.",
+        "version": "v2",
+        "filePath": "/src/theme/README.md?ref=2.x"
+      },
+      {
+        "title": "Internationalization",
+        "component": "locale",
+        "describe": "Vant uses Chinese as the default language. If you want to use other languages, please follow the instructions below.",
+        "version": "v2",
+        "filePath": "/docs/markdown/locale.en-US.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "Basic Components",
+    "items": [
+      {
+        "title": "Button",
+        "component": "button",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/button/README.md?ref=2.x"
+      },
+      {
+        "title": "Cell",
+        "component": "cell",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/cell/README.md?ref=2.x"
+      },
+      {
+        "title": "Icon",
+        "component": "icon",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/icon/README.md?ref=2.x"
+      },
+      {
+        "title": "Image",
+        "component": "image",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/image/README.md?ref=2.x"
+      },
+      {
+        "title": "Layout",
+        "component": "col",
+        "describe": "Quickly and easily create layouts with van-row and van-col.",
+        "version": "v2",
+        "filePath": "/src/col/README.md?ref=2.x"
+      },
+      {
+        "title": "Popup",
+        "component": "popup",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/popup/README.md?ref=2.x"
+      },
+      {
+        "title": "Built-in style",
+        "component": "style",
+        "describe": "Vant contains some common styles that can be used directly by the className.",
+        "version": "v2",
+        "filePath": "/src/style/README.md?ref=2.x"
+      },
+      {
+        "title": "Toast",
+        "component": "toast",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/toast/README.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "Form Components",
+    "items": [
+      {
+        "title": "Calendar",
+        "component": "calendar",
+        "describe": "Calendar component for selecting dates or date ranges.",
+        "version": "v2",
+        "filePath": "/src/calendar/README.md?ref=2.x"
+      },
+      {
+        "title": "Cascader",
+        "component": "cascader",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/cascader/README.md?ref=2.x"
+      },
+      {
+        "title": "Checkbox",
+        "component": "checkbox",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/checkbox/README.md?ref=2.x"
+      },
+      {
+        "title": "DatetimePicker",
+        "component": "datetime-picker",
+        "describe": "Used to select time, support date and time dimensions, usually used with the Popup component.",
+        "version": "v2",
+        "filePath": "/src/datetime-picker/README.md?ref=2.x"
+      },
+      {
+        "title": "Field",
+        "component": "field",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/field/README.md?ref=2.x"
+      },
+      {
+        "title": "Form",
+        "component": "form",
+        "describe": "Used for data entry and verification, and supports input boxes, radio buttons, check boxes, file uploads and other types. Should be used with Field component.",
+        "version": "v2",
+        "filePath": "/src/form/README.md?ref=2.x"
+      },
+      {
+        "title": "NumberKeyboard",
+        "component": "number-keyboard",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/number-keyboard/README.md?ref=2.x"
+      },
+      {
+        "title": "PasswordInput",
+        "component": "password-input",
+        "describe": "The PasswordInput component is usually used with NumberKeyboard Component.",
+        "version": "v2",
+        "filePath": "/src/password-input/README.md?ref=2.x"
+      },
+      {
+        "title": "Picker",
+        "component": "picker",
+        "describe": "The Picker component is usually used with Popup Component.",
+        "version": "v2",
+        "filePath": "/src/picker/README.md?ref=2.x"
+      },
+      {
+        "title": "Radio",
+        "component": "radio",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/radio/README.md?ref=2.x"
+      },
+      {
+        "title": "Rate",
+        "component": "rate",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/rate/README.md?ref=2.x"
+      },
+      {
+        "title": "Search",
+        "component": "search",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/search/README.md?ref=2.x"
+      },
+      {
+        "title": "Slider",
+        "component": "slider",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/slider/README.md?ref=2.x"
+      },
+      {
+        "title": "Stepper",
+        "component": "stepper",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/stepper/README.md?ref=2.x"
+      },
+      {
+        "title": "Switch",
+        "component": "switch",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/switch/README.md?ref=2.x"
+      },
+      {
+        "title": "SwitchCell",
+        "component": "switch-cell",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/switch-cell/README.md?ref=2.x"
+      },
+      {
+        "title": "Uploader",
+        "component": "uploader",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/uploader/README.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "Action Components",
+    "items": [
+      {
+        "title": "ActionSheet",
+        "component": "action-sheet",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/action-sheet/README.md?ref=2.x"
+      },
+      {
+        "title": "Dialog",
+        "component": "dialog",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/dialog/README.md?ref=2.x"
+      },
+      {
+        "title": "DropdownMenu",
+        "component": "dropdown-menu",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/dropdown-menu/README.md?ref=2.x"
+      },
+      {
+        "title": "Loading",
+        "component": "loading",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/loading/README.md?ref=2.x"
+      },
+      {
+        "title": "Notify",
+        "component": "notify",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/notify/README.md?ref=2.x"
+      },
+      {
+        "title": "Overlay",
+        "component": "overlay",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/overlay/README.md?ref=2.x"
+      },
+      {
+        "title": "PullRefresh",
+        "component": "pull-refresh",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/pull-refresh/README.md?ref=2.x"
+      },
+      {
+        "title": "ShareSheet",
+        "component": "share-sheet",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/share-sheet/README.md?ref=2.x"
+      },
+      {
+        "title": "SwipeCell",
+        "component": "swipe-cell",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/swipe-cell/README.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "Display Components",
+    "items": [
+      {
+        "title": "Badge",
+        "component": "badge",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/badge/README.md?ref=2.x"
+      },
+      {
+        "title": "Circle",
+        "component": "circle",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/circle/README.md?ref=2.x"
+      },
+      {
+        "title": "Collapse",
+        "component": "collapse",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/collapse/README.md?ref=2.x"
+      },
+      {
+        "title": "CountDown",
+        "component": "count-down",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/count-down/README.md?ref=2.x"
+      },
+      {
+        "title": "Divider",
+        "component": "divider",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/divider/README.md?ref=2.x"
+      },
+      {
+        "title": "Empty",
+        "component": "empty",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/empty/README.md?ref=2.x"
+      },
+      {
+        "title": "ImagePreview",
+        "component": "image-preview",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/image-preview/README.md?ref=2.x"
+      },
+      {
+        "title": "Lazyload",
+        "component": "lazyload",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/lazyload/README.md?ref=2.x"
+      },
+      {
+        "title": "List",
+        "component": "list",
+        "describe": "A list component to show items and control loading status.",
+        "version": "v2",
+        "filePath": "/src/list/README.md?ref=2.x"
+      },
+      {
+        "title": "NoticeBar",
+        "component": "notice-bar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/notice-bar/README.md?ref=2.x"
+      },
+      {
+        "title": "Popover",
+        "component": "popover",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/popover/README.md?ref=2.x"
+      },
+      {
+        "title": "Progress",
+        "component": "progress",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/progress/README.md?ref=2.x"
+      },
+      {
+        "title": "Skeleton",
+        "component": "skeleton",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/skeleton/README.md?ref=2.x"
+      },
+      {
+        "title": "Steps",
+        "component": "steps",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/steps/README.md?ref=2.x"
+      },
+      {
+        "title": "Sticky",
+        "component": "sticky",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/sticky/README.md?ref=2.x"
+      },
+      {
+        "title": "Swipe",
+        "component": "swipe",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/swipe/README.md?ref=2.x"
+      },
+      { "title": "Tag", "component": "tag", "describe": "", "version": "v2", "filePath": "/src/tag/README.md?ref=2.x" }
+    ]
+  },
+  {
+    "title": "Navigation Components",
+    "items": [
+      {
+        "title": "Grid",
+        "component": "grid",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/grid/README.md?ref=2.x"
+      },
+      {
+        "title": "IndexBar",
+        "component": "index-bar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/index-bar/README.md?ref=2.x"
+      },
+      {
+        "title": "NavBar",
+        "component": "nav-bar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/nav-bar/README.md?ref=2.x"
+      },
+      {
+        "title": "Pagination",
+        "component": "pagination",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/pagination/README.md?ref=2.x"
+      },
+      {
+        "title": "Sidebar",
+        "component": "sidebar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/sidebar/README.md?ref=2.x"
+      },
+      { "title": "Tab", "component": "tab", "describe": "", "version": "v2", "filePath": "/src/tab/README.md?ref=2.x" },
+      {
+        "title": "Tabbar",
+        "component": "tabbar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/tabbar/README.md?ref=2.x"
+      },
+      {
+        "title": "TreeSelect",
+        "component": "tree-select",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/tree-select/README.md?ref=2.x"
+      }
+    ]
+  },
+  {
+    "title": "Business Components",
+    "items": [
+      {
+        "title": "AddressEdit",
+        "component": "address-edit",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/address-edit/README.md?ref=2.x"
+      },
+      {
+        "title": "AddressList",
+        "component": "address-list",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/address-list/README.md?ref=2.x"
+      },
+      {
+        "title": "Area",
+        "component": "area",
+        "describe": "The Picker component is usually used with Popup Component.",
+        "version": "v2",
+        "filePath": "/src/area/README.md?ref=2.x"
+      },
+      {
+        "title": "Card",
+        "component": "card",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/card/README.md?ref=2.x"
+      },
+      {
+        "title": "ContactCard",
+        "component": "contact-card",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/contact-card/README.md?ref=2.x"
+      },
+      {
+        "title": "ContactEdit",
+        "component": "contact-edit",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/contact-edit/README.md?ref=2.x"
+      },
+      {
+        "title": "ContactList",
+        "component": "contact-list",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/contact-list/README.md?ref=2.x"
+      },
+      {
+        "title": "Coupon",
+        "component": "coupon-list",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/coupon-list/README.md?ref=2.x"
+      },
+      {
+        "title": "GoodsAction",
+        "component": "goods-action",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/goods-action/README.md?ref=2.x"
+      },
+      {
+        "title": "SubmitBar",
+        "component": "submit-bar",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/submit-bar/README.md?ref=2.x"
+      },
+      { "title": "Sku", "component": "sku", "describe": "", "version": "v2", "filePath": "/src/sku/README.md?ref=2.x" }
+    ]
+  },
+  {
+    "title": "Deprecated",
+    "items": [
+      {
+        "title": "Panel",
+        "component": "panel",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/panel/README.md?ref=2.x"
+      },
+      {
+        "title": "SwitchCell",
+        "component": "switch-cell",
+        "describe": "",
+        "version": "v2",
+        "filePath": "/src/switch-cell/README.md?ref=2.x"
+      }
+    ]
+  }
+]

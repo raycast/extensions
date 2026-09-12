@@ -1,0 +1,545 @@
+[
+  {
+    "command": "wp admin",
+    "description": "Open /wp-admin/ in a browser.",
+    "url": "https://developer.wordpress.org/cli/commands/admin/"
+  },
+  {
+    "command": "wp cache",
+    "description": "Adds, removes, fetches, and flushes the WP Object Cache object.",
+    "url": "https://developer.wordpress.org/cli/commands/cache/",
+    "subcommands": [
+      { "name": "add", "description": "Adds a value to the object cache." },
+      { "name": "decr", "description": "Decrements a value in the object cache." },
+      { "name": "delete", "description": "Removes a value from the object cache." },
+      { "name": "flush", "description": "Flushes the object cache." },
+      { "name": "get", "description": "Gets a value from the object cache." },
+      { "name": "incr", "description": "Increments a value in the object cache." },
+      { "name": "replace", "description": "Replaces a value in the object cache." },
+      { "name": "set", "description": "Sets a value to the object cache." },
+      { "name": "type", "description": "Attempts to determine which object cache is being used." }
+    ]
+  },
+  {
+    "command": "wp cap",
+    "description": "Adds, removes, and lists capabilities of a user role.",
+    "url": "https://developer.wordpress.org/cli/commands/cap/",
+    "subcommands": [
+      { "name": "add", "description": "Adds a capability to a role." },
+      { "name": "list", "description": "Lists capabilities for a given role." },
+      { "name": "remove", "description": "Removes a capability from a role." }
+    ]
+  },
+  {
+    "command": "wp cli",
+    "description": "Reviews current WP-CLI info, checks for updates, or views defined aliases.",
+    "url": "https://developer.wordpress.org/cli/commands/cli/",
+    "subcommands": [
+      { "name": "alias", "description": "Retrieves and sets command aliases." },
+      { "name": "check-update", "description": "Checks to see if there is a newer version of WP-CLI available." },
+      { "name": "cmd-dump", "description": "Dumps the list of installed commands, as JSON." },
+      { "name": "completions", "description": "Generates tab completion strings." },
+      { "name": "has-command", "description": "Detects if a command exists." },
+      { "name": "info", "description": "Prints various details about the WP-CLI environment." },
+      { "name": "param-dump", "description": "Dumps the list of global parameters, as JSON or in var_export format." },
+      { "name": "update", "description": "Updates WP-CLI to the latest release." },
+      { "name": "version", "description": "Prints WP-CLI version." }
+    ]
+  },
+  {
+    "command": "wp comment",
+    "description": "Creates, updates, deletes, and moderates comments.",
+    "url": "https://developer.wordpress.org/cli/commands/comment/",
+    "subcommands": [
+      { "name": "approve", "description": "Approves a comment." },
+      { "name": "count", "description": "Counts comments." },
+      { "name": "create", "description": "Creates a new comment." },
+      { "name": "delete", "description": "Deletes a comment." },
+      { "name": "exists", "description": "Verifies whether a comment exists." },
+      { "name": "generate", "description": "Generates some comments." },
+      { "name": "get", "description": "Gets the data of a single comment." },
+      { "name": "list", "description": "Gets a list of comments." },
+      { "name": "meta", "description": "Adds, updates, deletes, and lists comment custom fields." },
+      { "name": "recount", "description": "Recalculates the comment_count value for one or more posts." },
+      { "name": "spam", "description": "Marks a comment as spam." },
+      { "name": "status", "description": "Gets the status of a comment." },
+      { "name": "trash", "description": "Trashes a comment." },
+      { "name": "unapprove", "description": "Unapproves a comment." },
+      { "name": "unspam", "description": "Unspams a comment." },
+      { "name": "untrash", "description": "Untrashes a comment." },
+      { "name": "update", "description": "Updates one or more comments." }
+    ]
+  },
+  {
+    "command": "wp config",
+    "description": "Generates and reads the wp-config.php file.",
+    "url": "https://developer.wordpress.org/cli/commands/config/",
+    "subcommands": [
+      { "name": "create", "description": "Generates a wp-config.php file." },
+      { "name": "delete", "description": "Deletes a specific constant or variable from the wp-config.php file." },
+      { "name": "edit", "description": "Launches system editor to edit the wp-config.php file." },
+      {
+        "name": "get",
+        "description": "Gets the value of a specific constant or variable defined in wp-config.php file."
+      },
+      {
+        "name": "has",
+        "description": "Checks whether a specific constant or variable exists in the wp-config.php file."
+      },
+      { "name": "list", "description": "Lists variables, constants, and file includes defined in wp-config.php file." },
+      { "name": "path", "description": "Gets the path to wp-config.php file." },
+      {
+        "name": "set",
+        "description": "Sets the value of a specific constant or variable defined in wp-config.php file."
+      },
+      { "name": "shuffle-salts", "description": "Refreshes the salts defined in the wp-config.php file." }
+    ]
+  },
+  {
+    "command": "wp core",
+    "description": "Downloads, installs, updates, and manages a WordPress installation.",
+    "url": "https://developer.wordpress.org/cli/commands/core/",
+    "subcommands": [
+      { "name": "check-update", "description": "Checks for WordPress updates via Version Check API." },
+      { "name": "download", "description": "Downloads core WordPress files." },
+      { "name": "install", "description": "Runs the standard WordPress installation process." },
+      { "name": "is-installed", "description": "Checks if WordPress is installed." },
+      {
+        "name": "multisite-convert",
+        "description": "Transforms an existing single-site installation into a multisite installation."
+      },
+      { "name": "multisite-install", "description": "Installs WordPress multisite from scratch." },
+      { "name": "update", "description": "Updates WordPress to a newer version." },
+      { "name": "update-db", "description": "Runs the WordPress database update procedure." },
+      { "name": "verify-checksums", "description": "Verifies WordPress files against WordPress.org's checksums." },
+      { "name": "version", "description": "Displays the WordPress version." }
+    ]
+  },
+  {
+    "command": "wp cron",
+    "description": "Tests, runs, and deletes WP-Cron events; manages WP-Cron schedules.",
+    "url": "https://developer.wordpress.org/cli/commands/cron/",
+    "subcommands": [
+      { "name": "event", "description": "Schedules, runs, and deletes WP-Cron events." },
+      { "name": "schedule", "description": "Gets WP-Cron schedules." },
+      { "name": "test", "description": "Tests the WP-Cron spawning system and reports back its status." }
+    ]
+  },
+  {
+    "command": "wp db",
+    "description": "Performs basic database operations using credentials stored in wp-config.php.",
+    "url": "https://developer.wordpress.org/cli/commands/db/",
+    "subcommands": [
+      { "name": "check", "description": "Checks the current status of the database." },
+      { "name": "clean", "description": "Removes all tables with `$table_prefix` from the database." },
+      { "name": "cli", "description": "Opens a MySQL console using credentials from wp-config.php." },
+      { "name": "columns", "description": "Displays information about a given table." },
+      { "name": "create", "description": "Creates a new database." },
+      { "name": "drop", "description": "Deletes the existing database." },
+      { "name": "export", "description": "Exports the database to a file or to STDOUT." },
+      { "name": "import", "description": "Imports a database from a file or from STDIN." },
+      { "name": "optimize", "description": "Optimizes the database." },
+      { "name": "prefix", "description": "Displays the database table prefix." },
+      { "name": "query", "description": "Executes a SQL query against the database." },
+      { "name": "repair", "description": "Repairs the database." },
+      { "name": "reset", "description": "Removes all tables from the database." },
+      { "name": "search", "description": "Finds a string in the database." },
+      { "name": "size", "description": "Displays the database name and size." },
+      { "name": "tables", "description": "Lists the database tables." }
+    ]
+  },
+  {
+    "command": "wp dist-archive",
+    "description": "Create a distribution archive based on a project's .distignore file.",
+    "url": "https://developer.wordpress.org/cli/commands/dist-archive/"
+  },
+  {
+    "command": "wp embed",
+    "description": "Inspects oEmbed providers, clears embed cache, and more.",
+    "url": "https://developer.wordpress.org/cli/commands/embed-2/",
+    "subcommands": [
+      { "name": "cache", "description": "Finds, triggers, and deletes oEmbed caches." },
+      { "name": "fetch", "description": "Attempts to convert a URL into embed HTML." },
+      { "name": "handler", "description": "Retrieves embed handlers." },
+      { "name": "provider", "description": "Retrieves oEmbed providers." }
+    ]
+  },
+  {
+    "command": "wp eval",
+    "description": "Executes arbitrary PHP code.",
+    "url": "https://developer.wordpress.org/cli/commands/eval/"
+  },
+  {
+    "command": "wp eval-file",
+    "description": "Loads and executes a PHP file.",
+    "url": "https://developer.wordpress.org/cli/commands/eval-file/"
+  },
+  {
+    "command": "wp export",
+    "description": "Exports WordPress content to a WXR file.",
+    "url": "https://developer.wordpress.org/cli/commands/export/"
+  },
+  {
+    "command": "wp find",
+    "description": "Find WordPress installations on the filesystem.",
+    "url": "https://developer.wordpress.org/cli/commands/find/"
+  },
+  {
+    "command": "wp help",
+    "description": "Gets help on WP-CLI, or on a specific command.",
+    "url": "https://developer.wordpress.org/cli/commands/help/"
+  },
+  {
+    "command": "wp i18n",
+    "description": "Provides internationalization tools for WordPress projects.",
+    "url": "https://developer.wordpress.org/cli/commands/i18n/",
+    "subcommands": [
+      { "name": "make-json", "description": "Extracts JavaScript strings from PO files and saves them as JSON." },
+      { "name": "make-mo", "description": "Creates MO files from PO files." },
+      { "name": "make-pot", "description": "Creates a POT file for a WordPress project." },
+      { "name": "update-po", "description": "Updates PO files from a POT file." }
+    ]
+  },
+  {
+    "command": "wp import",
+    "description": "Imports content from a given WXR file.",
+    "url": "https://developer.wordpress.org/cli/commands/import/"
+  },
+  {
+    "command": "wp language",
+    "description": "Installs, activates, and manages language packs.",
+    "url": "https://developer.wordpress.org/cli/commands/language/",
+    "subcommands": [
+      { "name": "core", "description": "Installs, activates, and manages core language packs." },
+      { "name": "plugin", "description": "Installs, activates, and manages plugin language packs." },
+      { "name": "theme", "description": "Installs, activates, and manages theme language packs." }
+    ]
+  },
+  {
+    "command": "wp maintenance-mode",
+    "description": "Activates, deactivates or checks the status of the maintenance mode of a site.",
+    "url": "https://developer.wordpress.org/cli/commands/maintenance-mode/",
+    "subcommands": [
+      { "name": "activate", "description": "Activates maintenance mode." },
+      { "name": "deactivate", "description": "Deactivates maintenance mode." },
+      { "name": "is-active", "description": "Detects the maintenance mode status." }
+    ]
+  },
+  {
+    "command": "wp media",
+    "description": "Imports files as attachments, regenerates thumbnails, or lists registered image sizes.",
+    "url": "https://developer.wordpress.org/cli/commands/media/",
+    "subcommands": [
+      { "name": "fix-orientation", "description": "Fixes the orientation of JPEG images based on EXIF data." },
+      { "name": "image-size", "description": "Lists all registered image sizes." },
+      { "name": "import", "description": "Creates attachments from local files or URLs." },
+      { "name": "regenerate", "description": "Regenerates thumbnails for one or more attachments." }
+    ]
+  },
+  {
+    "command": "wp menu",
+    "description": "Lists, creates, assigns, and deletes the active theme's navigation menus.",
+    "url": "https://developer.wordpress.org/cli/commands/menu/",
+    "subcommands": [
+      { "name": "create", "description": "Creates a new menu." },
+      { "name": "delete", "description": "Deletes one or more menus." },
+      { "name": "item", "description": "List, add, and delete items associated with a menu." },
+      { "name": "list", "description": "Gets a list of menus." },
+      { "name": "location", "description": "Assigns, removes, and lists a menu's locations." }
+    ]
+  },
+  {
+    "command": "wp network",
+    "description": "Perform network-wide operations.",
+    "url": "https://developer.wordpress.org/cli/commands/network/",
+    "subcommands": [{ "name": "meta", "description": "Adds, updates, deletes, and lists network custom fields." }]
+  },
+  {
+    "command": "wp option",
+    "description": "Retrieves and sets site options, including plugin and WordPress settings.",
+    "url": "https://developer.wordpress.org/cli/commands/option/",
+    "subcommands": [
+      { "name": "add", "description": "Adds a new option value." },
+      { "name": "delete", "description": "Deletes an option." },
+      { "name": "get", "description": "Gets the value of an option." },
+      { "name": "list", "description": "Lists options and their values." },
+      { "name": "patch", "description": "Updates a nested value in an option." },
+      { "name": "pluck", "description": "Gets a nested value from an option." },
+      { "name": "set", "description": "Sets the value of an option." },
+      { "name": "update", "description": "Updates an option value." }
+    ]
+  },
+  {
+    "command": "wp package",
+    "description": "Lists, installs, and removes WP-CLI packages.",
+    "url": "https://developer.wordpress.org/cli/commands/package/",
+    "subcommands": [
+      { "name": "browse", "description": "Browses WP-CLI packages available for installation." },
+      { "name": "install", "description": "Installs a WP-CLI package." },
+      { "name": "list", "description": "Lists installed WP-CLI packages." },
+      { "name": "path", "description": "Gets the path to an installed WP-CLI package." },
+      { "name": "uninstall", "description": "Uninstalls a WP-CLI package." },
+      { "name": "update", "description": "Updates all installed WP-CLI packages to their latest version." }
+    ]
+  },
+  {
+    "command": "wp plugin",
+    "description": "Manages plugins, including installs, activations, and updates.",
+    "url": "https://developer.wordpress.org/cli/commands/plugin/",
+    "subcommands": [
+      { "name": "activate", "description": "Activates one or more plugins." },
+      { "name": "auto-updates", "description": "Manages plugin auto-updates." },
+      { "name": "deactivate", "description": "Deactivates one or more plugins." },
+      { "name": "delete", "description": "Deletes plugin files without deactivating or uninstalling." },
+      { "name": "get", "description": "Gets details about an installed plugin." },
+      { "name": "install", "description": "Installs one or more plugins." },
+      { "name": "is-active", "description": "Checks if a given plugin is active." },
+      { "name": "is-installed", "description": "Checks if a given plugin is installed." },
+      { "name": "list", "description": "Gets a list of plugins." },
+      { "name": "path", "description": "Gets the path to a plugin or to the plugin directory." },
+      { "name": "search", "description": "Searches the WordPress.org plugin directory." },
+      { "name": "status", "description": "Reveals the status of one or all plugins." },
+      { "name": "toggle", "description": "Toggles a plugin's activation state." },
+      { "name": "uninstall", "description": "Uninstalls one or more plugins." },
+      { "name": "update", "description": "Updates one or more plugins." },
+      { "name": "verify-checksums", "description": "Verifies plugin files against WordPress.org's checksums." }
+    ]
+  },
+  {
+    "command": "wp post",
+    "description": "Manages posts, content, and meta.",
+    "url": "https://developer.wordpress.org/cli/commands/post/",
+    "subcommands": [
+      { "name": "create", "description": "Creates a new post." },
+      { "name": "delete", "description": "Deletes an existing post." },
+      { "name": "edit", "description": "Launches system editor to edit post content." },
+      { "name": "exists", "description": "Verifies whether a post exists." },
+      { "name": "generate", "description": "Generates some posts." },
+      { "name": "get", "description": "Gets details about a post." },
+      { "name": "list", "description": "Gets a list of posts." },
+      { "name": "meta", "description": "Adds, updates, deletes, and lists post custom fields." },
+      { "name": "term", "description": "Adds, updates, removes, and lists post terms." },
+      { "name": "update", "description": "Updates one or more existing posts." }
+    ]
+  },
+  {
+    "command": "wp post-type",
+    "description": "Retrieves details on the site's registered post types.",
+    "url": "https://developer.wordpress.org/cli/commands/post-type/",
+    "subcommands": [
+      { "name": "get", "description": "Gets details about a registered post type." },
+      { "name": "list", "description": "Lists registered post types." }
+    ]
+  },
+  {
+    "command": "wp profile",
+    "description": "Quickly identify what's slow with WordPress.",
+    "url": "https://developer.wordpress.org/cli/commands/profile/",
+    "subcommands": [
+      { "name": "hook", "description": "Profiles the hooks run for a given request." },
+      { "name": "stage", "description": "Profiles the stages in a request." }
+    ]
+  },
+  {
+    "command": "wp rewrite",
+    "description": "Lists or flushes the site's rewrite rules, updates the permalink structure.",
+    "url": "https://developer.wordpress.org/cli/commands/rewrite/",
+    "subcommands": [
+      { "name": "flush", "description": "Flushes rewrite rules." },
+      { "name": "list", "description": "Gets a list of the current rewrite rules." },
+      { "name": "structure", "description": "Updates the permalink structure." }
+    ]
+  },
+  {
+    "command": "wp role",
+    "description": "Manages user roles, including creating new roles and resetting to defaults.",
+    "url": "https://developer.wordpress.org/cli/commands/role/",
+    "subcommands": [
+      { "name": "create", "description": "Creates a new role." },
+      { "name": "delete", "description": "Deletes an existing role." },
+      { "name": "exists", "description": "Checks whether a role exists." },
+      { "name": "list", "description": "Lists all roles." },
+      { "name": "reset", "description": "Resets any default role to default capabilities." }
+    ]
+  },
+  {
+    "command": "wp scaffold",
+    "description": "Generates code for post types, taxonomies, plugins, child themes, etc.",
+    "url": "https://developer.wordpress.org/cli/commands/scaffold/",
+    "subcommands": [
+      {
+        "name": "block",
+        "description": "Generates PHP, JS and CSS code for registering a Gutenberg block for a plugin or theme."
+      },
+      { "name": "child-theme", "description": "Generates child theme based on an existing theme." },
+      { "name": "plugin", "description": "Generates starter code for a plugin." },
+      { "name": "plugin-tests", "description": "Generates files needed for running PHPUnit tests in a plugin." },
+      { "name": "post-type", "description": "Generates PHP code for registering a custom post type." },
+      { "name": "taxonomy", "description": "Generates PHP code for registering a custom taxonomy." },
+      { "name": "theme-tests", "description": "Generates files needed for running PHPUnit tests in a theme." },
+      { "name": "_s", "description": "Generates starter code for a theme based on _s." }
+    ]
+  },
+  {
+    "command": "wp search-replace",
+    "description": "Searches/replaces strings in the database.",
+    "url": "https://developer.wordpress.org/cli/commands/search-replace/"
+  },
+  {
+    "command": "wp server",
+    "description": "Launches PHP's built-in web server for a specific WordPress installation.",
+    "url": "https://developer.wordpress.org/cli/commands/server/"
+  },
+  {
+    "command": "wp shell",
+    "description": "Opens an interactive PHP console for running and testing PHP code.",
+    "url": "https://developer.wordpress.org/cli/commands/shell/"
+  },
+  {
+    "command": "wp sidebar",
+    "description": "Lists registered sidebars.",
+    "url": "https://developer.wordpress.org/cli/commands/sidebar/",
+    "subcommands": [{ "name": "list", "description": "Lists registered sidebars." }]
+  },
+  {
+    "command": "wp site",
+    "description": "Creates, deletes, empties, moderates, and lists one or more sites on a multisite installation.",
+    "url": "https://developer.wordpress.org/cli/commands/site/",
+    "subcommands": [
+      { "name": "activate", "description": "Activates one or more sites." },
+      { "name": "archive", "description": "Archives one or more sites." },
+      { "name": "create", "description": "Creates a site in a multisite installation." },
+      { "name": "deactivate", "description": "Deactivates one or more sites." },
+      { "name": "delete", "description": "Deletes a site in a multisite installation." },
+      { "name": "empty", "description": "Empties a site of its content (posts, comments, terms, and meta)." },
+      { "name": "list", "description": "Lists all sites in a multisite installation." },
+      { "name": "mature", "description": "Sets one or more sites as mature." },
+      { "name": "meta", "description": "Adds, updates, deletes, and lists site custom fields." },
+      {
+        "name": "option",
+        "description": "Adds, updates, deletes, and lists site options in a multisite installation."
+      },
+      { "name": "private", "description": "Sets one or more sites as private." },
+      { "name": "public", "description": "Sets one or more sites as public." },
+      { "name": "spam", "description": "Marks one or more sites as spam." },
+      { "name": "unarchive", "description": "Unarchives one or more sites." },
+      { "name": "unmature", "description": "Sets one or more sites as unmature." },
+      { "name": "unspam", "description": "Removes one or more sites from spam." }
+    ]
+  },
+  {
+    "command": "wp super-admin",
+    "description": "Lists, adds, or removes super admin users on a multisite installation.",
+    "url": "https://developer.wordpress.org/cli/commands/super-admin/",
+    "subcommands": [
+      { "name": "add", "description": "Grants super admin privileges to one or more users." },
+      { "name": "list", "description": "Lists users with super admin capabilities." },
+      { "name": "remove", "description": "Removes super admin privileges from one or more users." }
+    ]
+  },
+  {
+    "command": "wp taxonomy",
+    "description": "Retrieves information about registered taxonomies.",
+    "url": "https://developer.wordpress.org/cli/commands/taxonomy/",
+    "subcommands": [
+      { "name": "get", "description": "Gets details about a registered taxonomy." },
+      { "name": "list", "description": "Lists registered taxonomies." }
+    ]
+  },
+  {
+    "command": "wp term",
+    "description": "Manages taxonomy terms and term meta, with create, delete, and list commands.",
+    "url": "https://developer.wordpress.org/cli/commands/term/",
+    "subcommands": [
+      { "name": "create", "description": "Creates a new term." },
+      { "name": "delete", "description": "Deletes an existing term." },
+      { "name": "generate", "description": "Generates some terms." },
+      { "name": "get", "description": "Gets details about a term." },
+      { "name": "list", "description": "Lists terms in a taxonomy." },
+      { "name": "meta", "description": "Adds, updates, deletes, and lists term custom fields." },
+      { "name": "recount", "description": "Recalculates number of posts assigned to each term." },
+      { "name": "update", "description": "Updates an existing term." }
+    ]
+  },
+  {
+    "command": "wp theme",
+    "description": "Manages themes, including installs, activations, and updates.",
+    "url": "https://developer.wordpress.org/cli/commands/theme/",
+    "subcommands": [
+      { "name": "activate", "description": "Activates a theme." },
+      { "name": "auto-updates", "description": "Manages theme auto-updates." },
+      { "name": "delete", "description": "Deletes one or more themes." },
+      { "name": "disable", "description": "Disables a theme on a WordPress multisite install." },
+      { "name": "enable", "description": "Enables a theme on a WordPress multisite install." },
+      { "name": "get", "description": "Gets details about a theme." },
+      { "name": "install", "description": "Installs one or more themes." },
+      { "name": "is-active", "description": "Checks if a given theme is active." },
+      { "name": "is-installed", "description": "Checks if a given theme is installed." },
+      { "name": "list", "description": "Gets a list of themes." },
+      { "name": "mod", "description": "Sets, gets, and removes theme mods." },
+      { "name": "path", "description": "Gets the path to a theme or to the theme directory." },
+      { "name": "search", "description": "Searches the WordPress.org theme directory." },
+      { "name": "status", "description": "Reveals the status of one or all themes." },
+      { "name": "update", "description": "Updates one or more themes." }
+    ]
+  },
+  {
+    "command": "wp transient",
+    "description": "Adds, gets, and deletes entries in the WordPress Transient Cache.",
+    "url": "https://developer.wordpress.org/cli/commands/transient/",
+    "subcommands": [
+      { "name": "delete", "description": "Deletes a transient value." },
+      { "name": "get", "description": "Gets a transient value." },
+      { "name": "list", "description": "Lists transients." },
+      { "name": "set", "description": "Sets a transient value." },
+      { "name": "type", "description": "Determines the type of transients implementation." }
+    ]
+  },
+  {
+    "command": "wp user",
+    "description": "Manages users, along with their roles, capabilities, and meta.",
+    "url": "https://developer.wordpress.org/cli/commands/user/",
+    "subcommands": [
+      { "name": "add-cap", "description": "Adds a capability to a user." },
+      { "name": "add-role", "description": "Adds a role for a user." },
+      {
+        "name": "application-password",
+        "description": "Creates, updates, deletes, lists and retrieves application passwords."
+      },
+      { "name": "check-password", "description": "Checks if a user's password is valid or not." },
+      { "name": "create", "description": "Creates a new user." },
+      { "name": "delete", "description": "Deletes one or more users from the current site." },
+      { "name": "exists", "description": "Verifies whether a user exists." },
+      { "name": "generate", "description": "Generates some users." },
+      { "name": "get", "description": "Gets details about a user." },
+      { "name": "import-csv", "description": "Imports users from a CSV file." },
+      { "name": "list", "description": "Lists users." },
+      { "name": "list-caps", "description": "Lists all capabilities for a user." },
+      { "name": "meta", "description": "Adds, updates, deletes, and lists user custom fields." },
+      { "name": "remove-cap", "description": "Removes a user's capability." },
+      { "name": "remove-role", "description": "Removes a user's role." },
+      { "name": "reset-password", "description": "Resets the password for one or more users." },
+      { "name": "session", "description": "Destroys and lists a user's sessions." },
+      { "name": "set-role", "description": "Sets the user role." },
+      { "name": "signup", "description": "Manages signups on a multisite installation." },
+      { "name": "spam", "description": "Marks one or more users as spam on multisite." },
+      { "name": "term", "description": "Adds, updates, removes, and lists user terms." },
+      { "name": "unspam", "description": "Removes one or more users from spam on multisite." },
+      { "name": "update", "description": "Updates an existing user." }
+    ]
+  },
+  {
+    "command": "wp widget",
+    "description": "Manages widgets, including adding and moving them within sidebars.",
+    "url": "https://developer.wordpress.org/cli/commands/widget/",
+    "subcommands": [
+      { "name": "add", "description": "Adds a widget to a sidebar." },
+      { "name": "deactivate", "description": "Deactivates one or more widgets from an active sidebar." },
+      { "name": "delete", "description": "Deletes one or more widgets from a sidebar." },
+      { "name": "list", "description": "Lists widgets associated with a sidebar." },
+      { "name": "move", "description": "Moves the position of a widget within a sidebar." },
+      { "name": "reset", "description": "Resets one or more sidebars to their default state." },
+      { "name": "update", "description": "Updates options for an existing widget." }
+    ]
+  }
+]

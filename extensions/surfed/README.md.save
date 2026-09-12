@@ -1,0 +1,24 @@
+# Surfed
+
+Surfed is a Safari history and bookmark manager, as well as a web automation tool. Search and filter your browsing history using multiple search terms and full-text search.
+
+
+With the Raycast extension you can search your Collections, Tags, URLs and Browsing History in Surfed.
+
+
+| **Filter**                                | **Shortcut** |
+|-------------------------------------------|--------------|
+| Key Fields (Title, URL, Meta Description) | a:{term}     |
+| URL                                       | u:{term}     |
+| Title                                     | t:{term}     |
+| Meta Description                          | m:{term}     |
+| Tag                                       | #{term}      |
+| Note                                      | n:{term}     |
+| Article                                   | c:{term}     |
+| Author                                    | p:{term}     |
+| Language                                  | l:{term}     |
+
+
+## Configuration
+
+If Surfed is protected by an password you have to enter the Surfed API-Key in Raycast to get search results.

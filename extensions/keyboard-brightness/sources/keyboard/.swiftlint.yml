@@ -1,0 +1,11 @@
+included:
+  - Package.swift
+  - Sources/Swift
+strict: true
+
+opt_in_rules:
+  - indentation_width
+
+line_length: 100
+indentation_width:
+  indentation_width: 2

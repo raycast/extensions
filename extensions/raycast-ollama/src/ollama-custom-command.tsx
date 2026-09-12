@@ -1,0 +1,50 @@
+import { getPreferenceValues, Icon, LaunchProps, List, showToast, Toast } from "@raycast/api";
+import { AnswerView } from "./lib/ui/AnswerView/main";
+import { ThinkingEffort } from "./lib/ollama/types";
+
+const p = getPreferenceValues<Preferences>();
+if (!p.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+
+const listErrorLegacyArguments: React.JSX.Element = (
+  <List>
+    <List.EmptyView
+      icon={Icon.ExclamationMark}
+      title="Error parsing command arguments"
+      description="Use “Create Custom Command” instead of running this command directly. If the command was created prior to June 3, 2024, you’ll need to recreate it using the updated prompt format."
+    />
+  </List>
+);
+
+export default function Command(props: LaunchProps<{ arguments: Arguments.OllamaCustomCommand }>): React.JSX.Element {
+  let server: string;
+  let model: string;
+  let parameters: {
+    creativity?: number;
+    thinking?: string;
+    keep_alive?: string;
+  };
+  try {
+    const modelIndex = props.arguments.model.indexOf(":");
+    server = props.arguments.model.substring(0, modelIndex);
+    model = props.arguments.model.substring(modelIndex + 1);
+    parameters = JSON.parse(props.arguments.parameters);
+  } catch (e: unknown) {
+    console.error(e);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: e instanceof Error ? e.message : String(e),
+    });
+    return listErrorLegacyArguments;
+  }
+  return (
+    <AnswerView
+      server={server}
+      model={model}
+      prompt={props.arguments.prompt}
+      creativity={Number(parameters.creativity)}
+      thinking={parameters.thinking !== "false" ? (parameters.thinking as ThinkingEffort) : undefined}
+      keep_alive={parameters.keep_alive}
+    />
+  );
+}

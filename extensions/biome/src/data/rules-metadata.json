@@ -1,0 +1,1530 @@
+{
+  "noAccessKey": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noAriaHiddenOnFocusable": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noAriaUnsupportedElements": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noAutofocus": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDistractingElements": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noHeaderScope": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noInteractiveElementToNoninteractiveRole": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noLabelWithoutControl": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNoninteractiveElementInteractions": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNoninteractiveElementToInteractiveRole": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNoninteractiveTabindex": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noPositiveTabindex": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noRedundantAlt": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noRedundantRoles": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noStaticElementInteractions": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSvgWithoutTitle": {
+    "recommended": true,
+    "fixable": false
+  },
+  "recommended": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useAltText": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useAnchorContent": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useAriaActivedescendantWithTabindex": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useAriaPropsForRole": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useAriaPropsSupportedByRole": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useButtonType": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useFocusableInteractive": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useGenericFontNames": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useHeadingContent": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useHtmlLang": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useIframeTitle": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useKeyWithClickEvents": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useKeyWithMouseEvents": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useMediaCaption": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useSemanticElements": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useValidAnchor": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useValidAriaProps": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useValidAriaRole": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useValidAriaValues": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useValidAutocomplete": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useValidLang": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noAdjacentSpacesInRegex": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noArguments": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noBannedTypes": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noCommaOperator": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noEmptyTypeParameters": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noExcessiveCognitiveComplexity": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noExcessiveLinesPerFunction": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noExcessiveNestedTestSuites": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noExtraBooleanCast": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noFlatMapIdentity": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noForEach": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noImplicitCoercions": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noImportantStyles": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noStaticOnlyClass": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noThisInStatic": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessCatch": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessConstructor": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessContinue": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessEmptyExport": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessEscapeInRegex": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessFragments": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessLabel": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessLoneBlockStatements": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessRename": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessStringConcat": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessStringRaw": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessSwitchCase": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessTernary": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessThisAlias": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessTypeConstraint": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessUndefinedInitialization": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noVoid": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useArrowFunction": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useDateNow": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useFlatMap": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useIndexOf": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useLiteralKeys": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useNumericLiterals": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useOptionalChain": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useRegexLiterals": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useSimpleNumberKeys": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useSimplifiedLogicExpression": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useWhile": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noChildrenProp": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noConstAssign": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noConstantCondition": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noConstantMathMinMaxClamp": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noConstructorReturn": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noEmptyCharacterClassInRegex": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noEmptyPattern": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noGlobalDirnameFilename": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noGlobalObjectCalls": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noInnerDeclarations": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noInvalidBuiltinInstantiation": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noInvalidConstructorSuper": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noInvalidDirectionInLinearGradient": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noInvalidGridAreas": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noInvalidPositionAtImportRule": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noInvalidUseBeforeDeclaration": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noMissingVarFunction": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNestedComponentDefinitions": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNodejsModules": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNonoctalDecimalEscape": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noPrecisionLoss": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noPrivateImports": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noProcessGlobal": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noQwikUseVisibleTask": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noReactPropAssignments": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noRenderReturnValue": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noRestrictedElements": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSelfAssign": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSetterReturn": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSolidDestructuredProps": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noStringCaseMismatch": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSwitchDeclarations": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUndeclaredDependencies": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUndeclaredVariables": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnknownFunction": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnknownMediaFeatureName": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnknownProperty": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnknownPseudoClass": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnknownPseudoElement": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnknownTypeSelector": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnknownUnit": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnmatchableAnbSelector": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnreachable": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnreachableSuper": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnsafeFinally": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnsafeOptionalChaining": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnusedFunctionParameters": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnusedImports": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnusedLabels": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnusedPrivateClassMembers": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnusedVariables": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noVoidElementsWithChildren": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noVoidTypeReturn": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useExhaustiveDependencies": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useGraphqlNamedOperations": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useHookAtTopLevel": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useImageSize": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useImportExtensions": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useIsNan": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useJsonImportAttributes": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useJsxKeyInIterable": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useParseIntRadix": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useQwikClasslist": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useSingleJsDocAsterisk": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useUniqueElementIds": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useValidForDirection": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useValidTypeof": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useYield": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noContinue": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noDeprecatedImports": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noDuplicateDependencies": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noEmptySource": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noFloatingPromises": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noForIn": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noImportCycles": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noIncrementDecrement": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noJsxLiterals": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noMisusedPromises": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noNextAsyncClientComponent": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noParametersOnlyUsedInRecursion": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noReactForwardRef": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noShadow": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noSyncScripts": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noUnknownAttribute": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noUnnecessaryConditions": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noUnresolvedImports": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noUnusedExpressions": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noUselessCatchBinding": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noUselessUndefined": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noVueDataObjectDeclaration": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noVueDuplicateKeys": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noVueReservedKeys": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noVueReservedProps": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noVueVIfWithVFor": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useArraySortCompare": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useConsistentArrowReturn": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useConsistentGraphqlDescriptions": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useDeprecatedDate": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useExhaustiveSwitchCases": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useExplicitType": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useFind": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useMaxParams": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useQwikMethodUsage": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useQwikValidLexicalScope": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useSortedClasses": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useSpread": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useUniqueGraphqlOperationName": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useVueDefineMacrosOrder": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useVueHyphenatedAttributes": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useVueMultiWordComponentNames": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useVueValidVBind": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useVueValidVElse": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useVueValidVElseIf": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useVueValidVHtml": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useVueValidVIf": {
+    "recommended": false,
+    "fixable": false
+  },
+  "useVueValidVOn": {
+    "recommended": false,
+    "fixable": false
+  },
+  "noAccumulatingSpread": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noAwaitInLoops": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noBarrelFile": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDelete": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDynamicNamespaceImportAccess": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noImgElement": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNamespaceImport": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noReExportAll": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnwantedPolyfillio": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useGoogleFontPreconnect": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useSolidForComponent": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useTopLevelRegex": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noBlankTarget": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDangerouslySetInnerHtml": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDangerouslySetInnerHtmlWithChildren": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noGlobalEval": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSecrets": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noCommonJs": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDefaultExport": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDescendingSpecificity": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDoneCallback": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noEnum": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noExportedImports": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noHeadElement": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noImplicitBoolean": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noInferrableTypes": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noMagicNumbers": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNamespace": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNegationElse": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNestedTernary": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNonNullAssertion": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noParameterAssign": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noParameterProperties": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noProcessEnv": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noRestrictedGlobals": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noRestrictedImports": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noRestrictedTypes": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noShoutyConstants": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSubstr": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnusedTemplateLiteral": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessElse": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noValueAtRule": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noYodaExpression": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useArrayLiterals": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useAsConstAssertion": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useAtIndex": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useBlockStatements": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useCollapsedElseIf": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useCollapsedIf": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useComponentExportOnlyModules": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useConsistentArrayType": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useConsistentBuiltinInstantiation": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useConsistentCurlyBraces": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useConsistentMemberAccessibility": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useConsistentObjectDefinitions": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useConsistentTypeDefinitions": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useConst": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useDefaultParameterLast": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useDefaultSwitchClause": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useDeprecatedReason": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useEnumInitializers": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useExplicitLengthCheck": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useExponentiationOperator": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useExportType": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useExportsLast": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useFilenamingConvention": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useForOf": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useFragmentSyntax": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useGraphqlNamingConvention": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useGroupedAccessorPairs": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useImportType": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useLiteralEnumMembers": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useNamingConvention": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useNodeAssertStrict": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useNodejsImportProtocol": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useNumberNamespace": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useNumericSeparators": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useObjectSpread": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useReactFunctionComponents": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useReadonlyClassProperties": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useSelfClosingElements": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useShorthandAssign": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useShorthandFunctionType": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useSingleVarDeclarator": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useSymbolDescription": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useTemplate": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useThrowNewError": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useThrowOnlyError": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useTrimStartEnd": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useUnifiedTypeSignatures": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noAlert": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noApproximativeNumericConstant": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noArrayIndexKey": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noAssignInExpressions": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noAsyncPromiseExecutor": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noBiomeFirstException": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noBitwiseOperators": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noCatchAssign": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noClassAssign": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noCommentText": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noCompareNegZero": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noConfusingLabels": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noConfusingVoidType": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noConsole": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noConstEnum": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noConstantBinaryExpressions": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noControlCharactersInRegex": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDebugger": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDocumentCookie": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDocumentImportInPage": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDoubleEquals": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateAtImportRules": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateCase": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateClassMembers": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateCustomProperties": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateElseIf": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateFields": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateFontNames": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateJsxProps": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateObjectKeys": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateParameters": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateProperties": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateSelectorsKeyframeBlock": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noDuplicateTestHooks": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noEmptyBlock": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noEmptyBlockStatements": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noEmptyInterface": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noEvolvingTypes": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noExplicitAny": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noExportsInTest": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noExtraNonNullAssertion": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noFallthroughSwitchClause": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noFocusedTests": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noFunctionAssign": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noGlobalAssign": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noGlobalIsFinite": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noGlobalIsNan": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noHeadImportInDocument": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noImplicitAnyLet": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noImportAssign": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noImportantInKeyframe": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noIrregularWhitespace": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noLabelVar": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noMisleadingCharacterClass": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noMisleadingInstantiator": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noMisplacedAssertion": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noMisrefactoredShorthandAssign": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noNonNullAssertedOptionalChain": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noOctalEscape": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noPrototypeBuiltins": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noQuickfixBiome": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noReactSpecificProps": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noRedeclare": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noRedundantUseStrict": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSelfCompare": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noShadowRestrictedNames": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noShorthandPropertyOverrides": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSkippedTests": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSparseArray": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noSuspiciousSemicolonInJsx": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noTemplateCurlyInString": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noThenProperty": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noTsIgnore": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnassignedVariables": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnknownAtRules": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnsafeDeclarationMerging": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUnsafeNegation": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessEscapeInString": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noUselessRegexBackrefs": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noVar": {
+    "recommended": true,
+    "fixable": false
+  },
+  "noWith": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useAdjacentOverloadSignatures": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useAwait": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useBiomeIgnoreFolder": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useDefaultSwitchClauseLast": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useErrorMessage": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useGetterReturn": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useGoogleFontDisplay": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useGuardForIn": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useIsArray": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useIterableCallbackReturn": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useNamespaceKeyword": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useNumberToFixedDigitsArgument": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useStaticResponseMethods": {
+    "recommended": true,
+    "fixable": false
+  },
+  "useStrictMode": {
+    "recommended": true,
+    "fixable": false
+  }
+}

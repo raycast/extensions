@@ -1,0 +1,381 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "minimax-tts",
+  "title": "MiniMax TTS",
+  "description": "Read selected text aloud with MiniMax TTS. Supports Chinese, English, and your own cloned voices.",
+  "icon": "command-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quick-read",
+      "title": "Quick Read Selected Text",
+      "subtitle": "MiniMax TTS",
+      "description": "Read selected text, or clipboard text if no selection is available. Trigger again to stop.",
+      "mode": "no-view"
+    },
+    {
+      "name": "resume-reading",
+      "title": "Resume Last Reading",
+      "subtitle": "MiniMax TTS",
+      "description": "Resume the previous reading from the next unfinished chunk",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart-reading",
+      "title": "Restart Last Reading",
+      "subtitle": "MiniMax TTS",
+      "description": "Restart the previous reading from the beginning",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-with-voice",
+      "title": "Read with Voice Selection",
+      "subtitle": "MiniMax TTS",
+      "description": "Browse MiniMax voices and read selected text aloud",
+      "mode": "view"
+    },
+    {
+      "name": "select-voice",
+      "title": "Select Quick Read Voice",
+      "subtitle": "MiniMax TTS",
+      "description": "Choose and preview the voice used by Quick Read",
+      "mode": "view"
+    },
+    {
+      "name": "clone-voice",
+      "title": "Clone Voice",
+      "subtitle": "MiniMax TTS",
+      "description": "Upload audio and create a cloned MiniMax voice",
+      "mode": "view"
+    },
+    {
+      "name": "stop-reading",
+      "title": "Stop Reading",
+      "subtitle": "MiniMax TTS",
+      "description": "Stop the current TTS playback",
+      "mode": "no-view"
+    },
+    {
+      "name": "speed-up-reading",
+      "title": "Speed up Reading",
+      "subtitle": "MiniMax TTS",
+      "description": "Increase reading speed by 0.25× for the next segment.",
+      "mode": "no-view"
+    },
+    {
+      "name": "slow-down-reading",
+      "title": "Slow Down Reading",
+      "subtitle": "MiniMax TTS",
+      "description": "Decrease reading speed by 0.25× for the next segment.",
+      "mode": "no-view"
+    },
+    {
+      "name": "playback-status",
+      "title": "Reading Status",
+      "subtitle": "MiniMax TTS",
+      "description": "Menu-bar status of the current MiniMax TTS reading with controls",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "authMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Authentication Mode",
+      "description": "Choose which MiniMax key type to use",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto Detect (Recommended)",
+          "value": "auto"
+        },
+        {
+          "title": "Token Plan Key",
+          "value": "token-plan"
+        },
+        {
+          "title": "Open Platform API Key",
+          "value": "payg"
+        }
+      ]
+    },
+    {
+      "name": "tokenPlanKey",
+      "type": "password",
+      "required": false,
+      "title": "Token Plan Key",
+      "description": "MiniMax Token Plan subscription key. Token Plan currently supports HD models only (Turbo requires the Open Platform key).",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "openPlatformApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Open Platform API Key",
+      "description": "MiniMax pay-as-you-go API key",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "region",
+      "type": "dropdown",
+      "required": false,
+      "title": "Region",
+      "description": "MiniMax API region",
+      "default": "cn",
+      "data": [
+        {
+          "title": "China (api.minimaxi.com)",
+          "value": "cn"
+        },
+        {
+          "title": "Global (api.minimax.io)",
+          "value": "global"
+        }
+      ]
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "required": false,
+      "title": "Model",
+      "description": "Token Plan supports HD models only. Turbo models require the Open Platform API Key.",
+      "default": "speech-2.8-hd",
+      "data": [
+        {
+          "title": "Speech 2.8 HD (Recommended, Token Plan Compatible)",
+          "value": "speech-2.8-hd"
+        },
+        {
+          "title": "Speech 2.8 Turbo (Open Platform Only)",
+          "value": "speech-2.8-turbo"
+        },
+        {
+          "title": "Speech 2.6 HD (Token Plan Compatible)",
+          "value": "speech-2.6-hd"
+        },
+        {
+          "title": "Speech 2.6 Turbo (Open Platform Only)",
+          "value": "speech-2.6-turbo"
+        },
+        {
+          "title": "Speech 02 HD (Token Plan Compatible)",
+          "value": "speech-02-hd"
+        },
+        {
+          "title": "Speech 02 Turbo (Open Platform Only)",
+          "value": "speech-02-turbo"
+        }
+      ]
+    },
+    {
+      "name": "defaultVoice",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Voice",
+      "description": "Voice used for Quick Read command",
+      "default": "Chinese (Mandarin)_Radio_Host",
+      "data": [
+        {
+          "title": "Radio Host (Chinese Male, Long Reading)",
+          "value": "Chinese (Mandarin)_Radio_Host"
+        },
+        {
+          "title": "Sincere Adult (Chinese Male, Conversational)",
+          "value": "Chinese (Mandarin)_Sincere_Adult"
+        },
+        {
+          "title": "Gentleman (Chinese Male, Scholarly)",
+          "value": "Chinese (Mandarin)_Gentleman"
+        },
+        {
+          "title": "Gentle Youth (Chinese Male, Warm)",
+          "value": "Chinese (Mandarin)_Gentle_Youth"
+        },
+        {
+          "title": "Lyrical Voice (Chinese Male, Soft)",
+          "value": "Chinese (Mandarin)_Lyrical_Voice"
+        },
+        {
+          "title": "Bright Clear Male (Chinese Male, Brisk)",
+          "value": "hunyin_6"
+        },
+        {
+          "title": "Elite Young Man (Chinese Male, Clear)",
+          "value": "male-qn-jingying"
+        },
+        {
+          "title": "Wise Woman (Chinese Female, Knowledgeable)",
+          "value": "Chinese (Mandarin)_Wise_Women"
+        },
+        {
+          "title": "Gentle Senior (Chinese Female, Warm Storytelling)",
+          "value": "Chinese (Mandarin)_Gentle_Senior"
+        },
+        {
+          "title": "Warm Bestie (Chinese Female, Comforting)",
+          "value": "Chinese (Mandarin)_Warm_Bestie"
+        },
+        {
+          "title": "Sweet Girl (Chinese Female, Expressive)",
+          "value": "Chinese_sweet_girl_vv1"
+        },
+        {
+          "title": "Reliable Executive (Chinese Male, Formal)",
+          "value": "Chinese (Mandarin)_Reliable_Executive"
+        },
+        {
+          "title": "News Anchor (Chinese Female)",
+          "value": "Chinese (Mandarin)_News_Anchor"
+        },
+        {
+          "title": "Male Announcer (Chinese Male)",
+          "value": "Chinese (Mandarin)_Male_Announcer"
+        },
+        {
+          "title": "Calm Woman (English Female, Guided)",
+          "value": "English_CalmWoman"
+        },
+        {
+          "title": "Captivating Female (English Female, Energetic)",
+          "value": "English_captivating_female1"
+        },
+        {
+          "title": "Attractive Woman (English Female, Natural)",
+          "value": "English_AttractiveGirl"
+        },
+        {
+          "title": "Nursery Teacher (English Female, Clear)",
+          "value": "English_nursery_teacher_vv2"
+        },
+        {
+          "title": "Expressive Narrator (English)",
+          "value": "English_expressive_narrator"
+        },
+        {
+          "title": "Magnetic-voiced Man (English)",
+          "value": "English_magnetic_voiced_man"
+        },
+        {
+          "title": "Graceful Lady (English)",
+          "value": "English_Graceful_Lady"
+        }
+      ]
+    },
+    {
+      "name": "customDefaultVoice",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Custom Voice ID",
+      "description": "Optional cloned or generated voice ID. Overrides Default Voice and appears in voice pickers. Get IDs from the Clone Voice command or your MiniMax dashboard.",
+      "placeholder": "voice_id from MiniMax"
+    },
+    {
+      "name": "customVoiceIds",
+      "type": "textfield",
+      "required": false,
+      "title": "Extra Custom Voice IDs",
+      "description": "Comma-separated cloned or generated voice IDs to show in voice pickers (in addition to the default).",
+      "placeholder": "voice_id_1, voice_id_2"
+    },
+    {
+      "name": "languageBoost",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language Boost",
+      "description": "Language hint for speech synthesis",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "Cantonese",
+          "value": "Chinese,Yue"
+        },
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        }
+      ]
+    },
+    {
+      "name": "speechRate",
+      "type": "dropdown",
+      "required": false,
+      "title": "Speech Rate",
+      "description": "Playback speed for speech synthesis",
+      "default": "1",
+      "data": [
+        {
+          "title": "0.5× (Slow)",
+          "value": "0.5"
+        },
+        {
+          "title": "0.75×",
+          "value": "0.75"
+        },
+        {
+          "title": "1.0× (Normal)",
+          "value": "1"
+        },
+        {
+          "title": "1.25×",
+          "value": "1.25"
+        },
+        {
+          "title": "1.5×",
+          "value": "1.5"
+        },
+        {
+          "title": "1.75×",
+          "value": "1.75"
+        },
+        {
+          "title": "2.0× (Fast)",
+          "value": "2"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

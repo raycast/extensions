@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "usememos",
+  "title": "Usememos",
+  "description": "Usememos is an extension for usememos/memos",
+  "icon": "icon.png",
+  "author": "zrr1999",
+  "contributors": [],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-memos",
+      "title": "List Memos",
+      "description": "List all memos",
+      "mode": "view"
+    },
+    {
+      "name": "open-memos",
+      "title": "Open Memos Web",
+      "description": "Jump to a memos web page",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openAiApiKey",
+      "title": "OpenAI API Key",
+      "description": "API Key is used to authenticate with OpenAI API",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model is used to specify the model to use",
+      "type": "textfield",
+      "required": true,
+      "default": "gpt-4o-mini"
+    },
+    {
+      "name": "openAiBasePath",
+      "title": "OpenAI Base Path (Optional)",
+      "description": "Base Path is used to override base path with OpenAI API",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "LLM will use this language to generate content",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "English",
+          "value": "en-US"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh-CN"
+        }
+      ],
+      "default": "zh-CN"
+    },
+    {
+      "name": "memosServerUrl",
+      "type": "textfield",
+      "title": "Memos Server URL",
+      "description": "URL is used to connect to the memos server",
+      "required": true
+    },
+    {
+      "name": "memosServerToken",
+      "type": "password",
+      "title": "Memos Server Token",
+      "description": "Token is used to authenticate with the memos server",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.0",
+    "@raycast/utils": "^1.17.0",
+    "openai": "4.58.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

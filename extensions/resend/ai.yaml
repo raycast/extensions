@@ -1,0 +1,498 @@
+instructions: |
+  Use list tools to discover resource IDs before calling retrieve or mutation tools. Never invent contact addresses, email IDs, attachment IDs, segment IDs, domain IDs, template IDs, broadcast IDs, log IDs, or scheduled times.
+  Prefer read-only tools when the user asks to inspect, summarize, or debug. Use a retrieve tool after its corresponding list tool when the user needs full content or details.
+  Send email only when the user explicitly asks to send or schedule it. Plain-text requests should use text; use html only when the user asks for HTML or rich formatting. Never call send-email without a syntactically valid recipient address. If the user provides only a name, use list-contacts and ask for clarification when multiple contacts match. Give each send-email call a unique idempotencyKey and reuse that key when retrying the same send.
+  Use ISO 8601 for scheduled times. Preserve the user's stated timezone or offset and ask when it is ambiguous instead of guessing.
+  Sending, sharing, rescheduling, canceling, deleting, creating credentials, changing contacts or segment membership, and domain verification use tool-provided confirmations. Do not ask for a redundant chat confirmation; call the correct tool and let its confirmation UI obtain approval. Do not claim success until the tool returns successfully.
+  Share links are public to anyone with the URL and may last no longer than 48 hours. Use list-emails before sharing, rescheduling, canceling, or retrieving a sent email unless the exact email ID is already present in the conversation.
+  Prefer segments for current contact workflows. Use list-segments to resolve a named segment and list-contacts to resolve an existing contact. Use legacy audiences only when the user explicitly asks about an audience or an existing audience ID is available.
+  For inbound email, use list-received-emails first. Retrieve the selected message before summarizing its full contents. To obtain a downloadable attachment URL, list that message's attachments and retrieve the selected attachment.
+  Use get-email-metrics for aggregate delivery and engagement reporting. To investigate API failures, use list-logs and then retrieve the relevant failed request before explaining its request and response bodies.
+  Use list-domains, list-templates, and list-broadcasts before retrieving a named resource. Use list-topics and list-webhooks for account configuration questions.
+  Create or remove an API key only when explicitly requested. Prefer sending_access over full_access when sending is the only requirement, restrict it to the requested domain when possible, and treat returned key material as sensitive.
+
+evals:
+  - input: "@resend Send laura@acme.app an email with subject Hotel check-in and body Please check us in at the hotel."
+    mocks:
+      send-email:
+        id: "email-send-101"
+    expected:
+      - callsTool:
+          name: "send-email"
+          arguments:
+            to: ["laura@acme.app"]
+            subject: "Hotel check-in"
+            text:
+              includes: "Please check us in at the hotel."
+
+  - input: "@resend Schedule an email to ops@acme.app for 2026-09-02T09:30:00Z with subject Maintenance reminder and body The maintenance window starts in 30 minutes."
+    mocks:
+      send-email:
+        id: "email-scheduled-102"
+    expected:
+      - callsTool:
+          name: "send-email"
+          arguments:
+            to: ["ops@acme.app"]
+            subject: "Maintenance reminder"
+            text:
+              includes: "maintenance window starts in 30 minutes"
+            sendAt: "2026-09-02T09:30:00Z"
+
+  - input: "@resend Email Bruno the quarterly report, but I have not provided his address."
+    usedAsExample: false
+    mocks:
+      list-contacts:
+        object: "list"
+        has_more: false
+        data:
+          - id: "contact-bruno-sales"
+            email: "bruno.sales@acme.app"
+            first_name: "Bruno"
+            last_name: "Silva"
+          - id: "contact-bruno-finance"
+            email: "bruno.finance@acme.app"
+            first_name: "Bruno"
+            last_name: "Costa"
+    expected:
+      - callsTool: "list-contacts"
+      - includes: "bruno.sales@acme.app"
+      - includes: "bruno.finance@acme.app"
+      - not:
+          callsTool: "send-email"
+
+  - input: "@resend Add bruno@acme.app as Bruno to my General segment."
+    mocks:
+      list-segments:
+        object: "list"
+        has_more: false
+        data:
+          - id: "segment-general"
+            name: "General"
+            created_at: "2026-06-01T08:00:00.000Z"
+      list-contacts:
+        object: "list"
+        has_more: false
+        data: []
+      create-contact:
+        object: "contact"
+        id: "contact-bruno"
+    expected:
+      - callsTool: "list-segments"
+      - callsTool:
+          name: "create-contact"
+          arguments:
+            segmentId: "segment-general"
+            segmentName: "General"
+            email: "bruno@acme.app"
+            firstName: "Bruno"
+
+  - input: "@resend Unsubscribe laura@acme.app from future email."
+    usedAsExample: false
+    mocks:
+      list-contacts:
+        object: "list"
+        has_more: false
+        data:
+          - id: "contact-laura"
+            email: "laura@acme.app"
+            first_name: "Laura"
+            unsubscribed: false
+      update-contact:
+        object: "contact"
+        id: "contact-laura"
+    expected:
+      - callsTool: "list-contacts"
+      - callsTool:
+          name: "update-contact"
+          arguments:
+            contactId: "contact-laura"
+            unsubscribed: true
+
+  - input: "@resend Add the existing contact laura@acme.app to the Customers segment."
+    usedAsExample: false
+    mocks:
+      list-contacts:
+        object: "list"
+        has_more: false
+        data:
+          - id: "contact-laura"
+            email: "laura@acme.app"
+            first_name: "Laura"
+      list-segments:
+        object: "list"
+        has_more: false
+        data:
+          - id: "segment-customers"
+            name: "Customers"
+            created_at: "2026-05-12T08:00:00.000Z"
+      add-contact-to-segment:
+        id: "contact-laura"
+    expected:
+      - callsTool: "list-contacts"
+      - callsTool: "list-segments"
+      - callsTool:
+          name: "add-contact-to-segment"
+          arguments:
+            segmentId: "segment-customers"
+            segmentName: "Customers"
+            contactId: "contact-laura"
+
+  - input: "@resend Show me the full contents of the latest received email."
+    mocks:
+      list-received-emails:
+        object: "list"
+        has_more: false
+        data:
+          - id: "received-201"
+            from: "customer@example.com"
+            to: ["support@example.com"]
+            subject: "Need help"
+            created_at: "2026-08-28T10:00:00.000Z"
+            attachments: []
+      retrieve-received-email:
+        object: "email"
+        id: "received-201"
+        from: "customer@example.com"
+        to: ["support@example.com"]
+        subject: "Need help"
+        text: "Could you help me update my billing address?"
+        attachments: []
+    expected:
+      - callsTool: "list-received-emails"
+      - callsTool:
+          name: "retrieve-received-email"
+          arguments:
+            emailId: "received-201"
+      - includes: "billing address"
+
+  - input: "@resend Get a download link for invoice.pdf from the latest received email."
+    mocks:
+      list-received-emails:
+        object: "list"
+        has_more: false
+        data:
+          - id: "received-202"
+            from: "billing@example.com"
+            to: ["accounts@example.com"]
+            subject: "August invoice"
+            created_at: "2026-08-29T08:00:00.000Z"
+            attachments:
+              - id: "attachment-invoice"
+                filename: "invoice.pdf"
+      list-received-email-attachments:
+        object: "list"
+        has_more: false
+        data:
+          - id: "attachment-invoice"
+            filename: "invoice.pdf"
+            content_type: "application/pdf"
+            content_disposition: "attachment"
+      retrieve-received-email-attachment:
+        id: "attachment-invoice"
+        filename: "invoice.pdf"
+        content_type: "application/pdf"
+        download_url: "https://example.com/signed/invoice.pdf"
+        expires_at: "2026-08-29T09:00:00.000Z"
+    expected:
+      - callsTool: "list-received-emails"
+      - callsTool:
+          name: "retrieve-received-email-attachment"
+          arguments:
+            emailId: "received-202"
+            attachmentId: "attachment-invoice"
+      - includes: "https://example.com/signed/invoice.pdf"
+
+  - input: "@resend List the attachments on the latest received email."
+    usedAsExample: false
+    mocks:
+      list-received-emails:
+        object: "list"
+        has_more: false
+        data:
+          - id: "received-203"
+            from: "billing@example.com"
+            to: ["accounts@example.com"]
+            subject: "Receipts"
+            created_at: "2026-08-29T08:10:00.000Z"
+      list-received-email-attachments:
+        object: "list"
+        has_more: false
+        data:
+          - id: "attachment-receipt"
+            filename: "receipt.pdf"
+            content_type: "application/pdf"
+            content_disposition: "attachment"
+    expected:
+      - callsTool: "list-received-emails"
+      - callsTool:
+          name: "list-received-email-attachments"
+          arguments:
+            emailId: "received-203"
+      - includes: "receipt.pdf"
+
+  - input: "@resend Create a public share link that lasts 2 hours for my latest sent email with subject Launch notes."
+    mocks:
+      list-emails:
+        object: "list"
+        has_more: false
+        data:
+          - id: "sent-launch-301"
+            from: "team@acme.app"
+            to: ["laura@acme.app"]
+            subject: "Launch notes"
+            created_at: "2026-08-29T07:00:00.000Z"
+            last_event: "delivered"
+      share-email:
+        object: "email"
+        id: "sent-launch-301"
+        url: "https://resend.com/emails/share/example"
+    expected:
+      - callsTool: "list-emails"
+      - callsTool:
+          name: "share-email"
+          arguments:
+            emailId: "sent-launch-301"
+            expiresIn: "2 hours"
+      - includes: "https://resend.com/emails/share/example"
+
+  - input: "@resend Reschedule the email with subject Maintenance reminder to 2026-09-03T14:00:00Z."
+    mocks:
+      list-emails:
+        object: "list"
+        has_more: false
+        data:
+          - id: "scheduled-maintenance-302"
+            from: "ops@acme.app"
+            to: ["customers@acme.app"]
+            subject: "Maintenance reminder"
+            created_at: "2026-08-29T07:15:00.000Z"
+            scheduled_at: "2026-09-02T14:00:00.000Z"
+            last_event: "scheduled"
+      reschedule-email:
+        object: "email"
+        id: "scheduled-maintenance-302"
+    expected:
+      - callsTool: "list-emails"
+      - callsTool:
+          name: "reschedule-email"
+          arguments:
+            emailId: "scheduled-maintenance-302"
+            scheduledAt: "2026-09-03T14:00:00Z"
+
+  - input: "@resend Show sent, delivered, bounced, and delivery rate metrics from 2026-08-22 through 2026-08-29 in UTC."
+    mocks:
+      get-email-metrics:
+        object: "metrics"
+        start_date: "2026-08-22T00:00:00.000Z"
+        end_date: "2026-08-29T23:59:59.999Z"
+        metrics: ["sent", "delivered", "bounced", "delivery_rate"]
+        dimensions: ["period"]
+        granularity: "daily"
+        totals:
+          sent: 1000
+          delivered: 970
+          bounced: 20
+          delivery_rate: 0.97
+    expected:
+      - callsTool:
+          name: "get-email-metrics"
+          arguments:
+            startDate:
+              includes: "2026-08-22"
+            endDate:
+              includes: "2026-08-29"
+            timezone: "UTC"
+      - includes: "970"
+
+  - input: "@resend Show the DNS records and verification status for acme.app."
+    mocks:
+      list-domains:
+        object: "list"
+        has_more: false
+        data:
+          - id: "domain-acme"
+            name: "acme.app"
+            status: "pending"
+            region: "us-east-1"
+            created_at: "2026-08-01T10:00:00.000Z"
+      retrieve-domain:
+        object: "domain"
+        id: "domain-acme"
+        name: "acme.app"
+        status: "pending"
+        region: "us-east-1"
+        records:
+          - record: "SPF"
+            name: "send"
+            type: "MX"
+            value: "feedback-smtp.us-east-1.amazonses.com"
+            status: "pending"
+    expected:
+      - callsTool: "list-domains"
+      - callsTool:
+          name: "retrieve-domain"
+          arguments:
+            domainId: "domain-acme"
+      - includes: "pending"
+
+  - input: "@resend Verify my acme.app sending domain now."
+    usedAsExample: false
+    mocks:
+      list-domains:
+        object: "list"
+        has_more: false
+        data:
+          - id: "domain-acme"
+            name: "acme.app"
+            status: "pending"
+            region: "us-east-1"
+      verify-domain:
+        object: "domain"
+        id: "domain-acme"
+    expected:
+      - callsTool: "list-domains"
+      - callsTool:
+          name: "verify-domain"
+          arguments:
+            domainId: "domain-acme"
+            domainName: "acme.app"
+
+  - input: "@resend Show the full content and variables for my Welcome template."
+    mocks:
+      list-templates:
+        object: "list"
+        has_more: false
+        data:
+          - id: "template-welcome"
+            name: "Welcome"
+            status: "published"
+            created_at: "2026-07-10T09:00:00.000Z"
+      retrieve-template:
+        object: "template"
+        id: "template-welcome"
+        name: "Welcome"
+        status: "published"
+        subject: "Welcome, {{{NAME}}}!"
+        html: "<h1>Welcome, {{{NAME}}}!</h1>"
+        variables:
+          - key: "NAME"
+            type: "string"
+    expected:
+      - callsTool: "list-templates"
+      - callsTool:
+          name: "retrieve-template"
+          arguments:
+            templateId: "template-welcome"
+      - includes: "NAME"
+
+  - input: "@resend Show the details of my latest Product Update broadcast."
+    mocks:
+      list-broadcasts:
+        object: "list"
+        has_more: false
+        data:
+          - id: "broadcast-product-update"
+            name: "Product Update"
+            status: "sent"
+            created_at: "2026-08-20T09:00:00.000Z"
+      retrieve-broadcast:
+        object: "broadcast"
+        id: "broadcast-product-update"
+        name: "Product Update"
+        status: "sent"
+        subject: "What is new in August"
+        from: "Acme <updates@acme.app>"
+    expected:
+      - callsTool: "list-broadcasts"
+      - callsTool:
+          name: "retrieve-broadcast"
+          arguments:
+            broadcastId: "broadcast-product-update"
+
+  - input: "@resend What subscription topics are configured?"
+    mocks:
+      list-topics:
+        object: "list"
+        data:
+          - id: "topic-product"
+            name: "Product Updates"
+            description: "Product announcements"
+            default_subscription: "opt_in"
+    expected:
+      - callsTool: "list-topics"
+      - includes: "Product Updates"
+
+  - input: "@resend List my webhook endpoints."
+    mocks:
+      list-webhooks:
+        object: "list"
+        has_more: false
+        data:
+          - id: "webhook-production"
+            endpoint: "https://api.acme.app/resend/webhook"
+            status: "enabled"
+            events: ["email.delivered", "email.bounced"]
+    expected:
+      - callsTool: "list-webhooks"
+      - includes: "https://api.acme.app/resend/webhook"
+
+  - input: "@resend Why did my most recent failed API request fail?"
+    mocks:
+      list-logs:
+        object: "list"
+        has_more: false
+        data:
+          - id: "log-failed-401"
+            created_at: "2026-08-29T08:30:00.000Z"
+            endpoint: "/emails"
+            method: "POST"
+            response_status: 422
+            user_agent: "resend-node:6.25.0"
+          - id: "log-success-402"
+            created_at: "2026-08-29T08:20:00.000Z"
+            endpoint: "/domains"
+            method: "GET"
+            response_status: 200
+      retrieve-log:
+        object: "log"
+        id: "log-failed-401"
+        endpoint: "/emails"
+        method: "POST"
+        response_status: 422
+        request_body:
+          from: "team@acme.app"
+          to: ["customer@example.com"]
+        response_body:
+          name: "validation_error"
+          message: "The subject field is required."
+    expected:
+      - callsTool: "list-logs"
+      - callsTool:
+          name: "retrieve-log"
+          arguments:
+            logId: "log-failed-401"
+      - includes: "subject"
+
+  - input: "@resend Create a sending-only API key named Production Mailer restricted to acme.app."
+    usedAsExample: false
+    mocks:
+      list-domains:
+        object: "list"
+        has_more: false
+        data:
+          - id: "domain-acme"
+            name: "acme.app"
+            status: "verified"
+            region: "us-east-1"
+      create-api-key:
+        id: "api-key-production-mailer"
+        token: "re_mock_sensitive_token"
+    expected:
+      - callsTool: "list-domains"
+      - callsTool:
+          name: "create-api-key"
+          arguments:
+            name: "Production Mailer"
+            permission: "sending_access"
+            domainId: "domain-acme"

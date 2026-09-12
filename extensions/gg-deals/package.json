@@ -1,0 +1,151 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gg-deals",
+  "title": "gg.deals",
+  "description": "Fetch the latest deals from gg.deals",
+  "icon": "icon.png",
+  "author": "Whitespace",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Game Deals",
+      "description": "Find the best game deals",
+      "mode": "view"
+    },
+    {
+      "name": "search-game",
+      "title": "Search Game",
+      "description": "Search game prices on GG.deals",
+      "mode": "view",
+      "icon": "extension-icon.png",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "title": "GG.deals API Key",
+          "description": "Your GG.deals API key",
+          "type": "password",
+          "required": true
+        },
+        {
+          "name": "country",
+          "title": "Country / Region",
+          "description": "Region used to retrieve game prices",
+          "type": "dropdown",
+          "required": true,
+          "default": "BR",
+          "data": [
+            {
+              "title": "🇧🇷 Brazil",
+              "value": "BR"
+            },
+            {
+              "title": "🇺🇸 United States",
+              "value": "US"
+            },
+            {
+              "title": "🇬🇧 United Kingdom",
+              "value": "GB"
+            },
+            {
+              "title": "🇨🇦 Canada",
+              "value": "CA"
+            },
+            {
+              "title": "🇦🇷 Argentina",
+              "value": "AR"
+            },
+            {
+              "title": "🇲🇽 Mexico",
+              "value": "MX"
+            },
+            {
+              "title": "🇵🇹 Portugal",
+              "value": "PT"
+            },
+            {
+              "title": "🇪🇸 Spain",
+              "value": "ES"
+            },
+            {
+              "title": "🇫🇷 France",
+              "value": "FR"
+            },
+            {
+              "title": "🇩🇪 Germany",
+              "value": "DE"
+            },
+            {
+              "title": "🇮🇹 Italy",
+              "value": "IT"
+            },
+            {
+              "title": "🇵🇱 Poland",
+              "value": "PL"
+            },
+            {
+              "title": "🇹🇷 Turkey",
+              "value": "TR"
+            },
+            {
+              "title": "🇯🇵 Japan",
+              "value": "JP"
+            },
+            {
+              "title": "🇰🇷 South Korea",
+              "value": "KR"
+            },
+            {
+              "title": "🇦🇺 Australia",
+              "value": "AU"
+            },
+            {
+              "title": "🇨🇱 Chile",
+              "value": "CL"
+            },
+            {
+              "title": "🇨🇴 Colombia",
+              "value": "CO"
+            },
+            {
+              "title": "🇵🇪 Peru",
+              "value": "PE"
+            },
+            {
+              "title": "🇮🇳 India",
+              "value": "IN"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.53.4",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0-rc.12",
+    "user-agents": "^1.0.580"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/user-agents": "^1.0.2",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

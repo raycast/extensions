@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "figma-shortcuts",
+  "title": "Figma Shortcuts",
+  "description": "Search and copy Figma keyboard shortcuts for macOS and Windows",
+  "icon": "command-icon.png",
+  "author": "arturdz",
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-shortcuts",
+      "title": "Search Figma Shortcuts",
+      "description": "Search Figma keyboard shortcuts and copy them to the clipboard",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "platform",
+          "type": "dropdown",
+          "title": "Platform",
+          "description": "Which OS shortcut format to display and copy",
+          "data": [
+            {
+              "value": "mac",
+              "title": "macOS"
+            },
+            {
+              "value": "windows",
+              "title": "Windows"
+            }
+          ],
+          "default": "mac",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

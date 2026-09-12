@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "",
+        "upper": "!"
+    },
+    "Digit2": {
+        "lower": "",
+        "upper": "@"
+    },
+    "Digit3": {
+        "lower": "",
+        "upper": "#"
+    },
+    "Digit4": {
+        "lower": "",
+        "upper": "$"
+    },
+    "Digit5": {
+        "lower": "",
+        "upper": "%"
+    },
+    "Digit6": {
+        "lower": "",
+        "upper": "^"
+    },
+    "Digit7": {
+        "lower": "",
+        "upper": "&"
+    },
+    "Digit8": {
+        "lower": "",
+        "upper": "*"
+    },
+    "Digit9": {
+        "lower": "",
+        "upper": ")"
+    },
+    "Digit0": {
+        "lower": "",
+        "upper": "("
+    },
+    "Minus": {
+        "lower": "",
+        "upper": "_"
+    },
+    "Equal": {
+        "lower": "",
+        "upper": "+"
+    },
+    "KeyQ": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyW": {
+        "lower": "",
+        "upper": "𐴧"
+    },
+    "KeyE": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyR": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyT": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyY": {
+        "lower": "",
+        "upper": "𐴤"
+    },
+    "KeyU": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyI": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyO": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyP": {
+        "lower": "",
+        "upper": "𐴜"
+    },
+    "BracketLeft": {
+        "lower": "",
+        "upper": "»"
+    },
+    "BracketRight": {
+        "lower": "",
+        "upper": "«"
+    },
+    "KeyA": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyS": {
+        "lower": "",
+        "upper": "𐴥"
+    },
+    "KeyD": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyF": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyG": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyH": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyJ": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyK": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyL": {
+        "lower": "",
+        "upper": ""
+    },
+    "Semicolon": {
+        "lower": "",
+        "upper": "؛"
+    },
+    "Quote": {
+        "lower": "",
+        "upper": "'"
+    },
+    "Backquote": {
+        "lower": "",
+        "upper": "𐴦"
+    },
+    "Backslash": {
+        "lower": "",
+        "upper": "\\"
+    },
+    "KeyZ": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyX": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyC": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyV": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyB": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyN": {
+        "lower": "",
+        "upper": ""
+    },
+    "KeyM": {
+        "lower": "",
+        "upper": ""
+    },
+    "Comma": {
+        "lower": "",
+        "upper": "،"
+    },
+    "Period": {
+        "lower": "",
+        "upper": "."
+    },
+    "Slash": {
+        "lower": "",
+        "upper": "؟"
+    }
+}

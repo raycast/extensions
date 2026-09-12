@@ -1,0 +1,153 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "datawrapper",
+  "title": "Datawrapper",
+  "description": "An unofficial extension for searching your Datawrapper charts, viewing recent Datawrapper charts, and other handy functions.",
+  "icon": "icon.png",
+  "author": "benkates",
+  "categories": [
+    "Applications",
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "datawrapperApiKey",
+      "title": "Datawrapper API token",
+      "placeholder": "See extension page for required scopes.",
+      "description": "Your Datawrapper API token with \"chart:read\" and \"user:read\" scopes (optionally: \"chart:write\").",
+      "type": "password",
+      "default": "",
+      "required": true
+    },
+    {
+      "name": "columns",
+      "title": "Grid Column Count",
+      "description": "The number of columns to display in chart listing grid.",
+      "type": "dropdown",
+      "default": "4",
+      "required": false,
+      "data": [
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "recentCharts",
+      "title": "View Recent Charts",
+      "description": "List your recently edited or published charts. Requires \"chart:read\" and \"user:read\" API token scopes.",
+      "mode": "view"
+    },
+    {
+      "name": "searchCharts",
+      "title": "Search Charts",
+      "description": "Display and search charts based on three different ordering criteria: recently edited, published, or created. Requires \"chart:read\" API token scope.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "authorId",
+          "title": "Filter results to author ID (numeric)",
+          "description": "Filter all search results to a specific visualization author.",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "folderId",
+          "title": "Filter results to folder ID (numeric)",
+          "description": "Filter all search results to a specific folder (found in the URL of the folder page).",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "teamId",
+          "title": "Filter results to team ID (string)",
+          "description": "Filter all search results to a specific team (found in the URL of the team's page).",
+          "type": "textfield",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "createNew",
+      "title": "Open New Chart Workflow",
+      "description": "Initiate the new Datawrapper chart, map, or table workflow.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "chartType",
+          "type": "dropdown",
+          "placeholder": "Chart Type",
+          "required": true,
+          "data": [
+            {
+              "title": "Chart",
+              "value": "Chart"
+            },
+            {
+              "title": "Map",
+              "value": "Map"
+            },
+            {
+              "title": "Table",
+              "value": "Table"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "openAcademy",
+      "title": "Open Datawrapper Academy",
+      "description": "Open the Datawrapper Academy in the browser with optional search query.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "searchQuery",
+          "placeholder": "Search",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "listParserFunctions",
+      "title": "List Parser Functions",
+      "description": "List Datawrapper \"parser\" functions for use in tooltips.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.1",
+    "moment": "^2.30.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

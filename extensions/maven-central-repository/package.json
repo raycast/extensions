@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "maven-central-repository",
+  "title": "Maven Central Repository",
+  "description": "Official search by the maintainers of Maven Central Repository.",
+  "icon": "search-maven-central-repository.png",
+  "author": "koinzhang",
+  "categories": [
+    "Developer Tools",
+    "Documentation",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-maven-central-repository",
+      "title": "Search Maven Central Repository",
+      "description": "Official search by the maintainers of Maven Central Repository.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "repository",
+          "placeholder": "Repository",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.1.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.10",
+    "@types/react": "19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

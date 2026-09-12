@@ -1,0 +1,240 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "localsend",
+  "title": "LocalSend",
+  "description": "Share files to nearby devices using LocalSend protocol",
+  "icon": "extension-icon.png",
+  "author": "kud",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "preferences": [
+    {
+      "name": "downloadPath",
+      "title": "Download Folder",
+      "description": "Where to save received files",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Downloads"
+    },
+    {
+      "name": "quickSave",
+      "title": "Quick Save",
+      "description": "How to handle incoming file transfers",
+      "type": "dropdown",
+      "required": false,
+      "default": "off",
+      "data": [
+        {
+          "title": "Off - Ask for confirmation",
+          "value": "off"
+        },
+        {
+          "title": "Favorites - Auto-accept from favorites only",
+          "value": "favorites"
+        },
+        {
+          "title": "On - Auto-accept from everyone",
+          "value": "on"
+        }
+      ]
+    },
+    {
+      "name": "enableDiscovery",
+      "title": "Enable Discovery",
+      "description": "Announce this device on the network so others can find it",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Make this device discoverable"
+    },
+    {
+      "name": "enableReceive",
+      "title": "Enable Receive",
+      "description": "Start receive server automatically in background (not recommended - use Receive command instead)",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable background receive server"
+    },
+    {
+      "name": "deviceName",
+      "title": "Device Name",
+      "description": "Name shown to other LocalSend devices (e.g., 'John's Mac')",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "deviceType",
+      "title": "Device Type",
+      "description": "Type of this device",
+      "type": "dropdown",
+      "required": false,
+      "default": "desktop",
+      "data": [
+        {
+          "title": "Desktop",
+          "value": "desktop"
+        },
+        {
+          "title": "Mobile",
+          "value": "mobile"
+        },
+        {
+          "title": "Web",
+          "value": "web"
+        },
+        {
+          "title": "Headless",
+          "value": "headless"
+        }
+      ]
+    },
+    {
+      "name": "deviceModel",
+      "title": "Device Model",
+      "description": "Model of this device (e.g., 'MacBook Pro M3')",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "httpPort",
+      "title": "HTTP Port",
+      "description": "Port for receiving files (default: 53318, LocalSend app uses 53317)",
+      "type": "textfield",
+      "required": false,
+      "default": "53318"
+    },
+    {
+      "name": "discoveryTimeout",
+      "title": "Discovery Timeout (seconds)",
+      "description": "How long to wait for device discovery responses",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    },
+    {
+      "name": "multicastAddress",
+      "title": "Multicast Address",
+      "description": "Multicast address for device discovery (default: 224.0.0.167)",
+      "type": "textfield",
+      "required": false,
+      "default": "224.0.0.167"
+    },
+    {
+      "name": "networkInterface",
+      "title": "Network Interface",
+      "description": "Specific network interface to use (leave empty for all interfaces)",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "enableEncryption",
+      "title": "Enable Encryption",
+      "description": "Use HTTPS for secure file transfer (experimental)",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable HTTPS encryption"
+    }
+  ],
+  "background": {
+    "command": "background"
+  },
+  "commands": [
+    {
+      "name": "send",
+      "title": "Send",
+      "subtitle": "LocalSend",
+      "description": "Choose what to send to a LocalSend device",
+      "mode": "view"
+    },
+    {
+      "name": "discover-devices",
+      "title": "Discover Devices",
+      "subtitle": "LocalSend",
+      "description": "Discover LocalSend devices on your network",
+      "mode": "view"
+    },
+    {
+      "name": "send-files",
+      "title": "Send Files",
+      "subtitle": "LocalSend",
+      "description": "Send files to a LocalSend device",
+      "mode": "view"
+    },
+    {
+      "name": "send-media",
+      "title": "Send Media",
+      "subtitle": "LocalSend",
+      "description": "Send images and videos to a LocalSend device",
+      "mode": "view"
+    },
+    {
+      "name": "send-text",
+      "title": "Send Text",
+      "subtitle": "LocalSend",
+      "description": "Send text content to a LocalSend device",
+      "mode": "view"
+    },
+    {
+      "name": "send-clipboard",
+      "title": "Send Clipboard",
+      "subtitle": "LocalSend",
+      "description": "Send clipboard content to a LocalSend device",
+      "mode": "view"
+    },
+    {
+      "name": "send-folder",
+      "title": "Send Folder",
+      "subtitle": "LocalSend",
+      "description": "Send entire folder to a LocalSend device",
+      "mode": "view"
+    },
+    {
+      "name": "receive",
+      "title": "Receive",
+      "subtitle": "LocalSend",
+      "description": "Start receive server and view received files",
+      "mode": "view"
+    },
+    {
+      "name": "localsend-status",
+      "title": "LocalSend Menu Bar",
+      "subtitle": "LocalSend",
+      "description": "Toggle discovery and receive server from menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "@types/archiver": "7.0.0",
+    "archiver": "7.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.9",
+    "@types/react": "19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

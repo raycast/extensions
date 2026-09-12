@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "android",
+  "title": "Android",
+  "description": "Useful Android commands to list projects and emulators",
+  "icon": "command-icon.png",
+  "author": "mibrahimdev",
+  "contributors": [
+    "3llomi"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-android",
+      "title": "List Projects",
+      "subtitle": "Android",
+      "description": "show android projects in directory",
+      "icon": "list-android.png",
+      "mode": "view"
+    },
+    {
+      "name": "list-emulators",
+      "title": "List Emulators",
+      "subtitle": "Android",
+      "description": "show android emulators",
+      "icon": "list-android.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-docs",
+      "title": "Search Android Docs",
+      "subtitle": "Android",
+      "description": "Search the official Android docs and read them as rendered markdown",
+      "icon": "search-docs.png",
+      "mode": "view"
+    },
+    {
+      "name": "capture-screenshot",
+      "title": "Capture Screenshot",
+      "subtitle": "Android",
+      "description": "Capture a screenshot of a connected device, preview it, and save or copy it",
+      "icon": "capture-screenshot.png",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "subtitle": "Android",
+      "description": "Scaffold a new Android project from an official template and open it in Android Studio",
+      "icon": "create-project.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "preferences": [
+    {
+      "title": "Android Projects Directory",
+      "name": "androidProjectsDirectory",
+      "description": "Locate your Android Projects",
+      "placeholder": "/Users/{user-name}/AndroidStudioProjects",
+      "type": "textfield",
+      "required": true,
+      "default": ""
+    },
+    {
+      "title": "Android SDK",
+      "name": "androidSDK",
+      "description": "Locate Android SDK path",
+      "type": "textfield",
+      "required": true,
+      "default": "~/Library/Android/sdk"
+    },
+    {
+      "title": "Android AVD",
+      "name": "androidAVD",
+      "description": "Locate Android AVD path",
+      "type": "textfield",
+      "required": true,
+      "default": "~/.android/avd"
+    },
+    {
+      "title": "Android CLI Path",
+      "name": "androidCliPath",
+      "description": "Optional path to the `android` binary. Leave blank to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "title": "Screenshot Folder",
+      "name": "screenshotFolder",
+      "description": "Where captured screenshots are auto-saved.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "tsc -p tsconfig.test.json && node --test \"dist/**/*.test.js\""
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

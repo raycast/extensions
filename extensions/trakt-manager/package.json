@@ -1,0 +1,112 @@
+{
+  "name": "trakt-manager",
+  "description": "Control your Trakt account directly from Raycast",
+  "author": "thesobercoder",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "categories": [
+    "Media",
+    "Other"
+  ],
+  "commands": [
+    {
+      "name": "search-media",
+      "title": "Search Media",
+      "subtitle": "Trakt Manager",
+      "description": "Search for movies and shows by title",
+      "keywords": [
+        "movies",
+        "shows",
+        "trakt",
+        "search"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "movies",
+      "title": "Search Movies",
+      "subtitle": "Trakt Manager",
+      "description": "Search for movies by title",
+      "mode": "view"
+    },
+    {
+      "name": "shows",
+      "title": "Search Shows",
+      "subtitle": "Trakt Manager",
+      "description": "Search for shows by title",
+      "mode": "view"
+    },
+    {
+      "name": "episodes",
+      "title": "Search Episodes",
+      "subtitle": "Trakt Manager",
+      "description": "Search for episodes by title",
+      "mode": "view"
+    },
+    {
+      "name": "watchlist",
+      "title": "Watchlist",
+      "subtitle": "Trakt Manager",
+      "description": "Lists movies and shows that are in your watchlist",
+      "mode": "view"
+    },
+    {
+      "name": "up-next",
+      "title": "Up Next",
+      "subtitle": "Trakt Manager",
+      "description": "Get the list of shows that are up next",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Trakt Manager",
+      "description": "Lists movies and shows that are in your history",
+      "mode": "view"
+    },
+    {
+      "name": "recommendations",
+      "title": "Recommendations",
+      "subtitle": "Trakt Manager",
+      "description": "Lists recommended movies and shows",
+      "mode": "view"
+    }
+  ],
+  "contributors": [
+    "vishalbalaji3",
+    "Berenger",
+    "burhanrashid52"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "@ts-rest/core": "^3.53.0-rc.1",
+    "node-fetch": "^3.3.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.0.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "syncpack": "^15.3.2",
+    "typescript": "^6.0.3"
+  },
+  "icon": "trakt.png",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "check": "tsc --noEmit",
+    "dev": "ray develop",
+    "dev:x": "RAY_Target=x ray develop",
+    "fix-lint": "ray lint --fix",
+    "fmt": "prettier '**/*' -wu && syncpack-format",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "pull": "ray pull-contributions"
+  },
+  "title": "Trakt Manager"
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "diskutil-mac",
+  "title": "Diskutil",
+  "description": "View your disks and volumes. An implementation of the macOS 'diskutil' command with quicker access to functionality, providing a better overview and a more user-friendly interface.",
+  "icon": "extension-icon.png",
+  "version": "1.3.0",
+  "author": "Globolo",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Run Diskutil",
+      "description": "View, mount, and eject your disks and volumes like diskutil, but with a user-friendly UI.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4",
+    "@types/react-dom": "^19.2.3",
+    "plist": "^3.1.0",
+    "react": "^19.2.6",
+    "sudo-prompt": "^9.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/plist": "^3.0.5",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "scripts/apply-mock.sh off && ray build -e dist",
+    "build:local": "scripts/apply-mock.sh off && ray build -e dist -o ./build",
+    "dev": "scripts/apply-mock.sh off --launch",
+    "dev:mock": "scripts/apply-mock.sh 1 --launch --log",
+    "mock": "scripts/apply-mock.sh",
+    "mock:ls": "ts-node --transpile-only src/mocks/listScenarios.ts",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "scripts/apply-mock.sh off && npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

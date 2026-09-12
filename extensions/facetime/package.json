@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "facetime",
+  "title": "FaceTime",
+  "description": "Make FaceTime calls with Raycast",
+  "icon": "facetime.png",
+  "author": "ron-myers",
+  "contributors": [
+    "arthur_fontaine"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "call",
+      "title": "FaceTime Call",
+      "description": "Opens FaceTime ready to make a call",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.1",
+    "@raycast/utils": "^1.16.2",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

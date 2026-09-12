@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sleevy",
+  "version": "1.0.0",
+  "description": "Add, view, and delete items from Sleevy",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "sleeve-it",
+      "title": "Sleeve It",
+      "description": "Save URL from clipboard to your Sleevy",
+      "mode": "no-view"
+    },
+    {
+      "name": "your-library",
+      "title": "Your Library",
+      "subtitle": "Sleevy",
+      "description": "Show all your saved items",
+      "mode": "view"
+    }
+  ],
+  "title": "Sleevy - Manage Your Bookmarks",
+  "author": "onnokh",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "The base URL for the Sleevy API",
+      "type": "textfield",
+      "required": true,
+      "default": "https://api.sleevy.app",
+      "placeholder": "https://api.sleevy.app"
+    },
+    {
+      "name": "webUrl",
+      "title": "Web URL",
+      "description": "The base URL for the Sleevy web app (used during Connect). Leave empty to derive from API URL.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://sleevy.app"
+    },
+    {
+      "name": "sourceName",
+      "title": "Source Name",
+      "description": "A name for this device (e.g. Work Laptop). Defaults to your computer name if empty.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "e.g. Work Laptop"
+    }
+  ]
+}

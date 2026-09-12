@@ -1,0 +1,12 @@
+/node_modules
+
+# Raycast-generated files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# Test and editor output
+/coverage
+.DS_Store

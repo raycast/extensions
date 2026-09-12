@@ -1,0 +1,329 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+test("parseProcessInfoFromPsOutput extracts pid, csrf token and extension port", async () => {
+  const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
+
+  const output = `
+  111 /Applications/Other.app/Contents/MacOS/language_server_macos --app_data_dir other --csrf_token abc
+  222 /Applications/Antigravity.app/Contents/MacOS/language_server_macos --app_data_dir antigravity --csrf_token token-123 --extension_server_port 48765
+  `;
+
+  const parsed = parseProcessInfoFromPsOutput(output);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 222);
+  assert.equal(parsed.processInfo?.csrfToken, "token-123");
+  assert.equal(parsed.processInfo?.extensionPort, 48765);
+});
+
+test("parseProcessInfoFromPsOutput detects the suffix-less language_server binary (Antigravity 2.7+)", async () => {
+  const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
+
+  const output = `
+  14265 /Applications/Antigravity.app/Contents/Resources/bin/language_server --standalone --override_ide_name antigravity --https_server_port 0 --csrf_token d49cf160-19c7-4601-97f3-56694388220f --app_data_dir antigravity
+  `;
+
+  const parsed = parseProcessInfoFromPsOutput(output);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 14265);
+  assert.equal(parsed.processInfo?.csrfToken, "d49cf160-19c7-4601-97f3-56694388220f");
+  assert.equal(parsed.processInfo?.extensionPort, null);
+});
+
+test("parseProcessInfoFromPsOutput ignores a Windsurf language server that is not Antigravity", async () => {
+  const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
+
+  const output = `
+  41540 /Applications/Devin.app/Contents/Resources/app/extensions/windsurf/bin/language_server_macos_arm --ide_name windsurf --extension_server_port 57388
+  `;
+
+  const parsed = parseProcessInfoFromPsOutput(output);
+
+  assert.equal(parsed.sawAntigravityProcess, false);
+  assert.equal(parsed.processInfo, null);
+});
+
+test("parseProcessInfoFromPsOutput prefers the Antigravity app over agy fallback", async () => {
+  const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
+
+  const output = `
+  111 /Users/user/.local/bin/agy --dangerously-skip-permissions
+  222 /Applications/Antigravity.app/Contents/MacOS/language_server_macos --app_data_dir antigravity --csrf_token token-123 --extension_server_port 48765
+  `;
+
+  const parsed = parseProcessInfoFromPsOutput(output);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 222);
+  assert.equal(parsed.processInfo?.csrfToken, "token-123");
+  assert.equal(parsed.processInfo?.extensionPort, 48765);
+});
+
+test("parseProcessInfoFromPsOutput marks antigravity seen when csrf token missing", async () => {
+  const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
+
+  const output = `
+  333 /Applications/Antigravity.app/Contents/MacOS/language_server_macos --app_data_dir antigravity --extension_server_port 41234
+  `;
+
+  const parsed = parseProcessInfoFromPsOutput(output);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.equal(parsed.processInfo, null);
+});
+
+test("parseProcessInfoFromWindowsProcessList extracts pid, csrf token and extension port for x64", async () => {
+  const { parseProcessInfoFromWindowsProcessList } = await import("./probe.ts");
+
+  const parsed = parseProcessInfoFromWindowsProcessList([
+    {
+      ProcessId: 444,
+      Name: "language_server_windows_x64.exe",
+      ExecutablePath:
+        "C:\\Users\\me\\AppData\\Local\\Programs\\Antigravity\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_x64.exe",
+      CommandLine:
+        '"C:\\Users\\me\\AppData\\Local\\Programs\\Antigravity\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_x64.exe" --app_data_dir C:\\Users\\me\\AppData\\Roaming\\Antigravity --csrf_token token-456 --extension_server_port 51234',
+    },
+  ]);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 444);
+  assert.equal(parsed.processInfo?.csrfToken, "token-456");
+  assert.equal(parsed.processInfo?.extensionPort, 51234);
+});
+
+test("parseProcessInfoFromWindowsProcessList detects the suffix-less language_server.exe binary", async () => {
+  const { parseProcessInfoFromWindowsProcessList } = await import("./probe.ts");
+
+  const parsed = parseProcessInfoFromWindowsProcessList([
+    {
+      ProcessId: 445,
+      Name: "language_server.exe",
+      ExecutablePath:
+        "C:\\Users\\me\\AppData\\Local\\Programs\\Antigravity\\resources\\app\\extensions\\antigravity\\bin\\language_server.exe",
+      CommandLine:
+        '"C:\\Users\\me\\AppData\\Local\\Programs\\Antigravity\\resources\\app\\extensions\\antigravity\\bin\\language_server.exe" --app_data_dir C:\\Users\\me\\AppData\\Roaming\\Antigravity --csrf_token token-789 --extension_server_port 51235',
+    },
+  ]);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 445);
+  assert.equal(parsed.processInfo?.csrfToken, "token-789");
+  assert.equal(parsed.processInfo?.extensionPort, 51235);
+});
+
+test("parseProcessInfoFromWindowsProcessList prefers the Antigravity app over agy fallback", async () => {
+  const { parseProcessInfoFromWindowsProcessList } = await import("./probe.ts");
+
+  const parsed = parseProcessInfoFromWindowsProcessList([
+    {
+      ProcessId: 333,
+      Name: "agy",
+      ExecutablePath: "C:\\Users\\me\\.local\\bin\\agy",
+      CommandLine: "agy --dangerously-skip-permissions",
+    },
+    {
+      ProcessId: 444,
+      Name: "language_server_windows_x64.exe",
+      ExecutablePath:
+        "C:\\Users\\me\\AppData\\Local\\Programs\\Antigravity\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_x64.exe",
+      CommandLine:
+        '"C:\\Users\\me\\AppData\\Local\\Programs\\Antigravity\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_x64.exe" --app_data_dir C:\\Users\\me\\AppData\\Roaming\\Antigravity --csrf_token token-456 --extension_server_port 51234',
+    },
+  ]);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 444);
+  assert.equal(parsed.processInfo?.csrfToken, "token-456");
+  assert.equal(parsed.processInfo?.extensionPort, 51234);
+});
+
+test("parseProcessInfoFromWindowsProcessList detects the agy.exe CLI fallback", async () => {
+  const { parseProcessInfoFromWindowsProcessList } = await import("./probe.ts");
+
+  const parsed = parseProcessInfoFromWindowsProcessList([
+    {
+      ProcessId: 777,
+      Name: "agy.exe",
+      ExecutablePath: "C:\\Users\\me\\.local\\bin\\agy.exe",
+      CommandLine: '"C:\\Users\\me\\.local\\bin\\agy.exe" --dangerously-skip-permissions',
+    },
+  ]);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 777);
+  assert.equal(parsed.processInfo?.csrfToken, "cli-dummy-token");
+});
+
+test("parseProcessInfoFromWindowsProcessList detects agy.exe installed under a path with spaces", async () => {
+  const { parseProcessInfoFromWindowsProcessList } = await import("./probe.ts");
+
+  const parsed = parseProcessInfoFromWindowsProcessList([
+    {
+      ProcessId: 888,
+      Name: "agy.exe",
+      ExecutablePath: "C:\\Program Files\\AGY\\agy.exe",
+      CommandLine: '"C:\\Program Files\\AGY\\agy.exe" --dangerously-skip-permissions',
+    },
+  ]);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 888);
+  assert.equal(parsed.processInfo?.csrfToken, "cli-dummy-token");
+});
+
+test("parseProcessInfoFromWindowsProcessList marks antigravity arm64 process seen when csrf token missing", async () => {
+  const { parseProcessInfoFromWindowsProcessList } = await import("./probe.ts");
+
+  const parsed = parseProcessInfoFromWindowsProcessList([
+    {
+      ProcessId: 555,
+      Name: "language_server_windows_arm.exe",
+      ExecutablePath:
+        "C:\\Users\\me\\AppData\\Local\\Programs\\Antigravity\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_arm.exe",
+    },
+  ]);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.equal(parsed.processInfo, null);
+});
+
+test("parseListeningPorts parses and de-duplicates listening ports", async () => {
+  const { parseListeningPorts } = await import("./probe.ts");
+
+  const output = `
+COMMAND   PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+server    222 me    10u  IPv4 0x0000000000000000      0t0  TCP 127.0.0.1:8080 (LISTEN)
+server    222 me    11u  IPv4 0x0000000000000000      0t0  TCP *:8080 (LISTEN)
+server    222 me    12u  IPv4 0x0000000000000000      0t0  TCP 127.0.0.1:9090 (LISTEN)
+`;
+
+  const ports = parseListeningPorts(output);
+
+  assert.deepEqual(ports, [8080, 9090]);
+});
+
+test("parseListeningPortsFromNetstatOutput parses and de-duplicates Windows listening ports for one pid", async () => {
+  const { parseListeningPortsFromNetstatOutput } = await import("./probe.ts");
+
+  const output = `
+  Proto  Local Address          Foreign Address        State           PID
+  TCP    127.0.0.1:6463         0.0.0.0:0              LISTENING       19692
+  TCP    127.0.0.1:6463         0.0.0.0:0              LISTENING       19692
+  TCP    [::1]:7768             [::]:0                 LISTENING       19692
+  TCP    127.0.0.1:51234        0.0.0.0:0              LISTENING       99999
+`;
+
+  const ports = parseListeningPortsFromNetstatOutput(output, 19692);
+
+  assert.deepEqual(ports, [6463, 7768]);
+});
+
+test("requestWithFallback retries with HTTP on the same port when HTTPS fails", async () => {
+  const { requestWithFallback } = await import("./probe.ts");
+
+  const attempts: string[] = [];
+
+  const sendRequest = async (options: { scheme: "http" | "https"; port: number }) => {
+    attempts.push(`${options.scheme}:${options.port}`);
+
+    if (options.scheme === "https") {
+      throw new Error("tls failed");
+    }
+
+    return { ok: true };
+  };
+
+  const result = await requestWithFallback(
+    { path: "/test", body: {} },
+    { httpsPort: 8443, httpPort: 8443, csrfToken: "csrf", timeoutMs: 1000 },
+    sendRequest as never,
+  );
+
+  assert.deepEqual(result, { ok: true });
+  assert.deepEqual(attempts, ["https:8443", "http:8443"]);
+});
+
+test("requestWithFallback retries HTTP on detected port when extension HTTP port is unavailable", async () => {
+  const { requestWithFallback } = await import("./probe.ts");
+
+  const attempts: string[] = [];
+
+  const sendRequest = async (options: { scheme: "http" | "https"; port: number }) => {
+    attempts.push(`${options.scheme}:${options.port}`);
+
+    if (options.scheme === "https") {
+      throw new Error("tls failed");
+    }
+
+    return { ok: true };
+  };
+
+  const result = await requestWithFallback(
+    { path: "/test", body: {} },
+    { httpsPort: 9443, httpPort: null, csrfToken: "csrf", timeoutMs: 1000 },
+    sendRequest as never,
+  );
+
+  assert.deepEqual(result, { ok: true });
+  assert.deepEqual(attempts, ["https:9443", "http:9443"]);
+});
+
+test("parseProcessInfoFromPsOutput extracts pid and csrf token for antigravity-cli path", async () => {
+  const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
+
+  const output = `
+  333 /Users/user/.gemini/antigravity-cli/bin/language_server_macos --csrf_token token-cli --extension_server_port 51234
+  `;
+
+  const parsed = parseProcessInfoFromPsOutput(output);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 333);
+  assert.equal(parsed.processInfo?.csrfToken, "token-cli");
+  assert.equal(parsed.processInfo?.extensionPort, 51234);
+});
+
+test("parseProcessInfoFromPsOutput extracts pid and dummy csrf token for agy process", async () => {
+  const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
+
+  const output = `
+  444 /Users/user/.local/bin/agy --dangerously-skip-permissions
+  `;
+
+  const parsed = parseProcessInfoFromPsOutput(output);
+
+  assert.equal(parsed.sawAntigravityProcess, true);
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 444);
+  assert.equal(parsed.processInfo?.csrfToken, "cli-dummy-token");
+});
+
+test("parseProcessInfoFromPsOutput ignores helpers with antigravity-cli only in their arguments", async () => {
+  const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
+
+  // A git subprocess the agy CLI spawns inside its scratch dir: it references an
+  // antigravity-cli path in its arguments but its executable is `git` and it holds
+  // no listening socket. It must not be picked over the real agy process.
+  const output = `
+  53536 /Library/Developer/CommandLineTools/usr/libexec/git-core/git --shallow-file /Users/user/.gemini/antigravity-cli/scratch/repo/.git/shallow.lock index-pack --stdin --fix-thin
+  14229 agy --dangerously-skip-permissions
+  `;
+
+  const parsed = parseProcessInfoFromPsOutput(output);
+
+  assert.ok(parsed.processInfo);
+  assert.equal(parsed.processInfo?.pid, 14229);
+  assert.equal(parsed.processInfo?.csrfToken, "cli-dummy-token");
+});

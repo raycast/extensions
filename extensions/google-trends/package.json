@@ -1,0 +1,822 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-trends",
+  "title": "Google Trends",
+  "description": "Daily and real-time surge trends in Google trends",
+  "icon": "Icon.png",
+  "author": "Kang",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "daily",
+      "title": "Show Daily",
+      "subtitle": "Google Trends",
+      "description": "Google Trends Daily List",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "country",
+          "type": "dropdown",
+          "required": true,
+          "title": "Daily Trends Country",
+          "description": "Select Daily Trends Country",
+          "default": "US",
+          "data": [
+            {
+              "title": "🇦🇷 Argentina",
+              "value": "AR"
+            },
+            {
+              "title": "🇦🇹 Austria",
+              "value": "AT"
+            },
+            {
+              "title": "🇦🇺 Australia",
+              "value": "AU"
+            },
+            {
+              "title": "🇧🇪 Belgium",
+              "value": "BE"
+            },
+            {
+              "title": "🇧🇷 Brazil",
+              "value": "BR"
+            },
+            {
+              "title": "🇨🇦 Canada",
+              "value": "CA"
+            },
+            {
+              "title": "🇨🇱 Chile",
+              "value": "CL"
+            },
+            {
+              "title": "🇨🇴 Colombia",
+              "value": "CO"
+            },
+            {
+              "title": "🇨🇿 Czech",
+              "value": "CZ"
+            },
+            {
+              "title": "🇩🇪 Germany",
+              "value": "DE"
+            },
+            {
+              "title": "🇩🇰 Denmark",
+              "value": "DK"
+            },
+            {
+              "title": "🇪🇬 Egypt",
+              "value": "EG"
+            },
+            {
+              "title": "🇫🇮 Finland",
+              "value": "FI"
+            },
+            {
+              "title": "🇫🇷 France",
+              "value": "FR"
+            },
+            {
+              "title": "🇬🇧 England",
+              "value": "GB"
+            },
+            {
+              "title": "🇬🇷 Greece",
+              "value": "GR"
+            },
+            {
+              "title": "🇭🇰 Hong Kong",
+              "value": "HK"
+            },
+            {
+              "title": "🇭🇺 Hungary",
+              "value": "HU"
+            },
+            {
+              "title": "🇮🇪 Ireland",
+              "value": "IE"
+            },
+            {
+              "title": "🇮🇳 India",
+              "value": "IN"
+            },
+            {
+              "title": "🇮🇹 Italy",
+              "value": "IT"
+            },
+            {
+              "title": "🇮🇩 Indonesia",
+              "value": "ID"
+            },
+            {
+              "title": "🇮🇱 Israel",
+              "value": "IL"
+            },
+            {
+              "title": "🇯🇵 Japan",
+              "value": "JP"
+            },
+            {
+              "title": "🇰🇪 Kenya",
+              "value": "KE"
+            },
+            {
+              "title": "🇰🇷 Korea",
+              "value": "KR"
+            },
+            {
+              "title": "🇲🇽 Mexico",
+              "value": "MX"
+            },
+            {
+              "title": "🇲🇾 Malaysia",
+              "value": "MY"
+            },
+            {
+              "title": "🇳🇬 Nigeria",
+              "value": "NG"
+            },
+            {
+              "title": "🇳🇱 Netherlands",
+              "value": "NL"
+            },
+            {
+              "title": "🇳🇴 Norway",
+              "value": "NO"
+            },
+            {
+              "title": "🇳🇿 New Zealand",
+              "value": "NZ"
+            },
+            {
+              "title": "🇵🇭 Philippines",
+              "value": "PH"
+            },
+            {
+              "title": "🇵🇱 Poland",
+              "value": "PL"
+            },
+            {
+              "title": "🇵🇹 Portugal",
+              "value": "PT"
+            },
+            {
+              "title": "🇷🇴 Romania",
+              "value": "RO"
+            },
+            {
+              "title": "🇷🇺 Russia",
+              "value": "RU"
+            },
+            {
+              "title": "🇸🇦 Saudi Arabia",
+              "value": "SA"
+            },
+            {
+              "title": "🇸🇬 Singapore",
+              "value": "SG"
+            },
+            {
+              "title": "🇸🇪 Sweden",
+              "value": "SE"
+            },
+            {
+              "title": "🇹🇭 Thailand",
+              "value": "TH"
+            },
+            {
+              "title": "🇹🇼 Taiwan",
+              "value": "TW"
+            },
+            {
+              "title": "🇨🇭 Swiss",
+              "value": "CH"
+            },
+            {
+              "title": "🇹🇷 Turkey",
+              "value": "TR"
+            },
+            {
+              "title": "🇺🇦 Ukraine",
+              "value": "UA"
+            },
+            {
+              "title": "🇺🇸 United States",
+              "value": "US"
+            },
+            {
+              "title": "🇻🇳 Vietnam",
+              "value": "VN"
+            },
+            {
+              "title": "🇿🇦 South Africa",
+              "value": "ZA"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "realtime",
+      "title": "Show Realtime",
+      "subtitle": "Google Trends",
+      "description": "Google Trends Realtime List",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "country",
+          "type": "dropdown",
+          "required": true,
+          "title": "RealTime Trends Country",
+          "description": "Select RealTime Trends Country",
+          "default": "US",
+          "data": [
+            {
+              "title": "🇦🇷 Argentina",
+              "value": "AR"
+            },
+            {
+              "title": "🇦🇹 Austria",
+              "value": "AT"
+            },
+            {
+              "title": "🇦🇺 Australia",
+              "value": "AU"
+            },
+            {
+              "title": "🇧🇪 Belgium",
+              "value": "BE"
+            },
+            {
+              "title": "🇧🇷 Brazil",
+              "value": "BR"
+            },
+            {
+              "title": "🇨🇦 Canada",
+              "value": "CA"
+            },
+            {
+              "title": "🇨🇱 Chile",
+              "value": "CL"
+            },
+            {
+              "title": "🇨🇴 Colombia",
+              "value": "CO"
+            },
+            {
+              "title": "🇩🇪 Germany",
+              "value": "DE"
+            },
+            {
+              "title": "🇫🇷 France",
+              "value": "FR"
+            },
+            {
+              "title": "🇬🇧 England",
+              "value": "GB"
+            },
+            {
+              "title": "🇮🇪 Ireland",
+              "value": "IE"
+            },
+            {
+              "title": "🇮🇳 India",
+              "value": "IN"
+            },
+            {
+              "title": "🇮🇹 Italy",
+              "value": "IT"
+            },
+            {
+              "title": "🇯🇵 Japan",
+              "value": "JP"
+            },
+            {
+              "title": "🇲🇽 Mexico",
+              "value": "MX"
+            },
+            {
+              "title": "🇲🇾 Malaysia",
+              "value": "MY"
+            },
+            {
+              "title": "🇳🇱 Netherlands",
+              "value": "NL"
+            },
+            {
+              "title": "🇳🇴 Norway",
+              "value": "NO"
+            },
+            {
+              "title": "🇳🇿 New Zealand",
+              "value": "NZ"
+            },
+            {
+              "title": "🇵🇭 Philippines",
+              "value": "PH"
+            },
+            {
+              "title": "🇵🇱 Poland",
+              "value": "PL"
+            },
+            {
+              "title": "🇵🇹 Portugal",
+              "value": "PT"
+            },
+            {
+              "title": "🇷🇺 Russia",
+              "value": "RU"
+            },
+            {
+              "title": "🇸🇪 Sweden",
+              "value": "SE"
+            },
+            {
+              "title": "🇨🇭 Swiss",
+              "value": "CH"
+            },
+            {
+              "title": "🇹🇷 Turkey",
+              "value": "TR"
+            },
+            {
+              "title": "🇺🇸 United States",
+              "value": "US"
+            },
+            {
+              "title": "🇻🇳 Vietnam",
+              "value": "VN"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lang",
+      "type": "dropdown",
+      "required": true,
+      "title": "Your Language",
+      "description": "Select Language",
+      "default": "en",
+      "data": [
+        {
+          "title": "🇿🇦 Afrikaans",
+          "value": "af"
+        },
+        {
+          "title": "🇦🇱 Albanian",
+          "value": "sq"
+        },
+        {
+          "title": "Amharic",
+          "value": "am"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "🇦🇲 Armenian",
+          "value": "hy"
+        },
+        {
+          "title": "🇦🇿 Azerbaijani",
+          "value": "az"
+        },
+        {
+          "title": "Basque",
+          "value": "eu"
+        },
+        {
+          "title": "🇧🇾 Belarusian",
+          "value": "be"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "🇧🇦 Bosnian",
+          "value": "bs"
+        },
+        {
+          "title": "🇧🇬 Bulgarian",
+          "value": "bg"
+        },
+        {
+          "title": "Catalan",
+          "value": "ca"
+        },
+        {
+          "title": "Cebuano",
+          "value": "ceb"
+        },
+        {
+          "title": "🇨🇳 Chinese Simplified",
+          "value": "zh-CN"
+        },
+        {
+          "title": "🇨🇳 Chinese Traditional",
+          "value": "zh-TW"
+        },
+        {
+          "title": "Corsican",
+          "value": "co"
+        },
+        {
+          "title": "🇭🇷 Croatian",
+          "value": "hr"
+        },
+        {
+          "title": "🇨🇿 Czech",
+          "value": "cs"
+        },
+        {
+          "title": "🇩🇰 Danish",
+          "value": "da"
+        },
+        {
+          "title": "🇳🇱 Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "🇬🇧 English",
+          "value": "en"
+        },
+        {
+          "title": "Esperanto",
+          "value": "eo"
+        },
+        {
+          "title": "🇪🇪 Estonian",
+          "value": "et"
+        },
+        {
+          "title": "🇫🇮 Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "🇫🇷 French",
+          "value": "fr"
+        },
+        {
+          "title": "Frisian",
+          "value": "fy"
+        },
+        {
+          "title": "Galician",
+          "value": "gl"
+        },
+        {
+          "title": "🇬🇪 Georgian",
+          "value": "ka"
+        },
+        {
+          "title": "🇩🇪 German",
+          "value": "de"
+        },
+        {
+          "title": "🇬🇷 Greek",
+          "value": "el"
+        },
+        {
+          "title": "Gujarati",
+          "value": "gu"
+        },
+        {
+          "title": "🇭🇹 Haitian Creole",
+          "value": "ht"
+        },
+        {
+          "title": "Hausa",
+          "value": "ha"
+        },
+        {
+          "title": "🌺 Hawaiian",
+          "value": "haw"
+        },
+        {
+          "title": "🇮🇱 Hebrew",
+          "value": "he"
+        },
+        {
+          "title": "🇮🇳 Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Hmong",
+          "value": "hmn"
+        },
+        {
+          "title": "🇭🇺 Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "🇮🇸 Icelandic",
+          "value": "is"
+        },
+        {
+          "title": "Igbo",
+          "value": "ig"
+        },
+        {
+          "title": "🇮🇩 Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "🇮🇪 Irish",
+          "value": "ga"
+        },
+        {
+          "title": "🇮🇹 Italian",
+          "value": "it"
+        },
+        {
+          "title": "🇯🇵 Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Javanese",
+          "value": "jv"
+        },
+        {
+          "title": "Kannada",
+          "value": "kn"
+        },
+        {
+          "title": "🇰🇿 Kazakh",
+          "value": "kk"
+        },
+        {
+          "title": "Khmer",
+          "value": "km"
+        },
+        {
+          "title": "Kinyarwanda",
+          "value": "rw"
+        },
+        {
+          "title": "🇰🇷 Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Kurdish",
+          "value": "ku"
+        },
+        {
+          "title": "Kyrgyz",
+          "value": "ky"
+        },
+        {
+          "title": "Lao",
+          "value": "lo"
+        },
+        {
+          "title": "🇱🇻 Latvian",
+          "value": "lv"
+        },
+        {
+          "title": "🇱🇹 Lithuanian",
+          "value": "lt"
+        },
+        {
+          "title": "🇱🇺 Luxembourgish",
+          "value": "lb"
+        },
+        {
+          "title": "🇲🇰 Macedonian",
+          "value": "mk"
+        },
+        {
+          "title": "Malagasy",
+          "value": "mg"
+        },
+        {
+          "title": "🇲🇾 Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Malayalam",
+          "value": "ml"
+        },
+        {
+          "title": "🇲🇹 Maltese",
+          "value": "mt"
+        },
+        {
+          "title": "🇳🇿 Maori",
+          "value": "mi"
+        },
+        {
+          "title": "Marathi",
+          "value": "mr"
+        },
+        {
+          "title": "🇲🇳 Mongolian",
+          "value": "mn"
+        },
+        {
+          "title": "🇲🇲 Myanmar (Burmese)",
+          "value": "my"
+        },
+        {
+          "title": "🇳🇵 Nepali",
+          "value": "ne"
+        },
+        {
+          "title": "🇳🇴 Norwegian",
+          "value": "no"
+        },
+        {
+          "title": "Nyanja (Chichewa)",
+          "value": "ny"
+        },
+        {
+          "title": "Odia (Oriya)",
+          "value": "or"
+        },
+        {
+          "title": "Pashto",
+          "value": "ps"
+        },
+        {
+          "title": "🇮🇷 Persian",
+          "value": "fa"
+        },
+        {
+          "title": "🇵🇱 Polish",
+          "value": "pl"
+        },
+        {
+          "title": "🇵🇹 Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "🇮🇳 Punjabi",
+          "value": "pa"
+        },
+        {
+          "title": "🇷🇴 Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "🇷🇺 Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Samoan",
+          "value": "sm"
+        },
+        {
+          "title": "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scots Gaelic",
+          "value": "gd"
+        },
+        {
+          "title": "🇷🇸 Serbian",
+          "value": "sr"
+        },
+        {
+          "title": "Sesotho",
+          "value": "st"
+        },
+        {
+          "title": "Shona",
+          "value": "sn"
+        },
+        {
+          "title": "Sindhi",
+          "value": "sd"
+        },
+        {
+          "title": "Sinhala (Sinhalese)",
+          "value": "si"
+        },
+        {
+          "title": "🇸🇰 Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "🇸🇮 Slovenian",
+          "value": "sl"
+        },
+        {
+          "title": "🇸🇴 Somali",
+          "value": "so"
+        },
+        {
+          "title": "🇪🇸 Spanish",
+          "value": "es"
+        },
+        {
+          "title": "🇸🇩 Sundanese",
+          "value": "su"
+        },
+        {
+          "title": "Swahili",
+          "value": "sw"
+        },
+        {
+          "title": "🇸🇪 Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "🇵🇭 Tagalog (Filipino)",
+          "value": "tl"
+        },
+        {
+          "title": "Tajik",
+          "value": "tg"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Tatar",
+          "value": "tt"
+        },
+        {
+          "title": "Telugu",
+          "value": "te"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "🇹🇭 Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "🇹🇲 Turkmen",
+          "value": "tk"
+        },
+        {
+          "title": "🇺🇦 Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        },
+        {
+          "title": "Uyghur",
+          "value": "ug"
+        },
+        {
+          "title": "Uzbek",
+          "value": "uz"
+        },
+        {
+          "title": "🇻🇳 Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welsh",
+          "value": "cy"
+        },
+        {
+          "title": "Xhosa",
+          "value": "xh"
+        },
+        {
+          "title": "🇮🇱 Yiddish",
+          "value": "yi"
+        },
+        {
+          "title": "Yoruba",
+          "value": "yo"
+        },
+        {
+          "title": "Zulu",
+          "value": "zu"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.6",
+    "axios": "^0.30.3",
+    "html-entities": "^2.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

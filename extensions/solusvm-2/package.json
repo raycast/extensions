@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "solusvm-2",
+  "title": "SolusVM 2",
+  "description": "Manage SolusVM 2",
+  "icon": "extension_icon.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "instance_url",
+      "title": "Instance URL",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://solusvm2.example.com:443/",
+      "description": "SolusVM 2 Instance with Port"
+    },
+    {
+      "name": "api_token",
+      "title": "API Token",
+      "type": "password",
+      "required": true,
+      "placeholder": "ey...XX",
+      "description": "API Token from Account"
+    }
+  ],
+  "commands": [
+    {
+      "name": "account",
+      "title": "Show Account",
+      "subtitle": "SolusVM 2",
+      "description": "Manage Settings and API Tokens",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "View Projects",
+      "subtitle": "SolusVM 2",
+      "description": "Manage Servers and Members",
+      "mode": "view"
+    },
+    {
+      "name": "iso-images",
+      "title": "View ISO images",
+      "subtitle": "SolusVM 2",
+      "description": "View Custom ISO Images",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.2",
+    "@raycast/utils": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

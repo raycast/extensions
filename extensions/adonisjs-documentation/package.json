@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "adonisjs-documentation",
+  "title": "AdonisJS Documentation",
+  "description": "Access AdonisJS documentation from within Raycast",
+  "icon": "adonis-logo.png",
+  "author": "craigharman",
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "version": "1.1.0",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "adonis",
+      "title": "Adonis",
+      "subtitle": "AdonisJS documentation search",
+      "description": "Search the Adonis JS documentation from within Raycast.",
+      "mode": "view",
+      "icon": "adonis-logo-128.png"
+    },
+    {
+      "name": "lucid",
+      "title": "Lucid",
+      "subtitle": "Lucid documentation search",
+      "description": "Search the Lucid JS documentation from within Raycast.",
+      "mode": "view",
+      "icon": "lucid-logo.png"
+    },
+    {
+      "name": "vine",
+      "title": "Vine",
+      "subtitle": "Vine documentation search",
+      "description": "Search the Vine JS documentation from within Raycast.",
+      "mode": "view",
+      "icon": "vinejs-logo.png"
+    },
+    {
+      "name": "bento",
+      "title": "Bento Cache",
+      "subtitle": "Bento Cache documentation search",
+      "description": "Search the Bento Cache documentation from within Raycast.",
+      "mode": "view",
+      "icon": "adonis-logo-128.png"
+    },
+    {
+      "name": "edge",
+      "title": "Edge",
+      "subtitle": "Edge templating documentation search",
+      "description": "Search the Edge documentation from within Raycast.",
+      "mode": "view",
+      "icon": "edge-logo.png"
+    },
+    {
+      "name": "japa",
+      "title": "Japa",
+      "subtitle": "Japa testing framework documentation search",
+      "description": "Search the Japa documentation from within Raycast.",
+      "mode": "view",
+      "icon": "japa-logo.png"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "algoliasearch": "^4.23.3",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.17.4",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

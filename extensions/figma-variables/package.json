@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "figma-variables",
+  "title": "Figma Variables",
+  "description": "Access Figma variables in Raycast",
+  "icon": "command-icon.png",
+  "author": "martin_molcrette",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Explore Figma Variables",
+      "description": "Explore your Figma Variables",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "description": "Figma Access Token",
+      "name": "accessToken",
+      "title": "Access Token",
+      "required": true
+    },
+    {
+      "type": "textfield",
+      "description": "Figma fileKey",
+      "name": "fileKey",
+      "title": "File Key",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "axios": "^1.8.4",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

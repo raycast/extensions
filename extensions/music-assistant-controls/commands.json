@@ -1,0 +1,3675 @@
+[{
+    "command": "auth/authorization_url",
+    "category": "Auth",
+    "summary": "Get OAuth authorization URL for authentication.",
+    "description": "Get OAuth authorization URL for authentication.\n\nFor OAuth providers (like Home Assistant), this returns the URL that\nthe user should visit in their browser to authorize the application.",
+    "parameters": [{
+        "name": "provider_id",
+        "type": "string",
+        "required": true,
+        "description": "The provider ID (e.g., \"hass\")."
+    }, {
+        "name": "return_url",
+        "type": "string",
+        "required": false,
+        "description": "URL to redirect to after OAuth completes."
+    }],
+    "return_type": "object with string keys and string values",
+    "authenticated": false,
+    "required_role": null
+}, {
+    "command": "auth/login",
+    "category": "Auth",
+    "summary": "Authenticate user with credentials via WebSocket.",
+    "description": "Authenticate user with credentials via WebSocket.\n\nThis command allows clients to authenticate over the WebSocket connection\nusing username/password or other provider-specific credentials.",
+    "parameters": [{
+        "name": "username",
+        "type": "string",
+        "required": false,
+        "description": "Username for authentication (for builtin provider)."
+    }, {
+        "name": "password",
+        "type": "string",
+        "required": false,
+        "description": "Password for authentication (for builtin provider)."
+    }, {
+        "name": "provider_id",
+        "type": "string",
+        "required": false,
+        "description": "The login provider ID (defaults to \"builtin\")."
+    }, {
+        "name": "device_name",
+        "type": "string",
+        "required": false,
+        "description": "Optional device name for the token (e.g., \"iPhone 15\", \"Desktop PC\")."
+    }, {
+        "name": "extra_credentials",
+        "type": "Any",
+        "required": true,
+        "description": "Additional provider-specific credentials."
+    }],
+    "return_type": "object with string keys and Any values",
+    "authenticated": false,
+    "required_role": null
+}, {
+    "command": "auth/logout",
+    "category": "Auth",
+    "summary": "Logout current user by revoking the current token.",
+    "description": "Logout current user by revoking the current token.",
+    "parameters": [],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "auth/me",
+    "category": "Auth",
+    "summary": "Get current authenticated user information.",
+    "description": "Get current authenticated user information.",
+    "parameters": [],
+    "return_type": "User",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "auth/providers",
+    "category": "Auth",
+    "summary": "Get list of available authentication providers.",
+    "description": "Get list of available authentication providers.\n\nReturns information about all available login providers including\nwhether they require OAuth redirect flow.",
+    "parameters": [],
+    "return_type": "Array of object with string keys and Any values",
+    "authenticated": false,
+    "required_role": null
+}, {
+    "command": "auth/token/create",
+    "category": "Auth",
+    "summary": "Create a new long-lived access token for current user or another user (admin only).",
+    "description": "Create a new long-lived access token for current user or another user (admin only).\n\nLong-lived tokens are intended for external integrations and API access.\nThey expire after 10 years and do NOT auto-renew on use.\n\nShort-lived tokens (for regular user sessions) are only created during login\nand auto-renew on each use (sliding 30-day expiration window).",
+    "parameters": [{
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "The name/description for the token (e.g., \"Home Assistant\", \"Mobile App\")."
+    }, {
+        "name": "user_id",
+        "type": "string",
+        "required": false,
+        "description": "Optional user ID to create token for (admin only)."
+    }],
+    "return_type": "string",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "auth/token/revoke",
+    "category": "Auth",
+    "summary": "Revoke an auth token.",
+    "description": "Revoke an auth token.",
+    "parameters": [{
+        "name": "token_id",
+        "type": "string",
+        "required": true,
+        "description": "The token ID to revoke."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "auth/tokens",
+    "category": "Auth",
+    "summary": "Get current user's auth tokens or another user's tokens (admin only).",
+    "description": "Get current user's auth tokens or another user's tokens (admin only).",
+    "parameters": [{
+        "name": "user_id",
+        "type": "string",
+        "required": false,
+        "description": "Optional user ID to get tokens for (admin only)."
+    }],
+    "return_type": "Array of AuthToken",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "auth/user",
+    "category": "Auth",
+    "summary": "Get user by ID (admin only).",
+    "description": "Get user by ID (admin only).",
+    "parameters": [{
+        "name": "user_id",
+        "type": "string",
+        "required": true,
+        "description": "The user ID."
+    }],
+    "return_type": "User",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "auth/user/create",
+    "category": "Auth",
+    "summary": "Create a new user with built-in authentication (admin only).",
+    "description": "Create a new user with built-in authentication (admin only).",
+    "parameters": [{
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "The username (minimum 2 characters)."
+    }, {
+        "name": "password",
+        "type": "string",
+        "required": true,
+        "description": "The password (minimum 8 characters)."
+    }, {
+        "name": "role",
+        "type": "string",
+        "required": false,
+        "description": "User role - \"admin\" or \"user\" (default: \"user\")."
+    }, {
+        "name": "display_name",
+        "type": "string",
+        "required": false,
+        "description": "Optional display name."
+    }, {
+        "name": "avatar_url",
+        "type": "string",
+        "required": false,
+        "description": "Optional avatar URL."
+    }, {
+        "name": "player_filter",
+        "type": "Array of string",
+        "required": false,
+        "description": "Optional list of player IDs user has access to."
+    }, {
+        "name": "provider_filter",
+        "type": "Array of string",
+        "required": false,
+        "description": "Optional list of provider instance IDs user has access to."
+    }],
+    "return_type": "User",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "auth/user/delete",
+    "category": "Auth",
+    "summary": "Delete user account (admin only).",
+    "description": "Delete user account (admin only).",
+    "parameters": [{
+        "name": "user_id",
+        "type": "string",
+        "required": true,
+        "description": "The user ID."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "auth/user/disable",
+    "category": "Auth",
+    "summary": "Disable user account (admin only).",
+    "description": "Disable user account (admin only).",
+    "parameters": [{
+        "name": "user_id",
+        "type": "string",
+        "required": true,
+        "description": "The user ID."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "auth/user/enable",
+    "category": "Auth",
+    "summary": "Enable user account (admin only).",
+    "description": "Enable user account (admin only).",
+    "parameters": [{
+        "name": "user_id",
+        "type": "string",
+        "required": true,
+        "description": "The user ID."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "auth/user/providers",
+    "category": "Auth",
+    "summary": "Get current user's linked authentication providers.",
+    "description": "Get current user's linked authentication providers.",
+    "parameters": [],
+    "return_type": "Array of object with string keys and Any values",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "auth/user/unlink_provider",
+    "category": "Auth",
+    "summary": "Unlink authentication provider from user (admin only).",
+    "description": "Unlink authentication provider from user (admin only).",
+    "parameters": [{
+        "name": "user_id",
+        "type": "string",
+        "required": true,
+        "description": "The user ID."
+    }, {
+        "name": "provider_type",
+        "type": "string",
+        "required": true,
+        "description": "Provider type to unlink."
+    }],
+    "return_type": "boolean",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "auth/user/update",
+    "category": "Auth",
+    "summary": "Update user profile information.",
+    "description": "Update user profile information.\n\nUsers can update their own profile. Admins can update any user including role and password.",
+    "parameters": [{
+        "name": "user_id",
+        "type": "string",
+        "required": false,
+        "description": "User ID to update (optional, defaults to current user)."
+    }, {
+        "name": "username",
+        "type": "string",
+        "required": false,
+        "description": "New username (optional)."
+    }, {
+        "name": "display_name",
+        "type": "string",
+        "required": false,
+        "description": "New display name (optional)."
+    }, {
+        "name": "avatar_url",
+        "type": "string",
+        "required": false,
+        "description": "New avatar URL (optional)."
+    }, {
+        "name": "password",
+        "type": "string",
+        "required": false,
+        "description": "New password (optional, minimum 8 characters)."
+    }, {
+        "name": "role",
+        "type": "string",
+        "required": false,
+        "description": "New role - \"admin\" or \"user\" (optional, set by admin only)."
+    }, {
+        "name": "preferences",
+        "type": "object with string keys and Any values",
+        "required": false,
+        "description": "User preferences dict (completely replaces existing, optional)."
+    }, {
+        "name": "player_filter",
+        "type": "Array of string",
+        "required": false,
+        "description": "List of player IDs user has access to (set by admin only, optional)."
+    }, {
+        "name": "provider_filter",
+        "type": "Array of string",
+        "required": false,
+        "description": "List of provider instance IDs user has access to (set by admin only, optional)."
+    }],
+    "return_type": "User",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "auth/users",
+    "category": "Auth",
+    "summary": "Get all users (admin only).",
+    "description": "Get all users (admin only).\n\nSystem users are excluded from the list.",
+    "parameters": [],
+    "return_type": "Array of User",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "config/core",
+    "category": "Config",
+    "summary": "Return all core controllers config options.",
+    "description": "Return all core controllers config options.",
+    "parameters": [{
+        "name": "include_values",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of CoreConfig",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/core/get",
+    "category": "Config",
+    "summary": "Return configuration for a single core controller.",
+    "description": "Return configuration for a single core controller.",
+    "parameters": [{
+        "name": "domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "CoreConfig",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/core/get_entries",
+    "category": "Config",
+    "summary": "Return Config entries to configure a core controller.",
+    "description": "Return Config entries to configure a core controller.\n\ncore_controller: name of the core controller\naction: [optional] action key called from config entries UI.\nvalues: the (intermediate) raw values for config entries sent with the action.",
+    "parameters": [{
+        "name": "domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "action",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "values",
+        "type": "object with string keys and boolean | number | integer | string | Array of number | Array of integer | Array of string | Array of boolean values",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of ConfigEntry",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/core/get_value",
+    "category": "Config",
+    "summary": "Return single configentry value for a core controller.",
+    "description": "Return single configentry value for a core controller.",
+    "parameters": [{
+        "name": "domain",
+        "type": "string",
+        "required": true,
+        "description": "The core controller domain."
+    }, {
+        "name": "key",
+        "type": "string",
+        "required": true,
+        "description": "The config key to retrieve."
+    }, {
+        "name": "default",
+        "type": "boolean | number | integer | string | Array of number | Array of integer | Array of string | Array of boolean",
+        "required": false,
+        "description": "Optional default value to return if key is not found."
+    }],
+    "return_type": "ConfigValueType",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/core/save",
+    "category": "Config",
+    "summary": "Save CoreController Config values.",
+    "description": "Save CoreController Config values.",
+    "parameters": [{
+        "name": "domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "values",
+        "type": "object with string keys and 'ConfigValueType' values",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "CoreConfig",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "config/dsp_presets/get",
+    "category": "Config",
+    "summary": "Return all user-defined DSP presets.",
+    "description": "Return all user-defined DSP presets.",
+    "parameters": [],
+    "return_type": "Array of DSPConfigPreset",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/dsp_presets/remove",
+    "category": "Config",
+    "summary": "Remove a user-defined DSP preset.",
+    "description": "Remove a user-defined DSP preset.",
+    "parameters": [{
+        "name": "preset_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "config/dsp_presets/save",
+    "category": "Config",
+    "summary": "Save/update a user-defined DSP presets.",
+    "description": "Save/update a user-defined DSP presets.\n\nThis method will validate the config before saving it to the persistent storage.",
+    "parameters": [{
+        "name": "preset",
+        "type": "DSPConfigPreset",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "DSPConfigPreset",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "config/players",
+    "category": "Config",
+    "summary": "Return all known player configurations, optionally filtered by provider id.",
+    "description": "Return all known player configurations, optionally filtered by provider id.",
+    "parameters": [{
+        "name": "provider",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "include_values",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of PlayerConfig",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/players/dsp/get",
+    "category": "Config",
+    "summary": "Return the DSP Configuration for a player.",
+    "description": "Return the DSP Configuration for a player.\n\nIn case the player does not have a DSP configuration, a default one is returned.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "DSPConfig",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/players/dsp/save",
+    "category": "Config",
+    "summary": "Save/update DSPConfig for a player.",
+    "description": "Save/update DSPConfig for a player.\n\nThis method will validate the config and apply it to the player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "config",
+        "type": "DSPConfig",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "DSPConfig",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "config/players/get",
+    "category": "Config",
+    "summary": "Return (full) configuration for a single player.",
+    "description": "Return (full) configuration for a single player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "action",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "values",
+        "type": "object with string keys and boolean | number | integer | string | Array of number | Array of integer | Array of string | Array of boolean values",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "PlayerConfig",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/players/get_entries",
+    "category": "Config",
+    "summary": "Return Config entries to configure a player.",
+    "description": "Return Config entries to configure a player.\n\nplayer_id: id of an existing player instance.\naction: [optional] action key called from config entries UI.\nvalues: the (intermediate) raw values for config entries sent with the action.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "action",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "values",
+        "type": "object with string keys and boolean | number | integer | string | Array of number | Array of integer | Array of string | Array of boolean values",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of ConfigEntry",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/players/get_value",
+    "category": "Config",
+    "summary": "Return single configentry value for a player.",
+    "description": "Return single configentry value for a player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "The player ID."
+    }, {
+        "name": "key",
+        "type": "string",
+        "required": true,
+        "description": "The config key to retrieve."
+    }, {
+        "name": "unpack_splitted_values",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether to unpack multi-value config entries."
+    }, {
+        "name": "default",
+        "type": "boolean | number | integer | string | Array of number | Array of integer | Array of string | Array of boolean",
+        "required": false,
+        "description": "Optional default value to return if key is not found."
+    }],
+    "return_type": "ConfigValueType",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/players/remove",
+    "category": "Config",
+    "summary": "Remove PlayerConfig.",
+    "description": "Remove PlayerConfig.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "config/players/save",
+    "category": "Config",
+    "summary": "Save/update PlayerConfig.",
+    "description": "Save/update PlayerConfig.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "values",
+        "type": "object with string keys and 'ConfigValueType' values",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "PlayerConfig",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "config/providers",
+    "category": "Config",
+    "summary": "Return all known provider configurations, optionally filtered by ProviderType.",
+    "description": "Return all known provider configurations, optionally filtered by ProviderType.",
+    "parameters": [{
+        "name": "provider_type",
+        "type": "ProviderType",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "provider_domain",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "include_values",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of ProviderConfig",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/providers/get",
+    "category": "Config",
+    "summary": "Return configuration for a single provider.",
+    "description": "Return configuration for a single provider.",
+    "parameters": [{
+        "name": "instance_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "ProviderConfig",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/providers/get_entries",
+    "category": "Config",
+    "summary": "Return Config entries to setup/configure a provider.",
+    "description": "Return Config entries to setup/configure a provider.\n\nprovider_domain: (mandatory) domain of the provider.\ninstance_id: id of an existing provider instance (None for new instance setup).\naction: [optional] action key called from config entries UI.\nvalues: the (intermediate) raw values for config entries sent with the action.",
+    "parameters": [{
+        "name": "provider_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "instance_id",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "action",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "values",
+        "type": "object with string keys and boolean | number | integer | string | Array of number | Array of integer | Array of string | Array of boolean values",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of ConfigEntry",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/providers/get_value",
+    "category": "Config",
+    "summary": "Return single configentry value for a provider.",
+    "description": "Return single configentry value for a provider.",
+    "parameters": [{
+        "name": "instance_id",
+        "type": "string",
+        "required": true,
+        "description": "The provider instance ID."
+    }, {
+        "name": "key",
+        "type": "string",
+        "required": true,
+        "description": "The config key to retrieve."
+    }, {
+        "name": "default",
+        "type": "boolean | number | integer | string | Array of number | Array of integer | Array of string | Array of boolean",
+        "required": false,
+        "description": "Optional default value to return if key is not found."
+    }],
+    "return_type": "ConfigValueType",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "config/providers/reload",
+    "category": "Config",
+    "summary": "Reload provider.",
+    "description": "Reload provider.",
+    "parameters": [{
+        "name": "instance_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "config/providers/remove",
+    "category": "Config",
+    "summary": "Remove ProviderConfig.",
+    "description": "Remove ProviderConfig.",
+    "parameters": [{
+        "name": "instance_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "config/providers/save",
+    "category": "Config",
+    "summary": "Save Provider(instance) Config.",
+    "description": "Save Provider(instance) Config.\n\nprovider_domain: (mandatory) domain of the provider.\nvalues: the raw values for config entries that need to be stored/updated.\ninstance_id: id of an existing provider instance (None for new instance setup).",
+    "parameters": [{
+        "name": "provider_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "values",
+        "type": "object with string keys and 'ConfigValueType' values",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "instance_id",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "ProviderConfig",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "info",
+    "category": "General",
+    "summary": "Return Info of this server.",
+    "description": "Return Info of this server.",
+    "parameters": [],
+    "return_type": "ServerInfoMessage",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "logging/get",
+    "category": "Logging",
+    "summary": "Return the application log from file.",
+    "description": "Return the application log from file.",
+    "parameters": [],
+    "return_type": "string",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "metadata/get_track_lyrics",
+    "category": "Metadata",
+    "summary": "Get lyrics for given track from metadata providers.",
+    "description": "Get lyrics for given track from metadata providers.\n\nReturns a tuple of (lyrics, lrc_lyrics) if found.",
+    "parameters": [{
+        "name": "track",
+        "type": "Track",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Array of (string | None, str)",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "metadata/set_default_preferred_language",
+    "category": "Metadata",
+    "summary": "Set the default preferred language.",
+    "description": "Set the default preferred language.\n\nReasoning behind this is that the backend can not make a wise choice for the default,\nso relies on some external source that knows better to set this info, like the frontend\nor a streaming provider.\nCan only be set once (by this call or the user).",
+    "parameters": [{
+        "name": "lang",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "metadata/set_preferred_language",
+    "category": "Metadata",
+    "summary": "Set the preferred language.",
+    "description": "Set the preferred language.\n\nNote that this will not modify any existing metadata,\nbut will be used for future lookups.",
+    "parameters": [{
+        "name": "lang",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "metadata/update_metadata",
+    "category": "Metadata",
+    "summary": "Get/update extra/enhanced metadata for/on given MediaItem.",
+    "description": "Get/update extra/enhanced metadata for/on given MediaItem.",
+    "parameters": [{
+        "name": "item",
+        "type": "string | Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "force_refresh",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/add_provider_mapping",
+    "category": "Music",
+    "summary": "Add provider mapping to the given library item.",
+    "description": "Add provider mapping to the given library item.",
+    "parameters": [{
+        "name": "media_type",
+        "type": "<enum 'MediaType",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "db_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "mapping",
+        "type": "ProviderMapping",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/albums/album_tracks",
+    "category": "Music",
+    "summary": "Return album tracks for the given provider album id.",
+    "description": "Return album tracks for the given provider album id.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "in_library_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of Track",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/albums/album_versions",
+    "category": "Music",
+    "summary": "Return all versions of an album we can find on all providers.",
+    "description": "Return all versions of an album we can find on all providers.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Array of Album",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/albums/count",
+    "category": "Music",
+    "summary": "Return the total number of items in the library.",
+    "description": "Return the total number of items in the library.",
+    "parameters": [{
+        "name": "favorite_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "album_types",
+        "type": "Array of AlbumType",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "integer",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/albums/get",
+    "category": "Music",
+    "summary": "Return (full) details for a single media item.",
+    "description": "Return (full) details for a single media item.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Album",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/albums/library_items",
+    "category": "Music",
+    "summary": "Get in-database albums.",
+    "description": "Get in-database albums.",
+    "parameters": [{
+        "name": "favorite",
+        "type": "boolean",
+        "required": false,
+        "description": "Filter by favorite status."
+    }, {
+        "name": "search",
+        "type": "string",
+        "required": false,
+        "description": "Filter by search query."
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Maximum number of items to return."
+    }, {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Number of items to skip."
+    }, {
+        "name": "order_by",
+        "type": "string",
+        "required": false,
+        "description": "Order by field (e.g. 'sort_name', 'timestamp_added')."
+    }, {
+        "name": "provider",
+        "type": "string | Array of string",
+        "required": false,
+        "description": "Filter by provider instance ID (single string or list)."
+    }, {
+        "name": "album_types",
+        "type": "Array of AlbumType",
+        "required": false,
+        "description": "Filter by album types."
+    }],
+    "return_type": "Array of Album",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/albums/remove",
+    "category": "Music",
+    "summary": "Delete item from the library(database).",
+    "description": "Delete item from the library(database).",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/albums/update",
+    "category": "Music",
+    "summary": "Update existing library record in the library database.",
+    "description": "Update existing library record in the library database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "update",
+        "type": "Album",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "overwrite",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Album",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/artists/artist_albums",
+    "category": "Music",
+    "summary": "Return (all/most popular) albums for an artist.",
+    "description": "Return (all/most popular) albums for an artist.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "in_library_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of Album",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/artists/artist_tracks",
+    "category": "Music",
+    "summary": "Return all/top tracks for an artist.",
+    "description": "Return all/top tracks for an artist.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "in_library_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "provider_filter",
+        "type": "string | Array of string",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of Track",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/artists/count",
+    "category": "Music",
+    "summary": "Return the total number of items in the library.",
+    "description": "Return the total number of items in the library.",
+    "parameters": [{
+        "name": "favorite_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "album_artists_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "integer",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/artists/get",
+    "category": "Music",
+    "summary": "Return (full) details for a single media item.",
+    "description": "Return (full) details for a single media item.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Artist",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/artists/library_items",
+    "category": "Music",
+    "summary": "Get in-database (album) artists.",
+    "description": "Get in-database (album) artists.",
+    "parameters": [{
+        "name": "favorite",
+        "type": "boolean",
+        "required": false,
+        "description": "Filter by favorite status."
+    }, {
+        "name": "search",
+        "type": "string",
+        "required": false,
+        "description": "Filter by search query."
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Maximum number of items to return."
+    }, {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Number of items to skip."
+    }, {
+        "name": "order_by",
+        "type": "string",
+        "required": false,
+        "description": "Order by field (e.g. 'sort_name', 'timestamp_added')."
+    }, {
+        "name": "provider",
+        "type": "string | Array of string",
+        "required": false,
+        "description": "Filter by provider instance ID (single string or list)."
+    }, {
+        "name": "album_artists_only",
+        "type": "boolean",
+        "required": false,
+        "description": "Only return artists that have albums."
+    }],
+    "return_type": "Array of Artist",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/artists/remove",
+    "category": "Music",
+    "summary": "Delete record from the database.",
+    "description": "Delete record from the database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/artists/update",
+    "category": "Music",
+    "summary": "Update existing library record in the library database.",
+    "description": "Update existing library record in the library database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "update",
+        "type": "Artist",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "overwrite",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Artist",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/audiobooks/audiobook_versions",
+    "category": "Music",
+    "summary": "Return all versions of an audiobook we can find on all providers.",
+    "description": "Return all versions of an audiobook we can find on all providers.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Array of Audiobook",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/audiobooks/count",
+    "category": "Music",
+    "summary": "Return the total number of items in the library.",
+    "description": "Return the total number of items in the library.",
+    "parameters": [{
+        "name": "favorite_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "integer",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/audiobooks/get",
+    "category": "Music",
+    "summary": "Return (full) details for a single media item.",
+    "description": "Return (full) details for a single media item.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Audiobook",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/audiobooks/library_items",
+    "category": "Music",
+    "summary": "Get in-database audiobooks.",
+    "description": "Get in-database audiobooks.",
+    "parameters": [{
+        "name": "favorite",
+        "type": "boolean",
+        "required": false,
+        "description": "Filter by favorite status."
+    }, {
+        "name": "search",
+        "type": "string",
+        "required": false,
+        "description": "Filter by search query."
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Maximum number of items to return."
+    }, {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Number of items to skip."
+    }, {
+        "name": "order_by",
+        "type": "string",
+        "required": false,
+        "description": "Order by field (e.g. 'sort_name', 'timestamp_added')."
+    }, {
+        "name": "provider",
+        "type": "string | Array of string",
+        "required": false,
+        "description": "Filter by provider instance ID (single string or list)."
+    }],
+    "return_type": "Array of Audiobook",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/audiobooks/remove",
+    "category": "Music",
+    "summary": "Delete library record from the database.",
+    "description": "Delete library record from the database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/audiobooks/update",
+    "category": "Music",
+    "summary": "Update existing library record in the library database.",
+    "description": "Update existing library record in the library database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "update",
+        "type": "Audiobook",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "overwrite",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Audiobook",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/browse",
+    "category": "Music",
+    "summary": "Browse Music providers.",
+    "description": "Browse Music providers.",
+    "parameters": [{
+        "name": "path",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Sequence[Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre | BrowseFolder]",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/favorites/add_item",
+    "category": "Music",
+    "summary": "Add an item to the favorites.",
+    "description": "Add an item to the favorites.",
+    "parameters": [{
+        "name": "item",
+        "type": "string | Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre | ItemMapping",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/favorites/remove_item",
+    "category": "Music",
+    "summary": "Remove (library) item from the favorites.",
+    "description": "Remove (library) item from the favorites.",
+    "parameters": [{
+        "name": "media_type",
+        "type": "<enum 'MediaType",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "library_item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/genres/count",
+    "category": "Music",
+    "summary": "Return the total number of items in the library.",
+    "description": "Return the total number of items in the library.",
+    "parameters": [{
+        "name": "favorite_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "integer",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/genres/get",
+    "category": "Music",
+    "summary": "Return (full) details for a single media item.",
+    "description": "Return (full) details for a single media item.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Genre",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/genres/library_items",
+    "category": "Music",
+    "summary": "Get the library items for this mediatype.",
+    "description": "Get the library items for this mediatype.",
+    "parameters": [{
+        "name": "favorite",
+        "type": "boolean",
+        "required": false,
+        "description": "Filter by favorite status."
+    }, {
+        "name": "search",
+        "type": "string",
+        "required": false,
+        "description": "Filter by search query."
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Maximum number of items to return."
+    }, {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Number of items to skip."
+    }, {
+        "name": "order_by",
+        "type": "string",
+        "required": false,
+        "description": "Order by field (e.g. 'sort_name', 'timestamp_added')."
+    }, {
+        "name": "provider",
+        "type": "string | Array of string",
+        "required": false,
+        "description": "Filter by provider instance ID (single string or list)."
+    }],
+    "return_type": "Array of Genre",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/genres/remove",
+    "category": "Music",
+    "summary": "Delete library record from the database.",
+    "description": "Delete library record from the database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/genres/update",
+    "category": "Music",
+    "summary": "Update existing library record in the library database.",
+    "description": "Update existing library record in the library database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "update",
+        "type": "Genre",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "overwrite",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Genre",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/get_library_item",
+    "category": "Music",
+    "summary": "Get single library music item by id and media type.",
+    "description": "Get single library music item by id and media type.",
+    "parameters": [{
+        "name": "media_type",
+        "type": "<enum 'MediaType",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/in_progress_items",
+    "category": "Music",
+    "summary": "Return a list of the Audiobooks and PodcastEpisodes that are in progress.",
+    "description": "Return a list of the Audiobooks and PodcastEpisodes that are in progress.",
+    "parameters": [{
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "all_users",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of ItemMapping",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/item",
+    "category": "Music",
+    "summary": "Get single music item by id and media type.",
+    "description": "Get single music item by id and media type.",
+    "parameters": [{
+        "name": "media_type",
+        "type": "<enum 'MediaType",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre | BrowseFolder",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/item_by_uri",
+    "category": "Music",
+    "summary": "Fetch MediaItem by uri.",
+    "description": "Fetch MediaItem by uri.",
+    "parameters": [{
+        "name": "uri",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre | BrowseFolder",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/library/add_item",
+    "category": "Music",
+    "summary": "Add item (uri or mediaitem) to the library.",
+    "description": "Add item (uri or mediaitem) to the library.",
+    "parameters": [{
+        "name": "item",
+        "type": "string | Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre | ItemMapping",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "overwrite_existing",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/library/remove_item",
+    "category": "Music",
+    "summary": "Remove item from the library.",
+    "description": "Remove item from the library.\n\nDestructive! Will remove the item and all dependants.",
+    "parameters": [{
+        "name": "media_type",
+        "type": "<enum 'MediaType",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "library_item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/mark_played",
+    "category": "Music",
+    "summary": "Mark item as played in playlog.",
+    "description": "Mark item as played in playlog.",
+    "parameters": [{
+        "name": "media_item",
+        "type": "Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre",
+        "required": true,
+        "description": "The media item to mark as played."
+    }, {
+        "name": "fully_played",
+        "type": "boolean",
+        "required": false,
+        "description": "If True, mark the item as fully played."
+    }, {
+        "name": "seconds_played",
+        "type": "integer",
+        "required": false,
+        "description": "The number of seconds played."
+    }, {
+        "name": "is_playing",
+        "type": "boolean",
+        "required": false,
+        "description": "If True, the item is currently playing."
+    }, {
+        "name": "userid",
+        "type": "string",
+        "required": false,
+        "description": "The user ID to mark the item as played for (instead of the current user)."
+    }, {
+        "name": "queue_id",
+        "type": "string",
+        "required": false,
+        "description": "The queue ID where the item was played."
+    }, {
+        "name": "user_initiated",
+        "type": "boolean",
+        "required": false,
+        "description": "If True, the playback was initiated by the user (e.g. enqueued)."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/mark_unplayed",
+    "category": "Music",
+    "summary": "Mark item as unplayed in playlog.",
+    "description": "Mark item as unplayed in playlog.",
+    "parameters": [{
+        "name": "media_item",
+        "type": "Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre",
+        "required": true,
+        "description": "The media item to mark as unplayed."
+    }, {
+        "name": "userid",
+        "type": "string",
+        "required": false,
+        "description": "The user ID to mark the item as unplayed for (instead of the current user)."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/match_providers",
+    "category": "Music",
+    "summary": "Search for mappings on all providers for the given library item.",
+    "description": "Search for mappings on all providers for the given library item.",
+    "parameters": [{
+        "name": "media_type",
+        "type": "<enum 'MediaType",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "db_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/playlists/add_playlist_tracks",
+    "category": "Music",
+    "summary": "Add tracks to playlist.",
+    "description": "Add tracks to playlist.",
+    "parameters": [{
+        "name": "db_playlist_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "uris",
+        "type": "Array of string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/playlists/count",
+    "category": "Music",
+    "summary": "Return the total number of items in the library.",
+    "description": "Return the total number of items in the library.",
+    "parameters": [{
+        "name": "favorite_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "integer",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/playlists/create_playlist",
+    "category": "Music",
+    "summary": "Create new playlist.",
+    "description": "Create new playlist.",
+    "parameters": [{
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_or_domain",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Playlist",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/playlists/get",
+    "category": "Music",
+    "summary": "Return (full) details for a single media item.",
+    "description": "Return (full) details for a single media item.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Playlist",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/playlists/library_items",
+    "category": "Music",
+    "summary": "Get the library items for this mediatype.",
+    "description": "Get the library items for this mediatype.",
+    "parameters": [{
+        "name": "favorite",
+        "type": "boolean",
+        "required": false,
+        "description": "Filter by favorite status."
+    }, {
+        "name": "search",
+        "type": "string",
+        "required": false,
+        "description": "Filter by search query."
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Maximum number of items to return."
+    }, {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Number of items to skip."
+    }, {
+        "name": "order_by",
+        "type": "string",
+        "required": false,
+        "description": "Order by field (e.g. 'sort_name', 'timestamp_added')."
+    }, {
+        "name": "provider",
+        "type": "string | Array of string",
+        "required": false,
+        "description": "Filter by provider instance ID (single string or list)."
+    }],
+    "return_type": "Array of Playlist",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/playlists/playlist_tracks",
+    "category": "Music",
+    "summary": "Return playlist tracks for the given provider playlist id.",
+    "description": "Return playlist tracks for the given provider playlist id.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "force_refresh",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "AsyncGenerator[Track, None]",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/playlists/remove",
+    "category": "Music",
+    "summary": "Delete library record from the database.",
+    "description": "Delete library record from the database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/playlists/remove_playlist_tracks",
+    "category": "Music",
+    "summary": "Remove multiple tracks from playlist.",
+    "description": "Remove multiple tracks from playlist.",
+    "parameters": [{
+        "name": "db_playlist_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "positions_to_remove",
+        "type": "Array of integer",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/playlists/update",
+    "category": "Music",
+    "summary": "Update existing library record in the library database.",
+    "description": "Update existing library record in the library database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "update",
+        "type": "Playlist",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "overwrite",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Playlist",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/podcasts/count",
+    "category": "Music",
+    "summary": "Return the total number of items in the library.",
+    "description": "Return the total number of items in the library.",
+    "parameters": [{
+        "name": "favorite_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "integer",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/podcasts/get",
+    "category": "Music",
+    "summary": "Return (full) details for a single media item.",
+    "description": "Return (full) details for a single media item.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Podcast",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/podcasts/library_items",
+    "category": "Music",
+    "summary": "Get in-database podcasts.",
+    "description": "Get in-database podcasts.",
+    "parameters": [{
+        "name": "favorite",
+        "type": "boolean",
+        "required": false,
+        "description": "Filter by favorite status."
+    }, {
+        "name": "search",
+        "type": "string",
+        "required": false,
+        "description": "Filter by search query."
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Maximum number of items to return."
+    }, {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Number of items to skip."
+    }, {
+        "name": "order_by",
+        "type": "string",
+        "required": false,
+        "description": "Order by field (e.g. 'sort_name', 'timestamp_added')."
+    }, {
+        "name": "provider",
+        "type": "string | Array of string",
+        "required": false,
+        "description": "Filter by provider instance ID (single string or list)."
+    }],
+    "return_type": "Array of Podcast",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/podcasts/podcast_episode",
+    "category": "Music",
+    "summary": "Return single podcast episode by the given provider podcast id.",
+    "description": "Return single podcast episode by the given provider podcast id.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "PodcastEpisode",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/podcasts/podcast_episodes",
+    "category": "Music",
+    "summary": "Return podcast episodes for the given provider podcast id.",
+    "description": "Return podcast episodes for the given provider podcast id.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "AsyncGenerator[PodcastEpisode, None]",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/podcasts/podcast_versions",
+    "category": "Music",
+    "summary": "Return all versions of an podcast we can find on all providers.",
+    "description": "Return all versions of an podcast we can find on all providers.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Array of Podcast",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/podcasts/remove",
+    "category": "Music",
+    "summary": "Delete library record from the database.",
+    "description": "Delete library record from the database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/podcasts/update",
+    "category": "Music",
+    "summary": "Update existing library record in the library database.",
+    "description": "Update existing library record in the library database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "update",
+        "type": "Podcast",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "overwrite",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Podcast",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/radios/count",
+    "category": "Music",
+    "summary": "Return the total number of items in the library.",
+    "description": "Return the total number of items in the library.",
+    "parameters": [{
+        "name": "favorite_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "integer",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/radios/get",
+    "category": "Music",
+    "summary": "Return (full) details for a single media item.",
+    "description": "Return (full) details for a single media item.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Radio",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/radios/library_items",
+    "category": "Music",
+    "summary": "Get the library items for this mediatype.",
+    "description": "Get the library items for this mediatype.",
+    "parameters": [{
+        "name": "favorite",
+        "type": "boolean",
+        "required": false,
+        "description": "Filter by favorite status."
+    }, {
+        "name": "search",
+        "type": "string",
+        "required": false,
+        "description": "Filter by search query."
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Maximum number of items to return."
+    }, {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Number of items to skip."
+    }, {
+        "name": "order_by",
+        "type": "string",
+        "required": false,
+        "description": "Order by field (e.g. 'sort_name', 'timestamp_added')."
+    }, {
+        "name": "provider",
+        "type": "string | Array of string",
+        "required": false,
+        "description": "Filter by provider instance ID (single string or list)."
+    }],
+    "return_type": "Array of Radio",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/radios/radio_versions",
+    "category": "Music",
+    "summary": "Return all versions of a radio station we can find on all providers.",
+    "description": "Return all versions of a radio station we can find on all providers.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Array of Radio",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/radios/remove",
+    "category": "Music",
+    "summary": "Delete library record from the database.",
+    "description": "Delete library record from the database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/radios/update",
+    "category": "Music",
+    "summary": "Update existing library record in the library database.",
+    "description": "Update existing library record in the library database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "update",
+        "type": "Radio",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "overwrite",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Radio",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/recently_added_tracks",
+    "category": "Music",
+    "summary": "Return a list of the last added tracks.",
+    "description": "Return a list of the last added tracks.",
+    "parameters": [{
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of Track",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/recently_played_items",
+    "category": "Music",
+    "summary": "Return a list of the last played items.",
+    "description": "Return a list of the last played items.",
+    "parameters": [{
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Maximum number of items to return."
+    }, {
+        "name": "media_types",
+        "type": "Array of MediaType",
+        "required": false,
+        "description": "Filter by media types."
+    }, {
+        "name": "userid",
+        "type": "string",
+        "required": false,
+        "description": "Filter by specific user ID."
+    }, {
+        "name": "queue_id",
+        "type": "string",
+        "required": false,
+        "description": "Filter by specific queue ID."
+    }, {
+        "name": "fully_played_only",
+        "type": "boolean",
+        "required": false,
+        "description": "If True, only return fully played items."
+    }, {
+        "name": "user_initiated_only",
+        "type": "boolean",
+        "required": false,
+        "description": "If True, only return items initiated by the user."
+    }],
+    "return_type": "Array of ItemMapping",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/recommendations",
+    "category": "Music",
+    "summary": "Get all recommendations.",
+    "description": "Get all recommendations.",
+    "parameters": [],
+    "return_type": "Array of RecommendationFolder",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/refresh_item",
+    "category": "Music",
+    "summary": "Try to refresh a mediaitem by requesting it's full object or search for substitutes.",
+    "description": "Try to refresh a mediaitem by requesting it's full object or search for substitutes.",
+    "parameters": [{
+        "name": "media_item",
+        "type": "string | Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/remove_provider_mapping",
+    "category": "Music",
+    "summary": "Remove provider mapping from the given library item.",
+    "description": "Remove provider mapping from the given library item.",
+    "parameters": [{
+        "name": "media_type",
+        "type": "<enum 'MediaType",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "db_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "mapping",
+        "type": "ProviderMapping",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/search",
+    "category": "Music",
+    "summary": "Perform global search for media items on all providers.",
+    "description": "Perform global search for media items on all providers.",
+    "parameters": [{
+        "name": "search_query",
+        "type": "string",
+        "required": true,
+        "description": "Search query."
+    }, {
+        "name": "media_types",
+        "type": "Array of MediaType",
+        "required": false,
+        "description": "A list of media_types to include."
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "number of items to return in the search (per type)."
+    }, {
+        "name": "library_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "SearchResults",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/sync",
+    "category": "Music",
+    "summary": "Start running the sync of (all or selected) musicproviders.",
+    "description": "Start running the sync of (all or selected) musicproviders.\n\nmedia_types: only sync these media types. None for all.\nproviders: only sync these provider instances. None for all.",
+    "parameters": [{
+        "name": "media_types",
+        "type": "Array of MediaType",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "providers",
+        "type": "Array of string",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/synctasks",
+    "category": "Music",
+    "summary": "Return list with providers that are currently (scheduled for) syncing.",
+    "description": "Return list with providers that are currently (scheduled for) syncing.",
+    "parameters": [],
+    "return_type": "Array of SyncTask",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/track_by_name",
+    "category": "Music",
+    "summary": "Get a track by its name, optionally with artist and album.",
+    "description": "Get a track by its name, optionally with artist and album.",
+    "parameters": [{
+        "name": "track_name",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "artist_name",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "album_name",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "track_version",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Track",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/tracks/count",
+    "category": "Music",
+    "summary": "Return the total number of items in the library.",
+    "description": "Return the total number of items in the library.",
+    "parameters": [{
+        "name": "favorite_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "integer",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/tracks/get",
+    "category": "Music",
+    "summary": "Return (full) details for a single media item.",
+    "description": "Return (full) details for a single media item.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "album_uri",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Track",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/tracks/library_items",
+    "category": "Music",
+    "summary": "Get in-database tracks.",
+    "description": "Get in-database tracks.",
+    "parameters": [{
+        "name": "favorite",
+        "type": "boolean",
+        "required": false,
+        "description": "Filter by favorite status."
+    }, {
+        "name": "search",
+        "type": "string",
+        "required": false,
+        "description": "Filter by search query."
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Maximum number of items to return."
+    }, {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": "Number of items to skip."
+    }, {
+        "name": "order_by",
+        "type": "string",
+        "required": false,
+        "description": "Order by field (e.g. 'sort_name', 'timestamp_added')."
+    }, {
+        "name": "provider",
+        "type": "string | Array of string",
+        "required": false,
+        "description": "Filter by provider instance ID (single string or list)."
+    }],
+    "return_type": "Array of Track",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/tracks/preview",
+    "category": "Music",
+    "summary": "Return url to short preview sample.",
+    "description": "Return url to short preview sample.",
+    "parameters": [{
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "string",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/tracks/remove",
+    "category": "Music",
+    "summary": "Delete record from the database.",
+    "description": "Delete record from the database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "recursive",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "music/tracks/similar_tracks",
+    "category": "Music",
+    "summary": "Get a list of similar tracks for the given track.",
+    "description": "Get a list of similar tracks for the given track.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": "The item ID of the track."
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": "The provider instance ID or domain."
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": "Maximum number of similar tracks to return."
+    }, {
+        "name": "allow_lookup",
+        "type": "boolean",
+        "required": false,
+        "description": "Allow lookup on other providers if not found."
+    }, {
+        "name": "preferred_provider_instances",
+        "type": "Array of string",
+        "required": false,
+        "description": "List of preferred provider instance IDs to use. When provided, these providers will be tried first before falling back to others."
+    }],
+    "return_type": "Array of Track",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/tracks/track_albums",
+    "category": "Music",
+    "summary": "Return all albums the track appears on.",
+    "description": "Return all albums the track appears on.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "in_library_only",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of Album",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/tracks/track_versions",
+    "category": "Music",
+    "summary": "Return all versions of a track we can find on all providers.",
+    "description": "Return all versions of a track we can find on all providers.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "provider_instance_id_or_domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "Array of Track",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "music/tracks/update",
+    "category": "Music",
+    "summary": "Update existing library record in the library database.",
+    "description": "Update existing library record in the library database.",
+    "parameters": [{
+        "name": "item_id",
+        "type": "string | integer",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "update",
+        "type": "Track",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "overwrite",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Track",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "player_queues/all",
+    "category": "Player Queues",
+    "summary": "Return all registered PlayerQueues.",
+    "description": "Return all registered PlayerQueues.",
+    "parameters": [],
+    "return_type": "Array of PlayerQueue",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/clear",
+    "category": "Player Queues",
+    "summary": "Clear all items in the queue.",
+    "description": "Clear all items in the queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "skip_stop",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/delete_item",
+    "category": "Player Queues",
+    "summary": "Delete item (by id or index) from the queue.",
+    "description": "Delete item (by id or index) from the queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "item_id_or_index",
+        "type": "integer | string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/dont_stop_the_music",
+    "category": "Player Queues",
+    "summary": "Configure Don't stop the music setting on the queue.",
+    "description": "Configure Don't stop the music setting on the queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "dont_stop_the_music_enabled",
+        "type": "boolean",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/get",
+    "category": "Player Queues",
+    "summary": "Return PlayerQueue by queue_id or None if not found.",
+    "description": "Return PlayerQueue by queue_id or None if not found.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "PlayerQueue",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/get_active_queue",
+    "category": "Player Queues",
+    "summary": "Return the current active/synced queue for a player.",
+    "description": "Return the current active/synced queue for a player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "PlayerQueue",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/items",
+    "category": "Player Queues",
+    "summary": "Return all QueueItems for given PlayerQueue.",
+    "description": "Return all QueueItems for given PlayerQueue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "offset",
+        "type": "integer",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of QueueItem",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/move_item",
+    "category": "Player Queues",
+    "summary": "Move queue item x up/down the queue.",
+    "description": "Move queue item x up/down the queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "id of the queue to process this request."
+    }, {
+        "name": "queue_item_id",
+        "type": "string",
+        "required": true,
+        "description": "the item_id of the queueitem that needs to be moved."
+    }, {
+        "name": "pos_shift",
+        "type": "integer",
+        "required": false,
+        "description": "move item to top of queue as next item if 0."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/next",
+    "category": "Player Queues",
+    "summary": "Handle NEXT TRACK command for given queue.",
+    "description": "Handle NEXT TRACK command for given queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "queue_id of the queue to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/pause",
+    "category": "Player Queues",
+    "summary": "Handle PAUSE command for given queue.",
+    "description": "Handle PAUSE command for given queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "queue_id of the playerqueue to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/play",
+    "category": "Player Queues",
+    "summary": "Handle PLAY command for given queue.",
+    "description": "Handle PLAY command for given queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "queue_id of the playerqueue to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/play_index",
+    "category": "Player Queues",
+    "summary": "Play item at index (or item_id) X in queue.",
+    "description": "Play item at index (or item_id) X in queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "index",
+        "type": "integer | string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "seek_position",
+        "type": "integer",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "fade_in",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "debounce",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/play_media",
+    "category": "Player Queues",
+    "summary": "Play media item(s) on the given queue.",
+    "description": "Play media item(s) on the given queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "The queue_id of the queue to play media on."
+    }, {
+        "name": "media",
+        "type": "Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre | ItemMapping | string | Array of (Artist | Album | Track | Radio | Playlist | Audiobook | Podcast | PodcastEpisode | Genre | ItemMapping | string)",
+        "required": true,
+        "description": "Media that should be played (MediaItem(s) and/or uri's)."
+    }, {
+        "name": "option",
+        "type": "QueueOption",
+        "required": false,
+        "description": "Which enqueue mode to use."
+    }, {
+        "name": "radio_mode",
+        "type": "boolean",
+        "required": false,
+        "description": "Enable radio mode for the given item(s)."
+    }, {
+        "name": "start_item",
+        "type": "Track | Radio | Audiobook | PodcastEpisode | string",
+        "required": false,
+        "description": "Optional item to start the playlist or album from."
+    }, {
+        "name": "username",
+        "type": "string",
+        "required": false,
+        "description": "The username of the user requesting the playback. Setting the username allows for overriding the logged-in user to account for playback history per user when the play_media is called from a shared context (like a web hook or automation)."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/play_pause",
+    "category": "Player Queues",
+    "summary": "Toggle play/pause on given playerqueue.",
+    "description": "Toggle play/pause on given playerqueue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "queue_id of the queue to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/previous",
+    "category": "Player Queues",
+    "summary": "Handle PREVIOUS TRACK command for given queue.",
+    "description": "Handle PREVIOUS TRACK command for given queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "queue_id of the queue to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/repeat",
+    "category": "Player Queues",
+    "summary": "Configure repeat setting on the the queue.",
+    "description": "Configure repeat setting on the the queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "repeat_mode",
+        "type": "<enum 'RepeatMode",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/resume",
+    "category": "Player Queues",
+    "summary": "Handle RESUME command for given queue.",
+    "description": "Handle RESUME command for given queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "queue_id of the queue to handle the command."
+    }, {
+        "name": "fade_in",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/seek",
+    "category": "Player Queues",
+    "summary": "Handle SEEK command for given queue.",
+    "description": "Handle SEEK command for given queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "queue_id of the queue to handle the command."
+    }, {
+        "name": "position",
+        "type": "integer",
+        "required": false,
+        "description": "position in seconds to seek to in the current playing item."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/shuffle",
+    "category": "Player Queues",
+    "summary": "Configure shuffle setting on the the queue.",
+    "description": "Configure shuffle setting on the the queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "shuffle_enabled",
+        "type": "boolean",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/skip",
+    "category": "Player Queues",
+    "summary": "Handle SKIP command for given queue.",
+    "description": "Handle SKIP command for given queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "queue_id of the queue to handle the command."
+    }, {
+        "name": "seconds",
+        "type": "integer",
+        "required": false,
+        "description": "number of seconds to skip in track. Use negative value to skip back."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/stop",
+    "category": "Player Queues",
+    "summary": "Handle STOP command for given queue.",
+    "description": "Handle STOP command for given queue.",
+    "parameters": [{
+        "name": "queue_id",
+        "type": "string",
+        "required": true,
+        "description": "queue_id of the playerqueue to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "player_queues/transfer",
+    "category": "Player Queues",
+    "summary": "Transfer queue to another queue.",
+    "description": "Transfer queue to another queue.",
+    "parameters": [{
+        "name": "source_queue_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "target_queue_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "auto_play",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/add_currently_playing_to_favorites",
+    "category": "Players",
+    "summary": "Add the currently playing item/track on given player to the favorites.",
+    "description": "Add the currently playing item/track on given player to the favorites.\n\nThis tries to resolve the currently playing media to an actual media item\nand add that to the favorites in the library.\n\nWill raise an error if the player is not currently playing anything\nor if the currently playing media can not be resolved to a media item.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/all",
+    "category": "Players",
+    "summary": "Return PlayerState for all registered players.",
+    "description": "Return PlayerState for all registered players.",
+    "parameters": [{
+        "name": "return_unavailable",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "return_disabled",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }, {
+        "name": "provider_filter",
+        "type": "string",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of Player",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/group",
+    "category": "Players",
+    "summary": "Handle GROUP command for given player.",
+    "description": "Handle GROUP command for given player.\n\nJoin/add the given player(id) to the given (leader) player/sync group.\nIf the target player itself is already synced to another player, this may fail.\nIf the player can not be synced with the given target player, this may fail.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }, {
+        "name": "target_player",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the syncgroup leader or group player."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/group_many",
+    "category": "Players",
+    "summary": "Join given player(s) to target player.",
+    "description": "Join given player(s) to target player.\n\nWill add the given player(s) to the target player (sync leader or group player).\nNOTE: This is a (deprecated) alias for cmd_set_members.",
+    "parameters": [{
+        "name": "target_player",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "child_player_ids",
+        "type": "Array of string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/group_volume",
+    "category": "Players",
+    "summary": "Handle adjusting the overall/group volume to a playergroup (or synced players).",
+    "description": "Handle adjusting the overall/group volume to a playergroup (or synced players).\n\nWill set a new (overall) volume level to a group player or syncgroup.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "volume_level",
+        "type": "integer",
+        "required": true,
+        "description": "volume level (0..100) to set to the group."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/group_volume_down",
+    "category": "Players",
+    "summary": "Send VOLUME_DOWN command to given playergroup.",
+    "description": "Send VOLUME_DOWN command to given playergroup.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/group_volume_up",
+    "category": "Players",
+    "summary": "Send VOLUME_UP command to given playergroup.",
+    "description": "Send VOLUME_UP command to given playergroup.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/next",
+    "category": "Players",
+    "summary": "Handle NEXT TRACK command for given player.",
+    "description": "Handle NEXT TRACK command for given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/pause",
+    "category": "Players",
+    "summary": "Send PAUSE command to given player.",
+    "description": "Send PAUSE command to given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/play",
+    "category": "Players",
+    "summary": "Send PLAY (unpause) command to given player.",
+    "description": "Send PLAY (unpause) command to given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/play_announcement",
+    "category": "Players",
+    "summary": "Handle playback of an announcement (url) on given player.",
+    "description": "Handle playback of an announcement (url) on given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }, {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "URL of the announcement to play."
+    }, {
+        "name": "pre_announce",
+        "type": "boolean | string",
+        "required": false,
+        "description": "optional bool if pre-announce should be used."
+    }, {
+        "name": "volume_level",
+        "type": "integer",
+        "required": false,
+        "description": "optional volume level to set for the announcement."
+    }, {
+        "name": "pre_announce_url",
+        "type": "string",
+        "required": false,
+        "description": "optional custom URL to use for the pre-announce chime."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/play_pause",
+    "category": "Players",
+    "summary": "Toggle play/pause on given player.",
+    "description": "Toggle play/pause on given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/power",
+    "category": "Players",
+    "summary": "Send POWER command to given player.",
+    "description": "Send POWER command to given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }, {
+        "name": "powered",
+        "type": "boolean",
+        "required": true,
+        "description": "bool if player should be powered on or off."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/previous",
+    "category": "Players",
+    "summary": "Handle PREVIOUS TRACK command for given player.",
+    "description": "Handle PREVIOUS TRACK command for given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/resume",
+    "category": "Players",
+    "summary": "Send RESUME command to given player.",
+    "description": "Send RESUME command to given player.\n\nResume (or restart) playback on the player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }, {
+        "name": "source",
+        "type": "string",
+        "required": false,
+        "description": "Optional source to resume."
+    }, {
+        "name": "media",
+        "type": "PlayerMedia",
+        "required": false,
+        "description": "Optional media to resume."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/seek",
+    "category": "Players",
+    "summary": "Handle SEEK command for given player.",
+    "description": "Handle SEEK command for given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }, {
+        "name": "position",
+        "type": "integer",
+        "required": true,
+        "description": "position in seconds to seek to in the current playing item."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/select_source",
+    "category": "Players",
+    "summary": "Handle SELECT SOURCE command on given player.",
+    "description": "Handle SELECT SOURCE command on given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }, {
+        "name": "source",
+        "type": "string",
+        "required": true,
+        "description": "The ID of the source that needs to be activated/selected."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/set_members",
+    "category": "Players",
+    "summary": "Join/unjoin given player(s) to/from target player.",
+    "description": "Join/unjoin given player(s) to/from target player.\n\nWill add the given player(s) to the target player (sync leader or group player).",
+    "parameters": [{
+        "name": "target_player",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the syncgroup leader or group player."
+    }, {
+        "name": "player_ids_to_add",
+        "type": "Array of string",
+        "required": false,
+        "description": "List of player_id's to add to the target player."
+    }, {
+        "name": "player_ids_to_remove",
+        "type": "Array of string",
+        "required": false,
+        "description": "List of player_id's to remove from the target player."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/stop",
+    "category": "Players",
+    "summary": "Send STOP command to given player.",
+    "description": "Send STOP command to given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/ungroup",
+    "category": "Players",
+    "summary": "Handle UNGROUP command for given player.",
+    "description": "Handle UNGROUP command for given player.\n\nRemove the given player from any (sync)groups it currently is synced to.\nIf the player is not currently grouped to any other player,\nthis will silently be ignored.\n\nNOTE: This is a (deprecated) alias for cmd_set_members.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/ungroup_many",
+    "category": "Players",
+    "summary": "Handle UNGROUP command for all the given players.",
+    "description": "Handle UNGROUP command for all the given players.",
+    "parameters": [{
+        "name": "player_ids",
+        "type": "Array of string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/volume_down",
+    "category": "Players",
+    "summary": "Send VOLUME_DOWN command to given player.",
+    "description": "Send VOLUME_DOWN command to given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/volume_mute",
+    "category": "Players",
+    "summary": "Send VOLUME_MUTE command to given player.",
+    "description": "Send VOLUME_MUTE command to given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }, {
+        "name": "muted",
+        "type": "boolean",
+        "required": true,
+        "description": "bool if player should be muted."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/volume_set",
+    "category": "Players",
+    "summary": "Send VOLUME_SET command to given player.",
+    "description": "Send VOLUME_SET command to given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }, {
+        "name": "volume_level",
+        "type": "integer",
+        "required": true,
+        "description": "volume level (0..100) to set on the player."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/cmd/volume_up",
+    "category": "Players",
+    "summary": "Send VOLUME_UP command to given player.",
+    "description": "Send VOLUME_UP command to given player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "player_id of the player to handle the command."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/create_group_player",
+    "category": "Players",
+    "summary": "Create a new (permanent) Group Player.",
+    "description": "Create a new (permanent) Group Player.",
+    "parameters": [{
+        "name": "provider",
+        "type": "string",
+        "required": true,
+        "description": "The provider(id) to create the group player for"
+    }, {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "Name of the new group player"
+    }, {
+        "name": "members",
+        "type": "Array of string",
+        "required": true,
+        "description": "List of player ids to add to the group"
+    }, {
+        "name": "dynamic",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether the group is dynamic (members can change)"
+    }],
+    "return_type": "Player",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "players/get",
+    "category": "Players",
+    "summary": "Return PlayerState by player_id.",
+    "description": "Return PlayerState by player_id.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }, {
+        "name": "raise_unavailable",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Player",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/get_by_name",
+    "category": "Players",
+    "summary": "Return PlayerState by name.",
+    "description": "Return PlayerState by name.",
+    "parameters": [{
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "Name of the player."
+    }],
+    "return_type": "Player",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/player_control",
+    "category": "Players",
+    "summary": "Return PlayerControl by control_id.",
+    "description": "Return PlayerControl by control_id.",
+    "parameters": [{
+        "name": "control_id",
+        "type": "string",
+        "required": true,
+        "description": "ID of the player control."
+    }],
+    "return_type": "PlayerControl",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/player_controls",
+    "category": "Players",
+    "summary": "Return all registered playercontrols.",
+    "description": "Return all registered playercontrols.",
+    "parameters": [],
+    "return_type": "Array of PlayerControl",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/plugin_source",
+    "category": "Players",
+    "summary": "Return PluginSource by source_id.",
+    "description": "Return PluginSource by source_id.",
+    "parameters": [{
+        "name": "source_id",
+        "type": "string",
+        "required": true,
+        "description": "ID of the plugin source."
+    }],
+    "return_type": "PluginSource",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/plugin_sources",
+    "category": "Players",
+    "summary": "Return all available plugin sources.",
+    "description": "Return all available plugin sources.",
+    "parameters": [],
+    "return_type": "Array of PluginSource",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "players/remove",
+    "category": "Players",
+    "summary": "Remove a player from a provider.",
+    "description": "Remove a player from a provider.\n\nCan only be called when a PlayerProvider supports ProviderFeature.REMOVE_PLAYER.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "players/remove_group_player",
+    "category": "Players",
+    "summary": "Remove a group player.",
+    "description": "Remove a group player.",
+    "parameters": [{
+        "name": "player_id",
+        "type": "string",
+        "required": true,
+        "description": "ID of the group player to remove."
+    }],
+    "return_type": "null",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "providers",
+    "category": "General",
+    "summary": "Return all loaded/running Providers (instances).",
+    "description": "Return all loaded/running Providers (instances).\n\nOptionally filtered by ProviderType.\nNote that this applies user filters for music providers (for non admin users).",
+    "parameters": [{
+        "name": "provider_type",
+        "type": "ProviderType",
+        "required": false,
+        "description": ""
+    }],
+    "return_type": "Array of (MetadataProvider | MusicProvider | PlayerProvider | PluginProvider)",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "providers/manifests",
+    "category": "Providers",
+    "summary": "Return all Provider manifests.",
+    "description": "Return all Provider manifests.",
+    "parameters": [],
+    "return_type": "Array of ProviderManifest",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "providers/manifests/get",
+    "category": "Providers",
+    "summary": "Return Provider manifests of single provider(domain).",
+    "description": "Return Provider manifests of single provider(domain).",
+    "parameters": [{
+        "name": "domain",
+        "type": "string",
+        "required": true,
+        "description": ""
+    }],
+    "return_type": "ProviderManifest",
+    "authenticated": true,
+    "required_role": null
+}, {
+    "command": "remote_access/configure",
+    "category": "Remote Access",
+    "summary": "Configure remote access settings.",
+    "description": "Configure remote access settings.",
+    "parameters": [{
+        "name": "enabled",
+        "type": "boolean",
+        "required": true,
+        "description": "Enable or disable remote access."
+    }],
+    "return_type": "RemoteAccessInfo",
+    "authenticated": true,
+    "required_role": "admin"
+}, {
+    "command": "remote_access/info",
+    "category": "Remote Access",
+    "summary": "Get remote access information.",
+    "description": "Get remote access information.",
+    "parameters": [],
+    "return_type": "RemoteAccessInfo",
+    "authenticated": true,
+    "required_role": "admin"
+}]

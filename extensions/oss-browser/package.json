@@ -1,0 +1,306 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "oss-browser",
+  "title": "OSS Browser",
+  "description": "Browse and manage Aliyun Object Storage Service",
+  "icon": "oss-browser.png",
+  "author": "JinShi",
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "oss-manager",
+      "title": "Manage Aliyun OSS",
+      "description": "Browse and manage Aliyun Object Storage",
+      "mode": "view",
+      "keywords": [
+        "OSS",
+        "Aliyun",
+        "Manage",
+        "Browser"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "region",
+      "type": "dropdown",
+      "required": true,
+      "title": "Region",
+      "description": "Please enter region",
+      "placeholder": "Enter Region",
+      "data": [
+        {
+          "title": "oss-cn-hangzhou",
+          "value": "oss-cn-hangzhou"
+        },
+        {
+          "title": "oss-cn-shanghai",
+          "value": "oss-cn-shanghai"
+        },
+        {
+          "title": "oss-cn-nanjing",
+          "value": "oss-cn-nanjing"
+        },
+        {
+          "title": "oss-cn-fuzhou",
+          "value": "oss-cn-fuzhou"
+        },
+        {
+          "title": "oss-cn-qingdao",
+          "value": "oss-cn-qingdao"
+        },
+        {
+          "title": "oss-cn-beijing",
+          "value": "oss-cn-beijing"
+        },
+        {
+          "title": "oss-cn-zhangjiakou",
+          "value": "oss-cn-zhangjiakou"
+        },
+        {
+          "title": "oss-cn-huhehaote",
+          "value": "oss-cn-huhehaote"
+        },
+        {
+          "title": "oss-cn-wulanchabu",
+          "value": "oss-cn-wulanchabu"
+        },
+        {
+          "title": "oss-cn-shenzhen",
+          "value": "oss-cn-shenzhen"
+        },
+        {
+          "title": "oss-cn-heyuan",
+          "value": "oss-cn-heyuan"
+        },
+        {
+          "title": "oss-cn-guangzhou",
+          "value": "oss-cn-guangzhou"
+        },
+        {
+          "title": "oss-cn-chengdu",
+          "value": "oss-cn-chengdu"
+        },
+        {
+          "title": "oss-cn-hongkong",
+          "value": "oss-cn-hongkong"
+        },
+        {
+          "title": "oss-us-west-1",
+          "value": "oss-us-west-1"
+        },
+        {
+          "title": "oss-us-east-1",
+          "value": "oss-us-east-1"
+        },
+        {
+          "title": "oss-ap-northeast-1",
+          "value": "oss-ap-northeast-1"
+        },
+        {
+          "title": "oss-ap-northeast-2",
+          "value": "oss-ap-northeast-2"
+        },
+        {
+          "title": "oss-ap-southeast-1",
+          "value": "oss-ap-southeast-1"
+        },
+        {
+          "title": "oss-ap-southeast-2",
+          "value": "oss-ap-southeast-2"
+        },
+        {
+          "title": "oss-ap-southeast-3",
+          "value": "oss-ap-southeast-3"
+        },
+        {
+          "title": "oss-ap-southeast-5",
+          "value": "oss-ap-southeast-5"
+        },
+        {
+          "title": "oss-ap-southeast-6",
+          "value": "oss-ap-southeast-6"
+        },
+        {
+          "title": "oss-ap-southeast-7",
+          "value": "oss-ap-southeast-7"
+        },
+        {
+          "title": "oss-ap-south-1",
+          "value": "oss-ap-south-1"
+        },
+        {
+          "title": "oss-eu-central-1",
+          "value": "oss-eu-central-1"
+        },
+        {
+          "title": "oss-eu-west-1",
+          "value": "oss-eu-west-1"
+        },
+        {
+          "title": "oss-me-east-1",
+          "value": "oss-me-east-1"
+        }
+      ]
+    },
+    {
+      "name": "accessKeyId",
+      "type": "textfield",
+      "required": true,
+      "title": "AccessKeyId",
+      "description": "Please enter accessKeyId",
+      "placeholder": "Enter AccessKeyId"
+    },
+    {
+      "name": "accessKeySecret",
+      "type": "password",
+      "required": true,
+      "title": "AccessKeySecret",
+      "description": "Please enter accessKeySecret",
+      "placeholder": "Enter AccessKeySecret"
+    },
+    {
+      "name": "bucket",
+      "type": "textfield",
+      "required": true,
+      "title": "Bucket",
+      "description": "Please enter bucket",
+      "placeholder": "Enter Bucket"
+    },
+    {
+      "name": "endPoint",
+      "type": "textfield",
+      "required": false,
+      "title": "EndPoint",
+      "description": "Please enter endPoint",
+      "placeholder": "http(s)://"
+    },
+    {
+      "name": "useCustomDomain",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Custom Domain",
+      "description": "Use custom domain name"
+    },
+    {
+      "name": "pageSize",
+      "type": "textfield",
+      "required": false,
+      "default": "100",
+      "title": "Page Size",
+      "description": "Page size of fetching oss data, default is 100, limit to 1000",
+      "placeholder": "Enter Page Size"
+    },
+    {
+      "name": "downloadLoc",
+      "type": "directory",
+      "required": false,
+      "title": "File Download Location",
+      "description": "Please select file download location, default is Desktop",
+      "placeholder": "Select File Download Location"
+    },
+    {
+      "name": "streamThreshold",
+      "type": "dropdown",
+      "required": false,
+      "title": "Download by Stream Threshold",
+      "description": "When the file size exceeds the threshold, streaming background downloads are used",
+      "default": "50",
+      "data": [
+        {
+          "title": "10M",
+          "value": "10"
+        },
+        {
+          "title": "50M",
+          "value": "50"
+        },
+        {
+          "title": "100M",
+          "value": "100"
+        },
+        {
+          "title": "200M",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "name": "stickBookmark",
+      "type": "checkbox",
+      "required": false,
+      "label": "Stick Bookmarks on Top in Root",
+      "description": "Stick bookmarks on top of list in root path",
+      "default": true
+    },
+    {
+      "name": "copyUrlAfterUpload",
+      "type": "checkbox",
+      "required": false,
+      "label": "Copy Url After Upload",
+      "description": "Copy file url to clipboard after upload",
+      "default": true
+    },
+    {
+      "name": "renameFileAs",
+      "type": "dropdown",
+      "required": false,
+      "title": "Rename Uploaded File as",
+      "description": "When a file is uploaded, you can specify how the file is to be named",
+      "default": "originalName",
+      "data": [
+        {
+          "title": "Original Name",
+          "value": "originalName"
+        },
+        {
+          "title": "MD5 of File Content",
+          "value": "md5OfContent"
+        },
+        {
+          "title": "Named with Date Suffix",
+          "value": "namedWithDate"
+        }
+      ]
+    }
+  ],
+  "keywords": [
+    "oss",
+    "browser",
+    "oss-browser",
+    "oss browser",
+    "aliyun",
+    "aliyun oss"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "ali-oss": "^6.17.1",
+    "got": "^12.3.0",
+    "raycast-toolkit": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/ali-oss": "^6.16.4",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "overrides": {
+    "urllib": "^3.9.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "default": "openai:gpt-5.6-luna",
+  "options": [
+    { "title": "OpenAI — GPT-5.6 Sol", "value": "openai:gpt-5.6-sol" },
+    { "title": "OpenAI — GPT-5.6 Terra", "value": "openai:gpt-5.6-terra" },
+    { "title": "OpenAI — GPT-5.6 Luna", "value": "openai:gpt-5.6-luna" },
+    { "title": "OpenAI — GPT-5.5", "value": "openai:gpt-5.5" },
+    { "title": "OpenAI — GPT-5.5 Pro", "value": "openai:gpt-5.5-pro" },
+    { "title": "OpenAI — GPT-5.4", "value": "openai:gpt-5.4" },
+    { "title": "OpenAI — GPT-5.4 mini", "value": "openai:gpt-5.4-mini" },
+    { "title": "OpenAI — GPT-5.4 nano", "value": "openai:gpt-5.4-nano" },
+    { "title": "OpenAI — GPT-5.2", "value": "openai:gpt-5.2" },
+    { "title": "OpenAI — GPT-5.1", "value": "openai:gpt-5.1" },
+    { "title": "OpenAI — GPT-5", "value": "openai:gpt-5" },
+    { "title": "OpenAI — GPT-5 mini", "value": "openai:gpt-5-mini" },
+    { "title": "OpenAI — GPT-5 nano", "value": "openai:gpt-5-nano" },
+    { "title": "OpenAI — GPT-4o mini", "value": "openai:gpt-4o-mini" },
+    { "title": "OpenAI — GPT-4o", "value": "openai:gpt-4o" },
+    { "title": "OpenAI — GPT-4.1 mini", "value": "openai:gpt-4.1-mini" },
+    { "title": "OpenAI — GPT-4.1", "value": "openai:gpt-4.1" },
+    { "title": "Anthropic — Claude Fable 5", "value": "anthropic:claude-fable-5" },
+    { "title": "Anthropic — Claude Opus 4.8", "value": "anthropic:claude-opus-4-8" },
+    { "title": "Anthropic — Claude Sonnet 5", "value": "anthropic:claude-sonnet-5" },
+    { "title": "Anthropic — Claude Haiku 4.5", "value": "anthropic:claude-haiku-4-5-20251001" },
+    { "title": "Anthropic — Claude Sonnet 4", "value": "anthropic:claude-sonnet-4-20250514" },
+    { "title": "Google — Gemini 3.5 Flash", "value": "gemini:gemini-3.5-flash" },
+    { "title": "Google — Gemini 3.1 Flash-Lite", "value": "gemini:gemini-3.1-flash-lite" },
+    { "title": "Google — Gemini 3.1 Pro Preview", "value": "gemini:gemini-3.1-pro-preview" },
+    { "title": "Google — Gemini 3 Flash Preview", "value": "gemini:gemini-3-flash-preview" },
+    { "title": "Google — Gemini 2.5 Flash", "value": "gemini:gemini-2.5-flash" },
+    { "title": "Google — Gemini 2.5 Pro", "value": "gemini:gemini-2.5-pro" }
+  ]
+}

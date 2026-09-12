@@ -1,0 +1,159 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "crypto-price",
+  "title": "Crypto Price",
+  "description": "Keep an eye on Bitcoin (BTC), Ethereum (ETH), and other cryptocurrency prices and more directly from your system menu bar",
+  "icon": "command-icon.png",
+  "author": "gutenye",
+  "contributors": [
+    "zampa"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Crypto Price",
+      "description": "See cryptocurency prices and more",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "currency",
+      "title": "Currency",
+      "description": "Currency to use for the price",
+      "type": "dropdown",
+      "required": false,
+      "default": "USD",
+      "data": [
+        {
+          "title": "🇺🇸 United States dollar",
+          "value": "USD"
+        },
+        {
+          "title": "🇪🇺 Euro",
+          "value": "EUR"
+        },
+        {
+          "title": "🇬🇧 Pound Sterling",
+          "value": "GBP"
+        },
+        {
+          "title": "🇯🇵 Japanese Yen",
+          "value": "JPY"
+        },
+        {
+          "title": "🇧🇷 Brazilian Real",
+          "value": "BRL"
+        }
+      ]
+    },
+    {
+      "name": "style",
+      "title": "Style",
+      "description": "Style to display on the system menubar",
+      "type": "dropdown",
+      "required": false,
+      "default": "price",
+      "data": [
+        {
+          "title": "$1,234",
+          "value": "price"
+        },
+        {
+          "title": "100 $1,234 200",
+          "value": "down24h-price-up24h"
+        },
+        {
+          "title": "1% $1,234 2%",
+          "value": "down24hPercent-price-up24hPercent"
+        }
+      ]
+    },
+    {
+      "name": "source",
+      "title": "Source",
+      "description": "Preferred source for fetching the price. If it's unavailable, the extension automatically falls back to the other sources.",
+      "type": "dropdown",
+      "required": false,
+      "default": "Binance",
+      "data": [
+        {
+          "title": "Binance",
+          "value": "Binance"
+        },
+        {
+          "title": "CoinGecko",
+          "value": "CoinGecko"
+        },
+        {
+          "title": "OKX",
+          "value": "OKX"
+        },
+        {
+          "title": "Coinbase",
+          "value": "Coinbase"
+        },
+        {
+          "title": "Kraken",
+          "value": "Kraken"
+        },
+        {
+          "title": "CryptoCompare (needs API key)",
+          "value": "CryptoCompare"
+        }
+      ]
+    },
+    {
+      "title": "Coins",
+      "name": "coins",
+      "description": "Coins to enable, default is BTC | ETH BNB SOL XRP",
+      "type": "textfield",
+      "default": "BTC | ETH BNB SOL XRP",
+      "required": false
+    },
+    {
+      "name": "cryptoCompareApiKey",
+      "title": "CryptoCompare API Key",
+      "description": "Optional. A free CryptoCompare (CCData) API key. Only needed to use CryptoCompare as a source — its public API now requires a key.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.19.1",
+    "lodash": "^4.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/jest": "^30.0.0",
+    "@types/lodash": "^4.17.24",
+    "@types/node": "~25.9.3",
+    "@types/react": "^19.2.17",
+    "@typescript-eslint/eslint-plugin": "^8.61.0",
+    "@typescript-eslint/parser": "^8.61.0",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "jest": "^30.4.2",
+    "prettier": "^3.8.4",
+    "ts-jest": "^29.4.11",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nts-radio",
+  "title": "NTS Radio",
+  "description": "Stream & Search NTS Radio",
+  "icon": "command-icon.png",
+  "author": "arjanski",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "closeWindowOnAction",
+      "title": "Close window on action",
+      "description": "Close the Raycast window after performing an action",
+      "type": "checkbox",
+      "label": "Enabled",
+      "default": false,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "station1",
+      "title": "Live 1",
+      "subtitle": "NTS Radio",
+      "description": "Play NTS station 1 live stream",
+      "mode": "no-view"
+    },
+    {
+      "name": "station2",
+      "title": "Live 2",
+      "subtitle": "NTS Radio",
+      "description": "Play NTS station 2 live stream",
+      "mode": "no-view"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "NTS Radio",
+      "description": "Search NTS shows and episodes",
+      "mode": "view"
+    },
+    {
+      "name": "latest",
+      "title": "Latest",
+      "subtitle": "NTS Radio",
+      "description": "The newest archive additions, updated daily",
+      "mode": "view"
+    },
+    {
+      "name": "mixtapes",
+      "title": "Infinite Mixtapes",
+      "subtitle": "NTS Radio",
+      "description": "Music-only themed radio streams, made from NTS resident and guest shows",
+      "mode": "view"
+    },
+    {
+      "name": "favourites",
+      "title": "My Favourites",
+      "subtitle": "NTS Radio",
+      "description": "Your favourite episodes (saved in the Raycast extension)",
+      "mode": "view"
+    },
+    {
+      "name": "play-pause",
+      "title": "Stop Audio",
+      "subtitle": "NTS Radio",
+      "description": "Stop the currently playing audio stream",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.0",
+    "@raycast/utils": "^1.5.2",
+    "oazapfts": "^4.6.0",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

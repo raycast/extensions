@@ -1,0 +1,740 @@
+[
+  {
+    "title": "Other",
+    "items": [
+      {
+        "category": "Components",
+        "title": "Affix",
+        "description": "Stick an element to the viewport.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*YSm4RI3iOJ8AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*03dxS64LxeQAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/affix"
+      },
+      {
+        "category": "Components",
+        "title": "App",
+        "description": "Application wrapper for some global usages.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*HJz8SZos2wgAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*oC92TK44Ex8AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "tag": "5.1.0",
+        "documentation": "https://ant.design/components/app"
+      },
+      {
+        "category": "Components",
+        "title": "ConfigProvider",
+        "description": "Provide a uniform configuration support for components.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*NVKORa7BCVwAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*YC4ERpGAddoAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/config-provider"
+      }
+    ]
+  },
+  {
+    "title": "Feedback",
+    "items": [
+      {
+        "category": "Components",
+        "title": "Alert",
+        "description": "Display warning messages that require attention.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*QsvtS41m45UAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*gOTISoMFZV0AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/alert"
+      },
+      {
+        "category": "Components",
+        "title": "Drawer",
+        "description": "A panel that slides out from the edge of the screen.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*BD2JSKm8I-kAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*r29rQ51bNdwAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/drawer"
+      },
+      {
+        "category": "Components",
+        "noinstant": true,
+        "title": "Message",
+        "description": "Display global messages as feedback in response to user operations.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Xl5ORK7Iy44AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*fv7mQIWdUgcAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/message"
+      },
+      {
+        "category": "Components",
+        "title": "Modal",
+        "description": "Display a modal dialog box, providing a title, content area, and action buttons.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Z9vzQZAdJDQAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*WtgsSLPa1Z4AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/modal"
+      },
+      {
+        "category": "Components",
+        "noinstant": true,
+        "title": "Notification",
+        "description": "Prompt notification message globally.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*cRmqTY4nKPEAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*W3RmSov-xVMAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/notification"
+      },
+      {
+        "category": "Components",
+        "title": "Popconfirm",
+        "description": "Pop up a bubble confirmation box for an action.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*a7tqQ6wrdeAAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*iwYsQpeFcB0AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/popconfirm"
+      },
+      {
+        "category": "Components",
+        "title": "Progress",
+        "description": "Display the current progress of the operation.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*gK_4S6fDRfgAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*HJH8Tb1lcYAAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/progress"
+      },
+      {
+        "category": "Components",
+        "title": "Result",
+        "description": "Used to feedback the processing results of a series of operations.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*-e2IRroDJyEAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*-0kxQrbHx2kAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/result"
+      },
+      {
+        "category": "Components",
+        "title": "Skeleton",
+        "description": "Provide a placeholder while you wait for content to load, or to visualize content that doesn't exist yet.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*uae3QbkNCm8AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*VcjGQLSrYdcAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/skeleton"
+      },
+      {
+        "category": "Components",
+        "title": "Spin",
+        "description": "Used for the loading status of a page or a block.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*5mC5TomY4B0AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*i43_ToFrL8YAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/spin"
+      },
+      {
+        "category": "Components",
+        "title": "Watermark",
+        "description": "Add specific text or patterns to the page.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*wr1ISY50SyYAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*duAQQbjHlHQAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 1
+        },
+        "tag": "5.1.0",
+        "documentation": "https://ant.design/components/watermark"
+      }
+    ]
+  },
+  {
+    "title": "Navigation",
+    "items": [
+      {
+        "category": "Components",
+        "title": "Anchor",
+        "description": "Hyperlinks to scroll on one page.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*ufP1TLS5VvIAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*_9_eTrgvHNQAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": null,
+        "documentation": "https://ant.design/components/anchor"
+      },
+      {
+        "category": "Components",
+        "title": "Breadcrumb",
+        "description": "Display the current location within a hierarchy. And allow going back to states higher up in the hierarchy.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*I5a2Tpqs3y0AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Tr90QKrE_LcAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/breadcrumb"
+      },
+      {
+        "category": "Components",
+        "title": "Dropdown",
+        "description": "A dropdown list.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*gTBySYX11WcAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*k619RJ_7bKEAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/dropdown"
+      },
+      {
+        "category": "Components",
+        "title": "Menu",
+        "description": "A versatile menu for navigation.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*KeyQQL5iKkkAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Vn4XSqJFAxcAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/menu"
+      },
+      {
+        "category": "Components",
+        "title": "Pagination",
+        "description": "A long list can be divided into several pages, and only one page will be loaded at a time.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*8y_iTJGY_aUAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*WM86SrBC8TsAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/pagination"
+      },
+      {
+        "category": "Components",
+        "title": "Steps",
+        "description": "A navigation bar that guides users through the steps of a task.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*677sTqCpE3wAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*cFsBQLA0b7UAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/steps"
+      }
+    ]
+  },
+  {
+    "title": "Data Entry",
+    "items": [
+      {
+        "category": "Components",
+        "title": "AutoComplete",
+        "description": "Autocomplete function of input field.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*g8THS4NpV6sAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*WERTQ6qvgEYAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/auto-complete"
+      },
+      {
+        "category": "Components",
+        "title": "Cascader",
+        "description": "Cascade selection box.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*ngTnQZNOcK0AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Nt8xR7afyr0AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/cascader"
+      },
+      {
+        "category": "Components",
+        "title": "Checkbox",
+        "description": "Collect user's choices.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*DzgiRbW3khIAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*G3MjTYXL6AIAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/checkbox"
+      },
+      {
+        "category": "Components",
+        "title": "ColorPicker",
+        "description": "Used for color selection.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*PpY4RYNM8UcAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*EHL-QYJofZsAAAAAAAAAAAAADrJ8AQ/original",
+        "tag": "5.5.0",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/color-picker"
+      },
+      {
+        "category": "Components",
+        "title": "DatePicker",
+        "description": "To select or input a date.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*qK9mRqFnBbAAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*wz1QTJSQgmAAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/date-picker"
+      },
+      {
+        "category": "Components",
+        "title": "Form",
+        "description": "High-performance form component with data domain management. Includes data entry, validation, and corresponding styles.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*-lcdS5Qm1bsAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*ylFATY6w-ygAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/form"
+      },
+      {
+        "category": "Components",
+        "title": "Input",
+        "description": "Through mouse or keyboard input content, it is the most basic form field wrapper.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Y3R0RowXHlAAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*sBqqTatJ-AkAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/input"
+      },
+      {
+        "category": "Components",
+        "title": "InputNumber",
+        "description": "Enter a number within certain range with the mouse or keyboard.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*JvWbSYhuNlIAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*1uH-R5kLAMIAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/input-number"
+      },
+      {
+        "category": "Components",
+        "title": "Mentions",
+        "description": "Used to mention someone or something in an input.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*e4bXT7Uhi9YAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*pxR2S53P_xoAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/mentions"
+      },
+      {
+        "category": "Components",
+        "title": "Radio",
+        "description": "Used to select a single state from multiple options.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*mrPVRope68wAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*xPfTSphsiA0AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/radio"
+      },
+      {
+        "category": "Components",
+        "title": "Rate",
+        "description": "Used for rating operation on something.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*oyOcTrB12_YAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*M7_ER7GJr6wAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/rate"
+      },
+      {
+        "category": "Components",
+        "title": "Select",
+        "description": "A dropdown menu for displaying choices.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*qGSbQJ0POEsAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*a6ggRInInJ4AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/select"
+      },
+      {
+        "category": "Components",
+        "title": "Slider",
+        "description": "A Slider component for displaying current value and intervals in range.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*_4heQaUrFn4AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*XkgXTaudeosAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/slider"
+      },
+      {
+        "category": "Components",
+        "title": "Switch",
+        "description": "Used to toggle between two states.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*rtArRpBNDZcAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*al07RK8SGf4AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/switch"
+      },
+      {
+        "category": "Components",
+        "title": "TimePicker",
+        "description": "To select/input a time.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*kGmGSLk_1fwAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*1hDmQJIDFJQAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/time-picker"
+      },
+      {
+        "category": "Components",
+        "title": "Transfer",
+        "description": "Double column transfer choice box.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*fkfzT5BbwNIAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*g9vUQq2nkpEAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/transfer"
+      },
+      {
+        "category": "Components",
+        "title": "TreeSelect",
+        "description": "Tree selection control.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*1zcHQLltaJcAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*hjwGSIa4J8QAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/tree-select"
+      },
+      {
+        "category": "Components",
+        "title": "Upload",
+        "description": "Used to select and upload files or drag and drop files.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*93ymR4RD4S0AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*l1nlSryXib8AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/upload"
+      }
+    ]
+  },
+  {
+    "title": "Data Display",
+    "items": [
+      {
+        "category": "Components",
+        "title": "Avatar",
+        "description": "Used to represent users or things, supporting the display of images, icons, or characters.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*JJBSS5lBG4IAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*YbgyQaRGz-UAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/avatar"
+      },
+      {
+        "category": "Components",
+        "title": "Badge",
+        "description": "Small numerical value or status descriptor for UI elements.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*e0qITYqF394AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*v8EQT7KoGbcAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/badge"
+      },
+      {
+        "category": "Components",
+        "title": "Calendar",
+        "description": "A container that displays data in calendar form.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*nF6_To7pDSAAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*-p-wQLik200AAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/calendar"
+      },
+      {
+        "category": "Components",
+        "title": "Card",
+        "description": "A container for displaying information.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*QXO1SKEdIzYAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*5WDvQp_H7LUAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/card"
+      },
+      {
+        "category": "Components",
+        "title": "Carousel",
+        "description": "A set of carousel areas.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*bPMSSqbaTMkAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*a-58QpYnqOsAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/carousel"
+      },
+      {
+        "category": "Components",
+        "title": "Collapse",
+        "description": "A content area which can be collapsed and expanded.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*B7HKR5OBe8gAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*sir-TK0HkWcAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/collapse"
+      },
+      {
+        "category": "Components",
+        "title": "Descriptions",
+        "description": "Display multiple read-only fields in a group.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*fHdlTpif6XQAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*d27AQJrowGAAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/descriptions"
+      },
+      {
+        "category": "Components",
+        "title": "Empty",
+        "description": "Empty state placeholder.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*ZdiZSLzEV0wAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*obM7S5lIxeMAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/empty"
+      },
+      {
+        "category": "Components",
+        "title": "Image",
+        "description": "Preview-able image.",
+        "cols": 2,
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*FbOCS6aFMeUAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*LVQ3R5JjjJEAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/image"
+      },
+      {
+        "category": "Components",
+        "title": "List",
+        "description": "Basic list display, which can carry text, lists, pictures, paragraphs.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*EYuhSpw1iSwAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*tBzwQ7raKX8AAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/list"
+      },
+      {
+        "category": "Components",
+        "title": "Popover",
+        "description": "The floating card pops up when clicking/mouse hovering over an element.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*kfW5RrfF4L8AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*6b8fSKVVtXIAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/popover"
+      },
+      {
+        "category": "Components",
+        "title": "QRCode",
+        "description": "Components that can convert text into QR codes, and support custom color and logo.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*cJopQrf0ncwAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*M4PBTZ_n9OgAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "tag": "5.1.0",
+        "documentation": "https://ant.design/components/qr-code"
+      },
+      {
+        "category": "Components",
+        "title": "Segmented",
+        "description": "Display multiple options and allow users to select a single option.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*XJR2TbS1aaQAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*-9tSSoO_MkIAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/segmented"
+      },
+      {
+        "category": "Components",
+        "title": "Statistic",
+        "description": "Display statistic number.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*YL7PRYNtH-4AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*BPWDRbSYxJ4AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/statistic"
+      },
+      {
+        "category": "Components",
+        "title": "Table",
+        "description": "A table displays rows of data.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*3yz3QqMlShYAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*Sv8XQ50NB40AAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/table"
+      },
+      {
+        "category": "Components",
+        "title": "Tabs",
+        "description": "Tabs make it easy to explore and switch between different views.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*72NDQqXkyOEAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*8HMoTZUoSGoAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/tabs"
+      },
+      {
+        "category": "Components",
+        "title": "Tag",
+        "description": "Used for marking and categorization.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*_SBsSrKLg00AAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*JPNAQYrVkYkAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/tag"
+      },
+      {
+        "category": "Components",
+        "title": "Timeline",
+        "description": "Vertical display timeline.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*FkTySqNt3sYAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*yIl9S4hAIBcAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/timeline"
+      },
+      {
+        "category": "Components",
+        "title": "Tooltip",
+        "description": "Simple text popup box.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*9LKlRbWytugAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*bCbPTJ7LQngAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/tooltip"
+      },
+      {
+        "category": "Components",
+        "title": "Tour",
+        "description": "A popup component for guiding users through a product.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*NMvqRZpuJfQAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*D70qQJJmzhgAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "tag": "5.0.0",
+        "documentation": "https://ant.design/components/tour"
+      },
+      {
+        "category": "Components",
+        "title": "Tree",
+        "description": "Multiple-level structure list.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*zYIWT52S4UMAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*_9MMRpWoOcYAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/tree"
+      }
+    ]
+  },
+  {
+    "title": "General",
+    "items": [
+      {
+        "category": "Components",
+        "title": "Button",
+        "description": "To trigger an operation.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*7va7RKs3YzIAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*3T4cRqxH9-8AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/button"
+      },
+      {
+        "category": "Components",
+        "title": "FloatButton",
+        "description": "A button that floats at the top of the page.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*tXAoQqyr-ioAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*hSAwR7cnabwAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "tag": "5.0.0",
+        "documentation": "https://ant.design/components/float-button"
+      },
+      {
+        "category": "Components",
+        "title": "Icon",
+        "description": "Semantic vector graphics.",
+        "showImport": false,
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*PdAYS7anRpoAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*xEDOTJx2DEkAAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/icon"
+      },
+      {
+        "category": "Components",
+        "title": "Typography",
+        "description": "Basic text writing, including headings, body text, lists, and more.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*MLt3R6m9huoAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*LT2jR41Uj2EAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/typography"
+      }
+    ]
+  },
+  {
+    "title": "Layout",
+    "items": [
+      {
+        "category": "Components",
+        "title": "Divider",
+        "description": "A divider line separates different content.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*7sMiTbzvaDoAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*KPSEQ74PLg4AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 2
+        },
+        "documentation": "https://ant.design/components/divider"
+      },
+      {
+        "category": "Components",
+        "title": "Flex",
+        "description": "A flex layout container for alignment.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*SMzgSJZE_AwAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*8yArQ43EGccAAAAAAAAAAAAADrJ8AQ/original",
+        "tag": "5.10.0",
+        "documentation": "https://ant.design/components/flex"
+      },
+      {
+        "category": "Components",
+        "title": "Grid",
+        "description": "24 Grids System.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*mfJeS6cqZrEAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*DLUwQ4B2_zQAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/grid"
+      },
+      {
+        "category": "Components",
+        "title": "Layout",
+        "description": "Handling the overall layout of a page.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*4i58ToAcxaYAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*HdS6Q5vUCDcAAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/layout"
+      },
+      {
+        "category": "Components",
+        "title": "Space",
+        "description": "Set components spacing.",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*ZiJ3SbOH9SUAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*37T2R6O9oi0AAAAAAAAAAAAADrJ8AQ/original",
+        "documentation": "https://ant.design/components/space"
+      },
+      {
+        "category": "Components",
+        "title": "Splitter",
+        "description": "Split panels to isolate",
+        "cover": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*f0SISaETY0wAAAAAAAAAAAAADrJ8AQ/original",
+        "coverDark": "https://mdn.alipayobjects.com/huamei_7uahnr/afts/img/A*y92yRYhObU8AAAAAAAAAAAAADrJ8AQ/original",
+        "demo": {
+          "cols": 1
+        },
+        "tag": "5.21.0",
+        "documentation": "https://ant.design/components/splitter"
+      }
+    ]
+  }
+]

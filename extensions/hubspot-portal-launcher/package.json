@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hubspot-portal-launcher",
+  "title": "HubSpot Portal Launcher",
+  "description": "A simple Raycast extension that allows you to quickly launch and navigate to different objects in your HubSpot portals",
+  "icon": "hubspot-icon.png",
+  "author": "chriso",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-portals",
+      "title": "Search Portals",
+      "subtitle": "HubSpot Portal",
+      "description": "Search and open HubSpot Portals",
+      "mode": "view"
+    },
+    {
+      "name": "add-portal",
+      "title": "Add Portal",
+      "subtitle": "HubSpot Portal",
+      "description": "Add additional HubSpot Portals to launch into",
+      "mode": "view"
+    },
+    {
+      "name": "import-portals",
+      "title": "Import Portals",
+      "subtitle": "HubSpot Portal",
+      "description": "Import HubSpot Portals from a JSON file",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.0",
+    "@types/nanoid": "^3.0.0",
+    "nanoid": "^4.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

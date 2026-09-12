@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "terminal-image-paste",
+  "title": "Terminal Image Paste",
+  "version": "1.0.0",
+  "description": "Paste clipboard image as a file path — works in any terminal, SSH session, or TUI app",
+  "icon": "icon.png",
+  "type": "module",
+  "author": "iisweetheartii",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "clipboard",
+    "image",
+    "paste",
+    "path",
+    "terminal",
+    "ssh",
+    "tmux",
+    "screenshot"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paste-image-path",
+      "title": "Paste Image as Path",
+      "description": "Save clipboard image to /tmp/clip-latest.png and type the path. Works in SSH, tmux, and any TUI.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "remoteHosts",
+          "title": "Remote SSH Hosts",
+          "description": "Comma-separated SSH hosts to sync image to (e.g. myserver,user@host). Leave empty for local only.",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "placeholder": "myserver, user@192.168.1.1"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo 'Use npm run publish instead' && exit 1"
+  }
+}

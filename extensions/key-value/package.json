@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "key-value",
+  "title": "Key Value",
+  "description": "Copy a key from the clipboard and paste a value from a JSON file",
+  "icon": "key-value-icon.png",
+  "author": "NirLevy",
+  "contributors": [
+    "pernielsentikaer",
+    "gkpln3"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "jsonFilePath",
+      "description": "Json file with key value pairs",
+      "type": "file",
+      "required": true,
+      "title": "Key Value Json File"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Find Value by Key",
+      "description": "Shows a list of key-value pairs from a JSON file and allows you to copy them to the clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "reload-url-no-view",
+      "title": "Reload from URL",
+      "description": "Reloads the JSON file from the URL",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "jsonURLPath",
+          "description": "URL path to a json file with key value pairs",
+          "type": "textfield",
+          "required": true,
+          "title": "Key Value Json URL"
+        },
+        {
+          "name": "jsonKeyForKey",
+          "description": "Key name to search for",
+          "type": "textfield",
+          "required": true,
+          "title": "Key"
+        },
+        {
+          "name": "jsonKeyForValue",
+          "description": "Key name to get the value from",
+          "type": "textfield",
+          "required": true,
+          "title": "Value"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.1",
+    "@raycast/utils": "^1.7.0",
+    "axios": "^1.8.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/node-fetch": "^2.6.11",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

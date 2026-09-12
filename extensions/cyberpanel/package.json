@@ -1,0 +1,189 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cyberpanel",
+  "title": "CyberPanel",
+  "description": "Interact with CyberPanel",
+  "icon": "cyberpanel.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "panelUrl",
+      "title": "Panel URL",
+      "description": "Full URL of CyberPanel Instance with Port",
+      "type": "textfield",
+      "placeholder": "https://cyberpanel.local:8090/",
+      "required": true
+    },
+    {
+      "name": "adminUser",
+      "title": "Admin Username",
+      "description": "Username of Admin Account in CyberPanel",
+      "type": "textfield",
+      "placeholder": "admin",
+      "required": true
+    },
+    {
+      "name": "adminPass",
+      "title": "Admin Password",
+      "description": "Password of Admin Account in CyberPanel",
+      "type": "password",
+      "placeholder": "hunter2",
+      "required": true
+    },
+    {
+      "name": "tokenType",
+      "title": "Token Type",
+      "description": "Which token format your CyberPanel instance supports",
+      "type": "dropdown",
+      "placeholder": "Token Type",
+      "required": true,
+      "default": "base64",
+      "data": [
+        {
+          "title": "Base64",
+          "value": "base64"
+        },
+        {
+          "title": "SHA-256",
+          "value": "sha256"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "verify-login",
+      "subtitle": "CyberPanel",
+      "title": "Verify Login",
+      "description": "Verify User Can Access API",
+      "mode": "no-view"
+    },
+    {
+      "name": "list-users",
+      "subtitle": "CyberPanel",
+      "title": "List Users",
+      "description": "List Users in CyberPanel",
+      "mode": "view"
+    },
+    {
+      "name": "list-packages",
+      "subtitle": "CyberPanel",
+      "title": "List Packages",
+      "description": "List Packages in CyberPanel",
+      "mode": "view"
+    },
+    {
+      "name": "list-ftp-accounts-in-domain",
+      "subtitle": "CyberPanel",
+      "title": "List FTP Accounts in Domain",
+      "description": "List FTP Accounts in a Domain in CyberPanel",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "selectedDomain",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "list-email-accounts-in-domain",
+      "subtitle": "CyberPanel",
+      "title": "List Email Accounts in Domain",
+      "description": "List Email Accounts in a Domain in CyberPanel",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "list-databases-in-domain",
+      "subtitle": "CyberPanel",
+      "title": "List Databases in Domain",
+      "description": "List Databases in a Domain in CyberPanel",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "databaseWebsite",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "list-dns-records-in-domain",
+      "subtitle": "CyberPanel",
+      "title": "List DNS Records in Domain",
+      "description": "List DNS Records in a Domain in CyberPanel",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "selectedZone",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        },
+        {
+          "name": "currentSelection",
+          "placeholder": "RECORD_TYPE",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "create-backup",
+      "subtitle": "CyberPanel",
+      "title": "Create Backup",
+      "description": "Create Backup in CyberPanel",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "websiteToBeBacked",
+          "placeholder": "DOMAIN",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "list-websites",
+      "subtitle": "CyberPanel",
+      "title": "List Websites",
+      "description": "List Websites in CyberPanel",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

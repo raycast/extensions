@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "twitch-chat",
+  "title": "Twitch Chat",
+  "description": "View twitch.tv's live chat",
+  "icon": "command-icon.png",
+  "author": "Aayush9029",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Chat",
+      "subtitle": "Connect and view live IRC chat",
+      "description": "View chat for twitch.tv channels live on raycast!",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "streamName",
+      "title": "Stream Name",
+      "description": "Streamer's Twitch username (without the 'twitch.tv/' prefix)",
+      "type": "textfield",
+      "default": "xqc",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.0",
+    "tmi.js": "^1.8.5"
+  },
+  "devDependencies": {
+    "@types/tmi.js": "^1.8.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

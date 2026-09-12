@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "1",
+        "upper": "!"
+    },
+    "Digit2": {
+        "lower": "2",
+        "upper": "\""
+    },
+    "Digit3": {
+        "lower": "3",
+        "upper": "#"
+    },
+    "Digit4": {
+        "lower": "4",
+        "upper": "$"
+    },
+    "Digit5": {
+        "lower": "5",
+        "upper": "%"
+    },
+    "Digit6": {
+        "lower": "6",
+        "upper": "^"
+    },
+    "Digit7": {
+        "lower": "7",
+        "upper": "'"
+    },
+    "Digit8": {
+        "lower": "8",
+        "upper": "("
+    },
+    "Digit9": {
+        "lower": "9",
+        "upper": "("
+    },
+    "Digit0": {
+        "lower": "0",
+        "upper": ")"
+    },
+    "Minus": {
+        "lower": "-",
+        "upper": "_"
+    },
+    "Equal": {
+        "lower": "=",
+        "upper": "~"
+    },
+    "KeyQ": {
+        "lower": "ქ",
+        "upper": ""
+    },
+    "KeyW": {
+        "lower": "წ",
+        "upper": "ჭ"
+    },
+    "KeyE": {
+        "lower": "ე",
+        "upper": ""
+    },
+    "KeyR": {
+        "lower": "რ",
+        "upper": "ღ"
+    },
+    "KeyT": {
+        "lower": "ტ",
+        "upper": "თ"
+    },
+    "KeyY": {
+        "lower": "ყ",
+        "upper": ""
+    },
+    "KeyU": {
+        "lower": "უ",
+        "upper": ""
+    },
+    "KeyI": {
+        "lower": "ი",
+        "upper": ""
+    },
+    "KeyO": {
+        "lower": "ო",
+        "upper": "`"
+    },
+    "KeyP": {
+        "lower": "პ",
+        "upper": "~"
+    },
+    "BracketLeft": {
+        "lower": "[",
+        "upper": "{"
+    },
+    "BracketRight": {
+        "lower": "[",
+        "upper": "{"
+    },
+    "KeyA": {
+        "lower": "ა",
+        "upper": ""
+    },
+    "KeyS": {
+        "lower": "ს",
+        "upper": "შ"
+    },
+    "KeyD": {
+        "lower": "დ",
+        "upper": ""
+    },
+    "KeyF": {
+        "lower": "ფ",
+        "upper": ""
+    },
+    "KeyG": {
+        "lower": "გ",
+        "upper": ""
+    },
+    "KeyH": {
+        "lower": "ჰ",
+        "upper": ""
+    },
+    "KeyJ": {
+        "lower": "ჯ",
+        "upper": "ჟ"
+    },
+    "KeyK": {
+        "lower": "კ",
+        "upper": ""
+    },
+    "KeyL": {
+        "lower": "ლ",
+        "upper": ""
+    },
+    "Semicolon": {
+        "lower": ";",
+        "upper": ":"
+    },
+    "Quote": {
+        "lower": ":",
+        "upper": "*"
+    },
+    "Backquote": {
+        "lower": "„",
+        "upper": "“"
+    },
+    "Backslash": {
+        "lower": "\\",
+        "upper": "}"
+    },
+    "KeyZ": {
+        "lower": "ზ",
+        "upper": "ძ"
+    },
+    "KeyX": {
+        "lower": "ხ",
+        "upper": ""
+    },
+    "KeyC": {
+        "lower": "ც",
+        "upper": "ჩ"
+    },
+    "KeyV": {
+        "lower": "ვ",
+        "upper": ""
+    },
+    "KeyB": {
+        "lower": "ბ",
+        "upper": ""
+    },
+    "KeyN": {
+        "lower": "ნ",
+        "upper": ""
+    },
+    "KeyM": {
+        "lower": "მ",
+        "upper": ""
+    },
+    "Comma": {
+        "lower": ",",
+        "upper": "<"
+    },
+    "Period": {
+        "lower": ".",
+        "upper": ">"
+    },
+    "Slash": {
+        "lower": "/",
+        "upper": "?"
+    }
+}

@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screen-studio",
+  "title": "Screen Studio",
+  "description": "Raycast extension that allows controlling the Screen Studio app easily",
+  "icon": "command-icon.png",
+  "author": "pie6k",
+  "access": "public",
+  "owner": "screen-studio",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "record-display",
+      "title": "Record Display",
+      "description": "Start recording display",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-window",
+      "title": "Record Window",
+      "description": "Start recording window",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-area",
+      "title": "Record Area",
+      "description": "Start recording area",
+      "mode": "no-view"
+    },
+    {
+      "name": "finish-recording",
+      "title": "Finish Recording",
+      "description": "Finish current recording",
+      "mode": "no-view"
+    },
+    {
+      "name": "cancel-recording",
+      "title": "Cancel Recording",
+      "description": "Cancel current recording",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart-recording",
+      "title": "Restart Recording",
+      "description": "Restart current recording",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-recording-area-cover",
+      "title": "Toggle Recording Area Cover",
+      "description": "Turn on/off recording area cover",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-recording-controls",
+      "title": "Toggle Recording Controls",
+      "description": "Show/hide recording controls",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-projects-folder",
+      "title": "Open Projects Folder",
+      "description": "Open projects folder",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "description": "Open settings",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "copy-and-zip-project",
+      "title": "Copy ZIP Project to Clipboard",
+      "description": "The project will be compressed into ZIP format and copied to the clipboard.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

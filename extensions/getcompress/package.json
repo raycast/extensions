@@ -1,0 +1,167 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "getcompress",
+  "title": "GetCompress",
+  "description": "Compress PDF, videos, images & GIFs in batches: fast, secure, local",
+  "icon": "icon.png",
+  "author": "petersamokhin",
+  "categories": [
+    "Productivity",
+    "Media",
+    "Applications"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "open-files",
+      "title": "Import Files",
+      "description": "Open the selected files or folders",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-compress-files",
+      "title": "Compress Files Quickly",
+      "description": "Compress selected files or folders with quick options",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "preset",
+          "type": "dropdown",
+          "placeholder": "Preset",
+          "required": false,
+          "data": [
+            {
+              "title": "Use Current Preset",
+              "value": "current"
+            },
+            {
+              "title": "Preset 1",
+              "value": "preset-0"
+            },
+            {
+              "title": "Preset 2",
+              "value": "preset-1"
+            },
+            {
+              "title": "Preset 3",
+              "value": "preset-2"
+            },
+            {
+              "title": "Preset 4",
+              "value": "preset-3"
+            },
+            {
+              "title": "Preset 5",
+              "value": "preset-4"
+            }
+          ]
+        },
+        {
+          "name": "quality",
+          "type": "dropdown",
+          "placeholder": "Quality",
+          "required": false,
+          "data": [
+            {
+              "title": "Use Preset Quality",
+              "value": "preset"
+            },
+            {
+              "title": "Balanced",
+              "value": "balanced"
+            },
+            {
+              "title": "Original",
+              "value": "original"
+            },
+            {
+              "title": "High",
+              "value": "high"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Low",
+              "value": "low"
+            }
+          ]
+        },
+        {
+          "name": "outputFormat",
+          "type": "dropdown",
+          "placeholder": "Output Format",
+          "required": false,
+          "data": [
+            {
+              "title": "Same as Preset/Input",
+              "value": "same"
+            },
+            {
+              "title": "JPEG",
+              "value": "jpeg"
+            },
+            {
+              "title": "MP4",
+              "value": "mp4"
+            },
+            {
+              "title": "GIF",
+              "value": "gif"
+            },
+            {
+              "title": "WebM",
+              "value": "webm"
+            },
+            {
+              "title": "WebP",
+              "value": "webp"
+            },
+            {
+              "title": "AVIF",
+              "value": "avif"
+            },
+            {
+              "title": "PNG",
+              "value": "png"
+            },
+            {
+              "title": "MOV",
+              "value": "mov"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "compress-files",
+      "title": "Compress Files",
+      "description": "Compress selected files or folders with more options",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

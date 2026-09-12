@@ -1,0 +1,84 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Artificial Analysis for Raycast: Project Structure
+
+## Description
+This document outlines the file structure for the Artificial Analysis Raycast extension, organized by responsibility. It serves as a roadmap for development.
+
+## File Structure
+
+```
+artificial-analysis/
+├── package.json                    # Extension configuration, commands, dependencies
+├── package-lock.json               # Locked dependency versions
+├── README.md                       # Extension documentation
+├── CHANGELOG.md                    # Changelog
+│
+├── assets/                         # Extension assets
+│   ├── extension-icon.png          # Extension icon
+│   └── ...                         # Additional icons and resources
+│
+└── src/                            # Source code
+    |
+    ├── comparison-of-models.tsx     # Command to compare AI models
+    ├── ...                         # Additional commands as the project evolves
+    |
+    ├── components/                 # Reusable UI components and actions
+    │   ├── actions/                # Reusable Action and ActionPanel components
+    │   │
+    │   ├── views/                  # Reusable view components
+    │   │   └── ...                 # Additional view components
+    │   │
+    ├── types/                      # TypeScript types and interfaces
+    │   ├── index.ts                # Extension-specific data models
+    │   └── ...                     # Additional types as the project evolves
+    │
+    └── hooks/                      # Custom React hooks
+        └── ...                     # Additional hooks as needed
+```
+
+## Directory Descriptions
+
+### `/src` - Commands
+The root `src` directory contains all Raycast command files. Each command is self-contained and includes all its UI logic.
+- `comparison-of-models.tsx`: Main command for comparing AI models.
+
+### `/src/components/actions/` - Action Components
+Reusable `Action`, `ActionPanel.Submenu` and `ActionPanel` components that encapsulate operations related for concrete features.
+- etc.
+
+### `/src/components/views/` - View Components
+Reusable components that represent different views within a part of some command.
+- etc.
+
+Each view is a React component that is displayed in the Raycast window as a page.
+
+### `/src/hooks/` - Custom React Hooks
+Custom hooks for managing state and logic.
+
+### `/src/utils/` - Utilities
+Minimal, essential helper functions.
+
+### `/src/types/` - TypeScript Definitions
+Contains all TypeScript type definitions and interfaces for the extension that should be available across the all commands/actions/hooks/views.
+- `index.ts`: Core types for the extension (related to extension-specific data models).
+
+## Organizational Principles
+
+- **Commands Own UI**: Command files (`/src/*.tsx`) contain all UI rendering logic. Views from `/src/components/views` are used to compose the final UI.
+- **Reusable Actions**: Standardized `Action` components are in `/src/components/actions/` for use across different commands.
+- **Minimal Utilities**: The `/src/utils/` directory contains only essential, reusable functions.
+- **Native Raycast API**: Use Raycast APIs directly (e.g., `getPreferenceValues()`, `showToast()`) without creating wrappers.
+
+## Dependencies
+
+### Main
+- `@raycast/api` & `@raycast/utils`
+- `react`: For UI components.
+
+### Development
+- `typescript`
+- `eslint` & `@raycast/eslint-config`

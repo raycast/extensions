@@ -1,0 +1,89 @@
+instructions: |
+  Use `exa-search` when the user needs fresh web results, a grounded answer with citations, content from a known URL, or technical context from docs and code examples.
+
+  Pick the tool that best matches the request:
+  1. Use `get-contents` when the user provides a URL or wants the content of a specific page.
+  2. Use `get-answer` when the user asks a question and wants a direct, sourced answer.
+  3. Use `get-code-context` for implementation help, library or framework usage, API docs, and code patterns.
+  4. Use `search` when the user needs live web discovery, recent information, or ranked results.
+  5. Use `search-deep` when the user wants deeper research, harder synthesis, or a more exhaustive investigation and higher latency is acceptable.
+  6. You may combine tools. A common flow is `search` or `search-deep` first, then `get-contents` for the most relevant URLs.
+
+  When using `search`:
+  - Write natural, specific queries.
+  - Only set `category` when a documented category clearly applies.
+  - If `category` is `people`, do not pass `includeDomains` or `excludeDomains`. Put constraints like LinkedIn, GitHub, or company names into the query itself.
+  - If `category` is `company`, do not pass `excludeDomains`. Put any source preference into the query itself instead.
+  - Start with the returned highlights before pulling full page content.
+
+  When using `search-deep`:
+  - Reserve it for research-heavy requests where better reasoning is worth the extra latency.
+  - Use the same category restrictions as `search`.
+  - Start with the returned highlights before pulling full page content.
+
+  When answering:
+  - Always cite sources.
+  - End every paragraph and list item with citations in this format: ([<host>](<full url>))
+  - If nothing relevant is found, respond with "No results found".
+evals:
+  - input: "@exa-search recent battery recycling policy changes in the EU"
+    mocks:
+      search: []
+    expected:
+      - callsTool:
+          name: search
+          arguments:
+            query:
+              - includes: "battery"
+              - includes: "EU"
+  - input: "@exa-search deeply research the AI browser automation market and key vendors"
+    mocks:
+      search-deep: []
+    expected:
+      - callsTool:
+          name: search-deep
+          arguments:
+            query:
+              - includes: "browser automation"
+              - includes: "vendors"
+  - input: "@exa-search linkedin profiles of people who have both eng and design experience"
+    expected:
+      - callsTool:
+          name: search
+          arguments:
+            category: "people"
+            query:
+              - includes: "LinkedIn"
+              - includes: "design"
+    mocks:
+      search: []
+  - input: "@exa-search What is the latest valuation of SpaceX?"
+    expected:
+      - callsTool:
+          name: get-answer
+          arguments:
+            query:
+              - includes: "SpaceX"
+              - includes: "valuation"
+    mocks:
+      get-answer: []
+  - input: "@exa-search get the page content for https://exa.ai/docs/reference/search"
+    expected:
+      - callsTool:
+          name: get-contents
+          arguments:
+            urls:
+              includes: "https://exa.ai/docs/reference/search"
+            mode: "text"
+    mocks:
+      get-contents: []
+  - input: "@exa-search how do I use React hooks for state management?"
+    expected:
+      - callsTool:
+          name: get-code-context
+          arguments:
+            query:
+              - includes: "React hooks"
+              - includes: "state management"
+    mocks:
+      get-code-context: []

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "display-modes",
+  "title": "Display Modes",
+  "description": "Manage displays modes (resolution, refresh rate...).",
+  "icon": "command-icon.png",
+  "author": "agustin.prats",
+  "contributors": [
+    "rom100maim"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Change Display Mode",
+      "description": "Change the display mode (resolution, refresh rate...) of your monitors.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-display-mode",
+      "title": "Quickly Change Display Mode",
+      "description": "Quickly change your monitor's display mode by specifying the desired height and refresh rate; the closest available mode will be selected.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "display",
+          "placeholder": "Display number",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "height",
+          "placeholder": "Height",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "refreshRate",
+          "placeholder": "Refresh Rate",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "display-modes-status-menu-bar",
+      "title": "Display Modes Status Menu Bar",
+      "description": "Change the display mode of your monitors from the status menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0",
+    "color-convert": "^3.1.0",
+    "execa": "^9.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

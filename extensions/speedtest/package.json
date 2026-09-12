@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "speedtest",
+  "title": "Speedtest",
+  "description": "Test the performance and quality of your internet connection via speedtest.net",
+  "icon": "speedtest.png",
+  "author": "tonka3000",
+  "contributors": [
+    "koayon",
+    "pernielsentikaer",
+    "stevensd2m",
+    "aliaksandr_zhebit",
+    "xilopaint",
+    "alexi.build",
+    "luarmr"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Test Internet Speed",
+      "description": "Test the performance and quality of your internet connection via speedtest.net",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "extract-zip": "^2.0.1",
+    "sha256-file": "^1.0.0",
+    "tar": "^7.5.22"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.3",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/sha256-file": "^1.0.3",
+    "@types/tar": "^6.1.13",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "overrides": {
+    "tar": "^7.5.22",
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
+}

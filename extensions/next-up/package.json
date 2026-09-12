@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "next-up",
+  "title": "Next Up",
+  "description": "A simple all-in-one scheduler and quick glance to manage custom weekly schedules for class and more!",
+  "icon": "extension-icon.png",
+  "author": "adrianbonpin",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "what-s-next",
+      "title": "Today",
+      "description": "See what's coming up next in your schedule today. Shows the next class and all of today's courses with quick access to meeting links.",
+      "mode": "view"
+    },
+    {
+      "name": "schedule-for-the-week",
+      "title": "Schedule for the Week",
+      "description": "View your entire week at a glance. All courses organized by day with today's schedule highlighted.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-schedules",
+      "title": "Manage Schedules",
+      "description": "Create, edit, and organize your class schedules. Add courses with multiple time slots, manage schedule groups, and set up quick-access links.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Next up Menu Bar",
+      "description": "Keep your next class visible in the menu bar at all times. Click to see today's full schedule and join meetings instantly.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "add-ephemeral-course",
+      "title": "Add Ephemeral Course",
+      "description": "Quickly add a temporary course for today. Automatically disappears tomorrow.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "exportPath",
+      "title": "Export Folder",
+      "description": "Folder where exported schedule JSON files will be saved (e.g. ~/Downloads)",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads"
+    },
+    {
+      "name": "importFilePath",
+      "title": "Import File Path",
+      "description": "Full path to a previously exported next-up JSON file to import via 'Import from File' action (⌘⇧I) in Manage Schedules",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "instructions": "Obsidian is a powerful knowledge base that works on top of a local folder of plain text Markdown files. You can help users search for notes, read notes, create new notes, open existing notes and append content to notes. Always ensure that you follow the user's instructions carefully and confirm any actions that will modify or create notes. If the user wants to open a note, make sure to use the appropriate command to open it in the Obsidian application. Default to the root of the vault when creating notes and only add tags when explicitly instructed by the user. When appending content, always confirm the exact content and location with the user before making changes. If you find any wikilinks in a note (syntax: [[Note Name | some alias]]) then you can simply use the search tool to search for 'Note Name' in the same vault you found the previous note in. Before using any tools that require a vault name or vault path, use the Get Vaults tool to request all available vaults first. Then use the returned information to call other tools. Especially because the user might not write the correct vault name but only reference it.",
+  "evals": [
+    {
+      "input": "@obsidian what are my coding principles in the notes vault?",
+      "mocks": {
+        "getVaults": "Vault Names: obsidian-notes, obsidian-recipes",
+        "readNote": "Note Path: /tmp/obsidian-notes/dev/My Coding Principles.md",
+        "searchNote": "Note: /tmp/obsidian-notes/dev/My Coding Principles.md"
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "arguments": {
+              "searchTerm": "coding principles",
+              "vaultName": "obsidian-notes"
+            },
+            "name": "searchNote"
+          }
+        },
+        {
+          "callsTool": {
+            "arguments": {
+              "fullNotePath": "/tmp/obsidian-notes/dev/My Coding Principles.md"
+            },
+            "name": "readNote"
+          }
+        }
+      ]
+    },
+    {
+      "input": "@obsidian open the note test in the notes vault.",
+      "mocks": {
+        "getVaults": "Vault Names: obsidian-notes, obsidian-recipes",
+        "searchNote": "Note: /tmp/obsidian-notes/dev/test.md",
+        "openNote": "Opened note"
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "arguments": {
+              "searchTerm": "test",
+              "vaultName": "obsidian-notes"
+            },
+            "name": "searchNote"
+          }
+        },
+        {
+          "callsTool": {
+            "arguments": {
+              "fullNotePath": "/tmp/obsidian-notes/dev/test.md"
+            },
+            "name": "openNote"
+          }
+        }
+      ]
+    }
+  ]
+}

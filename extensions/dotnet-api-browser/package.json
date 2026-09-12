@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dotnet-api-browser",
+  "title": ".NET API Browser",
+  "description": "Quickly search the .NET API catalog.",
+  "icon": "dotnet-logo.png",
+  "author": "vcsjones",
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search .NET API Catalog",
+      "description": "Quickly search the .NET API catalog.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "truncate",
+          "type": "checkbox",
+          "label": "Truncate API Names",
+          "required": false,
+          "description": "Strip APIs of their namespaces when displaying.",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

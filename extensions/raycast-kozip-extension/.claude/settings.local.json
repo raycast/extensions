@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:developers.raycast.com)",
+      "Bash(mkdir:*)",
+      "Bash(ray:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm setup:*)",
+      "Bash(source:*)",
+      "Bash(ls:*)",
+      "Bash(export PNPM_HOME=\"/Users/humphrey.park/Library/pnpm\")",
+      "Bash(export PATH=\"$PNPM_HOME:$PATH\")",
+      "Bash(open .)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run fix-lint)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ],
+    "deny": []
+  }
+}

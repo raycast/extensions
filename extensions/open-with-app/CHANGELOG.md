@@ -1,0 +1,24 @@
+# Open With App Changelog
+
+## [Fix default selection on Raycast 2] - 2026-05-25
+
+- Fix: default the highlighted row to the first Recommended Application instead of the first Other Application
+- Fix: prevent a one-row scroll the first time the user presses the down arrow
+
+## [Add Bloom support] - 2026-05-05
+
+- Read the selection from Bloom in addition to Finder
+- Detect the frontmost file manager at runtime; Finder remains the fallback
+- Refactor selection retrieval behind a pluggable provider interface so other file managers can be added later
+
+## [Fix Recommended Applications section position] - 2024-11-26
+
+- Fix: keep the Recommended Applications section always on top of the Other Applications section
+
+## [Usability improvements] - 2023-12-05
+
+- works even if Finder is not the frontmost app
+- display which items will be open in the search placeholder
+- show apps that are recommended for these files on top, other apps on the bottom
+- sort by frecency (namespaced to file types)
+- indicate if nothing is selected at start of workflow (empty list) instead of at the end (error toast)

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "new-york-times",
+  "title": "New York Times",
+  "description": "Checkout all NYT posts",
+  "icon": "icon.png",
+  "author": "Antonwy",
+  "contributors": [
+    "xmok"
+  ],
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "nyt-popular-posts",
+      "title": "View Popular Posts",
+      "subtitle": "New York Times",
+      "description": "Checkout the most popular NYT posts",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "nyt-search-posts",
+      "title": "Search Posts",
+      "subtitle": "New York Times",
+      "description": "Search all NYT posts",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "nyt-top-posts",
+      "title": "View Top Posts",
+      "subtitle": "New York Times",
+      "description": "Checkout the current top NYT posts",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "NYT API Key",
+      "description": "Your NYT API Key",
+      "type": "password",
+      "required": true,
+      "placeholder": "Ny...xxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

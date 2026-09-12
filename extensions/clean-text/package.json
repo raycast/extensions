@@ -1,0 +1,340 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clean-text",
+  "title": "Clean Text",
+  "description": "Clean and format text with various text modification operations",
+  "icon": "command-icon.png",
+  "author": "GenuineCheddar",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clean-text",
+      "title": "Clean Text",
+      "description": "Apply text cleaning and formatting modifications",
+      "mode": "view"
+    },
+    {
+      "name": "combo1",
+      "title": "Clean Combo 1",
+      "description": "Apply your first custom combination of text modifications",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "popToRoot",
+          "type": "checkbox",
+          "title": "Pop to Root",
+          "label": "Return to root after action",
+          "description": "Return to root after applying combo",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "normalizeWhitespace",
+          "type": "checkbox",
+          "title": "Normalize Whitespace",
+          "label": "Remove newlines and extra spaces",
+          "description": "Ignored if Single Paragraph Mode is enabled (which includes this)",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "unifyQuotes",
+          "type": "checkbox",
+          "title": "Unify Quotes",
+          "label": "Convert quotes using global settings",
+          "description": "Standardize quote characters",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "removeInvisibleCharacters",
+          "type": "checkbox",
+          "title": "Remove Invisible Characters",
+          "label": "Remove invisible characters",
+          "description": "Remove Invisible characters",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "maintainLineBreaks",
+          "type": "checkbox",
+          "title": "Maintain Line Breaks",
+          "label": "Standardize line break format",
+          "description": "Ignored if Single Paragraph Mode is enabled (which removes line breaks)",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "singleParagraph",
+          "type": "checkbox",
+          "title": "Single Paragraph Mode",
+          "label": "Convert to single paragraph",
+          "description": "Merges text, normalizes whitespace, and trims automatically",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "removeNumbering",
+          "type": "checkbox",
+          "title": "Remove Numbering",
+          "label": "Remove bullets and numbering",
+          "description": "Remove list formatting",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "capitalizeSentences",
+          "type": "checkbox",
+          "title": "Capitalize Sentences",
+          "label": "Capitalize first letter of sentences",
+          "description": "Fix sentence capitalization (works best when applied last)",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "combo2",
+      "title": "Clean Combo 2",
+      "description": "Apply your second custom combination of text modifications",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "popToRoot",
+          "type": "checkbox",
+          "title": "Pop to Root",
+          "label": "Return to root after action",
+          "description": "Return to root after applying combo",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "normalizeWhitespace",
+          "type": "checkbox",
+          "title": "Normalize Whitespace",
+          "label": "Remove newlines and extra spaces",
+          "description": "Ignored if Single Paragraph Mode is enabled (which includes this)",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "unifyQuotes",
+          "type": "checkbox",
+          "title": "Unify Quotes",
+          "label": "Convert quotes using global settings",
+          "description": "Standardize quote characters",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "removeInvisibleCharacters",
+          "type": "checkbox",
+          "title": "Remove Invisible Characters",
+          "label": "Remove invisible characters",
+          "description": "Remove invisible characters",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "maintainLineBreaks",
+          "type": "checkbox",
+          "title": "Maintain Line Breaks",
+          "label": "Standardize line break format",
+          "description": "Ignored if Single Paragraph Mode is enabled (which removes line breaks)",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "singleParagraph",
+          "type": "checkbox",
+          "title": "Single Paragraph Mode",
+          "label": "Convert to single paragraph",
+          "description": "Merges text, normalizes whitespace, and trims automatically",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "removeNumbering",
+          "type": "checkbox",
+          "title": "Remove Numbering",
+          "label": "Remove bullets and numbering",
+          "description": "Remove list formatting",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "capitalizeSentences",
+          "type": "checkbox",
+          "title": "Capitalize Sentences",
+          "label": "Capitalize first letter of sentences",
+          "description": "Fix sentence capitalization (works best when applied last)",
+          "default": true,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "source",
+      "type": "dropdown",
+      "title": "Preferred Source",
+      "description": "Where to get text from first",
+      "default": "selection",
+      "required": false,
+      "data": [
+        {
+          "title": "Selected Text",
+          "value": "selection"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        }
+      ]
+    },
+    {
+      "name": "action",
+      "type": "dropdown",
+      "title": "Preferred Action",
+      "description": "What to do with the modified text",
+      "default": "paste",
+      "required": false,
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "popToRoot",
+      "type": "checkbox",
+      "title": "Pop to Root",
+      "label": "Return to root after action",
+      "description": "Return to root after action",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "defaultQuoteType",
+      "type": "dropdown",
+      "title": "Default Quote Type",
+      "description": "Choose the default quote style for quote unification",
+      "default": "double",
+      "required": false,
+      "data": [
+        {
+          "title": "Double Quotes (\")",
+          "value": "double"
+        },
+        {
+          "title": "Single Quotes (')",
+          "value": "single"
+        },
+        {
+          "title": "Smart Double Quotes (\"\")",
+          "value": "smart-double"
+        },
+        {
+          "title": "Smart Single Quotes ('')",
+          "value": "smart-single"
+        }
+      ]
+    },
+    {
+      "name": "defaultWhitespaceType",
+      "type": "dropdown",
+      "title": "Default Whitespace Type",
+      "description": "Choose the default whitespace type for text processing",
+      "default": "space",
+      "required": false,
+      "data": [
+        {
+          "title": "Regular Space",
+          "value": "space"
+        },
+        {
+          "title": "No-Break Space",
+          "value": "no-break-space"
+        },
+        {
+          "title": "Thin Space",
+          "value": "thin-space"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "customWhitespaceChar",
+      "type": "textfield",
+      "title": "Custom Whitespace Character",
+      "description": "Specify a custom whitespace character to use",
+      "default": " ",
+      "required": false
+    },
+    {
+      "name": "defaultLineBreakFormat",
+      "type": "dropdown",
+      "title": "Default Line Break Format",
+      "description": "Choose the default line break format for text processing",
+      "default": "auto",
+      "required": false,
+      "data": [
+        {
+          "title": "Auto (detect OS)",
+          "value": "auto"
+        },
+        {
+          "title": "LF (Unix/Linux/macOS)",
+          "value": "LF"
+        },
+        {
+          "title": "CRLF (Windows)",
+          "value": "CRLF"
+        }
+      ]
+    },
+    {
+      "name": "abbreviationExceptions",
+      "type": "textfield",
+      "title": "Abbreviation Exceptions",
+      "description": "Comma-separated list of abbreviations that should not trigger sentence capitalization",
+      "default": "etc., p. ej., vs., e.g., i.e., cf., op. cit., et al., Ph.D., M.D., Dr., Mr., Mrs., Ms., Prof., Sr., Jr.",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^2.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

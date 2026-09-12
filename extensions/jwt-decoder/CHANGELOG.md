@@ -1,0 +1,42 @@
+# JWT-Decoder Changelog
+
+## [JWT Debugger] - 2026-07-28
+
+- Added a **JWT Debugger** command: a token.dev-style workbench to decode, encode, edit, re-sign, and verify JSON Web Tokens locally
+- Supports HMAC, RSA, RSA-PSS, ECDSA, and unsecured `none`, with Base64 secrets and PEM keys
+
+## [Fix] - 2026-07-06
+
+- Fixed the React version-mismatch crash by removing `react-dom` and rendering the token SVG directly as a string, dropping the `preact` and `preact-render-to-string` dependencies.
+
+## [Fix] - 2026-05-28
+
+- Fixed runtime React version mismatch by pinning React peer versions
+
+## [Fix] - 2026-04-15
+
+- Pinned `react` and `react-dom` to `19.0.0` to avoid runtime React version mismatch errors
+
+## [Maintenance] - 2026-04-13
+
+- Updated dependencies to resolve react mismatch error
+
+## [Maintenance] - 2025-12-27
+
+- Updated dependencies to resolve react mismatch error
+
+## [Maintenance] - 2025-11-12
+
+- Updated dependencies
+
+## [Windows Support] - 2025-10-13
+
+- Added support for Windows platform
+
+## [Maintenance] - 2025-03-24
+
+- Updated dependencies
+
+## [Bug Fixes] - 2023-11-28
+
+- Fixed a bug where decoded jwt token were not being displayed correctly

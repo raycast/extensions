@@ -1,0 +1,172 @@
+{
+  "id": "settings",
+  "title": "Settings",
+  "description": "Configure Claude Code with global and project-level settings in a `settings.json` file.",
+  "commands": [
+    {
+      "id": "settings-permissions",
+      "name": "permissions",
+      "description": "A list of explicitly allowed, denied, or ask-for-confirmation tools and commands. Use this to create a safe, restricted environment or block sensitive operations.",
+      "usage": "\"permissions\": {\n  \"allow\": [\"Bash(npm run lint)\"],\n  \"ask\": [\"Bash(git push:*)\"],\n  \"deny\": [\"Bash(curl:*)\"]\n}",
+      "example": "{\n  \"permissions\": {\n    \"allow\": [\n      \"Bash(npm run test:*)\"\n    ],\n    \"ask\": [\n      \"Bash(git push:*)\"\n    ],\n    \"deny\": [\n      \"Bash(curl:*)\",\n      \"Read(./.env)\"\n    ]\n  }\n}",
+      "category": "settings",
+      "tags": ["allow", "ask", "deny", "permissions", "security"]
+    },
+    {
+      "id": "settings-env",
+      "name": "env",
+      "description": "A map of environment variables that will be automatically applied to every session.",
+      "usage": "\"env\": {\n  \"MY_CUSTOM_VAR\": \"value\"\n}",
+      "example": "{\n  \"env\": {\n    \"CLAUDE_CODE_ENABLE_TELEMETRY\": \"1\",\n    \"OTEL_METRICS_EXPORTER\": \"otlp\"\n  }\n}",
+      "category": "settings",
+      "tags": ["environment", "session", "variables"]
+    },
+    {
+      "id": "settings-api-key-helper",
+      "name": "apiKeyHelper",
+      "description": "Specifies a path to a custom script that generates and returns authentication values, for dynamic or temporary credentials.",
+      "usage": "\"apiKeyHelper\": \"/bin/generate_temp_api_key.sh\"",
+      "example": "{\n  \"apiKeyHelper\": \"/path/to/your/key-gen-script.sh\"\n}",
+      "category": "settings",
+      "tags": ["auth", "credentials", "script"]
+    },
+    {
+      "id": "settings-cleanup-period",
+      "name": "cleanupPeriodDays",
+      "description": "Sets the retention period in days for chat transcripts before they are automatically deleted (default: 30).",
+      "usage": "\"cleanupPeriodDays\": 20",
+      "example": "{\n  \"cleanupPeriodDays\": 90\n}",
+      "category": "settings",
+      "tags": ["cleanup", "history", "retention"]
+    },
+    {
+      "id": "settings-include-coauthored-by",
+      "name": "includeCoAuthoredBy",
+      "description": "If false, prevents Claude from adding a 'Co-Authored-By' byline in git commits (default: true).",
+      "usage": "\"includeCoAuthoredBy\": false",
+      "example": "{\n  \"includeCoAuthoredBy\": false\n}",
+      "category": "settings",
+      "tags": ["author", "commits", "git"]
+    },
+    {
+      "id": "settings-enable-all-project-mcp-servers",
+      "name": "enableAllProjectMcpServers",
+      "description": "Automatically approve all MCP servers defined in project .mcp.json files.",
+      "usage": "\"enableAllProjectMcpServers\": true",
+      "example": "{\n  \"enableAllProjectMcpServers\": true\n}",
+      "category": "settings",
+      "tags": ["approve", "auto", "mcp", "project", "servers"]
+    },
+    {
+      "id": "settings-enabled-mcp-json-servers",
+      "name": "enabledMcpjsonServers",
+      "description": "List of specific MCP servers from .mcp.json files to approve.",
+      "usage": "\"enabledMcpjsonServers\": [\"server1\", \"server2\"]",
+      "example": "{\n  \"enabledMcpjsonServers\": [\n    \"memory\",\n    \"github\"\n  ]\n}",
+      "category": "settings",
+      "tags": ["approve", "list", "mcp", "servers", "specific"]
+    },
+    {
+      "id": "settings-disabled-mcp-json-servers",
+      "name": "disabledMcpjsonServers",
+      "description": "List of specific MCP servers from .mcp.json files to reject.",
+      "usage": "\"disabledMcpjsonServers\": [\"server1\", \"server2\"]",
+      "example": "{\n  \"disabledMcpjsonServers\": [\n    \"filesystem\"\n  ]\n}",
+      "category": "settings",
+      "tags": ["block", "list", "mcp", "reject", "servers"]
+    },
+    {
+      "id": "settings-force-login-method",
+      "name": "forceLoginMethod",
+      "description": "Use 'claudeai' to restrict login to Claude.ai accounts, 'console' to restrict login to Anthropic Console (API usage billing) accounts.",
+      "usage": "\"forceLoginMethod\": \"claudeai\"",
+      "example": "{\n  \"forceLoginMethod\": \"console\"\n}",
+      "category": "settings",
+      "tags": ["account", "authentication", "login", "restrict"]
+    },
+    {
+      "id": "settings-disable-all-hooks",
+      "name": "disableAllHooks",
+      "description": "Disable all hooks from being executed.",
+      "usage": "\"disableAllHooks\": true",
+      "example": "{\n  \"disableAllHooks\": true\n}",
+      "isNew": true,
+      "category": "settings",
+      "tags": ["disable", "hooks"]
+    },
+    {
+      "id": "settings-hooks",
+      "name": "hooks",
+      "description": "Configure custom commands to run before or after tool executions.",
+      "usage": "\"hooks\": {\n  \"EventName\": [\n    {\n      \"matcher\": \"ToolPattern\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"your-command-here\"\n        }\n      ]\n    }\n  ]\n}",
+      "example": "{\n  \"hooks\": {\n    \"beforeToolCall\": [\n      {\n        \"matcher\": \"Bash(*)\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"echo 'Running bash command'\"\n          }\n        ]\n      }\n    ]\n  }\n}",
+      "category": "settings",
+      "tags": ["automation", "commands", "events", "hooks"]
+    },
+    {
+      "id": "settings-model",
+      "name": "model",
+      "description": "Override the default Claude Code model for the session.",
+      "usage": "\"model\": \"claude-3-sonnet-20240229\"",
+      "example": "{\n  \"model\": \"claude-3-opus-20240229\"\n}",
+      "isNew": true,
+      "category": "settings",
+      "tags": ["configuration", "model", "override"]
+    },
+    {
+      "id": "settings-status-line",
+      "name": "statusLine",
+      "description": "Configure custom context display in the status line.",
+      "usage": "\"statusLine\": {\n  \"displayFields\": [\"field1\", \"field2\"]\n}",
+      "example": "{\n  \"statusLine\": {\n    \"displayFields\": [\"currentModel\", \"tokenCount\"]\n  }\n}",
+      "isNew": true,
+      "category": "settings",
+      "tags": ["configuration", "display", "status", "ui"]
+    },
+    {
+      "id": "settings-aws-auth-refresh",
+      "name": "awsAuthRefresh",
+      "description": "Custom script for AWS credential refresh.",
+      "usage": "\"awsAuthRefresh\": \"/path/to/aws-refresh-script.sh\"",
+      "example": "{\n  \"awsAuthRefresh\": \"/usr/local/bin/aws-sso-refresh.sh\"\n}",
+      "category": "settings",
+      "tags": ["auth", "aws", "credentials", "script"]
+    },
+    {
+      "id": "settings-aws-credential-export",
+      "name": "awsCredentialExport",
+      "description": "Custom script for AWS credential export.",
+      "usage": "\"awsCredentialExport\": \"/path/to/aws-export-script.sh\"",
+      "example": "{\n  \"awsCredentialExport\": \"/usr/local/bin/aws-creds-export.sh\"\n}",
+      "category": "settings",
+      "tags": ["auth", "aws", "credentials", "export", "script"]
+    },
+    {
+      "id": "settings-disable-bypass-permissions-mode",
+      "name": "disableBypassPermissionsMode",
+      "description": "Prevent the use of bypass permissions mode.",
+      "usage": "\"disableBypassPermissionsMode\": true",
+      "example": "{\n  \"disableBypassPermissionsMode\": true\n}",
+      "category": "settings",
+      "tags": ["disable", "permissions", "security"]
+    },
+    {
+      "id": "settings-additional-directories",
+      "name": "additionalDirectories",
+      "description": "Additional working directories that Claude has access to beyond the current project directory.",
+      "usage": "\"additionalDirectories\": [\"../docs/\"]",
+      "example": "{\n  \"additionalDirectories\": [\n    \"../shared-utils/\",\n    \"../documentation/\"\n  ]\n}",
+      "category": "settings",
+      "tags": ["access", "directories", "permissions", "working"]
+    },
+    {
+      "id": "settings-default-mode",
+      "name": "defaultMode",
+      "description": "Default permission mode when opening Claude Code. Options include 'acceptEdits', 'bypassPermissions', 'default', 'plan'.",
+      "usage": "\"defaultMode\": \"acceptEdits\"",
+      "example": "{\n  \"defaultMode\": \"plan\"\n}",
+      "category": "settings",
+      "tags": ["default", "mode", "permissions", "startup"]
+    }
+  ]
+}

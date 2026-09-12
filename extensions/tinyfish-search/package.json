@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tinyfish-search",
+  "title": "TinyFish Search",
+  "description": "Search the web with TinyFish, open result URLs, and fetch clean page content.",
+  "icon": "icon.png",
+  "author": "pranav_janakiraman",
+  "license": "MIT",
+  "categories": [
+    "Web"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Web",
+      "description": "Search the web with TinyFish, browse result URLs, and fetch clean page content.",
+      "mode": "view",
+      "keywords": [
+        "tinyfish",
+        "web",
+        "search"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Search query",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "TinyFish API Key",
+      "description": "Your TinyFish API key. Create one at https://agent.tinyfish.ai/api-keys.",
+      "type": "password",
+      "required": true,
+      "placeholder": "tf_..."
+    },
+    {
+      "name": "location",
+      "title": "Location",
+      "description": "Optional country code for geo-targeted results, for example US, GB, FR, or SG.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "US"
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Optional language code for result language, for example en, fr, de, or ja.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "en"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wayback-machine",
+  "title": "Wayback Machine",
+  "description": "Quickly open and save webpages in Wayback Machine",
+  "icon": "wayback-icon.png",
+  "author": "pernielsentikaer",
+  "contributors": [
+    "andreaselia",
+    "j3lte",
+    "chrismessina",
+    "tofrankie"
+  ],
+  "categories": [
+    "Web",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open",
+      "title": "Open in Wayback Machine",
+      "description": "Open a webpage in Wayback Machine",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://www.raycast.com",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "browser",
+      "title": "Open Current Tab in Wayback Machine",
+      "description": "Open the current tab in Wayback Machine",
+      "mode": "no-view"
+    },
+    {
+      "name": "save",
+      "title": "Save to Wayback Machine",
+      "description": "Save a webpage to Wayback Machine",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://www.raycast.com",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "saveMultiple",
+      "title": "Save Multiple to Wayback Machine",
+      "description": "Save multiple webpages to Wayback Machine",
+      "mode": "view"
+    },
+    {
+      "name": "search-pages",
+      "title": "Search Pages",
+      "description": "Search archived webpages snapshots",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultView",
+      "title": "Default View",
+      "description": "Choose which view to open in the Wayback Machine",
+      "type": "dropdown",
+      "default": "snapshot",
+      "data": [
+        {
+          "title": "Latest Snapshot",
+          "value": "snapshot"
+        },
+        {
+          "title": "Calendar",
+          "value": "web/*"
+        },
+        {
+          "title": "Collections",
+          "value": "web/collections/*"
+        },
+        {
+          "title": "Changes",
+          "value": "web/changes"
+        },
+        {
+          "title": "Summary",
+          "value": "details"
+        },
+        {
+          "title": "Site Map",
+          "value": "web/sitemap"
+        },
+        {
+          "title": "URLs",
+          "value": "web/urls"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "checkForSnapshots",
+      "title": "Check for Snapshots?",
+      "label": "Enable",
+      "description": "Check if an archived snapshot exists before opening. Disable for faster performance.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.0.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.1",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

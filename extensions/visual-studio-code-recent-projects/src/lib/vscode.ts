@@ -1,0 +1,403 @@
+import { getPreferenceValues, open } from "@raycast/api";
+import * as child_process from "child_process";
+import * as fs from "fs";
+import * as afs from "fs/promises";
+import * as os from "os";
+import path from "path";
+import { fileExists, isMac, isWin } from "./utils";
+import { getEditorApplication } from "../utils/editor";
+import { build } from "./preferences";
+
+interface ExtensionMetaRoot {
+  identifier: ExtensionIdentifier;
+  version: string;
+  location: ExtensionLocation | string;
+  metadata?: ExtensionMetadata;
+}
+
+interface ExtensionIdentifier {
+  id: string;
+  uuid: string;
+}
+
+interface ExtensionLocation {
+  $mid: number;
+  fsPath: string;
+  path: string;
+  scheme: string;
+}
+
+interface ExtensionMetadata {
+  id: string;
+  publisherId?: string;
+  publisherDisplayName?: string;
+  targetPlatform?: string;
+  isApplicationScoped?: boolean;
+  updated?: boolean;
+  isPreReleaseVersion: boolean;
+  installedTimestamp?: number;
+  preRelease?: boolean;
+}
+
+export interface Extension {
+  id: string;
+  name: string;
+  version: string;
+  preRelease?: boolean;
+  icon?: string;
+  updated?: boolean;
+  fsPath: string;
+  publisherId?: string;
+  publisherDisplayName?: string;
+  preview?: boolean;
+  installedTimestamp?: number;
+}
+
+interface PackageJSONInfo {
+  displayName?: string;
+  icon?: string;
+  preview?: boolean;
+}
+
+function getWindowsVSCodeInstallRoots(): string[] {
+  const localAppDataPath = process.env.LOCALAPPDATA ?? path.join(os.homedir(), "AppData", "Local");
+  const roots = [
+    path.join(localAppDataPath, "Programs"),
+    process.env.ProgramFiles,
+    process.env["ProgramFiles(x86)"],
+  ].filter((value): value is string => Boolean(value));
+
+  return [...new Set(roots)];
+}
+
+function resolveWindowsVSCodePath(relativePath: string): string {
+  const candidates = getWindowsVSCodeInstallRoots().map((root) => path.join(root, relativePath));
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
+}
+
+function getNLSVariable(text: string | undefined): string | undefined {
+  if (!text) {
+    return text;
+  }
+  const m = text.match(/%(.+)%/);
+  if (m) {
+    return m[1];
+  }
+}
+
+function macApplicationPath(appName: string, ...segments: string[]) {
+  const candidates = [
+    path.join("/Applications", appName, ...segments),
+    path.join(os.homedir(), "Applications", appName, ...segments),
+  ];
+
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
+}
+
+function cliPaths(): Record<string, string> {
+  let cliPaths: Record<string, string> = {};
+
+  if (isWin) {
+    const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
+    cliPaths = {
+      Antigravity: path.join(programsFolder, "Antigravity", "bin", "antigravity.cmd"),
+      Code: resolveWindowsVSCodePath(path.join("Microsoft VS Code", "bin", "code.cmd")),
+      "Code - Insiders": resolveWindowsVSCodePath(path.join("Microsoft VS Code Insiders", "bin", "code-insiders.cmd")),
+      Kiro: path.join(programsFolder, "Kiro", "bin", "kiro.cmd"),
+      Cursor: path.join(programsFolder, "cursor", "resources", "app", "bin", "cursor.cmd"),
+      "IBM Bob": path.join(programsFolder, "IBM Bob", "bin", "bobide.cmd"),
+      Positron: path.join(programsFolder, "Positron", "bin", "positron.cmd"),
+      Qoder: path.join(programsFolder, "Qoder", "bin", "code.cmd"),
+      Trae: path.join(programsFolder, "Trae", "bin", "trae.cmd"),
+      "Trae CN": path.join(programsFolder, "Trae CN", "bin", "trae-cn.cmd"),
+      VSCodium: path.join(programsFolder, "VSCodium", "bin", "codium.cmd"),
+      "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders", "bin", "codium-insiders.cmd"),
+      Devin: path.join(programsFolder, "Devin", "bin", "devin-desktop.cmd"),
+      Windsurf: path.join(programsFolder, "Windsurf", "bin", "windsurf.cmd"),
+      Lingma: path.join(programsFolder, "Lingma", "bin", "lingma.cmd"),
+    };
+  }
+
+  if (isMac) {
+    cliPaths = {
+      Antigravity: macApplicationPath("Antigravity.app", "Contents", "Resources", "app", "bin", "antigravity"),
+      Code: macApplicationPath("Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code"),
+      "Code - Insiders": macApplicationPath(
+        "Visual Studio Code - Insiders.app",
+        "Contents",
+        "Resources",
+        "app",
+        "bin",
+        "code",
+      ),
+      Cursor: macApplicationPath("Cursor.app", "Contents", "Resources", "app", "bin", "cursor"), // it also has code, which is an alias
+      "IBM Bob": macApplicationPath("IBM Bob.app", "Contents", "Resources", "app", "bin", "bobide"),
+      Kiro: macApplicationPath("Kiro.app", "Contents", "Resources", "app", "bin", "kiro"),
+      Positron: macApplicationPath("Positron.app", "Contents", "Resources", "app", "bin", "code"),
+      Qoder: macApplicationPath("Qoder.app", "Contents", "Resources", "app", "bin", "code"),
+      Trae: macApplicationPath("Trae.app", "Contents", "Resources", "app", "bin", "marscode"),
+      "Trae CN": macApplicationPath("Trae CN.app", "Contents", "Resources", "app", "bin", "marscode"),
+      VSCodium: macApplicationPath("VSCodium.app", "Contents", "Resources", "app", "bin", "codium"),
+      "VSCodium - Insiders": macApplicationPath(
+        "VSCodium - Insiders.app",
+        "Contents",
+        "Resources",
+        "app",
+        "bin",
+        "codium-insiders",
+      ),
+      Devin: macApplicationPath("Devin.app", "Contents", "Resources", "app", "bin", "devin-desktop"),
+      Windsurf: macApplicationPath("Windsurf.app", "Contents", "Resources", "app", "bin", "windsurf"),
+      Lingma: macApplicationPath("Lingma.app", "Contents", "Resources", "app", "bin", "code"),
+    };
+  }
+
+  return cliPaths;
+}
+
+function getVSCodeCLIFilename(): string {
+  const availableCliPaths = cliPaths();
+  const name = availableCliPaths[getBuildNamePreference()];
+  if (!name || name.length <= 0) {
+    return availableCliPaths.Code;
+  }
+  return name;
+}
+
+function programPaths(): Record<string, string> {
+  let programPaths: Record<string, string> = {};
+
+  if (isWin) {
+    const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
+    programPaths = {
+      Antigravity: path.join(programsFolder, "Antigravity"),
+      Code: resolveWindowsVSCodePath("Microsoft VS Code"),
+      "Code - Insiders": resolveWindowsVSCodePath("Microsoft VS Code Insiders"),
+      Cursor: path.join(programsFolder, "cursor"),
+      "IBM Bob": path.join(programsFolder, "IBM Bob"),
+      Kiro: path.join(programsFolder, "Kiro"),
+      Positron: path.join(programsFolder, "Positron"),
+      Qoder: path.join(programsFolder, "Qoder"),
+      Trae: path.join(programsFolder, "Trae"),
+      "Trae CN": path.join(programsFolder, "Trae CN"),
+      VSCodium: path.join(programsFolder, "VSCodium"),
+      "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders"),
+      Devin: path.join(programsFolder, "Devin"),
+      Windsurf: path.join(programsFolder, "Windsurf"),
+      Lingma: path.join(programsFolder, "Lingma"),
+    };
+  }
+
+  if (isMac) {
+    programPaths = {
+      Antigravity: macApplicationPath("Antigravity.app", "Contents", "Resources", "app"),
+      Code: macApplicationPath("Visual Studio Code.app", "Contents", "Resources", "app"),
+      "Code - Insiders": macApplicationPath("Visual Studio Code - Insiders.app", "Contents", "Resources", "app"),
+      Cursor: macApplicationPath("Cursor.app", "Contents", "Resources", "app"),
+      "IBM Bob": macApplicationPath("IBM Bob.app", "Contents", "Resources", "app"),
+      Kiro: macApplicationPath("Kiro.app", "Contents", "Resources", "app"),
+      Positron: macApplicationPath("Positron.app", "Contents", "Resources", "app"),
+      Qoder: macApplicationPath("Qoder.app", "Contents", "Resources", "app"),
+      Trae: macApplicationPath("Trae.app", "Contents", "Resources", "app"),
+      "Trae CN": macApplicationPath("Trae CN.app", "Contents", "Resources", "app"),
+      VSCodium: macApplicationPath("VSCodium.app", "Contents", "Resources", "app"),
+      "VSCodium - Insiders": macApplicationPath("VSCodium - Insiders.app", "Contents", "Resources", "app"),
+      Devin: macApplicationPath("Devin.app", "Contents", "Resources", "app"),
+      Windsurf: macApplicationPath("Windsurf.app", "Contents", "Resources", "app"),
+      Lingma: macApplicationPath("Lingma.app", "Contents", "Resources", "app"),
+    };
+  }
+
+  return programPaths;
+}
+
+function resolveWindowsProductJSONPath(installDir: string): string {
+  const defaultProductJSONPath = path.join(installDir, "resources", "app", "product.json");
+
+  if (fs.existsSync(defaultProductJSONPath)) {
+    return defaultProductJSONPath;
+  }
+
+  try {
+    // VS Code's Windows versioned resources folder is commit.substring(0, 10).
+    // https://github.com/microsoft/vscode/blob/8cc98deb3ce25f83f2fd240507e682da0b6dad41/build/gulpfile.vscode.win32.ts#L76
+    const versionedResourcesDirs = fs
+      .readdirSync(installDir, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory() && /^[0-9a-f]{10}$/i.test(dirent.name));
+
+    const versionedResourcesDir =
+      versionedResourcesDirs.length <= 1
+        ? versionedResourcesDirs[0]?.name
+        : versionedResourcesDirs
+            .map(({ name }) => ({
+              name,
+              stats: fs.statSync(path.join(installDir, name)),
+            }))
+            .reduce((latest, current) => (current.stats.mtimeMs > latest.stats.mtimeMs ? current : latest)).name;
+
+    const productJSONPath = versionedResourcesDir
+      ? path.join(installDir, versionedResourcesDir, "resources", "app", "product.json")
+      : undefined;
+
+    return productJSONPath && fs.existsSync(productJSONPath) ? productJSONPath : defaultProductJSONPath;
+  } catch {
+    return defaultProductJSONPath;
+  }
+}
+
+export function getProductJSONPath(): string {
+  const programPathsForPlatform = programPaths();
+  const programPath = programPathsForPlatform[getBuildNamePreference()] || programPathsForPlatform.Code;
+
+  if (isWin) {
+    return resolveWindowsProductJSONPath(programPath);
+  }
+
+  return path.join(programPath, "product.json");
+}
+
+class VSCodeCLI {
+  private cliFilename: string;
+  private execOptions: child_process.ExecFileSyncOptions | undefined;
+  constructor(cliFilename: string) {
+    this.cliFilename = `"${cliFilename}"`;
+    this.execOptions = isWin ? { shell: true } : undefined;
+  }
+
+  installExtensionByIDSync(id: string) {
+    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"], this.execOptions);
+  }
+
+  uninstallExtensionByIDSync(id: string) {
+    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], this.execOptions);
+  }
+
+  openFolderURISync(uri: string, reuseWindow = false) {
+    child_process.execFileSync(
+      this.cliFilename,
+      [reuseWindow ? "--reuse-window" : "--new-window", "--folder-uri", uri],
+      this.execOptions,
+    );
+  }
+
+  openFileURISync(uri: string, reuseWindow = false) {
+    child_process.execFileSync(
+      this.cliFilename,
+      [reuseWindow ? "--reuse-window" : "--new-window", "--file-uri", uri],
+      this.execOptions,
+    );
+  }
+
+  async newWindow() {
+    const editorApp = await getEditorApplication(build);
+    open("", editorApp);
+  }
+}
+
+export function getVSCodeCLI(): VSCodeCLI {
+  return new VSCodeCLI(getVSCodeCLIFilename());
+}
+
+async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | undefined> {
+  try {
+    if (await fileExists(filename)) {
+      const packageJSONData = await afs.readFile(filename, { encoding: "utf-8" });
+      const packageJSON = JSON.parse(packageJSONData);
+      let displayName = packageJSON.displayName as string | undefined;
+      const nlsVariable = getNLSVariable(displayName);
+      const iconFilename = packageJSON.icon as string | undefined;
+      const folder = path.dirname(filename);
+      if (nlsVariable && nlsVariable.length > 0) {
+        const nlsFilename = path.join(folder, "package.nls.json");
+        try {
+          if (await fileExists(nlsFilename)) {
+            const nlsContent = await afs.readFile(nlsFilename, { encoding: "utf-8" });
+            const nlsJSON = JSON.parse(nlsContent);
+            const displayNameNLS = nlsJSON[nlsVariable] as string | undefined;
+            if (displayNameNLS && displayNameNLS.length > 0) {
+              displayName = displayNameNLS;
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+      const preview = packageJSON.preview as boolean | undefined;
+      const icon = iconFilename ? path.join(folder, iconFilename) : undefined;
+      return {
+        displayName,
+        icon,
+        preview,
+      };
+    }
+  } catch {
+    //
+  }
+}
+
+export async function getLocalExtensions(): Promise<Extension[] | undefined> {
+  const extensionsRootFolder = path.join(os.homedir(), `.${getBuildScheme()}/extensions`);
+  const extensionsManifrestFilename = path.join(extensionsRootFolder, "extensions.json");
+  if (await fileExists(extensionsManifrestFilename)) {
+    const data = await afs.readFile(extensionsManifrestFilename, { encoding: "utf-8" });
+    const extensions = JSON.parse(data) as ExtensionMetaRoot[] | undefined;
+    if (extensions && extensions.length > 0) {
+      const result: Extension[] = [];
+      for (const e of extensions) {
+        const extFsPath =
+          typeof e.location === "string"
+            ? path.join(extensionsRootFolder, e.location)
+            : (e.location.fsPath ?? e.location.path);
+        const packageFilename = path.join(extFsPath, "package.json");
+        const pkgInfo = await getPackageJSONInfo(packageFilename);
+        result.push({
+          id: e.identifier.id,
+          name: pkgInfo?.displayName || e.identifier.id,
+          version: e.version,
+          preRelease: e.metadata?.preRelease,
+          icon: pkgInfo?.icon,
+          updated: e.metadata?.updated,
+          fsPath: extFsPath,
+          publisherId: e.metadata?.publisherId,
+          publisherDisplayName: e.metadata?.publisherDisplayName,
+          preview: pkgInfo?.preview,
+          installedTimestamp: e.metadata?.installedTimestamp,
+        });
+      }
+      return result;
+    }
+  }
+  return undefined;
+}
+
+export function getBuildNamePreference(): string {
+  const prefs = getPreferenceValues();
+  const build = prefs.build as string;
+  return build;
+}
+
+const buildSchemes: Record<string, string> = {
+  Antigravity: "antigravity",
+  Code: "vscode",
+  "Code - Insiders": "vscode-insiders",
+  Cursor: "cursor",
+  "IBM Bob": "bobide",
+  Kiro: "kiro",
+  VSCodium: "vscode-oss",
+  "VSCodium - Insiders": "vscode-oss-insiders",
+  Positron: "positron",
+  Qoder: "qoder",
+  Devin: "devin",
+  Windsurf: "windsurf",
+  Trae: "trae",
+  "Trae CN": "trae-cn",
+  Lingma: "lingma",
+};
+
+export function getBuildScheme(): string {
+  const scheme = buildSchemes[getBuildNamePreference()] as string | undefined;
+  if (!scheme || scheme.length <= 0) {
+    return buildSchemes.Code;
+  }
+  return scheme;
+}

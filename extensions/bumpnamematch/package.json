@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bump-name-match",
+  "title": "Bump Name Match",
+  "description": "Discover name meanings, origins, and more - then match your favorite baby names with your partner",
+  "icon": "icon.png",
+  "author": "Rob",
+  "categories": [
+    "Fun"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-names",
+      "title": "Search Names",
+      "subtitle": "BumpNameMatch",
+      "description": "Search baby names and view their details",
+      "mode": "view"
+    },
+    {
+      "name": "my-lists",
+      "title": "My Lists",
+      "subtitle": "BumpNameMatch",
+      "description": "Browse your favorite lists and manage saved names",
+      "mode": "view"
+    },
+    {
+      "name": "search-origins",
+      "title": "Search by Origin",
+      "subtitle": "BumpNameMatch",
+      "description": "Browse names by cultural origin, optionally filtered by gender",
+      "mode": "view"
+    },
+    {
+      "name": "naming-sessions",
+      "title": "Naming Sessions",
+      "subtitle": "BumpNameMatch",
+      "description": "Vote on names with your partner and see your matches",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Personal API key used to save names to your favorite lists and view them in My Lists. Create one at https://bumpnamematch.com/dashboard/api-keys",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

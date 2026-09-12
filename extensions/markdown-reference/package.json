@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "markdown-reference",
+  "title": "Markdown Reference",
+  "description": "Markdown documentation at your fingertips",
+  "icon": "logo.png",
+  "author": "codedbyjordan",
+  "contributors": [
+    "ridemountainpig"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "markdown-reference",
+      "title": "Search Markdown Syntax",
+      "description": "Quickly search up how to format with Markdown",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "~25.0.7",
+    "@types/react": "^19.2.8",
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/parser": "^8.53.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

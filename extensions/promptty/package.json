@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "promptty",
+  "type": "module",
+  "version": "1.0.0",
+  "title": "Promptty",
+  "description": "Search, paste, and copy prompts from your Promptty library",
+  "icon": "icon.png",
+  "author": "michalkos",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "keywords": [
+    "prompts",
+    "snippets",
+    "prompt library",
+    "ai prompts"
+  ],
+  "commands": [
+    {
+      "name": "search-promptty",
+      "title": "Search Promptty",
+      "description": "Search, paste, and copy saved prompts",
+      "mode": "view",
+      "keywords": [
+        "prompts",
+        "snippets"
+      ],
+      "preferences": [
+        {
+          "name": "snapshotFile",
+          "title": "Snapshot File",
+          "description": "Optional prompts-v1.json override for troubleshooting access",
+          "type": "file",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.23",
+    "@raycast/utils": "2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "9.39.2",
+    "prettier": "3.8.1",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}

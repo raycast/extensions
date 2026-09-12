@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cursors",
+  "title": "Cursors",
+  "description": "All macOS cursors at your fingertips",
+  "icon": "cursors.png",
+  "author": "storm",
+  "contributors": [
+    "pernielsentikaer",
+    "chrismessina"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Design Tools"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Cursors",
+      "description": "All macOS cursors at your fingertips",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary action",
+      "description": "Primary action to use",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "gridSize",
+      "title": "Grid Size",
+      "description": "Number of columns to display in the grid",
+      "type": "dropdown",
+      "required": false,
+      "default": "8",
+      "data": [
+        {
+          "title": "3 Columns",
+          "value": "3"
+        },
+        {
+          "title": "4 Columns",
+          "value": "4"
+        },
+        {
+          "title": "5 Columns",
+          "value": "5"
+        },
+        {
+          "title": "6 Columns",
+          "value": "6"
+        },
+        {
+          "title": "7 Columns",
+          "value": "7"
+        },
+        {
+          "title": "8 Columns",
+          "value": "8"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.1",
+    "@resvg/resvg-wasm": "^2.6.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.2",
+    "vitest": "^3.0.9"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

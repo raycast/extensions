@@ -1,0 +1,100 @@
+{
+  "name": "osquery",
+  "title": "Osquery",
+  "description": "Schema-driven Osquery query lookup tool, easy way for table discovery and query building",
+  "icon": "osquery.png",
+  "author": "henry-st",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-tables",
+      "title": "Search Osquery Tables",
+      "description": "Search tables and columns with category filters",
+      "mode": "view"
+    },
+    {
+      "name": "find-column",
+      "title": "Find Column Across Tables",
+      "description": "Find a column and see all tables that have it, build JOIN queries",
+      "mode": "view"
+    },
+    {
+      "name": "query-templates",
+      "title": "Osquery Query Templates",
+      "description": "Browse common query templates by category",
+      "mode": "view"
+    },
+    {
+      "name": "validate-query",
+      "title": "Validate Osquery Query",
+      "description": "Validate SQL queries against the schema",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultPlatform",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Platform",
+      "description": "Filter tables by platform",
+      "default": "darwin",
+      "data": [
+        {
+          "title": "All Platforms",
+          "value": "all"
+        },
+        {
+          "title": "macOS",
+          "value": "darwin"
+        },
+        {
+          "title": "Linux",
+          "value": "linux"
+        },
+        {
+          "title": "Windows",
+          "value": "windows"
+        }
+      ]
+    },
+    {
+      "name": "fleetUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Fleet URL",
+      "description": "Your Fleet server URL (e.g., https://fleet.example.com)",
+      "placeholder": "https://fleet.example.com"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.3",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "react": "^19.2.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o ./dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "sanity-check": "npx ts-node scripts/sanity-check.ts",
+    "prepublish": "npm run sanity-check",
+    "publish": "npx @raycast/api@latest publish",
+    "update-schema": "npx ts-node scripts/update-schema.ts"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

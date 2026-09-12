@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.omc/
+.DS_Store
+raycast-env.d.ts
+.idea/
+CLAUDE.md
+.claude/
+AGENTS.md

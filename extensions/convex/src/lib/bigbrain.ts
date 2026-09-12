@@ -1,0 +1,191 @@
+/**
+ * BigBrain API Client for Raycast
+ *
+ * Standalone client for Convex's BigBrain API (api.convex.dev/api/dashboard)
+ * Used for fetching teams, projects, deployments, and user profile.
+ */
+import {
+  BIG_BRAIN_URL,
+  BIG_BRAIN_DASHBOARD_PATH,
+  CONVEX_CLIENT_ID,
+} from "./constants";
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export interface Team {
+  id: number;
+  name: string;
+  slug: string;
+  creator?: number;
+  suspended?: boolean;
+}
+
+export interface Project {
+  id: number;
+  name: string;
+  slug: string;
+  teamId: number;
+  creator?: number;
+  isDemo?: boolean;
+}
+
+export interface Deployment {
+  id: number;
+  name: string;
+  projectId: number;
+  deploymentType: "dev" | "prod" | "preview";
+  kind: "cloud" | "local";
+  creator?: number;
+  previewIdentifier?: string | null;
+  /** Actual deployment URL as returned by the API (may be region-scoped, e.g. https://name.eu-west-1.convex.cloud) */
+  deploymentUrl?: string;
+  url?: string;
+}
+
+export interface UserProfile {
+  id?: number;
+  name?: string;
+  email?: string;
+  profilePictureUrl?: string;
+}
+
+// ============================================================================
+// Core API Function
+// ============================================================================
+
+/**
+ * Make a request to the BigBrain Dashboard API
+ *
+ * @param path - API path (e.g., "/teams" or "/teams/{team_id}/projects")
+ * @param options - Request options
+ * @returns The API response
+ */
+async function callBigBrainAPI<T = unknown>(
+  path: string,
+  options: {
+    accessToken: string;
+    method?: "GET" | "POST" | "PUT" | "DELETE";
+    body?: unknown;
+    pathParams?: Record<string, string | number>;
+    queryParams?: Record<string, string | number | undefined | null>;
+    /** API prefix; defaults to the internal dashboard API */
+    basePath?: string;
+  },
+): Promise<T> {
+  const {
+    accessToken,
+    method = "GET",
+    body,
+    pathParams,
+    queryParams,
+    basePath = BIG_BRAIN_DASHBOARD_PATH,
+  } = options;
+
+  // Replace path parameters
+  let finalPath = path;
+  if (pathParams) {
+    for (const [key, value] of Object.entries(pathParams)) {
+      finalPath = finalPath.replace(`{${key}}`, String(value));
+    }
+  }
+
+  // Build query string
+  const queryString = new URLSearchParams();
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value !== undefined && value !== null) {
+        queryString.append(key, String(value));
+      }
+    }
+  }
+
+  const url = `${BIG_BRAIN_URL}${basePath}${finalPath}${queryString.toString() ? `?${queryString.toString()}` : ""}`;
+
+  const response = await fetch(url, {
+    method,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "Convex-Client": CONVEX_CLIENT_ID,
+    },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error");
+    throw new Error(
+      `BigBrain API error: ${response.status} ${response.statusText} - ${errorText}`,
+    );
+  }
+
+  const data = await response.json();
+  return data as T;
+}
+
+// ============================================================================
+// Team & Project Functions
+// ============================================================================
+
+/**
+ * Fetch all teams the user has access to
+ */
+export async function getTeams(accessToken: string): Promise<Team[]> {
+  return callBigBrainAPI<Team[]>("/teams", { accessToken });
+}
+
+/**
+ * Fetch all projects for a team
+ */
+export async function getProjects(
+  accessToken: string,
+  teamId: number,
+): Promise<Project[]> {
+  return callBigBrainAPI<Project[]>("/teams/{team_id}/projects", {
+    accessToken,
+    pathParams: { team_id: teamId },
+  });
+}
+
+/**
+ * Fetch all deployments for a project.
+ * Uses the public Management API (the internal dashboard "instances" endpoint
+ * was removed and now returns 404).
+ */
+export async function getDeployments(
+  accessToken: string,
+  projectId: number,
+): Promise<Deployment[]> {
+  const deployments = await callBigBrainAPI<Deployment[]>(
+    "/projects/{project_id}/list_deployments",
+    {
+      accessToken,
+      pathParams: { project_id: projectId },
+      basePath: "/v1",
+    },
+  );
+
+  return deployments.map((deployment) => ({
+    ...deployment,
+    // Prefer the URL reported by the API: newer deployments live on
+    // region-scoped domains where https://<name>.convex.cloud does not resolve
+    url:
+      deployment.url ??
+      deployment.deploymentUrl ??
+      `https://${deployment.name}.convex.cloud`,
+  }));
+}
+
+/**
+ * Fetch user profile. Non-critical (only used for display), and the endpoint
+ * rejects CLI-style tokens these days — degrade to an empty profile on failure.
+ */
+export async function getProfile(accessToken: string): Promise<UserProfile> {
+  try {
+    return await callBigBrainAPI<UserProfile>("/profile", { accessToken });
+  } catch (error) {
+    console.error("Failed to fetch profile:", error);
+    return {};
+  }
+}

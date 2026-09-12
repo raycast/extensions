@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "youtube-subscriber-count",
+  "title": "YouTube Subscriber Count",
+  "description": "Celebrates whenever you get a new subscriber with a confetti 🎉",
+  "icon": "command-icon.png",
+  "author": "iman_neo",
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Start YouTube Subscriber Count",
+      "description": "Automatically celebrates whenever you get a new subscriber with a confetti 🎉",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imaNNeo/raycast_extensions/tree/main/youtube-celebrate"
+  },
+  "preferences": [
+    {
+      "name": "youtubeApiKey",
+      "description": "YouTube API Key",
+      "required": true,
+      "identifier": "youtubeApiKey",
+      "title": "YouTube API Key",
+      "type": "password",
+      "placeholder": "Enter your YouTube API key here"
+    },
+    {
+      "name": "youtubeChannelId",
+      "description": "YouTube Channel ID",
+      "required": true,
+      "identifier": "youtubeChannelId",
+      "title": "YouTube Channel ID",
+      "type": "textfield",
+      "placeholder": "Enter your YouTube Channel ID (such as `UCLtLg_CkuGBnf_-wUHnv6Nw`)"
+    },
+    {
+      "name": "celebrationThreshold",
+      "description": "Celebration subscribers threshold. If you enter 10, it means when you get 10 subscribers it shows the celebration confetti (enter 0 to disable celebration)",
+      "required": true,
+      "default": "0",
+      "identifier": "celebrationThreshold",
+      "title": "Celebration subscribers threshold",
+      "type": "textfield",
+      "placeholder": "Enter your celebration subscribers threshold"
+    },
+    {
+      "name": "localeFormat",
+      "description": "Format the subscriber count",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Formatting Options",
+      "label": "Yes, Format Subscriber Count"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

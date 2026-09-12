@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-mdn",
+  "title": "Search MDN",
+  "description": "Search MDN Web Docs",
+  "icon": "icon.png",
+  "author": "krzysztofzuraw",
+  "contributors": [
+    "OBQun",
+    "k8scat",
+    "j3lte",
+    "stelo",
+    "Sheraff"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Web Docs",
+      "subtitle": "MDN",
+      "description": "Search MDN Web Docs",
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "title": "Default Action",
+          "data": [
+            {
+              "title": "Read Document",
+              "value": "preview"
+            },
+            {
+              "title": "Open in Browser",
+              "value": "open"
+            }
+          ],
+          "required": false,
+          "default": "preview",
+          "name": "defaultAction",
+          "description": "Choose which action appears first"
+        },
+        {
+          "type": "dropdown",
+          "title": "Language",
+          "data": [
+            {
+              "title": "English (US)",
+              "value": "en-US"
+            },
+            {
+              "title": "Español",
+              "value": "es"
+            },
+            {
+              "title": "Français",
+              "value": "fr"
+            },
+            {
+              "title": "日本語",
+              "value": "ja"
+            },
+            {
+              "title": "한국어",
+              "value": "ko"
+            },
+            {
+              "title": "Português (Brasil)",
+              "value": "pt-BR"
+            },
+            {
+              "title": "Русский",
+              "value": "ru"
+            },
+            {
+              "title": "简体中文",
+              "value": "zh-CN"
+            },
+            {
+              "title": "繁體中文",
+              "value": "zh-TW"
+            }
+          ],
+          "required": false,
+          "default": "en-US",
+          "name": "language",
+          "description": "Language used for MDN search results"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "^20.14.2",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

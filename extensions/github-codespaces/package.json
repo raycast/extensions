@@ -1,0 +1,90 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "github-codespaces",
+	"title": "GitHub Codespaces",
+	"description": "Manage and launch codespaces",
+	"icon": "github.png",
+	"author": "michael.wang",
+	"categories": [
+		"Developer Tools",
+		"Productivity"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "open-codespace",
+			"title": "Open Codespace",
+			"description": "Display and manage your recent codespaces",
+			"mode": "view"
+		},
+		{
+			"name": "active-codespaces",
+			"title": "Active Codespaces",
+			"subtitle": "GitHub Codespaces",
+			"description": "See your active codespaces at a glance",
+			"mode": "menu-bar",
+			"interval": "1m"
+		}
+	],
+	"preferences": [
+		{
+			"name": "personalAccessToken",
+			"title": "Personal Access Token",
+			"description": "Personal Access Token for GitHub",
+			"type": "password",
+			"required": true
+		},
+		{
+			"name": "preferredEditor",
+			"title": "Preferred Editor",
+			"description": "Preferred editor for codespaces",
+			"type": "dropdown",
+			"data": [
+				{
+					"title": "Visual Studio Code",
+					"value": "vscode"
+				},
+				{
+					"title": "Web editor",
+					"value": "web"
+				},
+				{
+					"title": "SSH",
+					"value": "ssh"
+				}
+			],
+			"required": false
+		},
+		{
+			"name": "useInsiders",
+			"label": "Prefer Insiders",
+			"description": "Launch the Insiders version of VS Code",
+			"type": "checkbox",
+			"required": false
+		}
+	],
+	"dependencies": {
+		"@octokit/types": "^7.3.1",
+		"@raycast/api": "^1.39.3",
+		"@raycast/utils": "^1.4.8",
+		"node-fetch": "^3.2.10",
+		"ts-pattern": "^4.0.5"
+	},
+	"devDependencies": {
+		"@types/node": "^18.7.14",
+		"@types/react": "^18.0.18",
+		"@typescript-eslint/eslint-plugin": "^5.0.0",
+		"@typescript-eslint/parser": "^5.0.0",
+		"eslint": "^7.32.0",
+		"eslint-config-prettier": "^8.3.0",
+		"prettier": "^2.5.1",
+		"typescript": "^4.4.3"
+	},
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"publish": "ray publish"
+	}
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ray-clicker",
+  "title": "Ray Clicker",
+  "description": "Idle clicker game for Raycast with upgrades, prestige, and fun events.",
+  "icon": "icon.png",
+  "author": "JonathanRReed",
+  "license": "MIT",
+  "categories": [
+    "Fun"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Ray Clicker",
+      "subtitle": "Idle Clicker Game",
+      "description": "Play the idle clicker game with upgrades",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pixtuoid",
+  "title": "Pixtuoid",
+  "description": "Manage which AI coding-agent CLIs feed your Pixtuoid office, and launch the floating window — without leaving Raycast.",
+  "icon": "pixtuoid.png",
+  "author": "IvanWng97",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-sources",
+      "title": "Manage Sources",
+      "description": "List every agent CLI Pixtuoid knows about and connect/disconnect each one.",
+      "mode": "view",
+      "keywords": [
+        "agents",
+        "ai",
+        "claude",
+        "codex",
+        "cursor",
+        "copilot",
+        "office"
+      ]
+    },
+    {
+      "name": "start-floating",
+      "title": "Start Floating Window",
+      "description": "Open the Pixtuoid floating desktop window.",
+      "mode": "no-view",
+      "keywords": [
+        "office",
+        "desktop",
+        "overlay",
+        "pixel"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "binaryPath",
+      "title": "Pixtuoid Binary",
+      "description": "Absolute path to the pixtuoid executable. Leave empty to auto-detect (login-shell PATH, then Homebrew / Cargo / ~/.local/bin).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/pixtuoid"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "json-schema-to-typescript": "^15.0.4",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "gen:contract": "json2ts -i contract/source-status.schema.json -o src/contract.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
