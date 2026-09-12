@@ -299,19 +299,20 @@ export async function runTile(scope: "app" | "all") {
     const onActiveScreen = windows.filter(
       (w) => screenOf(w, screens)?.id === activeScreen.id && !isFullscreen(w, screens),
     );
-    // Auto-detect target: the frontmost window on that screen.
-    const frontWindow = onActiveScreen.find((w) => !isRaycastWindow(w));
+    // Probe every eligible window on the screen in one pass, before any target
+    // is chosen. Choosing first and probing after meant Auto Tile could commit
+    // to the first configured app that merely had a window on screen, then
+    // fail with "No tileable windows" while the next configured app had
+    // plenty. One probe costs the same round trips as probing a single app.
+    const candidates = onActiveScreen.filter((w) => !isRaycastWindow(w) && !isExcluded(w)).sort(byWindowId);
+    const tileable = await getTileable(candidates);
+    const tileableWindows = candidates.filter((w) => tileable.has(w.id));
 
     let targetAppName: string | undefined;
     let targetWindows: WMWindow[];
 
     if (scope === "all") {
-      const candidates = onActiveScreen.filter((w) => !isRaycastWindow(w) && !isExcluded(w)).sort(byWindowId);
-      // Drop what Accessibility won't resize (fixed-size utility windows, dialogs)
-      // before the layout is computed, or they take a grid slot and leave a hole
-      // in it when the resize is refused.
-      const tileable = await getTileable(candidates);
-      targetWindows = candidates.filter((w) => tileable.has(w.id)).slice(0, MAX_WINDOWS);
+      targetWindows = tileableWindows.slice(0, MAX_WINDOWS);
 
       if (targetWindows.length === 0) {
         toast.style = Toast.Style.Failure;
@@ -320,16 +321,17 @@ export async function runTile(scope: "app" | "all") {
       }
     } else {
       if (appNames.length > 0) {
-        for (const candidate of appNames) {
+        // First configured app that has at least one tileable window here; an
+        // app whose windows are all fixed-size is skipped, not reported.
+        targetAppName = appNames.find((candidate) => {
           const lower = candidate.toLowerCase();
-          if (excluded.has(lower)) continue;
-          if (onActiveScreen.some((w) => w.appName.toLowerCase() === lower)) {
-            targetAppName = candidate;
-            break;
-          }
-        }
+          return tileableWindows.some((w) => w.appName.toLowerCase() === lower);
+        });
       } else {
-        targetAppName = frontWindow?.appName;
+        // Auto-detect target: the frontmost tileable window on that screen.
+        // `onActiveScreen` keeps the front-to-back order; `tileableWindows`
+        // is sorted by creation and would name the oldest window instead.
+        targetAppName = onActiveScreen.find((w) => tileable.has(w.id))?.appName;
       }
 
       if (!targetAppName) {
@@ -337,22 +339,12 @@ export async function runTile(scope: "app" | "all") {
         toast.title =
           appNames.length > 0
             ? `No tileable windows found (looked for: ${appNames.join(", ")})`
-            : "No focused window to detect target app";
+            : "No tileable window to detect target app";
         return;
       }
 
       const targetLower = targetAppName.toLowerCase();
-      const candidates = onActiveScreen
-        .filter((w) => w.appName.toLowerCase() === targetLower && !isExcluded(w))
-        .sort(byWindowId);
-      const tileable = await getTileable(candidates);
-      targetWindows = candidates.filter((w) => tileable.has(w.id)).slice(0, MAX_WINDOWS);
-
-      if (targetWindows.length === 0) {
-        toast.style = Toast.Style.Failure;
-        toast.title = `No tileable windows for ${targetAppName}`;
-        return;
-      }
+      targetWindows = tileableWindows.filter((w) => w.appName.toLowerCase() === targetLower).slice(0, MAX_WINDOWS);
     }
 
     // Toggle: if the previous invocation tiled exactly this window set AND the
