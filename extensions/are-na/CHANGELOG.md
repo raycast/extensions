@@ -1,6 +1,6 @@
 # Are.na Changelog
 
-## [Expand Commands and AI Tools] - {PR_MERGE_DATE}
+## [Expand Commands and AI Tools] - 2026-09-12
 
 - Added a dark-theme command icon so the Are.na mark stays visible on dark Raycast chrome.
 - Added multiline text previews to block grids, with light and dark appearances.
