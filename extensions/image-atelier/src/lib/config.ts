@@ -4,11 +4,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { Config, endpoint } from "./images";
 export function getProvider() {
-  const preferences = getPreferenceValues<{
-    baseUrl: string;
-    apiKey: string;
-    outputDirectory?: string;
-  }>();
+  const preferences = getPreferenceValues<Preferences>();
   return {
     ...preferences,
     outputDirectory:

@@ -26,7 +26,7 @@ Mention `@image-atelier` in Raycast AI Chat to generate an image, then ask for c
 
 Example: `@image-atelier Generate a watercolor illustration of a mountain cabin at sunrise.`
 
-The editing tool requires an absolute local image path supplied by the user or returned by a previous tool call. If a chat attachment does not expose a local path, save it first or use the form's file picker. Local image rendering in AI Chat depends on Raycast; tool results also include the saved file path.
+Before an AI edit, a tool confirmation identifies the selected photo, destination, model, and instructions. The editing tool requires an absolute local image path supplied by the user or returned by a previous tool call. If a chat attachment does not expose a local path, save it first or use the form's file picker. Local image rendering in AI Chat depends on Raycast; tool results also include the saved file path.
 
 ## Provider compatibility
 
@@ -40,6 +40,8 @@ The provider must support Bearer authentication and the following OpenAI-style I
 Base URLs may include a version prefix or end in `/images/generations` or `/images/edits`. HTTPS is required except for localhost services. Size and quality are omitted when **Provider Default** is selected; other values must be supported by the selected model.
 
 PNG, JPEG, and WebP are supported. Editing accepts one reference image under 50 MB. Masks, multiple reference images, streaming, and Responses/Chat Completions image protocols are not supported. Model discovery may list models that require one of those other protocols.
+
+Downloaded and decoded images are limited to 50 MiB. JSON responses have a separate bounded limit to allow base64 overhead; oversized bodies are canceled during reading.
 
 Requests time out after five minutes; image downloads after one minute. Failed generation is not retried automatically because a provider may already have processed a request. Check provider activity before retrying.
 

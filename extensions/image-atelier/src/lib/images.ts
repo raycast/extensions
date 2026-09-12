@@ -1,3 +1,9 @@
+import {
+  readBounded,
+  decodeImage,
+  MAX_IMAGE_BYTES,
+  MAX_JSON_BYTES,
+} from "./response";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile, stat } from "node:fs/promises";
 import { isAbsolute, join, basename } from "node:path";
@@ -141,8 +147,9 @@ export async function createImage(
   let payload: {
     data?: { b64_json?: string; url?: string; revised_prompt?: string }[];
   };
+  const json = await readBounded(response, MAX_JSON_BYTES);
   try {
-    payload = (await response.json()) as typeof payload;
+    payload = JSON.parse(json.toString("utf8")) as typeof payload;
   } catch {
     throw new Error(
       "API returned non-JSON content. Check that Base URL points to an Images API.",
@@ -155,7 +162,7 @@ export async function createImage(
     );
   let bytes: Buffer;
   if (item.b64_json) {
-    bytes = Buffer.from(item.b64_json, "base64");
+    bytes = decodeImage(item.b64_json);
   } else if (item.url) {
     const downloadUrl = new URL(item.url);
     if (downloadUrl.protocol !== "https:")
@@ -167,7 +174,7 @@ export async function createImage(
     });
     if (!download.ok)
       throw new Error(`Image download failed (HTTP ${download.status}).`);
-    bytes = Buffer.from(await download.arrayBuffer());
+    bytes = await readBounded(download, MAX_IMAGE_BYTES);
   } else {
     throw new Error(
       "API response must contain data[0].b64_json or data[0].url.",
