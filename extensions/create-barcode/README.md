@@ -11,17 +11,17 @@ Supports EAN-13, ITF, NW-7 (Codabar), CODE39 and CODE128. Every symbology that c
 3. Pick a symbology from the list on the left to see its preview on the right
 4. Export it from the Action Panel
 
-Use the search bar dropdown (`⌘P`) to pin a single symbology. The default is **Auto Detect**.
+Use the search bar dropdown (`⌘P` on macOS, `Ctrl+P` on Windows) to pin a single symbology. The default is **Auto Detect**.
 
 ## Supported Symbologies
 
-| Symbology   | Accepted Input                                                                    |
-| ----------- | --------------------------------------------------------------------------------- |
-| **EAN-13**  | 12 or 13 digits (the check digit is calculated when 12 are given)                   |
-| **ITF**     | Digits (a leading `0` is added when the length is odd)                              |
-| **NW-7**    | Digits and `-` `$` `:` `/` `.` `+`, wrapped in an `A`–`D` start/stop pair           |
-| **CODE39**  | Digits, uppercase letters and `-` `.` space `$` `/` `+` `%`                         |
-| **CODE128** | Printable ASCII                                                                     |
+| Symbology   | Accepted Input                                                            |
+| ----------- | ------------------------------------------------------------------------- |
+| **EAN-13**  | 12 or 13 digits (the check digit is calculated when 12 are given)         |
+| **ITF**     | Digits (a leading `0` is added when the length is odd)                    |
+| **NW-7**    | Digits and `-` `$` `:` `/` `.` `+`, wrapped in an `A`–`D` start/stop pair |
+| **CODE39**  | Digits, uppercase letters and `-` `.` space `$` `/` `+` `%`               |
+| **CODE128** | Printable ASCII                                                           |
 
 EAN-13 and ITF also accept input containing hyphens, spaces and full-width digits (`4912-3456 7890` becomes `4912345678904`).
 

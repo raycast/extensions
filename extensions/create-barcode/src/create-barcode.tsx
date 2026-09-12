@@ -32,7 +32,6 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={placeholderFor(selected)}
-      navigationTitle="Create Barcode"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Barcode Type"
@@ -201,13 +200,13 @@ function BarcodeItem({
 
           <ActionPanel.Section title="Preview">
             <Action
-              title="Zoom in"
+              title="Zoom In"
               icon={Icon.Plus}
               shortcut={crossPlatform([], "]")}
               onAction={() => onHeightChange(stepHeight(height, 1))}
             />
             <Action
-              title="Zoom out"
+              title="Zoom Out"
               icon={Icon.Minus}
               shortcut={crossPlatform([], "[")}
               onAction={() => onHeightChange(stepHeight(height, -1))}
