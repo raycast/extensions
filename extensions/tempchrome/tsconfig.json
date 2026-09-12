@@ -17,7 +17,6 @@
     "noEmit": true
   },
   "include": [
-    "scripts/sync-options-schema.ts",
     "src/**/*",
     "raycast-env.d.ts"
   ]

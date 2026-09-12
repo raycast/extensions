@@ -14,15 +14,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "lint:fix": "ray lint --fix",
-    "publish": "ray publish",
-    "prepare": "node scripts/prepare.mjs",
-    "sync:options": "bun scripts/sync-options-schema.ts",
-    "icon": "bash scripts/render-icon.sh",
-    "prebuild": "bun run sync:options",
-    "predev": "bun run sync:options",
-    "prelint": "bun run sync:options",
-    "prelint:fix": "bun run sync:options",
-    "prepublish": "bun run sync:options"
+    "publish": "ray publish"
   },
   "dependencies": {
     "@raycast/api": "^2.3.1",
