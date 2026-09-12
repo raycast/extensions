@@ -29,6 +29,13 @@ const LIMITS = { tabs: 6, bookmarks: 6, reading: 4, history: 8 };
 const TOP_HIT_ITEM_ID = "top-hit";
 const OPEN_ADDRESS_ITEM_ID = "open-address";
 
+type SelectionSession = {
+  key: string;
+  target?: string;
+  awaitingTarget: boolean;
+  userNavigated: boolean;
+};
+
 // Exact navigation intent has higher tiers than general text matching. These
 // tiers deliberately dominate source preferences and frecency in Top Hit.
 function scoreTerm(term: string, title: string, domain: string, url: string): number {
@@ -158,8 +165,7 @@ function uniqueUrls<T extends { url: string }>(items: T[], seen: Set<string>): T
 export default function Command() {
   const [query, setQuery] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string>();
-  const selectionLockRef = useRef<string | undefined>(undefined);
-  const selectionEpochRef = useRef(0);
+  const selectionSessionRef = useRef<SelectionSession | undefined>(undefined);
   const q = query.trim().toLowerCase();
   const hasQuery = q.length > 0;
 
@@ -250,28 +256,35 @@ export default function Command() {
   ).slice(0, LIMITS.history);
   const address = isWebAddress(query) ? normalizeWebAddress(query) : undefined;
 
-  // Keep the selection controlled after local data arrives. Releasing
-  // selectedItemId makes Raycast fall back to its default web-search item.
-  // Stable item IDs let native Ctrl+N/Ctrl+P report their new selection back
-  // through onSelectionChange without moving the list.
+  // Keep selection controlled while the local sources resolve. A session lasts
+  // for one query/profile pair: it auto-selects a Top Hit until the user
+  // navigates, after which slower data must not steal their selection.
   useEffect(() => {
     const target = topHit ? TOP_HIT_ITEM_ID : address ? OPEN_ADDRESS_ITEM_ID : undefined;
-    const epoch = ++selectionEpochRef.current;
-    selectionLockRef.current = target;
-    setSelectedItemId(target);
-    if (!target) return;
+    const key = `${selectedProfileId}\u0000${query}`;
+    const previous = selectionSessionRef.current;
+    const isNewSession = previous?.key !== key;
 
-    // Raycast can emit the old selection while new local results are mounting.
-    // Ignore it briefly; the controlled selectedItemId already points at the
-    // new Top Hit. The lock is only for this asynchronous render window.
-    const releaseTimer = setTimeout(() => {
-      if (selectionEpochRef.current === epoch) selectionLockRef.current = undefined;
-    }, 250);
+    if (isNewSession) {
+      selectionSessionRef.current = {
+        key,
+        target,
+        awaitingTarget: !!target,
+        userNavigated: false,
+      };
+      setSelectedItemId(target);
+      return;
+    }
 
-    return () => {
-      clearTimeout(releaseTimer);
-    };
-  }, [query, topHit?.key, address]);
+    // Local tabs, bookmarks, and history resolve at different times. Keep
+    // following the best candidate only until the user has made a choice.
+    if (!previous.userNavigated && previous.target !== target) {
+      previous.target = target;
+      previous.awaitingTarget = !!target;
+      setSelectedItemId(target);
+      return;
+    }
+  }, [query, selectedProfileId, topHit?.key, address]);
 
   return (
     <List
@@ -281,10 +294,26 @@ export default function Command() {
       onSearchTextChange={setQuery}
       {...(selectedItemId ? { selectedItemId } : {})}
       onSelectionChange={(id) => {
-        if (selectionLockRef.current) {
-          if (id !== selectionLockRef.current) return;
-          selectionLockRef.current = undefined;
+        const session = selectionSessionRef.current;
+        if (session?.awaitingTarget) {
+          // Ignore the stale selection that Raycast can report while replacing
+          // an older result set. The matching callback acknowledges the new
+          // controlled selection without relying on a timing threshold.
+          if (id !== session.target) return;
+          session.awaitingTarget = false;
+          setSelectedItemId(id ?? undefined);
+          return;
         }
+
+        // Web Search is Raycast's initial fallback item. Seeing it selected
+        // does not prove that the user navigated, so a Top Hit which resolves
+        // later must still be allowed to take focus. Moving past it does prove
+        // an explicit navigation choice.
+        if (!session?.target && !session?.userNavigated && id === "web-search") {
+          setSelectedItemId(id);
+          return;
+        }
+        if (session) session.userNavigated = true;
         setSelectedItemId(id ?? undefined);
       }}
       searchBarPlaceholder="Search tabs, bookmarks, history, or the web"
