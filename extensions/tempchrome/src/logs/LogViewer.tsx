@@ -109,10 +109,26 @@ function timestampForFilename(): string {
   );
 }
 
+/** Wraps a value in single quotes so the shell treats every character literally. */
+function shellQuote(value: string): string {
+  return `'${value.split("'").join(`'\\''`)}'`;
+}
+
+/** Renders a value as an AppleScript string literal. */
+function appleScriptLiteral(value: string): string {
+  return `"${value.split("\\").join("\\\\").split('"').join('\\"')}"`;
+}
+
 async function openInTerminal(logPath: string): Promise<void> {
+  // The path crosses two parsers, so it needs two layers of quoting. Terminal
+  // hands `do script` to the shell, and the profile directory name comes from a
+  // world-writable temp directory, so an unquoted path would let a crafted
+  // directory name run commands. Shell-quote first, then escape the finished
+  // command for the AppleScript string literal that carries it.
+  const command = `tail -F ${shellQuote(logPath)}`;
   const script = `tell application "Terminal"
     activate
-    do script "tail -F ${logPath.replace(/"/g, '\\"')}"
+    do script ${appleScriptLiteral(command)}
   end tell`;
   await execFileAsync("osascript", ["-e", script]);
 }

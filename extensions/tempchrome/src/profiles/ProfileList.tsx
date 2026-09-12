@@ -17,7 +17,7 @@ import { chromiumExists, clearQuarantine, launchChromium } from "../chromium/lau
 import { quickLaunch } from "../launch";
 import LogViewer from "../logs/LogViewer";
 import { getPreferences } from "../preferences";
-import { removePath } from "../utils/fs";
+import { trashPath } from "../utils/fs";
 import { reportError } from "../utils/reportError";
 import { sweepStaleProfiles, unmarkAutoCleanup, updateRegistry } from "./autoCleanup";
 import { formatBytes, listProfiles, type ProfileInfo } from "./listing";
@@ -86,7 +86,7 @@ export default function ProfileList(): JSX.Element {
     const title = profile.inUse ? "Delete profile in use?" : "Delete profile?";
     const message = profile.inUse
       ? `${profile.id} (${formatBytes(profile.size)}) is currently in use by Chromium. Deleting it may corrupt the running session. Continue?`
-      : `${profile.id} (${formatBytes(profile.size)}) will be permanently deleted.`;
+      : `${profile.id} (${formatBytes(profile.size)}) will be moved to the Trash.`;
     const primaryTitle = profile.inUse ? "Delete Anyway" : "Delete";
 
     const confirmed = await confirmAlert({
@@ -106,10 +106,10 @@ export default function ProfileList(): JSX.Element {
       title: `Deleting ${profile.id}…`,
     });
     try {
-      await removePath(profile.path);
+      await trashPath(profile.path);
       await unmarkAutoCleanup(profile.path);
       toast.style = Toast.Style.Success;
-      toast.title = `Deleted ${profile.id}`;
+      toast.title = `Moved ${profile.id} to Trash`;
       toast.message = `Freed ${formatBytes(profile.size)}`;
       revalidate();
     } catch (error) {
@@ -135,7 +135,7 @@ export default function ProfileList(): JSX.Element {
     const confirmed = await confirmAlert({
       title: `Delete ${idle.length} idle profile(s)?`,
       message:
-        `Total ${formatBytes(totalSize)} will be permanently deleted.` +
+        `Total ${formatBytes(totalSize)} will be moved to the Trash.` +
         (inUse > 0 ? ` ${inUse} in-use profile(s) will be skipped.` : ""),
       primaryAction: {
         title: `Delete ${idle.length}`,
@@ -151,7 +151,7 @@ export default function ProfileList(): JSX.Element {
       title: `Deleting ${idle.length} profile(s)…`,
     });
     try {
-      await Promise.all(idle.map((profile) => removePath(profile.path)));
+      await trashPath(idle.map((profile) => profile.path));
       const idlePaths = new Set(idle.map((profile) => profile.path));
       await updateRegistry((current) => {
         const next = { ...current };
@@ -162,7 +162,7 @@ export default function ProfileList(): JSX.Element {
       });
 
       toast.style = Toast.Style.Success;
-      toast.title = `Deleted ${idle.length} profile(s)`;
+      toast.title = `Moved ${idle.length} profile(s) to Trash`;
       toast.message = `Freed ${formatBytes(totalSize)}` + (inUse > 0 ? ` · ${inUse} in use skipped` : "");
       revalidate();
     } catch (error) {
