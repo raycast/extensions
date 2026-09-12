@@ -1,0 +1,246 @@
+{
+  "name": "tempchrome",
+  "title": "TempChrome",
+  "description": "Launch Chromium with temporary, isolated profiles",
+  "author": "alex_liao_oncloud",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools"
+  ],
+  "icon": "icon.png",
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "publish": "ray publish",
+    "prepare": "node scripts/prepare.mjs",
+    "sync:options": "bun scripts/sync-options-schema.ts",
+    "icon": "bash scripts/render-icon.sh",
+    "prebuild": "bun run sync:options",
+    "predev": "bun run sync:options",
+    "prelint": "bun run sync:options",
+    "prelint:fix": "bun run sync:options",
+    "prepublish": "bun run sync:options"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/bun": "^1.3.12",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.0.10",
+    "eslint": "^10.10.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "commands": [
+    {
+      "name": "launch",
+      "title": "Quick Launch TempChrome",
+      "subtitle": "TempChrome",
+      "description": "Create a temporary profile and launch Chromium instantly",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "autoCleanup",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Cleanup",
+          "description": "Automatically delete the temp profile once the Chromium window is closed",
+          "default": true,
+          "label": "Mark profile for cleanup after Chromium closes"
+        },
+        {
+          "name": "startUrl",
+          "type": "textfield",
+          "required": false,
+          "title": "Start URL",
+          "description": "Open Chromium directly on this page (leave blank for the default new tab)",
+          "default": "",
+          "placeholder": "https://example.com"
+        },
+        {
+          "name": "browsingMode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Browsing Mode",
+          "description": "Default browsing mode",
+          "default": "normal",
+          "data": [
+            {
+              "title": "Normal",
+              "value": "normal"
+            },
+            {
+              "title": "Incognito",
+              "value": "incognito"
+            }
+          ]
+        },
+        {
+          "name": "appMode",
+          "type": "checkbox",
+          "required": false,
+          "title": "App Mode",
+          "description": "Requires a Start URL. Emits --app=<url> instead of the positional URL",
+          "default": false,
+          "label": "Open Start URL in a chromeless window (--app)"
+        },
+        {
+          "name": "windowState",
+          "type": "dropdown",
+          "required": false,
+          "title": "Window State",
+          "description": "Initial window mode",
+          "default": "normal",
+          "data": [
+            {
+              "title": "Normal",
+              "value": "normal"
+            },
+            {
+              "title": "Maximized",
+              "value": "maximized"
+            },
+            {
+              "title": "Fullscreen",
+              "value": "fullscreen"
+            },
+            {
+              "title": "Kiosk",
+              "value": "kiosk"
+            }
+          ]
+        },
+        {
+          "name": "windowSize",
+          "type": "textfield",
+          "required": false,
+          "title": "Window Size",
+          "description": "Initial window size (WxH or W,H)",
+          "default": "",
+          "placeholder": "1440x900"
+        },
+        {
+          "name": "windowPosition",
+          "type": "textfield",
+          "required": false,
+          "title": "Window Position",
+          "description": "Initial window position (X,Y)",
+          "default": "",
+          "placeholder": "100,100"
+        },
+        {
+          "name": "disableWebSecurity",
+          "type": "checkbox",
+          "required": false,
+          "title": "Disable Web Security",
+          "description": "Disables same-origin policy (use with caution)",
+          "default": false,
+          "label": "Pass --disable-web-security on launch"
+        },
+        {
+          "name": "ignoreCertificateErrors",
+          "type": "checkbox",
+          "required": false,
+          "title": "Ignore Certificate Errors",
+          "description": "Skips TLS validation — use only for local dev",
+          "default": false,
+          "label": "Pass --ignore-certificate-errors (insecure)"
+        },
+        {
+          "name": "disableExtensions",
+          "type": "checkbox",
+          "required": false,
+          "title": "Disable Extensions",
+          "description": "Start Chromium without any installed extensions",
+          "default": false,
+          "label": "Pass --disable-extensions on launch"
+        },
+        {
+          "name": "autoOpenDevtools",
+          "type": "checkbox",
+          "required": false,
+          "title": "Auto-Open DevTools",
+          "description": "Passes --auto-open-devtools-for-tabs",
+          "default": false,
+          "label": "Open DevTools for each new tab"
+        },
+        {
+          "name": "remoteDebuggingPort",
+          "type": "textfield",
+          "required": false,
+          "title": "Remote Debugging Port",
+          "description": "Enable CDP on a port (1–65535); blank to disable",
+          "default": "",
+          "placeholder": "9222"
+        },
+        {
+          "name": "userAgent",
+          "type": "textfield",
+          "required": false,
+          "title": "User Agent",
+          "description": "Override the User-Agent string",
+          "default": "",
+          "placeholder": "Mozilla/5.0 …"
+        },
+        {
+          "name": "proxyServer",
+          "type": "textfield",
+          "required": false,
+          "title": "Proxy Server",
+          "description": "HTTP or SOCKS proxy",
+          "default": "",
+          "placeholder": "host:port"
+        },
+        {
+          "name": "language",
+          "type": "textfield",
+          "required": false,
+          "title": "Language",
+          "description": "BCP-47 language tag (e.g. en-US, ja-JP)",
+          "default": "",
+          "placeholder": "en-US"
+        },
+        {
+          "name": "customArgs",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Chromium Arguments",
+          "description": "Extra CLI flags appended to every launch (whitespace-separated)",
+          "default": "",
+          "placeholder": "--flag1 --flag2=value"
+        }
+      ]
+    },
+    {
+      "name": "tempchrome",
+      "title": "TempChrome",
+      "subtitle": "TempChrome",
+      "description": "Launch, manage profiles, or install Chromium",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "chromiumInstallDir",
+      "type": "textfield",
+      "required": false,
+      "title": "Chromium Install Directory",
+      "description": "Directory that contains (or will contain) Chromium.app. The installer places Chromium.app here; launches spawn the binary inside it.",
+      "default": "~/Applications"
+    },
+    {
+      "name": "tempBaseDir",
+      "type": "textfield",
+      "required": false,
+      "title": "Temp Profile Base Directory",
+      "description": "Directory where temporary profiles are created",
+      "default": "/tmp/tempchrome_profile"
+    }
+  ]
+}
