@@ -146,9 +146,17 @@ export async function validatePlacements(
 
   for (const [net, meta] of Object.entries(PLACEMENT_META)) {
     const count = counts[net] ?? 0;
-    if (count === 0) continue;
     const sentId = platforms?.[net]?.[meta.key];
     const hasPlacement = Boolean(sentId);
+
+    if (count === 0) {
+      // A raw-JSON placement for a network with no selected profile would otherwise reach createPost
+      // unvalidated, targeting a page/board/org/channel/location for a network we aren't posting to.
+      if (hasPlacement) {
+        return `${meta.label}: select a profile on this network before choosing a placement.`;
+      }
+      continue;
+    }
 
     if (count > 1) {
       if (hasPlacement) {
