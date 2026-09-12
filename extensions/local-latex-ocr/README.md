@@ -7,7 +7,7 @@ Capture a printed equation anywhere on your Mac and convert it to LaTeX without 
 - **Capture Math** returns raw LaTeX.
 - **Capture Math as Markdown** wraps the result in `$...$`.
 - **Capture Display Math** wraps the result in a `$$...$$` block.
-- **Review Last Capture** lets you inspect, edit, copy, paste, recapture, or discard the latest uncertain result.
+- **Review Last Capture** lets you inspect, edit, copy, paste, recapture, or discard the latest result.
 
 Assign global hotkeys to the three capture commands in Raycast Settings → Extensions.
 
@@ -21,6 +21,7 @@ macOS will ask Raycast for Screen & System Audio Recording permission when scree
 
 - Captured images and inference stay on the Mac.
 - With **Copy to Clipboard** enabled, every completed capture is copied, including results routed to review for low confidence or syntax issues.
+- Automatic paste is currently gated behind the review screen until confidence is calibrated on a representative paper/PDF corpus.
 - There are no API keys, remote inference calls, analytics, LaunchAgents, or login items.
 - Network access is only needed to download a versioned model that is not already installed.
 - A temporary worker keeps the model warm for ten minutes after use and then exits. Its short Unix socket lives in a per-user 0700 directory under `/tmp`; model state and logs remain in Raycast support storage.

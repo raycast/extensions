@@ -1,11 +1,11 @@
 import { Clipboard } from "@raycast/api";
 import { formatLatex } from "./output";
-import type { ExtensionPreferences, OutputMode } from "../types";
+import type { OutputMode } from "../types";
 
 export async function deliverLatex(
   latex: string,
   mode: OutputMode,
-  preferences: Pick<ExtensionPreferences, "copyToClipboard" | "pasteAutomatically">,
+  preferences: Pick<Preferences, "copyToClipboard" | "pasteAutomatically">,
 ): Promise<string> {
   const output = formatLatex(latex, mode);
   await deliverOutput(output, preferences);
@@ -26,7 +26,7 @@ export async function pasteLatex(output: string): Promise<void> {
 
 async function deliverOutput(
   output: string,
-  preferences: Pick<ExtensionPreferences, "copyToClipboard" | "pasteAutomatically">,
+  preferences: Pick<Preferences, "copyToClipboard" | "pasteAutomatically">,
 ): Promise<void> {
   if (preferences.copyToClipboard) await Clipboard.copy(output);
   if (preferences.pasteAutomatically) await Clipboard.paste(output);

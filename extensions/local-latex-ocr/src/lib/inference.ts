@@ -36,9 +36,7 @@ export function configureOnnxRuntime(
   preferredBackend = options?.backend ?? parseBackend(process.env.LOCAL_LATEX_OCR_BACKEND);
   const requestedThreads = Number(process.env.LOCAL_LATEX_OCR_THREADS ?? "1");
   const threads = options?.threads ?? requestedThreads;
-  wasmOrt.env.wasm.numThreads = Number.isFinite(threads)
-    ? Math.max(1, Math.min(8, Math.floor(threads)))
-    : 1;
+  wasmOrt.env.wasm.numThreads = Number.isFinite(threads) ? Math.max(1, Math.min(8, Math.floor(threads))) : 1;
   wasmOrt.env.wasm.proxy = false;
   wasmOrt.env.wasm.wasmPaths = `${directory}${path.sep}`;
 }
@@ -49,9 +47,7 @@ export class InferenceEngine {
 
   static async create(modelDirectory: string): Promise<InferenceEngineLike> {
     if (!(await isTexTellerModel(modelDirectory))) {
-      throw new Error(
-        "TexTeller3 model files are missing. Download the verified TexTeller3 model before capturing.",
-      );
+      throw new Error("TexTeller3 model files are missing. Download the verified TexTeller3 model before capturing.");
     }
     return new InferenceEngine(await TexTellerEngine.create(modelDirectory));
   }
@@ -90,9 +86,7 @@ class TexTellerEngine implements InferenceEngineLike {
       present: input.replace("past_key_values.", "present."),
     }));
     if (this.cacheInputs.length !== TEX_TELLER_LAYERS * 4) {
-      throw new Error(
-        `Unexpected TexTeller3 decoder cache layout (${this.cacheInputs.length} tensors).`,
-      );
+      throw new Error(`Unexpected TexTeller3 decoder cache layout (${this.cacheInputs.length} tensors).`);
     }
   }
 
@@ -229,11 +223,7 @@ class TexTellerEngine implements InferenceEngineLike {
         }
         past = nextPast;
         logits = nextOutputs[this.decoderWithPast.outputNames[0]];
-        disposeOutputs(
-          nextOutputs,
-          this.decoderWithPast.outputNames[0],
-          this.decoderWithPast.outputNames.slice(1),
-        );
+        disposeOutputs(nextOutputs, this.decoderWithPast.outputNames[0], this.decoderWithPast.outputNames.slice(1));
       }
     } finally {
       logits?.dispose();
@@ -281,11 +271,9 @@ function disposeOutputs(
 async function isTexTellerModel(directory: string): Promise<boolean> {
   try {
     await Promise.all(
-      [
-        "encoder_model_q4f16.onnx",
-        "decoder_model_q4f16.onnx",
-        "decoder_with_past_model_q4f16.onnx",
-      ].map((name) => stat(resolveTexTellerFile(directory, name))),
+      ["encoder_model_q4f16.onnx", "decoder_model_q4f16.onnx", "decoder_with_past_model_q4f16.onnx"].map((name) =>
+        stat(resolveTexTellerFile(directory, name)),
+      ),
     );
     await stat(path.join(directory, "tokenizer.json"));
     return true;
@@ -302,13 +290,10 @@ function nativeSessionTuning(
   backend: Exclude<InferenceBackend, "auto">,
 ): Partial<wasmOrt.InferenceSession.SessionOptions> {
   if (backend === "wasm") return {};
-  const appleSiliconCpu =
-    backend === "cpu" && process.platform === "darwin" && process.arch === "arm64";
+  const appleSiliconCpu = backend === "cpu" && process.platform === "darwin" && process.arch === "arm64";
   // TexTeller's encoder/decoder are compute-heavy. Apple Silicon scales well
   // to the performance cores; users can override this for thermals/battery.
-  const threadCount = Number(
-    process.env.LOCAL_LATEX_OCR_NATIVE_THREADS ?? (appleSiliconCpu ? "6" : "0"),
-  );
+  const threadCount = Number(process.env.LOCAL_LATEX_OCR_NATIVE_THREADS ?? (appleSiliconCpu ? "6" : "0"));
   const arenaSetting = process.env.LOCAL_LATEX_OCR_CPU_ARENA ?? (appleSiliconCpu ? "1" : undefined);
   return {
     interOpNumThreads: 1,
@@ -358,10 +343,8 @@ function argmax(values: ArrayLike<number>, offset = 0, length = values.length): 
 
 function maxSoftmaxProbability(values: ArrayLike<number>, offset: number, length: number): number {
   let maximum = Number.NEGATIVE_INFINITY;
-  for (let index = 0; index < length; index += 1)
-    maximum = Math.max(maximum, values[offset + index]);
+  for (let index = 0; index < length; index += 1) maximum = Math.max(maximum, values[offset + index]);
   let denominator = 0;
-  for (let index = 0; index < length; index += 1)
-    denominator += Math.exp(values[offset + index] - maximum);
+  for (let index = 0; index < length; index += 1) denominator += Math.exp(values[offset + index] - maximum);
   return denominator === 0 ? 0 : 1 / denominator;
 }

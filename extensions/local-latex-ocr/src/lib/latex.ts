@@ -1,7 +1,11 @@
 import katex from "katex";
 
-export const DEFAULT_MEAN_CONFIDENCE = 0.72;
-export const DEFAULT_MIN_CONFIDENCE = 0.08;
+// The current synthetic corpus contains high-confidence but semantically wrong
+// outputs, so token confidence is not yet safe for automatic delivery. Keep all
+// results behind review until a real paper/PDF calibration corpus is available.
+export const DEFAULT_MEAN_CONFIDENCE = 0.995;
+export const DEFAULT_MIN_CONFIDENCE = 0.9;
+export const REQUIRE_REVIEW_UNTIL_CALIBRATED = true;
 
 export function postProcessLatex(input: string): string {
   const unwrapped = input
@@ -30,9 +34,7 @@ export function postProcessLatex(input: string): string {
       .replace(new RegExp(`(${letter})\\s+?(${nonLetter})`, "g"), "$1$2");
   }
 
-  return output
-    .replace(/\uE000(\d+)\uE000/g, (_, index: string) => protectedParts[Number(index)])
-    .trim();
+  return output.replace(/\uE000(\d+)\uE000/g, (_, index: string) => protectedParts[Number(index)]).trim();
 }
 
 export function hasBalancedLatex(input: string): boolean {
@@ -80,12 +82,12 @@ export function getReviewReasons(input: {
   maxTokenCount: number;
 }): string[] {
   const reasons: string[] = [];
+  if (REQUIRE_REVIEW_UNTIL_CALIBRATED) reasons.push("Automatic delivery is gated until confidence is calibrated");
   if (!input.eosReached) reasons.push("The model did not emit an end token");
   if (input.tokenCount >= input.maxTokenCount) reasons.push("The result reached the token limit");
   if (!hasBalancedLatex(input.latex)) reasons.push("LaTeX braces or environments are unbalanced");
   if (!isKatexValid(input.latex)) reasons.push("KaTeX could not render the result");
-  if (input.meanTokenProbability < DEFAULT_MEAN_CONFIDENCE)
-    reasons.push("Average token confidence is low");
+  if (input.meanTokenProbability < DEFAULT_MEAN_CONFIDENCE) reasons.push("Average token confidence is low");
   if (input.minimumTokenProbability < DEFAULT_MIN_CONFIDENCE)
     reasons.push("At least one token has very low confidence");
   return [...new Set(reasons)];

@@ -137,10 +137,7 @@ export function prepareTexTellerInput(source: GrayImage): SquareModelInput {
   const left = Math.floor((size - resized.width) / 2);
   const top = Math.floor((size - resized.height) / 2);
   for (let y = 0; y < resized.height; y += 1) {
-    pixels.set(
-      resized.data.subarray(y * resized.width, (y + 1) * resized.width),
-      (top + y) * size + left,
-    );
+    pixels.set(resized.data.subarray(y * resized.width, (y + 1) * resized.width), (top + y) * size + left);
   }
 
   const mean = 0.9545467;
@@ -151,12 +148,7 @@ export function prepareTexTellerInput(source: GrayImage): SquareModelInput {
   return { data: pixels, dimensions: [1, 1, size, size] };
 }
 
-function resize(
-  source: GrayImage,
-  width: number,
-  height: number,
-  method: "bilinear" | "bicubic",
-): GrayImage {
+function resize(source: GrayImage, width: number, height: number, method: "bilinear" | "bicubic"): GrayImage {
   if (width === source.width && height === source.height) return source;
   const data = new Float32Array(width * height);
   const sample = method === "bilinear" ? bilinearSample : bicubicSample;

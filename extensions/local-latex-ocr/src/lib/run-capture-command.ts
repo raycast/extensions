@@ -17,19 +17,16 @@ import { copyLatex, deliverLatex } from "./deliver";
 import { ensureModel, MODEL_TOTAL_BYTES } from "./model";
 import { cleanStaleCaptures, saveReview } from "./review-store";
 import { recognizeWithWorker, warmWorker } from "./worker-client";
-import type { ExtensionPreferences, OutputMode, ReviewRecord } from "../types";
+import type { OutputMode, ReviewRecord } from "../types";
 
-export async function runCaptureCommand(
-  outputMode: OutputMode,
-  commandName: string,
-): Promise<void> {
+export async function runCaptureCommand(outputMode: OutputMode, commandName: string): Promise<void> {
   const startedAt = performance.now();
   if (process.arch !== "arm64") {
     await showHUD("Local LaTeX OCR currently supports Apple Silicon Macs only");
     return;
   }
 
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   void cleanStaleCaptures(environment.supportPath);
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -111,20 +108,12 @@ export async function runCaptureCommand(
     const message = error instanceof Error ? error.message : String(error);
     toast.style = Toast.Style.Failure;
     toast.title =
-      error instanceof ScreenCapturePermissionError
-        ? "Screen capture unavailable"
-        : "Could not recognize equation";
+      error instanceof ScreenCapturePermissionError ? "Screen capture unavailable" : "Could not recognize equation";
     toast.message = message;
-    if (
-      error instanceof ScreenCapturePermissionError ||
-      /screen|capture|blank|visible equation/i.test(message)
-    ) {
+    if (error instanceof ScreenCapturePermissionError || /screen|capture|blank|visible equation/i.test(message)) {
       toast.primaryAction = {
         title: "Open Screen Recording Settings",
-        onAction: () =>
-          void open(
-            "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
-          ),
+        onAction: () => void open("x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"),
       };
     }
   }

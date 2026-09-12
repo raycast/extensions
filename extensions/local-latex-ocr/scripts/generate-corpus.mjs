@@ -18,12 +18,7 @@ for (const [index, formula] of corpus.entries()) {
 `;
   const texPath = path.join(output, `${formula.id}.tex`);
   await writeFile(texPath, source);
-  run("pdflatex", [
-    "-interaction=batchmode",
-    "-halt-on-error",
-    `-output-directory=${output}`,
-    texPath,
-  ]);
+  run("pdflatex", ["-interaction=batchmode", "-halt-on-error", `-output-directory=${output}`, texPath]);
   const pdfPath = path.join(output, `${formula.id}.pdf`);
   const pngPath = path.join(output, `${formula.id}.png`);
   const variant = index % 5;
@@ -37,17 +32,7 @@ for (const [index, formula] of corpus.entries()) {
           : variant === 4
             ? ["-colorspace", "Gray", "-contrast-stretch", "1%x1%"]
             : [];
-  run("magick", [
-    "-density",
-    "180",
-    pdfPath,
-    "-alpha",
-    "remove",
-    "-trim",
-    "+repage",
-    ...effects,
-    pngPath,
-  ]);
+  run("magick", ["-density", "180", pdfPath, "-alpha", "remove", "-trim", "+repage", ...effects, pngPath]);
 }
 
 await writeFile(

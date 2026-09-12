@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { createReadStream } from "node:fs";
 import { mkdir, open, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -124,11 +125,7 @@ export async function ensureModel(
     }
     await writeFile(
       path.join(stagingDirectory, "verified.json"),
-      JSON.stringify(
-        { version: MODEL_VERSION, assets: MODEL_ASSETS, verifiedAt: Date.now() },
-        null,
-        2,
-      ),
+      JSON.stringify({ version: MODEL_VERSION, assets: MODEL_ASSETS, verifiedAt: Date.now() }, null, 2),
       { mode: 0o600 },
     );
     await rm(modelDirectory, { recursive: true, force: true });
@@ -149,11 +146,18 @@ async function isVerified(directory: string): Promise<boolean> {
     for (const asset of MODEL_ASSETS) {
       const metadata = await stat(path.join(directory, asset.name));
       if (!metadata.isFile() || metadata.size !== asset.size) return false;
+      if ((await sha256File(path.join(directory, asset.name))) !== asset.sha256) return false;
     }
     return true;
   } catch {
     return false;
   }
+}
+
+async function sha256File(filePath: string): Promise<string> {
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(filePath)) hash.update(chunk as Buffer);
+  return hash.digest("hex");
 }
 
 async function acquireLock(lockPath: string): Promise<boolean> {
@@ -198,8 +202,7 @@ async function downloadAsset(
   onProgress: (downloadedBytes: number) => void,
 ): Promise<void> {
   const response = await fetch(asset.url, { redirect: "follow" });
-  if (!response.ok || !response.body)
-    throw new Error(`Could not download ${asset.name}: HTTP ${response.status}`);
+  if (!response.ok || !response.body) throw new Error(`Could not download ${asset.name}: HTTP ${response.status}`);
 
   const partialPath = path.join(destinationDirectory, `${asset.name}.partial`);
   const destinationPath = path.join(destinationDirectory, asset.name);
@@ -214,8 +217,7 @@ async function downloadAsset(
       if (done) break;
       const chunk = Buffer.from(value);
       downloadedBytes += chunk.length;
-      if (downloadedBytes > asset.size)
-        throw new Error(`${asset.name} exceeded its expected size.`);
+      if (downloadedBytes > asset.size) throw new Error(`${asset.name} exceeded its expected size.`);
       hash.update(chunk);
       await file.write(chunk);
       onProgress(downloadedBytes);

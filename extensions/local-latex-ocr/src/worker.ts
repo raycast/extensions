@@ -46,10 +46,8 @@ async function processRequest(request: WorkerRequest): Promise<WorkerResponse> {
     };
   }
   resetIdleTimer();
-  if (request.type === "ping")
-    return { protocol: 3, requestId: request.requestId, ok: true, pong: true };
-  const modelDirectory =
-    request.type === "recognize" || request.type === "warm" ? request.modelDirectory : undefined;
+  if (request.type === "ping") return { protocol: 3, requestId: request.requestId, ok: true, pong: true };
+  const modelDirectory = request.type === "recognize" || request.type === "warm" ? request.modelDirectory : undefined;
   const imagePath = request.type === "recognize" ? request.imagePath : undefined;
   if (
     !modelDirectory ||

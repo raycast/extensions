@@ -18,9 +18,7 @@ const build = spawnSync(
   { stdio: "inherit" },
 );
 if (build.status !== 0) process.exit(build.status ?? 1);
-const benchmark = spawnSync(
-  process.execPath,
-  [path.join(root, "work", "benchmark.cjs"), ...process.argv.slice(2)],
-  { stdio: "inherit" },
-);
+const benchmark = spawnSync(process.execPath, [path.join(root, "work", "benchmark.cjs"), ...process.argv.slice(2)], {
+  stdio: "inherit",
+});
 process.exit(benchmark.status ?? 1);

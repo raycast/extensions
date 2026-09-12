@@ -46,9 +46,7 @@ async function main(): Promise<void> {
 
   const firstInferenceMs = rows[0]?.result.elapsedMs ?? 0;
   const latencies = rows.map((row) => row.result.elapsedMs).sort((a, b) => a - b);
-  const syntaxValid = rows.filter(
-    (row) => row.result.syntaxValid && hasBalancedLatex(row.result.latex),
-  ).length;
+  const syntaxValid = rows.filter((row) => row.result.syntaxValid && hasBalancedLatex(row.result.latex)).length;
   const calibration = calibrate(rows);
   const report =
     `# Local LaTeX OCR Benchmark\n\n` +
@@ -73,11 +71,7 @@ async function main(): Promise<void> {
   await writeFile(reportPath, report);
   await writeFile(
     reportPath.replace(/\.md$/, ".json"),
-    JSON.stringify(
-      { generatedAt: new Date().toISOString(), loadMs, peakRss, calibration, rows },
-      null,
-      2,
-    ),
+    JSON.stringify({ generatedAt: new Date().toISOString(), loadMs, peakRss, calibration, rows }, null, 2),
   );
   process.stdout.write(report);
 }

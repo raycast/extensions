@@ -43,9 +43,3 @@ export type ReviewRecord = {
   commandName: string;
   result: OcrResult;
 };
-
-export type ExtensionPreferences = {
-  pasteAutomatically: boolean;
-  copyToClipboard: boolean;
-  alwaysShowPreview: boolean;
-};

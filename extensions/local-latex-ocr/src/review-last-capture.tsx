@@ -8,6 +8,7 @@ import {
   getPreferenceValues,
   Icon,
   Keyboard,
+  LaunchProps,
   launchCommand,
   LaunchType,
   popToRoot,
@@ -19,15 +20,17 @@ import { pathToFileURL } from "node:url";
 import { deliverLatex } from "./lib/deliver";
 import { formatLatex } from "./lib/output";
 import { discardReview, loadReview } from "./lib/review-store";
-import type { ExtensionPreferences, ReviewRecord } from "./types";
+import type { ReviewRecord } from "./types";
 
-export default function ReviewLastCapture() {
+export default function ReviewLastCapture({
+  launchContext = {},
+}: LaunchProps<{ launchContext?: { requestId?: string } }>) {
   const [record, setRecord] = useState<ReviewRecord>();
   const [loaded, setLoaded] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
-    void loadReview(environment.supportPath).then((value) => {
+    void loadReview(environment.supportPath, launchContext.requestId).then((value) => {
       setRecord(value);
       setLoaded(true);
     });
@@ -35,9 +38,7 @@ export default function ReviewLastCapture() {
 
   if (!loaded) return <Detail isLoading markdown="Loading the latest capture…" />;
   if (!record) {
-    return (
-      <Detail markdown="# No Capture to Review\n\nRun one of the three capture commands first." />
-    );
+    return <Detail markdown="# No Capture to Review\n\nRun one of the three capture commands first." />;
   }
 
   const imageUrl = pathToFileURL(record.imagePath).href;
@@ -55,11 +56,7 @@ export default function ReviewLastCapture() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
-            title="Paste LaTeX"
-            icon={Icon.Clipboard}
-            onAction={() => void pasteRecord(record)}
-          />
+          <Action title="Paste LaTeX" icon={Icon.Clipboard} onAction={() => void pasteRecord(record)} />
           <Action
             title="Edit LaTeX"
             icon={Icon.Pencil}
@@ -92,7 +89,7 @@ export default function ReviewLastCapture() {
 }
 
 function EditLatexForm({ record }: { record: ReviewRecord }) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   return (
     <Form
       navigationTitle="Edit LaTeX"

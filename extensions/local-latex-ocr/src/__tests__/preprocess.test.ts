@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  BlankCaptureError,
-  cropAndPad,
-  prepareTexTellerInput,
-  type GrayImage,
-} from "../lib/preprocess";
+import { BlankCaptureError, cropAndPad, prepareTexTellerInput, type GrayImage } from "../lib/preprocess";
 
 function whiteImage(width: number, height: number): GrayImage {
   return { width, height, data: new Float32Array(width * height).fill(255) };

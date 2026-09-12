@@ -1,18 +1,13 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
-import {
-  closeSync,
-  constants,
-  mkdirSync,
-  openSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { execFile } from "node:child_process";
+import { closeSync, constants, mkdirSync, openSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import net from "node:net";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { promisify } from "node:util";
 import type { OcrResult, WorkerRequest, WorkerResponse } from "../types";
+
+const execFileAsync = promisify(execFile);
 
 // The worker answers ping before loading model sessions, so a healthy start is
 // normally sub-second. Keep failures from turning into an 8-second cold-start
@@ -60,13 +55,9 @@ export async function recognizeWithWorker(input: {
     try {
       return await (await InferenceEngine.create(input.modelDirectory)).recognize(input.imagePath);
     } catch (directError) {
-      const workerMessage =
-        workerError instanceof Error ? workerError.message : String(workerError);
-      const directMessage =
-        directError instanceof Error ? directError.message : String(directError);
-      throw new Error(
-        `OCR worker failed (${workerMessage}); direct inference also failed (${directMessage}).`,
-      );
+      const workerMessage = workerError instanceof Error ? workerError.message : String(workerError);
+      const directMessage = directError instanceof Error ? directError.message : String(directError);
+      throw new Error(`OCR worker failed (${workerMessage}); direct inference also failed (${directMessage}).`);
     }
   }
 }
@@ -147,11 +138,7 @@ async function ensureWorker(paths: WorkerPaths, token: string): Promise<void> {
     return;
   }
 
-  const logFd = openSync(
-    paths.logPath,
-    constants.O_CREAT | constants.O_WRONLY | constants.O_APPEND,
-    0o600,
-  );
+  const logFd = openSync(paths.logPath, constants.O_CREAT | constants.O_WRONLY | constants.O_APPEND, 0o600);
   try {
     try {
       const response = await ping();
@@ -206,15 +193,29 @@ async function stopStaleWorker(paths: WorkerPaths): Promise<void> {
   try {
     const pid = Number.parseInt(readFileSync(paths.pidPath, "utf8").trim(), 10);
     if (Number.isInteger(pid) && pid > 1 && pid !== process.pid) {
-      try {
-        process.kill(pid, "SIGTERM");
-      } catch {
-        // The PID has already exited or belongs to a process we cannot signal.
+      // Never signal a PID solely because it was left in a file: macOS may have
+      // reused it for an unrelated process. Verify the complete worker command
+      // line before sending SIGTERM.
+      const { stdout } = await execFileAsync("/bin/ps", ["-p", String(pid), "-o", "command="], {
+        maxBuffer: 32 * 1024,
+      });
+      const command = stdout.trim();
+      const isOurWorker =
+        command.includes(paths.workerPath) &&
+        command.includes(`--socket ${paths.socketPath}`) &&
+        command.includes(`--support-path ${paths.supportPath}`);
+      if (isOurWorker) {
+        try {
+          process.kill(pid, "SIGTERM");
+        } catch {
+          // The verified worker has already exited or cannot be signaled.
+        }
+        await new Promise((resolve) => setTimeout(resolve, 150));
       }
-      await new Promise((resolve) => setTimeout(resolve, 150));
     }
   } catch {
-    // No PID file means the socket itself is the only stale state to remove.
+    // Missing PID, ps failure, or an unreadable process is never a reason to
+    // kill. The socket itself is still safe to remove below.
   }
   rmSync(paths.socketPath, { force: true });
   rmSync(paths.legacySocketPath, { force: true });
@@ -241,10 +242,7 @@ function sendRequest(socketPath: string, request: WorkerRequest): Promise<Worker
   return new Promise((resolve, reject) => {
     const socket = net.createConnection(socketPath);
     let buffer = "";
-    const timeout = setTimeout(
-      () => socket.destroy(new Error("OCR worker request timed out.")),
-      REQUEST_TIMEOUT_MS,
-    );
+    const timeout = setTimeout(() => socket.destroy(new Error("OCR worker request timed out.")), REQUEST_TIMEOUT_MS);
     socket.setEncoding("utf8");
     socket.once("connect", () => socket.write(`${JSON.stringify(request)}\n`));
     socket.on("data", (chunk) => {

@@ -11,6 +11,10 @@
 - Removed the previous OCR model path; TexTeller3 is now the sole inference backend.
 - Added model warm-up during region selection, reusable decoder tensors, precomputed cache bindings, and tuned six-thread Apple Silicon CPU sessions.
 - Completed TexTeller preprocessing, tokenizer cleanup, display-delimiter normalization, and immediate clipboard copy for reviewed results.
+- Gated automatic delivery until confidence is calibrated on a representative paper/PDF corpus.
+- Isolated concurrent review records by request ID and verified the worker command line before stale-PID cleanup.
+- Recomputed SHA-256 hashes for every installed model asset before loading it.
+- Added Store metadata screenshots and aligned the generated preferences type and Raycast Prettier defaults.
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
