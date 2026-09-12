@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, type LaunchProps } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { Clipboard } from "@raycast/api";
 import { readNowPlayingTrackId, type Album, type QobuzClient, type Track } from "@kud/qobuz";
@@ -16,11 +16,11 @@ import {
   type ResolvedTrack,
 } from "./lib/resolve";
 
-type Source = "clipboard" | "now-playing";
+type Source = "argument" | "now-playing" | "clipboard";
 
 // Where the input came from, and which other source the panel can offer to
 // switch to, when one is available.
-type Input = { source: Source; alternative?: Source };
+type Input = { source: Source; alternative?: Exclude<Source, "argument"> };
 
 type ToQobuz = Input & {
   mode: "to-qobuz";
@@ -40,8 +40,13 @@ type FromQobuz = Input & {
 
 type Conversion = { mode: "empty" } | { mode: "error"; reason: ResolveFailure } | ToQobuz | FromQobuz;
 
-const SUPPORTED_HINT =
-  "Play something in Qobuz, or copy a **Spotify**, **YouTube Music**, or **Qobuz** track link, then run this command.";
+const SUPPORTED_HINT = [
+  "This command converts, in order:",
+  "",
+  "1. the track link typed after the command, if any",
+  "2. the track the **Qobuz** app is currently on",
+  "3. a **Spotify**, **YouTube Music**, or **Qobuz** track link on the clipboard",
+].join("\n");
 
 const UNRESOLVED_MESSAGE: Record<ResolveFailure, string> = {
   invalid: ["# Nothing to convert", "", SUPPORTED_HINT].join("\n"),
@@ -84,12 +89,26 @@ const convertToQobuz = async (client: QobuzClient, resolved: ResolvedTrack): Pro
   return { mode: "to-qobuz", resolved, track, album, exact };
 };
 
-// Precedence: the track Qobuz is currently on wins, a track link on the
-// clipboard is the fallback. Qobuz's state file carries no playing flag, only a
-// queue position, so the current track is present whenever the queue is — the
-// clipboard is reached by choice (the switch action) far more often than by
-// fallback.
-const convert = async (preferred: Source | undefined): Promise<Conversion> => {
+const convertUrl = async (url: string, input: Input): Promise<Conversion> => {
+  const outcome = await resolveLink(url);
+  if (!outcome.ok) return { mode: "error", reason: outcome.reason };
+
+  const client = await getClient();
+  const converted =
+    outcome.direction === "from-qobuz"
+      ? await convertFromQobuz(client, outcome.qobuzTrackId)
+      : await convertToQobuz(client, outcome.track);
+  return { ...converted, ...input };
+};
+
+// Precedence: a link typed as the argument, then the track Qobuz is currently
+// on, then a track link on the clipboard. Qobuz's state file carries no playing
+// flag, only a queue position, so the current track is present whenever the
+// queue is — the clipboard is reached by choice (the switch action) far more
+// often than by fallback. A typed link is deliberate, so it never falls through.
+const convert = async (argument: string, preferred: Source | undefined): Promise<Conversion> => {
+  if (argument) return convertUrl(argument, { source: "argument" });
+
   const nowPlayingId = await readNowPlayingTrackId();
   const url = (await Clipboard.readText())?.trim() || "";
   const clipboardUsable = looksLikeTrackLink(url);
@@ -100,20 +119,13 @@ const convert = async (preferred: Source | undefined): Promise<Conversion> => {
   }
 
   if (!url) return { mode: "empty" };
-  const outcome = await resolveLink(url);
-  if (!outcome.ok) return { mode: "error", reason: outcome.reason };
-
-  const client = await getClient();
-  const converted =
-    outcome.direction === "from-qobuz"
-      ? await convertFromQobuz(client, outcome.qobuzTrackId)
-      : await convertToQobuz(client, outcome.track);
-  return { ...converted, source: "clipboard", alternative: nowPlayingId !== undefined ? "now-playing" : undefined };
+  return convertUrl(url, { source: "clipboard", alternative: nowPlayingId !== undefined ? "now-playing" : undefined });
 };
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.ConvertLink }>) {
+  const argument = props.arguments.link?.trim() ?? "";
   const [preferred, setPreferred] = useState<Source | undefined>(undefined);
-  const { data, isLoading } = usePromise(convert, [preferred], {
+  const { data, isLoading } = usePromise(convert, [argument, preferred], {
     onError: (error) => {
       showFailureToast(error, { title: "Couldn't convert link" });
     },
@@ -136,7 +148,7 @@ const renderMetadata = (data: Conversion | undefined) => {
   return undefined;
 };
 
-const SWITCH_ACTION: Record<Source, { title: string; icon: Icon }> = {
+const SWITCH_ACTION: Record<Exclude<Source, "argument">, { title: string; icon: Icon }> = {
   "now-playing": { title: "Use Now Playing Instead", icon: Icon.Music },
   clipboard: { title: "Use Clipboard Link Instead", icon: Icon.Clipboard },
 };
@@ -205,7 +217,11 @@ const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) 
   return undefined;
 };
 
-const SOURCE_LABEL: Record<Source, string> = { clipboard: "Clipboard", "now-playing": "Now Playing in Qobuz" };
+const SOURCE_LABEL: Record<Source, string> = {
+  argument: "Typed link",
+  "now-playing": "Now Playing in Qobuz",
+  clipboard: "Clipboard",
+};
 
 function ToQobuzMetadata({ data, track }: { data: ToQobuz; track: Track }) {
   return (
