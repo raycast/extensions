@@ -8,6 +8,7 @@ import {
   deezerByIsrc,
   findIsrc,
   isLikelyMatch,
+  looksLikeTrackLink,
   resolveLink,
   spotifySearchUrl,
   ytMusicSearchUrl,
@@ -17,10 +18,9 @@ import {
 
 type Source = "clipboard" | "now-playing";
 
-// Where the input came from, and whether the other source is available to
-// switch to. nowPlayingId is only set when the clipboard won, so the panel can
-// offer the currently playing track as an alternative.
-type Input = { source: Source; nowPlayingId?: number };
+// Where the input came from, and which other source the panel can offer to
+// switch to, when one is available.
+type Input = { source: Source; alternative?: Source };
 
 type ToQobuz = Input & {
   mode: "to-qobuz";
@@ -41,13 +41,7 @@ type FromQobuz = Input & {
 type Conversion = { mode: "empty" } | { mode: "error"; reason: ResolveFailure } | ToQobuz | FromQobuz;
 
 const SUPPORTED_HINT =
-  "Copy a **Spotify**, **YouTube Music**, or **Qobuz** track link — or play something in Qobuz — then run this command.";
-
-// A clipboard that is not a track link from a known service says nothing about
-// intent, so the currently playing track takes over. A link from a known
-// service of the wrong kind (album, playlist) is a deliberate paste and keeps
-// its error instead.
-const YIELDS_TO_NOW_PLAYING: ReadonlySet<ResolveFailure> = new Set(["invalid", "unknown"]);
+  "Play something in Qobuz, or copy a **Spotify**, **YouTube Music**, or **Qobuz** track link, then run this command.";
 
 const UNRESOLVED_MESSAGE: Record<ResolveFailure, string> = {
   invalid: ["# Nothing to convert", "", SUPPORTED_HINT].join("\n"),
@@ -90,40 +84,36 @@ const convertToQobuz = async (client: QobuzClient, resolved: ResolvedTrack): Pro
   return { mode: "to-qobuz", resolved, track, album, exact };
 };
 
-// Precedence: a usable track link on the clipboard wins, the track Qobuz is
-// currently on fills in otherwise. Qobuz's state file carries no playing flag,
-// only a queue position — so "is something playing" cannot be detected, and
-// putting now-playing first would make the clipboard unreachable on any machine
-// with a queue.
-const convert = async (preferNowPlaying: boolean): Promise<Conversion> => {
+// Precedence: the track Qobuz is currently on wins, a track link on the
+// clipboard is the fallback. Qobuz's state file carries no playing flag, only a
+// queue position, so the current track is present whenever the queue is — the
+// clipboard is reached by choice (the switch action) far more often than by
+// fallback.
+const convert = async (preferred: Source | undefined): Promise<Conversion> => {
   const nowPlayingId = await readNowPlayingTrackId();
-  const convertNowPlaying = async (trackId: number): Promise<Conversion> => ({
-    ...(await convertFromQobuz(await getClient(), trackId)),
-    source: "now-playing",
-  });
-
-  if (preferNowPlaying && nowPlayingId !== undefined) return convertNowPlaying(nowPlayingId);
-
   const url = (await Clipboard.readText())?.trim() || "";
-  const outcome = url ? await resolveLink(url) : undefined;
+  const clipboardUsable = looksLikeTrackLink(url);
 
-  if (outcome?.ok) {
-    const client = await getClient();
-    const converted =
-      outcome.direction === "from-qobuz"
-        ? await convertFromQobuz(client, outcome.qobuzTrackId)
-        : await convertToQobuz(client, outcome.track);
-    return { ...converted, source: "clipboard", nowPlayingId };
+  if (nowPlayingId !== undefined && preferred !== "clipboard") {
+    const converted = await convertFromQobuz(await getClient(), nowPlayingId);
+    return { ...converted, source: "now-playing", alternative: clipboardUsable ? "clipboard" : undefined };
   }
 
-  const reason: ResolveFailure = outcome?.reason ?? "invalid";
-  if (nowPlayingId !== undefined && YIELDS_TO_NOW_PLAYING.has(reason)) return convertNowPlaying(nowPlayingId);
-  return outcome ? { mode: "error", reason } : { mode: "empty" };
+  if (!url) return { mode: "empty" };
+  const outcome = await resolveLink(url);
+  if (!outcome.ok) return { mode: "error", reason: outcome.reason };
+
+  const client = await getClient();
+  const converted =
+    outcome.direction === "from-qobuz"
+      ? await convertFromQobuz(client, outcome.qobuzTrackId)
+      : await convertToQobuz(client, outcome.track);
+  return { ...converted, source: "clipboard", alternative: nowPlayingId !== undefined ? "now-playing" : undefined };
 };
 
 export default function Command() {
-  const [preferNowPlaying, setPreferNowPlaying] = useState(false);
-  const { data, isLoading } = usePromise(convert, [preferNowPlaying], {
+  const [preferred, setPreferred] = useState<Source | undefined>(undefined);
+  const { data, isLoading } = usePromise(convert, [preferred], {
     onError: (error) => {
       showFailureToast(error, { title: "Couldn't convert link" });
     },
@@ -134,7 +124,7 @@ export default function Command() {
       isLoading={isLoading}
       markdown={buildMarkdown(data, isLoading)}
       metadata={renderMetadata(data)}
-      actions={renderActions(data, () => setPreferNowPlaying(true))}
+      actions={renderActions(data, setPreferred)}
     />
   );
 }
@@ -146,14 +136,22 @@ const renderMetadata = (data: Conversion | undefined) => {
   return undefined;
 };
 
-const renderActions = (data: Conversion | undefined, onUseNowPlaying: () => void) => {
+const SWITCH_ACTION: Record<Source, { title: string; icon: Icon }> = {
+  "now-playing": { title: "Use Now Playing Instead", icon: Icon.Music },
+  clipboard: { title: "Use Clipboard Link Instead", icon: Icon.Clipboard },
+};
+
+const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) => void) => {
   if (!data) return undefined;
 
-  const useNowPlaying = (data.mode === "to-qobuz" || data.mode === "from-qobuz") &&
-    data.source === "clipboard" &&
-    data.nowPlayingId !== undefined && (
-      <Action title="Use Now Playing Instead" icon={Icon.Music} onAction={onUseNowPlaying} />
-    );
+  const alternative = data.mode === "to-qobuz" || data.mode === "from-qobuz" ? data.alternative : undefined;
+  const switchAction = alternative && (
+    <Action
+      title={SWITCH_ACTION[alternative].title}
+      icon={SWITCH_ACTION[alternative].icon}
+      onAction={() => onSwitch(alternative)}
+    />
+  );
 
   if (data.mode === "to-qobuz" && data.track) {
     const trackUrl = deepLink.track(data.track.id);
@@ -165,7 +163,7 @@ const renderActions = (data: Conversion | undefined, onUseNowPlaying: () => void
         <Action.OpenInBrowser title="Open in Browser" url={trackUrl} />
         <Action.Open title="Play Track in Qobuz" target={appLink.track(data.track.id)} icon={Icon.Play} />
         <Action.CopyToClipboard title="Copy Qobuz Link" content={trackUrl} />
-        {useNowPlaying}
+        {switchAction}
       </ActionPanel>
     );
   }
@@ -179,7 +177,7 @@ const renderActions = (data: Conversion | undefined, onUseNowPlaying: () => void
           icon={Icon.MagnifyingGlass}
           url={`https://open.qobuz.com/search/${encodeURIComponent(q)}`}
         />
-        {useNowPlaying}
+        {switchAction}
       </ActionPanel>
     );
   }
@@ -199,7 +197,7 @@ const renderActions = (data: Conversion | undefined, onUseNowPlaying: () => void
         />
         {data.deezerUrl && <Action.OpenInBrowser title="Open on Deezer" url={data.deezerUrl} />}
         <Action.CopyToClipboard title="Copy Artist & Title" content={data.query} />
-        {useNowPlaying}
+        {switchAction}
       </ActionPanel>
     );
   }

@@ -2,7 +2,7 @@
 
 ## [Now Playing fallback] - {PR_MERGE_DATE}
 
-- Convert Track Link: when the clipboard holds no usable track link, convert the track Qobuz is currently on instead; a "Use Now Playing Instead" action switches to it when both are available
+- Convert Track Link: convert the track Qobuz is currently on, falling back to a track link on the clipboard; when both are available, an action switches to the other one
 - Convert Track Link: show where the input came from (clipboard or Qobuz) in the metadata
 - Convert Track Link: show the "Nothing to convert" hint when the clipboard is empty instead of a blank view
 
