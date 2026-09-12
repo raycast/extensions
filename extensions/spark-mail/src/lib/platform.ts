@@ -1,8 +1,10 @@
-import { join } from "node:path";
+import { win32 } from "node:path";
 
 /**
  * Where to look for the Spark CLI on a given platform. Pure so it can be unit
- * tested without touching the real filesystem or environment.
+ * tested without touching the real filesystem or environment. Windows dirs are
+ * joined with `path.win32` so the result is Windows-shaped even when the test
+ * suite runs on macOS.
  */
 export function sparkSearch(
   platform: NodeJS.Platform,
@@ -12,7 +14,7 @@ export function sparkSearch(
     return {
       bin: "spark.exe",
       dirs: [
-        join(
+        win32.join(
           env.LOCALAPPDATA ?? "",
           "Programs",
           "SparkDesktop",
