@@ -1,4 +1,19 @@
 import { DataPoint } from "../types";
+import { LINE_COLOR_HEX } from "../constants";
+
+/**
+ * Resolves a line color to something an SVG renderer understands.
+ * Raycast `Color` tokens ("raycast-yellow", ...) are mapped to hex values;
+ * anything else (hex, rgb(), named colors) is passed through untouched.
+ */
+export function resolveLineColor(
+  lineColor: string,
+  theme: "light" | "dark" | null,
+): string {
+  const mapped = LINE_COLOR_HEX[lineColor];
+  if (!mapped) return lineColor;
+  return theme === "dark" ? mapped.dark : mapped.light;
+}
 
 export function renderGraphToSVG(
   expression: string,
@@ -18,6 +33,7 @@ export function renderGraphToSVG(
   const gridColor =
     theme === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
   const textColor = theme === "dark" ? "#FFFFFF" : "#000000";
+  const strokeColor = resolveLineColor(lineColor, theme);
 
   const [xMin, xMax] = xDomain;
   const [yMin, yMax] = yDomain;
@@ -80,7 +96,7 @@ export function renderGraphToSVG(
           })
           .join(" ");
 
-        return `<path d="${pathData}" stroke="${lineColor}" stroke-width="2" fill="none" />`;
+        return `<path d="${pathData}" stroke="${strokeColor}" stroke-width="2" fill="none" />`;
       })
       .filter((p) => p !== "");
 
