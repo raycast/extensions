@@ -37,6 +37,16 @@ export default async function Command(): Promise<StorageInfo> {
       freeBytes = info.free * 1e9;
     }
 
+    if (totalBytes <= 0) {
+      return {
+        total: "Unavailable",
+        used: "Unavailable",
+        free: "Unavailable",
+        percentUsed: "Unavailable",
+        summary: "Storage information unavailable",
+      };
+    }
+
     const totalFormatted = formatStorage(totalBytes);
     const usedFormatted = formatStorage(usedBytes);
     const freeFormatted = formatStorage(freeBytes);
