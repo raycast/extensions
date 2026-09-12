@@ -1,6 +1,6 @@
 # Qobuz Changelog
 
-## [Now Playing fallback] - {PR_MERGE_DATE}
+## [Now Playing fallback] - 2026-09-12
 
 - Convert Track Link: convert the track Qobuz is currently on, falling back to a track link on the clipboard; when both are available, an action switches to the other one
 - Convert Track Link: accept an optional track link as a command argument, which takes precedence over both
