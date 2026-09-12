@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Vibe Prospecting MCP Server] - {PR_MERGE_DATE}
+## [Add Vibe Prospecting MCP Server] - 2026-09-12
 
 - Add Vibe Prospecting to the community registry for B2B company and contact intelligence in prospecting workflows. Connects to the remote OAuth MCP server through `mcp-remote`.
 
