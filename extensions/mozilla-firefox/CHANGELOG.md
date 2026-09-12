@@ -1,5 +1,15 @@
 # Mozilla Firefox Changelog
 
+## [Live Bookmarks & Search Fixes] - 2026-09-12
+
+- Search Bookmarks now reads live from `moz_bookmarks` in `places.sqlite` instead of the daily `bookmarkbackups` lz4 file, so new bookmarks show up immediately
+- Search History hides redirect artifacts (`hidden = 0`) and entries that were never visited
+- Search History and Search Bookmarks match the query against the URL as well as the title
+- Fixed history entries being grouped under the wrong day when the UTC and local dates differ
+- Tag assignments are excluded from Search Bookmarks, so tagged URLs no longer appear once per tag
+- Search terms containing a single quote no longer break the SQL query, and `%` / `_` are matched literally instead of acting as wildcards
+- Removed the built-in lz4 decoder and the "no bookmarks" error view, which are no longer needed
+
 ## [Windows Support] - 2026-09-09
 
 - Added Windows support for all three commands: New Tab, Search History, Search Bookmarks
