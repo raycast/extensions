@@ -1,8 +1,7 @@
-import fetch from "node-fetch";
 import { LocalStorage } from "@raycast/api";
-import moment from "moment";
-
+import { differenceInMilliseconds, format, isBefore, isSameDay, parse } from "date-fns";
 import humanizeDuration from "humanize-duration";
+import { DEFAULT_ZONE_ID, fetchResource, loadCached } from "./loaders";
 
 const humanizer = humanizeDuration.humanizer({
   language: "shortEn",
@@ -22,7 +21,7 @@ const humanizer = humanizeDuration.humanizer({
 
 export interface PrayerTimeItem {
   label: string;
-  time: moment.Moment;
+  time: Date;
   value: string;
   different: string;
   isCurrent: boolean;
@@ -55,7 +54,7 @@ const prayerNameMap: Map<PrayerKey, string> = new Map<PrayerKey, string>([
   ["isha", `Isya`],
 ]);
 
-export interface SolatApiData {
+interface SolatApiData {
   prayerTime: PrayerTime[];
   status: string;
   serverTime: string;
@@ -65,44 +64,19 @@ export interface SolatApiData {
   bearing: string;
 }
 
-export async function fetchSolatData(zoneId = "WLY01"): Promise<SolatApiData | undefined> {
-  console.log("fetch prayer times for", zoneId);
+async function fetchSolatData(zoneId = DEFAULT_ZONE_ID): Promise<SolatApiData | undefined> {
+  console.log("Fetching prayer times for", zoneId);
   const url = `https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=year&zone=${zoneId}`;
-  try {
-    const res = await fetch(url);
-    return (await res.json()) as SolatApiData;
-  } catch (e) {
-    console.error("failed to retrieve prayer times", e);
-  }
-  return;
+  return fetchResource(url, "Unable to load prayer times", async (response) => (await response.json()) as SolatApiData);
 }
 
-export async function loadSolatData(zoneId = "WLY01") {
-  const CACHE_KEY = `prayer-time-${zoneId}-${new Date().getFullYear()}`;
-  const raw = (await LocalStorage.getItem(CACHE_KEY)) as string;
-  if (raw) {
-    try {
-      return JSON.parse(raw as string) as SolatApiData;
-    } catch (e) {
-      // noinspection ES6MissingAwait
-      LocalStorage.removeItem(CACHE_KEY);
-    }
-  }
-  const res = await fetchSolatData(zoneId);
-  if (res) {
-    // noinspection ES6MissingAwait
-    LocalStorage.setItem(CACHE_KEY, JSON.stringify(res));
-    return res;
-  }
-  return;
+async function loadSolatData(zoneId = DEFAULT_ZONE_ID, shouldRefresh = false) {
+  const cacheKey = `prayer-time-${zoneId}-${new Date().getFullYear()}`;
+  return loadCached(cacheKey, () => fetchSolatData(zoneId), shouldRefresh);
 }
 
-function getDiffSec(time: moment.Moment) {
-  return time.diff(moment(), "ms");
-}
-
-export function getHumanDifferent(time: any) {
-  return `in ${humanizer(getDiffSec(moment(time)), {
+function getHumanDifferent(time: Date) {
+  return `in ${humanizer(differenceInMilliseconds(time, new Date()), {
     round: true,
     conjunction: " and ",
     serialComma: false,
@@ -110,39 +84,46 @@ export function getHumanDifferent(time: any) {
   })}`;
 }
 
-export async function loadTodaySolat(zoneId: string): Promise<PrayerTime | undefined> {
-  const data = await loadSolatData(zoneId);
+export async function loadTodaySolat(zoneId: string, shouldRefresh = false): Promise<PrayerTime | undefined> {
+  const data = await loadSolatData(zoneId, shouldRefresh);
 
   return data?.prayerTime
     ?.filter((t) => {
-      const input = moment(t.date, "DD-MMM-YYYY");
-      const currentDate = moment();
-      return currentDate.isSame(input, "date");
+      const input = parse(t.date, "dd-MMM-yyyy", new Date());
+      return isSameDay(new Date(), input);
     })
     .map((t) => {
       const keys: PrayerKey[] = ["imsak", "fajr", "syuruk", "dhuhr", "asr", "maghrib", "isha"];
+
       t.items = keys.map((key) => {
         const value: string = t[key as PrayerKey] as string;
-        const time = moment(value, "HH:mm:ss");
+        const time = parse(value, "HH:mm:ss", new Date());
+
         return {
-          value: time.format("hh:mm A"),
+          value: format(time, "hh:mm a"),
           label: prayerNameMap.get(key)!,
           different: `${getHumanDifferent(time)}`,
           time,
         } as PrayerTimeItem;
       });
-      const current = t.items
-        .slice()
-        .reverse()
-        .find((item, i) => moment().isSameOrAfter(item.time) || (t.items && i == t.items?.length - 1));
+
+      const current = t.items.findLast((item) => !isBefore(new Date(), item.time)) ?? t.items[0];
+
       if (current) {
         current.isCurrent = true;
         const currentIndex = t.items.indexOf(current);
+
         if (t.items.length > 1) {
           t.items[currentIndex + 1 < t.items.length ? currentIndex + 1 : 0].isNext = true;
         }
       }
+
       return t;
     })
     .find(Boolean);
+}
+
+export async function loadStoredPrayerTime(): Promise<{ zoneId: string; prayerTime: PrayerTime | undefined }> {
+  const zoneId = (await LocalStorage.getItem<string>("zone")) || DEFAULT_ZONE_ID;
+  return { zoneId, prayerTime: await loadTodaySolat(zoneId) };
 }
