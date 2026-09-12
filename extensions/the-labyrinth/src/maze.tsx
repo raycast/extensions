@@ -37,6 +37,9 @@ const FAST_STEP_MS = 70;
 const HELD_KEY_GAP_MS = 260;
 const CATCH_ANIM_MS = 780;
 
+/** Human-readable movement shortcut for the current OS (matches `moveShortcut`). */
+const MOVE_KEYS_LABEL = process.platform === "win32" ? "Ctrl + Arrow Keys" : "⌘ + Arrow Keys";
+
 /** Theme-aware sidebar colors (Raycast adapts these to light/dark appearance). */
 const RANK_COLOR: Record<Rank, Color> = {
   CHAOS: Color.Red,
@@ -645,7 +648,7 @@ Press ⏎ to descend to Level ${game.level + 1}.`;
       : `**${score} pts** · 💎 ${game.gemTotal - game.gems.length}/${game.gemTotal}${game.needsKey ? ` · ${game.hasKey ? "🔑" : "🔒"}` : ""}${game.fogRadius !== null ? ` · ${game.lit ? "🕯️" : "🌑"}` : ""}${game.ice ? " · 🧊" : ""}${game.shifting ? " · 🧱" : ""}${game.trailLife !== null ? " · 🐾" : ""} · ${game.moves} moves\n\n`;
     statusBlock = `${hudLine}## Level ${game.level}
 
-Move with **⌘ + Arrow Keys** — ${objectives.join(" · ")}`;
+Move with **${MOVE_KEYS_LABEL}** — ${objectives.join(" · ")}`;
   }
 
   const markdown = introing
@@ -705,7 +708,7 @@ ${statusBlock}`;
               title="Best"
               text={best.level > 0 ? `Level ${best.level} · ${best.score} pts` : "—"}
             />
-            <Detail.Metadata.Label title="Move" text={introing ? "Press ⏎ to start" : "⌘ + Arrow Keys"} />
+            <Detail.Metadata.Label title="Move" text={introing ? "Press ⏎ to start" : MOVE_KEYS_LABEL} />
           </Detail.Metadata>
         ) : undefined
       }

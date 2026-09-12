@@ -1,6 +1,6 @@
 # The Labyrinth Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Endless procedurally generated maze levels rendered as SVG
 - Keys, gems, ghosts, portals, fog, icy floors, shifting walls and fading footprints unlock as you descend
