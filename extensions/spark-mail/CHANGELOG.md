@@ -1,6 +1,6 @@
 # Spark Mail Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-09-12
 
 - Added Windows support: finds `spark.exe` in the Spark Desktop install folder or on `PATH`, handles CRLF output, and cleans URL-encoded line breaks out of Spark deep links
 - "Show Attachments in Finder" now uses the built-in action, so it reads "Show in Explorer" on Windows
