@@ -101,7 +101,7 @@ export const learnedPackages = (commands: ScriptCommand[]) => {
   return learned;
 };
 
-/** Walks up the domain, so `sonymusic-pde.datadoghq.com` finds what `datadoghq.com` was filed under. */
+/** Walks up the domain, so `app.raindrop.io` finds what `raindrop.io` was filed under. */
 export const packageForTarget = (target: string, learned: Map<string, string>) => {
   const host = hostOf(target);
   if (!host) return undefined;
