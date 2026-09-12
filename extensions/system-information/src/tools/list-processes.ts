@@ -34,7 +34,7 @@ export default async function Command(): Promise<ProcessListResult> {
     };
   } catch (error) {
     throw new Error(
-      `Failed to retrieve process information: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to retrieve process information: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
