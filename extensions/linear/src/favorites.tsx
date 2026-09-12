@@ -7,6 +7,7 @@ import { getFavorites } from "./api/favorites";
 import OpenInLinear from "./components/OpenInLinear";
 import View from "./components/View";
 import { formatCycle } from "./helpers/cycles";
+import { getLabelOpenProps } from "./helpers/favorites";
 import { getIcon } from "./helpers/icons";
 import { getInitiativeIcon } from "./helpers/initiatives";
 import { getProjectIcon } from "./helpers/projects";
@@ -95,14 +96,7 @@ function Favorites() {
               title: label.name,
             };
 
-            // Workspace-level labels aren't tied to a team, so they have no
-            // team-scoped URL to open.
-            if (label.team) {
-              openInLinearProps = {
-                title: "Open Label",
-                url: baseLinearUrl + `/team/${label.team.key}/label/${label.name}`,
-              };
-            }
+            openInLinearProps = getLabelOpenProps(baseLinearUrl, label);
           }
 
           if (type === "project" && project) {
