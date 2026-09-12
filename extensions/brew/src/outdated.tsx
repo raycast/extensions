@@ -4,10 +4,9 @@
  *
  * The list opens with everything not pinned selected — exactly what a plain
  * `brew upgrade` would do — so running immediately is equivalent to Upgrade
- * All. A pin is a lock, matching brew's own behaviour: pinned formulae cannot
+ * All. A pin is a lock, matching brew's own behaviour: a pinned package cannot
  * be selected, and upgrading one means unpinning it first, which selects it.
- * Casks carry no pin state before Homebrew 6, so every cask is simply
- * selectable.
+ * Formulae and casks behave identically here.
  * Upgrades are reported via the toast/HUD, with the icon of each item
  * reflecting its selection and upgrade status.
  */
@@ -18,6 +17,8 @@ import {
   upgradeKey,
   type OutdatedCask,
   type OutdatedFormula,
+  type OutdatedResults,
+  type PinKind,
   type UpgradePackage,
   type UpgradePackageStatus,
 } from "./utils";
@@ -46,9 +47,15 @@ import { OutdatedList, statusIcon } from "./components/outdatedList";
 // and a selection that shares it makes the post-run list (kept open unless
 // the closeAfterAction preference is set) unreadable — "chosen for the next
 // run" and "done in the last run" must not look identical.
-const INCLUDED_ICON = { source: Icon.CheckCircle, tintColor: Color.Blue };
-const EXCLUDED_ICON = { source: Icon.Circle, tintColor: Color.SecondaryText };
-const PINNED_ICON = { source: Icon.Tack, tintColor: Color.SecondaryText };
+// Included and excluded are two states of one control, so they share a tint and
+// differ only in glyph — two different greys read as two unrelated things.
+// Blue means "in progress" in the icon vocabulary (see packageIcons.ts), so the
+// neutral primary tint is what is left for a selection.
+const SELECTION_TINT = Color.PrimaryText;
+const INCLUDED_ICON = { source: Icon.CheckCircle, tintColor: SELECTION_TINT };
+const EXCLUDED_ICON = { source: Icon.CircleDisabled, tintColor: SELECTION_TINT };
+// A pinned row is excluded too — the pin accessory is what says why.
+const PINNED_ICON = EXCLUDED_ICON;
 
 function ShowUpgradesContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
@@ -90,8 +97,7 @@ function ShowUpgradesContent() {
   const reviewPackages = useMemo<SelectablePackage[]>(() => {
     const fetched: SelectablePackage[] = [
       ...(reviewSource?.formulae ?? []).map((f) => ({ kind: "formula" as const, name: f.name, pinned: f.pinned })),
-      // Casks carry no pin state before Homebrew 6 — plainly selectable
-      ...(reviewSource?.casks ?? []).map((c) => ({ kind: "cask" as const, name: c.name })),
+      ...(reviewSource?.casks ?? []).map((c) => ({ kind: "cask" as const, name: c.name, pinned: c.pinned })),
     ];
     return applyPinOverrides(fetched, pinOverrides);
   }, [reviewSource, pinOverrides]);
@@ -101,7 +107,14 @@ function ShowUpgradesContent() {
     if (!data) return;
     setPinOverrides((previous) => {
       if (previous.size === 0) return previous;
-      const fetched = data.formulae.map((f) => ({ kind: "formula" as const, name: f.name, pinned: f.pinned }));
+      // Both kinds, or confirmedPinOverrides reads every cask as "no longer
+      // outdated" and retires its override on the next fetch — handing authority
+      // back to a possibly stale `pinned` and undoing the race protection the
+      // overrides exist to provide.
+      const fetched = [
+        ...data.formulae.map((f) => ({ kind: "formula" as const, name: f.name, pinned: f.pinned })),
+        ...data.casks.map((c) => ({ kind: "cask" as const, name: c.name, pinned: c.pinned })),
+      ];
       const retired = confirmedPinOverrides(fetched, previous);
       if (retired.length === 0) return previous;
       const next = new Map(previous);
@@ -159,10 +172,10 @@ function ShowUpgradesContent() {
   );
 
   const handlePinChange = useCallback(
-    async (formula: OutdatedFormula, pinned: boolean) => {
-      const ok = pinned ? await pin(formula) : await unpin(formula);
+    async (item: OutdatedCask | OutdatedFormula, kind: PinKind, pinned: boolean) => {
+      const ok = pinned ? await pin(item, kind) : await unpin(item, kind);
       if (!ok) return;
-      const key = selectionKey("formula", formula.name);
+      const key = selectionKey(kind, item.name);
       setPinOverrides((previous) => new Map(previous).set(key, pinned));
       setSelection(applyPinChange(reviewSelection, key, pinned));
       revalidate();
@@ -175,10 +188,8 @@ function ShowUpgradesContent() {
       const state = upgrade.states.get(upgradeKey({ name: item.name, isCask }));
       if (state) return statusIcon(state);
       const key = selectionKey(isCask ? "cask" : "formula", item.name);
-      if (!isCask) {
-        const pinned = pinOverrides.get(key) ?? (item as OutdatedFormula).pinned;
-        if (pinned) return { value: PINNED_ICON, tooltip: "Pinned — unpin to include" };
-      }
+      const pinned = pinOverrides.get(key) ?? item.pinned;
+      if (pinned) return { value: PINNED_ICON, tooltip: "Pinned — unpin to include" };
       if (reviewSelection.get(key) !== true) {
         return { value: EXCLUDED_ICON, tooltip: upgrade.isUpgrading ? "Not in this upgrade" : "Excluded from upgrade" };
       }
@@ -190,21 +201,27 @@ function ShowUpgradesContent() {
   const actions = useCallback(
     (item: OutdatedCask | OutdatedFormula, isCask: boolean) => {
       if (upgrade.isUpgrading) {
-        return <UpgradingActionPanel outdated={item} onCancel={upgrade.cancel} />;
+        return (
+          <UpgradingActionPanel
+            outdated={item}
+            pinned={(pinOverrides.get(selectionKey(isCask ? "cask" : "formula", item.name)) ?? item.pinned) === true}
+            onCancel={upgrade.cancel}
+          />
+        );
       }
       const key = selectionKey(isCask ? "cask" : "formula", item.name);
       return (
         <ReviewActionPanel
           outdated={item}
           isCask={isCask}
-          pinned={!isCask && (pinOverrides.get(key) ?? (item as OutdatedFormula).pinned) === true}
+          pinned={(pinOverrides.get(key) ?? item.pinned) === true}
           included={reviewSelection.get(key) === true}
           runTitle={selectedCount > 0 ? runTitle : undefined}
           allSelected={allSelected}
           onToggle={() => toggle(key)}
           onToggleAll={toggleAll}
           onStart={startUpgrade}
-          onPinChange={(pinned) => handlePinChange(item as OutdatedFormula, pinned)}
+          onPinChange={(pinned) => handlePinChange(item, isCask ? "cask" : "formula", pinned)}
           onUpgrade={(status) => upgrade.setPackageState({ name: item.name, isCask }, { status })}
           onAction={handleAction}
         />
@@ -225,9 +242,18 @@ function ShowUpgradesContent() {
     ],
   );
 
+  // The list partitions rows into Pinned sections and draws the tack from each
+  // item's own `pinned`, so it needs the same effective state the icons and
+  // actions use — otherwise a just-pinned package sits in the wrong section,
+  // with the wrong accessory, until a refetch lands (or forever, if it fails).
+  const listSource = applyPinOverridesToResults(
+    upgrade.isUpgrading ? (upgrade.outdated ?? data) : (data ?? upgrade.outdated),
+    pinOverrides,
+  );
+
   return (
     <OutdatedList
-      outdated={upgrade.isUpgrading ? (upgrade.outdated ?? data) : (data ?? upgrade.outdated)}
+      outdated={listSource}
       isLoading={isLoading || isRefreshing || upgrade.isUpgrading}
       filterType={filter}
       searchBarPlaceholder={upgrade.isUpgrading ? "Upgrading…" : undefined}
@@ -258,6 +284,34 @@ async function showInstalled() {
   } catch {
     await showToast({ style: Toast.Style.Failure, title: "Could Not Open Show Installed" });
   }
+}
+
+/**
+ * A copy of the outdated results with locally made pin changes applied, so the
+ * list renders the same pin state the icons and action guards already use.
+ *
+ * Returns the input untouched when there is nothing to override, keeping the
+ * object identity React memoization depends on, and never mutates it: the same
+ * payload is held by the fetch cache and the upgrade engine's snapshot.
+ */
+function applyPinOverridesToResults(
+  results: OutdatedResults | undefined,
+  overrides: ReadonlyMap<string, boolean>,
+): OutdatedResults | undefined {
+  if (!results || overrides.size === 0) {
+    return results;
+  }
+  const withOverride = <T extends { name: string; pinned: boolean }>(kind: PinKind, items: T[]): T[] =>
+    items.map((item) => {
+      const pinned = overrides.get(selectionKey(kind, item.name));
+      return pinned === undefined || pinned === item.pinned ? item : { ...item, pinned };
+    });
+
+  return {
+    ...results,
+    formulae: withOverride("formula", results.formulae),
+    casks: withOverride("cask", results.casks),
+  };
 }
 
 function ReviewActionPanel(props: {
@@ -291,7 +345,7 @@ function ReviewActionPanel(props: {
   const toggleAllAction = (
     <Action
       title={props.allSelected ? "Deselect All" : "Select All"}
-      icon={props.allSelected ? Icon.Circle : Icon.CheckCircle}
+      icon={props.allSelected ? Icon.CircleDisabled : Icon.CheckCircle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
       onAction={props.onToggleAll}
     />
@@ -304,7 +358,7 @@ function ReviewActionPanel(props: {
       <ActionPanel>
         <ActionPanel.Section>
           <Action
-            title="Unpin and Select"
+            title={props.isCask ? "Unpin Cask and Include" : "Unpin Formula and Include"}
             icon={Icon.TackDisabled}
             shortcut={Keyboard.Shortcut.Common.Pin}
             onAction={() => props.onPinChange(false)}
@@ -312,11 +366,17 @@ function ReviewActionPanel(props: {
           {runAction}
           {toggleAllAction}
         </ActionPanel.Section>
+        {/* Pinned: no single-package upgrade and no upgrade command — brew
+            refuses an explicitly named pinned package outright. */}
         <OutdatedActionSections
           outdated={props.outdated}
+          isCask={props.isCask}
+          pinned
           onUpgrade={props.onUpgrade}
           onAction={props.onAction}
           omitPin
+          omitUpgrade
+          omitUpgradeCommand
         />
       </ActionPanel>
     );
@@ -327,23 +387,27 @@ function ReviewActionPanel(props: {
       <ActionPanel.Section>
         <Action
           title={props.included ? "Exclude from Upgrade" : "Include in Upgrade"}
-          icon={props.included ? Icon.Circle : Icon.CheckCircle}
+          icon={props.included ? Icon.CircleDisabled : Icon.CheckCircle}
           onAction={props.onToggle}
         />
         {runAction}
         {toggleAllAction}
-        {/* Selection-aware pin: pinning locks the formula out of the run.
-            Formulae only — casks cannot be pinned before Homebrew 6. */}
-        {!props.isCask && (
-          <Action
-            title="Pin"
-            icon={Icon.Tack}
-            shortcut={Keyboard.Shortcut.Common.Pin}
-            onAction={() => props.onPinChange(true)}
-          />
-        )}
+        {/* Selection-aware pin: pinning locks the package out of the run. */}
+        <Action
+          title={props.isCask ? "Pin Cask" : "Pin Formula"}
+          icon={Icon.Tack}
+          shortcut={Keyboard.Shortcut.Common.Pin}
+          onAction={() => props.onPinChange(true)}
+        />
       </ActionPanel.Section>
-      <OutdatedActionSections outdated={props.outdated} onUpgrade={props.onUpgrade} onAction={props.onAction} omitPin />
+      <OutdatedActionSections
+        outdated={props.outdated}
+        isCask={props.isCask}
+        pinned={props.pinned}
+        onUpgrade={props.onUpgrade}
+        onAction={props.onAction}
+        omitPin
+      />
     </ActionPanel>
   );
 }

@@ -7,6 +7,17 @@
 - A list row leads with the command's name and carries its host in the subtitle, rather than the other way round. Leading with the host is right in Raycast's own launcher, where a row appears among apps and extensions and the domain says _this opens a browser_ before anything else is read — but in a list where every row is already a link command that signal fires on all of them and distinguishes none, while spending the front of the only column that can differ. Several commands on one service shared their leading characters and rendered as near-identical rows. The host is not lost: it moves to the subtitle, where it answers _is this the one I want_ instead. A title that is only a host keeps it, and shows its package in the subtitle as before — as does a command with no icon, since the mark is what normally names the brand and a row without one has nothing else carrying it.
 - Nothing searchable changed. The full title, the filename and the package name are all still matched, so every command is found by exactly what found it before.
 
+## [Sigils and Shared Icons] - 2026-09-12
+
+### Fixed
+
+- A `@scope` or `#category` typed into **Package** now moves to the control that owns it, instead of being taken as part of the brand. `Linear · @work` used to make a brand called literally that: it slugged into `linear-work.my-issues.sh` rather than `work.linear.my-issues.sh`, and the list read it back as a brand rather than a scope. A control you have already set is never overridden — a conflicting sigil is reported as dropped instead — and the move is confirmed in a line beneath the field, because the filename preview shows the outcome but never the edit.
+- Icons are stored under the package rather than the command, and an icon already in your script directory is used before the network is asked. A private or intranet host is invisible to any public favicon service, so a command for one fell back to a generic link glyph even when the right mark was already sitting beside it; storing per command also re-fetched the same image for every new command of a service.
+
+### Changed
+
+- Example values in source comments are neutral placeholders rather than names taken from one contributor's own command collection.
+
 ## [Surface Routers] - 2026-08-30
 
 ### Added

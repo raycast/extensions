@@ -172,7 +172,7 @@ function DataFeedsAPIDetail({ data, hasJsonLd, isChallengePage }: DataFeedsAPIDe
             />
           )}
           {hasJsonLd && metadata!.jsonLd!.length > 3 && (
-            <List.Item.Detail.Metadata.Label title="" text={`...and ${metadata!.jsonLd!.length - 3} more`} />
+            <List.Item.Detail.Metadata.Label title={`…and ${metadata!.jsonLd!.length - 3} more`} />
           )}
 
           {/* host-meta was fetched and cached but rendered nowhere, so its data
@@ -206,7 +206,7 @@ function DataFeedsAPIDetail({ data, hasJsonLd, isChallengePage }: DataFeedsAPIDe
                 />
               ))}
               {hostMetadata.links && hostMetadata.links.length > 3 && (
-                <List.Item.Detail.Metadata.Label title="" text={`...and ${hostMetadata.links.length - 3} more`} />
+                <List.Item.Detail.Metadata.Label title={`…and ${hostMetadata.links.length - 3} more`} />
               )}
               {!hostMetadata.links?.length && <List.Item.Detail.Metadata.Label title="" text="No links declared" />}
             </>

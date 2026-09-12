@@ -1,44 +1,31 @@
 import { Color, Icon } from "@raycast/api";
 import { Task } from "./types";
 
+export const defaultListKey = "task-default-list-v1";
+
 export function isCompleted(task: Task): boolean {
-  if (task.status === "completed") {
-    return true;
-  } else {
-    return false;
-  }
+  return task.status === "completed";
 }
 
-export function getChildren(parent: Task, tasks: Task[]): Task[] {
-  const children: Task[] = tasks.filter(function (task) {
-    return task.parent == parent.id;
-  });
-  return children;
+export function dueDay(value?: string): string | undefined {
+  return value?.slice(0, 10);
 }
 
-export function getIdNames(tasks: Task[]): { [key: string]: string } {
-  const id_names: { [key: string]: string } = {};
-  for (let index = 0; index < tasks.length; index++) {
-    const element = tasks[index];
-    id_names[element.id] = element.title;
-  }
-  return id_names;
+export function todayValue(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
 }
 
 export function getIcon(task: Task): { source: Icon; tintColor?: Color } {
-  const due_date = task.due === undefined ? new Date() : new Date(task.due);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  // Due
-  if (!isCompleted(task) && due_date < today) {
+  const completed = isCompleted(task);
+  const due = dueDay(task.due);
+  if (!completed && due && due < todayValue()) {
     return { source: Icon.Circle, tintColor: Color.Red };
   }
-  // Completed
-  else if (isCompleted(task)) {
+  if (completed) {
     return { source: Icon.Checkmark, tintColor: Color.Green };
   }
-  // Uncomplete
-  else {
-    return { source: Icon.Circle };
-  }
+  return { source: Icon.Circle };
 }

@@ -4,7 +4,7 @@
  * Provides functions for displaying toast notifications.
  */
 
-import { Clipboard, Toast, showHUD } from "@raycast/api";
+import { Clipboard, Toast, showHUD, showToast } from "@raycast/api";
 import { ExecError } from "./types";
 import { uiLogger } from "./logger";
 import { isRecoverableError, getErrorMessage, isBrewLockError } from "./errors";
@@ -34,6 +34,26 @@ export interface ActionToastHandle {
   showFailureHUD: (message: string) => Promise<void>;
   /** Hide the toast */
   hide: () => void;
+}
+
+/**
+ * Finish an in-progress action toast.
+ *
+ * Raycast's toast update/hide messages carry no toast id: they act on whichever
+ * toast is currently on screen. Mutating the animated toast in place therefore
+ * risks leaving its "Cancel" action attached to a finished operation. Showing a
+ * fresh toast makes that structurally impossible: `showToast` replaces the
+ * visible toast outright, so it needs no `hide()` first — and adding one would
+ * open an `await` gap in which another writer could claim the slot.
+ */
+async function settle(toast: Toast, style: Toast.Style, title: string, hudMessage: string): Promise<void> {
+  if (preferences.closeAfterAction) {
+    // Close window and show HUD. Dismissal is best-effort: it must not gate the HUD.
+    toast.hide().catch((err) => uiLogger.log("Failed to hide action toast", err));
+    await showHUD(hudMessage);
+  } else {
+    await showToast({ style, title });
+  }
 }
 
 /**
@@ -72,30 +92,10 @@ export function showActionToast(actionOptions: ActionToastOptions): ActionToastH
       toast.title = title;
     },
     showSuccessHUD: async (message: string) => {
-      if (preferences.closeAfterAction) {
-        toast.hide();
-        // Close window and show HUD
-        await showHUD(`✅ ${message}`);
-      } else {
-        // Keep window open - update existing toast in-place to avoid stale detail HUD
-        toast.style = Toast.Style.Success;
-        toast.title = message;
-        toast.message = undefined;
-        toast.primaryAction = undefined;
-      }
+      await settle(toast, Toast.Style.Success, message, `✅ ${message}`);
     },
     showFailureHUD: async (message: string) => {
-      if (preferences.closeAfterAction) {
-        toast.hide();
-        // Close window and show HUD
-        await showHUD(`❌ ${message}`);
-      } else {
-        // Keep window open - update existing toast in-place to avoid stale detail HUD
-        toast.style = Toast.Style.Failure;
-        toast.title = message;
-        toast.message = undefined;
-        toast.primaryAction = undefined;
-      }
+      await settle(toast, Toast.Style.Failure, message, `❌ ${message}`);
     },
     hide: () => {
       toast.hide();

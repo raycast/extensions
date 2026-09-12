@@ -1,8 +1,7 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { AlbumList, AlbumTrackList, PlaylistTrackList } from "./browse-media";
-import { formatTrackDisplayTitle, getTrackRatingDisplayMode } from "./format";
+import { AlbumList, AlbumTrackList, PlaylistTrackList, TrackRow } from "./browse-media";
 import { getAudioPlaylists, searchLibrary } from "./plex";
 import {
   NowPlayingAction,
@@ -11,7 +10,6 @@ import {
   albumAccessories,
   artworkSource,
   librarySetupDescription,
-  trackAccessories,
   usePlaybackActions,
 } from "./shared-ui";
 import { useAsyncValue } from "./use-async-value";
@@ -87,8 +85,6 @@ function SearchResultsList(props: {
   onPlayNext: (item: PlayableItem) => Promise<void>;
   onQueue: (item: PlayableItem) => Promise<void>;
 }) {
-  const ratingDisplayMode = getTrackRatingDisplayMode();
-
   return (
     <>
       {props.artists.length > 0 ? (
@@ -146,35 +142,15 @@ function SearchResultsList(props: {
 
       {props.tracks.length > 0 ? (
         <List.Section title="Songs">
-          {props.tracks.map((track) =>
-            (() => {
-              return (
-                <List.Item
-                  key={`track-${track.ratingKey}`}
-                  icon={artworkSource(track.thumb)}
-                  title={formatTrackDisplayTitle(track.title, {
-                    parentIndex: track.parentIndex,
-                    index: track.index,
-                    userRating: track.userRating,
-                    displayMode: ratingDisplayMode,
-                  })}
-                  subtitle={[track.grandparentTitle, track.parentTitle].filter(Boolean).join(" - ")}
-                  accessories={trackAccessories(track)}
-                  actions={
-                    <ActionPanel>
-                      <PlaybackActionItems
-                        item={track}
-                        onPlay={props.onPlay}
-                        onPlayNext={props.onPlayNext}
-                        onQueue={props.onQueue}
-                        nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })(),
-          )}
+          {props.tracks.map((track) => (
+            <TrackRow
+              key={track.ratingKey}
+              track={track}
+              onPlay={props.onPlay}
+              onPlayNext={props.onPlayNext}
+              onQueue={props.onQueue}
+            />
+          ))}
         </List.Section>
       ) : null}
 

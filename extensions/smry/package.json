@@ -1,0 +1,134 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "smry",
+  "title": "Smry",
+  "description": "Save browser tabs and links to your smry Inbox or Later list.",
+  "icon": "icon.png",
+  "author": "smry",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "bookmark",
+    "read later",
+    "articles",
+    "browser tabs",
+    "reading list"
+  ],
+  "preferences": [
+    {
+      "name": "defaultSaveStatus",
+      "title": "Default Destination",
+      "description": "Where Save Current Tab and the primary browser-tab action put articles.",
+      "type": "dropdown",
+      "required": false,
+      "default": "later",
+      "data": [
+        {
+          "title": "Later",
+          "value": "later"
+        },
+        {
+          "title": "Inbox",
+          "value": "inbox"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Create a private key in smry's Developer Console for silent, confirmed saves.",
+      "type": "password",
+      "required": true,
+      "placeholder": "smry_…"
+    }
+  ],
+  "commands": [
+    {
+      "name": "save-current-tab",
+      "title": "Save Current Tab",
+      "subtitle": "smry",
+      "description": "Save the active browser tab to your default smry destination",
+      "mode": "no-view",
+      "keywords": [
+        "bookmark",
+        "article",
+        "read later"
+      ]
+    },
+    {
+      "name": "browse-tabs",
+      "title": "Save Browser Tabs",
+      "subtitle": "smry",
+      "description": "Search open browser tabs and save one to smry",
+      "mode": "view",
+      "keywords": [
+        "article",
+        "read later",
+        "save tab"
+      ]
+    },
+    {
+      "name": "save-link",
+      "title": "Save Link",
+      "subtitle": "smry",
+      "description": "Save any public link to your smry Inbox or Later list",
+      "mode": "no-view",
+      "keywords": [
+        "url",
+        "bookmark",
+        "read later"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "destination",
+          "placeholder": "Destination",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Later",
+              "value": "later"
+            },
+            {
+              "title": "Inbox",
+              "value": "inbox"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "node --import tsx --test tests/**/*.test.ts"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

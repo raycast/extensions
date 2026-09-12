@@ -27,15 +27,6 @@ export class ProviderConfig {
 
   static volcanoSecretId = myPreferences.volcanoAccessKeyId?.trim();
   static volcanoSecretKey = myPreferences.volcanoAccessKeySecret?.trim();
-
-  static openAIAPIKey = myPreferences.openAIAPIKey?.trim();
-  static openAIEndpoint = myPreferences.openAIAPIURL.trim();
-  static openAIModel = myPreferences.openAIModel.trim();
-  static forceMaxCompletionTokens = myPreferences.forceMaxCompletionTokens;
-
-  static geminiAPIKey = myPreferences.geminiAPIKey?.trim();
-  static geminiEndpoint = myPreferences.geminiAPIURL.trim();
-  static geminiModel = myPreferences.geminiModel.trim();
 }
 
 export function hasBaiduAppKey(): boolean {

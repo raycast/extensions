@@ -48,8 +48,14 @@ export default function Command() {
     );
   }
 
-  const busy = status?.pools.reduce((n, p) => n + p.busy, 0) ?? 0;
-  const slots = status?.pools.reduce((n, p) => n + p.count, 0) ?? 0;
+  // A paused pool's slots are not enabled capacity. Counting them anyway
+  // dilutes the fraction: a pool that is fully busy reads as half-full the
+  // moment a sibling pool is paused, because its idle slots are still in the
+  // denominator. The mark should answer "how full is what's enabled", which
+  // means paused pools are excluded rather than counted as empty.
+  const activePools = status?.pools.filter((pool) => !pool.paused) ?? [];
+  const busy = activePools.reduce((n, p) => n + p.busy, 0);
+  const slots = activePools.reduce((n, p) => n + p.count, 0);
 
   // Monochrome by default, and deliberately untinted: a built-in icon left
   // alone is redrawn per display in that menu bar's own ink, which is the only

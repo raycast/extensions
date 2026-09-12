@@ -1,0 +1,158 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bitcoin-tools",
+  "version": "0.0.1",
+  "type": "module",
+  "title": "Bitcoin Tools",
+  "description": "Generate, convert, and inspect Bitcoin SV keys, addresses, scripts, transactions, and market data.",
+  "categories": [
+    "Developer Tools",
+    "Finance"
+  ],
+  "keywords": [
+    "bitcoin",
+    "bsv",
+    "wif",
+    "address",
+    "p2pkh",
+    "xpub",
+    "xpriv",
+    "transaction"
+  ],
+  "icon": "bitcoin-tools-app-icon.png",
+  "author": "satchmo",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "copy-address-from-wif",
+      "title": "Copy Address from WIF",
+      "description": "Convert a WIF private key to its BSV address and copy it to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "wif",
+          "description": "The WIF private key to convert",
+          "placeholder": "Enter WIF private key",
+          "type": "password",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "p2pkh-script-from-address",
+      "title": "Create P2PKH Script",
+      "description": "Create a Pay to Public Key Hash locking script from a BSV address",
+      "mode": "view"
+    },
+    {
+      "name": "address-from-pubkey-hash",
+      "title": "Create Address from Public Key Hash",
+      "description": "Create a BSV address from a 20-byte public key hash",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "pubkeyHash",
+          "description": "A 40-character hexadecimal public key hash",
+          "placeholder": "Enter public key hash",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "generate-address",
+      "title": "Generate BSV Address",
+      "description": "Generate a random BSV address and use the configured output behavior",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-xpub",
+      "title": "Generate BIP32 XPUB",
+      "description": "Generate a random BIP32 extended public key and use the configured output behavior",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-xpriv",
+      "title": "Generate BIP32 XPRIV",
+      "description": "Generate a random BIP32 extended private key and use the configured output behavior",
+      "mode": "no-view"
+    },
+    {
+      "name": "generate-private-key",
+      "title": "Generate Private Key (WIF)",
+      "description": "Generate a random WIF private key and use the configured output behavior",
+      "mode": "no-view"
+    },
+    {
+      "name": "decode-transaction",
+      "title": "Decode Transaction",
+      "description": "Decode a raw BSV transaction into a readable summary",
+      "mode": "view"
+    },
+    {
+      "name": "bsv-price-menu-bar",
+      "title": "BSV Price in Menu Bar",
+      "description": "See the current BSV price and block height in the menu bar",
+      "mode": "menu-bar",
+      "interval": "15m"
+    },
+    {
+      "name": "bitcoin-price",
+      "title": "View Bitcoin Price",
+      "subtitle": "BSV",
+      "description": "View current Bitcoin SV market and chain data",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@bsv/sdk": "^2.1.7",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "typecheck": "ray build -e dist && tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "copy",
+      "description": "Determines whether generated non-secret values are copied to the clipboard. WIF and XPRIV values are always copied.",
+      "type": "checkbox",
+      "default": true,
+      "required": true,
+      "title": "Copy Generated Values",
+      "label": "Copy"
+    },
+    {
+      "name": "insert",
+      "description": "Determines whether generated non-secret values are inserted into the currently focused app. WIF and XPRIV values are never inserted.",
+      "type": "checkbox",
+      "default": false,
+      "required": true,
+      "title": "Insert Generated Values",
+      "label": "Insert"
+    }
+  ]
+}

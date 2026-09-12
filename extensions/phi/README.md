@@ -9,7 +9,8 @@ Control [Phi Browser](https://phibrowser.com) directly from Raycast.
 - Activate, close, or reload tabs, and copy their URLs.
 - Run common page actions, including refresh, force refresh, manage extensions, and Split View.
 - Open new tabs in a selected Space.
-- Open a standard or incognito window.
+- Open standard, incognito, and Kiosk windows, with an optional URL for Kiosk.
+- Create and activate a new Incognito Space.
 
 ## Requirements
 

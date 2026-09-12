@@ -9,7 +9,8 @@
   "contributors": [
     "serhii_kravchenko",
     "Laptop765",
-    "kud"
+    "kud",
+    "BryanG02"
   ],
   "categories": [
     "Applications",
@@ -132,6 +133,7 @@
     "test:run": "vitest run"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

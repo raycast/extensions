@@ -1,7 +1,7 @@
 import { Action, ActionPanel, getPreferenceValues, Grid, Icon, LaunchProps, List, LocalStorage } from "@raycast/api";
 import { useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { formatTrackDisplayTitle, getTrackRatingDisplayMode } from "./format";
 import {
@@ -12,7 +12,11 @@ import {
   getTracksForAlbum,
   getTracksForPlaylist,
   getTracksPage,
+  resolveTrackAlbum,
+  resolveTrackArtist,
   searchLibrary,
+  type TrackAlbumTarget,
+  type TrackArtistTarget,
 } from "./plex";
 import {
   NowPlayingAction,
@@ -86,6 +90,29 @@ function useBrowseSearch(sectionKey: string | undefined, query: string): BrowseS
 }
 
 // ---------------------------------------------------------------------------
+// Shared: deferred list selection
+// ---------------------------------------------------------------------------
+
+// Raycast ignores a selectedItemId that arrives in the same update as the item it points at,
+// so the id is handed over one tick after the item is in the list. Once set it stays put: Raycast
+// only re-applies the prop when it changes, so the user's own selection moves are not overridden.
+function useDeferredSelection(items: { ratingKey: string }[], itemId?: string): string | undefined {
+  const [selectedItemId, setSelectedItemId] = useState<string>();
+  const isItemPresent = itemId !== undefined && items.some((item) => item.ratingKey === itemId);
+
+  useEffect(() => {
+    if (!itemId || !isItemPresent) {
+      return;
+    }
+
+    const timer = setTimeout(() => setSelectedItemId(itemId), 0);
+    return () => clearTimeout(timer);
+  }, [itemId, isItemPresent]);
+
+  return selectedItemId;
+}
+
+// ---------------------------------------------------------------------------
 // Shared: launch context
 // ---------------------------------------------------------------------------
 
@@ -93,6 +120,8 @@ interface BrowseLaunchContext {
   target?: "album" | "artist";
   ratingKey?: string;
   sectionKey?: string;
+  // The item to highlight in the target view: a track for "album", an album for "artist".
+  selectedRatingKey?: string;
 }
 
 function getBrowseNavigationTitle(libraryName: string, serverName?: string): string {
@@ -152,6 +181,7 @@ function AlbumRow(props: {
   return (
     <List.Item
       key={props.album.ratingKey}
+      id={props.album.ratingKey}
       icon={artworkSource(props.album.thumb)}
       title={props.album.title}
       subtitle={props.album.parentTitle}
@@ -214,9 +244,11 @@ function PlaylistRow(props: {
   );
 }
 
-function TrackRow(props: {
+export function TrackRow(props: {
   track: MusicTrack;
+  id?: string;
   coverPath?: string;
+  leadingActions?: ReactNode;
   onPlay: (item: PlayableItem) => Promise<void>;
   onPlayNext: (item: PlayableItem) => Promise<void>;
   onQueue: (item: PlayableItem) => Promise<void>;
@@ -226,6 +258,7 @@ function TrackRow(props: {
   return (
     <List.Item
       key={props.track.ratingKey}
+      id={props.id ?? props.track.ratingKey}
       icon={artworkSource(props.track.thumb ?? props.coverPath)}
       title={formatTrackDisplayTitle(props.track.title, {
         parentIndex: props.track.parentIndex,
@@ -243,7 +276,10 @@ function TrackRow(props: {
             onPlayNext={props.onPlayNext}
             onQueue={props.onQueue}
             nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
-          />
+            leadingActions={props.leadingActions}
+          >
+            <TrackNavigationActions track={props.track} />
+          </PlaybackActionItems>
         </ActionPanel>
       }
     />
@@ -538,6 +574,7 @@ function AlbumGridItem(props: {
   return (
     <Grid.Item
       key={props.album.ratingKey}
+      id={props.album.ratingKey}
       content={artworkSource(props.album.thumb)}
       title={props.album.title}
       subtitle={props.album.year?.toString()}
@@ -563,7 +600,7 @@ function AlbumGridItem(props: {
   );
 }
 
-export function AlbumList(props: { artist: MusicArtist; sectionKey: string }) {
+export function AlbumList(props: { artist: MusicArtist; sectionKey: string; selectedAlbumRatingKey?: string }) {
   const albums = useAsyncValue(
     () => getAlbumsForArtist(props.sectionKey, props.artist),
     `${props.sectionKey}:${props.artist.ratingKey}`,
@@ -573,6 +610,7 @@ export function AlbumList(props: { artist: MusicArtist; sectionKey: string }) {
   const { viewMode, toggleViewMode, isLoaded } = useAlbumViewMode();
 
   const isLoading = !isLoaded || albums.isLoading || playback.isPerforming;
+  const selectedItemId = useDeferredSelection(albums.value, props.selectedAlbumRatingKey);
 
   const errorView = albums.error ? (
     viewMode === "list" ? (
@@ -621,6 +659,7 @@ export function AlbumList(props: { artist: MusicArtist; sectionKey: string }) {
         isLoading={isLoading}
         navigationTitle={props.artist.title}
         searchBarPlaceholder="Filter albums"
+        selectedItemId={selectedItemId}
         actions={defaultActions}
       >
         {errorView}
@@ -649,6 +688,7 @@ export function AlbumList(props: { artist: MusicArtist; sectionKey: string }) {
       isLoading={isLoading}
       navigationTitle={props.artist.title}
       searchBarPlaceholder="Filter albums"
+      selectedItemId={selectedItemId}
       actions={defaultActions}
     >
       {errorView}
@@ -679,7 +719,7 @@ const SCOPED_SEARCH_TRACK_LIMIT = 1000;
 // AlbumTrackList: albums are small — always load all tracks for scoped search
 // ---------------------------------------------------------------------------
 
-export function AlbumTrackList(props: { album: MusicAlbum; sectionKey: string }) {
+export function AlbumTrackList(props: { album: MusicAlbum; sectionKey: string; selectedTrackRatingKey?: string }) {
   const tracks = useAsyncValue(() => getTracksForAlbum(props.album), props.album.ratingKey, [] as MusicTrack[]);
   const playback = usePlaybackActions();
 
@@ -690,6 +730,17 @@ export function AlbumTrackList(props: { album: MusicAlbum; sectionKey: string })
       tracks={tracks.value}
       isLoading={tracks.isLoading || playback.isPerforming}
       error={tracks.error}
+      selectedTrackRatingKey={props.selectedTrackRatingKey}
+      renderLeadingActions={(track) => (
+        <>
+          <Action
+            title="Play Album from This Track"
+            icon={Icon.PlayFilled}
+            onAction={() => playback.playFromTrack(props.album, track)}
+          />
+          <Action title="Play Album from Start" icon={Icon.Rewind} onAction={() => playback.play(props.album)} />
+        </>
+      )}
       onPlay={playback.play}
       onPlayNext={playback.playNext}
       onQueue={playback.queue}
@@ -788,6 +839,23 @@ function LargePlaylistTrackList(props: { playlist: AudioPlaylist; sectionKey: st
 }
 
 // ---------------------------------------------------------------------------
+// Shared: unique item ids for track lists
+// ---------------------------------------------------------------------------
+
+// A playlist can hold the same track more than once, and Raycast needs every item id in a list to be
+// unique. The first occurrence keeps its bare rating key, which album pre-selection targets; repeats get
+// an occurrence suffix.
+function withUniqueItemIds(tracks: MusicTrack[]): { track: MusicTrack; itemId: string }[] {
+  const occurrences = new Map<string, number>();
+
+  return tracks.map((track) => {
+    const occurrence = occurrences.get(track.ratingKey) ?? 0;
+    occurrences.set(track.ratingKey, occurrence + 1);
+    return { track, itemId: occurrence === 0 ? track.ratingKey : `${track.ratingKey}:${occurrence}` };
+  });
+}
+
+// ---------------------------------------------------------------------------
 // TrackList: all tracks loaded — uses Raycast built-in client-side filtering
 // ---------------------------------------------------------------------------
 
@@ -797,17 +865,20 @@ function TrackList(props: {
   tracks: MusicTrack[];
   isLoading: boolean;
   error?: string;
+  selectedTrackRatingKey?: string;
+  renderLeadingActions?: (track: MusicTrack) => ReactNode;
   onPlay: (item: PlayableItem) => Promise<void>;
   onPlayNext: (item: PlayableItem) => Promise<void>;
   onQueue: (item: PlayableItem) => Promise<void>;
 }) {
-  const ratingDisplayMode = getTrackRatingDisplayMode();
+  const selectedItemId = useDeferredSelection(props.tracks, props.selectedTrackRatingKey);
 
   return (
     <List
       isLoading={props.isLoading}
       navigationTitle={props.title}
       searchBarPlaceholder="Filter tracks"
+      selectedItemId={selectedItemId}
       actions={
         <ActionPanel>
           <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
@@ -828,29 +899,16 @@ function TrackList(props: {
           }
         />
       ) : null}
-      {props.tracks.map((track) => (
-        <List.Item
-          key={track.ratingKey}
-          icon={artworkSource(track.thumb ?? props.coverPath)}
-          title={formatTrackDisplayTitle(track.title, {
-            parentIndex: track.parentIndex,
-            index: track.index,
-            userRating: track.userRating,
-            displayMode: ratingDisplayMode,
-          })}
-          subtitle={[track.grandparentTitle, track.parentTitle].filter(Boolean).join(" - ")}
-          accessories={trackAccessories(track)}
-          actions={
-            <ActionPanel>
-              <PlaybackActionItems
-                item={track}
-                onPlay={props.onPlay}
-                onPlayNext={props.onPlayNext}
-                onQueue={props.onQueue}
-                nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
-              />
-            </ActionPanel>
-          }
+      {withUniqueItemIds(props.tracks).map(({ track, itemId }) => (
+        <TrackRow
+          key={itemId}
+          id={itemId}
+          track={track}
+          coverPath={props.coverPath}
+          leadingActions={props.renderLeadingActions?.(track)}
+          onPlay={props.onPlay}
+          onPlayNext={props.onPlayNext}
+          onQueue={props.onQueue}
         />
       ))}
     </List>
@@ -873,8 +931,6 @@ function PaginatedTrackList(props: {
   onPlayNext: (item: PlayableItem) => Promise<void>;
   onQueue: (item: PlayableItem) => Promise<void>;
 }) {
-  const ratingDisplayMode = getTrackRatingDisplayMode();
-
   return (
     <List
       isLoading={props.isLoading}
@@ -891,31 +947,48 @@ function PaginatedTrackList(props: {
         </ActionPanel>
       }
     >
-      {props.tracks.map((track) => (
-        <List.Item
-          key={track.ratingKey}
-          icon={artworkSource(track.thumb ?? props.coverPath)}
-          title={formatTrackDisplayTitle(track.title, {
-            parentIndex: track.parentIndex,
-            index: track.index,
-            userRating: track.userRating,
-            displayMode: ratingDisplayMode,
-          })}
-          subtitle={[track.grandparentTitle, track.parentTitle].filter(Boolean).join(" - ")}
-          accessories={trackAccessories(track)}
-          actions={
-            <ActionPanel>
-              <PlaybackActionItems
-                item={track}
-                onPlay={props.onPlay}
-                onPlayNext={props.onPlayNext}
-                onQueue={props.onQueue}
-                nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
-              />
-            </ActionPanel>
-          }
+      {withUniqueItemIds(props.tracks).map(({ track, itemId }) => (
+        <TrackRow
+          key={itemId}
+          id={itemId}
+          track={track}
+          coverPath={props.coverPath}
+          onPlay={props.onPlay}
+          onPlayNext={props.onPlayNext}
+          onQueue={props.onQueue}
         />
       ))}
+    </List>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Shared: loading / error placeholder
+// ---------------------------------------------------------------------------
+
+function PendingView(props: {
+  navigationTitle: string;
+  loadingTitle: string;
+  errorTitle: string;
+  icon: Icon;
+  isLoading: boolean;
+  error?: string;
+}) {
+  const actions = (
+    <ActionPanel>
+      <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
+      <PreferencesAction />
+    </ActionPanel>
+  );
+
+  return (
+    <List isLoading={props.isLoading} navigationTitle={props.navigationTitle} actions={actions}>
+      <List.EmptyView
+        icon={props.error ? Icon.ExclamationMark : props.icon}
+        title={props.error ? props.errorTitle : props.loadingTitle}
+        description={props.error}
+        actions={actions}
+      />
     </List>
   );
 }
@@ -924,7 +997,7 @@ function PaginatedTrackList(props: {
 // Deep-link launch views
 // ---------------------------------------------------------------------------
 
-function LaunchAlbumView(props: { ratingKey: string; sectionKey: string }) {
+function LaunchAlbumView(props: { ratingKey: string; sectionKey: string; selectedTrackRatingKey?: string }) {
   const album = useAsyncValue(
     async () => {
       const metadata = await getMetadataByRatingKey(props.ratingKey);
@@ -940,36 +1013,28 @@ function LaunchAlbumView(props: { ratingKey: string; sectionKey: string }) {
   );
 
   if (album.value) {
-    return <AlbumTrackList album={album.value} sectionKey={props.sectionKey} />;
+    return (
+      <AlbumTrackList
+        album={album.value}
+        sectionKey={props.sectionKey}
+        selectedTrackRatingKey={props.selectedTrackRatingKey}
+      />
+    );
   }
 
   return (
-    <List
-      isLoading={album.isLoading}
+    <PendingView
       navigationTitle="Browse Album"
-      actions={
-        <ActionPanel>
-          <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
-          <PreferencesAction />
-        </ActionPanel>
-      }
-    >
-      <List.EmptyView
-        icon={album.error ? Icon.ExclamationMark : Icon.Music}
-        title={album.error ? "Unable to load album" : "Loading album"}
-        description={album.error}
-        actions={
-          <ActionPanel>
-            <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
-            <PreferencesAction />
-          </ActionPanel>
-        }
-      />
-    </List>
+      loadingTitle="Loading album"
+      errorTitle="Unable to load album"
+      icon={Icon.Music}
+      isLoading={album.isLoading}
+      error={album.error}
+    />
   );
 }
 
-function LaunchArtistView(props: { ratingKey: string; sectionKey: string }) {
+function LaunchArtistView(props: { ratingKey: string; sectionKey: string; selectedAlbumRatingKey?: string }) {
   const artist = useAsyncValue(
     async () => {
       const metadata = await getMetadataByRatingKey(props.ratingKey);
@@ -985,32 +1050,107 @@ function LaunchArtistView(props: { ratingKey: string; sectionKey: string }) {
   );
 
   if (artist.value) {
-    return <AlbumList artist={artist.value} sectionKey={props.sectionKey} />;
+    return (
+      <AlbumList
+        artist={artist.value}
+        sectionKey={props.sectionKey}
+        selectedAlbumRatingKey={props.selectedAlbumRatingKey}
+      />
+    );
   }
 
   return (
-    <List
-      isLoading={artist.isLoading}
+    <PendingView
       navigationTitle="Browse Artist"
-      actions={
-        <ActionPanel>
-          <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
-          <PreferencesAction />
-        </ActionPanel>
-      }
-    >
-      <List.EmptyView
-        icon={artist.error ? Icon.ExclamationMark : Icon.Person}
-        title={artist.error ? "Unable to load artist" : "Loading artist"}
-        description={artist.error}
-        actions={
-          <ActionPanel>
-            <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
-            <PreferencesAction />
-          </ActionPanel>
-        }
+      loadingTitle="Loading artist"
+      errorTitle="Unable to load artist"
+      icon={Icon.Person}
+      isLoading={artist.isLoading}
+      error={artist.error}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Track navigation: Go to Album / Go to Artist from any track row
+// ---------------------------------------------------------------------------
+
+function TrackAlbumView(props: { track: MusicTrack }) {
+  const target = useAsyncValue(
+    () => resolveTrackAlbum(props.track),
+    props.track.ratingKey,
+    undefined as TrackAlbumTarget | undefined,
+  );
+
+  if (target.value) {
+    return (
+      <AlbumTrackList
+        album={target.value.album}
+        sectionKey={target.value.sectionKey}
+        selectedTrackRatingKey={props.track.ratingKey}
       />
-    </List>
+    );
+  }
+
+  return (
+    <PendingView
+      navigationTitle="Go to Album"
+      loadingTitle="Loading album"
+      errorTitle="Unable to load album"
+      icon={Icon.Music}
+      isLoading={target.isLoading}
+      error={target.error}
+    />
+  );
+}
+
+function TrackArtistView(props: { track: MusicTrack }) {
+  const target = useAsyncValue(
+    () => resolveTrackArtist(props.track),
+    props.track.ratingKey,
+    undefined as TrackArtistTarget | undefined,
+  );
+
+  if (target.value) {
+    return (
+      <AlbumList
+        artist={target.value.artist}
+        sectionKey={target.value.sectionKey}
+        selectedAlbumRatingKey={target.value.albumRatingKey}
+      />
+    );
+  }
+
+  return (
+    <PendingView
+      navigationTitle="Go to Artist"
+      loadingTitle="Loading artist"
+      errorTitle="Unable to load artist"
+      icon={Icon.Person}
+      isLoading={target.isLoading}
+      error={target.error}
+    />
+  );
+}
+
+export function TrackNavigationActions(props: { track: MusicTrack }) {
+  const { push } = useNavigation();
+
+  return (
+    <>
+      <Action
+        title="Go to Album"
+        icon={Icon.Music}
+        shortcut={{ modifiers: ["cmd"], key: "g" }}
+        onAction={() => push(<TrackAlbumView track={props.track} />)}
+      />
+      <Action
+        title="Go to Artist"
+        icon={Icon.Person}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+        onAction={() => push(<TrackArtistView track={props.track} />)}
+      />
+    </>
   );
 }
 
@@ -1022,11 +1162,23 @@ export default function Command(props: LaunchProps<{ launchContext?: BrowseLaunc
   const context = props.launchContext;
 
   if (context?.target === "album" && context.ratingKey && context.sectionKey) {
-    return <LaunchAlbumView ratingKey={context.ratingKey} sectionKey={context.sectionKey} />;
+    return (
+      <LaunchAlbumView
+        ratingKey={context.ratingKey}
+        sectionKey={context.sectionKey}
+        selectedTrackRatingKey={context.selectedRatingKey}
+      />
+    );
   }
 
   if (context?.target === "artist" && context.ratingKey && context.sectionKey) {
-    return <LaunchArtistView ratingKey={context.ratingKey} sectionKey={context.sectionKey} />;
+    return (
+      <LaunchArtistView
+        ratingKey={context.ratingKey}
+        sectionKey={context.sectionKey}
+        selectedAlbumRatingKey={context.selectedRatingKey}
+      />
+    );
   }
 
   return <RootContent />;

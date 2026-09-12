@@ -529,15 +529,17 @@ private func getActiveWindowRef() -> AXUIElement? {
   var currentX: CGFloat
   var currentY: CGFloat
   var currentWidth: CGFloat
+  var currentHeight: CGFloat
   var currentScreenFrame: CGRect
 
-  if let wx = windowX, let wy = windowY, let ww = windowWidth, windowHeight != nil,
+  if let wx = windowX, let wy = windowY, let ww = windowWidth, let wh = windowHeight,
     let sf = screenFrame
   {
     // Use provided values - assume they're already in AX coordinates
     currentX = CGFloat(wx)
     currentY = CGFloat(wy)
     currentWidth = CGFloat(ww)
+    currentHeight = CGFloat(wh)
     currentScreenFrame = sf
   } else {
     // Parse from active window - these will be in AX coordinates
@@ -556,6 +558,7 @@ private func getActiveWindowRef() -> AXUIElement? {
     currentX = CGFloat(info.windowX)
     currentY = CGFloat(info.windowY)
     currentWidth = CGFloat(info.windowWidth)
+    currentHeight = CGFloat(info.windowHeight)
     currentScreenFrame = info.screenFrame
   }
 
@@ -567,23 +570,6 @@ private func getActiveWindowRef() -> AXUIElement? {
   let requestedWidth = newWidth
   let requestedHeight = newHeight
 
-  // Calculate new position (in AX coordinates)
-  var newX: CGFloat
-  var newY: CGFloat
-
-  if preservePosition && windowX != nil && windowY != nil {
-    // Preserve exact position as requested
-    newX = CGFloat(windowX!)
-    newY = CGFloat(windowY!)
-  } else {
-    // Calculate window center point on X axis (in AX coordinates)
-    let centerX = currentX + currentWidth / 2
-
-    // Center horizontally, keep Y position the same
-    newX = centerX - newWidth / 2
-    newY = currentY  // Keep Y position unchanged
-  }
-
   // Adjust dimensions if they exceed screen boundaries
   if newWidth > currentScreenFrame.width {
     newWidth = currentScreenFrame.width
@@ -593,22 +579,20 @@ private func getActiveWindowRef() -> AXUIElement? {
     newHeight = currentScreenFrame.height
   }
 
-  // Ensure position is within screen boundaries
-  if newX < currentScreenFrame.minX {
-    newX = currentScreenFrame.minX
-  } else if newX + newWidth > currentScreenFrame.maxX {
-    newX = currentScreenFrame.maxX - newWidth
-  }
-
-  if newY < currentScreenFrame.minY {
-    newY = currentScreenFrame.minY
-  } else if newY + newHeight > currentScreenFrame.maxY {
-    newY = currentScreenFrame.maxY - newHeight
-  }
-
-  // Set new window position and size (using AX coordinates, which is what the AX API expects)
-  let position = CGPoint(x: newX, y: newY)
   let size = CGSize(width: newWidth, height: newHeight)
+  var preservedPosition: CGPoint?
+  if preservePosition, let windowX, let windowY {
+    preservedPosition = CGPoint(x: windowX, y: windowY)
+  }
+  let placement = WindowResizePlacement(
+    windowFrame: CGRect(x: currentX, y: currentY, width: currentWidth, height: currentHeight),
+    screenFrame: currentScreenFrame,
+    targetSize: size,
+    preservedPosition: preservedPosition
+  )
+
+  // Use the same anchor for the requested size and any app-constrained size below.
+  let position = placement.position(for: size)
   setWindowPositionAndSize(windowRef: windowRef, position: position, size: size)
 
   // Verify window was successfully resized
@@ -629,46 +613,21 @@ private func getActiveWindowRef() -> AXUIElement? {
   // Use reasonable tolerance for size validation
   let sizeTolerance: CGFloat = 5.0
 
-  // Check if window size differs significantly from requested size
-  let widthDiffers = abs(windowData.windowSize.width - newWidth) > sizeTolerance
-  let heightDiffers = abs(windowData.windowSize.height - newHeight) > sizeTolerance
-
-  // Determine if any dimension differs significantly from requested
-  let sizeDiffers = widthDiffers || heightDiffers
-
   // Final position and size values to use in the result
   var finalPositionX = windowData.windowPosition.x
   var finalPositionY = windowData.windowPosition.y
   let finalWidth = windowData.windowSize.width
   let finalHeight = windowData.windowSize.height
 
-  // If actual size differs from requested size and not preserving position, recalculate position
-  if sizeDiffers && !preservePosition {
-    // For X coordinate: center horizontally based on original center
-    let centerX = currentX + currentWidth / 2
-    var adjustedX = centerX - finalWidth / 2
-
-    // For Y coordinate: keep top edge aligned with original top edge
-    var adjustedY = currentY  // Keep top edge aligned
-
-    // Ensure adjusted position is within screen boundaries
-    if adjustedX < currentScreenFrame.minX {
-      adjustedX = currentScreenFrame.minX
-    } else if adjustedX + finalWidth > currentScreenFrame.maxX {
-      adjustedX = currentScreenFrame.maxX - finalWidth
-    }
-
-    if adjustedY < currentScreenFrame.minY {
-      adjustedY = currentScreenFrame.minY
-    } else if adjustedY + finalHeight > currentScreenFrame.maxY {
-      adjustedY = currentScreenFrame.maxY - finalHeight
-    }
+  // Apps may constrain either size or position while applying the resize.
+  if !preservePosition {
+    let adjusted = placement.position(for: windowData.windowSize)
 
     // Apply adjusted position if it's different from current position
-    if abs(adjustedX - windowData.windowPosition.x) > 1.0
-      || abs(adjustedY - windowData.windowPosition.y) > 1.0
+    if abs(adjusted.x - windowData.windowPosition.x) > 1.0
+      || abs(adjusted.y - windowData.windowPosition.y) > 1.0
     {
-      var adjustedPosition = CGPoint(x: adjustedX, y: adjustedY)
+      var adjustedPosition = adjusted
       let axAdjustedPosition = AXValueCreate(.cgPoint, &adjustedPosition)!
       AXUIElementSetAttributeValue(windowRef, kAXPositionAttribute as CFString, axAdjustedPosition)
 

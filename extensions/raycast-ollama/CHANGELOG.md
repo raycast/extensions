@@ -1,5 +1,14 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2026-09-07
+
+- [Improvement] added "Paste in Active App" action for all commands, which pastes the answer on the active application.
+
+## [Fix] - 2026-09-04
+
+- Fixed model discovery timing out too quickly and showing connection failures as an empty installed-model list.
+- Fixed Manage Models and Loaded Models crashing when a remote Ollama server omits a loaded model's context length.
+
 ## [Fix] - 2026-06-16
 
 - [Fix] Command "Chat with Ollama" and "Answer" commands: fixed a bug in the thinking rendering during streaming. The thinking text could stop updating mid-generation while the stream continued and the final answer appeared. The root cause was a missing flush of the pending `textThinkingBuffer` on stream termination (`emitDone`) combined with a `else if` in the throttle path that prevented symmetric flushing of thinking and content buffers.

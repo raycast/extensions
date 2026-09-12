@@ -20,7 +20,8 @@
     "xmok",
     "niksite",
     "ojowwalker77",
-    "gumadeiras"
+    "gumadeiras",
+    "jsonMartin"
   ],
   "pastContributors": [
     "axsuul",
@@ -177,6 +178,13 @@
       "title": "Close Other Tabs",
       "subtitle": "Safari",
       "description": "Close all Safari tabs except the current one",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "subtitle": "Safari",
+      "description": "Open a new Safari window",
       "mode": "no-view"
     }
   ],
