@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { showFailureToast, useFetch } from "@raycast/utils";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { supportsComments } from "../lib/comments";
 import { useProfiles } from "../lib/hooks";
 import { api, APP_URL, authHeaders, deletePost, publishDraft } from "../lib/postproxy";
@@ -66,8 +66,9 @@ export function PostDetail({ post, onChange }: { post: Post; onChange?: () => vo
   const { data: profiles } = useProfiles();
   const { pop } = useNavigation();
 
-  // Full post (list items can be compact and omit media / insights).
-  const { data: full, error: fullError } = useFetch(api(`/posts/${post.id}`), {
+  // Full post (list items can be compact and omit media / insights). The post from the list is always
+  // shown, so a failed refetch just keeps that data; useFetch surfaces the error via its own toast.
+  const { data: full } = useFetch(api(`/posts/${post.id}`), {
     headers: authHeaders(),
     initialData: post,
     keepPreviousData: true,
@@ -79,22 +80,11 @@ export function PostDetail({ post, onChange }: { post: Post; onChange?: () => vo
   // Freeze the cutoff to the selected period; periodFromIso() reads Date.now(), so without this the
   // analytics URL would change on every render (incl. fetch-state updates) and refetch in a loop.
   const fromIso = useMemo(() => periodFromIso(period), [period]);
-  const {
-    data: statsResponse,
-    isLoading: loadingStats,
-    error: statsError,
-  } = useFetch<PostStatsResponse>(
+  const { data: statsResponse, isLoading: loadingStats } = useFetch<PostStatsResponse>(
     api(`/posts/stats?post_ids=${post.id}${fromIso ? `&from=${encodeURIComponent(fromIso)}` : ""}`),
     { headers: authHeaders(), keepPreviousData: true },
   );
 
-  // The post from the list is always shown, so surface load errors (details/analytics) as a toast.
-  useEffect(() => {
-    if (fullError) showFailureToast(fullError, { title: "Couldn't load post details" });
-  }, [fullError]);
-  useEffect(() => {
-    if (statsError) showFailureToast(statsError, { title: "Couldn't load analytics" });
-  }, [statsError]);
   const statPlatforms = statsResponse?.data?.[post.id]?.platforms ?? [];
   const latestByPlatform = latestStatsByPlatform(statsResponse, post.id);
   const total = [...latestByPlatform.values()].reduce((sum, stats) => sum + impressionsOf(stats), 0);

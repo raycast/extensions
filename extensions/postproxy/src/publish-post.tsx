@@ -25,14 +25,11 @@ interface FormValues {
 }
 
 export default function PublishPost() {
-  const { data: profiles, isLoading, error: profilesError } = useProfiles();
+  // A failed profiles load (e.g. a bad API key) is surfaced by useProfiles' own failure toast; the Form
+  // can't host an EmptyView, so we don't add a second toast here.
+  const { data: profiles, isLoading } = useProfiles();
   const { data: groups } = useProfileGroups();
   const { pop } = useNavigation();
-
-  // The Form can't host an EmptyView, so surface a load error (e.g. a bad API key) as a toast.
-  useEffect(() => {
-    if (profilesError) showFailureToast(profilesError, { title: "Couldn't load profiles" });
-  }, [profilesError]);
 
   // Per-network placement selections (Facebook Page / LinkedIn Org / Pinterest Board / Telegram Channel).
   const [networkPlacements, setNetworkPlacements] = useState<Record<string, string>>({});
@@ -105,10 +102,31 @@ export default function PublishPost() {
     .sort()
     .join(",");
   const placementTargets = useMemo(() => eligibleProfiles, [placementKey]);
-  const { data: placementsByNetwork } = usePromise(loadPlacementsByNetwork, [placementTargets]);
+  const { data: placements, revalidate: revalidatePlacements } = usePromise(loadPlacementsByNetwork, [
+    placementTargets,
+  ]);
+  const placementsByNetwork = placements?.byNetwork;
   const placementNetworks = placementsByNetwork
     ? Object.keys(placementsByNetwork).filter((n) => PLACEMENT_META[n])
     : [];
+
+  // A failed placements fetch would otherwise render no dropdown, stranding a mandatory network at
+  // submit. Surface it with a retry so the user can recover instead of being stuck on "Choose a …".
+  useEffect(() => {
+    const placementErrors = placements?.errors ?? [];
+    if (placementErrors.length > 0) {
+      showFailureToast(placementErrors[0], {
+        title: "Couldn't load some placement options",
+        primaryAction: {
+          title: "Retry",
+          onAction: (toast) => {
+            toast.hide();
+            revalidatePlacements();
+          },
+        },
+      });
+    }
+  }, [placements, revalidatePlacements]);
 
   // When placements change (e.g. the profile on a network was swapped), drop any selection that's no
   // longer valid — reset it to empty so the dropdown shows "Choose…" again. Never auto-pick a default.

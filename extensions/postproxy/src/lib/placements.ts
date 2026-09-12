@@ -1,4 +1,4 @@
-import { api, authHeaders, normalizeList } from "./postproxy";
+import { normalizeList, request } from "./postproxy";
 import type { Placement, Profile } from "./types";
 
 /**
@@ -50,15 +50,20 @@ export function overSelectedMandatoryNetworks(profiles: Profile[]): string[] {
   return Object.keys(counts).filter((net) => counts[net] > 1 && requiresPlacement(net));
 }
 
-/** Fetch placements for the given profiles, merged & de-duped by network (for the pickers). */
-export async function loadPlacementsByNetwork(profiles: Profile[]): Promise<Record<string, Placement[]>> {
+/**
+ * Fetch placements for the given profiles, merged & de-duped by network (for the pickers). Keeps
+ * partial results and collects per-profile failures so the caller can warn + offer a retry instead of
+ * silently rendering no dropdown (which would strand a mandatory network at submit time).
+ */
+export async function loadPlacementsByNetwork(
+  profiles: Profile[],
+): Promise<{ byNetwork: Record<string, Placement[]>; errors: Error[] }> {
   const byNetwork: Record<string, Placement[]> = {};
+  const errors: Error[] = [];
   await Promise.all(
     profiles.map(async (profile) => {
       try {
-        const response = await fetch(api(`/profiles/${profile.id}/placements`), { headers: authHeaders() });
-        if (!response.ok) return;
-        const items = normalizeList<Placement>(await response.json());
+        const items = normalizeList<Placement>(await request("GET", `/profiles/${profile.id}/placements`));
         if (items.length === 0) return;
         const net = profile.platform.toLowerCase();
         const list = byNetwork[net] ?? (byNetwork[net] = []);
@@ -67,12 +72,12 @@ export async function loadPlacementsByNetwork(profiles: Profile[]): Promise<Reco
           const key = item.id ?? item.name;
           if (!list.some((p) => (p.id ?? p.name) === key)) list.push(item);
         }
-      } catch {
-        // ignore per-profile failures
+      } catch (error) {
+        errors.push(error instanceof Error ? error : new Error(String(error)));
       }
     }),
   );
-  return byNetwork;
+  return { byNetwork, errors };
 }
 
 /** Merge raw platform-params JSON with per-network placement selections into the `platforms` object. */
@@ -121,7 +126,23 @@ export async function validatePlacements(
   selectedProfiles: Profile[],
 ): Promise<string | null> {
   const counts = placementNetworkCounts(selectedProfiles);
-  const fresh = await loadPlacementsByNetwork(eligiblePlacementProfiles(selectedProfiles));
+
+  // Re-fetch the valid placements for each single-profile network, tracking failures per network so a
+  // request outage is reported as the real error rather than a misleading "choose a placement".
+  const validByNetwork: Record<string, Set<string>> = {};
+  const failedByNetwork: Record<string, Error> = {};
+  await Promise.all(
+    eligiblePlacementProfiles(selectedProfiles).map(async (profile) => {
+      const net = profile.platform.toLowerCase();
+      try {
+        const list = normalizeList<Placement>(await request("GET", `/profiles/${profile.id}/placements`));
+        const set = validByNetwork[net] ?? (validByNetwork[net] = new Set<string>());
+        for (const placement of list) set.add(placement.id ?? "");
+      } catch (error) {
+        failedByNetwork[net] = error instanceof Error ? error : new Error(String(error));
+      }
+    }),
+  );
 
   for (const [net, meta] of Object.entries(PLACEMENT_META)) {
     const count = counts[net] ?? 0;
@@ -139,8 +160,13 @@ export async function validatePlacements(
       continue;
     }
 
-    // Exactly one profile of this network is selected.
-    const validIds = new Set((fresh[net] ?? []).map((p) => p.id ?? ""));
+    // Exactly one profile of this network is selected. If we couldn't fetch its placements, don't
+    // guess — surface the real failure, but only when a placement is actually needed (one was chosen,
+    // or the network mandates one); an optional network with no selection can still publish.
+    if (failedByNetwork[net] && (hasPlacement || requiresPlacement(net))) {
+      return `Couldn't verify the ${meta.label} — ${failedByNetwork[net].message}`;
+    }
+    const validIds = validByNetwork[net] ?? new Set<string>();
     if (hasPlacement) {
       if (!validIds.has(String(sentId))) {
         return `Choose a ${meta.label} to publish.`; // stale / out-of-order / invalid raw-JSON id

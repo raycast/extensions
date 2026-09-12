@@ -38,6 +38,25 @@ export function ProfileStats({ profile, groupName }: { profile: Profile; groupNa
   });
   const error = placementsError ?? statsError;
 
+  // Surface a real request failure before the "no placement" branch — otherwise a failed placements
+  // lookup looks identical to "no placement available" and would hide the actual error.
+  if (error) {
+    return (
+      <List.Item.Detail
+        markdown={`### ${profile.name}\n\nCouldn't load stats.`}
+        metadata={
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label title="Profile" text={profile.name} />
+            <List.Item.Detail.Metadata.Label title="Platform" text={platformLabel(profile.platform)} />
+            {groupName ? <List.Item.Detail.Metadata.Label title="Group" text={groupName} /> : null}
+            <List.Item.Detail.Metadata.Separator />
+            <List.Item.Detail.Metadata.Label title="Error" text={error.message} />
+          </List.Item.Detail.Metadata>
+        }
+      />
+    );
+  }
+
   if (requiresPlacement && !placementId && !loadingPlacements) {
     return (
       <List.Item.Detail
@@ -66,8 +85,6 @@ export function ProfileStats({ profile, groupName }: { profile: Profile; groupNa
             statEntries.map(([key, value]) => (
               <List.Item.Detail.Metadata.Label key={key} title={humanizeKey(key)} text={formatNumber(value)} />
             ))
-          ) : error ? (
-            <List.Item.Detail.Metadata.Label title="Stats" text={`Error: ${error.message}`} />
           ) : (
             <List.Item.Detail.Metadata.Label title="Stats" text={isLoading ? "Loading…" : "No data yet"} />
           )}
