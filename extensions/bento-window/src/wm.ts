@@ -292,27 +292,32 @@ function run(argv) {
       if (a.value() === true) { a.value = false; enhanced.push(a); }
     } catch (e) { /* 读不到就按未开启处理 */ }
   }
-  for (const m of moves) {
-    const t = targets[m.id];
-    if (!t) continue;
-    // 已经在目标位置的窗口不必再写：省一次往返，也省一次多余的重绘
-    if (m.x === m.cx && m.y === m.cy && m.width === m.cw && m.height === m.ch) continue;
-    const w = t.proc.windows[t.i];
-    try {
-      // 顺序必须是 size → position → size：先挪位置会让大窗悬出屏幕，
-      // 随后的 resize 触发 AppKit 跨屏约束、高度被加上 ~57px（macOS 26 实测）。
-      // 末尾那次 size 只有放大路径需要（贴底放大时首次 size 同样会被钳）——
-      // 平铺基本都是缩小，无条件补发等于白花一次往返和一次可见跳变
-      w.size = [m.width, m.height];
-      w.position = [m.x, m.y];
-      if (m.width > m.cw || m.height > m.ch) w.size = [m.width, m.height];
-    } catch (e) {
-      notePermission(state, e);
-      failed.push(m.id);
+  // 写入阶段整体包在 try/finally 里：无论中间哪一步抛出，关掉的
+  // AXEnhancedUserInterface 都要恢复，不能让别家 app 留在关闭状态
+  try {
+    for (const m of moves) {
+      const t = targets[m.id];
+      if (!t) continue;
+      // 已经在目标位置的窗口不必再写：省一次往返，也省一次多余的重绘
+      if (m.x === m.cx && m.y === m.cy && m.width === m.cw && m.height === m.ch) continue;
+      try {
+        const w = t.proc.windows[t.i];
+        // 顺序必须是 size → position → size：先挪位置会让大窗悬出屏幕，
+        // 随后的 resize 触发 AppKit 跨屏约束、高度被加上 ~57px（macOS 26 实测）。
+        // 末尾那次 size 只有放大路径需要（贴底放大时首次 size 同样会被钳）——
+        // 平铺基本都是缩小，无条件补发等于白花一次往返和一次可见跳变
+        w.size = [m.width, m.height];
+        w.position = [m.x, m.y];
+        if (m.width > m.cw || m.height > m.ch) w.size = [m.width, m.height];
+      } catch (e) {
+        notePermission(state, e);
+        failed.push(m.id);
+      }
     }
-  }
-  for (const a of enhanced) {
-    try { a.value = true; } catch (e) { /* 恢复失败无碍，下次读到 false 也只是不再动画 */ }
+  } finally {
+    for (const a of enhanced) {
+      try { a.value = true; } catch (e) { /* 恢复失败无碍，下次读到 false 也只是不再动画 */ }
+    }
   }
   return JSON.stringify({ failed: failed, permissionErrno: state.permissionErrno });
 }
