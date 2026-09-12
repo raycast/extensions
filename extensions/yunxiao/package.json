@@ -97,24 +97,25 @@
         }
     ],
     "dependencies": {
-        "@raycast/api": "^1.104.23"
+        "@raycast/api": "^2.3.1"
     },
     "devDependencies": {
         "@raycast/eslint-config": "^2.1.1",
-        "@types/node": "^20.0.0",
-        "@types/react": "^18.2.0",
-        "eslint": "^9.0.0",
+        "@types/node": "^22.20.2",
+        "@types/react": "^19.3.0",
+        "eslint": "^10.10.0",
         "prettier": "^3.9.6",
         "typescript": "^5.4.0"
     },
     "overrides": {
-        "@types/react": "^18.2.0"
+        "@types/react": "^19.3.0"
     },
     "scripts": {
         "test": "node --test --experimental-strip-types test/*.test.mjs",
         "build": "ray build",
         "dev": "ray develop",
         "lint": "ray lint",
+        "pull": "npx @raycast/api@latest pull-contributions",
         "publish": "npx @raycast/api@latest publish"
     }
 }

@@ -223,7 +223,6 @@ export default function ListTestPlans() {
                         actions={
                             <ActionPanel>
                                 <Action.OpenInBrowser title="在 Testhub 中打开" url={testPlanUrl(plan.id)} />
-                                <Action.CopyToClipboard title="复制计划 ID" content={plan.id} />
                             </ActionPanel>
                         }
                     />

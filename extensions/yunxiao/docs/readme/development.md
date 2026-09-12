@@ -20,6 +20,7 @@ src/
 │   ├── sprints.ts        # SearchSprints（POST .../sprints:search）
 │   ├── testplans.ts      # ListTestPlans（POST .../testplans:search）
 │   ├── workitems.ts      # SearchWorkitems
+│   ├── workitems-normalize.ts # 响应归一化（categoryId → category）
 │   ├── codeup.ts         # ListRepositories / ListOpenMergeRequests（GET /oapi/v1/codeup/...）
 │   └── types.ts          # 共享类型 + YunxiaoApiError
 ├── utils/
@@ -94,12 +95,25 @@ npm run build             # 等价于 ray build
 | 搜索工作项   | `/oapi/v1/projex/organizations/{orgId}/workitems:search`                 | `/oapi/v1/projex/workitems:search`                 | POST   | `{spaceId,spaceType,category?,page,perPage,orderBy,sort}`                                     |
 | 工作项详情   | `/oapi/v1/projex/organizations/{orgId}/workitems/{id}?spaceId={spaceId}` | `/oapi/v1/projex/workitems/{id}?spaceId={spaceId}` | GET    | —                                                                                             |
 | 列出迭代     | `/oapi/v1/projex/organizations/{orgId}/projects/{id}/sprints`            | `/oapi/v1/projex/projects/{id}/sprints`            | GET    | query: `{page,perPage,status?,name?}`（status 取值：TODO / DOING / ARCHIVED，多选用逗号分隔） |
-| 列出测试计划 | `/oapi/v1/projex/organizations/{orgId}/testPlan/list`                    | `/oapi/v1/projex/testPlan/list`                    | POST   | query: `{page,perPage,projectIdentifier?,sprintIdentifier?,status?,name?}`                    |
+| 列出测试计划 | `/oapi/v1/projex/organizations/{orgId}/testPlan/list`                    | `/oapi/v1/projex/testPlan/list`                    | POST   | query: `{page,perPage,projectIdentifier?,sprintIdentifier?,status?,name?}`（参数全走 query，body 为空 `{}`） |
 
 | 列出代码库 | `/oapi/v1/codeup/organizations/{orgId}/repositories` | `/oapi/v1/codeup/repositories` | GET | `{page,perPage,orderBy,sort,search?,archived?}` |
 | 查询合并请求 | `/oapi/v1/codeup/organizations/{orgId}/changeRequests` | `/oapi/v1/codeup/changeRequests` | GET | `{page,perPage,projectIds?,authorIds?,reviewerIds?,state=opened,search?,orderBy,sort,createdAfter?,createdBefore?}`（state 取值：opened / merged / closed，默认 opened） |
 
 > 历史教训：`/organization/{orgId}/listProjects` 这类 `devops/2021-06-25` 端点需要阿里云 ROA 签名（AccessKey），不能用 PAT；本扩展已避开。
+
+> 历史教训：`SearchWorkitems` 的**请求参数叫 `category`，响应字段却叫 `categoryId`**（取值同为 `Req`/`Bug`/…）。
+> 视图层只读 `category` 会恒为 `undefined`，`workitemUrl` 因此拼不出详情地址、回车无反应。
+> 已由 `api/workitems-normalize.ts` 把 `categoryId` 归一化到 `category`，并只接受官方枚举值，避免脏数据拼进 URL 路径。
+
+> 历史教训：`testPlan/list` 返回的起止时间是**数字型 Unix 毫秒时间戳**（如 `1788105600000`），不是 ISO 字符串。
+> normalize 层统一 `String()` 之后会变成纯数字串，而 `new Date("1788105600000")` 是 Invalid Date，
+> 会把原始数字直接漏到界面上。`utils/format.ts` 的 `formatDateYMD` 已按纯数字串识别时间戳（10 位按秒 / 13 位及以上按毫秒）。
+
+> 历史教训：POST 请求必须显式带 `Content-Type: application/json`。像 `testPlan/list` 这种参数全走 query、body 为空的接口，
+> 若不设置该头，网关会把请求推断成 `application/x-www-form-urlencoded` 并返回 500
+> （`InvaildData.Failed` / `Content type ... not supported`）。`client.ts` 的 `requestCore` 统一为所有 POST 补上该头，
+> 并在缺少 body 时发送 `{}`；回归用例见 `test/client.test.mjs`。
 
 ## 6. 扩展点
 

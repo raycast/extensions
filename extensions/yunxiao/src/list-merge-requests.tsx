@@ -63,7 +63,7 @@ export default function ListMergeRequests() {
     const [errorDetails, setErrorDetails] = useState<string>();
     const [search, setSearch] = useState("");
     const [stateFilter, setStateFilter] = useState<MergeRequestStateFilter>("opened");
-    const activeController = useRef<AbortController>();
+    const activeController = useRef<AbortController | undefined>(undefined);
 
     function load(state: MergeRequestStateFilter) {
         activeController.current?.abort();

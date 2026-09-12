@@ -375,7 +375,6 @@ function TestPlansView({ projectId, projectName }: TestPlansViewProps) {
                         actions={
                             <ActionPanel>
                                 <Action.OpenInBrowser title="访问该测试计划" url={testPlanUrl(p.id)} />
-                                <Action.CopyToClipboard title="复制计划 ID" content={p.id} />
                             </ActionPanel>
                         }
                     />
@@ -498,7 +497,11 @@ function WorkitemsView({ projectId, projectName }: WorkitemsViewProps) {
                             ]}
                             actions={
                                 <ActionPanel>
-                                    {browserUrl ? <Action.OpenInBrowser title="在云效中打开" url={browserUrl} /> : null}
+                                    {/* 兜底到项目工作项列表页，避免类别缺失时回车无任何反应。 */}
+                                    <Action.OpenInBrowser
+                                        title="在云效中打开"
+                                        url={browserUrl ?? projectWorkitemsUrl(projectId)}
+                                    />
                                 </ActionPanel>
                             }
                         />

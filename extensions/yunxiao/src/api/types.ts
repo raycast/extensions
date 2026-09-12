@@ -48,7 +48,8 @@ export interface Workitem {
     identifier?: string;
     subject: string;
     serialNumber: string;
-    categoryId: string;
+    /** 官方响应里的工作项大类型（"Req"/"Bug"/... ），由 normalize 层同步到 category */
+    categoryId?: string;
     status?: WorkitemStatusRef;
     priority?: WorkitemPriorityRef;
     assignee?: WorkitemUserRef | null;

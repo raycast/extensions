@@ -146,8 +146,7 @@ Codeup 浏览器快速入口（已迁移到 `yunxiao-entry` 的「代码管理�
 - 状态过滤：同一组合下拉的第二段；全部 / 未开始（TODO）/ 进行中（DOING）/ 已完成（DONE）；切换会按官方 ListTestPlan 的 `status`
   查询参数重新拉取。
 - 搜索覆盖计划名、计划 ID、状态原值、状态中文、负责人 ID、项目 ID 与项目名（解析自下拉里的项目），大小写不敏感。
-- 选中计划 → 「在 Testhub 中打开」跳转到 `https://devops.aliyun.com/testhub/plan/{plan_id}/dashboard`；「复制计划 ID」把 `
-testPlanIdentifier` 写入剪贴板。
+- 选中计划 → 「在 Testhub 中打开」跳转到 `https://devops.aliyun.com/testhub/plan/{plan_id}/dashboard`。
 - 底层走 `POST /oapi/v1/projex/organizations/{orgId}/testPlan/list`（Region 版去掉 `organizations/{orgId}/` 段），参数通过
   query 传递：`page`、`perPage`、`projectIdentifier`、`sprintIdentifier?`、`status?`、`name?`。分页信息通过响应头 `x-page` /
   `x-per-page` / `x-total` / `x-next-page` / `x-total-pages` 携带；本命令一次拉一页（默认 `perPage=200`，官方上限 1000）。

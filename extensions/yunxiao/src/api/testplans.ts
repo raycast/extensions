@@ -9,7 +9,8 @@
  * 鉴权：x-yunxiao-token
  *
  * 参数通过 query 传递（page / perPage / sprintIdentifier / projectIdentifier / status / name），
- * 即便使用 POST 方法 body 也是空的。
+ * 即便使用 POST 方法 body 也是空的（客户端会补一个 `{}` 并声明 Content-Type: application/json，
+ * 否则网关会把请求当作 form-urlencoded 并返回 500）。
  *
  * 响应是裸数组 [TestPlan, ...]，字段包括 testPlanIdentifier / name / status /
  * gmtCreate / managers / spaceIdentifier；实际响应还可能携带起止时间字段

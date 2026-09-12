@@ -51,7 +51,7 @@ export default function ListRepositories() {
     const [error, setError] = useState<string>();
     const [errorDetails, setErrorDetails] = useState<string>();
     const [search, setSearch] = useState("");
-    const activeController = useRef<AbortController>();
+    const activeController = useRef<AbortController | undefined>(undefined);
 
     function load() {
         activeController.current?.abort();

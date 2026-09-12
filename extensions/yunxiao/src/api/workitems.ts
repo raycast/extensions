@@ -9,7 +9,10 @@
  */
 
 import { buildProjectPath, fetchAllPages, resolveCredentials, requestWithHeaders } from "./client";
+import { normalizeWorkitems } from "./workitems-normalize";
 import { WORKITEM_CATEGORIES, type PaginatedResult, type Workitem, type WorkitemCategory } from "./types";
+
+export { normalizeWorkitems };
 
 const MAX_RESULTS = 50;
 
@@ -28,6 +31,7 @@ export interface ListWorkitemsOptions {
  * 列出项目下的工作项。
  *
  * SearchWorkitems 返回裸数组；category 多值用逗号分隔。
+ * 注意：请求参数叫 category，响应字段却叫 categoryId，由 normalize 层归一化。
  * 「全部」直接传 `Req,Bug,Task,Risk,Request,Topic`，避免 API 报「工作项类型不能为空」400。
  *
  * 未显式指定 page 时自动翻页拉取全部工作项，避免工作项数超过一页时后面的条目
@@ -74,21 +78,21 @@ export async function listWorkitems(opts: ListWorkitemsOptions): Promise<Paginat
 
     if (opts.page !== undefined) {
         const page = Math.max(1, Math.floor(opts.page));
-        const { data } = await requestWithHeaders<Workitem[]>(path, {
+        const { data } = await requestWithHeaders<unknown>(path, {
             method: "POST",
             body: buildBody(page),
             signal: opts.signal,
         });
-        return { items: Array.isArray(data) ? data : [] };
+        return { items: normalizeWorkitems(data) };
     }
 
     const items = await fetchAllPages<Workitem>(async (page) => {
-        const { data, headers } = await requestWithHeaders<Workitem[]>(path, {
+        const { data, headers } = await requestWithHeaders<unknown>(path, {
             method: "POST",
             body: buildBody(page),
             signal: opts.signal,
         });
-        return { items: Array.isArray(data) ? data : [], headers };
+        return { items: normalizeWorkitems(data), headers };
     });
     return { items };
 }

@@ -110,14 +110,14 @@
 
 ### 顶层命令
 
-- [x] 测试计划 (`list-test-plans`) : 进入命令后直接列出当前组织所有可见测试计划；搜索栏右侧 `项目 · 状态` 组合下拉可按项目 / TODO / DOING / DONE 进一步过滤；回车在 Testhub 中打开 `https://devops.aliyun.com/testhub/plan/{plan_id}/dashboard`；附「复制计划 ID」动作。
+- [x] 测试计划 (`list-test-plans`) : 进入命令后直接列出当前组织所有可见测试计划；搜索栏右侧 `项目 · 状态` 组合下拉可按项目 / TODO / DOING / DONE 进一步过滤；回车在 Testhub 中打开 `https://devops.aliyun.com/testhub/plan/{plan_id}/dashboard`。
 
 ### Sections
 
 **「Section 1」按状态分组**
 
 - [x] 测试计划列表（`项目 · 状态` 组合下拉：项目过滤默认 `全部项目`；状态过滤：全部 / TODO / DOING / DONE / 本地搜索：名称、ID、状态原值、状态中文、负责人 ID、项目 ID、项目名）
-- [x] 操作：在 Testhub 中打开、复制计划 ID
+- [x] 操作：在 Testhub 中打开
 
 **「Section 2」项目列表内嵌入口（`list-projects`）**
 

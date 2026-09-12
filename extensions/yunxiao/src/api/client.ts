@@ -88,9 +88,12 @@ async function requestCore(
         Accept: "application/json",
     };
     const init: RequestInit = { method, headers };
-    if (options.body !== undefined) {
+    // 云效网关对 POST 强制校验 Content-Type：缺省时会被推断成
+    // application/x-www-form-urlencoded 并直接 500（"Content type ... not supported"）。
+    // 因此所有 POST 都显式声明 JSON，无 body 的接口（如 testPlan/list，参数全走 query）补一个空对象。
+    if (options.body !== undefined || method === "POST") {
         headers["Content-Type"] = "application/json";
-        init.body = JSON.stringify(options.body);
+        init.body = JSON.stringify(options.body ?? {});
     }
     if (options.signal) {
         init.signal = options.signal;
