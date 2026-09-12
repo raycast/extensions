@@ -5,7 +5,14 @@ import { useToken } from "./instances";
 import Services from "./services";
 import { getTotalServices } from "./utils";
 
-export default function Environments({ project }: { project: ModernProject }) {
+export default function Environments({
+  project,
+  revalidate,
+}: {
+  project: ModernProject;
+  /** Passed through to Services, so a lifecycle action there can refresh this project's data. */
+  revalidate?: () => void;
+}) {
   const { url, headers } = useToken();
 
   async function deleteEnvironment(environment: Environment) {
@@ -55,7 +62,11 @@ export default function Environments({ project }: { project: ModernProject }) {
           accessories={[{ date: new Date(environment.createdAt) }]}
           actions={
             <ActionPanel>
-              <Action.Push icon="folder-input.svg" title="Services" target={<Services environment={environment} />} />
+              <Action.Push
+                icon="folder-input.svg"
+                title="Services"
+                target={<Services environment={environment} revalidate={revalidate} />}
+              />
               <Action.Push
                 icon={Icon.Plus}
                 title="Create Environment"

@@ -17,7 +17,14 @@ import { Server, Service, ErrorResult } from "./interfaces";
 import type { ServiceScope } from "./utils";
 import { getTotalServices } from "./utils";
 
-export default function Services({ environment }: { environment: ServiceScope }) {
+export default function Services({
+  environment,
+  revalidate,
+}: {
+  environment: ServiceScope;
+  /** Refetches the project tree this screen's data came from, so a lifecycle action's effect on status is reflected without leaving the screen. */
+  revalidate?: () => void;
+}) {
   const { url, headers } = useToken();
 
   interface GroupedService extends Service {
@@ -114,6 +121,7 @@ export default function Services({ environment }: { environment: ServiceScope })
       }
       toast.style = Toast.Style.Success;
       toast.title = ACTION_PAST[action];
+      revalidate?.();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = `Could not ${action} service`;
@@ -262,17 +270,6 @@ export default function Services({ environment }: { environment: ServiceScope })
             }
             actions={
               <ActionPanel>
-                <ActionPanel.Section title="Actions">
-                  {SERVICE_ACTIONS[service.type].map((action) => (
-                    <Action
-                      key={action}
-                      icon={ACTION_ICONS[action]}
-                      title={ACTION_LABELS[action]}
-                      style={action === "stop" ? Action.Style.Destructive : undefined}
-                      onAction={() => runServiceAction(service, action)}
-                    />
-                  ))}
-                </ActionPanel.Section>
                 <ActionPanel.Submenu icon={Icon.Plus} title="Create">
                   <Action.Push
                     icon="folder-input.svg"
@@ -285,6 +282,17 @@ export default function Services({ environment }: { environment: ServiceScope })
                     target={<CreateDatabase environment={environment} />}
                   />
                 </ActionPanel.Submenu>
+                <ActionPanel.Section title="Actions">
+                  {SERVICE_ACTIONS[service.type].map((action) => (
+                    <Action
+                      key={action}
+                      icon={ACTION_ICONS[action]}
+                      title={ACTION_LABELS[action]}
+                      style={action === "stop" ? Action.Style.Destructive : undefined}
+                      onAction={() => runServiceAction(service, action)}
+                    />
+                  ))}
+                </ActionPanel.Section>
                 <Action
                   icon={Icon.Trash}
                   title="Delete"
