@@ -95,10 +95,14 @@ function Favorites() {
               title: label.name,
             };
 
-            openInLinearProps = {
-              title: "Open Label",
-              url: baseLinearUrl + `/team/${label.team.key}/label/${label.name}`,
-            };
+            // Workspace-level labels aren't tied to a team, so they have no
+            // team-scoped URL to open.
+            if (label.team) {
+              openInLinearProps = {
+                title: "Open Label",
+                url: baseLinearUrl + `/team/${label.team.key}/label/${label.name}`,
+              };
+            }
           }
 
           if (type === "project" && project) {

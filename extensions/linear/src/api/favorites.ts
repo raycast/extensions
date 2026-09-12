@@ -27,7 +27,7 @@ export type Favorite = {
     state: Pick<WorkflowState, "id" | "type" | "name" | "color">;
   };
   label?: Pick<IssueLabel, "id" | "name" | "color"> & {
-    team: Pick<Team, "key">;
+    team: Pick<Team, "key"> | null;
   };
   project?: Pick<Project, "id" | "name" | "icon" | "color" | "url">;
   initiative?: Pick<Initiative, "id" | "name" | "color" | "icon">;
