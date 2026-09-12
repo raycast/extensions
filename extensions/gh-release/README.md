@@ -19,7 +19,7 @@ It reuses whatever credentials `gh` already holds and stores no tokens of its ow
 
 By default the extension lists repos you have **push access** to, across your own account, your organizations, and anything you've been added to as a collaborator. Push access is the filter that matters, since it's what creating a release requires — a repo you can see but not push to is not a repo you can release, so it's left out.
 
-Archived repos are always excluded, the list is ordered by most recent push, and it's capped at 100 repos.
+Archived repos are always excluded, and the list is ordered by most recent push. Every repo you can reach is listed — the extension pages through the full result set rather than stopping at the first hundred.
 
 ## How the next tag is picked
 

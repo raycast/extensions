@@ -18,40 +18,36 @@ import { execFile } from "child_process";
 import { existsSync } from "fs";
 import { promisify } from "util";
 import { nextTag, type Bump } from "./version";
+import { parseRepos } from "./repos";
 
 const run = promisify(execFile);
 
-// ponytail: Raycast doesn't inherit the login shell PATH
+// Raycast doesn't inherit the login shell PATH
 const GH =
   ["/opt/homebrew/bin/gh", "/usr/local/bin/gh", "/usr/bin/gh"].find(
     existsSync,
   ) ?? "gh";
 
 const BUMPS: Bump[] = ["patch", "minor", "major"];
-// ponytail: patch is the primary action (Enter), so it needs no shortcut of its own
+// patch is the primary action (Enter), so it needs no shortcut of its own
 const SHORTCUTS: Record<Bump, Keyboard.Shortcut | undefined> = {
   patch: undefined,
   minor: { modifiers: ["cmd", "shift"], key: "m" },
   major: { modifiers: ["cmd", "shift"], key: "j" },
 };
 
-type Repo = {
-  nameWithOwner: string;
-  description: string | null;
-  pushedAt: string;
-};
-
-// ponytail: `gh repo list <owner>` only returns repos that owner *owns*, which is
+// `gh repo list <owner>` only returns repos that owner *owns*, which is
 // empty for org-based accounts. Releasing needs push access, so ask for that instead.
 // --paginate is load-bearing: the owner filter runs client-side, so capping at one
 // page would hide that owner's repos rather than just trimming the tail.
+// No --jq here: gh runs it per page and emits one JSON document per page, which
+// JSON.parse can't read, and --slurp (which would wrap them) can't combine with --jq.
+// Bare --paginate merges the pages into a single array, so filtering happens in
+// parseRepos instead.
 const LIST_ARGS = [
   "api",
   "--paginate",
   "user/repos?affiliation=owner,organization_member,collaborator&sort=pushed&per_page=100",
-  "--jq",
-  "[.[] | select(.archived == false) | select(.permissions.push) |" +
-    " {nameWithOwner: .full_name, description, pushedAt: .pushed_at}]",
 ];
 
 /** Latest release tag, or "" when the repo genuinely has none. Throws otherwise. */
@@ -69,7 +65,7 @@ async function latestTag(repo: string): Promise<string> {
     ]);
     return stdout.trim();
   } catch (err) {
-    // ponytail: only a real "no releases" may become empty history. Swallowing an
+    // only a real "no releases" may become empty history. Swallowing an
     // auth or network failure here would propose v0.0.1 over an existing v4.x.
     const detail = `${(err as { stderr?: string })?.stderr ?? ""}\n${
       err instanceof Error ? err.message : String(err)
@@ -103,7 +99,7 @@ async function release(repo: string, bump: Bump) {
   const tag = nextTag(last, bump);
   await checking.hide();
 
-  // ponytail: refuse rather than guess — bumping "nightly" would look like a regression
+  // refuse rather than guess — bumping "nightly" would look like a regression
   if (!tag) {
     await showToast({
       style: Toast.Style.Failure,
@@ -177,14 +173,7 @@ export default function Command() {
   const owner = getPreferenceValues<Preferences>().owner?.trim() ?? "";
 
   const { isLoading, data, revalidate, error } = useExec(GH, LIST_ARGS, {
-    parseOutput: ({ stdout }) =>
-      (JSON.parse(stdout || "[]") as Repo[])
-        .filter(
-          (r) =>
-            !owner ||
-            r.nameWithOwner.split("/")[0].toLowerCase() === owner.toLowerCase(),
-        )
-        .sort((a, b) => b.pushedAt.localeCompare(a.pushedAt)),
+    parseOutput: ({ stdout }) => parseRepos(stdout, owner),
     failureToastOptions: {
       title: "Could not list repos",
       message: "Is the gh CLI installed and logged in?",
@@ -222,7 +211,7 @@ export default function Command() {
         <List.Item
           key={repo.nameWithOwner}
           icon={{ source: Icon.Rocket, tintColor: Color.PrimaryText }}
-          // ponytail: unfiltered, the list spans many owners — the bare name is ambiguous
+          // unfiltered, the list spans many owners — the bare name is ambiguous
           title={owner ? repo.nameWithOwner.split("/")[1] : repo.nameWithOwner}
           subtitle={repo.description ?? undefined}
           accessories={[

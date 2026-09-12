@@ -48,7 +48,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "check": "node --experimental-strip-types --no-warnings scripts/version.check.ts",
+    "check": "node --experimental-strip-types --no-warnings scripts/version.check.ts && node --experimental-strip-types --no-warnings scripts/repos.check.ts",
     "publish": "ray publish"
   }
 }
