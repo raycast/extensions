@@ -293,15 +293,25 @@ export function getAgentTarget(agent: { name?: string; pane_id: string }): strin
   return agent.name || agent.pane_id;
 }
 
+/** The state of a `session list` read, as the cached-promise hooks report it. */
+export interface SessionListState {
+  data?: HerdrSession[];
+  isLoading: boolean;
+  error?: unknown;
+}
+
 /**
  * Whether `name` is among the listed Sessions. Herdr 0.9 reports a Session that
  * does not exist exactly like a Stopped one, and `herdr --session` creates what
- * it cannot find, so a start is offered only for a listed Session. No list yet,
- * or a listing that failed, is unknown, and unknown never earns a start.
+ * it cannot find, so a start is offered only for a listed Session. Only a
+ * settled, successful listing is evidence: the hooks keep the previous list
+ * while a refresh is in flight or after one fails, so a Session deleted in the
+ * meantime would otherwise still read as listed. Anything else is unknown, and
+ * unknown never earns a start.
  */
-export function sessionPresence(sessions: HerdrSession[] | undefined, name: string): "listed" | "missing" | "unknown" {
-  if (sessions === undefined) return "unknown";
-  return sessions.some((session) => session.name === name) ? "listed" : "missing";
+export function sessionPresence(list: SessionListState, name: string): "listed" | "missing" | "unknown" {
+  if (list.isLoading || list.error !== undefined || list.data === undefined) return "unknown";
+  return list.data.some((session) => session.name === name) ? "listed" : "missing";
 }
 
 /** The Session a failure names when its server is Stopped, so views can offer to start it. */

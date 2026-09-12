@@ -239,10 +239,21 @@ describe("focusResource", () => {
 // confirmed the name; loading and a failed listing both read as unknown.
 describe("sessionPresence", () => {
   const listed = [{ name: "tmp-a", default: false, running: false, session_dir: "/x", socket_path: "/x/s" }];
+  const settled = { data: listed, isLoading: false, error: undefined };
 
   it("distinguishes a listed session from a missing one, and treats no list as unknown", () => {
-    expect(sessionPresence(listed, "tmp-a")).toBe("listed");
-    expect(sessionPresence(listed, "tmp-b")).toBe("missing");
-    expect(sessionPresence(undefined, "tmp-a")).toBe("unknown");
+    expect(sessionPresence(settled, "tmp-a")).toBe("listed");
+    expect(sessionPresence(settled, "tmp-b")).toBe("missing");
+    expect(sessionPresence({ data: undefined, isLoading: false }, "tmp-a")).toBe("unknown");
+  });
+
+  // Regression: the hook keeps the previous list while a refresh is in flight or
+  // after one fails, so a session deleted in the meantime still read as listed
+  // and could be started, which creates it anew. Only a settled, successful
+  // listing is evidence.
+  it("treats a list that is refreshing or failed as unknown even when it names the session", () => {
+    expect(sessionPresence({ data: listed, isLoading: true }, "tmp-a")).toBe("unknown");
+    expect(sessionPresence({ data: listed, isLoading: false, error: new Error("boom") }, "tmp-a")).toBe("unknown");
+    expect(sessionPresence({ data: listed, isLoading: true }, "tmp-b")).toBe("unknown");
   });
 });

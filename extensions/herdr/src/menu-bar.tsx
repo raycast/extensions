@@ -104,7 +104,7 @@ export default function Command() {
   // create it, so the session list is consulted only while one reads as stopped,
   // and Start is offered only once the list has confirmed the name.
   const sessions = useCachedPromise(getSessions, [], { execute: Boolean(stoppedSession), keepPreviousData: true });
-  const presence = stoppedSession === undefined ? "unknown" : sessionPresence(sessions.data, stoppedSession);
+  const presence = stoppedSession === undefined ? "unknown" : sessionPresence(sessions, stoppedSession);
 
   if (!visible) return null;
 

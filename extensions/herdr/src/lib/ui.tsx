@@ -115,7 +115,7 @@ export function ManageSessionsAction({ title = "Manage Sessions…" }: { title?:
 // confirmed the name; while the list loads, or if it fails, there is no start.
 function SessionStoppedView({ session, onRetry }: { session: string; onRetry?: () => void }) {
   const sessions = useCachedPromise(getSessions, [], { keepPreviousData: true });
-  const presence = sessionPresence(sessions.data, session);
+  const presence = sessionPresence(sessions, session);
   const markdown =
     presence === "missing"
       ? `# Session “${session}” was not found\n\nIt may have been deleted, or the Default Session preference may be misspelled. Choose another session for Raycast to control.`
