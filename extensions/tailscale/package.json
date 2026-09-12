@@ -16,7 +16,8 @@
     "j3lte",
     "itsmatteomanf",
     "MatteoGauthier",
-    "McKeev"
+    "McKeev",
+    "csharp"
   ],
   "categories": [
     "Developer Tools",
@@ -38,6 +39,13 @@
       "title": "My Devices",
       "subtitle": "Tailscale",
       "description": "View a list of your own devices",
+      "mode": "view"
+    },
+    {
+      "name": "services",
+      "title": "Services",
+      "subtitle": "Tailscale",
+      "description": "View the services available in your tailnet",
       "mode": "view"
     },
     {

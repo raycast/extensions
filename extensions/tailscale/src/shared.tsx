@@ -13,6 +13,14 @@ export type Location = {
   Priority: number;
 };
 
+export interface Service {
+  ip: string;
+  hostname: string;
+  displayName?: string;
+  endpoints: string;
+  type: string;
+}
+
 export interface Device {
   self: boolean;
   key: string;
@@ -176,6 +184,24 @@ export function getStatus(peers = true) {
     throw new NotConnectedError();
   }
   return data;
+}
+
+export function getServices(): Service[] {
+  const resp = tailscale("service list");
+
+  return resp
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("IP "))
+    .map((line) => line.split(/\s{2,}/))
+    .filter((columns) => columns.length >= 5)
+    .map(([ip, hostname, displayName, endpoints, type]) => ({
+      ip,
+      hostname,
+      displayName: displayName === "-" ? undefined : displayName,
+      endpoints,
+      type,
+    }));
 }
 
 export function getNetcheck() {
