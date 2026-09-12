@@ -9,7 +9,7 @@
 - **Tickets**: your support tickets, with the number, the status and the visitor.
 - **Ask My Chatbot**: type a question and read the answer your chatbot gives your visitors. Ask a follow-up in the same conversation.
 
-Every command has an action to open the chat in Asyntai.
+Every list command has an action to open the chat in Asyntai.
 
 ## Setup
 
