@@ -5,7 +5,11 @@
   "description": "Start screen recordings and take screenshots with Record — the dead-simple screen recorder. No signup, no watermark, unlimited length.",
   "icon": "icon.png",
   "author": "devrecordso",
-  "categories": ["Productivity", "Media", "Communication"],
+  "categories": [
+    "Productivity",
+    "Media",
+    "Communication"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -13,28 +17,46 @@
       "title": "Record Screen",
       "description": "Start recording your entire screen with the Record desktop app",
       "mode": "no-view",
-      "keywords": ["screen", "capture", "video", "loom"]
+      "keywords": [
+        "screen",
+        "capture",
+        "video",
+        "loom"
+      ]
     },
     {
       "name": "record-window",
       "title": "Record Window",
       "description": "Pick a window and start recording it",
       "mode": "no-view",
-      "keywords": ["window", "capture", "video"]
+      "keywords": [
+        "window",
+        "capture",
+        "video"
+      ]
     },
     {
       "name": "record-area",
       "title": "Record Area",
       "description": "Drag out a custom area of the screen and start recording it",
       "mode": "no-view",
-      "keywords": ["area", "region", "capture", "video"]
+      "keywords": [
+        "area",
+        "region",
+        "capture",
+        "video"
+      ]
     },
     {
       "name": "stop-recording",
       "title": "Stop Recording",
       "description": "Stop the current recording — the share link opens in your browser",
       "mode": "no-view",
-      "keywords": ["stop", "finish", "end"]
+      "keywords": [
+        "stop",
+        "finish",
+        "end"
+      ]
     },
     {
       "name": "pause-resume",
@@ -42,21 +64,33 @@
       "description": "Toggle pause on the current recording",
       "mode": "no-view",
       "disabledByDefault": true,
-      "keywords": ["pause", "resume"]
+      "keywords": [
+        "pause",
+        "resume"
+      ]
     },
     {
       "name": "screenshot-area",
       "title": "Screenshot Area",
       "description": "Drag out an area and screenshot it — an instant share link, ready to paste",
       "mode": "no-view",
-      "keywords": ["screenshot", "area", "region", "snip"]
+      "keywords": [
+        "screenshot",
+        "area",
+        "region",
+        "snip"
+      ]
     },
     {
       "name": "screenshot-screen",
       "title": "Screenshot Screen",
       "description": "Screenshot your entire screen — an instant share link, ready to paste",
       "mode": "no-view",
-      "keywords": ["screenshot", "screen", "capture"]
+      "keywords": [
+        "screenshot",
+        "screen",
+        "capture"
+      ]
     },
     {
       "name": "screenshot-window",
@@ -64,14 +98,21 @@
       "description": "Pick a window and screenshot it",
       "mode": "no-view",
       "disabledByDefault": true,
-      "keywords": ["screenshot", "window"]
+      "keywords": [
+        "screenshot",
+        "window"
+      ]
     },
     {
       "name": "open-record",
       "title": "Open Record",
       "description": "Open the Record desktop app panel",
       "mode": "no-view",
-      "keywords": ["panel", "app", "launch"]
+      "keywords": [
+        "panel",
+        "app",
+        "launch"
+      ]
     }
   ],
   "dependencies": {

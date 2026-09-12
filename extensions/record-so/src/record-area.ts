@@ -1,5 +1,5 @@
-import { trigger } from './lib/trigger';
+import { trigger } from "./lib/trigger";
 
 export default async function Command() {
-  await trigger('recordso://record?target=area', 'Drag out the area to record');
+  await trigger("recordso://record?target=area", "Drag out the area to record");
 }

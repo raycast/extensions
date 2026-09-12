@@ -1,18 +1,18 @@
-import { closeMainWindow, open, showHUD } from '@raycast/api';
-import { readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
+import { closeMainWindow, open, showHUD } from "@raycast/api";
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
 
 /** Where new users land when the desktop app isn't installed. */
-const DOWNLOAD_URL = 'https://record.so/';
+const DOWNLOAD_URL = "https://record.so/";
 
 /** First desktop version whose deep links execute commands (older ones only open the panel). */
-const MIN_VERSION = '1.7.1';
+const MIN_VERSION = "1.7.1";
 
 /** Installed Record.so version from its Info.plist, or null when it can't be determined. */
 function installedVersion(): string | null {
-  for (const app of ['/Applications/Record.so.app', `${homedir()}/Applications/Record.so.app`]) {
+  for (const app of ["/Applications/Record.so.app", `${homedir()}/Applications/Record.so.app`]) {
     try {
-      const plist = readFileSync(`${app}/Contents/Info.plist`, 'utf8');
+      const plist = readFileSync(`${app}/Contents/Info.plist`, "utf8");
       const m = plist.match(/<key>CFBundleShortVersionString<\/key>\s*<string>([^<]+)<\/string>/);
       if (m) return m[1];
     } catch {
@@ -23,8 +23,8 @@ function installedVersion(): string | null {
 }
 
 function olderThan(version: string, min: string): boolean {
-  const a = version.split('.').map((n) => Number.parseInt(n, 10) || 0);
-  const b = min.split('.').map((n) => Number.parseInt(n, 10) || 0);
+  const a = version.split(".").map((n) => Number.parseInt(n, 10) || 0);
+  const b = min.split(".").map((n) => Number.parseInt(n, 10) || 0);
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
     const d = (a[i] ?? 0) - (b[i] ?? 0);
     if (d !== 0) return d < 0;
