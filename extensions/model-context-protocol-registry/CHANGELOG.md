@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Pixelesq MCP Server] - {PR_MERGE_DATE}
+## [Add Pixelesq MCP Server] - 2026-09-12
 
 - Add Pixelesq to the official registry: build and manage a Pixelesq website (pages, sections, content, SEO and analytics) with every edit saved as a draft until you publish. Remote Streamable HTTP server at https://mcp.pixelesq.app/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
 
