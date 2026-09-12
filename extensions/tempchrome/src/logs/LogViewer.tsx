@@ -109,28 +109,43 @@ function timestampForFilename(): string {
   );
 }
 
+// The runner path arrives as an argument rather than spliced into this source,
+// so no AppleScript escaping is involved and the script text stays constant.
+// `quoted form of` is AppleScript's own shell quoting.
+const OPEN_IN_TERMINAL_SCRIPT = `on run argv
+  tell application "Terminal"
+    activate
+    do script "sh " & quoted form of (item 1 of argv)
+  end tell
+end run`;
+
 /** Wraps a value in single quotes so the shell treats every character literally. */
 function shellQuote(value: string): string {
   return `'${value.split("'").join(`'\\''`)}'`;
 }
 
-/** Renders a value as an AppleScript string literal. */
-function appleScriptLiteral(value: string): string {
-  return `"${value.split("\\").join("\\\\").split('"').join('\\"')}"`;
-}
-
 async function openInTerminal(logPath: string): Promise<void> {
-  // The path crosses two parsers, so it needs two layers of quoting. Terminal
-  // hands `do script` to the shell, and the profile directory name comes from a
-  // world-writable temp directory, so an unquoted path would let a crafted
-  // directory name run commands. Shell-quote first, then escape the finished
-  // command for the AppleScript string literal that carries it.
-  const command = `tail -F ${shellQuote(logPath)}`;
-  const script = `tell application "Terminal"
-    activate
-    do script ${appleScriptLiteral(command)}
-  end tell`;
-  await execFileAsync("osascript", ["-e", script]);
+  // Terminal's `do script` types its argument into a tty, and the tty line
+  // discipline rewrites the text: it turns CR into LF, and TAB triggers shell
+  // completion. Quoting cannot survive that, and a rewritten path would make
+  // `tail` silently follow the wrong file. So the command goes into a runner
+  // script that `sh` parses directly, and Terminal only ever receives that
+  // runner's own path, which this code chooses and keeps free of such
+  // characters. Profile directory names come from a world-writable temp
+  // directory, so they stay untrusted and are never parsed as code.
+  const runnerPath = path.join(os.tmpdir(), `tempchrome-tail-${process.pid}-${Date.now()}.sh`);
+  const runner = `#!/bin/sh
+rm -f -- "$0"
+exec tail -F ${shellQuote(logPath)}
+`;
+  await fs.promises.writeFile(runnerPath, runner, { mode: 0o700 });
+  try {
+    await execFileAsync("osascript", ["-e", OPEN_IN_TERMINAL_SCRIPT, runnerPath]);
+  } catch (error) {
+    // The runner deletes itself once it runs, so only a failed launch leaves it.
+    await fs.promises.rm(runnerPath, { force: true }).catch(() => undefined);
+    throw error;
+  }
 }
 
 function severityOf(row: LogRow): string {
