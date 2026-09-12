@@ -12,6 +12,7 @@ const Actions = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolea
   <ActionPanel>
     <ActionPanel.Section>
       <OpenTabAction tab={props.tab} closeLaunchers={props.closeLaunchers} />
+      <Action.OpenInBrowser title="Open in Default Browser" url={props.tab.url} />
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CopyUrlAction url={props.tab.url} />
@@ -30,11 +31,12 @@ const Actions = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolea
   </ActionPanel>
 );
 
-const TabListItem = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolean }) => {
+const TabListItem = (props: { tab: Tab; refresh: () => void; closeLaunchers?: boolean; id?: string }) => {
   const url = props.tab.url;
 
   return (
     <List.Item
+      id={props.id}
       title={getTitle(props.tab)}
       icon={getFavicon(props.tab.url)}
       actions={<Actions tab={props.tab} refresh={props.refresh} closeLaunchers={props.closeLaunchers} />}
