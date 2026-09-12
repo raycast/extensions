@@ -9,6 +9,7 @@ import { castSceneNow, renderCastScene } from "./lib/cast";
 import { renderLoadingCard, svgToMarkdown } from "./lib/svg";
 import { styleFor } from "./lib/themes";
 import { formatPlace } from "./lib/api";
+import { RETRY_HINT } from "./lib/platform";
 import { escapeMarkdown } from "./lib/text";
 
 /** Full-window markdown width for an image-only Detail. */
@@ -40,7 +41,7 @@ export default function Command() {
         "Loading",
       );
     }
-    return `## Cast couldn't check the sky\n\n${escapeMarkdown(error?.message ?? "Check your connection and try again.")}\n\nPress ⌘R to retry.`;
+    return `## Cast couldn't check the sky\n\n${escapeMarkdown(error?.message ?? "Check your connection and try again.")}\n\n${RETRY_HINT}`;
   }, [scene, isLoading, error, active, settings.theme]);
 
   if (locations.length === 0 || !active) {

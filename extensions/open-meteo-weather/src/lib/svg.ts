@@ -5,7 +5,7 @@ import { FetchedTile, TILE_PX } from "./tiles";
 
 const W = 840;
 const H = 490;
-const FONT = `-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif`;
+const FONT = `-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif`;
 
 export interface HeroChartPoint {
   /** Short hour label, e.g. "14h" — only rendered for some points */

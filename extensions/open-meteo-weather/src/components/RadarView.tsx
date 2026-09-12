@@ -7,6 +7,7 @@ import { Forecast, GeoResult, fmt, formatPlace } from "../lib/api";
 import { nowcastSummary } from "../lib/build";
 import { buildRadarShareSvg } from "../lib/share";
 import { renderRadarLoadingCard, svgToMarkdown } from "../lib/svg";
+import { RETRY_HINT } from "../lib/platform";
 import { escapeMarkdown } from "../lib/text";
 import { styleFor } from "../lib/themes";
 import { MAX_ZOOM, MIN_ZOOM, RADAR_ZOOM, tilePoint, tileToLatLon } from "../lib/tiles";
@@ -102,7 +103,7 @@ export function RadarView(props: {
         radar.markdown ??
         (radar.isLoading
           ? svgToMarkdown(renderRadarLoadingCard(formatPlace(place), style, RADAR_WIDTH), "Loading radar")
-          : `## Radar unavailable\n\n${escapeMarkdown(radar.error?.message ?? "Check your connection and try again.")}\n\nPress ⌘R to retry.`)
+          : `## Radar unavailable\n\n${escapeMarkdown(radar.error?.message ?? "Check your connection and try again.")}\n\n${RETRY_HINT}`)
       }
       metadata={
         <Detail.Metadata>

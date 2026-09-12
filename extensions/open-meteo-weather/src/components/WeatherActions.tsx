@@ -124,7 +124,9 @@ export function WeatherActions(props: {
           title={`Show ${s.forecastDays === 7 ? 16 : 7}-Day Forecast`}
           icon={Icon.Calendar}
           onAction={s.toggleForecastDays}
-          shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
+          // Windows can't mirror ⌘D as Ctrl+D: that is Keyboard.Shortcut.Common.Remove there
+          // (used by "Remove Location" below), so the toggle takes Ctrl+Shift+D instead.
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "d" }, Windows: { modifiers: ["ctrl", "shift"], key: "d" } }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Share">
