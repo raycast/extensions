@@ -1,41 +1,44 @@
 import { Action, Icon, Toast, open, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useRef, useState } from "react";
-import { checkConnectionHealth, execute, listConnections, request, webUrl } from "../lib/client";
+import { useEffect, useRef, useState } from "react";
+import { checkConnectionHealth, execute, listConnections, webUrl } from "../lib/client";
 import {
   connectionHandoffCode,
-  directReconnectClient,
   handoffFromExecution,
   integrationDetailUrl,
   validatedIntegrationUrl,
-  type IntegrationWithAuth,
-  type OAuthClientSummary,
-  type OAuthStartResult,
 } from "../lib/connection-actions";
 import { safeBrowserUrl } from "../lib/execution";
+import { startOAuthReconnect } from "../lib/connection-reconnect";
 import type { Connection } from "../lib/types";
 
 export function ConnectionReconnectAction({
   connection,
-  integration,
   onChecked,
 }: {
   connection: Connection;
-  integration?: IntegrationWithAuth;
   onChecked?: () => void;
 }) {
   const busy = useRef(false);
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
   const [waitingForBrowser, setWaitingForBrowser] = useState(false);
 
-  async function browserHandoff() {
+  async function browserHandoff(current: Connection) {
     const result = await execute(
       connectionHandoffCode({
-        integration: connection.integration,
-        owner: connection.owner,
-        template: connection.template,
-        label: connection.name,
+        integration: current.integration,
+        owner: current.owner,
+        template: current.template,
+        label: current.name,
       }),
     );
+    if (!active.current) return;
     const handoff = handoffFromExecution(result);
     const safeUrl = handoff && validatedIntegrationUrl(handoff.url, webUrl(), connection.integration);
     if (!safeUrl) throw new Error("Executor did not return a valid integration URL for this server.");
@@ -84,35 +87,22 @@ export function ConnectionReconnectAction({
         return;
       }
 
-      if (!connection.oauthClient) {
+      const rows = await listConnections({ integration: connection.integration, owner: connection.owner });
+      const current = rows.find(
+        (item) =>
+          item.name === connection.name &&
+          item.owner === connection.owner &&
+          item.integration === connection.integration,
+      );
+      if (!current) throw new Error("The connection is no longer present in Executor.");
+      const started = await startOAuthReconnect(current, () => active.current);
+      if (!active.current) return;
+      if (!started) {
         toast.hide();
-        await browserHandoff();
+        await browserHandoff(current);
         return;
       }
 
-      // Reconnect routing always uses a fresh client inventory. A missing,
-      // dynamic, enterprise-managed, or otherwise unknown binding remains in
-      // Executor's browser flow so Raycast never creates or silently rebinds it.
-      const clients = await request<OAuthClientSummary[]>("/api/oauth/clients");
-      const client = directReconnectClient(clients, connection, integration);
-      if (!client) {
-        toast.hide();
-        await browserHandoff();
-        return;
-      }
-
-      const started = await request<OAuthStartResult>("/api/oauth/start", {
-        method: "POST",
-        body: JSON.stringify({
-          client: client.slug,
-          clientOwner: client.owner,
-          owner: connection.owner,
-          name: connection.name,
-          integration: connection.integration,
-          template: connection.template,
-          identityLabel: connection.identityLabel ?? null,
-        }),
-      });
       if (started.status === "redirect") {
         const authorizationUrl = safeBrowserUrl(started.authorizationUrl);
         if (!authorizationUrl) throw new Error("Executor returned an unsafe OAuth authorization URL.");
@@ -128,7 +118,7 @@ export function ConnectionReconnectAction({
       await verifyReconnect();
     } catch (error) {
       toast.hide();
-      await showFailureToast(error, { title: "Could Not Reconnect" });
+      if (active.current) await showFailureToast(error, { title: "Could Not Reconnect" });
     } finally {
       busy.current = false;
     }

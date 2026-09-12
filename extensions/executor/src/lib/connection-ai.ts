@@ -12,15 +12,13 @@ import {
 } from "./client";
 import {
   connectionHandoffCode,
-  directReconnectClient,
   handoffFromExecution,
   integrationDetailUrl,
   validatedIntegrationUrl,
   type IntegrationWithAuth,
-  type OAuthClientSummary,
-  type OAuthStartResult,
 } from "./connection-actions";
 import { safeBrowserUrl } from "./execution";
+import { startOAuthReconnect } from "./connection-reconnect";
 import type { Connection, Owner } from "./types";
 
 export interface ConnectionTargetInput {
@@ -211,11 +209,9 @@ export function startExecutorConnection(input: AddConnectionInput) {
 
 export async function reconnectExecutorConnection(input: ConnectionTargetInput) {
   const connection = await exactConnection(input);
-  const integration = (await getIntegration(connection.integration)) as IntegrationWithAuth;
-  const clients = await request<OAuthClientSummary[]>("/api/oauth/clients");
-  const client = directReconnectClient(clients, connection, integration);
+  const started = await startOAuthReconnect(connection);
 
-  if (!client) {
+  if (!started) {
     const result = await execute(
       connectionHandoffCode({
         integration: connection.integration,
@@ -236,18 +232,6 @@ export async function reconnectExecutorConnection(input: ConnectionTargetInput) 
     };
   }
 
-  const started = await request<OAuthStartResult>("/api/oauth/start", {
-    method: "POST",
-    body: JSON.stringify({
-      client: client.slug,
-      clientOwner: client.owner,
-      owner: connection.owner,
-      name: connection.name,
-      integration: connection.integration,
-      template: connection.template,
-      identityLabel: connection.identityLabel ?? null,
-    }),
-  });
   if (started.status === "redirect") {
     const url = started.authorizationUrl && safeBrowserUrl(started.authorizationUrl);
     if (!url) throw new Error("Executor returned an unsafe OAuth authorization URL.");

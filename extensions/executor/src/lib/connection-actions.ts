@@ -6,6 +6,7 @@ export interface OAuthClientSummary {
   grant: "authorization_code" | "client_credentials" | "id_jag";
   authorizationUrl?: string;
   tokenUrl?: string;
+  resource?: string | null;
   origin:
     | { kind: "manual"; integration?: string | null }
     | { kind: "dynamic_client_registration"; integration?: string | null }
@@ -69,7 +70,8 @@ export function directReconnectClient(
   );
   if (!method || method.oauth?.enterpriseIdentityProvider) return undefined;
   const client = matchingOAuthClient(clients, connection);
-  if (!client || client.grant === "id_jag" || client.origin.kind === "dynamic_client_registration") return undefined;
+  if (!client || !client.origin || client.grant === "id_jag" || client.origin.kind === "dynamic_client_registration")
+    return undefined;
   if (
     client.origin.kind === "first_party" &&
     client.origin.integrations &&

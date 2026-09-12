@@ -19,7 +19,7 @@ import { accountCacheKey, checkConnectionHealth, defaultOwner, listConnections, 
 import { ConnectionSetupForm } from "./components/connection-setup-form";
 import { ConnectionMetadataForm } from "./components/connection-metadata-form";
 import { ConnectionReconnectAction } from "./components/connection-reconnect-action";
-import { needsReconnect, type IntegrationWithAuth } from "./lib/connection-actions";
+import { needsReconnect } from "./lib/connection-actions";
 import {
   connectionLabel,
   HEALTH_STATUSES,
@@ -187,11 +187,7 @@ function Connections() {
                     <ActionPanel>
                       <ActionPanel.Section>
                         {needsReconnect(connection) ? (
-                          <ConnectionReconnectAction
-                            connection={connection}
-                            integration={directory.get(connection.integration) as IntegrationWithAuth | undefined}
-                            onChecked={() => revalidate()}
-                          />
+                          <ConnectionReconnectAction connection={connection} onChecked={() => revalidate()} />
                         ) : null}
                         <Action.Push
                           title="Browse Tools"

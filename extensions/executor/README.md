@@ -147,8 +147,10 @@ Try these prompts with your configured workspace name:
 A confirmed expired health result or missing OAuth scopes makes reconnect the primary action. An old access-token
 expiry alone does not, because the provider may refresh the token automatically.
 
-Supported OAuth bindings can start their existing sign-in flow from Raycast. Dynamic registration, enterprise,
-and other complex repair cases hand off to Executor's own account UI. Browser launch is not treated as successful
+Supported OAuth bindings can start their existing sign-in flow from Raycast. Existing dynamically registered
+apps can rediscover and register through Executor before opening provider authorization, preserving the same
+connection. Enterprise authentication, client metadata (CIMD), missing app bindings, and unsupported discovery
+hand off to Executor's own account UI. Browser launch is not treated as successful
 reconnection; return and check the connection afterward. Metadata editing changes labels and descriptions only.
 Credential entry and provider configuration stay in Executor.
 
