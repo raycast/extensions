@@ -1,6 +1,8 @@
 import {
   Action,
   ActionPanel,
+  Alert,
+  confirmAlert,
   Form,
   Icon,
   Keyboard,
@@ -172,7 +174,17 @@ export default function Command() {
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
-                  onAction={() => runMutation(() => deleteBookmark(vaultPath, bookmark.id), "Deleted")}
+                  onAction={async () => {
+                    // Unlike a note's own delete, this has no Trash to recover from — the
+                    // style/wording alone don't stop an accidental keystroke, so a real
+                    // confirmation is what actually does.
+                    const confirmed = await confirmAlert({
+                      title: "Delete Bookmark Permanently",
+                      message: `"${bookmark.title}" will be deleted. This can't be undone.`,
+                      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+                    });
+                    if (confirmed) await runMutation(() => deleteBookmark(vaultPath, bookmark.id), "Deleted");
+                  }}
                 />
                 <Action title="Change Vault Folder" icon={Icon.Cog} onAction={openExtensionPreferences} />
               </ActionPanel>

@@ -65,24 +65,35 @@ function normalizeUrlForCompare(raw: string): string {
   try {
     const parsed = new URL(withScheme);
     const cleanPath = parsed.pathname.replace(/\/+$/, "");
-    return `${parsed.protocol}//${parsed.hostname.toLowerCase()}${cleanPath}${parsed.search}`;
+    // .host, not .hostname: the latter drops the port, so two different local dev servers
+    // (localhost:3000 vs localhost:8080) would normalize identically and look like duplicates.
+    return `${parsed.protocol}//${parsed.host.toLowerCase()}${cleanPath}${parsed.search}`;
   } catch {
     return trimmed.toLowerCase();
   }
 }
 
+/** Empty is only the right answer for "this vault has never saved a bookmark" (no file yet) — the
+ *  one case ENOENT actually means. Anything else (a permission error, a half-written file from a
+ *  crash mid-rename, disk trouble) has to be a real failure: every write in this module reads the
+ *  file, modifies it in memory, and writes the WHOLE thing back, so treating a transient read
+ *  failure as "empty" would have the next save silently replace every existing bookmark with just
+ *  the one being added or changed. Letting it throw here means a caller either surfaces the error
+ *  (an in-app command with a toast) or the mutation itself stops rather than clobbering real data. */
 async function readBookmarksFile(vaultPath: string): Promise<BookmarksFile> {
+  let raw: string;
   try {
-    const raw = await fs.readFile(bookmarksFilePath(vaultPath), "utf8");
-    const parsed = JSON.parse(raw) as Partial<BookmarksFile>;
-    return {
-      bookmarks: Array.isArray(parsed.bookmarks) ? parsed.bookmarks : [],
-      tags: Array.isArray(parsed.tags) ? parsed.tags : [],
-      pinnedTagIds: Array.isArray(parsed.pinnedTagIds) ? parsed.pinnedTagIds : [],
-    };
-  } catch {
-    return { bookmarks: [], tags: [], pinnedTagIds: [] };
+    raw = await fs.readFile(bookmarksFilePath(vaultPath), "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return { bookmarks: [], tags: [], pinnedTagIds: [] };
+    throw error;
   }
+  const parsed = JSON.parse(raw) as Partial<BookmarksFile>;
+  return {
+    bookmarks: Array.isArray(parsed.bookmarks) ? parsed.bookmarks : [],
+    tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+    pinnedTagIds: Array.isArray(parsed.pinnedTagIds) ? parsed.pinnedTagIds : [],
+  };
 }
 
 async function writeBookmarksFile(vaultPath: string, data: BookmarksFile): Promise<void> {
@@ -296,8 +307,14 @@ export async function addBookmark(vaultPath: string, rawUrl: string, customTitle
     enriching: false,
   };
 
-  data.bookmarks = [bookmark, ...data.bookmarks];
-  await writeBookmarksFile(vaultPath, data);
+  // Re-read right before writing rather than reusing `data` from above: the title and favicon
+  // fetches in between can take several seconds, and writing back that stale snapshot would
+  // silently discard any edit, archive, or delete made elsewhere while this was still in flight.
+  // The dedupe check above is still against the early read — a duplicate created in that same
+  // window is an acceptable race, but losing unrelated data to it is not.
+  const latest = await readBookmarksFile(vaultPath);
+  latest.bookmarks = [bookmark, ...latest.bookmarks];
+  await writeBookmarksFile(vaultPath, latest);
   return { status: "created", bookmark };
 }
 

@@ -9,7 +9,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { getVaultPath, isValidVault } from "./vault";
 import { addBookmark, setBookmarkArchived } from "./bookmarks";
 
@@ -36,7 +36,13 @@ export default function Command() {
     },
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Saving…" });
-      const result = await addBookmark(vaultPath, values.url, values.title);
+      let result;
+      try {
+        result = await addBookmark(vaultPath, values.url, values.title);
+      } catch (error) {
+        await showFailureToast(error, { title: "Couldn't save the bookmark" });
+        return;
+      }
       if (result.status === "invalid-url") {
         toast.style = Toast.Style.Failure;
         toast.title = "That doesn't look like a valid URL";

@@ -28,7 +28,15 @@ export default async function Command() {
     return;
   }
 
-  const result = await addBookmark(vaultPath, activeTab.url, activeTab.title ?? "");
+  let result;
+  try {
+    result = await addBookmark(vaultPath, activeTab.url, activeTab.title ?? "");
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Couldn't save the bookmark";
+    toast.message = error instanceof Error ? error.message : String(error);
+    return;
+  }
 
   if (result.status === "invalid-url") {
     toast.style = Toast.Style.Failure;

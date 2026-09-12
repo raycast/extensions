@@ -2,10 +2,6 @@ import { existsSync, statSync } from "fs";
 import path from "path";
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
-  vaultPath: string;
-}
-
 // Matches METADATA_DIR_NAME in MarkdownOS's main/handlers/vault.ts.
 export const VAULT_MARKER_DIR = ".markdownos";
 

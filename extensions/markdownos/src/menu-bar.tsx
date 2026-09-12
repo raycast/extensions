@@ -11,10 +11,6 @@ import { showFailureToast } from "@raycast/utils";
 import { isValidVault } from "./vault";
 import { openApp } from "./app-link";
 
-interface MenuBarPreferences {
-  vaultPath: string;
-}
-
 // A no-view command launched this way runs quietly in the background, same as pressing it from
 // Raycast's own root search would; a view command instead opens Raycast straight to that view.
 // Either way this is the SAME command the menu bar item names, so there is exactly one
@@ -28,7 +24,7 @@ async function launch(name: string, title: string) {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<MenuBarPreferences>();
+  const preferences = getPreferenceValues<Preferences.MenuBar>();
   const valid = isValidVault(preferences.vaultPath);
 
   return (

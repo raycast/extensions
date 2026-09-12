@@ -6,13 +6,27 @@
  */
 
 import { execFileSync } from "child_process";
-import { readFileSync } from "fs";
+import { readFileSync, realpathSync } from "fs";
 import * as os from "os";
 import * as path from "path";
 import { open, showToast, Toast } from "@raycast/api";
 
 const APP_BUNDLE_ID_PREFIX = "app.glaze.macos.mf0c4ifk";
 const LEGACY_VAULT_PATH = path.join(os.homedir(), "Documents", "Owl Vault");
+
+/** `path.resolve` only normalizes `.`/`..` — it leaves symlinks untouched, so a vault reached
+ *  through one (an iCloud alias, a synced-folder shortcut) would never match the app's own
+ *  `vault-location.json` even when it's genuinely the same directory. Falls back to `path.resolve`
+ *  if the path doesn't exist yet (a stale `vault-location.json`, or a preference not saved yet) —
+ *  `realpathSync` throws there, and this has to keep returning SOMETHING comparable rather than
+ *  crash the whole app lookup over one bad path. */
+function canonicalVaultPath(vaultPath: string): string {
+  try {
+    return realpathSync(vaultPath);
+  } catch {
+    return path.resolve(vaultPath);
+  }
+}
 
 interface AppInstance {
   /** The .app bundle's own path — for launching it directly (Open App), as opposed to a deep
@@ -42,7 +56,7 @@ function findAppForVault(vaultPath: string): AppInstance | null {
     return null;
   }
 
-  const targetVault = path.resolve(vaultPath);
+  const targetVault = canonicalVaultPath(vaultPath);
 
   for (const appPath of appPaths) {
     let info: {
@@ -68,7 +82,7 @@ function findAppForVault(vaultPath: string): AppInstance | null {
     } catch {
       // No vault-location.json — this instance is on the legacy default, already assumed above.
     }
-    if (path.resolve(appVaultPath) !== targetVault) continue;
+    if (canonicalVaultPath(appVaultPath) !== targetVault) continue;
 
     const ownEntry = info.CFBundleURLTypes?.find((entry) => entry.CFBundleURLName === bundleId);
     const scheme = ownEntry?.CFBundleURLSchemes?.[0];
