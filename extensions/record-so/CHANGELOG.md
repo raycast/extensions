@@ -1,6 +1,6 @@
 # Record Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-12
 
 - Record Screen / Window / Area commands
 - Stop and Pause/Resume commands
