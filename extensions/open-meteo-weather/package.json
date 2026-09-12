@@ -39,12 +39,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.2.0",
+    "@raycast/api": "^2.3.1",
     "@raycast/utils": "^2.3.1",
     "gifenc": "^1.0.3",
     "jpeg-js": "^0.4.4",
     "pngjs": "^7.0.0",
-    "suncalc": "^2.0.1"
+    "suncalc": "^2.0.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
