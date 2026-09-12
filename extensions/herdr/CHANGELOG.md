@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix Agent Focus and Agent Names] - 2026-09-11
+
+- Switch to the agent's tab when focusing an agent. `agent focus` moves the server's focus but leaves the attached client drawing the tab it is already on, so the agent's pane never came into view. Workspaces and tabs were unaffected, because `workspace focus` and `tab focus` are what move the client.
+- Name agents by the session title they set, rather than by their working directory. Two agents in one repository were indistinguishable. A title that is only the agent's own product name still yields to the directory.
+
 ## [Menu Bar Background Refresh] - 2026-09-03
 
 - Refresh the menu bar in the background every minute instead of only when it is opened.

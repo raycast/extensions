@@ -4,8 +4,10 @@ import { agentDisplayNameToId, KNOWN_AGENT_NAMES } from "./skills-cli-agents";
 import {
   InvalidCustomNpxPathError,
   NpxResolutionError,
+  SkillsCliBusyError,
   isInvalidCustomNpxPathError,
   isNpxResolutionError,
+  isSkillsCliBusyError,
   runSkillsCli,
   type SkillsCliRunner,
 } from "./skills-cli-runner";
@@ -15,8 +17,10 @@ const home = homedir();
 export {
   InvalidCustomNpxPathError,
   NpxResolutionError,
+  SkillsCliBusyError,
   isInvalidCustomNpxPathError,
   isNpxResolutionError,
+  isSkillsCliBusyError,
   KNOWN_AGENT_NAMES,
 };
 
