@@ -96,7 +96,7 @@ export function BlockActions({ block, channel, extraActions }: BlockActionsProps
   return (
     <ActionPanel title={block?.title ?? "✦"}>
       {renderBlockAction()}
-      {block ? (
+      {block && block.class !== "Channel" ? (
         <ActionPanel.Section>
           <Action.Push
             icon={Icon.Pencil}
@@ -108,40 +108,6 @@ export function BlockActions({ block, channel, extraActions }: BlockActionsProps
             title="Connect Block to Channels"
             target={<ConnectBlockView block={block} channel={channel} />}
           />
-          {channel && block.connection?.id ? (
-            <Action
-              icon={Icon.XMarkCircle}
-              title="Remove from This Channel"
-              style={Action.Style.Destructive}
-              onAction={async () => {
-                const confirmed = await confirmAlert({
-                  title: "Remove connection?",
-                  message: "This only removes the block from the current channel.",
-                  primaryAction: {
-                    title: "Remove",
-                    style: Alert.ActionStyle.Destructive,
-                  },
-                });
-                if (!confirmed) {
-                  return;
-                }
-                try {
-                  const connectionId = block.connection?.id;
-                  if (!connectionId) {
-                    return;
-                  }
-                  await arena.connection(connectionId).delete();
-                  await showToast({
-                    style: Toast.Style.Success,
-                    title: "Removed from channel",
-                    message: block.title ?? `Block ${block.id}`,
-                  });
-                } catch (error) {
-                  showFailureToast(error, { title: "Failed to remove connection" });
-                }
-              }}
-            />
-          ) : null}
           <Action
             icon={Icon.Trash}
             title="Delete Block"
@@ -170,6 +136,42 @@ export function BlockActions({ block, channel, extraActions }: BlockActionsProps
                 });
               } catch (error) {
                 showFailureToast(error, { title: "Failed to delete block" });
+              }
+            }}
+          />
+        </ActionPanel.Section>
+      ) : null}
+      {channel && block?.connection?.id ? (
+        <ActionPanel.Section>
+          <Action
+            icon={Icon.XMarkCircle}
+            title="Remove from This Channel"
+            style={Action.Style.Destructive}
+            onAction={async () => {
+              const confirmed = await confirmAlert({
+                title: "Remove connection?",
+                message: "This only removes the item from the current channel.",
+                primaryAction: {
+                  title: "Remove",
+                  style: Alert.ActionStyle.Destructive,
+                },
+              });
+              if (!confirmed) {
+                return;
+              }
+              try {
+                const connectionId = block.connection?.id;
+                if (!connectionId) {
+                  return;
+                }
+                await arena.connection(connectionId).delete();
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Removed from channel",
+                  message: block.title ?? `Block ${block.id}`,
+                });
+              } catch (error) {
+                showFailureToast(error, { title: "Failed to remove connection" });
               }
             }}
           />
