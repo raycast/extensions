@@ -9,7 +9,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { showFailureToast, useForm } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 import { getVaultPath, isValidVault } from "./vault";
 import { addBookmark, setBookmarkArchived } from "./bookmarks";
 
@@ -40,7 +40,12 @@ export default function Command() {
       try {
         result = await addBookmark(vaultPath, values.url, values.title);
       } catch (error) {
-        await showFailureToast(error, { title: "Couldn't save the bookmark" });
+        // Updates the SAME toast rather than showing a new one: showFailureToast would leave the
+        // "Saving…" animated toast above stuck spinning forever, with a second, separate failure
+        // toast appearing alongside it instead of replacing it.
+        toast.style = Toast.Style.Failure;
+        toast.title = "Couldn't save the bookmark";
+        toast.message = error instanceof Error ? error.message : String(error);
         return;
       }
       if (result.status === "invalid-url") {
