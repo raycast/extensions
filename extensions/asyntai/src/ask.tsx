@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, Toast, showToast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { api, newAskSession } from "./api";
+import { api, newAskSession, safeMarkdown } from "./api";
 
 // One session per command run, so a follow-up question keeps the context.
 type Turn = { question: string; answer: string };
 
-export default function Ask(props: LaunchProps<{ arguments: { question?: string } }>) {
+export default function Ask(props: LaunchProps<{ arguments: Arguments.Ask }>) {
   const [sessionId] = useState(newAskSession);
   const first = (props.arguments.question || "").trim();
   if (first) {
@@ -73,8 +73,14 @@ function Answer(props: { sessionId: string; turns: Turn[]; question: string }) {
   const turns: Turn[] = [...props.turns, { question: props.question, answer }];
   const history = turns
     .map((t) => {
-      const reply = t.answer || (loading ? "_Thinking..._" : error ? `_${error}_` : "");
-      return `**You**\n\n${t.question}\n\n**Chatbot**\n\n${reply}`;
+      const reply = t.answer
+        ? safeMarkdown(t.answer)
+        : loading
+          ? "_Thinking..._"
+          : error
+            ? `_${safeMarkdown(error)}_`
+            : "";
+      return `**You**\n\n${safeMarkdown(t.question)}\n\n**Chatbot**\n\n${reply}`;
     })
     .join("\n\n---\n\n");
 
