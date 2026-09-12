@@ -143,14 +143,19 @@ export async function getState(): Promise<WMState> {
 // 匹配用「最近优先」而不是「第一个落在容差内」：macOS 新窗口 cascade 偏移约
 // 20px，小于容差 40，逐个取首个命中会让层叠的同 app 窗口互相错配、交换槽位。
 // 先枚举全部候选对，按四维距离全局升序锁定，层叠时也能对上。
+// 不可平铺的 AX 窗口不参与配对：Electron 类 app 常带一个与主窗口坐标完全
+// 相同的覆盖层窗口（飞书的 WatermarkWidget，AXUnknown、AXSize 不可设），
+// 若让它进候选，距离同为 0 时会先被选中，size 写上去被静默忽略，主窗口原地不动。
 const MATCH_HELPER = `
 const TOL = 40;
-function matchGroup(group, positions, sizes) {
+const PERMISSION_ERRNOS = [-25211, -1743];
+function matchGroup(group, ax) {
   const pairs = [];
   for (let g = 0; g < group.length; g++) {
     const m = group[g];
-    for (let i = 0; i < positions.length; i++) {
-      const p = positions[i], s = sizes[i];
+    for (let i = 0; i < ax.positions.length; i++) {
+      if (!ax.eligible[i]) continue;
+      const p = ax.positions[i], s = ax.sizes[i];
       const dx = p[0]-m.cx, dy = p[1]-m.cy, dw = s[0]-m.cw, dh = s[1]-m.ch;
       if (Math.abs(dx)<=TOL && Math.abs(dy)<=TOL && Math.abs(dw)<=TOL && Math.abs(dh)<=TOL) {
         pairs.push({ g: g, i: i, dist: dx*dx + dy*dy + dw*dw + dh*dh });
@@ -170,68 +175,68 @@ function matchGroup(group, positions, sizes) {
   for (let g = 0; g < group.length; g++) if (!usedMove[g]) unmatched.push(g);
   return { matched: matched, unmatched: unmatched };
 }
-// 按 pid 取 System Events 进程。进程列表在读 unixId 之后可能变动，索引会指向
-// 另一个 app，所以寻址后必须再核对一次 pid——四维坐标匹配挡不住这种串台：
-// 同屏窗口本就常常层叠在一起，别家窗口落进 40pt 容差内完全可能。
-function procForPid(se, pidIndex, pid) {
-  const idx = pidIndex[pid];
-  if (idx === undefined) throw new Error('pid gone');
-  const proc = se.processes[idx];
-  if (proc.unixId() !== Number(pid)) throw new Error('pid moved');
-  return proc;
+// 进程一律按 pid 过滤寻址，specifier 每次求值都由 System Events 现场解析，
+// 不存在「先读索引、后用索引」的时间窗——进程列表中途增减也指不到别家。
+// 代价是每次求值比索引寻址多约 15ms（实测 45ms vs 29ms）。不要用 windows()
+// 物化：物化出的引用按进程名寻址，同名多进程（如两个 Ghostty 实例）会指错。
+function procByPid(se, pid) {
+  return se.processes.whose({ unixId: Number(pid) })[0];
+}
+// 一个进程全部窗口的坐标与可平铺性，三次往返。eligible 对应官方
+// WindowManagement API 的 positionable && resizable：AXSize 与 AXPosition 的
+// settable 用一个 whose 过滤一次取回（实测 45ms，分两次读要 98ms），两项都
+// 为 true 才算可平铺；缺任一属性的窗口返回的数组不足两项，同样视为不可平铺。
+function readWindows(proc) {
+  const positions = proc.windows.position();
+  const sizes = proc.windows.size();
+  const settable = proc.windows.attributes.whose({ _or: [{ name: 'AXSize' }, { name: 'AXPosition' }] }).settable();
+  const eligible = [];
+  for (let i = 0; i < positions.length; i++) {
+    const s = settable[i];
+    eligible.push(Array.isArray(s) && s.length === 2 && s[0] === true && s[1] === true);
+  }
+  return { positions: positions, sizes: sizes, eligible: eligible };
 }
 function groupByPid(items) {
   const byPid = {};
   for (const m of items) (byPid[m.pid] = byPid[m.pid] || []).push(m);
   return byPid;
 }
-// 一次拿全部进程的 pid 建索引，之后按索引寻址。不要用 whose({unixId})：
-// 那是过滤查询，System Events 在 specifier 每次求值时都会重跑一遍全进程
-// 匹配（实测每 app 约 58ms，之后每次 .windows 访问还要再付一次），而
-// unixId() 一次往返就拿到全部 128 个进程、只要 34ms。实测读开销 910→426ms。
-// 索引寻址同时规避了物化引用按进程名寻址、同名多进程指错窗口的老坑。
-function pidIndexOf(se) {
-  const allPids = se.processes.unixId();
-  const pidIndex = {};
-  for (let i = 0; i < allPids.length; i++) pidIndex[allPids[i]] = i;
-  return pidIndex;
+// 只记权限类错误码。「不能获取对象」(-1728) 之类的普通失败若先到，
+// 不能把后面真正的权限拒绝盖掉。
+function notePermission(state, e) {
+  if (PERMISSION_ERRNOS.indexOf(e.errorNumber) !== -1) state.permissionErrno = e.errorNumber;
 }
 `;
 
-// 可平铺性探测。CG 列表里混着改不了大小的窗口——固定尺寸的工具窗、对话框、
-// 面板——它们一旦进网格就会占掉一个槽位、随后设置失败，网格缺一块。
-// AX 的 AXSize settable 就是官方 WindowManagement API 里 resizable 的来源，
-// 用它把这些窗口在布局计算之前挑出去。AXPosition 不查：实测连不可 resize 的
-// 窗口也几乎总是可移动的，多查一轮只是白付一次往返。
+// 可平铺性探测。CG 列表里混着改不了大小或位置的窗口——固定尺寸的工具窗、
+// 对话框、面板、覆盖层——它们一旦进网格就会占掉一个槽位、随后设置失败，
+// 网格缺一块。用 AX 的 AXSize / AXPosition settable 在布局计算之前挑出去。
 const PROBE_SCRIPT = `
 ${MATCH_HELPER}
 function run(argv) {
   const items = JSON.parse(argv[0]);
   const se = Application('System Events');
-  const pidIndex = pidIndexOf(se);
   const byPid = groupByPid(items);
   const tileable = [];
-  let permissionErrno = 0;
+  const state = { permissionErrno: 0 };
   for (const pid of Object.keys(byPid)) {
     const group = byPid[pid];
-    let positions, sizes, settable;
+    let ax;
     try {
-      const proc = procForPid(se, pidIndex, pid);
-      positions = proc.windows.position();
-      sizes = proc.windows.size();
-      settable = proc.windows.attributes.byName('AXSize').settable();
+      ax = readWindows(procByPid(se, pid));
     } catch (e) {
-      if (!permissionErrno && e.errorNumber) permissionErrno = e.errorNumber;
+      notePermission(state, e);
       continue; // 探测不到就当作不可平铺，移动阶段本来也会失败
     }
-    const res = matchGroup(group, positions, sizes);
-    for (const pr of res.matched) if (settable[pr.i] === true) tileable.push(group[pr.g].id);
+    const res = matchGroup(group, ax);
+    for (const pr of res.matched) tileable.push(group[pr.g].id);
   }
-  return JSON.stringify({ tileable: tileable, permissionErrno: permissionErrno });
+  return JSON.stringify({ tileable: tileable, permissionErrno: state.permissionErrno });
 }
 `;
 
-// 返回候选里真正能被平铺的窗口 id。AX 里对不上号或不可 resize 的一律剔除，
+// 返回候选里真正能被平铺的窗口 id。AX 里对不上号或不可 resize / 移动的一律剔除，
 // 它们进网格只会占一个空槽。
 export async function getTileable(windows: WMWindow[]): Promise<Set<string>> {
   if (windows.length === 0) return new Set();
@@ -254,50 +259,62 @@ function run(argv) {
   const moves = JSON.parse(argv[0]);
   const se = Application('System Events');
   const failed = [];
-  let permissionErrno = 0;
-  const pidIndex = pidIndexOf(se);
+  const state = { permissionErrno: 0 };
+  // 第一阶段按进程分组读坐标、配对——批量读一次 Apple Event 拿全部窗口，
+  // 比逐窗口快得多。第二阶段再按调用方给的槽位顺序逐个写入，这样网格是
+  // 从槽位 1 起一格格填满，而不是按 pid 顺序一个 app 一个 app 地跳。
   const byPid = groupByPid(moves);
+  const targets = {}; // move id → { proc, i }
+  const enhanced = []; // 本次临时关掉的 AXEnhancedUserInterface，写完恢复
   for (const pid of Object.keys(byPid)) {
     const group = byPid[pid];
-    let proc, positions, sizes;
+    let proc, ax;
     try {
-      proc = procForPid(se, pidIndex, pid);
-      // 批量取坐标：一次 Apple Event，比逐窗口快得多
-      positions = proc.windows.position();
-      sizes = proc.windows.size();
+      proc = procByPid(se, pid);
+      // 可设置性在这里再读一遍而不是沿用探测结果：探测到移动之间窗口可能增减，
+      // AX 索引会漂，而探测阶段剔掉的覆盖层窗口仍会和主窗口一起出现在这份列表里
+      ax = readWindows(proc);
     } catch (e) {
-      if (!permissionErrno && e.errorNumber) permissionErrno = e.errorNumber;
+      notePermission(state, e);
       for (const m of group) failed.push(m.id);
       continue;
     }
-    // 先全部完成匹配再移动，避免移动后的坐标干扰后续匹配
-    const res = matchGroup(group, positions, sizes);
+    const res = matchGroup(group, ax);
     for (const g of res.unmatched) failed.push(group[g].id);
-    // 按原顺序移动，保持与调用方给出的槽位顺序一致
-    const matched = res.matched.slice().sort((a, b) => a.g - b.g);
-    for (const pr of matched) {
-      const i = pr.i, m = group[pr.g];
-      // 已经在目标位置的窗口不必再写：省一次往返，也省一次多余的重绘
-      if (m.x === m.cx && m.y === m.cy && m.width === m.cw && m.height === m.ch) continue;
-      // 关键：用 proc.windows[i] 的 whose 链式引用寻址，绝不调用 windows()
-      // 物化——物化出的引用按进程名寻址，同名多进程（如两个 Ghostty 实例）
-      // 时会全部解析到第一个进程，窗口就指错了
-      const w = proc.windows[i];
-      try {
-        // 顺序必须是 size → position → size：先挪位置会让大窗悬出屏幕，
-        // 随后的 resize 触发 AppKit 跨屏约束、高度被加上 ~57px（macOS 26 实测）。
-        // 末尾那次 size 只有放大路径需要（贴底放大时首次 size 同样会被钳）——
-        // 平铺基本都是缩小，无条件补发等于白花一次往返和一次可见跳变
-        w.size = [m.width, m.height];
-        w.position = [m.x, m.y];
-        if (m.width > m.cw || m.height > m.ch) w.size = [m.width, m.height];
-      } catch (e) {
-        if (!permissionErrno && e.errorNumber) permissionErrno = e.errorNumber;
-        failed.push(m.id);
-      }
+    for (const pr of res.matched) targets[group[pr.g].id] = { proc: proc, i: pr.i };
+    // AXEnhancedUserInterface 一旦被某个辅助功能客户端打开，AppKit 就把这个
+    // app 的窗口 frame 变化做成渐进动画：size 刚写下去还在动，紧接着的 position
+    // 写入就叠在中间帧上，窗口最终停在离槽位几十像素的地方、尺寸也是个中间值
+    // （实测一个 Ghostty 实例连 properties 合并写都救不回来）。Rectangle、yabai、
+    // Hammerspoon 的做法相同：移窗前临时关掉，移完恢复。
+    try {
+      const a = proc.attributes.byName('AXEnhancedUserInterface');
+      if (a.value() === true) { a.value = false; enhanced.push(a); }
+    } catch (e) { /* 读不到就按未开启处理 */ }
+  }
+  for (const m of moves) {
+    const t = targets[m.id];
+    if (!t) continue;
+    // 已经在目标位置的窗口不必再写：省一次往返，也省一次多余的重绘
+    if (m.x === m.cx && m.y === m.cy && m.width === m.cw && m.height === m.ch) continue;
+    const w = t.proc.windows[t.i];
+    try {
+      // 顺序必须是 size → position → size：先挪位置会让大窗悬出屏幕，
+      // 随后的 resize 触发 AppKit 跨屏约束、高度被加上 ~57px（macOS 26 实测）。
+      // 末尾那次 size 只有放大路径需要（贴底放大时首次 size 同样会被钳）——
+      // 平铺基本都是缩小，无条件补发等于白花一次往返和一次可见跳变
+      w.size = [m.width, m.height];
+      w.position = [m.x, m.y];
+      if (m.width > m.cw || m.height > m.ch) w.size = [m.width, m.height];
+    } catch (e) {
+      notePermission(state, e);
+      failed.push(m.id);
     }
   }
-  return JSON.stringify({ failed: failed, permissionErrno: permissionErrno });
+  for (const a of enhanced) {
+    try { a.value = true; } catch (e) { /* 恢复失败无碍，下次读到 false 也只是不再动画 */ }
+  }
+  return JSON.stringify({ failed: failed, permissionErrno: state.permissionErrno });
 }
 `;
 
