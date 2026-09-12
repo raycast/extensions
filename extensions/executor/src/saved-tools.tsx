@@ -51,44 +51,52 @@ function SavedTools() {
           accessories={[{ tag: item.args ? "Preset" : "Favorite" }]}
           actions={
             <ActionPanel>
-              <Action.Push
-                title={item.args ? "Use Preset" : "Run Tool"}
-                icon={Icon.Play}
-                target={<RunTool tool={item.tool} initialArgs={item.args} />}
-              />
-              <Action.Push
-                title="Edit Saved Tool"
-                icon={Icon.Pencil}
-                shortcut={Keyboard.Shortcut.Common.Edit}
-                target={<EditSavedTool item={item} onSaved={revalidate} />}
-              />
-              <Action.Push
-                title="Find Tools to Save"
-                icon={Icon.Plus}
-                shortcut={Keyboard.Shortcut.Common.New}
-                target={<ToolBrowser />}
-              />
-              <Action
-                title="Remove Saved Tool"
-                shortcut={Keyboard.Shortcut.Common.Remove}
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={async () => {
-                  try {
-                    await removeSavedTool(item.id);
-                    await revalidate();
-                  } catch (error) {
-                    await showFailureToast(error, { title: "Could Not Remove Saved Tool" });
-                  }
-                }}
-              />
-              <Action
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-                title="Reload Saved Tools"
-                icon={Icon.ArrowClockwise}
-                onAction={() => revalidate()}
-              />
-              <WorkspaceAction />
+              <ActionPanel.Section>
+                <Action.Push
+                  title={item.args ? "Use Preset" : "Run Tool"}
+                  icon={Icon.Play}
+                  target={<RunTool tool={item.tool} initialArgs={item.args} />}
+                />
+                <Action.Push
+                  title="Edit Saved Tool"
+                  icon={Icon.Pencil}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                  target={<EditSavedTool item={item} onSaved={revalidate} />}
+                />
+                <Action.Push
+                  title="Find Tools to Save"
+                  icon={Icon.Plus}
+                  shortcut={Keyboard.Shortcut.Common.New}
+                  target={<ToolBrowser />}
+                />
+              </ActionPanel.Section>
+
+              <ActionPanel.Section title="Navigation">
+                <Action
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  title="Reload Saved Tools"
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => revalidate()}
+                />
+                <WorkspaceAction />
+              </ActionPanel.Section>
+
+              <ActionPanel.Section>
+                <Action
+                  title="Remove Saved Tool"
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={async () => {
+                    try {
+                      await removeSavedTool(item.id);
+                      await revalidate();
+                    } catch (error) {
+                      await showFailureToast(error, { title: "Could Not Remove Saved Tool" });
+                    }
+                  }}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

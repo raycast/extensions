@@ -515,43 +515,54 @@ export function PolicyBrowser({ initialPattern }: { initialPattern?: string }) {
             ]}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View Policy"
-                  shortcut={{ modifiers: ["cmd"], key: "i" }}
-                  icon={Icon.Eye}
-                  target={<PolicyDetail policy={policy} onChanged={revalidate} />}
-                />
-                <Action.Push
-                  title="Edit Policy"
-                  shortcut={Keyboard.Shortcut.Common.Edit}
-                  icon={Icon.Pencil}
-                  target={<PolicyForm policy={policy} onSaved={revalidate} />}
-                />
-                <Action.Push
-                  title="New Policy"
-                  shortcut={Keyboard.Shortcut.Common.New}
-                  icon={Icon.Plus}
-                  target={<NewPolicy initialPattern={initialPattern} onSaved={revalidate} />}
-                />
-                <Action
-                  title="Delete Policy"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                  onAction={() => remove(policy)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Pattern"
-                  shortcut={Keyboard.Shortcut.Common.Copy}
-                  content={policy.pattern}
-                />
-                <Action
-                  shortcut={Keyboard.Shortcut.Common.Refresh}
-                  title="Reload Policies"
-                  icon={Icon.ArrowClockwise}
-                  onAction={revalidate}
-                />
-                <WorkspaceAction />
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="View Policy"
+                    shortcut={{ modifiers: ["cmd"], key: "i" }}
+                    icon={Icon.Eye}
+                    target={<PolicyDetail policy={policy} onChanged={revalidate} />}
+                  />
+                  <Action.Push
+                    title="Edit Policy"
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    icon={Icon.Pencil}
+                    target={<PolicyForm policy={policy} onSaved={revalidate} />}
+                  />
+                  <Action.Push
+                    title="New Policy"
+                    shortcut={Keyboard.Shortcut.Common.New}
+                    icon={Icon.Plus}
+                    target={<NewPolicy initialPattern={initialPattern} onSaved={revalidate} />}
+                  />
+                </ActionPanel.Section>
+
+                <ActionPanel.Section title="Copy">
+                  <Action.CopyToClipboard
+                    title="Copy Pattern"
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                    content={policy.pattern}
+                  />
+                </ActionPanel.Section>
+
+                <ActionPanel.Section title="Navigation">
+                  <Action
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    title="Reload Policies"
+                    icon={Icon.ArrowClockwise}
+                    onAction={revalidate}
+                  />
+                  <WorkspaceAction />
+                </ActionPanel.Section>
+
+                <ActionPanel.Section>
+                  <Action
+                    title="Delete Policy"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    onAction={() => remove(policy)}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

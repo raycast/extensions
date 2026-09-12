@@ -14,7 +14,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { accountCacheKey, defaultOwner, getToolSchema, listConnections, listTools } from "./lib/client";
 import { asJson, codeBlock, connectionLabel, summarize, titleCase, toolLabel, schemaFields } from "./lib/format";
 import { integrationIcon, integrationLabel, useIntegrationDirectory } from "./lib/integrations";
@@ -34,44 +34,51 @@ function callCommand(tool: ToolSummary): string {
   return `executor call ${tool.address} '{}'`;
 }
 
-function ToolActions({ tool }: { tool: ToolSummary }) {
+function ToolActions({ tool, children }: { tool: ToolSummary; children?: ReactNode }) {
   return (
     <>
-      <Action.Push title="Run Tool" icon={Icon.Play} target={<RunTool tool={tool} />} />
-      <Action
-        title="Save Tool"
-        shortcut={Keyboard.Shortcut.Common.Save}
-        icon={Icon.Star}
-        onAction={async () => {
-          try {
-            await saveTool({ id: tool.address, title: toolLabel(tool.name), tool });
-            await showToast({ style: Toast.Style.Success, title: "Tool Saved" });
-          } catch (error) {
-            await showFailureToast(error, { title: "Could Not Save Tool" });
-          }
-        }}
-      />
-      <Action.CopyToClipboard
-        title="Copy Tool Address"
-        shortcut={Keyboard.Shortcut.Common.Copy}
-        content={tool.address}
-        icon={Icon.Clipboard}
-      />
-      <Action.CopyToClipboard
-        title="Copy Executor Call Command"
-        content={callCommand(tool)}
-        icon={Icon.Terminal}
-        shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-      />
-      <Action.Push
-        title="Manage Policies for This Tool"
-        icon={Icon.Shield}
-        target={<PolicyBrowser initialPattern={tool.address.replace(/^tools\./, "")} />}
-      />
-      <ConsoleAction
-        title="Open Integration in Executor"
-        path={`/integrations/${encodeURIComponent(tool.integration)}`}
-      />
+      <ActionPanel.Section>
+        {children}
+        <Action.Push title="Run Tool" icon={Icon.Play} target={<RunTool tool={tool} />} />
+        <Action
+          title="Save Tool"
+          shortcut={Keyboard.Shortcut.Common.Save}
+          icon={Icon.Star}
+          onAction={async () => {
+            try {
+              await saveTool({ id: tool.address, title: toolLabel(tool.name), tool });
+              await showToast({ style: Toast.Style.Success, title: "Tool Saved" });
+            } catch (error) {
+              await showFailureToast(error, { title: "Could Not Save Tool" });
+            }
+          }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Copy">
+        <Action.CopyToClipboard
+          title="Copy Tool Address"
+          shortcut={Keyboard.Shortcut.Common.Copy}
+          content={tool.address}
+          icon={Icon.Clipboard}
+        />
+        <Action.CopyToClipboard
+          title="Copy Executor Call Command"
+          content={callCommand(tool)}
+          icon={Icon.Terminal}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Manage">
+        <Action.Push
+          title="Manage Policies for This Tool"
+          icon={Icon.Shield}
+          target={<PolicyBrowser initialPattern={tool.address.replace(/^tools\./, "")} />}
+        />
+        <ConsoleAction
+          title="Open Integration in Executor"
+          path={`/integrations/${encodeURIComponent(tool.integration)}`}
+        />
+      </ActionPanel.Section>
     </>
   );
 }
@@ -134,64 +141,70 @@ function ToolSchemaView({ tool, connectionName }: { tool: ToolSummary; connectio
         <ActionPanel>
           <ToolActions tool={tool} />
           {data ? (
-            <Action.Push
-              title="View Technical Schema"
-              icon={Icon.Code}
-              target={
-                <Detail
-                  navigationTitle={workspaceTitle(`${toolLabel(tool.name)} Schema`)}
-                  markdown={[
-                    "## Tool Address",
-                    codeBlock(tool.address, "text"),
-                    "## Input",
-                    codeBlock(
-                      data.inputTypeScript ?? asJson(data.inputSchema),
-                      data.inputTypeScript ? "typescript" : "json",
-                    ),
-                    "## Output",
-                    codeBlock(
-                      data.outputTypeScript ?? asJson(data.outputSchema),
-                      data.outputTypeScript ? "typescript" : "json",
-                    ),
-                    ...(data.typeScriptDefinitions
-                      ? [
-                          "## Type Definitions",
-                          codeBlock(Object.values(data.typeScriptDefinitions).join("\n\n"), "typescript"),
-                        ]
-                      : []),
-                    ...(data.schemaDefinitions
-                      ? ["## Schema Definitions", codeBlock(asJson(data.schemaDefinitions))]
-                      : []),
-                  ].join("\n\n")}
+            <ActionPanel.Section title="Schema">
+              {data ? (
+                <Action.Push
+                  title="View Technical Schema"
+                  icon={Icon.Code}
+                  target={
+                    <Detail
+                      navigationTitle={workspaceTitle(`${toolLabel(tool.name)} Schema`)}
+                      markdown={[
+                        "## Tool Address",
+                        codeBlock(tool.address, "text"),
+                        "## Input",
+                        codeBlock(
+                          data.inputTypeScript ?? asJson(data.inputSchema),
+                          data.inputTypeScript ? "typescript" : "json",
+                        ),
+                        "## Output",
+                        codeBlock(
+                          data.outputTypeScript ?? asJson(data.outputSchema),
+                          data.outputTypeScript ? "typescript" : "json",
+                        ),
+                        ...(data.typeScriptDefinitions
+                          ? [
+                              "## Type Definitions",
+                              codeBlock(Object.values(data.typeScriptDefinitions).join("\n\n"), "typescript"),
+                            ]
+                          : []),
+                        ...(data.schemaDefinitions
+                          ? ["## Schema Definitions", codeBlock(asJson(data.schemaDefinitions))]
+                          : []),
+                      ].join("\n\n")}
+                    />
+                  }
                 />
-              }
-            />
+              ) : null}
+              {/* Preserve standard acronyms rather than the linter's "Typescript" suggestion. */}
+              {/* eslint-disable @raycast/prefer-title-case */}
+              {typeScript.length > 0 ? (
+                <Action.CopyToClipboard
+                  title="Copy TypeScript Types"
+                  content={typeScript}
+                  icon={Icon.Code}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                />
+              ) : null}
+              {/* eslint-enable @raycast/prefer-title-case */}
+              {data?.inputSchema ? (
+                <Action.CopyToClipboard
+                  title="Copy Input JSON Schema"
+                  content={asJson(data.inputSchema)}
+                  icon={Icon.Snippets}
+                />
+              ) : null}
+            </ActionPanel.Section>
           ) : null}
-          {/* Preserve standard acronyms rather than the linter's "Typescript" suggestion. */}
-          {/* eslint-disable @raycast/prefer-title-case */}
-          {typeScript.length > 0 ? (
-            <Action.CopyToClipboard
-              title="Copy TypeScript Types"
-              content={typeScript}
-              icon={Icon.Code}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+          <ActionPanel.Section title="Navigation">
+            <Action
+              title="Reload Tool"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={revalidate}
             />
-          ) : null}
-          {/* eslint-enable @raycast/prefer-title-case */}
-          {data?.inputSchema ? (
-            <Action.CopyToClipboard
-              title="Copy Input JSON Schema"
-              content={asJson(data.inputSchema)}
-              icon={Icon.Snippets}
-            />
-          ) : null}
-          <Action
-            title="Reload Tool"
-            icon={Icon.ArrowClockwise}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={revalidate}
-          />
-          <WorkspaceAction />
+            <WorkspaceAction />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -448,20 +461,23 @@ export function ToolBrowser({
               ]}
               actions={
                 <ActionPanel>
-                  <Action.Push
-                    title="View Tool"
-                    shortcut={{ modifiers: ["cmd"], key: "i" }}
-                    icon={Icon.Code}
-                    target={<ToolSchemaView tool={tool} connectionName={displayConnection(tool)} />}
-                  />
-                  <ToolActions tool={tool} />
-                  <Action
-                    title="Reload Tools"
-                    icon={Icon.ArrowClockwise}
-                    shortcut={Keyboard.Shortcut.Common.Refresh}
-                    onAction={reload}
-                  />
-                  <WorkspaceAction />
+                  <ToolActions tool={tool}>
+                    <Action.Push
+                      title="View Tool"
+                      shortcut={{ modifiers: ["cmd"], key: "i" }}
+                      icon={Icon.Code}
+                      target={<ToolSchemaView tool={tool} connectionName={displayConnection(tool)} />}
+                    />
+                  </ToolActions>
+                  <ActionPanel.Section title="Navigation">
+                    <Action
+                      title="Reload Tools"
+                      icon={Icon.ArrowClockwise}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                      onAction={reload}
+                    />
+                    <WorkspaceAction />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />

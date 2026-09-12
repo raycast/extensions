@@ -185,65 +185,79 @@ function Connections() {
                   accessories={accessories}
                   actions={
                     <ActionPanel>
-                      {needsReconnect(connection) ? (
-                        <ConnectionReconnectAction
-                          connection={connection}
-                          integration={directory.get(connection.integration) as IntegrationWithAuth | undefined}
-                          onChecked={() => revalidate()}
+                      <ActionPanel.Section>
+                        {needsReconnect(connection) ? (
+                          <ConnectionReconnectAction
+                            connection={connection}
+                            integration={directory.get(connection.integration) as IntegrationWithAuth | undefined}
+                            onChecked={() => revalidate()}
+                          />
+                        ) : null}
+                        <Action.Push
+                          title="Browse Tools"
+                          icon={Icon.MagnifyingGlass}
+                          target={<ToolBrowser initialIntegration={connection.integration} connection={connection} />}
                         />
-                      ) : null}
-                      <Action.Push
-                        title="Browse Tools"
-                        icon={Icon.MagnifyingGlass}
-                        target={<ToolBrowser initialIntegration={connection.integration} connection={connection} />}
-                      />
-                      <Action.Push
-                        title="Edit Connection Details"
-                        shortcut={Keyboard.Shortcut.Common.Edit}
-                        icon={Icon.Pencil}
-                        target={<ConnectionMetadataForm connection={connection} onSaved={() => revalidate()} />}
-                      />
-                      <Action.Push
-                        title="Add Connection"
-                        shortcut={Keyboard.Shortcut.Common.New}
-                        icon={Icon.Plus}
-                        target={<ConnectionSetupForm initialIntegration={connection.integration} />}
-                      />
-                      <Action title="Check Health" icon={Icon.Heartbeat} onAction={() => onCheckHealth(connection)} />
-                      <Action
-                        title="Resync Tools"
-                        icon={Icon.ArrowClockwise}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                        onAction={() => onRefresh(connection)}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy Connection Address"
-                        shortcut={Keyboard.Shortcut.Common.Copy}
-                        content={connection.address}
-                        icon={Icon.Clipboard}
-                      />
-                      <ConsoleAction
-                        title="Open in Executor"
-                        path={`/integrations/${encodeURIComponent(connection.integration)}`}
-                      />
-                      <Action
-                        title="Reload Connections"
-                        icon={Icon.RotateClockwise}
-                        shortcut={Keyboard.Shortcut.Common.Refresh}
-                        onAction={() => revalidate()}
-                      />
-                      <DeleteExecutorItemAction
-                        target={{
-                          kind: "connection",
-                          integration: connection.integration,
-                          owner: connection.owner,
-                          connection: connection.name,
-                        }}
-                        onDeleted={() => {
-                          void revalidate();
-                        }}
-                      />
-                      <WorkspaceAction />
+                        <Action.Push
+                          title="Edit Connection Details"
+                          shortcut={Keyboard.Shortcut.Common.Edit}
+                          icon={Icon.Pencil}
+                          target={<ConnectionMetadataForm connection={connection} onSaved={() => revalidate()} />}
+                        />
+                        <Action.Push
+                          title="Add Connection"
+                          shortcut={Keyboard.Shortcut.Common.New}
+                          icon={Icon.Plus}
+                          target={<ConnectionSetupForm initialIntegration={connection.integration} />}
+                        />
+                      </ActionPanel.Section>
+
+                      <ActionPanel.Section title="Connection">
+                        <Action title="Check Health" icon={Icon.Heartbeat} onAction={() => onCheckHealth(connection)} />
+                        <Action
+                          title="Resync Tools"
+                          icon={Icon.ArrowClockwise}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                          onAction={() => onRefresh(connection)}
+                        />
+                      </ActionPanel.Section>
+
+                      <ActionPanel.Section title="Copy">
+                        <Action.CopyToClipboard
+                          title="Copy Connection Address"
+                          shortcut={Keyboard.Shortcut.Common.Copy}
+                          content={connection.address}
+                          icon={Icon.Clipboard}
+                        />
+                      </ActionPanel.Section>
+
+                      <ActionPanel.Section title="Navigation">
+                        <ConsoleAction
+                          title="Open in Executor"
+                          path={`/integrations/${encodeURIComponent(connection.integration)}`}
+                        />
+                        <Action
+                          title="Reload Connections"
+                          icon={Icon.RotateClockwise}
+                          shortcut={Keyboard.Shortcut.Common.Refresh}
+                          onAction={() => revalidate()}
+                        />
+                        <WorkspaceAction />
+                      </ActionPanel.Section>
+
+                      <ActionPanel.Section>
+                        <DeleteExecutorItemAction
+                          target={{
+                            kind: "connection",
+                            integration: connection.integration,
+                            owner: connection.owner,
+                            connection: connection.name,
+                          }}
+                          onDeleted={() => {
+                            void revalidate();
+                          }}
+                        />
+                      </ActionPanel.Section>
                     </ActionPanel>
                   }
                 />

@@ -108,39 +108,44 @@ function IntegrationBrowser() {
                 accessories={[...(matches ? [{ tag: "Added" }] : []), { text: item.domain }]}
                 actions={
                   <ActionPanel>
-                    {matches ? (
-                      <ConsoleAction
-                        title="Open Integration in Executor"
-                        path={`/integrations/${encodeURIComponent(item.slug!)}`}
-                      />
-                    ) : (
+                    <ActionPanel.Section>
+                      {matches ? (
+                        <ConsoleAction
+                          title="Open Integration in Executor"
+                          path={`/integrations/${encodeURIComponent(item.slug!)}`}
+                        />
+                      ) : (
+                        <Action.Push
+                          title="Configure Integration"
+                          icon={Icon.Plus}
+                          target={<IntegrationSetupForm item={item} />}
+                        />
+                      )}
                       <Action.Push
-                        title="Configure Integration"
-                        icon={Icon.Plus}
+                        title="View Integration Details"
+                        shortcut={{ modifiers: ["cmd"], key: "i" }}
+                        icon={Icon.Info}
                         target={<IntegrationSetupForm item={item} />}
                       />
-                    )}
-                    <Action.Push
-                      title="View Integration Details"
-                      shortcut={{ modifiers: ["cmd"], key: "i" }}
-                      icon={Icon.Info}
-                      target={<IntegrationSetupForm item={item} />}
-                    />
-                    <Action.Push
-                      title="Add Custom Integration"
-                      icon={Icon.Plus}
-                      shortcut={Keyboard.Shortcut.Common.New}
-                      target={
-                        <IntegrationSetupForm defaults={{ kind: kind === "all" ? "mcp" : (kind as CatalogKind) }} />
-                      }
-                    />
-                    <Action
-                      shortcut={Keyboard.Shortcut.Common.Refresh}
-                      title="Reload Catalog"
-                      icon={Icon.ArrowClockwise}
-                      onAction={() => revalidate()}
-                    />
-                    <WorkspaceAction />
+                      <Action.Push
+                        title="Add Custom Integration"
+                        icon={Icon.Plus}
+                        shortcut={Keyboard.Shortcut.Common.New}
+                        target={
+                          <IntegrationSetupForm defaults={{ kind: kind === "all" ? "mcp" : (kind as CatalogKind) }} />
+                        }
+                      />
+                    </ActionPanel.Section>
+
+                    <ActionPanel.Section title="Navigation">
+                      <Action
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
+                        title="Reload Catalog"
+                        icon={Icon.ArrowClockwise}
+                        onAction={() => revalidate()}
+                      />
+                      <WorkspaceAction />
+                    </ActionPanel.Section>
                   </ActionPanel>
                 }
               />

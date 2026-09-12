@@ -187,7 +187,7 @@ export function ExecutionResultView({
       actions={
         <ActionPanel>
           {paused && !unavailable && !busy ? (
-            <>
+            <ActionPanel.Section title="Approval">
               {isUrl && url ? (
                 <Action.OpenInBrowser title="Continue in Browser" shortcut={Keyboard.Shortcut.Common.Open} url={url} />
               ) : null}
@@ -215,29 +215,35 @@ export function ExecutionResultView({
                 icon={Icon.Stop}
                 onAction={() => resume("cancel").catch(() => undefined)}
               />
-            </>
+            </ActionPanel.Section>
           ) : null}
-          <Action.CopyToClipboard
-            title="Copy Result JSON"
-            shortcut={Keyboard.Shortcut.Common.Copy}
-            content={asJson(value)}
-          />
-          <Action
-            title="Export Result JSON"
-            shortcut={Keyboard.Shortcut.Common.Save}
-            icon={Icon.Download}
-            onAction={exportResult}
-          />
-          <Action.CopyToClipboard title="Copy Text Output" content={result.text} />
-          <Action.Push
-            title="View Full Response"
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
-            icon={Icon.Code}
-            target={<Detail markdown={codeBlock(asJson(result.structured))} />}
-          />
-          {code ? <Action.CopyToClipboard title="Copy Code" content={code} /> : null}
-          {paused ? <Action.CopyToClipboard title="Copy Execution Identifier" content={paused.executionId} /> : null}
-          <WorkspaceAction />
+          <ActionPanel.Section title="Copy and Export">
+            <Action.CopyToClipboard
+              title="Copy Result JSON"
+              shortcut={Keyboard.Shortcut.Common.Copy}
+              content={asJson(value)}
+            />
+            <Action
+              title="Export Result JSON"
+              shortcut={Keyboard.Shortcut.Common.Save}
+              icon={Icon.Download}
+              onAction={exportResult}
+            />
+            <Action.CopyToClipboard title="Copy Text Output" content={result.text} />
+            {code ? <Action.CopyToClipboard title="Copy Code" content={code} /> : null}
+            {paused ? <Action.CopyToClipboard title="Copy Execution Identifier" content={paused.executionId} /> : null}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Inspect">
+            <Action.Push
+              title="View Full Response"
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+              icon={Icon.Code}
+              target={<Detail markdown={codeBlock(asJson(result.structured))} />}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Navigation">
+            <WorkspaceAction />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

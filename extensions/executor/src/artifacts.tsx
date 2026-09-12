@@ -19,7 +19,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { accountCacheKey, getArtifact, listArtifacts, listConnections, removeArtifact } from "./lib/client";
 import { consoleUrl } from "./lib/console";
 import { artifactSearchKeywords, escapeMarkdown, safeArtifactUrl, validateArtifactTitle } from "./lib/artifacts";
@@ -113,11 +113,13 @@ function ArtifactActions({
   onChanged,
   onDelete,
   detail = false,
+  children,
 }: {
   artifact: ArtifactSummary;
   onChanged: () => void;
   onDelete: () => Promise<boolean>;
   detail?: boolean;
+  children?: ReactNode;
 }) {
   const opening = useRef(false);
 
@@ -148,48 +150,58 @@ function ArtifactActions({
 
   return (
     <>
-      <Action
-        title="Open Artifact in Executor"
-        shortcut={Keyboard.Shortcut.Common.Open}
-        icon={Icon.Globe}
-        onAction={openArtifact}
-      />
-      {!detail ? (
-        <Action.Push
-          title="View Artifact Details"
-          shortcut={{ modifiers: ["cmd"], key: "i" }}
-          icon={Icon.Info}
-          target={<ArtifactDetail artifact={artifact} onChanged={onChanged} onDelete={onDelete} />}
+      <ActionPanel.Section>
+        <Action
+          title="Open Artifact in Executor"
+          shortcut={Keyboard.Shortcut.Common.Open}
+          icon={Icon.Globe}
+          onAction={openArtifact}
         />
-      ) : null}
-      <Action.Push
-        title="Edit Artifact Details"
-        icon={Icon.Pencil}
-        shortcut={Keyboard.Shortcut.Common.Edit}
-        target={<MetadataForm artifact={artifact} onSaved={onChanged} />}
-      />
-      <Action
-        title="Copy Artifact Link"
-        shortcut={Keyboard.Shortcut.Common.Copy}
-        icon={Icon.Link}
-        onAction={copyLink}
-      />
-      {/* Preserve the API's standard initialism. */}
-      {/* eslint-disable-next-line @raycast/prefer-title-case */}
-      <Action.CopyToClipboard title="Copy Artifact ID" content={artifact.id} icon={Icon.Clipboard} />
-      <Action
-        title="Delete Artifact"
-        icon={Icon.Trash}
-        style={Action.Style.Destructive}
-        shortcut={Keyboard.Shortcut.Common.Remove}
-        onAction={onDelete}
-      />
-      <Action
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        title="Reload Artifacts"
-        icon={Icon.RotateClockwise}
-        onAction={onChanged}
-      />
+        {!detail ? (
+          <Action.Push
+            title="View Artifact Details"
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            icon={Icon.Info}
+            target={<ArtifactDetail artifact={artifact} onChanged={onChanged} onDelete={onDelete} />}
+          />
+        ) : null}
+        <Action.Push
+          title="Edit Artifact Details"
+          icon={Icon.Pencil}
+          shortcut={Keyboard.Shortcut.Common.Edit}
+          target={<MetadataForm artifact={artifact} onSaved={onChanged} />}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Copy">
+        <Action
+          title="Copy Artifact Link"
+          shortcut={Keyboard.Shortcut.Common.Copy}
+          icon={Icon.Link}
+          onAction={copyLink}
+        />
+        {/* Preserve the API's standard initialism. */}
+        {/* eslint-disable-next-line @raycast/prefer-title-case */}
+        <Action.CopyToClipboard title="Copy Artifact ID" content={artifact.id} icon={Icon.Clipboard} />
+      </ActionPanel.Section>
+      {children}
+      <ActionPanel.Section title="Navigation">
+        <Action
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          title="Reload Artifacts"
+          icon={Icon.RotateClockwise}
+          onAction={onChanged}
+        />
+        <WorkspaceAction />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          title="Delete Artifact"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          shortcut={Keyboard.Shortcut.Common.Remove}
+          onAction={onDelete}
+        />
+      </ActionPanel.Section>
     </>
   );
 }
@@ -270,34 +282,36 @@ function ArtifactDetail({
               if (deleted) pop();
               return deleted;
             }}
-          />
-          {bindings.length > 0 ? (
-            <Action.CopyToClipboard title="Copy Bindings JSON" content={asJson(data?.bindings)} />
-          ) : null}
-          {data ? (
-            <Action.Push
-              title="View Artifact Source"
-              icon={Icon.Code}
-              target={
-                <Detail
-                  navigationTitle={workspaceTitle("Artifact Source")}
-                  markdown={codeBlock(data.code, "tsx")}
-                  actions={
-                    <ActionPanel>
-                      <Action.CopyToClipboard
-                        title="Copy Source"
-                        shortcut={Keyboard.Shortcut.Common.Copy}
-                        content={data.code}
-                      />
-                      <Action.CopyToClipboard title="Copy Bindings JSON" content={asJson(data.bindings)} />
-                      <WorkspaceAction />
-                    </ActionPanel>
+          >
+            {data ? (
+              <ActionPanel.Section title="Source">
+                {bindings.length > 0 ? (
+                  <Action.CopyToClipboard title="Copy Bindings JSON" content={asJson(data?.bindings)} />
+                ) : null}
+                <Action.Push
+                  title="View Artifact Source"
+                  icon={Icon.Code}
+                  target={
+                    <Detail
+                      navigationTitle={workspaceTitle("Artifact Source")}
+                      markdown={codeBlock(data.code, "tsx")}
+                      actions={
+                        <ActionPanel>
+                          <Action.CopyToClipboard
+                            title="Copy Source"
+                            shortcut={Keyboard.Shortcut.Common.Copy}
+                            content={data.code}
+                          />
+                          <Action.CopyToClipboard title="Copy Bindings JSON" content={asJson(data.bindings)} />
+                          <WorkspaceAction />
+                        </ActionPanel>
+                      }
+                    />
                   }
                 />
-              }
-            />
-          ) : null}
-          <WorkspaceAction />
+              </ActionPanel.Section>
+            ) : null}
+          </ArtifactActions>
         </ActionPanel>
       }
     />
@@ -393,7 +407,6 @@ function Artifacts() {
           actions={
             <ActionPanel>
               <ArtifactActions artifact={artifact} onChanged={revalidate} onDelete={() => onDelete(artifact)} />
-              <WorkspaceAction />
             </ActionPanel>
           }
         />

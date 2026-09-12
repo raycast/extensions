@@ -441,52 +441,60 @@ export default function ManageWorkspaces(
             accessories={isActive ? [{ tag: { value: "Active", color: Color.Green } }] : []}
             actions={
               <ActionPanel>
-                <Action
-                  title={isActive ? `Open ${workspace.name}` : `Switch to ${workspace.name}`}
-                  shortcut={isActive ? Keyboard.Shortcut.Common.Open : undefined}
-                  icon={isActive ? Icon.CheckCircle : Icon.ArrowRight}
-                  onAction={() => (isActive ? openWorkspace(workspace, returnCommand) : onSwitch(workspace))}
-                />
-                {!isActive ? (
+                <ActionPanel.Section>
                   <Action
-                    title={`Open ${workspace.name}`}
-                    icon={Icon.ArrowRight}
-                    shortcut={Keyboard.Shortcut.Common.Open}
-                    onAction={() => openWorkspace(workspace, returnCommand)}
+                    title={isActive ? `Open ${workspace.name}` : `Switch to ${workspace.name}`}
+                    shortcut={isActive ? Keyboard.Shortcut.Common.Open : undefined}
+                    icon={isActive ? Icon.CheckCircle : Icon.ArrowRight}
+                    onAction={() => (isActive ? openWorkspace(workspace, returnCommand) : onSwitch(workspace))}
                   />
-                ) : null}
-                <Action.Push
-                  title="Add Workspace"
-                  icon={Icon.Plus}
-                  shortcut={Keyboard.Shortcut.Common.New}
-                  target={addWorkspace}
-                />
-                <Action.Push
-                  title="Edit Workspace"
-                  shortcut={Keyboard.Shortcut.Common.Edit}
-                  icon={Icon.Pencil}
-                  target={<EditWorkspaceForm workspace={workspace} onSaved={() => revalidate()} />}
-                />
-                {isLegacyWorkspace(workspace) ? (
-                  <Action title="Verify Workspace" icon={Icon.CheckCircle} onAction={() => onVerify(workspace)} />
-                ) : null}
-                {isLegacyWorkspace(workspace) ? (
-                  <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-                ) : (
+                  {!isActive ? (
+                    <Action
+                      title={`Open ${workspace.name}`}
+                      icon={Icon.ArrowRight}
+                      shortcut={Keyboard.Shortcut.Common.Open}
+                      onAction={() => openWorkspace(workspace, returnCommand)}
+                    />
+                  ) : null}
+                  <Action.Push
+                    title="Add Workspace"
+                    icon={Icon.Plus}
+                    shortcut={Keyboard.Shortcut.Common.New}
+                    target={addWorkspace}
+                  />
+                  <Action.Push
+                    title="Edit Workspace"
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                    icon={Icon.Pencil}
+                    target={<EditWorkspaceForm workspace={workspace} onSaved={() => revalidate()} />}
+                  />
+                  {isLegacyWorkspace(workspace) ? (
+                    <Action title="Verify Workspace" icon={Icon.CheckCircle} onAction={() => onVerify(workspace)} />
+                  ) : null}
+                </ActionPanel.Section>
+
+                <ActionPanel.Section>
                   <Action
-                    title="Remove Workspace"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    shortcut={Keyboard.Shortcut.Common.Remove}
-                    onAction={() => onRemove(workspace)}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    title="Reload Workspaces"
+                    icon={Icon.RotateClockwise}
+                    onAction={() => revalidate()}
                   />
-                )}
-                <Action
-                  shortcut={Keyboard.Shortcut.Common.Refresh}
-                  title="Reload Workspaces"
-                  icon={Icon.RotateClockwise}
-                  onAction={() => revalidate()}
-                />
+                </ActionPanel.Section>
+
+                <ActionPanel.Section>
+                  {isLegacyWorkspace(workspace) ? (
+                    <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                  ) : (
+                    <Action
+                      title="Remove Workspace"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
+                      onAction={() => onRemove(workspace)}
+                    />
+                  )}
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

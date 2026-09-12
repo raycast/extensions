@@ -144,50 +144,64 @@ function Integrations() {
           icon={integrationIcon(integration.slug, directory)}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Browse Tools"
-                icon={Icon.MagnifyingGlass}
-                target={<ToolBrowser initialIntegration={integration.slug} />}
-              />
-              <Action.Push
-                title="Add Connection"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-                icon={Icon.Plus}
-                target={<ConnectionSetupForm initialIntegration={integration.slug} />}
-              />
-              <Action.Push
-                title="Edit Integration Details"
-                shortcut={Keyboard.Shortcut.Common.Edit}
-                icon={Icon.Pencil}
-                target={<IntegrationMetadataForm integration={integration} onSaved={() => revalidate()} />}
-              />
-              <Action.Push
-                title="Add Integration"
-                shortcut={Keyboard.Shortcut.Common.New}
-                icon={Icon.Plus}
-                target={<AddIntegration />}
-              />
-              <ConsoleAction title="Open in Executor" path={`/integrations/${encodeURIComponent(integration.slug)}`} />
-              <Action.CopyToClipboard
-                title="Copy Integration Slug"
-                shortcut={Keyboard.Shortcut.Common.Copy}
-                content={integration.slug}
-              />
-              <Action
-                title="Reload Integrations"
-                icon={Icon.ArrowClockwise}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={() => revalidate()}
-              />
-              {integration.canRemove ? (
-                <DeleteExecutorItemAction
-                  target={{ kind: "integration", integration: integration.slug }}
-                  onDeleted={() => {
-                    void revalidate();
-                  }}
+              <ActionPanel.Section>
+                <Action.Push
+                  title="Browse Tools"
+                  icon={Icon.MagnifyingGlass}
+                  target={<ToolBrowser initialIntegration={integration.slug} />}
                 />
+                <Action.Push
+                  title="Add Connection"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                  icon={Icon.Plus}
+                  target={<ConnectionSetupForm initialIntegration={integration.slug} />}
+                />
+                <Action.Push
+                  title="Edit Integration Details"
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                  icon={Icon.Pencil}
+                  target={<IntegrationMetadataForm integration={integration} onSaved={() => revalidate()} />}
+                />
+                <Action.Push
+                  title="Add Integration"
+                  shortcut={Keyboard.Shortcut.Common.New}
+                  icon={Icon.Plus}
+                  target={<AddIntegration />}
+                />
+              </ActionPanel.Section>
+
+              <ActionPanel.Section title="Copy">
+                <Action.CopyToClipboard
+                  title="Copy Integration Slug"
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                  content={integration.slug}
+                />
+              </ActionPanel.Section>
+
+              <ActionPanel.Section title="Navigation">
+                <ConsoleAction
+                  title="Open in Executor"
+                  path={`/integrations/${encodeURIComponent(integration.slug)}`}
+                />
+                <Action
+                  title="Reload Integrations"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={() => revalidate()}
+                />
+                <WorkspaceAction />
+              </ActionPanel.Section>
+
+              {integration.canRemove ? (
+                <ActionPanel.Section>
+                  <DeleteExecutorItemAction
+                    target={{ kind: "integration", integration: integration.slug }}
+                    onDeleted={() => {
+                      void revalidate();
+                    }}
+                  />
+                </ActionPanel.Section>
               ) : null}
-              <WorkspaceAction />
             </ActionPanel>
           }
         />
