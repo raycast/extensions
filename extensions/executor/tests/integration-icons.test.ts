@@ -11,13 +11,34 @@ test("icons follow provider metadata, regardless of integration slug", () => {
   }
 });
 
-test("catalog domains identify providers even when specifications are hosted elsewhere", () => {
+test("catalog domains take precedence over the display URL fallback", () => {
   const metadata = { kind: "openapi", displayUrl: "https://raw.githubusercontent.com/example/spec/main/openapi.json" };
-  expect(integrationIcon("custom_service", new Map([["custom_service", metadata]]))).toMatchObject({ source: "plug" });
+  expect(integrationIcon("custom_service", new Map([["custom_service", metadata]]))).toMatchObject({
+    source: "https://integrations.sh/logo/githubusercontent.com?sz=128",
+  });
   expect(
     integrationIcon("custom_service", new Map([["custom_service", { ...metadata, logoDomain: "example.org" }]])),
   ).toMatchObject({
     source: "https://integrations.sh/logo/example.org?sz=128",
+  });
+});
+
+test("OpenAPI integrations retain Executor's display-domain logos after being saved or renamed", () => {
+  for (const [displayUrl, domain] of [
+    ["https://api.example.org", "example.org"],
+    ["https://secure.example.net/api/v3.0", "example.net"],
+    ["https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest", "googleapis.com"],
+  ]) {
+    const metadata = { kind: "openapi", displayUrl };
+    for (const slug of ["original", "renamed_integration"]) {
+      expect(integrationIcon(slug, new Map([[slug, metadata]]))).toMatchObject({
+        source: `https://integrations.sh/logo/${domain}?sz=128`,
+        fallback: "plug",
+      });
+    }
+  }
+  expect(integrationIcon("unconfigured", new Map([["unconfigured", { kind: "openapi" }]]))).toMatchObject({
+    source: "plug",
   });
 });
 

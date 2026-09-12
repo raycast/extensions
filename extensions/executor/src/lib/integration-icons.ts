@@ -11,8 +11,8 @@ export function registrableDomain(value: string | null | undefined): string | nu
   try {
     const url = new URL(value.includes("://") ? value : `https://${value}`);
     if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) return null;
-    const result = parse(url.hostname, { allowPrivateDomains: true });
-    return result.isIcann || result.isPrivate ? result.domain : null;
+    const result = parse(url.hostname);
+    return result.isIcann ? result.domain : null;
   } catch {
     return null;
   }
@@ -34,12 +34,9 @@ export function integrationIcon(
   if (slug === "executor") return { source: "extension_icon.png" };
 
   const integration = directory?.get(slug);
-  // A catalog domain identifies the provider. An OpenAPI URL identifies a file host.
-  const domain = integration?.logoDomain
-    ? registrableDomain(integration.logoDomain)
-    : integration?.kind === "openapi"
-      ? null
-      : registrableDomain(integration?.displayUrl);
+  // Executor's display URL can be a base URL, saved provider domain, or spec URL.
+  // Use its domain fallback for every integration kind, just like the console.
+  const domain = registrableDomain(integration?.logoDomain ?? integration?.displayUrl);
   if (!domain) return { source: Icon.Plug, tintColor: Color.SecondaryText };
 
   return {

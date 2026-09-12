@@ -158,7 +158,7 @@ Credential entry and provider configuration stay in Executor.
 
 ## Integration catalog
 
-Provider logos use catalog domains or configured endpoint metadata through Executor’s logo service, with no built-in provider-domain list. OpenAPI specification hosts do not identify a provider; without catalog metadata, those integrations use a neutral icon.
+Provider logos use catalog domains or Executor’s display URL through its logo service, with no built-in provider-domain list. This includes OpenAPI integrations: Executor may supply an API base URL, saved provider domain, or specification URL. Missing metadata or unavailable images fall back to a neutral icon.
 
 **Add Integration** searches the same public integrations.sh registry used by Executor, with provider logos,
 pagination, and MCP/API/GraphQL filters. Provider names are public search queries. Pasted endpoint URLs are
