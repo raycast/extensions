@@ -213,7 +213,11 @@ function codePointSafePrefix(value: string, limit: number): string {
 export function truncateLabel(value: string, limit = MAX_LABEL_CHARACTERS): string {
   if (value.length <= limit) return value;
   // Copy the short prefix so a display label never retains a much larger string.
-  return codePointSafePrefix(value, limit - 1).split("").join("") + "…";
+  return (
+    codePointSafePrefix(value, limit - 1)
+      .split("")
+      .join("") + "…"
+  );
 }
 
 export function jsonPathPreview(path: string): { text: string; markdown: string; truncated: boolean } {
