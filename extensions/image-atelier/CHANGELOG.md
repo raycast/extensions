@@ -8,3 +8,5 @@
 - Save images to a configurable local folder and open, copy, or save additional copies.
 
 - Confirm local-photo uploads before AI editing and bound provider responses to prevent excessive memory use.
+
+- Support line-wrapped base64 image responses and include an actual Quick AI generation screenshot as review evidence.

@@ -43,3 +43,10 @@ test("accepts exact limits and validates base64 decoded size including padding",
   assert.throws(() => decodeImage("AQID", 2), /size limit/);
   assert.throws(() => decodeImage("AQIDBAUG", 3), /size limit/);
 });
+
+test("accepts line-wrapped base64 without weakening decoded size limits", () => {
+  assert.deepEqual(decodeImage(" A Q\r\nI D\t", 3), Buffer.from([1, 2, 3]));
+  assert.deepEqual(decodeImage(" A Q = = \n", 1), Buffer.from([1]));
+  assert.throws(() => decodeImage(" A Q I D \n", 2), /size limit/);
+  assert.throws(() => decodeImage("AQID\r\nBAUG", 3), /size limit/);
+});

@@ -33,9 +33,10 @@ export async function readBounded(
 export function decodeImage(value: string, limit = MAX_IMAGE_BYTES): Buffer {
   if (typeof value !== "string")
     throw new Error("Invalid base64 image response.");
-  if (value.length > Math.ceil(limit / 3) * 4)
+  const normalizedValue = value.replace(/[ \t\r\n\f]/g, "");
+  if (normalizedValue.length > Math.ceil(limit / 3) * 4)
     throw new Error("Image exceeds the size limit.");
-  const bytes = Buffer.from(value, "base64");
+  const bytes = Buffer.from(normalizedValue, "base64");
   if (bytes.length > limit) throw new Error("Image exceeds the size limit.");
   return bytes;
 }
