@@ -102,11 +102,15 @@ export const getSessionActivePath = (): string => {
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore-backups", "recovery.jsonlz4");
 };
 
-const escapeSql = (term: string) => term.replace(/'/g, "''");
+// Escape ' for SQL and the LIKE wildcards % and _ (plus the escape char itself) so they match literally.
+const escapeLike = (term: string) => term.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");
 
 export const searchWhereClause = (query: string | undefined, titleColumn: string, urlColumn: string): string => {
   const terms = query?.trim().split(/\s+/).filter(Boolean) ?? [];
   return terms
-    .map((t) => `AND (${titleColumn} LIKE '%${escapeSql(t)}%' OR ${urlColumn} LIKE '%${escapeSql(t)}%')`)
+    .map(
+      (t) =>
+        `AND (${titleColumn} LIKE '%${escapeLike(t)}%' ESCAPE '\\' OR ${urlColumn} LIKE '%${escapeLike(t)}%' ESCAPE '\\')`,
+    )
     .join(" ");
 };

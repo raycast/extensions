@@ -493,11 +493,26 @@ describe("searchWhereClause", () => {
 
   it("matches every term against title or url", () => {
     expect(searchWhereClause("foo bar", "title", "url")).toBe(
-      "AND (title LIKE '%foo%' OR url LIKE '%foo%') AND (title LIKE '%bar%' OR url LIKE '%bar%')",
+      "AND (title LIKE '%foo%' ESCAPE '\\' OR url LIKE '%foo%' ESCAPE '\\') " +
+        "AND (title LIKE '%bar%' ESCAPE '\\' OR url LIKE '%bar%' ESCAPE '\\')",
     );
   });
 
   it("escapes single quotes", () => {
-    expect(searchWhereClause("o'reilly", "t", "u")).toBe("AND (t LIKE '%o''reilly%' OR u LIKE '%o''reilly%')");
+    expect(searchWhereClause("o'reilly", "t", "u")).toBe(
+      "AND (t LIKE '%o''reilly%' ESCAPE '\\' OR u LIKE '%o''reilly%' ESCAPE '\\')",
+    );
+  });
+
+  it("treats LIKE wildcards and backslashes as literals", () => {
+    expect(searchWhereClause("%20", "t", "u")).toBe(
+      "AND (t LIKE '%\\%20%' ESCAPE '\\' OR u LIKE '%\\%20%' ESCAPE '\\')",
+    );
+    expect(searchWhereClause("my_file", "t", "u")).toBe(
+      "AND (t LIKE '%my\\_file%' ESCAPE '\\' OR u LIKE '%my\\_file%' ESCAPE '\\')",
+    );
+    expect(searchWhereClause("a\\b", "t", "u")).toBe(
+      "AND (t LIKE '%a\\\\b%' ESCAPE '\\' OR u LIKE '%a\\\\b%' ESCAPE '\\')",
+    );
   });
 });
