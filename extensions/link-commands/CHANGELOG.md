@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Readable Rows] - {PR_MERGE_DATE}
+## [Readable Rows] - 2026-09-12
 
 ### Changed
 
