@@ -1,6 +1,6 @@
 # Link Commands Changelog
 
-## [Sigils and Shared Icons] - {PR_MERGE_DATE}
+## [Sigils and Shared Icons] - 2026-09-12
 
 ### Fixed
 
