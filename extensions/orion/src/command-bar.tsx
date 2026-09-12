@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import useTabs from "./hooks/useTabs";
@@ -157,10 +157,9 @@ function uniqueUrls<T extends { url: string }>(items: T[], seen: Set<string>): T
 
 export default function Command() {
   const [query, setQuery] = useState("");
-  // This is deliberately only an initial focus request. Keeping the current
-  // selection in React state makes List controlled, which disrupts Raycast's
-  // native Ctrl+N/Ctrl+P scrolling behavior.
-  const [autoSelectedItemId, setAutoSelectedItemId] = useState<string>();
+  const [selectedItemId, setSelectedItemId] = useState<string>();
+  const selectionLockRef = useRef<string | undefined>(undefined);
+  const selectionEpochRef = useRef(0);
   const q = query.trim().toLowerCase();
   const hasQuery = q.length > 0;
 
@@ -251,25 +250,26 @@ export default function Command() {
   ).slice(0, LIMITS.history);
   const address = isWebAddress(query) ? normalizeWebAddress(query) : undefined;
 
-  // Local data arrives asynchronously. First render the new result set, then
-  // request focus on the next tick. Without the two phases, Raycast can report
-  // the old web-search selection and cancel the Top Hit focus request.
+  // Keep the selection controlled after local data arrives. Releasing
+  // selectedItemId makes Raycast fall back to its default web-search item.
+  // Stable item IDs let native Ctrl+N/Ctrl+P report their new selection back
+  // through onSelectionChange without moving the list.
   useEffect(() => {
     const target = topHit ? TOP_HIT_ITEM_ID : address ? OPEN_ADDRESS_ITEM_ID : undefined;
-    setAutoSelectedItemId(undefined);
+    const epoch = ++selectionEpochRef.current;
+    selectionLockRef.current = target;
+    setSelectedItemId(target);
     if (!target) return;
 
-    let releaseTimer: ReturnType<typeof setTimeout> | undefined;
-    const focusTimer = setTimeout(() => {
-      setAutoSelectedItemId(target);
-      // Give Raycast time to apply the programmatic focus, then immediately
-      // return navigation ownership so Ctrl+N/Ctrl+P stays native.
-      releaseTimer = setTimeout(() => setAutoSelectedItemId(undefined), 125);
-    }, 0);
+    // Raycast can emit the old selection while new local results are mounting.
+    // Ignore it briefly; the controlled selectedItemId already points at the
+    // new Top Hit. The lock is only for this asynchronous render window.
+    const releaseTimer = setTimeout(() => {
+      if (selectionEpochRef.current === epoch) selectionLockRef.current = undefined;
+    }, 250);
 
     return () => {
-      clearTimeout(focusTimer);
-      if (releaseTimer) clearTimeout(releaseTimer);
+      clearTimeout(releaseTimer);
     };
   }, [query, topHit?.key, address]);
 
@@ -279,7 +279,14 @@ export default function Command() {
       filtering={false}
       throttle
       onSearchTextChange={setQuery}
-      selectedItemId={autoSelectedItemId}
+      {...(selectedItemId ? { selectedItemId } : {})}
+      onSelectionChange={(id) => {
+        if (selectionLockRef.current) {
+          if (id !== selectionLockRef.current) return;
+          selectionLockRef.current = undefined;
+        }
+        setSelectedItemId(id ?? undefined);
+      }}
       searchBarPlaceholder="Search tabs, bookmarks, history, or the web"
       searchBarAccessory={
         <ProfileDropdown
@@ -318,6 +325,7 @@ export default function Command() {
       {hasQuery && (
         <List.Section title="Search the Web">
           <List.Item
+            id="web-search"
             icon={Icon.MagnifyingGlass}
             title={`Search ${getSearchEngineName()} for “${query}”`}
             actions={
@@ -332,7 +340,7 @@ export default function Command() {
       {suggestionHits.length > 0 && (
         <List.Section title="Suggestions">
           {suggestionHits.map((s, i) => (
-            <SuggestionListItem key={`sugg-${i}-${s}`} suggestion={s} />
+            <SuggestionListItem id={`suggestion-${i}-${s}`} key={`sugg-${i}-${s}`} suggestion={s} />
           ))}
         </List.Section>
       )}
@@ -340,7 +348,7 @@ export default function Command() {
       {tabSection.length > 0 && (
         <List.Section title="Open Tabs">
           {tabSection.map((t) => (
-            <TabListItem key={tabKey(t)} tab={t} refresh={refresh} closeLaunchers />
+            <TabListItem id={tabKey(t)} key={tabKey(t)} tab={t} refresh={refresh} closeLaunchers />
           ))}
         </List.Section>
       )}
@@ -348,7 +356,7 @@ export default function Command() {
       {bookmarkSection.length > 0 && (
         <List.Section title="Bookmarks">
           {bookmarkSection.map((b) => (
-            <UrlListItem key={`bm-${b.uuid}`} item={b} />
+            <UrlListItem id={`bm-${b.uuid}`} key={`bm-${b.uuid}`} item={b} />
           ))}
         </List.Section>
       )}
@@ -356,7 +364,7 @@ export default function Command() {
       {readingSection.length > 0 && (
         <List.Section title="Reading List">
           {readingSection.map((b) => (
-            <UrlListItem key={`rl-${b.uuid}`} item={b} />
+            <UrlListItem id={`rl-${b.uuid}`} key={`rl-${b.uuid}`} item={b} />
           ))}
         </List.Section>
       )}
@@ -364,7 +372,7 @@ export default function Command() {
       {!permissionView && historySection.length > 0 && (
         <List.Section title="History">
           {historySection.map((h) => (
-            <UrlListItem key={`hist-${h.id}`} item={h} />
+            <UrlListItem id={`hist-${h.id}`} key={`hist-${h.id}`} item={h} />
           ))}
         </List.Section>
       )}
