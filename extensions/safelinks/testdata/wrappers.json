@@ -1,0 +1,277 @@
+{
+  "version": 1,
+  "note": "Single source of truth for decoder parity. The Go server, the Svelte SPA and the Raycast extension must each pass every case below with the same result contract: {ok:true,wrapper,decoded,chain,flags,notes} or {ok:false,error:'empty-input'|'no-url-found'}.",
+  "case_count": 22,
+  "cases": [
+    {
+      "id": "microsoft-basic",
+      "input": "https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fexample.com%2Freport%3Fid%3D7&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D&reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://example.com/report?id=7",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      },
+      "note": "url param percent-encoded once; data/sdata/reserved are discarded"
+    },
+    {
+      "id": "microsoft-html-escaped",
+      "input": "https://eur01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.example.org%2Fa%3Fb%3D1%26c%3D2&amp;data=05%7C01%7Cuser%40contoso.com%7Cabc&amp;sdata=xyz%3D&amp;reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://www.example.org/a?b=1&c=2",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      },
+      "note": "&amp; must be unescaped before parsing"
+    },
+    {
+      "id": "microsoft-no-reserved",
+      "input": "https://na01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fsub.example.co.uk%2Fx&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://sub.example.co.uk/x",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      }
+    },
+    {
+      "id": "microsoft-nested",
+      "input": "https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Feur01.safelinks.protection.outlook.com%2F%3Furl%3Dhttps%253A%252F%252Fexample.com%252Finner%26data%3D05%257C01%257Cuser%2540contoso.com%257Cabc%26sdata%3Dxyz%253D%26reserved%3D0&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D&reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://example.com/inner",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 3
+      },
+      "note": "loop until stable, max 5 rounds"
+    },
+    {
+      "id": "microsoft-double-encoded",
+      "input": "https://nam12.safelinks.protection.outlook.com/?url=https%253A%252F%252Fexample.com%252Fdbl&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D&reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://example.com/dbl",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      }
+    },
+    {
+      "id": "microsoft-schemeless",
+      "input": "nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fexample.com%2Fns&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D&reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://example.com/ns",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      }
+    },
+    {
+      "id": "text-with-wrapped-url",
+      "input": "Hey, see this: https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fexample.com%2Fhi&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D&reserved=0 (thanks!)",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://example.com/hi",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      },
+      "note": "extract the first http(s) URL and strip trailing punctuation"
+    },
+    {
+      "id": "proofpoint-v3",
+      "input": "https://urldefense.com/v3/__https://example.com/it__;!!FbZ0Zw!JdM1l0g$",
+      "expect": {
+        "ok": true,
+        "wrapper": "proofpoint-v3",
+        "decoded": "https://example.com/it",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      }
+    },
+    {
+      "id": "proofpoint-v2",
+      "input": "https://urldefense.proofpoint.com/v2/url?u=https-3A__www.example.com_path-3Fa-3D1&d=DwMFaQ&c=abc&r=xyz&m=def&s=ghi&e=",
+      "expect": {
+        "ok": true,
+        "wrapper": "proofpoint-v2",
+        "decoded": "https://www.example.com/path?a=1",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      }
+    },
+    {
+      "id": "google-url-q",
+      "input": "https://www.google.com/url?q=https%3A%2F%2Fexample.com%2Fg&sa=D&usg=AOvVaw0",
+      "expect": {
+        "ok": true,
+        "wrapper": "google-redirect",
+        "decoded": "https://example.com/g",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      }
+    },
+    {
+      "id": "generic-redirect-param",
+      "input": "https://track.example.net/redir?redirect=https%3A%2F%2Ftarget.example%2Fdest&mid=1",
+      "expect": {
+        "ok": true,
+        "wrapper": "generic-url-param",
+        "decoded": "https://target.example/dest",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      }
+    },
+    {
+      "id": "generic-base64-param",
+      "input": "https://links.example.com/l?u=aHR0cHM6Ly9leGFtcGxlLmNvbS9iNjQ",
+      "expect": {
+        "ok": true,
+        "wrapper": "generic-url-param",
+        "decoded": "https://example.com/b64",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 2
+      }
+    },
+    {
+      "id": "not-wrapped",
+      "input": "https://example.com/plain",
+      "expect": {
+        "ok": true,
+        "wrapper": "none",
+        "decoded": "https://example.com/plain",
+        "flags_include": [],
+        "flags_exclude": [],
+        "chain_length": 1
+      }
+    },
+    {
+      "id": "flag-punycode",
+      "input": "https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fxn--pypal-4ve.com%2Flogin&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D&reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://xn--pypal-4ve.com/login",
+        "flags_include": [
+          "punycode"
+        ],
+        "flags_exclude": []
+      }
+    },
+    {
+      "id": "flag-userinfo-and-ip",
+      "input": "https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fuser%3Apass%40192.168.1.5%2Fwp-login.php&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D&reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://user:pass@192.168.1.5/wp-login.php",
+        "flags_include": [
+          "userinfo",
+          "ip-literal"
+        ],
+        "flags_exclude": []
+      }
+    },
+    {
+      "id": "flag-plain-http",
+      "input": "https://nam12.safelinks.protection.outlook.com/?url=http%3A%2F%2Fexample.com%2Finsecure&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D&reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "http://example.com/insecure",
+        "flags_include": [
+          "plain-http"
+        ],
+        "flags_exclude": [
+          "shortener"
+        ]
+      }
+    },
+    {
+      "id": "flag-shortener",
+      "input": "https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fbit.ly%2F3xYzQwE&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D&reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://bit.ly/3xYzQwE",
+        "flags_include": [
+          "shortener"
+        ],
+        "flags_exclude": []
+      }
+    },
+    {
+      "id": "flag-tracking-params",
+      "input": "https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fexample.com%2Fp%3Futm_source%3Dnews%26gclid%3Dabc123&data=05%7C01%7Cuser%40contoso.com%7Cabc&sdata=xyz%3D&reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://example.com/p?utm_source=news&gclid=abc123",
+        "flags_include": [
+          "tracking-params"
+        ],
+        "flags_exclude": [
+          "shortener"
+        ]
+      }
+    },
+    {
+      "id": "error-empty",
+      "input": "",
+      "expect": {
+        "ok": false,
+        "error": "empty-input"
+      }
+    },
+    {
+      "id": "error-no-url",
+      "input": "just some text, no link",
+      "expect": {
+        "ok": false,
+        "error": "no-url-found"
+      }
+    },
+    {
+      "id": "error-mailto-like",
+      "input": "mailto:someone@example.com",
+      "expect": {
+        "ok": false,
+        "error": "no-url-found"
+      }
+    },
+    {
+      "id": "microsoft-realworld-1password",
+      "input": "https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fmarketing.1password.co%2Fn%2FMzIyLUJXWC05MzYAAAGkJfvwyGVXvkQ7En5VdyeQgD0hILB01g_cDCwwiU3ENfXsFpjUIUj7QPCRymc6hGiwCJ2CaKc%3D&data=05%7C02%7Chenry.rausch%40seventhings.com%7C0d4a6dd89ba3438d688d08df0e9029ff%7C1abaefce561f4a3aa5693e305e3aa52f%7C1%7C0%7C639245684498819226%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=NMPMN9qu8kAxCLDRL7aV%2FGUmqDvEPfIBAg8dyrADCo8%3D&reserved=0",
+      "expect": {
+        "ok": true,
+        "wrapper": "microsoft-safelinks",
+        "decoded": "https://marketing.1password.co/n/MzIyLUJXWC05MzYAAAGkJfvwyGVXvkQ7En5VdyeQgD0hILB01g_cDCwwiU3ENfXsFpjUIUj7QPCRymc6hGiwCJ2CaKc=",
+        "flags_include": [],
+        "flags_exclude": [
+          "shortener",
+          "plain-http"
+        ],
+        "chain_length": 2
+      },
+      "note": "Real link captured by the operator from a genuine eur02 Safe Links mail on 2026-09-12; the destination's trailing %3D decodes to '=' inside the path."
+    }
+  ]
+}

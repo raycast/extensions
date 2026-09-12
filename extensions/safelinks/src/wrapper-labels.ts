@@ -10,7 +10,7 @@ export const wrapperLabels: Record<Wrapper, { label: string; subtitle: string }>
 	'google-redirect': { label: 'Google redirect', subtitle: 'Google outbound URL wrapper' },
 	'generic-url-param': {
 		label: 'Generic URL parameter',
-		subtitle: 'Percent-encoded or base64 destination'
+		subtitle: 'Heuristic redirect parameter, not a vendor wrapper'
 	},
 	none: { label: 'Not wrapped', subtitle: 'The original URL is the destination' }
 };

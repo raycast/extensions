@@ -50,7 +50,7 @@ export function ResultView({
 	const [result, setResult] = useState(initial);
 	const [loading, setLoading] = useState(false);
 	const { push } = useNavigation();
-	const preferences = getPreferenceValues<{ stripTrackingParams: boolean }>();
+	const preferences = getPreferenceValues<Preferences>();
 	const copiedUrl = preferences.stripTrackingParams
 		? stripTrackingParams(result.decoded)
 		: result.decoded;

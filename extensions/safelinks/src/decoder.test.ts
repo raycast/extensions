@@ -1,11 +1,20 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, it, expect, vi } from 'vitest';
 import { decode, stripTrackingParams } from './decoder';
 import { destinationDomain } from './domain';
 
-const fixtures = JSON.parse(
-	readFileSync(new URL('../../testdata/wrappers.json', import.meta.url), 'utf8')
-);
+// The SvelteKit app reads the repository fixture; the standalone Raycast
+// extension ships an identical copy next to its own sources, because the store
+// pull request only contains the extension folder. Parity is asserted in the
+// web suite (src/lib/parity.test.ts).
+function loadFixtures() {
+	for (const relative of ['../../testdata/wrappers.json', '../testdata/wrappers.json']) {
+		const url = new URL(relative, import.meta.url);
+		if (existsSync(url)) return JSON.parse(readFileSync(url, 'utf8'));
+	}
+	throw new Error('wrappers.json fixture not found');
+}
+const fixtures = loadFixtures();
 describe('authoritative fixtures', () => {
 	it('has exactly 22 cases', () => expect(fixtures.cases).toHaveLength(22));
 	for (const item of fixtures.cases) {
@@ -55,6 +64,11 @@ describe('normalization and wrapper boundaries', () => {
 		],
 		[
 			'https://tenant.example/?url=https%3A%2F%2Fexample.com&data=x',
+			{ wrapper: 'generic-url-param', decoded: 'https://example.com' }
+		],
+		[
+			'https://tenant.example/?url=https%3A%2F%2Fexample.com&data=' +
+				encodeURIComponent('05|02|user@tenant.example|abc|def'),
 			{ wrapper: 'microsoft-safelinks', decoded: 'https://example.com' }
 		],
 		['https://www.google.co.uk/url?q=https%3A%2F%2Fexample.com', { wrapper: 'google-redirect' }],
@@ -139,4 +153,46 @@ describe('destination risk and domain', () => {
 		['https://192.168.1.1', '192.168.1.1'],
 		['https://[::1]', '[::1]']
 	])('registrable domain %s', (input, expected) => expect(destinationDomain(input)).toBe(expected));
+});
+
+describe('extraction and wrapper heuristics', () => {
+	it('keeps an apostrophe inside a URL path', () =>
+		expect(decode("See https://example.com/it's-here")).toMatchObject({
+			ok: true,
+			decoded: "https://example.com/it's-here"
+		}));
+	it('keeps an apostrophe inside a query value', () =>
+		expect(decode("https://example.com/?q=it's")).toMatchObject({
+			decoded: "https://example.com/?q=it's"
+		}));
+	it('still strips trailing prose punctuation and quotes', () => {
+		expect(decode('"https://example.com/x"')).toMatchObject({
+			decoded: 'https://example.com/x'
+		});
+		expect(decode('see `https://example.com/y` now')).toMatchObject({
+			decoded: 'https://example.com/y'
+		});
+		expect(decode('(https://example.com/z)')).toMatchObject({
+			decoded: 'https://example.com/z'
+		});
+	});
+	it('does not label an unrelated url+data pair as Microsoft Safe Links', () => {
+		const result = decode('https://example.com/?url=https://other.example&data=x');
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		expect(result.wrapper).not.toBe('microsoft-safelinks');
+		expect(result.decoded).toBe('https://example.com/?url=https://other.example&data=x');
+	});
+	it('still recognises a tenant-custom Safe Links data record', () => {
+		const wrapped =
+			'https://links.contoso.com/?url=' +
+			encodeURIComponent('https://example.com/custom') +
+			'&data=' +
+			encodeURIComponent('05|02|user@contoso.com|abc|def') +
+			'&sdata=xyz%3D';
+		expect(decode(wrapped)).toMatchObject({
+			wrapper: 'microsoft-safelinks',
+			decoded: 'https://example.com/custom'
+		});
+	});
 });

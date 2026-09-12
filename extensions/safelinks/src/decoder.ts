@@ -91,16 +91,32 @@ function normalize(input: string): string | undefined {
 			hostOf(schemeless) === 'urldefense.proofpoint.com')
 	)
 		return 'https://' + value;
-	const match = value.match(/https?:\/\/[^\s<>"'‘’“”`]+/i);
+	// Stop only at whitespace and angle brackets: an apostrophe, backtick or
+	// curly quote is legal inside a URL path or query, so cutting there would
+	// report a destination the user never pasted.
+	const match = value.match(/https?:\/\/[^\s<>]+/i);
 	if (!match) return;
 	value = match[0];
-	const opening: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
-	while (/[.,;:!?\)\]\}>"']$/.test(value)) {
+	const openers: Record<string, string> = {
+		')': '(',
+		']': '[',
+		'}': '{',
+		'"': '"',
+		"'": "'",
+		'`': '`',
+		'’': '‘',
+		'”': '“'
+	};
+	// Only trailing punctuation is stripped, and only when it is unbalanced.
+	while (/[.,;:!?\)\]\}>"'`’”“‘]$/.test(value)) {
 		const last = value.at(-1)!;
-		if (opening[last]) {
-			const opens = [...value].filter((c) => c === opening[last]).length;
+		const opener = openers[last];
+		if (opener) {
+			const opens = [...value].filter((c) => c === opener).length;
 			const closes = [...value].filter((c) => c === last).length;
-			if (opens >= closes) break;
+			// A quote or backtick is balanced by parity, a bracket by counting its
+			// two different characters.
+			if (opener === last ? opens % 2 === 0 : opens >= closes) break;
 		}
 		value = value.slice(0, -1);
 	}
@@ -114,9 +130,14 @@ function unwrap(value: string): { wrapper: Wrapper; value: string; note?: string
 	let wrapper: Wrapper = 'none';
 	let candidate: string | null = null;
 	let note: string | undefined;
+	// Only a genuine Safe Links wrapper is labelled Microsoft: the safelinks host
+	// itself, or a tenant-custom domain whose `data` parameter carries the
+	// versioned pipe-delimited record ("05|02|user@tenant|…"). An unrelated
+	// ?url=…&data=x is deliberately left alone instead of being rewritten as a
+	// Microsoft link the user never pasted.
 	if (
 		under(host, 'safelinks.protection.outlook.com') ||
-		(q.has('url') && (q.has('data') || q.has('sdata')))
+		(q.has('url') && /^\d{2}\|\d{2}\|/.test(percent(q.get('data') ?? '')))
 	) {
 		wrapper = 'microsoft-safelinks';
 		candidate = q.get('url');
@@ -174,6 +195,7 @@ function unwrap(value: string): { wrapper: Wrapper; value: string; note?: string
 			}
 		}
 		wrapper = 'generic-url-param';
+		note = `Destination taken from the "${key}" parameter; heuristic match, not a vendor-specific wrapper.`;
 	}
 	if (candidate === null) return;
 	candidate = destination(candidate);

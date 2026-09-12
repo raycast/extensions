@@ -2,7 +2,7 @@
 	"$schema": "https://www.raycast.com/schemas/extension.json",
 	"name": "safelinks",
 	"title": "Safe Links Decoder",
-	"description": "Reveal the destination, wrapper chain and risk flags of rewritten email links with local, offline decoding.",
+	"description": "Decode Microsoft Safe Links and other rewritten email links to the real destination - locally, the link is never opened.",
 	"icon": "icon.png",
 	"author": "henry_rausch",
 	"platforms": [
@@ -43,7 +43,7 @@
 		"dev": "ray develop",
 		"lint": "ray lint",
 		"publish": "npx @raycast/api@latest publish",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "node ../scripts/gen_raycast_env.mjs && tsc --noEmit",
 		"test": "vitest run"
 	},
 	"dependencies": {
