@@ -25,6 +25,102 @@ export default function Services({ environment }: { environment: ServiceScope })
     id: string;
     status: "idle" | "done";
   }
+
+  type LifecycleAction = "deploy" | "redeploy" | "rebuild" | "start" | "stop" | "reload";
+
+  // Route suffix is always the action name itself, e.g. `application.deploy`, `postgres.rebuild`.
+  const SERVICE_ACTIONS: Record<GroupedService["type"], LifecycleAction[]> = {
+    application: ["deploy", "redeploy", "start", "stop", "reload"],
+    compose: ["deploy", "redeploy", "start", "stop"],
+    mariadb: ["deploy", "rebuild", "start", "stop", "reload"],
+    mongo: ["deploy", "rebuild", "start", "stop", "reload"],
+    mysql: ["deploy", "rebuild", "start", "stop", "reload"],
+    postgres: ["deploy", "rebuild", "start", "stop", "reload"],
+    redis: ["deploy", "rebuild", "start", "stop", "reload"],
+  };
+
+  const ID_FIELDS: Record<GroupedService["type"], string> = {
+    application: "applicationId",
+    mariadb: "mariadbId",
+    mongo: "mongoId",
+    mysql: "mysqlId",
+    postgres: "postgresId",
+    redis: "redisId",
+    compose: "composeId",
+  };
+
+  const ACTION_ICONS: Record<LifecycleAction, Icon> = {
+    deploy: Icon.Rocket,
+    redeploy: Icon.RotateClockwise,
+    rebuild: Icon.Hammer,
+    start: Icon.Play,
+    stop: Icon.Stop,
+    reload: Icon.ArrowClockwise,
+  };
+
+  const ACTION_LABELS: Record<LifecycleAction, string> = {
+    deploy: "Deploy",
+    redeploy: "Redeploy",
+    rebuild: "Rebuild",
+    start: "Start",
+    stop: "Stop",
+    reload: "Reload",
+  };
+
+  const ACTION_PROGRESS: Record<LifecycleAction, string> = {
+    deploy: "Deploying",
+    redeploy: "Redeploying",
+    rebuild: "Rebuilding",
+    start: "Starting",
+    stop: "Stopping",
+    reload: "Reloading",
+  };
+
+  const ACTION_PAST: Record<LifecycleAction, string> = {
+    deploy: "Deployed",
+    redeploy: "Redeployed",
+    rebuild: "Rebuilt",
+    start: "Started",
+    stop: "Stopped",
+    reload: "Reloaded",
+  };
+
+  async function runServiceAction(service: GroupedService, action: LifecycleAction) {
+    if (action === "stop") {
+      const options: Alert.Options = {
+        title: `Stop ${service.name}?`,
+        message: "The service will become unreachable until it is started again.",
+        primaryAction: {
+          style: Alert.ActionStyle.Destructive,
+          title: "Stop",
+        },
+      };
+      if (!(await confirmAlert(options))) return;
+    }
+
+    const toast = await showToast(Toast.Style.Animated, ACTION_PROGRESS[action], service.name);
+    try {
+      const body: Record<string, string> = { [ID_FIELDS[service.type]]: service.id };
+      if (action === "reload") body.appName = service.appName;
+
+      const response = await fetch(url + `${service.type}.${action}`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) {
+        const err = (await response.json()) as ErrorResult;
+        throw new Error(err.message);
+      }
+      toast.style = Toast.Style.Success;
+      toast.title = ACTION_PAST[action];
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = `Could not ${action} service`;
+      toast.message = `${error}`;
+    }
+  }
+
   const services: GroupedService[] = [
     ...environment.applications.map((a) => ({
       ...a,
@@ -166,6 +262,17 @@ export default function Services({ environment }: { environment: ServiceScope })
             }
             actions={
               <ActionPanel>
+                <ActionPanel.Section title="Actions">
+                  {SERVICE_ACTIONS[service.type].map((action) => (
+                    <Action
+                      key={action}
+                      icon={ACTION_ICONS[action]}
+                      title={ACTION_LABELS[action]}
+                      style={action === "stop" ? Action.Style.Destructive : undefined}
+                      onAction={() => runServiceAction(service, action)}
+                    />
+                  ))}
+                </ActionPanel.Section>
                 <ActionPanel.Submenu icon={Icon.Plus} title="Create">
                   <Action.Push
                     icon="folder-input.svg"

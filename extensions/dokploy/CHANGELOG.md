@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Service Lifecycle Actions] - {PR_MERGE_DATE}
+
+- Add `Deploy`, `Redeploy`/`Rebuild`, `Start`, `Stop` and `Reload` actions to the **Services** screen, so a service can be managed without leaving Raycast.
+
 ## [Added support for Dokploy v0.25.0] - 2026-01-12
 
 - API data model updated from `Project → Services` to `Project → Environments → Services`.
