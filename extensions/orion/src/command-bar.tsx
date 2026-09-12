@@ -182,6 +182,20 @@ export default function Command() {
   } = useHistorySearch(selectedProfileId, hasQuery ? query : undefined);
   const { suggestions, isLoading: suggestionsLoading } = useSuggestions(query);
 
+  // A result ID from the previous query can disappear while typing (for
+  // example, the "Open Address" item vanishes when `sina.com.cn` becomes
+  // `sina`). Reset the session synchronously with the input change so
+  // Raycast's fallback selection cannot be mistaken for manual navigation.
+  const resetSelectionSession = (profileId: string, nextQuery: string) => {
+    selectionSessionRef.current = {
+      key: `${profileId}\u0000${nextQuery}`,
+      target: undefined,
+      awaitingTarget: false,
+      userNavigated: false,
+    };
+    setSelectedItemId(undefined);
+  };
+
   const isLoading = !profiles || tabs === undefined || bookmarksLoading || historyLoading || suggestionsLoading;
 
   // Never show the launcher tabs in the list itself.
@@ -291,7 +305,12 @@ export default function Command() {
       isLoading={isLoading}
       filtering={false}
       throttle
-      onSearchTextChange={setQuery}
+      onSearchTextChange={(nextQuery) => {
+        if (nextQuery !== query) {
+          resetSelectionSession(selectedProfileId, nextQuery);
+        }
+        setQuery(nextQuery);
+      }}
       {...(selectedItemId ? { selectedItemId } : {})}
       onSelectionChange={(id) => {
         const session = selectionSessionRef.current;
@@ -321,7 +340,12 @@ export default function Command() {
         <ProfileDropdown
           profiles={profiles}
           selectedProfileId={selectedProfileId}
-          onProfileSelected={setSelectedProfileId}
+          onProfileSelected={(profileId) => {
+            if (profileId !== selectedProfileId) {
+              resetSelectionSession(profileId, query);
+            }
+            setSelectedProfileId(profileId);
+          }}
         />
       }
     >
