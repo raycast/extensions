@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+  <channel>
+    <title>xAI System Status</title>
+    <item>
+      <title>[API (us-east-1.api.x.ai)] New API incident</title>
+      <link>https://status.x.ai/api-us-east-1/INC-new</link>
+      <guid>INC-new</guid>
+      <description><![CDATA[
+        <h3>Status: RESOLVED</h3><h4>Updates:</h4>
+        <div><p><strong>Tue, 11 Aug 2026 15:30:00 GMT</strong></p><h3>Service Restored</h3><p>Recovered.</p></div>
+        <div><p><strong>Tue, 11 Aug 2026 15:00:00 GMT</strong></p><h3>Investigating</h3><p>Investigating.</p></div>
+      ]]></description>
+      <pubDate>Tue, 11 Aug 2026 15:00:00 GMT</pubDate>
+      <category>resolved</category>
+    </item>
+    <item>
+      <title>[Grok (Web)] Web incident</title>
+      <link>https://status.x.ai/grok-com/INC-web</link>
+      <guid>INC-web</guid>
+      <description><![CDATA[<h3>Status: RESOLVED</h3>]]></description>
+      <pubDate>Mon, 10 Aug 2026 16:00:00 GMT</pubDate>
+      <category>resolved</category>
+    </item>
+    <item>
+      <title>[API (us-east-1.api.x.ai)] Old API incident</title>
+      <link>https://status.x.ai/old-api-id/INC-old</link>
+      <guid>INC-old</guid>
+      <description><![CDATA[<h3>Status: RESOLVED</h3>]]></description>
+      <pubDate>Sun, 09 Aug 2026 16:00:00 GMT</pubDate>
+      <category>resolved</category>
+    </item>
+    <item>
+      <title>General announcement without a component</title>
+      <link>https://status.x.ai/INC-general</link>
+      <guid>INC-general</guid>
+      <description><![CDATA[<h3>Status: RESOLVED</h3>]]></description>
+      <pubDate>Sat, 08 Aug 2026 16:00:00 GMT</pubDate>
+      <category>resolved</category>
+    </item>
+  </channel>
+</rss>

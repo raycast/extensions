@@ -1,0 +1,14 @@
+{
+  "incidents": [
+    {
+      "id": "active-incident",
+      "name": "Elevated latency",
+      "status": "investigating",
+      "impact": "minor",
+      "created_at": "2026-08-11T15:00:00Z",
+      "updated_at": "2026-08-11T15:05:00Z",
+      "components": [{ "id": "embed" }],
+      "incident_updates": []
+    }
+  ]
+}

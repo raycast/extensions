@@ -1,0 +1,18 @@
+{
+  "status": {
+    "indicator": "minor",
+    "description": "Degraded Performance"
+  },
+  "components": [
+    {
+      "id": "api",
+      "name": "API",
+      "status": "operational"
+    },
+    {
+      "id": "code",
+      "name": "Code Assistant",
+      "status": "degraded_performance"
+    }
+  ]
+}

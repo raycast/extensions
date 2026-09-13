@@ -1,0 +1,25 @@
+{
+  "request_id": "request-structure",
+  "data": {
+    "component_impacts": [
+      {
+        "component_id": "chat",
+        "start_at_seconds": 1786363200,
+        "end_at_seconds": 1786366800,
+        "status": "degraded"
+      }
+    ],
+    "component_uptimes": [
+      {
+        "component_id": "api",
+        "uptime": 100,
+        "available_since_seconds": 1786233600
+      },
+      {
+        "component_id": "chat",
+        "uptime": 99.8,
+        "available_since_seconds": 1786233600
+      }
+    ]
+  }
+}
