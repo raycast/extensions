@@ -1,5 +1,10 @@
 # Toggl Track Changelog
 
+## [Quickstop Timer] - {PR_MERGE_DATE}
+
+- Added a "Quickstop Timer" command that stops the running time entry with no UI, so it can be bound to a global hotkey
+- In Low Data Mode the command confirms the running entry against the API before stopping, so it never acts on a stale cached timer
+
 ## [Fix Duplicate Billable Checkbox] - 2026-09-11
 
 - Fixed two `Billable` checkboxes rendering with the same `billable` form ID when a billable project is selected in a premium workspace — they are now a single checkbox, shown whenever either condition applies
