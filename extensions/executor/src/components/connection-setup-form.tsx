@@ -25,6 +25,7 @@ import type { ExecutionResult } from "../lib/types";
 import { ExecutionResultView } from "./execution-result";
 import { SetupStatus } from "./setup-status";
 import { WorkspaceAction } from "./workspace-command";
+import { ConsoleAction } from "./console-action";
 
 export interface ConnectionSetupDefaults {
   integration?: string;
@@ -102,7 +103,15 @@ export function ConnectionSetupForm({
   }
 
   async function submit() {
-    if (lock.current || isLoading || error || awaitingApps || appsError) return;
+    if (lock.current || error || appsError) return;
+    if (isLoading || awaitingApps) {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Setup",
+        message: "Wait for connection setup to finish loading, then try again.",
+      });
+      return;
+    }
     if (!selected) {
       setIntegrationError("Choose an integration.");
       integrationRef.current?.focus();
@@ -238,9 +247,30 @@ export function ConnectionSetupForm({
               />
               <Action.OpenInBrowser title="Continue Setup" url={pending.url} />
             </>
+          ) : selected && !method && !isLoading ? (
+            <>
+              <ConsoleAction
+                title="Configure in Executor"
+                path={`/integrations/${encodeURIComponent(selected.slug)}`}
+              />
+              <Action
+                title="Reload Setup"
+                icon={Icon.RotateClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
+            </>
           ) : (
             <Action.SubmitForm
-              title={browserSetup ? "Continue in Executor" : selectedClient ? "Authorize Connection" : "Add Connection"}
+              title={
+                isLoading || awaitingApps
+                  ? "Loading Setup"
+                  : browserSetup
+                    ? "Continue in Executor"
+                    : selectedClient
+                      ? "Authorize Connection"
+                      : "Add Connection"
+              }
               icon={browserSetup ? Icon.Globe : Icon.Plug}
               onSubmit={submit}
             />

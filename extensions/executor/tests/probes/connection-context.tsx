@@ -15,6 +15,8 @@ let cursor = 0;
 let data: unknown[] | undefined;
 let loadError: Error | undefined;
 const submissions: unknown[] = [];
+const toasts: { title: string; message: string }[] = [];
+let loadingApps = false;
 const workspace = { id: "test-workspace", name: "Test" };
 mock.module("react/jsx-runtime", () => ({ jsx: node, jsxs: node, Fragment: "Fragment" }));
 mock.module("react", () => ({
@@ -47,10 +49,12 @@ mock.module("@raycast/api", () => ({
   Toast: { Style: {} },
   useNavigation: () => ({ pop() {} }),
   open() {},
-  showToast() {},
+  showToast(toast: { title: string; message: string }) {
+    toasts.push(toast);
+  },
 }));
 mock.module("@raycast/utils", () => ({
-  usePromise: () => ({ data: undefined, isLoading: false }),
+  usePromise: () => ({ data: undefined, isLoading: loadingApps }),
   showFailureToast(error: unknown) {
     throw error;
   },
@@ -94,6 +98,7 @@ stub("lib/connection-setup", {
 stub("components/execution-result", { ExecutionResultView: "Result" });
 stub("components/setup-status", { SetupStatus: "Status" });
 stub("components/workspace-command", { WorkspaceAction: "WorkspaceAction" });
+stub("components/console-action", { ConsoleAction: "ConsoleAction" });
 
 const { ConnectionSetupForm } = await import(`${source}/components/connection-setup-form`);
 type Element = {
@@ -122,6 +127,8 @@ function reset() {
   data = undefined;
   loadError = undefined;
   submissions.length = 0;
+  toasts.length = 0;
+  loadingApps = false;
 }
 const integration = (slug: string, name: string) => ({
   slug,
@@ -195,4 +202,32 @@ field(tree, "integration")?.props.onChange("alpha");
 assert.equal(field(render(), "credential:token")?.props.value, "", "changing provider clears credentials");
 assert.equal(render({ isRootView: true })[0].props.navigationTitle, undefined);
 assert.equal(render()[0].props.navigationTitle, "Add Connection");
+
+// Waiting must be visible and explain why submitting cannot continue yet.
+for (const oauth of [false, true]) {
+  reset();
+  if (oauth) {
+    data = [{ ...integration("alpha", "Alpha"), authMethods: [{ kind: "oauth", template: "oauth" }] }];
+    loadingApps = true;
+  }
+  tree = render({ initialIntegration: "alpha" });
+  const action = tree.find((el) => el.type === "Submit")!;
+  assert.equal(action.props.title, "Loading Setup");
+  await action.props.onSubmit();
+  assert.equal(toasts[0]?.title, "Loading Setup");
+  assert.ok(toasts[0]?.message.includes("try again"));
+  assert.equal(submissions.length, 0);
+}
+
+reset();
+data = [{ ...integration("alpha", "Alpha"), authMethods: [] }];
+tree = render({ initialIntegration: "alpha" });
+assert.equal(
+  tree.some((el) => el.type === "Submit"),
+  false,
+  "missing authentication must not expose inert submission",
+);
+assert.equal(tree.find((el) => el.type === "ConsoleAction")?.props.path, "/integrations/alpha");
+assert.equal(tree.find((el) => el.type === "ConsoleAction")?.props.title, "Configure in Executor");
+assert.ok(tree.some((el) => el.props.title === "Reload Setup"));
 console.log("Connection context regression checks passed");
