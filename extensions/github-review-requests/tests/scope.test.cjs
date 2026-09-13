@@ -6,6 +6,7 @@ const { loadConfig, saveConfig, searchString } = require("../src/attention/lib/c
 
 // Run the classic menu's actual refresh path without mounting native Raycast UI.
 let requests = [];
+let watchedRequests = [];
 const original = Module._load;
 Module._load = function (id, parent, isMain) {
   if (id === "react")
@@ -18,8 +19,9 @@ Module._load = function (id, parent, isMain) {
     return {
       default: () => ({
         updatedPulls: [],
-        fetchPulls: async filters => {
+        fetchPulls: async (filters, watchedFilters) => {
           requests.push(filters.join(" "));
+          watchedRequests.push(watchedFilters ? watchedFilters.join(" ") : undefined);
           return [];
         },
         updatePulls: async () => {},
@@ -36,6 +38,7 @@ const viewer = { login: "tester", orgs: ["acme"], teams: [] };
 beforeEach(() => {
   reset();
   requests = [];
+  watchedRequests = [];
 });
 
 async function assertScope(expected) {
@@ -97,4 +100,75 @@ test("explicit filter scopes and raw queries retain their meaning", async () => 
     "is:pr is:open org:acme repo:other/project",
   );
   assert.equal(searchString({ name: "Raw", raw: "is:pr user:someone" }, config), "is:pr user:someone");
+});
+
+// The sweep that lists a repository's pull requests whoever opened them, which
+// rides alongside the authored/review-requested searches above.
+test("the classic menu sweeps your own repositories by default", async () => {
+  await usePulls().runPullIteration("tester");
+  assert.deepEqual(watchedRequests, ["is:open draft:false archived:false user:tester"]);
+});
+
+test("the classic menu sweeps the organizations you selected, with your account seeded in", async () => {
+  await saveConfig({ ...(await loadConfig()), activeOrgs: ["acme", "globex"] });
+  await usePulls().runPullIteration("tester");
+  assert.deepEqual(watchedRequests, ["is:open draft:false archived:false user:tester user:acme user:globex"]);
+});
+
+test("the classic menu honours an owner scope you deliberately took yourself out of", async () => {
+  await saveConfig({ ...(await loadConfig()), activeOrgs: ["acme"], ownerSeeded: true });
+  await usePulls().runPullIteration("tester");
+  assert.deepEqual(watchedRequests, ["is:open draft:false archived:false user:acme"]);
+  assert.deepEqual(requests, ["is:open draft:false archived:false user:acme"]);
+});
+
+test("the classic menu sweeps a watched repository on top of your own", async () => {
+  await saveConfig({ ...(await loadConfig()), repos: [{ owner: "acme", name: "api" }] });
+  await usePulls().runPullIteration("tester");
+  assert.deepEqual(watchedRequests, ["is:open draft:false archived:false user:tester repo:acme/api"]);
+});
+
+test("a watched repository never costs you the organizations you selected", async () => {
+  await saveConfig({
+    ...(await loadConfig()),
+    activeOrgs: ["tester", "acme", "globex"],
+    repos: [{ owner: "initech", name: "tps" }],
+    ownerSeeded: true,
+  });
+  await usePulls().runPullIteration("tester");
+  assert.deepEqual(watchedRequests, [
+    "is:open draft:false archived:false user:tester user:acme user:globex repo:initech/tps",
+  ]);
+});
+
+test("the menu narrows only the organization whose repository you watched", async () => {
+  await saveConfig({
+    ...(await loadConfig()),
+    activeOrgs: ["tester", "acme", "globex"],
+    repos: [{ owner: "globex", name: "ui" }],
+    ownerSeeded: true,
+  });
+  await usePulls().runPullIteration("tester");
+  assert.deepEqual(watchedRequests, ["is:open draft:false archived:false user:tester user:acme repo:globex/ui"]);
+});
+
+test("watching a repository leaves your review requests across the whole scope alone", async () => {
+  await saveConfig({
+    ...(await loadConfig()),
+    activeOrgs: ["tester", "acme", "globex"],
+    repos: [{ owner: "globex", name: "ui" }],
+    ownerSeeded: true,
+  });
+  await usePulls().runPullIteration("tester");
+  assert.deepEqual(
+    requests,
+    ["is:open draft:false archived:false user:tester user:acme user:globex"],
+    "a watch list must never hide a pull request that asks for your review",
+  );
+});
+
+test("the sweep leaves the authored and review-requested searches as one search each", async () => {
+  state.preferences.owners = "acme";
+  await usePulls().runPullIteration("tester");
+  assert.deepEqual(requests, ["is:open draft:false archived:false user:tester user:acme"]);
 });

@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 
+import { UnconfirmedWriteError } from "../lib/graphql";
+
 type CommentFormProps = {
   navigationTitle: string;
   /** Field label above the text area, e.g. "Reply" or "Comment". */
@@ -33,7 +35,9 @@ export function CommentForm({ navigationTitle, label, submitTitle, context, onSu
       pop();
     } catch (err) {
       toast.style = Toast.Style.Failure;
-      toast.title = "Could not post";
+      // An unconfirmed write may well have landed. Saying "could not post"
+      // would invite exactly the duplicate the client just declined to make.
+      toast.title = err instanceof UnconfirmedWriteError ? "Not confirmed by GitHub" : "Could not post";
       toast.message = err instanceof Error ? err.message : String(err);
     } finally {
       setIsSubmitting(false);

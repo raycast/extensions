@@ -115,6 +115,11 @@ export type Config = {
   ignoredAuthors: string[];
   /** Toggles the built-in categories (needs review, team, mine, awaiting reply). */
   showBuiltins: boolean;
+  /**
+   * Set once your own account has been offered to the scope, so taking
+   * yourself back out is not undone on the next launch.
+   */
+  ownerSeeded?: boolean;
   /** User-defined saved filters. */
   filters: SavedFilter[];
   /** Desktop-notification behaviour for the background watcher. */
@@ -127,6 +132,8 @@ export type Config = {
  */
 export const DEFAULT_IGNORED_AUTHORS = [
   "dependabot",
+  // The legacy Dependabot account, still the author of record on older PRs.
+  "dependabot-preview",
   "renovate",
   "github-actions",
   "copilot",
@@ -240,6 +247,69 @@ export function ownerQualifier(config: Config): string {
   return ownerScopeTokens(config)
     .map(token => ` ${token}`)
     .join("");
+}
+
+/**
+ * Puts your own account in scope the first time the extension knows who you
+ * are, so your repositories show without hunting for the setting. It runs
+ * once — the flag it leaves behind means removing yourself afterwards sticks.
+ *
+ * An empty scope is left alone: it already searches everywhere, your own
+ * repositories included, and narrowing it to just you would hide the review
+ * requests that arrive from organizations.
+ */
+export async function ensureOwnerInScope(config: Config, login: string): Promise<Config> {
+  if (config.ownerSeeded || !login) return config;
+
+  const next: Config = { ...config, ownerSeeded: true };
+  if (config.activeOrgs.length > 0 && !config.activeOrgs.some(o => o.toLowerCase() === login.toLowerCase())) {
+    next.activeOrgs = [login, ...config.activeOrgs];
+  }
+  await saveConfig(next);
+  return next;
+}
+
+/**
+ * Watched repos as "owner/name". Every one of them counts: you picked the
+ * repository by hand, so narrowing the owner scope later hides its pull
+ * requests nowhere — the two selections add up rather than cancelling out.
+ */
+export function watchedRepoNames(config: Config): string[] {
+  return config.repos.map(nameWithOwner);
+}
+
+/**
+ * Scope for the sweep that lists a repository's pull requests whatever their
+ * author, rather than only the ones you opened or were asked to review.
+ *
+ * Everything you selected counts, the way GitHub ORs scope qualifiers: the
+ * owners in scope plus any repository you watch. Watching one repository adds
+ * it, it does not quietly drop the organizations you already picked. With
+ * nothing configured at all this falls back to your own account, which is what
+ * makes your repositories show by default.
+ */
+export function watchedScopeTokens(config: Config, login: string): string[] {
+  // No owner scope means everywhere, and your own repositories are the part of
+  // everywhere this sweep can usefully cover.
+  const owners = config.activeOrgs.length > 0 ? config.activeOrgs : login ? [login] : [];
+  const sameOwner = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+  const tokens: string[] = [];
+
+  for (const owner of owners) {
+    const picked = config.repos.filter(r => sameOwner(r.owner, owner));
+    // Watching repositories inside an owner is a statement about that owner:
+    // sweep those repositories rather than everything it holds. An owner you
+    // picked no repositories from stays whole.
+    if (picked.length > 0) tokens.push(...picked.map(r => `repo:${nameWithOwner(r)}`));
+    else tokens.push(`user:${owner}`);
+  }
+
+  // A watched repository outside the owner scope is still an explicit choice.
+  for (const repo of config.repos) {
+    if (!owners.some(o => sameOwner(o, repo.owner))) tokens.push(`repo:${nameWithOwner(repo)}`);
+  }
+
+  return tokens;
 }
 
 // ---------------------------------------------------------------------------

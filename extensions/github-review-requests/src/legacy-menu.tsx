@@ -2,20 +2,17 @@ import { MenuSettings } from "./attention/components/menu-settings";
 import { MenuBarExtra, open, Icon, Color, launchCommand, LaunchType } from "@raycast/api";
 import { useMemo } from "react";
 import usePulls from "./hooks/usePulls";
-import { groupedByAttribute } from "./util";
-import { PullRequestShort, ReviewDecision } from "./types";
+import { groupPullsByOwner } from "./util";
+import { ReviewDecision } from "./types";
 import PullRequestItem from "./components/PullRequestItem";
 
-interface PullRequestGroup {
-  [owner: string]: PullRequestShort[];
-}
-
 const actionablePullRequests = () => {
-  const { isLoading, isReady, login, openPulls, recentlyVisitedPulls, visitPull, runPullIteration } = usePulls();
+  const { isLoading, isReady, login, openPulls, recentlyVisitedPulls, scopeOwners, visitPull, runPullIteration } =
+    usePulls();
 
   const title = useMemo(() => (openPulls.length > 0 ? `${openPulls.length}` : "🎉"), [openPulls]);
 
-  const pullsByOwner = useMemo(() => groupedByAttribute(openPulls, "owner") as PullRequestGroup, [openPulls]);
+  const ownerGroups = useMemo(() => groupPullsByOwner(scopeOwners, openPulls), [scopeOwners, openPulls]);
 
   return (
     <MenuBarExtra isLoading={isLoading} icon="icon.png" title={title} tooltip="Your Pull Requests">
@@ -32,11 +29,7 @@ const actionablePullRequests = () => {
         </MenuBarExtra.Submenu>
       </MenuBarExtra.Section>
       <>
-        {Object.entries(pullsByOwner).map(([owner, pulls]) => {
-          if (pulls.length === 0) {
-            return null;
-          }
-
+        {ownerGroups.map(({ owner, pulls }) => {
           const approvedPulls = pulls.filter(
             ({ reviewDecision, user }) => reviewDecision === ReviewDecision.APPROVED && user?.login === login,
           );
@@ -49,10 +42,16 @@ const actionablePullRequests = () => {
             ({ reviewDecision, user }) =>
               (reviewDecision === ReviewDecision.REVIEW_REQUIRED || reviewDecision === null) && user?.login === login,
           );
-          const reviewRequestedPulls = pulls.filter(({ user }) => user?.login !== login);
+          // Anything the scope sweep alone turned up is not a review request,
+          // so it gets its own group and the original four keep their exact
+          // meaning.
+          const reviewRequestedPulls = pulls.filter(
+            ({ user, inWatchedScope }) => user?.login !== login && !inWatchedScope,
+          );
+          const inScopePulls = pulls.filter(({ user, inWatchedScope }) => user?.login !== login && inWatchedScope);
 
           return (
-            <MenuBarExtra.Section title={owner ?? "Unknown"} key={owner}>
+            <MenuBarExtra.Section title={owner} key={owner}>
               <MenuBarExtra.Submenu
                 title={`Wait For Merge${approvedPulls.length ? ` (${approvedPulls.length})` : ""}`}
                 icon={approvedPulls.length > 0 ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Checkmark}
@@ -107,6 +106,25 @@ const actionablePullRequests = () => {
                   />
                 ))}
               </MenuBarExtra.Submenu>
+              {/*
+                Rendered whether or not it has anything, like the four above:
+                a submenu that comes and goes with a background refresh moves
+                everything under it while the menu is open, and a click already
+                on its way lands on the wrong row.
+              */}
+              <MenuBarExtra.Submenu
+                title={`Other Open PRs${inScopePulls.length ? ` (${inScopePulls.length})` : ""}`}
+                icon={inScopePulls.length > 0 ? { source: Icon.Binoculars, tintColor: Color.Blue } : Icon.Binoculars}
+              >
+                {inScopePulls.map((pull, index) => (
+                  <PullRequestItem
+                    key={pull.id}
+                    pull={pull}
+                    index={index}
+                    onAction={() => open(pull.url).then(() => visitPull(pull))}
+                  />
+                ))}
+              </MenuBarExtra.Submenu>
             </MenuBarExtra.Section>
           );
         })}
@@ -129,7 +147,7 @@ const actionablePullRequests = () => {
         <MenuBarExtra.Section>
           <MenuBarExtra.Item
             title="Force Refresh"
-            onAction={runPullIteration}
+            onAction={() => runPullIteration()}
             icon={Icon.RotateClockwise}
             shortcut={{ key: "r", modifiers: ["cmd"] }}
           />

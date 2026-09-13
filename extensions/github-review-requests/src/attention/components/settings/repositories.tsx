@@ -2,23 +2,23 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { useConfig, useViewer } from "../../hooks";
-import { orgRepos, viewerRepos } from "../../lib/github";
+import { ownerRepos, viewerRepos } from "../../lib/github";
 import { nameWithOwner, parseRepoRef, type RepoRef } from "../../lib/types";
 
 /**
  * Picks the repositories that feed the "Watching" category. Candidates come
- * from the active orgs, or from everything the viewer can see when no org
- * scope is set.
+ * from the owners in the active scope — personal accounts as well as
+ * organizations — or from everything the viewer can see when no scope is set.
  */
 export function Repositories() {
   const { config, update } = useConfig();
   const { data: viewer } = useViewer();
 
   const { data: candidates, isLoading } = useCachedPromise(
-    async (orgs: string) => {
-      const list = orgs ? orgs.split(",").filter(Boolean) : [];
+    async (owners: string) => {
+      const list = owners ? owners.split(",").filter(Boolean) : [];
       if (list.length === 0) return viewerRepos();
-      const pages = await Promise.all(list.map(org => orgRepos(org)));
+      const pages = await Promise.all(list.map(owner => ownerRepos(owner)));
       return pages.flat();
     },
     [config.activeOrgs.join(",")],

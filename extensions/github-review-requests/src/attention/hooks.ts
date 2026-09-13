@@ -7,13 +7,15 @@ import { DEMO_VIEWER, demoPullRequests, isDemoMode } from "./lib/demo";
 import { checkGhStatus } from "./lib/gh-status";
 import { fetchViewer, search } from "./lib/github";
 import { clearSamlRefusal, takeSamlRefusal } from "./lib/graphql";
+import { refreshMenuBar } from "./lib/menu-refresh";
 import { loadSeen, markNewSince } from "./lib/seen";
 import type { Category } from "./lib/tabs";
 import type { PullRequest, Viewer } from "./lib/types";
 
 /**
- * Loads the persisted config and exposes an `update` that writes it back and
- * refreshes every consumer in this view.
+ * Loads the persisted config and exposes an `update` that writes it back,
+ * refreshes every consumer in this view, and nudges the menu bar so the change
+ * shows up there too without a manual refresh.
  */
 export function useConfig() {
   const { data, isLoading, revalidate, mutate } = useCachedPromise(loadConfig, [], {
@@ -33,6 +35,9 @@ export function useConfig() {
           shouldRevalidateAfter: false,
         },
       );
+      // Not awaited: the toggle should feel instant, and the nudge waits for a
+      // quiet moment of its own before touching the menu.
+      void refreshMenuBar();
     },
     [mutate],
   );

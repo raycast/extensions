@@ -2,6 +2,11 @@
  * A minimal GitHub GraphQL client: bearer token from the gh CLI, bounded
  * concurrency, and retries on 5xx / secondary-rate-limit responses. Ported
  * from flex-review's internal/gh client.
+ *
+ * Retrying is only safe when resending the operation can't change the outcome.
+ * Callers that create something — a comment, a thread reply — opt out with
+ * `idempotent: false` so an ambiguous failure surfaces instead of duplicating
+ * the write. See `UnconfirmedWriteError`.
  */
 import { GhError, forgetToken, loginCommand, token } from "./gh-cli";
 import { host, usesCli } from "./preferences";
@@ -26,6 +31,32 @@ export class GraphQLError extends Error {
     this.ssoHeader = ssoHeader ?? undefined;
   }
 }
+
+/**
+ * A write that failed without GitHub saying whether it landed — a dropped
+ * connection, or a 5xx returned after the mutation may already have been
+ * applied. Sending it again could post a duplicate, so the client stops and
+ * hands the decision to the person, who can check the pull request first.
+ */
+export class UnconfirmedWriteError extends Error {
+  constructor(reason: string) {
+    super(
+      `GitHub did not confirm the request (${reason}). It may already have gone through — check the pull request on GitHub before sending it again.`,
+    );
+    this.name = "UnconfirmedWriteError";
+  }
+}
+
+export type RequestOptions = {
+  /**
+   * Whether resending the operation is harmless. Queries and mutations that
+   * converge on one state (resolving a thread) retry freely; a mutation that
+   * creates something new must not, so it passes `false`.
+   *
+   * Defaults to `true`, which keeps every existing read on the retry loop.
+   */
+  idempotent?: boolean;
+};
 
 /**
  * The most recent SAML refusal, if any. A search across several orgs comes
@@ -116,7 +147,12 @@ type GraphQLResponse<T> = {
 };
 
 /** Executes a GraphQL query and returns its `data` payload. */
-export async function graphql<T>(query: string, variables: Record<string, unknown> = {}): Promise<T> {
+export async function graphql<T>(
+  query: string,
+  variables: Record<string, unknown> = {},
+  options: RequestOptions = {},
+): Promise<T> {
+  const idempotent = options.idempotent ?? true;
   const bearer = await token(host());
   const body = JSON.stringify({ query, variables });
 
@@ -139,6 +175,9 @@ export async function graphql<T>(query: string, variables: Record<string, unknow
         });
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
+        // The request may have reached GitHub with only the reply lost on the
+        // way back, so a write stops here rather than risk posting twice.
+        if (!idempotent) throw new UnconfirmedWriteError(lastError.message);
         await sleep(backoff(undefined, attempt));
         continue;
       }
@@ -148,6 +187,12 @@ export async function graphql<T>(query: string, variables: Record<string, unknow
 
       if (response.status >= 500 || response.status === 429 || secondary) {
         lastError = new GraphQLError(`GitHub returned ${response.status}: ${text.trim().slice(0, 200)}`);
+        // Rate-limit answers are refusals — GitHub turned the request away
+        // without running it, so even a write is safe to send again. A 5xx
+        // says nothing either way: the mutation may already have been applied.
+        if (!idempotent && response.status >= 500) {
+          throw new UnconfirmedWriteError(`GitHub returned ${response.status}`);
+        }
         await sleep(backoff(response, attempt));
         continue;
       }

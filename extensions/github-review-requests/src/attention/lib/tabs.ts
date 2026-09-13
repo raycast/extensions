@@ -6,9 +6,8 @@
 import { Color, Icon } from "@raycast/api";
 
 import type { Config } from "./config";
-import { orgActive, ownerQualifier, searchString } from "./config";
+import { ownerQualifier, searchString, watchedRepoNames } from "./config";
 import type { PullRequest, Viewer } from "./types";
-import { nameWithOwner } from "./types";
 
 /**
  * Caps how many teams are OR'd into the team-review query, keeping the GitHub
@@ -117,9 +116,9 @@ export function watchedTeams(config: Config, viewer: Viewer): string[] {
   return out.length > 0 ? out : mine;
 }
 
-/** Watched repos in the active orgs (all of them when no org is active). */
+/** Every watched repo, whatever the owner scope currently is. */
 export function watchedRepos(config: Config): string[] {
-  return config.repos.filter(r => orgActive(config, r.owner)).map(nameWithOwner);
+  return watchedRepoNames(config);
 }
 
 /** An OR of repo: qualifiers for open PRs, or "" when nothing is watched. */

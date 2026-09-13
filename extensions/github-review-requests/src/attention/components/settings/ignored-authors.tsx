@@ -1,14 +1,17 @@
 import { Action, ActionPanel, Color, Form, Icon, Keyboard, List, useNavigation } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
-import { useConfig } from "../../hooks";
+import { useConfig, useViewer } from "../../hooks";
 import {
   DEFAULT_IGNORED_AUTHORS,
   normalizeAuthor,
+  watchedScopeTokens,
   withAuthorIgnored,
   withIgnoredAuthors,
   withoutAuthorIgnored,
 } from "../../lib/config";
+import { scopeAuthors, type ScopeAuthors } from "../../lib/github";
 
 /** A one-field form for adding an author to the ignore list. */
 function AddAuthorForm({ onAdd }: { onAdd: (login: string) => Promise<void> }) {
@@ -57,10 +60,20 @@ function AddAuthorForm({ onAdd }: { onAdd: (login: string) => Promise<void> }) {
  */
 export function IgnoredAuthors() {
   const { config, update } = useConfig();
+  const { data: viewer } = useViewer();
 
   const ignored = config.ignoredAuthors;
   const ignoredSet = new Set(ignored.map(normalizeAuthor));
   const suggestions = DEFAULT_IGNORED_AUTHORS.filter(a => !ignoredSet.has(a));
+
+  // Who is actually opening pull requests where you look, so the list can be
+  // built from real accounts rather than remembered bot names.
+  const scope = watchedScopeTokens(config, viewer?.login ?? "");
+  const { data: discovered, isLoading } = useCachedPromise(
+    async (tokens: string): Promise<ScopeAuthors[]> => (tokens ? scopeAuthors(tokens.split(" ")) : []),
+    [scope.join(" ")],
+    { initialData: [] as ScopeAuthors[], keepPreviousData: true, execute: Boolean(viewer) },
+  );
 
   const addAction = (
     <Action.Push
@@ -73,13 +86,14 @@ export function IgnoredAuthors() {
 
   return (
     <List
+      isLoading={isLoading}
       navigationTitle="Ignored Authors"
       searchBarPlaceholder="Filter ignored authors…"
       actions={<ActionPanel>{addAction}</ActionPanel>}
     >
       <List.EmptyView
         icon={Icon.EyeDisabled}
-        title="Nothing is ignored"
+        title={isLoading ? "Looking for authors in your scope…" : "Nothing is ignored"}
         description="Add a bot account here and its pull requests disappear from every category."
         actions={<ActionPanel>{addAction}</ActionPanel>}
       />
@@ -114,6 +128,35 @@ export function IgnoredAuthors() {
           />
         ))}
       </List.Section>
+
+      {discovered.map(({ owner, authors }) => {
+        const open = authors.filter(a => !ignoredSet.has(normalizeAuthor(a.login)));
+        if (open.length === 0) return null;
+
+        return (
+          <List.Section key={owner} title={owner} subtitle={`${open.length} opening PRs`}>
+            {open.map(({ login, count }) => (
+              <List.Item
+                key={`${owner}/${login}`}
+                icon={{ source: Icon.Person, tintColor: Color.SecondaryText }}
+                title={login}
+                accessories={[{ tag: { value: `${count} open`, color: Color.SecondaryText } }]}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      icon={Icon.EyeDisabled}
+                      title="Ignore This Author"
+                      onAction={() => update(withAuthorIgnored(config, login))}
+                    />
+                    <Action.OpenInBrowser title="Open Profile on GitHub" url={`https://github.com/${login}`} />
+                    {addAction}
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        );
+      })}
 
       <List.Section title="Common Bots" subtitle={suggestions.length ? String(suggestions.length) : undefined}>
         {suggestions.map(author => (

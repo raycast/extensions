@@ -1,6 +1,11 @@
 ## [Update] - {PR_MERGE_DATE}
 
 - Preserve personal and organization owner scopes across both menu layouts, and honor Search Everywhere after migration.
+- List your own account alongside the organizations when choosing the owner scope, selected by default and removable.
+- Refresh the menu bar automatically when a tracking setting changes, instead of waiting for Force Refresh.
+- Keep a section for every owner in scope, and a steady menu height, so a background refresh cannot move a row under a click.
+- Build the ignore list from the accounts actually opening pull requests in your scope, grouped by owner.
+- Show every open pull request in the repositories you watch — your own account's by default — grouped separately from your review requests.
 - Preserve the original GitHub icon, search, review-status menu, and PAT support.
 - Add optional GitHub CLI authentication across all commands.
 - Add conversation reply tracking, ageing, filters, an optional attention menu, and an activity inbox.

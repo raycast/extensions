@@ -4,7 +4,7 @@
  * extension and the TUI see exactly the same data.
  */
 import { normalizeAuthor } from "./config";
-import { demoDetail, demoRepos, isDemoMode } from "./demo";
+import { demoDetail, demoPullRequests, demoRepos, isDemoMode } from "./demo";
 import { graphql } from "./graphql";
 import { maxResults } from "./preferences";
 import type {
@@ -515,7 +515,10 @@ export async function pullRequestDetail(owner: string, name: string, number: num
 // Mutations
 // ---------------------------------------------------------------------------
 
-/** Posts a reply on an existing inline review thread. */
+/**
+ * Posts a reply on an existing inline review thread. Not idempotent: a resend
+ * would add a second reply, so the client refuses to retry it blindly.
+ */
 export async function replyToThread(threadId: string, body: string): Promise<Comment> {
   const data = await graphql<{
     addPullRequestReviewThreadReply: {
@@ -536,12 +539,16 @@ export async function replyToThread(threadId: string, body: string): Promise<Com
       }
     `,
     { threadId, body },
+    { idempotent: false },
   );
   const c = data.addPullRequestReviewThreadReply.comment;
   return { author: c.author?.login ?? "", body: c.bodyText, createdAt: c.createdAt };
 }
 
-/** Posts a top-level conversation comment on the PR (subjectId is its node id). */
+/**
+ * Posts a top-level conversation comment on the PR (subjectId is its node id).
+ * Not idempotent, for the same reason as `replyToThread`.
+ */
 export async function addComment(subjectId: string, body: string): Promise<Comment> {
   const data = await graphql<{
     addComment: { commentEdge: { node: { author: { login: string } | null; bodyText: string; createdAt: string } } };
@@ -562,12 +569,16 @@ export async function addComment(subjectId: string, body: string): Promise<Comme
       }
     `,
     { subjectId, body },
+    { idempotent: false },
   );
   const c = data.addComment.commentEdge.node;
   return { author: c.author?.login ?? "", body: c.bodyText, createdAt: c.createdAt };
 }
 
-/** Resolves or unresolves an inline review thread. */
+/**
+ * Resolves or unresolves an inline review thread. Idempotent — the mutation
+ * sets a state rather than appending, so a retry lands on the same result.
+ */
 export async function setThreadResolved(threadId: string, resolved: boolean): Promise<void> {
   const mutation = resolved
     ? `mutation($threadId: ID!) { resolveReviewThread(input: {threadId: $threadId}) { thread { id } } }`
@@ -576,12 +587,110 @@ export async function setThreadResolved(threadId: string, resolved: boolean): Pr
 }
 
 // ---------------------------------------------------------------------------
+// Authors in scope
+// ---------------------------------------------------------------------------
+
+const SCOPE_AUTHORS_QUERY = `
+query($q: String!, $first: Int!, $after: String) {
+  search(query: $q, type: ISSUE, first: $first, after: $after) {
+    pageInfo { hasNextPage endCursor }
+    nodes {
+      ... on PullRequest {
+        author { login }
+        repository { owner { login } }
+      }
+    }
+  }
+}`;
+
+/** The accounts opening pull requests under one owner, busiest first. */
+export type ScopeAuthors = { owner: string; authors: { login: string; count: number }[] };
+
+type ScopeAuthorsData = {
+  search: {
+    pageInfo: { hasNextPage: boolean; endCursor: string | null };
+    nodes: ({ author: { login: string } | null; repository: { owner: { login: string } } | null } | null)[];
+  };
+};
+
+/**
+ * Lists who is actually opening pull requests in the scope, grouped by owner,
+ * so the ignore list can be built from real accounts instead of guesswork.
+ *
+ * One search per scope token rather than a single OR'd query: a busy
+ * organization would otherwise fill every page and the quiet ones would look
+ * empty. Deliberately light — logins and owners only, no review threads.
+ */
+export async function scopeAuthors(tokens: string[], limitPerToken = 100): Promise<ScopeAuthors[]> {
+  if (await isDemoMode()) {
+    return groupAuthors(
+      demoPullRequests("review-requested").map(pr => ({
+        owner: pr.repository.split("/")[0] ?? "",
+        login: pr.author,
+      })),
+    );
+  }
+
+  const found: { owner: string; login: string }[] = [];
+
+  await Promise.all(
+    tokens.map(async token => {
+      let after: string | undefined;
+
+      while (true) {
+        const data = await graphql<ScopeAuthorsData>(SCOPE_AUTHORS_QUERY, {
+          q: `is:pr is:open archived:false ${token}`,
+          first: Math.min(limitPerToken, 100),
+          ...(after ? { after } : {}),
+        });
+
+        for (const node of data.search.nodes) {
+          const login = node?.author?.login ?? "";
+          const owner = node?.repository?.owner.login ?? "";
+          if (login && owner) found.push({ owner, login });
+        }
+
+        const { hasNextPage, endCursor } = data.search.pageInfo;
+        if (!hasNextPage || !endCursor || found.length >= limitPerToken * tokens.length) break;
+        after = endCursor;
+      }
+    }),
+  );
+
+  return groupAuthors(found);
+}
+
+function groupAuthors(found: { owner: string; login: string }[]): ScopeAuthors[] {
+  const owners = new Map<string, { owner: string; counts: Map<string, { login: string; count: number }> }>();
+
+  for (const { owner, login } of found) {
+    const key = owner.toLowerCase();
+    const group = owners.get(key) ?? { owner, counts: new Map() };
+    const seen = group.counts.get(login.toLowerCase());
+    if (seen) seen.count++;
+    else group.counts.set(login.toLowerCase(), { login, count: 1 });
+    owners.set(key, group);
+  }
+
+  return [...owners.values()].map(group => ({
+    owner: group.owner,
+    authors: [...group.counts.values()].sort((a, b) => b.count - a.count || a.login.localeCompare(b.login)),
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Repositories
 // ---------------------------------------------------------------------------
 
-const ORG_REPOS_QUERY = `
-query($org: String!, $first: Int!, $after: String) {
-  organization(login: $org) {
+/**
+ * `repositoryOwner` resolves a User as readily as an Organization, so a
+ * personal owner in the scope lists its repositories instead of failing the
+ * query — and an unknown login comes back as null rather than an error that
+ * would take the other owners in a mixed scope down with it.
+ */
+const OWNER_REPOS_QUERY = `
+query($owner: String!, $first: Int!, $after: String) {
+  repositoryOwner(login: $owner) {
     repositories(first: $first, after: $after, orderBy: {field: PUSHED_AT, direction: DESC}) {
       pageInfo { hasNextPage endCursor }
       nodes { name owner { login } }
@@ -589,9 +698,9 @@ query($org: String!, $first: Int!, $after: String) {
   }
 }`;
 
-/** Lists an org's repositories, most-recently-pushed first, up to `limit`. */
-export async function orgRepos(org: string, limit = 200): Promise<RepoRef[]> {
-  if (await isDemoMode()) return demoRepos().filter(r => r.owner === org);
+/** Lists an owner's repositories, most-recently-pushed first, up to `limit`. */
+export async function ownerRepos(owner: string, limit = 200): Promise<RepoRef[]> {
+  if (await isDemoMode()) return demoRepos().filter(r => r.owner === owner);
 
   const out: RepoRef[] = [];
   let after: string | undefined;
@@ -599,15 +708,15 @@ export async function orgRepos(org: string, limit = 200): Promise<RepoRef[]> {
   while (out.length < limit) {
     const pageSize = Math.min(limit - out.length, 100);
     const data = await graphql<{
-      organization: {
+      repositoryOwner: {
         repositories: {
           pageInfo: { hasNextPage: boolean; endCursor: string | null };
           nodes: { name: string; owner: { login: string } }[];
         };
       } | null;
-    }>(ORG_REPOS_QUERY, { org, first: pageSize, ...(after ? { after } : {}) });
+    }>(OWNER_REPOS_QUERY, { owner, first: pageSize, ...(after ? { after } : {}) });
 
-    const repos = data.organization?.repositories;
+    const repos = data.repositoryOwner?.repositories;
     if (!repos) break;
 
     for (const node of repos.nodes) {
