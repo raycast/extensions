@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OpenCode Go — Raycast UI prototype (throwaway)</title>
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --panel: #ffffff;
+    --ink: #1d1d1f;
+    --sub: #6e6e73;
+    --line: #e6e6ea;
+    --acc: #0a84ff;
+    --tag: #e8f0fe;
+    --tag-ink: #1a56a0;
+    --bar: #d7e7fd;
+    --ok: #34c759;
+    --warn: #ff9500;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .raycast {
+    width: 640px; max-width: 96vw; max-height: 92vh;
+    background: var(--panel);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.16);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .searchbar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .searchbar .lens { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--sub); position: relative; }
+  .searchbar .lens::after { content: ""; position: absolute; width: 6px; height: 2px; background: var(--sub); bottom: -3px; right: -4px; transform: rotate(45deg); }
+  .searchbar .q { color: var(--sub); flex: 1; }
+  .searchbar .kbd { font-size: 11px; color: var(--sub); border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; }
+  .list { overflow-y: auto; flex: 1; padding: 6px 8px 14px; }
+  .section { padding: 10px 10px 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--sub); }
+  .row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 10px; border-radius: 8px;
+  }
+  .row:hover { background: #f0f0f2; }
+  .row .ic {
+    width: 30px; height: 30px; border-radius: 7px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; color: #fff;
+  }
+  .row .body { flex: 1; min-width: 0; }
+  .row .t { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .s { color: var(--sub); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .acc { flex: none; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--sub); }
+  .tag { font-size: 11px; border-radius: 5px; padding: 2px 7px; background: var(--tag); color: var(--tag-ink); font-weight: 600; }
+  .tag.win { background: #eafaf0; color: #18794e; }
+  .tag.lose { background: #fff3e0; color: #b25e09; }
+  .pbar { width: 64px; height: 6px; border-radius: 3px; background: var(--bar); overflow: hidden; }
+  .pbar > span { display: block; height: 100%; background: var(--acc); }
+  .dash { padding: 18px 20px 8px; }
+  .dash h1 { font-size: 18px; margin-bottom: 14px; }
+  .winrow { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .winrow:last-of-type { border-bottom: 0; }
+  .winrow .meta { text-align: right; font-size: 12px; color: var(--sub); }
+  .widebar { height: 8px; border-radius: 4px; background: var(--bar); margin: 6px 0 2px; overflow: hidden; }
+  .widebar > span { display: block; height: 100%; background: var(--acc); }
+  .md { color: var(--ink); font-size: 13px; }
+  .md pre { font-family: inherit; white-space: pre-wrap; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; }
+  .chip { display: flex; align-items: center; gap: 7px; background: #f0f0f2; border-radius: 8px; padding: 6px 10px; font-size: 12px; }
+  .chip b { font-weight: 600; }
+  .chipbar { width: 44px; height: 5px; border-radius: 3px; background: var(--bar); overflow: hidden; }
+  .chipbar > span { display: block; height: 100%; background: var(--acc); }
+  .foot { border-top: 1px solid var(--line); padding: 10px 16px; font-size: 12px; color: var(--sub); display: flex; justify-content: space-between; }
+  .switcher {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px;
+    background: #1d1d1f; color: #fff; border-radius: 999px;
+    padding: 8px 14px; font-size: 13px; box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    z-index: 99;
+  }
+  .switcher button { background: none; border: none; color: #fff; font-size: 15px; cursor: pointer; padding: 2px 6px; }
+  .variant-tag { font-size: 11px; padding: 1px 8px; border-radius: 999px; background: #3a3a3d; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="raycast">
+  <div class="searchbar"><span class="lens"></span><span class="q" id="q">Search models, limits, picks…</span><span class="kbd">↵</span></div>
+  <div id="vA" class="view"></div>
+  <div id="vB" class="view hidden"></div>
+  <div id="vC" class="view hidden"></div>
+  <div class="foot"><span>OpenCode Go</span><span id="footNote"></span></div>
+</div>
+
+<div class="switcher">
+  <button id="prev" aria-label="previous variant">‹</button>
+  <span id="label">A (Sections)</span>
+  <span class="variant-tag" id="key">A</span>
+  <button id="next" aria-label="next variant">›</button>
+</div>
+
+<script>
+// ── Mock data (shape mirrors the OCG API + reference plugin) ──────────────
+const WINDOWS = [
+  { key: "rolling", name: "Rolling 5h", pct: 42, cap: "$12", reset: "resets in 1h 12m", status: "ok" },
+  { key: "weekly",  name: "Weekly",     pct: 31, cap: "$30", reset: "resets in 4d 6h",  status: "ok" },
+  { key: "monthly", name: "Monthly",    pct: 18, cap: "$60", reset: "resets in 26d 14h",status: "ok" },
+];
+const PICKS = [
+  { id: "glm-5.3-flash",         kind: "stretch",    req: 240 },
+  { id: "deepseek-v4-flash",     kind: "best-value", req: 210 },
+];
+const MODELS = [
+  { id: "glm-5.3-flash",           in: 0.10, out: 0.30, req: 240, mod: { input: ["text","image"], output: ["text"] } },
+  { id: "deepseek-v4-flash",       in: 0.075,out: 0.25, req: 210, mod: { input: ["text"], output: ["text"] } },
+  { id: "qwen3-500b",              in: 0.30, out: 0.90, req: 120, mod: { input: ["text","image"], output: ["text"] } },
+  { id: "gpt-5.1",                 in: 0.40, out: 1.20, req: 90,  mod: { input: ["text","image"], output: ["text"] } },
+  { id: "claude-sonnet-4.5",       in: 0.80, out: 4.00, req: 40,  mod: { input: ["text","image"], output: ["text"] } },
+  { id: "muse-spark-1.2-contributor", in: 0.20, out: 0.80, req: 180, note: "trains on prompts", mod: { input: ["text","image"], output: ["text","image"] } },
+  { id: "opus-4.5",                in: 1.50, out: 7.50, req: 20,  mod: { input: ["text","image"], output: ["text"] } },
+];
+const OTHER = 5; // models folded into "other (N)"
+const money = (v) => "$" + (v < 0.1 ? v.toFixed(3) : v.toFixed(2)) + "/M";
+const req5h = (m) => "~" + m.req + " req/5h";
+const MOD_ICON = { text: "text", image: "image", video: "video", audio: "audio" };
+const mod = (m) => "in " + m.mod.input.map(k => MOD_ICON[k] || k).join(", ") + " · out " + m.mod.output.map(k => MOD_ICON[k] || k).join(", ");
+
+const els = {
+  A: document.getElementById("vA"),
+  B: document.getElementById("vB"),
+  C: document.getElementById("vC"),
+};
+
+// ── Variant A — Sections: Limits ▸ Picks ▸ Catalog ─────────────────────────
+function renderA() {
+  const h = [];
+  h.push(`<div class="section">Go limits</div>`);
+  for (const w of WINDOWS) {
+    h.push(`<div class="row">
+      <div class="ic" style="background:${w.status==='rate-limited'?'var(--warn)':'var(--acc)'}">${w.key==='rolling'?'5h':'⌛'}</div>
+      <div class="body"><div class="t">${w.name} · ${w.cap}</div><div class="s">${w.reset}${w.status==='rate-limited'?' · rate-limited':''}</div></div>
+      <div class="acc"><div class="pbar"><span style="width:${w.pct}%"></span></div>${w.pct}%</div>
+    </div>`);
+  }
+  h.push(`<div class="section">Picks · today</div>`);
+  for (const p of PICKS) {
+    const m = MODELS.find(x => x.id === p.id);
+    h.push(`<div class="row">
+      <div class="ic" style="background:var(--ok)">✦</div>
+      <div class="body"><div class="t">${p.id}</div><div class="s">${req5h(m)} · ${mod(m)}</div></div>
+      <div class="acc"><span class="tag ${p.kind==='stretch'?'win':'lose'}">${p.kind === 'stretch' ? 'Stretch' : 'Best value'}</span></div>
+    </div>`);
+  }
+  h.push(`<div class="section">Model catalog · by cost</div>`);
+  for (const m of MODELS) {
+    h.push(`<div class="row">
+      <div class="ic" style="background:#8e8e93">M</div>
+      <div class="body"><div class="t">${m.id}</div><div class="s">${mod(m)}${m.note ? ' · ' + m.note : ''}</div></div>
+      <div class="acc">${money(m.in)} / ${money(m.out)}</div>
+    </div>`);
+  }
+  h.push(`<div class="row"><div class="body"><div class="s">… and ${OTHER} more models (folded)</div></div></div>`);
+  els.A.innerHTML = h.join("");
+}
+
+// ── Variant B — Dashboard (Detail/markdown) + catalog as a push-away ────────
+function renderB() {
+  const bar = (pct) => "█".repeat(Math.round(pct / 10)) + "░".repeat(10 - Math.round(pct / 10));
+  els.B.innerHTML = `
+    <div class="dash">
+      <h1>OpenCode Go</h1>
+      ${WINDOWS.map(w => `
+        <div class="winrow">
+          <div><b>${w.name}</b> · ${w.cap}</div>
+          <div class="widebar"><span style="width:${w.pct}%"></span></div>
+          <div class="meta"><div>${w.pct}% used</div><div>${w.reset}</div></div>
+        </div>`).join("")}
+      <div class="section" style="padding-left:0">Today's picks</div>
+      ${PICKS.map(p => {
+        const m = MODELS.find(x => x.id === p.id);
+        return `<div class="winrow">
+          <div><b>${p.id}</b> <span class="tag ${p.kind==='stretch'?'win':'lose'}">${p.kind==='stretch'?'Stretch':'Best value'}</span></div>
+          <div class="meta"><div>${req5h(m)} · ${money(m.in)}/${money(m.out)}</div><div>${mod(m)}</div></div>
+        </div>`;
+      }).join("")}
+      <div class="foot-note">Open model catalog → the full List with price + quota sorting.</div>
+    </div>`;
+}
+
+// ── Variant C — Catalog-first density: models own the screen ───────────────
+function renderC() {
+  const h = [`<div class="chips">`];
+  for (const w of WINDOWS) {
+    h.push(`<span class="chip"><b>${w.name.replace('Rolling ','')}</b> ${w.pct}%<span class="chipbar"><span style="width:${w.pct}%"></span></span><span style="color:var(--sub)">${w.reset.replace('resets in ','')}</span></span>`);
+  }
+  h.push(`</div>`);
+  const sorted = [...MODELS].sort((a, b) => b.req - a.req);
+  for (const m of sorted) {
+    const isPick = PICKS.find(p => p.id === m.id);
+    h.push(`<div class="row">
+      <div class="body"><div class="t">${m.id}${m.note ? ' <span style="color:var(--sub)">(excluded)</span>' : ''}</div>
+        <div class="s">${mod(m)}</div></div>
+      <div class="acc"><span class="tag">${money(m.in)}/${money(m.out)}</span><span class="tag">${req5h(m)}</span>${isPick ? `<span class="tag ${isPick.kind==='stretch'?'win':'lose'}">${isPick.kind==='stretch'?'Stretch':'Value'}</span>` : ''}</div>
+    </div>`);
+  }
+  h.push(`<div class="row"><div class="body"><div class="s">… and ${OTHER} more models (folded)</div></div></div>`);
+  els.C.innerHTML = h.join("");
+}
+
+// ── Variant switcher ────────────────────────────────────────────────────────
+const VARIANTS = [
+  { key: "A", name: "Sections", render: renderA, note: "Balanced: limits → picks → catalog, progress icons" },
+  { key: "B", name: "Dashboard", render: renderB, note: "Markdown Detail summary, catalog one action away" },
+  { key: "C", name: "Catalog-first", render: renderC, note: "Dense: models own the list, limits as chips" },
+];
+let current = new URLSearchParams(location.search).get("variant") || "A";
+
+function show() {
+  const v = VARIANTS.find(x => x.key === current) || VARIANTS[0];
+  ["A", "B", "C"].forEach(k => els[k].classList.toggle("hidden", k !== v.key));
+  document.getElementById("label").textContent = `${v.key} (${v.name})`;
+  document.getElementById("key").textContent = v.key;
+  document.getElementById("footNote").textContent = v.note;
+}
+function cycle(dir) {
+  const i = VARIANTS.findIndex(x => x.key === current);
+  current = VARIANTS[(i + dir + VARIANTS.length) % VARIANTS.length].key;
+  const u = new URL(location.href); u.searchParams.set("variant", current);
+  history.replaceState(null, "", u);
+  show();
+}
+
+renderA(); renderB(); renderC(); show();
+document.getElementById("prev").onclick = () => cycle(-1);
+document.getElementById("next").onclick = () => cycle(1);
+addEventListener("keydown", (e) => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea" || e.target.isContentEditable) return;
+  if (e.key === "ArrowLeft") cycle(-1);
+  if (e.key === "ArrowRight") cycle(1);
+});
+</script>
+</body>
+</html>

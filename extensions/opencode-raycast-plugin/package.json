@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "opencode-raycast-plugin",
+  "title": "Opencode Info",
+  "description": "Track OpenCode Go usage from the menu bar — limit windows, model catalog, and daily picks.",
+  "icon": "icon.png",
+  "author": "markus_merzinger",
+  "categories": ["Developer Tools"],
+  "platforms": ["macOS"],
+  "keywords": ["opencode", "usage", "subscription", "models", "quota", "limits", "go", "zen"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "opencode-raycast-plugin",
+      "title": "Opencode Info",
+      "description": "Opencode Info: limit windows, model catalog, and daily picks.",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "opencode-raycast-plugin-menu-bar",
+      "title": "Opencode Info",
+      "description": "Opencode Info in the menu bar.",
+      "mode": "menu-bar",
+      "icon": "menubar-icon.png",
+      "interval": "60s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API key",
+      "description": "Your OpenCode Go API key.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "maxModels",
+      "title": "Max catalog rows",
+      "description": "How many models to show before folding into \"other\".",
+      "type": "textfield",
+      "required": false,
+      "default": "12"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true
+  }
+}
