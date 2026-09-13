@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "switcheroo",
+  "title": "Switcheroo",
+  "description": "Manage Switcheroo keyboard remapper configuration",
+  "icon": "command-icon.png",
+  "author": "mjphayes",
+  "platforms": ["macOS"],
+  "categories": [
+    "System",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-remaps",
+      "title": "View Remaps",
+      "description": "View and manage all keyboard remapping rules",
+      "mode": "view"
+    },
+    {
+      "name": "add-remap",
+      "title": "Add Remap",
+      "description": "Add a new keyboard remapping rule",
+      "mode": "view"
+    },
+    {
+      "name": "restart",
+      "title": "Restart Switcheroo",
+      "description": "Restart the Switcheroo service",
+      "mode": "no-view"
+    },
+    {
+      "name": "view-logs",
+      "title": "View Logs",
+      "description": "View recent Switcheroo log output",
+      "mode": "view"
+    },
+    {
+      "name": "edit-config",
+      "title": "Edit Config",
+      "description": "Open Switcheroo config in your default editor",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "smol-toml": "^1.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "lint:ci": "eslint src/** && prettier --check src/** !**/.DS_Store",
+    "publish": "ray publish",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1"
+  }
+}
