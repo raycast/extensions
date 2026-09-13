@@ -14,7 +14,7 @@ import { KIND_COLOR, KIND_ICON } from "../lib/appearance";
 import { DocDetails, loadDetails } from "../lib/docpage";
 import { entryUrl } from "../lib/entry-url";
 import { PrimaryAction } from "../lib/preferences";
-import { membersOf } from "../lib/search";
+import { memberCount, membersOf } from "../lib/search";
 import {
   boilerplate,
   importStatement,
@@ -136,9 +136,7 @@ function EntryActions({
   extra?: ReactNode;
 }) {
   const { push } = useNavigation();
-  const members = hasMembers(entry)
-    ? membersOf(ctx.entries, entry, (candidate) => isDeprecated(ctx, candidate))
-    : [];
+  const members = hasMembers(entry) ? memberCount(ctx.entries, entry) : 0;
   const references = (details?.references ?? [])
     .map((name) => ctx.entries.find((candidate) => candidate.name === name))
     .filter(
@@ -174,9 +172,9 @@ function EntryActions({
       <ActionPanel.Section>
         {ctx.primaryAction === "browser" ? openInBrowser : showDetails}
         {ctx.primaryAction === "browser" ? showDetails : openInBrowser}
-        {members.length > 0 ? (
+        {members > 0 ? (
           <Action
-            title={`Show ${members.length} Members`}
+            title={`Show ${members} Members`}
             icon={Icon.BulletPoints}
             shortcut={{ modifiers: ["cmd"], key: "m" }}
             onAction={() => push(<MemberList parent={entry} ctx={ctx} />)}

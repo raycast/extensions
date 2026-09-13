@@ -205,10 +205,15 @@ function addEntry(
   version: string,
 ): void {
   if (!entry) return;
-  const finished: DocEntry = { ...entry, version };
-  const current = best.get(finished.name);
-  if (!current || finished.name.length < current.name.length)
-    best.set(finished.name, finished);
+  const current = best.get(entry.name);
+  if (current && entry.name.length >= current.name.length) return;
+
+  // A JSON round trip flattens the concatenated strings, halving the heap a
+  // freshly downloaded inventory retains compared with the built objects.
+  const finished = JSON.parse(
+    JSON.stringify({ ...entry, version }),
+  ) as DocEntry;
+  best.set(finished.name, finished);
 }
 
 async function fetchText(base: string, file: string): Promise<string> {

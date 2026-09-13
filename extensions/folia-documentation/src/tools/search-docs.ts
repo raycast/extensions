@@ -1,3 +1,4 @@
+import { mapConcurrent } from "../lib/concurrency";
 import { loadDetails } from "../lib/docpage";
 import { entryUrl } from "../lib/entry-url";
 import { loadGuides } from "../lib/guides";
@@ -17,6 +18,7 @@ type Input = {
 };
 
 const DESCRIPTION_LIMIT = 1200;
+const DETAIL_CONCURRENCY = 2;
 
 export default async function searchDocs(input: Input) {
   const { docsVersion, includeGuides = true } = getPreferences();
@@ -37,8 +39,10 @@ export default async function searchDocs(input: Input) {
     Math.max(0, Math.min(input.limit ?? 5, 10)),
   );
 
-  const results = await Promise.all(
-    matches.map(async (entry) => {
+  const results = await mapConcurrent(
+    matches,
+    DETAIL_CONCURRENCY,
+    async (entry) => {
       const details = await loadDetails(entry);
       const badges = meta[entry.name];
       return {
@@ -51,7 +55,7 @@ export default async function searchDocs(input: Input) {
         example: details.example,
         url: entryUrl(entry),
       };
-    }),
+    },
   );
 
   return {

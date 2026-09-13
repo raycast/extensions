@@ -22,11 +22,9 @@ const BROWSE_LIMIT = 300;
 const PACKAGE_PREFIX =
   /^(?:org\.bukkit|io\.papermc\.paper|com\.destroystokyo\.paper|org\.spigotmc)\./;
 
-function lastSegment(name: string): string {
-  const hash = name.lastIndexOf("#");
-  if (hash !== -1) return name.slice(hash + 1);
-  const dot = name.lastIndexOf(".");
-  return dot === -1 ? name : name.slice(dot + 1);
+function afterLastSeparator(value: string): string {
+  const hash = value.lastIndexOf("#");
+  return value.slice((hash !== -1 ? hash : value.lastIndexOf(".")) + 1);
 }
 
 // getRegionScheduler -> get_region_scheduler, so a token search can require a
@@ -63,12 +61,28 @@ function termScore(short: string, member: string, term: string): number {
   return -1;
 }
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function isSegmentBoundary(code: number): boolean {
+  return (
+    code === 46 ||
+    code === 95 ||
+    code === 35 ||
+    code === 45 ||
+    /\s/.test(String.fromCharCode(code))
+  );
 }
 
+// Runs for every entry on every keystroke, so it scans with indexOf instead
+// of compiling a new RegExp per call.
 function startsSegment(haystack: string, token: string): boolean {
-  return new RegExp(`(?:^|[\\s._#-])${escapeRegExp(token)}`).test(haystack);
+  if (haystack.startsWith(token)) return true;
+  for (
+    let at = haystack.indexOf(token, 1);
+    at !== -1;
+    at = haystack.indexOf(token, at + 1)
+  ) {
+    if (isSegmentBoundary(haystack.charCodeAt(at - 1))) return true;
+  }
+  return false;
 }
 
 // A token is matched against both the segmented and the raw form: the segmented
@@ -132,15 +146,19 @@ function buildIndex(entry: DocEntry): Indexed {
     };
   }
 
-  const trimmed = entry.name.replace(PACKAGE_PREFIX, "");
-  const member = withoutParameters(lastSegment(entry.name));
+  // Every field is a slice of one of two strings so the index for ~33,000
+  // entries shares their characters instead of holding six copies each.
+  const bare = withoutParameters(entry.name);
+  const qualified = bare.toLowerCase();
+  const full = segment(bare);
+  const prefix = PACKAGE_PREFIX.exec(bare)?.[0].length ?? 0;
   return {
-    short: withoutParameters(trimmed).toLowerCase(),
-    member: member.toLowerCase(),
-    shortSegments: segment(withoutParameters(trimmed)),
-    memberSegments: segment(member),
-    full: segment(withoutParameters(entry.name)),
-    qualified: withoutParameters(entry.name).toLowerCase(),
+    short: qualified.slice(prefix),
+    member: afterLastSeparator(qualified),
+    shortSegments: full.slice(prefix),
+    memberSegments: afterLastSeparator(full),
+    full,
+    qualified,
   };
 }
 
@@ -250,4 +268,27 @@ export function membersOf(
       .sort(compare);
   }
   return entries.filter((entry) => entry.owner === parent.name).sort(compare);
+}
+
+const memberCounts = new WeakMap<DocEntry[], Map<string, number>>();
+
+function countKey(entry: DocEntry): string | null {
+  if (entry.owner) return entry.owner;
+  return entry.kind === "package" ? null : `package:${entry.pkg}`;
+}
+
+// Every rendered row shows its member count, so the counts are built in one
+// pass per entry list instead of running membersOf for each row on each render.
+export function memberCount(entries: DocEntry[], parent: DocEntry): number {
+  let counts = memberCounts.get(entries);
+  if (!counts) {
+    counts = new Map();
+    for (const entry of entries) {
+      const key = countKey(entry);
+      if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    memberCounts.set(entries, counts);
+  }
+  const key = parent.kind === "package" ? `package:${parent.pkg}` : parent.name;
+  return counts.get(key) ?? 0;
 }

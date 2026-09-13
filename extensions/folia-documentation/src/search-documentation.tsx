@@ -172,9 +172,18 @@ export default function SearchDocumentation() {
       ];
     }
 
+    const wanted = new Set([...(favorites ?? []), ...(recents ?? [])]);
+    const found = new Map<string, DocEntry>();
+    if (wanted.size > 0) {
+      for (const entry of scope) {
+        if (wanted.has(entry.name) && !found.has(entry.name))
+          found.set(entry.name, entry);
+      }
+    }
+
     const pick = (names: string[]): DocEntry[] =>
       names
-        .map((name) => scope.find((entry) => entry.name === name))
+        .map((name) => found.get(name))
         .filter((entry): entry is DocEntry => Boolean(entry));
 
     const pinned = pick(favorites ?? []);

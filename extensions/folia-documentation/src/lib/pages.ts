@@ -53,8 +53,11 @@ async function storePage(key: string, html: string): Promise<void> {
   }
 }
 
+const pendingPages = new Map<string, Promise<string>>();
+
 // `base` folds the Javadoc version and the guide site into the same cache key
 // space, so switching versions in preferences never serves a stale page.
+// Results that share a page wait on one download instead of each holding a copy.
 export async function fetchPage(
   page: string,
   base: string,
@@ -65,6 +68,22 @@ export async function fetchPage(
   const remembered = memoryPages.get(key);
   if (remembered && !force) return remembered;
 
+  const pending = force ? undefined : pendingPages.get(key);
+  if (pending) return pending;
+
+  const request = loadPage(key, page, force, remember).finally(() =>
+    pendingPages.delete(key),
+  );
+  pendingPages.set(key, request);
+  return request;
+}
+
+async function loadPage(
+  key: string,
+  page: string,
+  force: boolean,
+  remember: boolean,
+): Promise<string> {
   if (!force) {
     const stored = await readStoredPage(key, false);
     if (stored) {
