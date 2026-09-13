@@ -1,6 +1,6 @@
 # OpenCodex Usage Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-09-13
 
 - Added Windows support.
 
