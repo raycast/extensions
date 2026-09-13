@@ -1,15 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
-import { resolveApiKey } from "./auth";
+import { keyFingerprint, resolveApiKey } from "./auth";
 import { fetchCatalog, fetchPricing, fetchUsage } from "./api";
 import { UsageCache } from "./cache";
 import { collect, type CollectorDeps } from "./collector";
 import { createSyncedStorage } from "./storage";
 import type { CollectResult } from "./types";
-
-export interface Preferences {
-  apiKey?: string;
-  maxModels?: string;
-}
 
 const GO_BASE_URL = "https://opencode.ai/zen/go/v1";
 const ZEN_BASE_URL = "https://opencode.ai/zen/v1";
@@ -37,8 +32,12 @@ function makeDeps(): CollectorDeps {
 
 // Synchronous read of the last-known payload — renders instantly on first paint.
 export function readInitialPayload(): CollectResult | undefined {
-  const payload = new UsageCache(createSyncedStorage()).readLastPayload();
-  return payload ? { ok: true, payload, fromCache: true } : undefined;
+  const cache = new UsageCache(createSyncedStorage());
+  const payload = cache.readLastPayload();
+  if (!payload) return undefined;
+  const key = resolveApiKey(getPreferenceValues<Preferences>().apiKey);
+  if (!key || !cache.isKeyScopeCurrent(keyFingerprint(key))) return undefined;
+  return { ok: true, payload, fromCache: true };
 }
 
 export async function collectUsage(force = false): Promise<CollectResult> {

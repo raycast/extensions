@@ -69,6 +69,16 @@ describe("fetchCatalog", () => {
     );
     await expect(fetchCatalog("https://opencode.ai/zen/go/v1")).resolves.toEqual(["ok"]);
   });
+
+  it("rejects a response whose data is not an array", async () => {
+    mockFetch(async () => new Response(JSON.stringify({ data: "nope" }), { status: 200 }));
+    await expect(fetchCatalog("https://opencode.ai/zen/go/v1")).rejects.toMatchObject({ kind: "http" });
+  });
+
+  it("rejects an empty catalog so the caller can fall back to cache", async () => {
+    mockFetch(async () => new Response(JSON.stringify({ data: [] }), { status: 200 }));
+    await expect(fetchCatalog("https://opencode.ai/zen/go/v1")).rejects.toMatchObject({ kind: "http" });
+  });
 });
 
 describe("fetchPricing", () => {

@@ -1,4 +1,5 @@
 import { ApiError } from "./api";
+import { keyFingerprint } from "./auth";
 import { UsageCache } from "./cache";
 import { picksFor, quotaFor } from "./quota";
 import type {
@@ -76,9 +77,15 @@ export async function collect(
     );
   }
 
+  const scope = keyFingerprint(key);
+
   if (!opts.force) {
     const cached = deps.cache.readLastPayload();
-    if (cached && !deps.cache.isUsageStale(cached, now)) {
+    if (
+      cached &&
+      deps.cache.isKeyScopeCurrent(scope) &&
+      !deps.cache.isUsageStale(cached, now)
+    ) {
       return { ok: true, payload: cached, fromCache: true };
     }
   }
@@ -94,12 +101,14 @@ export async function collect(
       return fail(err.kind, err.message);
     }
     const cached = deps.cache.readLastPayload();
-    if (cached)
+    if (cached && deps.cache.isKeyScopeCurrent(scope))
       return {
         ok: true,
         payload: { ...cached, offline: true },
         fromCache: true,
       };
+    if (err instanceof ApiError && err.kind === "http")
+      return fail("offline", err.message);
     return fail("offline", "Can't reach the OpenCode Go API.");
   }
 
@@ -146,5 +155,6 @@ export async function collect(
     offline: false,
   };
   deps.cache.writeLastPayload(payload);
+  deps.cache.setKeyScope(scope);
   return { ok: true, payload, fromCache: false };
 }

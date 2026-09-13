@@ -11,7 +11,7 @@ Then paste your **OpenCode Go API key** into the extension preferences:
 1. Open Raycast → Extensions → **Opencode Info** → Preferences.
 2. Enter your API key in the **API key** field.
 
-The extension reads the key from preferences and fetches your usage, the model catalog, and current pricing from opencode's public endpoints. Your key never leaves this Mac.
+The extension reads the key from preferences and sends it only to the OpenCode API to fetch your usage. It fetches the model catalog and current pricing from opencode's public endpoints without sharing your key.
 
 ## Features
 

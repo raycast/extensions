@@ -40,15 +40,17 @@ export async function fetchUsage(key: string, baseUrl: string): Promise<Usage> {
 }
 
 export async function fetchCatalog(baseUrl: string): Promise<string[]> {
-  const json = (await getJson(`${baseUrl}/models`)) as {
-    data?: Array<{ id?: unknown }>;
-  };
-  const ids = (json.data ?? [])
-    .map((m) => m.id)
+  const json = (await getJson(`${baseUrl}/models`)) as { data?: unknown };
+  if (!Array.isArray(json.data)) {
+    throw new ApiError("http", "Unexpected catalog response");
+  }
+  const ids = json.data
+    .map((m) => (m as { id?: unknown }).id)
     .filter(
       (id): id is string =>
         typeof id === "string" && id.length > 0 && id.length <= 128,
     );
+  if (ids.length === 0) throw new ApiError("http", "Empty catalog response");
   return ids;
 }
 

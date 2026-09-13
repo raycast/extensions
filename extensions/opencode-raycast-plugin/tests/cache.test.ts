@@ -92,6 +92,17 @@ describe("usage staleness", () => {
   });
 });
 
+describe("key scope", () => {
+  it("reports a scope as current only when it matches", () => {
+    const cache = new UsageCache(new MemoryStorage());
+    expect(cache.readKeyScope()).toBeNull();
+    expect(cache.isKeyScopeCurrent("abc")).toBe(false);
+    cache.setKeyScope("abc");
+    expect(cache.isKeyScopeCurrent("abc")).toBe(true);
+    expect(cache.isKeyScopeCurrent("def")).toBe(false);
+  });
+});
+
 describe("DEFAULT_POLICY", () => {
   it("uses 24h for pricing and picks, 60s for usage", () => {
     expect(DEFAULT_POLICY).toEqual({ pricingTtlMs: 24 * HOUR, picksTtlMs: 24 * HOUR, usageTtlMs: 60_000 });

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "../src/lib/api";
+import { keyFingerprint } from "../src/lib/auth";
 import { UsageCache } from "../src/lib/cache";
 import { collect, type CollectorDeps } from "../src/lib/collector";
 import type { Payload, PricingCatalog, PricingModel, Usage } from "../src/lib/types";
@@ -118,6 +119,7 @@ describe("collect", () => {
     const cache = new UsageCache(storage);
     const prev: Payload = { windows: USAGE, models: { go: [], zen: [] }, picks: { stretch: null, bestValue: null, computedAt: NOW.toISOString() }, updatedAt: new Date(NOW.getTime() - 70_000).toISOString(), offline: false };
     cache.writeLastPayload(prev);
+    cache.setKeyScope(keyFingerprint("key"));
     const deps = buildDeps({
       cache,
       fetchUsage: vi.fn(async () => { throw new ApiError("offline", "Network request failed"); }),
@@ -213,6 +215,7 @@ describe("collect", () => {
       updatedAt: new Date(NOW.getTime() - 30_000).toISOString(),
       offline: false,
     });
+    cache.setKeyScope(keyFingerprint("key"));
     const fetchUsage = vi.fn(async () => USAGE);
     const deps = buildDeps({ cache, fetchUsage });
     const result = await collect(deps, { force: false });
@@ -220,6 +223,29 @@ describe("collect", () => {
     if (!result.ok) return;
     expect(result.fromCache).toBe(true);
     expect(fetchUsage).not.toHaveBeenCalled();
+  });
+
+  it("ignores the cache when the API key changes", async () => {
+    const storage = new MemoryStorage();
+    const cache = new UsageCache(storage);
+    cache.writeLastPayload({
+      windows: USAGE,
+      models: { go: [], zen: [] },
+      picks: { stretch: null, bestValue: null, computedAt: NOW.toISOString() },
+      updatedAt: new Date(NOW.getTime() - 30_000).toISOString(),
+      offline: false,
+    });
+    cache.setKeyScope(keyFingerprint("old-key"));
+    const fetchUsage = vi.fn(async () => USAGE);
+    const deps = buildDeps({
+      cache,
+      resolveKey: vi.fn(async () => "new-key"),
+      fetchUsage,
+    });
+    const result = await collect(deps, { force: false });
+    expect(result.ok).toBe(true);
+    expect(fetchUsage).toHaveBeenCalledTimes(1);
+    expect(cache.readKeyScope()).toBe(keyFingerprint("new-key"));
   });
 
   it("refetches when forced even with a warm cache", async () => {
