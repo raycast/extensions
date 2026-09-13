@@ -16,7 +16,7 @@ Please refer to the official [Soulver CLI GitHub Repository](https://github.com/
 Evaluates mathematical expressions, financial calculations, unit conversions, and date math.
 - Pass an expression as an argument directly in Raycast.
 - If no argument is provided, evaluates the current clipboard contents.
-- Automatically copies the answer to your clipboard and displays a HUD notification.
+- Shows the result in a Raycast Detail view with the expression and result metadata, and copies the answer to your clipboard.
 
 ### 2. Raycast AI Tools
 Empowers Raycast AI (in Quick AI, AI Chat, and AI Commands) to interact with your Soulver sheetbooks:
