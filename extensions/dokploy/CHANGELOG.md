@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Fix icons not adapting to dark theme] - 2026-09-13
+
+- `folder-input.svg`, `database.svg`, `circuit-board.svg` and `blocks.svg` used a hardcoded stroke color that stayed dark in Raycast's dark theme, making them nearly invisible. Added `@dark` variants so Raycast can pick the right one per theme.
+
 ## [Added support for Dokploy v0.25.0] - 2026-01-12
 
 - API data model updated from `Project → Services` to `Project → Environments → Services`.
