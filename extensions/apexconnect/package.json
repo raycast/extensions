@@ -1,0 +1,566 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apexconnect",
+  "title": "Apex Connect+",
+  "version": "1.2.4",
+  "author": "advaitthakur",
+  "license": "MIT",
+  "description": "Apex Connect+ remote control. Control your house with Raycast 🚀",
+  "icon": "apex-connect.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "All Entities",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect entities",
+      "mode": "view"
+    },
+    {
+      "name": "covers",
+      "title": "Covers",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect covers",
+      "mode": "view"
+    },
+    {
+      "name": "fans",
+      "title": "Fans",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect fans",
+      "mode": "view"
+    },
+    {
+      "name": "lights",
+      "title": "Lights",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect lights",
+      "mode": "view"
+    },
+    {
+      "name": "persons",
+      "title": "Persons",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect persons",
+      "mode": "view"
+    },
+    {
+      "name": "sensors",
+      "title": "Sensors",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect sensors",
+      "mode": "view"
+    },
+    {
+      "name": "binarysensors",
+      "title": "Binary Sensors",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect binary sensors",
+      "mode": "view"
+    },
+    {
+      "name": "mediaplayers",
+      "title": "Mediaplayers",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect mediaplayers",
+      "mode": "view"
+    },
+    {
+      "name": "automations",
+      "title": "Automations",
+      "subtitle": "Apex Connect",
+      "description": "Apex Connect automations",
+      "mode": "view"
+    },
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle": "Apex Connect",
+      "description": "Open Apex Connect dashboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "climate",
+      "title": "Climate",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect climate entities",
+      "mode": "view"
+    },
+    {
+      "name": "attributes",
+      "title": "All Entities with Attributes",
+      "subtitle": "Apex Connect",
+      "description": "Query Apex Connect entity attributes",
+      "mode": "view"
+    },
+    {
+      "name": "batteries",
+      "title": "Batteries",
+      "subtitle": "Apex Connect",
+      "description": "Query Batteries",
+      "mode": "view"
+    },
+    {
+      "name": "motions",
+      "title": "Motions",
+      "subtitle": "Apex Connect",
+      "description": "Query Motion Sensors",
+      "mode": "view"
+    },
+    {
+      "name": "vacuums",
+      "title": "Vacuum Cleaners",
+      "subtitle": "Apex Connect",
+      "description": "Query Vacuum Cleaners",
+      "mode": "view"
+    },
+    {
+      "name": "cameras",
+      "title": "Cameras",
+      "subtitle": "Apex Connect",
+      "description": "Query Cameras",
+      "mode": "view"
+    },
+    {
+      "name": "scripts",
+      "title": "Scripts",
+      "subtitle": "Apex Connect",
+      "description": "Query Scripts",
+      "mode": "view"
+    },
+    {
+      "name": "buttons",
+      "title": "Buttons",
+      "subtitle": "Apex Connect",
+      "description": "Query Buttons",
+      "mode": "view"
+    },
+    {
+      "name": "scenes",
+      "title": "Scenes",
+      "subtitle": "Apex Connect",
+      "description": "Query Scenes",
+      "mode": "view"
+    },
+    {
+      "name": "switches",
+      "title": "Switches",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect Switches",
+      "mode": "view"
+    },
+    {
+      "name": "helpers",
+      "title": "Helpers",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect Helpers",
+      "mode": "view"
+    },
+    {
+      "name": "updates",
+      "title": "Updates",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect Entity Updates",
+      "mode": "view"
+    },
+    {
+      "name": "doors",
+      "title": "Doors",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect Entity with device class door",
+      "mode": "view"
+    },
+    {
+      "name": "weather",
+      "title": "Weather",
+      "subtitle": "Apex Connect",
+      "description": "Get Weather states of Apex Connect Entity Weather",
+      "mode": "view"
+    },
+    {
+      "name": "windows",
+      "title": "Windows",
+      "subtitle": "Apex Connect",
+      "description": "Get/Set states of Apex Connect Entity with device class window",
+      "mode": "view"
+    },
+    {
+      "name": "notificationmenu",
+      "title": "Notifications Menu",
+      "description": "Display Persistent Notifications, Low Batteries and Update in the Menu Bar",
+      "mode": "menu-bar",
+      "subtitle": "Apex Connect",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showcount",
+          "description": "Show Notification Count in Menu",
+          "type": "checkbox",
+          "label": "Show Notification Count in Menubar",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "indicatorUpdates",
+          "description": "Pending Updates will activate the Indicator",
+          "type": "checkbox",
+          "required": false,
+          "title": "Indicator",
+          "label": "Updates",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "zones",
+      "title": "Zones",
+      "description": "Get states about Zones",
+      "mode": "view",
+      "subtitle": "Apex Connect"
+    },
+    {
+      "name": "weathermenu",
+      "title": "Weather Menu",
+      "description": "Display Weather entity in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Weather Entity ID which will be shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    },
+    {
+      "name": "assist",
+      "title": "Assist",
+      "description": "Conversation with Apex Connect Assist",
+      "mode": "view",
+      "subtitle": "Apex Connect"
+    },
+    {
+      "name": "connection",
+      "title": "Connection Check",
+      "description": "Check the Connection to Apex Connect",
+      "mode": "view",
+      "subtitle": "Apex Connect",
+      "disabledByDefault": true
+    },
+    {
+      "name": "mediaplayermenu",
+      "title": "Mediaplayer Menu",
+      "description": "Display Media Players in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "media_player.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "media_player.player1,media_player.player2,media_player.bath*"
+        }
+      ]
+    },
+    {
+      "name": "lightsmenu",
+      "title": "Lights Menu",
+      "description": "Display Lights in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "light.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "light.mylight1,light.mylight2,light.bath*"
+        }
+      ]
+    },
+    {
+      "name": "coversmenu",
+      "title": "Covers Menu",
+      "description": "Display Covers in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "cover.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "cover.mycover1,cover.bath*"
+        }
+      ]
+    },
+    {
+      "name": "batteriesmenu",
+      "title": "Batteries Menu",
+      "description": "Display Batteries in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Included Entities",
+          "placeholder": "sensor.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "sensor.mysensor1,cover.mysensor*"
+        },
+        {
+          "name": "excludeHigher",
+          "description": "Exclude Battery with a Level higher then the given value. Keep empty to disable the filter",
+          "type": "textfield",
+          "required": false,
+          "title": "Exclude Higher then",
+          "placeholder": "50"
+        }
+      ]
+    },
+    {
+      "name": "entitiesmenu",
+      "title": "Entities Menu",
+      "description": "Show given entities in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "includedEntities",
+          "description": "Given entities will be included in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": true,
+          "title": "Included Entities",
+          "placeholder": "cover.*"
+        },
+        {
+          "name": "excludedEntities",
+          "description": "Given entities will be hidden in the menu. Multiple elements can be separated by , . Wildcards are supported.",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Entities",
+          "placeholder": "cover.mycover1,cover.bath*"
+        }
+      ]
+    },
+    {
+      "name": "entitymenu01",
+      "title": "Entity Menu 1",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    },
+    {
+      "name": "entitymenu02",
+      "title": "Entity Menu 2",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    },
+    {
+      "name": "entitymenu03",
+      "title": "Entity Menu 3",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instance",
+      "type": "textfield",
+      "required": true,
+      "title": "Apex Connect URL",
+      "description": "URL of your Apex Connect instance",
+      "placeholder": "https://user.cloud.apexinfosys.in"
+    },
+    {
+      "name": "instanceInternal",
+      "type": "textfield",
+      "required": false,
+      "title": "Internal Apex Connect URL (optional)",
+      "description": "URL of your Apex Connect instance in your Home Network. This url is used when the current WiFI SSID is in the SSID list of your Home WiFi or the url is pingable.",
+      "placeholder": "http://apexconnect.local:1702"
+    },
+    {
+      "name": "homeSSIDs",
+      "type": "textfield",
+      "required": false,
+      "title": "Home Network Detection",
+      "description": "A list of your Home Network WiFi SSIDs separated by a comma if you have multiple. The SSIDs are used to detect your Home WiFi. Only required if the Internal Apex Connect URL is set.",
+      "placeholder": "HomeWiFi1,HomeWiFi2"
+    },
+    {
+      "name": "usePing",
+      "description": "Use ping to detect Home Network",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Ping",
+      "default": true
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Apex Connect long-lived access token",
+      "placeholder": "Enter your Apex Connect long-lived access token"
+    },
+    {
+      "name": "ignorecerts",
+      "type": "checkbox",
+      "label": "Ignore Certificates",
+      "required": false,
+      "default": false,
+      "title": "Network Settings",
+      "description": "Ignore Certificates",
+      "placeholder": "Ignore Certificates"
+    },
+    {
+      "name": "showEntityId",
+      "type": "checkbox",
+      "label": "Show Entity IDs",
+      "required": false,
+      "default": false,
+      "title": "Style",
+      "description": "Show Entity IDs as subtitle"
+    },
+    {
+      "name": "camerarefreshinterval",
+      "type": "textfield",
+      "required": false,
+      "default": "3000",
+      "title": "Camera Refresh Interval (ms)",
+      "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 mean no auto refresh at all",
+      "placeholder": "3000"
+    },
+    {
+      "name": "preferredapp",
+      "description": "Preferred Application to Open",
+      "type": "dropdown",
+      "required": false,
+      "title": "Preferred Application",
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Companion",
+          "value": "companion"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "Other"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.5.2",
+    "@apexinfosysindia/js-websocket": "^9.6.3",
+    "javascript-time-ago": "^2.5.9",
+    "lodash-es": "^4.17.21",
+    "multicast-dns": "^7.2.5",
+    "node-fetch": "^2.6.1",
+    "open": "^8.3.0",
+    "ping": "^0.4.4",
+    "plist": "^3.0.6",
+    "url-join": "^4.0.1",
+    "ws": "^8.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash-es": "^4.17.6",
+    "@types/multicast-dns": "^7.2.1",
+    "@types/node": "^20.8.10",
+    "@types/node-fetch": "^2.5.12",
+    "@types/ping": "^0.4.1",
+    "@types/plist": "^3.0.2",
+    "@types/react": "^18.2.27",
+    "@types/url-join": "^4.0.1",
+    "@types/ws": "^8.2.0",
+    "eslint": "^7.32.0",
+    "prettier": "^3.2.5",
+    "react": "^18.2.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
