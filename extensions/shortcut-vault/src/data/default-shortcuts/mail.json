@@ -1,0 +1,133 @@
+{
+  "ownerName": "Mail",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://support.apple.com/guide/mail/keyboard-shortcuts-mlhlb94f262b/mac",
+  "shortcuts": [
+    {
+      "id": "new-email",
+      "commandName": "Start a New Email",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-viewer-window",
+      "commandName": "Open New Mail Viewer Window",
+      "modifiers": ["command", "option"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-viewer-tab",
+      "commandName": "Open New Mail Viewer Tab",
+      "modifiers": ["command", "option", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "attach-files",
+      "commandName": "Attach Files to Email",
+      "modifiers": ["command", "shift"],
+      "key": "A",
+      "scope": "app"
+    },
+    {
+      "id": "paste-as-quotation",
+      "commandName": "Paste Text as Quotation",
+      "modifiers": ["command", "shift"],
+      "key": "V",
+      "scope": "app"
+    },
+    {
+      "id": "show-bcc",
+      "commandName": "Show Bcc Address Field",
+      "modifiers": ["command", "option"],
+      "key": "B",
+      "scope": "app"
+    },
+    {
+      "id": "get-new-mail",
+      "commandName": "Get New Emails",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "send-email",
+      "commandName": "Send Email",
+      "modifiers": ["command", "shift"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "reply",
+      "commandName": "Reply to Selected Email",
+      "modifiers": ["command"],
+      "key": "R",
+      "scope": "app"
+    },
+    {
+      "id": "reply-all",
+      "commandName": "Reply All to Selected Email",
+      "modifiers": ["command", "shift"],
+      "key": "R",
+      "scope": "app"
+    },
+    {
+      "id": "forward",
+      "commandName": "Forward Selected Email",
+      "modifiers": ["command", "shift"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "redirect",
+      "commandName": "Redirect Selected Email",
+      "modifiers": ["command", "shift"],
+      "key": "E",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-sidebar",
+      "commandName": "Hide or Show Mail Sidebar",
+      "modifiers": ["control", "command"],
+      "key": "S",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-message-filter",
+      "commandName": "Enable or Disable Message Filter",
+      "modifiers": ["command"],
+      "key": "L",
+      "scope": "app"
+    },
+    {
+      "id": "mark-read-unread",
+      "commandName": "Mark Emails as Read or Unread",
+      "modifiers": ["command", "shift"],
+      "key": "U",
+      "scope": "app"
+    },
+    {
+      "id": "archive-emails",
+      "commandName": "Archive Emails",
+      "modifiers": ["control", "command"],
+      "key": "A",
+      "scope": "app"
+    },
+    {
+      "id": "move-to-junk",
+      "commandName": "Move Selected Emails to Junk",
+      "modifiers": ["command", "shift"],
+      "key": "J",
+      "scope": "app"
+    },
+    {
+      "id": "plain-rich-format",
+      "commandName": "Toggle Plain Text or Rich Format",
+      "modifiers": ["command", "shift"],
+      "key": "T",
+      "scope": "app"
+    }
+  ]
+}

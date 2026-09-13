@@ -1,0 +1,224 @@
+{
+  "ownerName": "Safari",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://support.apple.com/guide/safari/keyboard-shortcuts-and-gestures-cpsh003/mac",
+  "shortcuts": [
+    {
+      "id": "new-tab",
+      "commandName": "New Tab",
+      "modifiers": ["command"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "new-window",
+      "commandName": "New Window",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-private-window",
+      "commandName": "New Private Window",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "close-tab",
+      "commandName": "Close Tab",
+      "modifiers": ["command"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "reopen-last-closed-tab",
+      "commandName": "Reopen Last Closed Tab",
+      "modifiers": ["command", "shift"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "next-tab",
+      "commandName": "Next Tab",
+      "modifiers": ["control"],
+      "key": "Tab",
+      "scope": "app"
+    },
+    {
+      "id": "previous-tab",
+      "commandName": "Previous Tab",
+      "modifiers": ["control", "shift"],
+      "key": "Tab",
+      "scope": "app"
+    },
+    {
+      "id": "show-tab-overview",
+      "commandName": "Show Tab Overview",
+      "modifiers": ["command", "shift"],
+      "key": "\\",
+      "scope": "app"
+    },
+    {
+      "id": "open-location",
+      "commandName": "Open Location",
+      "modifiers": ["command"],
+      "key": "L",
+      "scope": "app"
+    },
+    {
+      "id": "search-page",
+      "commandName": "Search Current Page",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "find-next",
+      "commandName": "Find Next",
+      "modifiers": ["command"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "find-previous",
+      "commandName": "Find Previous",
+      "modifiers": ["command", "shift"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "reload-page",
+      "commandName": "Reload Page",
+      "modifiers": ["command"],
+      "key": "R",
+      "scope": "app"
+    },
+    {
+      "id": "reload-without-cache",
+      "commandName": "Reload Page Without Cache",
+      "modifiers": ["command", "option"],
+      "key": "R",
+      "scope": "app"
+    },
+    {
+      "id": "stop-loading",
+      "commandName": "Stop Loading Page",
+      "modifiers": [],
+      "key": "Esc",
+      "scope": "app"
+    },
+    {
+      "id": "go-back",
+      "commandName": "Back",
+      "modifiers": ["command"],
+      "key": "[",
+      "scope": "app"
+    },
+    {
+      "id": "go-forward",
+      "commandName": "Forward",
+      "modifiers": ["command"],
+      "key": "]",
+      "scope": "app"
+    },
+    {
+      "id": "show-sidebar",
+      "commandName": "Show Sidebar",
+      "modifiers": ["command", "shift"],
+      "key": "L",
+      "scope": "app"
+    },
+    {
+      "id": "add-bookmark",
+      "commandName": "Add Bookmark",
+      "modifiers": ["command"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "show-bookmarks",
+      "commandName": "Show Bookmarks",
+      "modifiers": ["command", "option"],
+      "key": "B",
+      "scope": "app"
+    },
+    {
+      "id": "show-reading-list",
+      "commandName": "Show Reading List",
+      "modifiers": ["command", "shift"],
+      "key": "L",
+      "scope": "app"
+    },
+    {
+      "id": "add-to-reading-list",
+      "commandName": "Add Current Page to Reading List",
+      "modifiers": ["command", "shift"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "print",
+      "commandName": "Print",
+      "modifiers": ["command"],
+      "key": "P",
+      "scope": "app"
+    },
+    {
+      "id": "save-page",
+      "commandName": "Save Page",
+      "modifiers": ["command"],
+      "key": "S",
+      "scope": "app"
+    },
+    {
+      "id": "zoom-in",
+      "commandName": "Zoom In",
+      "modifiers": ["command"],
+      "key": "+",
+      "scope": "app"
+    },
+    {
+      "id": "zoom-out",
+      "commandName": "Zoom Out",
+      "modifiers": ["command"],
+      "key": "-",
+      "scope": "app"
+    },
+    {
+      "id": "actual-size",
+      "commandName": "Actual Size",
+      "modifiers": ["command"],
+      "key": "0",
+      "scope": "app"
+    },
+    {
+      "id": "scroll-down-screen",
+      "commandName": "Scroll Down a Screen",
+      "modifiers": [],
+      "key": "Space",
+      "scope": "app"
+    },
+    {
+      "id": "scroll-up-screen",
+      "commandName": "Scroll Up a Screen",
+      "modifiers": ["shift"],
+      "key": "Space",
+      "scope": "app"
+    },
+    {
+      "id": "scroll-top",
+      "commandName": "Scroll to Top",
+      "modifiers": ["command"],
+      "key": "Up",
+      "scope": "app"
+    },
+    {
+      "id": "scroll-bottom",
+      "commandName": "Scroll to Bottom",
+      "modifiers": ["command"],
+      "key": "Down",
+      "scope": "app"
+    }
+  ]
+}
