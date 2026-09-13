@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-navigator",
+  "title": "GitHub Navigator",
+  "type": "module",
+  "description": "Browse your GitHub repositories",
+  "icon": "icon.png",
+  "author": "tofrankie",
+  "pastContributors": [
+    "webpro"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/tofrankie/raycast-github-navigator",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@octokit/core": "^7.0.6",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "browser-tab-bridge": "^0.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
+  },
+  "commands": [
+    {
+      "name": "browser-repository",
+      "mode": "view",
+      "title": "Browse Repositories",
+      "description": "Browse your GitHub repositories",
+      "keywords": [
+        "github"
+      ],
+      "preferences": [
+        {
+          "name": "personalAccessToken",
+          "type": "password",
+          "required": true,
+          "title": "GitHub Token",
+          "description": "Your GitHub personal access token (classic). Required scopes: notifications, repo, project, read:org, and read:user.",
+          "link": "https://github.com/settings/tokens",
+          "placeholder": "Enter your personal access token"
+        },
+        {
+          "name": "sort",
+          "type": "dropdown",
+          "required": true,
+          "title": "Sorting",
+          "description": "Choose the initial sorting method for repositories",
+          "default": "updated_at",
+          "data": [
+            {
+              "title": "Last Updated",
+              "value": "updated_at"
+            },
+            {
+              "title": "Stars",
+              "value": "stargazers_count"
+            },
+            {
+              "title": "Open Issues",
+              "value": "open_issues_count"
+            },
+            {
+              "title": "Pull Requests",
+              "value": "open_prs_count"
+            }
+          ]
+        },
+        {
+          "name": "frecencySortingEnabled",
+          "type": "checkbox",
+          "required": true,
+          "title": "Frecency Sorting",
+          "label": "Enable frecency sorting",
+          "description": "After the initial sort, apply frecency sorting based on how often and how recently you open repositories.",
+          "default": true
+        },
+        {
+          "name": "reuseBrowserTab",
+          "type": "checkbox",
+          "required": true,
+          "title": "Browser Tab Reuse",
+          "label": "Reuse existing browser tab",
+          "description": "Focus an existing browser tab instead of opening a new one.",
+          "default": false
+        }
+      ]
+    }
+  ]
+}
