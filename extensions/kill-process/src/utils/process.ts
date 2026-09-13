@@ -7,6 +7,7 @@ import {
   isWindows,
   getKillAllCommand,
   getKillCommand,
+  getKillGroupCommand,
   getKillTreeCommand,
   getProcessListCommandSpec,
   getProcessPerformanceCommandSpec,
@@ -153,6 +154,16 @@ export async function terminateProcessesByName(processName: string, force = fals
 
 export async function terminateProcessTree(processId: number, force = false): Promise<void> {
   await executeCommand(getKillTreeCommand(processId, force));
+}
+
+export async function terminateProcessGroup(process: Process, force = false): Promise<void> {
+  const childProcessIds = process.childProcessIds ?? [];
+  if (!isWindows || childProcessIds.length === 0) {
+    await terminateProcessTree(process.id, force);
+    return;
+  }
+
+  await executeCommand(getKillGroupCommand([process.id, ...childProcessIds], force));
 }
 
 export async function relaunchProcess(process: Process): Promise<void> {
