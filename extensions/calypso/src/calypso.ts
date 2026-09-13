@@ -462,6 +462,25 @@ export async function* runConversation(
 
   const ctx = toolContext(p);
   const messages: ChatMessage[] = history.map((m) => ({ ...m }));
+
+  // A rag_search result from an EARLIER turn (answered locally) can be sitting in
+  // `history` already — e.g. the local rig went to sleep between turns and this turn
+  // fell back to a cloud endpoint. Redact it before it goes out, not just new calls
+  // made from this point on: `messages` is what actually gets serialized and sent.
+  if (ep.isCloud) {
+    const ragCallIds = new Set<string>();
+    for (const m of messages) {
+      for (const tc of m.tool_calls ?? []) {
+        if (tc.function.name === "rag_search") ragCallIds.add(tc.id);
+      }
+    }
+    for (const m of messages) {
+      if (m.role === "tool" && m.tool_call_id && ragCallIds.has(m.tool_call_id)) {
+        m.content = "[redacted: private knowledge-base content withheld from a cloud fallback endpoint]";
+      }
+    }
+  }
+
   // Prepend guidance without clobbering a user-set system prompt. Idempotent: if a
   // caller persists `finalMessages` (see StreamEvent) and resends it next turn, the
   // system message already carries this text — appending it again every turn would
