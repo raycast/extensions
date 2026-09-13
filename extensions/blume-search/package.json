@@ -1,0 +1,51 @@
+{
+  "name": "blume-search",
+  "title": "Blume Search",
+  "description": "Search projects, conversations, messages, setup, and suggestions in Blume.",
+  "icon": "icon.png",
+  "author": "olav_ljosland",
+  "access": "public",
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint --non-interactive",
+    "publish": "ray publish",
+    "test": "node --experimental-strip-types --test src/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Blume",
+      "description": "Search everything indexed by Blume and open a result in the app.",
+      "mode": "view",
+      "keywords": ["projects", "messages", "artifacts", "conversations"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "application",
+      "type": "appPicker",
+      "required": false,
+      "title": "Blume Application",
+      "description": "Optionally choose Blume Canary instead of the stable Blume installation."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.1",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.4",
+    "typescript": "^5.9.3"
+  }
+}
