@@ -2,6 +2,7 @@ import { ActionPanel, clearSearchBar, Icon, List } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
 import { DestructiveAction, PrimaryAction, TextToSpeechAction } from "../actions";
 import { CopyActionSection } from "../actions/copy";
+import { EditModelAction } from "../actions/edit-model";
 import { FormInputActionSection } from "../actions/form-input";
 import { PreferencesActionSection } from "../actions/preferences";
 import { SaveActionSection } from "../actions/save";
@@ -20,7 +21,7 @@ export const ChatView = ({
   isAutoSaveConversation,
   onModelChange,
 }: ChatViewProps) => {
-  const sortedChats = data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const sortedChats = [...data].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const getActionPanel = (selectedChat: Chat) => (
     <ActionPanel>
@@ -46,7 +47,7 @@ export const ChatView = ({
       ) : null}
       <FormInputActionSection
         initialQuestion={question}
-        onSubmit={(question, files) => use.chats.ask(question, files, conversation.model)}
+        onSubmit={(question, files, model) => use.chats.ask(question, files, model ?? conversation.model)}
         models={models}
         selectedModel={selectedModel}
         onModelChange={onModelChange}
@@ -77,6 +78,7 @@ export const ChatView = ({
           />
         </ActionPanel.Section>
       )}
+      <EditModelAction modelId={selectedModel} />
       <PreferencesActionSection />
     </ActionPanel>
   );

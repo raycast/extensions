@@ -15,12 +15,12 @@ import { useChat } from "../../hooks/useChat";
 import React, { useEffect, useState } from "react";
 import { canAccessBrowserExtension } from "../../utils/browser";
 import { PrimaryAction } from "../../actions";
-import { Command, ChatHook } from "../../type";
+import { Command, ChatHook, Model } from "../../type";
 import { fetchContent } from "../../utils/cmd-input";
 import { getAppIconPath } from "../../utils/icon";
 import Ask from "../../ask";
 import { v4 as uuidv4 } from "uuid";
-import { mapCommandToModel, useCommand } from "../../hooks/useCommand";
+import { useCommand } from "../../hooks/useCommand";
 
 type CommandLaunchContext = { commandId?: string };
 export type CommandLaunchProps = LaunchProps<{ launchContext?: CommandLaunchContext }>;
@@ -35,7 +35,16 @@ export default function CommandView(props: CommandLaunchProps) {
   const [frontmostApp, setFrontmostApp] = useState<Application | null>(null);
 
   const requestedCommandId = props.launchContext?.commandId || "";
-  const requestedCommand = commands.data[requestedCommandId];
+  const [request, setRequest] = useState<{ command: Command; model: Model }>();
+  const requestedCommand = request?.command;
+  const requestedModel = request?.model;
+  useEffect(() => {
+    const command = commands.data[requestedCommandId];
+    if (!commands.isLoading && command && !request) {
+      const model = commands.resolveModel(command);
+      setRequest({ command: { ...command, model: model.option }, model });
+    }
+  }, [commands.isLoading, commands.data, requestedCommandId, request]);
 
   useEffect(() => {
     getFrontmostApplication().then(setFrontmostApp);
@@ -53,9 +62,9 @@ export default function CommandView(props: CommandLaunchProps) {
   }, [requestedCommand]);
 
   useEffect(() => {
-    if (userInput && requestedCommand) {
+    if (userInput && requestedCommand && requestedModel) {
       setAiAnswer(null);
-      chat.ask(userInput, [], mapCommandToModel(requestedCommand));
+      chat.ask(userInput, [], requestedModel);
     }
   }, [userInput, requestedCommand]);
 
@@ -68,10 +77,10 @@ export default function CommandView(props: CommandLaunchProps) {
     }
   }, [chat.streamData, chat.isLoading, chat.data]);
 
-  if (!commands.isLoading && !requestedCommand) {
+  if (!commands.isLoading && !commands.data[requestedCommandId] && !request) {
     return buildCommandNotFoundView(requestedCommandId);
   }
-  if (!requestedCommand) {
+  if (!requestedCommand || !requestedModel) {
     return <Detail markdown="" />;
   }
   if (requestedCommand.contentSource === "browserTab" && !canAccessBrowserExtension()) {
@@ -86,6 +95,7 @@ export default function CommandView(props: CommandLaunchProps) {
     userInput,
     aiAnswer,
     userInputError || chat.errorMsg,
+    requestedModel,
   );
 
   return <Detail markdown={viewBuilder.buildContent()} actions={viewBuilder.buildActionPanel()} />;
@@ -96,6 +106,7 @@ class CommandViewBuilder {
   totalViewWidthPx: number;
 
   command: Command;
+  model: Model;
   chat: ChatHook;
   navigation: Navigation;
   frontmostApp: Application | null;
@@ -111,11 +122,13 @@ class CommandViewBuilder {
     userInput: string | null,
     aiAnswer: string | null,
     error: string | null,
+    model: Model,
   ) {
     this.totalViewWidthPx = 710;
     this.iconSizePx = 17;
 
     this.command = command;
+    this.model = model;
     this.chat = chat;
     this.navigation = navigation;
     this.frontmostApp = frontmostApp;
@@ -252,7 +265,7 @@ ${this.error || ""}`;
               conversation={{
                 id: uuidv4(),
                 chats: this.chat.data,
-                model: mapCommandToModel(this.command),
+                model: this.model,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 pinned: false,
