@@ -5,8 +5,12 @@
   "description": "Shows the usage of all the connected OpenCodex model providers",
   "icon": "extension-icon.png",
   "author": "jonas_list",
+  "contributors": [
+    "sansaxena789"
+  ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "keywords": [
     "opencodex",
@@ -280,8 +284,8 @@
   ],
   "tools": [],
   "dependencies": {
-    "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
