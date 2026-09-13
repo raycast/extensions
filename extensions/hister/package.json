@@ -25,8 +25,8 @@
       "type": "textfield",
       "required": false,
       "title": "Hister Binary Path",
-      "description": "Custom path to hister executable (leave blank to use /Users/jeet/go/bin/hister or PATH)",
-      "placeholder": "/Users/jeet/go/bin/hister"
+      "description": "Custom path to hister binary (leave blank to auto-detect from PATH or standard paths)",
+      "placeholder": "hister or ~/go/bin/hister"
     },
     {
       "name": "maxResults",

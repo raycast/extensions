@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
 import { getFavicon, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
-import { Preferences, searchHister } from "./hister";
+import { searchHister } from "./hister";
 
 function safeHostname(urlStr: string): string {
   try {
@@ -14,10 +14,11 @@ function safeHostname(urlStr: string): string {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const abortable = useRef<AbortController>(null);
-  const prefs = getPreferenceValues<Preferences>();
-  const limit = Number.parseInt(prefs.maxResults ?? "50", 10) || 50;
+  const prefs = getPreferenceValues<Preferences.Search>();
+  const parsedLimit = Number.parseInt(prefs.maxResults ?? "50", 10);
+  const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(Math.max(parsedLimit, 1), 200) : 50;
 
-  const { isLoading, data: results = [] } = usePromise(
+  const { isLoading, data: results = [], error, revalidate } = usePromise(
     (q: string, l: number) => searchHister(q, l, abortable.current?.signal),
     [searchText, limit],
     { abortable }
@@ -30,15 +31,29 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       throttle
     >
-      <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title={isLoading ? "Searching Hister..." : "No History Found"}
-        description={
-          isLoading
-            ? "Querying local Hister index"
-            : "No matching documents found. Make sure 'hister listen' is running."
-        }
-      />
+      {error ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Search Failed"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" onAction={revalidate} />
+              <Action.OpenInBrowser title="Open Hister Dashboard" url="http://127.0.0.1:4433" />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title={isLoading ? "Searching Hister..." : "No History Found"}
+          description={
+            isLoading
+              ? "Querying local Hister index"
+              : "No matching documents found. Make sure 'hister listen' is running."
+          }
+        />
+      )}
 
       {results.map((doc) => {
         const time = doc.updated || doc.added;

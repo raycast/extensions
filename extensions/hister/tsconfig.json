@@ -14,5 +14,5 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx"
   },
-  "include": ["src/**/*", "package.json"]
+  "include": ["src/**/*", "package.json", "raycast-env.d.ts"]
 }

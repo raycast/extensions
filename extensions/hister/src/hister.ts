@@ -14,11 +14,6 @@ export interface HisterDocument {
   readonly updated: number;
 }
 
-export interface Preferences {
-  readonly histerBinaryPath?: string;
-  readonly maxResults?: string;
-}
-
 let cachedBinary: string | null = null;
 const isWindows = process.platform === "win32";
 const binName = isWindows ? "hister.exe" : "hister";
@@ -27,7 +22,6 @@ function isExecutable(filePath: string): boolean {
   try {
     const stats = fs.statSync(filePath);
     if (!stats.isFile()) return false;
-    // On Windows, file presence suffices; on POSIX check execute bits
     return isWindows ? true : (stats.mode & 0o111) !== 0;
   } catch {
     return false;
@@ -39,7 +33,7 @@ export function getBinaryPath(): string {
     return cachedBinary;
   }
 
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.Search>();
   if (prefs.histerBinaryPath?.trim()) {
     const custom = prefs.histerBinaryPath.trim();
     if (isExecutable(custom)) {
@@ -93,10 +87,32 @@ export function parseHisterOutput(stdout: string): readonly HisterDocument[] {
   const parsed = JSON.parse(cleanJson);
   if (!Array.isArray(parsed)) return [];
 
-  return parsed.filter(
-    (item): item is HisterDocument =>
-      typeof item === "object" && item !== null && typeof item.url === "string"
-  );
+  const results: HisterDocument[] = [];
+  for (const item of parsed) {
+    if (typeof item === "object" && item !== null && typeof (item as Record<string, unknown>).url === "string") {
+      const rec = item as Record<string, unknown>;
+      const rawUrl = String(rec.url ?? "").trim();
+      if (!rawUrl) continue;
+
+      const rawTitle = typeof rec.title === "string" ? rec.title.trim() : "";
+      const rawDomain = typeof rec.domain === "string" ? rec.domain.trim() : "";
+      const rawScore = typeof rec.score === "number" && !Number.isNaN(rec.score) ? rec.score : 0;
+      const rawAdded = typeof rec.added === "number" && !Number.isNaN(rec.added) ? rec.added : 0;
+      const rawUpdated = typeof rec.updated === "number" && !Number.isNaN(rec.updated) ? rec.updated : 0;
+
+      results.push({
+        id: typeof rec.id === "string" && rec.id.trim() ? rec.id.trim() : rawUrl,
+        url: rawUrl,
+        title: rawTitle || rawUrl,
+        domain: rawDomain,
+        score: rawScore,
+        added: rawAdded,
+        updated: rawUpdated,
+      });
+    }
+  }
+
+  return results;
 }
 
 export function searchHister(
