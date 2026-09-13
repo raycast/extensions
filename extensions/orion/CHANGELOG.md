@@ -5,6 +5,7 @@
 - Improve Top Hit ranking with deterministic match tiers and source precedence: open tabs, bookmarks, reading list, then history. Deduplicate matching destinations and use history frecency only to resolve ties within history.
 - Keep Top Hit selected as local sources resolve, while preserving an explicit Ctrl+N/Ctrl+P selection when later results arrive.
 - Reset the selection session whenever the query or profile changes, so deleting or appending text cannot leave Web Search focused after a prior candidate disappears.
+- After the first Ctrl+N/Ctrl+P navigation, release selection to Raycast's native list so repeated navigation remains smooth while later results do not steal focus.
 - Recognize typed web addresses and offer opening them in the system default browser. Add the same default-browser action to local Orion results.
 
 ## [Command Bar] - 2026-06-22

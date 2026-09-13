@@ -329,11 +329,16 @@ export default function Command() {
         // later must still be allowed to take focus. Moving past it does prove
         // an explicit navigation choice.
         if (!session?.target && !session?.userNavigated && id === "web-search") {
-          setSelectedItemId(id);
+          setSelectedItemId(undefined);
           return;
         }
+
+        // Automatic Top Hit selection needs a controlled List only until the
+        // user starts navigating. From then on, defer to Raycast's native
+        // focus and scroll handling; continually controlling selectedItemId
+        // causes visible scroll jumps after repeated Ctrl+N/Ctrl+P cycles.
         if (session) session.userNavigated = true;
-        setSelectedItemId(id ?? undefined);
+        setSelectedItemId(undefined);
       }}
       searchBarPlaceholder="Search tabs, bookmarks, history, or the web"
       searchBarAccessory={
