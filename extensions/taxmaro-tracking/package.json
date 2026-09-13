@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "taxmaro-tracking",
+  "description": "Unofficial Raycast Extension providing Shortcuts for time tracking on Taxmaro.",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "phibr0",
+  "scripts": {
+    "build": "ray build --target release",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@formatjs/intl-durationformat": "^0.10.18",
+    "@raycast/api": "^2.0.3",
+    "@raycast/utils": "^2.3.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "toggle-tracking",
+      "title": "Toggle Tracking",
+      "subtitle": "Taxmaro",
+      "description": "Start or stop time tracking.",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Tracking Status",
+      "subtitle": "Taxmaro",
+      "description": "Show today's tracked time and control tracking from the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "API token created in Taxmaro.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "title": "Taxmaro Tracking",
+  "tools": []
+}
