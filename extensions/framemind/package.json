@@ -1,0 +1,52 @@
+{
+  "name": "framemind",
+  "title": "FrameMind",
+  "version": "1.0.0",
+  "description": "Search, capture, and ask about screenshots with FrameMind.",
+  "author": "koby_ofek",
+  "icon": "icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint . && prettier --check \"src/**/*.{ts,tsx}\"",
+    "lint:store": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.102.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.8.0"
+  },
+  "overrides": {
+    "esbuild": "0.28.1",
+    "minimatch": "10.2.6"
+  },
+  "commands": [
+    { "name": "search", "title": "Search Screenshots", "description": "Search the local FrameMind library", "mode": "view" },
+    { "name": "recent", "title": "Recent Screenshots", "description": "Show the latest local screenshots", "mode": "view" },
+    { "name": "capture", "title": "Capture", "description": "Open FrameMind capture review", "mode": "no-view" },
+    { "name": "ask-screen", "title": "Ask Screen", "description": "Open a reviewed Ask Screen request", "mode": "view" },
+    { "name": "copy-ocr", "title": "Copy OCR", "description": "Copy OCR for an asset identifier", "mode": "view" },
+    { "name": "open-result", "title": "Open Result", "description": "Open a FrameMind screenshot by identifier", "mode": "view" }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "FrameMind CLI Path",
+      "description": "Path to the signed framemind executable",
+      "type": "textfield",
+      "default": "/Applications/FrameMind.app/Contents/Helpers/framemind",
+      "required": true
+    }
+  ]
+}
