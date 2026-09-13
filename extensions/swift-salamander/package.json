@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "swift-salamander",
+  "type": "module",
+  "title": "Swift Salamander",
+  "description": "Open paths, Finder selections, and saved workspaces in Swift Salamander.",
+  "icon": "icon.png",
+  "author": "c0desurfer",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Applications", "Productivity"],
+  "keywords": ["files", "file manager", "finder", "dual pane"],
+  "preferences": [
+    {
+      "name": "pathTarget",
+      "title": "Open Paths In",
+      "description": "Choose where path commands navigate in Swift Salamander.",
+      "type": "dropdown",
+      "required": true,
+      "default": "active",
+      "data": [
+        { "title": "Active Pane", "value": "active" },
+        { "title": "Opposite Pane", "value": "opposite" },
+        { "title": "New Tab", "value": "new-tab" }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "test": "node --test test/*.test.mjs",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.3"
+  },
+  "commands": [
+    {
+      "name": "activate",
+      "title": "Open Swift Salamander",
+      "description": "Bring Swift Salamander to the front",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-path",
+      "title": "Open Path",
+      "description": "Open a directory or reveal a file in Swift Salamander",
+      "mode": "no-view",
+      "arguments": [
+        { "name": "path", "type": "text", "placeholder": "Path, such as ~ or ~/Downloads", "required": true }
+      ]
+    },
+    {
+      "name": "open-clipboard-path",
+      "title": "Open Clipboard Path",
+      "description": "Open the local path currently on the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-finder-selection",
+      "title": "Open Finder Selection",
+      "description": "Reveal Finder's selected items in Swift Salamander",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-workspace",
+      "title": "Open Saved Workspace",
+      "description": "Apply a saved workspace by name; this command does not accept paths",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        { "name": "name", "type": "text", "placeholder": "Saved workspace name", "required": true }
+      ]
+    }
+  ]
+}
