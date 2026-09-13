@@ -409,27 +409,17 @@ async function* streamOnce(
 }
 
 /**
- * A rag_search result can be sitting in `messages` from an earlier LOCAL turn —
- * conversations persist their whole transcript, and a later turn can fall back to a
- * cloud endpoint (e.g. the local rig went to sleep mid-conversation). This returns a
- * copy with any such tool result redacted, for use as the WIRE payload only: the
- * caller keeps sending the original `messages` to streamOnce's other callers and
- * returning it as `finalMessages`, so persisted history still has the real content
- * for a later turn that goes back to a local endpoint.
+ * True once `rag_search` has been used anywhere in a conversation — a tool call for
+ * it, or its result. A conversation's ASSISTANT PROSE from an earlier turn can be
+ * derived from what rag_search returned, with no reliable way to tell which words
+ * came from where; redacting only the raw tool-result text (an earlier approach
+ * here, see git history) left that derived prose to leak on a later cloud turn.
+ * The robust rule is coarser but actually closes the leak: once private
+ * knowledge-base content has touched a conversation, no part of it goes to a
+ * cloud endpoint again, full stop.
  */
-function redactRagForCloud(messages: ChatMessage[]): ChatMessage[] {
-  const ragCallIds = new Set<string>();
-  for (const m of messages) {
-    for (const tc of m.tool_calls ?? []) {
-      if (tc.function.name === "rag_search") ragCallIds.add(tc.id);
-    }
-  }
-  if (ragCallIds.size === 0) return messages;
-  return messages.map((m) =>
-    m.role === "tool" && m.tool_call_id && ragCallIds.has(m.tool_call_id)
-      ? { ...m, content: "[redacted: private knowledge-base content withheld from a cloud fallback endpoint]" }
-      : m,
-  );
+function historyUsedRagSearch(messages: ChatMessage[]): boolean {
+  return messages.some((m) => (m.tool_calls ?? []).some((tc) => tc.function.name === "rag_search"));
 }
 
 /** Nudges the model to check the private knowledge base before reaching for the open web. */
@@ -479,6 +469,18 @@ export async function* runConversation(
   history: ChatMessage[],
   signal: AbortSignal,
 ): AsyncGenerator<StreamEvent> {
+  // Once rag_search has been used anywhere in this conversation, a cloud endpoint is
+  // never acceptable again -- not just for the raw tool result (see
+  // historyUsedRagSearch's doc comment), even for a turn where tools are off. Checked
+  // before the enableTools branch below because that branch also talks to `ep` directly.
+  if (ep.isCloud && historyUsedRagSearch(history)) {
+    throw new Error(
+      "This conversation used your private knowledge base earlier. Cloud fallback is disabled " +
+        "for it so that content is never sent to a third party -- reconnect a local endpoint " +
+        "(Calypso 1 or 2) to continue, or start a new conversation.",
+    );
+  }
+
   if (!p.enableTools) {
     yield* streamMessages(ep, p, history, signal);
     return;
@@ -504,13 +506,8 @@ export async function* runConversation(
 
   for (let round = 0; ; round++) {
     const pending: PendingCall[] = [];
-    // The wire payload is redacted for a cloud endpoint; `messages` itself stays
-    // the real, unredacted transcript — it accumulates rounds and is returned as
-    // `finalMessages` for the caller to persist, so a later LOCAL turn still has
-    // the actual rag_search content to ground follow-ups.
-    const wire = ep.isCloud ? redactRagForCloud(messages) : messages;
     try {
-      for await (const ev of streamOnce(ep, p, wire, true, pending, signal)) {
+      for await (const ev of streamOnce(ep, p, messages, true, pending, signal)) {
         if (ev.done) break;
         yield ev;
       }
@@ -518,7 +515,7 @@ export async function* runConversation(
       // A server built without --jinja rejects `tools`; degrade instead of dying.
       if (round === 0) {
         yield { toolResult: `tools unavailable (${(e as Error).message.slice(0, 80)}) — answering without them` };
-        yield* streamMessages(ep, p, wire, signal);
+        yield* streamMessages(ep, p, messages, signal);
         return;
       }
       throw e;
