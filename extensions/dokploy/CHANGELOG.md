@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Fix icons not adapting to dark theme] - {PR_MERGE_DATE}
+## [Fix icons not adapting to dark theme] - 2026-09-13
 
 - `folder-input.svg`, `database.svg`, `circuit-board.svg` and `blocks.svg` used a hardcoded stroke color that stayed dark in Raycast's dark theme, making them nearly invisible. Added `@dark` variants so Raycast can pick the right one per theme.
 
