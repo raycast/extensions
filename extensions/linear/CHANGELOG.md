@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Favorites Crash Fix] - {PR_MERGE_DATE}
+
+- Fix the Favorites command crashing when a favorite is a workspace-level label (no team).
+
 ## [AI Comment Reliability] - 2026-09-02
 
 - Prevent AI comment tools from retrying successful writes and creating duplicate comments.
