@@ -98,7 +98,7 @@ function HistoryItemActions({
   const [profileCurrent] = useCachedState(CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID);
 
   async function openAndRecordVisit(openBehaviour: SettingsProfileOpenBehaviour): Promise<void> {
-    await onVisit?.();
+    void onVisit?.();
     await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile: openBehaviour });
   }
 
@@ -109,7 +109,7 @@ function HistoryItemActions({
         title="Open in Guest Window"
         icon={{ source: Icon.Person }}
         onAction={async () => {
-          await onVisit?.();
+          void onVisit?.();
           await createNewGuestWindowToWebsite(url);
           await closeMainWindow();
         }}
