@@ -1,6 +1,6 @@
 # GraphCalc Changelog
 
-## [Fix missing graph line on Windows] - {PR_MERGE_DATE}
+## [Fix missing graph line on Windows] - 2026-09-13
 
 - Fixed the plotted line not being rendered on Windows. The SVG used Raycast `Color` tokens (e.g. `raycast-yellow`) as the stroke color, which the image renderer cannot interpret; they are now resolved to concrete hex colors adapted to light/dark appearance
 - Fixes https://github.com/raycast/extensions/issues/24231
