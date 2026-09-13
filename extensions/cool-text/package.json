@@ -1,0 +1,114 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cool-text",
+  "title": "CoolText",
+  "description": "Turn text, emoji, and images into alphabet emoji, ASCII art, or Unicode dot art.",
+  "icon": "cooltext-pencil-transparent.png",
+  "author": "pho_huynh",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun",
+    "Communication"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "private": true,
+  "commands": [
+    {
+      "name": "preview",
+      "title": "CoolText",
+      "description": "Create text or image art, preview styles, and copy the result.",
+      "mode": "view",
+      "keywords": [
+        "emoji",
+        "ascii",
+        "alphabet",
+        "clipboard",
+        "image",
+        "unicode",
+        "dots"
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text to copy (optional)",
+          "required": false
+        },
+        {
+          "name": "variant",
+          "type": "dropdown",
+          "placeholder": "Alphabet Emoji",
+          "required": false,
+          "data": [
+            {
+              "title": "Alphabet Emoji",
+              "value": "alphabet"
+            },
+            {
+              "title": "ASCII Art",
+              "value": "ascii"
+            },
+            {
+              "title": "Unicode Dots",
+              "value": "dots"
+            }
+          ]
+        },
+        {
+          "name": "font",
+          "type": "dropdown",
+          "placeholder": "Small",
+          "required": false,
+          "data": [
+            {
+              "title": "Small",
+              "value": "Small"
+            },
+            {
+              "title": "Standard",
+              "value": "Standard"
+            },
+            {
+              "title": "Slant",
+              "value": "Slant"
+            },
+            {
+              "title": "Big",
+              "value": "Big"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.1",
+    "figlet": "^1.11.4",
+    "jimp": "^1.6.1",
+    "react": "^19.2.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.5.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}
