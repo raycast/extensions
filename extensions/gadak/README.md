@@ -43,8 +43,9 @@ that only works in Terminal is not found that way.
 
 ## Requirements
 
-- gadak installed — the [macOS app](https://github.com/midagedev/gadak#install)
-  or `brew install midagedev/tap/gadak`
+- gadak installed — the [macOS app](https://github.com/midagedev/gadak#install),
+  `brew install --cask midagedev/tap/gadak` (app plus CLI), or
+  `brew install midagedev/tap/gadak-cli` (CLI only)
 - a synced mirror (`gadak init && gadak sync`)
 
 Without a binary, the command offers that install command and the install

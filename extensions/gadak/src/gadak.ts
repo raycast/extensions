@@ -12,7 +12,9 @@ export const GADAK_CANDIDATES = [
   "/Applications/Gadak.app/Contents/Resources/bin/gadak",
 ] as const;
 
-export const INSTALL_COMMAND = "brew install midagedev/tap/gadak";
+// The cask is the app plus the CLI on PATH; `gadak-cli` is the
+// CLI-only formula. Either lands a binary the discovery list finds.
+export const INSTALL_COMMAND = "brew install --cask midagedev/tap/gadak";
 export const INSTALL_GUIDE_URL = "https://github.com/midagedev/gadak#install";
 
 let cachedPath: string | undefined;
@@ -161,41 +163,33 @@ function runSQL<T>(bin: string, profile: string, query: string): Promise<T[]> {
   }
   args.push("sql", "--json", query);
   return new Promise((resolve, reject) => {
-    execFile(
-      bin,
-      args,
-      { maxBuffer: 8 * 1024 * 1024 },
-      (err, stdout, stderr) => {
-        if (err) {
-          reject({
-            stderr: String(stderr || ""),
-            message: err.message,
-            code: (err as NodeJS.ErrnoException).code,
-          } satisfies SearchFail);
-          return;
+    execFile(bin, args, { maxBuffer: 8 * 1024 * 1024 }, (err, stdout, stderr) => {
+      if (err) {
+        reject({
+          stderr: String(stderr || ""),
+          message: err.message,
+          code: (err as NodeJS.ErrnoException).code,
+        } satisfies SearchFail);
+        return;
+      }
+      const rows: T[] = [];
+      for (const line of stdout.split(/\r?\n/)) {
+        const t = line.trim();
+        if (!t) continue;
+        try {
+          rows.push(JSON.parse(t) as T);
+        } catch {
+          // a stray non-JSON line is a warning, not data
         }
-        const rows: T[] = [];
-        for (const line of stdout.split(/\r?\n/)) {
-          const t = line.trim();
-          if (!t) continue;
-          try {
-            rows.push(JSON.parse(t) as T);
-          } catch {
-            // a stray non-JSON line is a warning, not data
-          }
-        }
-        resolve(rows);
-      },
-    );
+      }
+      resolve(rows);
+    });
   });
 }
 
 /** The empty-query home: recently viewed (local.db visits), recently updated.
  *  Both queries read the mirror only; failures degrade to empty sections. */
-export async function runRecent(
-  bin: string,
-  profile: string,
-): Promise<RecentOk> {
+export async function runRecent(bin: string, profile: string): Promise<RecentOk> {
   const viewedQ = `
     select v.kind, v.key, max(v.viewed_at) as viewed_at,
            coalesce(i.summary, it.title) as title, i.status as status
@@ -208,18 +202,12 @@ export async function runRecent(
     from issues_full order by updated_at desc limit 8`;
   const [viewed, updated] = await Promise.all([
     runSQL<RecentVisit>(bin, profile, viewedQ).catch(() => [] as RecentVisit[]),
-    runSQL<RecentUpdate>(bin, profile, updatedQ).catch(
-      () => [] as RecentUpdate[],
-    ),
+    runSQL<RecentUpdate>(bin, profile, updatedQ).catch(() => [] as RecentUpdate[]),
   ]);
   return { viewed: viewed.filter((v) => v.title), updated };
 }
 
-export function runSearch(
-  bin: string,
-  profile: string,
-  q: string,
-): Promise<SearchOk> {
+export function runSearch(bin: string, profile: string, q: string): Promise<SearchOk> {
   const args: string[] = [];
   if (profile) {
     args.push("--profile", profile);
@@ -227,39 +215,34 @@ export function runSearch(
   args.push("search", "--json", "--limit", "20", q);
   return new Promise((resolve, reject) => {
     const t0 = performance.now();
-    execFile(
-      bin,
-      args,
-      { maxBuffer: 32 * 1024 * 1024 },
-      (err, stdout, stderr) => {
-        if (err) {
-          const code = (err as NodeJS.ErrnoException).code;
-          reject({
-            stderr: String(stderr || ""),
-            message: err.message,
-            code,
-          } satisfies SearchFail);
-          return;
-        }
-        try {
-          const p = JSON.parse(stdout) as {
-            issues?: Issue[];
-            pages?: Page[];
-            matches?: Record<string, Match>;
-          };
-          resolve({
-            issues: p.issues ?? [],
-            pages: p.pages ?? [],
-            matches: p.matches ?? {},
-            ms: performance.now() - t0,
-          });
-        } catch {
-          reject({
-            stderr: String(stderr || stdout || ""),
-            message: "gadak search --json returned a body that is not JSON",
-          } satisfies SearchFail);
-        }
-      },
-    );
+    execFile(bin, args, { maxBuffer: 32 * 1024 * 1024 }, (err, stdout, stderr) => {
+      if (err) {
+        const code = (err as NodeJS.ErrnoException).code;
+        reject({
+          stderr: String(stderr || ""),
+          message: err.message,
+          code,
+        } satisfies SearchFail);
+        return;
+      }
+      try {
+        const p = JSON.parse(stdout) as {
+          issues?: Issue[];
+          pages?: Page[];
+          matches?: Record<string, Match>;
+        };
+        resolve({
+          issues: p.issues ?? [],
+          pages: p.pages ?? [],
+          matches: p.matches ?? {},
+          ms: performance.now() - t0,
+        });
+      } catch {
+        reject({
+          stderr: String(stderr || stdout || ""),
+          message: "gadak search --json returned a body that is not JSON",
+        } satisfies SearchFail);
+      }
+    });
   });
 }
