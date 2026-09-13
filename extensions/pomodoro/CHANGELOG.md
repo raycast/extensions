@@ -3,6 +3,7 @@
 ## [Skip to Next] - {PR_MERGE_DATE}
 
 - Add Skip to Next (⌘N) to jump from the current interval to the next one in the control command, menu bar, Slack variant, and Raycast AI
+- Fix interval history entries being overwritten when the pomodoro counter resets
 
 ## [Updated contributor] - 2026-08-18
 

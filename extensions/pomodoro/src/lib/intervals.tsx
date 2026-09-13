@@ -63,7 +63,8 @@ export function createInterval(type: IntervalType, isFreshStart?: boolean, custo
 
   const interval: Interval = {
     type,
-    id: completedCount,
+    // Unique per interval so history upserts never overwrite an earlier entry when the counter resets.
+    id: Date.now(),
     length: customDuration || intervalDurations[type],
     parts: [
       {
