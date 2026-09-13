@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { getProcessList, getTopProcesses } from "../lib/process-list";
+import { getProcessList, getTopProcesses, countProcesses } from "../lib/process-list";
 import { execf } from "../lib/exec";
 
 vi.mock("../lib/exec", () => ({
@@ -58,5 +58,17 @@ describe("getProcessList", () => {
 
     const preview = await getTopProcesses("cpu", 2);
     expect(preview).toHaveLength(2);
+  });
+});
+
+describe("countProcesses", () => {
+  it("counts one process per non-empty line", async () => {
+    vi.mocked(execf).mockResolvedValue("  1\n 415\n78236\n");
+    await expect(countProcesses()).resolves.toBe(3);
+  });
+
+  it("returns 0 for empty output", async () => {
+    vi.mocked(execf).mockResolvedValue("");
+    await expect(countProcesses()).resolves.toBe(0);
   });
 });

@@ -124,10 +124,10 @@
   "preferences": [
     {
       "name": "defaultView",
-      "description": "Select active tab upon launch",
+      "description": "Select the view shown on launch",
       "type": "dropdown",
       "required": false,
-      "title": "Default tab",
+      "title": "Default View",
       "placeholder": "placeHolder",
       "data": [
         {
