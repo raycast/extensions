@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "agent-feedback",
+  "title": "Agent Feedback",
+  "description": "Record narrated UI feedback and copy local, agent-ready context.",
+  "icon": "extension-icon.png",
+  "author": "vojtaholik",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "agent",
+    "feedback",
+    "screen recording",
+    "voice",
+    "whisper",
+    "visual",
+    "dom"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-recording",
+      "title": "Record Agent Feedback",
+      "subtitle": "Ready to Record",
+      "description": "Toggle screen and microphone recording, then copy an agent-ready report.",
+      "mode": "no-view"
+    },
+    {
+      "name": "mark-moment",
+      "title": "Mark Feedback Moment",
+      "description": "Add a timestamped screenshot to the active feedback recording.",
+      "mode": "no-view"
+    },
+    {
+      "name": "download-model",
+      "title": "Download Local Whisper Model",
+      "description": "Download the multilingual Whisper base model for fully local transcription.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-sessions",
+      "title": "Open Feedback Sessions",
+      "description": "Open the local folder containing recordings, transcripts, screenshots, and reports.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "whisperModelPath",
+      "type": "file",
+      "required": false,
+      "title": "Whisper Model Path",
+      "description": "Optional path to an existing whisper.cpp .bin model. Leave empty to use the model downloaded by this extension."
+    },
+    {
+      "name": "whisperCliPath",
+      "type": "file",
+      "required": false,
+      "title": "Whisper CLI Path",
+      "description": "Optional path to whisper-cli. Homebrew installations on Apple silicon and Intel are detected automatically."
+    },
+    {
+      "name": "language",
+      "type": "textfield",
+      "required": true,
+      "default": "auto",
+      "title": "Spoken Language",
+      "description": "Whisper language code such as en or cs, or auto."
+    },
+    {
+      "name": "displayNumber",
+      "type": "textfield",
+      "required": true,
+      "default": "1",
+      "title": "Display Number",
+      "description": "1 records the main display; use 2 or higher for another display."
+    },
+    {
+      "name": "maxFrames",
+      "type": "dropdown",
+      "required": true,
+      "default": "8",
+      "title": "Maximum Automatic Frames",
+      "description": "Maximum screenshots included when no moments were marked manually.",
+      "data": [
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        },
+        {
+          "title": "12",
+          "value": "12"
+        },
+        {
+          "title": "16",
+          "value": "16"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "node --test tests/*.test.mts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
