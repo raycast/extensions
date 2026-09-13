@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kv-store",
+  "title": "Key Value Store",
+  "description": "Store categorized key-value pairs, generate passwords, and copy values from Raycast or the menu bar.",
+  "icon": "icon.png",
+  "author": "georgy_s",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "kv",
+      "title": "Search Key Values",
+      "description": "Create, organize, search, generate passwords, and copy local key-value pairs.",
+      "mode": "view",
+      "keywords": [
+        "kv",
+        "key",
+        "value",
+        "clipboard",
+        "storage",
+        "category",
+        "password",
+        "generator"
+      ]
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "description": "Generate a 12-character alphanumeric password and save it as a key.",
+      "mode": "view",
+      "keywords": [
+        "password",
+        "key",
+        "generate",
+        "random"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Key Values in Menu Bar",
+      "description": "Browse categorized keys in the menu bar and copy their values.",
+      "mode": "menu-bar"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint src && prettier --check package.json tsconfig.json eslint.config.js src README.md CHANGELOG.md",
+    "lint:store": "ray lint",
+    "fix-lint": "eslint src --fix && prettier --write package.json tsconfig.json eslint.config.js src README.md CHANGELOG.md",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.23",
+    "@raycast/utils": "2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "10.7.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.2"
+  }
+}
