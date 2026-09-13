@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+assets/runtime/
+coverage/
+work/
+:memory:.ses
