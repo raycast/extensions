@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rirc",
+  "title": "RIRC",
+  "description": "Search and paste GIFs from GIPHY or KLIPY.",
+  "icon": "RIRC logo.png",
+  "author": "ahmad_shahzad",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search GIFs",
+      "description": "Search GIFs from GIPHY or KLIPY.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "giphyApiKey",
+          "type": "password",
+          "required": false,
+          "title": "GIPHY API Key",
+          "description": "API key from developers.giphy.com.",
+          "placeholder": "Enter GIPHY API key"
+        },
+        {
+          "name": "klipyApiKey",
+          "type": "password",
+          "required": false,
+          "title": "KLIPY API Key",
+          "description": "App key from the KLIPY Partner Panel.",
+          "placeholder": "Enter KLIPY app key"
+        },
+        {
+          "name": "jinaApiKey",
+          "type": "password",
+          "required": false,
+          "title": "Jina AI API Key",
+          "description": "API key for visual semantic search of saved media.",
+          "placeholder": "Enter Jina AI API key"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
+  }
+}
