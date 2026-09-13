@@ -5,7 +5,7 @@ import { loadCached } from "./lib/loaders";
 import { loadStoredPrayerTime, loadTodaySolat, PrayerTime, PrayerTimeItem } from "./lib/prayer-times";
 import { extractZones, Zone } from "./lib/zones";
 
-function Zones(props: { onChange: (z: Zone) => void }) {
+function Zones(props: { value?: string; onChange: (z: Zone) => void }) {
   const { data: zones, isLoading } = usePromise(() =>
     loadCached({ key: "zones", load: extractZones, isValid: (zones) => zones.length > 0 }),
   );
@@ -14,7 +14,7 @@ function Zones(props: { onChange: (z: Zone) => void }) {
     <List.Dropdown
       isLoading={isLoading}
       tooltip="Select Zone"
-      storeValue={true}
+      value={props.value}
       onChange={(newId) => {
         props.onChange(zones?.find((z) => z.id == newId) || { id: newId, name: "", state: "" });
       }}
@@ -109,7 +109,10 @@ function PrayerTimes() {
   }
 
   return (
-    <List searchBarAccessory={<Zones onChange={onZoneChange} />} isLoading={isInitialLoading || isChangingZone}>
+    <List
+      searchBarAccessory={<Zones value={zoneId} onChange={onZoneChange} />}
+      isLoading={isInitialLoading || isChangingZone}
+    >
       {currentPrayerTime?.items?.length ? (
         <List.Section title={currentPrayerTime.date}>
           {currentPrayerTime.items.map((p) => (
