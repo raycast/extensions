@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-ssh-tunnel",
+  "title": "Quick SSH Tunnel",
+  "description": "Connect and manage SSH tunnels without saved configuration.",
+  "icon": "command-icon.png",
+  "author": "fadlee",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-ssh-tunnel",
+      "title": "Quick SSH Tunnel",
+      "subtitle": "SSH Tunnels",
+      "description": "Connect to an SSH tunnel and reconnect recent servers.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.78.0"
+  },
+  "devDependencies": {
+    "@clack/prompts": "^1.7.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.0",
+    "@types/react": "^19.0.10",
+    "esbuild": "^0.28.2",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist && npm run build:cli",
+    "build:cli": "esbuild src/cli/index.ts --bundle --platform=node --target=node18 --outfile=cli/bin/cli.js --banner:js=\"#!/usr/bin/env node\"",
+    "publish:cli": "npm run build:cli && (cd cli && npm publish)",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish:raycast": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.1"
+}
