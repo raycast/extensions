@@ -23,6 +23,7 @@ const GUIDE_LIMIT = 20000;
 
 const MEMORY_PAGE_LIMIT = 2;
 const MAX_BLOCK = 300000;
+const MAX_SCAN = 2000000;
 
 const memoryPages = new Map<string, string>();
 
@@ -71,15 +72,36 @@ async function storePage(page: string, html: string): Promise<void> {
   }
 }
 
-export async function fetchPage(
+const inflightPages = new Map<
+  string,
+  { force: boolean; request: Promise<string> }
+>();
+
+export function fetchPage(
   page: string,
   force = false,
   remember = true,
 ): Promise<string> {
   const key = `${docsVersion()}:${page}`;
   const remembered = memoryPages.get(key);
-  if (remembered && !force) return remembered;
+  if (remembered && !force) return Promise.resolve(remembered);
 
+  const pending = inflightPages.get(key);
+  if (pending && (pending.force || !force)) return pending.request;
+
+  const request = loadPage(page, key, force, remember).finally(() => {
+    if (inflightPages.get(key)?.request === request) inflightPages.delete(key);
+  });
+  inflightPages.set(key, { force, request });
+  return request;
+}
+
+async function loadPage(
+  page: string,
+  key: string,
+  force: boolean,
+  remember: boolean,
+): Promise<string> {
   if (!force) {
     const stored = await readStoredPage(page, false);
     if (stored) {
@@ -130,7 +152,6 @@ function trimGuideSection(section: HtmlNode): string {
 
 interface Block {
   signature: string | null;
-  body: HtmlNode | null;
   html: string;
 }
 
@@ -143,10 +164,15 @@ function anchorIndex(html: string, anchor: string): number {
   return match ? match.index + 1 : -1;
 }
 
-function balancedEnd(html: string, start: number, tag: string): number {
+function balancedEnd(
+  html: string,
+  start: number,
+  tag: string,
+  span = MAX_BLOCK,
+): number {
   const open = new RegExp(`<${tag}[\\s>]`, "g");
   const close = new RegExp(`</${tag}>`, "g");
-  const limit = Math.min(html.length, start + MAX_BLOCK);
+  const limit = Math.min(html.length, start + span);
   open.lastIndex = start + 1;
   close.lastIndex = start + 1;
 
@@ -160,13 +186,53 @@ function balancedEnd(html: string, start: number, tag: string): number {
       depth++;
       opening = open.exec(html);
     }
-    if (opening) open.lastIndex = opening.index;
+    open.lastIndex = opening ? opening.index : html.length;
 
     depth--;
     close.lastIndex = closing.index + closing[0].length;
     if (depth === 0) return close.lastIndex;
   }
   return limit;
+}
+
+function withoutNestedDefinitions(html: string): string {
+  const nested = /<dl class="py[\s"]/g;
+  const parts: string[] = [];
+  let cursor = 0;
+
+  for (let match = nested.exec(html); match; match = nested.exec(html)) {
+    parts.push(html.slice(cursor, match.index));
+    cursor = balancedEnd(html, match.index, "dl");
+    nested.lastIndex = cursor;
+  }
+  parts.push(html.slice(cursor));
+
+  return parts.join("").slice(0, MAX_BLOCK);
+}
+
+function definitionBlock(html: string, anchor: string): Block | null {
+  if (!anchor) return null;
+  const index = anchorIndex(html, anchor);
+  if (index === -1) return null;
+
+  const termStart = html.lastIndexOf("<", index);
+  const termEnd = html.indexOf("</dt>", index);
+  if (!html.startsWith("<dt", termStart) || termEnd === -1) return null;
+  const signature = parse(html.slice(termStart, termEnd + "</dt>".length)).text;
+
+  const bodyStart = html.indexOf("<dd", termEnd);
+  const definitionEnd = html.indexOf("</dl>", termEnd);
+  if (bodyStart === -1 || (definitionEnd !== -1 && definitionEnd < bodyStart))
+    return { signature, html: "" };
+
+  const innerStart = html.indexOf(">", bodyStart) + 1;
+  const bodyEnd = balancedEnd(html, bodyStart, "dd", MAX_SCAN);
+  return {
+    signature,
+    html: withoutNestedDefinitions(
+      html.slice(innerStart, bodyEnd - "</dd>".length),
+    ),
+  };
 }
 
 function sliceAround(html: string, anchor: string): string | null {
@@ -195,7 +261,7 @@ function sliceAround(html: string, anchor: string): string | null {
 
 function sectionBlock(section: HtmlNode | null): Block | null {
   if (!section) return null;
-  return { signature: null, body: section, html: trimGuideSection(section) };
+  return { signature: null, html: trimGuideSection(section) };
 }
 
 function extractBlock(root: HtmlNode, anchor: string): Block | null {
@@ -204,15 +270,17 @@ function extractBlock(root: HtmlNode, anchor: string): Block | null {
   const target = root.querySelector(`[id="${anchor.replace(/"/g, '\\"')}"]`);
   if (!target) return null;
 
-  if (target.tagName === "DT") {
-    const definition = target.parentNode as HtmlNode | null;
-    const body = definition?.querySelector("dd") ?? null;
-    return { signature: target.text, body, html: body?.innerHTML ?? "" };
-  }
-
   return sectionBlock(
     target.closest("section") ?? (target.parentNode as HtmlNode | null),
   );
+}
+
+function findBlock(html: string, anchor: string): Block | null {
+  const definition = definitionBlock(html, anchor);
+  if (definition) return definition;
+
+  const slice = sliceAround(html, anchor);
+  return slice ? extractBlock(parse(slice), anchor) : null;
 }
 
 function cleanSignature(text: string): string {
@@ -314,8 +382,7 @@ export async function loadDetails(entry: DocEntry): Promise<DocDetails> {
   const cached = detailsCache.get(cacheKey(entry));
   if (cached) return JSON.parse(cached) as DocDetails;
 
-  const slice = sliceAround(await fetchPage(entry.page), entry.anchor);
-  const block = slice ? extractBlock(parse(slice), entry.anchor) : null;
+  const block = findBlock(await fetchPage(entry.page), entry.anchor);
 
   if (!block) {
     return {

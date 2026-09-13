@@ -2,7 +2,7 @@ import { loadDetails } from "../lib/docpage";
 import { loadFaq } from "../lib/faq";
 import { loadInventory } from "../lib/inventory";
 import { ensureMeta } from "../lib/metadata";
-import { membersOf, searchEntries } from "../lib/search";
+import { indexEntries, membersOf, searchEntries } from "../lib/search";
 
 type Input = {
   /** The fully qualified name, for example "discord.Client.wait_for" or "discord.ext.commands.Bot". */
@@ -46,7 +46,9 @@ export default async function readEntry(input: Input) {
     example: details.example,
     references: details.references,
     members: input.includeMembers
-      ? membersOf(inventory.entries, entry).map((member) => member.name)
+      ? membersOf(indexEntries(inventory.entries), entry).map(
+          (member) => member.name,
+        )
       : undefined,
     url: entry.url,
   };

@@ -1,13 +1,23 @@
 import { environment } from "@raycast/api";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { parse } from "node-html-parser";
 import { CACHE_SCHEMA, docsBase, docsVersion } from "./constants";
 import { fetchPage } from "./docpage";
 import { DocEntry } from "./types";
 
 const FAQ_PAGE = "faq.html";
 const FAQ_TTL = 24 * 60 * 60 * 1000;
+const HEADING =
+  /<section id="([^"]+)">\s*(?:<span id="[^"]*"><\/span>\s*)*<(h[23])>([\s\S]*?)<\/\2>/g;
+
+const ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+};
 
 interface StoredFaq {
   fetchedAt: number;
@@ -21,23 +31,28 @@ function faqFile(): string {
   );
 }
 
+function headingText(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, "")
+    .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (entity, code: string) => {
+      if (code[0] !== "#") return ENTITIES[code.toLowerCase()] ?? entity;
+      return String.fromCodePoint(
+        code[1].toLowerCase() === "x"
+          ? parseInt(code.slice(2), 16)
+          : parseInt(code.slice(1), 10),
+      );
+    })
+    .replace(/¶/g, "")
+    .trim();
+}
+
 function scan(html: string): StoredFaq["questions"] {
   const questions: StoredFaq["questions"] = [];
-  const root = parse(html);
+  let category = "FAQ";
 
-  for (const section of root.querySelectorAll("section")) {
-    const heading = section.querySelector("h3");
-    const anchor = section.getAttribute("id");
-    if (!heading || !anchor || heading.parentNode !== section) continue;
-
-    const category =
-      section.parentNode?.querySelector("h2")?.text.replace(/¶/g, "").trim() ??
-      "FAQ";
-    questions.push({
-      anchor,
-      question: heading.text.replace(/¶/g, "").trim(),
-      category,
-    });
+  for (const [, anchor, level, heading] of html.matchAll(HEADING)) {
+    if (level === "h2") category = headingText(heading);
+    else questions.push({ anchor, question: headingText(heading), category });
   }
 
   return questions;

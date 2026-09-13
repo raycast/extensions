@@ -17,7 +17,7 @@ import { loadInventory, refreshInventory } from "./lib/inventory";
 import { ensureMeta } from "./lib/metadata";
 import { getPreferences } from "./lib/preferences";
 import { describeFilters, parseQuery } from "./lib/query";
-import { browseEntries, searchEntries } from "./lib/search";
+import { browseEntries, indexEntries, searchEntries } from "./lib/search";
 import { DocEntry, SECTIONS, SectionId } from "./lib/types";
 
 const RECENT_LIMIT = 8;
@@ -91,9 +91,12 @@ export default function SearchDocumentation() {
     [recents, setRecents],
   );
 
+  const index = useMemo(() => indexEntries(entries), [entries]);
+
   const ctx: ViewContext = useMemo(
     () => ({
       entries,
+      index,
       meta: meta ?? {},
       favorites: favorites ?? [],
       toggleFavorite,

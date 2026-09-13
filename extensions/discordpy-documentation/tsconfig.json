@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2021",
-    "lib": ["ES2021"],
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM"],
     "module": "commonjs",
     "skipLibCheck": true,
     "moduleResolution": "node",

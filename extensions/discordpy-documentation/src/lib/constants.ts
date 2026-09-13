@@ -1,6 +1,6 @@
 import { getPreferences } from "./preferences";
 
-export const CACHE_SCHEMA = "v2";
+export const CACHE_SCHEMA = "v3";
 
 export function docsVersion(): string {
   return getPreferences().docsVersion;

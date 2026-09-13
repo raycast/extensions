@@ -116,13 +116,29 @@ export function searchEntries(entries: DocEntry[], query: string): DocEntry[] {
     .map((item) => item.entry);
 }
 
-export function membersOf(entries: DocEntry[], parent: DocEntry): DocEntry[] {
-  const prefix = `${parent.name}.`;
-  return entries
-    .filter(
-      (entry) =>
-        entry.name.startsWith(prefix) &&
-        !entry.name.slice(prefix.length).includes("."),
-    )
-    .sort(byProminence);
+export interface EntryIndex {
+  byName: Map<string, DocEntry>;
+  members: Map<string, DocEntry[]>;
+}
+
+export function indexEntries(entries: DocEntry[]): EntryIndex {
+  const byName = new Map<string, DocEntry>();
+  const members = new Map<string, DocEntry[]>();
+
+  for (const entry of entries) {
+    if (!byName.has(entry.name)) byName.set(entry.name, entry);
+    const dot = entry.name.lastIndexOf(".");
+    if (dot === -1) continue;
+    const parent = entry.name.slice(0, dot);
+    const group = members.get(parent);
+    if (group) group.push(entry);
+    else members.set(parent, [entry]);
+  }
+  for (const group of members.values()) group.sort(byProminence);
+
+  return { byName, members };
+}
+
+export function membersOf(index: EntryIndex, parent: DocEntry): DocEntry[] {
+  return index.members.get(parent.name) ?? [];
 }

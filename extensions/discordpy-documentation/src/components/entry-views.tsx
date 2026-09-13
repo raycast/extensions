@@ -13,7 +13,7 @@ import { ReactNode, useState } from "react";
 import { KIND_COLOR, KIND_ICON } from "../lib/appearance";
 import { DocDetails, loadDetails } from "../lib/docpage";
 import { PrimaryAction } from "../lib/preferences";
-import { membersOf } from "../lib/search";
+import { EntryIndex, membersOf } from "../lib/search";
 import {
   boilerplate,
   importStatement,
@@ -24,6 +24,7 @@ import { DocEntry, KIND_LABELS, MetaIndex, SECTIONS } from "../lib/types";
 
 export interface ViewContext {
   entries: DocEntry[];
+  index: EntryIndex;
   meta: MetaIndex;
   favorites: string[];
   toggleFavorite: (name: string) => void;
@@ -104,10 +105,10 @@ function EntryActions({
   const { push } = useNavigation();
   const members =
     entry.kind === "class" || entry.kind === "exception"
-      ? membersOf(ctx.entries, entry)
+      ? membersOf(ctx.index, entry)
       : [];
   const references = (details?.references ?? [])
-    .map((name) => ctx.entries.find((candidate) => candidate.name === name))
+    .map((name) => ctx.index.byName.get(name))
     .filter(
       (candidate): candidate is DocEntry =>
         Boolean(candidate) && candidate?.name !== entry.name,
@@ -180,7 +181,7 @@ function EntryActions({
             title="Copy Example Code"
             content={details.example}
             icon={Icon.Code}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
           />
         )}
         {importLine && (
@@ -194,7 +195,7 @@ function EntryActions({
           <Action.CopyToClipboard
             title="Copy Signature"
             content={details.signature}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
           />
         )}
         <Action.CopyToClipboard
@@ -380,7 +381,7 @@ export function MemberList({
   parent: DocEntry;
   ctx: ViewContext;
 }) {
-  const members = membersOf(ctx.entries, parent);
+  const members = membersOf(ctx.index, parent);
 
   return (
     <EntryListView

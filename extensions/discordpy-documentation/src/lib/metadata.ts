@@ -54,6 +54,7 @@ function describe(signature: string, body: string): EntryMeta | null {
 
 function scanPage(html: string, meta: MetaIndex): void {
   const terms = [...html.matchAll(TERM_PATTERN)];
+  let following = 0;
 
   for (let index = 0; index < terms.length; index++) {
     const term = terms[index];
@@ -66,10 +67,13 @@ function scanPage(html: string, meta: MetaIndex): void {
     const bodyStart = html.indexOf("<dd", termEnd);
     if (bodyStart === -1) continue;
 
-    const following = terms.find(
-      (candidate) => (candidate.index ?? 0) > bodyStart,
-    );
-    const nextTerm = following?.index ?? html.length;
+    following = Math.max(following, index + 1);
+    while (
+      following < terms.length &&
+      (terms[following].index ?? 0) <= bodyStart
+    )
+      following++;
+    const nextTerm = terms[following]?.index ?? html.length;
     const nested = html.indexOf('<dl class="py', bodyStart);
     const bodyEnd = Math.min(
       nextTerm,
