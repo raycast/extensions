@@ -1,0 +1,4 @@
+node_modules/
+dist/
+raycast-dev.log
+raycast-dev.err.log
