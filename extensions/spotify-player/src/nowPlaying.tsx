@@ -352,9 +352,7 @@ function NowPlayingCommand() {
           {isPlaying && <PauseAction onPause={() => currentlyPlayingRevalidate()} />}
           {!isPlaying && <PlayAction onPlay={() => currentlyPlayingRevalidate()} />}
           {trackOrEpisodeActions}
-          {myPlaylistsData?.items && meData && uri && (
-            <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
-          )}
+          {uri && <AddToPlaylistAction uri={uri} />}
           <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device" shortcut={ConnectDevice}>
             {myDevicesData?.devices
               ?.filter((device) => !device.is_restricted)
