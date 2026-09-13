@@ -11,6 +11,13 @@ export default function SearchRepositoryDropdown(props: { onFilterChange: (filte
     <List.Dropdown tooltip="Filter Repositories" onChange={props.onFilterChange} storeValue>
       <List.Dropdown.Section>
         <List.Dropdown.Item title={"All Repositories"} icon={Icon.List} value={""} />
+        {viewer && organizations.length >= 1 ? (
+          <List.Dropdown.Item
+            title={"My Repositories"}
+            icon={Icon.Person}
+            value={`user:${viewer.login} ${organizations.map((org) => `org:${org.login}`).join(" ")}`}
+          />
+        ) : null}
         {hasMultipleOrganizations ? (
           <List.Dropdown.Item
             title={"My Organizations"}
