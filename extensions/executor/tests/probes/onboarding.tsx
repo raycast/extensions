@@ -81,7 +81,7 @@ assert.equal(render().type, "Detail");
 
 profile = { id: "configured", name: "QA Workspace" };
 const switchAction = WorkspaceAction() as unknown as ReturnType<typeof node>;
-assert.equal(switchAction.props.title, "Switch Workspace (QA Workspace)");
+assert.equal(switchAction.props.title, "Switch Workspace");
 await (switchAction.props.onAction as () => Promise<void>)();
 assert.deepEqual(launched, { name: "workspaces", type: "user", context: { returnCommand: "search-tools" } });
 profile = undefined;

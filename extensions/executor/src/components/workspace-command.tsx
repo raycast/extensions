@@ -38,10 +38,9 @@ export function WorkspaceMetadata() {
 }
 
 export function WorkspaceAction() {
-  const workspace = currentWorkspace();
   return (
     <Action
-      title={workspace ? `Switch Workspace (${workspace.name})` : "Switch Workspace"}
+      title="Switch Workspace"
       icon={Icon.Building}
       shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
       onAction={() =>

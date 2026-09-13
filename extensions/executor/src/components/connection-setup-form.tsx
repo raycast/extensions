@@ -50,6 +50,8 @@ export function ConnectionSetupForm({
   const integrations = [...((data ?? []) as IntegrationWithAuth[])].sort((a, b) => a.name.localeCompare(b.name));
   const directory = new Map(integrations.map((item) => [item.slug, item]));
   const [integration, setIntegration] = useState(defaults.integration ?? initialIntegration ?? "");
+  const [integrationError, setIntegrationError] = useState<string>();
+  const integrationRef = useRef<Form.Dropdown>(null);
   const selected = integrations.find((i) => i.slug === integration);
   const missingIntegration = Boolean(data && integration && !selected);
   const [owner, setOwner] = useState<"user" | "org">(defaults.owner ?? defaultOwner() ?? "user");
@@ -101,7 +103,13 @@ export function ConnectionSetupForm({
   }
 
   async function submit() {
-    if (lock.current || isLoading || error || !selected || !method || awaitingApps || appsError) return;
+    if (lock.current || isLoading || error || awaitingApps || appsError) return;
+    if (!selected) {
+      setIntegrationError("Choose an integration.");
+      integrationRef.current?.focus();
+      return;
+    }
+    if (!method) return;
     const missing = Object.fromEntries(
       (fields ?? []).filter((key) => !values[key]?.trim()).map((key) => [key, "Required."]),
     );
@@ -231,14 +239,16 @@ export function ConnectionSetupForm({
               />
               <Action.OpenInBrowser title="Continue Setup" url={pending.url} />
             </>
-          ) : method && !isLoading && !awaitingApps ? (
+          ) : (
             <Action.SubmitForm
               title={browserSetup ? "Continue in Executor" : selectedClient ? "Authorize Connection" : "Add Connection"}
               icon={browserSetup ? Icon.Globe : Icon.Plug}
               onSubmit={submit}
             />
-          ) : null}
-          <WorkspaceAction />
+          )}
+          <ActionPanel.Section title="Navigation">
+            <WorkspaceAction />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -250,15 +260,19 @@ export function ConnectionSetupForm({
         <>
           <Form.Dropdown
             id="integration"
+            ref={integrationRef}
             title="Integration"
             value={selected?.slug ?? ""}
             error={
-              missingIntegration ? "This integration is unavailable. Reload or choose another integration." : undefined
+              missingIntegration
+                ? "This integration is unavailable. Reload or choose another integration."
+                : integrationError
             }
             storeValue={false}
             onChange={(value) => {
               if (lock.current || value === integration || !integrations.some((item) => item.slug === value)) return;
               setIntegration(value);
+              setIntegrationError(undefined);
               setTemplate("");
               resetCredentials();
             }}

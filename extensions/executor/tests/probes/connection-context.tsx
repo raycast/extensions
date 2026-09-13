@@ -36,7 +36,7 @@ mock.module("react", () => ({
 }));
 mock.module("@raycast/api", () => ({
   Action: Object.assign("Action", { SubmitForm: "Submit", OpenInBrowser: "Browser" }),
-  ActionPanel: "Actions",
+  ActionPanel: Object.assign("Actions", { Section: "Section" }),
   Form: Object.assign("Form", {
     Dropdown: Object.assign("Dropdown", { Item: "Option" }),
     TextField: "Text",
@@ -176,8 +176,22 @@ reset();
 data = rows;
 tree = render();
 assert.equal(field(tree, "integration")?.props.value, "", "standalone creation requires an explicit choice");
+const primary = tree.find((el) => el.type === "Submit")!;
+assert.equal(primary.props.title, "Add Connection", "workspace switching must not become the form primary");
+let focused = false;
+(field(tree, "integration")!.props.ref as { current: unknown }).current = {
+  focus() {
+    focused = true;
+  },
+};
+await primary.props.onSubmit();
+tree = render();
+assert.equal(field(tree, "integration")?.props.error, "Choose an integration.");
+assert.equal(focused, true);
+assert.equal(submissions.length, 0, "empty selection must never create a connection");
 field(tree, "integration")?.props.onChange("quality_lab");
 tree = render();
+assert.equal(field(tree, "integration")?.props.error, undefined);
 field(tree, "credential:token")?.props.onChange("synthetic-token");
 tree = render();
 field(tree, "integration")?.props.onChange("alpha");
