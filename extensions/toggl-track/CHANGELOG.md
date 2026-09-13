@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Fix Negative Running Durations] - {PR_MERGE_DATE}
+## [Fix Negative Running Durations] - 2026-09-13
 
 - Clamped elapsed-time calculations for the running entry to zero, so a start time in the future no longer renders a garbled negative duration in the list and menu bar, or subtracts from today's total
 
