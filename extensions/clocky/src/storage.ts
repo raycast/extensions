@@ -1,5 +1,6 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { Session, StatusState } from "./types";
+import { normalizeWorkDays } from "./utils";
 
 const SESSIONS_KEY = "clocky.sessions";
 const VACATION_KEY = "clocky.vacationDays";
@@ -42,9 +43,9 @@ export async function saveSessions(sessions: Session[]) {
 export async function getTargetConfig(): Promise<TargetConfig> {
   // Preference name: targetWeeklyHours (number, weekly). We convert to daily target hours.
   try {
-    const prefs = getPreferenceValues() as { targetWeeklyHours?: number | string; workDaysPerWeek?: number | string };
+    const prefs = getPreferenceValues<Preferences>();
     const prefDays = toNumber(prefs?.workDaysPerWeek);
-    const workDaysPerWeek = prefDays && prefDays > 0 ? prefDays : 5;
+    const workDaysPerWeek = normalizeWorkDays(prefDays && prefDays > 0 ? prefDays : 5);
     const weeklyHours = toNumber(prefs?.targetWeeklyHours);
     if (weeklyHours && weeklyHours > 0) {
       return { targetHours: weeklyHours / workDaysPerWeek, workDaysPerWeek };
@@ -92,10 +93,7 @@ function minutesToMs(value: unknown, defaultMinutes: number): number {
 
 export async function getForgotThresholds(): Promise<ForgotThresholds> {
   try {
-    const prefs = getPreferenceValues() as {
-      forgotClockOutThresholdMinutes?: number | string;
-      forgotClockInThresholdMinutes?: number | string;
-    };
+    const prefs = getPreferenceValues<Preferences>();
     return {
       forgotClockOutMs: minutesToMs(prefs?.forgotClockOutThresholdMinutes, DEFAULT_FORGOT_CLOCK_OUT_MINUTES),
       forgotClockInMs: minutesToMs(prefs?.forgotClockInThresholdMinutes, DEFAULT_FORGOT_CLOCK_IN_MINUTES),

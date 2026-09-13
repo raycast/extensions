@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  allPausesWithinSession,
+  closeSessionAt,
   detectTickGapMs,
   getDaySummary,
   getForgotClockInSuggestion,
@@ -7,9 +9,11 @@ import {
   getVisibleWeekDays,
   hasAnotherOpenSession,
   hasOverlappingPause,
+  hasOverlappingSession,
   isPauseWithinSession,
+  normalizeWorkDays,
 } from "./utils";
-import { Session } from "./types";
+import { Pause, Session } from "./types";
 
 describe("getDaySummary", () => {
   it("extends an open session to the full day when nowIso is later than the day itself", () => {
@@ -51,6 +55,24 @@ describe("getVisibleWeekDays", () => {
   it("floors a fractional workDaysPerWeek", () => {
     const days = getVisibleWeekDays(monday, 5.9);
     expect(days).toHaveLength(5);
+  });
+});
+
+describe("normalizeWorkDays", () => {
+  it("passes whole numbers through unchanged", () => {
+    expect(normalizeWorkDays(3)).toBe(3);
+  });
+
+  it("floors fractional values", () => {
+    expect(normalizeWorkDays(5.9)).toBe(5);
+  });
+
+  it("clamps values above 7 down to 7", () => {
+    expect(normalizeWorkDays(10)).toBe(7);
+  });
+
+  it("clamps values below 1 up to 1", () => {
+    expect(normalizeWorkDays(0)).toBe(1);
   });
 });
 
@@ -114,6 +136,45 @@ describe("isPauseWithinSession", () => {
   });
 });
 
+describe("allPausesWithinSession", () => {
+  const sessionStart = new Date("2026-09-07T08:00:00.000Z");
+  const sessionEnd = new Date("2026-09-07T16:00:00.000Z");
+
+  it("returns true when there are no pauses", () => {
+    expect(allPausesWithinSession(undefined, sessionStart, sessionEnd)).toBe(true);
+    expect(allPausesWithinSession([], sessionStart, sessionEnd)).toBe(true);
+  });
+
+  it("returns true when every pause still fits within the new bounds", () => {
+    const pauses: Pause[] = [
+      { start: "2026-09-07T09:00:00.000Z", end: "2026-09-07T09:30:00.000Z" },
+      { start: "2026-09-07T12:00:00.000Z", end: "2026-09-07T12:30:00.000Z" },
+    ];
+    expect(allPausesWithinSession(pauses, sessionStart, sessionEnd)).toBe(true);
+  });
+
+  it("returns false when a pause falls outside the shrunk end bound", () => {
+    const pauses: Pause[] = [{ start: "2026-09-07T15:00:00.000Z", end: "2026-09-07T15:30:00.000Z" }];
+    const shrunkEnd = new Date("2026-09-07T14:00:00.000Z");
+    expect(allPausesWithinSession(pauses, sessionStart, shrunkEnd)).toBe(false);
+  });
+
+  it("returns false when a pause falls outside the shrunk start bound", () => {
+    const pauses: Pause[] = [{ start: "2026-09-07T09:00:00.000Z", end: "2026-09-07T09:30:00.000Z" }];
+    const laterStart = new Date("2026-09-07T10:00:00.000Z");
+    expect(allPausesWithinSession(pauses, laterStart, sessionEnd)).toBe(false);
+  });
+
+  it("checks every pause, not just the first", () => {
+    const pauses: Pause[] = [
+      { start: "2026-09-07T09:00:00.000Z", end: "2026-09-07T09:30:00.000Z" },
+      { start: "2026-09-07T15:00:00.000Z", end: "2026-09-07T15:30:00.000Z" },
+    ];
+    const shrunkEnd = new Date("2026-09-07T14:00:00.000Z");
+    expect(allPausesWithinSession(pauses, sessionStart, shrunkEnd)).toBe(false);
+  });
+});
+
 describe("hasOverlappingPause", () => {
   const pauses = [
     { start: "2026-09-07T09:00:00.000Z", end: "2026-09-07T09:30:00.000Z" },
@@ -149,6 +210,63 @@ describe("hasOverlappingPause", () => {
         "2026-09-07T10:00:00.000Z",
       ),
     ).toBe(true);
+  });
+
+  it("treats a second open pause as overlapping an existing open pause", () => {
+    const openPauses = [{ start: "2026-09-07T09:00:00.000Z" }];
+    expect(
+      hasOverlappingPause(
+        openPauses,
+        new Date("2026-09-07T09:15:00.000Z"),
+        null,
+        undefined,
+        "2026-09-07T10:00:00.000Z",
+      ),
+    ).toBe(true);
+  });
+});
+
+describe("hasOverlappingSession", () => {
+  const sessions: Session[] = [
+    { id: "a", start: "2026-09-07T09:00:00.000Z", end: "2026-09-07T10:00:00.000Z" },
+    { id: "b", start: "2026-09-07T12:00:00.000Z", end: "2026-09-07T13:00:00.000Z" },
+  ];
+
+  it("returns false when the candidate does not overlap any session", () => {
+    expect(
+      hasOverlappingSession(sessions, new Date("2026-09-07T10:30:00.000Z"), new Date("2026-09-07T11:30:00.000Z")),
+    ).toBe(false);
+  });
+
+  it("returns true when the candidate overlaps an existing closed session", () => {
+    expect(
+      hasOverlappingSession(sessions, new Date("2026-09-07T09:30:00.000Z"), new Date("2026-09-07T09:45:00.000Z")),
+    ).toBe(true);
+  });
+
+  it("treats the currently open session's missing end as now", () => {
+    const withOpen: Session[] = [...sessions, { id: "c", start: "2026-09-07T14:00:00.000Z" }];
+    expect(
+      hasOverlappingSession(
+        withOpen,
+        new Date("2026-09-07T14:30:00.000Z"),
+        new Date("2026-09-07T15:00:00.000Z"),
+        undefined,
+        "2026-09-07T16:00:00.000Z",
+      ),
+    ).toBe(true);
+  });
+
+  it("excludes the session being edited from the check", () => {
+    expect(
+      hasOverlappingSession(sessions, new Date("2026-09-07T09:30:00.000Z"), new Date("2026-09-07T09:45:00.000Z"), "a"),
+    ).toBe(false);
+  });
+
+  it("does not treat sessions that only touch at a shared boundary as overlapping", () => {
+    expect(
+      hasOverlappingSession(sessions, new Date("2026-09-07T10:00:00.000Z"), new Date("2026-09-07T12:00:00.000Z")),
+    ).toBe(false);
   });
 });
 
@@ -245,5 +363,54 @@ describe("getForgotClockInSuggestion", () => {
   it("does not flag when the elapsed time is below the threshold", () => {
     const result = getForgotClockInSuggestion(undefined, awakeSinceIso, "2026-09-07T09:10:00.000Z", thresholdMs);
     expect(result?.shouldFlag).toBe(false);
+  });
+});
+
+describe("closeSessionAt", () => {
+  const endIso = "2026-09-07T17:00:00.000Z";
+
+  it("closes every open pause on the session", () => {
+    const session: Session = {
+      id: "a",
+      start: "2026-09-07T09:00:00.000Z",
+      pauses: [
+        { start: "2026-09-07T10:00:00.000Z" },
+        { start: "2026-09-07T11:00:00.000Z", end: "2026-09-07T11:15:00.000Z" },
+        { start: "2026-09-07T12:00:00.000Z" },
+      ],
+    };
+    closeSessionAt(session, endIso);
+    expect(session.end).toBe(endIso);
+    expect(session.pauses?.[0].end).toBe(endIso);
+    expect(session.pauses?.[1].end).toBe("2026-09-07T11:15:00.000Z");
+    expect(session.pauses?.[2].end).toBe(endIso);
+  });
+
+  it("closes a single open pause, unchanged from prior behavior", () => {
+    const session: Session = {
+      id: "a",
+      start: "2026-09-07T09:00:00.000Z",
+      pauses: [{ start: "2026-09-07T10:00:00.000Z" }],
+    };
+    closeSessionAt(session, endIso);
+    expect(session.end).toBe(endIso);
+    expect(session.pauses?.[0].end).toBe(endIso);
+  });
+
+  it("does nothing to pauses when there are none open", () => {
+    const session: Session = {
+      id: "a",
+      start: "2026-09-07T09:00:00.000Z",
+      pauses: [{ start: "2026-09-07T10:00:00.000Z", end: "2026-09-07T10:15:00.000Z" }],
+    };
+    closeSessionAt(session, endIso);
+    expect(session.end).toBe(endIso);
+    expect(session.pauses?.[0].end).toBe("2026-09-07T10:15:00.000Z");
+  });
+
+  it("handles a session with no pauses", () => {
+    const session: Session = { id: "a", start: "2026-09-07T09:00:00.000Z" };
+    closeSessionAt(session, endIso);
+    expect(session.end).toBe(endIso);
   });
 });

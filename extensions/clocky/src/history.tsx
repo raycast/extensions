@@ -14,12 +14,14 @@ import { useEffect, useMemo, useState } from "react";
 import { getSessions, getVacationDays, saveSessions, toggleVacationDay } from "./storage";
 import { Pause, Session } from "./types";
 import {
+  allPausesWithinSession,
   dayKeyFromIso,
   formatDayLabel,
   formatTime,
   getWorkAndBreak,
   hasAnotherOpenSession,
   hasOverlappingPause,
+  hasOverlappingSession,
   isPauseWithinSession,
   msBetween,
   msToClock,
@@ -83,6 +85,10 @@ export default function Command() {
       await showToast(Toast.Style.Failure, "Another session is already open");
       return false;
     }
+    if (hasOverlappingSession(updated, values.start, values.end ?? null)) {
+      await showToast(Toast.Style.Failure, "Session overlaps another session");
+      return false;
+    }
     updated.push({ id: newSessionId(), start: values.start.toISOString(), end: values.end?.toISOString(), pauses: [] });
     updated.sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
     await saveSessions(updated);
@@ -100,6 +106,14 @@ export default function Command() {
     }
     if (!values.end && hasAnotherOpenSession(updated, id)) {
       await showToast(Toast.Style.Failure, "Another session is already open");
+      return false;
+    }
+    if (hasOverlappingSession(updated, values.start, values.end ?? null, id)) {
+      await showToast(Toast.Style.Failure, "Session overlaps another session");
+      return false;
+    }
+    if (!allPausesWithinSession(session.pauses, values.start, values.end ?? null)) {
+      await showToast(Toast.Style.Failure, "Pause would fall outside the session", "Adjust or delete the pause first");
       return false;
     }
     session.start = values.start.toISOString();
@@ -318,15 +332,14 @@ function PauseList({ sessionId, onRefresh }: { sessionId: string; onRefresh: () 
       return false;
     }
     const existing = session.pauses ?? [];
-    const overlaps = hasOverlappingPause(existing, values.start, pauseEnd);
+    if (hasOverlappingPause(existing, values.start, pauseEnd)) {
+      await showToast(Toast.Style.Failure, "Pause overlaps another pause");
+      return false;
+    }
     const next = [...existing, { start: values.start.toISOString(), end: values.end?.toISOString() }];
     next.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
     await saveSessionPauses(next);
-    if (overlaps) {
-      await showToast(Toast.Style.Success, "Pause added", "Overlaps with another pause");
-    } else {
-      await showToast(Toast.Style.Success, "Pause added");
-    }
+    await showToast(Toast.Style.Success, "Pause added");
     return true;
   };
 
@@ -341,16 +354,15 @@ function PauseList({ sessionId, onRefresh }: { sessionId: string; onRefresh: () 
       await showToast(Toast.Style.Failure, "Pause must be within the session's time span");
       return false;
     }
-    const overlaps = hasOverlappingPause(existing, values.start, pauseEnd, index);
+    if (hasOverlappingPause(existing, values.start, pauseEnd, index)) {
+      await showToast(Toast.Style.Failure, "Pause overlaps another pause");
+      return false;
+    }
     const next = [...existing];
     next[index] = { start: values.start.toISOString(), end: values.end?.toISOString() };
     next.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
     await saveSessionPauses(next);
-    if (overlaps) {
-      await showToast(Toast.Style.Success, "Pause updated", "Overlaps with another pause");
-    } else {
-      await showToast(Toast.Style.Success, "Pause updated");
-    }
+    await showToast(Toast.Style.Success, "Pause updated");
     return true;
   };
 
