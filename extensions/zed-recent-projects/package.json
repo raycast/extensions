@@ -105,6 +105,14 @@
       "label": "Show Open Status",
       "default": false,
       "description": "Display an 'Open' tag for projects currently open in Zed"
+    },
+    {
+      "name": "focusOpenProjects",
+      "type": "checkbox",
+      "required": false,
+      "label": "Focus Already-Open Projects",
+      "default": false,
+      "description": "Focus the existing window of an already-open project instead of opening it again (macOS only)"
     }
   ],
   "dependencies": {

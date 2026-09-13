@@ -4,6 +4,7 @@ import { runAppleScript } from "@raycast/utils";
 import { homedir } from "os";
 import { execWithCleanEnv, isMac, isWindows } from "./utils";
 import { zedBuild } from "./preferences";
+import { findUniqueMatchingWindowTitle } from "./zed-window-title";
 
 export type ZedBuild = Preferences["build"];
 export type ZedBundleId = "dev.zed.Zed" | "dev.zed.Zed-Preview" | "dev.zed.Zed-Dev";
@@ -109,16 +110,57 @@ const ZedProcessNameMapping: Record<ZedBundleId, string> = {
   "dev.zed.Zed-Dev": "Zed Dev",
 };
 
-export async function closeZedWindow(windowTitle: string, bundleId: ZedBundleId): Promise<boolean> {
-  const processName = ZedProcessNameMapping[bundleId];
-  const escapedTitle = windowTitle.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+function escapeAppleScriptString(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
 
+async function listZedWindowTitles(processName: string): Promise<string[]> {
   const script = `
 tell application "System Events"
   tell process "${processName}"
+    set output to ""
     repeat with w in (every window)
-      if name of w contains "${escapedTitle}" then
-        click (first button of w whose description is "close button")
+      set output to output & (name of w) & linefeed
+    end repeat
+    return output
+  end tell
+end tell
+`;
+
+  const result = await runAppleScript(script);
+  return result
+    .split(/\r?\n/)
+    .map((title) => title.trim())
+    .filter(Boolean);
+}
+
+function zedWindowActionScript(action: "raise" | "close"): { actionLine: string; activate: string } {
+  switch (action) {
+    case "raise":
+      return { actionLine: `perform action "AXRaise" of w`, activate: `\n    set frontmost to true` };
+    case "close":
+      return { actionLine: `click (first button of w whose description is "close button")`, activate: "" };
+    default: {
+      const _exhaustive: never = action;
+      throw new Error(`Unhandled Zed window action: ${_exhaustive}`);
+    }
+  }
+}
+
+async function actOnZedWindowByName(
+  processName: string,
+  windowName: string,
+  action: "raise" | "close",
+): Promise<boolean> {
+  const escapedName = escapeAppleScriptString(windowName);
+  const { actionLine, activate } = zedWindowActionScript(action);
+
+  const script = `
+tell application "System Events"
+  tell process "${processName}"${activate}
+    repeat with w in (every window)
+      if name of w is "${escapedName}" then
+        ${actionLine}
         return "true"
       end if
     end repeat
@@ -127,11 +169,60 @@ tell application "System Events"
 end tell
 `;
 
+  const result = await runAppleScript(script);
+  return result === "true";
+}
+
+async function withUniqueZedWindow(
+  projectTitle: string,
+  bundleId: ZedBundleId,
+  projectPath: string | undefined,
+  action: "raise" | "close",
+): Promise<boolean> {
+  const processName = ZedProcessNameMapping[bundleId];
+  const titles = await listZedWindowTitles(processName);
+  const match = findUniqueMatchingWindowTitle(titles, projectTitle, projectPath);
+  if (!match) {
+    return false;
+  }
+  return actOnZedWindowByName(processName, match, action);
+}
+
+export async function closeZedWindow(
+  windowTitle: string,
+  bundleId: ZedBundleId,
+  projectPath?: string,
+): Promise<boolean> {
   try {
-    const result = await runAppleScript(script);
-    return result === "true";
+    return await withUniqueZedWindow(windowTitle, bundleId, projectPath, "close");
   } catch (error) {
     console.error("Failed to close Zed window:", error);
+    return false;
+  }
+}
+
+/**
+ * Bring an already-open Zed window to the front instead of opening a new one.
+ * Recent Zed versions open a new window for every CLI invocation, even when
+ * the workspace is already open, so focusing has to go through System Events.
+ *
+ * Only succeeds when exactly one window uniquely matches the project title
+ * (or path). Ambiguous titles return false so the caller can fall back to the CLI.
+ *
+ * @param windowTitle - Title of the entry whose window should be focused
+ * @param bundleId - Bundle ID of the Zed build to target
+ * @param projectPath - Optional workspace path used to disambiguate identical titles
+ * @returns true if a matching window was found and raised
+ */
+export async function focusZedWindow(
+  windowTitle: string,
+  bundleId: ZedBundleId,
+  projectPath?: string,
+): Promise<boolean> {
+  try {
+    return await withUniqueZedWindow(windowTitle, bundleId, projectPath, "raise");
+  } catch (error) {
+    console.error("Failed to focus Zed window:", error);
     return false;
   }
 }

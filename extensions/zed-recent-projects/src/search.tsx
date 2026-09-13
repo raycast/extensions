@@ -7,8 +7,8 @@ import { EntryItem } from "./components/entry-item";
 import { usePinnedEntries } from "./hooks/use-pinned-entries";
 import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
 import { isMultiFolder } from "./lib/workspaces";
-import { closeZedWindow, getZedBundleId, openWithZedCli, ZedBuild } from "./lib/zed";
-import { showOpenStatus } from "./lib/preferences";
+import { closeZedWindow, focusZedWindow, getZedBundleId, openWithZedCli, ZedBuild } from "./lib/zed";
+import { focusOpenProjects, showOpenStatus } from "./lib/preferences";
 import { execWindowsZed } from "./lib/windows";
 import { platform } from "os";
 import { openProject } from "./lib/open-project";
@@ -43,7 +43,7 @@ export function Command() {
 
   const closeEntry = async (entry: Entry) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Closing project..." });
-    const success = await closeZedWindow(entry.title, bundleId);
+    const success = await closeZedWindow(entry.title, bundleId, getEntryPrimaryPath(entry));
     if (success) {
       toast.style = Toast.Style.Success;
       toast.title = "Project closed";
@@ -192,6 +192,15 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   const { app, cliPath } = useZedContext();
   const zedIcon = { fileIcon: app.path };
   const primaryPath = getEntryPrimaryPath(entry);
+  const bundleId = getZedBundleId(getPreferenceValues<Preferences>().build as ZedBuild);
+
+  // Opt-in: raise the window of an already-open entry instead of invoking the
+  // CLI, which opens a duplicate window on recent Zed versions. macOS only:
+  // focusing goes through System Events (cliPath is also null off macOS).
+  // Always pass the path so two folders with the same basename can still
+  // uniquely match when the window title includes the workspace path.
+  const focusIfOpen = async () =>
+    focusOpenProjects && isMac && entry.isOpen && (await focusZedWindow(entry.title, bundleId, primaryPath));
 
   const actionTitle = entry.isOpen ? "Focus Window" : "Open in Zed";
 
@@ -214,7 +223,11 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   if (isEntryMultiFolder(entry) && cliPath) {
     const openMultiFolder = async () => {
       try {
-        await openProject(() => openWithZedCli(cliPath, entry.paths), closeMainWindow);
+        if (await focusIfOpen()) {
+          await closeMainWindow();
+        } else {
+          await openProject(() => openWithZedCli(cliPath, entry.paths), closeMainWindow);
+        }
         triggerRevalidation();
       } catch (error) {
         await showToast({
@@ -245,7 +258,11 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   if (cliPath) {
     const openSingleFolder = async () => {
       try {
-        await openProject(() => openWithZedCli(cliPath!, [entry.paths[0]]), closeMainWindow);
+        if (await focusIfOpen()) {
+          await closeMainWindow();
+        } else {
+          await openProject(() => openWithZedCli(cliPath!, [entry.paths[0]]), closeMainWindow);
+        }
         triggerRevalidation();
       } catch (error) {
         await showToast({
