@@ -5,36 +5,53 @@ import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { runAppleScript as runAppleScriptRaycast, showFailureToast } from "@raycast/utils";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
-  const faviconFormula = useOriginalFavicon
-    ? `execute t javascript ¬
-        "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
-    : '""';
+  // `properties of tabs` returns every tab's title, URL and id for a whole window in
+  // a single Apple Event, instead of two round-trips per tab. Reading the three
+  // attributes as separate lists would be a similar win, but they would be separate
+  // snapshots: a tab opened or closed in between shifts one list against the others
+  // and a row would end up carrying another tab's id. The favicon still needs one
+  // event per tab, so it is only evaluated when the preference is on. That event
+  // addresses the tab by id rather than by position, so it cannot pick up a
+  // different tab's icon if the window changed since the snapshot, and it is
+  // wrapped in a `try` so one unreachable tab cannot abort the whole listing.
+  const faviconStatement = useOriginalFavicon
+    ? `set _favicon to ""
+            try
+              set _favicon to execute (first tab of w whose id is (id of _p)) javascript ¬
+                "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"
+            end try`
+    : `set _favicon to ""`;
 
   await checkAppInstalled();
 
   try {
     const openTabs = await runAppleScript(`
+      set _field_sep to character id ${Tab.TAB_CONTENTS_SEPARATOR.charCodeAt(0)}
+      set _rec_sep to character id ${Tab.TAB_RECORD_SEPARATOR.charCodeAt(0)}
       set _output to ""
       tell application "Google Chrome"
         repeat with w in windows
           set _w_id to get id of w as inches as string
-          set _tab_index to 1
-          repeat with t in tabs of w
-            set _title to get title of t
-            set _url to get URL of t
-            set _favicon to ${faviconFormula}
-            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
-            set _tab_index to _tab_index + 1
+          set _props to properties of tabs of w
+          repeat with i from 1 to count of _props
+            set _p to item i of _props
+            ${faviconStatement}
+            set _output to (_output & (id of _p) & _field_sep & _w_id & _field_sep & i & _field_sep & (URL of _p) & _field_sep & _favicon & _field_sep & (title of _p) & _rec_sep)
           end repeat
         end repeat
       end tell
       return _output
   `);
 
-    return openTabs
-      .split("\n")
-      .filter((line) => line.length !== 0)
-      .map((line) => Tab.parse(line));
+    return (
+      openTabs
+        .split(Tab.TAB_RECORD_SEPARATOR)
+        // Anything without a field separator is not a record — notably the trailing
+        // newline osascript appends, which is not empty and would otherwise parse
+        // into a tab with no url and no id.
+        .filter((line) => line.includes(Tab.TAB_CONTENTS_SEPARATOR))
+        .map((line) => Tab.parse(line))
+    );
   } catch (err) {
     if ((err as Error).message.includes('Can\'t get application "Google Chrome"')) {
       LocalStorage.removeItem("is-installed");
@@ -119,15 +136,95 @@ export async function openNewTab({
   }
 }
 
+// The actions below address tabs by Chrome's own tab id rather than by position,
+// and scan every window rather than only the one the tab was listed in: a listed
+// tab's position is valid only for the instant it was read, and the tab may since
+// have been reordered, or moved to another window entirely. Acting on a stale
+// position means activating the wrong tab — or, for `closeActiveTab`, closing it.
+//
+// `close` and `reload` act on a tab reference resolved by Chrome, so no positional
+// index is involved at any point. `setActiveTab` has to go through
+// `active tab index`, the only activation Chrome exposes, so it consumes the index
+// in the very iteration that produced it and re-derives it on every attempt.
+
+// Defence in depth: `tabId` is the only field interpolated into these scripts, so
+// it is checked to be what Chrome actually returns — digits — rather than trusted
+// because the delimiters should have kept page-controlled text out of it.
+const tabIdForScript = (tabId: string) => {
+  if (!/^\d+$/.test(tabId)) {
+    throw new Error(`Unexpected Chrome tab id: ${JSON.stringify(tabId)}`);
+  }
+  return tabId;
+};
+
+const actOnTabById = (tabId: string, action: string) => `
+      repeat with w in windows
+        set _matches to (every tab of w whose id is "${tabIdForScript(tabId)}")
+        if (count of _matches) = 0 then
+          -- Chrome reports ids as text, but match numerically as well so a build
+          -- that hands them back as numbers still resolves. Safe to interpolate
+          -- unquoted: the id has been validated to be digits.
+          set _matches to (every tab of w whose id is ${tabIdForScript(tabId)})
+        end if
+        if (count of _matches) > 0 then
+          set _t to item 1 of _matches
+          set index of w to 1
+          ${action}
+          return true
+        end if
+      end repeat
+      error "Tab not found"`;
+
 export async function setActiveTab(tab: Tab): Promise<void> {
+  // `as text` because Chrome reports ids as text; the cast keeps the comparison
+  // working if a build ever hands back numbers instead.
   await runAppleScript(`
     tell application "Google Chrome"
       activate
-      set _wnd to first window where id is ${tab.windowsId}
-      set index of _wnd to 1
-      set active tab index of _wnd to ${tab.tabIndex}
+      -- Remember what was active, so a run that ends up failing does not leave some
+      -- other tab selected as a side effect.
+      set _prev_window_id to missing value
+      set _prev_tab_id to missing value
+      try
+        set _prev_window_id to id of front window
+        set _prev_tab_id to (id of active tab of front window) as text
+      end try
+      repeat 3 times
+        set _seen to false
+        repeat with w in windows
+          set _tab_ids to id of tabs of w
+          repeat with i from 1 to count of _tab_ids
+            if (item i of _tab_ids as text) is "${tabIdForScript(tab.tabId)}" then
+              set _seen to true
+              set index of w to 1
+              set active tab index of w to i
+              -- Confirm the index still resolved to the intended tab. If the list
+              -- shifted in between, retry from a fresh scan rather than leaving a
+              -- different tab activated.
+              if (id of active tab of w as text) is "${tabIdForScript(tab.tabId)}" then return true
+              exit repeat
+            end if
+          end repeat
+          if _seen then exit repeat
+        end repeat
+        if not _seen then exit repeat
+      end repeat
+      -- Every attempt failed; put the previously active tab back before reporting.
+      if _prev_window_id is not missing value then
+        try
+          set _pw to first window whose id is _prev_window_id
+          set _prev_ids to id of tabs of _pw
+          repeat with j from 1 to count of _prev_ids
+            if (item j of _prev_ids as text) is _prev_tab_id then
+              set index of _pw to 1
+              set active tab index of _pw to j
+              exit repeat
+            end if
+          end repeat
+        end try
+      end if
+      error "Tab not found"
     end tell
-    return true
   `);
 }
 
@@ -135,12 +232,8 @@ export async function closeActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       activate
-      set _wnd to first window where id is ${tab.windowsId}
-      set index of _wnd to 1
-      set active tab index of _wnd to ${tab.tabIndex}
-      close active tab of _wnd
+      ${actOnTabById(tab.tabId, "close _t")}
     end tell
-    return true
   `);
 }
 
@@ -148,12 +241,8 @@ export async function reloadTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       activate
-      set _wnd to first window where id is ${tab.windowsId}
-      set index of _wnd to 1
-      set active tab index of _wnd to ${tab.tabIndex}
-      tell active tab of _wnd to reload
+      ${actOnTabById(tab.tabId, "tell _t to reload")}
     end tell
-    return true
   `);
 }
 
