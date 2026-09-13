@@ -3,6 +3,7 @@ import { existsSync, lstatSync } from "fs";
 import { join } from "path";
 import { PLIST_NAME } from "./config";
 import { parseLaunchctlProgram, isValidHomebrewExec } from "./service-pure.mjs";
+import { runServiceRestart } from "./service-restart.mjs";
 
 export { parseLaunchctlProgram, isValidHomebrewExec };
 
@@ -183,74 +184,70 @@ function plistIsSwitcherooStandalone(): boolean {
   }
 }
 
-export function restartService(): void {
-  const uid = getUid();
-  const info = detectLayout();
-
-  if (info === null) {
-    if (!plistIsSwitcherooStandalone()) {
-      const homebrewExec = getHomebrewExpectedExec();
-      if (homebrewExec) {
-        throw new Error(
-          "Switcheroo is not running. Start it with: brew services start switcheroo",
-        );
-      }
-      throw new Error(
-        "Switcheroo is not installed or not running. Install via `brew install switcheroo` or run ./install.sh.",
-      );
-    }
-    execFileSync(
-      LAUNCHCTL,
-      ["bootstrap", `gui/${uid}`, STANDALONE_PLIST_PATH],
-      {
-        encoding: "utf-8",
-        stdio: ["pipe", "pipe", "pipe"],
-      },
-    );
-    return;
+/** Verify the standalone plist has KeepAlive=true (required for graceful
+ * SIGTERM + relaunch). Returns true only if the plist contains a
+ * KeepAlive key with value true. */
+function plistKeepAliveTrue(): boolean {
+  try {
+    const keepAlive = execFileSync(
+      PLUTIL,
+      ["-extract", "KeepAlive", "raw", "-o", "-", STANDALONE_PLIST_PATH],
+      { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] },
+    ).trim();
+    return keepAlive === "true" || keepAlive === "1";
+  } catch {
+    // KeepAlive key doesn't exist or plutil failed
+    return false;
   }
+}
 
-  if (info.layout === "standalone") {
-    if (!plistIsSwitcherooStandalone()) {
-      throw new Error(
-        `Refusing to restart ${STANDALONE_LABEL}: plist validation failed`,
-      );
-    }
-    execFileSync(LAUNCHCTL, ["bootout", `gui/${uid}/${STANDALONE_LABEL}`], {
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-    if (!plistIsSwitcherooStandalone()) {
-      throw new Error(
-        `Refusing to re-bootstrap ${STANDALONE_LABEL}: plist changed after bootout (TOCTOU)`,
-      );
-    }
-    execFileSync(
-      LAUNCHCTL,
-      ["bootstrap", `gui/${uid}`, STANDALONE_PLIST_PATH],
-      {
+/**
+ * Type of the execFileSync-like function used internally.
+ * Allows tests to inject a mock without touching real launchctl.
+ */
+export type ExecFn = (
+  cmd: string,
+  args: string[],
+  opts?: { encoding?: string; stdio?: ("pipe" | "ignore" | "inherit")[] },
+) => string;
+
+/** Result of a restart operation (mirrors service-restart.mjs RestartResult). */
+export interface RestartResult {
+  command: string;
+  args: string[];
+  label: string;
+  reason: "loaded" | "absent";
+  message: string;
+}
+
+/**
+ * Restart the Switcheroo service.
+ *
+ * - If no service is loaded and the standalone plist is valid → bootstrap.
+ * - If standalone is loaded → identity-verified graceful `kill SIGTERM`
+ *   (KeepAlive relaunches). Returns "Restart requested" — not completion.
+ * - If Homebrew is loaded → identity-verified `kickstart -k`.
+ *
+ * The pure decision logic lives in service-restart.mjs (runServiceRestart)
+ * so it can be tested without real launchctl calls. This wrapper wires
+ * the real I/O functions into that decision engine and returns the result.
+ */
+export function restartService(): RestartResult {
+  return runServiceRestart({
+    detectLayout,
+    plistIsStandalone: plistIsSwitcherooStandalone,
+    plistKeepAlive: plistKeepAliveTrue,
+    getLoadedProgram,
+    getHomebrewExec: getHomebrewExpectedExec,
+    getUid,
+    getStandalonePlistPath: () => STANDALONE_PLIST_PATH,
+    exec: (cmd, args, opts) => {
+      return execFileSync(cmd, args, {
+        ...opts,
         encoding: "utf-8",
-        stdio: ["pipe", "pipe", "pipe"],
-      },
-    );
-  } else if (info.layout === "homebrew") {
-    // Re-verify the loaded job program equals the expected executable
-    // immediately before kickstart (TOCTOU protection)
-    const currentProg = getLoadedProgram(uid, HOMEBREW_LABEL);
-    if (currentProg !== info.executable) {
-      throw new Error(
-        `Refusing to kickstart ${HOMEBREW_LABEL}: loaded program changed (TOCTOU)`,
-      );
-    }
-    execFileSync(
-      LAUNCHCTL,
-      ["kickstart", "-k", `gui/${uid}/${HOMEBREW_LABEL}`],
-      {
-        encoding: "utf-8",
-        stdio: ["pipe", "pipe", "pipe"],
-      },
-    );
-  }
+      }) as string;
+    },
+  });
 }
 
 export function isServiceRunning(): boolean {

@@ -38,10 +38,17 @@ keyboard events via `CGEventTap`. After installing the daemon:
 The extension supports both install layouts:
 
 - **Homebrew** (`brew services`): label `homebrew.mxcl.switcheroo`,
-  restarted via `launchctl kickstart -k`.
+  restarted via `launchctl kickstart -k`. This is the pre-existing
+  Homebrew lifecycle managed by `brew services`.
 - **Standalone** (`install.sh`): label
-  `com.mitchelljphayes.switcheroo`, restarted via `launchctl bootout`
-  + `bootstrap`.
+  `com.mitchelljphayes.switcheroo`. When loaded, the extension requests
+  a graceful `launchctl kill SIGTERM` (the daemon handles SIGTERM to
+  clean up kernel-level mappings) and verifies the plist has
+  `KeepAlive=true` so launchd relaunches the daemon automatically.
+  The UI reports "Restart requested" — relaunch is asynchronous and
+  not polled or guaranteed. When absent, the extension bootstraps
+  the daemon from the verified plist. The extension verifies the
+  plist identity before restarting and refuses ambiguous or foreign jobs.
 
 The extension auto-detects which layout is active and refuses to
 restart a foreign/ambiguous job. If neither is running, it shows an

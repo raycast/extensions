@@ -3,16 +3,16 @@ import { restartService } from "./lib/service";
 
 export default async function Command() {
   try {
-    restartService();
+    const result = restartService();
     await showToast({
       style: Toast.Style.Success,
-      title: "Switcheroo restarted",
+      title: result.message,
     });
   } catch (e) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to restart Switcheroo",
-      message: String(e),
+      message: e instanceof Error ? e.message : String(e),
     });
   }
 }

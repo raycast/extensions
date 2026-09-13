@@ -8,11 +8,7 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import {
-  addRemap,
-  addModifierRemap,
-  addConditionalRemap,
-  addTapHold,
-  addChord,
+  addRemapEntry,
   updateRemap,
   RemapType,
   RemapItem,
@@ -21,8 +17,10 @@ import {
   RawConditionalRemap,
   RawTapHold,
   RawChord,
+  TargetIdentity,
 } from "./lib/config";
 import { restartService } from "./lib/service";
+import { parsePositiveInt, validateChordKeys } from "./lib/config-pure.mjs";
 import { ALL_KEYS, MODIFIER_KEYS, MODIFIER_NAMES } from "./lib/keys";
 
 const TYPE_OPTIONS: { value: RemapType; title: string }[] = [
@@ -36,6 +34,12 @@ const TYPE_OPTIONS: { value: RemapType; title: string }[] = [
 interface RemapFormProps {
   onAdd?: () => void;
   editItem?: RemapItem;
+  /** Document revision (SHA-256) captured at display time for stale detection */
+  documentRevision?: string;
+  /** Entry fingerprint captured at display time for stale detection */
+  editFingerprint?: string;
+  /** Target identity from snapshot for commit revalidation */
+  targetIdentity?: TargetIdentity | null;
 }
 
 function getDefaultValues(editItem?: RemapItem) {
@@ -74,7 +78,13 @@ function getDefaultValues(editItem?: RemapItem) {
   }
 }
 
-export function AddRemapForm({ onAdd, editItem }: RemapFormProps) {
+export function AddRemapForm({
+  onAdd,
+  editItem,
+  documentRevision,
+  editFingerprint,
+  targetIdentity,
+}: RemapFormProps) {
   const { pop } = useNavigation();
   const isEditing = !!editItem;
   const defaults = getDefaultValues(editItem);
@@ -82,10 +92,63 @@ export function AddRemapForm({ onAdd, editItem }: RemapFormProps) {
     editItem?.type ?? "conditional_remap",
   );
 
+  // ── Controlled field state + inline errors (F5) ────────────────────
+  const [timeoutValue, setTimeoutValue] = useState<string>(
+    (defaults.timeout_ms as string) ?? "200",
+  );
+  const [windowValue, setWindowValue] = useState<string>(
+    (defaults.window_ms as string) ?? "100",
+  );
+  const [keysValue, setKeysValue] = useState<string[]>(
+    (defaults.keys as string[]) ?? [],
+  );
+  const [timeoutError, setTimeoutError] = useState<string | null>(null);
+  const [windowError, setWindowError] = useState<string | null>(null);
+  const [keysError, setKeysError] = useState<string | null>(null);
+
   async function handleSubmit(values: Record<string, string | string[]>) {
+    // ── F5: validate BEFORE any config write ──────────────────────────
+    let parsedTimeout = 200;
+    let parsedWindow = 100;
+    let parsedKeys: string[] = [];
+
+    if (remapType === "tap_hold") {
+      try {
+        parsedTimeout = parsePositiveInt(timeoutValue, "Timeout");
+        setTimeoutError(null);
+      } catch (e) {
+        setTimeoutError(
+          e instanceof Error ? e.message : "Invalid timeout value",
+        );
+        return;
+      }
+    }
+
+    if (remapType === "chord") {
+      try {
+        parsedWindow = parsePositiveInt(windowValue, "Window");
+        setWindowError(null);
+      } catch (e) {
+        setWindowError(e instanceof Error ? e.message : "Invalid window value");
+        return;
+      }
+      try {
+        parsedKeys = validateChordKeys(
+          keysValue.length > 0 ? keysValue : ((values.keys as string[]) ?? []),
+        );
+        setKeysError(null);
+      } catch (e) {
+        setKeysError(
+          e instanceof Error ? e.message : "Invalid chord keys selection",
+        );
+        return;
+      }
+    }
+
+    // ── F1: separate config write from restart ────────────────────────
+    // All writes route through atomic I/O with revision/fingerprint.
     try {
       if (isEditing) {
-        // Build the raw data object for the update
         let data: Record<string, unknown>;
         switch (remapType) {
           case "remap":
@@ -106,65 +169,99 @@ export function AddRemapForm({ onAdd, editItem }: RemapFormProps) {
               key: values.key,
               tap: values.tap,
               hold: values.hold,
-              timeout_ms: parseInt(values.timeout_ms as string, 10) || 200,
+              timeout_ms: parsedTimeout,
             };
             break;
           case "chord":
             data = {
-              keys: values.keys,
+              keys: parsedKeys,
               emit: values.emit,
-              window_ms: parseInt(values.window_ms as string, 10) || 100,
+              window_ms: parsedWindow,
             };
             break;
           default:
             throw new Error(`Unknown remap type: ${remapType}`);
         }
-        updateRemap(editItem.id, data);
+        // Edit: pass captured revision + fingerprint + target for stale detection.
+        updateRemap(
+          editItem.id,
+          data,
+          documentRevision ?? "",
+          editFingerprint ?? "",
+          targetIdentity ?? null,
+        );
       } else {
+        // Add: reads fresh snapshot at action time inside addRemapEntry.
+        // No stale-revision concern — adds don't modify existing entries.
         switch (remapType) {
           case "remap":
-            addRemap(values.from as string, values.to as string);
+            addRemapEntry("remap", {
+              from: values.from as string,
+              to: values.to as string,
+            });
             break;
           case "modifier_remap":
-            addModifierRemap(values.from as string, values.to as string);
+            addRemapEntry("modifier_remap", {
+              from: values.from as string,
+              to: values.to as string,
+            });
             break;
           case "conditional_remap":
-            addConditionalRemap(
-              values.modifier as string,
-              values.from as string,
-              values.to as string,
-            );
+            addRemapEntry("conditional_remap", {
+              modifier: values.modifier as string,
+              from: values.from as string,
+              to: values.to as string,
+            });
             break;
           case "tap_hold":
-            addTapHold(
-              values.key as string,
-              values.tap as string,
-              values.hold as string,
-              parseInt(values.timeout_ms as string, 10) || 200,
-            );
+            addRemapEntry("tap_hold", {
+              key: values.key as string,
+              tap: values.tap as string,
+              hold: values.hold as string,
+              timeout_ms: parsedTimeout,
+            });
             break;
           case "chord":
-            addChord(
-              values.keys as string[],
-              values.emit as string,
-              parseInt(values.window_ms as string, 10) || 100,
-            );
+            addRemapEntry("chord", {
+              keys: parsedKeys,
+              emit: values.emit as string,
+              window_ms: parsedWindow,
+            });
             break;
         }
       }
-
-      restartService();
-      onAdd?.();
-      await showToast({
-        style: Toast.Style.Success,
-        title: isEditing ? "Remap updated" : "Remap added",
-      });
-      pop();
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
         title: isEditing ? "Failed to update remap" : "Failed to add remap",
-        message: String(e),
+        message: e instanceof Error ? e.message : String(e),
+      });
+      return;
+    }
+
+    // Write succeeded — report success and navigate regardless of restart.
+    onAdd?.();
+    await showToast({
+      style: Toast.Style.Success,
+      title: isEditing ? "Remap updated" : "Remap added",
+    });
+    pop();
+
+    // Second try/catch: restart only. Failure is non-fatal.
+    // The result message is displayed but does not block navigation.
+    try {
+      const result = restartService();
+      // Show "Restart requested" for graceful standalone, "Switcheroo
+      // restarted" for Homebrew. The save toast already showed persistence.
+      await showToast({
+        style: Toast.Style.Success,
+        title: result.message,
+      });
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Saved, but restart failed",
+        message: e instanceof Error ? e.message : String(e),
       });
     }
   }
@@ -314,7 +411,12 @@ export function AddRemapForm({ onAdd, editItem }: RemapFormProps) {
           <Form.TextField
             id="timeout_ms"
             title="Timeout (ms)"
-            defaultValue={(defaults.timeout_ms as string) ?? "200"}
+            value={timeoutValue}
+            onChange={(v) => {
+              setTimeoutValue(v);
+              if (timeoutError) setTimeoutError(null);
+            }}
+            error={timeoutError ?? undefined}
           />
         </>
       )}
@@ -324,7 +426,12 @@ export function AddRemapForm({ onAdd, editItem }: RemapFormProps) {
           <Form.TagPicker
             id="keys"
             title="Keys"
-            defaultValue={defaults.keys as string[]}
+            value={keysValue}
+            onChange={(v) => {
+              setKeysValue(v);
+              if (keysError) setKeysError(null);
+            }}
+            error={keysError ?? undefined}
           >
             {ALL_KEYS.map((k) => (
               <Form.TagPicker.Item key={k} value={k} title={k} />
@@ -342,7 +449,12 @@ export function AddRemapForm({ onAdd, editItem }: RemapFormProps) {
           <Form.TextField
             id="window_ms"
             title="Window (ms)"
-            defaultValue={(defaults.window_ms as string) ?? "100"}
+            value={windowValue}
+            onChange={(v) => {
+              setWindowValue(v);
+              if (windowError) setWindowError(null);
+            }}
+            error={windowError ?? undefined}
           />
         </>
       )}
