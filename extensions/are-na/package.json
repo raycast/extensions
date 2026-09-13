@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "are-na",
   "title": "Are.na",
-  "description": "Are.na is a platform for connecting ideas and building knowledge through visual blocks and channels. This Raycast extension allows users to search for channels, blocks, and users on Are.na, as well as create new channels directly from Raycast. Easily discover, explore, and organize content from your Are.na account without leaving your workflow.",
+  "description": "Search and browse Are.na, save blocks, manage channels, and connect ideas with Raycast AI.",
   "icon": "extension-icon.png",
   "author": "alvinkobe",
   "contributors": [
     "xmok",
-    "0xdhrv"
+    "0xdhrv",
+    "ray.dhruv"
   ],
   "categories": [
     "Web"
@@ -62,6 +63,20 @@
       "subtitle": "Are.na",
       "description": "Browse channels from your Are.na account",
       "mode": "view"
+    },
+    {
+      "name": "create-block",
+      "title": "Create Block",
+      "description": "Save a URL or Markdown text to one or more Are.na channels",
+      "subtitle": "Are.na",
+      "mode": "view"
+    },
+    {
+      "name": "open-arena",
+      "title": "Open Are.na Link",
+      "description": "Open a channel or block by URL, ID, or slug directly in Raycast",
+      "subtitle": "Are.na",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -99,6 +114,51 @@
       "name": "create-channel",
       "title": "Create Channel",
       "description": "Create a new channel on the user's Are.na account with a title and visibility (public, closed, or private). Requires user confirmation in Raycast before running."
+    },
+    {
+      "name": "create-block",
+      "title": "Create Block",
+      "description": "Create a block from a URL or Markdown text and save it to 1–20 channels. Do not use for connecting existing blocks. Requires confirmation."
+    },
+    {
+      "name": "update-block",
+      "title": "Update Block",
+      "description": "Edit an existing block title, description, or Text block content. Requires confirmation."
+    },
+    {
+      "name": "update-channel",
+      "title": "Update Channel",
+      "description": "Edit a channel title, description, or visibility. Requires confirmation."
+    },
+    {
+      "name": "connect-content",
+      "title": "Connect Content to Channels",
+      "description": "Connect an existing block or channel to 1–20 channels without duplicating the content. Search first to select exact items. Requires confirmation."
+    },
+    {
+      "name": "remove-connection",
+      "title": "Remove Connection",
+      "description": "Remove a specific connection using a connection ID from channel contents. Does not delete the block or channel. Requires confirmation."
+    },
+    {
+      "name": "get-block-connections",
+      "title": "Get Block Connections",
+      "description": "List channels containing a block with pagination. To remove a placement, fetch the destination channel contents to find its connection ID."
+    },
+    {
+      "name": "get-user",
+      "title": "Get User",
+      "description": "Get a user profile by ID, slug, or profile URL."
+    },
+    {
+      "name": "get-user-contents",
+      "title": "Get User Contents",
+      "description": "Browse a user’s blocks and channels with content type filtering and pagination."
+    },
+    {
+      "name": "channel-digest",
+      "title": "Get Channel Digest",
+      "description": "Summarize a channel using its metadata, collaborators, and a bounded sample of contents. Returns sample type counts and item previews; never implies a full-channel analysis."
     }
   ],
   "preferences": [
@@ -163,7 +223,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "pull": "ray pull-contributions"
+    "pull": "ray pull-contributions",
+    "test": "node --test tests/*.test.cjs"
   },
   "platforms": [
     "macOS"

@@ -214,7 +214,7 @@ function SearchAllCommand() {
                 {result!.blocks.map((block: Block) => (
                   <Grid.Item
                     key={`block-${block.id}`}
-                    content={getIconSource(block)}
+                    content={getIconSource(block, true)}
                     title={block.title || block.generated_title || `Block ${block.id}`}
                     subtitle={block.class}
                     actions={

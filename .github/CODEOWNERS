@@ -140,7 +140,7 @@
 /extensions/arcane-wallpaper                                        @clins1994
 /extensions/archisteamfarm                                          @luinbytes
 /extensions/archiver                                                @404J @3llomi @ridemountainpig
-/extensions/are-na                                                  @alvinashiatey @xmok @0xdhrv
+/extensions/are-na                                                  @alvinashiatey @xmok @0xdhrv @0xdhrv
 /extensions/area-code-lookup                                        @camerondare
 /extensions/area-code-search                                        @mjking
 /extensions/array-this                                              @matheus-depaula
@@ -1721,7 +1721,7 @@
 /extensions/move-cursor-next-display                                @jsiu93
 /extensions/mozaika                                                 @sezabut
 /extensions/mozeidon                                                @egovelox
-/extensions/mozilla-firefox                                         @crisboarna @grandkrav @Laptop765 @kud @Bryan-0220
+/extensions/mozilla-firefox                                         @crisboarna @grandkrav @Laptop765 @kud @Bryan-0220 @rockschtar
 /extensions/mozilla-vpn                                             @nwhistler
 /extensions/mui-documentation                                       @kgrhartlage
 /extensions/mule-secure-properties                                  @Gonzalez-S
@@ -1927,7 +1927,7 @@
 /extensions/openai-translator                                       @douo @dekura @leeonfield @ridemountainpig
 /extensions/openclaw                                                @leveragedrobot @leveragedrobot @RaviTharuma
 /extensions/opencode-sessions                                       @mike182uk @mormubis @0xdhrv
-/extensions/opencodex-usage                                         @list-jonas
+/extensions/opencodex-usage                                         @list-jonas @AviralSaxena
 /extensions/openfortivpn                                            @rafalpetryka
 /extensions/openhue                                                 @thibauult
 /extensions/openqr                                                  @sam-moreton
@@ -2052,7 +2052,7 @@
 /extensions/php-toolbox                                             @inxilpro
 /extensions/phpmon                                                  @nicoverbruggen
 /extensions/pi-drill                                                @nikinadruhou @pernielsentikaer
-/extensions/pia-controls                                            @Yakitrak
+/extensions/pia-controls                                            @Yakitrak @vxirau
 /extensions/pianoman                                                @juhamust @0xdhrv
 /extensions/picgo                                                   @RUBisco0211
 /extensions/pick-random                                             @MatteoGauthier @hongqn
@@ -2345,6 +2345,7 @@
 /extensions/recent-excel                                            @aradbm
 /extensions/recents                                                 @GastroGeek @kgrhartlage @anwarulislam
 /extensions/reclaim-ai                                              @lightbody @ajohnson1200 @gunrein @clayton-knapp @clayton-knapp @SandyGifford @clayton-knapp
+/extensions/record-so                                               @devrecordso
 /extensions/rectangle                                               @crickford
 /extensions/recurly                                                 @kudrykv
 /extensions/redactcast                                              @TheMax98000
@@ -2643,7 +2644,7 @@
 /extensions/spaceship                                               @xmok
 /extensions/spacetime-tracking                                      @olivierbossel
 /extensions/spanish-tv-guide                                        @doktor500
-/extensions/spark-mail                                              @keito4
+/extensions/spark-mail                                              @keito4 @artistro08
 /extensions/spatie-documentation                                    @danyelkeddah
 /extensions/specify                                                 @AllanMichay
 /extensions/speech-to-text                                          @facundoPri
@@ -2830,6 +2831,7 @@
 /extensions/thaw                                                    @diazdesandi
 /extensions/the-blue-cloud                                          @chyroc @xmok
 /extensions/the-forest-link                                         @0xdhrv
+/extensions/the-labyrinth                                           @luarmr
 /extensions/the-lot-radio                                           @evnm
 /extensions/the-matrix                                              @clins1994
 /extensions/the-matrix-of-destiny                                   @ordinz

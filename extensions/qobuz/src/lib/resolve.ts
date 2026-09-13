@@ -64,6 +64,25 @@ const resolveYouTube = async (url: string): Promise<ResolvedTrack | null> => {
   };
 };
 
+/**
+ * Cheap, offline check that a string is a single-track link from a supported
+ * service — the shape test of resolveLink without its network round-trip, for
+ * deciding whether to offer the clipboard as an alternative input.
+ */
+export const looksLikeTrackLink = (input: string): boolean => {
+  let url: URL;
+  try {
+    url = new URL(input);
+  } catch {
+    return false;
+  }
+  const host = url.hostname;
+  if (isQobuz(host)) return /\/track\/\d+/.test(url.pathname);
+  if (isSpotify(host)) return url.pathname.includes("/track/");
+  if (isYouTube(host)) return url.pathname === "/watch" || host.endsWith("youtu.be");
+  return false;
+};
+
 export const resolveLink = async (input: string): Promise<ResolveOutcome> => {
   let url: URL;
   try {

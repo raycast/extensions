@@ -1,16 +1,16 @@
-import { getPreferenceValues } from "@raycast/api";
+import { setDND } from "../doNotDisturb";
 import {
   continueInterval,
   createInterval,
-  getCompletedPomodoroCount,
   getCurrentInterval,
+  getNextIntervalType,
   intervalDurations,
   pauseInterval,
   resetInterval,
 } from "../intervals";
 import { Interval, IntervalType } from "../types";
 import { clearStatus, endSnooze, setSnooze, setStatus } from "./slackAPI";
-import { FocusText, LongBreakText, ShortBreakText } from "../constants";
+import { IntervalTitles } from "../constants";
 
 export async function slackCreateInterval(intervalType: IntervalType, slackToken: string, isFreshStart = true) {
   const intervalMinutes = intervalDurations[intervalType] / 60;
@@ -61,47 +61,36 @@ export async function slackRestartInterval(slackToken: string) {
   }
 }
 
-export function getNextSlackIntervalExecutor() {
+export async function slackSkipInterval(slackToken: string) {
   const currentInterval = getCurrentInterval();
-  resetInterval();
-
-  const preferences = getPreferenceValues();
-  const completedCount = getCompletedPomodoroCount();
-  const longBreakThreshold = parseInt(preferences.longBreakStartThreshold, 10);
-  let executor: {
-    title: string;
-    onStart: (slackToken: string) => Promise<Interval | undefined>;
-  };
-
-  switch (currentInterval?.type) {
-    case "short-break":
-      executor = {
-        title: FocusText,
-        onStart: async (slackToken) => await slackCreateInterval("focus", slackToken, false),
-      };
-      break;
-    case "long-break":
-      executor = {
-        title: FocusText,
-        onStart: async (slackToken) => slackCreateInterval("focus", slackToken),
-      };
-      break;
-    default:
-      if (completedCount === longBreakThreshold) {
-        executor = {
-          title: LongBreakText,
-          onStart: async (slackToken) => await slackCreateInterval("long-break", slackToken),
-        };
-      } else {
-        executor = {
-          title: ShortBreakText,
-          onStart: async (slackToken) => await slackCreateInterval("short-break", slackToken, false),
-        };
-      }
-      break;
+  if (!currentInterval) {
+    return;
   }
 
-  return executor;
+  const nextType = getNextIntervalType(currentInterval.type);
+  const interval = await slackCreateInterval(nextType, slackToken, isFreshStart(currentInterval.type, nextType));
+  if (currentInterval.type === "focus") {
+    setDND(false);
+  }
+  return interval;
+}
+
+export function getNextSlackIntervalExecutor() {
+  const currentInterval = getCurrentInterval();
+  const nextType = getNextIntervalType(currentInterval?.type);
+  resetInterval();
+
+  return {
+    title: IntervalTitles[nextType],
+    onStart: async (slackToken: string) =>
+      slackCreateInterval(nextType, slackToken, isFreshStart(currentInterval?.type, nextType)),
+  };
+}
+
+// The Slack flow resets the completed-pomodoro counter whenever a long break starts or ends.
+// Shared by skip and auto-advance so both transitions count identically.
+function isFreshStart(currentType: IntervalType | undefined, nextType: IntervalType): boolean {
+  return currentType === "long-break" || nextType === "long-break";
 }
 
 const getRemainingTime = (interval: Interval): number => {
