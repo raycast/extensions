@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Service Lifecycle Actions] - {PR_MERGE_DATE}
+## [Service Lifecycle Actions] - 2026-09-13
 
 - Add `Deploy`, `Redeploy`/`Rebuild`, `Start`, `Stop` and `Reload` actions to the **Services** screen, so a service can be managed without leaving Raycast.
 
