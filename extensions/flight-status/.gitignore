@@ -1,0 +1,7 @@
+node_modules/
+dist/
+raycast-env.d.ts
+*.tsbuildinfo
+.temp/
+.env
+.DS_Store
