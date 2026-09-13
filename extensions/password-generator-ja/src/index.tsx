@@ -71,6 +71,7 @@ export default function Command() {
     }
 
     if (availableChars.length === 0) {
+      setCombinationError(undefined);
       setPassword("");
       return;
     }
