@@ -14,6 +14,7 @@ import {
 import { useFetch, useForm, FormValidation } from "@raycast/utils";
 import { useToken } from "./instances";
 import { Server, Service, ErrorResult } from "./interfaces";
+import ServiceLogs from "./service-logs";
 import type { ServiceScope } from "./utils";
 import { getTotalServices } from "./utils";
 
@@ -292,6 +293,7 @@ export default function Services({
                       onAction={() => runServiceAction(service, action)}
                     />
                   ))}
+                  <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
                 </ActionPanel.Section>
                 <Action
                   icon={Icon.Trash}
