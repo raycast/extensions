@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screenshot-paste",
+  "title": "Screenshot Paste",
+  "description": "Capture the screen under your cursor and paste it where you type - no mouse needed.",
+  "icon": "icon.png",
+  "author": "chomamateusz",
+  "license": "MIT",
+  "categories": [
+    "Media"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "capture-and-paste",
+      "title": "Paste New Screenshot: Screen Under Cursor",
+      "description": "Capture the display under the mouse pointer and paste it where you are typing",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-display-and-paste",
+      "title": "Paste New Screenshot: Choose Screen",
+      "description": "Pick a display from a list (the real screen lights up), then capture it and paste it where you are typing",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "screenshotDirectory",
+      "title": "Screenshot Directory",
+      "description": "Directory where screenshots are stored",
+      "type": "textfield",
+      "required": true,
+      "default": "~/Pictures/RaycastScreenshots"
+    },
+    {
+      "name": "pasteMode",
+      "title": "Paste As",
+      "description": "File: the clipboard holds the PNG file, like dragging it from Finder - works in Slack, Cursor, Teams, Mail, Messages. Image: the clipboard holds pixel data, like Cmd-Shift-Ctrl-4 - for apps that reject files; needs Accessibility permission for Raycast.",
+      "type": "dropdown",
+      "required": true,
+      "default": "file",
+      "data": [
+        {
+          "title": "File (attachment)",
+          "value": "file"
+        },
+        {
+          "title": "Image (pixel data)",
+          "value": "image"
+        }
+      ]
+    },
+    {
+      "name": "afterPaste",
+      "title": "After Pasting",
+      "description": "Save the pasted screenshot to the screenshot folder, or discard it",
+      "type": "dropdown",
+      "required": true,
+      "default": "save",
+      "data": [
+        {
+          "title": "Save to screenshot folder",
+          "value": "save"
+        },
+        {
+          "title": "Discard",
+          "value": "discard"
+        }
+      ]
+    },
+    {
+      "name": "captureDelayMs",
+      "title": "Capture Delay",
+      "description": "Milliseconds to wait after closing Raycast before capturing",
+      "type": "textfield",
+      "required": true,
+      "default": "200"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.1.2",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.4.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.0.0",
+    "prettier": "^3.9.0",
+    "typescript": "^6.0.3"
+  }
+}
