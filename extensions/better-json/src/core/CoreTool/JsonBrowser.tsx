@@ -15,18 +15,19 @@ import {
 import type { Keyboard } from "@raycast/api";
 import {
   compactJson,
+  createChildPager,
   createJsonNode,
   formatJson,
-  getChildPage,
   isContainer,
   JsonNode,
   JsonType,
   jsonPreview,
-  MAX_SEARCH_NODES,
+  jsonPathPreview,
   PAGE_SIZE,
   searchNodes,
   serializeJsonString,
   summarizeJson,
+  truncateLabel,
 } from "../jsonTools";
 import { InputSource, JsonDocument, readDocument } from "../document";
 import { readDraft, saveDraft } from "../draft";
@@ -92,14 +93,12 @@ export default function JsonBrowser({ document, scope, navigation }: Props) {
     () => (searching ? searchNodes(document.tree, query, typeFilter) : []),
     [document, query, typeFilter, searching],
   );
-  const children = useMemo(
-    () => (searching ? [] : getChildPage(current, 0, visibleCount)),
-    [current, visibleCount, searching],
-  );
+  const childPager = useMemo(() => createChildPager(current), [current]);
+  const children = useMemo(() => (searching ? [] : childPager(visibleCount)), [childPager, visibleCount, searching]);
   const nodes = searching ? matches.slice(0, visibleCount) : [current, ...children];
   const selected = nodes.find((node) => node.id === selectedId) ?? nodes[0];
   const limitedSearch = document.tree.truncated
-    ? `Search covers the first ${MAX_SEARCH_NODES.toLocaleString()} nodes. Browse levels to reach the rest.`
+    ? `Search is partial (${document.tree.nodes.length.toLocaleString()} nodes indexed). Long fields and text may be shortened. Browse levels to reach the rest.`
     : "";
 
   function clearSearch() {
@@ -223,11 +222,11 @@ export default function JsonBrowser({ document, scope, navigation }: Props) {
   function actions(node?: JsonNode) {
     const canEnter = node && isContainer(node) && (searching || node.id !== current.id);
     return (
-      <ActionPanel title={node?.path ?? "Document"}>
+      <ActionPanel title={truncateLabel(node?.path ?? "Document")}>
         <ActionPanel.Section>
           {canEnter && (
             <Action
-              title={`Enter ${node.path === "$" ? "Document" : node.key}`}
+              title={`Enter ${node.path === "$" ? "Document" : truncateLabel(node.key)}`}
               icon={Icon.ArrowRight}
               onAction={() => enter(node)}
             />
@@ -346,7 +345,7 @@ export default function JsonBrowser({ document, scope, navigation }: Props) {
       isLoading={isLoading}
       isShowingDetail={nodes.length > 0}
       filtering={false}
-      navigationTitle={current.path === "$" ? "Better JSON" : current.path}
+      navigationTitle={current.path === "$" ? "Inspect JSON" : truncateLabel(current.path)}
       searchText={query}
       onSearchTextChange={(value) => {
         setQuery(value);
@@ -388,7 +387,7 @@ export default function JsonBrowser({ document, scope, navigation }: Props) {
             ? `Entire Document · ${matches.length} Matches${document.tree.truncated ? " in Search Index" : ""}`
             : current.path === "$"
               ? "Entire Document"
-              : current.path
+              : truncateLabel(current.path)
         }
         subtitle={
           searching ? limitedSearch : `${document.inputSource} · ${children.length}/${current.childrenCount} children`
@@ -408,12 +407,12 @@ export default function JsonBrowser({ document, scope, navigation }: Props) {
                     : isContainer(node)
                       ? "Current Object"
                       : "Current Value"
-                : node.key
+                : truncateLabel(node.key)
             }
-            subtitle={searching ? node.path : node.preview}
+            subtitle={searching ? truncateLabel(node.path) : node.preview}
             accessories={
               isContainer(node) && (searching || node.id !== current.id)
-                ? [{ icon: Icon.ChevronRight, tooltip: `Enter ${node.path}` }]
+                ? [{ icon: Icon.ChevronRight, tooltip: `Enter ${truncateLabel(node.path)}` }]
                 : []
             }
             detail={
@@ -440,13 +439,15 @@ function NodeDetail({
 }) {
   const preview = useMemo(() => jsonPreview(node.value), [node.value]);
   const mode = document.parseNestedStrings
-    ? `Auto-deserialized · ${document.nestedStringCount} conversions`
+    ? `Auto-deserialized · ${document.nestedStringCount} ${document.nestedStringCount === 1 ? "conversion" : "conversions"}`
     : "Original data types";
-  // Use a delimiter longer than any backtick sequence in an unusual property name.
-  const path = JSON.stringify(node.path).slice(1, -1);
-  const delimiter = "`".repeat(Math.max(0, ...(path.match(/`+/g) ?? []).map((value) => value.length)) + 1);
-  const heading = node.path === "$" ? "Entire Document" : `${delimiter} ${path} ${delimiter}`;
-  const notes = [preview.truncated ? "Preview shortened. Copy includes the complete value." : "", searchWarning]
+  const path = jsonPathPreview(node.path);
+  const heading = node.path === "$" ? "Entire Document" : path.markdown;
+  const notes = [
+    preview.truncated ? "Preview shortened. Copy includes the complete value." : "",
+    path.truncated ? "Path shortened. Copy As → Path includes the complete path." : "",
+    searchWarning,
+  ]
     .filter(Boolean)
     .join("\n\n");
   const markdown = `### ${heading}\n\n${document.inputSource} · ${mode}\n\n${notes ? notes + "\n\n" : ""}${preview.markdown}`;
@@ -456,7 +457,7 @@ function NodeDetail({
       metadata={
         showMetadata ? (
           <List.Item.Detail.Metadata>
-            <List.Item.Detail.Metadata.Label title="Path" text={node.path} />
+            <List.Item.Detail.Metadata.Label title="Path" text={path.text} />
             <List.Item.Detail.Metadata.Label title="Type" text={node.type} />
             <List.Item.Detail.Metadata.Label title="Children" text={String(node.childrenCount)} />
             <List.Item.Detail.Metadata.Label title="Document" text={summarizeJson(document.value)} />
@@ -507,7 +508,7 @@ function CopyAction({
           await Clipboard.copy(content);
           await showToast(
             Toast.Style.Success,
-            `Copied ${scope}`,
+            `Copied ${truncateLabel(scope)}`,
             `${format === "pretty" ? "Formatted JSON" : format === "compact" ? "Compact JSON" : format === "serialized" ? "Serialized JSON" : "Text"} · ${content.length.toLocaleString()} characters`,
           );
         } catch {
