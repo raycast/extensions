@@ -13,6 +13,15 @@ export type Location = {
   Priority: number;
 };
 
+export interface Service {
+  name: string;
+  addresses: string[];
+  hostname: string;
+  ports: string[];
+  displayName?: string;
+  type?: string;
+}
+
 export interface Device {
   self: boolean;
   key: string;
@@ -176,6 +185,29 @@ export function getStatus(peers = true) {
     throw new NotConnectedError();
   }
   return data;
+}
+
+type ServiceResponse = {
+  Name: string;
+  Addrs: string[];
+  Ports: string[];
+  Hostname: string;
+  DisplayName?: string;
+  Type?: string;
+};
+
+export function getServices(): Service[] {
+  const resp = tailscale("service list --json");
+  const services = JSON.parse(resp) as ServiceResponse[];
+
+  return services.map((service) => ({
+    name: service.Name.replace(/^svc:/, ""),
+    addresses: service.Addrs,
+    hostname: service.Hostname,
+    ports: service.Ports,
+    displayName: service.DisplayName,
+    type: service.Type?.toLowerCase(),
+  }));
 }
 
 export function getNetcheck() {

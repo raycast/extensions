@@ -16,7 +16,8 @@
     "j3lte",
     "itsmatteomanf",
     "MatteoGauthier",
-    "McKeev"
+    "McKeev",
+    "csharp"
   ],
   "categories": [
     "Developer Tools",
@@ -30,7 +31,7 @@
       "name": "devices",
       "title": "All Devices",
       "subtitle": "Tailscale",
-      "description": "View a list of every device in the tailnet",
+      "description": "View a list of every device in your tailnet",
       "mode": "view"
     },
     {
@@ -38,6 +39,13 @@
       "title": "My Devices",
       "subtitle": "Tailscale",
       "description": "View a list of your own devices",
+      "mode": "view"
+    },
+    {
+      "name": "services",
+      "title": "Services",
+      "subtitle": "Tailscale",
+      "description": "View the services available in your tailnet",
       "mode": "view"
     },
     {
@@ -51,7 +59,7 @@
       "name": "exit",
       "title": "Exit Node",
       "subtitle": "Tailscale",
-      "description": "View any available Exit node in your Tailnet and quickly activate one",
+      "description": "View any available Exit node in your tailnet and quickly activate one",
       "mode": "view"
     },
     {
@@ -102,7 +110,7 @@
           "type": "checkbox",
           "required": false,
           "label": "Show Tailnet Name",
-          "description": "Show the tailnet name in the status bar",
+          "description": "Show your tailnet name in the status bar",
           "default": true
         }
       ]
@@ -162,7 +170,7 @@
         },
         {
           "name": "showTailnetName",
-          "description": "Show the tailnet name next to the menu bar icon",
+          "description": "Show your tailnet name next to the menu bar icon",
           "type": "checkbox",
           "label": "Show Tailnet Name",
           "default": false,
