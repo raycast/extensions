@@ -1,5 +1,13 @@
 # Orion Changelog
 
+## [Command Bar] - {PR_MERGE_DATE}
+
+- Improve Top Hit ranking with deterministic match tiers and source precedence: open tabs, bookmarks, reading list, then history. Deduplicate matching destinations and use history frecency only to resolve ties within history.
+- Keep Top Hit selected as local sources resolve, while preserving an explicit Ctrl+N/Ctrl+P selection when later results arrive.
+- Reset the selection session whenever the query or profile changes, so deleting or appending text cannot leave Web Search focused after a prior candidate disappears.
+- After the first Ctrl+N/Ctrl+P navigation, release selection to Raycast's native list so repeated navigation remains smooth while later results do not steal focus.
+- Recognize typed web addresses and offer opening them in the system default browser. Add the same default-browser action to local Orion results.
+
 ## [Command Bar] - 2026-06-22
 
 - Add a "Command Bar" command — an Arc-style unified palette that searches open tabs, bookmarks, reading list, history, and the web from one place. Shows a top hit, a "Search the Web" action, live search-engine autocomplete, and per-source sections. Includes a profile switcher (search bar accessory) and a Search Engine preference (DuckDuckGo, Google, Brave, or Kagi). Results open in Orion rather than the system default browser.
