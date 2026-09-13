@@ -61,6 +61,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "lint:ci": "eslint src/** && prettier --check src/** !**/.DS_Store",
+    "test": "node --test \"src/lib/**/*.test.mjs\"",
     "publish": "ray publish",
     "prepublishOnly": "echo \"Error: no publish\" && exit 1"
   }
