@@ -12,8 +12,8 @@ import {
   open,
   useNavigation,
 } from "@raycast/api";
-import { dirname, join } from "path";
-import { RefData, Preferences, resolveHome, MAX_RENDER_RESULTS } from "./zoteroApi";
+import { RefData, Preferences, MAX_RENDER_RESULTS } from "./zoteroApi";
+import { resolveAttachmentPath } from "./attachments";
 import { LibraryRef, itemIdentity, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
 import type { CollectionOption } from "./collections";
 import { useVisitedUrls } from "./useVisitedUrls";
@@ -72,17 +72,6 @@ const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], ke
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 const copyDoiShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
 const copyPDFPathShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "," };
-
-function resolveAttachmentPath(item: RefData, zoteroPath: string): string | null {
-  if (!item.attachment?.path || !item.attachment?.key) return null;
-  const attachmentPath = item.attachment.path;
-  if (!attachmentPath.startsWith("storage:")) {
-    return attachmentPath;
-  }
-  const filename = attachmentPath.slice("storage:".length);
-  const expandedZoteroPath = resolveHome(zoteroPath);
-  return join(dirname(expandedZoteroPath), "storage", item.attachment.key, filename);
-}
 
 function getURL(item: RefData): string {
   return `${
@@ -311,6 +300,9 @@ export const View = ({
                           }
                         }}
                       />
+                    )}
+                    {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
+                      <Action.ShowInFinder path={attachmentFilePath} title="Show PDF in Finder" />
                     )}
                     <Action.OpenInBrowser
                       icon={Icon.Link}
