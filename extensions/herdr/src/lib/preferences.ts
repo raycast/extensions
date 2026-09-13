@@ -6,6 +6,13 @@ export function getHerdrPreferences(): HerdrPreferences {
   return getPreferenceValues<HerdrPreferences>();
 }
 
+export type SessionEnterAction = "attach" | "switch";
+
+/** What Enter does on a session in Manage Sessions. Attach keeps the original behavior. */
+export function getSessionEnterAction(): SessionEnterAction {
+  return getHerdrPreferences().sessionEnterAction === "switch" ? "switch" : "attach";
+}
+
 export function getRefreshIntervalMs(): number {
   const value = Number(getHerdrPreferences().refreshInterval || "5");
   return Math.max(2, Number.isFinite(value) ? value : 5) * 1_000;

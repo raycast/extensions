@@ -2,20 +2,25 @@ import { describe, expect, it } from "vitest";
 import {
   buildGhosttyFocusScript,
   buildITermFocusScript,
+  buildITermTtyListScript,
   buildTerminalFocusScript,
+  buildTerminalTtyListScript,
   parseHerdrClientTtys,
+  parseHerdrClients,
+  parseTtyList,
   selectWezTermPane,
+  selectWezTermPanes,
   selectWezTermWindow,
 } from "../src/lib/terminal-focus";
 
 describe("parseHerdrClientTtys", () => {
   const processes = `
-??       /opt/herdr /opt/herdr server
-ttys001  herdr     herdr
-ttys002  herdr     herdr --session work
-ttys003  herdr     herdr session attach review
-ttys004  zsh       zsh
-ttys005  herdr     herdr --session default
+31029 ??       /opt/herdr server
+30001 ttys001  herdr
+30002 ttys002  herdr --session work
+30003 ttys003  herdr session attach review
+30004 ttys004  zsh
+30005 ttys005  herdr --session default
 `;
 
   it("finds bare and explicitly default-session Herdr clients", () => {
@@ -25,6 +30,53 @@ ttys005  herdr     herdr --session default
   it("finds the requested named session", () => {
     expect(parseHerdrClientTtys(processes, "/opt/herdr", "work")).toEqual(["/dev/ttys002"]);
     expect(parseHerdrClientTtys(processes, "/opt/herdr", "review")).toEqual(["/dev/ttys003"]);
+  });
+
+  // Regression: the remote bridge is a bare `herdr client` and a --remote
+  // attach drives another host's server. Reading either as a local Client made
+  // Reveal activate a pane showing a different machine's session.
+  it("never reveals the remote bridge or a remote attach as a local client", () => {
+    const remote = `
+48369 ttys041  herdr --remote clouddesk --session work
+48678 ttys041  /opt/herdr client
+`;
+    expect(parseHerdrClientTtys(remote, "/opt/herdr", "work")).toEqual([]);
+    expect(parseHerdrClientTtys(remote, "/opt/herdr", "default")).toEqual([]);
+  });
+
+  // Regression: a Herdr CLI call carries the same `--session` prefix as a
+  // client. Reading one as a Client let Switch reveal its pane or SIGTERM
+  // someone's running command.
+  it("never reads a Herdr CLI call as a client", () => {
+    const calls = `
+70001 ttys010  herdr --session work pane read w1:p1 --lines 200
+70002 ttys011  herdr --session work api snapshot
+70003 ttys012  herdr session list --json
+70004 ttys013  herdr --session work agent prompt claude "go"
+70005 ttys014  herdr status --json
+`;
+    expect(parseHerdrClientTtys(calls, "/opt/herdr", "work")).toEqual([]);
+    expect(parseHerdrClients(calls, "/opt/herdr", "work")).toEqual([]);
+  });
+
+  it("reads a client that carries other global flags", () => {
+    const clients = `
+70010 ttys015  herdr --handoff --session work
+70011 ttys016  herdr --session=work
+70012 ttys017  herdr session attach work
+`;
+    expect(parseHerdrClientTtys(clients, "/opt/herdr", "work")).toEqual([
+      "/dev/ttys015",
+      "/dev/ttys016",
+      "/dev/ttys017",
+    ]);
+  });
+
+  // macOS renders a truncated executable path in `comm`, so a binary path with
+  // a space split the row apart. The lookup asks for pid, tty and args only.
+  it("reads clients whose binary path contains a space", () => {
+    const spaced = `60001 ttys007  /tmp/my tools/herdr --session work`;
+    expect(parseHerdrClientTtys(spaced, "/tmp/my tools/herdr", "work")).toEqual(["/dev/ttys007"]);
   });
 });
 
@@ -52,5 +104,79 @@ describe("terminal focus adapters", () => {
     expect(selectWezTermWindow(panes)).toBe("4");
     expect(selectWezTermPane("not json", ["/dev/ttys002"])).toBeUndefined();
     expect(selectWezTermWindow("not json")).toBeUndefined();
+  });
+});
+
+describe("parseHerdrClients", () => {
+  // Shapes taken from a real `ps -o pid=,tty=,comm=,args=`: comm is truncated,
+  // the server has no tty, and the remote bridge is a bare `herdr client`
+  // sharing the tty of its `--remote` parent.
+  const processes = `
+31029 ??       /opt/herdr server
+23895 ttys001  herdr session attach review
+51496 ttys017  /opt/herdr session attach default
+48369 ttys041  herdr --remote clouddesk --session meshclaw
+48678 ttys041  /opt/herdr client
+60001 ttys005  herdr
+60002 ttys006  herdr --session=work
+`;
+
+  it("returns pid and tty of clients whose argv names the session", () => {
+    expect(parseHerdrClients(processes, "/opt/herdr", "review")).toEqual([{ pid: "23895", tty: "/dev/ttys001" }]);
+    expect(parseHerdrClients(processes, "/opt/herdr", "work")).toEqual([{ pid: "60002", tty: "/dev/ttys006" }]);
+  });
+
+  // Regression guard for the detach path: a bare client or the remote bridge
+  // must never read as a Default Session client, so argv alone never qualifies.
+  it("excludes bare clients, the remote bridge, and remote attaches", () => {
+    expect(parseHerdrClients(processes, "/opt/herdr", "default")).toEqual([{ pid: "51496", tty: "/dev/ttys017" }]);
+    expect(parseHerdrClients(processes, "/opt/herdr", "meshclaw")).toEqual([]);
+  });
+});
+
+describe("selectWezTermPanes", () => {
+  const panes = JSON.stringify([
+    { window_id: 4, pane_id: 1, tty_name: "/dev/ttys001" },
+    { window_id: 5, pane_id: 2, tty_name: "/dev/ttys002" },
+    { window_id: 5, pane_id: 3, tty_name: "/dev/ttys003" },
+  ]);
+
+  it("keeps only ttys that are WezTerm panes and reports each match's window", () => {
+    expect(selectWezTermPanes(panes, ["/dev/ttys041", "/dev/ttys001", "/dev/ttys003"])).toEqual({
+      matches: [
+        { tty: "/dev/ttys001", windowId: "4", paneId: "1" },
+        { tty: "/dev/ttys003", windowId: "5", paneId: "3" },
+      ],
+      windowId: "4",
+    });
+    expect(selectWezTermPanes(panes, ["/dev/ttys041"])).toEqual({ matches: [], windowId: undefined });
+  });
+
+  it("is unavailable when the listing is not a pane array", () => {
+    expect(selectWezTermPanes("not json", ["/dev/ttys001"])).toBeUndefined();
+    expect(selectWezTermPanes("9", ["/dev/ttys001"])).toBeUndefined();
+  });
+
+  // Regression: JSON that parses but is not an array made the pane and window
+  // selectors throw out of the launch path instead of falling back.
+  it("leaves every WezTerm selector total over unexpected output", () => {
+    for (const output of ["not json", "9", '{"pane_id":1}']) {
+      expect(() => selectWezTermPane(output, ["/dev/ttys001"])).not.toThrow();
+      expect(() => selectWezTermWindow(output)).not.toThrow();
+      expect(selectWezTermPane(output, ["/dev/ttys001"])).toBeUndefined();
+      expect(selectWezTermWindow(output)).toBeUndefined();
+    }
+  });
+});
+
+describe("terminal tty listings", () => {
+  it("asks Terminal and iTerm for every tty", () => {
+    expect(buildTerminalTtyListScript()).toContain("tty of every tab of every window");
+    expect(buildITermTtyListScript()).toContain("tty of every session of every tab of every window");
+  });
+
+  it("parses the flattened list osascript prints", () => {
+    expect(parseTtyList("/dev/ttys001, /dev/ttys002, /dev/ttys001")).toEqual(["/dev/ttys001", "/dev/ttys002"]);
+    expect(parseTtyList("")).toEqual([]);
   });
 });

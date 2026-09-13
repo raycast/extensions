@@ -12,7 +12,7 @@ import { agentName } from "../lib/agent-appearance";
 import { focusResource, getAgentTarget, runHerdr, sendAgentKeys, sendPaneKeys } from "../lib/herdr";
 import { launchHerdrInTerminal, revealFocusedHerdr } from "../lib/terminal";
 import type { AgentInfo, PaneInfo, TabInfo, WorkspaceInfo } from "../lib/types";
-import { runAction, shortcuts } from "../lib/ui";
+import { ManageSessionsAction, runAction, shortcuts } from "../lib/ui";
 import { PaneOutput } from "./pane-output";
 import { PromptAgentForm } from "./prompt-agent-form";
 import { CreateTabForm, RenameForm, RunCommandForm, SplitPaneForm } from "./resource-forms";
@@ -30,6 +30,7 @@ function UtilityActions({ onRefresh }: { onRefresh?: () => void | Promise<void> 
       {onRefresh ? (
         <Action title="Refresh" icon={Icon.ArrowClockwise} shortcut={shortcuts.refresh} onAction={onRefresh} />
       ) : null}
+      <ManageSessionsAction />
       <Action title="Open Extension Preferences…" icon={Icon.Gear} onAction={openExtensionPreferences} />
       <Action.OpenInBrowser title="Open Herdr Documentation" url="https://herdr.dev/docs/" />
     </ActionPanel.Section>

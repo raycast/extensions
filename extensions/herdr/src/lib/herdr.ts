@@ -4,6 +4,7 @@ import { delimiter, join } from "node:path";
 import { homedir } from "node:os";
 import { execFile } from "node:child_process";
 import { getHerdrPreferences } from "./preferences";
+import { resolveSession } from "./session-selection";
 import type { HerdrSession, HerdrSnapshot, PaneInfo } from "./types";
 
 interface RunOptions {
@@ -25,6 +26,7 @@ export class HerdrError extends Error {
     message: string,
     readonly code?: string,
     readonly detail?: string,
+    readonly session?: string,
   ) {
     super(message);
     this.name = "HerdrError";
@@ -99,14 +101,28 @@ function extractCliError(stderr: string): HerdrError | undefined {
   return undefined;
 }
 
+// Read commands never start a server. Herdr 0.9 answers a Stopped session with
+// a `server_not_running` error envelope; older versions print the raw refused
+// connection, and only that text counts there, since a missing socket path
+// (NotFound) meant the session did not exist. Herdr 0.9 reports both cases
+// alike, so the Stopped views check `session list` before offering to start.
+const STOPPED_SESSION_CODE = "server_not_running";
+
+function isStoppedSessionStderr(stderr: string): boolean {
+  return /ConnectionRefused|Connection refused/.test(stderr);
+}
+
+function stoppedSessionError(session: string, detail: string): HerdrError {
+  return new HerdrError(`Herdr session “${session}” is stopped`, "session_not_running", detail, session);
+}
+
 export async function runHerdr(args: string[], options: RunOptions = {}): Promise<string> {
   const binary = await resolveHerdrBinary();
-  const preferences = getHerdrPreferences();
-  const selectedSession = options.session ?? (preferences.sessionName?.trim() || "default");
+  const session = await resolveSession(options.session);
   // Without --session the CLI falls back to an inherited HERDR_SESSION, so the
   // session is always named explicitly. An empty session opts out for
   // commands that span sessions.
-  const sessionArgs = selectedSession ? ["--session", selectedSession] : [];
+  const sessionArgs = session ? ["--session", session] : [];
 
   return new Promise<string>((resolve, reject) => {
     execFile(
@@ -120,10 +136,19 @@ export async function runHerdr(args: string[], options: RunOptions = {}): Promis
       },
       (error, stdout, stderr) => {
         const cliError = extractCliError(stderr);
-        if (cliError) return reject(cliError);
+        if (cliError) {
+          if (session && cliError.code === STOPPED_SESSION_CODE)
+            return reject(stoppedSessionError(session, cliError.detail ?? ""));
+          return reject(cliError);
+        }
         if (error) {
           const detail = stderr.trim() || stdout.trim() || error.message;
           const timedOut = "killed" in error && error.killed;
+          // Read from stderr alone, and only when the command ran to
+          // completion: `pane read` puts raw terminal text on stdout, which can
+          // quote a refused connection of its own.
+          if (session && !timedOut && isStoppedSessionStderr(stderr))
+            return reject(stoppedSessionError(session, detail));
           return reject(
             new HerdrError(
               timedOut ? "The Herdr command timed out" : "Unable to run the Herdr command",
@@ -150,8 +175,8 @@ export async function runHerdrJson<T>(args: string[], options: RunOptions = {}):
   }
 }
 
-export async function getSnapshot(signal?: AbortSignal): Promise<HerdrSnapshot> {
-  const result = await runHerdrJson<{ snapshot: HerdrSnapshot }>(["api", "snapshot"], { signal });
+export async function getSnapshot(signal?: AbortSignal, session?: string): Promise<HerdrSnapshot> {
+  const result = await runHerdrJson<{ snapshot: HerdrSnapshot }>(["api", "snapshot"], { signal, session });
   if (!result.snapshot) throw new HerdrError("Herdr did not return a session snapshot", "invalid_snapshot");
   return result.snapshot;
 }
@@ -266,6 +291,32 @@ export async function runInPane(target: string, command: string): Promise<void> 
 
 export function getAgentTarget(agent: { name?: string; pane_id: string }): string {
   return agent.name || agent.pane_id;
+}
+
+/** The state of a `session list` read, as the cached-promise hooks report it. */
+export interface SessionListState {
+  data?: HerdrSession[];
+  isLoading: boolean;
+  error?: unknown;
+}
+
+/**
+ * Whether `name` is among the listed Sessions. Herdr 0.9 reports a Session that
+ * does not exist exactly like a Stopped one, and `herdr --session` creates what
+ * it cannot find, so a start is offered only for a listed Session. Only a
+ * settled, successful listing is evidence: the hooks keep the previous list
+ * while a refresh is in flight or after one fails, so a Session deleted in the
+ * meantime would otherwise still read as listed. Anything else is unknown, and
+ * unknown never earns a start.
+ */
+export function sessionPresence(list: SessionListState, name: string): "listed" | "missing" | "unknown" {
+  if (list.isLoading || list.error !== undefined || list.data === undefined) return "unknown";
+  return list.data.some((session) => session.name === name) ? "listed" : "missing";
+}
+
+/** The Session a failure names when its server is Stopped, so views can offer to start it. */
+export function stoppedSessionOf(error: unknown): string | undefined {
+  return error instanceof HerdrError && error.code === "session_not_running" ? error.session : undefined;
 }
 
 export function formatHerdrError(error: unknown): { title: string; message?: string } {

@@ -6,20 +6,43 @@ import { tmpdir } from "node:os";
 import type { Application } from "@raycast/api";
 import { getHerdrPreferences } from "./preferences";
 import { resolveHerdrBinary, runHerdr, runHerdrJson } from "./herdr";
-import { lookupHerdrClientTtys } from "./process-lookup";
+import { resolveSession } from "./session-selection";
+import { lookupHerdrClientTtys, lookupHerdrClients } from "./process-lookup";
 import { shellQuote } from "./parsers";
 import { detectTerminalKind, expandCustomLauncher } from "./terminal-config";
 import {
   buildGhosttyFocusScript,
   buildITermFocusScript,
+  buildITermTtyListScript,
   buildTerminalFocusScript,
+  buildTerminalTtyListScript,
+  parseTtyList,
   selectWezTermPane,
+  selectWezTermPanes,
   selectWezTermWindow,
+  type HerdrClient,
+  type WezTermMatch,
 } from "./terminal-focus";
 
 const FAST_FOCUS_TIMEOUT_MS = 450;
 const PROCESS_LOOKUP_TIMEOUT_MS = 250;
 type ClientFocusResult = "focused" | "missing" | "unavailable";
+
+export interface LaunchOptions {
+  /** Prefix the resolved session flag. Callers passing their own `session attach` argv opt out. */
+  includeSession?: boolean;
+  /** Open a new Terminal Window instead of a tab in an existing one. */
+  newWindow?: boolean;
+  /** WezTerm only: spawn the tab into this window. */
+  windowId?: string;
+  /** WezTerm only: a `cli list --format json` output the caller already has. */
+  wezTermListing?: string;
+}
+
+export interface LaunchResult {
+  /** WezTerm only: the pane `cli spawn` created, so a caller can confirm this launch and no other attached. */
+  wezTermPaneId?: string;
+}
 
 function execCapture(path: string, args: string[], timeout = 5_000): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -60,10 +83,6 @@ function selectedApplication(): Application | undefined {
   return getHerdrPreferences().terminalApplication;
 }
 
-function selectedSession(): string {
-  return getHerdrPreferences().sessionName?.trim() || "default";
-}
-
 function wezTermExecutable(application: Application | undefined): string | undefined {
   if (!application?.path) return undefined;
   return join(application.path, "Contents", "MacOS", "wezterm");
@@ -82,13 +101,14 @@ export async function bringTerminalToFront(): Promise<void> {
   }
 }
 
-async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
+export async function focusExistingHerdrClient(explicitSession?: string): Promise<ClientFocusResult> {
   const application = selectedApplication();
   const kind = detectTerminalKind(application || { bundleId: "com.apple.Terminal", name: "Terminal", path: "" });
+  const session = await resolveSession(explicitSession);
 
   if (kind === "terminal" || kind === "iterm") {
     const binary = await resolveHerdrBinary();
-    const ttys = await lookupHerdrClientTtys(binary, selectedSession(), PROCESS_LOOKUP_TIMEOUT_MS);
+    const ttys = await lookupHerdrClientTtys(binary, session, PROCESS_LOOKUP_TIMEOUT_MS);
     if (ttys === undefined) return "unavailable";
     if (ttys.length === 0) return "missing";
     const script = kind === "terminal" ? buildTerminalFocusScript(ttys) : buildITermFocusScript(ttys);
@@ -106,6 +126,7 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
       mustClearTitle = true;
       const title = await runHerdrJson<{ changed: boolean; reason: string }>(["terminal", "title", "set", marker], {
         timeout: FAST_FOCUS_TIMEOUT_MS,
+        session,
       });
       if (!title.changed) {
         mustClearTitle = false;
@@ -121,10 +142,10 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
     } finally {
       if (mustClearTitle) {
         try {
-          await runHerdr(["terminal", "title", "clear"], { timeout: FAST_FOCUS_TIMEOUT_MS });
+          await runHerdr(["terminal", "title", "clear"], { timeout: FAST_FOCUS_TIMEOUT_MS, session });
         } catch {
           // Retry generously so the marker title does not stick.
-          await runHerdr(["terminal", "title", "clear"], { timeout: 5_000 }).catch(() => undefined);
+          await runHerdr(["terminal", "title", "clear"], { timeout: 5_000, session }).catch(() => undefined);
         }
       }
     }
@@ -138,7 +159,7 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
       resolveHerdrBinary(),
     ]);
     if (!listing) return "unavailable";
-    const ttys = await lookupHerdrClientTtys(binary, selectedSession(), PROCESS_LOOKUP_TIMEOUT_MS);
+    const ttys = await lookupHerdrClientTtys(binary, session, PROCESS_LOOKUP_TIMEOUT_MS);
     if (ttys === undefined) return "unavailable";
     const paneId = selectWezTermPane(listing, ttys);
     if (!paneId) return "missing";
@@ -153,6 +174,59 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
   }
 
   return "unavailable";
+}
+
+/** A located Client, with its Terminal Window and pane where the terminal reports them. */
+export type LocatedClient = HerdrClient & { windowId?: string; paneId?: string };
+
+export type ClientLocation =
+  | { status: "found"; clients: LocatedClient[]; windowId?: string; listing?: string }
+  | { status: "none" }
+  | { status: "unavailable"; reason: string };
+
+/**
+ * The Clients of `session` whose tty is a Terminal Pane of the configured
+ * Terminal Application, with the WezTerm window of the first. Only these may
+ * be detached: servers, CLI calls, and the remote bridge run on Herdr's own
+ * ptys and never appear in a terminal's pane listing.
+ */
+export async function locateTerminalPaneClients(session: string): Promise<ClientLocation> {
+  const application = selectedApplication();
+  const kind = detectTerminalKind(application || { bundleId: "com.apple.Terminal", name: "Terminal", path: "" });
+  const terminalName = application?.name || "the terminal";
+  if (kind !== "wezterm" && kind !== "terminal" && kind !== "iterm") {
+    return { status: "unavailable", reason: `${terminalName} cannot list its panes` };
+  }
+
+  const binary = await resolveHerdrBinary();
+  const clients = await lookupHerdrClients(binary, session, PROCESS_LOOKUP_TIMEOUT_MS);
+  if (clients === undefined) return { status: "unavailable", reason: "the process list could not be read" };
+  if (clients.length === 0) return { status: "none" };
+  const ttys = clients.map((client) => client.tty);
+
+  let matches: WezTermMatch[] | undefined;
+  let windowId: string | undefined;
+  let listing: string | undefined;
+  if (kind === "wezterm") {
+    const executable = wezTermExecutable(application);
+    listing = executable
+      ? await tryExecCapture(executable, ["cli", "list", "--format", "json"], FAST_FOCUS_TIMEOUT_MS)
+      : undefined;
+    const panes = listing ? selectWezTermPanes(listing, ttys) : undefined;
+    matches = panes?.matches;
+    windowId = panes?.windowId;
+  } else {
+    // Terminal and iTerm report their ttys but no window this launcher can target.
+    const script = kind === "terminal" ? buildTerminalTtyListScript() : buildITermTtyListScript();
+    const output = await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
+    matches = output === undefined ? undefined : parseTtyList(output).map((tty) => ({ tty }));
+  }
+  if (matches === undefined) return { status: "unavailable", reason: `${terminalName} did not list its panes` };
+  const byTty = new Map(matches.map((match) => [match.tty, match]));
+  const inPanes = clients
+    .filter((client) => byTty.has(client.tty))
+    .map((client) => ({ ...client, windowId: byTty.get(client.tty)?.windowId, paneId: byTty.get(client.tty)?.paneId }));
+  return inPanes.length > 0 ? { status: "found", clients: inPanes, windowId, listing } : { status: "none" };
 }
 
 export async function revealFocusedHerdr(): Promise<boolean> {
@@ -177,103 +251,120 @@ async function launchWarp(appTarget: string, command: string): Promise<void> {
   cleanup.unref();
 }
 
-export async function launchHerdrInTerminal(
-  args: string[] = [],
-  options: { includePreferredSession?: boolean } = {},
-): Promise<void> {
+async function wezTermPlacement(executable: string, options: LaunchOptions): Promise<string[]> {
+  if (options.newWindow) return ["--new-window"];
+  if (options.windowId) return ["--window-id", options.windowId];
+  // A caller that already listed the panes passes the listing on, so a Switch
+  // does not spawn a third `wezterm cli list`.
+  const listing =
+    options.wezTermListing ??
+    (await tryExecCapture(executable, ["cli", "list", "--format", "json"], FAST_FOCUS_TIMEOUT_MS));
+  const windowId = listing ? selectWezTermWindow(listing) : undefined;
+  return windowId ? ["--window-id", windowId] : ["--new-window"];
+}
+
+/** A custom launcher places the Client itself, so the extension cannot say where it went. */
+export function hasCustomTerminalLauncher(): boolean {
+  return Boolean(getHerdrPreferences().customTerminalLauncher?.trim());
+}
+
+export async function launchHerdrInTerminal(args: string[] = [], options: LaunchOptions = {}): Promise<LaunchResult> {
   const binary = await resolveHerdrBinary();
   const application = selectedApplication();
   // Launched clients inherit the Raycast process environment, where a leaked
-  // HERDR_SESSION would retarget them, so the session is always named. The
-  // opt-out branches on the option alone: an unset preference is also
-  // undefined and must still produce the flag.
-  const sessionArgs =
-    options.includePreferredSession === false
-      ? args
-      : ["--session", getHerdrPreferences().sessionName?.trim() || "default", ...args];
+  // HERDR_SESSION would retarget them, so the resolved session is always
+  // named. Callers that pass their own `session attach` argv opt out.
+  const sessionArgs = options.includeSession === false ? args : ["--session", await resolveSession(), ...args];
   const command = [binary, ...sessionArgs].map(shellQuote).join(" ");
   const customLauncher = getHerdrPreferences().customTerminalLauncher?.trim();
   if (customLauncher) {
     const [executable, launcherArgs] = expandCustomLauncher(customLauncher, binary, sessionArgs);
     await spawnDetached(executable, launcherArgs);
-    return;
+    return {};
   }
   const kind = detectTerminalKind(application || { bundleId: "com.apple.Terminal", name: "Terminal", path: "" });
 
   if (kind === "terminal") {
     const script = `tell application "Terminal"\nactivate\ndo script ${appleScriptString(command)}\nend tell`;
     await exec("/usr/bin/osascript", ["-e", script]);
-    return;
+    return {};
   }
   if (kind === "iterm") {
-    const script = `tell application "iTerm"
-activate
-if (count windows) > 0 then
+    const placement = options.newWindow
+      ? `set targetWindow to create window with default profile
+set targetSession to current session of targetWindow`
+      : `if (count windows) > 0 then
   set targetWindow to current window
   set targetTab to create tab with default profile targetWindow
   set targetSession to current session of targetTab
 else
   set targetWindow to create window with default profile
   set targetSession to current session of targetWindow
-end if
+end if`;
+    const script = `tell application "iTerm"
+activate
+${placement}
 tell targetSession to write text ${appleScriptString(command)}
 end tell`;
     await exec("/usr/bin/osascript", ["-e", script]);
-    return;
+    return {};
   }
 
   const appTarget = application?.path || application?.name;
   if (!appTarget) {
     await exec("/usr/bin/open", ["-a", "Terminal"]);
-    return;
+    return {};
   }
   if (kind === "ghostty") {
+    const placement = options.newWindow
+      ? "new window with configuration cfg"
+      : `if (count windows) > 0 then
+  new tab in front window with configuration cfg
+else
+  new window with configuration cfg
+end if`;
     const script = `tell application "Ghostty"
 activate
 set cfg to new surface configuration
 set command of cfg to ${appleScriptString(command)}
-if (count windows) > 0 then
-  new tab in front window with configuration cfg
-else
-  new window with configuration cfg
-end if
+${placement}
 return "opened"
 end tell`;
-    if ((await tryExecCapture("/usr/bin/osascript", ["-e", script], 1_500)) === "opened") return;
+    if ((await tryExecCapture("/usr/bin/osascript", ["-e", script], 1_500)) === "opened") return {};
     await exec("/usr/bin/open", ["-na", appTarget, "--args", "-e", binary, ...sessionArgs]);
-    return;
+    return {};
   }
   if (kind === "alacritty") {
     await exec("/usr/bin/open", ["-na", appTarget, "--args", "-e", binary, ...sessionArgs]);
-    return;
+    return {};
   }
   if (kind === "wezterm") {
     const executable = wezTermExecutable(application);
     if (executable) {
-      const listing = await tryExecCapture(executable, ["cli", "list", "--format", "json"], FAST_FOCUS_TIMEOUT_MS);
-      const windowId = listing ? selectWezTermWindow(listing) : undefined;
+      const placement = await wezTermPlacement(executable, options);
       const paneId = await tryExecCapture(
         executable,
-        ["cli", "spawn", ...(windowId ? ["--window-id", windowId] : ["--new-window"]), "--", binary, ...sessionArgs],
+        ["cli", "spawn", ...placement, "--", binary, ...sessionArgs],
         750,
       );
       if (paneId && /^\d+$/.test(paneId)) {
         await bringTerminalToFront();
-        return;
+        return { wezTermPaneId: paneId };
       }
     }
     await exec("/usr/bin/open", ["-na", appTarget, "--args", "start", "--", binary, ...sessionArgs]);
-    return;
+    return {};
   }
   if (kind === "kitty") {
     const kittyExecutable = application?.path ? join(application.path, "Contents", "MacOS", "kitty") : undefined;
     if (kittyExecutable) await spawnDetached(kittyExecutable, [binary, ...sessionArgs]);
     else await exec("/usr/bin/open", ["-na", appTarget, "--args", binary, ...sessionArgs]);
-    return;
+    return {};
   }
   if (kind === "warp") {
     await launchWarp(appTarget, command);
-    return;
+    return {};
   }
   await exec("/usr/bin/open", ["-na", appTarget, "--args", "-e", binary, ...sessionArgs]);
+  return {};
 }

@@ -42,11 +42,31 @@ describe("Raycast UI contracts", () => {
     expect(preference?.data?.map((item) => item.value)).toEqual(["open", "none"]);
   });
 
+  // Attach stays the Enter action by default so the upstream behavior is unchanged.
+  it("offers attach and switch as session Enter actions, defaulting to attach", () => {
+    const manifest = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+      preferences: Array<{ name: string; default?: string; data?: Array<{ value: string }> }>;
+    };
+    const preference = manifest.preferences.find((item) => item.name === "sessionEnterAction");
+    expect(preference?.data?.map((item) => item.value)).toEqual(["attach", "switch"]);
+    expect(preference?.default).toBe("attach");
+  });
+
   it("does not assign Raycast-reserved shared shortcuts", () => {
     for (const [name, shortcut] of Object.entries(shortcuts)) {
       expect(reservedShortcuts, `${name} uses reserved shortcut ${shortcutKey(shortcut)}`).not.toContain(
         shortcutKey(shortcut),
       );
+    }
+  });
+
+  // CONTEXT.md reserves Switch for detach + attach + select, so only Manage
+  // Sessions may title an action that way; elsewhere it opens the picker.
+  it("titles only the real switch action Switch", () => {
+    for (const path of sourceFiles(join(process.cwd(), "src"))) {
+      if (path.endsWith("sessions.tsx") || !path.endsWith(".tsx")) continue;
+      const titles = [...readFileSync(path, "utf8").matchAll(/"([^"\n]*\bSwitch\b[^"\n]*)"/g)].map((match) => match[1]);
+      expect(titles, `${path} titles a non-switch action Switch`).toEqual([]);
     }
   });
 
