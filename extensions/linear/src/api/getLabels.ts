@@ -1,7 +1,7 @@
-import { IssueLabel } from "@linear/sdk";
+import { IssueLabel, LinearClient } from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
 
-import { getLinearClient } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 
 import { getPaginated, PageInfo } from "./pagination";
 
@@ -20,14 +20,14 @@ function getPageLimits() {
 
 export type LabelResult = Pick<IssueLabel, "id" | "name" | "color">;
 
-export async function getLabels(teamId?: string) {
+export async function getLabels(teamId?: string, client?: LinearClient) {
   if (!teamId) {
     return [];
   }
 
   const { pageSize, pageLimit } = getPageLimits();
 
-  const { graphQLClient } = getLinearClient();
+  const { graphQLClient } = resolveClient(client);
 
   return getPaginated(
     async (cursor) =>

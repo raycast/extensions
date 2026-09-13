@@ -1,7 +1,3 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { serializeComment } from "./commentUtils";
 import {
   client,
@@ -12,6 +8,7 @@ import {
   resolveProject,
   tryGet,
 } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 interface Input {
   body: string;
@@ -24,9 +21,11 @@ interface Input {
   milestoneId?: string;
   statusUpdateId?: string;
   statusUpdateType?: "project" | "initiative";
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   const linearClient = client();
 
   if ((input.id || input.parentId) && input.statusUpdateType) {

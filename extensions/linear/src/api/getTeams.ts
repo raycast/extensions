@@ -1,7 +1,7 @@
-import { Cycle, Organization, Team } from "@linear/sdk";
+import { Cycle, LinearClient, Organization, Team } from "@linear/sdk";
 import { sortBy } from "lodash";
 
-import { getLinearClient } from "./linearClient";
+import { resolveClient } from "./linearClient";
 
 export type TeamResult = Pick<
   Team,
@@ -28,8 +28,8 @@ export type TeamsAndOrgResult = {
   organization: OrganizationResult;
 };
 
-export async function getTeams(query: string = "") {
-  const { graphQLClient, linearClient } = getLinearClient();
+export async function getTeams(query: string = "", client?: LinearClient) {
+  const { graphQLClient, linearClient } = resolveClient(client);
 
   const me = await linearClient.viewer;
 

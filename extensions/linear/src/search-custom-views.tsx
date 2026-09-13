@@ -3,6 +3,7 @@ import { useEffect } from "react";
 
 import IssueListItem from "./components/IssueListItem";
 import View from "./components/View";
+import { WorkspaceListDropdown } from "./components/WorkspaceDropdown";
 import { getIcon } from "./helpers/icons";
 import { useCustomViews, useCustomViewIssues } from "./hooks/useCustomViews";
 import useMe from "./hooks/useMe";
@@ -50,7 +51,11 @@ function CustomViewList() {
   }, [customViewsError]);
 
   return (
-    <List isLoading={isLoadingCustomViews} searchBarPlaceholder="Search custom views">
+    <List
+      isLoading={isLoadingCustomViews}
+      searchBarPlaceholder="Search custom views"
+      searchBarAccessory={<WorkspaceListDropdown />}
+    >
       {customViews?.map((view) => {
         const accessories: List.Item.Accessory[] = [];
 

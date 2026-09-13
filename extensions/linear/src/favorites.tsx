@@ -6,6 +6,8 @@ import { ComponentProps, ReactElement } from "react";
 import { getFavorites } from "./api/favorites";
 import OpenInLinear from "./components/OpenInLinear";
 import View from "./components/View";
+import { useWorkspaces } from "./components/WorkspaceContext";
+import { WorkspaceListDropdown } from "./components/WorkspaceDropdown";
 import { formatCycle } from "./helpers/cycles";
 import { getIcon } from "./helpers/icons";
 import { getInitiativeIcon } from "./helpers/initiatives";
@@ -15,7 +17,14 @@ import { getUserIcon } from "./helpers/users";
 import { CustomViewIssues } from "./search-custom-views";
 
 function Favorites() {
-  const { data, isLoading } = useCachedPromise(getFavorites);
+  const { workspaceKey } = useWorkspaces();
+  const { data, isLoading } = useCachedPromise(
+    (key: string) => {
+      void key;
+      return getFavorites();
+    },
+    [workspaceKey],
+  );
 
   const favorites = data?.favorites ?? [];
   const urlKey = data?.organization?.urlKey;
@@ -23,7 +32,7 @@ function Favorites() {
   const baseLinearUrl = `https://linear.app/${urlKey}`;
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarAccessory={<WorkspaceListDropdown />}>
       {favorites.map(
         ({ id, type, customView, cycle, document, issue, label, project, initiative, user, updatedAt }) => {
           let props: Pick<List.Item.Props, "icon" | "title"> | null = null;

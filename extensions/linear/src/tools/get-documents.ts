@@ -1,8 +1,9 @@
-import { Document, Initiative, Project, User } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
+import { Document, Initiative, LinearClient, Project, User } from "@linear/sdk";
 import { sortBy } from "lodash";
 
-import { getLinearClient, linear } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
+
+import { resolveToolClient, withToolAuth } from "./resolveToolWorkspace";
 
 export type DocumentResult = Pick<
   Document,
@@ -49,8 +50,12 @@ const docFragment = `
 
 export type DocumentEntity = { projectId: string } | { initiativeId: string };
 
-export async function getDocuments(query: string = "", entity: DocumentEntity = { projectId: "" }) {
-  const { graphQLClient } = getLinearClient();
+export async function getDocuments(
+  query: string = "",
+  entity: DocumentEntity = { projectId: "" },
+  client?: LinearClient,
+) {
+  const { graphQLClient } = resolveClient(client);
 
   const searchProject = "projectId" in entity && entity.projectId.length > 0;
   const searchInitiative = "initiativeId" in entity && entity.initiativeId.length > 0;
@@ -86,19 +91,25 @@ export async function getDocuments(query: string = "", entity: DocumentEntity = 
   return { docs, hasMoreDocs };
 }
 
-export default withAccessToken(linear)(async (inputs: {
+type Input = {
   /** Search query to filter documents */
   query?: string;
   /** Restrict the documents/PRDs returned to a specific initiative */
   initiativeId?: string;
   /** Restrict the documents/PRDs returned to a specific project */
   projectId?: string;
-}) => {
+
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
+};
+
+export default withToolAuth(async (inputs: Input) => {
+  const client = await resolveToolClient(inputs.workspaceId);
   let entity: DocumentEntity = { projectId: "" };
   if (inputs.projectId) {
     entity = { projectId: inputs.projectId };
   } else if (inputs.initiativeId) {
     entity = { initiativeId: inputs.initiativeId };
   }
-  return (await getDocuments(inputs.query || undefined, entity)).docs;
+  return (await getDocuments(inputs.query || undefined, entity, client)).docs;
 });

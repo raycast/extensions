@@ -1,7 +1,4 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import {
   afterDate,
@@ -14,6 +11,7 @@ import {
   resolveTeam,
   resolveUser,
 } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 type ProjectFilter = NonNullable<Parameters<LinearClient["projects"]>[0]>["filter"];
 type Field =
@@ -56,10 +54,12 @@ interface Input extends PageInput {
   includeMembers?: boolean;
   includeArchived?: boolean;
   fields?: Field[];
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 }
 const defaultFields: Field[] = ["id", "name", "summary", "description", "url", "priority", "createdAt", "updatedAt"];
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   const initiative = input.initiative ? await resolveInitiative(input.initiative) : undefined;
   const team = input.team ? await resolveTeam(input.team) : undefined;
   const member = input.member ? await resolveUser(input.member) : undefined;

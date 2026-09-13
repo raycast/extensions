@@ -1,4 +1,6 @@
-import { getLinearClient } from "../api/linearClient";
+import { LinearClient } from "@linear/sdk";
+
+import { resolveClient } from "../api/linearClient";
 
 import { IssueFragment, IssueResult } from "./getIssues";
 
@@ -18,8 +20,8 @@ export type CreateIssuePayload = {
   parentId?: string;
 };
 
-export async function createIssue(payload: CreateIssuePayload) {
-  const { graphQLClient } = getLinearClient();
+export async function createIssue(payload: CreateIssuePayload, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const title = payload.title.replace(/"/g, "\\$&");
   const description = payload.description?.replace(/\n/g, "\\n")?.replace(/"/g, "\\$&");
@@ -89,8 +91,8 @@ type CreateSubIssuePayload = {
   stateId?: string;
 };
 
-export async function createSubIssue(payload: CreateSubIssuePayload) {
-  const { graphQLClient } = getLinearClient();
+export async function createSubIssue(payload: CreateSubIssuePayload, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const title = payload.title.replace(/"/g, "\\$&");
   const description = payload.description?.replace(/\n/g, "\\n").replace(/"/g, "\\$&");

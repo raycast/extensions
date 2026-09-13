@@ -1,9 +1,6 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { issueInput, IssueUpdateInput, serializeIssue, setIssueRelations, setIssueReleases } from "./issueUtils";
 import { applyPatch, client, ContentPatch, resolveIssue } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   id?: string;
@@ -54,9 +51,11 @@ type Input = {
   removeBlocks?: string[];
   removeBlockedBy?: string[];
   removeRelatedTo?: string[];
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   if (input.description !== undefined && input.patch) throw new Error("Pass description or patch, not both.");
   const existing = input.id ? await resolveIssue(input.id) : undefined;
   if (!existing && (!input.title || !input.team))

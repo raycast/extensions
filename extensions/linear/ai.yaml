@@ -14,6 +14,9 @@ instructions: |
   - For `list-comments` and new threads with `save-comment`, provide exactly one parent. Use `parentId` for replies and `id` for edits.
   - "Close" an issue by moving it to a completed status. Only use `delete-issue` when the user explicitly asks to delete or trash it.
   - "Inbox" means Linear notifications.
+  - If the user names a workspace, or more than one workspace might be connected, call `get-workspaces` once, then pass its `workspaceId` value to EVERY subsequent tool call in the conversation, and state in your answer which workspace you acted in.
+  - Never guess or construct `workspaceId` values; only use values returned by `get-workspaces`. If the named workspace is not in the list, say so and list the available ones.
+  - If no workspace is mentioned and only one is connected, omit `workspaceId`.
 
 evals:
   # Existing core behavior and routing boundaries
@@ -2134,3 +2137,88 @@ evals:
           arguments:
             type: project
             id: project-update-2
+
+  # Multi-workspace routing (PR #30314)
+  - input: "@linear list my workspaces"
+    mocks:
+      get-workspaces:
+        - workspaceId: org-a:user-1
+          name: ConceptM
+          urlKey: conceptm
+          userEmail: alex@example.com
+          isActive: true
+        - workspaceId: org-b:user-2
+          name: flox
+          urlKey: floxdotdev
+          userEmail: sam@example.com
+          isActive: false
+    expected:
+      - callsTool: get-workspaces
+
+  - input: '@linear create an issue titled "Test multi" in the flox workspace for team ENG'
+    usedAsExample: false
+    mocks:
+      get-workspaces:
+        - workspaceId: org-a:user-1
+          name: ConceptM
+          urlKey: conceptm
+          userEmail: alex@example.com
+          isActive: true
+        - workspaceId: org-b:user-2
+          name: flox
+          urlKey: floxdotdev
+          userEmail: sam@example.com
+          isActive: false
+      get-teams:
+        - id: team-eng
+          name: Engineering
+          key: ENG
+      create-issue:
+        success: true
+        issue:
+          id: issue-1
+          identifier: ENG-1
+          title: Test multi
+          url: https://linear.app/floxdotdev/issue/ENG-1
+      save-issue:
+        success: true
+        issue:
+          id: issue-1
+          identifier: ENG-1
+          title: Test multi
+          url: https://linear.app/floxdotdev/issue/ENG-1
+    expected:
+      - callsTool: get-workspaces
+      - or:
+          - callsTool:
+              name: save-issue
+              arguments:
+                workspaceId: org-b:user-2
+          - callsTool:
+              name: create-issue
+              arguments:
+                workspaceId: org-b:user-2
+
+  - input: "@linear list open issues assigned to me in the flox workspace"
+    usedAsExample: false
+    mocks:
+      get-workspaces:
+        - workspaceId: org-a:user-1
+          name: ConceptM
+          urlKey: conceptm
+          userEmail: alex@example.com
+          isActive: true
+        - workspaceId: org-b:user-2
+          name: flox
+          urlKey: floxdotdev
+          userEmail: sam@example.com
+          isActive: false
+      list-issues:
+        nodes: []
+    expected:
+      - callsTool: get-workspaces
+      - callsTool:
+          name: list-issues
+          arguments:
+            assignee: me
+            workspaceId: org-b:user-2

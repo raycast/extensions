@@ -1,7 +1,9 @@
-import { getLinearClient } from "./linearClient";
+import { LinearClient } from "@linear/sdk";
 
-export async function deleteDocument(documentId: string) {
-  const { graphQLClient } = getLinearClient();
+import { resolveClient } from "./linearClient";
+
+export async function deleteDocument(documentId: string, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const { data } = await graphQLClient.rawRequest<{ documentDelete: { success: boolean } }, Record<string, unknown>>(
     `
@@ -21,8 +23,8 @@ export type DocUpdatePayload = Partial<{
   initiativeId: string;
 }>;
 
-export async function updateDocument(documentId: string, payload: DocUpdatePayload) {
-  const { graphQLClient } = getLinearClient();
+export async function updateDocument(documentId: string, payload: DocUpdatePayload, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   let docUpdateInput = `projectId: ${payload.projectId ? `"${payload.projectId}"` : null}`;
   docUpdateInput += `, initiativeId: ${payload.initiativeId ? `"${payload.initiativeId}"` : null}`;

@@ -1,9 +1,7 @@
 import { InitiativeUpdateHealthType, ProjectUpdateHealthType } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { client, resolveInitiative, resolveProject } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   type: "project" | "initiative";
@@ -13,9 +11,11 @@ type Input = {
   body?: string;
   health?: "onTrack" | "atRisk" | "offTrack";
   isDiffHidden?: boolean;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   if (input.id) {
     const result =
       input.type === "project"

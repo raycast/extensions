@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import IssueListItem from "./components/IssueListItem";
 import View from "./components/View";
+import { WorkspaceListDropdown } from "./components/WorkspaceDropdown";
 import useMe from "./hooks/useMe";
 import usePriorities from "./hooks/usePriorities";
 import useSearchIssues from "./hooks/useSearchIssues";
@@ -24,6 +25,7 @@ function SearchIssues() {
       throttle
       searchBarPlaceholder="Globally search issues across projects"
       pagination={pagination}
+      searchBarAccessory={<WorkspaceListDropdown />}
     >
       <List.Section title="Updated Recently" subtitle={numberOfIssues}>
         {data?.map((issue) => (

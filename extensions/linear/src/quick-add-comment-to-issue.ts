@@ -8,11 +8,21 @@ import {
   showHUD,
   Keyboard,
 } from "@raycast/api";
-import { withAccessToken } from "@raycast/utils";
 
-import { getLinearClient, linear } from "./api/linearClient";
+import { getLinearClient } from "./api/linearClient";
+import { withWorkspaceAuth } from "./api/withWorkspaceAuth";
+import { resolveWorkspaceArgument, updateWorkspaceChoicesSubtitle } from "./helpers/workspaceArgument";
 
-const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) => {
+const command = async (props: {
+  arguments: Arguments.QuickAddCommentToIssue;
+  launchContext?: { refreshSubtitle?: boolean };
+}) => {
+  await updateWorkspaceChoicesSubtitle(); // awaited: the no-view process exits when the command resolves — a fire-and-forget write would be killed
+
+  if (props.launchContext?.refreshSubtitle) {
+    return; // background refresh launch — subtitle updated above, do nothing else
+  }
+
   const { issueId, comment } = props.arguments;
 
   const toast = await showToast({
@@ -20,10 +30,18 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
     title: `Adding comment to ${issueId}`,
   });
 
+  const resolved = await resolveWorkspaceArgument(props.arguments.workspace);
+  if (!resolved.ok) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Workspace not matched";
+    toast.message = resolved.message;
+    return;
+  }
+
   const preferences = getPreferenceValues<Preferences.QuickAddCommentToIssue>();
 
   try {
-    const { linearClient } = getLinearClient();
+    const linearClient = resolved.client ?? getLinearClient().linearClient;
 
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
@@ -75,4 +93,4 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
   }
 };
 
-export default withAccessToken(linear)(command);
+export default withWorkspaceAuth(command);

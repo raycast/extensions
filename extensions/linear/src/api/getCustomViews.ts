@@ -1,7 +1,7 @@
-import { CustomView, Team } from "@linear/sdk";
+import { CustomView, LinearClient, Team } from "@linear/sdk";
 
 import { IssueFragment, IssueResult } from "../api/getIssues";
-import { getLinearClient } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 import { getPaginated, PageInfo } from "../api/pagination";
 
 export type CustomViewResult = Pick<CustomView, "id" | "name" | "icon" | "color" | "shared"> & {
@@ -9,8 +9,8 @@ export type CustomViewResult = Pick<CustomView, "id" | "name" | "icon" | "color"
   team?: Pick<Team, "id" | "name" | "key">;
 };
 
-export async function getCustomViews(): Promise<CustomViewResult[]> {
-  const { graphQLClient } = getLinearClient();
+export async function getCustomViews(client?: LinearClient): Promise<CustomViewResult[]> {
+  const { graphQLClient } = resolveClient(client);
 
   const allViews = await getPaginated(
     async (cursor) =>
@@ -52,8 +52,8 @@ export async function getCustomViews(): Promise<CustomViewResult[]> {
   return allViews.filter((v) => v.modelName === "Issue");
 }
 
-export async function getCustomViewIssues(viewId: string): Promise<IssueResult[]> {
-  const { graphQLClient } = getLinearClient();
+export async function getCustomViewIssues(viewId: string, client?: LinearClient): Promise<IssueResult[]> {
+  const { graphQLClient } = resolveClient(client);
 
   return getPaginated(
     async (cursor) =>

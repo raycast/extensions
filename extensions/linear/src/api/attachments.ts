@@ -1,9 +1,9 @@
 import { readFile } from "fs/promises";
 import path from "path";
 
-import { UploadFile } from "@linear/sdk";
+import { LinearClient, UploadFile } from "@linear/sdk";
 
-import { getLinearClient } from "./linearClient";
+import { resolveClient } from "./linearClient";
 
 const DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
@@ -58,8 +58,8 @@ export type UploadedFile = {
   name: string;
 };
 
-export async function uploadFile(filePath: string): Promise<UploadedFile> {
-  const { graphQLClient } = getLinearClient();
+export async function uploadFile(filePath: string, client?: LinearClient): Promise<UploadedFile> {
+  const { graphQLClient } = resolveClient(client);
 
   const buffer = await readFile(filePath);
   const contentType = getContentType(filePath);
@@ -118,14 +118,14 @@ function escapeMarkdownLabel(value: string) {
   return value.replaceAll("\\", "\\\\").replaceAll("[", "\\[").replaceAll("]", "\\]");
 }
 
-export async function appendFileAttachments(markdown: string, attachmentPaths?: string[]) {
+export async function appendFileAttachments(markdown: string, attachmentPaths?: string[], client?: LinearClient) {
   if (!attachmentPaths?.length) {
     return markdown;
   }
 
   const files: UploadedFile[] = [];
   for (const filePath of attachmentPaths) {
-    files.push(await uploadFile(filePath));
+    files.push(await uploadFile(filePath, client));
   }
   const attachments = files.map(({ assetUrl, contentType, name }) => {
     const label = escapeMarkdownLabel(name);
@@ -140,9 +140,9 @@ export type CreateAttachmentPayload = {
   url: string;
 };
 
-export async function createAttachment(payload: CreateAttachmentPayload) {
-  const { linearClient } = getLinearClient();
-  const file = await uploadFile(payload.url);
+export async function createAttachment(payload: CreateAttachmentPayload, client?: LinearClient) {
+  const { linearClient } = resolveClient(client);
+  const file = await uploadFile(payload.url, client);
   const result = await linearClient.createAttachment({
     issueId: payload.issueId,
     title: file.name,
@@ -152,8 +152,8 @@ export async function createAttachment(payload: CreateAttachmentPayload) {
   return { success: result.success, id: result.attachmentId };
 }
 
-export async function attachLinkUrl(payload: CreateAttachmentPayload) {
-  const { linearClient } = getLinearClient();
+export async function attachLinkUrl(payload: CreateAttachmentPayload, client?: LinearClient) {
+  const { linearClient } = resolveClient(client);
   const result = await linearClient.attachmentLinkURL(payload.issueId, payload.url);
 
   return { success: result.success, id: result.attachmentId };
