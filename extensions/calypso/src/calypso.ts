@@ -408,6 +408,30 @@ async function* streamOnce(
   yield { done: true };
 }
 
+/**
+ * A rag_search result can be sitting in `messages` from an earlier LOCAL turn —
+ * conversations persist their whole transcript, and a later turn can fall back to a
+ * cloud endpoint (e.g. the local rig went to sleep mid-conversation). This returns a
+ * copy with any such tool result redacted, for use as the WIRE payload only: the
+ * caller keeps sending the original `messages` to streamOnce's other callers and
+ * returning it as `finalMessages`, so persisted history still has the real content
+ * for a later turn that goes back to a local endpoint.
+ */
+function redactRagForCloud(messages: ChatMessage[]): ChatMessage[] {
+  const ragCallIds = new Set<string>();
+  for (const m of messages) {
+    for (const tc of m.tool_calls ?? []) {
+      if (tc.function.name === "rag_search") ragCallIds.add(tc.id);
+    }
+  }
+  if (ragCallIds.size === 0) return messages;
+  return messages.map((m) =>
+    m.role === "tool" && m.tool_call_id && ragCallIds.has(m.tool_call_id)
+      ? { ...m, content: "[redacted: private knowledge-base content withheld from a cloud fallback endpoint]" }
+      : m,
+  );
+}
+
 /** Nudges the model to check the private knowledge base before reaching for the open web. */
 const TOOL_GUIDANCE =
   "You have tools: rag_search (the user's private knowledge base), web_search (live web via " +
@@ -463,24 +487,6 @@ export async function* runConversation(
   const ctx = toolContext(p);
   const messages: ChatMessage[] = history.map((m) => ({ ...m }));
 
-  // A rag_search result from an EARLIER turn (answered locally) can be sitting in
-  // `history` already — e.g. the local rig went to sleep between turns and this turn
-  // fell back to a cloud endpoint. Redact it before it goes out, not just new calls
-  // made from this point on: `messages` is what actually gets serialized and sent.
-  if (ep.isCloud) {
-    const ragCallIds = new Set<string>();
-    for (const m of messages) {
-      for (const tc of m.tool_calls ?? []) {
-        if (tc.function.name === "rag_search") ragCallIds.add(tc.id);
-      }
-    }
-    for (const m of messages) {
-      if (m.role === "tool" && m.tool_call_id && ragCallIds.has(m.tool_call_id)) {
-        m.content = "[redacted: private knowledge-base content withheld from a cloud fallback endpoint]";
-      }
-    }
-  }
-
   // Prepend guidance without clobbering a user-set system prompt. Idempotent: if a
   // caller persists `finalMessages` (see StreamEvent) and resends it next turn, the
   // system message already carries this text — appending it again every turn would
@@ -498,8 +504,13 @@ export async function* runConversation(
 
   for (let round = 0; ; round++) {
     const pending: PendingCall[] = [];
+    // The wire payload is redacted for a cloud endpoint; `messages` itself stays
+    // the real, unredacted transcript — it accumulates rounds and is returned as
+    // `finalMessages` for the caller to persist, so a later LOCAL turn still has
+    // the actual rag_search content to ground follow-ups.
+    const wire = ep.isCloud ? redactRagForCloud(messages) : messages;
     try {
-      for await (const ev of streamOnce(ep, p, messages, true, pending, signal)) {
+      for await (const ev of streamOnce(ep, p, wire, true, pending, signal)) {
         if (ev.done) break;
         yield ev;
       }
@@ -507,7 +518,7 @@ export async function* runConversation(
       // A server built without --jinja rejects `tools`; degrade instead of dying.
       if (round === 0) {
         yield { toolResult: `tools unavailable (${(e as Error).message.slice(0, 80)}) — answering without them` };
-        yield* streamMessages(ep, p, history, signal);
+        yield* streamMessages(ep, p, wire, signal);
         return;
       }
       throw e;
