@@ -2,6 +2,7 @@ import { Clipboard, environment } from "@raycast/api";
 import path from "node:path";
 import os from "node:os";
 import fs from "node:fs/promises";
+import { showFailureToast } from "@raycast/utils";
 
 const folderName = "posters";
 
@@ -13,7 +14,8 @@ export async function downloadImage(url: string, downloadPath: string) {
     await fs.writeFile(targetPath, buffer);
     return targetPath;
   } catch (error) {
-    throw new Error(`Could not download file. Reason: ${error}`);
+    const message = error instanceof Error ? error.message : String(error);
+    showFailureToast(message, { title: `Could not download file` });
   }
 }
 
@@ -22,9 +24,10 @@ export async function copyImage(url: string) {
   const downloadPath = path.join(environment.supportPath, folderName);
   const filePath = await downloadImage(url, downloadPath);
   try {
-    const fileContent: Clipboard.Content = { file: filePath };
+    const fileContent: Clipboard.Content = { file: filePath ?? "" };
     await Clipboard.copy(fileContent);
   } catch (error) {
-    throw new Error(`Could not copy file '${filePath}. Reason: ${error}'`);
+    const message = error instanceof Error ? error.message : String(error);
+    showFailureToast(message, { title: `Could not copy file '${filePath}'` });
   }
 }

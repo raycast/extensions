@@ -13,4 +13,4 @@ Search for TV Shows and get individual episode ratings
 
 ## Issues
 
-If any issues persist, feel free to [contact me](https://x.com/muhammadrizo_y).
+If you encounter any issues, feel free to [contact me](https://x.com/muhammadrizo_y).

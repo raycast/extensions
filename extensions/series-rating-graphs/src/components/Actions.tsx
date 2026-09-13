@@ -14,8 +14,9 @@ import { SearchResult } from "../types";
 import ShowDetail from "./ShowDetail";
 import { useEffect, useState } from "react";
 import { copyImage, downloadImage } from "../utils/image";
+import { isMacOS } from "../utils/helpers";
 
-const preferences = getPreferenceValues();
+const preferences = getPreferenceValues<Preferences>();
 const tmdbAccessToken = preferences.tmdbAccessToken;
 
 function useTmdbId(imdbId: string) {
@@ -54,17 +55,11 @@ const handleNoTmdbAccessTokenAlert = async () => {
   await confirmAlert(options);
 };
 
-export function ActionShowDetails({ show }: { show: SearchResult }) {
-  return (
-    <Action.Push
-      title="Show Details"
-      icon={Icon.AppWindow}
-      target={<ShowDetail show={show} originalTitle={show.originalTitle} />}
-    />
-  );
+export function ShowDetailsAction({ show }: { show: SearchResult }) {
+  return <Action.Push title="Show Details" icon={Icon.Sidebar} target={<ShowDetail show={show} />} />;
 }
 
-export function ActionOpenSeriesGraphPage({
+export function OpenSeriesGraphPageAction({
   imdbId,
   shortcut,
 }: {
@@ -90,7 +85,7 @@ export function ActionOpenSeriesGraphPage({
   );
 }
 
-export function ActionOpenImdbPage({ imdbId, shortcut }: { imdbId: string; shortcut: Keyboard.Shortcut | undefined }) {
+export function OpenImdbPageAction({ imdbId, shortcut }: { imdbId: string; shortcut: Keyboard.Shortcut | undefined }) {
   return (
     <Action.OpenInBrowser
       title="Open IMDb Page"
@@ -101,7 +96,7 @@ export function ActionOpenImdbPage({ imdbId, shortcut }: { imdbId: string; short
   );
 }
 
-export function ActionOpenTmdbPage({ imdbId, shortcut }: { imdbId: string; shortcut: Keyboard.Shortcut | undefined }) {
+export function OpenTmdbPageAction({ imdbId, shortcut }: { imdbId: string; shortcut: Keyboard.Shortcut | undefined }) {
   const tmdbId = useTmdbId(imdbId);
 
   return tmdbAccessToken ? (
@@ -121,7 +116,7 @@ export function ActionOpenTmdbPage({ imdbId, shortcut }: { imdbId: string; short
   );
 }
 
-export function ActionPrevPage({
+export function PrevPageAction({
   tablePageIndex,
   setTablePageIndex,
 }: {
@@ -141,7 +136,7 @@ export function ActionPrevPage({
   );
 }
 
-export function ActionNextPage({
+export function NextPageAction({
   tablePageIndex,
   setTablePageIndex,
 }: {
@@ -161,7 +156,7 @@ export function ActionNextPage({
   );
 }
 
-export function ActionCopyPoster({ posterUrl }: { posterUrl: string }) {
+export function CopyPosterAction({ posterUrl }: { posterUrl: string }) {
   return (
     <Action
       title="Copy Poster"
@@ -173,15 +168,11 @@ export function ActionCopyPoster({ posterUrl }: { posterUrl: string }) {
         });
         try {
           await copyImage(posterUrl);
-          (() => {
-            toast.title = "Poster copied to clipboard";
-            toast.style = Toast.Style.Success;
-          })();
+          toast.title = "Poster copied to clipboard";
+          toast.style = Toast.Style.Success;
         } catch {
-          (() => {
-            toast.title = "Failed to copy poster";
-            toast.style = Toast.Style.Failure;
-          })();
+          toast.title = "Failed to copy poster";
+          toast.style = Toast.Style.Failure;
         }
       }}
       shortcut={Keyboard.Shortcut.Common.Copy}
@@ -189,8 +180,7 @@ export function ActionCopyPoster({ posterUrl }: { posterUrl: string }) {
   );
 }
 
-export function ActionDownloadPoster({ posterUrl }: { posterUrl: string }) {
-  const preferences = getPreferenceValues<Preferences>();
+export function DownloadPosterAction({ posterUrl }: { posterUrl: string }) {
   const downloadPath = preferences.downloadPath;
   const showInFinderAfterDownload = preferences.showInFinderAfterDownload;
 
@@ -204,39 +194,31 @@ export function ActionDownloadPoster({ posterUrl }: { posterUrl: string }) {
           style: Toast.Style.Animated,
         });
         try {
-          const filePath = await downloadImage(posterUrl, downloadPath);
-          (() => {
-            toast.title = `Poster downloaded to ${downloadPath}`;
-            toast.style = Toast.Style.Success;
-          })();
-          if (showInFinderAfterDownload) await showInFinder(filePath);
+          const filePath = await downloadImage(posterUrl, downloadPath ?? "");
+          toast.title = `Poster downloaded to ${downloadPath}`;
+          toast.style = Toast.Style.Success;
+          toast.primaryAction = {
+            title: `Show in ${isMacOS ? "Finder" : "File Explorer"}`,
+            onAction: () => showInFinder(filePath ?? ""),
+            shortcut: Keyboard.Shortcut.Common.OpenWith,
+          };
+          if (showInFinderAfterDownload) await showInFinder(filePath ?? "");
         } catch {
-          (() => {
-            toast.title = "Failed to download poster";
-            toast.style = Toast.Style.Failure;
-          })();
+          toast.title = "Failed to download poster";
+          toast.style = Toast.Style.Failure;
         }
       }}
-      shortcut={{
-        macOS: { modifiers: ["cmd"], key: "s" },
-        Windows: { modifiers: ["ctrl"], key: "s" },
-      }}
+      shortcut={Keyboard.Shortcut.Common.Save}
     />
   );
 }
 
-export function ActionToggleLayout({
-  layout,
-  setLayout,
-}: {
-  layout: string;
-  setLayout: React.Dispatch<React.SetStateAction<string>>;
-}) {
+export function ToggleLayoutAction({ layout, onToggleLayout }: { layout: string; onToggleLayout: () => void }) {
   return (
     <Action
-      title={layout === "grid" ? "Switch to List View" : "Switch to Grid View"}
+      title="Toggle Layout"
       icon={layout === "grid" ? Icon.AppWindowList : Icon.AppWindowGrid3x3}
-      onAction={() => setLayout(layout === "grid" ? "list" : "grid")}
+      onAction={onToggleLayout}
       shortcut={{
         macOS: { modifiers: ["cmd"], key: "l" },
         Windows: { modifiers: ["ctrl"], key: "l" },
@@ -245,16 +227,13 @@ export function ActionToggleLayout({
   );
 }
 
-export function ActionReload({ revalidate }: { revalidate: () => void }) {
+export function ReloadAction({ revalidate }: { revalidate: () => void }) {
   return (
     <Action
       title="Reload"
       icon={Icon.ArrowClockwise}
       onAction={() => revalidate()}
-      shortcut={{
-        macOS: { modifiers: ["cmd"], key: "r" },
-        Windows: { modifiers: ["ctrl"], key: "r" },
-      }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
     />
   );
 }
