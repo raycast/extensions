@@ -9,6 +9,7 @@ import {
   connectionHandoffCode,
   handoffFromExecution,
   newlyCreatedConnection,
+  oauthClientDisplayName,
   validatedIntegrationUrl,
   type IntegrationWithAuth,
   type OAuthClientSummary,
@@ -390,7 +391,7 @@ export function ConnectionSetupForm({
                     <Form.Dropdown.Item
                       key={`${c.owner}/${c.slug}`}
                       value={`${c.owner}/${c.slug}`}
-                      title={`${c.slug} · ${c.owner === "org" ? "Workspace" : "Personal"}`}
+                      title={`${oauthClientDisplayName(c.slug)} · ${c.owner === "org" ? "Workspace" : "Personal"}`}
                       icon={Icon.Key}
                     />
                   ))}

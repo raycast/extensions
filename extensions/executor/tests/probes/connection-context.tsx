@@ -80,6 +80,7 @@ stub("lib/integrations", {
   useDisplayIntegrations: () => ({ data, isLoading: !data && !loadError, error: loadError, revalidate() {} }),
 });
 stub("lib/connection-actions", {
+  oauthClientDisplayName: (slug: string) => slug,
   connectionHandoffCode() {},
   handoffFromExecution() {},
   newlyCreatedConnection() {},

@@ -13,6 +13,13 @@ export interface OAuthClientSummary {
     | { kind: "first_party"; integrations?: string[] | null; allowedScopes?: string[] };
 }
 
+/** Match Executor's OAuth app display labels; keep the original slug for authorization. */
+export function oauthClientDisplayName(slug: string): string {
+  const bare = slug.startsWith("first-party:") ? slug.slice("first-party:".length) : slug;
+  const text = bare.replace(/[-_]/g, " ").trim();
+  return text.length > 0 ? text.charAt(0).toUpperCase() + text.slice(1) : slug;
+}
+
 export interface OAuthStartResult {
   status: "connected" | "redirect";
   authorizationUrl?: string;

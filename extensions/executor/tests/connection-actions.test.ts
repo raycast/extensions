@@ -6,6 +6,7 @@ import {
   integrationDetailUrl,
   needsReconnect,
   newlyCreatedConnection,
+  oauthClientDisplayName,
   validatedIntegrationUrl,
 } from "../src/lib/connection-actions";
 import type { Connection } from "../src/lib/types";
@@ -34,6 +35,12 @@ const integration = {
 };
 
 describe("connection management boundaries", () => {
+  test("OAuth app labels match Executor without changing identifiers", () => {
+    expect(oauthClientDisplayName("google")).toBe("Google");
+    expect(oauthClientDisplayName("first-party:google")).toBe("Google");
+    expect(oauthClientDisplayName("team_app-prod")).toBe("Team app prod");
+    expect(oauthClientDisplayName("MTA")).toBe("MTA");
+  });
   test("reconnect is driven by confirmed health or missing scopes, never token expiry alone", () => {
     expect(needsReconnect(connection({ expiresAt: 1 }))).toBe(false);
     expect(needsReconnect(connection({ lastHealth: { status: "expired", checkedAt: 1 } }))).toBe(true);
