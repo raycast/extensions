@@ -13,7 +13,7 @@ let launched: unknown;
 const node = (type: unknown, props: Record<string, unknown>) => ({ type, props });
 mock.module("react/jsx-runtime", () => ({ jsx: node, jsxs: node }));
 mock.module("@raycast/api", () => ({
-  Action: Object.assign("Action", { OpenInBrowser: "Browser" }),
+  Action: Object.assign("Action", { OpenInBrowser: "Browser", Push: "Push" }),
   ActionPanel: "Actions",
   List: Object.assign("List", { EmptyView: "Empty" }),
   Detail: "Detail",
@@ -44,6 +44,7 @@ mock.module(source, () => ({
   },
   currentWorkspace: () => profile,
 }));
+mock.module(new URL("../../src/workspaces.tsx", import.meta.url).pathname, () => ({ default: "WorkspacePicker" }));
 const { withWorkspace, WorkspaceAction } = await import("../../src/components/workspace-command");
 const Child = () => null;
 const Command = withWorkspace(Child);
@@ -82,7 +83,10 @@ assert.equal(render().type, "Detail");
 profile = { id: "configured", name: "QA Workspace" };
 const switchAction = WorkspaceAction() as unknown as ReturnType<typeof node>;
 assert.equal(switchAction.props.title, "Switch Workspace");
-await (switchAction.props.onAction as () => Promise<void>)();
-assert.deepEqual(launched, { name: "workspaces", type: "user", context: { returnCommand: "search-tools" } });
+assert.equal(switchAction.type, "Push");
+assert.equal(switchAction.props.onAction, undefined);
+const picker = switchAction.props.target as ReturnType<typeof node>;
+assert.equal(picker.type, "WorkspacePicker");
+assert.deepEqual(picker.props, { isRootView: false, launchContext: { returnCommand: "search-tools" } });
 profile = undefined;
 assert.equal((WorkspaceAction() as unknown as ReturnType<typeof node>).props.title, "Switch Workspace");

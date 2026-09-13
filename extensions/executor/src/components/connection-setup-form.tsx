@@ -1,11 +1,10 @@
-import { listDisplayIntegrations } from "../lib/integration-display";
 import { Action, ActionPanel, Form, Icon, Keyboard, Toast, open, showToast, useNavigation } from "@raycast/api";
 import { usePromise, showFailureToast } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { defaultOwner, execute, listConnections, request, webUrl } from "../lib/client";
 import { currentWorkspace, runInWorkspace, workspaceTitle } from "../lib/workspaces";
 import { connectionLabel, titleCase } from "../lib/format";
-import { integrationIcon } from "../lib/integrations";
+import { integrationIcon, useDisplayIntegrations } from "../lib/integrations";
 import {
   connectionHandoffCode,
   handoffFromExecution,
@@ -46,7 +45,7 @@ export function ConnectionSetupForm({
   const { pop } = useNavigation();
   const [workspace] = useState(currentWorkspace);
   const scoped = <T,>(fn: () => Promise<T>) => runInWorkspace(workspace!, fn);
-  const { data, isLoading, error, revalidate } = usePromise(() => scoped(listDisplayIntegrations));
+  const { data, isLoading, error, revalidate } = useDisplayIntegrations();
   const integrations = [...((data ?? []) as IntegrationWithAuth[])].sort((a, b) => a.name.localeCompare(b.name));
   const directory = new Map(integrations.map((item) => [item.slug, item]));
   const [integration, setIntegration] = useState(defaults.integration ?? initialIntegration ?? "");

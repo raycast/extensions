@@ -12,7 +12,6 @@ const stub = (path: string, exports: object) => {
 const node = (type: unknown, props: Record<string, unknown>) => ({ type, props });
 let hooks: unknown[] = [];
 let cursor = 0;
-let promiseIndex = 0;
 let data: unknown[] | undefined;
 let loadError: Error | undefined;
 const submissions: unknown[] = [];
@@ -51,10 +50,7 @@ mock.module("@raycast/api", () => ({
   showToast() {},
 }));
 mock.module("@raycast/utils", () => ({
-  usePromise: () =>
-    promiseIndex++ === 0
-      ? { data, isLoading: !data && !loadError, error: loadError, revalidate() {} }
-      : { data: undefined, isLoading: false },
+  usePromise: () => ({ data: undefined, isLoading: false }),
   showFailureToast(error: unknown) {
     throw error;
   },
@@ -66,7 +62,6 @@ stub("lib/client", {
   webUrl() {},
   execute() {},
 });
-stub("lib/integration-display", { listDisplayIntegrations() {} });
 stub("lib/workspaces", {
   currentWorkspace: () => workspace,
   workspaceTitle: (title: string) => title,
@@ -76,7 +71,10 @@ stub("lib/workspaces", {
   },
 });
 stub("lib/format", { connectionLabel: () => "Test Connection", titleCase: (s: string) => s });
-stub("lib/integrations", { integrationIcon: () => "provider-icon" });
+stub("lib/integrations", {
+  integrationIcon: () => "provider-icon",
+  useDisplayIntegrations: () => ({ data, isLoading: !data && !loadError, error: loadError, revalidate() {} }),
+});
 stub("lib/connection-actions", {
   connectionHandoffCode() {},
   handoffFromExecution() {},
@@ -114,7 +112,6 @@ function elements(tree: unknown): Element[] {
 }
 function render(props: object = {}) {
   cursor = 0;
-  promiseIndex = 0;
   return elements(ConnectionSetupForm(props));
 }
 function field(tree: Element[], id: string) {

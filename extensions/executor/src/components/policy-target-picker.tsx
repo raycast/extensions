@@ -1,9 +1,13 @@
-import { listDisplayIntegrations } from "../lib/integration-display";
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, type ReactElement } from "react";
 import { accountCacheKey, listConnections, listTools } from "../lib/client";
-import { integrationIcon, integrationLabel, useIntegrationDirectory } from "../lib/integrations";
+import {
+  integrationIcon,
+  integrationLabel,
+  useIntegrationDirectory,
+  useDisplayIntegrations,
+} from "../lib/integrations";
 import { connectionPresentation, summarize, toolLabel } from "../lib/format";
 import { integrationPolicyPattern, exactPolicyPattern } from "../lib/policies";
 import { workspaceTitle } from "../lib/workspaces";
@@ -14,18 +18,7 @@ import { connectedTools } from "../lib/tool-availability";
 type Props = { policyForm: (pattern?: string) => ReactElement };
 
 function IntegrationPicker({ policyForm }: Props) {
-  const {
-    data = [],
-    isLoading,
-    error,
-    revalidate,
-  } = useCachedPromise(
-    async (_scope: string) => {
-      void _scope;
-      return listDisplayIntegrations();
-    },
-    [accountCacheKey()],
-  );
+  const { data = [], isLoading, error, revalidate } = useDisplayIntegrations();
   const directory = new Map(data.map((item) => [item.slug, item]));
   return (
     <List

@@ -6,7 +6,6 @@ import {
   Color,
   Form,
   Icon,
-  LaunchProps,
   LaunchType,
   List,
   Toast,
@@ -22,6 +21,7 @@ import {
   Workspace,
   activateWorkspace,
   activeWorkspaceId,
+  currentWorkspace,
   listWorkspaces,
   normalizeServerUrl,
   removeWorkspace,
@@ -307,11 +307,11 @@ function EditWorkspaceForm({ workspace, onSaved }: { workspace: Workspace; onSav
   );
 }
 
-export default function ManageWorkspaces(
-  { launchContext }: LaunchProps<{ launchContext?: WorkspaceLaunchContext }> = {} as LaunchProps<{
-    launchContext?: WorkspaceLaunchContext;
-  }>,
-) {
+export default function ManageWorkspaces({
+  launchContext,
+  isRootView = true,
+}: { launchContext?: WorkspaceLaunchContext; isRootView?: boolean } = {}) {
+  const { pop } = useNavigation();
   const deleting = useRef(new Set<string>());
   const verifying = useRef(new Set<string>());
   const switching = useRef(false);
@@ -327,13 +327,19 @@ export default function ManageWorkspaces(
   );
 
   const workspaces = data?.workspaces ?? [];
-  const activeId = data?.activeId ?? workspaces[0]?.id;
+  const commandWorkspaceId = !isRootView ? currentWorkspace()?.id : undefined;
+  const activeId = commandWorkspaceId ?? data?.activeId ?? workspaces[0]?.id;
   const returnCommand = launchContext?.returnCommand;
 
   async function onSwitch(workspace: Workspace) {
     if (switching.current) return;
     switching.current = true;
     try {
+      if (!isRootView) {
+        if (workspace.id === commandWorkspaceId) pop();
+        else await openWorkspace(workspace, returnCommand);
+        return;
+      }
       await activateWorkspace(workspace.id);
       await revalidate();
       await showToast({ style: Toast.Style.Success, title: `Switched to ${workspace.name}` });
@@ -399,7 +405,7 @@ export default function ManageWorkspaces(
 
   const addWorkspace = (
     <AddWorkspaceForm
-      isRootView={launchContext?.intent === "add"}
+      isRootView={isRootView && launchContext?.intent === "add"}
       workspaces={workspaces}
       returnCommand={returnCommand}
       onSaved={() => revalidate()}
@@ -409,7 +415,11 @@ export default function ManageWorkspaces(
   if (launchContext?.intent === "add" && data) return addWorkspace;
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search workspaces by name, organization, or server">
+    <List
+      isLoading={isLoading}
+      navigationTitle={isRootView ? undefined : "Switch Workspace"}
+      searchBarPlaceholder="Search workspaces by name, organization, or server"
+    >
       <List.EmptyView
         icon={error ? Icon.Warning : Icon.Building}
         title={error ? "Could Not Load Workspaces" : "No Workspaces Added"}
@@ -449,7 +459,9 @@ export default function ManageWorkspaces(
                     title={isActive ? `Open ${workspace.name}` : `Switch to ${workspace.name}`}
                     shortcut={isActive ? Keyboard.Shortcut.Common.Open : undefined}
                     icon={isActive ? Icon.CheckCircle : Icon.ArrowRight}
-                    onAction={() => (isActive ? openWorkspace(workspace, returnCommand) : onSwitch(workspace))}
+                    onAction={() =>
+                      isRootView && isActive ? openWorkspace(workspace, returnCommand) : onSwitch(workspace)
+                    }
                   />
                   {!isActive ? (
                     <Action

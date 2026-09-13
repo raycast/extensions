@@ -12,6 +12,7 @@ import {
   environment,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import ManageWorkspaces from "../workspaces";
 import type { ComponentType } from "react";
 import {
   bindCommandWorkspace,
@@ -39,17 +40,11 @@ export function WorkspaceMetadata() {
 
 export function WorkspaceAction() {
   return (
-    <Action
+    <Action.Push
       title="Switch Workspace"
       icon={Icon.Building}
       shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-      onAction={() =>
-        launchCommand({
-          name: "workspaces",
-          type: LaunchType.UserInitiated,
-          context: { returnCommand: environment.commandName },
-        })
-      }
+      target={<ManageWorkspaces isRootView={false} launchContext={{ returnCommand: environment.commandName }} />}
     />
   );
 }
