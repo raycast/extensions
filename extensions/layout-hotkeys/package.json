@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "layout-hotkeys",
+  "title": "Layout Hotkeys",
+  "description": "Jump straight to a specific keyboard layout with a hotkey, instead of cycling through them.",
+  "icon": "extension-icon.png",
+  "author": "pavelkh",
+  "categories": ["System"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "slot-1",
+      "title": "Switch to Layout 1",
+      "description": "Switch to the input source assigned to slot 1. Bind a global hotkey to this command.",
+      "mode": "no-view"
+    },
+    {
+      "name": "slot-2",
+      "title": "Switch to Layout 2",
+      "description": "Switch to the input source assigned to slot 2. Bind a global hotkey to this command.",
+      "mode": "no-view"
+    },
+    {
+      "name": "slot-3",
+      "title": "Switch to Layout 3",
+      "description": "Switch to the input source assigned to slot 3. Bind a global hotkey to this command.",
+      "mode": "no-view"
+    },
+    {
+      "name": "slot-4",
+      "title": "Switch to Layout 4",
+      "description": "Switch to the input source assigned to slot 4. Bind a global hotkey to this command.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-1",
+      "title": "Convert Selection to Layout 1",
+      "description": "Rewrite the selected text as if it had been typed with the layout assigned to slot 1.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-2",
+      "title": "Convert Selection to Layout 2",
+      "description": "Rewrite the selected text as if it had been typed with the layout assigned to slot 2.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-3",
+      "title": "Convert Selection to Layout 3",
+      "description": "Rewrite the selected text as if it had been typed with the layout assigned to slot 3.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-4",
+      "title": "Convert Selection to Layout 4",
+      "description": "Rewrite the selected text as if it had been typed with the layout assigned to slot 4.",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert",
+      "title": "Convert Selection",
+      "description": "Preview the selected text rewritten into each of your layouts and pick one.",
+      "mode": "view"
+    },
+    {
+      "name": "configure",
+      "title": "Configure Layout Slots",
+      "description": "Choose which input source each Switch to Layout hotkey selects.",
+      "mode": "view"
+    },
+    {
+      "name": "cycle",
+      "title": "Cycle Input Source",
+      "description": "Switch to the next enabled input source.",
+      "mode": "no-view"
+    },
+    {
+      "name": "current",
+      "title": "Show Current Input Source",
+      "description": "Show which input source is currently active.",
+      "mode": "no-view"
+    },
+    {
+      "name": "index",
+      "title": "Switch Input Source",
+      "description": "Browse enabled input sources and switch to one.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showHud",
+      "title": "Feedback",
+      "label": "Show a HUD after switching",
+      "description": "Off by default — the HUD keeps Raycast on screen after the switch and makes it feel slow.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "whenNothingSelected",
+      "title": "When Nothing Is Selected",
+      "description": "What the Convert Selection commands do when you have not selected any text.",
+      "type": "dropdown",
+      "required": false,
+      "default": "wholeField",
+      "data": [
+        {
+          "title": "Convert the whole focused field",
+          "value": "wholeField"
+        },
+        {
+          "title": "Do nothing",
+          "value": "nothing"
+        }
+      ]
+    },
+    {
+      "name": "switchAfterConvert",
+      "title": "After Converting",
+      "label": "Switch to the target layout",
+      "description": "After rewriting text into another layout, make that layout active so you can keep typing in it.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
