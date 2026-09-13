@@ -66,10 +66,11 @@ export default function Command() {
     : undefined;
 
   const title = !isLoading && prayerState.menuPrayer ? menuTitle : undefined;
+  const icon = preferences.iconColor === "black" ? "mosque01-black.svg" : "mosque01.svg";
 
   return (
     <MenuBarExtra
-      icon={preferences.showIcon ? "mosque01.svg" : undefined}
+      icon={preferences.showIcon ? icon : undefined}
       title={title}
       tooltip={`${prayerState.current?.label} since ${prayerState.current?.value}, Next: ${prayerState.nextPrayer?.label} at ${prayerState.nextPrayer?.value}`}
       isLoading={isLoading || (!title && !preferences.showIcon)}

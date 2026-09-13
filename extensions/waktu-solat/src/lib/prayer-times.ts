@@ -67,12 +67,16 @@ interface SolatApiData {
 async function fetchSolatData(zoneId = DEFAULT_ZONE_ID): Promise<SolatApiData | undefined> {
   console.log("Fetching prayer times for", zoneId);
   const url = `https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=year&zone=${zoneId}`;
-  return fetchResource(url, "Unable to load prayer times", async (response) => (await response.json()) as SolatApiData);
+  return fetchResource({
+    url,
+    errorTitle: "Unable to load prayer times",
+    parseResponse: async (response) => (await response.json()) as SolatApiData,
+  });
 }
 
 async function loadSolatData(zoneId = DEFAULT_ZONE_ID, shouldRefresh = false) {
   const cacheKey = `prayer-time-${zoneId}-${new Date().getFullYear()}`;
-  return loadCached(cacheKey, () => fetchSolatData(zoneId), shouldRefresh);
+  return loadCached({ key: cacheKey, load: () => fetchSolatData(zoneId), shouldRefresh });
 }
 
 function getHumanDifferent(time: Date) {

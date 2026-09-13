@@ -9,9 +9,6 @@ View Malaysia prayer times from [JAKIM](https://www.e-solat.gov.my/) directly in
 - View today's prayer times for Malaysian zones.
 - Choose a zone from the prayer-times command.
 - Display the current and next prayer in the menu bar.
-- Configure when the menu-bar item appears before or after a prayer.
-- Customize the menu-bar title with `$name` and `$time` placeholders.
-- Cache prayer times locally for faster subsequent launches.
 
 ## Usage
 
@@ -26,6 +23,7 @@ The selected zone is shared between the command and the menu-bar item. The menu-
 Open **Raycast Settings → Extensions → Waktu Solat** to configure the menu bar:
 
 - **Show icon in menu bar** — Show or hide the mosque icon.
+- **Menu bar icon color** — Choose a white or black mosque icon.
 - **Menubar template** — Customize the title using `$name` for the prayer name and `$time` for its time. The default is `$name at $time`.
 - **Offset before prayer time** — Number of minutes during which the next prayer is shown before it starts. The default is 30 minutes.
 - **Offset after prayer time** — Number of minutes during which the current prayer remains shown after it starts. The default is 30 minutes.

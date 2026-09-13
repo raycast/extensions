@@ -1,12 +1,14 @@
 import { Action, ActionPanel, Color, List, LocalStorage } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { loadCached } from "./lib/loaders";
 import { loadStoredPrayerTime, loadTodaySolat, PrayerTime, PrayerTimeItem } from "./lib/prayer-times";
 import { extractZones, Zone } from "./lib/zones";
 
 function Zones(props: { onChange: (z: Zone) => void }) {
-  const { data: zones, isLoading } = usePromise(() => loadCached("zones", extractZones));
+  const { data: zones, isLoading } = usePromise(() =>
+    loadCached({ key: "zones", load: extractZones, isValid: (zones) => zones.length > 0 }),
+  );
 
   return (
     <List.Dropdown
@@ -64,31 +66,45 @@ function PrayerTimes() {
   const [selectedZoneId, setSelectedZoneId] = useState<string>();
   const [prayerTime, setPrayerTime] = useState<PrayerTime>();
   const [isChangingZone, setIsChangingZone] = useState(false);
+  const requestId = useRef(0);
 
   const zoneId = selectedZoneId ?? initialData?.zoneId;
-  const currentPrayerTime = selectedZoneId ? prayerTime : initialData?.prayerTime;
+  const currentPrayerTime = prayerTime ?? initialData?.prayerTime;
 
   async function onZoneChange(z: Zone) {
-    setSelectedZoneId(z.id);
+    const currentRequestId = ++requestId.current;
     setIsChangingZone(true);
 
     try {
+      const result = await loadTodaySolat(z.id);
+      if (!result || currentRequestId !== requestId.current) return;
+
       await LocalStorage.setItem("zone", z.id);
-      setPrayerTime(await loadTodaySolat(z.id));
+      if (currentRequestId !== requestId.current) return;
+
+      setSelectedZoneId(z.id);
+      setPrayerTime(result);
     } finally {
-      setIsChangingZone(false);
+      if (currentRequestId === requestId.current) {
+        setIsChangingZone(false);
+      }
     }
   }
 
   async function refreshPrayerTime() {
     if (!zoneId) return;
-    setSelectedZoneId(zoneId);
+    const currentRequestId = ++requestId.current;
     setIsChangingZone(true);
 
     try {
-      setPrayerTime(await loadTodaySolat(zoneId, true));
+      const result = await loadTodaySolat(zoneId, true);
+      if (result && currentRequestId === requestId.current) {
+        setPrayerTime(result);
+      }
     } finally {
-      setIsChangingZone(false);
+      if (currentRequestId === requestId.current) {
+        setIsChangingZone(false);
+      }
     }
   }
 

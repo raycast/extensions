@@ -2,11 +2,15 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 
 export const DEFAULT_ZONE_ID = "WLY01";
 
-export async function fetchResource<T>(
-  url: string,
-  errorTitle: string,
-  parseResponse: (response: Response) => Promise<T>,
-): Promise<T | undefined> {
+export async function fetchResource<T>({
+  url,
+  errorTitle,
+  parseResponse,
+}: {
+  url: string;
+  errorTitle: string;
+  parseResponse: (response: Response) => Promise<T>;
+}): Promise<T | undefined> {
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -26,16 +30,24 @@ export async function fetchResource<T>(
   }
 }
 
-export async function loadCached<T>(
-  key: string,
-  load: () => Promise<T | undefined>,
+export async function loadCached<T>({
+  key,
+  load,
   shouldRefresh = false,
-): Promise<T | undefined> {
+  isValid = () => true,
+}: {
+  key: string;
+  load: () => Promise<T | undefined>;
+  shouldRefresh?: boolean;
+  isValid?: (value: T) => boolean;
+}): Promise<T | undefined> {
   const raw = await LocalStorage.getItem<string>(key);
 
   if (raw && !shouldRefresh) {
     try {
-      return JSON.parse(raw) as T;
+      const cached = JSON.parse(raw) as T;
+      if (isValid(cached)) return cached;
+      await LocalStorage.removeItem(key);
     } catch (error) {
       console.error(`Unable to parse cached data for ${key}`, error);
       await LocalStorage.removeItem(key);
@@ -43,7 +55,7 @@ export async function loadCached<T>(
   }
 
   const result = await load();
-  if (result) {
+  if (result !== undefined && isValid(result)) {
     await LocalStorage.setItem(key, JSON.stringify(result));
     return result;
   }

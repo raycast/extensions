@@ -37,6 +37,24 @@
       "label": "Show icon in menu bar"
     },
     {
+      "name": "iconColor",
+      "description": "Choose the color of the mosque icon in the menu bar.",
+      "type": "dropdown",
+      "required": false,
+      "default": "white",
+      "data": [
+        {
+          "title": "White",
+          "value": "white"
+        },
+        {
+          "title": "Black",
+          "value": "black"
+        }
+      ],
+      "title": "Menu bar icon color"
+    },
+    {
       "name": "menuTemplate",
       "description": "Use $name for the prayer name and $time for the prayer time.",
       "type": "textfield",
