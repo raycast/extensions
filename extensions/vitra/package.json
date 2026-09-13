@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vitra",
+  "title": "Vitra",
+  "description": "See where your day stands — readiness, sleep and recovery from your Oura ring, read locally from the Vitra desktop app.",
+  "icon": "vitra.png",
+  "author": "pedro_pt_thomaz",
+  "categories": [
+    "Data"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "today",
+      "title": "Vitra Today",
+      "subtitle": "Vitra",
+      "description": "Today's readiness, sleep and recovery, read from Vitra's local snapshot.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.8"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
