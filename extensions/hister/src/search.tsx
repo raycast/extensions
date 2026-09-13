@@ -3,6 +3,14 @@ import { getFavicon, usePromise } from "@raycast/utils";
 import { useRef, useState } from "react";
 import { Preferences, searchHister } from "./hister";
 
+function safeHostname(urlStr: string): string {
+  try {
+    return new URL(urlStr).hostname;
+  } catch {
+    return "";
+  }
+}
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const abortable = useRef<AbortController>(null);
@@ -36,7 +44,7 @@ export default function Command() {
         const time = doc.updated || doc.added;
         const date = time ? new Date(time * 1000) : undefined;
         const title = doc.title.trim() || doc.url;
-        const domain = doc.domain || (doc.url ? new URL(doc.url).hostname : "");
+        const domain = doc.domain || safeHostname(doc.url);
 
         return (
           <List.Item

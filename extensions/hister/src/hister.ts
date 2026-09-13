@@ -20,11 +20,15 @@ export interface Preferences {
 }
 
 let cachedBinary: string | null = null;
+const isWindows = process.platform === "win32";
+const binName = isWindows ? "hister.exe" : "hister";
 
 function isExecutable(filePath: string): boolean {
   try {
     const stats = fs.statSync(filePath);
-    return stats.isFile() && (stats.mode & 0o111) !== 0;
+    if (!stats.isFile()) return false;
+    // On Windows, file presence suffices; on POSIX check execute bits
+    return isWindows ? true : (stats.mode & 0o111) !== 0;
   } catch {
     return false;
   }
@@ -45,18 +49,34 @@ export function getBinaryPath(): string {
   }
 
   const home = os.homedir();
-  const candidates = [
-    path.join(home, "go", "bin", "hister"),
-    path.join(home, ".local", "bin", "hister"),
-    path.join(home, ".cargo", "bin", "hister"),
-    "/opt/homebrew/bin/hister",
-    "/usr/local/bin/hister",
-    "/usr/bin/hister",
-  ];
+  const candidates = isWindows
+    ? [
+        path.join(home, "go", "bin", binName),
+        path.join(process.env.LOCALAPPDATA ?? "", "Programs", "hister", binName),
+        path.join(process.env.ProgramFiles ?? "C:\\Program Files", "hister", binName),
+      ]
+    : [
+        path.join(home, "go", "bin", binName),
+        path.join(home, ".local", "bin", binName),
+        path.join(home, ".cargo", "bin", binName),
+        "/opt/homebrew/bin/hister",
+        "/usr/local/bin/hister",
+        "/usr/bin/hister",
+      ];
 
   for (const candidate of candidates) {
-    if (isExecutable(candidate)) {
+    if (candidate && isExecutable(candidate)) {
       return (cachedBinary = candidate);
+    }
+  }
+
+  // Cross-platform system PATH scan
+  const pathDirs = (process.env.PATH ?? "").split(path.delimiter);
+  for (const dir of pathDirs) {
+    if (!dir) continue;
+    const fullPath = path.join(dir, binName);
+    if (isExecutable(fullPath)) {
+      return (cachedBinary = fullPath);
     }
   }
 
@@ -95,7 +115,7 @@ export function searchHister(
       if (err) {
         if (signal?.aborted) return resolve([]);
         const raw = `${stderr || err.message}`;
-        if (raw.includes("connection refused")) {
+        if (raw.includes("connection refused") || raw.includes("connectex")) {
           return reject(new Error("Hister daemon is not running. Start it with 'hister listen'."));
         }
         return reject(new Error(raw));
