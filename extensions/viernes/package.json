@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "viernes",
+  "title": "Viernes",
+  "description": "Gestiona tareas en viernes",
+  "icon": "SCL CIRCULO.png",
+  "author": "carlos_polanco",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+  {
+    "name": "vikunjaUrl",
+    "type": "textfield",
+    "required": true,
+    "title": "Vikunja URL",
+    "description": "URL de tu servidor de Vikunja",
+    "default": "https://viernes.searchclub.lat"
+  },
+  {
+    "name": "vikunjaToken",
+    "type": "password",
+    "required": true,
+    "title": "Vikunja API Token",
+    "description": "Token de API de Vikunja"
+  }
+],
+  "commands": [
+  {
+    "name": "agregar-tarea",
+    "title": "Agregar Tarea",
+    "description": "Agrega una tarea",
+    "mode": "view"
+  },
+  {
+    "name": "configurar-favoritos",
+    "title": "Configurar Favoritos",
+    "description": "Selecciona tus proyectos favoritos",
+    "mode": "view"
+  }
+],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+
+}
