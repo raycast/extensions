@@ -1,0 +1,91 @@
+{
+  "data": {
+    "viewer": {
+      "login": "alice",
+      "name": "Alice Smith",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/1?v=4",
+      "organizations": { "nodes": [{ "login": "acme" }] },
+      "followers": { "totalCount": 2611 },
+      "following": { "totalCount": 74 },
+      "repositories": {
+        "totalCount": 3,
+        "nodes": [
+          { "stargazerCount": 283 },
+          { "stargazerCount": 217 },
+          { "stargazerCount": 11 }
+        ]
+      }
+    },
+    "prs": {
+      "issueCount": 4,
+      "nodes": [
+        { "number": 55, "title": "Fix the floating tab bar", "url": "https://github.com/alice/webapp/pull/55",
+          "createdAt": "2026-08-17T17:49:40Z", "isDraft": false,
+          "author": { "login": "bob", "__typename": "User" },
+          "repository": { "nameWithOwner": "alice/webapp" } },
+        { "number": 56, "title": "Bump lodash from 4.17.20 to 4.17.21", "url": "https://github.com/alice/webapp/pull/56",
+          "createdAt": "2026-08-17T10:00:00Z", "isDraft": false,
+          "author": { "login": "dependabot", "__typename": "Bot" },
+          "repository": { "nameWithOwner": "alice/webapp" } },
+        { "number": 57, "title": "Work in progress", "url": "https://github.com/alice/webapp/pull/57",
+          "createdAt": "2026-08-16T10:00:00Z", "isDraft": true,
+          "author": { "login": "carol", "__typename": "User" },
+          "repository": { "nameWithOwner": "alice/webapp" } },
+        { "number": 204, "title": "Refactor auth middleware", "url": "https://github.com/acme/backend/pull/204",
+          "createdAt": "2026-08-18T07:00:00Z", "isDraft": false,
+          "author": { "login": "dave", "__typename": "User" },
+          "repository": { "nameWithOwner": "acme/backend" } }
+      ]
+    },
+    "issues": {
+      "issueCount": 2,
+      "nodes": [
+        { "number": 12, "title": "Crash on cold start", "url": "https://github.com/alice/webapp/issues/12",
+          "createdAt": "2026-08-16T09:00:00Z",
+          "author": { "login": "erin", "__typename": "User" },
+          "repository": { "nameWithOwner": "alice/webapp" } },
+        { "number": 13, "title": "Opened by a deleted account", "url": "https://github.com/alice/webapp/issues/13",
+          "createdAt": "2026-08-15T09:00:00Z",
+          "author": null,
+          "repository": { "nameWithOwner": "alice/webapp" } }
+      ]
+    },
+    "review": {
+      "issueCount": 1,
+      "nodes": [
+        { "number": 204, "title": "Refactor auth middleware", "url": "https://github.com/acme/backend/pull/204",
+          "createdAt": "2026-08-18T07:00:00Z", "isDraft": false,
+          "author": { "login": "dave", "__typename": "User" },
+          "repository": { "nameWithOwner": "acme/backend" } }
+      ]
+    },
+    "changesRequested": {
+      "issueCount": 1,
+      "nodes": [
+        { "number": 88, "title": "Address review feedback", "url": "https://github.com/alice/webapp/pull/88",
+          "createdAt": "2026-08-18T08:00:00Z", "isDraft": false,
+          "author": { "login": "alice", "__typename": "User" },
+          "repository": { "nameWithOwner": "alice/webapp" } }
+      ]
+    },
+    "myPullRequests": {
+      "issueCount": 2,
+      "nodes": [
+        { "number": 88, "title": "Address review feedback", "url": "https://github.com/alice/webapp/pull/88",
+          "createdAt": "2026-08-18T08:00:00Z", "isDraft": false,
+          "author": { "login": "alice", "__typename": "User" },
+          "repository": { "nameWithOwner": "alice/webapp" } },
+        { "number": 91, "title": "Add dark mode", "url": "https://github.com/other/project/pull/91",
+          "createdAt": "2026-08-18T09:00:00Z", "isDraft": false,
+          "author": { "login": "alice", "__typename": "User" },
+          "repository": { "nameWithOwner": "other/project" } }
+      ]
+    },
+    "rateLimit": {
+      "limit": 5000,
+      "remaining": 4911,
+      "resetAt": "2026-08-18T13:00:00Z",
+      "cost": 1
+    }
+  }
+}
