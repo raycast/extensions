@@ -1,6 +1,6 @@
 # Create Barcode Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-13
 
 - Generate EAN-13, ITF, NW-7 (Codabar), CODE39 and CODE128 barcodes straight from the search bar
 - List every symbology that can encode the current input so you can compare them side by side
