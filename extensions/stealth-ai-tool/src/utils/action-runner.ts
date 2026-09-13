@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 
 import { execSync } from "child_process";
-import { LLMService } from "./llm-service";
+import { LLMConfigError, LLMService } from "./llm-service";
 
 interface ActionConfig {
   title: string;
@@ -49,7 +49,10 @@ const DEFAULT_CONFIGS: Record<string, ActionConfig> = {
 
 // In-memory lock to prevent concurrent executions
 let isRunning = false;
-let lastRunTime = 0;
+// Debounce is tracked per action so a hotkey double-fire is swallowed without
+// one action blocking a different one.
+const lastRunTimes = new Map<string, number>();
+const DEBOUNCE_MS = 3000;
 
 export async function runStealthAction(
   actionId: string,
@@ -64,16 +67,17 @@ export async function runStealthAction(
     return;
   }
 
-  // Debounce: don't run if last run was less than 3 seconds ago
-  if (now - lastRunTime < 3000) {
+  // Debounce: don't re-run the same action within the debounce window
+  const lastRun = lastRunTimes.get(actionId) ?? 0;
+  if (now - lastRun < DEBOUNCE_MS) {
     console.log(
-      `[DEBOUNCE] Last run was ${now - lastRunTime}ms ago. Aborting.`,
+      `[DEBOUNCE] ${actionId} last ran ${now - lastRun}ms ago. Aborting.`,
     );
     return;
   }
 
   isRunning = true;
-  lastRunTime = now;
+  lastRunTimes.set(actionId, now);
 
   try {
     await runStealthActionInternal(actionId, forceEditor);
@@ -83,24 +87,22 @@ export async function runStealthAction(
   }
 }
 
+/** Surfaces a configuration problem with a one-press route to the fix. */
 async function showModelErrorToast(errorMsg: string) {
-  const isModelError = /model/i.test(errorMsg);
   const toast = await showToast({
     style: Toast.Style.Failure,
-    title: isModelError ? "Model Error" : "AI Call Failed",
-    message: isModelError ? "Run 'Configure AI Model' to fix this" : errorMsg,
+    title: "AI Not Configured",
+    message: errorMsg,
   });
-  if (isModelError) {
-    toast.primaryAction = {
-      title: "Configure AI Model",
-      onAction: () => {
-        launchCommand({
-          name: "configure-model",
-          type: LaunchType.UserInitiated,
-        });
-      },
-    };
-  }
+  toast.primaryAction = {
+    title: "Configure AI Model",
+    onAction: () => {
+      launchCommand({
+        name: "configure-model",
+        type: LaunchType.UserInitiated,
+      });
+    },
+  };
   return toast;
 }
 
@@ -209,21 +211,6 @@ async function runStealthActionInternal(
     console.log(`[DEBUG] environment.canAccess(AI) failed with error: ${e}`);
   }
 
-  try {
-    console.log("AI.Model Keys: " + Object.keys(AI.Model).join(", "));
-    const mapping: Record<string, string> = {};
-    for (const key of Object.keys(AI.Model)) {
-      try {
-        mapping[key] = (AI.Model as Record<string, string>)[key];
-      } catch (_e) {
-        // ignore
-      }
-    }
-    console.log("[DEBUG] AI.Model Mapping:", JSON.stringify(mapping, null, 2));
-  } catch (e) {
-    console.log(`[DEBUG] AI.Model logging failed: ${e}`);
-  }
-
   // 3. Get selected text using Raycast's native cross-platform API
   let selectedText = "";
   let hasRealSelection = false;
@@ -275,7 +262,9 @@ async function runStealthActionInternal(
     // 5. Final AI access check
     const currentProvider = await LLMService.getProvider();
     if (!canAccessAI && currentProvider === "raycast") {
-      throw new Error("Raycast AI is required. Please upgrade to Raycast Pro.");
+      throw new LLMConfigError(
+        "Raycast AI is required. Upgrade to Raycast Pro, or pick another provider.",
+      );
     }
 
     // 6. Call AI (using new LLM Service)
@@ -291,14 +280,9 @@ async function runStealthActionInternal(
 
       const errorMsg = (e as Error).message;
 
-      // Check for model-related errors
-      if (/model/i.test(errorMsg)) {
-        await showModelErrorToast(errorMsg);
-        return;
-      }
-
-      // Special handling for Raycast AI limitation
-      if (errorMsg.includes("Raycast AI is not supported")) {
+      // Misconfiguration (missing key/model, unreachable local server) gets a
+      // toast that links straight to the configuration command.
+      if (e instanceof LLMConfigError) {
         await showModelErrorToast(errorMsg);
         return;
       }
@@ -354,8 +338,8 @@ async function runStealthActionInternal(
     toast.title = "Done!";
   } catch (error) {
     console.error("Error:", error);
-    const errorMsg = String(error);
-    if (/model/i.test(errorMsg)) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    if (error instanceof LLMConfigError) {
       await showModelErrorToast(errorMsg);
     } else {
       toast.style = Toast.Style.Failure;
