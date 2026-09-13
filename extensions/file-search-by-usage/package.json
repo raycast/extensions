@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "file-search-by-usage",
+  "title": "File Search by Usage",
+  "description": "Search local and cloud files in one place, ranked by usage.",
+  "icon": "command-icon.png",
+  "author": "raycast_file_search",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Files and Folders",
+      "description": "Search files and folders across local and cloud storage, ranked by usage.",
+      "mode": "view"
+    },
+    {
+      "name": "index-shortcuts",
+      "title": "Index Google Drive",
+      "description": "Index Google Drive shortcuts and shared-folder contents that Spotlight cannot find.",
+      "mode": "no-view"
+    },
+    {
+      "name": "populate-recents",
+      "title": "Populate from Recent Files",
+      "description": "Seed the search cache with recently opened documents and nearby files, without changing recorded usage.",
+      "mode": "no-view"
+    },
+    {
+      "name": "delete-data",
+      "title": "Delete All Data and Cache",
+      "description": "Delete usage history, pins, searches, learned shortcuts, and cached indexes without touching your files.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showHidden",
+      "title": "Listing",
+      "label": "Show hidden files",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Show dot-prefixed files and folders by default. Toggle Hidden Files changes visibility for the current command run."
+    },
+    {
+      "name": "showScores",
+      "title": "Listing",
+      "label": "Show usage scores",
+      "description": "Show each item's usage score in the list. Useful for understanding why results are ordered the way they are.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1",
+    "proper-lockfile": "^4.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/react": "^19.0.10",
+    "@types/react-test-renderer": "19.0.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react-test-renderer": "19.0.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "harness": "node_modules/.bin/esbuild harness/rank-harness.ts --bundle --platform=node --format=cjs --external:esbuild --external:react --external:react-test-renderer --outfile=harness/.build/rank-harness.cjs --log-level=warning && node harness/.build/rank-harness.cjs",
+    "harness:live": "npm run harness -- --live"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
