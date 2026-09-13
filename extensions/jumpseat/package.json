@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jumpseat",
+  "title": "Jumpseat",
+  "description": "See your and your friends' upcoming Jumpseat flights at a glance.",
+  "icon": "extension-icon.png",
+  "author": "chefski",
+  "access": "public",
+  "license": "MIT",
+  "version": "0.1.0",
+  "categories": [
+    "Applications"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "upcoming-flights",
+      "title": "Upcoming Flights",
+      "description": "See your upcoming flights and travel details",
+      "mode": "view"
+    },
+    {
+      "name": "friends-upcoming-flights",
+      "title": "Friends' Upcoming Flights",
+      "description": "See upcoming flights shared by your Jumpseat friends",
+      "mode": "view"
+    },
+    {
+      "name": "next-flight-in-menu-bar",
+      "title": "Next Flight in Menu Bar",
+      "description": "Keep your next Jumpseat flight in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "2.1.2",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "@types/node": "^26.0.0",
+    "@types/react": "^19.1.12",
+    "eslint": "^10.9.1",
+    "prettier": "^3.6.2",
+    "typescript": "npm:@typescript/typescript6@^6.0.3",
+    "vitest": "^4.1.10"
+  }
+}
