@@ -1,0 +1,16 @@
+fl=467f175
+h=claude.ai
+ip=2001:db8::1
+ts=1785164923.000
+visit_scheme=https
+uag=curl/8.7.1
+colo=SJC
+sliver=none
+http=http/2
+loc=US
+tls=TLSv1.3
+sni=plaintext
+warp=off
+gateway=off
+rbi=off
+kex=X25519
