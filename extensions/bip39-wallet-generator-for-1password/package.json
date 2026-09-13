@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bip39-wallet-generator-for-1password",
+  "title": "BIP39 Wallet Generator for 1Password",
+  "description": "Generate a BIP39 wallet locally and save it directly to 1Password",
+  "icon": "extension-icon-mnemonic-v3.png",
+  "author": "aurevae",
+  "categories": [
+    "Security"
+  ],
+  "keywords": [
+    "bip39",
+    "mnemonic",
+    "seed phrase",
+    "1password"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "generate-wallet",
+      "title": "Generate Wallet",
+      "description": "Generate a BIP39 recovery phrase locally and display its EVM, Bitcoin, and Solana addresses",
+      "keywords": [
+        "bip39",
+        "mnemonic",
+        "seed phrase",
+        "1password"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "generate-wallet-to-1password",
+      "title": "Generate Wallet to 1Password",
+      "description": "Generate a wallet and save its recovery phrase and public addresses to 1Password",
+      "keywords": [
+        "bip39",
+        "mnemonic",
+        "seed phrase",
+        "1password"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "wordCount",
+      "title": "Recovery Phrase Length",
+      "description": "Number of words generated for new recovery phrases",
+      "type": "dropdown",
+      "required": false,
+      "default": "12",
+      "data": [
+        {
+          "title": "12 words",
+          "value": "12"
+        },
+        {
+          "title": "24 words",
+          "value": "24"
+        }
+      ]
+    },
+    {
+      "name": "cliPath",
+      "title": "1Password CLI Path",
+      "description": "Optional absolute path to the op binary",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/op"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run --dir test"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7",
+    "bip39": "^3.1.0",
+    "bitcoinjs-lib": "^7.0.0",
+    "ed25519-hd-key": "^1.3.0",
+    "ethers": "^6.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  }
+}
