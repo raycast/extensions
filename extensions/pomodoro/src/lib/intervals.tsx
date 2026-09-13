@@ -8,8 +8,17 @@ const cache = new Cache();
 const CURRENT_INTERVAL_CACHE_KEY = "pomodoro-interval/1.1";
 const COMPLETED_POMODORO_COUNT_CACHE_KEY = "pomodoro-interval/completed-pomodoro-count";
 const POMODORO_INTERVAL_HISTORY = "pomodoro-interval/history";
+const LAST_INTERVAL_ID_CACHE_KEY = "pomodoro-interval/last-id";
 
 const currentTimestamp = () => Math.round(new Date().valueOf() / 1000);
+
+// Monotonic, so history upserts never overwrite an earlier entry even if two intervals start in the same millisecond.
+function nextIntervalId(): number {
+  const lastId = parseInt(cache.get(LAST_INTERVAL_ID_CACHE_KEY) ?? "0", 10);
+  const id = Math.max(Date.now(), lastId + 1);
+  cache.set(LAST_INTERVAL_ID_CACHE_KEY, id.toString());
+  return id;
+}
 
 export async function getIntervalHistory(): Promise<Interval[]> {
   const history = await LocalStorage.getItem(POMODORO_INTERVAL_HISTORY);
@@ -63,8 +72,7 @@ export function createInterval(type: IntervalType, isFreshStart?: boolean, custo
 
   const interval: Interval = {
     type,
-    // Unique per interval so history upserts never overwrite an earlier entry when the counter resets.
-    id: Date.now(),
+    id: nextIntervalId(),
     length: customDuration || intervalDurations[type],
     parts: [
       {
