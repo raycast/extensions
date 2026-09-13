@@ -1,6 +1,6 @@
 # Better JSON Inspector Changelog
 
-## [Precision, Performance, and Naming] - {PR_MERGE_DATE}
+## [Precision, Performance, and Naming] - 2026-09-13
 
 - Preserve precision-sensitive JSON numbers in previews, search, formatted copies, and compact copies, including deeply nested documents.
 - Decode complete escaping layers in single-quoted log input without altering backslashes, quotes, or control characters.
