@@ -1,5 +1,9 @@
 # Windows Terminal Changelog
 
+## [New Tab Menu Preference] - {PR_MERGE_DATE}
+
+- Added the `Use New Tab Menu order` preference. When enabled, profiles are filtered and ordered to match Windows Terminal's `newTabMenu` setting (`profile`, `matchProfiles`, `folder`, and `remainingProfiles` entries), instead of the raw `settings.json` list order.
+
 ## [Always Open Administrator in a Normal Window] - 2026-07-22
 
 - "Open as Administrator" now always launches into a regular window, regardless of the `Open profiles in quake window` preference. Elevated quake windows don't respond to Windows Terminal's global quake shortcut (Win+`), so routing admin through quake left users unable to summon the drop-down back once it lost focus. The separate "Open as Administrator (Non-Quake)" action added in the previous release is no longer needed and has been removed.
