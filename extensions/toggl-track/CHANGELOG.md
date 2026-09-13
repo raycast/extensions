@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Back-date a New Timer] - {PR_MERGE_DATE}
+## [Back-date a New Timer] - 2026-09-13
 
 - Added a "Start Time" option to the new time entry form to start a timer as of 5, 10 or 15 minutes ago, or a custom number of minutes, for when you remember to start tracking after you began working
 
