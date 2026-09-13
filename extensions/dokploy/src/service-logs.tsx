@@ -25,7 +25,12 @@ export default function ServiceLogs({ service }: { service: { id: string; type: 
     url + `${service.type}.readLogs?${ID_FIELDS[service.type]}=${service.id}&tail=${LOG_TAIL}`,
     {
       headers,
-      parseResponse: (response) => response.text(),
+      parseResponse: async (response) => {
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.text();
+      },
       initialData: "",
       keepPreviousData: true,
     },
@@ -35,7 +40,7 @@ export default function ServiceLogs({ service }: { service: { id: string; type: 
     <Detail
       navigationTitle={`${service.name} Logs`}
       isLoading={isLoading}
-      markdown={logs ? `\`\`\`\n${logs}\n\`\`\`` : "No logs yet."}
+      markdown={logs ? `\`\`\`\n${logs.replace(/```/g, "\\`\\`\\`")}\n\`\`\`` : "No logs yet."}
       actions={
         <ActionPanel>
           <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />

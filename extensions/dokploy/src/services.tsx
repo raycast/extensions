@@ -293,7 +293,10 @@ export default function Services({
                       onAction={() => runServiceAction(service, action)}
                     />
                   ))}
-                  <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
+                  {/* compose.readLogs requires a containerId, which this screen doesn't have; leave compose out until that's picked. */}
+                  {service.type !== "compose" && (
+                    <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
+                  )}
                 </ActionPanel.Section>
                 <Action
                   icon={Icon.Trash}

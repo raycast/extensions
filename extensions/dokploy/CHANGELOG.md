@@ -2,7 +2,7 @@
 
 ## [View Service Logs] - {PR_MERGE_DATE}
 
-- Add a `View Logs` action to the **Services** screen, showing the last 200 lines of a service's logs with `Refresh` and `Copy Logs` actions.
+- Add a `View Logs` action to the **Services** screen, showing the last 200 lines of a service's logs with `Refresh` and `Copy Logs` actions. Not yet available for Compose stacks, which need a container to be picked first.
 
 ## [Service Lifecycle Actions] - 2026-09-13
 
