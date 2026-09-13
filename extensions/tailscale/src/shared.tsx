@@ -14,11 +14,12 @@ export type Location = {
 };
 
 export interface Service {
-  ip: string;
+  name: string;
+  addresses: string[];
   hostname: string;
+  ports: string[];
   displayName?: string;
-  endpoints: string;
-  type: string;
+  type?: string;
 }
 
 export interface Device {
@@ -186,22 +187,27 @@ export function getStatus(peers = true) {
   return data;
 }
 
-export function getServices(): Service[] {
-  const resp = tailscale("service list");
+type ServiceResponse = {
+  Name: string;
+  Addrs: string[];
+  Ports: string[];
+  Hostname: string;
+  DisplayName?: string;
+  Type?: string;
+};
 
-  return resp
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith("IP "))
-    .map((line) => line.split(/\s{2,}/))
-    .filter((columns) => columns.length >= 5)
-    .map(([ip, hostname, displayName, endpoints, type]) => ({
-      ip,
-      hostname,
-      displayName: displayName === "-" ? undefined : displayName,
-      endpoints,
-      type,
-    }));
+export function getServices(): Service[] {
+  const resp = tailscale("service list --json");
+  const services = JSON.parse(resp) as ServiceResponse[];
+
+  return services.map((service) => ({
+    name: service.Name.replace(/^svc:/, ""),
+    addresses: service.Addrs,
+    hostname: service.Hostname,
+    ports: service.Ports,
+    displayName: service.DisplayName,
+    type: service.Type?.toLowerCase(),
+  }));
 }
 
 export function getNetcheck() {
