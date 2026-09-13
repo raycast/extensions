@@ -12,3 +12,7 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+.claude
+
+# SDD scratch (subagent-driven-development workspace)
+.superpowers
