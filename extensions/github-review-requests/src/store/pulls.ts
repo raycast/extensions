@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { PullRequestShort } from "../types";
+import { MenuPullRequest, PullRequestShort } from "../types";
 import searchPullRequestsWithDependencies from "../graphql/searchPullRequestsWithDependencies";
 
 const updatedPullsKey = "updatedPulls";
@@ -7,7 +7,7 @@ const recentlyVisitedPullsKey = "recentlyVisitedPulls";
 
 export type PullStore = {
   updatedPulls: PullRequestShort[];
-  recentlyVisitedPulls: PullRequestShort[];
+  recentlyVisitedPulls: MenuPullRequest[];
 };
 
 export const loadAllPullsFromStore = (): Promise<PullStore> =>
@@ -15,8 +15,8 @@ export const loadAllPullsFromStore = (): Promise<PullStore> =>
     .then(() => console.debug("loadAllPullsFromStore"))
     .then(() => Promise.all([LocalStorage.getItem(updatedPullsKey), LocalStorage.getItem(recentlyVisitedPullsKey)]))
     .then(([updatedPulls, recentlyVisitedPulls]) => ({
-      updatedPulls: parsePulls(updatedPulls),
-      recentlyVisitedPulls: parsePulls(recentlyVisitedPulls),
+      updatedPulls: parsePulls<PullRequestShort>(updatedPulls),
+      recentlyVisitedPulls: parsePulls<MenuPullRequest>(recentlyVisitedPulls),
     }))
     .then(({ updatedPulls, recentlyVisitedPulls }) => {
       console.debug(
@@ -26,17 +26,32 @@ export const loadAllPullsFromStore = (): Promise<PullStore> =>
       return { updatedPulls, recentlyVisitedPulls };
     });
 
-export const loadAllPullsFromRemote = (defaultFilters: string[]): Promise<PullRequestShort[]> =>
+/**
+ * Loads the menu's pull requests: the ones you opened, the ones awaiting your
+ * review, and — when `watchedFilters` is given — every open pull request in the
+ * repositories you watch, whoever opened them. The first two searches are
+ * unchanged; anything only the third turns up is tagged `inWatchedScope` so the
+ * menu can keep it out of the review-request group.
+ */
+export const loadAllPullsFromRemote = (
+  defaultFilters: string[],
+  watchedFilters?: string[],
+): Promise<PullRequestShort[]> =>
   Promise.resolve()
     .then(() => console.debug("loadAllPullsFromRemote"))
     .then(() =>
       Promise.all([
         searchPullRequestsWithDependencies(defaultFilters.concat(["author:@me"]).join(" ")),
         searchPullRequestsWithDependencies(defaultFilters.concat(["review-requested:@me"]).join(" ")),
+        watchedFilters?.length
+          ? searchPullRequestsWithDependencies(watchedFilters.join(" ")).then(pulls =>
+              pulls.map(pull => ({ ...pull, inWatchedScope: true })),
+            )
+          : Promise.resolve([] as PullRequestShort[]),
       ]),
     )
-    .then(([authoredPulls, reviewRequestedPulls]: [PullRequestShort[], PullRequestShort[]]) =>
-      authoredPulls.concat(reviewRequestedPulls),
+    .then(([authoredPulls, reviewRequestedPulls, watchedPulls]) =>
+      authoredPulls.concat(reviewRequestedPulls).concat(watchedPulls),
     )
     .then((pulls: PullRequestShort[]) =>
       pulls.reduce((acc, current) => {
@@ -54,8 +69,8 @@ export const loadAllPullsFromRemote = (defaultFilters: string[]): Promise<PullRe
       return pulls;
     });
 
-const parsePulls = (serialized: LocalStorage.Value | undefined): PullRequestShort[] =>
-  serialized ? JSON.parse(serialized as string) : [];
+const parsePulls = <T>(serialized: LocalStorage.Value | undefined): T[] =>
+  serialized ? (JSON.parse(serialized as string) as T[]) : [];
 
 export const saveUpdatedPullsToStore = (updatedPulls: PullRequestShort[]) =>
   Promise.resolve()
@@ -63,7 +78,7 @@ export const saveUpdatedPullsToStore = (updatedPulls: PullRequestShort[]) =>
     .then(() => LocalStorage.setItem(updatedPullsKey, JSON.stringify(updatedPulls)))
     .then(() => console.debug(`saveUpdatedPullsToStore updated=${updatedPulls.length}`));
 
-export const saveRecentVisitedPullsToStore = (recentlyVisitedPulls: PullRequestShort[]) =>
+export const saveRecentVisitedPullsToStore = (recentlyVisitedPulls: MenuPullRequest[]) =>
   Promise.resolve()
     .then(() => console.debug("saveRecentVisitedPullsToStore"))
     .then(() => LocalStorage.setItem(recentlyVisitedPullsKey, JSON.stringify(recentlyVisitedPulls)))
