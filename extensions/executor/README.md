@@ -158,7 +158,9 @@ Credential entry and provider configuration stay in Executor.
 
 ## Integration catalog
 
-Provider logos use catalog domains or Executor’s display URL through its logo service, with no built-in provider-domain list. This includes OpenAPI integrations: Executor may supply an API base URL, saved provider domain, or specification URL. Missing metadata or unavailable images fall back to a neutral icon.
+Provider artwork is matched by URL against Executor’s upstream presets, including GitHub and Google product icons. Other OpenAPI integrations use their configured API base URL or saved provider domain; a specification host alone does not establish branding. Missing metadata or unavailable images fall back to a neutral icon. There is no account-specific provider map.
+
+The bundled artwork metadata records its upstream revision in `src/lib/integration-artwork.json`. To refresh it from a reviewed Executor checkout, run `node scripts/update-integration-artwork.mjs /path/to/executor <full-commit-sha>`. This extracts static URLs and icons without executing upstream code. Attribution is in `EXECUTOR-NOTICE.txt`.
 
 **Add Integration** searches the same public integrations.sh registry used by Executor, with provider logos,
 pagination, and MCP/API/GraphQL filters. Provider names are public search queries. Pasted endpoint URLs are

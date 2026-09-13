@@ -1,6 +1,13 @@
 import { Color, Icon, Image } from "@raycast/api";
 import { parse } from "tldts";
 import type { Integration } from "./types";
+import presets from "./integration-artwork.json";
+
+export type IntegrationIconMetadata = Pick<Integration, "displayUrl"> & {
+  kind?: string;
+  /** null means the server metadata identifies only a specification host. */
+  logoDomain?: string | null;
+};
 
 /** Executor's public logo service owns brand lookup and image fallbacks. */
 const LOGO_PROXY = "https://integrations.sh/logo";
@@ -22,6 +29,40 @@ export function integrationLogoUrl(domain: string, size = 64): string {
   return `${LOGO_PROXY}/${encodeURIComponent(domain)}?sz=${size * 2}`;
 }
 
+export function normalizedIntegrationUrl(value: string | null | undefined): string | undefined {
+  if (!value || !registrableDomain(value)) return undefined;
+  try {
+    const url = new URL(value);
+    url.hash = "";
+    url.searchParams.sort();
+    return url.toString().replace(/\/$/, "");
+  } catch {
+    return undefined;
+  }
+}
+
+function googleService(value: string): string | undefined {
+  const url = new URL(value);
+  const segments = url.pathname.split("/").filter(Boolean);
+  if (url.hostname === "www.googleapis.com") {
+    return segments[0] === "discovery" && segments[2] === "apis" ? segments[3] : segments[0];
+  }
+  return url.hostname.endsWith(".googleapis.com") ? url.hostname.slice(0, -".googleapis.com".length) : undefined;
+}
+
+/** Match upstream preset URLs, never user-editable names or integration slugs. */
+export function integrationPresetIcon(integration: IntegrationIconMetadata): string | undefined {
+  const url = normalizedIntegrationUrl(integration.displayUrl);
+  if (!url) return undefined;
+  const service = integration.kind === "openapi" ? googleService(url) : undefined;
+  return presets.artwork.find((preset) => {
+    if (preset.kind !== integration.kind) return false;
+    return (
+      normalizedIntegrationUrl(preset.url) === url || (service !== undefined && googleService(preset.url) === service)
+    );
+  })?.icon;
+}
+
 /**
  * The provider logo for an integration, falling back to a neutral icon when no
  * brand domain is known. Executor itself gets the extension's own icon, matching
@@ -29,18 +70,26 @@ export function integrationLogoUrl(domain: string, size = 64): string {
  */
 export function integrationIcon(
   slug: string,
-  directory?: ReadonlyMap<string, Pick<Integration, "displayUrl"> & { kind?: string; logoDomain?: string }>,
+  directory?: ReadonlyMap<string, IntegrationIconMetadata>,
 ): Image.ImageLike {
   if (slug === "executor") return { source: "extension_icon.png" };
 
   const integration = directory?.get(slug);
-  // Executor's display URL can be a base URL, saved provider domain, or spec URL.
-  // Use its domain fallback for every integration kind, just like the console.
-  const domain = registrableDomain(integration?.logoDomain ?? integration?.displayUrl);
-  if (!domain) return { source: Icon.Plug, tintColor: Color.SecondaryText };
+  const domain = registrableDomain(
+    integration?.logoDomain !== undefined
+      ? integration.logoDomain
+      : integration?.kind === "openapi"
+        ? undefined
+        : integration?.displayUrl,
+  );
+  const source =
+    (integration?.logoDomain && domain ? integrationLogoUrl(domain) : undefined) ??
+    (integration ? integrationPresetIcon(integration) : undefined) ??
+    (domain ? integrationLogoUrl(domain) : undefined);
+  if (!source) return { source: Icon.Plug, tintColor: Color.SecondaryText };
 
   return {
-    source: integrationLogoUrl(domain),
+    source,
     mask: Image.Mask.RoundedRectangle,
     fallback: Icon.Plug,
   };

@@ -118,6 +118,20 @@ test("Custom-provider reconnect probes, registers and starts the same connection
   });
 });
 
+test("dynamic reconnect preserves a shared OAuth client's owner", async () => {
+  const sharedClientConnection: Connection = {
+    ...connection,
+    oauthClientOwner: "org",
+  };
+  const calls = fixture({ client: { ...stored, owner: "org" } });
+  await startOAuthReconnect(sharedClientConnection);
+  expect(calls.find((call) => call.path.endsWith("register-dynamic"))?.body?.owner).toBe("org");
+  expect(calls.at(-1)?.body).toMatchObject({
+    clientOwner: "org",
+    owner: "user",
+  });
+});
+
 test("AI reconnect uses the same automatic route without an Executor UI handoff", async () => {
   const calls = fixture();
   const result = await reconnectExecutorConnection({

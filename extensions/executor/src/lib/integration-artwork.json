@@ -1,0 +1,348 @@
+{
+  "source": "https://github.com/UsefulSoftwareCo/executor",
+  "revision": "eaa1f3a57ffff88aede8e83783ea7ed4471aec1f",
+  "sources": [
+    "packages/plugins/openapi/src/sdk/presets.ts",
+    "packages/plugins/openapi/src/providers/google/presets.ts",
+    "packages/plugins/mcp/src/sdk/presets.ts",
+    "packages/plugins/graphql/src/sdk/presets.ts"
+  ],
+  "artwork": [
+    {
+      "kind": "openapi",
+      "id": "figma",
+      "url": "https://raw.githubusercontent.com/figma/rest-api-spec/refs/heads/main/openapi/openapi.yaml",
+      "icon": "https://integrations.sh/logo/figma.com"
+    },
+    {
+      "kind": "openapi",
+      "id": "stripe",
+      "url": "https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json",
+      "icon": "https://integrations.sh/logo/stripe.com"
+    },
+    {
+      "kind": "openapi",
+      "id": "github-rest",
+      "url": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json",
+      "icon": "https://integrations.sh/logo/github.com"
+    },
+    {
+      "kind": "openapi",
+      "id": "vercel",
+      "url": "https://openapi.vercel.sh",
+      "icon": "https://integrations.sh/logo/vercel.com"
+    },
+    {
+      "kind": "openapi",
+      "id": "neon",
+      "url": "https://neon.tech/api_spec/release/v2.json",
+      "icon": "https://integrations.sh/logo/neon.tech"
+    },
+    {
+      "kind": "openapi",
+      "id": "openai",
+      "url": "https://app.stainless.com/api/spec/documented/openai/openapi.documented.yml",
+      "icon": "https://integrations.sh/logo/openai.com"
+    },
+    {
+      "kind": "openapi",
+      "id": "sentry",
+      "url": "https://raw.githubusercontent.com/getsentry/sentry-api-schema/main/openapi-derefed.json",
+      "icon": "https://svgl.app/library/sentry.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "posthog",
+      "url": "https://us.posthog.com/api/schema/",
+      "icon": "https://svgl.app/library/posthog.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "exa",
+      "url": "https://raw.githubusercontent.com/exa-labs/openapi-spec/refs/heads/master/exa-openapi-spec.yaml",
+      "icon": "https://integrations.sh/logo/exa.ai"
+    },
+    {
+      "kind": "openapi",
+      "id": "exa-websets",
+      "url": "https://raw.githubusercontent.com/exa-labs/openapi-spec/refs/heads/master/exa-websets-spec.yaml",
+      "icon": "https://integrations.sh/logo/exa.ai"
+    },
+    {
+      "kind": "openapi",
+      "id": "axiom",
+      "url": "https://raw.githubusercontent.com/axiomhq/docs/main/content/docs/%28api-reference%29/restapi/versions/v2.json",
+      "icon": "https://integrations.sh/logo/axiom.co"
+    },
+    {
+      "kind": "openapi",
+      "id": "asana",
+      "url": "https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/asana.com/1.0/openapi.yaml",
+      "icon": "https://integrations.sh/logo/asana.com"
+    },
+    {
+      "kind": "openapi",
+      "id": "twilio",
+      "url": "https://raw.githubusercontent.com/twilio/twilio-oai/main/spec/json/twilio_api_v2010.json",
+      "icon": "https://integrations.sh/logo/twilio.com"
+    },
+    {
+      "kind": "openapi",
+      "id": "digitalocean",
+      "url": "https://raw.githubusercontent.com/digitalocean/openapi/main/specification/DigitalOcean-public.v2.yaml",
+      "icon": "https://integrations.sh/logo/digitalocean.com"
+    },
+    {
+      "kind": "openapi",
+      "id": "val-town",
+      "url": "https://api.val.town/openapi.json",
+      "icon": "https://integrations.sh/logo/val.town"
+    },
+    {
+      "kind": "openapi",
+      "id": "resend",
+      "url": "https://raw.githubusercontent.com/resend/resend-openapi/main/resend.yaml",
+      "icon": "https://integrations.sh/logo/resend.com"
+    },
+    {
+      "kind": "openapi",
+      "id": "spotify",
+      "url": "https://raw.githubusercontent.com/sonallux/spotify-web-api/refs/heads/main/official-spotify-open-api.yml",
+      "icon": "https://svgl.app/library/spotify.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-calendar",
+      "url": "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/calendar_2020q4/v8/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-meet",
+      "url": "https://meet.googleapis.com/$discovery/rest?version=v2",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v8/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-gmail",
+      "url": "https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/gmail_2020q4/v8/web-96dp/logo_gmail_2020q4_color_2x_web_96dp.png"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-sheets",
+      "url": "https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/sheets_2020q4/v8/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-drive",
+      "url": "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/drive_2020q4/v8/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-docs",
+      "url": "https://www.googleapis.com/discovery/v1/apis/docs/v1/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/docs_2020q4/v12/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-slides",
+      "url": "https://www.googleapis.com/discovery/v1/apis/slides/v1/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/slides_2020q4/v12/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-forms",
+      "url": "https://forms.googleapis.com/$discovery/rest?version=v1",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/forms_2020q4/v6/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-tasks",
+      "url": "https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/tasks/v5/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-people",
+      "url": "https://www.googleapis.com/discovery/v1/apis/people/v1/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/contacts_2022/v2/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-photos-library",
+      "url": "https://www.googleapis.com/discovery/v1/apis/photoslibrary/v1/rest",
+      "icon": "https://www.gstatic.com/images/branding/product/2x/photos_96dp.png"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-photos-picker",
+      "url": "https://photospicker.googleapis.com/$discovery/rest?version=v1",
+      "icon": "https://www.gstatic.com/images/branding/product/2x/photos_96dp.png"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-chat",
+      "url": "https://www.googleapis.com/discovery/v1/apis/chat/v1/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/chat_2020q4/v8/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-keep",
+      "url": "https://keep.googleapis.com/$discovery/rest?version=v1",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/keep_2020q4/v8/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-youtube-data",
+      "url": "https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/youtube/v9/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-search-console",
+      "url": "https://www.googleapis.com/discovery/v1/apis/searchconsole/v1/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/googleg/v6/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-classroom",
+      "url": "https://www.googleapis.com/discovery/v1/apis/classroom/v1/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/classroom/v7/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-admin-directory",
+      "url": "https://admin.googleapis.com/$discovery/rest?version=directory_v1",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/admin_2020q4/v6/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-admin-reports",
+      "url": "https://admin.googleapis.com/$discovery/rest?version=reports_v1",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/admin_2020q4/v6/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-apps-script",
+      "url": "https://www.googleapis.com/discovery/v1/apis/script/v1/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/apps_script/v10/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-bigquery",
+      "url": "https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/google_cloud/v6/192px.svg"
+    },
+    {
+      "kind": "openapi",
+      "id": "google-cloud-resource-manager",
+      "url": "https://cloudresourcemanager.googleapis.com/$discovery/rest?version=v3",
+      "icon": "https://fonts.gstatic.com/s/i/productlogos/google_cloud/v6/192px.svg"
+    },
+    {
+      "kind": "mcp",
+      "id": "deepwiki",
+      "url": "https://mcp.deepwiki.com/mcp",
+      "icon": "https://integrations.sh/logo/deepwiki.com"
+    },
+    {
+      "kind": "mcp",
+      "id": "slack",
+      "url": "https://mcp.slack.com/mcp",
+      "icon": "https://integrations.sh/logo/slack.com"
+    },
+    {
+      "kind": "mcp",
+      "id": "context7",
+      "url": "https://mcp.context7.com/mcp",
+      "icon": "https://integrations.sh/logo/context7.com"
+    },
+    {
+      "kind": "mcp",
+      "id": "browserbase",
+      "url": "https://mcp.browserbase.com/mcp",
+      "icon": "https://integrations.sh/logo/browserbase.com"
+    },
+    {
+      "kind": "mcp",
+      "id": "firecrawl",
+      "url": "https://mcp.firecrawl.dev/mcp",
+      "icon": "https://integrations.sh/logo/firecrawl.dev"
+    },
+    {
+      "kind": "mcp",
+      "id": "neon",
+      "url": "https://mcp.neon.tech/mcp",
+      "icon": "https://integrations.sh/logo/neon.tech"
+    },
+    {
+      "kind": "mcp",
+      "id": "axiom",
+      "url": "https://mcp.axiom.co/mcp",
+      "icon": "https://integrations.sh/logo/axiom.co"
+    },
+    {
+      "kind": "mcp",
+      "id": "stripe",
+      "url": "https://mcp.stripe.com",
+      "icon": "https://integrations.sh/logo/stripe.com"
+    },
+    {
+      "kind": "mcp",
+      "id": "linear",
+      "url": "https://mcp.linear.app/mcp",
+      "icon": "https://integrations.sh/logo/linear.app"
+    },
+    {
+      "kind": "mcp",
+      "id": "notion",
+      "url": "https://mcp.notion.com/mcp",
+      "icon": "https://integrations.sh/logo/notion.com"
+    },
+    {
+      "kind": "mcp",
+      "id": "sentry",
+      "url": "https://mcp.sentry.dev/mcp",
+      "icon": "https://svgl.app/library/sentry.svg"
+    },
+    {
+      "kind": "mcp",
+      "id": "cloudflare",
+      "url": "https://mcp.cloudflare.com/mcp?codemode=false",
+      "icon": "https://integrations.sh/logo/cloudflare.com"
+    },
+    {
+      "kind": "graphql",
+      "id": "github-graphql",
+      "url": "https://api.github.com/graphql",
+      "icon": "https://integrations.sh/logo/github.com"
+    },
+    {
+      "kind": "graphql",
+      "id": "gitlab",
+      "url": "https://gitlab.com/api/graphql",
+      "icon": "https://integrations.sh/logo/gitlab.com"
+    },
+    {
+      "kind": "graphql",
+      "id": "linear",
+      "url": "https://api.linear.app/graphql",
+      "icon": "https://integrations.sh/logo/linear.app"
+    },
+    {
+      "kind": "graphql",
+      "id": "monday",
+      "url": "https://api.monday.com/v2",
+      "icon": "https://integrations.sh/logo/monday.com"
+    },
+    {
+      "kind": "graphql",
+      "id": "anilist",
+      "url": "https://graphql.anilist.co",
+      "icon": "https://integrations.sh/logo/anilist.co"
+    }
+  ]
+}

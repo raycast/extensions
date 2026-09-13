@@ -1,4 +1,5 @@
-import { accountCacheKey, defaultOwner, listConnections, listIntegrations } from "./client";
+import { accountCacheKey, defaultOwner, listConnections } from "./client";
+import { listDisplayIntegrations } from "./integration-display";
 import { listPendingApprovals } from "./pending-approvals";
 import { buildStatusSnapshot } from "./status";
 import { resolveWorkspace, runInWorkspace, workspaceSummary } from "./workspaces";
@@ -9,7 +10,7 @@ export async function loadWorkspaceStatus(id: string) {
     const [connections, approvals, integrations] = await Promise.allSettled([
       listConnections({ owner: defaultOwner() }, AbortSignal.timeout(15000)),
       listPendingApprovals(accountCacheKey()),
-      listIntegrations(AbortSignal.timeout(15000)),
+      listDisplayIntegrations(AbortSignal.timeout(15000)),
     ]);
     const error = connections.status === "rejected" ? new Error("Could not load saved connection health.") : undefined;
     return {

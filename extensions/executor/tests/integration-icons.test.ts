@@ -14,7 +14,7 @@ test("icons follow provider metadata, regardless of integration slug", () => {
 test("catalog domains take precedence over the display URL fallback", () => {
   const metadata = { kind: "openapi", displayUrl: "https://raw.githubusercontent.com/example/spec/main/openapi.json" };
   expect(integrationIcon("custom_service", new Map([["custom_service", metadata]]))).toMatchObject({
-    source: "https://integrations.sh/logo/githubusercontent.com?sz=128",
+    source: "plug",
   });
   expect(
     integrationIcon("custom_service", new Map([["custom_service", { ...metadata, logoDomain: "example.org" }]])),
@@ -27,9 +27,8 @@ test("OpenAPI integrations retain Executor's display-domain logos after being sa
   for (const [displayUrl, domain] of [
     ["https://api.example.org", "example.org"],
     ["https://secure.example.net/api/v3.0", "example.net"],
-    ["https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest", "googleapis.com"],
   ]) {
-    const metadata = { kind: "openapi", displayUrl };
+    const metadata = { kind: "openapi", displayUrl, logoDomain: domain };
     for (const slug of ["original", "renamed_integration"]) {
       expect(integrationIcon(slug, new Map([[slug, metadata]]))).toMatchObject({
         source: `https://integrations.sh/logo/${domain}?sz=128`,
@@ -60,5 +59,35 @@ test("domain parsing covers public suffixes without exposing local hosts or URL 
     "not a URL",
   ]) {
     expect(registrableDomain(url)).toBeNull();
+  }
+});
+
+test("upstream artwork resolves GitHub specs and Google APIs by URL even after renaming", () => {
+  const icons = [
+    [
+      "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json",
+      "https://integrations.sh/logo/github.com",
+    ],
+    [
+      "https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest",
+      "https://fonts.gstatic.com/s/i/productlogos/sheets_2020q4/v8/192px.svg",
+    ],
+    [
+      "https://sheets.googleapis.com/v4/spreadsheets",
+      "https://fonts.gstatic.com/s/i/productlogos/sheets_2020q4/v8/192px.svg",
+    ],
+  ];
+  for (const [displayUrl, source] of icons) {
+    expect(integrationIcon("renamed", new Map([["renamed", { kind: "openapi", displayUrl }]]))).toMatchObject({
+      source,
+    });
+  }
+  for (const displayUrl of [
+    "https://www.googleapis.com.evil.example.org/discovery/v1/apis/sheets/v4/rest",
+    "https://user:secret@www.googleapis.com/discovery/v1/apis/sheets/v4/rest",
+  ]) {
+    expect(
+      integrationIcon("google_sheets", new Map([["google_sheets", { kind: "openapi", displayUrl }]])),
+    ).toMatchObject({ source: "plug" });
   }
 });

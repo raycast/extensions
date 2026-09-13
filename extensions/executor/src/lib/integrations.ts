@@ -1,13 +1,13 @@
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { accountCacheKey, listIntegrations } from "./client";
+import { accountCacheKey } from "./client";
+import { listDisplayIntegrations, type DisplayIntegration } from "./integration-display";
 import { integrationName } from "./format";
-import type { Integration } from "./types";
 
 export { integrationIcon, integrationLogoUrl, registrableDomain } from "./integration-icons";
 
 /** Slug to integration metadata supplied by Executor. */
-export type IntegrationDirectory = Map<string, Integration>;
+export type IntegrationDirectory = Map<string, DisplayIntegration>;
 
 /**
  * Executor's own display name for an integration, e.g. `google_gmail` renders as
@@ -26,11 +26,11 @@ export function useIntegrationDirectory(): IntegrationDirectory {
   const { data } = useCachedPromise(
     async (_scope: string) => {
       void _scope;
-      return listIntegrations();
+      return listDisplayIntegrations();
     },
     [accountCacheKey()],
     {
-      initialData: [] as Integration[],
+      initialData: [] as DisplayIntegration[],
       failureToastOptions: { title: "Could Not Load Integrations" },
     },
   );

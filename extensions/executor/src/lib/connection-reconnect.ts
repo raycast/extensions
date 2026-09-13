@@ -56,7 +56,7 @@ async function registerReconnectClient(
   const registered = await request<{ client: string }>("/api/oauth/clients/register-dynamic", {
     method: "POST",
     body: JSON.stringify({
-      owner: connection.owner,
+      owner: stored.owner,
       slug,
       issuer: probe.issuer ?? null,
       registrationEndpoint,
@@ -75,7 +75,7 @@ async function registerReconnectClient(
   if (typeof registered.client !== "string" || !registered.client.trim()) {
     throw new Error("Executor did not return the registered OAuth app.");
   }
-  return { slug: registered.client, owner: connection.owner };
+  return { slug: registered.client, owner: stored.owner };
 }
 
 /** Start the same saved connection; undefined means supported browser setup is required. */

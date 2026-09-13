@@ -50,10 +50,13 @@ function expiryAccessory(connection: Connection) {
   const expired = expires.getTime() < Date.now();
   return expired
     ? {
-        icon: { source: Icon.Clock, tintColor: Color.SecondaryText },
+        tag: { value: "Token Expired", color: Color.SecondaryText },
         tooltip: `Credential expiry: ${formatDate(connection.expiresAt)}. This date alone does not mean the connection needs repair; credentials may refresh automatically.`,
       }
-    : { text: `Expires ${relative}`, tooltip: `Credential expiry: ${formatDate(connection.expiresAt)}` };
+    : {
+        tag: { value: `Expires ${relative}`, color: Color.SecondaryText },
+        tooltip: `Credential expiry: ${formatDate(connection.expiresAt)}`,
+      };
 }
 
 function Connections() {
@@ -192,7 +195,10 @@ function Connections() {
                     }
                   : undefined,
                 health
-                  ? { text: recordedHealthAge(health.checkedAt), tooltip: `Checked ${formatDate(health.checkedAt)}` }
+                  ? {
+                      tag: { value: recordedHealthAge(health.checkedAt), color: Color.SecondaryText },
+                      tooltip: `Checked ${formatDate(health.checkedAt)}`,
+                    }
                   : undefined,
                 {
                   icon: connection.owner === "org" ? Icon.TwoPeople : Icon.Person,
