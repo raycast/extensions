@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "contextburn",
+  "title": "Contextburn",
+  "description": "Run efficiency of your Claude Code sessions: what share of paid tokens became model output, and how much was re-reading context already sent.",
+  "icon": "extension-icon.png",
+  "author": "arsentev-ai",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "efficiency",
+      "title": "Run Efficiency",
+      "subtitle": "Contextburn",
+      "description": "Useful work vs. context re-reading for recent Claude Code sessions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "command",
+      "title": "Contextburn CLI",
+      "description": "Path to the contextburn command (pip install contextburn).",
+      "type": "textfield",
+      "required": false,
+      "default": "contextburn"
+    },
+    {
+      "name": "hours",
+      "title": "Window (Hours)",
+      "description": "How many hours back to measure.",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
