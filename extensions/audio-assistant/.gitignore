@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.tools/
+.env*
+!.env.example
+*.log
+.DS_Store
+coverage/
+.native-test/
+.publish/
+assets/old-icon.png

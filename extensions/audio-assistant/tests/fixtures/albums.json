@@ -1,0 +1,30 @@
+[
+  {
+    "item_id": "album-1",
+    "provider": "library",
+    "name": "Blue Hour",
+    "version": "",
+    "uri": "library://album/album-1",
+    "media_type": "album",
+    "artists": [
+      {
+        "item_id": "artist-1",
+        "provider": "library",
+        "name": "North Window",
+        "uri": "library://artist/artist-1",
+        "media_type": "artist"
+      }
+    ],
+    "metadata": {
+      "images": [
+        {
+          "type": "thumb",
+          "path": "library/album/album-1.jpg",
+          "provider": "filesystem_local--fixture",
+          "remotely_accessible": false,
+          "proxy_id": "4a986958eb143d884923f7eaf70579d298f84a39b2ca0eb7b855fd12828cd02a"
+        }
+      ]
+    }
+  }
+]
