@@ -1,0 +1,67 @@
+{
+  "name": "lan-tools",
+  "title": "LAN Tools",
+  "description": "Inventory your home network, read this Mac's connection, and run a pure-HTTP internet speed test.",
+  "icon": "icon.png",
+  "version": "1.0.0",
+  "author": "tbrizitsky",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "showPublicLocation",
+      "title": "Show public IP & location",
+      "description": "Resolve this Mac's public IP to a location via ipinfo.io (city, region, country, ISP). Turn off to keep the lookup local.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show public IP & location"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "My LAN",
+      "subtitle": "LAN Tools",
+      "description": "Sweep the network and list all discovered devices with name, IP, MAC, vendor, and advertised services.",
+      "mode": "view"
+    },
+    {
+      "name": "my-info",
+      "title": "This Mac",
+      "subtitle": "LAN Tools",
+      "description": "Show this Mac's network identity, Wi-Fi RF state, and environment (public IP, DNS, neighbors).",
+      "mode": "view"
+    },
+    {
+      "name": "speedtest",
+      "title": "Speed Test",
+      "subtitle": "LAN Tools",
+      "description": "Measure internet download, upload, and latency via pure-HTTP providers (Cloudflare default, Yandex).",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.2",
+    "eslint": "^10.8.0",
+    "tsx": "^4.23.5",
+    "typescript": "^5.9.3"
+  }
+}
