@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "saturn",
+  "title": "Saturn",
+  "description": "Bookmarks are text. Memory is visual. Search and save websites captured by the Saturn macOS app.",
+  "icon": "app-icon.png",
+  "author": "sachindabas",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-links",
+      "title": "Search Bookmarks",
+      "subtitle": "Saturn",
+      "description": "Search bookmarks saved in Saturn by title, tag, or page text. Assign a global hotkey in Raycast Settings → Shortcuts.",
+      "mode": "view",
+      "keywords": [
+        "saturn",
+        "bookmarks",
+        "search bookmarks",
+        "search",
+        "find",
+        "hotkey",
+        "links",
+        "urls",
+        "collection",
+        "saved"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "browse-collections",
+      "title": "Browse Collections",
+      "subtitle": "Saturn",
+      "description": "Browse your Saturn collections and open a saved bookmark directly.",
+      "mode": "view",
+      "keywords": [
+        "saturn",
+        "collections",
+        "folders",
+        "bookmarks",
+        "links",
+        "saved"
+      ]
+    },
+    {
+      "name": "save-link",
+      "title": "Save to Saturn",
+      "subtitle": "Saturn",
+      "description": "Save the frontmost browser page to Saturn. Opened from Saturn with ⌘B, or assign a global hotkey in Raycast Settings → Shortcuts.",
+      "mode": "view",
+      "keywords": [
+        "saturn",
+        "save",
+        "add",
+        "bookmark",
+        "capture",
+        "link",
+        "clip"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "RAY_Target=x ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node test/deep-link-fixtures.mjs && node test/search-fixtures.mjs",
+    "test:app": "node test/tokenizer-parity.mjs && node test/page-text-fixtures.mjs && node test/app-modules-fixtures.mjs",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
