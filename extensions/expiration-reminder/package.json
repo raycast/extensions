@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "expiration-reminder",
+  "title": "Expiration Reminder",
+  "description": "Fast, keyboard-driven access to your Expiration Reminder compliance data — view expired and about-to-expire items, search expirations, contacts and files, and create new records without leaving Raycast.",
+  "icon": "icon.png",
+  "author": "expirationreminder",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-expired",
+      "title": "Show Expired Items",
+      "subtitle": "Expiration Reminder",
+      "description": "List items already past their expiration date, most overdue first.",
+      "mode": "view"
+    },
+    {
+      "name": "show-about-to-expire",
+      "title": "Show About-To-Expire Items",
+      "subtitle": "Expiration Reminder",
+      "description": "List items expiring within a configurable window (default 30 days), soonest first.",
+      "mode": "view"
+    },
+    {
+      "name": "search-expirations",
+      "title": "Search Expirations",
+      "subtitle": "Expiration Reminder",
+      "description": "Search across your expiration items by name.",
+      "mode": "view"
+    },
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "subtitle": "Expiration Reminder",
+      "description": "Search across your contacts by name or email.",
+      "mode": "view"
+    },
+    {
+      "name": "contact-expirations",
+      "title": "Show a Contact's Expirations",
+      "subtitle": "Expiration Reminder",
+      "description": "Pick a contact and drill into their expiration items.",
+      "mode": "view"
+    },
+    {
+      "name": "create-expiration",
+      "title": "Create an Expiration",
+      "subtitle": "Expiration Reminder",
+      "description": "Add a new expiration item.",
+      "mode": "view"
+    },
+    {
+      "name": "create-contact",
+      "title": "Create a Contact",
+      "subtitle": "Expiration Reminder",
+      "description": "Add a new contact.",
+      "mode": "view"
+    },
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "subtitle": "Expiration Reminder",
+      "description": "Search document attachments on your expiration items.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultExpiryWindow",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default \"Expiring Soon\" Window",
+      "description": "Default window for the About-to-Expire command.",
+      "default": "30",
+      "data": [
+        { "title": "7 days", "value": "7" },
+        { "title": "30 days", "value": "30" },
+        { "title": "60 days", "value": "60" },
+        { "title": "90 days", "value": "90" }
+      ]
+    },
+    {
+      "name": "pageSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Page Size",
+      "description": "Rows requested per page for list commands (server cap is 500).",
+      "default": "100",
+      "data": [
+        { "title": "25", "value": "25" },
+        { "title": "50", "value": "50" },
+        { "title": "100", "value": "100" }
+      ]
+    },
+    {
+      "name": "telemetryEnabled",
+      "type": "checkbox",
+      "required": false,
+      "title": "Telemetry",
+      "label": "Send anonymous usage events",
+      "description": "Opt in to anonymous, PII-free usage telemetry to help improve the extension.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
