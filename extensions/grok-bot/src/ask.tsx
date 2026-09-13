@@ -1,0 +1,79 @@
+import { Form, List, LaunchProps, getSelectedText, popToRoot } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { useBots } from "./hooks/use-bots";
+import { getLastBotId } from "./lib/last-bot";
+import { resolveInitialBot } from "./lib/match-bot";
+import { AgentId } from "./lib/types";
+import { AskForm } from "./views/ask-form";
+import { GatewayEmptyView, RosterLoadingView } from "./views/gateway-empty";
+
+type AskArguments = {
+  question?: string;
+  bot?: string;
+};
+
+type Draft = {
+  message: string;
+  botId: AgentId | undefined;
+};
+
+export default function AskCommand(props: LaunchProps<{ arguments: AskArguments; fallbackText?: string }>) {
+  const { bots, error, isLoading, revalidate } = useBots();
+  const [selectedText, setSelectedText] = useState<string | null>(null);
+  const [lastBotId, setLastBotIdState] = useState<AgentId | null | undefined>(undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+    void Promise.all([
+      getSelectedText()
+        .then((value) => value.trim())
+        .catch(() => ""),
+      getLastBotId(),
+    ]).then(([text, last]) => {
+      if (!cancelled) {
+        setSelectedText(text);
+        setLastBotIdState(last);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const question = props.arguments.question?.trim() ?? "";
+  const fallback = props.fallbackText?.trim() ?? "";
+  const messageReady = selectedText !== null;
+  const lastReady = lastBotId !== undefined;
+  const rosterReady = !isLoading || bots.length > 0;
+  const ready = messageReady && lastReady && rosterReady;
+
+  if (!ready) {
+    if (isLoading && bots.length === 0 && error === null) {
+      return (
+        <List isLoading filtering={false}>
+          <RosterLoadingView onRetry={revalidate} />
+        </List>
+      );
+    }
+    return <Form isLoading />;
+  }
+
+  if (bots.length === 0) {
+    return (
+      <List>
+        <GatewayEmptyView error={error} onRetry={revalidate} />
+      </List>
+    );
+  }
+
+  const draft: Draft = {
+    message: question || fallback || selectedText,
+    botId: resolveInitialBot({
+      bots,
+      query: props.arguments.bot,
+      lastId: lastBotId,
+    })?.id,
+  };
+
+  return <AskForm bots={bots} initialBotId={draft.botId} initialMessage={draft.message} onSuccess={popToRoot} />;
+}
