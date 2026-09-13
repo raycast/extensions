@@ -106,5 +106,8 @@
     "lint": "ray lint",
     "publish": "ray publish"
   },
-  "type": "module"
+  "type": "module",
+  "platforms": [
+    "macOS"
+  ]
 }

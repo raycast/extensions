@@ -1,6 +1,6 @@
 # Waktu Solat Changelog
 
-## [Raycast v2 Upgrade and Reliability Improvements] - {PR_MERGE_DATE}
+## [Raycast v2 Upgrade and Reliability Improvements] - 2026-09-13
 
 - Improve initial loading, loading indicators, and empty states for prayer times.
 - Add user-visible error handling when JAKIM prayer-time or zone data is unavailable.
