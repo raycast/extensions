@@ -16,6 +16,7 @@ import {
   forgetResolvedGadak,
   isSearchFail,
   resolveGadakBinary,
+  runRecent,
   runSearch,
   searchErrorDetail,
   searchErrorFull,
@@ -23,8 +24,20 @@ import {
   type Issue,
   type Match,
   type Page,
+  type RecentOk,
   type SearchFail,
 } from "./gadak";
+
+/** "3h ago" — coarse on purpose; the row is a memory aid, not a report. */
+function relativeTime(iso: string): string {
+  const then = Date.parse(iso);
+  if (Number.isNaN(then)) return "";
+  const s = Math.max(0, (Date.now() - then) / 1000);
+  if (s < 90) return "just now";
+  if (s < 5400) return `${Math.round(s / 60)}m ago`;
+  if (s < 129600) return `${Math.round(s / 3600)}h ago`;
+  return `${Math.round(s / 86400)}d ago`;
+}
 
 /** Mirrored Jira/Confluence text is data, not markup: escape CommonMark
  *  punctuation so a title containing `*` or `#` renders literally. */
@@ -108,7 +121,21 @@ export default function Command() {
   const [ms, setMs] = useState<number | null>(null);
   const [detail, setDetail] = useState(true);
   const [error, setError] = useState<SearchFail | null>(null);
+  const [recent, setRecent] = useState<RecentOk | null>(null);
   const seq = useRef(0);
+
+  // The empty-query home. Loaded once per profile; a failure means the
+  // sections just do not render (the search path reports its own errors).
+  useEffect(() => {
+    if (!bin) return;
+    let live = true;
+    runRecent(bin, profile).then((r) => {
+      if (live) setRecent(r);
+    });
+    return () => {
+      live = false;
+    };
+  }, [bin, profile]);
 
   useEffect(() => {
     const q = text.trim();
@@ -334,6 +361,101 @@ export default function Command() {
               ))}
             </List.Section>
           )}
+        </>
+      ) : !q &&
+        recent &&
+        (recent.viewed.length > 0 || recent.updated.length > 0) ? (
+        <>
+          {recent.viewed.length > 0 && (
+            <List.Section title="Recently Viewed">
+              {recent.viewed.map((v) => (
+                <List.Item
+                  key={`v-${v.kind}-${v.key}`}
+                  icon={
+                    v.kind === "page"
+                      ? { source: Icon.Document, tintColor: Color.Green }
+                      : { source: Icon.Circle, tintColor: Color.Blue }
+                  }
+                  title={v.title}
+                  subtitle={v.kind === "issue" ? v.key : undefined}
+                  accessories={[
+                    v.status ? { text: v.status } : {},
+                    { text: relativeTime(v.viewed_at) },
+                  ]}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title="Open in Gadak"
+                        icon={Icon.ArrowRight}
+                        onAction={() =>
+                          open(
+                            v.kind === "page"
+                              ? docLink(v.key, profile)
+                              : deepLink(v.key, profile),
+                          )
+                        }
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Deep Link"
+                        icon={Icon.Link}
+                        content={
+                          v.kind === "page"
+                            ? docLink(v.key, profile)
+                            : deepLink(v.key, profile)
+                        }
+                      />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
+          {(() => {
+            const seen = new Set(
+              recent.viewed.filter((v) => v.kind === "issue").map((v) => v.key),
+            );
+            const rows = recent.updated.filter((u) => !seen.has(u.key));
+            if (rows.length === 0) return null;
+            return (
+              <List.Section title="Recently Updated">
+                {rows.map((u) => (
+                  <List.Item
+                    key={`u-${u.key}`}
+                    icon={{
+                      source: Icon.Circle,
+                      tintColor: Color.SecondaryText,
+                    }}
+                    title={u.key}
+                    subtitle={u.summary}
+                    accessories={[
+                      u.assignee ? { text: u.assignee } : {},
+                      u.status ? { text: u.status } : {},
+                      { text: relativeTime(u.updated_at) },
+                    ]}
+                    actions={
+                      <ActionPanel>
+                        <Action
+                          title="Open in Gadak"
+                          icon={Icon.ArrowRight}
+                          onAction={() => open(deepLink(u.key, profile))}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Deep Link"
+                          icon={Icon.Link}
+                          content={deepLink(u.key, profile)}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Issue Key"
+                          icon={Icon.Clipboard}
+                          content={u.key}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                ))}
+              </List.Section>
+            );
+          })()}
         </>
       ) : !q ? (
         <List.EmptyView

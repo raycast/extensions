@@ -133,6 +133,88 @@ export function searchErrorFull(fail: SearchFail): string {
   return body || fail.message;
 }
 
+/** One row of the empty-query home: something you looked at recently. */
+export type RecentVisit = {
+  kind: "issue" | "page";
+  key: string;
+  title: string;
+  status: string | null;
+  viewed_at: string;
+};
+
+/** One row of the empty-query home: something that moved recently. */
+export type RecentUpdate = {
+  key: string;
+  summary: string;
+  status: string | null;
+  assignee: string | null;
+  updated_at: string;
+};
+
+export type RecentOk = { viewed: RecentVisit[]; updated: RecentUpdate[] };
+
+/** `gadak sql --json` emits one JSON object per line. */
+function runSQL<T>(bin: string, profile: string, query: string): Promise<T[]> {
+  const args: string[] = [];
+  if (profile) {
+    args.push("--profile", profile);
+  }
+  args.push("sql", "--json", query);
+  return new Promise((resolve, reject) => {
+    execFile(
+      bin,
+      args,
+      { maxBuffer: 8 * 1024 * 1024 },
+      (err, stdout, stderr) => {
+        if (err) {
+          reject({
+            stderr: String(stderr || ""),
+            message: err.message,
+            code: (err as NodeJS.ErrnoException).code,
+          } satisfies SearchFail);
+          return;
+        }
+        const rows: T[] = [];
+        for (const line of stdout.split(/\r?\n/)) {
+          const t = line.trim();
+          if (!t) continue;
+          try {
+            rows.push(JSON.parse(t) as T);
+          } catch {
+            // a stray non-JSON line is a warning, not data
+          }
+        }
+        resolve(rows);
+      },
+    );
+  });
+}
+
+/** The empty-query home: recently viewed (local.db visits), recently updated.
+ *  Both queries read the mirror only; failures degrade to empty sections. */
+export async function runRecent(
+  bin: string,
+  profile: string,
+): Promise<RecentOk> {
+  const viewedQ = `
+    select v.kind, v.key, max(v.viewed_at) as viewed_at,
+           coalesce(i.summary, it.title) as title, i.status as status
+    from local.visits v
+    left join issues_full i on v.kind='issue' and i.key = v.key
+    left join items it on v.kind='page' and it.kind='page' and it.key = v.key
+    group by v.kind, v.key order by viewed_at desc limit 8`;
+  const updatedQ = `
+    select key, summary, status, assignee, updated_at
+    from issues_full order by updated_at desc limit 8`;
+  const [viewed, updated] = await Promise.all([
+    runSQL<RecentVisit>(bin, profile, viewedQ).catch(() => [] as RecentVisit[]),
+    runSQL<RecentUpdate>(bin, profile, updatedQ).catch(
+      () => [] as RecentUpdate[],
+    ),
+  ]);
+  return { viewed: viewed.filter((v) => v.title), updated };
+}
+
 export function runSearch(
   bin: string,
   profile: string,

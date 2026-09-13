@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search Issues and Docs",
+      "title": "Search Jira & Confluence",
       "subtitle": "Gadak",
       "description": "Search Jira issues and wiki pages in the local gadak mirror; Enter opens the hit in the Gadak app.",
       "mode": "view",
