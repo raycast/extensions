@@ -22,10 +22,10 @@
     "@raycast/api": "^1.103.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
-    "eslint": "^8.57.0",
+    "eslint": "^10.10.0",
     "prettier": "^3.4.0",
     "typescript": "^5.7.0",
     "vitest": "^3.2.4"
@@ -34,7 +34,9 @@
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "npm run test",
     "test": "vitest run"
   }
 }

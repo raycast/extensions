@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   ARCHIVE_URL,
@@ -30,11 +21,7 @@ const SECTION_ICON: Record<string, string> = {
 
 const PAGE_SIZE = 30;
 
-function fetchText(
-  url: string,
-  onOk: (t: string) => void,
-  onErr: (e: string) => void,
-) {
+function fetchText(url: string, onOk: (t: string) => void, onErr: (e: string) => void) {
   let alive = true;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 15000);
@@ -52,8 +39,7 @@ function fetchText(
     })
     .catch((e) => {
       clearTimeout(timer);
-      if (alive)
-        onErr(e?.name === "AbortError" ? "Request timed out" : String(e));
+      if (alive) onErr(e?.name === "AbortError" ? "Request timed out" : String(e));
     });
   return () => {
     alive = false;
@@ -161,13 +147,7 @@ function IssueDetail({ issue }: { issue: Issue }) {
     <Detail
       isLoading={isLoading}
       navigationTitle={issue.title}
-      markdown={
-        articles
-          ? toIssueMarkdown(issue, articles)
-          : error
-            ? `# Couldn't load issue\n\n${error}`
-            : "Loading…"
-      }
+      markdown={articles ? toIssueMarkdown(issue, articles) : error ? `# Couldn't load issue\n\n${error}` : "Loading…"}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={issue.url} />
@@ -177,14 +157,8 @@ function IssueDetail({ issue }: { issue: Issue }) {
             shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
             onAction={() => push(<ArticleList issue={issue} />)}
           />
-          {error && (
-            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={retry} />
-          )}
-          <Action.CopyToClipboard
-            title="Copy Issue URL"
-            icon={Icon.Clipboard}
-            content={issue.url}
-          />
+          {error && <Action title="Retry" icon={Icon.ArrowClockwise} onAction={retry} />}
+          <Action.CopyToClipboard title="Copy Issue URL" icon={Icon.Clipboard} content={issue.url} />
         </ActionPanel>
       }
     />
@@ -215,21 +189,13 @@ function ArticleList({ issue }: { issue: Issue }) {
           description={error}
           actions={
             <ActionPanel>
-              <Action
-                title="Retry"
-                icon={Icon.ArrowClockwise}
-                onAction={retry}
-              />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={retry} />
             </ActionPanel>
           }
         />
       )}
       {[...groups].map(([section, items]) => (
-        <List.Section
-          key={section}
-          title={`${SECTION_ICON[section] ?? "•"} ${section}`}
-          subtitle={`${items.length}`}
-        >
+        <List.Section key={section} title={`${SECTION_ICON[section] ?? "•"} ${section}`} subtitle={`${items.length}`}>
           {items.map((a, idx) => (
             <List.Item
               key={`${a.url}::${idx}`}
@@ -241,20 +207,10 @@ function ArticleList({ issue }: { issue: Issue }) {
                   markdown={toArticleMarkdown(a)}
                   metadata={
                     <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title="Section"
-                        text={section}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Source"
-                        text={hostOf(a.url)}
-                      />
+                      <List.Item.Detail.Metadata.Label title="Section" text={section} />
+                      <List.Item.Detail.Metadata.Label title="Source" text={hostOf(a.url)} />
                       <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Link
-                        title="Read full article"
-                        text={a.title}
-                        target={a.url}
-                      />
+                      <List.Item.Detail.Metadata.Link title="Read full article" text={a.title} target={a.url} />
                     </List.Item.Detail.Metadata>
                   }
                 />
@@ -274,11 +230,7 @@ function ArticleList({ issue }: { issue: Issue }) {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     onAction={() => push(<IssueDetail issue={issue} />)}
                   />
-                  <Action.CopyToClipboard
-                    title="Copy Article URL"
-                    icon={Icon.Clipboard}
-                    content={a.url}
-                  />
+                  <Action.CopyToClipboard title="Copy Article URL" icon={Icon.Clipboard} content={a.url} />
                 </ActionPanel>
               }
             />
@@ -297,10 +249,7 @@ export default function BrowseIssues() {
   const q = searchText.toLowerCase();
   const filtered = (issues ?? []).filter(
     (i) =>
-      !q ||
-      i.title.toLowerCase().includes(q) ||
-      i.number.includes(q) ||
-      formatDate(i.date).toLowerCase().includes(q),
+      !q || i.title.toLowerCase().includes(q) || i.number.includes(q) || formatDate(i.date).toLowerCase().includes(q),
   );
   const visible = filtered.slice(0, shown);
   return (
@@ -311,9 +260,7 @@ export default function BrowseIssues() {
         setSearchText(t);
         setShown(PAGE_SIZE);
       }}
-      searchBarPlaceholder={
-        issues ? `Search ${issues.length} issues...` : "Search issues..."
-      }
+      searchBarPlaceholder={issues ? `Search ${issues.length} issues...` : "Search issues..."}
       pagination={{
         pageSize: PAGE_SIZE,
         hasMore: shown < filtered.length,
@@ -326,11 +273,7 @@ export default function BrowseIssues() {
           description={error}
           actions={
             <ActionPanel>
-              <Action
-                title="Retry"
-                icon={Icon.ArrowClockwise}
-                onAction={retry}
-              />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={retry} />
             </ActionPanel>
           }
         />
@@ -344,11 +287,7 @@ export default function BrowseIssues() {
           accessories={[{ text: `#${issue.number}` }]}
           actions={
             <ActionPanel>
-              <Action
-                title="Read Issue"
-                icon={Icon.Document}
-                onAction={() => push(<IssueDetail issue={issue} />)}
-              />
+              <Action title="Read Issue" icon={Icon.Document} onAction={() => push(<IssueDetail issue={issue} />)} />
               <Action
                 title="Browse as List"
                 icon={Icon.List}
@@ -356,11 +295,7 @@ export default function BrowseIssues() {
                 onAction={() => push(<ArticleList issue={issue} />)}
               />
               <Action.OpenInBrowser url={issue.url} />
-              <Action.CopyToClipboard
-                title="Copy Issue URL"
-                icon={Icon.Clipboard}
-                content={issue.url}
-              />
+              <Action.CopyToClipboard title="Copy Issue URL" icon={Icon.Clipboard} content={issue.url} />
             </ActionPanel>
           }
         />
@@ -374,15 +309,9 @@ export async function demo() {
   const archiveHtml = await fetch(ARCHIVE_URL).then((r) => r.text());
   const issues = parseArchive(archiveHtml);
   if (!issues.length) throw new Error("archive parse drift — no issues found");
-  console.assert(
-    issues.length > 500,
-    `expected hundreds of issues, got ${issues.length}`,
-  );
+  console.assert(issues.length > 500, `expected hundreds of issues, got ${issues.length}`);
   const html = await fetch(issues[0].url).then((r) => r.text());
   const articles = parseArticles(html);
-  console.assert(
-    articles.length > 5,
-    `expected articles, got ${articles.length}`,
-  );
+  console.assert(articles.length > 5, `expected articles, got ${articles.length}`);
   console.log(`ok: ${issues[0].title} -> ${articles.length} articles`);
 }

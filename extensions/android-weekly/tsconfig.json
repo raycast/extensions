@@ -13,6 +13,6 @@
     "jsx": "react-jsx",
     "outDir": "./dist"
   },
-  "include": ["src/**/*", "__tests__/**/*"],
+  "include": ["src/**/*", "__tests__/**/*", "raycast-env.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

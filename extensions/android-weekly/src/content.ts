@@ -24,18 +24,15 @@ const NAMED: Record<string, string> = {
 
 // single pass — chained replaces double-decode "&amp;lt;" into "<"
 export function decode(s: string): string {
-  return s.replace(
-    /&(amp|lt|gt|quot|apos|nbsp|#\d+|#x[0-9a-fA-F]+);/g,
-    (m, e: string) => {
-      if (e.startsWith("#")) {
-        const n = e[1] === "x" ? parseInt(e.slice(2), 16) : Number(e.slice(1));
-        // fromCodePoint throws on lone surrogates — leave those raw
-        const valid = n >= 0 && n <= 0x10ffff && !(n >= 0xd800 && n <= 0xdfff);
-        return valid ? String.fromCodePoint(n) : m;
-      }
-      return NAMED[e] ?? m;
-    },
-  );
+  return s.replace(/&(amp|lt|gt|quot|apos|nbsp|#\d+|#x[0-9a-fA-F]+);/g, (m, e: string) => {
+    if (e.startsWith("#")) {
+      const n = e[1] === "x" ? parseInt(e.slice(2), 16) : Number(e.slice(1));
+      // fromCodePoint throws on lone surrogates — leave those raw
+      const valid = n >= 0 && n <= 0x10ffff && !(n >= 0xd800 && n <= 0xdfff);
+      return valid ? String.fromCodePoint(n) : m;
+    }
+    return NAMED[e] ?? m;
+  });
 }
 
 export function stripTags(s: string): string {
@@ -52,20 +49,7 @@ export function hostOf(url: string): string {
   }
 }
 
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 // manual format avoids Date timezone day-shifting on YYYY-MM-DD strings
 export function formatDate(date: string): string {
@@ -81,8 +65,7 @@ export function formatDate(date: string): string {
 
 export function parseArchive(html: string): Issue[] {
   const issues: Issue[] = [];
-  const re =
-    /<span>\s*(\d{4}-\d{2}-\d{2})\s*<\/span>\s*<h3>\s*<a href="(\/issues\/issue-\d+)">Issue #(\d+)<\/a>/g;
+  const re = /<span>\s*(\d{4}-\d{2}-\d{2})\s*<\/span>\s*<h3>\s*<a href="(\/issues\/issue-\d+)">Issue #(\d+)<\/a>/g;
   for (const m of html.matchAll(re)) {
     issues.push({
       number: m[3],
@@ -109,8 +92,7 @@ export function parseArticles(html: string): Article[] {
     const title = stripTags(m[2]);
     if (!title || title.length < 3) continue;
     const index = m.index ?? 0;
-    const section =
-      [...sections].reverse().find((s) => s.index < index)?.name ?? "Articles";
+    const section = [...sections].reverse().find((s) => s.index < index)?.name ?? "Articles";
     articles.push({ title, url, description: stripTags(m[3]), section });
   }
   return articles;
