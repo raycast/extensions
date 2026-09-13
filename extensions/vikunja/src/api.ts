@@ -38,12 +38,39 @@ export interface Task {
   updated: string;
 }
 
+export interface User {
+  id: number;
+  username: string;
+  name: string;
+  email: string;
+}
+
+export interface TaskReminder {
+  /**
+   * Absolute reminder timestamp.
+   *
+   * For a relative reminder the Vikunja web client sends the Unix epoch here
+   * rather than null, and the server ignores it when `relative_to` is set.
+   * We match that so behaviour is identical to the official frontend.
+   */
+  reminder: string;
+  /** Offset in seconds from `relative_to`. Negative means before. */
+  relative_period: number;
+  /** Which task date the offset applies to. */
+  relative_to: "due_date" | "start_date" | "end_date";
+}
+
 export interface TaskInput {
   title: string;
   description?: string;
   priority?: number;
   due_date?: string | null;
   is_favorite?: boolean;
+  repeat_after?: number;
+  repeat_mode?: number;
+  reminders?: TaskReminder[];
+  /** Assignees are accepted directly on create, same as the web client does. */
+  assignees?: User[];
 }
 
 function getBaseUrl(): string {
@@ -77,8 +104,47 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+/**
+ * Fetches every page of a paginated collection.
+ *
+ * Vikunja pages list endpoints (50 per page by default) and reports the page
+ * count in `x-pagination-total-pages`. Without this, instances with more than
+ * one page of labels would make existing labels look missing, which would then
+ * get duplicated on create.
+ */
+async function requestAll<T>(path: string): Promise<T[]> {
+  const separator = path.includes("?") ? "&" : "?";
+  const results: T[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const url = `${getBaseUrl()}/api/v1${path}${separator}page=${page}`;
+    const response = await fetch(url, { headers: getHeaders() });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`Vikunja API error (${response.status}): ${body}`);
+    }
+
+    const items = (await response.json()) as T[];
+    results.push(...items);
+
+    if (page === 1) {
+      const reported = Number(
+        response.headers.get("x-pagination-total-pages") ?? "1",
+      );
+      totalPages = Number.isFinite(reported) && reported > 0 ? reported : 1;
+    }
+
+    page += 1;
+  } while (page <= totalPages);
+
+  return results;
+}
+
 export async function getProjects(includeArchived = false): Promise<Project[]> {
-  const projects = await request<Project[]>("/projects");
+  const projects = await requestAll<Project>("/projects");
   return includeArchived ? projects : projects.filter((p) => !p.is_archived);
 }
 
@@ -104,7 +170,22 @@ export async function deleteProject(projectId: number): Promise<void> {
 }
 
 export async function getLabels(): Promise<Label[]> {
-  return request<Label[]>("/labels");
+  return requestAll<Label>("/labels");
+}
+
+/**
+ * Searches the members of a project.
+ *
+ * Assignees can only be resolved per project, so this is called with the
+ * project the task will land in.
+ */
+export async function getProjectUsers(
+  projectId: number,
+  search: string,
+): Promise<User[]> {
+  return request<User[]>(
+    `/projects/${projectId}/projectusers?s=${encodeURIComponent(search)}`,
+  );
 }
 
 export async function createTask(
@@ -140,9 +221,14 @@ export async function addLabelsToTask(
   taskId: number,
   labelIds: number[],
 ): Promise<void> {
-  for (const labelId of labelIds) {
-    await addLabelToTask(taskId, labelId);
-  }
+  await Promise.all(labelIds.map((labelId) => addLabelToTask(taskId, labelId)));
+}
+
+export async function createLabel(title: string): Promise<Label> {
+  return request<Label>("/labels", {
+    method: "PUT",
+    body: JSON.stringify({ title }),
+  });
 }
 
 export async function updateTaskLabels(
