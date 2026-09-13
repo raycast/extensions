@@ -12,7 +12,7 @@ vi.mock("@raycast/api", () => ({
 import { getPreferenceValues } from "@raycast/api";
 
 // Import after the mock is in place so the module picks up the stub.
-import { getBookmarksDirectoryPath, getHistoryDbPath } from "../index";
+import { getHistoryDbPath, searchWhereClause } from "../index";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -278,17 +278,6 @@ describe("getProfileName (via getHistoryDbPath)", () => {
     // No valid profile for Nightly — safer to return empty than silently read release data.
     expect(result).toBe(path.join(PROFILES_BASE, "places.sqlite"));
   });
-
-  // --- Public API surface (bookmarks path delegates to same logic) ----------
-
-  it("getBookmarksDirectoryPath uses the same profile resolution", () => {
-    setPrefs("default-release");
-    mockProfiles(["abc123.default-release"]);
-
-    const result = getBookmarksDirectoryPath();
-
-    expect(result).toBe(path.join(PROFILES_BASE, "abc123.default-release", "bookmarkbackups"));
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -452,15 +441,6 @@ describe("getProfileName on Windows (via getHistoryDbPath)", () => {
     expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
   });
 
-  it("getBookmarksDirectoryPath uses APPDATA on Windows", () => {
-    setPrefs("default-release");
-    mockProfiles(["abc123.default-release"]);
-
-    const result = getBookmarksDirectoryPath();
-
-    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc123.default-release", "bookmarkbackups"));
-  });
-
   it("returns an empty path segment when the Profiles directory does not exist on Windows", () => {
     setPrefs("default-release");
     vi.spyOn(fs, "readdirSync").mockImplementation(() => {
@@ -502,5 +482,37 @@ describe("getProfileName on Windows (via getHistoryDbPath)", () => {
     const result = getHistoryDbPath();
 
     expect(result).toBe(path.join(PROFILES_BASE_WIN, "good.profile", "places.sqlite"));
+  });
+});
+
+describe("searchWhereClause", () => {
+  it("returns an empty clause for no query", () => {
+    expect(searchWhereClause(undefined, "title", "url")).toBe("");
+    expect(searchWhereClause("   ", "title", "url")).toBe("");
+  });
+
+  it("matches every term against title or url", () => {
+    expect(searchWhereClause("foo bar", "title", "url")).toBe(
+      "AND (title LIKE '%foo%' ESCAPE '\\' OR url LIKE '%foo%' ESCAPE '\\') " +
+        "AND (title LIKE '%bar%' ESCAPE '\\' OR url LIKE '%bar%' ESCAPE '\\')",
+    );
+  });
+
+  it("escapes single quotes", () => {
+    expect(searchWhereClause("o'reilly", "t", "u")).toBe(
+      "AND (t LIKE '%o''reilly%' ESCAPE '\\' OR u LIKE '%o''reilly%' ESCAPE '\\')",
+    );
+  });
+
+  it("treats LIKE wildcards and backslashes as literals", () => {
+    expect(searchWhereClause("%20", "t", "u")).toBe(
+      "AND (t LIKE '%\\%20%' ESCAPE '\\' OR u LIKE '%\\%20%' ESCAPE '\\')",
+    );
+    expect(searchWhereClause("my_file", "t", "u")).toBe(
+      "AND (t LIKE '%my\\_file%' ESCAPE '\\' OR u LIKE '%my\\_file%' ESCAPE '\\')",
+    );
+    expect(searchWhereClause("a\\b", "t", "u")).toBe(
+      "AND (t LIKE '%a\\\\b%' ESCAPE '\\' OR u LIKE '%a\\\\b%' ESCAPE '\\')",
+    );
   });
 });

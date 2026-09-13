@@ -21,8 +21,16 @@
       "name": "convert-link",
       "title": "Convert Track Link",
       "subtitle": "Qobuz",
-      "description": "Copy a Spotify, YouTube Music, or Qobuz track link, then run this to convert it to the other services.",
-      "mode": "view"
+      "description": "Convert the track playing in Qobuz — or a Spotify, YouTube Music, or Qobuz track link from the clipboard — to the other services.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "link",
+          "placeholder": "Track link (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "now-playing",

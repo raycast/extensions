@@ -317,6 +317,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "pixelesq",
+    title: "Pixelesq",
+    description:
+      "Build and manage your Pixelesq website from Raycast: create pages, edit sections, write content, fix SEO and read analytics, with every edit saved as a draft until you publish.",
+    icon: "https://mcp.pixelesq.app/icon.png",
+    homepage: "https://www.pixelesq.com/docs/integrations/claude",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.pixelesq.app/mcp"],
+    },
+  },
+  {
     name: "posteverywhere",
     title: "PostEverywhere",
     description:

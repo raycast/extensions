@@ -7,13 +7,15 @@ import {
   createInterval,
   getCurrentInterval,
   getNextIntervalExecutor,
+  getNextIntervalType,
   isPaused,
   pauseInterval,
   preferences,
   resetInterval,
   restartInterval,
+  skipInterval,
 } from "./lib/intervals";
-import { FocusText, ShortBreakText, LongBreakText } from "./lib/constants";
+import { FocusText, IntervalTitles, ShortBreakText, LongBreakText } from "./lib/constants";
 import { GiphyResponse, Interval, Quote } from "./lib/types";
 import { checkDNDExtensionInstall } from "./lib/doNotDisturb";
 
@@ -36,6 +38,9 @@ const createAction = (action: () => void) => () => {
 const ActionsList = () => {
   const currentInterval = getCurrentInterval();
   checkDNDExtensionInstall();
+  const skipAction = currentInterval ? (
+    <Action onAction={createAction(skipInterval)} title={"Skip to Next"} shortcut={{ modifiers: ["cmd"], key: "n" }} />
+  ) : null;
 
   return (
     <List navigationTitle="Control Pomodoro Timers">
@@ -48,6 +53,7 @@ const ActionsList = () => {
               actions={
                 <ActionPanel>
                   <Action onAction={createAction(continueInterval)} title={"Continue"} />
+                  {skipAction}
                 </ActionPanel>
               }
             />
@@ -58,6 +64,7 @@ const ActionsList = () => {
               actions={
                 <ActionPanel>
                   <Action onAction={createAction(pauseInterval)} title={"Pause"} />
+                  {skipAction}
                 </ActionPanel>
               }
             />
@@ -68,6 +75,7 @@ const ActionsList = () => {
             actions={
               <ActionPanel>
                 <Action onAction={createAction(resetInterval)} title={"Reset"} />
+                {skipAction}
               </ActionPanel>
             }
           />
@@ -77,8 +85,15 @@ const ActionsList = () => {
             actions={
               <ActionPanel>
                 <Action onAction={createAction(restartInterval)} title={"Restart Current"} />
+                {skipAction}
               </ActionPanel>
             }
+          />
+          <List.Item
+            title="Skip to Next"
+            subtitle={IntervalTitles[getNextIntervalType(currentInterval.type)]}
+            icon={Icon.Forward}
+            actions={<ActionPanel>{skipAction}</ActionPanel>}
           />
         </>
       ) : (
