@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "emotecast",
+  "title": "Emotecast",
+  "description": "Search 7TV, BetterTTV and FrankerFaceZ emotes and paste them as animated files at emoji or sticker size",
+  "icon": "command-icon.png",
+  "author": "Kan-A-Pesh",
+  "categories": [
+    "Communication",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-emotes",
+      "title": "Search Emotes",
+      "subtitle": "Emotecast",
+      "description": "Search emotes and paste them at emoji or sticker size",
+      "mode": "view",
+      "keywords": [
+        "emote",
+        "emoji",
+        "7tv",
+        "bttv",
+        "betterttv",
+        "frankerfacez",
+        "twitch",
+        "gif",
+        "discord",
+        "nitro",
+        "sticker"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showNsfw",
+      "title": "NSFW Emotes",
+      "label": "Include NSFW emotes, hidden until selected",
+      "description": "When enabled, NSFW emotes appear hidden and are revealed on selection",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "FFmpeg Path",
+      "description": "Used to resize emotes that are not served at the exact target height. Leave empty to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "magickPath",
+      "title": "ImageMagick Path",
+      "description": "Used to decode animated WebP emotes, which most ffmpeg builds cannot read. Leave empty to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.6",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.10",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:live": "vitest run --config vitest.live.config.mts",
+    "lint": "biome lint src tests && ray lint",
+    "fix-lint": "biome lint src tests --write && ray lint --fix",
+    "check": "biome lint src tests && ray lint && vitest run && ray build -e dist",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
