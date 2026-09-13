@@ -10,6 +10,13 @@ function sanitizeForHtml(text: string): string {
     .replace(/'/g, "&#039;");
 }
 
+export function generateRichLink(url: string, title: string): { text: string; html: string } {
+  return {
+    text: url,
+    html: `<a href="${sanitizeForHtml(url)}">${sanitizeForHtml(title)}</a>`,
+  };
+}
+
 function sanitizeUrl(url: string): string {
   try {
     new URL(url);
