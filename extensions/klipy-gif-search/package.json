@@ -1,0 +1,113 @@
+{
+  "name": "klipy-gif-search",
+  "title": "KLIPY GIF Search",
+  "version": "1.0.0",
+  "description": "Search KLIPY, import local GIFs, and copy web-optimized files",
+  "author": "amixaam",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "search-gifs",
+      "title": "Search KLIPY GIFs",
+      "description": "Search, favorite, import, optimize, and copy GIFs",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "title": "KLIPY API Key",
+          "description": "Create a free test or production key at partner.klipy.com",
+          "type": "password",
+          "required": true
+        },
+        {
+          "name": "maxSizeMB",
+          "title": "Maximum GIF Size (MB)",
+          "description": "Imported and downloaded GIFs are optimized below this size when possible",
+          "type": "textfield",
+          "default": "2",
+          "required": true
+        },
+        {
+          "name": "optimizeThresholdKB",
+          "title": "Optimization Threshold (KB)",
+          "description": "GIFs at or below this size are copied without optimization",
+          "type": "textfield",
+          "default": "500",
+          "required": true
+        },
+        {
+          "name": "maxDimension",
+          "title": "Maximum Width or Height",
+          "description": "Large GIFs are scaled down to this many pixels before copying",
+          "type": "textfield",
+          "default": "720",
+          "required": true
+        },
+        {
+          "name": "contentFilter",
+          "title": "Content Filter",
+          "description": "Choose the KLIPY safety level used for searches and trending results",
+          "type": "dropdown",
+          "default": "off",
+          "required": true,
+          "data": [
+            {
+              "title": "High",
+              "value": "high"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Low",
+              "value": "low"
+            },
+            {
+              "title": "Off",
+              "value": "off"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "import-gifs",
+      "title": "Import Local GIFs",
+      "description": "Add local GIF files to your searchable library",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^1.17.0",
+    "modern-gif": "^2.1.0",
+    "react": "^19.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
