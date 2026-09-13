@@ -1,0 +1,144 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tinkerer-club",
+  "title": "Tinkerer Club",
+  "description": "Browse and participate in Tinkerer Club from Raycast, with confirmable AI tools.",
+  "icon": "tinkerer-club-icon.png",
+  "author": "Olli0103",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "keywords": [
+    "community",
+    "feed",
+    "articles",
+    "prompts",
+    "tinkerer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-tinkerer",
+      "title": "Search Club",
+      "description": "Search members, posts, topics, projects, and other club content.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-prompts",
+      "title": "Browse Prompts",
+      "description": "Search, inspect, and copy prompts shared by the club.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-feed",
+      "title": "Browse Feed",
+      "description": "Read posts and comments, reply, and react without leaving Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-articles",
+      "title": "Browse Articles",
+      "description": "Search published articles, read full posts, and inspect your drafts.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-post",
+      "title": "Quick Post",
+      "description": "Publish, queue, or save a short Tinkerer Club post.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-api",
+      "title": "Browse API",
+      "description": "Browse and run procedures from the live Tinkerer Club API catalog.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "menu-bar",
+      "title": "Tinkerer Club Menu Bar",
+      "description": "See recent feed activity and articles, then open common Tinkerer actions.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-feed",
+      "title": "Get Tinkerer Feed",
+      "description": "Get the latest posts from the authenticated member's Tinkerer Club feed."
+    },
+    {
+      "name": "get-articles",
+      "title": "Get Tinkerer Articles",
+      "description": "Search published Tinkerer Club articles for Raycast AI."
+    },
+    {
+      "name": "search-club",
+      "title": "Search Tinkerer Club",
+      "description": "Search Tinkerer Club members, posts, topics, projects, and other club content."
+    },
+    {
+      "name": "get-post",
+      "title": "Get Tinkerer Conversation",
+      "description": "Get one Tinkerer Club post and its comments by post ID."
+    },
+    {
+      "name": "comment-on-post",
+      "title": "Comment on Tinkerer Post",
+      "description": "Post a comment or reply after showing the user a confirmation."
+    },
+    {
+      "name": "react",
+      "title": "React on Tinkerer Club",
+      "description": "Add or remove a reaction on a post or comment after showing the user a confirmation."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Platform Base URL",
+      "description": "The HTTPS origin that serves /api/v1, without a trailing API path.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://app.tinkerer.club",
+      "placeholder": "https://app.tinkerer.club"
+    },
+    {
+      "name": "authorizationValue",
+      "title": "API Key",
+      "description": "A member API key created in Tinkerer Club Settings. It is sent in the x-api-key header.",
+      "type": "password",
+      "required": true,
+      "placeholder": "tnk_…"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.3.0",
+    "react": "19.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.20.2",
+    "@types/react": "19.3.0",
+    "eslint": "10.10.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "vitest": "5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test && npm run lint && npm run build",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
