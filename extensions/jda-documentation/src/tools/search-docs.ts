@@ -24,7 +24,7 @@ export default async function searchDocs(input: Input) {
     loadFaq(),
   ]);
   const entries = [...inventory.entries, ...guides, ...faq];
-  const meta = await ensureMeta(inventory.entries);
+  const meta = await ensureMeta(inventory);
 
   const scope = input.kind
     ? entries.filter((entry) => entry.kind === input.kind)

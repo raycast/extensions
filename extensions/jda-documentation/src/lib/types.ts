@@ -38,9 +38,16 @@ export interface EntryMeta {
 
 export type MetaIndex = Record<string, EntryMeta>;
 
+export interface Validators {
+  etag?: string;
+  lastModified?: string;
+}
+
 export interface Inventory {
-  version: string;
   fetchedAt: number;
+  revision: string;
+  version: string;
+  validators: Record<string, Validators>;
   entries: DocEntry[];
 }
 

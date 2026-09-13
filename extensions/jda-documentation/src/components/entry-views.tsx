@@ -13,7 +13,7 @@ import { ReactNode, useState } from "react";
 import { KIND_COLOR, KIND_ICON } from "../lib/appearance";
 import { DocDetails, loadDetails } from "../lib/docpage";
 import { PrimaryAction } from "../lib/preferences";
-import { membersOf } from "../lib/search";
+import { findEntry, memberCount, membersOf } from "../lib/search";
 import {
   boilerplate,
   importStatement,
@@ -143,9 +143,9 @@ function EntryActions({
   extra?: ReactNode;
 }) {
   const { push } = useNavigation();
-  const members = hasMembers(entry) ? membersOf(ctx.entries, entry) : [];
+  const members = hasMembers(entry) ? memberCount(ctx.entries, entry) : 0;
   const references = (details?.references ?? [])
-    .map((name) => ctx.entries.find((candidate) => candidate.name === name))
+    .map((name) => findEntry(ctx.entries, name))
     .filter(
       (candidate): candidate is DocEntry =>
         Boolean(candidate) && candidate?.name !== entry.name,
@@ -178,9 +178,9 @@ function EntryActions({
       <ActionPanel.Section>
         {ctx.primaryAction === "browser" ? openInBrowser : showDetails}
         {ctx.primaryAction === "browser" ? showDetails : openInBrowser}
-        {members.length > 0 ? (
+        {members > 0 ? (
           <Action
-            title={`Show ${members.length} Members`}
+            title={`Show ${members} Members`}
             icon={Icon.BulletPoints}
             shortcut={{ modifiers: ["cmd"], key: "m" }}
             onAction={() => push(<MemberList parent={entry} ctx={ctx} />)}
@@ -218,7 +218,7 @@ function EntryActions({
             title="Copy Example Code"
             content={details.example}
             icon={Icon.Code}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
           />
         )}
         {importLine && (
@@ -232,7 +232,7 @@ function EntryActions({
           <Action.CopyToClipboard
             title="Copy Signature"
             content={details.signature}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
           />
         )}
         <Action.CopyToClipboard

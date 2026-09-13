@@ -1,9 +1,8 @@
-import { Cache } from "@raycast/api";
 import { parse } from "node-html-parser";
 import TurndownService from "turndown";
-import { CACHE_SCHEMA, DOCS_BASE, WIKI_BASE } from "./constants";
+import { DOCS_BASE, WIKI_BASE } from "./constants";
 import { faqHtml } from "./faq";
-import { discardPages, fetchPage } from "./pages";
+import { detailsCache, fetchPage } from "./pages";
 import { DocEntry } from "./types";
 import { guideHtml } from "./wiki";
 
@@ -26,11 +25,6 @@ function safeDecode(value: string): string {
     return value;
   }
 }
-
-const detailsCache = new Cache({
-  namespace: `details-${CACHE_SCHEMA}`,
-  capacity: 10 * 1024 * 1024,
-});
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -269,13 +263,6 @@ export async function loadDetails(entry: DocEntry): Promise<DocDetails> {
 
   detailsCache.set(entry.name, JSON.stringify(details));
   return details;
-}
-
-// A refresh exists because the published docs moved, so the downloaded pages
-// are stale too and have to go with the rendered Markdown.
-export async function clearDetailsCache(): Promise<void> {
-  detailsCache.clear();
-  await discardPages();
 }
 
 export interface PageTarget {

@@ -34,13 +34,13 @@ None of this is a hand-written table. Event intents are resolved by replaying JD
 | Show Members (types and packages) | <kbd>⌘</kbd><kbd>M</kbd> |
 | Show Referenced Entries | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>R</kbd> |
 | Copy Boilerplate | <kbd>⌘</kbd><kbd>B</kbd> |
-| Copy Example Code | <kbd>⌘</kbd><kbd>E</kbd> |
+| Copy Example Code | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>E</kbd> |
 | Toggle Preview pane | <kbd>⌘</kbd><kbd>D</kbd> |
 | Add to Favorites | <kbd>⌘</kbd><kbd>F</kbd> |
 | Open in Browser | <kbd>⌘</kbd><kbd>O</kbd> |
 | Copy Qualified Name | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>.</kbd> |
 | Copy Import Statement | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>I</kbd> |
-| Copy Signature | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>S</kbd> |
+| Copy Signature | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>G</kbd> |
 | Copy Markdown Link | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>L</kbd> |
 | Copy Documentation URL | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>C</kbd> |
 | View Source on GitHub | <kbd>⌘</kbd><kbd>⇧</kbd><kbd>O</kbd> |
@@ -156,16 +156,16 @@ Both read the same on-disk index the commands use, so they work offline for anyt
 
 Javadoc publishes a machine-readable search index next to the pages it renders, so the extension does not have to scrape anything to know what exists:
 
-1. **`type-search-index.js`, `member-search-index.js` and `package-search-index.js`** — the Javadoc search indexes. Together they describe every documented package, type and member with its page and anchor. Cached on disk for 24 hours; all searching happens locally against that cache, so typing never hits the network.
-2. **`overview-tree.html`** — scanned once per day to rebuild the class hierarchy, which is what turns JDA's `GatewayIntent.fromEvents` rules into a per-event intent badge, together with the busiest type pages for the method badges.
+1. **`type-search-index.js`, `member-search-index.js` and `package-search-index.js`** — the Javadoc search indexes. Together they describe every documented package, type and member with its page and anchor. Cached on disk and checked once a day with a conditional request: while the documentation is unchanged that check is three `304` responses and no download. All searching happens locally against that cache, so typing never hits the network.
+2. **`overview-tree.html`** — scanned to rebuild the class hierarchy, which is what turns JDA's `GatewayIntent.fromEvents` rules into a per-event intent badge, together with every member page for the method badges. The scan is tied to the revision of the indexes, so it only runs again when a new JDA release is published.
 3. **`search/search_index.json` on jda.wiki** — the guide and FAQ index, with the section itself sliced out of the rendered page so sub-headings stay attached to their parent section.
 4. **The entry's own page** — fetched when you open an entry. Only the `<section>` that carries the anchor is sliced out at the string level and parsed, because building a DOM for a page the size of `Guild.html` costs about twenty times the memory of one section.
 
 ### Offline use
 
-Every page that gets fetched is written to disk, and every rendered entry is kept in Raycast's cache, so anything you have already opened works with no network at all. **Prefetch All Docs for Offline Use**, in the action panel of the root list, downloads all of it up front — useful before a flight. If a request fails or times out (15 s), the extension falls back to the stored copy instead of failing.
+Every page that gets fetched is written to disk compressed — the whole Javadoc and wiki take about 4 MB instead of 30 MB — and every rendered entry is kept in Raycast's cache, so anything you have already opened works with no network at all. **Prefetch All Docs for Offline Use**, in the action panel of the root list, downloads all of it up front — useful before a flight. If a request fails or times out (15 s), the extension falls back to the stored copy instead of failing.
 
-**Refresh Index** re-downloads the indexes and rebuilds the badges before the 24-hour cache expires, for example after a new JDA release.
+**Refresh Index** checks for a new JDA release right away instead of waiting for the daily check. Unchanged files answer `304`, so a refresh without a new release downloads nothing, and the offline copy is kept either way.
 
 ## Preferences
 

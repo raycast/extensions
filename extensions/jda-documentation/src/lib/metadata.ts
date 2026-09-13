@@ -1,9 +1,10 @@
 import { environment } from "@raycast/api";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { CACHE_SCHEMA } from "./constants";
 import { fetchPage } from "./pages";
-import { DocEntry, EntryMeta, MetaIndex } from "./types";
+import { writeFileAtomic } from "./storage";
+import { DocEntry, EntryMeta, Inventory, MetaIndex } from "./types";
 
 const META_TTL = 24 * 60 * 60 * 1000;
 const SCAN_CONCURRENCY = 16;
@@ -93,6 +94,7 @@ const EVENT_INTENT_RULES: { supertypes: string[]; intents: string[] }[] = [
 
 interface StoredMeta {
   fetchedAt: number;
+  revision?: string;
   meta: MetaIndex;
 }
 
@@ -336,35 +338,79 @@ async function readStored(): Promise<StoredMeta | null> {
   }
 }
 
+// Member pages only change when the documentation is republished, so a complete
+// scan taken at the inventory's revision stays valid until that revision moves.
+function isCurrent(
+  stored: StoredMeta,
+  inventory: Inventory,
+  force: boolean,
+): boolean {
+  if (stored.revision && inventory.revision)
+    return stored.revision === inventory.revision;
+  return !force && Date.now() - stored.fetchedAt < META_TTL;
+}
+
 // Held for the lifetime of the process for the same reason as the inventory:
 // every search, filter and AI tool call otherwise re-reads and re-parses it.
 let memoryMeta: StoredMeta | null = null;
+let pending: { key: string; promise: Promise<MetaIndex> } | null = null;
 
-export async function ensureMeta(
-  entries: DocEntry[],
-  force = false,
+async function rebuild(
+  inventory: Inventory,
+  force: boolean,
 ): Promise<MetaIndex> {
-  if (!force && memoryMeta && Date.now() - memoryMeta.fetchedAt < META_TTL)
-    return memoryMeta.meta;
-
-  const stored = memoryMeta ?? (await readStored());
-  if (!force && stored && Date.now() - stored.fetchedAt < META_TTL) {
+  const stored = await readStored();
+  if (stored && isCurrent(stored, inventory, force)) {
     memoryMeta = stored;
     return stored.meta;
   }
-  if (!entries.length) return stored?.meta ?? {};
+
+  const previous = memoryMeta ?? stored;
+  if (!inventory.entries.length) return previous?.meta ?? {};
 
   try {
-    const { meta, complete } = await scan(entries, force, stored?.meta);
+    const { meta, complete } = await scan(
+      inventory.entries,
+      force,
+      previous?.meta,
+    );
     if (complete) {
-      memoryMeta = { fetchedAt: Date.now(), meta };
-      await mkdir(environment.supportPath, { recursive: true });
-      await writeFile(metaFile(), JSON.stringify(memoryMeta), "utf8");
+      memoryMeta = {
+        fetchedAt: Date.now(),
+        revision: inventory.revision,
+        meta,
+      };
+      await writeFileAtomic(metaFile(), JSON.stringify(memoryMeta)).catch(
+        () => undefined,
+      );
     } else if (!memoryMeta) {
-      memoryMeta = { fetchedAt: stored?.fetchedAt ?? 0, meta };
+      memoryMeta = { fetchedAt: previous?.fetchedAt ?? 0, meta };
     }
     return meta;
   } catch {
-    return stored?.meta ?? {};
+    return previous?.meta ?? {};
   }
+}
+
+// The list and a refresh can ask at the same moment; one scan of 859 pages
+// has to serve both instead of running twice side by side.
+export async function ensureMeta(
+  inventory: Inventory,
+  force = false,
+): Promise<MetaIndex> {
+  if (memoryMeta && isCurrent(memoryMeta, inventory, force))
+    return memoryMeta.meta;
+
+  const key = inventory.revision || String(inventory.fetchedAt);
+  if (pending) {
+    if (pending.key === key) return pending.promise;
+    await pending.promise.catch(() => undefined);
+    return ensureMeta(inventory, force);
+  }
+
+  const promise = rebuild(inventory, force).finally(() => {
+    pending = null;
+  });
+  pending = { key, promise };
+  return promise;
 }

@@ -1,7 +1,10 @@
 import { environment } from "@raycast/api";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { CACHE_SCHEMA, DOCS_BASE, timeoutSignal } from "./constants";
+import { CACHE_SCHEMA, DOCS_BASE } from "./constants";
+import { fetchIfChanged, fetchText, revisionOf } from "./http";
+import { clearDetailsCache } from "./pages";
+import { pruneStaleSchemas, writeFileAtomic } from "./storage";
 import { DocEntry, EntryKind, Inventory, SectionId } from "./types";
 
 const CACHE_TTL = 24 * 60 * 60 * 1000;
@@ -9,6 +12,7 @@ const CACHE_TTL = 24 * 60 * 60 * 1000;
 const TYPE_INDEX = "type-search-index.js";
 const MEMBER_INDEX = "member-search-index.js";
 const PACKAGE_INDEX = "package-search-index.js";
+const INDEX_FILES = [PACKAGE_INDEX, TYPE_INDEX, MEMBER_INDEX];
 
 // The "k" field of a Javadoc search index item is an index into the itemDesc
 // table of the generated search.js. Members default to 5 (method) and types to
@@ -160,18 +164,11 @@ function deduplicate(entries: DocEntry[]): DocEntry[] {
   return [...best.values()];
 }
 
-async function fetchText(file: string): Promise<string> {
-  const response = await fetch(DOCS_BASE + file, { signal: timeoutSignal() });
-  if (!response.ok)
-    throw new Error(`Failed to download ${file} (HTTP ${response.status})`);
-  return response.text();
-}
-
 async function fetchVersion(): Promise<string> {
   try {
-    const overview = await fetchText("index.html");
+    const overview = await fetchText(`${DOCS_BASE}index.html`);
     return (
-      /<title>[^<]*\(JDA ([^)]+?) API\)<\/title>/.exec(overview)?.[1] ?? ""
+      /<title>[^<]*\(JDA ([^)]+?) API\)<\/title>/.exec(overview.body)?.[1] ?? ""
     );
   } catch {
     return "";
@@ -192,63 +189,111 @@ async function readCache(): Promise<Inventory | null> {
 }
 
 async function writeCache(inventory: Inventory): Promise<void> {
-  await mkdir(environment.supportPath, { recursive: true });
-  await writeFile(cachePath(), JSON.stringify(inventory), "utf8");
+  await writeFileAtomic(cachePath(), JSON.stringify(inventory));
 }
 
-async function download(): Promise<Inventory> {
-  const [types, members, packages, version] = await Promise.all([
-    fetchText(TYPE_INDEX),
-    fetchText(MEMBER_INDEX),
-    fetchText(PACKAGE_INDEX),
+// The three index files are published together with every page, so when all of
+// them answer 304 the cached inventory, metadata and pages are all still current.
+async function download(previous: Inventory | null): Promise<Inventory> {
+  const checked = await Promise.all(
+    INDEX_FILES.map((file) =>
+      fetchIfChanged(DOCS_BASE + file, previous?.validators[file]),
+    ),
+  );
+  if (previous && checked.every((result) => result === null)) {
+    const renewed = { ...previous, fetchedAt: Date.now() };
+    await writeCache(renewed);
+    return renewed;
+  }
+
+  const [[packages, types, members], version] = await Promise.all([
+    Promise.all(
+      checked.map(
+        (result, index) => result ?? fetchText(DOCS_BASE + INDEX_FILES[index]),
+      ),
+    ),
     fetchVersion(),
   ]);
 
   const entries = [
-    ...parseIndexFile(packages).map(packageEntry),
-    ...parseIndexFile(types).map(typeEntry),
-    ...parseIndexFile(members).map(memberEntry),
+    ...parseIndexFile(packages.body).map(packageEntry),
+    ...parseIndexFile(types.body).map(typeEntry),
+    ...parseIndexFile(members.body).map(memberEntry),
   ].filter((entry): entry is DocEntry => entry !== null);
 
   if (entries.length < 1000)
     throw new Error("The Javadoc search index came back unexpectedly small");
 
   const inventory: Inventory = {
-    version,
     fetchedAt: Date.now(),
+    revision: revisionOf([
+      packages.validators,
+      types.validators,
+      members.validators,
+    ]),
+    version,
+    validators: {
+      [PACKAGE_INDEX]: packages.validators,
+      [TYPE_INDEX]: types.validators,
+      [MEMBER_INDEX]: members.validators,
+    },
     entries: deduplicate(entries).sort((a, b) => a.name.localeCompare(b.name)),
   };
   await writeCache(inventory);
+
+  if (
+    previous &&
+    (!inventory.revision || previous.revision !== inventory.revision)
+  )
+    await clearDetailsCache();
+  await pruneStaleSchemas();
   return inventory;
 }
 
 // Parsing the cache file costs several megabytes of transient JSON, so the
 // result is held for the lifetime of the process rather than read per command.
 let memoryInventory: Inventory | null = null;
+let pending: Promise<Inventory> | null = null;
+
+function isFresh(inventory: Inventory): boolean {
+  return Date.now() - inventory.fetchedAt < CACHE_TTL;
+}
+
+// A refresh pressed while the first load is still downloading must join it
+// rather than race it to the same cache file.
+function exclusive(task: () => Promise<Inventory>): Promise<Inventory> {
+  if (!pending) {
+    pending = task().finally(() => {
+      pending = null;
+    });
+  }
+  return pending;
+}
 
 export async function loadInventory(): Promise<Inventory> {
-  if (memoryInventory && Date.now() - memoryInventory.fetchedAt < CACHE_TTL)
-    return memoryInventory;
+  if (memoryInventory && isFresh(memoryInventory)) return memoryInventory;
 
-  const cached = await readCache();
-  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) {
-    memoryInventory = cached;
-    return cached;
-  }
-
-  try {
-    memoryInventory = await download();
-    return memoryInventory;
-  } catch (error) {
-    if (cached) {
+  return exclusive(async () => {
+    const cached = (await readCache()) ?? memoryInventory;
+    if (cached && isFresh(cached)) {
       memoryInventory = cached;
       return cached;
     }
-    throw error;
-  }
+
+    try {
+      memoryInventory = await download(cached);
+    } catch (error) {
+      if (!cached) throw error;
+      memoryInventory = cached;
+    }
+    return memoryInventory;
+  });
 }
 
 export async function refreshInventory(): Promise<Inventory> {
-  memoryInventory = await download();
-  return memoryInventory;
+  await pending?.catch(() => undefined);
+  return exclusive(async () => {
+    memoryInventory = await download(memoryInventory ?? (await readCache()));
+    return memoryInventory;
+  });
 }

@@ -1,4 +1,4 @@
-export const CACHE_SCHEMA = "v1";
+export const CACHE_SCHEMA = "v2";
 
 export const DOCS_BASE = "https://docs.jda.wiki/";
 

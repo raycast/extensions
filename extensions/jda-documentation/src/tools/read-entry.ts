@@ -2,7 +2,7 @@ import { loadDetails } from "../lib/docpage";
 import { loadFaq } from "../lib/faq";
 import { loadInventory } from "../lib/inventory";
 import { ensureMeta } from "../lib/metadata";
-import { membersOf, searchEntries } from "../lib/search";
+import { findEntry, membersOf, searchEntries } from "../lib/search";
 import { loadGuides } from "../lib/wiki";
 
 const MEMBER_LIMIT = 80;
@@ -23,7 +23,7 @@ export default async function readEntry(input: Input) {
   const entries = [...inventory.entries, ...guides, ...faq];
 
   const entry =
-    entries.find((candidate) => candidate.name === input.name) ??
+    findEntry(entries, input.name) ??
     entries.find(
       (candidate) => candidate.name.toLowerCase() === input.name.toLowerCase(),
     ) ??
@@ -38,7 +38,7 @@ export default async function readEntry(input: Input) {
 
   const [details, meta] = await Promise.all([
     loadDetails(entry),
-    ensureMeta(inventory.entries),
+    ensureMeta(inventory),
   ]);
   const badges = meta[entry.name];
 

@@ -7,18 +7,21 @@ import {
   ViewContext,
 } from "./components/entry-views";
 import { DOCS_BASE } from "./lib/constants";
-import {
-  clearDetailsCache,
-  documentationPages,
-  prefetchPages,
-} from "./lib/docpage";
+import { documentationPages, prefetchPages } from "./lib/docpage";
 import { isFaqEntry, loadFaq, refreshFaq } from "./lib/faq";
 import { loadInventory, refreshInventory } from "./lib/inventory";
 import { ensureMeta } from "./lib/metadata";
+import { clearDetailsCache } from "./lib/pages";
 import { getPreferences } from "./lib/preferences";
 import { describeFilters, parseQuery } from "./lib/query";
-import { browseEntries, searchEntries } from "./lib/search";
-import { DocEntry, SECTIONS, SectionId } from "./lib/types";
+import { browseEntries, findEntry, searchEntries } from "./lib/search";
+import {
+  DocEntry,
+  Inventory,
+  MetaIndex,
+  SECTIONS,
+  SectionId,
+} from "./lib/types";
 import { loadGuides, refreshGuides } from "./lib/wiki";
 
 const RECENT_LIMIT = 8;
@@ -53,8 +56,9 @@ export default function SearchDocumentation() {
   );
 
   const { data: meta, revalidate: revalidateMeta } = usePromise(
-    ensureMeta,
-    [documented],
+    async (current?: Inventory): Promise<MetaIndex> =>
+      current ? ensureMeta(current) : {},
+    [inventory],
     { execute: documented.length > 0 },
   );
 
@@ -172,8 +176,12 @@ export default function SearchDocumentation() {
 
     const pick = (names: string[]): DocEntry[] =>
       names
-        .map((name) => scope.find((entry) => entry.name === name))
-        .filter((entry): entry is DocEntry => Boolean(entry));
+        .map((name) => findEntry(entries, name))
+        .filter(
+          (entry): entry is DocEntry =>
+            entry !== undefined &&
+            (section === "all" || entry.section === section),
+        );
 
     const pinned = pick(favorites ?? []);
     const recent = pick(recents ?? []).filter(
@@ -208,8 +216,8 @@ export default function SearchDocumentation() {
         await refreshGuides();
         await refreshFaq();
       }
-      await ensureMeta(refreshed.entries, true);
       await clearDetailsCache();
+      await ensureMeta(refreshed, true);
       await revalidate();
       await revalidateWiki();
       await revalidateMeta();

@@ -221,16 +221,54 @@ export function searchEntries(entries: DocEntry[], query: string): DocEntry[] {
     .map((item) => item.entry);
 }
 
-export function membersOf(entries: DocEntry[], parent: DocEntry): DocEntry[] {
-  if (parent.kind === "package") {
-    return entries
-      .filter(
-        (entry) =>
-          entry.pkg === parent.pkg && entry.kind !== "package" && !entry.owner,
-      )
-      .sort(byProminence);
+interface EntryLookup {
+  byName: Map<string, DocEntry>;
+  children: Map<string, DocEntry[]>;
+}
+
+const lookups = new WeakMap<DocEntry[], EntryLookup>();
+
+function childKey(parent: DocEntry): string {
+  return parent.kind === "package" ? `package:${parent.pkg}` : parent.name;
+}
+
+// Every rendered row shows its member count, and filtering the whole inventory
+// per row cost 19 ms on each selection change across 300 rows.
+function lookupOf(entries: DocEntry[]): EntryLookup {
+  const cached = lookups.get(entries);
+  if (cached) return cached;
+
+  const byName = new Map<string, DocEntry>();
+  const children = new Map<string, DocEntry[]>();
+  for (const entry of entries) {
+    if (!byName.has(entry.name)) byName.set(entry.name, entry);
+
+    const parent =
+      entry.owner || (entry.kind === "package" ? "" : `package:${entry.pkg}`);
+    if (!parent) continue;
+    const siblings = children.get(parent);
+    if (siblings) siblings.push(entry);
+    else children.set(parent, [entry]);
   }
-  return entries
-    .filter((entry) => entry.owner === parent.name)
-    .sort(byProminence);
+
+  const built = { byName, children };
+  lookups.set(entries, built);
+  return built;
+}
+
+export function findEntry(
+  entries: DocEntry[],
+  name: string,
+): DocEntry | undefined {
+  return lookupOf(entries).byName.get(name);
+}
+
+export function memberCount(entries: DocEntry[], parent: DocEntry): number {
+  return lookupOf(entries).children.get(childKey(parent))?.length ?? 0;
+}
+
+export function membersOf(entries: DocEntry[], parent: DocEntry): DocEntry[] {
+  return [...(lookupOf(entries).children.get(childKey(parent)) ?? [])].sort(
+    byProminence,
+  );
 }

@@ -1,9 +1,11 @@
 import { environment } from "@raycast/api";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { CACHE_SCHEMA, timeoutSignal, WIKI_BASE } from "./constants";
-import { fetchPage } from "./pages";
-import { DocEntry } from "./types";
+import { CACHE_SCHEMA, WIKI_BASE } from "./constants";
+import { fetchIfChanged } from "./http";
+import { clearDetailsCache, fetchPage } from "./pages";
+import { writeFileAtomic } from "./storage";
+import { DocEntry, Validators } from "./types";
 
 const WIKI_INDEX = "search/search_index.json";
 const WIKI_TTL = 24 * 60 * 60 * 1000;
@@ -21,6 +23,7 @@ interface WikiDocument {
 
 interface StoredWiki {
   fetchedAt: number;
+  validators?: Validators;
   documents: WikiDocument[];
 }
 
@@ -30,21 +33,27 @@ function wikiFile(): string {
   return path.join(environment.supportPath, `wiki-${CACHE_SCHEMA}.json`);
 }
 
-async function download(): Promise<StoredWiki> {
-  const response = await fetch(WIKI_BASE + WIKI_INDEX, {
-    signal: timeoutSignal(),
-  });
-  if (!response.ok)
-    throw new Error(
-      `Failed to download the JDA wiki index (HTTP ${response.status})`,
-    );
+async function download(previous: StoredWiki | null): Promise<StoredWiki> {
+  const fresh = await fetchIfChanged(
+    WIKI_BASE + WIKI_INDEX,
+    previous?.validators,
+  );
+  if (!fresh && previous) {
+    const renewed = { ...previous, fetchedAt: Date.now() };
+    await writeFileAtomic(wikiFile(), JSON.stringify(renewed));
+    return renewed;
+  }
+  if (!fresh) throw new Error("Failed to download the JDA wiki index");
 
-  const payload = (await response.json()) as { docs?: WikiDocument[] };
-  const documents = (payload.docs ?? []).filter((document) => document.title);
-  const stored: StoredWiki = { fetchedAt: Date.now(), documents };
+  const payload = JSON.parse(fresh.body) as { docs?: WikiDocument[] };
+  const stored: StoredWiki = {
+    fetchedAt: Date.now(),
+    validators: fresh.validators,
+    documents: (payload.docs ?? []).filter((document) => document.title),
+  };
 
-  await mkdir(environment.supportPath, { recursive: true });
-  await writeFile(wikiFile(), JSON.stringify(stored), "utf8");
+  await writeFileAtomic(wikiFile(), JSON.stringify(stored));
+  if (previous) await clearDetailsCache();
   return stored;
 }
 
@@ -61,18 +70,17 @@ async function ensureWiki(force = false): Promise<StoredWiki> {
   if (cached && !force && Date.now() - cached.fetchedAt < WIKI_TTL)
     return cached;
 
-  const stored = force ? null : await readStored();
-  if (stored && Date.now() - stored.fetchedAt < WIKI_TTL) {
+  const stored = (await readStored()) ?? cached;
+  if (stored && !force && Date.now() - stored.fetchedAt < WIKI_TTL) {
     cached = stored;
     return stored;
   }
 
   try {
-    cached = await download();
+    cached = await download(stored);
   } catch (error) {
-    const stale = stored ?? (await readStored());
-    if (!stale) throw error;
-    cached = stale;
+    if (!stored) throw error;
+    cached = stored;
   }
   return cached;
 }
