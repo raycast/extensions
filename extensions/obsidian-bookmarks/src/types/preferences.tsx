@@ -3,12 +3,22 @@ export type FormActionPreference =
   | "copyObsidianUrl"
   | "copyObsidianUrlAsMarkdown"
   | "openUrl"
+  | "openUrlInCurrentWindow"
   | "copyUrl"
   | "copyUrlAsMarkdown"
   | "clearCache"
-  | "fetchContent";
+  | "fetchContent"
+  | "saveChanges";
 
-export type DetailActionPreference = FormActionPreference | "showDetails" | "markAsRead" | "deleteFile";
+export type DetailActionPreference =
+  | FormActionPreference
+  | "showDetails"
+  | "toggleFavorite"
+  | "moveFavoriteUp"
+  | "moveFavoriteDown"
+  | "editBookmark"
+  | "markAsRead"
+  | "deleteFile";
 
 export interface Preferences {
   vaultPath: string;
@@ -23,4 +33,5 @@ export interface Preferences {
   useBrowserExtension: boolean;
   searchRecursively: boolean;
   checkDuplicates: boolean;
+  faviconField?: string;
 }

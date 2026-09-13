@@ -6,6 +6,7 @@ import dedent from "ts-dedent";
 import { LinkFormState } from "../hooks/use-link-form";
 import { File, FrontMatter, Preferences } from "../types";
 
+import getFaviconField from "./favicon-field";
 import { fileExists } from "./file-utils";
 import getPublisher from "./get-publisher";
 import { addToLocalStorageFiles } from "./localstorage-files";
@@ -21,6 +22,35 @@ function formatDate(date: Date): string {
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
+}
+
+/**
+ * Builds the frontmatter line holding the favicon override, using the field
+ * name configured in preferences. Returns null when the feature is turned off
+ * or when the bookmark doesn't override its favicon.
+ */
+function faviconLine(favicon: string | null | undefined): string | null {
+  const value = favicon?.trim();
+  if (!value) return null;
+
+  const field = getFaviconField();
+
+  // Field names aren't necessarily valid bare YAML keys, so quote anything
+  // that isn't a plain identifier.
+  const key = /^[\w-]+$/.test(field) ? field : JSON.stringify(field);
+  return `${key}: ${JSON.stringify(value)}`;
+}
+
+function favoriteLine(favorite: number | null | undefined): string | null {
+  return typeof favorite === "number" ? `favorite: ${favorite}` : null;
+}
+
+/** The optional frontmatter lines that follow `tags`, as a single suffix. */
+function extraLines(attributes: FrontMatter): string {
+  return [faviconLine(attributes.favicon), favoriteLine(attributes.favorite)]
+    .filter((line) => line != null)
+    .map((line) => `\n${line}`)
+    .join("");
 }
 
 async function getFileName(filename: string): Promise<string> {
@@ -43,6 +73,7 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   const attributes: FrontMatter = {
     source: values.url,
     publisher: getPublisher(values.url),
+    favicon: values.favicon.trim() || null,
     title: values.title,
     tags: values.tags.flatMap((t) => tagify(t)),
     saved: midnight,
@@ -55,14 +86,15 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   ${values.description}
   `;
 
-  const frontmatter = dedent`
+  const frontmatter =
+    dedent`
   title: ${JSON.stringify(attributes.title)}
   saved: ${formatDate(midnight)}
   source: ${JSON.stringify(attributes.source)}
   publisher: ${JSON.stringify(attributes.publisher)}
   read: ${JSON.stringify(attributes.read)}
   tags: ${JSON.stringify(attributes.tags)}
-  `;
+  ` + extraLines(attributes);
 
   const { datePrefix } = getPreferenceValues<Preferences>();
   const prefix = datePrefix ? formatDate(midnight) + "-" : "";
@@ -86,7 +118,9 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
 export default async function saveToObsidian(file: File): Promise<string> {
   // Combine the form tags with the required tags
   const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
-  const combinedTags = file.attributes.tags.flatMap((t) => tagify(t)).concat(requiredTags);
+  const combinedTags = Array.from(new Set(file.attributes.tags.flatMap((t) => tagify(t)).concat(requiredTags)));
+
+  const tagsAndExtras = `tags: ${JSON.stringify(combinedTags)}${extraLines(file.attributes)}`;
 
   const template = dedent`
     ---
@@ -95,7 +129,7 @@ export default async function saveToObsidian(file: File): Promise<string> {
     source: ${JSON.stringify(file.attributes.source)}
     publisher: ${JSON.stringify(file.attributes.publisher)}
     read: ${JSON.stringify(file.attributes.read)}
-    tags: ${JSON.stringify(combinedTags)}
+    ${tagsAndExtras}
     ---
 
     ${file.body}
@@ -107,4 +141,58 @@ export default async function saveToObsidian(file: File): Promise<string> {
     addToLocalStorageFiles([file]),
   ]);
   return file.fileName;
+}
+
+const BOOKMARK_HEADING = /^#\s+\[[^\]\n]*\]\([^)\n]*\)\n?/;
+
+function splitBookmarkBody(body: string | undefined): { hasHeading: boolean; description: string } {
+  const content = body ?? "";
+  const match = content.match(BOOKMARK_HEADING);
+  if (!match) return { hasHeading: false, description: content };
+
+  return { hasHeading: true, description: content.slice(match[0].length).replace(/^\n+/, "") };
+}
+
+export function asFormValues(file: File): LinkFormState["values"] {
+  return {
+    url: file.attributes.source,
+    title: file.attributes.title,
+    favicon: file.attributes.favicon ?? "",
+    tags: file.attributes.tags,
+    description: splitBookmarkBody(file.body).description,
+  };
+}
+
+export function asUpdatedFile(values: LinkFormState["values"], original: File): File {
+  const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
+  const urlChanged = values.url !== original.attributes.source;
+
+  const attributes: FrontMatter = {
+    ...original.attributes,
+    source: values.url,
+    publisher: urlChanged ? getPublisher(values.url) : original.attributes.publisher,
+    favicon: values.favicon.trim() || null,
+    title: values.title,
+    tags: Array.from(new Set(values.tags.flatMap((t) => tagify(t)).concat(requiredTags))),
+  };
+
+  const frontmatter =
+    dedent`
+  title: ${JSON.stringify(attributes.title)}
+  saved: ${formatDate(attributes.saved)}
+  source: ${JSON.stringify(attributes.source)}
+  publisher: ${JSON.stringify(attributes.publisher)}
+  read: ${JSON.stringify(attributes.read)}
+  tags: ${JSON.stringify(attributes.tags)}
+  ` + extraLines(attributes);
+
+  const { hasHeading } = splitBookmarkBody(original.body);
+  const heading = `# [${values.title.replace(/[[\]]/g, "")}](${values.url})`;
+
+  return {
+    ...original,
+    attributes,
+    frontmatter,
+    body: hasHeading ? `${heading}\n\n${values.description}` : values.description,
+  };
 }

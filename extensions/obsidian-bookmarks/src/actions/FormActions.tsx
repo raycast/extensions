@@ -1,10 +1,22 @@
-import { Action, Color, FileIcon, Icon, popToRoot, showHUD, BrowserExtension, showToast, Toast } from "@raycast/api";
-import { useMemo } from "react";
-import { asFile } from "../helpers/save-to-obsidian";
+import {
+  Action,
+  Color,
+  FileIcon,
+  Icon,
+  popToRoot,
+  showHUD,
+  BrowserExtension,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { useCallback, useMemo } from "react";
+import { asFile, asUpdatedFile } from "../helpers/save-to-obsidian";
+import { sanitizeUrl } from "../helpers/url-sanitizer";
 import { useFileIcon } from "../hooks/use-applications";
 import { LinkFormState } from "../hooks/use-link-form";
 import { usePreference } from "../hooks/use-preferences";
-import { FormActionPreference } from "../types";
+import { File, FormActionPreference } from "../types";
 import * as methods from "./methods";
 import { ActionGroup, OrderedActionPanel } from "./order-manager";
 import { clearCache } from "../helpers/clear-cache";
@@ -13,8 +25,18 @@ const saveFile = (values: LinkFormState["values"]) => asFile(values).then((f) =>
 const delay = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
 const popAndShowHUD = (message: string) => popToRoot().then(() => showHUD(message));
 
-async function fetchPageContent(): Promise<string> {
+async function fetchPageContent(expectedUrl?: string): Promise<string> {
   try {
+    // When editing, the content must come from the bookmarked page — not from
+    // whatever tab happens to be in front, which is usually Raycast's caller.
+    if (expectedUrl) {
+      const tabs = await BrowserExtension.getTabs();
+      const activeTab = tabs.find((tab) => tab.active);
+      if (!activeTab?.url || sanitizeUrl(activeTab.url) !== sanitizeUrl(expectedUrl)) {
+        throw new Error("Open this bookmark's page in your browser first, then try again.");
+      }
+    }
+
     const content = await BrowserExtension.getContent({ format: "markdown" });
     return `\n\n# Page Content\n\n${content}`;
   } catch (error) {
@@ -25,7 +47,8 @@ async function fetchPageContent(): Promise<string> {
 
 const createContentActions = (
   values: LinkFormState["values"],
-  setValues: (values: LinkFormState["values"]) => void
+  setValues: (values: LinkFormState["values"]) => void,
+  isEditing: boolean
 ): ActionGroup<FormActionPreference> => ({
   key: "content",
   useDivider: "unless-first",
@@ -39,7 +62,7 @@ const createContentActions = (
         shortcut: { modifiers: ["cmd"], key: "g" },
         onAction: async () => {
           try {
-            const content = await fetchPageContent();
+            const content = await fetchPageContent(isEditing ? values.url : undefined);
             setValues({
               ...values,
               description: values.description + content,
@@ -125,6 +148,18 @@ const createBrowserActions = (values: LinkFormState["values"]): ActionGroup<Form
       },
     ],
     [
+      "openUrlInCurrentWindow",
+      {
+        title: "Save and Open Link in Current Window",
+        icon: Icon.AppWindow,
+        shortcut: { modifiers: ["cmd", "opt"], key: "o" },
+        onAction: async () => {
+          const file = await saveFile(values);
+          return Promise.allSettled([methods.openUrlInCurrentWindow(file), popAndShowHUD("Opening link…")]);
+        },
+      },
+    ],
+    [
       "copyUrl",
       {
         icon: Icon.Link,
@@ -145,6 +180,29 @@ const createBrowserActions = (values: LinkFormState["values"]): ActionGroup<Form
         onAction: async () => {
           const file = await saveFile(values);
           return Promise.allSettled([methods.copyUrlAsMarkdown(file), popAndShowHUD("Link copied")]);
+        },
+      },
+    ],
+  ]),
+});
+
+const createUpdateActions = (
+  values: LinkFormState["values"],
+  file: File,
+  onUpdated: (saved: File) => void,
+  icon?: FileIcon
+): ActionGroup<FormActionPreference> => ({
+  key: "update",
+  useDivider: "never",
+  icon,
+  actions: new Map<FormActionPreference, Action.Props>([
+    [
+      "saveChanges",
+      {
+        title: "Update Bookmark",
+        onAction: async () => {
+          const saved = await methods.saveFile(asUpdatedFile(values, file), true);
+          onUpdated(saved);
         },
       },
     ],
@@ -173,16 +231,41 @@ const createDestructiveActions = (): ActionGroup<FormActionPreference> => ({
 export type FormActionsProps = {
   values: LinkFormState["values"];
   setValues: (values: LinkFormState["values"]) => void;
+  file?: File;
+  onSaved?: (file: File) => void;
 };
 
-export default function FormActions({ values, setValues }: FormActionsProps): JSX.Element {
+export default function FormActions({ values, setValues, file, onSaved }: FormActionsProps): React.JSX.Element {
   const { value: obsidianIcon } = useFileIcon("Obsidian");
   const { value: defaultAction } = usePreference("defaultFormAction");
+  const { pop } = useNavigation();
+
+  const onUpdated = useCallback(
+    (saved: File) => {
+      onSaved?.(saved);
+      pop();
+      showToast({ style: Toast.Style.Success, title: "Bookmark updated" });
+    },
+    [onSaved, pop]
+  );
 
   const obsidianActions = useMemo(() => createObsidianActions(values, obsidianIcon), [values, obsidianIcon]);
   const browserActions = useMemo(() => createBrowserActions(values), [values]);
-  const contentActions = useMemo(() => createContentActions(values, setValues), [values, setValues]);
+  const contentActions = useMemo(
+    () => createContentActions(values, setValues, file != null),
+    [values, setValues, file]
+  );
   const destructiveActions = useMemo(() => createDestructiveActions(), []);
+  const updateActions = useMemo(
+    () => (file ? createUpdateActions(values, file, onUpdated, obsidianIcon) : undefined),
+    [values, file, onUpdated, obsidianIcon]
+  );
+
+  if (updateActions) {
+    return (
+      <OrderedActionPanel groups={[updateActions, contentActions, destructiveActions]} defaultAction="saveChanges" />
+    );
+  }
 
   return (
     <OrderedActionPanel
