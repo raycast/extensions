@@ -42,10 +42,14 @@ function HistoryItem({
   profile,
   entry: { url, title, id },
   type,
+  onVisit,
+  onResetRanking,
 }: {
   entry: HistoryEntry;
   profile: string;
   type: "History" | "Bookmark";
+  onVisit?: () => void | Promise<void>;
+  onResetRanking?: () => void | Promise<void>;
 }): ReactElement {
   const { icon, isInvalid } = getSafeFavicon(url);
 
@@ -60,7 +64,15 @@ function HistoryItem({
           ? [{ text: "⚠️ Invalid URL - Cannot open", tooltip: "This URL uses an unsupported protocol" }]
           : undefined
       }
-      actions={<ChromeActions.TabHistory title={title} url={url} profile={profile} />}
+      actions={
+        <ChromeActions.TabHistory
+          title={title}
+          url={url}
+          profile={profile}
+          onVisit={onVisit}
+          onResetRanking={onResetRanking}
+        />
+      }
     />
   );
 }

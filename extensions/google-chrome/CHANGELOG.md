@@ -1,5 +1,10 @@
 # Google Chrome Changelog
 
+## [Sort Bookmarks by Frecency] - {PR_MERGE_DATE}
+
+- Rank bookmarks opened from Raycast above rarely used ones in Search Bookmarks and Search All.
+- Add a Reset Ranking action to restore a bookmark to its original position.
+
 ## [Add Search Windows Command] - 2026-08-16
 
 - Add a new Search Windows command to search and select open Google Chrome windows.

@@ -85,52 +85,58 @@ function HistoryItemActions({
   title,
   url,
   profile: profileOriginal,
+  onVisit,
+  onResetRanking,
 }: {
   title: string;
   url: string;
   profile: string;
+  onVisit?: () => void | Promise<void>;
+  onResetRanking?: () => void | Promise<void>;
 }): ReactElement {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID);
 
+  async function openAndRecordVisit(openBehaviour: SettingsProfileOpenBehaviour): Promise<void> {
+    await onVisit?.();
+    await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile: openBehaviour });
+  }
+
   return (
     <ActionPanel title={title}>
-      <Action onAction={() => openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })} title={"Open"} />
+      <Action onAction={() => openAndRecordVisit(openTabInProfile)} title={"Open"} />
       <Action
         title="Open in Guest Window"
         icon={{ source: Icon.Person }}
         onAction={async () => {
+          await onVisit?.();
           await createNewGuestWindowToWebsite(url);
           await closeMainWindow();
         }}
       />
       <ActionPanel.Section title={"Open in profile"}>
         <Action
-          onAction={() =>
-            openNewTab({
-              url,
-              profileOriginal,
-              profileCurrent,
-              openTabInProfile: SettingsProfileOpenBehaviour.ProfileCurrent,
-            })
-          }
+          onAction={() => openAndRecordVisit(SettingsProfileOpenBehaviour.ProfileCurrent)}
           title={"Open in Current Profile"}
           shortcut={Keyboard.Shortcut.Common.Open}
         />
         <Action
-          onAction={() =>
-            openNewTab({
-              url,
-              profileOriginal,
-              profileCurrent,
-              openTabInProfile: SettingsProfileOpenBehaviour.ProfileOriginal,
-            })
-          }
+          onAction={() => openAndRecordVisit(SettingsProfileOpenBehaviour.ProfileOriginal)}
           title={"Open in Original Profile"}
           shortcut={Keyboard.Shortcut.Common.OpenWith}
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+      {onResetRanking ? (
+        <ActionPanel.Section>
+          <Action
+            title="Reset Ranking"
+            icon={{ source: Icon.ArrowCounterClockwise }}
+            onAction={onResetRanking}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
+          />
+        </ActionPanel.Section>
+      ) : null}
     </ActionPanel>
   );
 }
