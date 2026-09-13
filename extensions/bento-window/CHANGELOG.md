@@ -1,6 +1,6 @@
 # Bento Window Changelog
 
-## [No Pro Required & Portrait Grids] - {PR_MERGE_DATE}
+## [No Pro Required & Portrait Grids] - 2026-09-13
 
 - **Works without a Raycast Pro subscription.** Bento Window used to depend on the Pro-gated Window Management API, which left every command unavailable on a free account. It now enumerates windows through CGWindowList and moves them through the Accessibility API instead, so anyone can use it. It needs Accessibility permission for Raycast — System Settings → Privacy & Security → Accessibility — and the first run offers a shortcut straight there if the permission is missing
 - **Portrait displays now get portrait grids.** The layouts were tuned for landscape screens, so two windows on a portrait display used to become two slivers side by side. Each layout is now measured against its own transpose and the better-fitting one wins: two windows stack, 6 becomes 3×2 instead of 2×3, and landscape screens keep the exact layouts they had
