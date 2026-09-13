@@ -1,0 +1,133 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "namecheap-domains",
+  "title": "Namecheap Domains",
+  "description": "Search for available domains with live Namecheap pricing, start a registration, and browse the domains in your Namecheap account",
+  "icon": "icon.png",
+  "author": "ricardodantas",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "keywords": [
+    "namecheap",
+    "domain",
+    "domains",
+    "registrar",
+    "dns",
+    "whois"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "apiUser",
+      "title": "API User",
+      "description": "Your Namecheap API username. This is usually the same as your account username.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "ncuser"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Generated under Profile \u203a Tools \u203a Namecheap API Access.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "userName",
+      "title": "Username",
+      "description": "Account username the commands run against. Leave blank to use the API User.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Same as API User"
+    },
+    {
+      "name": "clientIp",
+      "title": "Client IP",
+      "description": "Sent as the ClientIp API parameter. Namecheap authorises the address your Mac actually connects from, so this cannot fix an 'Invalid request IP' error. Leave blank to detect it.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Auto-detect"
+    },
+    {
+      "name": "sandbox",
+      "title": "Environment",
+      "label": "Use the Namecheap Sandbox",
+      "description": "Requests go to api.sandbox.namecheap.com. Sandbox is a separate account with its own whitelist, and its domains are not real.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "check-availability",
+      "title": "Check Domain Availability",
+      "subtitle": "Namecheap",
+      "description": "Check whether a domain or keyword is available, with Namecheap registration pricing",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultTlds",
+          "title": "Default TLDs",
+          "description": "Comma-separated TLDs checked when you type a keyword without a dot.",
+          "type": "textfield",
+          "required": false,
+          "default": "com, net, org, io, dev, app, ai, co",
+          "placeholder": "com, net, org, io"
+        }
+      ]
+    },
+    {
+      "name": "register-domain",
+      "title": "Register Domain",
+      "subtitle": "Namecheap",
+      "description": "Verify availability and price, then continue to Namecheap checkout",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "Domain",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "list-domains",
+      "title": "My Domains",
+      "subtitle": "Namecheap",
+      "description": "Browse the domains in your Namecheap account and open their management pages",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1",
+    "fast-xml-parser": "^5.11.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "typecheck": "tsc -p tsconfig.check.json",
+    "smoke": "node --import tsx scripts/smoke.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
