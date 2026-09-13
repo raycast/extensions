@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "seconds-clock",
+  "title": "Seconds Clock",
+  "description": "A focused seconds clock with polished multi-timer and stopwatch support.",
+  "icon": "icon.png",
+  "author": "syed_hyder",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "clock",
+    "seconds",
+    "time",
+    "digital",
+    "timer",
+    "stopwatch"
+  ],
+  "commands": [
+    {
+      "name": "show-seconds-clock",
+      "title": "Show Seconds Clock",
+      "description": "Open a large flip-clock-style view with live seconds.",
+      "mode": "view"
+    },
+    {
+      "name": "set-timer",
+      "title": "Set Timer",
+      "description": "Create a named countdown timer from natural duration text.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-timers",
+      "title": "Manage Timers",
+      "description": "View, rename, favorite, extend, and stop timers.",
+      "mode": "view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "description": "Stop a running timer quickly.",
+      "mode": "view"
+    },
+    {
+      "name": "start-stopwatch",
+      "title": "Start Stopwatch",
+      "description": "Start a stopwatch that counts up from zero.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-stopwatch",
+      "title": "Show Stopwatch",
+      "description": "View the running stopwatch in Raycast.",
+      "mode": "view"
+    },
+    {
+      "name": "stop-stopwatch",
+      "title": "Stop Stopwatch",
+      "description": "Stop the running stopwatch.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "timeFormat",
+      "title": "Time Format",
+      "description": "Choose whether the clock uses a 12-hour or 24-hour format.",
+      "type": "dropdown",
+      "required": true,
+      "default": "12-hour",
+      "data": [
+        {
+          "title": "12-hour",
+          "value": "12-hour"
+        },
+        {
+          "title": "24-hour",
+          "value": "24-hour"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}
