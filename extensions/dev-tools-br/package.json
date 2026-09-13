@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dev-tools-br",
+  "title": "Dev Tools BR",
+  "description": "Geradores, validadores e utilitários locais para desenvolvimento e testes no Brasil.",
+  "icon": "extension-icon.png",
+  "author": "ewerton_batista",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Dev Tools BR",
+      "subtitle": "Mocks, validadores e utilitários",
+      "description": "Abra todos os geradores, validadores e utilitários de desenvolvimento.",
+      "mode": "view",
+      "keywords": [
+        "4devs",
+        "mock",
+        "cpf",
+        "cnpj",
+        "brasil",
+        "validator",
+        "generator"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@br-validators/core": "1.10.0-data.41",
+    "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}
