@@ -14,6 +14,7 @@ import {
 } from "@raycast/api";
 import { RefData, Preferences, MAX_RENDER_RESULTS } from "./zoteroApi";
 import { resolveAttachmentPath } from "./attachments";
+import { isAbsolute } from "path";
 import { LibraryRef, itemIdentity, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
 import type { CollectionOption } from "./collections";
 import { useVisitedUrls } from "./useVisitedUrls";
@@ -301,9 +302,12 @@ export const View = ({
                         }}
                       />
                     )}
-                    {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
-                      <Action.ShowInFinder path={attachmentFilePath} title="Show PDF in Finder" />
-                    )}
+                    {item.attachment?.key &&
+                      item.attachment.key !== `` &&
+                      attachmentFilePath &&
+                      isAbsolute(attachmentFilePath) && (
+                        <Action.ShowInFinder path={attachmentFilePath} title="Show PDF in Finder" />
+                      )}
                     <Action.OpenInBrowser
                       icon={Icon.Link}
                       title="Open in Zotero"

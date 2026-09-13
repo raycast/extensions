@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { resolveAttachmentPath } from "./attachments";
 import type { RefData } from "./zoteroApi";
 
@@ -11,6 +11,8 @@ const itemWithStorageAttachment: RefData = {
 };
 
 describe("resolveAttachmentPath", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
   it("resolves a storage: attachment to <zotero dir>/storage/<attachment key>/<filename>", () => {
     const p = resolveAttachmentPath(itemWithStorageAttachment, "/Users/isaac/Zotero/zotero.sqlite");
     expect(p).toBe("/Users/isaac/Zotero/storage/ATTY5678/paper.pdf");
@@ -42,11 +44,7 @@ describe("resolveAttachmentPath", () => {
 
   it("expands a ~ in the zotero path before joining the storage dir", () => {
     vi.stubEnv("HOME", "/fake/home");
-    try {
-      const p = resolveAttachmentPath(itemWithStorageAttachment, "~/Zotero/zotero.sqlite");
-      expect(p).toBe("/fake/home/Zotero/storage/ATTY5678/paper.pdf");
-    } finally {
-      vi.unstubAllEnvs();
-    }
+    const p = resolveAttachmentPath(itemWithStorageAttachment, "~/Zotero/zotero.sqlite");
+    expect(p).toBe("/fake/home/Zotero/storage/ATTY5678/paper.pdf");
   });
 });
