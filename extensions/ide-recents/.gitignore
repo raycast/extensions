@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Raycast / Tinycast Build Artifacts
+build/
+dist/
+*.tar.gz
+*.zip
+
+# Raycast CLI Cache & Local Data
+.raycast/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Operating System Files (macOS / Windows)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor Configs (Optional local settings)
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
