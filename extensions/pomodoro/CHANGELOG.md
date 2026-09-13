@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Skip to Next] - {PR_MERGE_DATE}
+
+- Add Skip to Next (⌘N) to jump from the current interval to the next one in the control command, menu bar, Slack variant, and Raycast AI
+
 ## [Updated contributor] - 2026-08-18
 
 ## [Fixes] - 2026-05-16
