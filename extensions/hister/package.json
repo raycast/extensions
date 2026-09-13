@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hister",
+  "title": "Hister Search",
+  "description": "Search indexed browsing history and web pages using Hister",
+  "icon": "extension-icon.png",
+  "author": "jeet",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Hister",
+      "subtitle": "History & Bookmarks",
+      "description": "Search browsing history and indexed URLs in Hister",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "histerBinaryPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Hister Binary Path",
+      "description": "Custom path to hister executable (leave blank to use /Users/jeet/go/bin/hister or PATH)",
+      "placeholder": "/Users/jeet/go/bin/hister"
+    },
+    {
+      "name": "maxResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Results",
+      "description": "Maximum number of search results to fetch (default: 50)",
+      "placeholder": "50"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
