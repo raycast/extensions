@@ -1,5 +1,12 @@
 # OBS Control Changelog
 
+## [New Commands] - 2026-08-18
+
+- Added explicit start and stop commands for recording, streaming, virtual camera, and replay buffer
+- Added explicit pause and resume recording commands
+- Added an optional scene name argument to Set Scene for automation
+- Launch OBS Studio automatically before connecting when it is installed but not running
+
 ## [New Command] - 2025-01-24
 
 Added Toggle Replay Buffer command
