@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "copy-as-file-link",
+  "title": "Copy as File Link",
+  "description": "Copy the selected Finder files/folders as file:/// links to the clipboard.",
+  "icon": "icon.png",
+  "author": "sergey_pashkevich",
+  "platforms": ["macOS"],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-link",
+      "title": "Copy as File Link",
+      "description": "Copy selected Finder items as file:/// links",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "paths",
+          "type": "text",
+          "placeholder": "Optional POSIX paths (newline-separated)",
+          "description": "If omitted, uses the current Finder selection. One path per line.",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "copy-folder-link",
+      "title": "Copy as File Link (Front Finder Window)",
+      "description": "Copy the front Finder window's folder as a file:/// link",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
