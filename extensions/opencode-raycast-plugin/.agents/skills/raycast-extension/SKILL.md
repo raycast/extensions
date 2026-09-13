@@ -542,10 +542,6 @@ In code:
 ```tsx
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiKey: string;
-}
-
 const { apiKey } = getPreferenceValues<Preferences>();
 ```
 

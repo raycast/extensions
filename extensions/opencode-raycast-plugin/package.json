@@ -29,7 +29,7 @@
   "preferences": [
     {
       "name": "apiKey",
-      "title": "API key",
+      "title": "API Key",
       "description": "Your OpenCode Go API key.",
       "type": "password",
       "required": true

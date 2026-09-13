@@ -40,6 +40,7 @@ function ErrorView({
     "bad-key": "Paste a new API key in Extension Preferences.",
     "no-entitlement": "An OpenCode Go subscription is required.",
     offline: undefined,
+    service: "The OpenCode Go API returned an error. Try again later.",
   };
   return (
     <List>

@@ -6,15 +6,35 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { progressIcon, windowRows } from "./lib/display";
+import { foldCatalog } from "./lib/catalog";
+import { PICK_ICON, pickLabel, progressIcon, windowRows } from "./lib/display";
+import { modalityText, moneyPerMillion } from "./lib/format";
 import { isKeyProblem } from "./lib/types";
-import { collectUsage, readInitialPayload } from "./lib/usage";
+import type { Model } from "./lib/types";
+import {
+  collectUsage,
+  maxModelsFromPreferences,
+  readInitialPayload,
+} from "./lib/usage";
 
 function openFullView() {
   launchCommand({
     name: "opencode-raycast-plugin",
     type: LaunchType.UserInitiated,
   }).catch(() => undefined);
+}
+
+function modelSubtitle(model: Model): string {
+  return [
+    model.modalities ? modalityText(model.modalities) : null,
+    model.cost
+      ? `${moneyPerMillion(model.cost.input)}/${moneyPerMillion(model.cost.output)}`
+      : null,
+    model.quota != null ? `~${model.quota} req/5h` : null,
+    model.isPick ? pickLabel(model.isPick) : null,
+  ]
+    .filter((part): part is string => part !== null)
+    .join("  ·  ");
 }
 
 export default function Command() {
@@ -73,6 +93,7 @@ export default function Command() {
 
     const { payload } = result;
     const rows = windowRows(payload.windows, new Date());
+    const { go } = foldCatalog(payload.models, maxModelsFromPreferences(), "");
 
     return (
       <>
@@ -93,6 +114,24 @@ export default function Command() {
               onAction={openFullView}
             />
           ))}
+        </MenuBarExtra.Section>
+        <MenuBarExtra.Section title="Go models">
+          {go.models.map((m) => (
+            <MenuBarExtra.Item
+              key={m.id}
+              icon={m.isPick ? PICK_ICON[m.isPick] : Icon.Bolt}
+              title={m.id}
+              subtitle={modelSubtitle(m)}
+              onAction={openFullView}
+            />
+          ))}
+          {go.folded > 0 && (
+            <MenuBarExtra.Item
+              icon={Icon.Ellipsis}
+              title={`and ${go.folded} more models`}
+              onAction={openFullView}
+            />
+          )}
         </MenuBarExtra.Section>
         <MenuBarExtra.Separator />
         <MenuBarExtra.Item

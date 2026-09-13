@@ -52,4 +52,4 @@ The menu-bar command's icon-only presence — the OpenCode logo as a template im
 _Avoid_: text in the menu bar
 
 **Failure class**:
-The extension's four error states: **no-key**, **bad-key** (401), **no-entitlement** (403), **offline**. No-key/bad-key/no-entitlement show error states; only offline keeps last-known data.
+The extension's five error states: **no-key**, **bad-key** (401), **no-entitlement** (403), **service** (HTTP/parse failure), **offline** (transport failure). No-key/bad-key/no-entitlement/service show error states; only offline keeps last-known data.

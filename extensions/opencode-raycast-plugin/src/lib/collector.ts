@@ -100,6 +100,11 @@ export async function collect(
     ) {
       return fail(err.kind, err.message);
     }
+    // A definitive API/parse failure is not a connectivity problem: surface it
+    // instead of masquerading as offline and serving last-known data.
+    if (err instanceof ApiError && err.kind === "http") {
+      return fail("service", err.message);
+    }
     const cached = deps.cache.readLastPayload();
     if (cached && deps.cache.isKeyScopeCurrent(scope))
       return {
@@ -107,8 +112,6 @@ export async function collect(
         payload: { ...cached, offline: true },
         fromCache: true,
       };
-    if (err instanceof ApiError && err.kind === "http")
-      return fail("offline", err.message);
     return fail("offline", "Can't reach the OpenCode Go API.");
   }
 
@@ -154,7 +157,6 @@ export async function collect(
     updatedAt: now.toISOString(),
     offline: false,
   };
-  deps.cache.writeLastPayload(payload);
-  deps.cache.setKeyScope(scope);
+  deps.cache.writeLastPayload(payload, scope);
   return { ok: true, payload, fromCache: false };
 }

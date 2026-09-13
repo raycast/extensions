@@ -22,7 +22,6 @@ const KEYS = {
   lastPayload: "ocg.lastPayload.v2",
   pricing: "ocg.pricing.v2",
   picksComputedAt: "ocg.picksComputedAt",
-  keyScope: "ocg.keyScope.v1",
 } as const;
 
 interface PricingEntry {
@@ -71,16 +70,18 @@ export class UsageCache {
     return v as Payload;
   }
 
-  writeLastPayload(payload: Payload): void {
-    this.storage.setItem(KEYS.lastPayload, JSON.stringify(payload));
+  writeLastPayload(payload: Payload, keyScope: string): void {
+    this.storage.setItem(
+      KEYS.lastPayload,
+      JSON.stringify({ ...payload, keyScope }),
+    );
   }
 
   readKeyScope(): string | null {
-    return this.storage.getItem(KEYS.keyScope);
-  }
-
-  setKeyScope(scope: string): void {
-    this.storage.setItem(KEYS.keyScope, scope);
+    const v = readJson<{ keyScope?: unknown }>(
+      this.storage.getItem(KEYS.lastPayload),
+    );
+    return typeof v?.keyScope === "string" ? v.keyScope : null;
   }
 
   isKeyScopeCurrent(scope: string): boolean {

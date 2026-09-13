@@ -54,7 +54,8 @@ export interface Payload {
   offline: boolean;
 }
 
-export type FailureType = "no-key" | "bad-key" | "no-entitlement" | "offline";
+export type FailureType =
+  "no-key" | "bad-key" | "no-entitlement" | "offline" | "service";
 
 export interface Failure {
   type: FailureType;

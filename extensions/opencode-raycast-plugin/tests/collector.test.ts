@@ -114,12 +114,23 @@ describe("collect", () => {
     expect(result.failure.type).toBe("offline");
   });
 
+  it("fails with service on an HTTP error without serving stale data", async () => {
+    const storage = new MemoryStorage();
+    const cache = new UsageCache(storage);
+    const prev: Payload = { windows: USAGE, models: { go: [], zen: [] }, picks: { stretch: null, bestValue: null, computedAt: NOW.toISOString() }, updatedAt: new Date(NOW.getTime() - 30_000).toISOString(), offline: false };
+    cache.writeLastPayload(prev, keyFingerprint("key"));
+    const deps = buildDeps({ cache, fetchUsage: vi.fn(async () => { throw new ApiError("http", "HTTP 500"); }) });
+    const result = await collect(deps, { force: true });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.failure.type).toBe("service");
+  });
+
   it("serves last-known data marked offline when the network fails", async () => {
     const storage = new MemoryStorage();
     const cache = new UsageCache(storage);
     const prev: Payload = { windows: USAGE, models: { go: [], zen: [] }, picks: { stretch: null, bestValue: null, computedAt: NOW.toISOString() }, updatedAt: new Date(NOW.getTime() - 70_000).toISOString(), offline: false };
-    cache.writeLastPayload(prev);
-    cache.setKeyScope(keyFingerprint("key"));
+    cache.writeLastPayload(prev, keyFingerprint("key"));
     const deps = buildDeps({
       cache,
       fetchUsage: vi.fn(async () => { throw new ApiError("offline", "Network request failed"); }),
@@ -157,7 +168,7 @@ describe("collect", () => {
     const storage = new MemoryStorage();
     const cache = new UsageCache(storage);
     const prev: Payload = { windows: USAGE, models: { go: [{ id: "old", cost: PRICE_FALLBACK, modalities: null, quota: 10, isPick: null }], zen: [] }, picks: { stretch: null, bestValue: null, computedAt: NOW.toISOString() }, updatedAt: NOW.toISOString(), offline: false };
-    cache.writeLastPayload(prev);
+    cache.writeLastPayload(prev, keyFingerprint("key"));
     const deps = buildDeps({ cache, fetchGoCatalog: vi.fn(async () => { throw new Error("boom"); }) });
     const result = await collect(deps);
     expect(result.ok).toBe(true);
@@ -169,7 +180,7 @@ describe("collect", () => {
     const storage = new MemoryStorage();
     const cache = new UsageCache(storage);
     const prev: Payload = { windows: USAGE, models: { go: [], zen: [{ id: "zcached", cost: PRICE_FALLBACK, modalities: null, quota: null, isPick: null }] }, picks: { stretch: null, bestValue: null, computedAt: NOW.toISOString() }, updatedAt: NOW.toISOString(), offline: false };
-    cache.writeLastPayload(prev);
+    cache.writeLastPayload(prev, keyFingerprint("key"));
     const deps = buildDeps({ cache, fetchZenCatalog: vi.fn(async () => { throw new Error("boom"); }) });
     const result = await collect(deps);
     expect(result.ok).toBe(true);
@@ -182,7 +193,7 @@ describe("collect", () => {
     const cache = new UsageCache(storage);
     const picks = { stretch: "a", bestValue: "b", computedAt: new Date(NOW.getTime() - 3600_000).toISOString() };
     const prev: Payload = { windows: USAGE, models: { go: [], zen: [] }, picks, updatedAt: new Date(NOW.getTime() - 70_000).toISOString(), offline: false };
-    cache.writeLastPayload(prev);
+    cache.writeLastPayload(prev, keyFingerprint("key"));
     cache.setPicksComputedAt(picks.computedAt);
     const deps = buildDeps({ cache });
     const result = await collect(deps);
@@ -214,8 +225,7 @@ describe("collect", () => {
       picks: { stretch: null, bestValue: null, computedAt: NOW.toISOString() },
       updatedAt: new Date(NOW.getTime() - 30_000).toISOString(),
       offline: false,
-    });
-    cache.setKeyScope(keyFingerprint("key"));
+    }, keyFingerprint("key"));
     const fetchUsage = vi.fn(async () => USAGE);
     const deps = buildDeps({ cache, fetchUsage });
     const result = await collect(deps, { force: false });
@@ -234,8 +244,7 @@ describe("collect", () => {
       picks: { stretch: null, bestValue: null, computedAt: NOW.toISOString() },
       updatedAt: new Date(NOW.getTime() - 30_000).toISOString(),
       offline: false,
-    });
-    cache.setKeyScope(keyFingerprint("old-key"));
+    }, keyFingerprint("old-key"));
     const fetchUsage = vi.fn(async () => USAGE);
     const deps = buildDeps({
       cache,
@@ -257,7 +266,7 @@ describe("collect", () => {
       picks: { stretch: null, bestValue: null, computedAt: NOW.toISOString() },
       updatedAt: new Date(NOW.getTime() - 30_000).toISOString(),
       offline: false,
-    });
+    }, keyFingerprint("key"));
     const fetchUsage = vi.fn(async () => USAGE);
     const deps = buildDeps({ cache, fetchUsage });
     await collect(deps, { force: true });
@@ -273,7 +282,7 @@ describe("collect", () => {
       picks: { stretch: null, bestValue: null, computedAt: NOW.toISOString() },
       updatedAt: new Date(NOW.getTime() - 70_000).toISOString(),
       offline: false,
-    });
+    }, keyFingerprint("key"));
     const fetchUsage = vi.fn(async () => USAGE);
     const deps = buildDeps({ cache, fetchUsage });
     await collect(deps, { force: false });

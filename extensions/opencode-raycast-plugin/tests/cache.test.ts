@@ -24,7 +24,7 @@ describe("last payload", () => {
   it("round-trips the last-known payload", () => {
     const cache = new UsageCache(new MemoryStorage());
     expect(cache.readLastPayload()).toBeNull();
-    cache.writeLastPayload(payload(T0.toISOString()));
+    cache.writeLastPayload(payload(T0.toISOString()), "scope");
     expect(cache.readLastPayload()?.updatedAt).toBe(T0.toISOString());
   });
 
@@ -93,11 +93,12 @@ describe("usage staleness", () => {
 });
 
 describe("key scope", () => {
-  it("reports a scope as current only when it matches", () => {
+  it("reads the scope stored atomically with the payload", () => {
     const cache = new UsageCache(new MemoryStorage());
     expect(cache.readKeyScope()).toBeNull();
     expect(cache.isKeyScopeCurrent("abc")).toBe(false);
-    cache.setKeyScope("abc");
+    cache.writeLastPayload(payload(T0.toISOString()), "abc");
+    expect(cache.readKeyScope()).toBe("abc");
     expect(cache.isKeyScopeCurrent("abc")).toBe(true);
     expect(cache.isKeyScopeCurrent("def")).toBe(false);
   });

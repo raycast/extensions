@@ -1,6 +1,6 @@
 # Opencode Info
 
-Track your [OpenCode Go](https://opencode.ai) usage from Raycast — the three limit windows, the live model catalog, and the daily picks — in a full view and a menu-bar command.
+Track your [OpenCode Go](https://opencode.ai) usage from Raycast. The full view shows the limit windows, the live model catalog, and the daily picks; a menu-bar command shows the limit windows and the Go model catalog at a glance.
 
 ## Setup
 
@@ -9,7 +9,7 @@ You need an **active OpenCode Go subscription** — the extension surfaces subsc
 Then paste your **OpenCode Go API key** into the extension preferences:
 
 1. Open Raycast → Extensions → **Opencode Info** → Preferences.
-2. Enter your API key in the **API key** field.
+2. Enter your API key in the **API Key** field.
 
 The extension reads the key from preferences and sends it only to the OpenCode API to fetch your usage. It fetches the model catalog and current pricing from opencode's public endpoints without sharing your key.
 
