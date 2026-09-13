@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kloak",
+  "title": "Kloak Password Manager",
+  "description": "Zero-knowledge, local-first password manager with instant search, auto-clear clipboard, and generator.",
+  "icon": "icon.png",
+  "author": "naetik_arvind",
+  "categories": [
+    "Security",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-vault",
+      "title": "Search Vault",
+      "subtitle": "Kloak",
+      "description": "Fuzzy search passwords and copy credentials instantly",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "Kloak",
+      "description": "Generate high-entropy password or EFF passphrase",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "add-entry",
+      "title": "Add Entry",
+      "subtitle": "Kloak",
+      "description": "Add new login, secure note, or card to vault",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "lock-vault",
+      "title": "Lock Vault",
+      "subtitle": "Kloak",
+      "description": "Immediately lock Kloak vault and wipe memory",
+      "mode": "no-view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "import-vault",
+      "title": "Import Passwords",
+      "subtitle": "Kloak",
+      "description": "Import from 1Password, Bitwarden, LastPass, Apple, Chrome",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "export-vault",
+      "title": "Export Vault",
+      "subtitle": "Kloak",
+      "description": "Export encrypted backup or open formats",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "autoClearClipboardSeconds",
+      "title": "Clear Clipboard After",
+      "description": "Seconds before copied passwords are wiped from clipboard",
+      "type": "textfield",
+      "default": "30",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
