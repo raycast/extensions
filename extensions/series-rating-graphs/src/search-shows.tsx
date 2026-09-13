@@ -1,29 +1,30 @@
-import { ActionPanel, List, Icon, getPreferenceValues, Grid, Keyboard } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { ActionPanel, List, Icon, getPreferenceValues, Grid, Keyboard, Color } from "@raycast/api";
+import { useCachedState, useFetch } from "@raycast/utils";
 import { useState } from "react";
 
 import {
-  ActionCopyPoster,
-  ActionDownloadPoster,
-  ActionOpenImdbPage,
-  ActionOpenSeriesGraphPage,
-  ActionOpenTmdbPage,
-  ActionShowDetails,
-  ActionToggleLayout,
+  CopyPosterAction,
+  DownloadPosterAction,
+  OpenImdbPageAction,
+  OpenSeriesGraphPageAction,
+  OpenTmdbPageAction,
+  ShowDetailsAction,
+  ToggleLayoutAction,
 } from "./components/Actions";
 import { SearchResult } from "./types";
 import { getApiBaseUrl } from "./utils/api";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const viewMode = preferences.viewMode;
   const preferredWebsite = preferences.preferredWebsite;
   const apiBaseUrl = getApiBaseUrl();
 
-  const [layout, setLayout] = useState<string>(viewMode);
-  const [columns, setColumns] = useState(5);
-
   const [searchText, setSearchText] = useState("");
+
+  const defaultLayout = preferences.viewMode ?? "grid";
+  const [layout, setLayout] = useCachedState("layout", defaultLayout);
+
+  const toggleLayout = () => setLayout((current: string) => (current === "grid" ? "list" : "grid"));
 
   const res = useFetch<{ titles: SearchResult[] }>(
     `${apiBaseUrl}/search/titles?query=${encodeURIComponent(searchText)}`,
@@ -51,27 +52,12 @@ export default function Command() {
         isLoading={res.isLoading}
         searchText={searchText}
         onSearchTextChange={setSearchText}
+        searchBarPlaceholder="Search TV Shows…"
         fit={Grid.Fit.Fill}
         aspectRatio="2/3"
-        columns={columns}
-        searchBarAccessory={
-          <Grid.Dropdown
-            tooltip="Grid Item Size"
-            storeValue
-            onChange={(newValue) => {
-              setColumns(parseInt(newValue));
-            }}
-          >
-            <Grid.Dropdown.Item title="Large" value="3" />
-            <Grid.Dropdown.Item title="Medium" value="5" />
-            <Grid.Dropdown.Item title="Small" value="8" />
-          </Grid.Dropdown>
-        }
         throttle
       >
-        {res.isLoading && searchText ? (
-          <Grid.EmptyView title="Loading…" icon={Icon.Hourglass} description="Fetching results…" />
-        ) : hasError && searchText ? (
+        {hasError && searchText ? (
           <Grid.EmptyView
             title="Failed to fetch data"
             icon={Icon.ExclamationMark}
@@ -89,39 +75,39 @@ export default function Command() {
                 title={show.primaryTitle}
                 subtitle={`(${show?.startYear ?? "unknown"}–${show?.endYear ?? "now"})`}
                 accessory={{
-                  icon: Icon.FilmStrip,
-                  tooltip: String(show?.rating?.aggregateRating || "N/A"),
+                  icon: { source: Icon.Star, tintColor: Color.Yellow },
+                  tooltip: show?.rating?.aggregateRating?.toFixed(1) ?? "N/A",
                 }}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <ActionShowDetails show={show} />
+                      <ShowDetailsAction show={show} />
                     </ActionPanel.Section>
                     {preferredWebsite === "imdb" ? (
                       <ActionPanel.Section>
-                        <ActionOpenImdbPage imdbId={show?.id} shortcut={undefined} />
-                        <ActionOpenSeriesGraphPage imdbId={show?.id} shortcut={shiftEnterShortcut} />
-                        <ActionOpenTmdbPage imdbId={show?.id} shortcut={altEnterShortcut} />
+                        <OpenImdbPageAction imdbId={show?.id} shortcut={undefined} />
+                        <OpenSeriesGraphPageAction imdbId={show?.id} shortcut={shiftEnterShortcut} />
+                        <OpenTmdbPageAction imdbId={show?.id} shortcut={altEnterShortcut} />
                       </ActionPanel.Section>
                     ) : preferredWebsite === "tmdb" ? (
                       <ActionPanel.Section>
-                        <ActionOpenTmdbPage imdbId={show?.id} shortcut={undefined} />
-                        <ActionOpenSeriesGraphPage imdbId={show?.id} shortcut={shiftEnterShortcut} />
-                        <ActionOpenImdbPage imdbId={show?.id} shortcut={altEnterShortcut} />
+                        <OpenTmdbPageAction imdbId={show?.id} shortcut={undefined} />
+                        <OpenSeriesGraphPageAction imdbId={show?.id} shortcut={shiftEnterShortcut} />
+                        <OpenImdbPageAction imdbId={show?.id} shortcut={altEnterShortcut} />
                       </ActionPanel.Section>
                     ) : (
                       <ActionPanel.Section>
-                        <ActionOpenSeriesGraphPage imdbId={show?.id} shortcut={undefined} />
-                        <ActionOpenImdbPage imdbId={show?.id} shortcut={shiftEnterShortcut} />
-                        <ActionOpenTmdbPage imdbId={show?.id} shortcut={altEnterShortcut} />
+                        <OpenSeriesGraphPageAction imdbId={show?.id} shortcut={undefined} />
+                        <OpenImdbPageAction imdbId={show?.id} shortcut={shiftEnterShortcut} />
+                        <OpenTmdbPageAction imdbId={show?.id} shortcut={altEnterShortcut} />
                       </ActionPanel.Section>
                     )}
                     <ActionPanel.Section>
-                      <ActionCopyPoster posterUrl={show?.primaryImage?.url} />
-                      <ActionDownloadPoster posterUrl={show?.primaryImage?.url} />
+                      <CopyPosterAction posterUrl={show?.primaryImage?.url} />
+                      <DownloadPosterAction posterUrl={show?.primaryImage?.url} />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
-                      <ActionToggleLayout layout={layout} setLayout={setLayout} />
+                      <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
                     </ActionPanel.Section>
                   </ActionPanel>
                 }
@@ -136,10 +122,15 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={res.isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
-      {res.isLoading && searchText ? (
-        <List.EmptyView title="Loading…" icon={Icon.Hourglass} description="Fetching results…" />
-      ) : hasError && searchText ? (
+    <List
+      isLoading={res.isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search TV Shows…"
+      isShowingDetail
+      throttle
+    >
+      {hasError && searchText ? (
         <List.EmptyView
           title="Failed to fetch data"
           icon={Icon.ExclamationMark}
@@ -154,42 +145,61 @@ export default function Command() {
                 source: show?.primaryImage?.url ?? "",
                 fallback: Icon.FilmStrip,
               }}
-              title={show.primaryTitle}
-              subtitle={`(${show?.startYear ?? "unknown"}–${show?.endYear ?? "now"})`}
-              accessories={[
-                ...(show?.primaryTitle !== show?.originalTitle ? [{ text: show?.originalTitle }] : []),
-                { text: String(show?.rating?.aggregateRating || "N/A"), icon: Icon.Star },
-              ]}
+              title={{ value: show.primaryTitle, tooltip: show.primaryTitle }}
+              detail={
+                <List.Item.Detail
+                  isLoading={res.isLoading}
+                  markdown={`<img src="${show.primaryImage?.url}" width="200" />`}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="Title" text={show.primaryTitle} />
+                      {show.primaryTitle === show.originalTitle || !show.originalTitle ? undefined : (
+                        <List.Item.Detail.Metadata.Label title="Original Title" text={show.originalTitle} />
+                      )}
+                      <List.Item.Detail.Metadata.Label
+                        icon={Icon.Calendar}
+                        title="Release Date"
+                        text={`${show.startYear ?? "N/A"}–${show.endYear ?? "now"}`}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        icon={Icon.Star}
+                        title="Rating"
+                        text={`${show.rating?.aggregateRating.toFixed(1) || "N/A"} (${show.rating?.voteCount.toLocaleString() || "N/A"} votes)`}
+                      />
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <ActionShowDetails show={show} />
+                    <ShowDetailsAction show={show} />
                   </ActionPanel.Section>
                   {preferredWebsite === "imdb" ? (
                     <ActionPanel.Section>
-                      <ActionOpenImdbPage imdbId={show?.id} shortcut={undefined} />
-                      <ActionOpenSeriesGraphPage imdbId={show?.id} shortcut={shiftEnterShortcut} />
-                      <ActionOpenTmdbPage imdbId={show?.id} shortcut={altEnterShortcut} />
+                      <OpenImdbPageAction imdbId={show?.id} shortcut={undefined} />
+                      <OpenSeriesGraphPageAction imdbId={show?.id} shortcut={shiftEnterShortcut} />
+                      <OpenTmdbPageAction imdbId={show?.id} shortcut={altEnterShortcut} />
                     </ActionPanel.Section>
                   ) : preferredWebsite === "tmdb" ? (
                     <ActionPanel.Section>
-                      <ActionOpenTmdbPage imdbId={show?.id} shortcut={undefined} />
-                      <ActionOpenSeriesGraphPage imdbId={show?.id} shortcut={shiftEnterShortcut} />
-                      <ActionOpenImdbPage imdbId={show?.id} shortcut={altEnterShortcut} />
+                      <OpenTmdbPageAction imdbId={show?.id} shortcut={undefined} />
+                      <OpenSeriesGraphPageAction imdbId={show?.id} shortcut={shiftEnterShortcut} />
+                      <OpenImdbPageAction imdbId={show?.id} shortcut={altEnterShortcut} />
                     </ActionPanel.Section>
                   ) : (
                     <ActionPanel.Section>
-                      <ActionOpenSeriesGraphPage imdbId={show?.id} shortcut={undefined} />
-                      <ActionOpenImdbPage imdbId={show?.id} shortcut={shiftEnterShortcut} />
-                      <ActionOpenTmdbPage imdbId={show?.id} shortcut={altEnterShortcut} />
+                      <OpenSeriesGraphPageAction imdbId={show?.id} shortcut={undefined} />
+                      <OpenImdbPageAction imdbId={show?.id} shortcut={shiftEnterShortcut} />
+                      <OpenTmdbPageAction imdbId={show?.id} shortcut={altEnterShortcut} />
                     </ActionPanel.Section>
                   )}
                   <ActionPanel.Section>
-                    <ActionCopyPoster posterUrl={show?.primaryImage?.url} />
-                    <ActionDownloadPoster posterUrl={show?.primaryImage?.url} />
+                    <CopyPosterAction posterUrl={show?.primaryImage?.url} />
+                    <DownloadPosterAction posterUrl={show?.primaryImage?.url} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
-                    <ActionToggleLayout layout={layout} setLayout={setLayout} />
+                    <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }
