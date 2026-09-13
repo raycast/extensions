@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "weinc",
+  "title": "WeInc",
+  "description": "Build websites with WeInc AI and browse your WeInc projects.",
+  "icon": "icon.png",
+  "author": "umair_ali_sadaqat",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "build-website",
+      "title": "Build Website",
+      "subtitle": "WeInc",
+      "description": "Describe a website and let WeInc AI build it for you.",
+      "mode": "view"
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "subtitle": "WeInc",
+      "description": "Browse your WeInc projects and open their previews.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiKey",
+          "title": "API Key",
+          "description": "Your WeInc API key (starts with wk_), generated from the agency dashboard.",
+          "type": "password",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
