@@ -363,11 +363,7 @@ function Artifacts() {
   }
 
   return (
-    <List
-      navigationTitle={workspaceTitle("Browse Artifacts")}
-      isLoading={isLoading}
-      searchBarPlaceholder="Search artifacts by title, description, or ID"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search artifacts by title, description, or ID">
       <List.EmptyView
         icon={error ? Icon.Warning : Icon.AppWindowGrid2x2}
         title={error ? "Could Not Load Artifacts" : "No Artifacts Found"}

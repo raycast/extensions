@@ -366,7 +366,13 @@ function PolicyDetail({ policy, onChanged }: { policy: Policy; onChanged: () => 
   );
 }
 
-export function PolicyBrowser({ initialPattern }: { initialPattern?: string }) {
+export function PolicyBrowser({
+  initialPattern,
+  isRootView = false,
+}: {
+  initialPattern?: string;
+  isRootView?: boolean;
+}) {
   const directory = useIntegrationDirectory();
   const [filter, setFilter] = useState<PolicyFilter>("all");
   const [searchText, setSearchText] = useState("");
@@ -413,7 +419,7 @@ export function PolicyBrowser({ initialPattern }: { initialPattern?: string }) {
 
   return (
     <List
-      navigationTitle={workspaceTitle(initialPattern ? "Tool Policies" : "Manage Policies")}
+      navigationTitle={isRootView ? undefined : workspaceTitle(initialPattern ? "Tool Policies" : "Manage Policies")}
       isLoading={isLoading}
       searchBarPlaceholder="Search tools, integrations, or policies"
       filtering
@@ -573,7 +579,7 @@ export function PolicyBrowser({ initialPattern }: { initialPattern?: string }) {
 }
 
 function ManagePolicies() {
-  return <PolicyBrowser />;
+  return <PolicyBrowser isRootView />;
 }
 
 export default withWorkspace(ManagePolicies);

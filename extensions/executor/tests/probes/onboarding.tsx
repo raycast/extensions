@@ -44,7 +44,7 @@ mock.module(source, () => ({
   },
   currentWorkspace: () => profile,
 }));
-const { withWorkspace } = await import("../../src/components/workspace-command");
+const { withWorkspace, WorkspaceAction } = await import("../../src/components/workspace-command");
 const Child = () => null;
 const Command = withWorkspace(Child);
 const render = () => Command({} as never) as unknown as ReturnType<typeof node>;
@@ -78,3 +78,11 @@ failure = new Error("Stored workspace could not be read.");
 await assert.rejects(() => load!(), /could not be read/);
 state = { error: failure, isLoading: false };
 assert.equal(render().type, "Detail");
+
+profile = { id: "configured", name: "QA Workspace" };
+const switchAction = WorkspaceAction() as unknown as ReturnType<typeof node>;
+assert.equal(switchAction.props.title, "Switch Workspace (QA Workspace)");
+await (switchAction.props.onAction as () => Promise<void>)();
+assert.deepEqual(launched, { name: "workspaces", type: "user", context: { returnCommand: "search-tools" } });
+profile = undefined;
+assert.equal((WorkspaceAction() as unknown as ReturnType<typeof node>).props.title, "Switch Workspace");

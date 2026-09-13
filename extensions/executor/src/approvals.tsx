@@ -1,4 +1,3 @@
-import { workspaceTitle } from "./lib/workspaces";
 import { WorkspaceAction } from "./components/workspace-command";
 import { withWorkspace } from "./components/workspace-command";
 import { Keyboard, Action, ActionPanel, Color, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
@@ -57,11 +56,7 @@ function Approvals() {
   }
 
   return (
-    <List
-      navigationTitle={workspaceTitle("Review Approvals")}
-      isLoading={isLoading || openingId !== undefined}
-      searchBarPlaceholder="Search recorded approvals"
-    >
+    <List isLoading={isLoading || openingId !== undefined} searchBarPlaceholder="Search recorded approvals">
       {error ? (
         <List.EmptyView
           icon={Icon.Warning}

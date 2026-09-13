@@ -1,7 +1,7 @@
 import { DeleteExecutorItemAction } from "./components/delete-executor-item-action";
 import { useEffect, useRef } from "react";
 import { createUncheckedHealthChecks } from "./lib/unchecked-health";
-import { currentWorkspace, runInWorkspace, workspaceTitle } from "./lib/workspaces";
+import { currentWorkspace, runInWorkspace } from "./lib/workspaces";
 import { WorkspaceAction } from "./components/workspace-command";
 import { withWorkspace } from "./components/workspace-command";
 import { ConsoleAction } from "./components/console-action";
@@ -132,11 +132,7 @@ function Connections() {
   }
 
   return (
-    <List
-      navigationTitle={workspaceTitle("Manage Connections")}
-      isLoading={isLoading}
-      searchBarPlaceholder="Filter connections"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Filter connections">
       <List.EmptyView
         icon={error ? Icon.Warning : Icon.Plug}
         title={error ? "Could Not Load Connections" : "No Connections Found"}

@@ -88,10 +88,12 @@ async function openWorkspace(workspace: Workspace, returnCommand?: string): Prom
 }
 
 function AddWorkspaceForm({
+  isRootView = false,
   workspaces,
   returnCommand,
   onSaved,
 }: {
+  isRootView?: boolean;
   workspaces: Workspace[];
   returnCommand?: string;
   onSaved: () => void;
@@ -180,7 +182,7 @@ function AddWorkspaceForm({
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="Add Workspace"
+      navigationTitle={isRootView ? undefined : "Add Workspace"}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Workspace" icon={Icon.Plus} onSubmit={onSubmit} />
@@ -396,17 +398,18 @@ export default function ManageWorkspaces(
   }
 
   const addWorkspace = (
-    <AddWorkspaceForm workspaces={workspaces} returnCommand={returnCommand} onSaved={() => revalidate()} />
+    <AddWorkspaceForm
+      isRootView={launchContext?.intent === "add"}
+      workspaces={workspaces}
+      returnCommand={returnCommand}
+      onSaved={() => revalidate()}
+    />
   );
 
   if (launchContext?.intent === "add" && data) return addWorkspace;
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Workspaces"
-      searchBarPlaceholder="Search workspaces by name, organization, or server"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search workspaces by name, organization, or server">
       <List.EmptyView
         icon={error ? Icon.Warning : Icon.Building}
         title={error ? "Could Not Load Workspaces" : "No Workspaces Added"}

@@ -11,7 +11,7 @@ import { ConsoleAction } from "./components/console-action";
 import { IntegrationSetupForm } from "./components/integration-setup-form";
 import type { IntegrationSetupDefaults } from "./lib/integration-setup";
 
-function IntegrationBrowser() {
+function IntegrationBrowser({ isRootView }: { isRootView: boolean }) {
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState("all");
   const directory = useIntegrationDirectory();
@@ -25,7 +25,7 @@ function IntegrationBrowser() {
   const showCustomRow = urlMode || (!isLoading && (Boolean(error) || !data?.length));
   return (
     <List
-      navigationTitle={workspaceTitle("Add Integration")}
+      navigationTitle={isRootView ? undefined : workspaceTitle("Add Integration")}
       searchBarPlaceholder="Search services or paste an endpoint URL"
       filtering={false}
       throttle
@@ -204,12 +204,20 @@ function IntegrationBrowser() {
   );
 }
 
-export function AddIntegration({ launchContext }: { launchContext?: { integrationSetup?: IntegrationSetupDefaults } }) {
+export function AddIntegration({
+  launchContext,
+  isRootView = false,
+}: {
+  launchContext?: { integrationSetup?: IntegrationSetupDefaults };
+  isRootView?: boolean;
+}) {
   return launchContext?.integrationSetup ? (
-    <IntegrationSetupForm defaults={launchContext.integrationSetup} />
+    <IntegrationSetupForm defaults={launchContext.integrationSetup} isRootView={isRootView} />
   ) : (
-    <IntegrationBrowser />
+    <IntegrationBrowser isRootView={isRootView} />
   );
 }
 
-export default withWorkspace(AddIntegration);
+export default withWorkspace(function AddIntegrationCommand(props) {
+  return <AddIntegration {...props} isRootView />;
+});

@@ -23,8 +23,10 @@ import { WorkspaceAction } from "./workspace-command";
 
 export function IntegrationSetupForm({
   defaults = {},
+  isRootView = false,
   item,
 }: {
+  isRootView?: boolean;
   defaults?: IntegrationSetupDefaults;
   item?: CatalogItem;
 }) {
@@ -227,7 +229,7 @@ export function IntegrationSetupForm({
 
   return (
     <Form
-      navigationTitle={workspaceTitle(item ? `Add ${item.title}` : "Add Custom Integration")}
+      navigationTitle={isRootView ? undefined : workspaceTitle(item ? `Add ${item.title}` : "Add Custom Integration")}
       isLoading={isLoading || busy}
       actions={
         <ActionPanel>

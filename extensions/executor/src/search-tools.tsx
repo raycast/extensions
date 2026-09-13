@@ -214,9 +214,11 @@ function ToolSchemaView({ tool, connectionName }: { tool: ToolSummary; connectio
 export function ToolBrowser({
   initialIntegration = "all",
   connection,
+  isRootView = false,
 }: {
   initialIntegration?: string;
   connection?: Connection;
+  isRootView?: boolean;
 }) {
   const [searchText, setSearchText] = useState("");
   const [integration, setIntegration] = useState(initialIntegration);
@@ -317,7 +319,9 @@ export function ToolBrowser({
     <List
       isLoading={isLoading || loadingConnections}
       filtering={false}
-      navigationTitle={workspaceTitle(connection ? `${connectionLabel(connection)} Tools` : "Search Tools")}
+      navigationTitle={
+        isRootView ? undefined : workspaceTitle(connection ? `${connectionLabel(connection)} Tools` : "Search Tools")
+      }
       throttle
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -489,7 +493,7 @@ export function ToolBrowser({
 }
 
 function SearchTools() {
-  return <ToolBrowser />;
+  return <ToolBrowser isRootView />;
 }
 
 export default withWorkspace(SearchTools);

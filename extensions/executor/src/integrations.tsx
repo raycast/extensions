@@ -1,3 +1,4 @@
+import { listDisplayIntegrations } from "./lib/integration-display";
 import { DeleteExecutorItemAction } from "./components/delete-executor-item-action";
 import { workspaceTitle } from "./lib/workspaces";
 import { WorkspaceAction } from "./components/workspace-command";
@@ -17,7 +18,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useRef, useState } from "react";
-import { accountCacheKey, listIntegrations } from "./lib/client";
+import { accountCacheKey } from "./lib/client";
 import { saveIntegrationMetadata } from "./lib/integration-metadata";
 import { summarize } from "./lib/format";
 import { integrationIcon } from "./lib/integrations";
@@ -94,7 +95,7 @@ function Integrations() {
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async (_scope: string) => {
       void _scope;
-      return listIntegrations();
+      return listDisplayIntegrations();
     },
     [accountCacheKey()],
     {
@@ -106,11 +107,7 @@ function Integrations() {
   const directory = new Map(integrations.map((integration) => [integration.slug, integration]));
 
   return (
-    <List
-      navigationTitle={workspaceTitle("Browse Integrations")}
-      isLoading={isLoading}
-      searchBarPlaceholder="Search integrations by name or description"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search integrations by name or description">
       <List.EmptyView
         icon={error ? Icon.Warning : Icon.Plug}
         title={error ? "Could Not Load Integrations" : "No Integrations Found"}

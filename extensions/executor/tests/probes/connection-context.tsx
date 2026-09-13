@@ -61,12 +61,12 @@ mock.module("@raycast/utils", () => ({
 }));
 stub("lib/client", {
   defaultOwner: () => "user",
-  listIntegrations() {},
   listConnections() {},
   request() {},
   webUrl() {},
   execute() {},
 });
+stub("lib/integration-display", { listDisplayIntegrations() {} });
 stub("lib/workspaces", {
   currentWorkspace: () => workspace,
   workspaceTitle: (title: string) => title,
@@ -182,4 +182,6 @@ field(tree, "credential:token")?.props.onChange("synthetic-token");
 tree = render();
 field(tree, "integration")?.props.onChange("alpha");
 assert.equal(field(render(), "credential:token")?.props.value, "", "changing provider clears credentials");
+assert.equal(render({ isRootView: true })[0].props.navigationTitle, undefined);
+assert.equal(render()[0].props.navigationTitle, "Add Connection");
 console.log("Connection context regression checks passed");

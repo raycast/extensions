@@ -1,4 +1,3 @@
-import { workspaceTitle } from "./lib/workspaces";
 import { WorkspaceAction } from "./components/workspace-command";
 import { withWorkspace } from "./components/workspace-command";
 import { Keyboard, Action, ActionPanel, Icon, List } from "@raycast/api";
@@ -14,11 +13,7 @@ function SavedTools() {
   const { data, isLoading, error, revalidate } = usePromise(loadSavedTools, [savedToolsKey()]);
   const directory = useIntegrationDirectory();
   return (
-    <List
-      navigationTitle={workspaceTitle("Saved Tools")}
-      isLoading={isLoading}
-      searchBarPlaceholder="Search saved tools and input presets"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search saved tools and input presets">
       <List.EmptyView
         icon={error ? Icon.Warning : Icon.Star}
         title={error ? "Could Not Load Saved Tools" : "No Saved Tools"}

@@ -1,7 +1,8 @@
+import { listDisplayIntegrations } from "../lib/integration-display";
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, type ReactElement } from "react";
-import { accountCacheKey, listConnections, listIntegrations, listTools } from "../lib/client";
+import { accountCacheKey, listConnections, listTools } from "../lib/client";
 import { integrationIcon, integrationLabel, useIntegrationDirectory } from "../lib/integrations";
 import { connectionPresentation, summarize, toolLabel } from "../lib/format";
 import { integrationPolicyPattern, exactPolicyPattern } from "../lib/policies";
@@ -21,7 +22,7 @@ function IntegrationPicker({ policyForm }: Props) {
   } = useCachedPromise(
     async (_scope: string) => {
       void _scope;
-      return listIntegrations();
+      return listDisplayIntegrations();
     },
     [accountCacheKey()],
   );
