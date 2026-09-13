@@ -1,5 +1,5 @@
-import { Cache, Color } from '@raycast/api'
-import Bonjour, { Service } from 'bonjour-service'
+import { Cache, Color, open } from '@raycast/api'
+import bonjour, { RemoteService } from 'bonjour'
 import { execSync } from 'child_process'
 
 export const KEY = 'services'
@@ -9,14 +9,18 @@ declare global {
   interface String {
     get available(): boolean
     get status(): Color
+    open(): void
   }
 }
 
 Object.defineProperties(String.prototype, {
+
   available: {
     get: function () {
       try {
-        return !!execSync(`curl -I http://${this}`)
+        return !!execSync(`curl -I ${this}`, {
+          timeout: 1000,
+        })
       } catch {
         return false
       }
@@ -25,12 +29,27 @@ Object.defineProperties(String.prototype, {
 
   status: {
     get: function () {
-      return this.available ? Color.Green : Color.Red
+      return this.available
+        ? Color.Green
+        : Color.Red
     },
   },
+
+  open: {
+    value: function () {
+      open(this)
+    },
+  },
+
 })
 
-export class HttpService extends Service {
+export interface HttpService extends RemoteService {
+  origin: string
+  origins: string[]
+}
+
+export class Http {
+
   static set services(value: HttpService[]) {
     value
       ? cache.set(KEY, JSON.stringify(Object.values(value)))
@@ -52,7 +71,8 @@ export class HttpService extends Service {
   }
 
   static fetch() {
-    new Bonjour().find({ type: 'http' }, (service: Service) => {
+    bonjour().find({ type: 'http' }, (service: RemoteService) => {
+      console.log(service)
       this.services = Object.values({
         ...(this.services ?? []).reduce((result, service) => {
           return {
@@ -63,11 +83,13 @@ export class HttpService extends Service {
 
         [service.name]: {
           ...service,
-          origin: `http://${service.host}:${service.port}`.toLowerCase(),
+          origin: `http://${service.host}:${service.port}`,
+          origins: service.addresses.map((address) => {
+            return `http://${address}:${service.port}`
+          }),
         } as HttpService,
       })
     })
   }
 
-  origin: string = ''
 }

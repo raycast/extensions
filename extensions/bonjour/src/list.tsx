@@ -1,13 +1,13 @@
-import { Action, ActionPanel, Icon, List, open } from '@raycast/api'
+import { Action, ActionPanel, Icon, List } from '@raycast/api'
 import { useCachedState } from '@raycast/utils'
-import { cache, HttpService, KEY } from './service'
+import { cache, Http, HttpService, KEY } from './service'
 
-HttpService.fetch()
+Http.fetch()
 export default function Command() {
   const [items, setItems] = useCachedState<HttpService[]>(KEY)
 
   const set = () => {
-    setItems(HttpService.services)
+    setItems(Http.services)
   }
 
   setTimeout(set, 3 * 1000)
@@ -22,7 +22,7 @@ export default function Command() {
             title={service.name}
             icon={{
               source: Icon.CircleFilled,
-              tintColor: service.host.status,
+              tintColor: service.origin.status,
             }}
             detail={
               <List.Item.Detail
@@ -39,16 +39,14 @@ export default function Command() {
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.TagList title="Addresses">
-                      {service.addresses?.map((address, index) => (
+                      {service.origins?.map((origin, index) => (
                         <List.Item.Detail.Metadata.TagList.Item
                           key={index}
-                          text={address}
-                          color={address.status}
+                          text={origin.split('//')[1]?.split(':')[0]}
+                          color={origin.status}
                           onAction={
-                            address.available
-                              ? () => {
-                                  open(`http://${address}`)
-                                }
+                            origin.available
+                              ? origin.open
                               : undefined
                           }
                         />
@@ -57,7 +55,7 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Referer"
-                      text={service.referer?.address}
+                      text={`${service.referer?.address}:${service.referer?.port}`}
                     />
                   </List.Item.Detail.Metadata>
                 }

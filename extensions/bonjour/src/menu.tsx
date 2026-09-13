@@ -1,13 +1,13 @@
-import { Icon, MenuBarExtra, open } from '@raycast/api'
+import { Icon, MenuBarExtra } from '@raycast/api'
 import { useCachedState } from '@raycast/utils'
-import { cache, HttpService, KEY } from './service'
+import { cache, Http, HttpService, KEY } from './service'
 
-HttpService.fetch()
+Http.fetch()
 export default function Command() {
   const [items, setItems] = useCachedState<HttpService[]>(KEY)
 
   const set = () => {
-    setItems(HttpService.services)
+    setItems(Http.services)
   }
 
   setTimeout(set, 3 * 1000)
@@ -27,11 +27,9 @@ export default function Command() {
               title={service.name}
               icon={{
                 source: Icon.CircleFilled,
-                tintColor: service.host.status,
+                tintColor: service.origin.status,
               }}
-              onAction={() => {
-                open(service.origin)
-              }}
+              onAction={service.origin.open}
             />
           )
         })
