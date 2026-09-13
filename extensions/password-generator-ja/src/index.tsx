@@ -7,6 +7,7 @@ export default function Command() {
 
   const [length, setLength] = useState("15");
   const [lengthError, setLengthError] = useState<string | undefined>();
+  const [combinationError, setCombinationError] = useState<string | undefined>();
 
   const [useUppercase, setUseUppercase] = useState(true);
   const [useLowercase, setUseLowercase] = useState(true);
@@ -82,14 +83,17 @@ export default function Command() {
       }
     };
 
-    // Issue 1 fix: never exceed the requested length.
-    // If the minimum counts exceed the length, shuffle then truncate so the
-    // final password is exactly `len` characters.
-    if (reqChars.length >= len) {
-      shuffle(reqChars);
-      setPassword(reqChars.slice(0, len).join(""));
+    // Follow-up fix: never silently drop requirements. If the configured
+    // minimums need more slots than the requested length, refuse to generate
+    // and surface an inline error instead of truncating required characters.
+    if (reqChars.length > len) {
+      setCombinationError(
+        `Minimum requirements (${reqChars.length}) exceed the length (${len}). Lower the minimums or increase the length.`,
+      );
+      setPassword("");
       return;
     }
+    setCombinationError(undefined);
 
     const remainingLength = len - reqChars.length;
     for (let i = 0; i < remainingLength; i++) {
@@ -108,7 +112,10 @@ export default function Command() {
   const handleCopy = async () => {
     // Issue 2 fix: never copy an empty password as success.
     if (!password) {
-      await showToast({ title: "Select at least one character set", style: Toast.Style.Failure });
+      await showToast({
+        title: combinationError ?? "Select at least one character set",
+        style: Toast.Style.Failure,
+      });
       return;
     }
     await Clipboard.copy(password);
@@ -142,6 +149,7 @@ export default function Command() {
       <Form.Checkbox id="useNumbers" title="" label="0-9" value={useNumbers} onChange={setUseNumbers} />
       <Form.Checkbox id="useSymbols" title="" label="!@#$%^&*" value={useSymbols} onChange={setUseSymbols} />
       {noCharsetSelected && <Form.Description title="" text="Select at least one character set." />}
+      {combinationError && <Form.Description title="" text={combinationError} />}
 
       <Form.Separator />
 
