@@ -1,6 +1,6 @@
 # Changelog
 
-## [Session Selection and Switching] - {PR_MERGE_DATE}
+## [Session Selection and Switching] - 2026-09-13
 
 - Select the session every command controls from Manage Sessions. Attaching a session selects it, Dashboard and Manage Agents name the session in their search bar, and a stopped selected session is shown as stopped with actions to start it or choose another instead of falling back to the default session.
 - Attach a session in a new terminal window.
