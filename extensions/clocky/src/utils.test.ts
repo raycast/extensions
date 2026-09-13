@@ -134,6 +134,10 @@ describe("isPauseWithinSession", () => {
   it("rejects an open pause starting after a closed session's end", () => {
     expect(isPauseWithinSession(sessionStart, sessionEnd, new Date("2026-09-07T17:00:00.000Z"), null)).toBe(false);
   });
+
+  it("rejects an open pause that otherwise fits within a closed session", () => {
+    expect(isPauseWithinSession(sessionStart, sessionEnd, new Date("2026-09-07T09:00:00.000Z"), null)).toBe(false);
+  });
 });
 
 describe("allPausesWithinSession", () => {
@@ -172,6 +176,11 @@ describe("allPausesWithinSession", () => {
     ];
     const shrunkEnd = new Date("2026-09-07T14:00:00.000Z");
     expect(allPausesWithinSession(pauses, sessionStart, shrunkEnd)).toBe(false);
+  });
+
+  it("returns false when the session gains an end while a pause is still open", () => {
+    const pauses: Pause[] = [{ start: "2026-09-07T09:00:00.000Z" }];
+    expect(allPausesWithinSession(pauses, sessionStart, sessionEnd)).toBe(false);
   });
 });
 

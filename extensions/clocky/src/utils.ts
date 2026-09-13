@@ -227,7 +227,7 @@ export function isPauseWithinSession(
   if (pauseStart.getTime() < sessionStart.getTime()) return false;
   if (sessionEnd) {
     if (pauseStart.getTime() > sessionEnd.getTime()) return false;
-    if (pauseEnd && pauseEnd.getTime() > sessionEnd.getTime()) return false;
+    if (!pauseEnd || pauseEnd.getTime() > sessionEnd.getTime()) return false;
   }
   return true;
 }
