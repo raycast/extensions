@@ -21,8 +21,10 @@ OpenAI API — this puts it behind the same keystroke, and gives it tools:
   assistant can reach
 - **fetch_url** via Firecrawl
 
-Every integration is optional. Leave a URL blank and that tool simply isn't
-offered to the model.
+Every integration is optional. Leave a URL blank and that tool tells the model
+it isn't configured instead of failing confusingly. `rag_search` additionally
+never runs when the turn is answered by a cloud fallback provider — private
+knowledge-base content is not sent to a third party.
 
 ## Commands
 

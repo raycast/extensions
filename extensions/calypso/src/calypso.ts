@@ -1,28 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 import { describeCall, runTool, TOOL_SPECS, ToolContext } from "./tools";
 
-export interface Preferences {
-  baseUrl: string;
-  model: string;
-  apiKey: string;
-  maxTokens: string;
-  temperature: string;
-  systemPrompt: string;
-  showReasoning: boolean;
-  fallbackBaseUrl: string;
-  fallbackModel: string;
-  preferredEndpoint: string;
-  enableTools: boolean;
-  maxToolRounds: string;
-  cloudProvider: string;
-  cloudApiKey: string;
-  cloudModel: string;
-  searxngUrl: string;
-  ragUrl: string;
-  ragApiKey: string;
-  ragCollection: string;
-  firecrawlUrl: string;
-}
+// `Preferences` is Raycast's own ambient type, generated from this extension's
+// package.json `preferences[]` array into raycast-env.d.ts (gitignored, regenerated
+// by `ray build`/`ray develop`). It is global — no import needed — so a hand-written
+// copy here would only drift from the real schema instead of catching drift at
+// compile time.
 
 export function toolContext(p: Preferences): ToolContext {
   return {
@@ -98,6 +81,14 @@ export interface StreamEvent {
   toolCall?: string;
   /** Short outcome line for that call, so a run stays auditable. */
   toolResult?: string;
+  /**
+   * Set alongside `done` by `runConversation` when the turn used tools: the full
+   * message list including every tool_call/tool exchange. A caller that keeps a
+   * persistent transcript (chat.tsx) should adopt this in place of its own history
+   * so a follow-up turn — or a reopened saved conversation — still has the tool
+   * results grounding the answer, instead of only the user/assistant prose.
+   */
+  finalMessages?: ChatMessage[];
 }
 
 /** Streamed tool-call fragments arrive piecewise — `arguments` is concatenated. */
@@ -181,7 +172,12 @@ export function endpoints(p: Preferences, target: string = "auto"): Endpoint[] {
     if (p.fallbackBaseUrl && trimSlash(p.fallbackBaseUrl) !== trimSlash(p.baseUrl)) list.push(one);
     const pick = (p.preferredEndpoint || "auto").trim().toLowerCase();
     if (pick === "calypso-1" || pick === "calypso-2") {
-      list.sort((a, b) => (a.model === pick ? -1 : b.model === pick ? 1 : 0));
+      // Compare against the endpoint's fixed slot label, not `.model` — that's a
+      // user-configurable string (custom model ids), so comparing it against the
+      // literal "calypso-1"/"calypso-2" made this setting a silent no-op whenever
+      // either endpoint's model id preference didn't match those exact strings.
+      const preferredLabel = pick === "calypso-1" ? "Fallback" : "Primary";
+      list.sort((a, b) => (a.label === preferredLabel ? -1 : b.label === preferredLabel ? 1 : 0));
     }
   }
 
@@ -322,7 +318,16 @@ async function* streamOnce(
       // Per-endpoint Qwen official sampling; the Temperature preference overrides it if set.
       ...ep.sampling,
       temperature: Number.isFinite(temperature) ? temperature : ep.sampling.temperature,
-      ...(withTools ? { tools: TOOL_SPECS, tool_choice: "auto" } : {}),
+      // A cloud endpoint never gets rag_search offered: that tool reads the user's
+      // private knowledge base, and its result would otherwise be sent to a
+      // third-party provider on the next round (see runConversation's execution guard,
+      // which also refuses to run it if a model calls it unprompted).
+      ...(withTools
+        ? {
+            tools: ep.isCloud ? TOOL_SPECS.filter((t) => t.function.name !== "rag_search") : TOOL_SPECS,
+            tool_choice: "auto",
+          }
+        : {}),
       stream: true,
     }),
   });
@@ -344,11 +349,12 @@ async function* streamOnce(
       buffer += decoder.decode(value, { stream: true });
 
       // SSE frames are separated by a blank line; keep the trailing partial frame.
-      const frames = buffer.split("\n\n");
+      // CRLF-tolerant: a server or proxy behind a Windows stack may emit \r\n framing.
+      const frames = buffer.split(/\r?\n\r?\n/);
       buffer = frames.pop() ?? "";
 
       for (const frame of frames) {
-        for (const line of frame.split("\n")) {
+        for (const line of frame.split(/\r?\n/)) {
           if (!line.startsWith("data:")) continue;
           const payload = line.slice(5).trim();
           if (!payload) continue;
@@ -456,9 +462,15 @@ export async function* runConversation(
 
   const ctx = toolContext(p);
   const messages: ChatMessage[] = history.map((m) => ({ ...m }));
-  // Prepend guidance without clobbering a user-set system prompt.
+  // Prepend guidance without clobbering a user-set system prompt. Idempotent: if a
+  // caller persists `finalMessages` (see StreamEvent) and resends it next turn, the
+  // system message already carries this text — appending it again every turn would
+  // otherwise make the system prompt grow without bound.
   if (messages[0]?.role === "system") {
-    messages[0].content = `${messages[0].content}\n\n${TOOL_GUIDANCE}`;
+    const existing = messages[0].content ?? "";
+    if (!existing.includes(TOOL_GUIDANCE)) {
+      messages[0].content = existing ? `${existing}\n\n${TOOL_GUIDANCE}` : TOOL_GUIDANCE;
+    }
   } else {
     messages.unshift({ role: "system", content: TOOL_GUIDANCE });
   }
@@ -484,13 +496,13 @@ export async function* runConversation(
 
     const calls = pending.filter((c) => c && c.name);
     if (calls.length === 0) {
-      yield { done: true };
+      yield { done: true, finalMessages: messages };
       return;
     }
 
     if (round >= maxRounds) {
       yield { toolResult: `stopped after ${maxRounds} tool rounds` };
-      yield { done: true };
+      yield { done: true, finalMessages: messages };
       return;
     }
 
@@ -506,7 +518,15 @@ export async function* runConversation(
 
     for (const [i, c] of calls.entries()) {
       yield { toolCall: describeCall(c.name, c.args) };
-      const out = await runTool(c.name, c.args, ctx);
+      // rag_search reads the user's private knowledge base. If this turn ended up on a
+      // cloud endpoint (local rigs unreachable), that content must not be executed and
+      // then handed to a third-party provider on the next round — refuse instead of
+      // running it, regardless of what the model asked for.
+      const out =
+        ep.isCloud && c.name === "rag_search"
+          ? "rag_search is disabled when answering via a cloud fallback endpoint: private " +
+            "knowledge-base content is never sent to a third-party provider."
+          : await runTool(c.name, c.args, ctx);
       const firstLine = out.split("\n").find((l) => l.trim()) ?? "";
       yield { toolResult: `${out.length} chars — ${firstLine.slice(0, 90)}` };
       messages.push({ role: "tool", tool_call_id: c.id || `call_${round}_${i}`, content: out });

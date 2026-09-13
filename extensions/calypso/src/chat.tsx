@@ -108,6 +108,7 @@ export default function Command() {
       let answer = "";
       let reasoning = "";
       const toolLines: string[] = [];
+      let finalMessages: ChatMessage[] | undefined;
 
       for await (const ev of runConversation(chosen, p, history.current, ctrl.signal)) {
         if (ev.content) {
@@ -127,11 +128,15 @@ export default function Command() {
           update({ tools: [...toolLines] });
         }
         if (ev.timings) update({ timings: ev.timings });
+        if (ev.finalMessages) finalMessages = ev.finalMessages;
         if (ev.done) break;
       }
 
-      // Only the assistant's prose goes back into history; tool traffic was
-      // already folded in by runConversation's own loop.
+      // When the turn used tools, adopt the full transcript runConversation built
+      // (including every tool_call/tool exchange) instead of just the prose — so a
+      // follow-up, or this conversation reopened later from history.ts, still has
+      // the tool results grounding the answer.
+      if (finalMessages) history.current = finalMessages;
       history.current.push({ role: "assistant", content: answer });
       update({ streaming: false });
     } catch (e) {

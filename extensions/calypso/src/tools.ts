@@ -106,6 +106,7 @@ function clampCount(n: unknown, fallback = 5): number {
 }
 
 async function webSearch(args: Record<string, unknown>, ctx: ToolContext): Promise<string> {
+  if (!ctx.searxngUrl.trim()) return "web_search unavailable: no SearXNG URL configured in extension preferences.";
   const query = String(args.query ?? "").trim();
   if (!query) return "web_search error: empty query.";
   const n = clampCount(args.count);
@@ -125,6 +126,7 @@ async function webSearch(args: Record<string, unknown>, ctx: ToolContext): Promi
 }
 
 async function ragSearch(args: Record<string, unknown>, ctx: ToolContext): Promise<string> {
+  if (!ctx.ragUrl.trim()) return "rag_search unavailable: no RAG API URL configured in extension preferences.";
   const query = String(args.query ?? "").trim();
   if (!query) return "rag_search error: empty query.";
   if (!ctx.ragApiKey) return "rag_search unavailable: no RAG API key configured in extension preferences.";
@@ -164,6 +166,7 @@ async function ragSearch(args: Record<string, unknown>, ctx: ToolContext): Promi
 }
 
 async function fetchUrl(args: Record<string, unknown>, ctx: ToolContext): Promise<string> {
+  if (!ctx.firecrawlUrl.trim()) return "fetch_url unavailable: no Firecrawl URL configured in extension preferences.";
   const url = String(args.url ?? "").trim();
   if (!/^https?:\/\//i.test(url)) return "fetch_url error: need an absolute http(s) URL.";
   try {
