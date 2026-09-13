@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  // The component tests render into jsdom, so they need the DOM lib and the
+  // jest-dom matcher augmentation that test/setup.ts pulls in. Keeping this in
+  // a separate project stops the extension itself from seeing browser globals.
+  "include": ["src/**/*", "test/**/*", "scripts/**/*", "raycast-env.d.ts"],
+  "exclude": [],
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"],
+    "noEmit": true
+  }
+}

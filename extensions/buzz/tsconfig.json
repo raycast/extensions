@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*", "raycast-env.d.ts"],
+  // Tests are checked separately by tsconfig.test.json: they need the DOM lib,
+  // which the extension itself must not have, since it does not run in a browser.
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    // Declared explicitly: these used to arrive only by accident, pulled in
+    // transitively by the test files' vitest import.
+    "types": ["node", "react"],
+    "module": "commonjs",
+    "target": "ES2023",
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true
+  }
+}

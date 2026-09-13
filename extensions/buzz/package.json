@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "buzz",
+  "title": "Buzz",
+  "description": "Browse channels, search messages, send direct messages, and set your status in Buzz",
+  "icon": "extension-icon.png",
+  "author": "caasols",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-channels",
+      "title": "Search Channels",
+      "description": "List and open Buzz channels",
+      "mode": "view"
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "description": "Full-text search across Buzz channel messages",
+      "mode": "view"
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "description": "Post a message to a Buzz channel, conversation, or person",
+      "mode": "view"
+    },
+    {
+      "name": "set-status",
+      "title": "Set Status",
+      "description": "View your current status and apply, create, edit or delete reusable status presets, or set a custom status",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "relayUrl",
+      "title": "Relay URL",
+      "description": "Your Buzz relay base URL. https:// or wss:// (wss is converted automatically)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://relay.example.com"
+    },
+    {
+      "name": "privateKey",
+      "title": "Private Key",
+      "description": "Your Nostr private key (nsec1... or 64-character hex). Stored by Raycast; never leaves your machine.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "nostr-tools": "^2.24.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@vitest/coverage-v8": "^2.1.9",
+    "eslint": "^10.5.0",
+    "jsdom": "^25.0.1",
+    "prettier": "^3.8.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsx": "^4.23.1",
+    "typescript": "^6.0.3",
+    "vitest": "^2.1.9"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "smoke": "tsx scripts/smoke.ts"
+  }
+}
