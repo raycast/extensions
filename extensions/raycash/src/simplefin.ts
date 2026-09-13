@@ -1,5 +1,11 @@
 import { createHash } from "crypto";
-import { Cache, Color, getPreferenceValues } from "@raycast/api";
+import {
+  Cache,
+  Color,
+  LaunchType,
+  getPreferenceValues,
+  launchCommand,
+} from "@raycast/api";
 
 /**
  * SimpleFIN Bridge client.
@@ -365,6 +371,27 @@ export async function getAccountSet(force = false): Promise<AccountSet> {
   cache.set(KEY_FETCHED_AT, String(fetchedAt));
 
   return { accounts, errors, fetchedAt, fromCache: false };
+}
+
+/**
+ * Repaints the menu bar extra after data changes underneath it.
+ *
+ * The menu bar holds whatever the menubar command last rendered, and nothing
+ * re-runs that command when another command writes the cache. Refresh Balances
+ * would fetch, stamp its own subtitle with the new time, and leave the menu
+ * showing the previous fetch until the 2h interval came round -- two surfaces
+ * reading one cache and disagreeing about it.
+ *
+ * A background launch re-renders the menu without stealing focus. The user can
+ * disable the Menu Bar command, and launchCommand throws when they have, so a
+ * failed repaint must never turn a successful refresh into an error.
+ */
+export async function repaintMenuBar(): Promise<void> {
+  try {
+    await launchCommand({ name: "menubar", type: LaunchType.Background });
+  } catch {
+    // Menu Bar command disabled or unavailable; nothing to repaint.
+  }
 }
 
 export type ThemeColor = Color | { light: string; dark: string };
@@ -879,34 +906,39 @@ export function formatDate(
   );
 }
 
+/**
+ * Formats the "Last Refreshed" stamp as an absolute date and time.
+ *
+ * Deliberately never says "Today" or "Yesterday". Both callers write into a
+ * surface that stays painted until the command next runs — the menu bar
+ * dropdown and the root search subtitle — so the string routinely outlives the
+ * render that produced it. A relative word is only true at the moment it is
+ * computed: a stamp written at 4:44pm was still claiming "Today at 4:44 PM"
+ * the following afternoon, which reads as a refresh that never happened. An
+ * absolute stamp says the same thing whenever it is eventually read.
+ *
+ * dateHeading() keeps its relative wording on purpose: the Day Heading Format
+ * preference documents that Today and Yesterday are always named.
+ */
 export function formatRefreshTime(
   timestamp: number,
   customDateFormat?: string,
 ): string {
   if (!timestamp) return "";
-  const date = new Date(timestamp);
   const epochSeconds = Math.floor(timestamp / 1000);
-
-  const startOfDay = (d: Date) =>
-    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  const days = Math.round(
-    (startOfDay(new Date()) - startOfDay(date)) / 86400000,
-  );
-
-  const timeStr = date.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
-  if (days === 0) return `Today at ${timeStr}`;
-  if (days === 1) return `Yesterday at ${timeStr}`;
 
   const format =
     (customDateFormat ?? getPrefs().prefDateFormat)?.trim() ||
     DEFAULT_DATE_FORMAT;
+  // A format carrying its own hour field already reads as a time.
   if (format.includes("h") || format.includes("H")) {
     return formatDate(epochSeconds, format);
   }
+
+  const timeStr = new Date(timestamp).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
   return `${formatDate(epochSeconds, format)} at ${timeStr}`;
 }
 

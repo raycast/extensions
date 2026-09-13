@@ -2,6 +2,7 @@ import { showToast, Toast, updateCommandMetadata } from "@raycast/api";
 import {
   formatRefreshTime,
   getAccountSet,
+  repaintMenuBar,
   requestsToday,
   MAX_REQUESTS_PER_DAY,
 } from "./simplefin";
@@ -19,6 +20,14 @@ export default async function Command() {
     await updateCommandMetadata({
       subtitle: `Last Refreshed: ${timeStr} • API Calls Today: ${calls} / 18`,
     });
+
+    // Update the other surface too, so the menu bar and this subtitle agree.
+    // Safe against the quota whichever way the call above went: the repaint
+    // re-enters getAccountSet, and it cannot reach the network here. A real
+    // fetch just reset the cache age to zero, and a cached result means the
+    // age was already under the 20 minute floor or the daily cap was spent --
+    // all three make shouldFetch decline.
+    await repaintMenuBar();
 
     if (accountSet.fromCache) {
       toast.style = Toast.Style.Failure;
