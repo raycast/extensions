@@ -198,6 +198,33 @@ test("entries past the retention window are deleted, not just hidden", async () 
   assert.deepEqual(stored, ["gh-review.activity.fresh"], "the expired entry must leave storage too");
 });
 
+test("activity older than the retention window is not reported as recorded", async () => {
+  assert.deepEqual(
+    await recordActivity([entry("stale", hoursAgo(80))]),
+    [],
+    "reporting it would advance the baseline over activity the inbox never held",
+  );
+  const stored = Object.keys(await api.LocalStorage.allItems()).filter(k => k.startsWith("gh-review.activity."));
+  assert.deepEqual(stored, [], "it must not be written only to be swept up in the same call");
+});
+
+test("a full inbox makes room for a new entry instead of dropping it", async () => {
+  // 500 is the cap, and every one of these is newer than the entry that follows.
+  const full = Array.from({ length: 500 }, (_, i) => entry(`old-${i}`, hoursAgo(1)));
+  await recordActivity(full);
+
+  const late = entry("late", hoursAgo(2));
+  assert.deepEqual(await recordActivity([late]), [late], "a kept entry is reported");
+
+  const inbox = await loadActivity();
+  assert.equal(inbox.length, 500, "the cap still holds");
+  assert.ok(
+    inbox.some(e => e.id === "late"),
+    "the entry this run reported must be in the inbox",
+  );
+  assert.ok(await api.LocalStorage.getItem("gh-review.activity.late"), "and in storage");
+});
+
 test("an inbox written under the old single key is carried over, once", async () => {
   await api.LocalStorage.setItem("gh-review.activity", JSON.stringify([entry("legacy")]));
 

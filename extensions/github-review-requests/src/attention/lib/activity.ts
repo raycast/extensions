@@ -106,11 +106,31 @@ async function adoptLegacyEntries(): Promise<void> {
   await LocalStorage.removeItem(ACTIVITY_KEY);
 }
 
-/** Drops entries older than the retention window and caps the total. */
-function prune(events: ActivityEvent[]): ActivityEvent[] {
-  const cutoff = new Date(Date.now() - RETENTION_HOURS * 60 * 60 * 1000).toISOString();
-  const kept = events.filter(e => e.at >= cutoff).sort((a, b) => b.at.localeCompare(a.at));
-  return kept.slice(0, MAX_ENTRIES);
+/** The oldest activity time the inbox still keeps. */
+function retentionCutoff(): string {
+  return new Date(Date.now() - RETENTION_HOURS * 60 * 60 * 1000).toISOString();
+}
+
+/**
+ * Drops entries older than the retention window and caps the total, newest
+ * first. Ids in `protect` are never dropped by the cap — a run hands in the
+ * entries it has just recorded, and the cap trims the oldest of the rest
+ * instead. An entry that arrives with an older timestamp than everything
+ * already stored is still the one the run is about to report on.
+ */
+function prune(events: ActivityEvent[], protect: ReadonlySet<string> = new Set()): ActivityEvent[] {
+  const cutoff = retentionCutoff();
+  const ordered = events.filter(e => e.at >= cutoff).sort((a, b) => b.at.localeCompare(a.at));
+  if (ordered.length <= MAX_ENTRIES) return ordered;
+
+  let overflow = ordered.length - MAX_ENTRIES;
+  const dropped = new Set<string>();
+  for (let i = ordered.length - 1; i >= 0 && overflow > 0; i--) {
+    if (protect.has(ordered[i].id)) continue;
+    dropped.add(ordered[i].id);
+    overflow--;
+  }
+  return ordered.filter(e => !dropped.has(e.id));
 }
 
 /**
@@ -118,8 +138,8 @@ function prune(events: ActivityEvent[]): ActivityEvent[] {
  * entries handed in are considered, so an entry another run added while this
  * one was working is left alone rather than swept up as unknown.
  */
-async function evict(events: ActivityEvent[]): Promise<void> {
-  const kept = new Set(prune(events).map(e => e.id));
+async function evict(events: ActivityEvent[], protect?: ReadonlySet<string>): Promise<void> {
+  const kept = new Set(prune(events, protect).map(e => e.id));
   const stale = events.filter(e => !kept.has(e.id));
   await Promise.all(stale.map(e => LocalStorage.removeItem(keyFor(e.id))));
 }
@@ -137,7 +157,9 @@ async function updateEntry(id: string, change: (event: ActivityEvent) => Activit
 
 /**
  * Adds new entries, skipping any whose id is already recorded. Returns the
- * entries that were genuinely new.
+ * entries that were genuinely new — and that the inbox actually kept: the
+ * watcher advances its baseline on the strength of this, so an entry reported
+ * here and swept up in the same call would be lost for good.
  *
  * Each entry goes to its own key, so a check running at the same time can
  * neither lose these nor have its own lost. Two runs that both record the same
@@ -148,10 +170,17 @@ export async function recordActivity(events: ActivityEvent[]): Promise<ActivityE
   await adoptLegacyEntries();
   const existing = await readEntries();
   const seen = new Set(existing.map(e => e.id));
-  const fresh = events.filter(e => !seen.has(e.id));
+  // Activity the window has already passed is never written, so it is never
+  // reported either. A comment count can move a pull request's signature while
+  // its last activity stays days old, and that entry has no place in a
+  // 72-hour inbox — but the run must not claim to have recorded it.
+  const cutoff = retentionCutoff();
+  const fresh = events.filter(e => !seen.has(e.id) && e.at >= cutoff);
   if (fresh.length === 0) return [];
   await Promise.all(fresh.map(e => LocalStorage.setItem(keyFor(e.id), JSON.stringify(e))));
-  await evict([...existing, ...fresh]);
+  // These entries are exempt from the cap: with the inbox already full of
+  // newer ones, trimming the oldest of those keeps room for what just arrived.
+  await evict([...existing, ...fresh], new Set(fresh.map(e => e.id)));
   return fresh;
 }
 
