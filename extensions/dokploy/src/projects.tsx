@@ -9,7 +9,11 @@ import { ActionPanel, Action, Icon, List, Form, showToast, Toast, Alert, confirm
 export default function Projects() {
   const { url, headers } = useToken();
 
-  const { isLoading, data: projects } = useFetch<Project[], Project[]>(url + "project.all", {
+  const {
+    isLoading,
+    data: projects,
+    revalidate,
+  } = useFetch<Project[], Project[]>(url + "project.all", {
     headers,
     initialData: [],
   });
@@ -88,14 +92,14 @@ export default function Projects() {
                     <Action.Push
                       icon="folder-input.svg"
                       title="Services"
-                      target={<Services environment={serviceScope} />}
+                      target={<Services environment={serviceScope} revalidate={revalidate} />}
                     />
                   ) : (
                     environmentsProject && (
                       <Action.Push
                         icon="folder-input.svg"
                         title="Environments"
-                        target={<Environments project={environmentsProject} />}
+                        target={<Environments project={environmentsProject} revalidate={revalidate} />}
                       />
                     )
                   )}

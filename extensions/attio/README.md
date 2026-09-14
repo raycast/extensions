@@ -41,7 +41,7 @@ Two dependencies are easy to miss because the command name doesn't suggest them:
 
 | Scope                             | Unlocks                                  |
 | --------------------------------- | ---------------------------------------- |
-| `record_permission:read-write`    | Editing and deleting records             |
+| `record_permission:read-write`    | Creating, editing, and deleting records  |
 | `note:read-write`                 | Editing notes                            |
 | `task:read-write`                 | Creating, completing, and deleting tasks |
 | `object_configuration:read-write` | Creating custom objects                  |
@@ -58,7 +58,8 @@ If you grant only the "required to read" scopes above, the extension is fully re
 
 ## Commands
 
-- **Search People / Search Companies / Search Deals** — browse, search, sort, filter, pin, edit, and export the standard objects; related records open in their home command
+- **Search People / Search Companies / Search Deals** — browse, search, sort, filter, pin, create, edit, and export the standard objects; related records open in their home command
+- **Create Person / Create Company / Create Deal** — schema-driven forms with draft support: dismiss Raycast mid-entry and your in-progress record is waiting when you come back
 - **Search Tasks** — browse, filter, sort, group by due date, create, edit, complete, and delete tasks
 - **My Tasks** — tasks assigned to you
 - **Search Notes** — browse and edit notes with markdown rendering and parent-record context
@@ -66,3 +67,16 @@ If you grant only the "required to read" scopes above, the extension is fully re
 - **Objects** — browse every object (including custom objects) and their records
 - **Members and Teams** — browse workspace members
 - **Manage Webhooks** — configure webhooks and webhook events (create, edit, delete; event-type picker)
+
+New records are created with the dedicated Create commands or from any record list (`⌘N`): writable attributes from your workspace schema are rendered — including person names, owners, and record links like a person's Company — with inline validation for required fields. Multi-value record links, locations, and interactions can only be set in Attio. The Create commands support Raycast drafts — a half-filled form survives dismissing Raycast.
+
+## AI Extension
+
+Ask Raycast AI to work with your Attio data — type `@attio` in AI Chat or Quick AI:
+
+- **Search Records** — "find the company Acme", "look up ada@example.com"
+- **Create Person** — "add Ada Lovelace (ada@example.com) as a contact"
+- **Create Company** — "create a company called Acme with domain acme.com"
+- **Create Deal** — "start a deal named Acme Enterprise worth 5000, owned by Chris"
+
+Create tools ask for confirmation before writing, and respect the same token scopes as the commands — a read-only token can search but not create.

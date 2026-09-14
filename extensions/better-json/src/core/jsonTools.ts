@@ -1,3 +1,5 @@
+import { ExactJsonNumber, parseExactJson } from "./jsonNumbers";
+
 export type JsonType = "object" | "array" | "string" | "number" | "boolean" | "null";
 
 export interface JsonNode {
@@ -9,11 +11,12 @@ export interface JsonNode {
   value: unknown;
   preview: string;
   childrenCount: number;
-  keywords: string[];
 }
 
 export interface JsonTree {
   nodes: JsonNode[];
+  searchText: string[];
+  indexedCharacters: number;
   truncated: boolean;
 }
 
@@ -33,9 +36,16 @@ export type ParseResult =
     };
 
 export const MAX_SEARCH_NODES = 3000;
+export const MAX_SEARCH_CHARACTERS = 1000000;
+export const MAX_SEARCH_FIELD_CHARACTERS = 4096;
 export const PAGE_SIZE = 100;
 export const MAX_PREVIEW_CHARACTERS = 40000;
+export const MAX_LABEL_CHARACTERS = 500;
 const MAX_PREVIEW_LENGTH = 140;
+const STRING_CHUNK_SIZE = 1024;
+// Parsed documents are immutable apart from replacing values during decoding.
+// Cache object keys so counts and later pages do not enumerate every sibling.
+const objectKeys = new WeakMap<Record<string, unknown>, string[]>();
 
 export function parseJsonDocument(source: string, options: ParseOptions = { parseNestedStrings: true }): ParseResult {
   const input = source.trim();
@@ -49,7 +59,7 @@ export function parseJsonDocument(source: string, options: ParseOptions = { pars
 
   for (const attempt of attempts) {
     try {
-      const value = JSON.parse(attempt);
+      const value = parseExactJson(attempt);
       const stats = { nestedStringCount: 0 };
       const normalizedValue = options.parseNestedStrings ? parseNestedJsonStrings(value, stats) : value;
 
@@ -68,6 +78,7 @@ export function parseJsonDocument(source: string, options: ParseOptions = { pars
 
 export function buildJsonTree(value: unknown): JsonTree {
   const nodes: JsonNode[] = [];
+  const tree: JsonTree = { nodes, searchText: [], indexedCharacters: 0, truncated: false };
   // Iterators keep traversal bounded without allocating all siblings or recursing
   // through deeply nested documents. Browsing itself does not use this index.
   const pending: Iterator<JsonNode>[] = [[createJsonNode(value)][Symbol.iterator]()];
@@ -77,11 +88,18 @@ export function buildJsonTree(value: unknown): JsonTree {
       pending.pop();
       continue;
     }
-    if (nodes.length === MAX_SEARCH_NODES) return { nodes, truncated: true };
+    if (nodes.length === MAX_SEARCH_NODES || tree.indexedCharacters === MAX_SEARCH_CHARACTERS) {
+      tree.truncated = true;
+      break;
+    }
+    const indexed = indexNode(next.value, MAX_SEARCH_CHARACTERS - tree.indexedCharacters);
     nodes.push(next.value);
+    tree.searchText.push(indexed.text);
+    tree.indexedCharacters += indexed.text.length;
+    tree.truncated ||= indexed.truncated;
     if (isContainer(next.value)) pending.push(iterateChildren(next.value));
   }
-  return { nodes, truncated: false };
+  return tree;
 }
 
 export function createJsonNode(value: unknown, path = "$", key = "$", depth = 0): JsonNode {
@@ -95,7 +113,6 @@ export function createJsonNode(value: unknown, path = "$", key = "$", depth = 0)
     type,
     preview: isContainerValue(value) ? summarizeJson(value) : getPreview(value),
     childrenCount: getChildrenCount(value),
-    keywords: createKeywords(path, key, value, type),
   };
 }
 
@@ -105,28 +122,50 @@ function* iterateChildren(parent: JsonNode): Generator<JsonNode> {
       yield createJsonNode(parent.value[i], `${parent.path}[${i}]`, `[${i}]`, parent.depth + 1);
     }
   } else if (isRecord(parent.value)) {
-    for (const key of Object.keys(parent.value)) {
+    for (const key of getObjectKeys(parent.value)) {
       yield createJsonNode(parent.value[key], joinObjectPath(parent.path, key), key, parent.depth + 1);
     }
   }
 }
 
 export function getChildPage(parent: JsonNode, offset = 0, limit = PAGE_SIZE): JsonNode[] {
+  if (!Number.isFinite(offset) || !Number.isFinite(limit) || limit < 1) return [];
+  const start = Math.max(0, Math.floor(offset));
+  const end = Math.min(parent.childrenCount, start + Math.floor(limit));
   const children: JsonNode[] = [];
-  let index = 0;
-  for (const child of iterateChildren(parent)) {
-    if (index++ < offset) continue;
-    children.push(child);
-    if (children.length >= limit) break;
+  if (Array.isArray(parent.value)) {
+    for (let index = start; index < end; index++) {
+      children.push(
+        createJsonNode(parent.value[index], parent.path + "[" + index + "]", "[" + index + "]", parent.depth + 1),
+      );
+    }
+  } else if (isRecord(parent.value)) {
+    const keys = getObjectKeys(parent.value);
+    for (let index = start; index < end; index++) {
+      const key = keys[index];
+      children.push(createJsonNode(parent.value[key], joinObjectPath(parent.path, key), key, parent.depth + 1));
+    }
   }
   return children;
 }
 
+export function createChildPager(parent: JsonNode): (count: number) => JsonNode[] {
+  const children: JsonNode[] = [];
+  return (count) => {
+    const limit = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
+    if (limit > children.length) {
+      for (const child of getChildPage(parent, children.length, limit - children.length)) children.push(child);
+    }
+    return children.slice(0, limit);
+  };
+}
+
 export function searchNodes(tree: JsonTree, query: string, typeFilter: "all" | JsonType): JsonNode[] {
   const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  return tree.nodes.filter((node) => {
+  return tree.nodes.filter((node, index) => {
     if (typeFilter !== "all" && node.type !== typeFilter) return false;
-    const text = node.keywords.join(" ").toLowerCase();
+    if (terms.length === 0) return true;
+    const text = tree.searchText[index];
     return terms.every((term) => text.includes(term));
   });
 }
@@ -136,25 +175,66 @@ export function isContainer(node: JsonNode): boolean {
 }
 
 function isContainerValue(value: unknown): boolean {
-  return value !== null && typeof value === "object";
+  return Array.isArray(value) || isRecord(value);
 }
 
 export function jsonPreview(value: unknown): { markdown: string; truncated: boolean } {
+  const { content, truncated } = boundedJson(value, 2, MAX_PREVIEW_CHARACTERS);
+  return { markdown: "```json\n" + content + (truncated ? "\n…" : "") + "\n```", truncated };
+}
+
+function boundedJson(value: unknown, spaces: number, limit: number): { content: string; truncated: boolean } {
   const chunks: string[] = [];
   let length = 0;
   let truncated = false;
   // Stop producing the preview once its display budget is reached. Decoding and
   // copying still use the complete value, even beyond the search index limit.
-  for (const chunk of jsonChunks(value, 2)) {
-    if (length + chunk.length > MAX_PREVIEW_CHARACTERS) {
-      chunks.push(chunk.slice(0, MAX_PREVIEW_CHARACTERS - length), "\n…");
+  for (const chunk of jsonChunks(value, spaces)) {
+    if (length + chunk.length > limit) {
+      chunks.push(codePointSafePrefix(chunk, limit - length));
       truncated = true;
       break;
     }
     chunks.push(chunk);
     length += chunk.length;
   }
-  return { markdown: `\`\`\`json\n${chunks.join("")}\n\`\`\``, truncated };
+  return { content: chunks.join(""), truncated };
+}
+
+function codePointSafePrefix(value: string, limit: number): string {
+  let end = Math.max(0, Math.min(value.length, Math.floor(limit)));
+  const last = value.charCodeAt(end - 1);
+  const next = value.charCodeAt(end);
+  // Keep the UTF-16 display budget, but never retain half of a surrogate pair.
+  if (last >= 0xd800 && last <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) end--;
+  return value.slice(0, end);
+}
+
+export function truncateLabel(value: string, limit = MAX_LABEL_CHARACTERS): string {
+  if (value.length <= limit) return value;
+  // Copy the short prefix so a display label never retains a much larger string.
+  return (
+    codePointSafePrefix(value, limit - 1)
+      .split("")
+      .join("") + "…"
+  );
+}
+
+export function jsonPathPreview(path: string): { text: string; markdown: string; truncated: boolean } {
+  const escaped = JSON.stringify(truncateLabel(path)).slice(1, -1);
+  const text = truncateLabel(escaped);
+  let longest = 0;
+  let run = 0;
+  for (const character of text) {
+    run = character === "`" ? run + 1 : 0;
+    longest = Math.max(longest, run);
+  }
+  const delimiter = "`".repeat(longest + 1);
+  return {
+    text,
+    markdown: delimiter + " " + text + " " + delimiter,
+    truncated: path.length > MAX_LABEL_CHARACTERS || escaped.length > MAX_LABEL_CHARACTERS,
+  };
 }
 
 export function describeParseError(source: string, error: unknown): string {
@@ -170,6 +250,7 @@ export function describeParseError(source: string, error: unknown): string {
 }
 
 export function getJsonType(value: unknown): JsonType {
+  if (value instanceof ExactJsonNumber) return "number";
   if (value === null) return "null";
   if (Array.isArray(value)) return "array";
   if (typeof value === "object") return "object";
@@ -202,7 +283,7 @@ export function summarizeJson(value: unknown): string {
   }
 
   if (type === "object") {
-    const count = Object.keys(value as Record<string, unknown>).length;
+    const count = getObjectKeys(value as Record<string, unknown>).length;
     return `${count} ${count === 1 ? "key" : "keys"}`;
   }
 
@@ -226,7 +307,12 @@ function createParseAttempts(input: string): string[] {
 
   if (isWrapped(input, "'")) {
     const inner = input.slice(1, -1);
-    attempts.push(inner, unescapeCommonJsonString(inner));
+    attempts.push(inner);
+    try {
+      attempts.push(unescapeLogString(inner));
+    } catch {
+      // An invalid escape is not permission to modify the original input.
+    }
   }
 
   return [...new Set(attempts)];
@@ -249,7 +335,7 @@ function parseNestedJsonStrings(value: unknown, stats: { nestedStringCount: numb
         };
       }
     } else if (isRecord(container)) {
-      for (const key of Object.keys(container)) {
+      for (const key of getObjectKeys(container)) {
         yield {
           value: container[key],
           set: (next) => {
@@ -305,7 +391,7 @@ function parseJsonLikeString(value: string): ParseResult {
     try {
       return {
         ok: true,
-        value: JSON.parse(attempt),
+        value: parseExactJson(attempt),
         nestedStringCount: 0,
       };
     } catch {
@@ -326,37 +412,56 @@ function isWrapped(value: string, quote: "'" | '"'): boolean {
   return value.startsWith(quote) && value.endsWith(quote);
 }
 
-function unescapeCommonJsonString(value: string): string {
-  return value.replace(/\\"/g, '"').replace(/\\'/g, "'");
+function unescapeLogString(value: string): string {
+  // Decode one complete escaping layer, including escaped backslashes and
+  // Unicode. Only the surrounding single-quote convention extends JSON rules.
+  const compatible = value.replace(/\\([\s\S])|"/g, (match, escaped: string | undefined) => {
+    if (escaped === "'") return "'";
+    return escaped === undefined ? '\\"' : match;
+  });
+  return JSON.parse('"' + compatible + '"') as string;
 }
 
 function getPreview(value: unknown): string {
-  if (typeof value === "string") {
-    return truncate(JSON.stringify(value));
-  }
-
-  return truncate(compactJson(value));
-}
-
-function truncate(value: string): string {
-  if (value.length <= MAX_PREVIEW_LENGTH) return value;
-  return `${value.slice(0, MAX_PREVIEW_LENGTH - 1)}...`;
+  const preview = boundedJson(value, 0, MAX_PREVIEW_LENGTH);
+  return preview.truncated ? codePointSafePrefix(preview.content, MAX_PREVIEW_LENGTH - 1) + "…" : preview.content;
 }
 
 function getChildrenCount(value: unknown): number {
   if (Array.isArray(value)) return value.length;
-  if (isRecord(value)) return Object.keys(value).length;
+  if (isRecord(value)) return getObjectKeys(value).length;
   return 0;
 }
 
-function createKeywords(path: string, key: string, value: unknown, type: JsonType): string[] {
-  const keywords = [path, key, type];
-
-  if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-    keywords.push(String(value));
+function indexNode(node: JsonNode, budget: number): { text: string; truncated: boolean } {
+  const fields = [node.path, node.key, node.type];
+  if (!isContainer(node)) fields.push(String(node.value));
+  const pieces: string[] = [];
+  let length = 0;
+  let truncated = false;
+  for (const field of fields) {
+    const remaining = Math.max(0, budget - length - (pieces.length ? 1 : 0));
+    const take = Math.min(remaining, MAX_SEARCH_FIELD_CHARACTERS);
+    const normalized = field.slice(0, take).toLowerCase();
+    const piece = normalized.slice(0, remaining);
+    truncated ||= field.length > take || normalized.length > remaining;
+    if (remaining === 0) {
+      truncated = true;
+      break;
+    }
+    length += piece.length + (pieces.length ? 1 : 0);
+    pieces.push(piece);
   }
+  return { text: pieces.join(" "), truncated };
+}
 
-  return keywords;
+function getObjectKeys(value: Record<string, unknown>): string[] {
+  let keys = objectKeys.get(value);
+  if (!keys) {
+    keys = Object.keys(value);
+    objectKeys.set(value, keys);
+  }
+  return keys;
 }
 
 function joinObjectPath(parentPath: string, key: string): string {
@@ -394,10 +499,16 @@ function* jsonChunks(value: unknown, spaces: number): Generator<string> {
       const current = next;
       next = undefined;
       if (Array.isArray(current.value) || isRecord(current.value)) {
-        const keys = Array.isArray(current.value) ? undefined : Object.keys(current.value);
+        const keys = Array.isArray(current.value) ? undefined : getObjectKeys(current.value);
         const length = Array.isArray(current.value) ? current.value.length : keys!.length;
         yield keys ? "{" : "[";
         frames.push({ value: current.value, keys, index: 0, length, depth: current.depth });
+      } else if (typeof current.value === "string") {
+        yield* jsonStringChunks(current.value);
+      } else if (current.value instanceof ExactJsonNumber) {
+        for (let index = 0; index < current.value.source.length; index += STRING_CHUNK_SIZE) {
+          yield current.value.source.slice(index, index + STRING_CHUNK_SIZE);
+        }
       } else {
         yield JSON.stringify(current.value) ?? String(current.value);
       }
@@ -415,7 +526,8 @@ function* jsonChunks(value: unknown, spaces: number): Generator<string> {
     const index = frame.index++;
     if (frame.keys) {
       const key = frame.keys[index];
-      yield JSON.stringify(key) + (spaces ? ": " : ":");
+      yield* jsonStringChunks(key);
+      yield spaces ? ": " : ":";
       next = { value: (frame.value as Record<string, unknown>)[key], depth: frame.depth + 1 };
     } else {
       next = { value: (frame.value as unknown[])[index], depth: frame.depth + 1 };
@@ -424,5 +536,18 @@ function* jsonChunks(value: unknown, spaces: number): Generator<string> {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
+  return value !== null && typeof value === "object" && !Array.isArray(value) && !(value instanceof ExactJsonNumber);
+}
+
+function* jsonStringChunks(value: string): Generator<string> {
+  yield '"';
+  for (let start = 0; start < value.length; ) {
+    let end = Math.min(value.length, start + STRING_CHUNK_SIZE);
+    const last = value.charCodeAt(end - 1);
+    const next = value.charCodeAt(end);
+    if (last >= 0xd800 && last <= 0xdbff && next >= 0xdc00 && next <= 0xdfff) end++;
+    yield JSON.stringify(value.slice(start, end)).slice(1, -1);
+    start = end;
+  }
+  yield '"';
 }

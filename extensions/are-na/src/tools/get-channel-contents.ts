@@ -1,5 +1,6 @@
+import { arenaReference, pagination } from "../utils/references";
 import { getPreferenceValues } from "@raycast/api";
-import type { Block, SearchSort } from "../api/types";
+import type { Block } from "../api/types";
 import { getAuthenticatedArena } from "./arenaAuth";
 import { blockSummary } from "./summarize";
 
@@ -19,12 +20,12 @@ type Input = {
   /**
    * Sort order for contents.
    */
-  sort?: SearchSort;
+  sort?: "position_asc" | "position_desc" | "created_at_asc" | "created_at_desc" | "updated_at_asc" | "updated_at_desc";
 };
 
 type ChannelBlockFields = { open?: boolean; length?: number };
 
-function summarizeItem(item: Block) {
+export function summarizeItem(item: Block) {
   if (item.class === "Channel") {
     const ext = item as Block & ChannelBlockFields;
     const status = item.visibility === "private" ? "private" : ext.open === false ? "closed" : "public";
@@ -38,16 +39,11 @@ function summarizeItem(item: Block) {
       owner_slug: ownerSlug,
       status,
       block_count: ext.length ?? 0,
+      connection_id: item.connection?.id ?? null,
       url: `https://www.are.na/${ownerSlug}/${item.slug}`,
     };
   }
   return { kind: "block" as const, ...blockSummary(item) };
-}
-
-function parseChannelRef(raw: string): string | number {
-  const t = raw.trim();
-  if (/^\d+$/.test(t)) return Number(t);
-  return t;
 }
 
 /**
@@ -57,19 +53,21 @@ export default async function tool(input: Input) {
   try {
     const prefs = getPreferenceValues<Preferences>();
     const defaultPer = Math.min(100, Math.max(1, parseInt(prefs.defaultPageSize ?? "24", 10) || 24));
-    const per = Math.min(100, Math.max(1, input.per ?? defaultPer));
-    const page = Math.max(1, input.page ?? 1);
-    const sort = input.sort ?? (prefs.defaultSearchSort as SearchSort) ?? "position_asc";
+    const { page, per } = pagination(input, defaultPer);
+    const sort = input.sort ?? "position_asc";
 
     const arena = await getAuthenticatedArena();
-    const ref = parseChannelRef(input.identifier);
-    const { items } = await arena.channel(ref).contents({ page, per, sort });
+    const ref = arenaReference(input.identifier, "channel");
+    const { items, meta } = await arena.channel(ref).contents({ page, per, sort });
 
     return {
       identifier: input.identifier,
       page,
       per,
       items: items.map(summarizeItem),
+      has_more: meta.has_more_pages,
+      next_page: meta.next_page,
+      total_count: meta.total_count,
     };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

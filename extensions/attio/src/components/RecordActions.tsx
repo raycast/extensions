@@ -34,6 +34,10 @@ export default function RecordActions(props: {
   pins?: { pinned: boolean; toggle: () => void };
   pushFallback: (objectSlug: string, recordId: string) => void;
   extraViewActions?: ReactNode;
+  /** "New <Object>" action — last row of the primary section. */
+  newAction?: ReactNode;
+  /** Export submenu — untitled tail section, above Delete. */
+  exportAction?: ReactNode;
 }) {
   const {
     record,
@@ -46,6 +50,8 @@ export default function RecordActions(props: {
     pins,
     pushFallback,
     extraViewActions,
+    newAction,
+    exportAction,
   } = props;
   const self = useSelf();
   const canEdit = satisfied(self.granted, "record_permission:read-write");
@@ -96,6 +102,9 @@ export default function RecordActions(props: {
   const title = recordTitle(record, objectSlug);
   const hasResolvableTitle = title !== shortId(record.id.record_id);
 
+  // Panel order per Chris's 2026-09-09 sort: Primary (open/pin/new), Edit
+  // (edit + copies), View (relations + list controls), then an untitled tail
+  // for Export and Delete — Delete always bottommost.
   return (
     <>
       <ActionPanel.Section>
@@ -107,6 +116,46 @@ export default function RecordActions(props: {
             onAction={() => openRelated("companies", companyRef!.target_record_id)}
           />
         )}
+        {pins && (
+          <Action
+            icon={pins.pinned ? Icon.TackDisabled : Icon.Tack}
+            title={pins.pinned ? "Unpin Record" : "Pin Record"}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "p" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+            }}
+            onAction={pins.toggle}
+          />
+        )}
+        {newAction}
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Edit">
+        {canEdit && attributes && (
+          <Action.Push
+            icon={Icon.Pencil}
+            title={`Edit ${singularNoun}`}
+            target={
+              <RecordEditForm
+                objectSlug={objectSlug}
+                singularNoun={singularNoun}
+                record={record}
+                attributes={attributes}
+                titleFor={titleFor}
+                onSaved={onMutated}
+              />
+            }
+            shortcut={Keyboard.Shortcut.Common.Edit}
+          />
+        )}
+        {hasResolvableTitle && <Action.CopyToClipboard title="Copy Name" content={title} />}
+        {emailValue && <Action.CopyToClipboard title="Copy Email Address" content={emailValue.email_address} />}
+        <Action.CopyToClipboard
+          title="Copy Record URL"
+          content={record.web_url}
+          shortcut={Keyboard.Shortcut.Common.CopyPath}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="View">
         {peopleRefs.length > 0 && (
           <ActionPanel.Submenu title="View Related People" icon={Icon.TwoPeople}>
             {peopleRefs.map((v) => (
@@ -131,35 +180,10 @@ export default function RecordActions(props: {
             ))}
           </ActionPanel.Submenu>
         )}
-        {pins && (
-          <Action
-            icon={pins.pinned ? Icon.TackDisabled : Icon.Tack}
-            title={pins.pinned ? "Unpin Record" : "Pin Record"}
-            shortcut={{
-              macOS: { modifiers: ["cmd", "shift"], key: "p" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "p" },
-            }}
-            onAction={pins.toggle}
-          />
-        )}
+        {extraViewActions}
       </ActionPanel.Section>
-      <ActionPanel.Section title="Edit">
-        {canEdit && attributes && (
-          <Action.Push
-            icon={Icon.Pencil}
-            title={`Edit ${singularNoun}`}
-            target={
-              <RecordEditForm
-                objectSlug={objectSlug}
-                singularNoun={singularNoun}
-                record={record}
-                attributes={attributes}
-                onSaved={onMutated}
-              />
-            }
-            shortcut={Keyboard.Shortcut.Common.Edit}
-          />
-        )}
+      <ActionPanel.Section>
+        {exportAction}
         {canEdit && (
           <Action
             icon={Icon.Trash}
@@ -170,16 +194,6 @@ export default function RecordActions(props: {
           />
         )}
       </ActionPanel.Section>
-      <ActionPanel.Section title="Copy">
-        <Action.CopyToClipboard
-          title="Copy Record URL"
-          content={record.web_url}
-          shortcut={Keyboard.Shortcut.Common.CopyPath}
-        />
-        {emailValue && <Action.CopyToClipboard title="Copy Email Address" content={emailValue.email_address} />}
-        {hasResolvableTitle && <Action.CopyToClipboard title="Copy Name" content={title} />}
-      </ActionPanel.Section>
-      {extraViewActions && <ActionPanel.Section title="View">{extraViewActions}</ActionPanel.Section>}
     </>
   );
 }

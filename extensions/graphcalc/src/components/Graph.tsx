@@ -3,24 +3,82 @@ import {
   Detail,
   ActionPanel,
   Action,
+  Icon,
+  Keyboard,
   environment,
-  Color,
-  LocalStorage,
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useGraphData } from "../hooks/useGraphData";
 import { useGraphNavigation } from "../hooks/useGraphNavigation";
-import { renderGraphToSVG } from "../utils/renderUtils";
-import { THEME_COLORS } from "../constants";
+import { useTheme } from "../hooks/useTheme";
+import { CARD_WIDTH, renderGraphToSVG } from "../utils/renderUtils";
+import { THEME_INFO, themeFor } from "../lib/themes";
+import {
+  SHARE_SCALE,
+  ShareMode,
+  canShareImage,
+  shareGraphImage,
+} from "../lib/share";
 import { GraphProps } from "../types";
+
+type Keys = { modifiers: Keyboard.KeyModifier[]; key: Keyboard.KeyEquivalent };
+
+/**
+ * A shortcut declared for both platforms. Raycast ignores shortcuts with an
+ * ambiguous modifier (`cmd`, `ctrl`) on the other platform, so both variants
+ * are spelled out. When `windows` is omitted it mirrors `macOS` with ⌘→Ctrl.
+ *
+ * Some macOS shortcuts cannot map 1:1: Raycast for Windows reserves
+ * Ctrl+Shift+arrows (reorder favorites), Ctrl+Shift+↵, Ctrl+Shift+, and
+ * Ctrl+Shift+D and silently drops actions that claim them, and punctuation
+ * keys depend on the keyboard layout there. Those get an explicit Windows
+ * variant using letters or Ctrl+Alt.
+ */
+function shortcut(macOS: Keys, windows?: Keys): Keyboard.Shortcut {
+  const win = windows ?? {
+    key: macOS.key,
+    modifiers: macOS.modifiers.map((m) => (m === "cmd" ? "ctrl" : m)),
+  };
+  return { macOS, Windows: win };
+}
+
+const SHORTCUTS = {
+  moveUp: shortcut(
+    { modifiers: ["cmd", "shift"], key: "arrowUp" },
+    { modifiers: ["ctrl", "alt"], key: "arrowUp" },
+  ),
+  moveDown: shortcut(
+    { modifiers: ["cmd", "shift"], key: "arrowDown" },
+    { modifiers: ["ctrl", "alt"], key: "arrowDown" },
+  ),
+  moveLeft: shortcut(
+    { modifiers: ["cmd", "shift"], key: "arrowLeft" },
+    { modifiers: ["ctrl", "alt"], key: "arrowLeft" },
+  ),
+  moveRight: shortcut(
+    { modifiers: ["cmd", "shift"], key: "arrowRight" },
+    { modifiers: ["ctrl", "alt"], key: "arrowRight" },
+  ),
+  resetView: shortcut(
+    { modifiers: ["cmd", "shift"], key: "." },
+    { modifiers: ["ctrl", "shift"], key: "r" },
+  ),
+  nextTheme: shortcut(
+    { modifiers: ["cmd", "shift"], key: ";" },
+    { modifiers: ["ctrl", "shift"], key: "t" },
+  ),
+  switchTheme: shortcut({ modifiers: ["cmd"], key: "t" }),
+  pasteImage: shortcut({ modifiers: ["cmd", "shift"], key: "v" }),
+  saveImage: shortcut({ modifiers: ["cmd", "shift"], key: "s" }),
+};
 
 const Graph: React.FC<GraphProps> = ({ expression }) => {
   const {
     dataSegments,
     result,
     svgRendered,
-    lineColor,
     error,
     xMin,
     xMax,
@@ -30,7 +88,6 @@ const Graph: React.FC<GraphProps> = ({ expression }) => {
     setXMax,
     setYMin,
     setYMax,
-    setLineColor,
   } = useGraphData(expression);
 
   const { zoomIn, zoomOut, moveLeft, moveRight, moveUp, moveDown, resetView } =
@@ -45,20 +102,35 @@ const Graph: React.FC<GraphProps> = ({ expression }) => {
       setYMax,
     );
 
-  const cycleThemeColor = async () => {
-    const currentIndex = THEME_COLORS.findIndex(
-      (color) => Color[color as keyof typeof Color] === lineColor,
-    );
-    const nextIndex = (currentIndex + 1) % THEME_COLORS.length;
-    const nextColorName = THEME_COLORS[nextIndex];
-    const nextColor = Color[nextColorName as keyof typeof Color] as string;
-    setLineColor(nextColor);
-    await LocalStorage.setItem("lineColor", nextColorName);
+  const { theme, setTheme, nextTheme } = useTheme();
+  const graphTheme = themeFor(theme, environment.appearance);
+
+  const cycleTheme = () => {
+    const next = nextTheme();
     showToast({
       style: Toast.Style.Success,
-      title: "Theme Color Changed",
-      message: `Graph line color changed to ${nextColorName}.`,
+      title: "Theme Changed",
+      message: `Graph theme set to ${THEME_INFO.find((t) => t.id === next)?.title ?? next}.`,
     });
+  };
+
+  /** The on-screen card, at export resolution. */
+  const shareSvg = () =>
+    renderGraphToSVG(
+      expression,
+      dataSegments,
+      [xMin, xMax],
+      [yMin, yMax],
+      graphTheme,
+      { displayWidth: CARD_WIDTH * SHARE_SCALE, title: expression },
+    );
+
+  const shareImage = async (mode: ShareMode) => {
+    try {
+      await shareGraphImage(shareSvg(), mode, expression);
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not render the image" });
+    }
   };
 
   return (
@@ -69,14 +141,14 @@ const Graph: React.FC<GraphProps> = ({ expression }) => {
           : result !== null
             ? `\\[${expression} = ${result}\\]`
             : svgRendered
-              ? `$$${expression}$$\n\n<img src="data:image/svg+xml;base64,${Buffer.from(
+              ? `<img src="data:image/svg+xml;base64,${Buffer.from(
                   renderGraphToSVG(
                     expression,
                     dataSegments,
                     [xMin, xMax],
                     [yMin, yMax],
-                    lineColor,
-                    environment.appearance,
+                    graphTheme,
+                    { title: expression },
                   ),
                 ).toString("base64")}" alt="Graph" />`
               : `$$${expression}$$\n\n`
@@ -85,38 +157,90 @@ const Graph: React.FC<GraphProps> = ({ expression }) => {
         !error &&
         result === null && (
           <ActionPanel>
-            <Action title="Zoom In" onAction={zoomIn} />
-            <Action title="Zoom Out" onAction={zoomOut} />
-            <Action
-              title="Move Up"
-              onAction={moveUp}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
-            />
-            <Action
-              title="Move Down"
-              onAction={moveDown}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
-            />
-            <Action
-              title="Move Left"
-              onAction={moveLeft}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
-            />
-            <Action
-              title="Move Right"
-              onAction={moveRight}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
-            />
-            <Action
-              title="Reset View"
-              onAction={resetView}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-            />
-            <Action
-              title="Change Theme Color"
-              onAction={cycleThemeColor}
-              shortcut={{ modifiers: ["cmd", "shift"], key: ";" }}
-            />
+            <ActionPanel.Section>
+              {/* "In", "Out" and "Up" are part of the verb here, not prepositions, so Title Case keeps them capitalized. */}
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
+              <Action title="Zoom In" onAction={zoomIn} />
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
+              <Action title="Zoom Out" onAction={zoomOut} />
+              <Action
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Move Up"
+                onAction={moveUp}
+                shortcut={SHORTCUTS.moveUp}
+              />
+              <Action
+                title="Move Down"
+                onAction={moveDown}
+                shortcut={SHORTCUTS.moveDown}
+              />
+              <Action
+                title="Move Left"
+                onAction={moveLeft}
+                shortcut={SHORTCUTS.moveLeft}
+              />
+              <Action
+                title="Move Right"
+                onAction={moveRight}
+                shortcut={SHORTCUTS.moveRight}
+              />
+              <Action
+                title="Reset View"
+                onAction={resetView}
+                shortcut={SHORTCUTS.resetView}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section title="Share">
+              {canShareImage && (
+                <>
+                  <Action
+                    title="Copy Image"
+                    icon={Icon.Image}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
+                    onAction={() => shareImage("copy")}
+                  />
+                  <Action
+                    title="Paste Image"
+                    icon={Icon.Clipboard}
+                    shortcut={SHORTCUTS.pasteImage}
+                    onAction={() => shareImage("paste")}
+                  />
+                  <Action
+                    title="Save Image to Downloads"
+                    icon={Icon.Download}
+                    shortcut={SHORTCUTS.saveImage}
+                    onAction={() => shareImage("save")}
+                  />
+                </>
+              )}
+              <Action.CopyToClipboard
+                title="Copy SVG"
+                icon={Icon.Code}
+                content={shareSvg()}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section title="Theme">
+              <Action
+                title="Next Theme"
+                icon={Icon.Brush}
+                onAction={cycleTheme}
+                shortcut={SHORTCUTS.nextTheme}
+              />
+              <ActionPanel.Submenu
+                title="Switch Theme"
+                icon={Icon.Brush}
+                shortcut={SHORTCUTS.switchTheme}
+              >
+                {THEME_INFO.map((t) => (
+                  <Action
+                    key={t.id}
+                    title={t.title}
+                    icon={theme === t.id ? Icon.CheckCircle : Icon.Circle}
+                    onAction={() => setTheme(t.id)}
+                  />
+                ))}
+              </ActionPanel.Submenu>
+            </ActionPanel.Section>
           </ActionPanel>
         )
       }

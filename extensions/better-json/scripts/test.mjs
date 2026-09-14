@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const output = mkdtempSync(path.join(tmpdir(), "better-json-tests-"));
-const tests = ["document", "jsonTools", "navigation"];
+const tests = ["document", "jsonTools", "jsonNumbers", "navigation"];
 try {
   const compile = spawnSync(process.execPath, [
     path.join(root, "node_modules/typescript/bin/tsc"),

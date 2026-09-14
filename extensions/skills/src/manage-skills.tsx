@@ -2,11 +2,48 @@ import { List, Detail, Icon, ActionPanel, Action, Color, openExtensionPreference
 import { useState } from "react";
 import { ensureSupportDir } from "./utils/ensure-support-dir";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
-import { isInvalidCustomNpxPathError, isNpxResolutionError } from "./utils/skills-cli";
+import { isInvalidCustomNpxPathError, isNpxResolutionError, isSkillsCliBusyError } from "./utils/skills-cli";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
 import { UpdateSkillAction } from "./components/actions/UpdateSkillAction";
 
 ensureSupportDir();
+
+interface SkillsErrorDescription {
+  errorTitle: string;
+  errorDetails: string;
+}
+
+function describeSkillsError(error: Error): SkillsErrorDescription {
+  if (isSkillsCliBusyError(error)) {
+    return {
+      errorTitle: "Another Skills Command Is Running",
+      errorDetails:
+        "Only one skills command can use the Skills CLI at a time, and the one holding it has not finished yet.\n\n1. Wait for the running command, such as **Update All Skills**, to finish.\n2. Press **Retry** to load the list again.",
+    };
+  }
+
+  if (isInvalidCustomNpxPathError(error)) {
+    return {
+      errorTitle: "Invalid Custom npx Path",
+      errorDetails:
+        "The configured **Custom npx Path** does not point to a valid `npx` executable.\n\n1. Open Extension Preferences (`Cmd+Shift+,`).\n2. Fix or clear **Custom npx Path**.\n3. If unsure, run `which npx` in Terminal and use that value.",
+    };
+  }
+
+  if (isNpxResolutionError(error)) {
+    return {
+      errorTitle: "Unable to Load Installed Skills",
+      errorDetails:
+        "This is a package runner resolution issue in the local CLI runtime.\n\n1. Install or repair Bun so `bunx` works.\n2. If you need to force Node/npm instead, run `which npx` in Terminal.\n3. Open Extension Preferences (`Cmd+Shift+,`) and set **Custom npx Path** to the path from step 2, then retry.",
+    };
+  }
+
+  return {
+    errorTitle: "Unable to Load Installed Skills",
+    errorDetails:
+      "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you force a non-standard Node.js setup.\n3. Run `bunx skills@latest list -g` (or `npx -y skills@latest list -g` if Bun is not installed) in Terminal to inspect the underlying CLI error.",
+  };
+}
 
 export default function Command() {
   const { skills, isLoading, error, revalidate, mutate } = useInstalledSkills();
@@ -14,27 +51,8 @@ export default function Command() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const toggleDetail = () => setIsShowingDetail((prev) => !prev);
-  const hasInvalidCustomNpxPathError = error ? isInvalidCustomNpxPathError(error) : false;
-  const hasNpxResolutionError = error ? isNpxResolutionError(error) : false;
-
   if (error && skills.length === 0) {
-    const { errorTitle, errorDetails } = hasInvalidCustomNpxPathError
-      ? {
-          errorTitle: "Invalid Custom npx Path",
-          errorDetails:
-            "The configured **Custom npx Path** does not point to a valid `npx` executable.\n\n1. Open Extension Preferences (`Cmd+Shift+,`).\n2. Fix or clear **Custom npx Path**.\n3. If unsure, run `which npx` in Terminal and use that value.",
-        }
-      : hasNpxResolutionError
-        ? {
-            errorTitle: "Unable to Load Installed Skills",
-            errorDetails:
-              "This is a package runner resolution issue in the local CLI runtime.\n\n1. Install or repair Bun so `bunx` works.\n2. If you need to force Node/npm instead, run `which npx` in Terminal.\n3. Open Extension Preferences (`Cmd+Shift+,`) and set **Custom npx Path** to the path from step 2, then retry.",
-          }
-        : {
-            errorTitle: "Unable to Load Installed Skills",
-            errorDetails:
-              "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you force a non-standard Node.js setup.\n3. Run `bunx skills@latest list -g` (or `npx -y skills@latest list -g` if Bun is not installed) in Terminal to inspect the underlying CLI error.",
-          };
+    const { errorTitle, errorDetails } = describeSkillsError(error);
 
     return (
       <Detail

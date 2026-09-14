@@ -15,6 +15,34 @@
     "Finance"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "plotDetail",
+      "title": "Plot Detail",
+      "description": "Number of points sampled per plot. Standard is enough for the graph's on-screen size. Raise it only when a curve looks jagged or broken after zooming far out (fast oscillations, steep functions). Higher settings make every zoom and pan slower and produce much larger images.",
+      "type": "dropdown",
+      "required": false,
+      "default": "1000",
+      "data": [
+        {
+          "title": "Standard – 1,000 points (recommended)",
+          "value": "1000"
+        },
+        {
+          "title": "High – 3,000 points",
+          "value": "3000"
+        },
+        {
+          "title": "Very High – 6,000 points",
+          "value": "6000"
+        },
+        {
+          "title": "Maximum – 12,000 points (slow)",
+          "value": "12000"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "index",

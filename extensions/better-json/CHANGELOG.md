@@ -1,4 +1,13 @@
-# Better JSON Changelog
+# Better JSON Inspector Changelog
+
+## [Precision, Performance, and Naming] - 2026-09-13
+
+- Preserve precision-sensitive JSON numbers in previews, search, formatted copies, and compact copies, including deeply nested documents.
+- Decode complete escaping layers in single-quoted log input without altering backslashes, quotes, or control characters.
+- Bound and cache search text, generate previews in small string chunks, and reuse previously loaded child pages.
+- Safely shorten unusual paths and labels for display while retaining complete values and paths for copying.
+- Use Better JSON Inspector and Inspect JSON consistently in the interface, documentation, and Store screenshot.
+- Add regression coverage for precision, log escaping, bounded previews and search, unusual paths, and incremental pagination.
 
 ## [Automatic Deep Deserialization and New Icon] - 2026-09-11
 

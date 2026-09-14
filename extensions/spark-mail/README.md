@@ -23,7 +23,9 @@ You'll need three things in place:
 
 1. **Spark Desktop** — installed and running. The CLI is just a thin client; if the app isn't open, there's nothing for it to talk to.
 2. **The Spark CLI** (`spark`) — set it up in **Spark Desktop → Settings → AI Agents → Spark CLI Setup**.
-3. **The path** (only if it's somewhere unusual) — if the `spark` binary doesn't live in a standard location, drop its absolute path into this extension's **Spark CLI Path** preference. Run `which spark` in a terminal to find it.
+3. **The path** (only if it's somewhere unusual) — if the `spark` binary doesn't live in a standard location, drop its absolute path into this extension's **Spark CLI Path** preference. Run `which spark` (macOS) or `where.exe spark` (Windows) in a terminal to find it.
+
+Works on both macOS and Windows. On Windows the extension looks for `spark.exe` inside the Spark Desktop install folder (`%LOCALAPPDATA%\Programs\SparkDesktop\...\SparkCore.bundle`) and on your `PATH`.
 
 ## A note on access levels
 

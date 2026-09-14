@@ -142,7 +142,10 @@ export function EmailItem({
             <Action.CopyToClipboard
               title="Copy Email ID"
               content={row.id}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "." },
+                Windows: { modifiers: ["ctrl", "shift"], key: "." },
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

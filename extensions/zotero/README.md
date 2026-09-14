@@ -131,6 +131,7 @@ This extension support a few sub commands.
 
 - link to the reference in your zotero app (default)
 - link to the PDF of your reference in zotero app or default PDF Reader
+- show the PDF file of your reference in Finder
 - copy the PDF file path of your reference to the clipboard
 - open original link to open URL in default browser
 - Copy BibTex citation key to the clipboard

@@ -106,6 +106,39 @@
       ]
     },
     {
+      "name": "create-person",
+      "title": "Create Person",
+      "description": "Add a new person to your workspace",
+      "mode": "view",
+      "keywords": [
+        "crm",
+        "new",
+        "contact"
+      ]
+    },
+    {
+      "name": "create-company",
+      "title": "Create Company",
+      "description": "Add a new company to your workspace",
+      "mode": "view",
+      "keywords": [
+        "crm",
+        "new",
+        "org"
+      ]
+    },
+    {
+      "name": "create-deal",
+      "title": "Create Deal",
+      "description": "Add a new deal to your pipeline",
+      "mode": "view",
+      "keywords": [
+        "crm",
+        "new",
+        "pipeline"
+      ]
+    },
+    {
       "name": "tasks",
       "title": "Search Tasks",
       "description": "List Workspace Tasks",
@@ -134,6 +167,28 @@
       "keywords": [
         "integrations"
       ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-records",
+      "title": "Search Records",
+      "description": "Search people, companies, and deals in the Attio workspace by name, email, domain, or deal title."
+    },
+    {
+      "name": "create-person",
+      "title": "Create Person",
+      "description": "Create a new person record in Attio with a name and optionally an email address, job title, and description."
+    },
+    {
+      "name": "create-company",
+      "title": "Create Company",
+      "description": "Create a new company record in Attio with a name and optionally a website domain and description."
+    },
+    {
+      "name": "create-deal",
+      "title": "Create Deal",
+      "description": "Create a new deal record in Attio with a name and optionally a stage, value, and owner (a workspace member)."
     }
   ],
   "dependencies": {

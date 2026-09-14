@@ -1,10 +1,13 @@
-import { evaluate } from "mathjs";
+import { compile } from "mathjs";
 import { DataPoint } from "../types";
 
 export function parseExpression(expression: string, xValues: number[]) {
   try {
+    // Parse once; evaluating a compiled expression per point is ~15x cheaper
+    // than `evaluate(expression, scope)`, which re-parses on every call.
+    const code = compile(expression);
     return xValues.map((x) => {
-      const result = evaluate(expression, { x });
+      const result = code.evaluate({ x });
       if (!isFinite(result)) {
         if (result === Infinity) {
           return Number.MAX_VALUE;
