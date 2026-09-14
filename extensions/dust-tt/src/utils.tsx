@@ -226,6 +226,7 @@ function renderTokenPlain(token: Token): string {
     case "hr":
       return "\n";
     case "space":
+    case "html":
       return "";
     default:
       return "raw" in token ? String(token.raw) : "";
