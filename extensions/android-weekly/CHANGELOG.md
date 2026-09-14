@@ -1,6 +1,6 @@
 # Android Weekly Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-14
 
 - Browse all 738 Android Weekly issues with pagination and search
 - Read full issue text rendered as markdown, grouped by section
