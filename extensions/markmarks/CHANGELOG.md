@@ -1,6 +1,6 @@
 # MarkMarks Changelog
 
-## [Add Aside Browser Support] - {PR_MERGE_DATE}
+## [Add Aside Browser Support] - 2026-09-14
 
 - Add Aside browser support
 
