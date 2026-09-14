@@ -560,18 +560,16 @@ export function OutdatedUpgradeAction(props: OutdatedActionProps) {
 }
 
 /**
- * Per-package sections shared by the outdated surfaces: single upgrade, pin,
- * refresh, copy/terminal commands and uninstall. A fragment so Show Upgrades
- * can append them beneath its selection actions.
+ * Per-package sections shared by the outdated surfaces: pin, copy/terminal
+ * commands, refresh and uninstall. A fragment so Show Upgrades can append them
+ * beneath its own upgrade actions.
+ *
+ * The upgrade actions themselves are NOT here: every caller hoists them into
+ * the panel's first section, so that the run action lands in the second slot,
+ * where Raycast binds ⌘↩.
  */
 export function OutdatedActionSections(
   props: OutdatedActionProps & {
-    /**
-     * Omit the per-package upgrade action from the sections. For rows that
-     * hoist that action to the panel's first slot (so a run action can take
-     * the second slot, where Raycast binds ⌘↩) without listing it twice.
-     */
-    omitUpgrade?: boolean;
     /**
      * Omit the pin action. For rows that hoist a selection-aware pin action
      * of their own — two Pin entries with different selection behaviour would
@@ -586,6 +584,12 @@ export function OutdatedActionSections(
      * cannot succeed until they unpin.
      */
     omitUpgradeCommand?: boolean;
+    /**
+     * Actions that belong beside Pin — Show Upgrades' selection actions, which
+     * act on the same row and so share its section rather than opening one of
+     * their own. Typed off ActionPanel.Section: see ViewSection.
+     */
+    children?: React.ComponentProps<typeof ActionPanel.Section>["children"];
   },
 ) {
   const { outdated } = props;
@@ -594,26 +598,14 @@ export function OutdatedActionSections(
 
   return (
     <>
-      <ActionPanel.Section>
-        {!props.omitUpgrade && (
-          <OutdatedUpgradeAction
-            outdated={outdated}
-            isCask={props.isCask}
-            pinned={pinned}
-            onUpgrade={props.onUpgrade}
-            onAction={props.onAction}
-          />
-        )}
-        {!props.omitPin && (
-          <Actions.PinAction item={outdated} kind={props.isCask ? "cask" : "formula"} onAction={props.onAction} />
-        )}
-        <Action
-          title="Refresh"
-          icon={Icon.ArrowClockwise}
-          shortcut={Keyboard.Shortcut.Common.Refresh}
-          onAction={() => props.onAction(true)}
-        />
-      </ActionPanel.Section>
+      {(props.children != undefined || !props.omitPin) && (
+        <ActionPanel.Section>
+          {props.children}
+          {!props.omitPin && (
+            <Actions.PinAction item={outdated} kind={props.isCask ? "cask" : "formula"} onAction={props.onAction} />
+          )}
+        </ActionPanel.Section>
+      )}
       {!(props.omitUpgradeCommand ?? pinned) && (
         <ActionPanel.Section>
           <Action.CopyToClipboard
@@ -629,6 +621,14 @@ export function OutdatedActionSections(
           />
         </ActionPanel.Section>
       )}
+      <ActionPanel.Section>
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={() => props.onAction(true)}
+        />
+      </ActionPanel.Section>
       <ActionPanel.Section>
         <Actions.FormulaUninstallAction formula={outdated} pinned={pinned} onAction={props.onAction} />
         {/* brew refuses to uninstall a pinned package without --force, and the
@@ -677,10 +677,8 @@ export function OutdatedActionPanel(
       <OutdatedActionSections
         outdated={props.outdated}
         isCask={props.isCask}
-        onUpgrade={props.onUpgrade}
         onAction={props.onAction}
         pinned={props.pinned}
-        omitUpgrade
       />
     </ActionPanel>
   );
