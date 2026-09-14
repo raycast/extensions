@@ -198,6 +198,76 @@ test("entries past the retention window are deleted, not just hidden", async () 
   assert.deepEqual(stored, ["gh-review.activity.fresh"], "the expired entry must leave storage too");
 });
 
+test("two checks committing at once keep both of their baselines", async () => {
+  const pr = (number, comments) => ({
+    repository: "acme/repo",
+    number,
+    lastActivity: new Date().toISOString(),
+    comments,
+    unresolved: 0,
+    awaitingReply: 0,
+    reviewDecision: "",
+  });
+  // Establish a baseline both runs start from, then let them diverge: the
+  // scheduled watcher covers both pull requests, a check from the settings
+  // screen only the one it was asked about.
+  const scheduled = [
+    { kind: "review-requested", pr: pr(1, 0) },
+    { kind: "awaiting-reply", pr: pr(2, 0) },
+  ];
+  await (await diffCandidates(scheduled)).commit();
+
+  const manual = [{ kind: "review-requested", pr: pr(1, 1) }];
+  const [a, b] = await Promise.all([diffCandidates(scheduled), diffCandidates(manual)]);
+  await Promise.all([a.commit(), b.commit()]);
+
+  const after = await diffCandidates(scheduled);
+  assert.deepEqual(
+    after.changes.map(c => c.pr.number),
+    [1],
+    "only the pull request that actually changed may come back; #2's fingerprint must survive the other commit",
+  );
+});
+
+test("fingerprints for pull requests no longer in scope are forgotten", async () => {
+  const stale = JSON.stringify({
+    "review-requested:acme/repo#9": { sig: "old", seen: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString() },
+  });
+  await api.LocalStorage.setItem("gh-review.watch-signatures", stale);
+
+  const pr = {
+    repository: "acme/repo",
+    number: 1,
+    lastActivity: new Date().toISOString(),
+    comments: 0,
+    unresolved: 0,
+    awaitingReply: 0,
+    reviewDecision: "",
+  };
+  await (await diffCandidates([{ kind: "review-requested", pr }])).commit();
+
+  const saved = JSON.parse(await api.LocalStorage.getItem("gh-review.watch-signatures"));
+  assert.deepEqual(Object.keys(saved), ["review-requested:acme/repo#1"], "the merged map must not grow forever");
+});
+
+test("a baseline written before entries carried a timestamp is kept", async () => {
+  await api.LocalStorage.setItem(
+    "gh-review.watch-signatures",
+    JSON.stringify({ "review-requested:acme/repo#1": "1|0|0|0|" }),
+  );
+  const pr = {
+    repository: "acme/repo",
+    number: 1,
+    lastActivity: "1",
+    comments: 0,
+    unresolved: 0,
+    awaitingReply: 0,
+    reviewDecision: "",
+  };
+  const diff = await diffCandidates([{ kind: "review-requested", pr }]);
+  assert.deepEqual(diff.changes, [], "an upgrade must not look like a fresh install");
+});
+
 test("activity older than the retention window is not reported as recorded", async () => {
   assert.deepEqual(
     await recordActivity([entry("stale", hoursAgo(80))]),

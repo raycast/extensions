@@ -29,6 +29,8 @@ const LAST_RUN_KEY = "gh-review.watch-last-run";
 /** How long inbox entries are kept, and how many at most. Matches the TUI. */
 const RETENTION_HOURS = 72;
 const MAX_ENTRIES = 500;
+/** How long a fingerprint outlives the last run that saw its pull request. */
+const SIGNATURE_RETENTION_DAYS = 30;
 
 /** One thing that happened, as recorded by the background watcher. */
 export type ActivityEvent = {
@@ -216,13 +218,23 @@ export function signature(pr: PullRequest): string {
   return [pr.lastActivity, pr.comments, pr.unresolved, pr.awaitingReply, pr.reviewDecision].join("|");
 }
 
-type SignatureMap = Record<string, string>;
+/** A fingerprint, and when a run last saw the pull request it belongs to. */
+type SignatureEntry = { sig: string; seen: string };
+type SignatureMap = Record<string, SignatureEntry>;
 
 async function loadSignatures(): Promise<SignatureMap | undefined> {
   const raw = await LocalStorage.getItem<string>(SIGNATURES_KEY);
   if (!raw) return undefined;
   try {
-    return JSON.parse(raw) as SignatureMap;
+    const stored = JSON.parse(raw) as Record<string, SignatureEntry | string>;
+    const now = new Date().toISOString();
+    const map: SignatureMap = {};
+    for (const [key, value] of Object.entries(stored)) {
+      // Baselines written before entries carried a timestamp are kept, dated
+      // now, so upgrading never looks like a fresh install.
+      map[key] = typeof value === "string" ? { sig: value, seen: now } : value;
+    }
+    return map;
   } catch {
     return undefined;
   }
@@ -230,6 +242,16 @@ async function loadSignatures(): Promise<SignatureMap | undefined> {
 
 async function saveSignatures(map: SignatureMap): Promise<void> {
   await LocalStorage.setItem(SIGNATURES_KEY, JSON.stringify(map));
+}
+
+/**
+ * Forgets fingerprints for pull requests no run has seen in a month. The
+ * baseline is merged rather than replaced, so without this the map would keep
+ * every pull request that ever passed through the scope.
+ */
+function pruneSignatures(map: SignatureMap): SignatureMap {
+  const cutoff = new Date(Date.now() - SIGNATURE_RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  return Object.fromEntries(Object.entries(map).filter(([, entry]) => entry.seen >= cutoff));
 }
 
 /** A PR the watcher found, tagged with which category surfaced it. */
@@ -255,6 +277,10 @@ export type Change = Candidate & { isNew: boolean };
  * The very first run has no baseline: it reports nothing and only establishes
  * one, so installing the extension never fires a wall of banners about pull
  * requests that were already sitting there.
+ *
+ * Committing merges into whatever is stored at that moment rather than
+ * replacing it, because the scheduled watcher and a check you start yourself
+ * run as separate processes over different candidates.
  */
 export async function diffCandidates(
   candidates: Candidate[],
@@ -262,10 +288,18 @@ export async function diffCandidates(
   const previous = await loadSignatures();
 
   const current: SignatureMap = {};
+  const seen = new Date().toISOString();
   for (const { kind, pr } of candidates) {
-    current[`${kind}:${pr.repository}#${pr.number}`] = signature(pr);
+    current[`${kind}:${pr.repository}#${pr.number}`] = { sig: signature(pr), seen };
   }
-  const commit = () => saveSignatures(current);
+  const commit = async () => {
+    // Read again here rather than reusing the map loaded above: a check running
+    // alongside this one may have committed its own candidates in between, and
+    // writing this run's map whole would drop every fingerprint it recorded —
+    // leaving those pull requests to look new again on the next pass.
+    const stored = (await loadSignatures()) ?? {};
+    await saveSignatures(pruneSignatures({ ...stored, ...current }));
+  };
 
   // Nothing to record on a first run, so the baseline can be taken immediately.
   if (!previous) {
@@ -279,7 +313,7 @@ export async function diffCandidates(
     const before = previous[key];
     if (before === undefined) {
       changes.push({ ...candidate, isNew: true });
-    } else if (before !== signature(candidate.pr)) {
+    } else if (before.sig !== signature(candidate.pr)) {
       changes.push({ ...candidate, isNew: false });
     }
   }
