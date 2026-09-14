@@ -20,13 +20,15 @@ function respondWith(...responses) {
 const networkFailure = () => () => {
   throw new TypeError("fetch failed");
 };
-const serverError = (status = 502) => () => new Response("upstream blew up", { status });
-const rateLimited = () =>
+const serverError =
+  (status = 502) =>
   () =>
-    new Response("You have exceeded a secondary rate limit", {
-      status: 403,
-      headers: { "retry-after": "0" },
-    });
+    new Response("upstream blew up", { status });
+const rateLimited = () => () =>
+  new Response("You have exceeded a secondary rate limit", {
+    status: 403,
+    headers: { "retry-after": "0" },
+  });
 const json = payload => () => new Response(JSON.stringify({ data: payload }));
 /** Headers arrive, then the body stream dies — GitHub already ran the mutation. */
 const interruptedBody = () => () =>
@@ -143,6 +145,39 @@ test("a write GitHub refused before running it stays an ordinary failure", async
   assert.equal(sent.length, 1);
 });
 
+test("a write answered with a bare JSON null is reported unconfirmed", async () => {
+  const sent = respondWith(payload(null));
+  await assert.rejects(addComment("pr-node-id", "looks good"), error => {
+    assert.ok(error instanceof UnconfirmedWriteError, "valid JSON is not the same as a GraphQL result");
+    assert.match(error.message, /check the pull request on GitHub/);
+    return true;
+  });
+  assert.equal(sent.length, 1, "the write must not be replayed");
+
+  const list = respondWith(payload([]));
+  await assert.rejects(replyToThread("thread-id", "looks good"), UnconfirmedWriteError);
+  assert.equal(list.length, 1);
+});
+
+test("an error raised after the mutation ran leaves the write unconfirmed", async () => {
+  // Same NOT_FOUND that rejects a bad node id, but raised deeper in the
+  // selection — execution had already begun, so the comment may exist.
+  const sent = respondWith(
+    payload({
+      data: { addComment: null },
+      errors: [
+        {
+          type: "NOT_FOUND",
+          message: "Could not resolve to a User.",
+          path: ["addComment", "commentEdge", "node", "author"],
+        },
+      ],
+    }),
+  );
+  await assert.rejects(addComment("pr-node-id", "looks good"), UnconfirmedWriteError);
+  assert.equal(sent.length, 1);
+});
+
 test("a read answered with partial data and an error still fails", async () => {
   respondWith(payload({ data: { viewer: null }, errors: [{ message: "Something went wrong" }] }));
   await assert.rejects(graphql("query { viewer { login } }"), error => {
@@ -182,7 +217,11 @@ test("reads and idempotent mutations keep retrying through a 5xx", async () => {
 });
 
 test("watched repositories resolve personal owners as well as organizations", async () => {
-  const sent = respondWith(json({ repositoryOwner: { repositories: { pageInfo: {}, nodes: [{ name: "dotfiles", owner: { login: "tester" } }] } } }));
+  const sent = respondWith(
+    json({
+      repositoryOwner: { repositories: { pageInfo: {}, nodes: [{ name: "dotfiles", owner: { login: "tester" } }] } },
+    }),
+  );
   assert.deepEqual(await ownerRepos("tester"), [{ owner: "tester", name: "dotfiles" }]);
   assert.match(sent[0].query, /repositoryOwner\(login: \$owner\)/);
   assert.doesNotMatch(sent[0].query, /organization\(login:/);

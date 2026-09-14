@@ -123,9 +123,24 @@ const REJECTED_BEFORE_WRITE = new Set([
   "RATE_LIMITED",
 ]);
 
-/** Reports whether GitHub turned the whole operation away before running it. */
-function rejectedBeforeWrite(errors: { type?: string }[]): boolean {
-  return errors.every(error => error.type !== undefined && REJECTED_BEFORE_WRITE.has(error.type));
+/**
+ * Reports whether GitHub turned the whole operation away before running it.
+ *
+ * The type alone isn't enough: the same `NOT_FOUND` that rejects a node id in
+ * the input can also be raised further down the selection, after the mutation
+ * has been applied. An error GitHub raised while validating carries no path,
+ * or at most the mutation field itself; anything deeper means execution had
+ * already begun, and the write stays unconfirmed.
+ */
+function rejectedBeforeWrite(errors: GraphQLErrorEntry[]): boolean {
+  return errors.every(
+    error => error.type !== undefined && REJECTED_BEFORE_WRITE.has(error.type) && (error.path ?? []).length <= 1,
+  );
+}
+
+/** Reports whether a parsed body is shaped like a GraphQL result at all. */
+function isEnvelope(value: unknown): value is GraphQLResponse<unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function endpoint(): string {
@@ -179,9 +194,11 @@ function backoff(response: Response | undefined, attempt: number): number {
   return Math.min(500 * 2 ** (attempt - 1), MAX_WAIT_MS);
 }
 
+type GraphQLErrorEntry = { message: string; type?: string; path?: (string | number)[] };
+
 type GraphQLResponse<T> = {
   data?: T;
-  errors?: { message: string; type?: string }[];
+  errors?: GraphQLErrorEntry[];
 };
 
 /** Executes a GraphQL query and returns its `data` payload. */
@@ -265,22 +282,33 @@ export async function graphql<T>(
         throw new GraphQLError(`GitHub returned ${response.status}: ${text.trim().slice(0, 200)}`, ssoHeader);
       }
 
-      let parsed: GraphQLResponse<T>;
+      let payload: unknown;
       try {
-        parsed = JSON.parse(text) as GraphQLResponse<T>;
+        payload = JSON.parse(text);
       } catch {
         // Truncated or otherwise unreadable: same position as a lost body, and
         // the mutation on the other end may well have been applied.
         if (!idempotent) throw new UnconfirmedWriteError("its response could not be read");
         throw new GraphQLError(`GitHub returned an unreadable response: ${text.trim().slice(0, 200)}`);
       }
+      // `null`, a bare array, a quoted string: all parse cleanly and none of
+      // them say anything about the mutation. Reading fields off one would
+      // throw its way out of here as an ordinary failure.
+      if (!isEnvelope(payload)) {
+        if (!idempotent) throw new UnconfirmedWriteError("its response was not a GraphQL result");
+        throw new GraphQLError(`GitHub returned an unexpected response: ${text.trim().slice(0, 200)}`);
+      }
+      const parsed = payload as GraphQLResponse<T>;
+      // Likewise an `errors` that isn't a list — take it as no errors rather
+      // than letting it break the checks below.
+      const errors = Array.isArray(parsed.errors) ? parsed.errors : undefined;
       // A write is only settled once the response actually carries what the
       // mutation was asked to create; `data` alone can be there with the
       // mutation field null or missing.
       const written = idempotent || confirmsWrite(parsed.data);
 
-      if (parsed.errors?.length) {
-        const messages = parsed.errors.map(e => e.message);
+      if (errors?.length) {
+        const messages = errors.map(e => String(e.message));
         const joined = messages.join("; ");
 
         if (isSamlRefusal(messages, ssoHeader)) {
@@ -298,7 +326,7 @@ export async function graphql<T>(
           if (written) return parsed.data as T;
           // No result to go on. Only an error GitHub raised before running the
           // mutation rules the write out; anything else leaves it open.
-          if (!rejectedBeforeWrite(parsed.errors)) {
+          if (!rejectedBeforeWrite(errors)) {
             throw new UnconfirmedWriteError(`GitHub answered with an error: ${joined}`);
           }
         }
