@@ -60,6 +60,13 @@ const assetPackCompleteMarker = ".raycast-complete";
 const assetPackLockName = ".pack-lock";
 const assetPackLockTakeoverName = ".pack-lock.takeover";
 const assetPackLockStaleMs = 60_000;
+// Hard ceiling on heartbeat silence: past this age the lock is reclaimed even
+// when the owner PID answers. A dead owner's PID can have been recycled for an
+// unrelated process, and gating purely on PID liveness would block recovery
+// forever. Five minutes of missed 10s heartbeats means the original owner is
+// not functioning; takeover stays safe because extraction uses per-process
+// staging and a rename that loses the race discards its own pack.
+const assetPackLockHardStaleMs = 5 * 60_000;
 
 const getAssetPackDestination = (version: string) => path.join(environment.assetsPath, "pack", version);
 
@@ -90,13 +97,18 @@ const parseOwnerPid = (token: string) => {
   return Number.isInteger(pid) && pid > 0 ? pid : undefined;
 };
 
-// A lock is recoverable only when its heartbeat is stale AND its owner
-// process is confirmed dead. A live but silent owner (slow disk, suspended
-// machine) keeps the lock rather than being evicted.
+// A lock is recoverable when its heartbeat is stale in two tiers:
+//   1. past soft-stale AND the owner process is confirmed dead (normal crash
+//      recovery — a live but silent holder keeps the lock), or
+//   2. past hard-stale regardless of PID liveness (the owner PID was recycled
+//      by an unrelated process, or the owner is wedged — bounds the wait so
+//      cacheAssetPack can never block forever).
 const inspectAssetPackLock = async (lockPath: string) => {
   try {
     const [{ mtimeMs }, token] = await Promise.all([fs.stat(lockPath), fs.readFile(lockPath, "utf8").catch(() => "")]);
-    if (Date.now() - mtimeMs <= assetPackLockStaleMs) return { recoverable: false as const };
+    const ageMs = Date.now() - mtimeMs;
+    if (ageMs <= assetPackLockStaleMs) return { recoverable: false as const };
+    if (ageMs > assetPackLockHardStaleMs) return { recoverable: true as const };
     const pid = parseOwnerPid(token);
     if (pid === undefined || isProcessAlive(pid)) return { recoverable: false as const };
     return { recoverable: true as const };
@@ -356,22 +368,41 @@ export const copySvg = async ({ version, icon, pathOnly }: { version: string; ic
   copyOrPaste(svg);
 };
 
+// Newest mtime of any file beneath a directory. The staging root's own mtime
+// is not refreshed by writes inside extracted subdirectories (e.g. icons/),
+// but the written files' mtimes are. This bounds reclamation when the owner
+// PID answers (possible PID reuse) without trusting directory age.
+const newestFileMtimeMs = async (directory: string): Promise<number> => {
+  let newest = 0;
+  for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      newest = Math.max(newest, await newestFileMtimeMs(entryPath));
+    } else {
+      newest = Math.max(newest, (await fs.stat(entryPath)).mtimeMs);
+    }
+  }
+  return newest;
+};
+
 export const cleanAssetPack = async () => {
   const directories = await fs.readdir(environment.assetsPath);
   await Promise.all(
     directories.map(async (d) => {
+      const directoryPath = path.join(environment.assetsPath, d);
       if (d.startsWith("pack")) {
-        await fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true });
+        await fs.rm(directoryPath, { recursive: true, force: true });
       } else if (d.startsWith(".pack-staging")) {
-        // Reclaim staging only when its creating process is confirmed dead.
-        // Directory age is not evidence of abandonment: writes beneath
-        // extracted subdirectories (e.g. icons/) do not refresh the staging
-        // root's mtime. The PID is encoded in the staging name; a live owner
-        // always wins, even if the directory looks old.
+        // Prefer PID liveness; when the PID answers but no file beneath the
+        // staging tree has been written within the hard-stale window, the PID
+        // was recycled (or the owner wedged) and the staging is abandoned.
         const segments = d.split("-");
         const ownerPid = Number(segments[segments.length - 2]);
-        if (Number.isInteger(ownerPid) && ownerPid > 0 && !isProcessAlive(ownerPid)) {
-          await fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true });
+        const ownerDead = !Number.isInteger(ownerPid) || ownerPid <= 0 || !isProcessAlive(ownerPid);
+        const contentStale =
+          Date.now() - (await newestFileMtimeMs(directoryPath).catch(() => 0)) > assetPackLockHardStaleMs;
+        if (ownerDead || contentStale) {
+          await fs.rm(directoryPath, { recursive: true, force: true });
         }
       }
     }),
