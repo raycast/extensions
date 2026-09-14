@@ -14,14 +14,16 @@ export type VpnStatusUpdate = {
  */
 export async function updateVpnStatus(update: VpnStatusUpdate): Promise<void> {
   await LocalStorage.setItem(VPN_STATUS_KEY, JSON.stringify(update));
-  // Always update the refresh timestamp when status changes
-  await updateMenuBarRefreshTimestamp();
 
-  // Force menubar refresh by relaunching the menubar command
-  // Only do this if we're not already in the menubar command
-  if (environment.launchType !== LaunchType.Background) {
-    await forceMenuBarRefresh();
-  }
+  // The menu bar polls this timestamp and refreshes every service when it changes, and each of
+  // those refreshes reports a status update of its own. Signalling from inside the menu bar would
+  // therefore never stop, and a command cannot launch itself either, so only the other commands
+  // signal. launchType would not do as the test here: it says how the command started, and opening
+  // the menu bar is a user launch rather than a background one.
+  if (environment.entryPointName === "menu-bar") return;
+
+  await updateMenuBarRefreshTimestamp();
+  await forceMenuBarRefresh();
 }
 
 /**
