@@ -1,7 +1,5 @@
-import { closeMainWindow } from "@raycast/api";
-import { exec } from "child_process";
+import { executeCapture } from './utils/screenshot';
 
-export default async () => {
-  exec("/usr/sbin/screencapture -p");
-  await closeMainWindow();
-};
+export default async function Command() {
+  await executeCapture('screen');
+}

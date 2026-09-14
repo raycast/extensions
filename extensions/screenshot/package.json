@@ -2,112 +2,102 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screenshot",
   "title": "Screenshot",
-  "description": "Capture your screen with macOS native tools",
-  "icon": "command-icon.png",
-  "author": "Aayush9029",
-  "contributors": [
-    "nirtamir2"
+  "description": "Capture full screen, selected region, or active window on Windows.",
+  "icon": "icon.png",
+  "author": "afaan_mushtaq",
+  "categories": [
+    "Media",
+    "System"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "all-in-one",
-      "title": "All in One",
-      "subtitle": "Screenshot",
-      "description": "Capture and Crop All in One",
-      "icon": "all-in-one.png",
-      "mode": "no-view"
-    },
-    {
-      "name": "capture-area",
-      "title": "Capture Area",
-      "subtitle": "Screenshot",
-      "description": "Capture Area of Screen",
-      "icon": "capture-area.png",
+      "name": "capture-screen",
+      "title": "Capture Screen",
+      "icon": "icon.png",
+      "description": "Capture a screenshot of the entire screen",
       "mode": "no-view"
     },
     {
       "name": "capture-window",
       "title": "Capture Window",
-      "subtitle": "Screenshot",
-      "description": "Capture App Window",
-      "icon": "capture-window.png",
+      "icon": "icon.png",
+      "description": "Select and capture a window",
       "mode": "no-view"
     },
     {
-      "name": "capture-window-to-clipboard",
-      "title": "Capture Window to Clipboard",
-      "subtitle": "Screenshot",
-      "description": "Capture App Window To Clipboard",
-      "icon": "capture-window-to-clipboard.png",
+      "name": "capture-region",
+      "title": "Capture Region",
+      "icon": "icon.png",
+      "description": "Select an area of the screen to capture",
       "mode": "no-view"
     },
     {
-      "name": "capture-screen",
-      "title": "Capture Screen",
-      "subtitle": "Screenshot",
-      "description": "Capture Screen",
-      "icon": "capture-fullscreen.png",
-      "mode": "no-view"
-    },
+      "name": "extract-text",
+      "title": "Extract Text",
+      "icon": "icon.png",
+      "description": "Extract text from an image using native local Windows OCR and copy to clipboard",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
     {
-      "name": "capture-timer",
-      "title": "Capture Timer",
-      "subtitle": "Screenshot",
-      "description": "Capture Screen after a Timer (default 5 seconds)",
-      "icon": "capture-timer.png",
-      "mode": "no-view",
-      "arguments": [
+      "name": "output",
+      "title": "Screenshot Output",
+      "description": "Choose what happens after a screenshot is captured",
+      "type": "dropdown",
+      "required": false,
+      "default": "save-and-copy",
+      "data": [
         {
-          "name": "time",
-          "placeholder": "Delay (default 5 sec)",
-          "type": "text",
-          "required": false
+          "title": "Save + Copy",
+          "value": "save-and-copy"
+        },
+        {
+          "title": "Save",
+          "value": "save"
+        },
+        {
+          "title": "Copy",
+          "value": "copy"
         }
       ]
     },
     {
-      "name": "capture-to-clipboard",
-      "title": "Capture to Clipboard",
-      "subtitle": "Screenshot",
-      "description": "Capture Area of Screen to Clipboard",
-      "icon": "clipboard.png",
-      "mode": "no-view"
+      "name": "saveLocation",
+      "title": "Screenshot Save Location",
+      "description": "Directory where screenshots are saved",
+      "type": "directory",
+      "required": false,
+      "default": "~/Pictures/Screenshots"
     },
     {
-      "name": "annotate",
-      "title": "Capture and Annotate",
-      "subtitle": "Screenshot",
-      "description": "Capture Screen and Annotate",
-      "icon": "annotate.png",
-      "mode": "no-view"
+      "name": "showMagnifier",
+      "title": "Show Magnifier",
+      "label": "Show cursor magnifying glass in Region mode",
+      "description": "Show a magnified pixel preview and crosshair guides around cursor during Region capture",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
-  "categories": [
-    "Productivity"
-  ],
   "dependencies": {
-    "@raycast/api": "^1.42.0",
-    "@raycast/utils": "^1.10.0"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^1.18.0"
   },
   "devDependencies": {
-    "@types/node": "^18.8.3",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.46.1",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.8.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
-  },
-  "version": "1.0.0",
-  "main": "index.js",
-  "platforms": [
-    "macOS"
-  ]
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }
