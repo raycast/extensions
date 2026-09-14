@@ -265,6 +265,26 @@ export function ProjectDetailView({
       });
       if (!confirmed) throw new Error(t("pd.overwriteCancelled"));
     }
+    const updatedLines =
+      at === undefined
+        ? addEnvVariable(lines, data.key, data.value, {
+            quote: data.quote,
+            disabled: data.disabled,
+            comment: data.comment,
+          })
+        : updateEnvVariableAt(lines, at, {
+            key: data.key,
+            value: data.value,
+            quote: data.quote,
+            disabled: data.disabled,
+            comment: data.comment,
+          });
+
+    // 先写文件,再动 registry 里的敏感名单:写盘失败或用户在冲突框里选了"放弃",名单不能先改了
+    // (否则旧名字的自定义标记丢了、文件里却还是旧名字)
+    const saved = await saveLines(updatedLines);
+    if (!saved) return;
+
     // 改了名字:名单里关于旧名字的敏感判断跟着改到新名字上,不留死条目
     let secretsNow = currentProject.customSecrets;
     const oldLine = at !== undefined ? lines[at] : undefined;
@@ -281,28 +301,12 @@ export function ProjectDetailView({
         }
       }
     }
-    const updatedLines =
-      at === undefined
-        ? addEnvVariable(lines, data.key, data.value, {
-            quote: data.quote,
-            disabled: data.disabled,
-            comment: data.comment,
-          })
-        : updateEnvVariableAt(lines, at, {
-            key: data.key,
-            value: data.value,
-            quote: data.quote,
-            disabled: data.disabled,
-            comment: data.comment,
-          });
 
     // 如果用户在表单里勾选了自定义敏感(改过名的话要用改名后的名单判断,闭包里的还是旧的)
     const isCurrentlySecret = isSecretKey(data.key, secretsNow);
     if (data.isSecret !== isCurrentlySecret) {
       await handleToggleSecret(data.key);
     }
-
-    await saveLines(updatedLines);
   };
 
   // 切换某一行的启用/禁用 (# KEY=val)。按行不按名字:同名两行时只动这一行

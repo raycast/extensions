@@ -36,31 +36,9 @@
       "mode": "view"
     }
   ],
-  "tools": [],
-  "preferences": [
-    {
-      "name": "language",
-      "title": "Language",
-      "description": "Display language for Env Keeper's interface",
-      "type": "dropdown",
-      "required": false,
-      "default": "en",
-      "data": [
-        {
-          "title": "简体中文",
-          "value": "zh"
-        },
-        {
-          "title": "English",
-          "value": "en"
-        }
-      ]
-    }
-  ],
   "dependencies": {
     "@env-keeper/core": "^1.0.0",
-    "@raycast/api": "^2.3.1",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^2.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

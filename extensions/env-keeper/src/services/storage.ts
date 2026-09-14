@@ -6,6 +6,7 @@ import {
   readFile,
   realpath,
   rename,
+  rm,
   stat,
   unlink,
   utimes,
@@ -13,6 +14,7 @@ import {
 } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { homedir, userInfo } from "node:os";
+import { trash } from "@raycast/api";
 import { basename, dirname, join } from "node:path";
 import {
   type ProjectMeta,
@@ -289,7 +291,7 @@ export async function readConfigSnapshot(filePath: string): Promise<string> {
 }
 
 export async function deleteConfigSnapshot(filePath: string): Promise<void> {
-  if (existsSync(filePath)) await unlink(filePath);
+  if (existsSync(filePath)) await trash(filePath);
 }
 
 /**
@@ -553,7 +555,7 @@ export async function readShellRcBackup(filePath: string): Promise<string> {
 }
 
 export async function deleteShellRcBackup(filePath: string): Promise<void> {
-  if (existsSync(filePath)) await unlink(filePath);
+  if (existsSync(filePath)) await trash(filePath);
 }
 
 /**
@@ -794,8 +796,17 @@ export async function saveShellConfig(config: ShellConfig): Promise<ConfigSnapsh
 
   const next = formatShellConfig(config);
   const snapshot = await snapshotConfigBeforeWrite("shell", SHELL_CONFIG_FILE, next);
+  // 两个文件必须一起成:shell.json 先写、shell.sh 写失败的话,界面会显示终端根本没在用的配置。
+  // 所以记住写之前的 json,脚本写不成就把 json 放回去再抛错
+  const previous = existsSync(SHELL_CONFIG_FILE) ? await readFile(SHELL_CONFIG_FILE, "utf8") : undefined;
   await writeFileAtomic(SHELL_CONFIG_FILE, next);
-  await writeFileAtomic(SHELL_SCRIPT_FILE, scriptContent, PRIVATE_FILE_MODE);
+  try {
+    await writeFileAtomic(SHELL_SCRIPT_FILE, scriptContent, PRIVATE_FILE_MODE);
+  } catch (error) {
+    if (previous === undefined) await rm(SHELL_CONFIG_FILE, { force: true });
+    else await writeFileAtomic(SHELL_CONFIG_FILE, previous);
+    throw error;
+  }
   return snapshot;
 }
 
@@ -1133,6 +1144,6 @@ export async function restoreSnapshot(options: {
  */
 export async function deleteSnapshot(filePath: string): Promise<void> {
   if (existsSync(filePath)) {
-    await unlink(filePath);
+    await trash(filePath);
   }
 }

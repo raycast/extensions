@@ -23,10 +23,16 @@ export async function applyPresetToFile(options: {
   });
   if (!result.success) throw new Error(result.error ?? "write failed");
 
-  // 读最新的再记,别拿调用方手里可能已经旧了的快照去覆盖
-  const presets = await loadPresets();
-  if (!presets.problem) {
-    await savePresets(recordPresetApplied(presets.data, project.id, envFilename, preset.id));
+  // 读最新的再记,别拿调用方手里可能已经旧了的快照去覆盖。
+  // 文件到这里已经改成功了,簿记失败不能再报"套用失败"——那会让调用方跳过刷新,界面停在旧内容上;
+  // 少一条"已套用"记录的后果只是之后不提示"文件被手改过",可以接受
+  try {
+    const presets = await loadPresets();
+    if (!presets.problem) {
+      await savePresets(recordPresetApplied(presets.data, project.id, envFilename, preset.id));
+    }
+  } catch (error) {
+    console.warn("preset applied but bookkeeping failed:", error);
   }
   return result;
 }

@@ -168,6 +168,20 @@ describe("#49 写 shell.sh 前先查语法", () => {
     await expect(storage.saveShellConfig(configWith("if true; then"))).resolves.toBeTruthy();
     expect(await readFile(join(dataDir, "shell.sh"), "utf8")).toContain("if true; then");
   });
+
+  it("shell.sh 写不进去时 shell.json 回滚,两个文件不会一新一旧", async () => {
+    await storage.saveShellConfig(configWith("export A=1"));
+    const before = await readFile(join(dataDir, "shell.json"), "utf8");
+    // 让脚本位置变成一个目录:原子写最后那步 rename 会失败
+    const script = join(dataDir, "shell.sh");
+    await rm(script, { force: true });
+    await mkdir(script);
+
+    await expect(storage.saveShellConfig(configWith("export B=2"))).rejects.toThrow();
+    expect(await readFile(join(dataDir, "shell.json"), "utf8")).toBe(before);
+
+    await rm(script, { recursive: true, force: true });
+  });
 });
 
 describe("#53 快照继承源文件权限", () => {

@@ -2,14 +2,13 @@
  * 英文文案宽度校验。
  *
  * Raycast 里这些位置只显示一行,超宽直接用 … 截断:列表项标题/副标题、Toast、Action 菜单项、
- * 搜索框占位、表单字段标题/下拉项/复选框说明。中文短、英文长,2026-09-13 实测英文界面这些位置
- * 几乎全部截断。这里按位置给英文定上限(字符数,占位符按原样计),超了就红,免得以后改文案又超。
+ * 搜索框占位、表单字段标题/下拉项/复选框说明。2026-09-13 实测这些位置的长文案几乎全部截断。这里按位置给英文定上限(字符数,占位符按原样计),超了就红,免得以后改文案又超。
  *
  * 上限是按"中文没截断的宽度 × 汉字约两倍宽"倒推再留余量得出的经验值,不是 Raycast 文档给的数。
  * 加新文案时:用在下面哪个位置,就把 key 加进哪一组;确认框正文、Markdown、tooltip 会自动换行,不用管。
  */
 import { describe, expect, it } from "vitest";
-import { dictionaries, type DictKey } from "../src/i18n.js";
+import { dictionary, type DictKey } from "../src/i18n.js";
 
 const slots: { max: number; keys: DictKey[] }[] = [
   // Action 菜单项
@@ -344,7 +343,7 @@ describe("英文文案宽度", () => {
   for (const { max, keys } of slots) {
     for (const key of keys) {
       it(`${key} ≤ ${max}`, () => {
-        const text = dictionaries.en[key];
+        const text = dictionary[key];
         expect(text, `key ${key} 不存在`).toBeTypeOf("string");
         expect(text.length, `"${text}" 有 ${text.length} 字符,上限 ${max}`).toBeLessThanOrEqual(max);
       });

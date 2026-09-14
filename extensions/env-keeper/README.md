@@ -16,11 +16,11 @@ Manage every project's `.env` files and your global shell config from Raycast. *
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| **Manage Envs** | Projects: register a project, manage variables per environment, snapshots and restore, generate `.env.example`.<br>Shell: manage global variables / aliases / snippets and generate `~/.env-keeper/shell.sh`. |
-| **Search Env Vars** | Search variable names or values across all projects, profiles and the shell config. |
-| **Jump to** | Open a project, env file, profile or shell snippet by name; snippets can be toggled in place. |
+| Command             | What it does                                                                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Manage Envs**     | Projects: register a project, manage variables per environment, snapshots and restore, generate `.env.example`.<br>Shell: manage global variables / aliases / snippets and generate `~/.env-keeper/shell.sh`. |
+| **Search Env Vars** | Search variable names or values across all projects, profiles and the shell config.                                                                                                                           |
+| **Jump to**         | Open a project, env file, profile or shell snippet by name; snippets can be toggled in place.                                                                                                                 |
 
 ## Core design: files are the source of truth
 
@@ -53,7 +53,3 @@ Everything the extension owns lives in `~/.env-keeper/`, fully transparent:
 - macOS with zsh or bash as the login shell (the real login shell is detected to decide between `~/.zshrc` and `~/.bash_profile`).
 - With fish or another shell, syntax validation is skipped automatically and never blocks saving.
 - Inline comments in `.env` are parsed the same way `dotenv` does, so the value shown in the UI equals the value your program gets.
-
-## Interface language
-
-English by default; Simplified Chinese can be selected in the extension preferences.
