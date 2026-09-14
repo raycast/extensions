@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { getOpenTabs } from "../actions";
 import { Preferences, SearchResult, Tab } from "../interfaces";
 import { getPreferenceValues } from "@raycast/api";
@@ -16,32 +16,17 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
 
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
-  const [isEmpty, setIsEmpty] = useState<boolean>(false);
 
+  // The tab list is read from Chrome once per command run. `query` is deliberately
+  // not a dependency here: filtering happens in memory below, so typing never
+  // re-runs the AppleScript.
   const { isLoading, data: tabData } = usePromise(
-    async (useOriginalFavicon: boolean, query: string) => {
+    async (useOriginalFavicon: boolean) => {
       const tabs = await getOpenTabs(useOriginalFavicon);
-      const parsedQuery = parseSearchQuery(query);
       setErrorView(undefined);
-      setIsEmpty(tabs.length === 0);
-
-      // Early return if no search query
-      if (parsedQuery.includeTerms.length === 0 && parsedQuery.excludeTerms.length === 0) {
-        return tabs;
-      }
-
-      return tabs.filter((tab) => {
-        try {
-          const searchable = `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`;
-          return matchesQuery(searchable, parsedQuery);
-        } catch {
-          // Handle invalid URLs gracefully
-          const searchable = `${tab.title.toLowerCase()} ${tab.url.toLowerCase()}`;
-          return matchesQuery(searchable, parsedQuery);
-        }
-      });
+      return tabs;
     },
-    [useOriginalFavicon, query],
+    [useOriginalFavicon],
     {
       onError(error) {
         if (error.message === NOT_INSTALLED_MESSAGE) {
@@ -53,7 +38,32 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
     },
   );
 
-  const data = isEmpty ? [] : tabData || [];
+  // Lowercasing is done once per tab list rather than on every keystroke.
+  const searchableTabs = useMemo(
+    () =>
+      (tabData ?? []).map((tab) => {
+        let searchable: string;
+        try {
+          searchable = `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`;
+        } catch {
+          // Handle invalid URLs gracefully
+          searchable = `${tab.title.toLowerCase()} ${tab.url.toLowerCase()}`;
+        }
+        return { tab, searchable };
+      }),
+    [tabData],
+  );
+
+  const data = useMemo(() => {
+    const parsedQuery = parseSearchQuery(query);
+
+    // Early return if no search query
+    if (parsedQuery.includeTerms.length === 0 && parsedQuery.excludeTerms.length === 0) {
+      return searchableTabs.map(({ tab }) => tab);
+    }
+
+    return searchableTabs.filter(({ searchable }) => matchesQuery(searchable, parsedQuery)).map(({ tab }) => tab);
+  }, [searchableTabs, query]);
 
   return { data, isLoading, errorView };
 }
