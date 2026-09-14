@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-14
 
 - Converted the `Caffeinate for ...` command from inline arguments back to a Form so its state isn't persisted between invocations.
 
