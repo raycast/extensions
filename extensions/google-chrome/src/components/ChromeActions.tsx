@@ -91,14 +91,14 @@ function HistoryItemActions({
   title: string;
   url: string;
   profile: string;
-  onVisit?: () => void | Promise<void>;
+  onVisit?: () => Promise<void>;
   onResetRanking?: () => void | Promise<void>;
 }): ReactElement {
   const { openTabInProfile } = getPreferenceValues<Preferences>();
   const [profileCurrent] = useCachedState(CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID);
 
   async function openAndRecordVisit(openBehaviour: SettingsProfileOpenBehaviour): Promise<void> {
-    void onVisit?.();
+    onVisit?.().catch((error) => console.error("Failed to record bookmark visit:", error));
     await openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile: openBehaviour });
   }
 
@@ -109,7 +109,7 @@ function HistoryItemActions({
         title="Open in Guest Window"
         icon={{ source: Icon.Person }}
         onAction={async () => {
-          void onVisit?.();
+          onVisit?.().catch((error) => console.error("Failed to record bookmark visit:", error));
           await createNewGuestWindowToWebsite(url);
           await closeMainWindow();
         }}

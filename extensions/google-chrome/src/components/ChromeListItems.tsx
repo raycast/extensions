@@ -48,7 +48,7 @@ function HistoryItem({
   entry: HistoryEntry;
   profile: string;
   type: "History" | "Bookmark";
-  onVisit?: () => void | Promise<void>;
+  onVisit?: () => Promise<void>;
   onResetRanking?: () => void | Promise<void>;
 }): ReactElement {
   const { icon, isInvalid } = getSafeFavicon(url);
