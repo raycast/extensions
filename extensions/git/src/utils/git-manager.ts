@@ -886,67 +886,66 @@ export class GitManager {
    */
   async interactiveRebase(startHash: string, plan: RebasePlanItem[]): Promise<void> {
     const tempDirectory = mkdtempSync(join(tmpdir(), "raycast-git-"));
-    // Reword messages are never written into the todo, where `exec` would hand them to the shell. Each one is written to a
-    // file that the sequence editor copies into rebase-merge, so it outlives a rebase that stops early (edit, conflict)
-    // and Git removes it when the rebase finishes or is aborted.
-    const rebaseMergePath = join(this.gitDirPath, "rebase-merge");
-    const quoteForShell = (value: string) => `'${value.replace(/'/g, `'\\''`)}'`;
-    const messageCopyCommands: string[] = [];
+    try {
+      // Reword messages are never written into the todo, where `exec` would hand them to the shell. Each one is written to a
+      // file that the sequence editor copies into rebase-merge, so it outlives a rebase that stops early (edit, conflict)
+      // and Git removes it when the rebase finishes or is aborted.
+      const rebaseMergePath = join(this.gitDirPath, "rebase-merge");
+      const quoteForShell = (value: string) => `'${value.replace(/'/g, `'\\''`)}'`;
+      const messageCopyCommands: string[] = [];
 
-    // Build rebase todo content based on plan
-    const todoLines: string[] = [];
+      // Build rebase todo content based on plan
+      const todoLines: string[] = [];
 
-    for (const item of plan) {
-      const action = item.action;
-      const hash = item.hash;
+      for (const item of plan) {
+        const action = item.action;
+        const hash = item.hash;
 
-      switch (action) {
-        case "pick":
-          todoLines.push(`pick ${hash}`);
-          break;
-        case "drop":
-          todoLines.push(`drop ${hash}`);
-          break;
-        case "edit":
-          todoLines.push(`edit ${hash}`);
-          break;
-        case "squash":
-          todoLines.push(`squash ${hash}`);
-          break;
-        case "fixup":
-          todoLines.push(`fixup ${hash}`);
-          break;
-        case "reword":
-          // Use pick + exec amend to set message non-interactively
-          todoLines.push(`pick ${hash}`);
-          if (item.newMessage) {
-            const messageFileName = `raycast-reword-${messageCopyCommands.length}`;
-            const messagePath = join(tempDirectory, messageFileName);
-            writeFileSync(messagePath, item.newMessage, { encoding: "utf-8" });
-            messageCopyCommands.push(`/bin/cp ${quoteForShell(messagePath)} ${quoteForShell(rebaseMergePath)}`);
-            todoLines.push(`exec git commit --amend -F ${quoteForShell(join(rebaseMergePath, messageFileName))}`);
-          } else {
-            rmSync(tempDirectory, { recursive: true, force: true });
-            throw new Error("No new message provided for reword action in interactive rebase plan");
-          }
-          break;
+        switch (action) {
+          case "pick":
+            todoLines.push(`pick ${hash}`);
+            break;
+          case "drop":
+            todoLines.push(`drop ${hash}`);
+            break;
+          case "edit":
+            todoLines.push(`edit ${hash}`);
+            break;
+          case "squash":
+            todoLines.push(`squash ${hash}`);
+            break;
+          case "fixup":
+            todoLines.push(`fixup ${hash}`);
+            break;
+          case "reword":
+            // Use pick + exec amend to set message non-interactively
+            todoLines.push(`pick ${hash}`);
+            if (item.newMessage) {
+              const messageFileName = `raycast-reword-${messageCopyCommands.length}`;
+              const messagePath = join(tempDirectory, messageFileName);
+              writeFileSync(messagePath, item.newMessage, { encoding: "utf-8" });
+              messageCopyCommands.push(`/bin/cp ${quoteForShell(messagePath)} ${quoteForShell(rebaseMergePath)}`);
+              todoLines.push(`exec git commit --amend -F ${quoteForShell(join(rebaseMergePath, messageFileName))}`);
+            } else {
+              throw new Error("No new message provided for reword action in interactive rebase plan");
+            }
+            break;
+        }
       }
-    }
 
-    // Create temporary sequence editor script that writes our todo
-    const editorPath = join(tempDirectory, "sequence-editor.sh");
-    // Use template literal to generate shell script for sequence editor
-    const script = `#!/bin/sh
+      // Create temporary sequence editor script that writes our todo
+      const editorPath = join(tempDirectory, "sequence-editor.sh");
+      // Use template literal to generate shell script for sequence editor
+      const script = `#!/bin/sh
 TODO_FILE="$1"
 ${messageCopyCommands.map((command) => `${command} || exit 1\n`).join("")}/bin/cat > "$TODO_FILE" <<'__REBASE_TODO__'
 ${todoLines.join("\n")}
 __REBASE_TODO__
 `;
-    writeFileSync(editorPath, script, { encoding: "utf-8" });
-    // Set executable permissions for the script: 0o755 means rwxr-xr-x (owner can read/write/execute, group and others can read/execute)
-    chmodSync(editorPath, 0o755);
+      writeFileSync(editorPath, script, { encoding: "utf-8" });
+      // Set executable permissions for the script: 0o755 means rwxr-xr-x (owner can read/write/execute, group and others can read/execute)
+      chmodSync(editorPath, 0o755);
 
-    try {
       const parentCommit = await this.getFirstParentOfCommit(startHash);
       const options = ["-c", `sequence.editor=${editorPath}`, "rebase", "--interactive"];
       if (parentCommit) {
