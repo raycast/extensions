@@ -1,5 +1,12 @@
 # Agent Usage Changelog
 
+## [Add Percentage Display preference] - 2026-09-14
+
+### New Features
+
+- Add a global **Percentage Display** preference (Remaining by default, or Used). In **Used** mode, quota percentages are shown as `100 − remaining` consistently across the main list, menu bar, tooltips, detail views, and copied usage text (e.g. 58% remaining → 42% used)
+- Pie and progress bars flip direction in Used mode while warning colors stay based on quota remaining, so the visual meaning stays consistent
+
 ## [Fixed exhausted quota display] - 2026-09-10
 
 - Keep MiniMax CN 5h and weekly usage visible with 0% remaining and reset countdowns when quotas are exhausted.

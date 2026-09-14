@@ -51,14 +51,28 @@ export function formatResetTime(value: string | null): string {
 }
 
 /**
- * Returns the percentage of a quota that remains.
+ * Returns the percentage of a quota that remains, or null when the quota is
+ * unknown (a non-positive or non-finite limit). Callers that draw a bar or pie
+ * should prefer this over {@link getRemainingPercent}: an unknown quota must not
+ * be drawn as 0% remaining, which the "Used" display mode would render as a
+ * full — i.e. fully consumed — bar.
+ * @param remaining - Units remaining (not yet consumed)
+ * @param total     - Total quota size
+ * @returns A number 0–100 clamped to [0, 100], or null if unknown.
+ */
+export function getRemainingPercentOrNull(remaining: number, total: number): number | null {
+  if (!Number.isFinite(remaining) || !Number.isFinite(total) || total <= 0) return null;
+  return Math.min(100, Math.max(0, (remaining / total) * 100));
+}
+
+/**
+ * Returns the percentage of a quota that remains, treating an unknown quota as 0.
  * @param remaining - Units remaining (not yet consumed)
  * @param total     - Total quota size
  * @returns A number 0–100 representing the remaining percentage, clamped to [0, 100].
  */
 export function getRemainingPercent(remaining: number, total: number): number {
-  if (total <= 0) return 0;
-  return Math.min(100, Math.max(0, (remaining / total) * 100));
+  return getRemainingPercentOrNull(remaining, total) ?? 0;
 }
 
 /**
