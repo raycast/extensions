@@ -59,7 +59,6 @@ export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
 const assetPackCompleteMarker = ".raycast-complete";
 const assetPackLockName = ".pack-lock";
 const assetPackLockStaleMs = 60_000;
-const assetPackLockAcquireTimeoutMs = 30_000;
 
 const getAssetPackDestination = (version: string) => path.join(environment.assetsPath, "pack", version);
 
@@ -80,17 +79,39 @@ const hasCompleteAssetPack = async (destination: string) => {
 const withAssetPackLock = async <T>(work: () => Promise<T>) => {
   const lockPath = path.join(environment.assetsPath, assetPackLockName);
   const token = `${process.pid}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
-  const deadline = Date.now() + assetPackLockAcquireTimeoutMs;
   for (;;) {
     try {
       await fs.writeFile(lockPath, token, { flag: "wx" });
+      // Refreshes are owner-guarded: opening with "r+" requires the lock to
+      // exist (it can never recreate a deleted lock) and the token is verified
+      // before writing (a holder whose lock was taken over after a stale period
+      // can never overwrite the new owner). Writes are chained and awaited on
+      // release so none can land after the lock is removed.
+      let heartbeatChain: Promise<void> = Promise.resolve();
+      const refreshLock = async () => {
+        let file: Awaited<ReturnType<typeof fs.open>> | undefined;
+        try {
+          file = await fs.open(lockPath, "r+");
+          const current = (await file.readFile("utf8")) ?? "";
+          if (current === token) {
+            // Touch mtime without rewriting content: a content rewrite on an
+            // open handle keeps its offset and could pad/truncate the token.
+            await file.utimes(new Date(), new Date());
+          }
+        } catch {
+          // The lock is gone or was taken over; stop maintaining it.
+        } finally {
+          await file?.close();
+        }
+      };
       const heartbeat = setInterval(() => {
-        fs.writeFile(lockPath, token, "utf8").catch(() => {});
+        heartbeatChain = heartbeatChain.then(refreshLock, refreshLock);
       }, 10_000);
       try {
         return await work();
       } finally {
         clearInterval(heartbeat);
+        await heartbeatChain;
         try {
           if ((await fs.readFile(lockPath, "utf8").catch(() => "")) === token) {
             await fs.rm(lockPath, { force: true });
@@ -101,7 +122,8 @@ const withAssetPackLock = async <T>(work: () => Promise<T>) => {
       }
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-      if (Date.now() > deadline) throw error;
+      // No acquisition timeout: wait as long as a live holder keeps the
+      // heartbeat fresh. A dead holder is detected via the stale mtime below.
       try {
         const { mtimeMs } = await fs.stat(lockPath);
         if (Date.now() - mtimeMs > assetPackLockStaleMs) {
