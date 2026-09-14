@@ -296,13 +296,22 @@ const pacoteAssetPack = async (version: string, assertOwner: () => Promise<void>
   }
 };
 
-// Wait for another holder to finish installing. Returns false after the
-// timeout so the caller can compete for the lock again (the successor may
-// itself have crashed, in which case its lock becomes recoverable).
-const waitForAssetPack = async (destination: string, timeoutMs: number) => {
+// Wait for another holder to finish installing. Returns as soon as the pack
+// is complete, or earlier when the holder's lock becomes recoverable (a
+// crashed successor's lock is reclaimable after the soft-stale threshold, far
+// sooner than the hard timeout) or disappears, so the caller can compete
+// again instead of idling through the whole timeout.
+const waitForAssetPack = async (destination: string, lockPath: string, timeoutMs: number) => {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await hasCompleteAssetPack(destination)) return true;
+    const inspection = await inspectAssetPackLock(lockPath).catch(() => ({ recoverable: false as const }));
+    if (inspection.recoverable) return false;
+    const lockMissing = await fs
+      .access(lockPath)
+      .then(() => false)
+      .catch(() => true);
+    if (lockMissing) return false;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   return hasCompleteAssetPack(destination);
@@ -310,6 +319,7 @@ const waitForAssetPack = async (destination: string, timeoutMs: number) => {
 
 export const cacheAssetPack = async (version: string) => {
   const destination = getAssetPackDestination(version);
+  const lockPath = path.join(environment.assetsPath, assetPackLockName);
   for (;;) {
     if (await hasCompleteAssetPack(destination)) return;
     try {
@@ -328,7 +338,7 @@ export const cacheAssetPack = async (version: string) => {
       // A successor took over; fall through to waiting for its pack.
       if (!(error instanceof AssetPackLockLostError)) throw error;
     }
-    if (await waitForAssetPack(destination, assetPackLockHardStaleMs)) return;
+    if (await waitForAssetPack(destination, lockPath, assetPackLockHardStaleMs)) return;
     // No completed pack within the hard-stale window: the successor stalled or
     // died. Re-enter acquisition — wait as a contender or take over its lock.
   }
