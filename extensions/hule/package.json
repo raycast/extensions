@@ -66,7 +66,7 @@
     {
       "name": "defaultList",
       "title": "Default List",
-      "description": "List name that Quick Add Task writes to. Leave empty to use your first list.",
+      "description": "List that Quick Add Task writes to, as “List” or “Workspace / List”. Leave empty to use your first list.",
       "type": "textfield",
       "required": false,
       "default": ""

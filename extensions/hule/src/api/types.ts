@@ -100,7 +100,6 @@ export interface AvailableBundle {
 /** `GET /auth/me` — the authenticated account. */
 export interface User {
   id: string;
-  username?: string | null;
   email?: string | null;
 }
 

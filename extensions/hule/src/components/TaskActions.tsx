@@ -25,7 +25,22 @@ async function run(label: string, action: () => Promise<unknown>, onDone: () => 
   }
 }
 
-export function TaskActions({ task, context, onChange }: { task: Task; context: HuleContext; onChange: () => void }) {
+/**
+ * `onDeleted` exists because "refresh" is the wrong answer for a view that shows
+ * the deleted task itself: re-reading it by id fails and leaves it on screen. A
+ * list refreshes and drops the row, so it can leave `onDeleted` out.
+ */
+export function TaskActions({
+  task,
+  context,
+  onChange,
+  onDeleted = onChange,
+}: {
+  task: Task;
+  context: HuleContext;
+  onChange: () => void;
+  onDeleted?: () => void;
+}) {
   const statuses = context.statusesOf(task.listId);
   const members = context.membersOf(task.workspaceId);
 
@@ -115,7 +130,7 @@ export function TaskActions({ task, context, onChange }: { task: Task; context: 
               message: `“${task.title}” and its subtasks and comments are removed for good.`,
               primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
             });
-            if (confirmed) await run("Delete task", () => deleteTask(task.id), onChange);
+            if (confirmed) await run("Delete task", () => deleteTask(task.id), onDeleted);
           }}
         />
         <Action

@@ -143,13 +143,11 @@ export function deleteTask(taskId: string): Promise<void> {
 }
 
 /**
- * Web URL of a task — what "Open in Hule" and "Copy Link" hand out.
+ * Origin of the web app, derived from the API host.
  *
- * `/tasks/:id` is the app's permalink: it survives the task being moved, and it
- * is the same shape the notification emails and the Telegram bot emit. The web
- * host is derived from the API host, which holds for the hosted product; a
- * self-hosted setup that splits the two differently gets a link it can correct
- * by hand (documented in the README).
+ * That derivation holds for the hosted product; a self-hosted setup that splits
+ * the two differently gets links it can correct by hand (documented in the
+ * README).
  */
 export function webBase(): string {
   return apiBase()
@@ -157,6 +155,12 @@ export function webBase(): string {
     .replace("//api.", "//app.");
 }
 
+/**
+ * Web URL of a task — what "Open in Hule" and "Copy Link" hand out.
+ *
+ * `/tasks/:id` is the app's permalink: it survives the task being moved, and it
+ * is the same shape the notification emails and the Telegram bot emit.
+ */
 export function taskUrl(task: Task): string {
   return `${webBase()}/tasks/${task.id}`;
 }

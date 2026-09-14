@@ -26,8 +26,10 @@ Two optional preferences:
 - **API URL** — only if you run a self-hosted Hule. Default: `https://api.hule-do.com/api`.
   A self-hosted setup whose web app is not on the matching `app.` host will still work; only
   the "Open in Hule" links need correcting.
-- **Default List** — the list name **Quick Add Task** writes to. Leave it empty and the
-  first list of your account is used.
+- **Default List** — the list **Quick Add Task** writes to. Write its name, or
+  `Workspace / List` when several workspaces have a list with that name. Leave it empty and
+  the first list of your account is used. A name that matches no list, or more than one, stops
+  Quick Add with an error instead of writing somewhere else.
 
 The token is stored in your macOS Keychain by Raycast and is sent only to the API URL above.
 Everything you can reach through this extension is what your Hule account can reach — the

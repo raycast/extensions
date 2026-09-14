@@ -1,4 +1,4 @@
-import { ActionPanel, Detail } from "@raycast/api";
+import { ActionPanel, Detail, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { PRIORITY_LABELS, getTask } from "../api/client";
@@ -32,6 +32,13 @@ export function TaskDetail({
   const refresh = () => {
     revalidate();
     onChange();
+  };
+  // A deleted task has nothing left to show: refresh the list that opened this
+  // panel and go back to it, instead of re-reading an id the server no longer has.
+  const { pop } = useNavigation();
+  const leave = () => {
+    onChange();
+    pop();
   };
 
   const status = context.statusesOf(task.listId).find((s) => s.id === task.statusId);
@@ -81,7 +88,7 @@ export function TaskDetail({
       }
       actions={
         <ActionPanel>
-          <TaskActions task={task} context={context} onChange={refresh} />
+          <TaskActions task={task} context={context} onChange={refresh} onDeleted={leave} />
         </ActionPanel>
       }
     />
