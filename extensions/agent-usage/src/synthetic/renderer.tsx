@@ -1,27 +1,33 @@
 import { List } from "@raycast/api";
 
 import { formatResetTime, getRemainingPercent } from "../agents/format.ts";
+import { toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
 import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
 import type { SyntheticUsage, SyntheticQuotaBucket, SyntheticError } from "./types.ts";
 
-function formatQuotaText(used: number, limit: number): string {
-  const remaining = limit - used;
-  const pct = Math.round(getRemainingPercent(remaining, limit));
-  return `${remaining}/${limit} (${pct}%)`;
+/** "(42%)" in remaining mode, "(58% used)" in used mode — counts always show remaining/limit. */
+function formatPct(remainingPct: number, mode: PercentageDisplayMode): string {
+  const pct = Math.round(toDisplayPercent(remainingPct, mode));
+  return mode === "used" ? `(${pct}% used)` : `(${pct}%)`;
 }
 
-function formatQuotaSection(bucket: SyntheticQuotaBucket, name: string): string {
+function formatQuotaText(used: number, limit: number, mode: PercentageDisplayMode): string {
+  const remaining = limit - used;
+  return `${remaining}/${limit} ${formatPct(getRemainingPercent(remaining, limit), mode)}`;
+}
+
+function formatQuotaSection(bucket: SyntheticQuotaBucket, name: string, mode: PercentageDisplayMode): string {
   const remaining = bucket.limit - bucket.requests;
-  const pct = Math.round(getRemainingPercent(remaining, bucket.limit));
-  return `${name}: ${remaining}/${bucket.limit} (${pct}%) - Renews: ${formatResetTime(bucket.renewsAt)}`;
+  return `${name}: ${remaining}/${bucket.limit} ${formatPct(getRemainingPercent(remaining, bucket.limit), mode)} - Renews: ${formatResetTime(bucket.renewsAt)}`;
 }
 
 export function formatSyntheticUsageText(usage: SyntheticUsage | null, error: SyntheticError | null): string {
@@ -29,19 +35,20 @@ export function formatSyntheticUsageText(usage: SyntheticUsage | null, error: Sy
   if (fallback !== null) return fallback;
   const u = usage as SyntheticUsage;
 
+  const mode = getPercentageDisplayMode();
   const subRemaining = u.subscription.limit - u.subscription.requests;
   const subPct = Math.round(getRemainingPercent(subRemaining, u.subscription.limit));
   let text = `Synthetic Usage`;
   text += `\n\nSubscription`;
-  text += `\n${generateAsciiBar(subPct)} ${formatQuotaSection(u.subscription, "Remaining")}`;
+  text += `\n${generateAsciiBar(toDisplayPercent(subPct, mode))} ${formatQuotaSection(u.subscription, "Remaining", mode)}`;
   text += `\n\nFree Tool Calls`;
   const toolRemaining = u.freeToolCalls.limit - u.freeToolCalls.requests;
   const toolPct = Math.round(getRemainingPercent(toolRemaining, u.freeToolCalls.limit));
-  text += `\n${generateAsciiBar(toolPct)} ${formatQuotaSection(u.freeToolCalls, "Remaining")}`;
+  text += `\n${generateAsciiBar(toDisplayPercent(toolPct, mode))} ${formatQuotaSection(u.freeToolCalls, "Remaining", mode)}`;
   text += `\n\nSearch (Hourly)`;
   const searchRemaining = u.search.hourly.limit - u.search.hourly.requests;
   const searchPct = Math.round(getRemainingPercent(searchRemaining, u.search.hourly.limit));
-  text += `\n${generateAsciiBar(searchPct)} ${formatQuotaSection(u.search.hourly, "Remaining")}`;
+  text += `\n${generateAsciiBar(toDisplayPercent(searchPct, mode))} ${formatQuotaSection(u.search.hourly, "Remaining", mode)}`;
   return text;
 }
 
@@ -50,6 +57,7 @@ export function renderSyntheticDetail(usage: SyntheticUsage | null, error: Synth
   if (fallback !== null) return fallback;
   const u = usage as SyntheticUsage;
 
+  const mode = getPercentageDisplayMode();
   const subRemaining = u.subscription.limit - u.subscription.requests;
   const subPct = Math.round(getRemainingPercent(subRemaining, u.subscription.limit));
   const toolRemaining = u.freeToolCalls.limit - u.freeToolCalls.requests;
@@ -62,7 +70,7 @@ export function renderSyntheticDetail(usage: SyntheticUsage | null, error: Synth
       {/* Subscription Section */}
       <List.Item.Detail.Metadata.Label
         title="Subscription"
-        text={`${generateAsciiBar(subPct)} ${formatQuotaText(u.subscription.requests, u.subscription.limit)}`}
+        text={`${generateAsciiBar(toDisplayPercent(subPct, mode))} ${formatQuotaText(u.subscription.requests, u.subscription.limit, mode)}`}
       />
       <List.Item.Detail.Metadata.Label title="Renews In" text={formatResetTime(u.subscription.renewsAt)} />
 
@@ -71,7 +79,7 @@ export function renderSyntheticDetail(usage: SyntheticUsage | null, error: Synth
       {/* Free Tool Calls Section */}
       <List.Item.Detail.Metadata.Label
         title="Free Tool Calls"
-        text={`${generateAsciiBar(toolPct)} ${formatQuotaText(u.freeToolCalls.requests, u.freeToolCalls.limit)}`}
+        text={`${generateAsciiBar(toDisplayPercent(toolPct, mode))} ${formatQuotaText(u.freeToolCalls.requests, u.freeToolCalls.limit, mode)}`}
       />
       <List.Item.Detail.Metadata.Label title="Renews In" text={formatResetTime(u.freeToolCalls.renewsAt)} />
 
@@ -80,7 +88,7 @@ export function renderSyntheticDetail(usage: SyntheticUsage | null, error: Synth
       {/* Search Section */}
       <List.Item.Detail.Metadata.Label
         title="Search (Hourly)"
-        text={`${generateAsciiBar(searchPct)} ${formatQuotaText(u.search.hourly.requests, u.search.hourly.limit)}`}
+        text={`${generateAsciiBar(toDisplayPercent(searchPct, mode))} ${formatQuotaText(u.search.hourly.requests, u.search.hourly.limit, mode)}`}
       />
       <List.Item.Detail.Metadata.Label title="Renews In" text={formatResetTime(u.search.hourly.renewsAt)} />
     </List.Item.Detail.Metadata>
@@ -103,12 +111,13 @@ export function getSyntheticAccessory(
 
   if (!usage) return getNoDataAccessory();
 
+  const mode = getPercentageDisplayMode();
   const remaining = usage.subscription.limit - usage.subscription.requests;
   const pct = Math.round(getRemainingPercent(remaining, usage.subscription.limit));
 
   return {
     icon: generatePieIcon(pct),
-    text: `${pct}%`,
+    text: `${Math.round(toDisplayPercent(pct, mode))}%`,
     tooltip: `Subscription: ${usage.subscription.requests}/${usage.subscription.limit} used | Search: ${usage.search.hourly.requests}/${usage.search.hourly.limit} | Free Tools: ${usage.freeToolCalls.requests}/${usage.freeToolCalls.limit}`,
   };
 }

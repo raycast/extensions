@@ -1,12 +1,14 @@
 import { List } from "@raycast/api";
 
 import { formatResetTime, getRemainingPercent } from "../agents/format.ts";
+import { formatPercentDisplay, toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
 import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
@@ -34,18 +36,26 @@ function getRemainingNumericPercent(entry: ZaiLimitEntry | undefined | null): nu
   return undefined;
 }
 
-function formatRemainingPercent(entry: ZaiLimitEntry): string {
-  return `${getRemainingNumericPercent(entry) ?? 0}% remaining`;
+function formatRemainingPercent(entry: ZaiLimitEntry, mode: PercentageDisplayMode): string {
+  return formatPercentDisplay(getRemainingNumericPercent(entry) ?? 0, mode);
 }
 
-function formatRemainingText(entry: ZaiLimitEntry): string {
+function formatRemainingText(entry: ZaiLimitEntry, mode: PercentageDisplayMode): string {
   if (entry.remaining != null && entry.usage != null) {
     return `${entry.remaining}/${entry.usage}`;
   }
   if (entry.currentValue != null) {
     return `${entry.currentValue}`;
   }
-  return `${100 - entry.percentage}%`;
+  return `${toDisplayPercent(100 - entry.percentage, mode)}%`;
+}
+
+/** Detail-panel value with its qualifying word — counts stay remaining-based, percentages follow the mode. */
+function formatRemainingTextWithWord(entry: ZaiLimitEntry, mode: PercentageDisplayMode): string {
+  if ((entry.remaining != null && entry.usage != null) || entry.currentValue != null) {
+    return `${formatRemainingText(entry, mode)} remaining`;
+  }
+  return formatPercentDisplay(100 - entry.percentage, mode);
 }
 
 export function formatZaiUsageText(usage: ZaiUsage | null, error: ZaiError | null): string {
@@ -53,12 +63,14 @@ export function formatZaiUsageText(usage: ZaiUsage | null, error: ZaiError | nul
   if (fallback !== null) return fallback;
   const u = usage as ZaiUsage;
 
+  const mode = getPercentageDisplayMode();
+
   function formatLimitText(label: string, perModelLabel: string, entry: ZaiLimitEntry | null): string {
     if (!entry) return "";
 
-    let limitText = `\n\n${label} (${entry.windowDescription}): ${formatRemainingText(entry)}`;
-    limitText += `\n${formatRemainingPercent(entry)}`;
-    limitText += `\n${generateAsciiBar(getRemainingNumericPercent(entry) ?? 0, ZAI_ASCII_BAR_WIDTH)}`;
+    let limitText = `\n\n${label} (${entry.windowDescription}): ${formatRemainingText(entry, mode)}`;
+    limitText += `\n${formatRemainingPercent(entry, mode)}`;
+    limitText += `\n${generateAsciiBar(toDisplayPercent(getRemainingNumericPercent(entry) ?? 0, mode), ZAI_ASCII_BAR_WIDTH)}`;
     if (entry.resetTime) {
       limitText += `\nResets In: ${formatResetTime(entry.resetTime)}`;
     }
@@ -90,6 +102,7 @@ export function renderZaiDetail(usage: ZaiUsage | null, error: ZaiError | null):
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as ZaiUsage;
+  const mode = getPercentageDisplayMode();
 
   function renderLimitMetadata(
     label: string,
@@ -101,7 +114,7 @@ export function renderZaiDetail(usage: ZaiUsage | null, error: ZaiError | null):
         {leadingSeparator && <List.Item.Detail.Metadata.Separator />}
         <List.Item.Detail.Metadata.Label
           title={`${label} (${entry.windowDescription})`}
-          text={`${generateAsciiBar(getRemainingNumericPercent(entry) ?? 0, ZAI_ASCII_BAR_WIDTH)} ${formatRemainingText(entry)} remaining`}
+          text={`${generateAsciiBar(toDisplayPercent(getRemainingNumericPercent(entry) ?? 0, mode), ZAI_ASCII_BAR_WIDTH)} ${formatRemainingTextWithWord(entry, mode)}`}
         />
         {entry.resetTime && (
           <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(entry.resetTime)} />
@@ -169,7 +182,8 @@ export function getZaiAccessory(usage: ZaiUsage | null, error: ZaiError | null, 
     .map((limit) => ({ ...limit, percent: getRemainingNumericPercent(limit.entry) }))
     .filter((limit): limit is AccessoryLimit & { percent: number } => limit.percent !== undefined);
 
-  const parts = limits.map((limit) => `${limit.label}: ${limit.percent}%`);
+  const mode = getPercentageDisplayMode();
+  const parts = limits.map((limit) => `${limit.label}: ${toDisplayPercent(limit.percent, mode)}%`);
 
   // Get bottleneck/minimum of all active percentages
   const activePercents = limits.map((limit) => limit.percent);
@@ -178,7 +192,7 @@ export function getZaiAccessory(usage: ZaiUsage | null, error: ZaiError | null, 
   // The displayed text should also show the bottleneck of tokens (daily vs weekly)
   const tokenPercents = limits.filter((limit) => limit.group === "token").map((limit) => limit.percent);
   const minTokenPercent = tokenPercents.length > 0 ? Math.min(...tokenPercents) : undefined;
-  const tokenText = minTokenPercent !== undefined ? `${minTokenPercent}%` : "—";
+  const tokenText = minTokenPercent !== undefined ? `${toDisplayPercent(minTokenPercent, mode)}%` : "—";
 
   return {
     icon: numericPercent !== undefined ? generatePieIcon(numericPercent) : undefined,
