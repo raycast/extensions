@@ -37,7 +37,16 @@ function getRemainingNumericPercent(entry: ZaiLimitEntry | undefined | null): nu
 }
 
 function formatRemainingPercent(entry: ZaiLimitEntry, mode: PercentageDisplayMode): string {
-  return formatPercentDisplay(getRemainingNumericPercent(entry) ?? 0, mode);
+  const percentRemaining = getRemainingNumericPercent(entry);
+  if (percentRemaining === undefined) return "--";
+  return formatPercentDisplay(percentRemaining, mode);
+}
+
+/** The limit's bar, or null when its percentage is unknown. */
+function formatBar(entry: ZaiLimitEntry, mode: PercentageDisplayMode): string | null {
+  const percentRemaining = getRemainingNumericPercent(entry);
+  if (percentRemaining === undefined) return null;
+  return generateAsciiBar(toDisplayPercent(percentRemaining, mode), ZAI_ASCII_BAR_WIDTH);
 }
 
 function formatRemainingText(entry: ZaiLimitEntry, mode: PercentageDisplayMode): string {
@@ -47,7 +56,9 @@ function formatRemainingText(entry: ZaiLimitEntry, mode: PercentageDisplayMode):
   if (entry.currentValue != null) {
     return `${entry.currentValue}`;
   }
-  return `${toDisplayPercent(100 - entry.percentage, mode)}%`;
+  const percentRemaining = getRemainingNumericPercent(entry);
+  if (percentRemaining === undefined) return "--";
+  return `${toDisplayPercent(percentRemaining, mode)}%`;
 }
 
 /** Detail-panel value with its qualifying word — counts stay remaining-based, percentages follow the mode. */
@@ -55,7 +66,7 @@ function formatRemainingTextWithWord(entry: ZaiLimitEntry, mode: PercentageDispl
   if ((entry.remaining != null && entry.usage != null) || entry.currentValue != null) {
     return `${formatRemainingText(entry, mode)} remaining`;
   }
-  return formatPercentDisplay(100 - entry.percentage, mode);
+  return formatRemainingPercent(entry, mode);
 }
 
 export function formatZaiUsageText(usage: ZaiUsage | null, error: ZaiError | null): string {
@@ -70,7 +81,10 @@ export function formatZaiUsageText(usage: ZaiUsage | null, error: ZaiError | nul
 
     let limitText = `\n\n${label} (${entry.windowDescription}): ${formatRemainingText(entry, mode)}`;
     limitText += `\n${formatRemainingPercent(entry, mode)}`;
-    limitText += `\n${generateAsciiBar(toDisplayPercent(getRemainingNumericPercent(entry) ?? 0, mode), ZAI_ASCII_BAR_WIDTH)}`;
+    const bar = formatBar(entry, mode);
+    if (bar !== null) {
+      limitText += `\n${bar}`;
+    }
     if (entry.resetTime) {
       limitText += `\nResets In: ${formatResetTime(entry.resetTime)}`;
     }
@@ -114,7 +128,7 @@ export function renderZaiDetail(usage: ZaiUsage | null, error: ZaiError | null):
         {leadingSeparator && <List.Item.Detail.Metadata.Separator />}
         <List.Item.Detail.Metadata.Label
           title={`${label} (${entry.windowDescription})`}
-          text={`${generateAsciiBar(toDisplayPercent(getRemainingNumericPercent(entry) ?? 0, mode), ZAI_ASCII_BAR_WIDTH)} ${formatRemainingTextWithWord(entry, mode)}`}
+          text={[formatBar(entry, mode), formatRemainingTextWithWord(entry, mode)].filter(Boolean).join(" ")}
         />
         {entry.resetTime && (
           <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(entry.resetTime)} />

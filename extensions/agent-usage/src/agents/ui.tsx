@@ -27,8 +27,7 @@ function getProgressColor(percent: number): string {
 
 /** The user's global "Percentage Display" preference (remaining by default). */
 export function getPercentageDisplayMode(): PercentageDisplayMode {
-  const { percentageDisplayMode } = getPreferenceValues<{ percentageDisplayMode?: string }>();
-  return percentageDisplayMode === "used" ? "used" : "remaining";
+  return getPreferenceValues<Preferences>().percentageDisplayMode;
 }
 
 /**
