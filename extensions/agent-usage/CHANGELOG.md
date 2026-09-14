@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add Percentage Display preference] - {PR_MERGE_DATE}
+## [Add Percentage Display preference] - 2026-09-14
 
 ### New Features
 
