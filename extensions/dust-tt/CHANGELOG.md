@@ -1,6 +1,6 @@
 # Dust.tt Changelog
 
-## [Feature] - 2026-09-14
+## [Feature] - {PR_MERGE_DATE}
 
 - Add "Replace Selection with Agent": silently sends the selected text to a specific assistant and replaces it with the answer, with no window — bind a Quicklink to a hotkey for instant use.
 - Add "Set up Replace Selection": pick any assistant and create a freely-renamable Quicklink for it, targeting the Replace Selection command. Create as many as you want, one per assistant.

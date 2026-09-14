@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { createDeeplink } from "@raycast/utils";
+import { useEffect } from "react";
 import { useAgents } from "./askAgent";
 import { getAgentScopeConfig } from "./utils";
 import { getDustClient, withPickedWorkspace } from "./dust_api/oauth";
@@ -12,9 +13,11 @@ export default withPickedWorkspace(function SetUpReplaceSelectionCommand() {
   const dustClient = getDustClient();
   const { agents, isLoading, error } = useAgents(dustClient);
 
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: `Could not load agents: ${error}` });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({ style: Toast.Style.Failure, title: `Could not load agents: ${error}` });
+    }
+  }, [error]);
 
   const sortedAgents = agents ? [...agents].sort((a, b) => a.name.localeCompare(b.name)) : undefined;
 

@@ -184,6 +184,8 @@ export async function answerQuestion({
         return;
       }
 
+      let onAnswerResult: Promise<void> | undefined;
+
       try {
         // Stream SSE events directly using undici fetch + Node.js async iterable,
         // bypassing the Dust client's streamAgentAnswerEvents which uses
@@ -278,7 +280,7 @@ export async function answerQuestion({
                 date: new Date(),
                 agent: agent.name,
               });
-              onAnswer?.(answer);
+              onAnswerResult = Promise.resolve(onAnswer?.(answer));
               break;
             }
             default:
@@ -316,6 +318,10 @@ export async function answerQuestion({
           });
           setDustAnswer(`**Dust API error** ${error}`);
         }
+      }
+
+      if (onAnswerResult) {
+        await onAnswerResult;
       }
     }
   }

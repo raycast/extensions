@@ -1,5 +1,13 @@
 import { DustAPI } from "@dust-tt/client";
-import { Clipboard, getSelectedText, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Clipboard,
+  getFrontmostApplication,
+  getSelectedText,
+  LaunchProps,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { answerQuestion, ConversationContext } from "./answerQuestion";
 import { getDustClient, provider } from "./dust_api/oauth";
@@ -21,7 +29,8 @@ async function ensureUser(dustApi: DustAPI) {
 async function resolveAgent(dustApi: DustAPI, agentId: string): Promise<AgentType | undefined> {
   const r = await dustApi.getAgentConfigurations({ view: "list" });
   if (r.isErr()) {
-    return undefined;
+    // Real API error, not "agent not found" — must not be mistaken for a deleted agent.
+    throw new Error(r.error.message);
   }
   const found = r.value.find((a) => a.sId === agentId);
   if (!found) {
@@ -34,6 +43,20 @@ export default withAccessToken(provider)(async function ReplaceSelectionWithAgen
   props: LaunchProps<{ launchContext?: { agentId?: string } }>,
 ) {
   try {
+    // Capture the selection and frontmost app before any network call, to avoid a race with focus changes.
+    let question: string;
+    try {
+      question = await getSelectedText();
+    } catch {
+      await showHUD("No text selected");
+      return;
+    }
+    if (!question.trim()) {
+      await showHUD("No text selected");
+      return;
+    }
+    const sourceApp = await getFrontmostApplication().catch(() => undefined);
+
     const dustApi = getDustClient();
 
     const workspaceId = await getWorkspaceId();
@@ -52,18 +75,6 @@ export default withAccessToken(provider)(async function ReplaceSelectionWithAgen
     const agent = await resolveAgent(dustApi, agentId);
     if (!agent) {
       await showHUD("This Quicklink's agent could not be found — it may have been deleted or renamed");
-      return;
-    }
-
-    let question: string;
-    try {
-      question = await getSelectedText();
-    } catch {
-      await showHUD("No text selected");
-      return;
-    }
-    if (!question.trim()) {
-      await showHUD("No text selected");
       return;
     }
 
@@ -94,8 +105,30 @@ export default withAccessToken(provider)(async function ReplaceSelectionWithAgen
       setConversationTitle: () => {},
       setDustDocuments: () => {},
       onAnswer: async (answer: string) => {
-        await Clipboard.paste(stripMarkdown(answer));
-        showToast({ style: Toast.Style.Success, title: "Replaced selected text with the answer" });
+        const plainAnswer = stripMarkdown(answer);
+
+        let selectionUnchanged = false;
+        try {
+          const [currentSelection, currentApp] = await Promise.all([
+            getSelectedText(),
+            getFrontmostApplication().catch(() => undefined),
+          ]);
+          selectionUnchanged = currentSelection === question && currentApp?.bundleId === sourceApp?.bundleId;
+        } catch {
+          selectionUnchanged = false;
+        }
+
+        if (selectionUnchanged) {
+          await Clipboard.paste(plainAnswer);
+          showToast({ style: Toast.Style.Success, title: "Replaced selected text with the answer" });
+        } else {
+          await Clipboard.copy(plainAnswer);
+          showToast({
+            style: Toast.Style.Success,
+            title: "Selection changed — answer copied instead",
+            message: "Paste it manually with ⌘V",
+          });
+        }
       },
     });
   } catch (error) {

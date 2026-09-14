@@ -76,6 +76,7 @@
     "date-fns": "^3.0.0-alpha.2",
     "eventsource-parser": "^1.1.1",
     "jwt-decode": "^4.0.0",
+    "marked": "^18.0.13",
     "undici": "^6.20.1"
   },
   "devDependencies": {
