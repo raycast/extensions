@@ -3,25 +3,14 @@ import { useFetch } from "@raycast/utils";
 import { useToken } from "./instances";
 import { parseTrpcTextResponse, trpcQueryUrl } from "./trpc";
 
-const ID_FIELDS: Record<string, string> = {
-  application: "applicationId",
-  mariadb: "mariadbId",
-  mongo: "mongoId",
-  mysql: "mysqlId",
-  postgres: "postgresId",
-  redis: "redisId",
-  compose: "composeId",
-};
-
 const LOG_TAIL = 200;
 
-export default function ServiceLogs({ service }: { service: { id: string; type: string; name: string } }) {
+export default function DeploymentLogs({ deployment }: { deployment: { deploymentId: string; title: string } }) {
   const { url, headers } = useToken();
 
-  const requestUrl = trpcQueryUrl(url, `${service.type}.readLogs`, {
-    [ID_FIELDS[service.type]]: service.id,
+  const requestUrl = trpcQueryUrl(url, "deployment.readLogs", {
+    deploymentId: deployment.deploymentId,
     tail: LOG_TAIL,
-    since: "all",
   });
 
   const {
@@ -37,7 +26,7 @@ export default function ServiceLogs({ service }: { service: { id: string; type: 
 
   return (
     <Detail
-      navigationTitle={`${service.name} Logs`}
+      navigationTitle={`${deployment.title} Logs`}
       isLoading={isLoading}
       markdown={logs ? `\`\`\`\n${logs.replace(/```/g, "\\`\\`\\`")}\n\`\`\`` : "No logs yet."}
       actions={

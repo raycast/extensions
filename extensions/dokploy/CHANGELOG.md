@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Deployment History and Rollback] - {PR_MERGE_DATE}
+
+- Add a `View Deployments` action to Applications and Compose stacks, listing past deployments with their status, build logs, and a `Roll Back` action for deployments that produced a rollback point. Running deployments can be cancelled, and history entries deleted.
+
 ## [View Service Logs] - 2026-09-14
 
 - Add a `View Logs` action to the **Services** screen, showing the last 200 lines of a service's logs with `Refresh` and `Copy Logs` actions. Not yet available for Compose stacks, which need a container to be picked first.

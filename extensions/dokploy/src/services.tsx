@@ -15,6 +15,7 @@ import { useFetch, useForm, FormValidation } from "@raycast/utils";
 import { useToken } from "./instances";
 import { Server, Service, ErrorResult } from "./interfaces";
 import ServiceLogs from "./service-logs";
+import DeploymentHistory from "./deployment-history";
 import type { ServiceScope } from "./utils";
 import { getTotalServices } from "./utils";
 
@@ -296,6 +297,13 @@ export default function Services({
                   {/* compose.readLogs requires a containerId, which this screen doesn't have; leave compose out until that's picked. */}
                   {service.type !== "compose" && (
                     <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
+                  )}
+                  {(service.type === "application" || service.type === "compose") && (
+                    <Action.Push
+                      icon={Icon.List}
+                      title="View Deployments"
+                      target={<DeploymentHistory service={{ ...service, type: service.type }} />}
+                    />
                   )}
                 </ActionPanel.Section>
                 <Action
