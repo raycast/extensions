@@ -1,7 +1,4 @@
 import { DateResolutionType } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import {
   applyPatch,
@@ -14,6 +11,7 @@ import {
   resolveTeam,
   resolveUser,
 } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 type Input = {
   id?: string;
   name?: string;
@@ -47,11 +45,13 @@ type Input = {
   removeInitiatives?: string[];
   setInitiatives?: string[];
   links?: { url: string; title: string }[];
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 async function ids(values: string[] | undefined, resolve: (value: string) => Promise<{ id: string }>) {
   return values ? Promise.all(values.map(async (value) => (await resolve(value)).id)) : undefined;
 }
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   if (input.description !== undefined && input.patch) throw new Error("Pass description or patch, not both.");
   if (input.setTeams && (input.addTeams || input.removeTeams))
     throw new Error("setTeams cannot be combined with addTeams or removeTeams.");

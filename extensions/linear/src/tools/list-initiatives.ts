@@ -1,7 +1,4 @@
 import { LinearClient, PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { InitiativeField, initiativeStatus, serializeInitiative } from "./initiativeUtils";
 import {
@@ -14,6 +11,7 @@ import {
   resolveTeam,
   resolveUser,
 } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 type InitiativeFilter = NonNullable<Parameters<LinearClient["initiatives"]>[0]>["filter"];
 
@@ -33,9 +31,11 @@ interface Input extends PageInput {
   includeProjects?: boolean;
   includeSubInitiatives?: boolean;
   fields?: InitiativeField[];
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   const owner = input.owner ? await resolveUser(input.owner) : undefined;
   const team = input.leadTeam ? await resolveTeam(input.leadTeam) : undefined;
   const parent = input.parentInitiative ? await resolveInitiative(input.parentInitiative) : undefined;

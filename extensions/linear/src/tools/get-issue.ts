@@ -1,18 +1,17 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { serializeIssue } from "./issueUtils";
 import { resolveIssue } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   id: string;
   includeRelations?: boolean;
   includeCustomerNeeds?: boolean;
   includeReleases?: boolean;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   const issue = await resolveIssue(input.id);
   return {
     ...(await serializeIssue(issue)),

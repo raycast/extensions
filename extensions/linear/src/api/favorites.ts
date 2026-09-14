@@ -4,6 +4,7 @@ import {
   Document,
   Issue,
   IssueLabel,
+  LinearClient,
   Project,
   Initiative,
   Team,
@@ -11,7 +12,7 @@ import {
   WorkflowState,
 } from "@linear/sdk";
 
-import { getLinearClient } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 
 export type Favorite = {
   id: string;
@@ -35,8 +36,8 @@ export type Favorite = {
   updatedAt: string;
 };
 
-export async function getFavorites() {
-  const { graphQLClient } = getLinearClient();
+export async function getFavorites(client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<
     { viewer: { organization: { urlKey: string } }; favorites: { nodes: Favorite[] } },
     Record<string, unknown>

@@ -1,13 +1,17 @@
-import { getLinearClient } from "../api/linearClient";
+import { LinearClient } from "@linear/sdk";
+
+import { resolveClient } from "../api/linearClient";
 
 export function formatConfirmation({
   name,
   value,
+  client,
 }: {
   name: string;
   value: undefined | null | number | string | string[];
+  client?: LinearClient;
 }) {
-  const { linearClient } = getLinearClient();
+  const { linearClient } = resolveClient(client);
 
   const formatters = {
     assigneeId: async (assigneeId: string) => {

@@ -7,6 +7,7 @@ import { updateNotification } from "./api/updateNotification";
 import IssueDetail from "./components/IssueDetail";
 import OpenInLinear from "./components/OpenInLinear";
 import View from "./components/View";
+import { WorkspaceListDropdown } from "./components/WorkspaceDropdown";
 import { getBotIcon } from "./helpers/bots";
 import { getErrorMessage } from "./helpers/errors";
 import { getNotificationIcon, getNotificationURL } from "./helpers/notifications";
@@ -14,6 +15,18 @@ import { getUserIcon } from "./helpers/users";
 import useMe from "./hooks/useMe";
 import useNotifications from "./hooks/useNotifications";
 import usePriorities from "./hooks/usePriorities";
+
+// The dev-build install may not have "Unread Notifications" (a menu-bar command) activated,
+// which makes launchCommand reject with "must be activated before it can be run in the
+// background". That refresh is best-effort — it must never turn a completed mutation
+// (mark as read/unread, mark all as read) into a reported failure (todoist precedent:
+// extensions/todoist/src/helpers/menu-bar.ts).
+function refreshUnreadNotificationsMenuBar() {
+  return launchCommand({ name: "unread-notifications", type: LaunchType.Background }).catch(() => {
+    // The menu-bar command may not be activated; a failed refresh must not report the
+    // completed mutation as a failure.
+  });
+}
 
 function Notifications() {
   const {
@@ -74,7 +87,7 @@ function Notifications() {
       });
 
       await showToast({ style: Toast.Style.Success, title: "Marked as read" });
-      await launchCommand({ name: "unread-notifications", type: LaunchType.Background });
+      await refreshUnreadNotificationsMenuBar();
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -115,7 +128,7 @@ function Notifications() {
       });
 
       await showToast({ style: Toast.Style.Success, title: "Marked as unread" });
-      await launchCommand({ name: "unread-notifications", type: LaunchType.Background });
+      await refreshUnreadNotificationsMenuBar();
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -203,7 +216,7 @@ function Notifications() {
       );
 
       await showToast({ style: Toast.Style.Success, title: "Marked all as read" });
-      await launchCommand({ name: "unread-notifications", type: LaunchType.Background });
+      await refreshUnreadNotificationsMenuBar();
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -214,7 +227,10 @@ function Notifications() {
   }
 
   return (
-    <List isLoading={isLoadingNotifications || isLoadingPriorities || isLoadingMe}>
+    <List
+      isLoading={isLoadingNotifications || isLoadingPriorities || isLoadingMe}
+      searchBarAccessory={<WorkspaceListDropdown />}
+    >
       <List.EmptyView title="Inbox" description="You don't have any notifications." />
 
       {sections.map(({ title, notifications }) => {

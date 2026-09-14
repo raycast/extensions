@@ -1,6 +1,15 @@
-import { Organization, Comment, User, IssueNotification, ProjectUpdate, Project, ActorBot } from "@linear/sdk";
+import {
+  Organization,
+  Comment,
+  User,
+  IssueNotification,
+  ProjectUpdate,
+  Project,
+  ActorBot,
+  LinearClient,
+} from "@linear/sdk";
 
-import { getLinearClient } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 
 import { IssueFragment, IssueResult } from "./getIssues";
 
@@ -27,8 +36,8 @@ export type NotificationResult = Pick<
 
 export type OrganizationResult = Pick<Organization, "urlKey">;
 
-export async function getNotifications() {
-  const { graphQLClient } = getLinearClient();
+export async function getNotifications(client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<
     { notifications: { nodes: NotificationResult[] } } & { organization: OrganizationResult },
     Record<string, unknown>

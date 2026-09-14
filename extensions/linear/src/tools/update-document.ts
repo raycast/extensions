@@ -1,6 +1,6 @@
-import { withAccessToken } from "@raycast/utils";
+import { resolveClient } from "../api/linearClient";
 
-import { getLinearClient, linear } from "../api/linearClient";
+import { describeToolWorkspace, resolveToolClient, withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   /** The ID of the document/PRD to update */
@@ -14,10 +14,14 @@ type Input = {
 
   /** The ID of the project the document/PRD belongs to */
   projectId?: string;
+
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async (inputs: Input) => {
-  const { linearClient } = getLinearClient();
+export default withToolAuth(async (inputs: Input) => {
+  const client = await resolveToolClient(inputs.workspaceId);
+  const { linearClient } = resolveClient(client);
   const result = await linearClient.updateDocument(inputs.documentId, {
     content: inputs.content,
     projectId: inputs.projectId,
@@ -31,13 +35,18 @@ export default withAccessToken(linear)(async (inputs: Input) => {
   return result.document;
 });
 
-export const confirmation = withAccessToken(linear)(async ({ documentId }: Input) => {
-  const { linearClient } = getLinearClient();
+export const confirmation = withToolAuth(async ({ documentId, workspaceId }: Input) => {
+  const workspaceName = await describeToolWorkspace(workspaceId);
+  const client = await resolveToolClient(workspaceId);
+  const { linearClient } = resolveClient(client);
 
   const document = await linearClient.document(documentId);
 
   return {
     message: `Are you sure you want to update the [document](${document.url})?`,
-    info: [{ name: "Title", value: document.title }],
+    info: [
+      ...(workspaceName ? [{ name: "Workspace", value: workspaceName }] : []),
+      { name: "Title", value: document.title },
+    ],
   };
 });

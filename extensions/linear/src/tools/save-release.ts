@@ -1,8 +1,5 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { client, resolveRelease, resolveReleasePipeline } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 function date(value?: string): Date | null | undefined {
   return value === "null" ? null : value === undefined ? undefined : new Date(value);
@@ -29,6 +26,8 @@ type Input = {
   /** Completed timestamp, or the literal string "null" to remove it. */
   completedAt?: string;
   commitSha?: string;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 async function resolveStage(pipelineId: string, query?: string) {
   if (!query) return undefined;
@@ -40,7 +39,7 @@ async function resolveStage(pipelineId: string, query?: string) {
   if (!stage) throw new Error(`No release stage found for "${query}".`);
   return stage.id;
 }
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   if (input.id) {
     const release = await resolveRelease(input.id);
     if (input.pipeline) {

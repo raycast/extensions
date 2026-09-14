@@ -1,13 +1,16 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import { defaultInitiativeFields, InitiativeField, serializeInitiative } from "./initiativeUtils";
 import { resolveInitiative } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
-type Input = { query: string; includeProjects?: boolean; includeSubInitiatives?: boolean };
+type Input = {
+  query: string;
+  includeProjects?: boolean;
+  includeSubInitiatives?: boolean;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
+};
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   const initiative = await resolveInitiative(input.query);
   const fields: InitiativeField[] = [
     ...defaultInitiativeFields,

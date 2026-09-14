@@ -1,7 +1,8 @@
 import { Action } from "@raycast/api";
-import { withAccessToken } from "@raycast/utils";
 
-import { getLinearClient, linear } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
+
+import { describeToolWorkspace, resolveToolClient, withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   /** The ID of the issue to add the label to. Format is a combination of a team key and a unique number, like `ENG-123` */
@@ -9,10 +10,14 @@ type Input = {
 
   /** The ID of the label to add to the issue. Never use title as ID: you have to use `get-labels` tool to get the actual ID from the list of labels */
   labelId: string;
+
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async ({ issueId, labelId }: Input) => {
-  const { linearClient } = getLinearClient();
+export default withToolAuth(async ({ issueId, labelId, workspaceId }: Input) => {
+  const client = await resolveToolClient(workspaceId);
+  const { linearClient } = resolveClient(client);
   const issue = await linearClient.issue(issueId);
   const currentLabelIds = issue.labelIds || [];
   const updatedLabelIds = currentLabelIds.filter((id) => id !== labelId);
@@ -27,8 +32,10 @@ export default withAccessToken(linear)(async ({ issueId, labelId }: Input) => {
   return result.issue;
 });
 
-export const confirmation = withAccessToken(linear)(async ({ issueId, labelId }: Input) => {
-  const { linearClient } = getLinearClient();
+export const confirmation = withToolAuth(async ({ issueId, labelId, workspaceId }: Input) => {
+  const workspaceName = await describeToolWorkspace(workspaceId);
+  const client = await resolveToolClient(workspaceId);
+  const { linearClient } = resolveClient(client);
 
   const label = await linearClient.issueLabel(labelId);
   const issue = await linearClient.issue(issueId);
@@ -36,6 +43,7 @@ export const confirmation = withAccessToken(linear)(async ({ issueId, labelId }:
   return {
     style: Action.Style.Destructive,
     info: [
+      ...(workspaceName ? [{ name: "Workspace", value: workspaceName }] : []),
       { name: "Issue", value: issue.title },
       { name: "Label", value: label.name },
     ],

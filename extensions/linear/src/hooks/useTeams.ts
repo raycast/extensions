@@ -1,9 +1,14 @@
 import { useCachedPromise } from "@raycast/utils";
 
 import { getTeams } from "../api/getTeams";
+import { useWorkspaces } from "../components/WorkspaceContext";
 
 export default function useTeams(query: string = "") {
-  const { data, error, isLoading } = useCachedPromise(getTeams, [query]);
+  const { workspaceKey } = useWorkspaces();
+  const { data, error, isLoading } = useCachedPromise(
+    (key: string, query: string) => getTeams(query),
+    [workspaceKey, query],
+  );
 
   return {
     teams: data?.teams,

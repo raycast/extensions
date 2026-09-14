@@ -1,9 +1,11 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
-import { withAccessToken } from "@raycast/utils";
 import React, { useEffect } from "react";
 
-import { linear } from "../api/linearClient";
+import { bootstrapWorkspaceAuth, clearActiveWorkspaceTokens, getWorkspaceSnapshot } from "../api/linearClient";
+import { withWorkspaceAuth } from "../api/withWorkspaceAuth";
 import { checkLinearApp } from "../helpers/isLinearInstalled";
+
+import { WorkspaceProvider } from "./WorkspaceContext";
 
 /**
  * Makes sure that we have a authenticated linear client available in the children
@@ -13,7 +15,7 @@ function View({ children }: { children: React.ReactNode }) {
     checkLinearApp();
   }, []);
 
-  return children;
+  return <WorkspaceProvider>{children}</WorkspaceProvider>;
 }
 
 interface AuthErrorBoundaryState {
@@ -49,18 +51,26 @@ class AuthErrorBoundary extends React.Component<{ children: React.ReactNode }, A
     // and let everything else surface normally.
     if (!isAuthError) throw error;
 
+    const failedWorkspaceName = getWorkspaceSnapshot()?.activeEntry?.orgName;
+
     return (
       <Detail
-        markdown={`# Sign In Failed\n\nFailed to authenticate with Linear:\n\`\`\`\n${error.message}\n\`\`\`\n\nThis can happen when the network is unreliable or the authorization code has expired. Please try signing in again.`}
+        markdown={`# Sign In Failed${failedWorkspaceName ? ` — ${failedWorkspaceName}` : ""}\n\nFailed to authenticate with Linear:\n\`\`\`\n${error.message}\n\`\`\`\n\nThis can happen when the network is unreliable or the authorization code has expired. Please try signing in again.`}
         actions={
           <ActionPanel>
             <Action
               title="Sign in Again"
               onAction={async () => {
-                await linear.client.removeTokens();
-                this.setState({ error: null });
+                await clearActiveWorkspaceTokens();
+                try {
+                  await bootstrapWorkspaceAuth(); // fresh interactive flow, identity-verified (ensureEntryToken)
+                  this.setState({ error: null });
+                } catch (error) {
+                  this.setState({ error: error instanceof Error ? error : new Error(String(error)) });
+                }
               }}
             />
+            <Action.Open title="Manage Workspaces" target="raycast://extensions/linear/linear/manage-workspaces" />
           </ActionPanel>
         }
       />
@@ -68,7 +78,7 @@ class AuthErrorBoundary extends React.Component<{ children: React.ReactNode }, A
   }
 }
 
-const AuthenticatedView = withAccessToken(linear)(View);
+const AuthenticatedView = withWorkspaceAuth(View);
 
 export default function ViewWithErrorBoundary({ children }: { children: React.ReactNode }) {
   return (

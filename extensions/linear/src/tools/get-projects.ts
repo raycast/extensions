@@ -1,15 +1,22 @@
 import { Project } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
 
-import { getLinearClient, linear } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
+
+import { resolveToolClient, withToolAuth } from "./resolveToolWorkspace";
 
 export type ProjectResult = Pick<
   Project,
   "id" | "description" | "name" | "content" | "progress" | "targetDate" | "startDate"
 >;
 
-export default withAccessToken(linear)(async () => {
-  const { linearClient } = getLinearClient();
+type Input = {
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
+};
+
+export default withToolAuth(async ({ workspaceId }: Input) => {
+  const client = await resolveToolClient(workspaceId);
+  const { linearClient } = resolveClient(client);
 
   const allProjects: ProjectResult[] = [];
   let hasNextPage = true;

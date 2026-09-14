@@ -1,9 +1,7 @@
 import { PaginationOrderBy } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
 
 import { client, collectFiltered, PageInput, resolveTeam } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 
 interface Input extends PageInput {
   /** Max results (default 50, max 250) */ limit?: number;
@@ -11,8 +9,10 @@ interface Input extends PageInput {
   /** Sort: createdAt | updatedAt */ orderBy?: "createdAt" | "updatedAt";
   name?: string;
   team?: string;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 }
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   const teamId = input.team ? (await resolveTeam(input.team)).id : undefined;
   const name = input.name?.toLowerCase();
   return collectFiltered(

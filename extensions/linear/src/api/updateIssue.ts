@@ -1,6 +1,6 @@
-import { Issue } from "@linear/sdk";
+import { Issue, LinearClient } from "@linear/sdk";
 
-import { getLinearClient } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 
 export type UpdateIssuePayload = {
   title: string;
@@ -18,8 +18,8 @@ export type UpdateIssuePayload = {
   parentId?: string;
 };
 
-export async function updateIssue(issueId: Issue["id"], payload: Partial<UpdateIssuePayload>) {
-  const { graphQLClient } = getLinearClient();
+export async function updateIssue(issueId: Issue["id"], payload: Partial<UpdateIssuePayload>, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const inputParts: string[] = [];
 

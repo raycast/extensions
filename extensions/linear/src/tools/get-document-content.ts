@@ -1,9 +1,9 @@
-import { Document } from "@linear/sdk";
-import { withAccessToken } from "@raycast/utils";
+import { Document, LinearClient } from "@linear/sdk";
 
-import { getLinearClient, linear } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 
 import { DocumentResult } from "./get-documents";
+import { resolveToolClient, withToolAuth } from "./resolveToolWorkspace";
 
 export type DocumentWithContent = Pick<Document, "content"> & DocumentResult;
 
@@ -35,8 +35,8 @@ const docFragment = `
   }
 `;
 
-export async function getDocumentContent(documentId: string) {
-  const { graphQLClient } = getLinearClient();
+export async function getDocumentContent(documentId: string, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const { data } = await graphQLClient.rawRequest<
     { documents: { nodes: DocumentWithContent[] } },
@@ -58,9 +58,15 @@ export async function getDocumentContent(documentId: string) {
   return data?.documents.nodes?.[0];
 }
 
-export default withAccessToken(linear)(async (inputs: {
+type Input = {
   /** The ID of the document/PRD to fetch */
   documentId: string;
-}) => {
-  return await getDocumentContent(inputs.documentId);
+
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
+};
+
+export default withToolAuth(async (inputs: Input) => {
+  const client = await resolveToolClient(inputs.workspaceId);
+  return await getDocumentContent(inputs.documentId, client);
 });

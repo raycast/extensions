@@ -1,6 +1,6 @@
-import { Project, ProjectStatus, ProjectUpdate, User } from "@linear/sdk";
+import { LinearClient, Project, ProjectStatus, ProjectUpdate, User } from "@linear/sdk";
 
-import { getLinearClient } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 
 export type ProjectResult = Pick<
   Project,
@@ -84,13 +84,11 @@ const projectFragment = `
   }
 `;
 
-export async function getProjects({
-  teamId,
-  searchText = "",
-  after = null,
-  first = null,
-}: GetProjectsOptions): Promise<GetProjectsResult> {
-  const { graphQLClient } = getLinearClient();
+export async function getProjects(
+  { teamId, searchText = "", after = null, first = null }: GetProjectsOptions,
+  client?: LinearClient,
+): Promise<GetProjectsResult> {
+  const { graphQLClient } = resolveClient(client);
 
   const projectsQueryFragment = `
     projects(first: $first, after: $after, filter: { name: { containsIgnoreCase: $searchText } }) {
@@ -161,8 +159,8 @@ const projectUpdateFragment = `
   }
 `;
 
-export async function getProjectUpdates(projectId: string) {
-  const { graphQLClient } = getLinearClient();
+export async function getProjectUpdates(projectId: string, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const { data } = await graphQLClient.rawRequest<
     { project: { projectUpdates: { nodes: ProjectUpdateResult[] } } },

@@ -37,8 +37,11 @@ import useProjects from "../hooks/useProjects";
 import useStates from "../hooks/useStates";
 import useTeams from "../hooks/useTeams";
 import useUsers from "../hooks/useUsers";
+import { useWorkspaceCachedState } from "../hooks/useWorkspaceCachedState";
 
 import IssueDetail from "./IssueDetail";
+import { useWorkspaces } from "./WorkspaceContext";
+import { WorkspaceFormDropdown } from "./WorkspaceDropdown";
 
 type CreateIssueFormProps = {
   assigneeId?: string;
@@ -55,6 +58,7 @@ type CreateIssueFormProps = {
 };
 
 export type CreateIssueValues = {
+  workspaceKey?: string;
   templateId: string;
   teamId: string;
   title: string;
@@ -107,6 +111,13 @@ function getCopyToastAction(copyToastAction: Preferences.CreateIssue["copyToastA
 export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
   const { autofocusField, copyToastAction } = getPreferenceValues<Preferences.CreateIssue>();
+  const { showSwitcher } = useWorkspaces();
+
+  // The workspace field lives outside useForm, so focus() cannot target it — the autoFocus
+  // prop does. With <2 entries the field renders null, so the preference must FALL BACK
+  // (to today's behavior) instead of leaving nothing focused.
+  const workspaceAutofocusActive = autofocusField === "workspaceKey" && showSwitcher;
+  const effectiveAutofocusField = autofocusField === "workspaceKey" && !showSwitcher ? undefined : autofocusField;
 
   const [teamQuery, setTeamQuery] = useState<string>("");
   const { teams, org, supportsTeamTypeahead, isLoadingTeams } = useTeams(teamQuery);
@@ -176,8 +187,10 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             links: "",
           });
 
-          if (hasMoreThanOneTeam && autofocusField) {
-            focus(autofocusField);
+          if (workspaceAutofocusActive) {
+            // The workspace field already carries autoFocus; focus() cannot target it.
+          } else if (hasMoreThanOneTeam && effectiveAutofocusField) {
+            focus(effectiveAutofocusField);
           } else {
             focus("title");
           }
@@ -257,14 +270,164 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
     },
   });
 
+  type StoredIssueDefaults = Partial<
+    Pick<CreateIssueValues, "teamId" | "stateId" | "priority" | "assigneeId" | "cycleId" | "projectId" | "milestoneId">
+  >;
+  const [storedDefaults, setStoredDefaults] = useWorkspaceCachedState<StoredIssueDefaults>("create-issue-defaults", {});
+  const restoredRef = useRef(false);
+
+  // Persist selections per workspace (replaces the old Form.Dropdown persistence prop,
+  // §4.5/B6). PER-FIELD READINESS
+  // semantics: a field's current value (INCLUDING an intentional empty like Unassigned /
+  // No Cycle / No Project) is written back only once that field's restore has completed —
+  // dependent option lists load at different times, and their fields are transiently
+  // empty until then; writing before readiness would clobber stored defaults, while
+  // truthy-only merging would make cleared choices resurrect on the next launch.
+  const readyFieldsRef = useRef<Set<keyof StoredIssueDefaults>>(new Set());
+
+  useEffect(() => {
+    if (!restoredRef.current) return;
+    const ready = readyFieldsRef.current;
+    setStoredDefaults({
+      ...storedDefaults,
+      ...(ready.has("teamId") ? { teamId: values.teamId } : {}),
+      ...(ready.has("stateId") ? { stateId: values.stateId } : {}),
+      ...(ready.has("priority") ? { priority: values.priority } : {}),
+      ...(ready.has("assigneeId") ? { assigneeId: values.assigneeId } : {}),
+      ...(ready.has("cycleId") ? { cycleId: values.cycleId } : {}),
+      ...(ready.has("projectId") ? { projectId: values.projectId } : {}),
+      ...(ready.has("milestoneId") ? { milestoneId: values.milestoneId } : {}),
+    });
+    // storedDefaults is deliberately omitted from deps: it's only read here (via the
+    // spread above) to preserve fields not yet ready, and including it would loop this
+    // effect against its own setStoredDefaults call.
+  }, [
+    values.teamId,
+    values.stateId,
+    values.priority,
+    values.assigneeId,
+    values.cycleId,
+    values.projectId,
+    values.milestoneId,
+  ]);
+
+  // Restore once per mount, validated against THIS workspace's data; a draft wins over restore.
+  // Priority is intentionally NOT restored here: setting teamId below triggers the
+  // template-reset effect further down (applyTemplate("") on team change), which would
+  // wipe priority straight back to "" on the very next commit. Priority (and assigneeId)
+  // are instead restored by the effect declared AFTER that reset effect, which re-applies
+  // them once the reset has already happened — see the comment there.
+  useEffect(() => {
+    if (restoredRef.current || isLoadingTeams || !teams) return;
+    restoredRef.current = true;
+    // A draft launch marks NOTHING ready (I4): the persist effect above only writes
+    // fields in readyFieldsRef, so leaving it unset here keeps a draft launch from ever
+    // clobbering the remembered per-workspace defaults. teamId also only restores when
+    // no explicit teamId prop was passed (I5) — pushed forms like SubIssues supply real
+    // context that a stale stored default must not override.
+    if (!props.draftValues) {
+      if (!props.teamId && storedDefaults.teamId && teams.some((team) => team.id === storedDefaults.teamId)) {
+        setValue("teamId", storedDefaults.teamId);
+      }
+      // stateId/assigneeId/cycleId/projectId/milestoneId are validated by their own data
+      // hooks' option lists as they load; setValue only when the id exists there:
+      readyFieldsRef.current.add("teamId");
+    }
+    // Deliberately scoped to [isLoadingTeams, teams]: this restore runs once per mount
+    // (guarded by restoredRef above), so props.draftValues/storedDefaults changing later
+    // must not re-trigger it.
+  }, [isLoadingTeams, teams]);
+
   const execute = !!values.teamId && values.teamId.trim().length > 0;
   const { issueTemplates, isLoadingIssueTemplates } = useIssueTemplates(values.teamId, { execute });
-  const { states } = useStates(values.teamId, { execute });
+  const { states, isLoadingStates } = useStates(values.teamId, { execute });
   const { labels } = useLabels(values.teamId, { execute });
-  const { cycles } = useCycles(values.teamId, { execute });
+  const { cycles, isLoadingCycles } = useCycles(values.teamId, { execute });
   const { issues } = useIssues(getLastCreatedIssues, [], { execute });
-  const { projects } = useProjects(values.teamId, { execute });
-  const { milestones } = useMilestones(values.projectId, { execute: !!values.projectId });
+  const { projects, isLoadingProjects } = useProjects(values.teamId, { execute });
+  const { milestones, isLoadingMilestones } = useMilestones(values.projectId, { execute: !!values.projectId });
+
+  // Team-dependent fields: each restores once its own option list has loaded, validated
+  // against THIS workspace's data (discard-on-restore, §4.5), then marks itself ready
+  // regardless of whether a value applied so the persist effect starts tracking it.
+  useEffect(() => {
+    if (readyFieldsRef.current.has("stateId") || !execute || isLoadingStates) return;
+    // Draft launches mark nothing ready (I4) — see the teamId restore effect above.
+    if (!props.draftValues) {
+      if (storedDefaults.stateId && states?.some((state) => state.id === storedDefaults.stateId)) {
+        setValue("stateId", storedDefaults.stateId);
+      }
+      readyFieldsRef.current.add("stateId");
+    }
+    // Deliberately scoped: guarded by readyFieldsRef.has("stateId") above, so this only
+    // ever acts on the first load of this workspace's state list.
+  }, [execute, isLoadingStates, states]);
+
+  useEffect(() => {
+    if (readyFieldsRef.current.has("assigneeId") || isLoadingUsers) return;
+    // assigneeId only restores when no explicit assigneeId prop was passed (I5) —
+    // assigned-issues.tsx supplies real context that a stale stored default must not override.
+    if (
+      !props.draftValues &&
+      !props.assigneeId &&
+      storedDefaults.assigneeId &&
+      users?.some((user) => user.id === storedDefaults.assigneeId)
+    ) {
+      setValue("assigneeId", storedDefaults.assigneeId);
+    }
+    // Ready-marking for assigneeId is owned by the post-template-reset effect declared
+    // after applyTemplate below (it re-applies assigneeId once a team change's reset has
+    // happened, then marks ready) — this effect only provides an early, best-effort
+    // restore for when the user list resolves before that reset happens.
+  }, [isLoadingUsers, users]);
+
+  useEffect(() => {
+    if (readyFieldsRef.current.has("cycleId") || isLoadingCycles) return;
+    // Draft launches mark nothing ready (I4); cycleId only restores when no explicit
+    // cycleId prop was passed (I5) — SubIssues/active-cycle supply real context that a
+    // stale stored default must not override.
+    if (!props.draftValues) {
+      if (!props.cycleId && storedDefaults.cycleId && cycles?.some((cycle) => cycle.id === storedDefaults.cycleId)) {
+        setValue("cycleId", storedDefaults.cycleId);
+      }
+      readyFieldsRef.current.add("cycleId");
+    }
+    // Deliberately scoped: guarded by readyFieldsRef.has("cycleId") above, so this only
+    // ever acts on the first load of this team's cycle list.
+  }, [isLoadingCycles, cycles]);
+
+  useEffect(() => {
+    if (readyFieldsRef.current.has("projectId") || isLoadingProjects) return;
+    // Draft launches mark nothing ready (I4); projectId only restores when no explicit
+    // projectId prop was passed (I5) — SubIssues/ProjectIssues supply real context that a
+    // stale stored default must not override.
+    if (!props.draftValues) {
+      if (
+        !props.projectId &&
+        storedDefaults.projectId &&
+        projects?.some((project) => project.id === storedDefaults.projectId)
+      ) {
+        setValue("projectId", storedDefaults.projectId);
+      }
+      readyFieldsRef.current.add("projectId");
+    }
+    // Deliberately scoped: guarded by readyFieldsRef.has("projectId") above, so this
+    // only ever acts on the first load of this team's project list.
+  }, [isLoadingProjects, projects]);
+
+  useEffect(() => {
+    if (readyFieldsRef.current.has("milestoneId") || isLoadingMilestones) return;
+    // Draft launches mark nothing ready (I4) — see the teamId restore effect above.
+    // No caller currently passes a milestoneId prop, so no I5 prop-guard is needed here.
+    if (!props.draftValues) {
+      if (storedDefaults.milestoneId && milestones?.some((milestone) => milestone.id === storedDefaults.milestoneId)) {
+        setValue("milestoneId", storedDefaults.milestoneId);
+      }
+      readyFieldsRef.current.add("milestoneId");
+    }
+    // Deliberately scoped: guarded by readyFieldsRef.has("milestoneId") above, so this
+    // only ever acts on the first load of this project's milestone list.
+  }, [isLoadingMilestones, milestones]);
 
   useEffect(() => {
     if (teams?.length === 1) {
@@ -279,6 +442,26 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       return;
     }
     applyTemplate("");
+  }, [values.teamId]);
+
+  // Declared after the template effect on purpose: a team change resets the dependent
+  // fields via applyTemplate(""), so the workspace's remembered defaults for the wiped
+  // fields are re-applied here — and only marked ready once this has run.
+  useEffect(() => {
+    if (!restoredRef.current || props.draftValues) return;
+    if (storedDefaults.priority) setValue("priority", storedDefaults.priority);
+    // assigneeId only restores when no explicit assigneeId prop was passed (I5).
+    if (
+      !props.assigneeId &&
+      storedDefaults.assigneeId &&
+      users?.some((user) => user.id === storedDefaults.assigneeId)
+    ) {
+      setValue("assigneeId", storedDefaults.assigneeId);
+    }
+    readyFieldsRef.current.add("priority");
+    readyFieldsRef.current.add("assigneeId");
+    // Deliberate deps: fires when the restored/changed team lands; storedDefaults/users
+    // are read via the render closure.
   }, [values.teamId]);
 
   function applyTemplate(templateId: string) {
@@ -462,11 +645,12 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       }
       isLoading={isLoadingTeams || isLoadingUsers || props.isLoading}
     >
+      <WorkspaceFormDropdown autoFocus={workspaceAutofocusActive} />
+
       {(supportsTeamTypeahead || hasMoreThanOneTeam) && (
         <>
           <Form.Dropdown
             title="Team"
-            storeValue
             {...itemProps.teamId}
             {...(supportsTeamTypeahead && {
               onSearchTextChange: setTeamQuery,
@@ -514,7 +698,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         {...itemProps.description}
       />
 
-      <Form.Dropdown title="Status" storeValue {...itemProps.stateId}>
+      <Form.Dropdown title="Status" {...itemProps.stateId}>
         {hasStates
           ? orderedStates.map((state) => {
               return (
@@ -524,7 +708,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           : null}
       </Form.Dropdown>
 
-      <Form.Dropdown title="Priority" storeValue {...itemProps.priority}>
+      <Form.Dropdown title="Priority" {...itemProps.priority}>
         {hasPriorities
           ? props.priorities?.map(({ priority, label }) => {
               return (
@@ -541,7 +725,6 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
       <Form.Dropdown
         title="Assignee"
-        storeValue
         {...itemProps.assigneeId}
         {...(supportsUserTypeahead && { onSearchTextChange: setUserQuery, isLoading: isLoadingUsers, throttle: true })}
       >
@@ -586,7 +769,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       {hasCycles || hasProjects || hasIssues ? <Form.Separator /> : null}
 
       {hasCycles ? (
-        <Form.Dropdown title="Cycle" storeValue {...itemProps.cycleId}>
+        <Form.Dropdown title="Cycle" {...itemProps.cycleId}>
           <Form.Dropdown.Item
             title="No Cycle"
             value=""
@@ -602,7 +785,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       ) : null}
 
       {hasProjects ? (
-        <Form.Dropdown title="Project" storeValue {...itemProps.projectId}>
+        <Form.Dropdown title="Project" {...itemProps.projectId}>
           <Form.Dropdown.Item
             title="No Project"
             value=""
@@ -623,7 +806,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       ) : null}
 
       {hasMilestones ? (
-        <Form.Dropdown title="Milestone" storeValue {...itemProps.milestoneId}>
+        <Form.Dropdown title="Milestone" {...itemProps.milestoneId}>
           <Form.Dropdown.Item title="No Milestone" value="" icon={{ source: "linear-icons/no-milestone.svg" }} />
 
           {milestones.map((milestone) => {

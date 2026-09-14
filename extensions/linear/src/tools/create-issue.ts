@@ -1,9 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
-import { linear } from "../api/linearClient";
 
 import { formatConfirmation } from "./formatConfirmation";
+import { describeToolWorkspace, resolveToolClient, withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   /** The priority of the issue (0-4, where 0 is no priority and 4 is urgent) */
@@ -45,9 +43,13 @@ type Input = {
 
   /** The estimate of the issue using a 0-5 scale */
   estimate?: number;
+
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async (inputs: Input) => {
+export default withToolAuth(async (inputs: Input) => {
+  const client = await resolveToolClient(inputs.workspaceId);
   const payload: CreateIssuePayload = {
     teamId: inputs.teamId,
     title: inputs.title,
@@ -61,19 +63,26 @@ export default withAccessToken(linear)(async (inputs: Input) => {
     priority: inputs.priority || 0,
   };
 
-  return createIssue(payload);
+  return createIssue(payload, client);
 });
 
-export const confirmation = withAccessToken(linear)(async (inputs: Input) => {
-  const { title, ...fields } = inputs;
+export const confirmation = withToolAuth(async (inputs: Input) => {
+  const workspaceName = await describeToolWorkspace(inputs.workspaceId);
+  const client = await resolveToolClient(inputs.workspaceId);
+  const { title, workspaceId, ...fields } = inputs;
+  void workspaceId; // destructured only to exclude it from `fields`
   const details = await Promise.all(
     Object.keys(fields).map((key) => {
       const name = key as keyof typeof fields;
-      return formatConfirmation({ name, value: fields[name] });
+      return formatConfirmation({ name, value: fields[name], client });
     }),
   );
 
   return {
-    info: [formatConfirmation({ name: "Title", value: title }), ...details],
+    info: [
+      ...(workspaceName ? [{ name: "Workspace", value: workspaceName }] : []),
+      formatConfirmation({ name: "Title", value: title, client }),
+      ...details,
+    ],
   };
 });

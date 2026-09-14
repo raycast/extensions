@@ -1,7 +1,3 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { linear } from "../api/linearClient";
-
 import {
   applyPatch,
   client,
@@ -10,6 +6,7 @@ import {
   resolveReleaseNote,
   resolveReleasePipeline,
 } from "./linearUtils";
+import { withToolAuth } from "./resolveToolWorkspace";
 type Input = {
   id?: string;
   pipeline?: string;
@@ -28,6 +25,8 @@ type Input = {
   releases?: string[];
   rangeFromRelease?: string;
   rangeToRelease?: string;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 async function releaseFields(input: Input) {
   return {
@@ -38,7 +37,7 @@ async function releaseFields(input: Input) {
     rangeToReleaseId: input.rangeToRelease ? (await resolveRelease(input.rangeToRelease)).id : undefined,
   };
 }
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
   if (input.id) {
     if (input.content !== undefined && input.patch) throw new Error("Pass content or patch, not both.");
     const note = await resolveReleaseNote(input.id);

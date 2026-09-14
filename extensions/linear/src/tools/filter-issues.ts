@@ -1,9 +1,7 @@
-import { withAccessToken } from "@raycast/utils";
-
 import { filterIssues } from "../api/getIssues";
-import { linear } from "../api/linearClient";
 
 import { collect, CursorPageInput } from "./linearUtils";
+import { resolveToolClient, withToolAuth } from "./resolveToolWorkspace";
 
 interface Input extends CursorPageInput {
   /** Max results (default 50, max 250) */ limit?: number;
@@ -132,11 +130,14 @@ interface Input extends CursorPageInput {
   * IMPORTANT: When user asks about my issues (assigned to me, my issues, etc), always filter by assignee.
   */
   filter: string;
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 }
 
-export default withAccessToken(linear)(async (input: Input) => {
+export default withToolAuth(async (input: Input) => {
+  const client = await resolveToolClient(input.workspaceId);
   return collect(async ({ first, after }) => {
-    const result = await filterIssues(input.filter, after, first);
+    const result = await filterIssues(input.filter, after, first, client);
     return {
       nodes: result.issues ?? [],
       pageInfo: result.pageInfo ?? { hasNextPage: false },

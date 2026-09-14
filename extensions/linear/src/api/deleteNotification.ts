@@ -1,9 +1,9 @@
-import { Notification } from "@linear/sdk";
+import { LinearClient, Notification } from "@linear/sdk";
 
-import { getLinearClient } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 
-export async function deleteNotification(id: Notification["id"]) {
-  const { graphQLClient } = getLinearClient();
+export async function deleteNotification(id: Notification["id"], client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const { data } = await graphQLClient.rawRequest<
     { notificationArchive: { success: boolean } },

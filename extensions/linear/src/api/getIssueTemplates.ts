@@ -1,4 +1,6 @@
-import { getLinearClient } from "./linearClient";
+import { LinearClient } from "@linear/sdk";
+
+import { resolveClient } from "./linearClient";
 
 export type IssueTemplateResult = {
   id: string;
@@ -52,12 +54,12 @@ function sortIssueTemplates(a: IssueTemplateResult, b: IssueTemplateResult) {
   return (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name);
 }
 
-export async function getIssueTemplates(teamId?: string) {
+export async function getIssueTemplates(teamId?: string, client?: LinearClient) {
   if (!teamId) {
     return [];
   }
 
-  const { graphQLClient } = getLinearClient();
+  const { graphQLClient } = resolveClient(client);
 
   const { data } = await graphQLClient.rawRequest<
     IssueTemplatesResponse,
