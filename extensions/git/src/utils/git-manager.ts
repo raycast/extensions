@@ -10,6 +10,7 @@ import {
   ResetMode,
   simpleGit,
   SimpleGit,
+  SimpleGitOptions,
 } from "simple-git";
 import { showToast, Toast, getPreferenceValues, Alert, confirmAlert, environment } from "@raycast/api";
 import { readFileSync, writeFileSync, mkdtempSync, chmodSync, rmSync, existsSync, statSync } from "fs";
@@ -65,20 +66,7 @@ export class GitManager {
     this.gitDirPath = gitDirPath;
     this.gitCommonDirPath = gitCommonDirPath;
 
-    this.git = simpleGit(repoPath, {
-      binary: getPreferenceValues<Preferences>().binaryPath,
-      errors: (error, _result) => {
-        if (error) {
-          showFailureToast(error, { title: `Error running command` });
-        }
-        return error;
-      },
-    });
-
-    this.git = this.git.env(shellEnvironmentVariables);
-
-    // Global logging of all git commands for debugging
-    this.setupGlobalLogging();
+    this.git = GitManager.createSimpleGit(repoPath).env(shellEnvironmentVariables);
   }
 
   /**
@@ -142,6 +130,35 @@ export class GitManager {
     return existsSync(join(this.gitCommonDirPath, "worktrees"));
   }
 
+  private static createSimpleGit(repoPath: string, unsafe?: SimpleGitOptions["unsafe"]): SimpleGit {
+    const git = simpleGit(repoPath, {
+      binary: getPreferenceValues<Preferences>().binaryPath,
+      unsafe,
+      errors: (error, _result) => {
+        if (error) {
+          showFailureToast(error, { title: `Error running command` });
+        }
+        return error;
+      },
+    });
+
+    // Global logging of all git commands for debugging
+    GitManager.setupGlobalLogging(git);
+    return git;
+  }
+
+  /**
+   * simple-git only accepts GIT_EDITOR and `-c sequence.editor` with allowUnsafeEditor, so commands that need them run on
+   * a separate instance with its own env copy (`this.git.env(name, value)` would write into shared shellEnvironmentVariables).
+   * GIT_EDITOR=true keeps the default commit message instead of opening an editor.
+   */
+  private createGitWithoutEditor(): SimpleGit {
+    return GitManager.createSimpleGit(this.repoPath, { allowUnsafeEditor: true }).env({
+      ...shellEnvironmentVariables,
+      GIT_EDITOR: "true",
+    });
+  }
+
   /**
    * Resolves git directories for a working tree.
    * In linked worktrees `.git` is a file pointing to `<main repo>/.git/worktrees/<name>`.
@@ -180,8 +197,8 @@ export class GitManager {
   /**
    * Sets up global logging of git commands and streaming output.
    */
-  private setupGlobalLogging(): void {
-    this.git.outputHandler((command, stdout, stderr, args) => {
+  private static setupGlobalLogging(git: SimpleGit): void {
+    git.outputHandler((command, stdout, stderr, args) => {
       const ignoredCommands = ["ls-files", "ls-remote", "remote", "worktree"];
       // Skip logging for ls-files command
       if (ignoredCommands.some((command) => args.includes(command))) {
@@ -927,7 +944,7 @@ __REBASE_TODO__
       } else {
         options.push("--root");
       }
-      await this.git.raw(options);
+      await this.createGitWithoutEditor().raw(options);
     } finally {
       try {
         rmSync(tempDirectory, { recursive: true, force: true });
@@ -1539,7 +1556,7 @@ __REBASE_TODO__
    * Continues an ongoing rebase.
    */
   async continueRebase(): Promise<void> {
-    await this.git.env("GIT_EDITOR", "true").rebase(["--continue"]);
+    await this.createGitWithoutEditor().rebase(["--continue"]);
   }
 
   /**
