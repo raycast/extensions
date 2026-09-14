@@ -5,10 +5,12 @@ import { groupProfiles, profileOptionTitle } from "./lib/grouping";
 import { useProfileGroups, useProfiles } from "./lib/hooks";
 import {
   buildPlatforms,
+  eligiblePlacementNetworks,
   eligiblePlacementProfiles,
   loadPlacementsByNetwork,
   overSelectedMandatoryNetworks,
   PLACEMENT_META,
+  rawPlacementIds,
   requiresPlacement,
   validatePlacements,
 } from "./lib/placements";
@@ -44,7 +46,7 @@ export default function PublishPost() {
       });
       try {
         const selectedNow = profiles.filter((p) => v.profiles.includes(p.id));
-        const platforms = buildPlatforms(v.platformParams, networkPlacements);
+        const platforms = buildPlatforms(v.platformParams, networkPlacements, eligiblePlacementNetworks(selectedNow));
         // Validate the final payload against a fresh fetch for the current profiles: catches
         // multi-profile ambiguity, raw-JSON placements, and stale/invalid ids alike.
         const placementError = await validatePlacements(platforms, selectedNow);
@@ -109,6 +111,8 @@ export default function PublishPost() {
   const placementNetworks = placementsByNetwork
     ? Object.keys(placementsByNetwork).filter((n) => PLACEMENT_META[n])
     : [];
+  // Placement ids set via raw Platform Parameters, so an untouched dropdown reflects what will be sent.
+  const rawPlacements = useMemo(() => rawPlacementIds(values.platformParams), [values.platformParams]);
 
   // A failed placements fetch would otherwise render no dropdown, stranding a mandatory network at
   // submit. Surface it with a retry so the user can recover instead of being stuck on "Choose a …".
@@ -137,11 +141,11 @@ export default function PublishPost() {
       const next = { ...prev };
       for (const net of Object.keys(prev)) {
         const list = placementsByNetwork[net];
-        if (!list) {
-          delete next[net]; // network no longer has a single selected profile
-          changed = true;
-          continue;
-        }
+        // Only clear a selection when a SUCCESSFUL fetch proves it's stale. Absence means the network
+        // isn't eligible yet or its fetch failed — neither should wipe the user's choice (a transient
+        // picker failure must not silently drop it, and buildPlatforms already ignores selections for
+        // non-eligible networks at submit).
+        if (!list) continue;
         const validIds = new Set(list.map((p) => p.id ?? ""));
         if (prev[net] && !validIds.has(prev[net])) {
           next[net] = "";
@@ -176,28 +180,36 @@ export default function PublishPost() {
       </Form.TagPicker>
 
       {placementNetworks.length > 0 || overSelectedNetworks.length > 0 ? <Form.Separator /> : null}
-      {placementNetworks.map((net) => (
-        <Form.Dropdown
-          key={net}
-          id={`placement_${net}`}
-          title={PLACEMENT_META[net].label}
-          value={networkPlacements[net] ?? ""}
-          onChange={(value) => setNetworkPlacements((prev) => ({ ...prev, [net]: value }))}
-        >
-          {/* Mandatory networks start unselected so the user must choose (no silent default). */}
-          {requiresPlacement(net) ? (
-            <Form.Dropdown.Item value="" title={`Choose a ${PLACEMENT_META[net].label}…`} />
-          ) : null}
-          {(placementsByNetwork?.[net] ?? []).map((placement) => (
-            <Form.Dropdown.Item
-              key={placement.id ?? placement.name}
-              value={placement.id ?? ""}
-              title={placement.name}
-              icon={platformIcon(net)}
-            />
-          ))}
-        </Form.Dropdown>
-      ))}
+      {placementNetworks.map((net) => {
+        const list = placementsByNetwork?.[net] ?? [];
+        // Optional networks (LinkedIn) can always post as the personal profile. Offer that explicitly
+        // unless the API already returns a personal (null-id) option, so the user can pick it back.
+        const needsPersonalOption = !requiresPlacement(net) && !list.some((placement) => !placement.id);
+        return (
+          <Form.Dropdown
+            key={net}
+            id={`placement_${net}`}
+            title={PLACEMENT_META[net].label}
+            value={networkPlacements[net] ?? rawPlacements[net] ?? ""}
+            onChange={(value) => setNetworkPlacements((prev) => ({ ...prev, [net]: value }))}
+          >
+            {/* Mandatory networks start unselected so the user must choose (no silent default). */}
+            {requiresPlacement(net) ? (
+              <Form.Dropdown.Item value="" title={`Choose a ${PLACEMENT_META[net].label}…`} />
+            ) : needsPersonalOption ? (
+              <Form.Dropdown.Item value="" title="Personal Profile" />
+            ) : null}
+            {list.map((placement) => (
+              <Form.Dropdown.Item
+                key={placement.id ?? placement.name}
+                value={placement.id ?? ""}
+                title={placement.name}
+                icon={platformIcon(net)}
+              />
+            ))}
+          </Form.Dropdown>
+        );
+      })}
       {overSelectedNetworks.length > 0 ? (
         <Form.Description
           text={`${overSelectedNetworks

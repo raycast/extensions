@@ -15,6 +15,9 @@ export const PLACEMENT_META: Record<string, { key: string; label: string }> = {
   google_business: { key: "location_id", label: "Google Business Location" },
 };
 
+/** Every known placement key — used to reject a placement key placed under the wrong network. */
+const PLACEMENT_KEYS = new Set(Object.values(PLACEMENT_META).map((m) => m.key));
+
 /** LinkedIn's placement is optional (omit → personal profile); the others are mandatory. */
 const OPTIONAL_PLACEMENT_NETWORKS = new Set(["linkedin"]);
 
@@ -64,8 +67,11 @@ export async function loadPlacementsByNetwork(
     profiles.map(async (profile) => {
       try {
         const items = normalizeList<Placement>(await request("GET", `/profiles/${profile.id}/placements`));
-        if (items.length === 0) return;
         const net = profile.platform.toLowerCase();
+        // Record the network even when the (successful) response is empty, so an empty result is
+        // distinguishable from a fetch failure (both were previously just "absent"). This lets the
+        // reconciliation effect clear a now-stale selection and lets the picker still render (e.g. a
+        // LinkedIn "Personal Profile" option) instead of silently vanishing.
         const list = byNetwork[net] ?? (byNetwork[net] = []);
         // Keep null-id placements (e.g. LinkedIn "Personal Profile"); de-dupe by id or name.
         for (const item of items) {
@@ -80,10 +86,17 @@ export async function loadPlacementsByNetwork(
   return { byNetwork, errors };
 }
 
-/** Merge raw platform-params JSON with per-network placement selections into the `platforms` object. */
+/**
+ * Merge raw platform-params JSON with the per-network dropdown selections into the `platforms` object.
+ * A dropdown selection is only applied for a network that is currently eligible (exactly one profile of
+ * that network is selected). This prevents a stale selection — left over after the profile was
+ * deselected or a second one was added before the pickers refreshed — from leaking into the payload.
+ * Raw JSON is applied as-is (the user's explicit override) and validated separately.
+ */
 export function buildPlatforms(
   rawJson: string,
   networkPlacements: Record<string, string>,
+  eligibleNetworks: Set<string>,
 ): Record<string, Record<string, unknown>> | undefined {
   const platforms: Record<string, Record<string, unknown>> = {};
   const trimmed = rawJson?.trim();
@@ -91,10 +104,13 @@ export function buildPlatforms(
     try {
       const parsed = JSON.parse(trimmed);
       if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        // Only keep platform entries whose value is itself a JSON object.
-        for (const [net, value] of Object.entries(parsed as Record<string, unknown>)) {
+        // Only keep platform entries whose value is itself a JSON object. Canonicalize a known
+        // placement network's key to lowercase so a mis-cased key (e.g. "LinkedIn") can't slip a
+        // placement past validation, which looks it up by the lowercase network name.
+        for (const [rawNet, value] of Object.entries(parsed as Record<string, unknown>)) {
           if (value && typeof value === "object" && !Array.isArray(value)) {
-            platforms[net] = { ...(value as Record<string, unknown>) };
+            const net = PLACEMENT_META[rawNet.toLowerCase()] ? rawNet.toLowerCase() : rawNet;
+            platforms[net] = { ...(platforms[net] ?? {}), ...(value as Record<string, unknown>) };
           }
         }
       }
@@ -102,13 +118,57 @@ export function buildPlatforms(
       // form validation blocks submit on invalid JSON; ignore here
     }
   }
-  for (const [net, placementId] of Object.entries(networkPlacements)) {
-    if (!placementId) continue;
+  // For an eligible network the dropdown is the authoritative placement control, so its value overrides
+  // any raw-JSON placement for that network: a chosen id is sent, and an explicit Personal/none ("")
+  // clears a raw organization_id/page_id/etc. — so what the user sees selected is what gets sent.
+  for (const net of eligibleNetworks) {
     const meta = PLACEMENT_META[net];
     if (!meta) continue;
-    platforms[net] = { ...(platforms[net] ?? {}), [meta.key]: placementId };
+    // Tri-state, so the dropdown only overrides raw JSON once the user has actually used it:
+    //  - untouched (no own key): leave any raw placement to stand;
+    //  - explicit Personal/none (own key ""): clear a raw placement;
+    //  - chosen id (own key, nonempty): override raw.
+    if (!Object.prototype.hasOwnProperty.call(networkPlacements, net)) continue;
+    const selection = networkPlacements[net];
+    if (selection) {
+      platforms[net] = { ...(platforms[net] ?? {}), [meta.key]: selection };
+    } else if (platforms[net] && meta.key in platforms[net]) {
+      const rest = { ...platforms[net] };
+      delete rest[meta.key];
+      if (Object.keys(rest).length > 0) platforms[net] = rest;
+      else delete platforms[net];
+    }
   }
   return Object.keys(platforms).length > 0 ? platforms : undefined;
+}
+
+/** The placement networks currently eligible for a dropdown selection (exactly one profile selected). */
+export function eligiblePlacementNetworks(profiles: Profile[]): Set<string> {
+  return new Set(eligiblePlacementProfiles(profiles).map((p) => p.platform.toLowerCase()));
+}
+
+/**
+ * Placement ids specified directly in raw Platform Parameters JSON, keyed by canonical network. Lets an
+ * untouched dropdown display the raw-controlled placement, so the picker reflects what will be sent.
+ */
+export function rawPlacementIds(rawJson: string): Record<string, string> {
+  const ids: Record<string, string> = {};
+  const trimmed = rawJson?.trim();
+  if (!trimmed || trimmed === "{}") return ids;
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      for (const [rawNet, value] of Object.entries(parsed as Record<string, unknown>)) {
+        const meta = PLACEMENT_META[rawNet.toLowerCase()];
+        if (!meta || !value || typeof value !== "object" || Array.isArray(value)) continue;
+        const id = (value as Record<string, unknown>)[meta.key];
+        if (typeof id === "string" && id) ids[rawNet.toLowerCase()] = id;
+      }
+    }
+  } catch {
+    // invalid JSON is blocked by form validation
+  }
+  return ids;
 }
 
 /**
@@ -126,6 +186,17 @@ export async function validatePlacements(
   selectedProfiles: Profile[],
 ): Promise<string | null> {
   const counts = placementNetworkCounts(selectedProfiles);
+
+  // Reject a known placement key placed under the wrong network in raw JSON (e.g. page_id under
+  // "instagram"), which would otherwise reach createPost unvalidated.
+  for (const [net, params] of Object.entries(platforms ?? {})) {
+    const ownKey = PLACEMENT_META[net]?.key;
+    for (const key of Object.keys(params)) {
+      if (PLACEMENT_KEYS.has(key) && key !== ownKey) {
+        return `Platform Parameters: "${key}" is not a placement for ${net} — remove it or move it to the matching network.`;
+      }
+    }
+  }
 
   // Re-fetch the valid placements for each single-profile network, tracking failures per network so a
   // request outage is reported as the real error rather than a misleading "choose a placement".
@@ -147,23 +218,32 @@ export async function validatePlacements(
   for (const [net, meta] of Object.entries(PLACEMENT_META)) {
     const count = counts[net] ?? 0;
     const sentId = platforms?.[net]?.[meta.key];
-    const hasPlacement = Boolean(sentId);
+    const hasPlacement = sentId != null && sentId !== "";
+
+    // A placement id must be a plain string; validation compares as a string but createPost sends the
+    // original value, so a raw-JSON number/array would otherwise validate yet be sent as a non-string.
+    if (hasPlacement && typeof sentId !== "string") {
+      return `${meta.label}: the placement id must be a string.`;
+    }
 
     if (count === 0) {
-      // A raw-JSON placement for a network with no selected profile would otherwise reach createPost
-      // unvalidated, targeting a page/board/org/channel/location for a network we aren't posting to.
+      // Stale dropdown selections are already filtered out in buildPlatforms, so a placement here can
+      // only come from raw Platform Parameters for a network with no selected profile — which would
+      // otherwise reach createPost unvalidated, targeting a destination we aren't posting to.
       if (hasPlacement) {
-        return `${meta.label}: select a profile on this network before choosing a placement.`;
+        return `${meta.label}: no profile on this network is selected — add one, or remove the placement from Platform Parameters.`;
       }
       continue;
     }
 
     if (count > 1) {
+      // Product rule: this extension sends one placement per network per post, so multiple profiles on
+      // the same network are published separately rather than sharing (or guessing) a single placement.
       if (hasPlacement) {
-        return `${meta.label}: a placement can't be shared across multiple profiles. Select a single profile on this network, or publish them in separate posts.`;
+        return `${meta.label}: one placement applies per network per post — select a single profile on this network, or publish the others separately.`;
       }
       if (requiresPlacement(net)) {
-        return `${meta.label}: multiple profiles are selected and each needs its own placement. Publish them in separate posts.`;
+        return `${meta.label}: multiple profiles on this network need their own posts — publish them separately.`;
       }
       continue;
     }
