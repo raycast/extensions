@@ -1,11 +1,10 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import type { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
 import { Issue } from "../api/issues";
 import { getUserAvatar } from "../helpers/avatars";
 import { getStatusColor } from "../helpers/issues";
-import { useEpicIssues } from "../hooks/useIssues";
 
 import IssueActions from "./IssueActions";
 
@@ -19,9 +18,7 @@ type IssueListItemProps = {
 export default function IssueListItem({ issue, mutate, onVisit, onClearRecentIssues }: IssueListItemProps) {
   const updatedAt = new Date(issue.fields.updated);
   const assignee = issue.fields.assignee;
-  const { issues: epicIssues } = useEpicIssues(issue?.id ?? "");
-  const hasChildIssues =
-    (issue.fields.subtasks && issue.fields.subtasks.length > 0) || (epicIssues && epicIssues.length > 0);
+  const hasChildIssues = !!issue.fields.subtasks?.length || issue.fields.issuetype.name === "Epic";
   const keywords = [issue.key, issue.fields.status.name, issue.fields.issuetype.name];
 
   if (issue.fields.priority) {
@@ -56,7 +53,10 @@ export default function IssueListItem({ issue, mutate, onVisit, onClearRecentIss
     <List.Item
       key={issue.id}
       keywords={keywords}
-      icon={{ value: issue.fields.issuetype.iconUrl, tooltip: `Issue Type: ${issue.fields.issuetype.name}` }}
+      icon={{
+        value: { source: issue.fields.issuetype.iconUrl, fallback: Icon.Circle },
+        tooltip: `Issue Type: ${issue.fields.issuetype.name}`,
+      }}
       title={issue.fields.summary || "Unknown issue title"}
       subtitle={issue.key}
       accessories={accessories}

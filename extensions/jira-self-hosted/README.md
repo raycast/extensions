@@ -8,8 +8,8 @@ Create, access and modify issues and sprints. Supports **Jira Server and Data Ce
 2. Fill in the required fields:
    - **Jira Base URL** — full URL including the context path if used, e.g. `https://jira.company.com` or `https://company.com/jira`.
    - **Username** — your Jira login name.
-   - **Password / API Token** — your Jira password, or a Personal Access Token if your instance supports it.
-   - **Auth Type** — choose **Basic** (username + password/token encoded as Base64) or **Bearer** (Personal Access Token; supported on Jira Data Center 9+).
+   - **Bearer Personal Access Token** — your Jira Personal Access Token. For Basic authentication, enter your password or API token instead.
+   - **Auth Type** — defaults to **Bearer** (Personal Access Token; supported on Jira Data Center 9+). Choose **Basic** to send a username + password/token encoded as Base64.
 
 ## Optional Settings
 

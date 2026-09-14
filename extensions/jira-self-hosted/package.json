@@ -5,6 +5,9 @@
   "description": "Create, access, and modify issues and sprints.",
   "icon": "icon.png",
   "author": "ernest0n",
+  "contributors": [
+    "Astatine-213"
+  ],
   "access": "public",
   "categories": [
     "Productivity"
@@ -152,8 +155,8 @@
     },
     {
       "name": "token",
-      "title": "Password / API Token",
-      "description": "Your Jira password or Personal Access Token",
+      "title": "Bearer Personal Access Token",
+      "description": "Your Jira Personal Access Token, sent as a Bearer token by default. For Basic authentication, enter your password or API token instead.",
       "type": "password",
       "required": true
     },
@@ -163,7 +166,7 @@
       "description": "Basic encodes username + password/token as Base64. Bearer sends a Personal Access Token directly (Jira Data Center 9+).",
       "type": "dropdown",
       "required": false,
-      "default": "basic",
+      "default": "bearer",
       "data": [
         {
           "title": "Basic (username + password/token)",

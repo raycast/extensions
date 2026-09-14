@@ -20,7 +20,7 @@ export const jiraWithApiToken = {
     const baseUrl = normalizeUrl(siteUrl);
 
     const authorizationHeader =
-      authType === "bearer" ? `Bearer ${token}` : `Basic ${Buffer.from(`${username}:${token}`).toString("base64")}`;
+      authType === "basic" ? `Basic ${Buffer.from(`${username}:${token}`).toString("base64")}` : `Bearer ${token}`;
 
     const myselfResponse = await jiraFetch(`${baseUrl}/rest/api/2/myself`, {
       headers: {
