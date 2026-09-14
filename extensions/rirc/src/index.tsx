@@ -256,12 +256,22 @@ export default function Command() {
         ? current
         : [itemToSave, ...current];
     });
+    let cleanupError: unknown;
     if (isSaved && gif.provider === "local") {
-      await trash(gif.mediaUrl);
+      try {
+        await trash(gif.mediaUrl);
+      } catch (error) {
+        cleanupError = error;
+      }
     }
     await showToast({
-      style: Toast.Style.Success,
-      title: isSaved ? "Removed from Saved" : "Saved GIF",
+      style: cleanupError ? Toast.Style.Failure : Toast.Style.Success,
+      title: cleanupError
+        ? "Removed, but could not trash file"
+        : isSaved
+          ? "Removed from Saved"
+          : "Saved GIF",
+      message: cleanupError instanceof Error ? cleanupError.message : undefined,
     });
   }
 
