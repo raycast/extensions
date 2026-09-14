@@ -1,5 +1,7 @@
 ## [Update] - {PR_MERGE_DATE}
 
+- Seed your own account into the owner scope only once the saved configuration has loaded, so the scope, watched repositories and saved filters are never replaced by defaults.
+- Report a comment or reply whose response is interrupted or unreadable as unconfirmed rather than failed, without resending it.
 - Preserve personal and organization owner scopes across both menu layouts, and honor Search Everywhere after migration.
 - List your own account alongside the organizations when choosing the owner scope, selected by default and removable.
 - Refresh the menu bar automatically when a tracking setting changes, instead of waiting for Force Refresh.

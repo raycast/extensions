@@ -16,17 +16,26 @@ import type { PullRequest, Viewer } from "./lib/types";
  * Loads the persisted config and exposes an `update` that writes it back,
  * refreshes every consumer in this view, and nudges the menu bar so the change
  * shows up there too without a manual refresh.
+ *
+ * `loaded` separates "the saved configuration says this" from the defaults
+ * standing in while it is read. Writing back a placeholder would save the
+ * defaults over the real scope, watch list and filters, so anything that
+ * writes waits for it.
  */
 export function useConfig() {
   const { data, isLoading, revalidate, mutate } = useCachedPromise(loadConfig, [], {
-    initialData: DEFAULT_CONFIG,
     keepPreviousData: true,
   });
 
   const config = data ?? DEFAULT_CONFIG;
+  const loaded = data !== undefined;
 
   const update = useCallback(
     async (next: Config) => {
+      // Every settings screen builds `next` by spreading the config it holds,
+      // so writing before the saved one arrives would persist the defaults.
+      // The wait is a LocalStorage read; the loss it prevents is permanent.
+      if (data === undefined) return;
       await mutate(
         saveConfig(next).then(() => next),
         {
@@ -39,10 +48,10 @@ export function useConfig() {
       // quiet moment of its own before touching the menu.
       void refreshMenuBar();
     },
-    [mutate],
+    [data, mutate],
   );
 
-  return { config, isLoading, update, revalidate };
+  return { config, isLoading, loaded, update, revalidate };
 }
 
 /** Loads the authenticated user, their orgs, and their teams. */

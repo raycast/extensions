@@ -28,6 +28,18 @@ const rateLimited = () =>
       headers: { "retry-after": "0" },
     });
 const json = payload => () => new Response(JSON.stringify({ data: payload }));
+/** Headers arrive, then the body stream dies — GitHub already ran the mutation. */
+const interruptedBody = () => () =>
+  new Response(
+    new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('{"data":'));
+        controller.error(new Error("socket hang up"));
+      },
+    }),
+  );
+const unreadableBody = () => () => new Response("<html>502 Bad Gateway</html>", { status: 200 });
+const emptyBody = () => () => new Response(JSON.stringify({}));
 
 const COMMENT = { author: { login: "tester" }, bodyText: "looks good", createdAt: "2026-09-11T09:00:00Z" };
 
@@ -54,6 +66,34 @@ test("an unconfirmed write tells the reader to check GitHub first", async () => 
     assert.match(error.message, /check the pull request on GitHub/);
     return true;
   });
+});
+
+test("a write whose response is interrupted is reported unconfirmed, not failed", async () => {
+  const sent = respondWith(interruptedBody());
+  await assert.rejects(addComment("pr-node-id", "looks good"), UnconfirmedWriteError);
+  assert.equal(sent.length, 1, "the write must not be replayed");
+});
+
+test("a write whose response cannot be parsed is reported unconfirmed", async () => {
+  const sent = respondWith(unreadableBody());
+  await assert.rejects(replyToThread("thread-id", "looks good"), UnconfirmedWriteError);
+  assert.equal(sent.length, 1);
+});
+
+test("a write answered with neither data nor errors is reported unconfirmed", async () => {
+  const sent = respondWith(emptyBody());
+  await assert.rejects(addComment("pr-node-id", "looks good"), UnconfirmedWriteError);
+  assert.equal(sent.length, 1);
+});
+
+test("an unreadable response to a read stays an ordinary failure", async () => {
+  const sent = respondWith(unreadableBody());
+  await assert.rejects(graphql("query { viewer { login } }"), error => {
+    assert.equal(error.name, "GraphQLError");
+    assert.doesNotMatch(error.message, /did not confirm/);
+    return true;
+  });
+  assert.equal(sent.length, 1);
 });
 
 test("a rate-limited write still retries, since GitHub refused to run it", async () => {

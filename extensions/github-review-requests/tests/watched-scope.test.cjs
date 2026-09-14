@@ -13,6 +13,13 @@ async function config(overrides = {}) {
   return { ...(await loadConfig()), ...overrides };
 }
 
+/** The configuration as it would be on disk when a command starts up. */
+async function saved(overrides = {}) {
+  const next = await config(overrides);
+  await saveConfig(next);
+  return next;
+}
+
 test("your own repositories are swept by default", async () => {
   assert.deepEqual(watchedScopeTokens(await config(), LOGIN), ["user:tester"]);
 });
@@ -88,39 +95,44 @@ test("watched repositories add to the owner scope instead of replacing it", asyn
 const { ensureOwnerInScope } = require("../src/attention/lib/config.ts");
 
 test("your account is added to an existing owner scope on first run", async () => {
-  const seeded = await ensureOwnerInScope(await config({ activeOrgs: ["acme", "globex"] }), LOGIN);
+  await saved({ activeOrgs: ["acme", "globex"] });
+  const seeded = await ensureOwnerInScope(LOGIN);
   assert.deepEqual(seeded.activeOrgs, [LOGIN, "acme", "globex"]);
   assert.equal(seeded.ownerSeeded, true);
 });
 
 test("removing yourself afterwards sticks across launches", async () => {
-  const seeded = await ensureOwnerInScope(await config({ activeOrgs: ["acme"] }), LOGIN);
-  const withoutMe = { ...seeded, activeOrgs: seeded.activeOrgs.filter(o => o !== LOGIN) };
-  await saveConfig(withoutMe);
+  await saved({ activeOrgs: ["acme"] });
+  const seeded = await ensureOwnerInScope(LOGIN);
+  await saveConfig({ ...seeded, activeOrgs: seeded.activeOrgs.filter(o => o !== LOGIN) });
 
-  const reloaded = await ensureOwnerInScope(await loadConfig(), LOGIN);
+  const reloaded = await ensureOwnerInScope(LOGIN);
   assert.deepEqual(reloaded.activeOrgs, ["acme"], "the seed must not undo a deliberate removal");
 });
 
 test("an empty scope is left searching everywhere rather than narrowed to you", async () => {
-  const seeded = await ensureOwnerInScope(await config({ activeOrgs: [] }), LOGIN);
+  await saved({ activeOrgs: [] });
+  const seeded = await ensureOwnerInScope(LOGIN);
   assert.deepEqual(seeded.activeOrgs, [], "narrowing here would hide review requests from organizations");
   assert.equal(seeded.ownerSeeded, true);
 });
 
 test("seeding twice adds your account only once", async () => {
-  const once = await ensureOwnerInScope(await config({ activeOrgs: ["acme"] }), LOGIN);
-  const twice = await ensureOwnerInScope(once, LOGIN);
+  await saved({ activeOrgs: ["acme"] });
+  await ensureOwnerInScope(LOGIN);
+  const twice = await ensureOwnerInScope(LOGIN);
   assert.deepEqual(twice.activeOrgs, [LOGIN, "acme"]);
 });
 
 test("an account already in scope is not duplicated", async () => {
-  const seeded = await ensureOwnerInScope(await config({ activeOrgs: ["acme", LOGIN] }), LOGIN);
+  await saved({ activeOrgs: ["acme", LOGIN] });
+  const seeded = await ensureOwnerInScope(LOGIN);
   assert.deepEqual(seeded.activeOrgs, ["acme", LOGIN]);
 });
 
 test("an unknown identity seeds nothing and stays unseeded", async () => {
-  const untouched = await ensureOwnerInScope(await config({ activeOrgs: ["acme"] }), "");
+  await saved({ activeOrgs: ["acme"] });
+  const untouched = await ensureOwnerInScope("");
   assert.deepEqual(untouched.activeOrgs, ["acme"]);
   assert.ok(!untouched.ownerSeeded, "a later launch that knows the login must still get its chance");
 });

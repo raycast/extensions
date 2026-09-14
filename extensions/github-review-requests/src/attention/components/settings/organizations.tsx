@@ -13,7 +13,7 @@ import { ensureOwnerInScope } from "../../lib/config";
  * from here too.
  */
 export function Organizations() {
-  const { config, update, revalidate } = useConfig();
+  const { config, loaded, update, revalidate } = useConfig();
   const { data: viewer, isLoading } = useViewer();
 
   const orgs = viewer?.orgs ?? [];
@@ -22,14 +22,18 @@ export function Organizations() {
 
   // Show your account already ticked the first time this screen knows who you
   // are, rather than waiting for the menu bar's next run to seed it.
+  //
+  // Not before the saved configuration is in hand: until then `config` is the
+  // defaults, whose empty `ownerSeeded` would ask for a seed that writes those
+  // defaults over the scope, watched repositories and saved filters on disk.
   useEffect(() => {
-    if (!login || config.ownerSeeded) return;
-    ensureOwnerInScope(config, login).then(next => {
-      if (next !== config) revalidate();
-    });
-  }, [login, config, revalidate]);
+    if (!login || !loaded || config.ownerSeeded) return;
+    void ensureOwnerInScope(login).then(() => revalidate());
+  }, [login, loaded, config.ownerSeeded, revalidate]);
 
   async function toggle(org: string) {
+    // Same reason the seed waits: this writes the whole configuration back.
+    if (!loaded) return;
     if (active.has(org.toLowerCase())) {
       await update({ ...config, activeOrgs: config.activeOrgs.filter(o => o.toLowerCase() !== org.toLowerCase()) });
       return;
@@ -39,6 +43,11 @@ export function Organizations() {
     // repositories, which were in scope a moment ago.
     const seedSelf = config.activeOrgs.length === 0 && login && org.toLowerCase() !== login.toLowerCase();
     await update({ ...config, activeOrgs: seedSelf ? [login, org] : [...config.activeOrgs, org] });
+  }
+
+  async function scopeTo(activeOrgs: string[]) {
+    if (!loaded) return;
+    await update({ ...config, activeOrgs });
   }
 
   function ownerItem(owner: string, icon: Icon) {
@@ -60,16 +69,8 @@ export function Organizations() {
               title={isActive ? "Remove from Scope" : "Add to Scope"}
               onAction={() => toggle(owner)}
             />
-            <Action
-              icon={Icon.BullsEye}
-              title="Only This Owner"
-              onAction={() => update({ ...config, activeOrgs: [owner] })}
-            />
-            <Action
-              icon={Icon.Globe}
-              title="Search Everywhere"
-              onAction={() => update({ ...config, activeOrgs: [] })}
-            />
+            <Action icon={Icon.BullsEye} title="Only This Owner" onAction={() => scopeTo([owner])} />
+            <Action icon={Icon.Globe} title="Search Everywhere" onAction={() => scopeTo([])} />
           </ActionPanel>
         }
       />
@@ -78,20 +79,20 @@ export function Organizations() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || !loaded}
       navigationTitle="Organizations"
       searchBarPlaceholder="Filter organizations…"
       actions={
         <ActionPanel>
-          <Action icon={Icon.Globe} title="Search Everywhere" onAction={() => update({ ...config, activeOrgs: [] })} />
+          <Action icon={Icon.Globe} title="Search Everywhere" onAction={() => scopeTo([])} />
         </ActionPanel>
       }
     >
       <List.EmptyView
         icon={Icon.Building}
-        title={isLoading ? "Loading owners…" : "No owners found"}
+        title={isLoading || !loaded ? "Loading owners…" : "No owners found"}
         description={
-          isLoading
+          isLoading || !loaded
             ? undefined
             : "Your token can't see any orgs. Grant the read:org scope with `gh auth refresh -s read:org`."
         }

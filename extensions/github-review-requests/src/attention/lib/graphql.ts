@@ -34,9 +34,10 @@ export class GraphQLError extends Error {
 
 /**
  * A write that failed without GitHub saying whether it landed — a dropped
- * connection, or a 5xx returned after the mutation may already have been
- * applied. Sending it again could post a duplicate, so the client stops and
- * hands the decision to the person, who can check the pull request first.
+ * connection, a 5xx returned after the mutation may already have been applied,
+ * or a reply whose body was interrupted, unreadable, or carried no result.
+ * Sending it again could post a duplicate, so the client stops and hands the
+ * decision to the person, who can check the pull request first.
  */
 export class UnconfirmedWriteError extends Error {
   constructor(reason: string) {
@@ -182,7 +183,16 @@ export async function graphql<T>(
         continue;
       }
 
-      const text = await response.text();
+      let text: string;
+      try {
+        text = await response.text();
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        // The headers arrived, so GitHub ran the operation; only the body was
+        // lost on the way back. A write has no idea whether it landed.
+        if (!idempotent) throw new UnconfirmedWriteError(`its response was interrupted: ${reason}`);
+        throw new GraphQLError(`Could not read GitHub's response: ${reason}`);
+      }
       const secondary = response.status === 403 && text.toLowerCase().includes("secondary rate limit");
 
       if (response.status >= 500 || response.status === 429 || secondary) {
@@ -215,7 +225,15 @@ export async function graphql<T>(
         throw new GraphQLError(`GitHub returned ${response.status}: ${text.trim().slice(0, 200)}`, ssoHeader);
       }
 
-      const parsed = JSON.parse(text) as GraphQLResponse<T>;
+      let parsed: GraphQLResponse<T>;
+      try {
+        parsed = JSON.parse(text) as GraphQLResponse<T>;
+      } catch {
+        // Truncated or otherwise unreadable: same position as a lost body, and
+        // the mutation on the other end may well have been applied.
+        if (!idempotent) throw new UnconfirmedWriteError("its response could not be read");
+        throw new GraphQLError(`GitHub returned an unreadable response: ${text.trim().slice(0, 200)}`);
+      }
       if (parsed.errors?.length) {
         const messages = parsed.errors.map(e => e.message);
         const joined = messages.join("; ");
@@ -230,6 +248,9 @@ export async function graphql<T>(
         }
         throw new GraphQLError(joined, ssoHeader);
       }
+      // Valid JSON carrying neither data nor errors says nothing about what
+      // GitHub did with the mutation, so a write is unconfirmed here too.
+      if (!parsed.data && !idempotent) throw new UnconfirmedWriteError("its response carried no result");
       return parsed.data as T;
     }
 

@@ -2,13 +2,7 @@ import usePullStore from "./usePullStore";
 import { useEffect, useState, useMemo } from "react";
 import { getLogin } from "../integration/getLogin";
 import { PullRequestShort } from "../types";
-import {
-  ensureOwnerInScope,
-  loadConfig,
-  normalizeAuthor,
-  ownerScopeTokens,
-  watchedScopeTokens,
-} from "../attention/lib/config";
+import { ensureOwnerInScope, normalizeAuthor, ownerScopeTokens, watchedScopeTokens } from "../attention/lib/config";
 
 const usePulls = () => {
   const { isPullStoreLoading, updatedPulls, recentlyVisitedPulls, visitPull, updatePulls, fetchPulls } = usePullStore();
@@ -36,10 +30,10 @@ const usePulls = () => {
     Promise.resolve()
       .then(() => console.debug("runPullIteration >>>>>>>>>"))
       .then(() => setIsRemotePullsLoading(true))
-      .then(() => loadConfig())
       // Runs on every launch, so your own account reaches the scope even if
-      // the settings screen is never opened.
-      .then(config => ensureOwnerInScope(config, viewerLogin ?? login))
+      // the settings screen is never opened. It reads the saved configuration
+      // itself and hands it back, seeded or not.
+      .then(() => ensureOwnerInScope(viewerLogin ?? login))
       .then(config => {
         setScopeOwners(config.activeOrgs);
         const base = ["is:open", "draft:false", "archived:false"];

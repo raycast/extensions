@@ -257,8 +257,16 @@ export function ownerQualifier(config: Config): string {
  * An empty scope is left alone: it already searches everywhere, your own
  * repositories included, and narrowing it to just you would hide the review
  * requests that arrive from organizations.
+ *
+ * It reads the stored configuration itself rather than taking a caller's copy:
+ * a view still loading holds placeholder defaults, and another command may
+ * have written since the caller read. Seeding one flag must not carry an
+ * outdated scope, watch list or saved filters back over what was saved.
+ *
+ * Returns the configuration as it now stands, seeded or not.
  */
-export async function ensureOwnerInScope(config: Config, login: string): Promise<Config> {
+export async function ensureOwnerInScope(login: string): Promise<Config> {
+  const config = await loadConfig();
   if (config.ownerSeeded || !login) return config;
 
   const next: Config = { ...config, ownerSeeded: true };

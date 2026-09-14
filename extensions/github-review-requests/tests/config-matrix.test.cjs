@@ -32,6 +32,12 @@ beforeEach(() => {
 });
 
 const config = async (overrides = {}) => ({ ...(await loadConfig()), ...overrides });
+/** The configuration as it would be on disk when a command starts up. */
+const saved = async (overrides = {}) => {
+  const next = await config(overrides);
+  await saveConfig(next);
+  return next;
+};
 const categoryQuery = (categories, id) => categories.find(c => c.id === id)?.query;
 
 // ---------------------------------------------------------------------------
@@ -228,18 +234,42 @@ test("a team subject becomes the dedicated team-review qualifier", async () => {
 // ---------------------------------------------------------------------------
 
 test("your account joins an existing scope once and a later removal sticks", async () => {
-  const seeded = await ensureOwnerInScope(await config({ activeOrgs: ["acme"] }), LOGIN);
+  await saved({ activeOrgs: ["acme"] });
+  const seeded = await ensureOwnerInScope(LOGIN);
   assert.deepEqual(seeded.activeOrgs, [LOGIN, "acme"]);
 
   await saveConfig({ ...seeded, activeOrgs: ["acme"] });
-  const reloaded = await ensureOwnerInScope(await loadConfig(), LOGIN);
+  const reloaded = await ensureOwnerInScope(LOGIN);
   assert.deepEqual(reloaded.activeOrgs, ["acme"]);
 });
 
 test("seeding never narrows an empty scope away from searching everywhere", async () => {
-  const seeded = await ensureOwnerInScope(await config({ activeOrgs: [] }), LOGIN);
+  await saved({ activeOrgs: [] });
+  const seeded = await ensureOwnerInScope(LOGIN);
   assert.deepEqual(seeded.activeOrgs, []);
   assert.equal(seeded.ownerSeeded, true);
+});
+
+test("seeding keeps the saved settings, not the defaults a loading view holds", async () => {
+  // What is on disk when the owner picker opens.
+  await saved({
+    activeOrgs: ["acme"],
+    repos: [{ owner: "acme", name: "api" }],
+    watchTeams: ["acme/core"],
+    ignoredAuthors: ["mybot"],
+    filters: [{ id: "f1", name: "Mine", role: "author" }],
+  });
+
+  // The picker seeds from whatever it holds, which early on is DEFAULT_CONFIG.
+  const seeded = await ensureOwnerInScope(LOGIN);
+  const stored = await loadConfig();
+
+  assert.deepEqual(seeded.activeOrgs, [LOGIN, "acme"]);
+  assert.deepEqual(stored.activeOrgs, [LOGIN, "acme"], "the scope must survive the seed");
+  assert.deepEqual(stored.repos, [{ owner: "acme", name: "api" }], "watched repositories must survive the seed");
+  assert.deepEqual(stored.watchTeams, ["acme/core"]);
+  assert.deepEqual(stored.ignoredAuthors, ["mybot"]);
+  assert.deepEqual(stored.filters, [{ id: "f1", name: "Mine", role: "author" }], "saved filters must survive the seed");
 });
 
 // ---------------------------------------------------------------------------
