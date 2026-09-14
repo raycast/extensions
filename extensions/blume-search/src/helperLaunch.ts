@@ -21,7 +21,7 @@ export function helperLaunchForApplication(application: InstalledApplication): B
   );
   const command = executableNames.map((name) => join(application.path, "Contents", "MacOS", name)).find(existsSync);
 
-  if (!command || !existsSync(helper)) {
+  if (!command) {
     throw new Error(`${application.name} does not include Raycast search yet. Update Blume and try again.`);
   }
   return {

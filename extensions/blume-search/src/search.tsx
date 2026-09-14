@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  List,
-  openExtensionPreferences,
-  type Application,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 
 import { createBlumeSearchClient, SearchSupersededError, type BlumeSearchClient } from "./blumeSearchClient.ts";
@@ -22,12 +13,10 @@ import {
   type SearchCategoryFilter,
 } from "./searchModel.ts";
 
-interface Preferences {
-  application?: Application;
-}
-
 export default function SearchBlume(): React.JSX.Element {
   const preferences = getPreferenceValues<Preferences>();
+  const applicationPath = preferences.application?.path;
+  const [retry, setRetry] = useState(0);
   const clientRef = useRef<BlumeSearchClient | null>(null);
   const [clientReady, setClientReady] = useState(false);
   const [deepLinkProtocol, setDeepLinkProtocol] = useState<"blume" | "blume-canary">("blume");
@@ -43,7 +32,7 @@ export default function SearchBlume(): React.JSX.Element {
     let active = true;
     setClientReady(false);
     setState(searchStateForApplicationChange());
-    void createBlumeSearchClient(preferences.application)
+    void createBlumeSearchClient(getPreferenceValues<Preferences>().application)
       .then((client) => {
         if (!active) {
           client.dispose();
@@ -67,7 +56,7 @@ export default function SearchBlume(): React.JSX.Element {
       clientRef.current?.dispose();
       clientRef.current = null;
     };
-  }, [preferences.application]);
+  }, [applicationPath, retry]);
 
   useEffect(() => {
     let current = true;
@@ -150,6 +139,11 @@ export default function SearchBlume(): React.JSX.Element {
           actions={
             state.error ? (
               <ActionPanel>
+                <Action
+                  title="Retry Search"
+                  onAction={() => setRetry((value) => value + 1)}
+                  icon={Icon.ArrowClockwise}
+                />
                 <Action title="Open Extension Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
               </ActionPanel>
             ) : undefined
