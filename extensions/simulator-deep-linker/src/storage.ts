@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { access, readFile, realpath, rename, stat, unlink, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, realpath, rename, rm, stat, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -133,30 +133,81 @@ export function decodeDeepLinks(source: string): DeepLink[] {
 }
 
 export async function addDeepLink(configuration: StorageConfiguration, values: NewDeepLink): Promise<DeepLink> {
-  const links = await readDeepLinks(configuration.storagePath);
-  const timestamp = iso8601WithoutFractionalSeconds(new Date());
-  const deepLink: DeepLink = {
-    createdAt: timestamp,
-    group: values.group,
-    id: randomUUID(),
-    isFavorite: values.isFavorite,
-    tags: values.tags,
-    title: values.title,
-    updatedAt: timestamp,
-    urlString: values.urlString,
-  };
+  return withStorageLock(configuration.storagePath, async (storagePath) => {
+    const links = await readDeepLinks(storagePath);
+    const timestamp = iso8601WithoutFractionalSeconds(new Date());
+    const deepLink: DeepLink = {
+      createdAt: timestamp,
+      group: values.group,
+      id: randomUUID(),
+      isFavorite: values.isFavorite,
+      tags: values.tags,
+      title: values.title,
+      updatedAt: timestamp,
+      urlString: values.urlString,
+    };
 
-  await writeDeepLinksAtomically(configuration.storagePath, [deepLink, ...links]);
-  return deepLink;
+    await writeDeepLinksAtomically(storagePath, [deepLink, ...links]);
+    return deepLink;
+  });
 }
 
 export async function deleteDeepLink(configuration: StorageConfiguration, id: string): Promise<void> {
-  const links = await readDeepLinks(configuration.storagePath);
-  const remainingLinks = links.filter((link) => link.id !== id);
-  if (remainingLinks.length === links.length) {
-    throw new Error("The deep link no longer exists in storage.");
+  await withStorageLock(configuration.storagePath, async (storagePath) => {
+    const links = await readDeepLinks(storagePath);
+    const remainingLinks = links.filter((link) => link.id !== id);
+    if (remainingLinks.length === links.length) {
+      throw new Error("The deep link no longer exists in storage.");
+    }
+    await writeDeepLinksAtomically(storagePath, remainingLinks);
+  });
+}
+
+const storageLockRetryMilliseconds = 25;
+const storageLockTimeoutMilliseconds = 10_000;
+const staleStorageLockMilliseconds = 120_000;
+
+async function withStorageLock<T>(storagePath: string, operation: (storagePath: string) => Promise<T>): Promise<T> {
+  const destinationPath = await realpath(storagePath);
+  const lockPath = `${destinationPath}.simulator-deep-linker.lock`;
+  const deadline = Date.now() + storageLockTimeoutMilliseconds;
+
+  while (true) {
+    try {
+      await mkdir(lockPath);
+      break;
+    } catch (error) {
+      if (!isNodeError(error, "EEXIST")) throw error;
+      await removeStaleStorageLock(lockPath);
+      if (Date.now() >= deadline) {
+        throw new Error("Timed out waiting for another Simulator Deep Linker writer to finish.");
+      }
+      await delay(storageLockRetryMilliseconds);
+    }
   }
-  await writeDeepLinksAtomically(configuration.storagePath, remainingLinks);
+
+  try {
+    return await operation(destinationPath);
+  } finally {
+    await rm(lockPath, { recursive: true, force: true });
+  }
+}
+
+async function removeStaleStorageLock(lockPath: string): Promise<void> {
+  try {
+    const lockStats = await stat(lockPath);
+    if (Date.now() - lockStats.mtimeMs <= staleStorageLockMilliseconds) return;
+
+    const stalePath = `${lockPath}.stale.${randomUUID()}`;
+    await rename(lockPath, stalePath);
+    await rm(stalePath, { recursive: true, force: true });
+  } catch (error) {
+    if (!isNodeError(error, "ENOENT")) throw error;
+  }
+}
+
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 async function writeDeepLinksAtomically(storagePath: string, links: DeepLink[]): Promise<void> {

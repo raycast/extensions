@@ -9,7 +9,7 @@ Search your saved deep-link library from Raycast, switch environments, copy reso
 1. Install Simulator Deep Linker:
    - Homebrew: `brew tap StefanBoblic/tap && brew install --cask simulator-deep-linker`
    - Or download the latest free release from [GitHub Releases](https://github.com/StefanBoblic/SimulatorDeepLinker/releases/latest).
-2. Open the macOS app once. It creates the shared storage and publishes its location for the extension.
+2. Open the macOS app once. Current versions create the shared storage immediately and publish its location for the extension. If you use an older release, save your first deep link in the app to create `deeplinks.json` before opening the extension.
 3. For Apple targets, install Xcode. For Android targets, install Android Platform Tools and make sure `adb` can see the device.
 4. In Raycast's extension preferences, choose the target platform. Add a bundle identifier for a physical Apple device or, optionally, an Android package to constrain link handling.
 

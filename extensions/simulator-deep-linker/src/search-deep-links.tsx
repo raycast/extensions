@@ -35,6 +35,7 @@ import {
   builtInEnvironments,
   decodeEnvironments,
   findUnresolvedVariables,
+  preferredEnvironmentID,
   resolveDeepLink,
 } from "./deep-link-utils.js";
 import { createLatestRequestGuard, fallbackTarget, normalizeTarget } from "./target-utils.js";
@@ -53,7 +54,7 @@ export default function SearchDeepLinks() {
   const [links, setLinks] = useState<DeepLink[]>([]);
   const [environments, setEnvironments] = useState<LinkEnvironment[]>(builtInEnvironments);
   const [selectedEnvironmentID, setSelectedEnvironmentID] = useState(
-    () => environmentByPreference(builtInEnvironments, preferences.defaultEnvironment)?.id ?? builtInEnvironments[0].id,
+    () => preferredEnvironmentID(builtInEnvironments, preferences.defaultEnvironment) ?? builtInEnvironments[0].id,
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -76,11 +77,9 @@ export default function SearchDeepLinks() {
       setStorageConfiguration(configuration);
       setLinks(decodedLinks);
       setEnvironments(decodedEnvironments);
-      if (!decodedEnvironments.some((environment) => environment.id === selectedEnvironmentID)) {
-        setSelectedEnvironmentID(
-          environmentByPreference(decodedEnvironments, preferences.defaultEnvironment)?.id ?? decodedEnvironments[0].id,
-        );
-      }
+      setSelectedEnvironmentID(
+        preferredEnvironmentID(decodedEnvironments, preferences.defaultEnvironment) ?? decodedEnvironments[0].id,
+      );
     } catch (loadError) {
       setStorageConfiguration(undefined);
       setError(loadError instanceof Error ? loadError.message : String(loadError));
@@ -420,17 +419,6 @@ async function readEnvironments(environmentsPath: string): Promise<LinkEnvironme
     if (isNodeError(error, "ENOENT")) return builtInEnvironments;
     throw new Error(`Could not read environments: ${error instanceof Error ? error.message : String(error)}`);
   }
-}
-
-function environmentByPreference(
-  environments: LinkEnvironment[],
-  preference: string | undefined,
-): LinkEnvironment | undefined {
-  const normalizedPreference = preference?.trim();
-  if (!normalizedPreference) return undefined;
-  return environments.find(
-    (environment) => environment.name.localeCompare(normalizedPreference, undefined, { sensitivity: "accent" }) === 0,
-  );
 }
 
 function targetName(selectedTarget: string | undefined, devices: TargetDevice[]): string | undefined {

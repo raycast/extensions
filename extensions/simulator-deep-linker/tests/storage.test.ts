@@ -6,6 +6,7 @@ import test from "node:test";
 import {
   addDeepLink,
   decodeDeepLinks,
+  deleteDeepLink,
   resolveStorageConfigurationAt,
   type StorageConfiguration,
 } from "../src/storage.js";
@@ -81,6 +82,59 @@ test("atomic updates preserve a custom storage symlink", async (t) => {
 
   assert.equal((await lstat(symlinkPath)).isSymbolicLink(), true);
   assert.equal(decodeDeepLinks(await readFile(targetPath, "utf8")).length, 2);
+});
+
+test("concurrent additions preserve every mutation", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  await writeFile(storagePath, "[]\n");
+  const configuration: StorageConfiguration = {
+    storagePath,
+    environmentsPath: path.join(directory, "environments.json"),
+  };
+
+  await Promise.all(
+    Array.from({ length: 20 }, (_, index) =>
+      addDeepLink(configuration, {
+        title: `Concurrent ${index}`,
+        urlString: `demoapp://concurrent/${index}`,
+        group: "",
+        tags: [],
+        isFavorite: false,
+      }),
+    ),
+  );
+
+  const links = decodeDeepLinks(await readFile(storagePath, "utf8"));
+  assert.equal(links.length, 20);
+  assert.equal(new Set(links.map((link) => link.urlString)).size, 20);
+});
+
+test("concurrent add and delete preserve both mutations", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  await writeFile(storagePath, `${JSON.stringify([validDeepLink])}\n`);
+  const configuration: StorageConfiguration = {
+    storagePath,
+    environmentsPath: path.join(directory, "environments.json"),
+  };
+
+  await Promise.all([
+    addDeepLink(configuration, {
+      title: "New link",
+      urlString: "demoapp://new",
+      group: "",
+      tags: [],
+      isFavorite: false,
+    }),
+    deleteDeepLink(configuration, validDeepLink.id),
+  ]);
+
+  const links = decodeDeepLinks(await readFile(storagePath, "utf8"));
+  assert.deepEqual(
+    links.map((link) => link.urlString),
+    ["demoapp://new"],
+  );
 });
 
 async function temporaryDirectory(t: test.TestContext): Promise<string> {

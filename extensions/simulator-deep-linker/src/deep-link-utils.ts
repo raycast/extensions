@@ -10,6 +10,19 @@ export const builtInEnvironments: LinkEnvironment[] = [
   { id: "00000000-0000-0000-0000-000000000002", name: "Production", variables: {}, isBuiltIn: true },
 ];
 
+export function preferredEnvironmentID(
+  environments: LinkEnvironment[],
+  preference: string | undefined,
+): string | undefined {
+  const normalizedPreference = preference?.trim();
+  if (!normalizedPreference) return environments[0]?.id;
+  return (
+    environments.find(
+      (environment) => environment.name.localeCompare(normalizedPreference, undefined, { sensitivity: "accent" }) === 0,
+    )?.id ?? environments[0]?.id
+  );
+}
+
 export function resolveDeepLink(source: string, variables: Record<string, string>): string {
   return Object.entries(variables).reduce(
     (value, [key, replacement]) =>

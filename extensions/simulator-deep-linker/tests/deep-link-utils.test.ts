@@ -6,6 +6,7 @@ import {
   buildADBRemoteCommand,
   decodeEnvironments,
   findUnresolvedVariables,
+  preferredEnvironmentID,
   resolveDeepLink,
 } from "../src/deep-link-utils.js";
 
@@ -75,6 +76,21 @@ test("validates and normalizes environment data", () => {
     () => decodeEnvironments(JSON.stringify([{ id: "not-a-uuid", name: "Broken", variables: { TOKEN: 42 } }])),
     /invalid format/,
   );
+});
+
+test("selects a saved custom default environment after environments load", () => {
+  const environments = decodeEnvironments(
+    JSON.stringify([
+      {
+        id: "105A7E9C-EE8D-4F3D-905A-5D568B2EB382",
+        name: "Staging",
+        variables: {},
+      },
+    ]),
+  );
+
+  assert.equal(preferredEnvironmentID(environments, " staging "), "105A7E9C-EE8D-4F3D-905A-5D568B2EB382");
+  assert.equal(preferredEnvironmentID(environments, "Missing"), environments[0].id);
 });
 
 test("restores built-in environments without duplicating legacy names or IDs", () => {
