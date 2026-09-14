@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vitra",
   "title": "Vitra",
-  "description": "See where your day stands — readiness, sleep and recovery from your Oura ring, read locally from the Vitra desktop app.",
+  "description": "Requires the Vitra desktop app. Reads Vitra's local snapshot to show today's readiness, sleep and recovery from your Oura ring — no Oura account, no network access.",
   "icon": "vitra.png",
   "author": "pedro_pt_thomaz",
   "categories": [
@@ -18,7 +18,7 @@
       "name": "today",
       "title": "Vitra Today",
       "subtitle": "Vitra",
-      "description": "Today's readiness, sleep and recovery, read from Vitra's local snapshot.",
+      "description": "Requires the Vitra desktop app. Today's readiness, sleep and recovery, read from the snapshot Vitra writes on this machine.",
       "mode": "view"
     }
   ],
