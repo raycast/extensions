@@ -17,7 +17,7 @@ type DustDocument = {
   referenceCount: number;
 };
 
-type ConversationContext = {
+export type ConversationContext = {
   timezone: string;
   username: string;
   email: string | null;
@@ -47,7 +47,7 @@ const useConversationContext = () => {
   return { context, isLoading };
 };
 
-async function answerQuestion({
+export async function answerQuestion({
   question,
   dustApi,
   context,
@@ -57,6 +57,7 @@ async function answerQuestion({
   setDustDocuments,
   agent = DUST_AGENT,
   signal,
+  onAnswer,
 }: {
   question: string;
   dustApi: DustAPI;
@@ -67,6 +68,7 @@ async function answerQuestion({
   setDustDocuments: (documents: DustDocument[]) => void;
   agent?: AgentType;
   signal: AbortSignal;
+  onAnswer?: (answer: string) => void;
 }) {
   function removeCiteMention(message: string) {
     const regex = / ?:cite\[[a-zA-Z0-9, ]+\]/g;
@@ -224,6 +226,7 @@ async function answerQuestion({
               const error = event.error as { code: string; message: string };
               console.error(`User message error: code: ${error.code} message: ${error.message}`);
               setDustAnswer(`**User message error** ${error.message}`);
+              showToast({ style: Toast.Style.Failure, title: "User message error", message: error.message });
               streamError = true;
               break;
             }
@@ -231,6 +234,7 @@ async function answerQuestion({
               const error = event.error as { code: string; message: string };
               console.error(`Agent message error: code: ${error.code} message: ${error.message}`);
               setDustAnswer(`**Dust API error** ${error.message}`);
+              showToast({ style: Toast.Style.Failure, title: "Dust API error", message: error.message });
               streamError = true;
               break;
             }
@@ -274,6 +278,7 @@ async function answerQuestion({
                 date: new Date(),
                 agent: agent.name,
               });
+              onAnswer?.(answer);
               break;
             }
             default:
@@ -317,7 +322,15 @@ async function answerQuestion({
 }
 
 export const AskDustQuestion = withPickedWorkspace(
-  ({ question, agent = DUST_AGENT }: { question: string; agent?: AgentType }) => {
+  ({
+    question,
+    agent = DUST_AGENT,
+    onAnswer,
+  }: {
+    question: string;
+    agent?: AgentType;
+    onAnswer?: (answer: string) => void;
+  }) => {
     const [conversationId, setConversationId] = useState<string | undefined>(undefined);
     const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
     const [dustAnswer, setDustAnswer] = useState<string | undefined>(undefined);
@@ -339,13 +352,15 @@ export const AskDustQuestion = withPickedWorkspace(
           setConversationTitle,
           setDustDocuments,
           signal: abortController.signal,
+          onAnswer,
         });
         return () => {
           abortController.abort();
         };
       }
-      // Note: context is intentionally omitted — it's a new object reference on every render
-      // and is guaranteed to be non-null when isLoadingContext is false.
+      // Note: context and onAnswer are intentionally omitted — context is a new object
+      // reference on every render (guaranteed non-null when isLoadingContext is false),
+      // and onAnswer is read via closure without needing to re-trigger the request.
     }, [question, isLoadingContext]);
 
     const dustAssistantUrl = `${dustApi.apiUrl()}/w/${dustApi.workspaceId()}/assistant`;

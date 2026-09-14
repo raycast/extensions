@@ -1,5 +1,11 @@
 # Dust.tt Changelog
 
+## [Feature] - 2026-09-14
+
+- Add "Replace Selection with Agent": silently sends the selected text to a specific assistant and replaces it with the answer, with no window — bind a Quicklink to a hotkey for instant use.
+- Add "Set up Replace Selection": pick any assistant and create a freely-renamable Quicklink for it, targeting the Replace Selection command. Create as many as you want, one per assistant.
+- Remove "Ask Claude-4" and "Ask GPT-5" (superseded by the two commands above, which let you point at any assistant yourself).
+
 ## [Maintenance] - {PR_MERGE_DATE}
 
 - Add `leandre_le_bizec` to the contributor list.

@@ -34,34 +34,6 @@
       ]
     },
     {
-      "name": "askClaude",
-      "title": "Ask Claude-4",
-      "description": "Query @claude-4 on Dust.tt",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Ask a question",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "askGpt",
-      "title": "Ask GPT-5",
-      "description": "Query @gpt-5 on Dust.tt",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "search",
-          "placeholder": "Ask a question",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
       "name": "history",
       "title": "Questions History",
       "subtitle": "Show the questions and answers of the last 30 days",
@@ -74,6 +46,19 @@
       "subtitle": "Select one of your assistants to ask a question",
       "description": "Select one of your assistants to ask a question",
       "mode": "view"
+    },
+    {
+      "name": "setUpReplaceSelection",
+      "title": "Set up Replace Selection",
+      "subtitle": "Create a Quicklink for an agent",
+      "description": "Pick an agent and use \"Create Quicklink…\" to save a dedicated, freely-renamable shortcut that silently replaces your selected text with that agent's answer.",
+      "mode": "view"
+    },
+    {
+      "name": "replaceSelectionWithAgent",
+      "title": "Replace Selection with Agent",
+      "description": "Silently sends the currently selected text to the agent bound to this shortcut and replaces the selection with the answer. Create shortcuts for specific agents from \"Set up Replace Selection\". Runs with no window, only toasts.",
+      "mode": "no-view"
     },
     {
       "name": "pickWorkspace",
@@ -110,5 +95,6 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "packageManager": "npm@11.12.1+sha512.cdca14b85d647b3192028d02aadbe82d75f79a446aceea9874be98e6d768f20ebd3555770a48d0e9906106007877bbc690f715e9372f2e2dc644a3c3157fb14c"
 }
