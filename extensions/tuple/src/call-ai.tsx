@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { aiAvailable, CallDraft, CallMetadata, generateCallMetadata } from "./lib/ai";
-import { setCallSummary, setCallTitle } from "./lib/tuple";
+import { setCallMetadata } from "./lib/tuple";
 
 function ProRequired({ navigationTitle }: { navigationTitle: string }) {
   return (
@@ -22,10 +22,7 @@ function ProRequired({ navigationTitle }: { navigationTitle: string }) {
 /** Write a drafted title + summary back to the call. Title is left untouched when blank (an empty
  *  title would be worse than the existing one); an empty summary is allowed and clears the field. */
 async function writeMetadata(callId: string, applied: CallDraft): Promise<void> {
-  if (applied.title) {
-    await setCallTitle(callId, applied.title);
-  }
-  await setCallSummary(callId, applied.summary);
+  await setCallMetadata(callId, applied.title ? applied : { summary: applied.summary });
 }
 
 /** Write a draft back to the call with toast feedback, then pop to the previous view on success. */
@@ -114,7 +111,7 @@ function SummaryDetail({
       <Detail
         isLoading
         navigationTitle={`Summary: ${title}`}
-        markdown="_Reading the transcript and drafting a title & summary…_"
+        markdown="_Reading the Capture and drafting a title & summary…_"
       />
     );
   }
@@ -160,7 +157,7 @@ function SummaryDetail({
                 callId={callId}
                 title={title}
                 draft={{ title: draftTitle || title, summary: draftSummary }}
-                description="AI drafted these from the transcript. Edit if you like, then apply."
+                description="AI drafted these from the Capture. Edit if you like, then apply."
                 onApplied={handleEditApplied}
               />
             }

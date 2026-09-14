@@ -1,6 +1,6 @@
 import { showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { joinCall, listRooms } from "./lib/tuple";
+import { joinRoom, listRooms } from "./lib/tuple";
 import { primaryPersonalRoom } from "./lib/types";
 
 export default async function JoinPersonalRoom() {
@@ -15,7 +15,7 @@ export default async function JoinPersonalRoom() {
       return;
     }
 
-    await joinCall(room.slug);
+    await joinRoom(room.slug);
     await showHUD("Joining your personal room");
   } catch (error) {
     await showFailureToast(error, { title: "Could Not Join Personal Room" });

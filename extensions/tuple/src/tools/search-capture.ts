@@ -1,9 +1,8 @@
-import { searchTranscriptSegments, stripMatchMarkers } from "../lib/tuple";
+import { searchCapture, stripMatchMarkers } from "../lib/tuple";
 
 type Input = {
   /**
-   * Key words or a name to find in transcripts. All terms must appear in a matching segment,
-   * so keep it focused — a few specific words work best. Call again with different terms to broaden.
+   * Text to find in captured conversations and shared content. Core owns matching semantics.
    */
   query: string;
   /** Only include matches from calls with a participant whose name or email contains this text. */
@@ -12,9 +11,9 @@ type Input = {
   limit?: number;
 };
 
-/** Full-text search across all stored call transcripts; returns matching spoken segments. */
+/** Search stored Capture occurrences, including shared content. */
 export default async function (input: Input) {
-  const matches = await searchTranscriptSegments(input.query, {
+  const matches = await searchCapture(input.query, {
     limit: input.limit ?? 25,
     participant: input.participant,
   });
@@ -22,7 +21,10 @@ export default async function (input: Input) {
   return matches.map((match) => ({
     callId: match.call_id,
     time: match.time,
+    kind: match.kind,
     speaker: match.speaker,
+    appName: match.app_name,
+    url: match.url,
     text: stripMatchMarkers(match.text || match.snippet).trim(),
   }));
 }
