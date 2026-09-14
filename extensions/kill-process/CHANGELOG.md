@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-14
 
 - Fixed truncated memory values in the process list by formatting accessories compactly (binary units without spaces, e.g. `100MiB` instead of `105 MB`, one decimal for CPU)
 
