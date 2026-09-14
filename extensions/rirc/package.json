@@ -3,7 +3,7 @@
   "name": "rirc",
   "title": "RIRC",
   "description": "Search, save, copy, and paste reaction media from KLIPY or GIPHY.",
-  "icon": "RIRC logo.png",
+  "icon": "rirc-cat.png",
   "author": "ahmad_shahzad",
   "categories": [
     "Media"
