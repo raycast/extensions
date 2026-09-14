@@ -1,6 +1,6 @@
 # Opencode Info
 
-Track your [OpenCode Go](https://opencode.ai) usage from Raycast. The full view shows the limit windows, the live model catalog, and the daily picks; a menu-bar command shows the limit windows and the Go model catalog at a glance.
+Track your [OpenCode Go](https://opencode.ai) usage from Raycast. The full view shows the limit windows, the live model catalog, and the daily picks; a menu-bar command shows the limit windows at a glance.
 
 ## Setup
 

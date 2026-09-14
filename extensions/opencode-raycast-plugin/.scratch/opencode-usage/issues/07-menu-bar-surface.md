@@ -23,6 +23,8 @@ The failure-mode UX matrix (no-key / bad-key / no-entitlement / offline) is deci
 
 ## Answer
 
+> **Superseded (store review, 2026-09-14):** the dropdown is **limits-only** — the three Go limit rows plus Force refresh / Open full view / Open Extension Preferences, **no model catalog, no picks**. The menu bar is a glance surface; the catalog and picks live in the full view. See `docs/adr/0001-menu-bar-surface-limits-only.md`. The catalog-first bullet below was the original prototype decision and no longer holds.
+
 Prototype: `.scratch/opencode-usage/prototype/menu-bar-prototype.html`. Human decided:
 
 - **Pill = icon-only**: the OpenCode logo as a menu-bar template image, **no text**. Always rendered (per the Auth and key handling matrix, the icon is still present when unconfigured and the dropdown shows the no-key setup item).
