@@ -56,24 +56,110 @@ export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
   return "?context=" + encodeURIComponent(JSON.stringify(launchContext));
 };
 
-export const pacoteAssetPack = async (version: string) => {
+const assetPackCompleteMarker = ".raycast-complete";
+const assetPackLockName = ".pack-lock";
+const assetPackLockStaleMs = 60_000;
+const assetPackLockAcquireTimeoutMs = 30_000;
+
+const getAssetPackDestination = (version: string) => path.join(environment.assetsPath, "pack", version);
+
+const hasCompleteAssetPack = async (destination: string) => {
+  try {
+    await fs.access(path.join(destination, assetPackCompleteMarker), fs.constants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// Cross-process mutual exclusion: Raycast runs each command invocation in its
+// own Node process, so multiple instances can race the clean/extract/swap
+// sequence. The lock file is created exclusively (O_EXCL) and carries a random
+// owner token; a heartbeat keeps its mtime fresh while the holder is working, so
+// a crashed holder is safely taken over after the stale interval.
+const withAssetPackLock = async <T>(work: () => Promise<T>) => {
+  const lockPath = path.join(environment.assetsPath, assetPackLockName);
+  const token = `${process.pid}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+  const deadline = Date.now() + assetPackLockAcquireTimeoutMs;
+  for (;;) {
+    try {
+      await fs.writeFile(lockPath, token, { flag: "wx" });
+      const heartbeat = setInterval(() => {
+        fs.writeFile(lockPath, token, "utf8").catch(() => {});
+      }, 10_000);
+      try {
+        return await work();
+      } finally {
+        clearInterval(heartbeat);
+        try {
+          if ((await fs.readFile(lockPath, "utf8").catch(() => "")) === token) {
+            await fs.rm(lockPath, { force: true });
+          }
+        } catch {
+          // Another holder may have taken over a stale lock; only remove our own.
+        }
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      if (Date.now() > deadline) throw error;
+      try {
+        const { mtimeMs } = await fs.stat(lockPath);
+        if (Date.now() - mtimeMs > assetPackLockStaleMs) {
+          await fs.rm(lockPath, { force: true });
+          continue;
+        }
+      } catch {
+        // The lock disappeared (or was replaced); retry acquiring it.
+      }
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+  }
+};
+
+const pacoteAssetPack = async (version: string) => {
   await showToast({
     style: Toast.Style.Animated,
     title: "Downloading asset pack",
   });
-  await pacote.extract(releaseVersion, path.join(environment.assetsPath, "pack", version));
+  // Extract into an instance-owned staging directory and swap it in only once
+  // the marker is written, so other instances never observe half-extracted
+  // files. This runs under withAssetPackLock; staging isolation additionally
+  // protects the destination if the process is killed mid-download.
+  const destination = getAssetPackDestination(version);
+  const staging = path.join(
+    environment.assetsPath,
+    `.pack-staging-${version}-${process.pid}-${Math.random().toString(36).slice(2, 8)}`,
+  );
+  try {
+    await pacote.extract(releaseVersion, staging);
+    await fs.writeFile(path.join(staging, assetPackCompleteMarker), version, "utf8");
+    await fs.mkdir(path.dirname(destination), { recursive: true });
+    try {
+      await fs.rename(staging, destination);
+    } catch (error) {
+      if (await hasCompleteAssetPack(destination)) {
+        await fs.rm(staging, { recursive: true, force: true });
+        return;
+      }
+      throw error;
+    }
+  } catch (error) {
+    await fs.rm(staging, { recursive: true, force: true });
+    throw error;
+  }
 };
 
 export const cacheAssetPack = async (version: string) => {
-  const destination = path.join(environment.assetsPath, "pack", version);
-  try {
-    await fs.access(destination, fs.constants.R_OK | fs.constants.W_OK);
-  } catch {
+  const destination = getAssetPackDestination(version);
+  if (await hasCompleteAssetPack(destination)) return;
+  await withAssetPackLock(async () => {
+    // Another instance may have completed the pack while we waited for the lock.
+    if (await hasCompleteAssetPack(destination)) return;
     cache.set("cached-version", "");
     await cleanAssetPack();
     await pacoteAssetPack(version);
     cache.set("cached-version", version);
-  }
+  });
 };
 
 export const loadCachedJson = async (version: string) => {
@@ -180,7 +266,7 @@ export const cleanAssetPack = async () => {
   const directories = await fs.readdir(environment.assetsPath);
   await Promise.all(
     directories
-      .filter((d) => d.startsWith("pack"))
+      .filter((d) => d.startsWith("pack") || d.startsWith(".pack-staging"))
       .map((d) => fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true })),
   );
 };
