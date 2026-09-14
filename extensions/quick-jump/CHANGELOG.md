@@ -1,6 +1,6 @@
 # Quick Jump Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-14
 
 ### Fixed
 - Fix the open config file command not working issue 
