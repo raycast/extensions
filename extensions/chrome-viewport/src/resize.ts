@@ -1,7 +1,7 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { measure, setBounds } from "./chrome";
-import { openDeviceMode } from "./devtools";
+import { closeDeviceModeIfNeeded, openDeviceMode } from "./devtools";
 import { Preset } from "./types";
 
 export type ApplyResult =
@@ -63,6 +63,10 @@ export async function applyAndNotify(p: Preset, prefix = ""): Promise<void> {
     return;
   }
 
+  // Leaving a DevTools phone handoff: close the panel first so chrome-delta
+  // measurement isn't poisoned by the ~620px dock (Cycle MBP step after iPhone).
+  await closeDeviceModeIfNeeded();
+
   try {
     const r = await applyPreset(p);
     if (r.kind === "info") {
@@ -76,9 +80,7 @@ export async function applyAndNotify(p: Preset, prefix = ""): Promise<void> {
       ? "✓"
       : `(requested ${r.requested.w}×${r.requested.h}${r.clamped ? ", clamped to display" : ""})`;
     const caveat = p.pointer === "coarse" ? " · geometry only" : "";
-    await showHUD(
-      `${prefix}${p.name} — viewport ${r.achieved.w}×${r.achieved.h} ${suffix}${caveat}`,
-    );
+    await showHUD(`${prefix}${p.name} — viewport ${r.achieved.w}×${r.achieved.h} ${suffix}${caveat}`);
   } catch (e) {
     await showFailureToast(e, { title: "Resize failed" });
   }

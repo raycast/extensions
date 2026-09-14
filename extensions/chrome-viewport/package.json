@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "resize",
-  "title": "Resize",
-  "description": "Viewport-accurate Chrome window presets for responsive dev. DevTools-parity device sizes, live chrome measurement, honest about what a window resize can't simulate.",
+  "name": "chrome-viewport",
+  "title": "Chrome Viewport",
+  "description": "Resize the front Chrome window so its viewport matches device presets for responsive work.",
   "icon": "icon.png",
   "author": "ali_reza_mohammad_poor",
   "license": "MIT",
@@ -17,7 +17,8 @@
       "name": "resize-to-preset",
       "title": "Resize to Preset",
       "description": "Resize the front Chrome window so its viewport matches a device preset",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Chrome"
     },
     {
       "name": "apply-preset",
@@ -31,32 +32,36 @@
           "type": "text",
           "required": true
         }
-      ]
+      ],
+      "subtitle": "Chrome"
     },
     {
       "name": "cycle-breakpoints",
       "title": "Cycle Breakpoints",
       "description": "Step through your pinned breakpoint sequence — bind to a hotkey and hit repeatedly",
-      "mode": "no-view"
+      "mode": "no-view",
+      "subtitle": "Chrome"
     },
     {
       "name": "add-custom-preset",
       "title": "Add Custom Preset",
-      "description": "Save a custom viewport preset to ~/.config/resize/presets.json",
-      "mode": "view"
+      "description": "Save a custom viewport preset to the extension support folder",
+      "mode": "view",
+      "subtitle": "Chrome"
     },
     {
       "name": "measure-viewport",
       "title": "Measure Viewport",
       "description": "Show the current Chrome viewport, window bounds, chrome delta, and zoom state",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Chrome"
     }
   ],
   "preferences": [
     {
       "name": "cycle1",
       "title": "Cycle Slot 1",
-      "description": "First preset in the Cycle Breakpoints rotation. Ignored if ~/.config/resize/presets.json defines a cycle array.",
+      "description": "First preset in the Cycle Breakpoints rotation. Ignored if the user presets file defines a cycle array.",
       "type": "dropdown",
       "required": false,
       "default": "mbp14",

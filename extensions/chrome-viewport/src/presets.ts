@@ -1,10 +1,14 @@
 import { environment } from "@raycast/api";
-import { readFileSync, existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import path from "path";
 import { Preset, PresetFile } from "./types";
 
-export const USER_PRESET_PATH = path.join(homedir(), ".config", "resize", "presets.json");
+/** User presets live under the extension support directory (not ~/.config). */
+export const USER_PRESET_PATH = path.join(environment.supportPath, "presets.json");
+
+/** Pre-store path; migrated into supportPath on first read if still present. */
+const LEGACY_PRESET_PATH = path.join(homedir(), ".config", "resize", "presets.json");
 
 const CLASSES = ["laptop", "tablet", "phone", "custom"];
 
@@ -36,25 +40,35 @@ function normalizePreset(raw: unknown, base?: Preset): Preset | null {
     pointer: merged.pointer === "coarse" ? "coarse" : "fine",
     hover: typeof merged.hover === "boolean" ? merged.hover : merged.pointer !== "coarse",
     strategy: merged.strategy === "info" ? "info" : "window",
-    warnings: Array.isArray(merged.warnings)
-      ? merged.warnings.filter((x) => typeof x === "string")
-      : [],
+    warnings: Array.isArray(merged.warnings) ? merged.warnings.filter((x) => typeof x === "string") : [],
   };
 }
 
-export function loadPresets(): { presets: Preset[]; cycle: string[]; fileCycle?: string[] } {
-  const bundled: PresetFile = JSON.parse(
-    readFileSync(path.join(environment.assetsPath, "devices.json"), "utf8"),
-  );
-
-  let user: PresetFile | undefined;
-  if (existsSync(USER_PRESET_PATH)) {
-    try {
-      user = JSON.parse(readFileSync(USER_PRESET_PATH, "utf8"));
-    } catch {
-      // unreadable user file: fall back to built-ins rather than breaking every command
-    }
+function readUserFile(filePath: string): PresetFile | undefined {
+  if (!existsSync(filePath)) return undefined;
+  try {
+    return JSON.parse(readFileSync(filePath, "utf8"));
+  } catch {
+    // unreadable user file: fall back to built-ins rather than breaking every command
+    return undefined;
   }
+}
+
+function migrateLegacyPresets(): void {
+  if (existsSync(USER_PRESET_PATH) || !existsSync(LEGACY_PRESET_PATH)) return;
+  try {
+    mkdirSync(path.dirname(USER_PRESET_PATH), { recursive: true });
+    writeFileSync(USER_PRESET_PATH, readFileSync(LEGACY_PRESET_PATH));
+  } catch {
+    // migration is best-effort; load will still read the legacy path below
+  }
+}
+
+export function loadPresets(): { presets: Preset[]; cycle: string[]; fileCycle?: string[] } {
+  const bundled: PresetFile = JSON.parse(readFileSync(path.join(environment.assetsPath, "devices.json"), "utf8"));
+
+  migrateLegacyPresets();
+  const user = readUserFile(USER_PRESET_PATH) ?? readUserFile(LEGACY_PRESET_PATH);
 
   const byId = new Map<string, Preset>();
   for (const p of Array.isArray(bundled.presets) ? bundled.presets : []) {
@@ -78,15 +92,22 @@ export function loadPresets(): { presets: Preset[]; cycle: string[]; fileCycle?:
   };
 }
 
-export function saveUserPreset(preset: Preset): void {
-  let file: PresetFile = { version: 1, presets: [] };
-  if (existsSync(USER_PRESET_PATH)) {
-    try {
-      file = JSON.parse(readFileSync(USER_PRESET_PATH, "utf8"));
-    } catch {
-      // overwrite a corrupt file rather than crash
-    }
+/** Ensure the support-folder presets file exists so Action.Open can reveal it. */
+export function ensureUserPresetFile(): string {
+  migrateLegacyPresets();
+  if (!existsSync(USER_PRESET_PATH)) {
+    mkdirSync(path.dirname(USER_PRESET_PATH), { recursive: true });
+    writeFileSync(USER_PRESET_PATH, JSON.stringify({ version: 1, presets: [] }, null, 2) + "\n");
   }
+  return USER_PRESET_PATH;
+}
+
+export function saveUserPreset(preset: Preset): void {
+  migrateLegacyPresets();
+  let file: PresetFile = { version: 1, presets: [] };
+  const existingFile = readUserFile(USER_PRESET_PATH) ?? readUserFile(LEGACY_PRESET_PATH);
+  if (existingFile) file = existingFile;
+
   const existing = Array.isArray(file.presets) ? file.presets : [];
   file.presets = [...existing.filter((p) => p?.id !== preset.id), preset];
   mkdirSync(path.dirname(USER_PRESET_PATH), { recursive: true });
@@ -95,5 +116,5 @@ export function saveUserPreset(preset: Preset): void {
 
 export function presetDeeplink(preset: Preset): string {
   const args = encodeURIComponent(JSON.stringify({ preset: preset.id }));
-  return `raycast://extensions/ali_reza_mohammad_poor/resize/apply-preset?arguments=${args}`;
+  return `raycast://extensions/ali_reza_mohammad_poor/chrome-viewport/apply-preset?arguments=${args}`;
 }

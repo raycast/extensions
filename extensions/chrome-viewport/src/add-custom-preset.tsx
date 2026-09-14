@@ -72,7 +72,7 @@ export default function Command() {
         <Form.Dropdown.Item value="phone" title="Phone" />
       </Form.Dropdown>
       <Form.Description
-        text={`Saved to ${USER_PRESET_PATH} — hand-editable, merges over built-ins by id.`}
+        text={`Saved under the extension support folder — hand-editable, merges over built-ins by id.`}
       />
     </Form>
   );

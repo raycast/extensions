@@ -55,8 +55,7 @@ export async function measure(): Promise<Measurement> {
       );
     }
     const chromeMsg = detail.split(" ::: ")[1]?.trim() ?? "";
-    if (chromeMsg.includes("turned off") || out.startsWith("ERR:JSNULL"))
-      throw new Error(SETUP_HINT);
+    if (chromeMsg.includes("turned off") || out.startsWith("ERR:JSNULL")) throw new Error(SETUP_HINT);
     throw new Error(chromeMsg || SETUP_HINT);
   }
 
@@ -77,7 +76,5 @@ export async function measure(): Promise<Measurement> {
 
 export async function setBounds(x1: number, y1: number, x2: number, y2: number): Promise<void> {
   const coords = [x1, y1, x2, y2].map(Math.round).join(", ");
-  await runAppleScript(
-    `tell application "Google Chrome" to set bounds of front window to {${coords}}`,
-  );
+  await runAppleScript(`tell application "Google Chrome" to set bounds of front window to {${coords}}`);
 }

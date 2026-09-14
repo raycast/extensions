@@ -10,11 +10,9 @@ export default async function Command() {
   const { presets, fileCycle } = loadPresets();
   const prefs = getPreferenceValues<{ cycle1?: string; cycle2?: string; cycle3?: string }>();
 
-  // A cycle array in ~/.config/resize/presets.json overrides the settings slots
+  // A cycle array in the user presets file overrides the settings slots
   // (the only way to get >3 steps or custom presets into the rotation).
-  const ids =
-    fileCycle ??
-    [prefs.cycle1, prefs.cycle2, prefs.cycle3].filter((v): v is string => !!v && v !== "none");
+  const ids = fileCycle ?? [prefs.cycle1, prefs.cycle2, prefs.cycle3].filter((v): v is string => !!v && v !== "none");
 
   const sequence = ids
     .map((id) => presets.find((p) => p.id === id))
