@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix Pager and Editor Environment Variables] - {PR_MERGE_DATE}
+## [Fix Pager and Editor Environment Variables] - 2026-09-14
 
 ### Fixed
 - **Git**: Fix "Use of PAGER is not permitted without enabling allowUnsafePager" (and the same error for `EDITOR`) when the shell exports a pager or editor
