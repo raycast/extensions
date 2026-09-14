@@ -119,7 +119,7 @@ test("concurrent add and delete preserve both mutations", async (t) => {
     environmentsPath: path.join(directory, "environments.json"),
   };
 
-  await Promise.all([
+  const [, remainingLinks] = await Promise.all([
     addDeepLink(configuration, {
       title: "New link",
       urlString: "demoapp://new",
@@ -133,6 +133,10 @@ test("concurrent add and delete preserve both mutations", async (t) => {
   const links = decodeDeepLinks(await readFile(storagePath, "utf8"));
   assert.deepEqual(
     links.map((link) => link.urlString),
+    ["demoapp://new"],
+  );
+  assert.deepEqual(
+    remainingLinks.map((link) => link.urlString),
     ["demoapp://new"],
   );
 });

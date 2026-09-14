@@ -23,6 +23,19 @@ export function preferredEnvironmentID(
   );
 }
 
+export function environmentIDAfterLoad(
+  environments: LinkEnvironment[],
+  preference: string | undefined,
+  currentEnvironmentID: string | undefined,
+  applyDefault: boolean,
+): string | undefined {
+  const preferredID = preferredEnvironmentID(environments, preference);
+  if (applyDefault) return preferredID;
+  return environments.some((environment) => environment.id === currentEnvironmentID)
+    ? currentEnvironmentID
+    : preferredID;
+}
+
 export function resolveDeepLink(source: string, variables: Record<string, string>): string {
   return Object.entries(variables).reduce(
     (value, [key, replacement]) =>

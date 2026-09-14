@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createLatestRequestGuard, fallbackTarget, normalizeTarget } from "../src/target-utils.js";
+import { createLatestRequestGuard, fallbackTarget, normalizeTarget, targetForPlatform } from "../src/target-utils.js";
 
 test("accepts results only from the latest discovery request", () => {
   const guard = createLatestRequestGuard();
@@ -29,4 +29,12 @@ test("uses booted only as the iOS Simulator fallback", () => {
   assert.equal(fallbackTarget("ios-device"), undefined);
   assert.equal(fallbackTarget("android", "booted"), undefined);
   assert.equal(fallbackTarget("ios-device", "booted"), undefined);
+});
+
+test("uses a selected target only for the platform that owns it", () => {
+  const androidSelection = { platform: "android" as const, id: "emulator-5554" };
+
+  assert.equal(targetForPlatform(androidSelection, "android"), "emulator-5554");
+  assert.equal(targetForPlatform(androidSelection, "ios"), "booted");
+  assert.equal(targetForPlatform(androidSelection, "ios-device"), undefined);
 });

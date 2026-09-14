@@ -5,6 +5,7 @@ import {
   assertCanOpen,
   buildADBRemoteCommand,
   decodeEnvironments,
+  environmentIDAfterLoad,
   findUnresolvedVariables,
   preferredEnvironmentID,
   resolveDeepLink,
@@ -91,6 +92,21 @@ test("selects a saved custom default environment after environments load", () =>
 
   assert.equal(preferredEnvironmentID(environments, " staging "), "105A7E9C-EE8D-4F3D-905A-5D568B2EB382");
   assert.equal(preferredEnvironmentID(environments, "Missing"), environments[0].id);
+  assert.equal(environmentIDAfterLoad(environments, "Staging", environments[0].id, true), environments[2].id);
+});
+
+test("preserves a manual environment selection on refresh", () => {
+  const environments = decodeEnvironments(
+    JSON.stringify([
+      { id: "105A7E9C-EE8D-4F3D-905A-5D568B2EB382", name: "Staging", variables: {} },
+      { id: "A94D79C7-C241-4D90-A64A-244B42F1CC62", name: "QA", variables: {} },
+    ]),
+  );
+
+  const stagingID = environments[2].id;
+  const qaID = environments[3].id;
+  assert.equal(environmentIDAfterLoad(environments, "Staging", qaID, false), qaID);
+  assert.equal(environmentIDAfterLoad(environments, "Staging", "removed-environment", false), stagingID);
 });
 
 test("restores built-in environments without duplicating legacy names or IDs", () => {

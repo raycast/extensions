@@ -34,11 +34,18 @@ import {
   buildADBRemoteCommand,
   builtInEnvironments,
   decodeEnvironments,
+  environmentIDAfterLoad,
   findUnresolvedVariables,
   preferredEnvironmentID,
   resolveDeepLink,
 } from "./deep-link-utils.js";
-import { createLatestRequestGuard, fallbackTarget, normalizeTarget } from "./target-utils.js";
+import {
+  TargetSelection,
+  createLatestRequestGuard,
+  fallbackTarget,
+  normalizeTarget,
+  targetForPlatform,
+} from "./target-utils.js";
 
 const executeFile = promisify(execFile);
 const commandOptions = { timeout: 60_000, maxBuffer: 1024 * 1024 } as const;
@@ -47,6 +54,12 @@ type TargetDevice = {
   id: string;
   name: string;
   detail?: string;
+};
+
+type TargetDiscoveryState = {
+  platform: Preferences.SearchDeepLinks["platform"];
+  devices: TargetDevice[];
+  error?: string;
 };
 
 export default function SearchDeepLinks() {
@@ -59,36 +72,59 @@ export default function SearchDeepLinks() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
   const [storageConfiguration, setStorageConfiguration] = useState<StorageConfiguration>();
-  const [targetDevices, setTargetDevices] = useState<TargetDevice[]>([]);
-  const [selectedTarget, setSelectedTarget] = useState(fallbackTarget(preferences.platform, preferences.target));
-  const [targetDiscoveryError, setTargetDiscoveryError] = useState<string>();
+  const [targetDiscovery, setTargetDiscovery] = useState<TargetDiscoveryState>({
+    platform: preferences.platform,
+    devices: [],
+  });
+  const [selectedTarget, setSelectedTarget] = useState<TargetSelection>({
+    platform: preferences.platform,
+    id: fallbackTarget(preferences.platform, preferences.target),
+  });
+  const storageLoadRequests = useRef(createLatestRequestGuard());
+  const activeStorageFile = useRef(preferences.storageFile);
+  const hasLoadedEnvironmentSelection = useRef(false);
   const targetDiscoveryRequests = useRef(createLatestRequestGuard());
   const activePlatform = useRef(preferences.platform);
+  activeStorageFile.current = preferences.storageFile;
   activePlatform.current = preferences.platform;
 
   async function load() {
+    const requestedStorageFile = preferences.storageFile;
+    const isLatestRequest = storageLoadRequests.current.begin();
+    const shouldApplyResult = () => isLatestRequest() && activeStorageFile.current === requestedStorageFile;
     setIsLoading(true);
     setError(undefined);
     try {
-      const configuration = await resolveStorageConfiguration(preferences.storageFile);
+      const configuration = await resolveStorageConfiguration(requestedStorageFile);
       const decodedLinks = await readDeepLinks(configuration.storagePath);
       const decodedEnvironments = await readEnvironments(configuration.environmentsPath);
+      if (!shouldApplyResult()) return;
 
       setStorageConfiguration(configuration);
       setLinks(decodedLinks);
       setEnvironments(decodedEnvironments);
+      const applyDefaultEnvironment = !hasLoadedEnvironmentSelection.current;
+      hasLoadedEnvironmentSelection.current = true;
       setSelectedEnvironmentID(
-        preferredEnvironmentID(decodedEnvironments, preferences.defaultEnvironment) ?? decodedEnvironments[0].id,
+        (currentEnvironmentID) =>
+          environmentIDAfterLoad(
+            decodedEnvironments,
+            preferences.defaultEnvironment,
+            currentEnvironmentID,
+            applyDefaultEnvironment,
+          ) ?? decodedEnvironments[0].id,
       );
     } catch (loadError) {
+      if (!shouldApplyResult()) return;
       setStorageConfiguration(undefined);
       setError(loadError instanceof Error ? loadError.message : String(loadError));
     } finally {
-      setIsLoading(false);
+      if (shouldApplyResult()) setIsLoading(false);
     }
   }
 
   useEffect(() => {
+    hasLoadedEnvironmentSelection.current = false;
     void load();
   }, [preferences.storageFile]);
 
@@ -96,26 +132,29 @@ export default function SearchDeepLinks() {
     const requestedPlatform = preferences.platform;
     const isLatestRequest = targetDiscoveryRequests.current.begin();
     const shouldApplyResult = () => isLatestRequest() && activePlatform.current === requestedPlatform;
-    setTargetDiscoveryError(undefined);
+    setTargetDiscovery({ platform: requestedPlatform, devices: [] });
     try {
       const devices = await discoverTargets(requestedPlatform);
       if (!shouldApplyResult()) return;
-      setTargetDevices(devices);
-      setSelectedTarget((currentTarget) => {
+      setTargetDiscovery({ platform: requestedPlatform, devices });
+      setSelectedTarget((currentSelection) => {
+        const currentTarget = currentSelection.platform === requestedPlatform ? currentSelection.id : undefined;
         if (
           currentTarget &&
           ((requestedPlatform === "ios" && currentTarget === "booted") ||
             devices.some((device) => device.id === currentTarget))
         ) {
-          return currentTarget;
+          return currentSelection;
         }
-        return devices[0]?.id || fallbackTarget(requestedPlatform, preferences.target);
+        return {
+          platform: requestedPlatform,
+          id: devices[0]?.id || fallbackTarget(requestedPlatform, preferences.target),
+        };
       });
     } catch (discoveryError) {
       if (!shouldApplyResult()) return;
       const message = commandError(discoveryError);
-      setTargetDevices([]);
-      setTargetDiscoveryError(message);
+      setTargetDiscovery({ platform: requestedPlatform, devices: [], error: message });
       if (showFailure) {
         await showToast({ style: Toast.Style.Failure, title: "Could Not Load Devices", message });
       }
@@ -123,7 +162,10 @@ export default function SearchDeepLinks() {
   }
 
   useEffect(() => {
-    setSelectedTarget(fallbackTarget(preferences.platform, preferences.target));
+    setSelectedTarget({
+      platform: preferences.platform,
+      id: fallbackTarget(preferences.platform, preferences.target),
+    });
     void loadTargetDevices();
   }, [preferences.platform, preferences.target]);
 
@@ -133,13 +175,16 @@ export default function SearchDeepLinks() {
   );
   const selectedEnvironment =
     environments.find((environment) => environment.id === selectedEnvironmentID) ?? environments[0];
+  const targetDevices = targetDiscovery.platform === preferences.platform ? targetDiscovery.devices : [];
+  const targetDiscoveryError = targetDiscovery.platform === preferences.platform ? targetDiscovery.error : undefined;
+  const selectedTargetID = targetForPlatform(selectedTarget, preferences.platform, preferences.target);
 
   async function openLink(link: DeepLink) {
     const toast = await showToast({ style: Toast.Style.Animated, title: `Opening ${link.title}` });
     try {
       const resolvedURL = resolveDeepLink(link.urlString, selectedEnvironment.variables);
       assertCanOpen(resolvedURL, selectedEnvironment.name);
-      await openURL(resolvedURL, preferences, selectedTarget);
+      await openURL(resolvedURL, preferences, selectedTargetID);
       toast.style = Toast.Style.Success;
       toast.title = "Deep Link Opened";
       toast.message = resolvedURL;
@@ -164,8 +209,8 @@ export default function SearchDeepLinks() {
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting Deep Link" });
     try {
-      await deleteDeepLink(storageConfiguration, link.id);
-      setLinks((currentLinks) => currentLinks.filter((candidate) => candidate.id !== link.id));
+      const updatedLinks = await deleteDeepLink(storageConfiguration, link.id);
+      setLinks(updatedLinks);
       toast.style = Toast.Style.Success;
       toast.title = "Deep Link Deleted";
       toast.message = link.title;
@@ -252,22 +297,22 @@ export default function SearchDeepLinks() {
                   <Action title="Open Deep Link" icon={Icon.Play} onAction={() => openLink(link)} />
                   {preferences.platform === "ios" || preferences.platform === "android" ? (
                     <ActionPanel.Submenu
-                      title={`Select Target Device${targetName(selectedTarget, targetDevices) ? ` (${targetName(selectedTarget, targetDevices)})` : ""}…`}
+                      title={`Select Target Device${targetName(selectedTargetID, targetDevices) ? ` (${targetName(selectedTargetID, targetDevices)})` : ""}…`}
                       icon={Icon.Mobile}
                     >
                       {preferences.platform === "ios" ? (
                         <Action
                           title="Booted Simulator"
-                          icon={selectedTarget === "booted" ? Icon.Checkmark : Icon.Mobile}
-                          onAction={() => setSelectedTarget("booted")}
+                          icon={selectedTargetID === "booted" ? Icon.Checkmark : Icon.Mobile}
+                          onAction={() => setSelectedTarget({ platform: preferences.platform, id: "booted" })}
                         />
                       ) : null}
                       {targetDevices.map((device) => (
                         <Action
                           key={device.id}
                           title={`${device.name}${device.detail ? ` (${device.detail})` : ""}`}
-                          icon={selectedTarget === device.id ? Icon.Checkmark : Icon.Mobile}
-                          onAction={() => setSelectedTarget(device.id)}
+                          icon={selectedTargetID === device.id ? Icon.Checkmark : Icon.Mobile}
+                          onAction={() => setSelectedTarget({ platform: preferences.platform, id: device.id })}
                         />
                       ))}
                       {targetDevices.length === 0 && preferences.platform === "android" ? (

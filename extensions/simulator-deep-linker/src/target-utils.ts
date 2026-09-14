@@ -1,5 +1,10 @@
 export type TargetPlatform = "ios" | "ios-device" | "android";
 
+export type TargetSelection = {
+  platform: TargetPlatform;
+  id?: string;
+};
+
 export function createLatestRequestGuard() {
   let latestRequestID = 0;
 
@@ -24,4 +29,14 @@ export function normalizeTarget(platform: TargetPlatform, target?: string): stri
 
 export function fallbackTarget(platform: TargetPlatform, target?: string): string | undefined {
   return normalizeTarget(platform, target) ?? (platform === "ios" ? "booted" : undefined);
+}
+
+export function targetForPlatform(
+  selection: TargetSelection,
+  platform: TargetPlatform,
+  fallback?: string,
+): string | undefined {
+  return selection.platform === platform
+    ? (normalizeTarget(platform, selection.id) ?? fallbackTarget(platform, fallback))
+    : fallbackTarget(platform, fallback);
 }
