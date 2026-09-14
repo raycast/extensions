@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Fix React 19 suspension, icons and My Filters] - 2026-09-14
+## [Fix React 19 suspension, icons and My Filters] - {PR_MERGE_DATE}
 
 - Fixed the infinite render suspension loop and associated 100MB JS Heap memory crash under React 19 by refactoring the `withJiraCredentials` wrapper. This ensures synchronous React components are not wrapped in uncached async promises, while preserving the error-catching wrapper for async AI tools.
 - Fixed `My Filters` command crashing on first launch with "Unbounded JQL queries are not allowed here" by casting the `execute` condition to a strict boolean, preventing an unintended query for an empty JQL string.
