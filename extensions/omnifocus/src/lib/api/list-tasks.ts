@@ -16,6 +16,7 @@ return tasks.reduce((ts, t) => {
       name: t.name(),
       flagged: t.flagged(),
       deferDate: t.deferDate() ? t.deferDate().toString() : null,
+      plannedDate: t.plannedDate && t.plannedDate() ? t.plannedDate().toString() : null,
       dueDate: t.dueDate() ? t.dueDate().toString() : null,
       dropped: t.dropped(),
       completed,

@@ -30,6 +30,7 @@ const leaves = window
         name: task.name(),
         flagged: task.flagged(),
         deferDate: task.deferDate() ? safeString(task.deferDate()) : null,
+        plannedDate: task.plannedDate && task.plannedDate() ? safeString(task.plannedDate()) : null,
         dueDate: task.dueDate() ? safeString(task.dueDate()) : null,
         dropped: task.dropped(),
         completed: task.completed(),

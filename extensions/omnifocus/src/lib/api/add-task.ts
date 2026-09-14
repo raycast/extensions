@@ -13,7 +13,7 @@ type OmniFocusAddTaskResponse =
       error: "tag_assignment_failed" | "project_assignment_failed";
     };
 export async function addTask(options: CreateOmniFocusTaskOptions): Promise<OmniFocusAddTaskResponse> {
-  const { name, deferDate, flagged, note, dueDate } = options;
+  const { name, deferDate, plannedDate, flagged, note, dueDate } = options;
 
   let source = `
   const omnifocus = Application('OmniFocus');
@@ -34,6 +34,12 @@ export async function addTask(options: CreateOmniFocusTaskOptions): Promise<Omni
   if (deferDate) {
     const dateString = deferDate.toISOString();
     source += `task.deferDate = new Date('${dateString}');\n`;
+  }
+
+  if (plannedDate) {
+    // Planned dates require OmniFocus 4.7+; the property is exposed as `planned date` in the scripting dictionary.
+    const dateString = plannedDate.toISOString();
+    source += `task.plannedDate = new Date('${dateString}');\n`;
   }
 
   if (dueDate) {
