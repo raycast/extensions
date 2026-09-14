@@ -107,7 +107,7 @@ export function useNetworkServices() {
   const [networkServices, setNetworkServices] = useState<Record<string, NetworkService>>({});
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [favoriteOrder, setFavoriteOrder] = useState<Record<string, number>>({});
-  const settleChecks = useRef(0);
+  const settleChecks = useRef<Record<string, number>>({});
 
   useEffect(() => {
     const loadData = async () => {
@@ -143,13 +143,19 @@ export function useNetworkServices() {
       (service) => service.status === "connecting" || service.status === "disconnecting",
     );
 
-    if (settling.length === 0) {
-      settleChecks.current = 0;
-      return;
+    // Counted per service: one that has been connecting for a while must not use up the grace
+    // period, or the check limit, of one that just started
+    for (const id of Object.keys(settleChecks.current)) {
+      if (!settling.some((service) => service.id === id)) delete settleChecks.current[id];
     }
 
-    if (settleChecks.current >= SETTLE_MAX_CHECKS) return;
-    const check = (settleChecks.current += 1);
+    const watched = settling.filter((service) => (settleChecks.current[service.id] ?? 0) < SETTLE_MAX_CHECKS);
+    if (watched.length === 0) return;
+
+    const checks: Record<string, number> = {};
+    for (const service of watched) {
+      checks[service.id] = settleChecks.current[service.id] = (settleChecks.current[service.id] ?? 0) + 1;
+    }
 
     let cancelled = false;
     const timer = setTimeout(async () => {
@@ -158,7 +164,7 @@ export function useNetworkServices() {
         // still settles through the networksetup fallback instead of staying in transition
         const statuses = await listVpnStatuses();
         const resolved = await Promise.all(
-          settling.map(async (service) => [service.id, await currentStatus(service, statuses)] as const),
+          watched.map(async (service) => [service.id, await currentStatus(service, statuses)] as const),
         );
         if (cancelled) return;
 
@@ -168,7 +174,7 @@ export function useNetworkServices() {
           for (const [id, status] of resolved) {
             const service = updated[id];
             if (!service) continue;
-            if (check <= SETTLE_GRACE_CHECKS && status === statusBeforeTransition(service.status)) continue;
+            if (checks[id] <= SETTLE_GRACE_CHECKS && status === statusBeforeTransition(service.status)) continue;
 
             updated[id] = { ...service, status };
           }
