@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Sort Bookmarks by Frecency] - {PR_MERGE_DATE}
+## [Sort Bookmarks by Frecency] - 2026-09-14
 
 - Rank bookmarks opened from Raycast above rarely used ones in Search Bookmarks and Search All.
 - Add a Reset Ranking action to restore a bookmark to its original position.
