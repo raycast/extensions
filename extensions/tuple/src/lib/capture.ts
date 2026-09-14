@@ -12,7 +12,7 @@ export function formatCapture(records: CaptureRecord[], icons = false): string {
     .map((record) => {
       const instant = record.type === "transcription_finished" ? record.data.start || record.time : record.time;
       const date = new Date(instant);
-      const clock = Number.isNaN(date.getTime()) ? instant : date.toLocaleTimeString("en-GB", { hour12: false });
+      const clock = Number.isNaN(date.getTime()) ? instant : date.toLocaleTimeString(undefined, { hour12: false });
       if (record.type === "transcription_finished" && typeof record.data.text === "string") {
         const speaker = names.get(record.data.user_id ?? 0) || `user:${record.data.user_id ?? "unknown"}`;
         return `${icons ? "💬 " : ""}[${clock}] ${speaker}: ${record.data.text}`;
@@ -20,6 +20,14 @@ export function formatCapture(records: CaptureRecord[], icons = false): string {
       return `${icons ? `${captureIcon(record)} ` : ""}[${clock}] ${formatCaptureEvent(record, names)}`;
     })
     .join("\n");
+}
+
+export function escapeMarkdownText(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replace(/([\\`*_[\]{}()#+\-.!|])/g, "\\$1");
 }
 
 function captureIcon(record: CaptureRecord): string {

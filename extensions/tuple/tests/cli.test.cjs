@@ -10,6 +10,7 @@ const fixture = fs.readFileSync(path.join(__dirname, "fixtures/capture.jsonl"), 
 const records = fixture.trim().split("\n").map(JSON.parse);
 const load = require("./load-typescript.cjs")(binary);
 const tuple = load("src/lib/tuple.ts");
+const { escapeMarkdownText } = load("src/lib/capture.ts");
 const { TupleErrorKind, contactCallAction, machineCallAction, primaryPersonalRoom } = load("src/lib/types.ts");
 function fake(body) {
   fs.writeFileSync(log, "");
@@ -118,7 +119,7 @@ test("complete Capture NDJSON and clock rendering retain all categories", async 
   fake(`process.stdout.write(${JSON.stringify(fixture)});`);
   assert.deepEqual(await tuple.getCapture("call-id"), records);
   const compact = await tuple.getLocalClockCapture("call-id");
-  const clock = (instant) => new Date(instant).toLocaleTimeString("en-GB", { hour12: false });
+  const clock = (instant) => new Date(instant).toLocaleTimeString(undefined, { hour12: false });
   assert.deepEqual(compact.split("\n"), [
     `[${clock(records[0].time)}] Riley Chen joined`,
     `[${clock(records[1].data.start)}] Riley Chen: Check C++: launch OR retry --flag?`,
@@ -133,6 +134,13 @@ test("complete Capture NDJSON and clock rendering retain all categories", async 
   assert.ok(calls().every((args) => !args.includes("--exclude")));
   fake(`process.stdout.write(${JSON.stringify(fixture)} + '{invalid');`);
   await assert.rejects(tuple.getCapture("call-id"));
+});
+
+test("Capture values render as literal Markdown text", () => {
+  assert.equal(
+    escapeMarkdownText("[Riley](https://example.com) <img> **shared** # notes & more"),
+    "\\[Riley\\]\\(https://example\\.com\\) &lt;img&gt; \\*\\*shared\\*\\* \\# notes &amp; more",
+  );
 });
 
 test("export default and explicit transcript selection use destination files", async () => {

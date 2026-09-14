@@ -20,6 +20,7 @@ import { EditCallMetadata, SummarizeCall } from "./call-ai";
 import { CallDraft } from "./lib/ai";
 import { TupleErrorDetail, TupleErrorEmptyView } from "./lib/empty-state";
 import { useTupleJson } from "./lib/hooks";
+import { escapeMarkdownText } from "./lib/capture";
 import {
   classifyError,
   deleteCapture,
@@ -403,8 +404,8 @@ async function exportWithFeedback(callId: string) {
 }
 
 function buildCaptureMarkdown(title: string, summary: string, capture: string | undefined): string {
-  const heading = `# ${title}`;
-  const summaryBlock = summary.trim() ? `\n\n${summary.trim()}` : "";
+  const heading = `# ${escapeMarkdownText(title)}`;
+  const summaryBlock = summary.trim() ? `\n\n${escapeMarkdownText(summary.trim())}` : "";
   const cleaned = capture ? formatCaptureText(capture) : "";
   const body = cleaned ? `\n\n---\n\n${cleaned}` : "\n\n_No Capture records available._";
   return `${heading}${summaryBlock}${body}`;
@@ -416,6 +417,7 @@ function formatCaptureText(raw: string): string {
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
+    .map(escapeMarkdownText)
     .join("\n\n");
 }
 
