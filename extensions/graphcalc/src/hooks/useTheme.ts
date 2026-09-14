@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LocalStorage } from "@raycast/api";
 import { DEFAULT_THEME_ID, THEME_IDS, ThemeId, isThemeId } from "../lib/themes";
 
@@ -23,21 +23,27 @@ const LEGACY_LINE_COLOR_TO_THEME: Record<string, ThemeId> = {
  */
 export function useTheme() {
   const [theme, setThemeState] = useState<ThemeId>(DEFAULT_THEME_ID);
+  // Set once the user picks a theme; a still-running initial load must not
+  // override that choice, in state or in storage.
+  const chosenByUser = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
+    const stale = () => cancelled || chosenByUser.current;
     const load = async () => {
       const saved = await LocalStorage.getItem<string>(THEME_KEY);
       if (isThemeId(saved)) {
-        if (!cancelled) setThemeState(saved);
+        if (!stale()) setThemeState(saved);
         return;
       }
       const legacy = await LocalStorage.getItem<string>(LEGACY_LINE_COLOR_KEY);
       if (legacy === undefined) return;
       const migrated = LEGACY_LINE_COLOR_TO_THEME[legacy] ?? DEFAULT_THEME_ID;
-      await LocalStorage.setItem(THEME_KEY, migrated);
+      if (!stale()) {
+        await LocalStorage.setItem(THEME_KEY, migrated);
+        if (!stale()) setThemeState(migrated);
+      }
       await LocalStorage.removeItem(LEGACY_LINE_COLOR_KEY);
-      if (!cancelled) setThemeState(migrated);
     };
     load().catch((error) => console.error("Could not load theme:", error));
     return () => {
@@ -46,6 +52,7 @@ export function useTheme() {
   }, []);
 
   const setTheme = (next: ThemeId) => {
+    chosenByUser.current = true;
     setThemeState(next);
     LocalStorage.setItem(THEME_KEY, next).catch((error) =>
       console.error("Could not save theme:", error),
