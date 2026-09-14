@@ -3,14 +3,16 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { queryTasks } from "./api/client";
 import { ConnectionError } from "./components/ConnectionError";
+import { LoadError } from "./components/LoadError";
 import { TaskListItem } from "./components/TaskListItem";
 import { useHule, type HuleContext } from "./hooks/useHule";
 import type { Task } from "./api/types";
 import { daysUntil } from "./helpers/dates";
+import { acrossWorkspaces, uniqueById } from "./helpers/workspaces";
 
 /**
- * One window of `POST /tasks/query`. The endpoint clamps `limit` to this
- * server-side, so it is the page size rather than a choice.
+ * One window of `POST /tasks/query` — the largest `limit` the endpoint accepts
+ * (it rejects anything above), so it is the page size rather than a choice.
  */
 const PER_WORKSPACE_LIMIT = 100;
 
@@ -23,48 +25,38 @@ const PER_WORKSPACE_LIMIT = 100;
  * travels through here should be small and plain.
  */
 function fetchMyTasks(seats: Array<{ workspaceId: string; memberId: string }>) {
-  return async ({
-    page,
-    lastItem,
-  }: {
-    page: number;
-    lastItem?: Task;
-  }): Promise<{
-    data: Task[];
-    hasMore: boolean;
-  }> => {
+  return async ({ page }: { page: number }): Promise<{ data: Task[]; hasMore: boolean }> => {
     if (seats.length === 0) return { data: [], hasMore: false };
 
-    const perWorkspace = await Promise.all(
-      seats.map(({ workspaceId, memberId }) =>
-        queryTasks(
-          workspaceId,
-          {
-            combinator: "and",
-            rules: [
-              { field: "assigneeId", operator: "=", value: memberId },
-              // Finished work is dropped by the SERVER, not below: the window is
-              // capped, so filtering afterwards would spend the cap on completed
-              // tasks and hide the open ones behind them.
-              { field: "statusGroup", operator: "!=", value: "done" },
-            ],
-          },
-          PER_WORKSPACE_LIMIT,
-          page + 1,
-        ),
+    // Every workspace is asked for the same page. One that has run out answers
+    // with an empty page — harmless — and the list goes on while any workspace
+    // still fills its window.
+    const perWorkspace = await acrossWorkspaces(seats, ({ workspaceId, memberId }) =>
+      queryTasks(
+        workspaceId,
+        {
+          combinator: "and",
+          rules: [
+            { field: "assigneeId", operator: "=", value: memberId },
+            // Finished work is dropped by the SERVER, not below: the window is
+            // capped, so filtering afterwards would spend the cap on completed
+            // tasks and hide the open ones behind them.
+            { field: "statusGroup", operator: "!=", value: "done" },
+          ],
+        },
+        PER_WORKSPACE_LIMIT,
+        page + 1,
+        // A subtask assigned to me is my work as much as a task is.
+        { withSubtasks: true },
       ),
     );
 
-    // A server older than the change that added `page` answers every request
-    // with the first window, and the answer carries neither a total nor a cursor
-    // to notice that with. The one signal left is the row we already ended on
-    // coming back again — then paging is unavailable and this is the last page.
-    const data = perWorkspace.flat().filter((task) => task.completedAt === null);
-    const repeated = lastItem !== undefined && data.at(-1)?.id === lastItem.id;
-
+    // No second, client-side "is it done" check: the server's status group is
+    // the truth, and `completedAt` can outlive a status that was moved back into
+    // an open group — filtering on it hid open work.
     return {
-      data: repeated ? [] : data,
-      hasMore: !repeated && perWorkspace.some((tasks) => tasks.length >= PER_WORKSPACE_LIMIT),
+      data: perWorkspace.flat(),
+      hasMore: perWorkspace.some((tasks) => tasks.length >= PER_WORKSPACE_LIMIT),
     };
   };
 }
@@ -93,14 +85,22 @@ function bucketOf(task: Task): Bucket {
 export default function Command() {
   const { data: context, isLoading: contextLoading, error, revalidate: reloadContext } = useHule();
   const seats = useMemo(() => seatsOf(context), [context]);
-  const { data, isLoading, revalidate, pagination } = useCachedPromise(fetchMyTasks, [seats], {
+  const {
+    data,
+    isLoading,
+    error: loadError,
+    revalidate,
+    pagination,
+  } = useCachedPromise(fetchMyTasks, [seats], {
     execute: seats.length > 0,
     keepPreviousData: true,
+    // The failure is drawn in the list itself (LoadError) — no second, generic toast.
+    onError: () => undefined,
   });
 
   if (error) return <ConnectionError message={error.message} onRetry={reloadContext} />;
 
-  const all = data ?? [];
+  const all = loadError ? [] : uniqueById(data ?? []);
   const refresh = () => {
     revalidate();
     reloadContext();
@@ -108,8 +108,9 @@ export default function Command() {
 
   return (
     <List isLoading={contextLoading || isLoading} pagination={pagination} searchBarPlaceholder="Filter your tasks…">
-      {all.length === 0 && (
-        <List.EmptyView icon={Icon.Checkmark} title="Nothing on You" description="No open task is assigned to you." />
+      {loadError && <LoadError error={loadError} onRetry={revalidate} />}
+      {!loadError && all.length === 0 && !isLoading && (
+        <List.EmptyView icon={Icon.Checkmark} title="All Clear" description="No open task is assigned to you." />
       )}
       {BUCKETS.map((bucket) => {
         const section = all.filter((task) => bucketOf(task) === bucket);

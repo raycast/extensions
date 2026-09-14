@@ -7,7 +7,7 @@ import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@rayc
  */
 export function ConnectionError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <List>
+    <List searchBarPlaceholder="Hule is unreachable">
       <List.EmptyView
         icon={Icon.ExclamationMark}
         title="Cannot Reach Hule"

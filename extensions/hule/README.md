@@ -1,4 +1,4 @@
-# Hule for Raycast
+# Hule
 
 Create, find and update [Hule](https://hule-do.com) tasks without leaving your keyboard.
 
@@ -23,12 +23,13 @@ the task in Hule, copies its link, or deletes it.
 
 Two optional preferences:
 
-- **API URL** — only if you run a self-hosted Hule. Default: `https://api.hule-do.com/api`.
+- **API URL** — only if you run a self-hosted Hule. Default: `https://api.hule-do.com/api`. It must
+  use `https://` (plain `http://` only for `localhost`), because the token travels with every request.
   A self-hosted setup whose web app is not on the matching `app.` host will still work; only
   the "Open in Hule" links need correcting.
 - **Default List** — the list **Quick Add Task** writes to. Write its name, or
   `Workspace / List` when several workspaces have a list with that name. Leave it empty and
-  the first list of your account is used. A name that matches no list, or more than one, stops
+  the first list you can add tasks to is used. A name that matches no list, or more than one, stops
   Quick Add with an error instead of writing somewhere else.
 
 The token is stored in your macOS Keychain by Raycast and is sent only to the API URL above.
@@ -40,8 +41,3 @@ delete the token in **Settings → API tokens**; it stops working immediately.
 
 The priority glyphs in `assets/` are [Iconoir](https://iconoir.com) (MIT), the same
 icon set the Hule app itself draws.
-
-## Where this lives
-
-The source of record is the Hule monorepo, under `apps/raycast`. The copy in
-`raycast/extensions` is what the Store builds.

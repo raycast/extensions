@@ -3,10 +3,10 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { PRIORITY_LABELS, getTask } from "../api/client";
 import type { Task } from "../api/types";
-import { listIcon, memberIcon, priorityColor, statusIcon } from "../helpers/appearance";
+import { listIcon, memberIcon, priorityColor, statusIcon, tagColor } from "../helpers/appearance";
 import { dueLabel } from "../helpers/dates";
 import { imageRefs, localImages } from "../helpers/images";
-import { richToMarkdown } from "../helpers/richText";
+import { escapeMarkdown, richToMarkdown } from "../helpers/richText";
 import type { HuleContext } from "../hooks/useHule";
 import { TaskActions } from "./TaskActions";
 
@@ -44,7 +44,7 @@ export function TaskDetail({
   const status = context.statusesOf(task.listId).find((s) => s.id === task.statusId);
   const list = context.listOf(task.listId);
   const workspace = context.workspaceOf(task.listId);
-  const assignee = context.membersOf(task.workspaceId).find((m) => m.id === task.assigneeId);
+  const assignee = context.memberOf(task.workspaceId, task.assigneeId);
   const tags = context.bundle.tags.filter((tag) => task.tagIds.includes(tag.id));
 
   const refs = useMemo(() => imageRefs(task.description), [task.description]);
@@ -53,7 +53,8 @@ export function TaskDetail({
   });
 
   const body = richToMarkdown(task.description, images ?? {});
-  const markdown = `# ${task.title}\n\n${body || "_No description._"}`;
+  // The title is task text like any other — one line, escaped.
+  const markdown = `# ${escapeMarkdown(task.title.replace(/\s+/g, " "))}\n\n${body || "_No description._"}`;
 
   return (
     <Detail
@@ -78,7 +79,7 @@ export function TaskDetail({
           {tags.length > 0 && (
             <Detail.Metadata.TagList title="Tags">
               {tags.map((tag) => (
-                <Detail.Metadata.TagList.Item key={tag.id} text={tag.name} color={tag.color} />
+                <Detail.Metadata.TagList.Item key={tag.id} text={tag.name} color={tagColor(tag.color)} />
               ))}
             </Detail.Metadata.TagList>
           )}

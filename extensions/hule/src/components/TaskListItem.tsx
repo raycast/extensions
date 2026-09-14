@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { PRIORITY_LABELS } from "../api/client";
 import type { Task } from "../api/types";
 import { memberIcon, priorityIcon, statusIcon } from "../helpers/appearance";
 import type { HuleContext } from "../hooks/useHule";
@@ -15,11 +16,11 @@ import { TaskDetail } from "./TaskDetail";
  */
 export function TaskListItem({ task, context, onChange }: { task: Task; context: HuleContext; onChange: () => void }) {
   const status = context.statusesOf(task.listId).find((s) => s.id === task.statusId);
-  const assignee = context.membersOf(task.workspaceId).find((m) => m.id === task.assigneeId);
+  const assignee = context.memberOf(task.workspaceId, task.assigneeId);
 
   const accessories: List.Item.Accessory[] = [];
   if (task.priority !== "none") {
-    accessories.push({ icon: priorityIcon(task.priority), tooltip: `Priority: ${task.priority}` });
+    accessories.push({ icon: priorityIcon(task.priority), tooltip: `Priority: ${PRIORITY_LABELS[task.priority]}` });
   }
   if (assignee) {
     accessories.push({

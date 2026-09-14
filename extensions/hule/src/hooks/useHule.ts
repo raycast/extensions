@@ -1,7 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { getBundle, getMe } from "../api/client";
-import type { AvailableBundle, List, Member, TemplateStatus, User, Workspace } from "../api/types";
+import type { AvailableBundle, List, Member, Task, TemplateStatus, User, Workspace } from "../api/types";
 
 export interface HuleContext {
   bundle: AvailableBundle;
@@ -13,7 +13,27 @@ export interface HuleContext {
   statusesOf: (listId: string) => TemplateStatus[];
   /** The membership that is *me* in a workspace — the value `assigneeId` takes. */
   myMemberId: (workspaceId: string) => string | undefined;
+  /** Active members — the people a task can be assigned to. */
   membersOf: (workspaceId: string) => Member[];
+  /** Any member by id, former ones included — for showing who a task is on. */
+  memberOf: (workspaceId: string, memberId: string | null) => Member | undefined;
+  /** Whether my access lets me change this task; the server refuses otherwise. */
+  canEdit: (task: Task) => boolean;
+}
+
+/**
+ * Lists a task can be created in: not archived, not inside an archived folder
+ * (archiving a folder leaves its lists' own flag alone), and open to me for
+ * editing — a read-only list answers a create with 403.
+ */
+export function writableLists(bundle: Pick<AvailableBundle, "lists" | "folders">): List[] {
+  const folderOf = (id: string | undefined) => (id ? bundle.folders?.find((f) => f.id === id) : undefined);
+  const inArchivedFolder = (folderId: string | undefined, seen = new Set<string>()): boolean => {
+    const folder = folderOf(folderId);
+    if (!folder || seen.has(folder.id)) return false;
+    return folder.archived || inArchivedFolder(folder.folderId, seen.add(folder.id));
+  };
+  return bundle.lists.filter((l) => !l.archived && l.myAccess !== "read" && !inArchivedFolder(l.folderId));
 }
 
 /**
@@ -30,7 +50,7 @@ export function buildContext(bundle: AvailableBundle, me: User): HuleContext {
   return {
     bundle,
     me,
-    openLists: bundle.lists.filter((l) => !l.archived),
+    openLists: writableLists(bundle),
     listOf,
     workspaceOf: (listId) => {
       const list = listOf(listId);
@@ -43,6 +63,9 @@ export function buildContext(bundle: AvailableBundle, me: User): HuleContext {
     },
     myMemberId: (workspaceId) => bundle.members.find((m) => m.workspaceId === workspaceId && m.userId === me.id)?.id,
     membersOf: (workspaceId) => bundle.members.filter((m) => m.workspaceId === workspaceId && m.status === "active"),
+    memberOf: (workspaceId, memberId) =>
+      memberId ? bundle.members.find((m) => m.workspaceId === workspaceId && m.id === memberId) : undefined,
+    canEdit: (task) => (task.myAccess ?? listOf(task.listId)?.myAccess) !== "read",
   };
 }
 

@@ -32,6 +32,8 @@ export interface Task {
   tagIds: string[];
   completedAt: string | null;
   taskKey: string | null;
+  /** The caller's access, derived from the task's list: "read" means look, don't touch. */
+  myAccess?: "read" | "edit";
   createdAt: string;
   updatedAt: string;
 }
@@ -79,6 +81,15 @@ export interface List {
   statusTemplateId: string | null;
   iconName?: string;
   iconColor?: string;
+  /** The caller's access: tasks can be created and changed only with "edit". */
+  myAccess?: "read" | "edit";
+}
+
+export interface Folder {
+  id: string;
+  /** The parent folder, when this one is nested. */
+  folderId?: string;
+  archived: boolean;
 }
 
 export interface Tag {
@@ -91,6 +102,7 @@ export interface Tag {
 /** `GET /available/all` — the cross-workspace boot bundle; we use a subset. */
 export interface AvailableBundle {
   workspaces: Workspace[];
+  folders: Folder[];
   lists: List[];
   statusTemplates: StatusTemplate[];
   members: Member[];

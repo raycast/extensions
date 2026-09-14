@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import { queryTasks, searchTasks } from "./api/client";
 import type { Task } from "./api/types";
 import { ConnectionError } from "./components/ConnectionError";
+import { LoadError } from "./components/LoadError";
 import { TaskListItem } from "./components/TaskListItem";
+import { acrossWorkspaces, uniqueById } from "./helpers/workspaces";
 import { useHule } from "./hooks/useHule";
 
 const RECENTS_LIMIT = 25;
@@ -30,7 +32,7 @@ function fetchTasks(workspaceIds: string[], term: string) {
     // twenty-five would only pay for the extra round trips.
     if (query.length === 0) {
       if (page > 0) return { data: [], hasMore: false };
-      const perWorkspace = await Promise.all(workspaceIds.map((id) => queryTasks(id, undefined, RECENTS_LIMIT)));
+      const perWorkspace = await acrossWorkspaces(workspaceIds, (id) => queryTasks(id, undefined, RECENTS_LIMIT));
       const merged = perWorkspace
         .flat()
         .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
@@ -38,12 +40,13 @@ function fetchTasks(workspaceIds: string[], term: string) {
       return { data: merged, hasMore: false };
     }
 
-    const perWorkspace = await Promise.all(workspaceIds.map((id) => searchTasks(id, query, PAGE_SIZE, page + 1)));
+    const perWorkspace = await acrossWorkspaces(workspaceIds, (id) => searchTasks(id, query, PAGE_SIZE, page + 1));
     return {
       data: perWorkspace.flatMap((result) => result.items ?? []),
-      // Search is offset-paginated AND reports a total, so "is there more" is an
-      // answer rather than a guess: a workspace whose window has not reached its
-      // own total still owes rows.
+      // Search reports a total per workspace, so "is there more" is read off the
+      // reply. The total counts the server's ranking pool, not every match, and a
+      // re-ranked pool can shift a row across a page boundary — the list drops
+      // such repeats by id.
       hasMore: perWorkspace.some((result) => result.page * result.limit < result.total),
     };
   };
@@ -55,16 +58,31 @@ export default function Command() {
   const [scope, setScope] = useState(ALL);
 
   const workspaces = useMemo(() => context?.bundle.workspaces ?? [], [context]);
-  const workspaceIds = useMemo(() => (scope === ALL ? workspaces.map((w) => w.id) : [scope]), [scope, workspaces]);
+  // The dropdown remembers its value between runs; a workspace left since then
+  // falls back to all of them instead of querying a membership that is gone.
+  const known = scope === ALL || workspaces.some((w) => w.id === scope);
+  const workspaceIds = useMemo(
+    () => (known && scope !== ALL ? [scope] : workspaces.map((w) => w.id)),
+    [known, scope, workspaces],
+  );
 
-  const { data, isLoading, revalidate, pagination } = useCachedPromise(fetchTasks, [workspaceIds, query], {
+  const {
+    data,
+    isLoading,
+    error: loadError,
+    revalidate,
+    pagination,
+  } = useCachedPromise(fetchTasks, [workspaceIds, query], {
     execute: workspaceIds.length > 0,
     keepPreviousData: true,
+    // The failure is drawn in the list itself (LoadError) — no second, generic toast.
+    onError: () => undefined,
   });
 
   if (error) return <ConnectionError message={error.message} onRetry={reloadContext} />;
 
-  const tasks = data ?? [];
+  // A failed query shows the failure, never the previous query's rows.
+  const tasks = loadError ? [] : uniqueById(data ?? []);
   // Which mode the list is in follows from the bar, not from the answer: the
   // reply is a flat page either way.
   const recents = query.trim().length === 0;
@@ -82,7 +100,7 @@ export default function Command() {
       throttle
       searchBarAccessory={
         workspaces.length > 1 ? (
-          <List.Dropdown tooltip="Workspace" value={scope} onChange={setScope} storeValue>
+          <List.Dropdown tooltip="Workspace" value={known ? scope : ALL} onChange={setScope} storeValue>
             <List.Dropdown.Item title="All Workspaces" value={ALL} icon={Icon.Globe} />
             <List.Dropdown.Section>
               {workspaces.map((workspace) => (
@@ -93,7 +111,8 @@ export default function Command() {
         ) : undefined
       }
     >
-      {tasks.length === 0 && !isLoading && (
+      {loadError && <LoadError error={loadError} onRetry={revalidate} />}
+      {!loadError && tasks.length === 0 && !isLoading && (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title={recents ? "Nothing Here Yet" : "Nothing Found"}

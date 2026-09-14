@@ -67,10 +67,14 @@ export function listIcon(list: List | undefined) {
  * avatar color.
  */
 export function memberIcon(member: Member | undefined): Image.ImageLike {
-  if (member?.avatarUrl) {
-    return { source: absoluteUrl(member.avatarUrl), mask: Image.Mask.Circle };
-  }
+  const photo = member?.avatarUrl ? absoluteUrl(member.avatarUrl) : undefined;
+  if (photo) return { source: photo, mask: Image.Mask.Circle };
   return { source: Icon.Person, tintColor: colorOf(member?.avatarColor) };
+}
+
+/** A tag's color: a hex passes through, a Hule color name maps onto Raycast's palette. */
+export function tagColor(color: string): Color.ColorLike {
+  return /^#[0-9a-f]{3,8}$/i.test(color) ? color : colorOf(color);
 }
 
 const PRIORITY_COLOR: Record<Priority, Color> = {

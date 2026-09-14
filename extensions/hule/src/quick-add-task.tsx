@@ -1,6 +1,7 @@
 import { LaunchProps, Toast, open, openExtensionPreferences, showToast } from "@raycast/api";
 import { createTask, getBundle, preferences, taskUrl } from "./api/client";
 import type { AvailableBundle, List } from "./api/types";
+import { writableLists } from "./hooks/useHule";
 
 export type ListChoice =
   | { list: List }
@@ -26,10 +27,10 @@ function normalize(name: string): string {
  * one-line command gives no chance to notice the task landed somewhere else.
  */
 export function resolveList(
-  bundle: Pick<AvailableBundle, "lists" | "workspaces">,
+  bundle: Pick<AvailableBundle, "lists" | "folders" | "workspaces">,
   preferredName: string | undefined,
 ): ListChoice {
-  const usable = bundle.lists.filter((list) => !list.archived);
+  const usable = writableLists(bundle);
   const wanted = preferredName?.trim() ?? "";
   if (!wanted) return usable[0] ? { list: usable[0] } : { problem: "none" };
 

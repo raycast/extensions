@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, Toast, open, popToRoot, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { useEffect } from "react";
-import { createTask, taskUrl } from "./api/client";
+import { useEffect, useMemo } from "react";
+import { PRIORITY_LABELS, createTask, taskUrl } from "./api/client";
 import { ConnectionError } from "./components/ConnectionError";
 import { toFloatingDay } from "./helpers/dates";
 import { useHule } from "./hooks/useHule";
@@ -29,8 +29,9 @@ export default function Command() {
           description: values.description.trim() || undefined,
           priority: values.priority as Priority,
           assigneeId: values.assigneeId || undefined,
-          dueDate: values.dueDate ? toFloatingDay(values.dueDate) : undefined,
-          allDay: true,
+          // `allDay` only with a date: sent alone it asks for the date-field
+          // permission on a task that has no date.
+          ...(values.dueDate ? { dueDate: toFloatingDay(values.dueDate), allDay: true } : {}),
         });
         toast.style = Toast.Style.Success;
         toast.title = "Task created";
@@ -60,7 +61,14 @@ export default function Command() {
   }, [context, values.listId, setValue]);
 
   const workspaceId = context?.listOf(values.listId)?.workspaceId;
-  const members = workspaceId ? (context?.membersOf(workspaceId) ?? []) : [];
+  const members = useMemo(() => (workspaceId ? (context?.membersOf(workspaceId) ?? []) : []), [context, workspaceId]);
+
+  // Switching the list to another workspace leaves the old assignee in the
+  // form's state while the dropdown, which has no such person, draws "Nobody" —
+  // the submit would then send someone the user no longer sees. Clear it.
+  useEffect(() => {
+    if (values.assigneeId && !members.some((m) => m.id === values.assigneeId)) setValue("assigneeId", "");
+  }, [members, values.assigneeId, setValue]);
 
   if (error) return <ConnectionError message={error.message} onRetry={revalidate} />;
 
@@ -93,7 +101,7 @@ export default function Command() {
           <Form.Dropdown.Item
             key={priority}
             value={priority}
-            title={priority[0].toUpperCase() + priority.slice(1)}
+            title={PRIORITY_LABELS[priority]}
             icon={priorityIcon(priority)}
           />
         ))}
