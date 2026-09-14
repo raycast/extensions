@@ -20,7 +20,7 @@ import { access, readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DeepLink,
   StorageConfiguration,
@@ -37,7 +37,7 @@ import {
   findUnresolvedVariables,
   resolveDeepLink,
 } from "./deep-link-utils.js";
-import { fallbackTarget, normalizeTarget } from "./target-utils.js";
+import { createLatestRequestGuard, fallbackTarget, normalizeTarget } from "./target-utils.js";
 
 const executeFile = promisify(execFile);
 const commandOptions = { timeout: 60_000, maxBuffer: 1024 * 1024 } as const;
@@ -61,6 +61,9 @@ export default function SearchDeepLinks() {
   const [targetDevices, setTargetDevices] = useState<TargetDevice[]>([]);
   const [selectedTarget, setSelectedTarget] = useState(fallbackTarget(preferences.platform, preferences.target));
   const [targetDiscoveryError, setTargetDiscoveryError] = useState<string>();
+  const targetDiscoveryRequests = useRef(createLatestRequestGuard());
+  const activePlatform = useRef(preferences.platform);
+  activePlatform.current = preferences.platform;
 
   async function load() {
     setIsLoading(true);
@@ -91,21 +94,26 @@ export default function SearchDeepLinks() {
   }, [preferences.storageFile]);
 
   async function loadTargetDevices(showFailure = false) {
+    const requestedPlatform = preferences.platform;
+    const isLatestRequest = targetDiscoveryRequests.current.begin();
+    const shouldApplyResult = () => isLatestRequest() && activePlatform.current === requestedPlatform;
     setTargetDiscoveryError(undefined);
     try {
-      const devices = await discoverTargets(preferences.platform);
+      const devices = await discoverTargets(requestedPlatform);
+      if (!shouldApplyResult()) return;
       setTargetDevices(devices);
       setSelectedTarget((currentTarget) => {
         if (
           currentTarget &&
-          ((preferences.platform === "ios" && currentTarget === "booted") ||
+          ((requestedPlatform === "ios" && currentTarget === "booted") ||
             devices.some((device) => device.id === currentTarget))
         ) {
           return currentTarget;
         }
-        return devices[0]?.id || fallbackTarget(preferences.platform, preferences.target);
+        return devices[0]?.id || fallbackTarget(requestedPlatform, preferences.target);
       });
     } catch (discoveryError) {
+      if (!shouldApplyResult()) return;
       const message = commandError(discoveryError);
       setTargetDevices([]);
       setTargetDiscoveryError(message);
