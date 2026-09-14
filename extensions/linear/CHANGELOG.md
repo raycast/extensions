@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Favorites Crash Fix] - {PR_MERGE_DATE}
+## [Favorites Crash Fix] - 2026-09-14
 
 - Fix the Favorites command crashing when a favorite is a workspace-level label (no team); both workspace and team labels now open through the favorite's Linear-provided URL.
 
