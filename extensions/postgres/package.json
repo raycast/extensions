@@ -1,0 +1,579 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "postgres",
+  "title": "PostgreSQL Client",
+  "description": "Connect to PostgreSQL databases — run queries, browse the schema, inspect slow queries, and let Raycast AI answer questions about your data.",
+  "icon": "extension-icon.png",
+  "author": "alpaycelik",
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "run-query",
+      "title": "Run Query",
+      "subtitle": "PostgreSQL",
+      "description": "Run a SQL statement against a connection and view the results",
+      "mode": "view"
+    },
+    {
+      "name": "browse-schema",
+      "title": "Browse Schema",
+      "subtitle": "PostgreSQL",
+      "description": "Browse schemas, tables, columns, indexes, and foreign keys",
+      "mode": "view"
+    },
+    {
+      "name": "query-history",
+      "title": "Query History",
+      "subtitle": "PostgreSQL",
+      "description": "Browse and re-run recent queries",
+      "mode": "view"
+    },
+    {
+      "name": "manage-connections",
+      "title": "Manage Connections",
+      "subtitle": "PostgreSQL",
+      "description": "Add and edit PostgreSQL connection profiles and pick the default one",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-connections",
+      "title": "List Connections",
+      "description": "List the saved PostgreSQL connection profiles and show which one is active"
+    },
+    {
+      "name": "get-schema",
+      "title": "Get Schema",
+      "description": "Inspect the database structure — schemas, tables, columns, primary keys, indexes, and foreign keys. Use this before writing a query so the SQL matches the real column names."
+    },
+    {
+      "name": "run-read-query",
+      "title": "Run Read Query",
+      "description": "Run a read-only SQL statement (SELECT/WITH/SHOW/TABLE/VALUES) and return the rows. Uses the active connection unless the connection argument names another. Runs inside a READ ONLY transaction, so it can never change data."
+    },
+    {
+      "name": "run-write-query",
+      "title": "Run Write Query",
+      "description": "Run a data- or schema-changing SQL statement (INSERT, UPDATE, DELETE, CREATE, ALTER, DROP, …). Uses the active connection unless the connection argument names another. Always asks the user for confirmation first, showing which database is targeted."
+    },
+    {
+      "name": "explain-query",
+      "title": "Explain Query",
+      "description": "Return the PostgreSQL query plan for a statement, optionally with real execution timings, to diagnose why it is slow"
+    },
+    {
+      "name": "find-slow-queries",
+      "title": "Find Slow Queries",
+      "description": "List the slowest statements recorded by the pg_stat_statements extension, ranked by total or mean execution time"
+    }
+  ],
+  "ai": {
+    "instructions": "You can inspect and query the user's PostgreSQL databases.\n\nRules:\n- Every tool runs against the user's active connection. Only pass the `connection` argument when the request names a specific database or environment (\"on staging\", \"in the analytics db\"). If you are unsure which connections exist, call `list-connections` first — never guess a name, an unknown one is rejected rather than falling back.\n- If the connection the user named does not exist, say so and stop. Never substitute another connection and never present numbers from a different database as the answer — a wrong number that looks right is worse than no answer.\n- When the answer comes from a connection other than the active one, say which database it was.\n- Call `get-schema` before writing a query against tables you have not seen yet. Never guess table or column names.\n- Use `run-read-query` for anything that only reads. It is enforced read-only by the server, so prefer it.\n- Use `run-write-query` only when the user clearly asks to change data or schema. It always asks the user to confirm.\n- Always put a LIMIT on exploratory SELECTs unless the user asked for the full result.\n- Quote identifiers that are not lower_snake_case with double quotes, e.g. \"createdAt\".\n- When a query is slow, use `explain-query` for the plan and `find-slow-queries` to see where the server spends its time. `find-slow-queries` needs the pg_stat_statements extension; if it is not installed, say so instead of retrying.\n- Summarize results in prose and only show a table when the individual rows matter.",
+    "evals": [
+      {
+        "input": "@postgres which tables are in the database?",
+        "mocks": {
+          "get-schema": {
+            "connection": "local",
+            "tables": [
+              {
+                "schema": "public",
+                "name": "users",
+                "kind": "table"
+              },
+              {
+                "schema": "public",
+                "name": "orders",
+                "kind": "table"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-schema"
+          }
+        ]
+      },
+      {
+        "input": "@postgres how many users signed up last week?",
+        "mocks": {
+          "get-schema": {
+            "connection": "local",
+            "columns": [
+              {
+                "table": "public.users",
+                "name": "id",
+                "type": "bigint",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "table": "public.users",
+                "name": "created_at",
+                "type": "timestamptz",
+                "nullable": false
+              }
+            ]
+          },
+          "run-read-query": {
+            "connection": "local",
+            "rowCount": 1,
+            "durationMs": 7,
+            "rows": [
+              {
+                "count": 128
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-schema"
+          },
+          {
+            "callsTool": {
+              "name": "run-read-query",
+              "arguments": {
+                "sql": {
+                  "includes": "users"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@postgres show me the 10 most recent orders",
+        "mocks": {
+          "get-schema": {
+            "connection": "local",
+            "columns": [
+              {
+                "table": "public.orders",
+                "name": "id",
+                "type": "bigint",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "table": "public.orders",
+                "name": "created_at",
+                "type": "timestamptz",
+                "nullable": false
+              }
+            ]
+          },
+          "run-read-query": {
+            "connection": "local",
+            "rowCount": 2,
+            "durationMs": 5,
+            "rows": [
+              {
+                "id": 42
+              },
+              {
+                "id": 41
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-read-query",
+              "arguments": {
+                "sql": {
+                  "includes": "LIMIT"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@postgres delete the user with id 5",
+        "mocks": {
+          "run-write-query": {
+            "connection": "local",
+            "durationMs": 9,
+            "result": "DELETE 1"
+          },
+          "get-schema": {
+            "connection": "local",
+            "database": "app",
+            "tables": [
+              {
+                "schema": "public",
+                "name": "users",
+                "kind": "table"
+              }
+            ],
+            "columns": [
+              {
+                "table": "public.users",
+                "name": "id",
+                "type": "bigint",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "table": "public.users",
+                "name": "status",
+                "type": "text",
+                "nullable": false
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-write-query",
+              "arguments": {
+                "sql": {
+                  "includes": "DELETE"
+                }
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Uses the write tool, which requires the user to confirm before the statement runs."
+          }
+        ]
+      },
+      {
+        "input": "@postgres why is \"SELECT * FROM orders WHERE user_id = 42\" slow?",
+        "mocks": {
+          "explain-query": {
+            "connection": "local",
+            "plan": "Seq Scan on orders  (cost=0.00..18334.00 rows=1 width=44)\n  Filter: (customer_id = 7)"
+          },
+          "get-schema": {
+            "connection": "local",
+            "database": "app",
+            "columns": [
+              {
+                "table": "public.orders",
+                "name": "id",
+                "type": "bigint",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "table": "public.orders",
+                "name": "user_id",
+                "type": "bigint",
+                "nullable": false
+              },
+              {
+                "table": "public.orders",
+                "name": "placed_at",
+                "type": "timestamptz",
+                "nullable": false
+              }
+            ]
+          },
+          "find-slow-queries": {
+            "connection": "local",
+            "database": "app",
+            "orderedBy": "total execution time",
+            "queries": [
+              {
+                "query": "SELECT * FROM orders WHERE user_id = $1",
+                "calls": 1200,
+                "totalExecMs": 101040,
+                "meanExecMs": 84.2,
+                "rows": 7200,
+                "cacheHitRatio": 0.62
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "explain-query"
+          }
+        ]
+      },
+      {
+        "input": "@postgres what are the slowest queries on this database?",
+        "mocks": {
+          "find-slow-queries": {
+            "connection": "local",
+            "queries": [
+              {
+                "query": "SELECT * FROM orders WHERE customer_id = $1",
+                "calls": 1200,
+                "meanExecMs": 84.2
+              }
+            ]
+          },
+          "get-schema": {
+            "connection": "local",
+            "database": "app",
+            "tables": [
+              {
+                "schema": "public",
+                "name": "users",
+                "kind": "table"
+              }
+            ],
+            "columns": [
+              {
+                "table": "public.users",
+                "name": "id",
+                "type": "bigint",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "table": "public.users",
+                "name": "status",
+                "type": "text",
+                "nullable": false
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "find-slow-queries"
+          }
+        ]
+      },
+      {
+        "input": "@postgres how many users are on staging?",
+        "mocks": {
+          "list-connections": {
+            "active": "production",
+            "connections": [
+              {
+                "name": "production",
+                "database": "app",
+                "isActive": true
+              },
+              {
+                "name": "staging",
+                "database": "app_staging",
+                "isActive": false
+              }
+            ]
+          },
+          "run-read-query": {
+            "connection": "staging",
+            "rowCount": 1,
+            "durationMs": 4,
+            "rows": [
+              {
+                "count": 50
+              }
+            ]
+          },
+          "get-schema": {
+            "connection": "production",
+            "database": "app",
+            "tables": [
+              {
+                "schema": "public",
+                "name": "users",
+                "kind": "table"
+              }
+            ],
+            "columns": [
+              {
+                "table": "public.users",
+                "name": "id",
+                "type": "bigint",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "table": "public.users",
+                "name": "status",
+                "type": "text",
+                "nullable": false
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-read-query",
+              "arguments": {
+                "connection": "staging"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Reports the number and makes clear it came from the staging database, not the active one."
+          }
+        ]
+      },
+      {
+        "input": "@postgres how many users are there?",
+        "mocks": {
+          "run-read-query": {
+            "connection": "production",
+            "rowCount": 1,
+            "durationMs": 4,
+            "rows": [
+              {
+                "count": 2000
+              }
+            ]
+          },
+          "get-schema": {
+            "connection": "production",
+            "database": "app",
+            "tables": [
+              {
+                "schema": "public",
+                "name": "users",
+                "kind": "table"
+              }
+            ],
+            "columns": [
+              {
+                "table": "public.users",
+                "name": "id",
+                "type": "bigint",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "table": "public.users",
+                "name": "status",
+                "type": "text",
+                "nullable": false
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "run-read-query"
+          },
+          {
+            "meetsCriteria": "Does not pass a connection argument, because the request names no database or environment."
+          }
+        ]
+      },
+      {
+        "input": "@postgres how many users per status does staging have?",
+        "mocks": {
+          "list-connections": {
+            "active": "production",
+            "connections": [
+              {
+                "name": "production",
+                "database": "app",
+                "isActive": true
+              }
+            ]
+          },
+          "run-read-query": {
+            "connection": "production",
+            "rowCount": 3,
+            "durationMs": 6,
+            "rows": [
+              {
+                "status": "active",
+                "count": 1199
+              }
+            ]
+          },
+          "get-schema": {
+            "connection": "production",
+            "database": "app",
+            "tables": [
+              {
+                "schema": "public",
+                "name": "users",
+                "kind": "table"
+              }
+            ],
+            "columns": [
+              {
+                "table": "public.users",
+                "name": "id",
+                "type": "bigint",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "table": "public.users",
+                "name": "status",
+                "type": "text",
+                "nullable": false
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "meetsCriteria": "States that no connection named \"staging\" is configured and that it can be added with the Manage Connections command. Does NOT report user counts from the production connection as the answer, because the question was about staging."
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "defaultConnectionString",
+      "type": "textfield",
+      "required": false,
+      "title": "Connection String",
+      "placeholder": "postgresql://user:password@localhost:5432/postgres",
+      "description": "Fallback connection used only when no connection profile has been saved yet. For anything beyond a single local database, use the Manage Connections command."
+    },
+    {
+      "name": "statementTimeout",
+      "type": "textfield",
+      "required": false,
+      "title": "Statement Timeout",
+      "placeholder": "15000",
+      "description": "Milliseconds after which the server cancels a statement (defaults to 15000). Applies to queries run from commands and from AI tools."
+    },
+    {
+      "name": "maxRows",
+      "type": "textfield",
+      "required": false,
+      "title": "Row Limit",
+      "placeholder": "500",
+      "description": "Maximum number of rows fetched per query (defaults to 500)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.18.6",
+    "@types/pg": "^8.11.10",
+    "@types/react": "^19.1.13",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}
