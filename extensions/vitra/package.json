@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vitra",
   "title": "Vitra",
-  "description": "Requires the Vitra desktop app. Reads Vitra's local snapshot to show today's readiness, sleep and recovery from your Oura ring — no Oura account, no network access.",
+  "description": "Requires the Vitra desktop app. Reads Vitra's local snapshot to show today's readiness, sleep and recovery from your Oura ring — no Oura credentials or setup in Raycast, and no network calls.",
   "icon": "vitra.png",
   "author": "pedro_pt_thomaz",
   "categories": [

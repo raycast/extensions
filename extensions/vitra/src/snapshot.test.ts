@@ -9,6 +9,7 @@ import {
   fmtSigned,
   load,
   relativeTime,
+  snapshotFault,
   summaryLine,
 } from "./snapshot";
 import type { Snapshot } from "./snapshot";
@@ -178,5 +179,88 @@ describe("the loader tells the four cases apart", () => {
       at("future.json", JSON.stringify({ ...base, schema: 99 })),
     ]);
     expect(r).toEqual({ kind: "unsupported", found: 99 });
+  });
+});
+
+describe("a file at the right schema still has to be a snapshot", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "vitra-shape-"));
+  const at = (name: string, body: string) => {
+    const p = path.join(dir, name);
+    fs.writeFileSync(p, body);
+    return p;
+  };
+
+  /** A real snapshot with one top-level key taken away. */
+  const without = (key: keyof Snapshot) => {
+    const copy: Record<string, unknown> = { ...base };
+    delete copy[key];
+    return copy;
+  };
+
+  it("does not hand the view a snapshot that is only a version number", () => {
+    // The crash this exists to prevent: { "schema": 1 } parses, matches the
+    // supported version, and then the view reads scores.readiness off
+    // undefined. Failing here means the user gets a sentence instead.
+    const r = load([at("stub.json", JSON.stringify({ schema: 1 }))]);
+    expect(r.kind).toBe("unreadable");
+  });
+
+  it("names the group that is missing", () => {
+    const r = load([
+      at("nobaselines.json", JSON.stringify(without("baselines"))),
+    ]);
+    expect(r).toEqual({
+      kind: "unreadable",
+      message: "baselines is missing or not an object",
+    });
+  });
+
+  it("rejects a measurement that is a string", () => {
+    const r = snapshotFault({
+      ...base,
+      measurements: { ...base.measurements, hrvMs: "20" },
+    });
+    expect(r).toBe("measurements.hrvMs is neither a number nor null");
+  });
+
+  it("accepts every nullable field actually being null", () => {
+    expect(
+      snapshotFault({
+        ...base,
+        day: null,
+        scores: { readiness: null, sleep: null, activity: null },
+        measurements: {
+          hrvMs: null,
+          restingHr: null,
+          sleepHours: null,
+          steps: null,
+          tempDeviationC: null,
+          spo2: null,
+        },
+        baselines: {
+          readiness: null,
+          hrvMs: null,
+          restingHr: null,
+          sleepHours: null,
+        },
+      }),
+    ).toBeNull();
+  });
+
+  it("lets a snapshot without flags through", () => {
+    // flags is read with ?. in the view, so its absence is not a fault.
+    expect(snapshotFault(without("flags"))).toBeNull();
+  });
+
+  it("treats a file with no schema number as malformed, not as a newer Vitra", () => {
+    const r = load([at("noschema.json", JSON.stringify(without("schema")))]);
+    expect(r).toEqual({
+      kind: "unreadable",
+      message: "schema is missing or not a number",
+    });
+  });
+
+  it("still accepts a real snapshot", () => {
+    expect(snapshotFault(base)).toBeNull();
   });
 });

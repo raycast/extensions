@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Color, Icon, List, open } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  Toast,
+  getApplications,
+  open,
+  showToast,
+} from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import {
   deltaHoursText,
@@ -16,6 +26,39 @@ import {
 
 // The view. Everything it renders comes from ./snapshot, which is deliberately
 // free of Raycast imports so the formatting can be tested without Raycast.
+
+/** Electron derives this from the app id; it is stable across both platforms. */
+const VITRA_BUNDLE_ID = "com.vitra.app";
+const VITRA_SITE = "https://vitrahealth.app";
+
+/**
+ * Launch Vitra, or say where to get it.
+ *
+ * open() wants a file, folder or URL — an application name is none of those, so
+ * the installed app has to be resolved to its own path first. Someone reaching
+ * for this action is, by definition, often someone who does not have Vitra
+ * installed, and the honest answer to that is a pointer to the site rather than
+ * a failure with no next step.
+ */
+async function openVitra(): Promise<void> {
+  const installed = await getApplications();
+  const vitra = installed.find(
+    (app) => app.bundleId === VITRA_BUNDLE_ID || app.name === "Vitra",
+  );
+  if (vitra) {
+    await open(vitra.path);
+    return;
+  }
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Vitra is not installed",
+    message: "It is the desktop app this extension reads from",
+    primaryAction: {
+      title: "Open vitrahealth.app",
+      onAction: () => void open(VITRA_SITE),
+    },
+  });
+}
 
 export default function Today() {
   const [result, setResult] = useState<LoadResult | null>(null);
@@ -38,17 +81,14 @@ export default function Today() {
               <Action
                 title="Open Vitra"
                 icon={Icon.AppWindow}
-                onAction={() => void open("Vitra")}
+                onAction={() => void openVitra()}
               />
               <Action
                 title="Reload"
                 icon={Icon.ArrowClockwise}
                 onAction={refresh}
               />
-              <Action.OpenInBrowser
-                title="About Vitra"
-                url="https://vitrahealth.app"
-              />
+              <Action.OpenInBrowser title="About Vitra" url={VITRA_SITE} />
             </ActionPanel>
           }
         />
@@ -68,7 +108,7 @@ export default function Today() {
       <Action
         title="Open Vitra"
         icon={Icon.AppWindow}
-        onAction={() => void open("Vitra")}
+        onAction={() => void openVitra()}
       />
       <Action title="Reload" icon={Icon.ArrowClockwise} onAction={refresh} />
       <Action.CopyToClipboard title="Copy Summary" content={summaryLine(s)} />
@@ -76,7 +116,7 @@ export default function Today() {
   );
 
   return (
-    <List navigationTitle={`Vitra — ${s.day ?? "no data yet"}`}>
+    <List>
       {stale && (
         <List.Section title="Note">
           <List.Item
@@ -192,7 +232,7 @@ export default function Today() {
         <List.Item
           icon={Icon.Lock}
           title="Read from your own machine"
-          subtitle={`Vitra ${s.appVersion} · published ${relativeTime(s.generatedAt)} · nothing leaves this device`}
+          subtitle={`${s.day ?? "No day yet"} · Vitra ${s.appVersion} · published ${relativeTime(s.generatedAt)} · nothing leaves this device`}
           actions={actions}
         />
       </List.Section>

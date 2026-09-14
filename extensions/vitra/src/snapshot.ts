@@ -66,6 +66,74 @@ export function candidatePaths(): string[] {
   );
 }
 
+function isObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
+function numberOrNull(v: unknown): boolean {
+  return v === null || typeof v === "number";
+}
+
+const SCORE_KEYS = ["readiness", "sleep", "activity"] as const;
+const MEASUREMENT_KEYS = [
+  "hrvMs",
+  "restingHr",
+  "sleepHours",
+  "steps",
+  "tempDeviationC",
+  "spo2",
+] as const;
+const BASELINE_KEYS = [
+  "readiness",
+  "hrvMs",
+  "restingHr",
+  "sleepHours",
+] as const;
+
+/**
+ * The first thing wrong with a parsed snapshot, or null if it is one.
+ *
+ * Valid JSON at the right schema version is not the same as a snapshot. A
+ * truncated write or a hand-edited file can parse cleanly and still be missing
+ * every nested group the view reads, and trusting the schema number alone means
+ * the crash lands in the middle of rendering, where the user sees a stack trace
+ * instead of an explanation. Checking here keeps the failure where the other
+ * failures already are.
+ */
+export function snapshotFault(v: unknown): string | null {
+  if (!isObject(v)) return "the file does not contain a JSON object";
+  // A file with no schema number at all is malformed rather than from a newer
+  // Vitra, so it is a fault here and not an "unsupported version" answer.
+  if (typeof v.schema !== "number") return "schema is missing or not a number";
+  if (typeof v.generatedAt !== "string")
+    return "generatedAt is missing or not a string";
+  if (typeof v.appVersion !== "string")
+    return "appVersion is missing or not a string";
+  if (!(v.day === null || typeof v.day === "string"))
+    return "day is neither a date nor null";
+  if (typeof v.scoresWithheld !== "boolean")
+    return "scoresWithheld is missing or not a boolean";
+  // flags may be absent — the view already treats a missing pacedHeart as
+  // false — but a flags that is present and not an object is a fault.
+  if (v.flags !== undefined && !isObject(v.flags))
+    return "flags is not an object";
+
+  const groups = [
+    ["scores", SCORE_KEYS],
+    ["measurements", MEASUREMENT_KEYS],
+    ["baselines", BASELINE_KEYS],
+  ] as const;
+  for (const [name, keys] of groups) {
+    const section = v[name];
+    if (!isObject(section)) return `${name} is missing or not an object`;
+    for (const key of keys) {
+      if (!numberOrNull(section[key]))
+        return `${name}.${key} is neither a number nor null`;
+    }
+  }
+  return null;
+}
+
 export type LoadResult =
   | { kind: "ok"; snapshot: Snapshot }
   | { kind: "missing" }
@@ -90,13 +158,19 @@ export function load(paths: string[] = candidatePaths()): LoadResult {
       continue; // not this path — try the next
     }
     try {
-      const parsed = JSON.parse(raw) as Snapshot;
+      const parsed: unknown = JSON.parse(raw);
       // A newer Vitra could publish a shape we do not understand. Say so rather
       // than rendering half of it and letting the user think a field is broken.
-      if (parsed.schema !== SUPPORTED_SCHEMA) {
+      if (
+        isObject(parsed) &&
+        typeof parsed.schema === "number" &&
+        parsed.schema !== SUPPORTED_SCHEMA
+      ) {
         return { kind: "unsupported", found: parsed.schema };
       }
-      return { kind: "ok", snapshot: parsed };
+      const fault = snapshotFault(parsed);
+      if (fault) return { kind: "unreadable", message: fault };
+      return { kind: "ok", snapshot: parsed as unknown as Snapshot };
     } catch (e) {
       lastError = e instanceof Error ? e.message : String(e);
     }
