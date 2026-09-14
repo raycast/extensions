@@ -7,11 +7,16 @@ type OmniFocusAddTaskResponse =
   | {
       task: OmniFocusTask;
       error?: never;
+      /** Set when a planned date was requested but OmniFocus could not store it (requires 4.7+ and a migrated database). */
+      plannedDateUnsupported?: boolean;
     }
   | {
       task?: never;
       error: "tag_assignment_failed" | "project_assignment_failed";
+      plannedDateUnsupported?: never;
     };
+
+type OmniFocusAddTaskScriptResult = OmniFocusTask & { plannedDateUnsupported?: boolean };
 export async function addTask(options: CreateOmniFocusTaskOptions): Promise<OmniFocusAddTaskResponse> {
   const { name, deferDate, plannedDate, flagged, note, dueDate } = options;
 
@@ -36,10 +41,13 @@ export async function addTask(options: CreateOmniFocusTaskOptions): Promise<Omni
     source += `task.deferDate = new Date('${dateString}');\n`;
   }
 
+  // Planned dates require OmniFocus 4.7+ AND a migrated database. On older versions or an
+  // unmigrated database the accessor throws, so guard it and report back instead of failing
+  // the whole task creation.
+  source += `let plannedDateUnsupported = false;\n`;
   if (plannedDate) {
-    // Planned dates require OmniFocus 4.7+; the property is exposed as `planned date` in the scripting dictionary.
     const dateString = plannedDate.toISOString();
-    source += `task.plannedDate = new Date('${dateString}');\n`;
+    source += `try { task.plannedDate = new Date('${dateString}'); } catch (e) { plannedDateUnsupported = true; }\n`;
   }
 
   if (dueDate) {
@@ -48,8 +56,8 @@ export async function addTask(options: CreateOmniFocusTaskOptions): Promise<Omni
 
   source += `doc.inboxTasks.push(task);`;
 
-  source += "return { id: task.id(), name: task.name() };";
-  const task = await executeScript<OmniFocusTask>(source);
+  source += "return { id: task.id(), name: task.name(), plannedDateUnsupported };";
+  const { plannedDateUnsupported, ...task } = await executeScript<OmniFocusAddTaskScriptResult>(source);
 
   if (options.tags) {
     try {
@@ -71,5 +79,5 @@ export async function addTask(options: CreateOmniFocusTaskOptions): Promise<Omni
       return { error: "project_assignment_failed" };
     }
   }
-  return { task };
+  return { task, plannedDateUnsupported };
 }
