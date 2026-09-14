@@ -103,6 +103,7 @@ export type ModelHook = BaseHook<Record<string, Model>> &
     setModels: PromiseFunctionWithOneArg<Record<string, Model>>;
     importModels: PromiseFunctionWithOneArg<Model[] | Record<string, Model>>;
     update: PromiseFunctionWithOneArg<Model>;
+    setPinned: (id: string, pinned: boolean) => Promise<void>;
   };
 
 export interface ChatHook {

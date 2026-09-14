@@ -1,4 +1,4 @@
-import { Action, Icon, LaunchType, useNavigation } from "@raycast/api";
+import { Action, Icon, Keyboard, LaunchType, useNavigation } from "@raycast/api";
 import type { Command } from "../type";
 import { DEFAULT_COMMANDS, useCommand } from "../hooks/useCommand";
 import { DestructiveAction } from ".";
@@ -41,7 +41,7 @@ export function CommandManagementActions({
       <Action
         title="Duplicate AI Command"
         icon={Icon.Duplicate}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        shortcut={Keyboard.Shortcut.Common.Duplicate}
         onAction={() => push(<CommandForm cmd={command} isNew use={{ commands }} onSaved={onCreated} />)}
       />
       <Action.CreateQuicklink

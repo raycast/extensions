@@ -9,6 +9,9 @@
 - Add navigation from Models to Ask and editing from Ask, retaining model selection, drafts and existing messages.
 - Keep Ask's remembered model when continuing an AI command or a saved conversation; update it only when a model is explicitly selected.
 - Keep model and command edits synchronized across open forms, and prevent removal of models still used by commands.
+- Preserve newer model and command settings when saving from a previously opened command.
+- Pin and unpin models without overwriting newer settings or restoring deleted models.
+- Use platform-appropriate shortcuts for creating, editing and duplicating models and AI commands on macOS and Windows.
 
 ## [Feature] - 2026-09-11
 

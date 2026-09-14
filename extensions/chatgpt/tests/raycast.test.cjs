@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const http = require("node:http");
 const { launch, available } = require("./raycast-harness.cjs");
 const { DEFAULT_MODEL } = require("../src/utils/model-defaults.ts");
-const { CATALOG_STORAGE_KEY } = require("../src/utils/model-catalog.ts");
+const { createModelCatalog, CATALOG_STORAGE_KEY } = require("../src/utils/model-catalog.ts");
 const native = {
   skip: available
     ? false
@@ -724,6 +724,30 @@ test("continuing a saved conversation uses its model without replacing Ask's rem
   t.after(ordinaryAsk.close);
   await ordinaryAsk.waitFor(page("Ask"));
   assert.equal(body(ordinaryAsk.tree).searchBarAccessory.value.value, "writer");
+});
+
+test("Models pin actions preserve settings saved after the list was loaded", native, async (t) => {
+  const app = await launch("model", fixture);
+  t.after(app.close);
+  await app.waitFor(page("Models"));
+  await select(app, "writer");
+  const other = createModelCatalog({
+    getItem: async (key) => app.storage.get(key),
+    setItem: async (key, value) => app.storage.set(key, value),
+  });
+  await other.load();
+  await other.saveModel({ ...writer, prompt: "Edited in another invocation" });
+  await action(app, "Pin Model");
+  await app.waitFor((tree) => actions(tree).some((item) => item.title === "Unpin Model"));
+  let saved = JSON.parse(app.storage.get(CATALOG_STORAGE_KEY)).models.writer;
+  assert.equal(saved.pinned, true);
+  assert.equal(saved.prompt, "Edited in another invocation");
+  assert.equal(body(app.tree).detail.markdown, "Edited in another invocation");
+  await action(app, "Unpin Model");
+  await app.waitFor((tree) => actions(tree).some((item) => item.title === "Pin Model"));
+  saved = JSON.parse(app.storage.get(CATALOG_STORAGE_KEY)).models.writer;
+  assert.equal(saved.pinned, false);
+  assert.equal(saved.prompt, "Edited in another invocation");
 });
 
 test("creating an ordinary model returns to Models with the new preset selected", native, async (t) => {

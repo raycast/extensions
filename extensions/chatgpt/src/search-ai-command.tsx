@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, LaunchType, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, LaunchType, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction } from "./actions";
 import { Command } from "./type";
@@ -49,19 +49,19 @@ function SearchAiCommand() {
       <ActionPanel.Section>
         <Action
           title={"Edit AI Command"}
-          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          shortcut={Keyboard.Shortcut.Common.Edit}
           icon={Icon.Pencil}
           onAction={() => navigation.push(<CommandForm cmd={cmd} use={{ commands }} />)}
         />
         <Action
           title={"Create AI Command"}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
           icon={Icon.NewDocument}
           onAction={() => navigation.push(<CommandForm use={{ commands }} />)}
         />
         <Action
           title={"Duplicate AI Command"}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          shortcut={Keyboard.Shortcut.Common.Duplicate}
           icon={Icon.Duplicate}
           onAction={() => navigation.push(<CommandForm cmd={cmd} isNew={true} use={{ commands }} />)}
         />

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction, PinAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
@@ -33,7 +33,7 @@ export default function Model() {
     <ActionPanel.Section title="Create">
       <Action
         title="Create Model"
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        shortcut={Keyboard.Shortcut.Common.New}
         icon={Icon.NewDocument}
         onAction={() =>
           push(
@@ -49,7 +49,10 @@ export default function Model() {
       />
       <Action
         title={model && !isCommandModel(model.id) ? "Create AI Command from This Model" : "Create AI Command"}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "n" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+        }}
         icon={Icon.Bolt}
         onAction={() =>
           push(
@@ -107,7 +110,7 @@ export default function Model() {
                 <PinAction
                   title={model.pinned ? "Unpin Model" : "Pin Model"}
                   isPinned={model.pinned}
-                  onAction={() => models.update({ ...model, pinned: !model.pinned }).catch(() => {})}
+                  onAction={() => models.setPinned(model.id, !model.pinned).catch(() => {})}
                 />
                 <ActionPanel.Section title="Delete">
                   <DestructiveAction

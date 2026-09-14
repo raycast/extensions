@@ -124,32 +124,35 @@ export function createModelCatalog(storage: Storage, now: () => Date = () => new
     snapshot = { catalog, models: catalogModels(catalog), isLoading: false, error: undefined };
     publish();
   };
+  const readLatest = async () => {
+    const saved = await storage.getItem(CATALOG_STORAGE_KEY);
+    if (saved) {
+      const next: Catalog = JSON.parse(saved);
+      if (next.version !== 1) throw new Error("Unsupported model configuration version.");
+      return next;
+    }
+    const [models, commands] = await Promise.all([storage.getItem("models"), storage.getItem("commands")]);
+    const next = migrateCatalog(JSON.parse(models || "{}"), JSON.parse(commands || "{}"), now().toISOString());
+    // Keep legacy keys intact for rollback.
+    await storage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(next));
+    return next;
+  };
   const load = () => {
-    loading ??= (async () => {
-      const saved = await storage.getItem(CATALOG_STORAGE_KEY);
-      let next: Catalog;
-      if (saved) {
-        next = JSON.parse(saved);
-        if (next.version !== 1) throw new Error("Unsupported model configuration version.");
-      } else {
-        const [models, commands] = await Promise.all([storage.getItem("models"), storage.getItem("commands")]);
-        next = migrateCatalog(JSON.parse(models || "{}"), JSON.parse(commands || "{}"), now().toISOString());
-        // One atomic value owns both collections. Keep legacy keys intact for rollback.
-        await storage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(next));
-      }
-      accept(next);
-    })().catch((error) => {
-      snapshot = { ...snapshot, isLoading: false, error: error instanceof Error ? error : new Error(String(error)) };
-      publish();
-      loading = undefined;
-      throw error;
-    });
+    loading ??= readLatest()
+      .then(accept)
+      .catch((error) => {
+        snapshot = { ...snapshot, isLoading: false, error: error instanceof Error ? error : new Error(String(error)) };
+        publish();
+        loading = undefined;
+        throw error;
+      });
     return loading;
   };
   const change = (update: (current: Catalog, timestamp: string) => Catalog) => {
     const result = writes.then(async () => {
       await load();
-      const next = update(catalog, now().toISOString());
+      // Another invocation may have saved since this store was loaded.
+      const next = update(await readLatest(), now().toISOString());
       catalogModels(next); // Validate references before persisting anything.
       await storage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(next));
       accept(next);
@@ -172,6 +175,15 @@ export function createModelCatalog(storage: Storage, now: () => Date = () => new
         return {
           ...current,
           models: { ...current.models, [model.id]: normalizeModel({ ...model, updated_at: timestamp }, timestamp) },
+        };
+      }),
+    setPinned: (id: string, pinned: boolean) =>
+      change((current, timestamp) => {
+        const model = current.models[id];
+        if (!model) throw new Error("Model no longer exists. Reopen Models and try again.");
+        return {
+          ...current,
+          models: { ...current.models, [id]: { ...model, pinned, updated_at: timestamp } },
         };
       }),
     removeModel: (model: Model) =>

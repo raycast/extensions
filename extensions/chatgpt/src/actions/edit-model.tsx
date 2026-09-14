@@ -1,4 +1,4 @@
-import { Action, Icon, useNavigation } from "@raycast/api";
+import { Action, Icon, Keyboard, useNavigation } from "@raycast/api";
 import { useCommand } from "../hooks/useCommand";
 import { useModelCatalog } from "../hooks/useModelCatalog";
 import { commandIdFromModel } from "../utils/model-catalog";
@@ -17,7 +17,7 @@ export function EditModelAction({ modelId }: { modelId: string }) {
     <Action
       title={command ? "Edit AI Command" : "Edit Model"}
       icon={Icon.Pencil}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      shortcut={Keyboard.Shortcut.Common.Edit}
       onAction={() => push(command ? <CommandForm cmd={command} use={{ commands }} /> : <ModelForm model={model} />)}
     />
   );

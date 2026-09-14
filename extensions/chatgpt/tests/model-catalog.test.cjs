@@ -273,6 +273,93 @@ test("queued saves merge rather than overwriting one another, and deleting a com
   assert.equal(restarted.getSnapshot().catalog.models.writer.prompt, "Updated");
 });
 
+test("stale stores preserve each other's changes and do not restore deleted models", async () => {
+  const io = storage();
+  const first = factory(io);
+  const second = factory(io);
+  await first.load();
+  await second.load();
+  await first.saveModel(base);
+  await second.saveCommand({ ...command, configurationMode: "independent" });
+  assert.equal(JSON.parse(io.values.get(CATALOG_STORAGE_KEY)).models.writer.option, base.option);
+  await first.saveModel({ ...base, name: "Edited model" });
+  assert.equal(JSON.parse(io.values.get(CATALOG_STORAGE_KEY)).commands.rewrite.name, command.name);
+  await second.removeModel(base);
+  await first.saveCommand({ ...command, configurationMode: "independent", name: "Edited command" });
+  const restarted = factory(io);
+  await restarted.load();
+  assert.equal(restarted.getSnapshot().catalog.models.writer, undefined);
+  assert.equal(restarted.getSnapshot().catalog.commands.rewrite.name, "Edited command");
+});
+
+test("pinning a stale model preserves newer settings and cannot restore a deleted model", async () => {
+  const io = storage();
+  const first = await configured(io);
+  const pinnedAt = "2026-09-14T22:00:00.000Z";
+  const second = createModelCatalog(io, () => new Date(pinnedAt));
+  await second.load();
+  for (const pinned of [true, false]) {
+    const latest = JSON.parse(io.values.get(CATALOG_STORAGE_KEY)).models.writer;
+    await first.saveModel({ ...latest, prompt: `New prompt before ${pinned ? "pin" : "unpin"}`, temperature: "0.9" });
+    const before = JSON.parse(io.values.get(CATALOG_STORAGE_KEY));
+    await second.setPinned(base.id, pinned);
+    const expected = {
+      ...before,
+      models: { ...before.models, writer: { ...before.models.writer, pinned, updated_at: pinnedAt } },
+    };
+    assert.deepEqual(JSON.parse(io.values.get(CATALOG_STORAGE_KEY)), expected);
+    assert.deepEqual(second.getSnapshot().catalog, expected);
+  }
+  await first.removeCommand(command);
+  await first.removeModel(base);
+  const before = io.values.get(CATALOG_STORAGE_KEY);
+  await assert.rejects(second.setPinned(base.id, true), /Model no longer exists/);
+  assert.equal(io.values.get(CATALOG_STORAGE_KEY), before);
+});
+
+test("stale stores validate references and imports against the latest saved commands", async () => {
+  const io = storage();
+  const first = factory(io);
+  await first.load();
+  await first.saveModel(base);
+  const second = factory(io);
+  await second.load();
+  await first.saveCommand(command);
+  await assert.rejects(second.removeModel(base), /Model used by: Rewrite/);
+  await assert.rejects(second.setModels({ default: DEFAULT_MODEL }), /Model used by: Rewrite/);
+  await second.importModels([{ ...DEFAULT_MODEL, prompt: "Imported" }]);
+  assert.equal(second.getSnapshot().catalog.models.writer.option, base.option);
+  assert.equal(second.getSnapshot().catalog.commands.rewrite.baseModelId, base.id);
+  await first.removeCommand(command);
+  await first.removeModel(base);
+  await assert.rejects(second.saveCommand(command), /existing base model/);
+  assert.equal(JSON.parse(io.values.get(CATALOG_STORAGE_KEY)).commands.rewrite, undefined);
+});
+
+test("a failed save from a stale store preserves persisted changes and can be retried", async () => {
+  const io = storage();
+  const first = factory(io);
+  const second = factory(io);
+  await first.load();
+  await second.load();
+  await first.saveModel(base);
+  const before = io.values.get(CATALOG_STORAGE_KEY);
+  const oldSnapshot = second.getSnapshot();
+  const setItem = io.setItem;
+  io.setItem = async () => {
+    throw new Error("Disk full");
+  };
+  await assert.rejects(second.saveCommand({ ...command, configurationMode: "independent" }), /Disk full/);
+  assert.equal(io.values.get(CATALOG_STORAGE_KEY), before);
+  assert.equal(second.getSnapshot(), oldSnapshot);
+  io.setItem = setItem;
+  await second.saveCommand({ ...command, configurationMode: "independent" });
+  await first.saveModel({ ...base, prompt: "After retry" });
+  const persisted = JSON.parse(io.values.get(CATALOG_STORAGE_KEY));
+  assert.equal(persisted.models.writer.prompt, "After retry");
+  assert.equal(persisted.commands.rewrite.name, command.name);
+});
+
 test("corrupt legacy data or an invalid command reference is reported without replacing stored data", async () => {
   const io = storage({ models: "{bad json", commands: "{}" });
   const store = factory(io);

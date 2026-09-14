@@ -66,6 +66,7 @@ Manage chat presets and AI commands together in **Models**. Select a preset and 
 - Full Text Input also supports editing the selected configuration. Subsequent requests use the saved settings.
 - Existing commands migrate to independent configuration with their original settings, without creating extra model presets. Existing explicit base-model relationships are preserved. A model used by commands cannot be removed until those commands become independent or use another base model.
 - Built-in commands start with independent settings. Importing models preserves any referenced base model missing from the import file, including when restoring an older backup.
+- Saving in Models or AI Commands reads the latest stored settings to preserve changes saved by another command.
 
 **AI Commands** is available for quick execution and command management. The standalone **Create AI Command** entry has been removed; use the action menu in **Models** to create commands. Existing commands are preserved. Shortcuts or deep links to the removed entry need to be replaced with **Models**.
 

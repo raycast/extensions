@@ -7,6 +7,8 @@ export { DEFAULT_MODEL } from "../utils/model-defaults";
 const actions = {
   add: (model: Model) => saveConfiguration(() => modelCatalog.saveModel(model), "Model saved"),
   update: (model: Model) => saveConfiguration(() => modelCatalog.saveModel(model), "Model updated"),
+  setPinned: (id: string, pinned: boolean) =>
+    saveConfiguration(() => modelCatalog.setPinned(id, pinned), "Model updated"),
   remove: (model: Model) => saveConfiguration(() => modelCatalog.removeModel(model), "Model removed"),
   clear: () => saveConfiguration(() => modelCatalog.setModels({ default: DEFAULT_MODEL }), "Models cleared"),
   setModels: modelCatalog.setModels,

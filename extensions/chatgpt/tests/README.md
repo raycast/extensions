@@ -1,5 +1,23 @@
 Model and command management checks
 
+Cross-command storage and shortcut review fixes:
+
+| Changed behavior | Decision | Conditions / stop boundary | Layer |
+| ---------------- | -------- | -------------------------- | ----- |
+| Sequential cross-invocation saves | test | Two stale stores sharing storage preserve each other's saved models and commands without restoring deleted models | Store integration |
+| Latest reference validation | test | A stale store checks newly saved command dependencies before deletion or import, retains referenced bases and rejects commands whose base was deleted | Store integration |
+| Failed writes | test | A stale store's failed save leaves storage and its snapshot intact; retry preserves the other store's changes | Store integration |
+| Pinning a stale model | test | Pin and unpin preserve the latest model fields and commands, update only pin state and modification time, and reject a model deleted by another store | Store integration |
+| Pin action wiring | test | Pin from a stale Models list preserves a separately saved prompt and updates the visible action to Unpin; Unpin clears the saved flag | Raycast runtime integration |
+| Same-store write queue | existing-test-enough | The existing concurrent-save test covers queued writes within one store | Store integration |
+| Platform shortcuts | no-test | Use Raycast Common Edit, Duplicate and New; declare macOS and Windows variants for the additional create shortcut. Validate SDK types and build; native Windows key handling remains manual | Typecheck/build |
+
+Each mutation reads the latest persisted catalog inside the existing per-store write queue and publishes its snapshot only after persistence succeeds. This fixes sequential saves from stale command invocations without adding dependencies.
+
+Scope reduction: simultaneous writes or initial migrations across separate invocations are outside this fix's guarantee. The three tests for simultaneous store saves, overlapping migration and concurrent runtime saves were removed with their filesystem-lock and shared-runtime harness additions. Their concurrency guarantee was explicitly retired; the stale-store regression tests and original migration and queue tests remain.
+
+Regression evidence: all 48 tests pass without skips. Two automated mutations in temporary copies (reusing the stale snapshot and dropping persistence) each fail all three stale-store regression tests with assertion errors. The Pin action test fails against the old full-object callback; the store test detects a stale source, recreation of a deleted model, an inverted pin value and a skipped pin update. Build, typecheck and lint pass. Native Windows keyboard handling remains a manual validation boundary.
+
 Review fixes scope:
 
 | Changed behavior | Decision | Conditions / stop boundary | Layer |
@@ -83,7 +101,7 @@ Review follow-up scope:
 | Existing Quicklinks            | test            | Serialized launch context selects a legacy command; the request preserves its settings and Continue selects its command model                     | Runtime integration |
 | Ask draft lifecycle            | update-existing | Returning from full input before submission preserves selected text; submitting clears Ask's controlled input; later rounds also clear it         | Runtime integration |
 
-Local validation: 43 tests pass with no skips on the installed Raycast desktop runtime, including the upstream model-picker tests. Typecheck, extension build and lint pass.
+Local validation: 48 tests pass with no skips, including tests using the installed Raycast runtime and the upstream model-picker tests. Typecheck, extension build and lint pass.
 
 Three semantic mutations were run in temporary copies of the repository and all failed their targeted tests: removing independent mode from built-ins, dropping retention of missing referenced bases during import, and removing Ask's controlled draft clear. The working tree was not modified by these checks.
 
