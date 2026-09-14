@@ -1,5 +1,9 @@
 # MarkMarks Changelog
 
+## [Add Aside Browser Support] - {PR_MERGE_DATE}
+
+- Add Aside browser support
+
 ## [Bug Fixes] - 2026-05-20
 
 - Fixed opening bookmarks from Safari so links target Safari directly
