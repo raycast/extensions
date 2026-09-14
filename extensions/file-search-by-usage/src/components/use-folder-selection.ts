@@ -3,21 +3,36 @@ import { Entry } from "../lib/types";
 import { rowIdForEntry } from "../lib/entry-identity";
 
 type InitialResult = {
-  source: "memory" | "spotlight" | "waiting";
+  /**
+   * "waiting" withholds the selection request entirely. The caller uses it
+   * while the completed list has not been published yet, so the first row is
+   * chosen from the finished list rather than from a partial one that is about
+   * to be re-ranked.
+   */
+  source: "memory" | "index" | "waiting";
   path?: string;
+  /** Cached entries are still being validated, so the list can still grow. */
   memoryPending?: boolean;
 };
 
 /** Choose an initial result once per query; preserve explicit parent-folder focus. */
-export function useFolderSelection(
-  initialPath: string | undefined,
-  rows: { entry: Entry }[],
-  generation: number,
-  query: string,
+export function useFolderSelection({
+  initialPath,
+  rows,
+  generation,
+  query,
   restorationRevision = 0,
   selectFirst = false,
-  initialResult: InitialResult = { source: "memory" },
-) {
+  initialResult = { source: "memory" },
+}: {
+  initialPath?: string;
+  rows: { entry: Entry }[];
+  generation: number;
+  query: string;
+  restorationRevision?: number;
+  selectFirst?: boolean;
+  initialResult?: InitialResult;
+}) {
   const firstFocus = useRef<{ id: string; userSelected: boolean } | undefined>(
     undefined,
   );
@@ -70,7 +85,7 @@ export function useFolderSelection(
     request.pending && query === request.query && !request.path && selectFirst;
 
   // Read the latest committed target at the deadline without restarting the
-  // timer for every Spotlight batch. Effects also ensure rows publish first.
+  // timer every time the rows change. Effects also ensure rows publish first.
   const latestTarget = useRef<string | undefined>(undefined);
   useEffect(() => {
     latestTarget.current = target?.entry.path;
@@ -96,7 +111,7 @@ export function useFolderSelection(
   const delay =
     !request.path &&
     !request.chosenPath &&
-    (initialResult.source === "spotlight" || initialResult.memoryPending)
+    (initialResult.source === "index" || initialResult.memoryPending)
       ? 200
       : 0;
   useEffect(() => {

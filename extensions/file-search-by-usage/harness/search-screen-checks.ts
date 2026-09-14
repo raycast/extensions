@@ -9,6 +9,8 @@ export async function searchScreenChecks(
   assert: (ok: boolean, label: string) => void,
 ) {
   const commits: { text?: string; eventCount: number }[] = [];
+  // Every prop set Raycast is handed, to check that none of them renders blank.
+  const rendered: List.Props[] = [];
   const queries: string[] = [];
   let input: (text: string, eventCount: number) => void;
   let setQuery: (text: string) => void;
@@ -17,6 +19,7 @@ export async function searchScreenChecks(
   let queryRenders = 0;
   let renderedQuery = "";
   function NativeList(props: List.Props) {
+    rendered.push(props);
     // Raycast's input hook batches its event counter with the consumer callback.
     const [eventCount, setEventCount] = React.useState(0);
     input = (text, count) => {
@@ -38,15 +41,37 @@ export async function searchScreenChecks(
     fs.readFileSync("src/components/search-screen.tsx", "utf8"),
     { loader: "tsx", format: "cjs", jsxFactory: "React.createElement" },
   ).code;
-  new Function("require", "module", "exports", "React", code)(
+  let clock = 0;
+  new Function("require", "module", "exports", "React", "performance", code)(
     (id: string) => (id === "react" ? React : { List: NativeList }),
     screenModule,
     screenModule.exports,
     React,
+    { now: () => clock },
   );
   const { SearchScreen, SearchScreenView, SearchScreenContent } =
     screenModule.exports;
   let screen = new SearchScreen();
+  const timed = new SearchScreen(7);
+  clock = 10;
+  timed.onSearchTextChange("ledger");
+  clock = 40;
+  timed.publish(7, { searchText: "obsolete" });
+  assert(
+    timed.getSearchStartedAt?.() === 10,
+    "result publications preserve the input timestamp used for latency diagnostics",
+  );
+  timed.setSearchText(6, "stale frame");
+  assert(
+    timed.getSearchStartedAt?.() === 10,
+    "obsolete input cannot restart the active query latency measurement",
+  );
+  clock = 50;
+  timed.setSearchText(7, "cloud");
+  assert(
+    timed.getSearchStartedAt?.() === 50,
+    "query-history edits start a new latency measurement",
+  );
   function Results({ frameId = 0 }: { frameId?: number }) {
     const query = React.useSyncExternalStore(
       screen.subscribe,
@@ -119,12 +144,29 @@ export async function searchScreenChecks(
       "result refreshes neither rewrite the input nor remount the native List",
     );
     const pendingResults = screen.getSnapshot();
-    await act(() => input("foobar", 10));
+    // The window has to open before the keystroke. A result-only publication
+    // leaves the search text and the input counter alone, so it commits
+    // nothing of its own: the keystroke's commit is the only place a stale
+    // publication could show up as text, and clearing after it left nothing
+    // to quantify over.
     commits.length = 0;
+    await act(() => input("foobar", 10));
     const rendersBefore = queryRenders;
-    await act(() => screen.publish(0, { ...pendingResults, isLoading: false }));
+    await act(() =>
+      screen.publish(0, {
+        ...pendingResults,
+        isLoading: false,
+        throttle: false,
+      }),
+    );
+    assert(
+      rendered.at(-1)?.throttle === true &&
+        typeof rendered.at(-1)?.onSearchTextChange === "function",
+      "stale result props cannot disable native input coalescing or disconnect typing",
+    );
     assert(
       screen.getSnapshot().searchText === "foobar" &&
+        commits.length > 0 &&
         commits.every((commit) => commit.text === "foobar"),
       "results prepared before a keystroke cannot overwrite newer input",
     );
@@ -135,14 +177,14 @@ export async function searchScreenChecks(
     commits.length = 0;
     await act(() => {
       for (const [index, text] of [
-        "g",
-        "gr",
-        "gra",
-        "gran",
-        "grant",
-        "grants",
-        "grant",
-        "grants",
+        "l",
+        "le",
+        "led",
+        "ledg",
+        "ledge",
+        "ledger",
+        "ledge",
+        "ledger",
       ].entries()) {
         input(text, index + 11);
         screen.publish(0, pendingResults);
@@ -150,9 +192,10 @@ export async function searchScreenChecks(
       refresh();
     });
     assert(
-      screen.getSearchText() === "grants" &&
-        renderedQuery === "grants" &&
-        commits.every((commit) => commit.text === "grants"),
+      screen.getSearchText() === "ledger" &&
+        renderedQuery === "ledger" &&
+        commits.length > 0 &&
+        commits.every((commit) => commit.text === "ledger"),
       "rapid typing and backspace survive repeated stale result publications",
     );
     await act(() => renderer!.unmount());
@@ -188,6 +231,27 @@ export async function searchScreenChecks(
     assert(
       screen.getSearchText() === "bar",
       "a discarded route cannot change the new route's query",
+    );
+
+    /*
+     * The blank screen, checked across every prop set of the run above.
+     *
+     * Raycast withholds the empty view of a list that is loading, so a list
+     * with no children and `isLoading` shows no rows, no message and no reason
+     * why. Four blank screens were this. `Results` publishes exactly that prop
+     * set on every other revision, so the store is what has to refuse it.
+     */
+    assert(rendered.length > 0, `the native list received prop sets to check`);
+    const blank = rendered.filter(
+      (props) => props.isLoading === true && props.children === undefined,
+    );
+    assert(
+      blank.length === 0,
+      `no published prop set both loads and has nothing to show (${blank.length} of ${rendered.length} did)`,
+    );
+    assert(
+      rendered.some((props) => props.isLoading === false),
+      "the flag still reaches Raycast, so the check above is not vacuous",
     );
   } finally {
     if (renderer) await act(() => renderer!.unmount());

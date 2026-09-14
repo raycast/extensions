@@ -34,13 +34,13 @@ export async function folderSelectionChecks(
     restorationRevision?: number;
   }) {
     renders++;
-    current = useFolderSelection(
+    current = useFolderSelection({
       initialPath,
-      entries,
+      rows: entries,
       generation,
       query,
       restorationRevision,
-    );
+    });
     React.useLayoutEffect(() => {
       selectionCommits.push(current.selectedId);
     });
@@ -61,7 +61,12 @@ export async function folderSelectionChecks(
       generation?: number;
     }) {
       renders++;
-      current = useFolderSelection(undefined, entries, generation, "", 0, true);
+      current = useFolderSelection({
+        rows: entries,
+        generation,
+        query: "",
+        selectFirst: true,
+      });
       React.useLayoutEffect(() => {
         selectionCommits.push(current.selectedId);
       });
@@ -330,7 +335,7 @@ export async function folderSelectionChecks(
     );
     await act(() => renderer!.unmount());
 
-    // Drive only the selection timer; no filesystem or Spotlight work is mocked.
+    // Drive only the selection timer; no filesystem or index work is mocked.
     const realSetTimeout = globalThis.setTimeout;
     const realClearTimeout = globalThis.clearTimeout;
     let now = 0;
@@ -357,20 +362,22 @@ export async function folderSelectionChecks(
     function TimedFolder({
       entries = rows,
       query = "foo",
-      source = "spotlight",
+      source = "index",
       memoryPath,
       memoryPending = false,
     }: {
       entries?: typeof rows;
       query?: string;
-      source?: "memory" | "spotlight" | "waiting";
+      source?: "memory" | "index" | "waiting";
       memoryPath?: string;
       memoryPending?: boolean;
     }) {
-      current = useFolderSelection(undefined, entries, 1, query, 0, true, {
-        source,
-        path: memoryPath,
-        memoryPending,
+      current = useFolderSelection({
+        rows: entries,
+        generation: 1,
+        query,
+        selectFirst: true,
+        initialResult: { source, path: memoryPath, memoryPending },
       });
       return null;
     }
@@ -441,12 +448,12 @@ export async function folderSelectionChecks(
       );
       assert(
         current!.selectedId === null,
-        "Spotlight delay starts when results appear, not when typing begins",
+        "the settling delay starts when results appear, not when typing begins",
       );
       await advance(199);
       assert(
         current!.selectedId === null,
-        "Spotlight-only results do not force selection before 200 ms",
+        "indexed results alone do not force selection before 200 ms",
       );
       await act(() =>
         renderer!.update(
@@ -459,14 +466,14 @@ export async function folderSelectionChecks(
       await advance(1);
       assert(
         current!.selectedId === "1:/foo/bar249",
-        "at 200 ms select the latest top Spotlight row without restarting the timer on batches",
+        "at 200 ms select the latest top indexed row without restarting the timer",
       );
       await act(() =>
         renderer!.update(React.createElement(TimedFolder, { query: "bar" })),
       );
       assert(
         current!.selectedId === "1:/foo/bar249",
-        "later Spotlight results keep the selected item stable",
+        "later indexed results keep the selected item stable",
       );
 
       await act(() =>
@@ -484,12 +491,12 @@ export async function folderSelectionChecks(
       );
       assert(
         current!.selectedId === "1:/foo/bar8",
-        "memory arriving during the Spotlight delay wins immediately",
+        "memory arriving during the settling delay wins immediately",
       );
       await advance(200);
       assert(
         current!.selectedId === "1:/foo/bar8",
-        "the cancelled Spotlight timer cannot overwrite the memory selection",
+        "the cancelled settling timer cannot overwrite the memory selection",
       );
 
       await act(() =>
@@ -623,7 +630,7 @@ export async function folderSelectionChecks(
       );
       assert(
         timers.size === 1,
-        "a Spotlight-only query owns just one settling timer",
+        "an index-only query owns just one settling timer",
       );
       await act(() => renderer!.unmount());
       assert(

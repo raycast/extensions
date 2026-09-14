@@ -6,6 +6,7 @@ import { act, create, ReactTestRenderer } from "react-test-renderer";
 import { SORT_MODES } from "../src/lib/types";
 import { useEventHandles } from "../src/components/use-event-handles";
 import { parseQuery } from "../src/lib/query";
+import { between, through } from "./source-slice";
 
 /** Run the browser's sort control with real React and a host-cache substitute. */
 export async function sortChecks(assert: (ok: boolean, label: string) => void) {
@@ -24,15 +25,12 @@ export async function sortChecks(assert: (ok: boolean, label: string) => void) {
   }
   const requireDependency = createRequire(`${process.cwd()}/package.json`);
   const source = fs.readFileSync("src/components/browser.tsx", "utf8");
-  const state = source.slice(
-    source.indexOf("  const [sortMode,"),
-    source.indexOf("  const [showingDetail,"),
+  const state = between(
+    source,
+    "  const [sortMode,",
+    "  const [showingDetail,",
   );
-  const start = source.indexOf("        <SearchOptions");
-  const dropdown = source.slice(
-    start,
-    source.indexOf("        />", start) + "        />".length,
-  );
+  const dropdown = through(source, "        <SearchOptions", "        />");
   const code = transformSync(
     `return function SortControl({ searchText = "" }) { const event = useEventHandles(); ${state}
       const parsed = parseQuery(searchText, typeFilter);

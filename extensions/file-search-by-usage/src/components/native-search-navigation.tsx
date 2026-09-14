@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { useNavigation } from "@raycast/api";
 import {
   ReactNode,
   useCallback,
@@ -20,28 +20,32 @@ export type NavigationActions = {
 type RenderFrame = (
   frame: SearchFrame,
   actions: NavigationActions,
+  active: boolean,
 ) => ReactNode;
 
 // Pushed routes are immutable elements. Share only the latest session renderer,
 // so settings/setup can update the active route without retaining old sessions.
 function createRenderer(initial: RenderFrame) {
-  let render = initial;
+  let snapshot = {
+    render: initial,
+    folder: undefined as SearchFrame | undefined,
+  };
   const listeners = new Set<() => void>();
   return {
-    getSnapshot: () => render,
+    getSnapshot: () => snapshot,
     subscribe: (listener: () => void) => {
       listeners.add(listener);
       return () => {
         listeners.delete(listener);
       };
     },
-    publish: (next: RenderFrame) => {
-      if (render === next) return;
-      render = next;
+    publish: (render: RenderFrame, folder?: SearchFrame) => {
+      if (snapshot.render === render && snapshot.folder === folder) return;
+      snapshot = { render, folder };
       for (const listener of listeners) listener();
     },
     clear: () => {
-      render = () => null;
+      snapshot = { render: () => null, folder: undefined };
       listeners.clear();
     },
   };
@@ -51,22 +55,33 @@ function ActiveFrame({
   renderer,
   frame,
   actions,
+  active = true,
+  followFolder = false,
 }: {
   renderer: ReturnType<typeof createRenderer>;
   frame: SearchFrame;
   actions: NavigationActions;
+  active?: boolean;
+  followFolder?: boolean;
 }) {
-  const render = useSyncExternalStore(renderer.subscribe, renderer.getSnapshot);
-  return render(frame, actions);
+  const snapshot = useSyncExternalStore(
+    renderer.subscribe,
+    renderer.getSnapshot,
+  );
+  return snapshot.render(
+    followFolder ? (snapshot.folder ?? frame) : frame,
+    actions,
+    active,
+  );
 }
 
 // Raycast invokes onPop from a state updater. Do not update our owner during
-// that render; let the popped route unmount before requesting its replacement.
+// that render; let the popped folder unmount before restoring global results.
 function afterPop(id: number, released: (id: number) => void) {
   return () => queueMicrotask(() => released(id));
 }
 
-/** At most two native routes: an empty root and one replaceable search view. */
+/** Default results live at the root; only one result producer is mounted. */
 export function NativeSearchNavigation({
   navigation,
   renderFrame,
@@ -77,13 +92,15 @@ export function NativeSearchNavigation({
   const { push, pop } = useNavigation();
   const event = useEventHandles();
   const [renderer] = useState(() => createRenderer(renderFrame));
+  const [rootFrame, setRootFrame] = useState<SearchFrame>(navigation.current);
   const [pending, setPending] = useState<SearchFrame | undefined>(
-    navigation.current,
+    navigation.current.dir ? navigation.current : undefined,
   );
-  const [rootQuery, setRootQuery] = useState("");
   const active = useRef<number | undefined>(undefined);
-  const replacement = useRef<SearchFrame | undefined>(undefined);
-  useLayoutEffect(() => renderer.publish(renderFrame), [renderer, renderFrame]);
+  useLayoutEffect(
+    () => renderer.publish(renderFrame, pending),
+    [renderer, renderFrame, pending],
+  );
   useEffect(() => {
     traceNavigation("navigation-root-mounted", { nativeRoutes: 1 });
     return () => {
@@ -96,42 +113,29 @@ export function NativeSearchNavigation({
     traceNavigation("native-route-popped", {
       frameId: id,
       active: active.current,
-      next: replacement.current?.id,
     });
     if (active.current !== id) return;
     active.current = undefined;
-    const next = replacement.current;
-    replacement.current = undefined;
-    if (!next) navigation.reset(navigation.current.id);
-    setRootQuery("");
-    setPending(next);
+    const startFrame = navigation.reset(navigation.current.id);
+    if (startFrame) setRootFrame(startFrame);
+    setPending(undefined);
   });
-  const replace = useCallback(
-    (next: FolderFrame | undefined) => {
-      if (!next) return;
-      if (active.current === undefined) setPending(next);
-      else {
-        traceNavigation("native-route-replacing", {
-          frameId: active.current,
-          next: next.id,
-        });
-        replacement.current = next;
-        pop();
-      }
-    },
-    [pop],
-  );
   const onNavigate = useCallback(
     (id: number, target: string, selectedPath?: string) => {
-      replace(navigation.navigate(id, target, selectedPath));
+      const next = navigation.navigate(id, target, selectedPath);
+      if (next) setPending(next);
     },
-    [navigation, replace],
+    [navigation],
   );
   const onReturnToStart = useCallback(
     (id: number) => {
-      replace(navigation.reset(id));
+      const next = navigation.reset(id);
+      if (!next) return;
+      setRootFrame(next);
+      if (active.current !== undefined) pop();
+      else setPending(undefined);
     },
-    [navigation, replace],
+    [navigation, pop],
   );
 
   useEffect(() => {
@@ -145,49 +149,22 @@ export function NativeSearchNavigation({
       <ActiveFrame
         renderer={renderer}
         frame={pending}
+        followFolder
         actions={{ onNavigate, onReturnToStart }}
       />,
       afterPop(pending.id, released),
     );
   }, [pending, push, renderer, onNavigate, onReturnToStart, released]);
 
-  const start = useCallback(
-    (text = "") => {
-      if (active.current !== undefined) return;
-      const next = navigation.reset(navigation.current.id);
-      if (next) setPending({ ...next, initialQuery: text });
-    },
-    [navigation],
-  );
-  // Buffer typing on the lightweight root before opening a new native input.
-  // Otherwise a rapid burst could straddle the root and new route's fields.
-  useEffect(() => {
-    if (!rootQuery || active.current !== undefined) return;
-    const timer = setTimeout(() => start(rootQuery), 250);
-    return () => clearTimeout(timer);
-  }, [rootQuery, start]);
+  // Folder changes replace only the result producer, not the native route.
+  // Keep the root input and its native event counter, but release its results
+  // before pushing. Remounting that input lets Back restore stale folder text.
   return (
-    <List
-      filtering={false}
-      searchText={rootQuery}
-      searchBarPlaceholder="Search files and folders everywhere…"
-      onSearchTextChange={event("startQuery", (text: string) => {
-        if (active.current === undefined) setRootQuery(text);
-      })}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Start Search"
-            onAction={event("start", () => start(rootQuery))}
-          />
-        </ActionPanel>
-      }
-    >
-      <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title="Search Files and Folders"
-        description="Type to search, or press Return to show recent files and places."
-      />
-    </List>
+    <ActiveFrame
+      renderer={renderer}
+      frame={rootFrame}
+      active={pending === undefined}
+      actions={{ onNavigate, onReturnToStart }}
+    />
   );
 }

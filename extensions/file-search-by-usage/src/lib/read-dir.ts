@@ -143,71 +143,10 @@ export function normalizeDir(full: string): string {
   return path.resolve(full);
 }
 
-export function isDirectory(full: string): boolean {
-  try {
-    return fs.statSync(full).isDirectory();
-  } catch {
-    return false;
-  }
-}
-
 export type Place = { name: string; path: string };
 
-const CLOUD_PROVIDER_NAMES: Record<string, string> = {
-  GoogleDrive: "Google Drive",
-  OneDrive: "OneDrive",
-  Dropbox: "Dropbox",
-  Box: "Box",
-  pCloud: "pCloud",
-  iCloudDrive: "iCloud Drive",
-};
-
-/** "GoogleDrive-you@example.com" → "Google Drive — you@example.com" */
-function prettyCloudName(raw: string): string {
-  const dash = raw.indexOf("-");
-  const provider = dash === -1 ? raw : raw.slice(0, dash);
-  const account = dash === -1 ? "" : raw.slice(dash + 1);
-  const label =
-    CLOUD_PROVIDER_NAMES[provider] ??
-    provider.replace(/([a-z])([A-Z])/g, "$1 $2");
-  return account ? `${label} — ${account}` : label;
-}
-
-/** Returns standard local folders and detected cloud drives. */
-export function standardPlaces(): Place[] {
-  const home = os.homedir();
-  const places: Place[] = [{ name: "Home", path: home }];
-
-  for (const name of ["Desktop", "Documents", "Downloads"]) {
-    const full = path.join(home, name);
-    if (isDirectory(full)) places.push({ name, path: full });
-  }
-
-  const icloud = path.join(
-    home,
-    "Library",
-    "Mobile Documents",
-    "com~apple~CloudDocs",
-  );
-  if (isDirectory(icloud)) places.push({ name: "iCloud Drive", path: icloud });
-
-  const cloudRoot = path.join(home, "Library", "CloudStorage");
-  try {
-    for (const dirent of fs.readdirSync(cloudRoot, { withFileTypes: true })) {
-      if (dirent.name.startsWith(".")) continue;
-      const full = path.join(cloudRoot, dirent.name);
-      if (isDirectory(full))
-        places.push({ name: prettyCloudName(dirent.name), path: full });
-    }
-  } catch {
-    return places;
-  }
-
-  return places;
-}
-
 /** Google Drive puts every shared folder behind a shortcut into this directory. */
-export const SHORTCUT_TARGETS = ".shortcut-targets-by-id";
+const SHORTCUT_TARGETS = ".shortcut-targets-by-id";
 
 export type SharedCloudFolderResult = {
   folders: Place[];
@@ -324,26 +263,6 @@ export function canonicalPath(full: string): string {
   }
 }
 
-/** System locations excluded from global results. */
-const SYSTEM_PREFIXES = [
-  "/System",
-  "/Library",
-  "/usr",
-  "/bin",
-  "/sbin",
-  "/opt",
-  "/private",
-  "/cores",
-  "/dev",
-  "/nix",
-];
-
-export function isSystemPath(full: string): boolean {
-  return SYSTEM_PREFIXES.some(
-    (prefix) => full === prefix || full.startsWith(prefix + path.sep),
-  );
-}
-
 export function pathExists(full: string): boolean {
   try {
     fs.statSync(full);
@@ -351,18 +270,4 @@ export function pathExists(full: string): boolean {
   } catch {
     return false;
   }
-}
-
-/** Finds hidden child directories whose names begin with a requested dot term. */
-export function hiddenDirsMatching(base: string, terms: string[]): string[] {
-  if (terms.length === 0) return [];
-  const wanted = terms.map((t) => t.toLowerCase());
-
-  const out: string[] = [];
-  for (const entry of readDirectory(base, true).entries) {
-    if (!entry.isDirectory || !entry.name.startsWith(".")) continue;
-    const name = entry.name.toLowerCase();
-    if (wanted.some((t) => name.startsWith(t))) out.push(entry.path);
-  }
-  return out;
 }

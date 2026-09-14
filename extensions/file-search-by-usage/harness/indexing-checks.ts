@@ -4,22 +4,29 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { buildSync, transformSync } from "esbuild";
-import type { Shortcut, ShortcutIndex } from "../src/lib/drive-shortcuts";
-import type { SharedIndex } from "../src/lib/shared-scan";
-import type { RecentScan } from "../src/lib/recent-files";
+import { DatabaseSync } from "node:sqlite";
 
 const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
 
-/** Loads real command/storage code while replacing Raycast and slow Drive scans. */
+/**
+ * Wait for a condition rather than a fixed number of microtask turns.
+ *
+ * The rebuild reads the configured scope before it takes the lock, so "the
+ * command has started" and "the command holds the lock" are several turns
+ * apart. Tests that need the lock held have to wait for it.
+ */
+async function until(ready: () => boolean, label: string): Promise<void> {
+  for (let i = 0; i < 2000; i++) {
+    if (ready()) return;
+    await flush();
+  }
+  throw new Error(`timed out waiting for ${label}`);
+}
+
+/** Loads real command/storage code while replacing Raycast and the slow scans. */
 function loadCommand(supportPath: string) {
   const storage = new Map<string, string>();
   const caches = new Map<string, Map<string, string>>();
-  const shared: SharedIndex = {
-    paths: ["/foo/bar"],
-    scannedAt: 1,
-    available: true,
-    partial: false,
-  };
   const clearing = { before: async () => {} };
   const writing: { before: (key: string) => Promise<void> } = {
     before: async () => {},
@@ -27,27 +34,21 @@ function loadCommand(supportPath: string) {
   const reading: { before: (key: string) => Promise<void> } = {
     before: async () => {},
   };
-  const scans: ((index: ShortcutIndex) => void)[] = [];
+  /** Resolvers for the rebuild each test holds open. */
+  const scans: ((report: unknown) => void)[] = [];
   const failures: ((error: Error) => void)[] = [];
-  const shortcutProgress: ShortcutIndex[] = [];
-  const sharedProgress: SharedIndex[] = [];
-  const recentScans: ((result: RecentScan) => void)[] = [];
+  const indexScans: ((result: string) => void)[] = [];
+  /** Off by default so tests that do not care about the index are unaffected. */
+  const indexGate = { pending: false };
   const scanOptions: {
-    recent: Parameters<
-      typeof import("../src/lib/recent-files").scanRecentFiles
-    >[0][];
-    shortcuts: Parameters<
-      typeof import("../src/lib/drive-shortcuts").scanShortcuts
-    >[0][];
-    shared: Parameters<
-      typeof import("../src/lib/shared-scan").scanSharedFolders
-    >[0][];
-  } = { recent: [], shortcuts: [], shared: [] };
+    index: { onProgress?: (message: string) => void }[];
+  } = { index: [] };
   const confirmation = { accepted: true };
   const cacheWriting = { fail: false };
   const toasts: { title: string; message?: string; style: string }[] = [];
   const api = {
     environment: { supportPath, launchType: "user" },
+    getPreferenceValues: () => ({ fdPath: "" }),
     LaunchType: { UserInitiated: "user" },
     Alert: { ActionStyle: { Destructive: "destructive" } },
     confirmAlert: async () => confirmation.accepted,
@@ -67,6 +68,10 @@ function loadCommand(supportPath: string) {
       setItem: async (key: string, value: string) => {
         await writing.before(key);
         storage.set(key, value);
+      },
+      removeItem: async (key: string) => {
+        await writing.before(key);
+        storage.delete(key);
       },
       allItems: async () => Object.fromEntries(storage),
       clear: async () => {
@@ -112,43 +117,44 @@ function loadCommand(supportPath: string) {
     const nativeRequire = createRequire(file);
     const localRequire = (id: string) => {
       if (id === "@raycast/api") return api;
-      if (id.endsWith("/recent-files"))
+      if (id.endsWith("/fd"))
         return {
-          scanRecentFiles: (options: (typeof scanOptions.recent)[number]) => {
-            scanOptions.recent.push(options);
-            return new Promise<RecentScan>((resolve) =>
-              recentScans.push(resolve),
-            );
+          findFd: () => ({ kind: "found", path: "/unused", source: "known" }),
+          describeFdLookup: () => "",
+          FD_DIRECTORIES: [],
+          FD_INSTALL_HINT: "",
+        };
+      // A fixed scope, so these tests do not depend on a mounted Drive.
+      if (id.endsWith("/index-settings-store"))
+        return {
+          loadIndexSettings: async () => ({
+            scopes: [supportPath],
+            patterns: [],
+            includeDrive: false,
+            includeHidden: true,
+            useIgnoreFiles: false,
+          }),
+          saveIndexSettings: async () => true,
+          resetIndexSettings: async () => true,
+        };
+      // Stub the crawl but keep the real orchestration, so the lock these
+      // tests are about is genuinely taken and released.
+      if (id.endsWith("/index-scan")) {
+        const real = load(path.resolve("src/lib/index-scan.ts")) as Record<
+          string,
+          unknown
+        >;
+        return {
+          ...real,
+          scanRoots: async (options: { onProgress?: unknown }) => {
+            scanOptions.index.push(options);
+            return new Promise((resolve, reject) => {
+              scans.push(resolve as (report: unknown) => void);
+              failures.push(reject);
+            });
           },
         };
-      if (id.endsWith("/drive-shortcuts"))
-        return {
-          scanShortcuts: async (
-            options: (typeof scanOptions.shortcuts)[number],
-          ) => {
-            scanOptions.shortcuts.push(options);
-            const result = await new Promise<ShortcutIndex>(
-              (resolve, reject) => {
-                scans.push(resolve);
-                failures.push(reject);
-              },
-            );
-            for (const checkpoint of shortcutProgress)
-              await options?.onProgress?.(checkpoint);
-            return result;
-          },
-        };
-      if (id.endsWith("/shared-scan"))
-        return {
-          scanSharedFolders: async (
-            options: (typeof scanOptions.shared)[number],
-          ) => {
-            scanOptions.shared.push(options);
-            for (const checkpoint of sharedProgress)
-              await options?.onProgress?.(checkpoint);
-            return shared;
-          },
-        };
+      }
       if (!id.startsWith(".")) return nativeRequire(id);
       const base = path.resolve(path.dirname(file), id);
       const target = [base + ".ts", base + ".tsx"].find((candidate) =>
@@ -169,7 +175,7 @@ function loadCommand(supportPath: string) {
     return module.exports;
   }
   const command = (
-    load(path.resolve("src/index-shortcuts.tsx")) as {
+    load(path.resolve("src/rebuild-index.tsx")) as {
       default: () => Promise<void>;
     }
   ).default;
@@ -178,53 +184,37 @@ function loadCommand(supportPath: string) {
       default: () => Promise<void>;
     }
   ).default;
-  const recents = load(
-    path.resolve("src/lib/recent-setup.ts"),
-  ) as typeof import("../src/lib/recent-setup");
-  const recentCommand = (
-    load(path.resolve("src/populate-recents.tsx")) as {
-      default: () => Promise<void>;
-    }
-  ).default;
   return {
-    driveSetup: load(
-      path.resolve("src/lib/drive-setup.ts"),
-    ) as typeof import("../src/lib/drive-setup"),
-    shortcutIndex: load(
-      path.resolve("src/lib/shortcut-index.ts"),
-    ) as typeof import("../src/lib/shortcut-index"),
-    sharedIndex: load(
-      path.resolve("src/lib/shared-index.ts"),
-    ) as typeof import("../src/lib/shared-index"),
     access: load(
       path.resolve("src/lib/storage-lock.ts"),
     ) as typeof import("../src/lib/storage-lock"),
-    discovered: load(
-      path.resolve("src/lib/discovered.ts"),
-    ) as typeof import("../src/lib/discovered"),
     usage: load(
       path.resolve("src/lib/usage-cache.ts"),
     ) as typeof import("../src/lib/usage-cache"),
     store: load(
       path.resolve("src/lib/store.ts"),
     ) as typeof import("../src/lib/store"),
+    history: load(
+      path.resolve("src/lib/history.ts"),
+    ) as typeof import("../src/lib/history"),
+    // The real settings storage, not the fixed-scope stub the command graph gets.
+    settings: load(
+      path.resolve("src/lib/index-settings-store.ts"),
+    ) as typeof import("../src/lib/index-settings-store"),
+    settingsLogic: load(
+      path.resolve("src/lib/index-settings.ts"),
+    ) as typeof import("../src/lib/index-settings"),
     writing,
     reading,
     command,
     deleteCommand,
     storage,
     caches,
-    shared,
     clearing,
     scans,
     failures,
-    shortcutProgress,
-    sharedProgress,
     toasts,
-    recents,
-    recentScans,
     scanOptions,
-    recentCommand,
     confirmation,
     cacheWriting,
     setup: fs.existsSync("src/lib/search-setup.ts")
@@ -351,7 +341,6 @@ export async function indexingChecks(
       staleWrite && !mutation.storage.has("searches"),
       "a pre-deletion query cannot save after the reset",
     );
-    await mutation.discovered.rememberDiscovered(["/foo/old.txt"], generation);
     await mutation.usage.writeCachedUsage(
       "/foo",
       new Map([["/foo/old.txt", { useCount: 1 }]]),
@@ -434,10 +423,13 @@ export async function indexingChecks(
       "expired work rejects its result but releases its own unchanged lock",
     );
     const first = test.command();
-    for (let i = 0; i < 100 && test.scans.length === 0; i++) await flush();
+    await until(
+      () => test.scans.length === 1,
+      "the first scan to hold the lock",
+    );
     const second = test.command();
     // Let the second command either acquire the lock or report contention.
-    for (let i = 0; i < 100; i++) await flush();
+    for (let i = 0; i < 400; i++) await flush();
     assert(
       test.scans.length === 1,
       "overlapping manual indexing does not start a second scan",
@@ -459,893 +451,24 @@ export async function indexingChecks(
       contention === "ELOCKED",
       "a separate process cannot index while a command holds the lock",
     );
-    const good: ShortcutIndex = {
-      shortcuts: [{ path: "/foo", name: "foo", target: "/bar" }],
-      scannedAt: 1,
-      available: true,
-      partial: false,
-    };
-    const setup = loadCommand(path.join(root, "recent-setup"));
-    setup.confirmation.accepted = false;
-    await setup.recentCommand();
-    assert(
-      setup.recentScans.length === 0 && setup.storage.size === 0,
-      "declining recent-file consent neither scans nor writes a setup choice",
-    );
-    setup.confirmation.accepted = true;
-    assert(
-      await setup.recents.needsRecentSetup(),
-      "first use offers recent-file setup",
-    );
-    await setup.recents.skipRecentSetup();
-    assert(
-      !(await setup.recents.needsRecentSetup()) &&
-        setup.recentScans.length === 0,
-      "skipping setup persists the choice without scanning",
-    );
-    const importing = setup.recents.populateRecentFiles();
-    await flush();
-    setup.toasts.length = 0;
-    await setup.deleteCommand();
-    assert(
-      !setup.toasts.some((t) => t.title === "Deleted everything"),
-      "deletion cannot succeed while recent-file import is active",
-    );
-    setup.recentScans[0]?.({
-      entries: [
-        {
-          path: "/foo/bar.txt",
-          name: "bar.txt",
-          isDirectory: false,
-          size: 1,
-          mtimeMs: 1,
-          birthtimeMs: 1,
-          recent: true,
-        },
+    // What a finished scan hands back to rebuildIndex.
+    const good = {
+      roots: [
+        { root: "/foo", scanned: 1, indexed: 1, elapsedMs: 1, complete: true },
       ],
-      partial: false,
-    });
-    await importing;
-    assert(
-      setup.recents.loadRecentEntries().length === 1 &&
-        !setup.storage.has("visits"),
-      "recent import saves its cache without changing recorded opens",
-    );
-    assert(
-      !(await setup.recents.needsRecentSetup()),
-      "successful import dismisses first-run setup",
-    );
-    await setup.deleteCommand();
-    assert(
-      setup.recents.loadRecentEntries().length === 0 &&
-        (await setup.recents.needsRecentSetup()),
-      "deletion clears recent-file data and restores optional setup without importing automatically",
-    );
-    setup.caches.get("recent-files")!.set(
-      "entries",
-      JSON.stringify([
-        {
-          path: "/foo/bar.txt",
-          name: "bar.txt",
-          isDirectory: false,
-          size: 1,
-          mtimeMs: 1,
-          birthtimeMs: 1,
-          lastUsedMs: "bad-date",
-        },
-      ]),
-    );
-    assert(
-      setup.recents.loadRecentEntries().length === 0,
-      "malformed imported metadata cannot enter the ranking pipeline",
-    );
-    setup.recents.clearRecentEntries();
-    setup.storage.set("recent-files-setup", "partial");
-    assert(
-      await setup.recents.needsRecentSetup(),
-      "partial recent import remains available to retry during setup",
-    );
-    const combined = loadCommand(path.join(root, "combined-setup"));
-    assert(
-      Boolean(combined.setup),
-      "first-run setup includes a Google Drive step",
-    );
-    if (combined.setup) {
-      const initialState = await combined.setup.loadSearchSetup();
-      assert(
-        initialState.recents && initialState.drive,
-        "first use offers both setup steps",
-      );
-      const stages: string[] = [];
-      const messages: string[] = [];
-      const run = combined.setup.runSearchSetup({
-        onStage: (stage) => stages.push(stage),
-        onStatus: (message) => messages.push(message),
-      });
-      await flush();
-      assert(
-        combined.scanOptions.recent[0]?.budgetMs === 60_000 &&
-          combined.scanOptions.recent[0]?.metadataBudgetMs === 15_000,
-        "first-run setup gives recent scanning and metadata longer budgets",
-      );
-      const limits = combined.scanOptions.recent[0];
-      assert(
-        limits?.maxDocuments === 500 &&
-          limits.maxFolders === 50 &&
-          limits.maxPerFolder === 500 &&
-          limits.maxEntries === 10_000,
-        "first-run setup requests 500 documents, 50 parents, 500 neighbors, and 10000 total entries",
-      );
-      await new Promise((resolve) => setTimeout(resolve, 1100));
-      assert(
-        messages.some((message) => /1s elapsed/.test(message)),
-        "setup publishes elapsed progress even while the provider has not returned",
-      );
-      assert(
-        combined.scans.length === 0,
-        "Drive indexing waits for recent import to finish",
-      );
-      await combined.deleteCommand();
-      assert(
-        !combined.toasts.some((t) => t.title === "Deleted everything"),
-        "combined setup excludes deletion",
-      );
-      combined.recentScans[0]({ entries: [], partial: false });
-      await flush();
-      assert(
-        combined.scanOptions.shortcuts[0]?.budgetMs === 600_000,
-        "first-run setup allows ten minutes for the shortcut scan",
-      );
-      combined.scans[0](good);
-      await run;
-      assert(
-        combined.scanOptions.shared[0]?.budgetMs === 600_000 &&
-          messages.some((message) => /shared.folder/i.test(message)),
-        "setup announces the shared-folder phase and gives it ten minutes",
-      );
-      const messageCount = messages.length;
-      await new Promise((resolve) => setTimeout(resolve, 1100));
-      assert(
-        messages.length === messageCount,
-        "finished setup stops its progress timer",
-      );
-      const finished = await combined.setup.loadSearchSetup();
-      assert(
-        !finished.recents &&
-          !finished.drive &&
-          stages.join(",") === "recents,drive",
-        "completed setup saves both choices in order",
-      );
-      const scansBefore = combined.scans.length;
-      await combined.setup.runSearchSetup();
-      assert(
-        combined.scans.length === scansBefore,
-        "completed setup does not scan again",
-      );
-      await combined.deleteCommand();
-      assert(
-        (await combined.setup.loadSearchSetup()).drive,
-        "deletion restores the Google Drive setup step",
-      );
-      await combined.setup.skipSearchSetup("recents");
-      const onlyDrive = await combined.setup.loadSearchSetup();
-      assert(
-        !onlyDrive.recents && onlyDrive.drive,
-        "skipping recents leaves Drive available",
-      );
-      const partial = combined.setup.runSearchSetup();
-      await flush();
-      combined.scans[1]({
-        ...good,
-        partial: true,
-        partialReason: "time-limit",
-      });
-      await partial;
-      assert(
-        combined.toasts.at(-1)?.message?.includes("time limit") === true,
-        "the final setup message retains the actual Drive stopping reason",
-      );
-      assert(
-        (await combined.setup.loadSearchSetup()).drive,
-        "partial Drive indexing remains available to retry",
-      );
-      const cancelled = new AbortController();
-      const retry = combined.setup.runSearchSetup({ signal: cancelled.signal });
-      await flush();
-      cancelled.abort();
-      combined.scans[2](good);
-      await retry;
-      assert(
-        (await combined.setup.loadSearchSetup()).drive,
-        "cancelled setup cannot mark Drive complete",
-      );
-      await combined.setup.skipSearchSetup("drive");
-      assert(
-        !(await combined.setup.loadSearchSetup()).drive,
-        "Drive can be skipped independently",
-      );
-      const generation = combined.access.dataGeneration();
-      await combined.deleteCommand();
-      await combined.setup.runSearchSetup({ generation });
-      assert(
-        combined.scans.length === 3 && combined.recentScans.length === 1,
-        "pre-deletion setup cannot restart scans or recreate choices",
-      );
-      await combined.setup.skipSearchSetup("recents");
-      combined.cacheWriting.fail = true;
-      const cannotSave = combined.setup.runSearchSetup();
-      await flush();
-      combined.scans[3](good);
-      await cannotSave;
-      assert(
-        (await combined.setup.loadSearchSetup()).drive,
-        "a complete Drive scan whose cache cannot be saved remains retryable",
-      );
-      combined.cacheWriting.fail = false;
-      const unavailable = combined.setup.runSearchSetup();
-      await flush();
-      combined.scans[4]({ ...good, available: false, shortcuts: [] });
-      await unavailable;
-      assert(
-        /unavailable/i.test(combined.toasts.at(-1)?.message ?? ""),
-        "the final setup summary preserves an unavailable Drive diagnosis",
-      );
-      assert(
-        (await combined.setup.loadSearchSetup()).drive,
-        "an unavailable Google Drive cannot complete setup",
-      );
-      await combined.deleteCommand();
-      const stopRecents = new AbortController();
-      const stopRun = combined.setup.runSearchSetup({
-        signal: stopRecents.signal,
-      });
-      await flush();
-      stopRecents.abort();
-      combined.recentScans[1]({ entries: [], partial: true, cancelled: true });
-      await stopRun;
-      assert(
-        combined.scans.length === 5 &&
-          (await combined.setup.loadSearchSetup()).recents,
-        "stopping recent import leaves both steps retryable and never starts Drive indexing",
-      );
-      await combined.setup.skipSearchSetup("drive");
-      const recentOnly = await combined.setup.loadSearchSetup();
-      assert(
-        recentOnly.recents && !recentOnly.drive,
-        "skipping Drive leaves recent-file setup available",
-      );
-      const partialRecent = combined.setup.runSearchSetup();
-      await flush();
-      combined.recentScans[2]({ entries: [], partial: true });
-      await partialRecent;
-      assert(
-        combined.toasts.some(
-          (toast) => toast.title === "Search setup incomplete",
-        ),
-        "setup reports an incomplete recent-file step even when Drive is skipped",
-      );
-    }
-    const prompt = loadCommand(path.join(root, "setup-prompt"));
-    assert(
-      (await prompt.setup!.loadSearchSetup()).hasRun === false,
-      "opening setup state without running a scan keeps the main prompt available",
-    );
-    prompt.confirmation.accepted = false;
-    const consent = await prompt.setup!.confirmSearchSetup(
-      await prompt.setup!.loadSearchSetup(),
-    );
-    assert(
-      !consent && (await prompt.setup!.loadSearchSetup()).hasRun === false,
-      "cancelling setup confirmation does not dismiss the main prompt",
-    );
-    prompt.confirmation.accepted = true;
-    const beforeStart = new AbortController();
-    beforeStart.abort();
-    await prompt.setup!.runSearchSetup({ signal: beforeStart.signal });
-    assert(
-      (await prompt.setup!.loadSearchSetup()).hasRun === false,
-      "a setup request cancelled before starting does not dismiss the main prompt",
-    );
-    await prompt.setup!.skipSearchSetup("recents");
-    await prompt.setup!.skipSearchSetup("drive");
-    assert(
-      (await prompt.setup!.loadSearchSetup()).hasRun === false,
-      "skipping sources is not recorded as having run setup",
-    );
-    const rerun = prompt.setup!.runSearchSetup({ rerun: true });
-    await flush();
-    assert(
-      prompt.recentScans.length === 1,
-      "setup in Actions can explicitly run again after both sources were skipped or completed",
-    );
-    prompt.recentScans[0]?.({ entries: [], partial: true });
-    await flush();
-    prompt.scans[0]?.({ ...good, partial: true, partialReason: "time-limit" });
-    await rerun;
-    const ranPartial = await prompt.setup!.loadSearchSetup();
-    assert(
-      ranPartial.hasRun === true && ranPartial.recents && ranPartial.drive,
-      "a partial setup remains retryable without restoring the main prompt",
-    );
-    await prompt.deleteCommand();
-    assert(
-      (await prompt.setup!.loadSearchSetup()).hasRun === false,
-      "deleting extension data resets the one-time setup prompt",
-    );
-    const stoppedPrompt = new AbortController();
-    const stoppedSetup = prompt.setup!.runSearchSetup({
-      signal: stoppedPrompt.signal,
-    });
-    await flush();
-    stoppedPrompt.abort();
-    prompt.recentScans.at(-1)?.({
-      entries: [],
-      partial: true,
-      cancelled: true,
-    });
-    await stoppedSetup;
-    assert(
-      (await prompt.setup!.loadSearchSetup()).hasRun === true,
-      "stopping a scan after it starts still dismisses the main prompt on later visits",
-    );
-    const legacyPrompt = loadCommand(path.join(root, "legacy-setup-prompt"));
-    legacyPrompt.storage.set("recent-files-setup", "partial");
-    assert(
-      (await legacyPrompt.setup!.loadSearchSetup()).hasRun === true,
-      "an earlier partial setup is recognized without asking existing users to run it again",
-    );
-    await legacyPrompt.setup!.skipSearchSetup("recents");
-    await legacyPrompt.setup!.skipSearchSetup("drive");
-    assert(
-      (await legacyPrompt.setup!.loadSearchSetup()).hasRun === true,
-      "skipping unfinished legacy steps cannot bring back the main setup prompt",
-    );
-
-    const startupPrompt = loadCommand(path.join(root, "startup-setup-prompt"));
-    const startupController = new AbortController();
-    let releaseSetupRead = () => {};
-    let startedSetupRead = () => {};
-    const setupReadStarted = new Promise<void>((resolve) => {
-      startedSetupRead = resolve;
-    });
-    const setupReadBlocked = new Promise<void>((resolve) => {
-      releaseSetupRead = resolve;
-    });
-    startupPrompt.reading.before = async (key) => {
-      if (key === "recent-files-setup") {
-        startedSetupRead();
-        await setupReadBlocked;
-      }
+      scanned: 1,
+      indexed: 1,
+      elapsedMs: 1,
+      complete: true,
+      forgotten: [] as string[],
     };
-    const stoppedBeforeWork = startupPrompt.setup!.runSearchSetup({
-      signal: startupController.signal,
-    });
-    await setupReadStarted;
-    startupController.abort();
-    releaseSetupRead();
-    await stoppedBeforeWork;
-    startupPrompt.reading.before = async () => {};
-    assert(
-      (await startupPrompt.setup!.loadSearchSetup()).hasRun === false &&
-        startupPrompt.recentScans.length === 0,
-      "stopping during startup before any scan begins keeps the main prompt available",
-    );
-
-    const busyPrompt = loadCommand(path.join(root, "busy-setup-prompt"));
-    const holdingIndex = busyPrompt.command();
-    await flush();
-    await busyPrompt.setup!.runSearchSetup();
-    assert(
-      (await busyPrompt.setup!.loadSearchSetup()).hasRun === false &&
-        busyPrompt.recentScans.length === 0,
-      "a busy indexing lock cannot dismiss the prompt without running setup",
-    );
-    busyPrompt.scans[0](good);
-    await holdingIndex;
-
-    const largerCache = loadCommand(path.join(root, "larger-recent-cache"));
-    await largerCache.setup!.skipSearchSetup("drive");
-    const largeImport = largerCache.setup!.runSearchSetup();
-    await flush();
-    const longParent = "/foo/" + "bar/".repeat(125);
-    const cachedRows: RecentScan["entries"] = Array.from(
-      { length: 10_000 },
-      (_, i) => ({
-        path: longParent + "baz-" + i + ".txt",
-        storagePath: longParent + "baz-" + i + ".txt",
-        name: "baz-" + i + ".txt",
-        isDirectory: false,
-        size: 1,
-        mtimeMs: 1,
-        birthtimeMs: 1,
-      }),
-    );
-    largerCache.recentScans[0]({ entries: cachedRows, partial: false });
-    await largeImport;
-    const reloaded = largerCache.recents.loadRecentEntries();
-    assert(
-      reloaded.length === 10_000 &&
-        reloaded[9999]?.path.endsWith("/baz-9999.txt"),
-      "all 10000 recent entries survive saving and reloading even with long cloud paths",
-    );
-    const standaloneImport = largerCache.recents.populateRecentFiles();
-    await flush();
-    const small = {
-      ...cachedRows[0],
-      path: "/foo/new.txt",
-      storagePath: "/foo/new.txt",
-      name: "new.txt",
-    };
-    largerCache.recentScans[1]({ entries: [small], partial: false });
-    await standaloneImport;
-    const mergedCache = largerCache.recents.loadRecentEntries();
-    assert(
-      mergedCache.length === 10_000 &&
-        mergedCache[0]?.path === "/foo/new.txt" &&
-        mergedCache.some((entry) => entry.path.endsWith("/baz-9000.txt")),
-      "a smaller later import retains the larger cache without exceeding 10000 entries",
-    );
-    const standaloneLimits = largerCache.scanOptions.recent[1];
-    assert(
-      standaloneLimits?.maxDocuments === undefined &&
-        standaloneLimits?.maxEntries === undefined,
-      "standalone recent scans keep their existing collection defaults",
-    );
-    largerCache.caches
-      .get("recent-files")!
-      .set("entries", JSON.stringify([...cachedRows, small]));
-    assert(
-      largerCache.recents.loadRecentEntries().length === 10_000,
-      "loading an oversized stored recent cache still enforces the 10000-entry ceiling",
-    );
-    largerCache.storage.delete("recent-files-setup");
-    const preserved = largerCache.recents.loadRecentEntries()[0]?.path;
-    const tooLarge = largerCache.setup!.runSearchSetup();
-    await flush();
-    const oversizedParent = "/foo/" + "bar/".repeat(300);
-    largerCache.recentScans[2]({
-      entries: cachedRows.map((entry, i) => ({
-        ...entry,
-        path: oversizedParent + i + ".txt",
-        storagePath: oversizedParent + i + ".txt",
-      })),
-      partial: false,
-    });
-    await tooLarge;
-    assert(
-      largerCache.recents.loadRecentEntries()[0]?.path === preserved &&
-        (await largerCache.setup!.loadSearchSetup()).recents,
-      "a cache exceeding its byte allowance preserves previous results and cannot complete setup",
-    );
-    const sharedCapacity = loadCommand(path.join(root, "shared-capacity"));
-    const savedShared = { ...sharedCapacity.shared, paths: ["/previous"] };
-    sharedCapacity.sharedIndex.saveSharedIndex(savedShared);
-    // Below the limit in JS characters, above it in UTF-8 bytes.
-    const oversizedShared = {
-      ...savedShared,
-      paths: Array.from(
-        { length: 40_000 },
-        (_, i) => "/cloud/" + "é".repeat(110) + i,
-      ),
-    };
-    assert(
-      !sharedCapacity.sharedIndex.saveSharedIndex(oversizedShared),
-      "an oversized UTF-8 shared index reports a failed save",
-    );
-    assert(
-      sharedCapacity.sharedIndex.loadSharedIndex().paths[0] === "/previous",
-      "an oversized shared index cannot evict the previous saved index",
-    );
-    Object.assign(sharedCapacity.shared, oversizedShared);
-    const oversizedRefresh = sharedCapacity.command();
-    await flush();
-    sharedCapacity.scans[0](good);
-    await oversizedRefresh;
-    assert(
-      sharedCapacity.toasts.at(-1)?.style === "failure" &&
-        !sharedCapacity.storage.has("google-drive-setup"),
-      "an oversized shared index cannot report indexing success or complete setup",
-    );
-    const boundaryShared = { ...savedShared, paths: [""] };
-    const overhead = Buffer.byteLength(JSON.stringify(boundaryShared), "utf8");
-    boundaryShared.paths[0] = "a".repeat(8_000_000 - overhead);
-    assert(
-      sharedCapacity.sharedIndex.saveSharedIndex(boundaryShared) &&
-        sharedCapacity.sharedIndex.loadSharedIndex().paths[0] ===
-          boundaryShared.paths[0],
-      "a shared index exactly at the byte limit is saved and readable",
-    );
-    assert(
-      sharedCapacity.sharedIndex.saveSharedIndex(savedShared) &&
-        sharedCapacity.sharedIndex.loadSharedIndex().paths[0] === "/previous",
-      "a smaller shared index can still replace a full cache",
-    );
-
-    for (const reason of ["time-limit", "depth-limit", "item-limit"] as const) {
-      const bounded = loadCommand(path.join(root, reason));
-      bounded.storage.set("shortcuts", JSON.stringify(good));
-      bounded.caches.get("shared-folders")!.set(
-        "index",
-        JSON.stringify({
-          paths: ["/foo/bar", "/foo/baz"],
-          scannedAt: 1,
-          available: true,
-          partial: false,
-        }),
-      );
-      Object.assign(bounded.shared, {
-        paths: ["/foo/bar"],
-        scannedAt: 2,
-        partial: true,
-        partialReason: reason,
-      });
-      const refresh = bounded.command();
-      await flush();
-      bounded.scans[0]({
-        ...good,
-        shortcuts: [],
-        scannedAt: 2,
-        partial: true,
-        partialReason: reason,
-      });
-      await refresh;
-      assert(
-        JSON.parse(bounded.storage.get("shortcuts")!).shortcuts.length === 1,
-        `${reason} refresh preserves a complete shortcut index`,
-      );
-      assert(
-        JSON.parse(bounded.caches.get("shared-folders")!.get("index")!).paths
-          .length === 2,
-        `${reason} refresh preserves a complete shared-folder index`,
-      );
-      assert(
-        bounded.toasts.some((t) => /merged/i.test(t.message ?? "")),
-        `${reason} refresh explains that partial discoveries were merged`,
-      );
-    }
-
-    for (const reason of ["time-limit", "depth-limit", "item-limit"] as const) {
-      const shrinking = loadCommand(path.join(root, `shrinking-${reason}`));
-      const savedShortcuts = JSON.stringify({ ...good, partial: true });
-      const savedShared = JSON.stringify({
-        paths: ["/foo/bar", "/foo/baz"],
-        scannedAt: 1,
-        available: true,
-        partial: true,
-      });
-      shrinking.storage.set("shortcuts", savedShortcuts);
-      shrinking.caches.get("shared-folders")!.set("index", savedShared);
-      Object.assign(shrinking.shared, {
-        paths: ["/foo/bar"],
-        scannedAt: 2,
-        partial: true,
-        partialReason: reason,
-      });
-      const refresh = shrinking.command();
-      await flush();
-      shrinking.scans[0]({
-        ...good,
-        shortcuts: [],
-        scannedAt: 2,
-        partial: true,
-        partialReason: reason,
-      });
-      await refresh;
-      assert(
-        JSON.parse(shrinking.storage.get("shortcuts")!).shortcuts.length ===
-          1 &&
-          JSON.parse(
-            shrinking.caches.get("shared-folders")!.get("index")!,
-          ).paths.join(",") === "/foo/bar,/foo/baz" &&
-          JSON.parse(shrinking.storage.get("shortcuts")!).scannedAt === 2,
-        `${reason} refresh preserves paths and updates the partial scan metadata`,
-      );
-      assert(
-        shrinking.toasts.some((t) => /merged/i.test(t.message ?? "")),
-        `${reason} refresh explains that partial discoveries were merged`,
-      );
-    }
-
-    const disjoint = loadCommand(path.join(root, "disjoint"));
-    disjoint.storage.set(
-      "shortcuts",
-      JSON.stringify({ ...good, partial: true }),
-    );
-    disjoint.caches.get("shared-folders")!.set(
-      "index",
-      JSON.stringify({
-        paths: ["/old"],
-        scannedAt: 1,
-        available: true,
-        partial: true,
-      }),
-    );
-    Object.assign(disjoint.shared, { paths: ["/new"], partial: true });
-    const disjointRefresh = disjoint.command();
-    await flush();
-    disjoint.scans[0]({
-      ...good,
-      partial: true,
-      shortcuts: [{ path: "/new", name: "new", target: "/target" }],
-    });
-    await disjointRefresh;
-    assert(
-      JSON.stringify(
-        JSON.parse(disjoint.storage.get("shortcuts")!).shortcuts.map(
-          (s: Shortcut) => s.path,
-        ),
-      ) === '["/foo","/new"]' &&
-        JSON.stringify(
-          JSON.parse(disjoint.caches.get("shared-folders")!.get("index")!)
-            .paths,
-        ) === '["/old","/new"]',
-      "equal-sized disjoint partial scans merge both indexes without losing saved paths",
-    );
-
-    for (const outcome of ["partial", "complete", "unavailable"] as const) {
-      const checkpointed = loadCommand(
-        path.join(root, `checkpoint-${outcome}`),
-      );
-      checkpointed.storage.set("shortcuts", JSON.stringify(good));
-      checkpointed.caches
-        .get("shared-folders")!
-        .set(
-          "index",
-          JSON.stringify({ ...checkpointed.shared, paths: ["/old"] }),
-        );
-      checkpointed.shortcutProgress.push(
-        {
-          ...good,
-          partial: true,
-          shortcuts: [
-            { path: "/checkpoint", name: "checkpoint", target: "/target" },
-          ],
-        },
-        {
-          ...good,
-          partial: true,
-          available: false,
-          shortcuts: [{ path: "/failed", name: "failed", target: "/target" }],
-        },
-      );
-      checkpointed.sharedProgress.push(
-        { ...checkpointed.shared, partial: true, paths: ["/checkpoint"] },
-        {
-          ...checkpointed.shared,
-          partial: true,
-          error: "read failed",
-          paths: ["/failed"],
-        },
-      );
-      Object.assign(checkpointed.shared, {
-        paths: ["/final"],
-        partial: outcome !== "complete",
-        available: outcome !== "unavailable",
-      });
-      const running = checkpointed.command();
-      await flush();
-      checkpointed.scans[0]({
-        ...good,
-        partial: outcome !== "complete",
-        shortcuts: [{ path: "/final", name: "final", target: "/target" }],
-      });
-      await running;
-      const shortcuts = JSON.parse(checkpointed.storage.get("shortcuts")!)
-        .shortcuts.map((s: Shortcut) => s.path)
-        .join(",");
-      const paths = checkpointed.sharedIndex.loadSharedIndex().paths.join(",");
-      assert(
-        shortcuts ===
-          (outcome === "complete" ? "/final" : "/foo,/checkpoint,/final"),
-        `${outcome} shortcut scan merges successful checkpoints, ignores failed ones, and only complete scans remove paths`,
-      );
-      assert(
-        paths ===
-          (outcome === "complete"
-            ? "/final"
-            : outcome === "partial"
-              ? "/old,/checkpoint,/final"
-              : "/old,/checkpoint"),
-        `${outcome} shared scan respects the last successfully saved checkpoint`,
-      );
-    }
-
-    for (const seeded of [false, true]) {
-      for (const failure of ["unavailable", "error", "throw"] as const) {
-        const failed = loadCommand(
-          path.join(root, `failed-${seeded}-${failure}`),
-        );
-        if (seeded) failed.storage.set("shortcuts", JSON.stringify(good));
-        const before = failed.storage.get("shortcuts");
-        const running = failed.command();
-        await flush();
-        if (failure === "throw")
-          failed.failures[0](new Error("provider failed"));
-        else
-          failed.scans[0]({
-            ...good,
-            available: failure !== "unavailable",
-            error: failure === "error" ? "read failed" : undefined,
-          });
-        await running;
-        assert(
-          failed.storage.get("shortcuts") === before &&
-            !failed.storage.has("google-drive-setup") &&
-            failed.scanOptions.shared.length === 0,
-          `${failure} shortcut scan leaves ${seeded ? "saved" : "empty"} storage unchanged and cannot complete setup`,
-        );
-      }
-    }
-
-    const cancelled = loadCommand(path.join(root, "checkpoint-cancelled"));
-    cancelled.storage.set("shortcuts", JSON.stringify(good));
-    const controller = new AbortController();
-    const cancelRun = cancelled.driveSetup.indexGoogleDrive({
-      signal: controller.signal,
-    });
-    await flush();
-    await cancelled.scanOptions.shortcuts[0]?.onProgress?.({
-      ...good,
-      partial: true,
-      shortcuts: [
-        { path: "/checkpoint", name: "checkpoint", target: "/target" },
-      ],
-    });
-    controller.abort();
-    await cancelled.scanOptions.shortcuts[0]?.onProgress?.({
-      ...good,
-      partial: true,
-      shortcuts: [{ path: "/late", name: "late", target: "/target" }],
-    });
-    cancelled.scans[0]({ ...good, shortcuts: [] });
-    assert(
-      (await cancelRun) === "cancelled" &&
-        JSON.parse(cancelled.storage.get("shortcuts")!)
-          .shortcuts.map((s: Shortcut) => s.path)
-          .join(",") === "/foo,/checkpoint",
-      "cancellation retains merged checkpoints and blocks late checkpoint and final writes",
-    );
-
-    for (const checkpoint of [false, true]) {
-      const oversized = loadCommand(
-        path.join(root, `union-capacity-${checkpoint}`),
-      );
-      const saved = {
-        ...good,
-        partial: true,
-        shortcuts: [
-          { path: "/" + "a".repeat(4_000_000), name: "old", target: "/target" },
-        ],
-      };
-      assert(
-        await oversized.shortcutIndex.saveShortcutIndex(saved),
-        "a bounded shortcut index fits before merging",
-      );
-      const incoming = {
-        ...good,
-        partial: true,
-        shortcuts: [
-          { path: "/" + "b".repeat(4_000_000), name: "new", target: "/target" },
-        ],
-      };
-      if (checkpoint) oversized.shortcutProgress.push(incoming);
-      const running = oversized.command();
-      await flush();
-      oversized.scans[0](checkpoint ? good : incoming);
-      await running;
-      assert(
-        oversized.storage.get("shortcuts") === JSON.stringify(saved) &&
-          oversized.toasts.at(-1)?.style === "failure" &&
-          !oversized.storage.has("google-drive-setup"),
-        `${checkpoint ? "checkpoint" : "final"} shortcut union exceeding its byte limit preserves the saved index and reports failure`,
-      );
-    }
-    const shortcutCapacity = loadCommand(path.join(root, "shortcut-capacity"));
-    await shortcutCapacity.shortcutIndex.saveShortcutIndex(good);
-    assert(
-      !(await shortcutCapacity.shortcutIndex.saveShortcutIndex({
-        ...good,
-        shortcuts: [
-          { path: "é".repeat(4_000_000), name: "large", target: "/target" },
-        ],
-      })) && shortcutCapacity.storage.get("shortcuts") === JSON.stringify(good),
-      "shortcut capacity counts UTF-8 bytes and rejects oversized writes without changing storage",
-    );
-    shortcutCapacity.writing.before = async (key) => {
-      if (key === "shortcuts") throw new Error("storage failed");
-    };
-    assert(
-      !(await shortcutCapacity.shortcutIndex.saveShortcutIndex({
-        ...good,
-        shortcuts: [],
-      })) && shortcutCapacity.storage.get("shortcuts") === JSON.stringify(good),
-      "shortcut storage failures return failure and leave the prior index intact",
-    );
-
-    for (const checkpoint of [false, true]) {
-      const sharedUnion = loadCommand(
-        path.join(root, `shared-union-capacity-${checkpoint}`),
-      );
-      const savedUnion = {
-        ...sharedUnion.shared,
-        partial: true,
-        paths: ["a".repeat(4_000_000)],
-      };
-      assert(
-        sharedUnion.sharedIndex.saveSharedIndex(savedUnion),
-        "shared paths fit before merging",
-      );
-      Object.assign(sharedUnion.shared, {
-        partial: true,
-        paths: ["b".repeat(4_000_000)],
-      });
-      if (checkpoint)
-        sharedUnion.sharedProgress.push({ ...sharedUnion.shared });
-      const sharedUnionRun = sharedUnion.command();
-      await flush();
-      sharedUnion.scans[0](good);
-      await sharedUnionRun;
-      assert(
-        sharedUnion.sharedIndex.loadSharedIndex().paths[0] ===
-          savedUnion.paths[0] &&
-          sharedUnion.toasts.at(-1)?.style === "failure" &&
-          !sharedUnion.storage.has("google-drive-setup"),
-        `oversized shared ${checkpoint ? "checkpoint" : "final"} union preserves saved paths instead of evicting or truncating them`,
-      );
-    }
-
-    const evolving = loadCommand(path.join(root, "evolving"));
-    const initial = evolving.command();
-    await flush();
-    Object.assign(evolving.shared, {
-      partial: true,
-      partialReason: "time-limit",
-    });
-    evolving.scans[0]({ ...good, partial: true, partialReason: "time-limit" });
-    await initial;
-    assert(
-      JSON.parse(evolving.storage.get("shortcuts")!).shortcuts.length === 1,
-      "a first partial scan provides searchable shortcuts",
-    );
-    assert(
-      JSON.parse(evolving.caches.get("shared-folders")!.get("index")!).paths
-        .length === 1,
-      "a first partial scan provides searchable shared-folder paths",
-    );
-    const improved = evolving.command();
-    await flush();
-    evolving.shared.paths = ["/foo/bar", "/foo/baz"];
-    evolving.scans[1]({
-      ...good,
-      shortcuts: [
-        ...good.shortcuts,
-        { path: "/baz", name: "baz", target: "/bar" },
-      ],
-      partial: true,
-    });
-    await improved;
-    assert(
-      JSON.parse(evolving.storage.get("shortcuts")!).shortcuts.length === 2 &&
-        JSON.parse(evolving.caches.get("shared-folders")!.get("index")!).paths
-          .length === 2,
-      "a later partial scan can refresh an already partial index",
-    );
-    const complete = evolving.command();
-    await flush();
-    Object.assign(evolving.shared, { paths: [], partial: false });
-    evolving.scans[2]({ ...good, shortcuts: [] });
-    await complete;
-    assert(
-      JSON.parse(evolving.storage.get("shortcuts")!).shortcuts.length === 0 &&
-        JSON.parse(evolving.caches.get("shared-folders")!.get("index")!).paths
-          .length === 0,
-      "a complete empty scan removes stale paths from previous partial indexes",
-    );
-
     const deletion = loadCommand(path.join(root, "deletion"));
     deletion.storage.set("pins", JSON.stringify(["/foo"]));
     const activeScan = deletion.command();
-    await flush();
+    await until(
+      () => deletion.scans.length === 1,
+      "the first scan to hold the lock",
+    );
     await deletion.deleteCommand();
     assert(
       deletion.storage.has("pins"),
@@ -1381,7 +504,8 @@ export async function indexingChecks(
     const activeDelete = deletion.deleteCommand();
     await clearStarted;
     const blockedScan = deletion.command();
-    await flush();
+    // Give a regression time to wrongly start a scan, then check none did.
+    for (let i = 0; i < 400; i++) await flush();
     assert(
       deletion.scans.length === 1,
       "indexing cannot start while deletion holds the lock",
@@ -1405,24 +529,12 @@ export async function indexingChecks(
       !fs.existsSync(path.join(root, "deletion", "google-drive-indexing.lock")),
       "a deletion failure releases the shared lock",
     );
-    // Without exclusion, a later scan completes before the older unavailable run.
-    if (test.scans.length > 1) {
-      test.scans[1](good);
-      await second;
-      test.scans[0]({
-        shortcuts: [],
-        scannedAt: 2,
-        available: false,
-        partial: false,
-      });
-    } else {
-      test.scans[0](good);
-    }
+    // The blocked request must settle rather than wait on the held lock.
+    test.scans[0](good);
     await Promise.all([first, second]);
-    const saved = JSON.parse(test.storage.get("shortcuts") ?? "{}");
     assert(
-      saved.shortcuts?.length === 1,
-      "an overlapping unavailable run cannot erase the saved index",
+      test.scans.length === 1,
+      "the blocked request finishes without ever starting its own scan",
     );
     assert(
       test.toasts.some(
@@ -1433,31 +545,60 @@ export async function indexingChecks(
       "a duplicate request explains that it must wait for indexing or deletion",
     );
 
+    // Wait for this run's own scan, not the resolved one from earlier.
+    const before = test.failures.length;
+    test.toasts.length = 0;
     const failed = test.command();
-    await flush();
-    test.failures.at(-1)!(new Error("Synthetic scan failure"));
+    await until(() => test.failures.length > before, "the next scan to start");
+    test.failures[before](new Error("Synthetic scan failure"));
     await failed;
+    assert(
+      test.toasts.some(
+        (toast) =>
+          toast.style === "failure" &&
+          toast.message?.includes("Synthetic scan failure"),
+      ),
+      "the real command reports scan errors instead of treating them as lock contention",
+    );
     assert(
       !fs.existsSync(path.join(root, "google-drive-indexing.lock")),
       "a scan exception releases the indexing lock",
     );
+
+    test.toasts.length = 0;
+    const beforeFinalization = test.scans.length;
+    const finalizing = test.command();
+    await until(
+      () => test.scans.length > beforeFinalization,
+      "the finalization test to hold the lock",
+    );
+    const damaged = new DatabaseSync(path.join(root, "file-index.sqlite"));
+    try {
+      damaged.exec("DROP TABLE files_fts");
+    } finally {
+      damaged.close();
+    }
+    test.scans[beforeFinalization](good);
+    await finalizing;
     assert(
-      JSON.parse(test.storage.get("shortcuts")!).shortcuts.length === 1,
-      "a scan exception preserves the saved index",
+      test.toasts.some(
+        (toast) =>
+          toast.style === "failure" && toast.message?.includes("files_fts"),
+      ),
+      "the real rebuild command preserves the FTS finalization error through its lock wrapper",
     );
 
     const replacementTest = loadCommand(path.join(root, "replacement"));
     const superseded = replacementTest.command();
-    await flush();
+    await until(
+      () => replacementTest.scans.length === 1,
+      "the superseded scan to hold the lock",
+    );
     const lock = path.join(root, "replacement", "google-drive-indexing.lock");
     fs.renameSync(lock, `${lock}.old`);
     fs.mkdirSync(lock);
     replacementTest.scans[0](good);
     await superseded;
-    assert(
-      !replacementTest.storage.has("shortcuts"),
-      "a run that lost lock ownership cannot save an index",
-    );
     assert(
       fs.existsSync(lock),
       "finishing an old run does not remove a replacement lock",
@@ -1521,7 +662,10 @@ export async function indexingChecks(
     fs.utimesSync(staleLock, oldTime, oldTime);
     const recovery = loadCommand(recoveryRoot);
     const recovered = recovery.command();
-    await flush();
+    await until(
+      () => recovery.scans.length === 1,
+      "the recovered scan to start",
+    );
     assert(
       recovery.scans.length === 1,
       "a stale lock left after a crash does not block future indexing",
@@ -1541,7 +685,17 @@ export async function indexingChecks(
       fs.utimesSync(unknownLock, oldTime, oldTime);
       const unknown = loadCommand(unknownRoot);
       const attempted = unknown.command();
-      await flush();
+      // It either acquires the lock and starts a scan, or reports contention
+      // and returns. Waiting on whichever happens keeps a regression from
+      // leaving an unresolved scan, which would end the run silently.
+      let reported = false;
+      void attempted.then(() => {
+        reported = true;
+      });
+      await until(
+        () => reported || unknown.scans.length > 0,
+        "the attempt to acquire the lock or report contention",
+      );
       const acquired = unknown.scans.length > 0;
       unknown.scans[0]?.(good);
       await attempted;
@@ -1550,7 +704,861 @@ export async function indexingChecks(
         `stale ${metadata} ownership metadata cannot prove a writer is dead`,
       );
     }
+    await visitWriteChecks(assert, root);
+    await rankingWriteChecks(assert, root);
+    await indexSettingsStoreChecks(assert, root);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
+/** A stored visit, in the shape decay and pruning read it back in. */
+type StoredVisit = {
+  count: number;
+  lastVisit: number;
+  ems: number;
+  tick: number;
+};
+
+type StoredLog = { tick: number; items: Record<string, StoredVisit> };
+
+/** pruneVisits' MIN_EMS floor, which the module does not export. */
+const PRUNE_FLOOR = 0.01;
+
+const seedVisit = (ems: number, tick: number, count = 1): StoredVisit => ({
+  count,
+  lastVisit: 0,
+  ems,
+  tick,
+});
+
+const storedLog = (storage: Map<string, string>): StoredLog | undefined => {
+  const raw = storage.get("visits");
+  return raw === undefined ? undefined : (JSON.parse(raw) as StoredLog);
+};
+
+/**
+ * A command instance whose support directory already exists.
+ *
+ * withStorageLock creates it on the first write, but invalidateData does not,
+ * and these tests move the generation before anything has been written.
+ */
+function storeAt(supportPath: string) {
+  fs.mkdirSync(supportPath, { recursive: true });
+  return loadCommand(supportPath);
+}
+
+/**
+ * Occupy the storage lock until released.
+ *
+ * Generation-free, so a reset during the test cannot cancel the holder itself
+ * and leave the lock behind.
+ */
+function holdStorageLock(access: typeof import("../src/lib/storage-lock")) {
+  let release!: () => void;
+  let taken!: () => void;
+  const started = new Promise<void>((resolve) => {
+    taken = resolve;
+  });
+  const done = access.withStorageLock(async () => {
+    taken();
+    await new Promise<void>((resolve) => {
+      release = resolve;
+    });
+  }, undefined);
+  return {
+    taken: started,
+    release: async () => {
+      release();
+      await done;
+    },
+  };
+}
+
+/** Real files, plus a symlinked alias, so canonical keys are unambiguous. */
+function visitFixture(root: string) {
+  const files = path.join(root, "visit-files");
+  fs.mkdirSync(files, { recursive: true });
+  const openedPath = path.join(files, "opened.txt");
+  const otherPath = path.join(files, "other.txt");
+  fs.writeFileSync(openedPath, "");
+  fs.writeFileSync(otherPath, "");
+  const aliasDir = path.join(root, "visit-alias");
+  fs.symlinkSync(files, aliasDir);
+  return {
+    openedPath,
+    otherPath,
+    aliasPath: path.join(aliasDir, "opened.txt"),
+    // A path under a directory that was never created, so it cannot exist.
+    missingPath: path.join(files, "gone", "deleted.txt"),
+    opened: fs.realpathSync(openedPath),
+    other: fs.realpathSync(otherPath),
+  };
+}
+
+async function visitWriteChecks(
+  assert: (condition: boolean, label: string) => void,
+  root: string,
+) {
+  console.log("\n=== visit log writes ===");
+  const files = visitFixture(path.join(root, "visits"));
+  const { openedPath, otherPath, aliasPath, missingPath, opened, other } =
+    files;
+
+  const first = storeAt(path.join(root, "visits", "first"));
+  const startedAt = Date.now();
+  const written = await first.store.recordVisit(openedPath);
+  const finishedAt = Date.now();
+  const stored = storedLog(first.storage);
+  assert(
+    stored !== undefined && stored.tick === 1 && written.tick === 1,
+    "the first recorded visit starts the event clock at one",
+  );
+  const entry = stored?.items[opened];
+  assert(
+    entry?.count === 1 && entry?.ems === 1 && entry?.tick === 0,
+    "a first visit stores one open with a full ems at the previous tick",
+  );
+  assert(
+    (entry?.lastVisit ?? -1) >= startedAt &&
+      (entry?.lastVisit ?? -1) <= finishedAt,
+    "a first visit stores the wall-clock time of the open",
+  );
+  assert(
+    Object.keys(stored?.items ?? {}).length === 1,
+    "an empty store gains exactly the one visited path",
+  );
+
+  const repeated = await first.store.recordVisit(openedPath);
+  const again = storedLog(first.storage)?.items[opened];
+  const decayed = Math.exp(-first.history.LAMBDA) + 1;
+  assert(
+    repeated.tick === 2 && again?.tick === 1 && again?.count === 2,
+    "a repeated visit to one path advances the clock and counts both opens",
+  );
+  assert(
+    Math.abs((again?.ems ?? 0) - decayed) < 1e-12,
+    "a repeated visit adds one to the ems decayed over the elapsed tick",
+  );
+
+  const aliased = await first.store.recordVisit(aliasPath);
+  assert(
+    aliased.items[opened]?.count === 3 &&
+      aliased.items[aliasPath] === undefined,
+    "a visit through a symlinked alias merges into the canonical path",
+  );
+
+  const generationTest = storeAt(path.join(root, "visits", "generation"));
+  const generation = generationTest.access.dataGeneration();
+  generationTest.access.invalidateData();
+  const refused = await generationTest.store
+    .recordVisit(openedPath, generation)
+    .then(
+      () => false,
+      () => true,
+    );
+  assert(
+    refused && !generationTest.storage.has("visits"),
+    "a visit captured before a reset cannot land afterwards",
+  );
+  await generationTest.store.recordVisit(
+    openedPath,
+    generationTest.access.dataGeneration(),
+  );
+  assert(
+    generationTest.storage.has("visits"),
+    "a visit captured after a reset still lands",
+  );
+
+  const pruning: {
+    label: string;
+    logTick: number;
+    visit: StoredVisit;
+    keeps: boolean;
+  }[] = [
+    {
+      label: "a full-ems entry survives a recorded visit",
+      logTick: 0,
+      visit: seedVisit(1, 0),
+      keeps: true,
+    },
+    {
+      label: "an entry above the pruning floor survives a recorded visit",
+      logTick: 0,
+      visit: seedVisit(0.02, 0),
+      keeps: true,
+    },
+    {
+      label: "an entry below the pruning floor is pruned",
+      logTick: 0,
+      visit: seedVisit(0.005, 0),
+      keeps: false,
+    },
+    {
+      // emsScore floors the elapsed ticks at zero, so this entry is undecayed
+      // and sits exactly on the inclusive floor.
+      label: "an entry exactly on the pruning floor survives",
+      logTick: 0,
+      visit: seedVisit(PRUNE_FLOOR, 1),
+      keeps: true,
+    },
+    {
+      label: "a zero-ems entry is pruned",
+      logTick: 0,
+      visit: seedVisit(0, 0),
+      keeps: false,
+    },
+    {
+      label: "a negative-ems entry is pruned",
+      logTick: 0,
+      visit: seedVisit(-1, 0),
+      keeps: false,
+    },
+    {
+      label: "an entry decayed under the floor by an old tick is pruned",
+      logTick: 1000,
+      visit: seedVisit(1, 99),
+      keeps: false,
+    },
+    {
+      label: "an entry still above the floor at an old tick survives",
+      logTick: 700,
+      visit: seedVisit(1, 0),
+      keeps: true,
+    },
+    {
+      // JSON cannot carry NaN, so a broken ems reads back as null and the
+      // stored open count stands in for it.
+      label: "an entry with no usable ems falls back to its open count",
+      logTick: 0,
+      visit: seedVisit(null as unknown as number, 0, 3),
+      keeps: true,
+    },
+    {
+      label: "an entry with neither a usable ems nor an open count is pruned",
+      logTick: 0,
+      visit: seedVisit(null as unknown as number, 0, 0),
+      keeps: false,
+    },
+  ];
+  const prune = storeAt(path.join(root, "visits", "pruning"));
+  for (const item of pruning) {
+    prune.storage.set(
+      "visits",
+      JSON.stringify({ tick: item.logTick, items: { [other]: item.visit } }),
+    );
+
+    await prune.store.recordVisit(openedPath);
+
+    const keys = Object.keys(storedLog(prune.storage)?.items ?? {});
+    assert(
+      keys.includes(opened) && keys.includes(other) === item.keeps,
+      item.label,
+    );
+  }
+
+  prune.storage.set(
+    "visits",
+    JSON.stringify({ tick: 0, items: { [missingPath]: seedVisit(1, 0) } }),
+  );
+  const gated = await prune.store.recordVisit(openedPath);
+  assert(
+    gated.items[missingPath] !== undefined,
+    "an entry for a deleted file survives while nothing is pruned",
+  );
+  prune.storage.set(
+    "visits",
+    JSON.stringify({
+      tick: 0,
+      items: { [missingPath]: seedVisit(1, 0), [other]: seedVisit(0, 0) },
+    }),
+  );
+  const swept = await prune.store.recordVisit(openedPath);
+  assert(
+    swept.items[missingPath] === undefined && swept.items[opened] !== undefined,
+    "a visit that prunes also forgets entries whose file is gone",
+  );
+
+  const cap = prune.history.MAX_ENTRIES;
+  const capCases: { label: string; seeded: number; kept: number }[] = [
+    {
+      label: "a log at exactly the entry cap keeps every entry",
+      seeded: cap - 1,
+      kept: cap,
+    },
+    {
+      label: "a log over the entry cap drops to the cap and sweeps the missing",
+      seeded: cap,
+      kept: 1,
+    },
+  ];
+  for (const item of capCases) {
+    const items: Record<string, StoredVisit> = {};
+    for (let i = 0; i < item.seeded; i++)
+      items[path.join(root, "visits", "gone", `fake-${i}`)] = seedVisit(0.5, 0);
+    prune.storage.set("visits", JSON.stringify({ tick: 0, items }));
+
+    await prune.store.recordVisit(openedPath);
+
+    assert(
+      Object.keys(storedLog(prune.storage)?.items ?? {}).length === item.kept,
+      item.label,
+    );
+  }
+
+  const reset = storeAt(path.join(root, "visits", "reset"));
+  reset.storage.set(
+    "visits",
+    JSON.stringify({
+      tick: 7,
+      items: {
+        [opened]: seedVisit(1, 0),
+        [aliasPath]: seedVisit(1, 0),
+        [other]: seedVisit(1, 0),
+      },
+    }),
+  );
+
+  const afterReset = await reset.store.resetVisit(aliasPath);
+
+  assert(
+    afterReset.tick === 7 && Object.keys(afterReset.items).join() === other,
+    "resetting a path drops its canonical and its raw key and keeps the clock",
+  );
+  assert(
+    Object.keys(storedLog(reset.storage)?.items ?? {}).join() === other,
+    "a reset visit is persisted, not only returned",
+  );
+  const resetAgain = await reset.store.resetVisit(aliasPath);
+  assert(
+    Object.keys(resetAgain.items).join() === other,
+    "resetting the same path twice changes nothing the second time",
+  );
+  reset.storage.delete("visits");
+  const resetEmpty = await reset.store.resetVisit(openedPath);
+  assert(
+    resetEmpty.tick === 0 &&
+      Object.keys(resetEmpty.items).length === 0 &&
+      Object.keys(storedLog(reset.storage)?.items ?? { x: seedVisit(1, 0) })
+        .length === 0,
+    "resetting a path in an empty store writes an empty log",
+  );
+
+  const suspendedReset = storeAt(path.join(root, "visits", "reset-stale"));
+  const seeded = JSON.stringify({
+    tick: 3,
+    items: { [opened]: seedVisit(1, 0) },
+  });
+  suspendedReset.storage.set("visits", seeded);
+  let resumeReset!: () => void;
+  let beganReset!: () => void;
+  const resetRead = new Promise<void>((resolve) => {
+    beganReset = resolve;
+  });
+  suspendedReset.reading.before = async (key: string) => {
+    if (key !== "visits") return;
+    beganReset();
+    await new Promise<void>((resolve) => {
+      resumeReset = resolve;
+    });
+  };
+  const staleReset = suspendedReset.store.resetVisit(openedPath).then(
+    () => false,
+    () => true,
+  );
+  await resetRead;
+  suspendedReset.access.invalidateData();
+  resumeReset();
+  const resetRejected = await staleReset;
+  suspendedReset.reading.before = async () => {};
+  assert(
+    resetRejected && suspendedReset.storage.get("visits") === seeded,
+    "a reset suspended across a data reset cannot save its old log",
+  );
+
+  const clear = storeAt(path.join(root, "visits", "clear"));
+  clear.storage.set("visits", seeded);
+  clear.storage.set("pins", JSON.stringify([opened]));
+
+  const cleared = await clear.store.clearVisits();
+
+  assert(
+    cleared.tick === 0 &&
+      Object.keys(cleared.items).length === 0 &&
+      !clear.storage.has("visits"),
+    "clearing visits removes the stored log",
+  );
+  assert(
+    clear.storage.has("pins"),
+    "clearing visits leaves the other stored ranking data alone",
+  );
+  const clearedAgain = await clear.store.clearVisits();
+  assert(
+    Object.keys(clearedAgain.items).length === 0 &&
+      !clear.storage.has("visits"),
+    "clearing an empty visit log is a no-op that creates nothing",
+  );
+
+  const blocked = storeAt(path.join(root, "visits", "clear-stale"));
+  blocked.storage.set("visits", seeded);
+  const held = holdStorageLock(blocked.access);
+  await held.taken;
+  const blockedClear = blocked.store.clearVisits().then(
+    () => false,
+    () => true,
+  );
+  for (let i = 0; i < 10; i++) await flush();
+  blocked.access.invalidateData();
+  await held.release();
+  const clearRejected = await blockedClear;
+  assert(
+    clearRejected && blocked.storage.get("visits") === seeded,
+    "a clear waiting on the storage lock is cancelled by a reset it did not see",
+  );
+}
+
+async function rankingWriteChecks(
+  assert: (condition: boolean, label: string) => void,
+  root: string,
+) {
+  console.log("\n=== abbreviation, pin and search writes ===");
+  const files = visitFixture(path.join(root, "ranking"));
+  const { openedPath, otherPath, aliasPath, opened, other } = files;
+
+  const abbreviations = storeAt(path.join(root, "ranking", "abbrev"));
+  const learned = await abbreviations.store.recordAbbreviation(
+    "  GDoc  ",
+    aliasPath,
+  );
+  assert(
+    JSON.stringify(learned) === JSON.stringify({ gdoc: { [opened]: 1 } }) &&
+      abbreviations.storage.get("abbreviations") === JSON.stringify(learned),
+    "a first abbreviation is stored trimmed, lower case and canonical",
+  );
+  const reinforced = await abbreviations.store.recordAbbreviation(
+    "gdoc",
+    openedPath,
+  );
+  assert(
+    reinforced.gdoc?.[opened] === 2 &&
+      Object.keys(reinforced.gdoc ?? {}).length === 1,
+    "learning the same pairing again reinforces the single entry",
+  );
+  const secondTarget = await abbreviations.store.recordAbbreviation(
+    "gdoc",
+    otherPath,
+  );
+  assert(
+    secondTarget.gdoc?.[opened] === 2 && secondTarget.gdoc?.[other] === 1,
+    "a second target for one query is learned alongside the first",
+  );
+
+  const untouched = abbreviations.storage.get("abbreviations");
+  // Rewriting the same value is still a write, so watch the keys, not the value.
+  const writes: string[] = [];
+  abbreviations.writing.before = async (key: string) => {
+    writes.push(key);
+  };
+  for (const blank of ["", "   ", "\t\n"]) {
+    writes.length = 0;
+
+    const unchanged = await abbreviations.store.recordAbbreviation(
+      blank,
+      openedPath,
+    );
+
+    assert(
+      JSON.stringify(unchanged) === untouched &&
+        abbreviations.storage.get("abbreviations") === untouched &&
+        writes.length === 0,
+      `an abbreviation for the query ${JSON.stringify(blank)} is not learned`,
+    );
+  }
+  abbreviations.writing.before = async () => {};
+  const blankOnly = storeAt(path.join(root, "ranking", "abbrev-blank"));
+  const nothingLearned = await blankOnly.store.recordAbbreviation(
+    "   ",
+    openedPath,
+  );
+  assert(
+    Object.keys(nothingLearned).length === 0 &&
+      !blankOnly.storage.has("abbreviations"),
+    "a blank query against an empty store learns nothing and writes nothing",
+  );
+  const abbrevGeneration = abbreviations.access.dataGeneration();
+  abbreviations.access.invalidateData();
+  const abbrevRefused = await abbreviations.store
+    .recordAbbreviation("gdoc", openedPath, abbrevGeneration)
+    .then(
+      () => false,
+      () => true,
+    );
+  assert(
+    abbrevRefused && abbreviations.storage.get("abbreviations") === untouched,
+    "an abbreviation chosen before a reset cannot land afterwards",
+  );
+
+  const pinCases: {
+    label: string;
+    stored: string | undefined;
+    target: string;
+    next: string[];
+  }[] = [
+    {
+      label: "toggling a path with nothing stored pins it",
+      stored: undefined,
+      target: openedPath,
+      next: [opened],
+    },
+    {
+      label: "toggling a pinned path unpins it",
+      stored: JSON.stringify([opened]),
+      target: openedPath,
+      next: [],
+    },
+    {
+      label: "toggling an alias of a pinned path unpins the canonical entry",
+      stored: JSON.stringify([opened]),
+      target: aliasPath,
+      next: [],
+    },
+    {
+      label: "toggling a new path appends it after the existing pins",
+      stored: JSON.stringify([other]),
+      target: openedPath,
+      next: [other, opened],
+    },
+    {
+      label: "toggling against malformed stored pins starts a fresh list",
+      stored: "{not json",
+      target: openedPath,
+      next: [opened],
+    },
+    {
+      label: "toggling against a non-array pin value starts a fresh list",
+      stored: '"pinned"',
+      target: openedPath,
+      next: [opened],
+    },
+    {
+      label: "toggling drops non-string entries from the stored pins",
+      stored: JSON.stringify([7, opened]),
+      target: otherPath,
+      next: [opened, other],
+    },
+  ];
+  const pins = storeAt(path.join(root, "ranking", "pins"));
+  for (const item of pinCases) {
+    if (item.stored === undefined) pins.storage.delete("pins");
+    else pins.storage.set("pins", item.stored);
+
+    const next = await pins.store.togglePin(item.target);
+
+    assert(
+      JSON.stringify(next) === JSON.stringify(item.next) &&
+        pins.storage.get("pins") === JSON.stringify(item.next),
+      item.label,
+    );
+  }
+
+  const suspendedPin = storeAt(path.join(root, "ranking", "pins-stale"));
+  const pinned = JSON.stringify([other]);
+  suspendedPin.storage.set("pins", pinned);
+  let resumePin!: () => void;
+  let beganPin!: () => void;
+  const pinRead = new Promise<void>((resolve) => {
+    beganPin = resolve;
+  });
+  suspendedPin.reading.before = async (key: string) => {
+    if (key !== "pins") return;
+    beganPin();
+    await new Promise<void>((resolve) => {
+      resumePin = resolve;
+    });
+  };
+  const stalePin = suspendedPin.store.togglePin(openedPath).then(
+    () => false,
+    () => true,
+  );
+  await pinRead;
+  suspendedPin.access.invalidateData();
+  resumePin();
+  const pinRejected = await stalePin;
+  suspendedPin.reading.before = async () => {};
+  assert(
+    pinRejected && suspendedPin.storage.get("pins") === pinned,
+    "a pin toggle suspended across a data reset cannot save its old list",
+  );
+
+  const capped = Array.from({ length: 30 }, (_, i) => `query-${i}`);
+  const searchCases: {
+    label: string;
+    stored: string | undefined;
+    query: string;
+    next: string[];
+    writes: boolean;
+  }[] = [
+    {
+      label: "the first recorded search is the whole history",
+      stored: undefined,
+      query: "report",
+      next: ["report"],
+      writes: true,
+    },
+    {
+      label: "a repeated search moves to the front without duplicating",
+      stored: JSON.stringify(["alpha", "report", "beta"]),
+      query: "  report  ",
+      next: ["report", "alpha", "beta"],
+      writes: true,
+    },
+    {
+      label: "a history at the cap drops its oldest query",
+      stored: JSON.stringify(capped),
+      query: "newest",
+      next: ["newest", ...capped.slice(0, 29)],
+      writes: true,
+    },
+    {
+      label: "malformed stored history starts fresh",
+      stored: "{not json",
+      query: "report",
+      next: ["report"],
+      writes: true,
+    },
+    {
+      label: "a blank search leaves a stored history untouched",
+      stored: JSON.stringify(["alpha"]),
+      query: "   ",
+      next: ["alpha"],
+      writes: true,
+    },
+    {
+      label: "a blank search against nothing stored writes nothing",
+      stored: undefined,
+      query: "   ",
+      next: [],
+      writes: false,
+    },
+  ];
+  const searches = storeAt(path.join(root, "ranking", "searches"));
+  for (const item of searchCases) {
+    if (item.stored === undefined) searches.storage.delete("searches");
+    else searches.storage.set("searches", item.stored);
+
+    const next = await searches.store.recordSearch(item.query);
+
+    assert(
+      JSON.stringify(next) === JSON.stringify(item.next) &&
+        searches.storage.has("searches") === item.writes &&
+        (!item.writes ||
+          searches.storage.get("searches") === JSON.stringify(item.next)),
+      item.label,
+    );
+  }
+}
+
+async function indexSettingsStoreChecks(
+  assert: (condition: boolean, label: string) => void,
+  root: string,
+) {
+  console.log("\n=== index settings storage ===");
+  const test = storeAt(path.join(root, "index-settings-store"));
+  const { DEFAULT_SETTINGS, SETTINGS_KEY, serializeSettings } =
+    test.settingsLogic;
+  type Settings = import("../src/lib/index-settings").IndexSettings;
+  const same = (a: Settings, b: Settings) =>
+    a.scopes.join("\u0000") === b.scopes.join("\u0000") &&
+    a.patterns.join("\u0000") === b.patterns.join("\u0000") &&
+    a.includeDrive === b.includeDrive &&
+    a.includeHidden === b.includeHidden &&
+    a.useIgnoreFiles === b.useIgnoreFiles;
+  const custom: Settings = {
+    scopes: ["/Users/someone/Reports"],
+    patterns: ["*.log"],
+    includeDrive: false,
+    includeHidden: true,
+    useIgnoreFiles: true,
+  };
+
+  const loadCases: {
+    label: string;
+    stored: string | undefined;
+    expected: Settings;
+  }[] = [
+    {
+      label: "absent stored settings load as the defaults",
+      stored: undefined,
+      expected: DEFAULT_SETTINGS,
+    },
+    {
+      label: "an empty stored value loads as the defaults",
+      stored: "",
+      expected: DEFAULT_SETTINGS,
+    },
+    {
+      label: "malformed stored json loads as the defaults",
+      stored: '{"scopes":',
+      expected: DEFAULT_SETTINGS,
+    },
+    {
+      label: "a stored number loads as the defaults",
+      stored: "42",
+      expected: DEFAULT_SETTINGS,
+    },
+    {
+      label: "a stored null loads as the defaults",
+      stored: "null",
+      expected: DEFAULT_SETTINGS,
+    },
+    {
+      label: "valid stored settings load back exactly as written",
+      stored: serializeSettings(custom),
+      expected: custom,
+    },
+    {
+      // A truncated or hand-edited file must not load as nothing to index.
+      label: "stored settings with no fields fall back per field",
+      stored: "{}",
+      expected: DEFAULT_SETTINGS,
+    },
+    {
+      // Distinct from the case above: emptied on purpose, so it stays empty.
+      label:
+        "stored empty lists stay empty, because removing every scope means it",
+      stored: JSON.stringify({ scopes: [], patterns: [] }),
+      expected: {
+        scopes: [],
+        patterns: [],
+        includeDrive: DEFAULT_SETTINGS.includeDrive,
+        includeHidden: DEFAULT_SETTINGS.includeHidden,
+        useIgnoreFiles: DEFAULT_SETTINGS.useIgnoreFiles,
+      },
+    },
+    {
+      label:
+        "a non-list scopes field falls back rather than emptying the scope",
+      stored: JSON.stringify({ scopes: "/not/a/list" }),
+      expected: DEFAULT_SETTINGS,
+    },
+    {
+      label: "stored lists lose their blank, duplicate and non-string entries",
+      stored: JSON.stringify({
+        scopes: ["/a", "  ", "/a", 7, "/b"],
+        patterns: ["*.log", "*.log"],
+      }),
+      expected: {
+        scopes: ["/a", "/b"],
+        patterns: ["*.log"],
+        includeDrive: DEFAULT_SETTINGS.includeDrive,
+        includeHidden: DEFAULT_SETTINGS.includeHidden,
+        useIgnoreFiles: DEFAULT_SETTINGS.useIgnoreFiles,
+      },
+    },
+  ];
+  for (const item of loadCases) {
+    if (item.stored === undefined) test.storage.delete(SETTINGS_KEY);
+    else test.storage.set(SETTINGS_KEY, item.stored);
+
+    const loaded = await test.settings.loadIndexSettings();
+
+    assert(same(loaded, item.expected), item.label);
+  }
+
+  test.storage.set(SETTINGS_KEY, serializeSettings(custom));
+  test.reading.before = async (key: string) => {
+    if (key === SETTINGS_KEY) throw new Error("Synthetic storage failure");
+  };
+  const afterReadFailure = await test.settings.loadIndexSettings().then(
+    (settings) => settings,
+    () => undefined,
+  );
+  test.reading.before = async () => {};
+  assert(
+    afterReadFailure !== undefined && same(afterReadFailure, DEFAULT_SETTINGS),
+    "a settings read that throws loads the defaults rather than failing",
+  );
+
+  const fresh = storeAt(path.join(root, "index-settings-save"));
+  const saved = await fresh.settings.saveIndexSettings(custom);
+  assert(
+    saved && fresh.storage.get(SETTINGS_KEY) === serializeSettings(custom),
+    "saving into an empty store reports success and writes the settings",
+  );
+  const widened: Settings = { ...custom, scopes: [...custom.scopes, "/extra"] };
+  const resaved = await fresh.settings.saveIndexSettings(widened);
+  assert(
+    resaved && fresh.storage.get(SETTINGS_KEY) === serializeSettings(widened),
+    "saving again replaces the stored settings",
+  );
+  const bogus = await fresh.settings.saveIndexSettings(
+    custom,
+    "not-a-generation",
+  );
+  assert(
+    bogus === "reset" &&
+      fresh.storage.get(SETTINGS_KEY) === serializeSettings(widened),
+    "a save against an unknown generation is refused as a reset, not written",
+  );
+  const generation = fresh.access.dataGeneration();
+  fresh.access.invalidateData();
+  const stale = await fresh.settings.saveIndexSettings(custom, generation);
+  assert(
+    stale === "reset" &&
+      fresh.storage.get(SETTINGS_KEY) === serializeSettings(widened),
+    "an edit begun before a reset is refused rather than saved over the reset",
+  );
+
+  const contended = storeAt(path.join(root, "index-settings-contended"));
+  const held = holdStorageLock(contended.access);
+  await held.taken;
+
+  const pending = contended.settings.saveIndexSettings(custom);
+  for (let i = 0; i < 20; i++) await flush();
+  const wroteEarly = contended.storage.has(SETTINGS_KEY);
+  await held.release();
+  const landed = await pending;
+
+  assert(
+    !wroteEarly &&
+      landed &&
+      contended.storage.get(SETTINGS_KEY) === serializeSettings(custom),
+    "a save waits for another storage writer and then lands",
+  );
+
+  contended.writing.before = async (key: string) => {
+    if (key === SETTINGS_KEY) throw new Error("Synthetic storage failure");
+  };
+  const writeFailure = await contended.settings.saveIndexSettings(widened);
+  contended.writing.before = async () => {};
+  assert(
+    writeFailure === "failed" &&
+      contended.storage.get(SETTINGS_KEY) === serializeSettings(custom),
+    "a settings write that throws reports a failure, not a data reset",
+  );
+
+  const resetCases: { label: string; stored: string | undefined }[] = [
+    {
+      label: "resetting stored settings restores the defaults",
+      stored: serializeSettings(custom),
+    },
+    {
+      label: "resetting an empty store writes the defaults",
+      stored: undefined,
+    },
+  ];
+  for (const item of resetCases) {
+    if (item.stored === undefined) test.storage.delete(SETTINGS_KEY);
+    else test.storage.set(SETTINGS_KEY, item.stored);
+
+    const reported = await test.settings.resetIndexSettings();
+
+    assert(
+      reported &&
+        test.storage.get(SETTINGS_KEY) ===
+          serializeSettings(DEFAULT_SETTINGS) &&
+        same(await test.settings.loadIndexSettings(), DEFAULT_SETTINGS),
+      item.label,
+    );
   }
 }

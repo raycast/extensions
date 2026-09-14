@@ -1,25 +1,21 @@
 import fs from "node:fs";
 import { transformSync } from "esbuild";
+import { between, locate, through } from "./source-slice";
 import path from "node:path";
 import * as queryTools from "../src/lib/query";
-import { scoreEntry } from "../src/lib/score";
-import { entryStoragePath } from "../src/lib/entry-identity";
-import {
-  driveIndexCaveat,
-  refreshShortcutIndex,
-  refreshSharedIndex,
-} from "../src/lib/index-refresh";
-import { relativeDepth } from "../src/lib/read-dir";
+import { stepSearchHistory } from "../src/lib/search-history";
+import { rankSources } from "../src/lib/rank-sources";
 import { Entry } from "../src/lib/types";
 import { createRecentValidator } from "../src/lib/recent-validation";
-import { createWorkQueue } from "../src/lib/work-queue";
-import { runSpotlightSearch } from "../src/lib/spotlight";
 import * as searchLimits from "../src/lib/search-limits";
 import { sortChecks } from "./sort-checks";
 import { folderSelectionChecks } from "./folder-selection-checks";
 import { navigationMemoryChecks } from "./navigation-memory-checks";
 import { navigationStackChecks } from "./navigation-stack-checks";
 import { listRenderChecks } from "./list-render-checks";
+import { displayRows } from "../src/lib/display-rows";
+import { folderUsageChecks } from "./folder-usage-checks";
+import { deriveProgress, rowsCanChange } from "../src/lib/progress";
 import * as React from "react";
 import { act, create, ReactTestRenderer } from "react-test-renderer";
 
@@ -28,14 +24,57 @@ export async function browserChecks(
   assert: (ok: boolean, label: string) => void,
 ) {
   await sortChecks(assert);
+  await folderUsageChecks(assert);
   await folderSelectionChecks(assert);
   await listRenderChecks(assert);
   await navigationMemoryChecks(assert);
   await navigationStackChecks(assert);
   const source = fs.readFileSync("src/components/browser.tsx", "utf8");
-  const visibilityCode = source.slice(
-    source.indexOf("  const showHidden ="),
-    source.indexOf("  const scopeController ="),
+  const progressCode = transformSync(
+    between(source, "  const progress = deriveProgress", "  const settling ="),
+    { loader: "ts" },
+  ).code;
+  const readyDeps = {
+    deriveProgress,
+    rankingReady: true,
+    backgroundPending: false,
+    cachedPending: false,
+    cachedPartial: false,
+    dir: "/folder",
+    hiddenOnly: () => false,
+    parsed: { longest: "" },
+    directoryPending: false,
+    visibleFolderError: undefined,
+    pathListing: { omitted: 0 },
+    directoryListing: { entries: [{}], truncated: 0 },
+    hiddenListing: { truncated: 0 },
+    pathQuery: undefined,
+    query: "",
+    searching: false,
+    searchError: undefined,
+    searchPartial: undefined,
+    searchLimitReached: false,
+    minQuery: 3,
+  };
+  const readyProgress = (extra = {}) => {
+    const deps = { ...readyDeps, ...extra };
+    return new Function(
+      ...Object.keys(deps),
+      progressCode + "\nreturn progress;",
+    )(...Object.values(deps));
+  };
+  assert(
+    rowsCanChange(readyProgress({ directoryPending: true })),
+    "folder readiness waits for the initial directory read",
+  );
+  assert(
+    !rowsCanChange(readyProgress()),
+    "a synchronously prepared child snapshot publishes without an extra effect or usage warmup",
+  );
+  const visibilityCode = between(
+    source,
+    "  const showHidden =",
+    "  const scopeController =",
   );
   const visibility = new Function(
     "prefs",
@@ -55,201 +94,199 @@ export async function browserChecks(
     visibility({ showHidden: false }, false, { hidden: true }),
     "dot-prefixed queries still request hidden matches",
   );
-  const setupActionsFile = "src/components/setup-actions.tsx";
-  if (!fs.existsSync(setupActionsFile)) {
-    assert(
-      false,
-      "setup remains available in Actions after the main prompt is dismissed",
-    );
-  } else {
-    type ActionNode = {
-      type: unknown;
-      props: Record<string, unknown>;
-      children: ActionNode[];
-    };
-    const element = (
-      type: unknown,
-      props: Record<string, unknown> | null,
-      ...children: ActionNode[]
-    ): ActionNode => ({ type, props: props ?? {}, children });
-    const renderedModule = {
-      exports: {} as { SetupActions: (props: object) => ActionNode },
-    };
-    const actionCode = transformSync(
-      fs.readFileSync(setupActionsFile, "utf8"),
-      {
-        loader: "tsx",
-        format: "cjs",
-        jsxFactory: "element",
-        jsxFragment: "fragment",
-      },
-    ).code;
-    new Function(
-      "require",
-      "module",
-      "exports",
-      "element",
-      "fragment",
-      actionCode,
-    )(
+  /*
+   * The empty view's action panel, evaluated from source.
+   *
+   * NavigationActions renders nothing at the top level, since there is no
+   * parent to go up to and no start to return to. That made the hidden-file
+   * toggle the first action, so Return toggled hidden files on a screen whose
+   * own message says to rebuild the index.
+   */
+  type ActionNode = {
+    type: unknown;
+    props: Record<string, unknown>;
+    children: ActionNode[];
+  };
+  const element = (
+    type: unknown,
+    props: Record<string, unknown> | null,
+    ...children: ActionNode[]
+  ): ActionNode => ({ type, props: props ?? {}, children });
+  const loadActionComponent = (file: string, name: string) => {
+    const loaded = { exports: {} as Record<string, unknown> };
+    const code = transformSync(fs.readFileSync(file, "utf8"), {
+      loader: "tsx",
+      format: "cjs",
+      jsxFactory: "element",
+      jsxFragment: "fragment",
+    }).code;
+    new Function("require", "module", "exports", "element", "fragment", code)(
       () => ({
         Action: "action",
-        ActionPanel: { Section: "section" },
-        Icon: { Clock: "clock" },
+        Icon: {},
+        Keyboard: { Shortcut: { Common: { MoveUp: {}, Refresh: {} } } },
       }),
-      renderedModule,
-      renderedModule.exports,
+      loaded,
+      loaded.exports,
       element,
       "fragment",
     );
-    const flatten = (node: ActionNode): ActionNode[] =>
-      !node || typeof node !== "object"
-        ? []
-        : [node, ...node.children.flatMap(flatten)];
-    let starts = 0;
-    let stops = 0;
-    const props = {
-      setup: { recents: false, drive: false, hasRun: true },
-      importing: false,
-      start: () => {
-        starts++;
-      },
-      cancel: () => {
-        stops++;
-      },
-      skip: () => {},
-    };
-    const actions = flatten(renderedModule.exports.SetupActions(props));
-    const start = actions.find((node) => node.props.title === "Set Up Search");
-    (start?.props.onAction as (() => void) | undefined)?.();
-    assert(
-      starts === 1,
-      "Actions can start setup again even when no unfinished steps remain",
-    );
-    const runningActions = flatten(
-      renderedModule.exports.SetupActions({ ...props, importing: true }),
-    );
-    const stop = runningActions.find(
-      (node) => node.props.title === "Stop Setup",
-    );
-    (stop?.props.onAction as (() => void) | undefined)?.();
-    assert(
-      stops === 1 &&
-        !runningActions.some((node) => node.props.title === "Set Up Search"),
-      "running setup exposes Stop Setup instead of a duplicate start action",
-    );
-    const partialActions = flatten(
-      renderedModule.exports.SetupActions({
-        ...props,
-        setup: { recents: true, drive: true, hasRun: true },
-      }),
-    );
-    assert(
-      partialActions.some((node) => node.props.title === "Skip Google Drive") &&
-        partialActions.some((node) => node.props.title === "Skip Recent Files"),
-      "unfinished sources can still be skipped from Actions after the main prompt disappears",
-    );
+    return loaded.exports[name];
+  };
+  const render = (node: ActionNode): ActionNode[] =>
+    !node || typeof node !== "object"
+      ? []
+      : typeof node.type === "function"
+        ? render(node.type(node.props))
+        : [node, ...node.children.flatMap(render)];
 
-    // Exercise the setup row's real action composition, not SetupActions alone:
-    // placing an unrelated action before it changes what Return invokes.
-    const loadActionComponent = (file: string, name: string) => {
-      const loaded = { exports: {} as Record<string, unknown> };
-      const code = transformSync(fs.readFileSync(file, "utf8"), {
-        loader: "tsx",
-        format: "cjs",
-        jsxFactory: "element",
-        jsxFragment: "fragment",
-      }).code;
-      new Function("require", "module", "exports", "element", "fragment", code)(
-        () => ({
-          Action: "action",
-          Icon: {},
-          Keyboard: { Shortcut: { Common: { MoveUp: {} } } },
-        }),
-        loaded,
-        loaded.exports,
-        element,
-        "fragment",
-      );
-      return loaded.exports[name];
-    };
-    const setupRowStart = source.indexOf('id="search-setup"');
-    const panelStart = source.indexOf("<ActionPanel>", setupRowStart);
-    const panelEnd = source.indexOf("</ActionPanel>", panelStart);
-    const panelCode = transformSync(
-      `return (${source.slice(panelStart, panelEnd + "</ActionPanel>".length)});`,
-      { loader: "tsx", jsxFactory: "element" },
-    ).code;
-    const render = (node: ActionNode): ActionNode[] =>
-      !node || typeof node !== "object"
-        ? []
-        : typeof node.type === "function"
-          ? render(node.type(node.props))
-          : [node, ...node.children.flatMap(render)];
-    for (const importing of [false, true]) {
-      let started = false;
-      let stopped = false;
-      let toggled = false;
-      const panel = new Function(
-        "element",
-        "ActionPanel",
-        "SetupActions",
+  /*
+   * A list section is never rendered with no rows in it.
+   *
+   * The branch used to choose on `rows`, while the rows themselves were gated
+   * on the view being active. A view on its way out therefore rendered a
+   * section containing nothing: a blank screen, no message, and no empty view
+   * to explain it.
+   */
+  assert(
+    /listView\.kind !== "rows" \? \(/u.test(source) &&
+      /visibleRows: visibleRows\.length/u.test(source),
+    "the branch comes from one decision taken over what will render",
+  );
+  assert(
+    /\{visibleRows\.map\(/u.test(source) &&
+      !/\(searchActive \? renderedRows : \[\]\)\.map/u.test(source),
+    "and the rows rendered are that same value",
+  );
+  assert(
+    !/settling \|\| rows\.length === 0/u.test(source),
+    "rows are not withheld for every settling stage, which blanked the screen for seconds",
+  );
+
+  /*
+   * One panel, used everywhere an empty list can appear.
+   *
+   * The List's own panel applies whenever no row owns one, and it used to be
+   * navigation plus the hidden-file toggle. Navigation renders nothing at the
+   * top level, so that panel was just Toggle Hidden Files, which is what
+   * Return did on the launch screen.
+   */
+  assert(
+    (source.match(/<ActionPanel>/gu) ?? []).length === 1,
+    "browser.tsx declares one action panel, so no site can drift from the chosen order",
+  );
+  assert(
+    (source.match(/actions=\{emptyActions\}/gu) ?? []).length === 2,
+    "the list and the one empty view use it",
+  );
+  assert(
+    !/<ActionPanel>\s*<HiddenFilesAction/u.test(source),
+    "no panel leads with the hidden-file toggle",
+  );
+  /*
+   * A list with no rows always explains itself. The render used to fall
+   * through to nothing while a query was in flight, leaving a blank screen.
+   */
+  assert(
+    !/rows\.length === 0 && \(!searching/u.test(source),
+    "no-rows does not depend on the search state, which used to fall through to nothing",
+  );
+
+  // Anchor on the two shared action declarations the panel reuses, not on the
+  // first <List.EmptyView>. There are two empty views, and slicing from the
+  // first one only found the right panel because that one happened to have
+  // none of its own.
+  const emptyPanelStart = locate(source, "  const rebuildAction = (");
+  const emptyPanelEnd = locate(source, "</ActionPanel>", emptyPanelStart);
+  assert(
+    emptyPanelStart > 0 && emptyPanelEnd > emptyPanelStart,
+    "the empty view's shared action panel is still where the test expects it",
+  );
+  const emptyPanelCode = transformSync(
+    `${source.slice(
+      emptyPanelStart,
+      emptyPanelEnd + "</ActionPanel>".length,
+    )});\nreturn emptyActions;`,
+    { loader: "tsx", jsxFactory: "element" },
+  ).code;
+  for (const noIndex of [true, false]) {
+    const emptyPanel = new Function(
+      "element",
+      "ActionPanel",
+      "Action",
+      "Icon",
+      "Keyboard",
+      "NavigationActions",
+      "HiddenFilesAction",
+      "SearchHistoryActions",
+      "rowHandlers",
+      "noIndex",
+      emptyPanelCode,
+    )(
+      element,
+      "panel",
+      // An object, not a string: the panel reads Action.Style.Destructive.
+      { Style: { Destructive: "destructive" } },
+      {},
+      { Shortcut: { Common: { Refresh: {} } } },
+      loadActionComponent(
+        "src/components/navigation-actions.tsx",
         "NavigationActions",
+      ),
+      loadActionComponent(
+        "src/components/hidden-files-action.tsx",
         "HiddenFilesAction",
-        "setupActions",
-        "rowHandlers",
-        panelCode,
-      )(
-        element,
-        "panel",
-        renderedModule.exports.SetupActions,
-        loadActionComponent(
-          "src/components/navigation-actions.tsx",
-          "NavigationActions",
-        ),
-        loadActionComponent(
-          "src/components/hidden-files-action.tsx",
-          "HiddenFilesAction",
-        ),
-        {
-          ...props,
-          importing,
-          start: () => {
-            started = true;
-          },
-          cancel: () => {
-            stopped = true;
-          },
-        },
-        {
-          onToggleHidden: () => {
-            toggled = true;
-          },
-        },
-      );
-      const rowActions = render(panel).filter((node) => node.type === "action");
-      (rowActions[0]?.props.onAction as (() => void) | undefined)?.();
+      ),
+      () => null,
+      {
+        onUp: undefined,
+        onReturnToStart: undefined,
+        onToggleHidden: () => {},
+        onRebuildIndex: () => {},
+        onRefresh: () => {},
+        onEraseEverything: () => {},
+        onHistoryBack: () => {},
+        onHistoryForward: () => {},
+      },
+      noIndex,
+    );
+    // Filter on the shape rather than the node type: these come from two
+    // differently loaded Action bindings. Requiring onAction keeps section
+    // headers, which also carry a title, out of the ordering check.
+    const emptyActions = render(emptyPanel).filter(
+      (node) =>
+        typeof node.props?.title === "string" &&
+        typeof node.props?.onAction === "function",
+    );
+    const titles = emptyActions.map((node) => node.props.title);
+    assert(
+      titles[0] !== "Toggle Hidden Files",
+      `the empty view's first action is not the hidden-file toggle (noIndex=${noIndex}, first=${String(titles[0])})`,
+    );
+    assert(
+      titles.includes("Rebuild Search Index") &&
+        titles.includes("Toggle Hidden Files") &&
+        titles.includes("Refresh"),
+      "the empty view keeps rebuilding, refreshing and the hidden-file toggle available",
+    );
+    assert(
+      new Set(titles).size === titles.length,
+      `no action is offered twice (${titles.join(", ")})`,
+    );
+    if (!noIndex)
       assert(
-        (importing ? stopped && !started : started && !stopped) && !toggled,
-        importing
-          ? "Return on the running setup row stops setup, not hidden-file visibility"
-          : "Return on Set Up Search starts setup, not hidden-file visibility",
+        titles[0] === "Refresh",
+        `with a working index, Return retries cheaply (first=${String(titles[0])})`,
       );
-      const toggle = rowActions.find(
-        (node) => node.props.title === "Toggle Hidden Files",
-      );
-      (toggle?.props.onAction as (() => void) | undefined)?.();
+    if (noIndex)
       assert(
-        toggled,
-        "the setup row retains the hidden-files action as a secondary option",
+        titles[0] === "Rebuild Search Index",
+        `with no index, Return rebuilds it, matching what the empty view says (first=${String(titles[0])})`,
       );
-    }
   }
+
   const inputCode = transformSync(
-    source.slice(
-      source.indexOf("  const onSearchTextChange ="),
-      source.indexOf("  const rankingReady ="),
-    ),
+    between(source, "  const onSearchTextChange =", "  const rankingReady ="),
     { loader: "ts" },
   ).code;
   const inputController = new AbortController();
@@ -279,10 +316,7 @@ export async function browserChecks(
     "editing the query cancels obsolete work before rendering the replacement",
   );
   const programmaticCode = transformSync(
-    source.slice(
-      source.indexOf("  const setQueryProgrammatically ="),
-      source.indexOf("  const parent ="),
-    ),
+    between(source, "  const setQueryProgrammatically =", "  const parent ="),
     { loader: "ts" },
   ).code;
   let historyIndex = 0;
@@ -306,11 +340,41 @@ export async function browserChecks(
     historyIndex === -1,
     "the first edit after recalling history resets its cursor",
   );
+  for (const direction of ["back", "forward"] as const) {
+    const empty = stepSearchHistory([], -1, direction);
+    assert(
+      empty.kind === "refuse" &&
+        empty.title === "No earlier searches yet" &&
+        (direction === "back") === (empty.message !== undefined),
+      `${direction} through an empty history refuses, and only Back explains how history is earned`,
+    );
+  }
+  const oldest = stepSearchHistory(["a", "b"], 1, "back");
+  assert(
+    oldest.kind === "refuse" && oldest.title === "That is the oldest search",
+    "Back off the end of history refuses rather than wrapping",
+  );
+  const newest = stepSearchHistory(["a", "b"], 0, "forward");
+  assert(
+    newest.kind === "clear",
+    "Forward off the newest search returns to an empty query instead of refusing",
+  );
+  const older = stepSearchHistory(["a", "b"], 0, "back");
+  assert(
+    older.kind === "recall" && older.index === 1 && older.query === "b",
+    "Back walks towards older searches",
+  );
+  const newer = stepSearchHistory(["a", "b"], 1, "forward");
+  assert(
+    newer.kind === "recall" && newer.index === 0 && newer.query === "a",
+    "Forward walks back towards newer ones",
+  );
   const historyBackCode = transformSync(
-    `return ({${source.slice(source.indexOf("      onHistoryBack:"), source.indexOf("      onHistoryForward:"))}}).onHistoryBack;`,
+    `return ({${between(source, "      onHistoryBack:", "      onHistoryForward:")}}).onHistoryBack;`,
     { loader: "ts" },
   ).code;
   new Function(
+    "stepSearchHistory",
     "history",
     "historyIndex",
     "setHistoryIndex",
@@ -319,6 +383,7 @@ export async function browserChecks(
     "Toast",
     historyBackCode,
   )(
+    stepSearchHistory,
     ["recent"],
     historyIndex,
     historyDependencies.setHistoryIndex,
@@ -331,187 +396,9 @@ export async function browserChecks(
     "History Back after an edit recalls the newest search, even with only one entry",
   );
 
-  const refreshCode = transformSync(
-    `return ({${source.slice(source.indexOf("      onReindexShortcuts:"), source.indexOf("      onToggleDetail:"))}}).onReindexShortcuts;`,
-    { loader: "ts" },
-  ).code;
-  const refreshToast = { style: "", title: "", message: "" };
-  let displayedShared = ["/previous"];
-  let canSaveShared = false;
-  const refreshDependencies = {
-    withIndexingLock: async (
-      work: (assertOwned: () => void) => Promise<void>,
-    ) => work(() => {}),
-    showToast: async (options: object) => Object.assign(refreshToast, options),
-    Toast: {
-      Style: { Animated: "animated", Failure: "failure", Success: "success" },
-    },
-    loadShortcutIndex: async () => ({ shortcuts: [], partial: false }),
-    scanShortcuts: async () => ({
-      shortcuts: [],
-      available: true,
-      partial: false,
-    }),
-    refreshShortcutIndex,
-    refreshSharedIndex,
-    saveShortcutIndex: async () => true,
-    setShortcuts: () => {},
-    setShortcutsScannedAt: () => {},
-    loadSharedIndex: () => ({
-      paths: ["/previous"],
-      available: true,
-      partial: false,
-    }),
-    scanSharedFolders: async () => ({
-      paths: ["/unsaved"],
-      available: true,
-      partial: false,
-    }),
-    saveSharedIndex: () => canSaveShared,
-    setSharedIndex: (paths: string[]) => {
-      displayedShared = paths;
-    },
-    setDriveIndexMessage: () => {},
-    driveIndexCaveat: () => undefined,
-  };
-  await new Function(...Object.keys(refreshDependencies), refreshCode)(
-    ...Object.values(refreshDependencies),
-  )();
-  assert(
-    refreshToast.style === "failure",
-    "refresh reports shared-index save failures instead of success",
-  );
-  assert(
-    displayedShared[0] === "/previous",
-    "refresh keeps displayed saved results when the shared index cannot be saved",
-  );
-  canSaveShared = true;
-  await new Function(...Object.keys(refreshDependencies), refreshCode)(
-    ...Object.values(refreshDependencies),
-  )();
-  assert(
-    refreshToast.style === "success" && displayedShared[0] === "/unsaved",
-    "a successful refresh still publishes the newly saved shared index",
-  );
-  const previousShortcuts = {
-    shortcuts: [{ path: "/shortcut", name: "shortcut", target: "/target" }],
-    available: true,
-    partial: true,
-    scannedAt: 1,
-  };
-  const previousShared = {
-    paths: ["/previous", "/other"],
-    available: true,
-    partial: true,
-    scannedAt: 1,
-  };
-  let shortcutWrites = 0;
-  let sharedWrites = 0;
-  let displayedShortcuts: unknown;
-  let displayedTimestamp: number | undefined;
-  let savedShortcutPaths: string[] = [];
-  let savedSharedPaths: string[] = [];
-  const partialRefreshDependencies = {
-    ...refreshDependencies,
-    loadShortcutIndex: async () => previousShortcuts,
-    scanShortcuts: async () => ({
-      ...previousShortcuts,
-      shortcuts: [{ path: "/new", name: "new", target: "/new-target" }],
-      scannedAt: 2,
-    }),
-    loadSharedIndex: () => previousShared,
-    scanSharedFolders: async () => ({
-      ...previousShared,
-      paths: ["/new"],
-      scannedAt: 2,
-    }),
-    saveShortcutIndex: async (index: typeof previousShortcuts) => {
-      shortcutWrites++;
-      savedShortcutPaths = index.shortcuts.map((item) => item.path);
-      return true;
-    },
-    saveSharedIndex: (index: typeof previousShared) => {
-      sharedWrites++;
-      savedSharedPaths = index.paths;
-      return true;
-    },
-    setShortcuts: (shortcuts: unknown) => {
-      displayedShortcuts = shortcuts;
-    },
-    setShortcutsScannedAt: (timestamp: number) => {
-      displayedTimestamp = timestamp;
-    },
-  };
-  await new Function(...Object.keys(partialRefreshDependencies), refreshCode)(
-    ...Object.values(partialRefreshDependencies),
-  )();
-  assert(
-    shortcutWrites === 1 &&
-      sharedWrites === 1 &&
-      savedShortcutPaths.join(",") === "/shortcut,/new" &&
-      savedSharedPaths.join(",") === "/previous,/other,/new" &&
-      JSON.stringify(displayedShortcuts) ===
-        JSON.stringify([
-          ...previousShortcuts.shortcuts,
-          { path: "/new", name: "new", target: "/new-target" },
-        ]) &&
-      displayedTimestamp === 2 &&
-      displayedShared.join(",") === "/previous,/other,/new",
-    "short action-panel refresh merges disjoint partial paths into storage and display",
-  );
-  assert(
-    /2 shortcuts/.test(refreshToast.message) &&
-      /3 items/.test(refreshToast.title),
-    "short action-panel refresh reports counts from the merged indexes",
-  );
-  const beforeFailedRefresh = displayedShortcuts;
-  const saveFailedDependencies = {
-    ...partialRefreshDependencies,
-    saveShortcutIndex: async () => false,
-  };
-  await new Function(...Object.keys(saveFailedDependencies), refreshCode)(
-    ...Object.values(saveFailedDependencies),
-  )();
-  assert(
-    refreshToast.style === "failure" &&
-      displayedShortcuts === beforeFailedRefresh &&
-      sharedWrites === 1,
-    "action-panel shortcut save failures preserve the displayed index and stop before updating shared paths",
-  );
-  for (const unavailable of [true, false]) {
-    let notice: string | undefined;
-    const failedSharedDependencies = {
-      ...partialRefreshDependencies,
-      driveIndexCaveat,
-      loadShortcutIndex: async () => ({ ...previousShortcuts, partial: false }),
-      scanShortcuts: async () => ({
-        ...previousShortcuts,
-        partialReason: "time-limit" as const,
-      }),
-      loadSharedIndex: () => ({ ...previousShared, partial: false }),
-      scanSharedFolders: async () => ({
-        ...previousShared,
-        available: !unavailable,
-      }),
-      saveSharedIndex: () => false,
-      setDriveIndexMessage: (message: string | undefined) => {
-        notice = message;
-      },
-    };
-    await new Function(...Object.keys(failedSharedDependencies), refreshCode)(
-      ...Object.values(failedSharedDependencies),
-    )();
-    assert(
-      refreshToast.style === "failure" &&
-        notice === "Google Drive shortcut indexing stopped at the time limit",
-      `${unavailable ? "unavailable" : "unsaved"} shared refresh still publishes the saved shortcut index's new completeness notice`,
-    );
-  }
   let target: { dir?: string; initialSelectionPath?: string } = {};
-  const upStart = source.indexOf("      onUp:");
-  const upEnd = source.indexOf("      onHistoryBack:", upStart);
   const upCode = transformSync(
-    `return ({${source.slice(upStart, upEnd)}}).onUp;`,
+    `return ({${between(source, "      onUp:", "      onHistoryBack:")}}).onUp;`,
     { loader: "ts" },
   ).code;
   const onUp = new Function("dir", "parent", "navigate", upCode)(
@@ -526,16 +413,21 @@ export async function browserChecks(
     target.dir === "/foo" && target.initialSelectionPath === "/foo/baz",
     "Command-Left opens the parent with the current folder selected",
   );
-  const discoveryStart = source.indexOf("  // Rank paths first");
-  const discoveryEnd = source.indexOf(
-    "  /** Pinned, frequently used",
-    discoveryStart,
-  );
+  /*
+   * The indexed search effect, evaluated from the real source.
+   *
+   * The effect is deliberately synchronous inside a debounce timer, so these
+   * checks are about one property: exactly one completed list reaches the view
+   * per settled query, and no older query can ever overwrite a newer one.
+   */
   const discoveryCode = transformSync(
-    source.slice(discoveryStart, discoveryEnd),
+    between(
+      source,
+      "  /**\n   * The indexed name search.",
+      "  /** Pinned, frequently used",
+    ),
     { loader: "ts" },
   ).code;
-  const paths = Array.from({ length: 125 }, (_, i) => `/foo/bar${i}.txt`);
   const makeEntry = (full: string): Entry => ({
     path: full,
     name: path.basename(full),
@@ -545,116 +437,325 @@ export async function browserChecks(
     birthtimeMs: 0,
     size: 1,
   });
-  let liveFound: Entry[] = [];
-  let stopDiscovery: (() => void) | undefined;
-  const queryController = new AbortController();
-  const discoveryDependencies = {
-    ...searchLimits,
-    createWorkQueue,
-    setMaxListeners: () => {},
-    ...queryTools,
-    path,
-    os: { homedir: () => "/foo" },
-    useEffect: (run: () => (() => void) | undefined) => {
-      stopDiscovery = run();
-    },
-    setTimeout: (run: () => void) => setTimeout(run, 0),
-    clearTimeout,
-    setFound: (value: Entry[] | ((previous: Entry[]) => Entry[])) => {
-      liveFound = typeof value === "function" ? value(liveFound) : value;
-    },
-    setFoundUsagePending: () => {},
-    setFoundUsageError: () => {},
-    setFoundUsagePartial: () => {},
-    setSearchError: () => {},
-    setSearchPartial: () => {},
-    setSearching: () => {},
-    setResultsTruncated: () => {},
-    setDiscovered: () => {},
-    pathQuery: undefined,
-    parsed: queryTools.parseQuery("bar"),
-    query: "bar",
-    minQuery: 3,
-    dir: undefined,
-    showHidden: false,
-    reloadKey: 0,
-    visits: {},
-    tick: 0,
-    queryController,
-    searchActive: true,
-    dataGeneration: () => "before",
-    DEBOUNCE_MS: 0,
-    SHORTLIST: 60,
-    coarseScore: () => 0,
-    relativeDepth,
-    isUnindexedScope: () => false,
-    statEntry: makeEntry,
-    validateRecentEntries: createRecentValidator(async (full) =>
-      makeEntry(full),
-    ),
-    readUsageMetaResult: async () => ({ meta: new Map(), complete: true }),
-    rememberDiscovered: async () => [],
-    searchPathResult: async (
-      _query: string,
-      opts: { onBatch?: (paths: string[]) => Promise<void> },
-    ) => {
-      if (opts.onBatch) {
-        for (let i = 0; i < paths.length; i += 60)
-          await opts.onBatch(paths.slice(i, i + 60));
-        return { paths: [], truncated: false };
-      }
-      return { paths, truncated: false };
-    },
-  };
-  // Real React replays startup effects in Strict Mode, as Raycast develop does.
+
+  type IndexCall = { query: string; showHidden: boolean; limit?: number };
+  type Published = { found: Entry[]; publications: number };
+
+  /** Drive the effect once with a controllable fake index. */
+  function runIndexEffect(options: {
+    parsed: queryTools.ParsedQuery;
+    dir?: string;
+    pathQuery?: unknown;
+    showHidden?: boolean;
+    searchActive?: boolean;
+    controller?: AbortController;
+    result?: (call: IndexCall) => {
+      status: string;
+      entries: Entry[];
+      truncated?: boolean;
+      tooShort?: boolean;
+      error?: string;
+    };
+  }) {
+    const calls: IndexCall[] = [];
+    const delays: number[] = [];
+    const published: Published = { found: [], publications: 0 };
+    const state = {
+      searching: [] as boolean[],
+      truncated: [] as boolean[],
+      tooShort: [] as boolean[],
+      status: [] as string[],
+      error: [] as (string | undefined)[],
+    };
+    let stop: (() => void) | undefined;
+    const dependencies = {
+      ...searchLimits,
+      ...queryTools,
+      useEffect: (run: () => (() => void) | undefined) => {
+        stop = run();
+      },
+      setTimeout: (run: () => void, delay: number) => {
+        delays.push(delay);
+        return setTimeout(run, 0);
+      },
+      clearTimeout,
+      indexFile: "/support/file-index.sqlite",
+      dir: options.dir,
+      pathQuery: options.pathQuery,
+      parsed: options.parsed,
+      showHidden: options.showHidden ?? false,
+      reloadKey: 0,
+      queryKey: JSON.stringify(options.parsed.tokens),
+      searchActive: options.searchActive ?? true,
+      queryController: options.controller ?? new AbortController(),
+      setFound: (value: Entry[]) => {
+        published.found = value;
+        if (value.length > 0) published.publications += 1;
+      },
+      setSearching: (value: boolean) => state.searching.push(value),
+      setResultsTruncated: (value: boolean) => state.truncated.push(value),
+      setIndexTooShort: (value: boolean) => state.tooShort.push(value),
+      setIndexStatus: (value: string) => state.status.push(value),
+      setSearchError: (value?: string) => state.error.push(value),
+      setSearchPartial: () => {},
+      searchIndex: (
+        _file: string,
+        parsed: queryTools.ParsedQuery,
+        opts: { showHidden?: boolean; limit?: number },
+      ) => {
+        const call = {
+          query: parsed.tokens.join(" "),
+          showHidden: opts.showHidden ?? false,
+          limit: opts.limit,
+        };
+        calls.push(call);
+        return (
+          options.result?.(call) ?? {
+            status: "ready",
+            entries: [makeEntry("/idx/one.txt")],
+            truncated: false,
+            tooShort: false,
+          }
+        );
+      },
+    };
+    const debounceCode = through(source, "const INDEX_DEBOUNCE_MS =", ";");
+    new Function(...Object.keys(dependencies), debounceCode + discoveryCode)(
+      ...Object.values(dependencies),
+    );
+    return { calls, delays, published, state, stop: () => stop?.() };
+  }
+
+  const settleTimers = () =>
+    new Promise<void>((resolve) => setTimeout(resolve, 20));
+
+  // One settled query publishes exactly one complete list.
+  const single = runIndexEffect({ parsed: queryTools.parseQuery("annual") });
+  await settleTimers();
+  assert(
+    single.delays.length === 1 && single.delays[0] <= 20,
+    "indexed search reserves at most 20ms of the input-to-display budget for debounce",
+  );
+  assert(
+    single.calls.length === 1 && single.calls[0].limit === 50,
+    "a settled query asks the index once for at most 50 candidates",
+  );
+  assert(
+    single.published.publications === 1 && single.published.found.length === 1,
+    "the completed list is published once, not accumulated in batches",
+  );
+  assert(
+    single.calls[0].limit === searchLimits.LIVE_RESULTS,
+    "the candidate limit passed to the index is the ranked-result cap",
+  );
+  assert(
+    single.state.searching[0] === true &&
+      single.state.searching.at(-1) === false,
+    "the search is reported running and then finished",
+  );
+  single.stop();
+
+  // Rapid typing: only the final query reaches the index.
+  const burst: ReturnType<typeof runIndexEffect>[] = [];
+  for (const text of ["ann", "annu", "annua", "annual"]) {
+    const run = runIndexEffect({ parsed: queryTools.parseQuery(text) });
+    burst.push(run);
+    // Each keystroke replaces the effect before its timer fires.
+    if (text !== "annual") run.stop();
+  }
+  await settleTimers();
+  assert(
+    burst.slice(0, -1).every((run) => run.calls.length === 0),
+    "a superseded keystroke never reaches the index",
+  );
+  assert(
+    burst.at(-1)!.calls.length === 1 &&
+      burst.at(-1)!.calls[0].query === "annual",
+    "only the final query in a burst is executed",
+  );
+  burst.at(-1)!.stop();
+
+  // A cancelled query publishes nothing, even if its timer has been scheduled.
+  const cancelController = new AbortController();
+  const cancelled = runIndexEffect({
+    parsed: queryTools.parseQuery("annual"),
+    controller: cancelController,
+  });
+  cancelController.abort();
+  await settleTimers();
+  assert(
+    cancelled.calls.length === 0 && cancelled.published.publications === 0,
+    "a query cancelled before its timer fires neither runs nor publishes",
+  );
+  cancelled.stop();
+
+  /*
+   * Staleness by construction: the effect's cleanup runs before the next
+   * effect's body, and the query is synchronous, so there is no point at which
+   * an older query holds a result it could still publish.
+   */
+  const stale = runIndexEffect({ parsed: queryTools.parseQuery("older") });
+  stale.stop();
+  const fresh = runIndexEffect({ parsed: queryTools.parseQuery("newer") });
+  await settleTimers();
+  assert(
+    stale.published.publications === 0,
+    "a stopped older query cannot publish after a newer one starts",
+  );
+  assert(
+    fresh.published.found.length === 1 && fresh.calls[0].query === "newer",
+    "the newer query's list is the one that reaches the view",
+  );
+  fresh.stop();
+
+  // Truncation at the candidate cap is reported rather than hidden.
+  const capped = runIndexEffect({
+    parsed: queryTools.parseQuery("bulk"),
+    result: () => ({
+      status: "ready",
+      entries: Array.from({ length: searchLimits.LIVE_RESULTS }, (_, i) =>
+        makeEntry(`/idx/bulk-${i}.txt`),
+      ),
+      truncated: true,
+    }),
+  });
+  await settleTimers();
+  assert(
+    capped.published.found.length === searchLimits.LIVE_RESULTS &&
+      capped.state.truncated.includes(true),
+    "a result set at the candidate cap is published and reported as truncated",
+  );
+  capped.stop();
+
+  // A failed index is reported as an error, not as an empty result set.
+  const failed = runIndexEffect({
+    parsed: queryTools.parseQuery("annual"),
+    result: () => ({
+      status: "failed",
+      entries: [],
+      error: "database disk image is malformed",
+    }),
+  });
+  await settleTimers();
+  assert(
+    failed.state.status.includes("failed") &&
+      failed.state.error.some((message) => message !== undefined),
+    "an unreadable index is reported rather than looking like no matches",
+  );
+  failed.stop();
+
+  // A too-short query is reported, and the index is still asked so the policy
+  // lives in one place rather than being duplicated by the caller.
+  const tooShort = runIndexEffect({
+    parsed: queryTools.parseQuery("ab"),
+    result: () => ({ status: "ready", entries: [], tooShort: true }),
+  });
+  await settleTimers();
+  assert(
+    tooShort.state.tooShort.includes(true) &&
+      tooShort.published.found.length === 0,
+    "a two-character query publishes no indexed rows and reports why",
+  );
+  tooShort.stop();
+
+  // Scopes that must never query the index.
+  for (const [label, options] of [
+    ["a folder shows direct children only", { dir: "/foo" }],
+    [
+      "the path bar reads the typed location",
+      { pathQuery: { dir: "/foo", prefix: "" } },
+    ],
+    [
+      "an empty query has nothing to look up",
+      { parsed: queryTools.parseQuery("") },
+    ],
+    [
+      "a bare dot is answered by reading, not the index",
+      { parsed: queryTools.parseQuery(".") },
+    ],
+    ["an inactive view does no work", { searchActive: false }],
+  ] as [string, Parameters<typeof runIndexEffect>[0]][]) {
+    const run = runIndexEffect({
+      parsed: queryTools.parseQuery("annual"),
+      ...options,
+    });
+    await settleTimers();
+    assert(run.calls.length === 0, `the index is not queried when ${label}`);
+    run.stop();
+  }
+
+  // Hidden visibility is passed through rather than filtered afterwards.
+  const hidden = runIndexEffect({
+    parsed: queryTools.parseQuery("annual"),
+    showHidden: true,
+  });
+  await settleTimers();
+  assert(
+    hidden.calls[0]?.showHidden === true,
+    "hidden visibility is pushed into the index query",
+  );
+  hidden.stop();
+
+  /*
+   * The same effect under real React, replayed as Strict Mode does at startup,
+   * with the query cancelled and restarted by history navigation.
+   */
   const lifecycleCode = transformSync(
-    source.slice(
-      source.indexOf("  const scopeController ="),
-      source.indexOf("  const navigate ="),
-    ),
+    between(source, "  const scopeController =", "  const navigate ="),
     { loader: "ts" },
   ).code;
-  const spotlightSignals: AbortSignal[] = [];
+  const indexQueries: string[] = [];
   const lifecycleDependencies = {
-    ...discoveryDependencies,
+    ...searchLimits,
+    ...queryTools,
     useEffect: React.useEffect,
     useMemo: React.useMemo,
     useState: React.useState,
     useCallback: React.useCallback,
     createElement: React.createElement,
     setHistoryIndex: () => {},
-    searchPathResult: async (
-      query: string,
-      opts: Parameters<typeof runSpotlightSearch>[1],
-    ) => {
-      if (opts.signal) spotlightSignals.push(opts.signal);
-      return runSpotlightSearch(query, opts, async (args) => {
-        if (args.includes("-name"))
-          return args.at(-1) === "foo_bar" ? "/foo/foo_bar\0" : "";
-        return args.at(-1) ===
-          'kMDItemFSName == "*f*"cd && kMDItemFSName == "*o*"cd && kMDItemFSName == "*b*"cd'
-          ? "/foo/foo_bar\0/foo/bof.txt\0"
-          : "";
-      });
+    path,
+    // Defined outside the sliced regions, so supplied here.
+    dir: undefined,
+    pathQuery: undefined,
+    searchActive: true,
+    INDEX_DEBOUNCE_MS: 0,
+    indexFile: "/support/file-index.sqlite",
+    setIndexStatus: () => {},
+    setIndexTooShort: () => {},
+    setResultsTruncated: () => {},
+    setSearchError: () => {},
+    setSearchPartial: () => {},
+    searchIndex: (_file: string, parsed: queryTools.ParsedQuery) => {
+      const query = parsed.tokens.join(" ");
+      indexQueries.push(query);
+      return {
+        status: "ready",
+        entries: query === "foo_bar" ? [makeEntry("/foo/foo_bar")] : [],
+        truncated: false,
+        tooShort: false,
+      };
     },
   };
   const historyInputCode = transformSync(
-    source.slice(
-      source.indexOf("  const setQueryProgrammatically ="),
-      source.indexOf("  const parent = dir"),
+    between(
+      source,
+      "  const setQueryProgrammatically =",
+      "  const parent = dir",
     ),
     { loader: "ts" },
   ).code;
   const Lifecycle = new Function(
     ...Object.keys(lifecycleDependencies),
-    `return function Lifecycle() {
-      const [searchText, setSearchText] = useState("");
+    `return function Lifecycle({initialQuery = ""}) {
+      const [searchText, setSearchText] = useState(initialQuery);
       const [reloadKey, setReloadKey] = useState(0);
       const [found, setFound] = useState([]);
       const [searching, setSearching] = useState(false);
       const [includeHidden, setIncludeHidden] = useState(false);
       const query = searchText.trim();
-      const parsed = parseQuery(searchText);
+      const parsed = useMemo(() => parseQuery(searchText), [searchText]);
+      const queryKey = useMemo(() => JSON.stringify(parsed.tokens), [parsed]);
       ${visibilityCode}
       ${lifecycleCode}
       ${inputCode}
@@ -665,6 +766,7 @@ export async function browserChecks(
         historyChange: setQueryProgrammatically,
         refresh: () => setReloadKey(key => key + 1),
         setHidden: setIncludeHidden,
+        cancelScope: () => scopeController.abort(),
         found, searching, signal: queryController.signal
       });
     };`,
@@ -675,22 +777,27 @@ export async function browserChecks(
   const previousAct = testGlobals.IS_REACT_ACT_ENVIRONMENT;
   testGlobals.IS_REACT_ACT_ENVIRONMENT = true;
   let renderer: ReactTestRenderer;
-  const settle = () => act(() => new Promise((r) => setTimeout(r, 100)));
-  const mount = () =>
+  const settle = () => act(() => new Promise((r) => setTimeout(r, 50)));
+  const mount = (initialQuery = "") =>
     act(() => {
       renderer = create(
         React.createElement(
           React.StrictMode,
           null,
-          React.createElement(Lifecycle),
+          React.createElement(Lifecycle, { initialQuery }),
         ),
       );
     });
   const currentSearch = () => renderer.root.findByType("search");
   try {
     await mount();
+    await settle();
+    assert(
+      !currentSearch().props.signal.aborted,
+      "Strict Mode startup leaves a usable query signal before the first keystroke",
+    );
     await act(() => {
-      for (const query of ["f", "fo", "foo", "foob"])
+      for (const query of ["f", "fo", "foo", "foo_bar"])
         currentSearch().props.change(query);
     });
     await settle();
@@ -698,21 +805,17 @@ export async function browserChecks(
       currentSearch().props.found.some(
         (entry: Entry) => entry.path === "/foo/foo_bar",
       ),
-      "fast first-run typing finds a fuzzy filename without an intermediate prefix search or setup cache",
+      "typing on first launch reaches the index without a setup run",
     );
-    await act(() => currentSearch().props.change("foo_bar"));
-    await settle();
     assert(
-      currentSearch().props.found.some(
-        (entry: Entry) => entry.path === "/foo/foo_bar",
-      ),
-      "first launch finds an exact Spotlight match without running setup",
+      indexQueries.at(-1) === "foo_bar",
+      "the last query typed is the one the index answers",
     );
     await act(() => currentSearch().props.refresh());
     await settle();
     assert(
       currentSearch().props.found.length === 1,
-      "the setup refresh keeps the current query searchable",
+      "a refresh keeps the current query searchable",
     );
     await act(() => {
       currentSearch().props.change("foo_ba");
@@ -743,21 +846,23 @@ export async function browserChecks(
       "fast edits and a repeated query still run the final search",
     );
     await act(() => renderer.unmount());
-    await mount();
-    await act(() => currentSearch().props.change("foo_bar"));
+    await mount("foo_bar");
     await settle();
     assert(
       currentSearch().props.found.length === 1,
-      "reopening the extension does not require another setup run",
+      "a new route searches its initial query after effect replay without another keystroke",
     );
-    const beforeToggle = spotlightSignals.at(-1)!;
+    const beforeToggle = currentSearch().props.signal;
     await act(() => currentSearch().props.setHidden(true));
     await settle();
     assert(
-      beforeToggle.aborted &&
-        !currentSearch().props.signal.aborted &&
+      beforeToggle.aborted,
+      "changing hidden visibility aborts the replaced query signal, so cached reads holding it stop",
+    );
+    assert(
+      !currentSearch().props.signal.aborted &&
         currentSearch().props.found.length === 1,
-      "changing hidden visibility cancels obsolete discovery and reruns the current query",
+      "changing hidden visibility reruns the current query",
     );
     const unchangedVisibility = currentSearch().props.signal;
     await act(() => currentSearch().props.setHidden(true));
@@ -766,312 +871,46 @@ export async function browserChecks(
         !unchangedVisibility.aborted,
       "unchanged effective visibility does not cancel the live search",
     );
+
+    // Memory stability across many searches and a lot of published rows.
+    const before = process.memoryUsage().heapUsed;
+    for (let i = 0; i < 200; i++) {
+      await act(() => currentSearch().props.change(`query_${i}`));
+    }
+    await settle();
+    global.gc?.();
+    const growth = process.memoryUsage().heapUsed - before;
+    assert(
+      growth < 64 * 1024 * 1024,
+      `two hundred searches do not retain unbounded state (${Math.round(growth / 1048576)}MB)`,
+    );
+    const queriesBeforeCancellation = indexQueries.length;
+    await act(() => {
+      currentSearch().props.cancelScope();
+      currentSearch().props.change("foo_bar");
+    });
+    await settle();
+    assert(
+      currentSearch().props.signal.aborted &&
+        indexQueries.length === queriesBeforeCancellation,
+      "controller recovery never restarts work after its scope was intentionally cancelled",
+    );
   } finally {
     await act(() => renderer?.unmount());
     testGlobals.IS_REACT_ACT_ENVIRONMENT = previousAct;
   }
-  const exactCode = transformSync(
-    source.slice(
-      source.indexOf("  useEffect(() => {\n    if (exactPath === undefined)"),
-      source.indexOf("  const exactReady ="),
+  const rankCode = transformSync(
+    between(
+      source,
+      "  const rankSources = useCallback(",
+      "  /** Delayed search results",
     ),
     { loader: "ts" },
   ).code;
-  let stopExact: (() => void) | undefined;
-  let exactSignal: AbortSignal | undefined;
-  let exactPublished = false;
-  let finishExact = () => {};
-  const exactWaiting = new Promise<void>((resolve) => {
-    finishExact = resolve;
-  });
-  const exactDependencies = {
-    useEffect: (run: () => () => void) => {
-      stopExact = run();
-    },
-    exactPath: "/foo/bar",
-    typedDirectory: { entries: [] },
-    queryController: new AbortController(),
-    reloadKey: 0,
-    setExactEntry: () => {
-      exactPublished = true;
-    },
-    validateRecentEntries: async (
-      _paths: unknown,
-      opts: { signal: AbortSignal },
-    ) => {
-      exactSignal = opts.signal;
-      await exactWaiting;
-      return { entries: [makeEntry("/foo/bar")] };
-    },
-  };
-  new Function(...Object.keys(exactDependencies), exactCode)(
-    ...Object.values(exactDependencies),
-  );
-  stopExact?.();
-  finishExact();
-  await new Promise<void>((resolve) => setImmediate(resolve));
-  assert(
-    exactSignal?.aborted === true &&
-      !exactPublished &&
-      !exactDependencies.queryController.signal.aborted,
-    "exact-path cleanup cancels its read without poisoning the next effect setup",
-  );
-  new Function(...Object.keys(discoveryDependencies), discoveryCode)(
-    ...Object.values(discoveryDependencies),
-  );
-  await new Promise((resolve) => setTimeout(resolve, 150));
-  assert(
-    liveFound.length === 125,
-    "the browser keeps collecting live matches beyond the first sixty results",
-  );
-  stopDiscovery?.();
-  let capReported = false;
-  let metadataPaths = 0;
-  let finishCap = () => {};
-  const capDone = new Promise<void>((resolve) => {
-    finishCap = resolve;
-  });
-  const capDependencies = {
-    ...discoveryDependencies,
-    queryController: new AbortController(),
-    setResultsTruncated: (value: boolean) => {
-      capReported ||= value;
-    },
-    setSearching: (value: boolean) => {
-      if (!value) finishCap();
-    },
-    readUsageMetaResult: async (paths: string[]) => {
-      metadataPaths += paths.length;
-      return { meta: new Map(), complete: true };
-    },
-    searchPathResult: async (
-      _query: string,
-      opts: { onBatch: (paths: string[]) => Promise<void> },
-    ) => {
-      for (let i = 0; i < 6000; i += 60)
-        await opts.onBatch(
-          Array.from({ length: 60 }, (_, j) => `/foo/bar${i + j}`),
-        );
-      return { paths: [], truncated: false };
-    },
-  };
-  new Function(...Object.keys(capDependencies), discoveryCode)(
-    ...Object.values(capDependencies),
-  );
-  await capDone;
-  assert(
-    liveFound.length === 500 && capReported && metadataPaths === 500,
-    "live result retention and metadata enrichment stop at the result cap and report partial coverage",
-  );
-  stopDiscovery?.();
-  liveFound = [];
-  const limitedCache = await createRecentValidator(async (full) =>
-    makeEntry(full),
-  )(
-    Array.from({ length: 501 }, (_, i) => ({ path: `/foo/bar${i}` })),
-    { limit: 500, continuous: true },
-  );
-  assert(
-    limitedCache.entries.length === 500 &&
-      limitedCache.partial &&
-      limitedCache.limited === true,
-    "concurrent cached reads report a cap even when the last workers finish together",
-  );
-  let unstick = () => {};
-  const stuck = new Promise<void>((resolve) => {
-    unstick = resolve;
-  });
-  const stalledController = new AbortController();
-  const stalledDependencies = {
-    ...discoveryDependencies,
-    queryController: stalledController,
-    validateRecentEntries: createRecentValidator(async (full) => {
-      if (full === paths[0]) await stuck;
-      return makeEntry(full);
-    }),
-  };
-  new Function(...Object.keys(stalledDependencies), discoveryCode)(
-    ...Object.values(stalledDependencies),
-  );
-  await new Promise((resolve) => setTimeout(resolve, 150));
-  assert(
-    liveFound.some((entry) => entry.path === paths[124]),
-    "one stalled file cannot block later Spotlight batches",
-  );
-  stalledController.abort();
-  const beforeLate = liveFound.length;
-  unstick();
-  await new Promise((resolve) => setTimeout(resolve, 20));
-  assert(
-    liveFound.length === beforeLate,
-    "a cancelled query cannot publish a formerly stalled file",
-  );
-  stopDiscovery?.();
-  for (const query of ["foofolder ext:pdf", "foofolder baz -f"]) {
-    liveFound = [];
-    const folder = "/foo/foofolder";
-    const target = `${folder}/baz.pdf`;
-    const expansionDependencies = {
-      ...discoveryDependencies,
-      query,
-      parsed: queryTools.parseQuery(query),
-      queryController: new AbortController(),
-      validateRecentEntries: createRecentValidator(async (full) => ({
-        ...makeEntry(full),
-        isDirectory: full === folder,
-      })),
-      searchPathResult: async (
-        _query: string,
-        opts: { onBatch: (paths: string[]) => Promise<void> },
-      ) => {
-        await opts.onBatch([folder]);
-        return { paths: [], truncated: false };
-      },
-      listUnder: async (
-        _roots: string[],
-        opts: { onBatch: (paths: string[]) => Promise<void> },
-      ) => {
-        await opts.onBatch([target]);
-        return { paths: [], truncated: false };
-      },
-    };
-    new Function(...Object.keys(expansionDependencies), discoveryCode)(
-      ...Object.values(expansionDependencies),
-    );
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    assert(
-      liveFound.some((entry) => entry.path === target),
-      `${query} expands a matching folder before applying result filters`,
-    );
-    stopDiscovery?.();
-  }
-  liveFound = [];
-  const expansionController = new AbortController();
-  const roots = ["/foo/foofolder-stalled", "/foo/foofolder-healthy"];
-  const healthyFile = `${roots[1]}/baz.pdf`;
-  const parallelExpansionDependencies = {
-    ...discoveryDependencies,
-    query: "foofolder ext:pdf",
-    parsed: queryTools.parseQuery("foofolder ext:pdf"),
-    queryController: expansionController,
-    validateRecentEntries: createRecentValidator(async (full) => ({
-      ...makeEntry(full),
-      isDirectory: roots.includes(full),
-    })),
-    searchPathResult: async (
-      _query: string,
-      opts: { onBatch: (paths: string[]) => Promise<void> },
-    ) => {
-      await opts.onBatch(roots);
-      return { paths: [], truncated: false };
-    },
-    listUnder: async (
-      [root]: string[],
-      opts: {
-        signal: AbortSignal;
-        onBatch: (paths: string[]) => Promise<void>;
-      },
-    ) => {
-      if (root === roots[0])
-        await new Promise<void>((resolve) =>
-          opts.signal.addEventListener("abort", () => resolve(), {
-            once: true,
-          }),
-        );
-      else await opts.onBatch([healthyFile]);
-      return { paths: [], truncated: false };
-    },
-  };
-  new Function(...Object.keys(parallelExpansionDependencies), discoveryCode)(
-    ...Object.values(parallelExpansionDependencies),
-  );
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  assert(
-    liveFound.some((entry) => entry.path === healthyFile),
-    "one stalled expansion root cannot block another matching folder",
-  );
-  expansionController.abort();
-  stopDiscovery?.();
-
-  for (const hasResults of [true, false]) {
-    let searchError: string | undefined;
-    let searchPartial: string | undefined;
-    const failureDependencies = {
-      ...discoveryDependencies,
-      queryController: new AbortController(),
-      setSearchError: (error?: string) => {
-        searchError = error;
-      },
-      setSearchPartial: (partial?: string) => {
-        searchPartial = partial;
-      },
-      validateRecentEntries: createRecentValidator(async (full) => {
-        await new Promise((resolve) => setTimeout(resolve, 20));
-        return makeEntry(full);
-      }),
-      searchPathResult: async (
-        _query: string,
-        opts: { onBatch: (paths: string[]) => Promise<void> },
-      ) => {
-        if (hasResults) await opts.onBatch([paths[0]]);
-        return {
-          paths: [],
-          truncated: false,
-          error: "Spotlight search failed",
-        };
-      },
-    };
-    new Function(...Object.keys(failureDependencies), discoveryCode)(
-      ...Object.values(failureDependencies),
-    );
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    assert(
-      hasResults
-        ? !searchError && !!searchPartial
-        : !!searchError && !searchPartial,
-      hasResults
-        ? "a source failure with delayed valid results is partial"
-        : "a source failure without valid results remains an error",
-    );
-    stopDiscovery?.();
-  }
-  let metadataError: string | undefined;
-  let metadataPartial: string | undefined;
-  const timeoutDependencies = {
-    ...discoveryDependencies,
-    queryController: new AbortController(),
-    setFoundUsageError: (error?: string) => {
-      metadataError = error;
-    },
-    setFoundUsagePartial: (partial?: string) => {
-      metadataPartial = partial;
-    },
-    readUsageMetaResult: async () => ({
-      meta: new Map(),
-      complete: false,
-      partial: "Timed out",
-    }),
-  };
-  new Function(...Object.keys(timeoutDependencies), discoveryCode)(
-    ...Object.values(timeoutDependencies),
-  );
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  assert(
-    !metadataError && !!metadataPartial,
-    "metadata timeouts remain partial rather than becoming process failures",
-  );
-  stopDiscovery?.();
-  const rankStart = source.indexOf("  const rankSources = useCallback(");
-  const rankEnd = source.indexOf("  /** Results available", rankStart);
-  const rankCode = transformSync(source.slice(rankStart, rankEnd), {
-    loader: "ts",
-  }).code;
   const rankDependencies = {
     ...queryTools,
     path,
-    scoreEntry,
-    entryStoragePath,
-    relativeDepth,
+    rankCandidates: rankSources,
     useCallback: (run: unknown) => run,
     dir: "/foo",
     canonicalDir: "/private/foo",
@@ -1081,7 +920,7 @@ export async function browserChecks(
     parsed: queryTools.parseQuery("-d"),
     visits: {},
     tick: 0,
-    compare: () => 0,
+    sortMode: "usage",
     showHidden: false,
   };
   const rank = new Function(
@@ -1144,6 +983,64 @@ export async function browserChecks(
     browseHidden([entries[0], hiddenEntry]).length === 2,
     "showing hidden files keeps both hidden and ordinary cached rows",
   );
+  // A memory match must survive a flood of indexed rows. `collectedRows` ranks
+  // the two sources together and caps afterwards, so a highly ranked visited
+  // file cannot be pushed past 500 by index results that rank below it.
+  const mergeDependencies = {
+    ...rankDependencies,
+    dir: undefined,
+    canonicalDir: undefined,
+    learnedSet: new Set<string>(),
+    effectiveQuery: "bar",
+    parsed: queryTools.parseQuery("bar"),
+    // A real usage record and the real Usage comparator: a stub compare would
+    // make the sort a no-op and the ordering claim below meaningless.
+    visits: {
+      "/memory/bar.txt": { count: 40, lastVisit: Date.now(), ems: 40, tick: 8 },
+    },
+    tick: 8,
+  };
+  const rankMerged = new Function(
+    ...Object.keys(mergeDependencies),
+    rankCode + "\nreturn rankSources;",
+  )(...Object.values(mergeDependencies)) as typeof rank;
+  const remembered: Entry = {
+    path: "/memory/bar.txt",
+    name: "bar.txt",
+    isDirectory: false,
+    isSymlink: false,
+    size: 1,
+    mtimeMs: 0,
+    birthtimeMs: 0,
+  };
+  const flood: Entry[] = Array.from({ length: 900 }, (_, i) => ({
+    path: `/indexed/bar-${i}.txt`,
+    name: `bar-${i}.txt`,
+    isDirectory: false,
+    isSymlink: false,
+    size: 1,
+    mtimeMs: 0,
+    birthtimeMs: 0,
+  }));
+  const mergedRows = rankMerged([...flood, remembered]);
+  const cappedRows = mergedRows.slice(0, searchLimits.LIVE_RESULTS);
+  assert(
+    mergedRows.length === 901,
+    "memory and indexed results are ranked as one list before any cap",
+  );
+  assert(
+    cappedRows.some((row) => row.entry.path === remembered.path),
+    "a visited file survives the 500-row cap alongside 900 indexed rows",
+  );
+  assert(
+    mergedRows[0]?.entry.path === remembered.path,
+    "and its usage puts it first, rather than merely inside the cap",
+  );
+  assert(
+    mergedRows.length > searchLimits.LIVE_RESULTS,
+    "the cap is applied to the merged list, so truncation is reported from it",
+  );
+
   const typedHiddenDependencies = {
     ...rankDependencies,
     dir: undefined,
@@ -1243,32 +1140,6 @@ export async function browserChecks(
   );
   for (const [variable, end, values] of [
     [
-      "discoveredCandidates",
-      "discoveredCache",
-      {
-        discovered: [
-          "/foo/bar",
-          "/foo/bar/baz",
-          "/private/foo/bar",
-          "/private/foo/bar/baz",
-          "/foobar/bar",
-        ],
-      },
-    ],
-    [
-      "shortcutCandidates",
-      "shortcutCache",
-      {
-        shortcutIndex: [
-          "/foo/bar",
-          "/foo/bar/baz",
-          "/private/foo/bar",
-          "/private/foo/bar/baz",
-          "/foobar/bar",
-        ].map((path) => ({ path })),
-      },
-    ],
-    [
       "learnedCandidates",
       "learnedCache",
       {
@@ -1282,9 +1153,8 @@ export async function browserChecks(
       },
     ],
   ] as const) {
-    const start = source.indexOf(`  const ${variable} =`);
     const code = transformSync(
-      source.slice(start, source.indexOf(`  const ${end} =`, start)),
+      between(source, `  const ${variable} =`, `  const ${end} =`),
       { loader: "ts" },
     ).code;
     const deps = {
@@ -1310,82 +1180,109 @@ export async function browserChecks(
       `${variable} excludes grandchildren before filesystem validation`,
     );
   }
+  // Inside a folder the list is its direct children, whatever is typed.
   for (const query of ["cloud", "foo -d", "foo ext:pdf", ".foo bar"]) {
-    let recursiveWork = 0;
-    const scopedDiscovery = {
-      ...discoveryDependencies,
-      dir: "/foo",
-      query,
+    const scoped = runIndexEffect({
       parsed: queryTools.parseQuery(query),
-      queryController: new AbortController(),
-      searchPathResult: async () => {
-        recursiveWork++;
-        return { paths: [], truncated: false };
-      },
-      walkSearch: async () => {
-        recursiveWork++;
-        return { paths: [], truncated: false };
-      },
-      listUnder: async () => {
-        recursiveWork++;
-        return { paths: [], truncated: false };
-      },
-      readDirectoryAsync: async () => {
-        recursiveWork++;
-        return { entries: [], truncated: 0 };
-      },
-    };
-    new Function(...Object.keys(scopedDiscovery), discoveryCode)(
-      ...Object.values(scopedDiscovery),
-    );
-    await new Promise((resolve) => setTimeout(resolve, 25));
-    stopDiscovery?.();
+      dir: "/foo",
+    });
+    await settleTimers();
     assert(
-      recursiveWork === 0,
-      `folder query ${query} does not start recursive discovery or Spotlight name search`,
+      scoped.calls.length === 0,
+      `folder query ${JSON.stringify(query)} searches direct children without querying the index`,
     );
+    scoped.stop();
   }
-  const mergeStart = source.indexOf("  /** Delayed search results");
-  const mergeEnd = source.indexOf("  const markVisited", mergeStart);
-  const mergeCode = transformSync(source.slice(mergeStart, mergeEnd), {
-    loader: "ts",
-  }).code;
-  const metadataEntry = { ...entries[0], useCount: 42, lastUsedMs: Date.now() };
-  const merged = new Function(
-    "useMemo",
-    "pathQuery",
-    "found",
-    "instantRows",
-    "rankSources",
-    "compare",
-    "LIVE_RESULTS",
+  const mergeCode = transformSync(
+    between(source, "  /** Delayed search results", "  const markVisited"),
+    { loader: "ts" },
+  ).code;
+  const boundedDependencies = {
+    useRef: () => ({ current: undefined }),
+    queryKey: "",
+    useMemo: (run: () => unknown) => run(),
+    pathQuery: undefined,
+    found: flood,
+    instantRows: rankMerged([remembered]),
+    children: [],
+    startingPoints: [remembered],
+    sharedFolders: [],
+    learnedMatches: [],
+    hiddenHome: [],
+    pathRows: [],
+    query: "",
+    rankSources: rankMerged,
+    displayRows,
+    LIVE_RESULTS: searchLimits.LIVE_RESULTS,
+    initialSelectionPath: flood[899].path,
+  };
+  const bounded = new Function(
+    ...Object.keys(boundedDependencies),
+    mergeCode + "\nreturn { rows, rowLimitReached };",
+  )(...Object.values(boundedDependencies));
+  assert(
+    bounded.rows.length === 50 && bounded.rowLimitReached,
+    "merged memory and indexed results retain only 50 ranked rows and report omissions",
+  );
+  assert(
+    bounded.rows[0].entry.path === remembered.path,
+    "the 50-result budget preserves the highest usage memory match",
+  );
+  assert(
+    bounded.rows[49].entry.path === flood[899].path,
+    "the folder just left stays selectable even outside the first 50 results",
+  );
+  const selectedDependencies = {
+    ...boundedDependencies,
+    initialSelectionPath: undefined,
+    queryKey: "bar",
+    useRef: () => ({
+      current: { query: "", queryKey: "bar", read: () => flood[898].path },
+    }),
+  };
+  const selectedRows = new Function(
+    ...Object.keys(selectedDependencies),
     mergeCode + "\nreturn rows;",
-  )(
-    (run: () => unknown) => run(),
-    undefined,
-    [metadataEntry],
-    rank([entries[0]]),
-    rank,
-    () => 0,
-    searchLimits.LIVE_RESULTS,
-  ) as { entry: Entry }[];
+  )(...Object.values(selectedDependencies));
+  assert(
+    selectedRows.length === 50 &&
+      selectedRows[49].entry.path === flood[898].path,
+    "sorting keeps the live selection even when it ranks below the candidate budget",
+  );
+  const metadataEntry = { ...entries[0], useCount: 42, lastUsedMs: Date.now() };
+  const metadataDependencies = {
+    ...boundedDependencies,
+    found: [metadataEntry],
+    startingPoints: [entries[0]],
+    rankSources: rank,
+    initialSelectionPath: undefined,
+  };
+  const merged = new Function(
+    ...Object.keys(metadataDependencies),
+    mergeCode + "\nreturn rows;",
+  )(...Object.values(metadataDependencies)) as { entry: Entry }[];
   assert(
     merged.length === 1 &&
       merged[0].entry.useCount === 42 &&
       merged[0].entry.lastUsedMs === metadataEntry.lastUsedMs,
-    "Spotlight usage enrichment survives when the same result becomes available from the cache",
+    "usage enrichment survives when the same result becomes available from the cache",
   );
   assert(
     !source.includes("standardPlaces()"),
     "starting-place discovery does not run synchronous filesystem calls during render",
   );
-  const start = source.indexOf(
+  const visitsStart = locate(
+    source,
     "  useEffect(() => {",
-    source.indexOf("// Load only visits"),
+    locate(source, "// Load only visits"),
   );
-  const end =
-    source.indexOf("  }, [reloadKey]);", start) + "  }, [reloadKey]);".length;
-  const effect = transformSync(source.slice(start, end), { loader: "ts" }).code;
+  const visitsEffect = through(
+    source,
+    "  useEffect(() => {",
+    "  }, [reloadKey]);",
+    visitsStart,
+  );
+  const effect = transformSync(visitsEffect, { loader: "ts" }).code;
   let generation = "before";
   let cleanup: (() => void) | undefined;
   let release: (value: object) => void = () => {};
@@ -1418,137 +1315,15 @@ export async function browserChecks(
     Object.keys(visits).length === 0,
     "an old browser storage load cannot restore pre-reset visits",
   );
-  const backgroundStart = source.indexOf("  useEffect(() => {", end);
-  const backgroundEnd =
-    source.indexOf("  }, [reloadKey]);", backgroundStart) +
-    "  }, [reloadKey]);".length;
   const background = transformSync(
-    source.slice(backgroundStart, backgroundEnd),
+    through(
+      source,
+      "  useEffect(() => {",
+      "  }, [reloadKey, indexFile]);",
+      visitsStart + visitsEffect.length,
+    ),
     { loader: "ts" },
   ).code;
-  const queryEnd =
-    source.indexOf("  }, [parsed.normalized, dir]);") +
-    "  }, [parsed.normalized, dir]);".length;
-  const queryStart = source.lastIndexOf("  useEffect(() => {", queryEnd);
-  const queryEffect = transformSync(source.slice(queryStart, queryEnd), {
-    loader: "ts",
-  }).code;
-  const savedPaths = ["/foo/foo_repository"];
-  let discovered: string[] = [];
-  const discoveredRef = { current: [] as string[] };
-  const cacheDependencies = {
-    useEffect: (run: () => unknown) => run(),
-    reloadKey: 0,
-    dataGeneration: () => "before",
-    loadSearches: async () => [],
-    loadShortcutIndex: async () => ({ shortcuts: [], scannedAt: 0 }),
-    loadAbbreviations: async () => ({}),
-    loadSharedIndex: () => ({ paths: [] }),
-    loadDiscovered: () => savedPaths,
-    driveIndexCaveat: () => undefined,
-    statEntry: () => undefined,
-    setBackgroundPending: () => {},
-    setHistory: () => {},
-    setShortcuts: () => {},
-    setShortcutsScannedAt: () => {},
-    setDriveIndexMessage: () => {},
-    setAbbreviations: () => {},
-    setSharedIndex: () => {},
-    setDiscovered: (paths: string[]) => {
-      discovered = paths;
-    },
-    discoveredRef,
-    setGeneration: () => {},
-    parsed: queryTools.parseQuery("foorep"),
-    dir: undefined,
-  };
-  const runCacheCode = (code: string, extra: Record<string, unknown> = {}) => {
-    const dependencies = { ...cacheDependencies, ...extra };
-    return new Function(...Object.keys(dependencies), code)(
-      ...Object.values(dependencies),
-    );
-  };
-  runCacheCode(background);
-  await new Promise((resolve) => setImmediate(resolve));
-  assert(
-    discovered.includes(savedPaths[0]),
-    "startup loads persisted discovered paths",
-  );
-  let synchronousStats = 0;
-  runCacheCode(background, {
-    loadShortcutIndex: async () => ({
-      shortcuts: [{ path: "/foo/bar", name: "bar", target: "/foo/baz" }],
-      scannedAt: 1,
-    }),
-    statEntry: () => {
-      synchronousStats++;
-      return undefined;
-    },
-  });
-  await new Promise((resolve) => setImmediate(resolve));
-  assert(
-    synchronousStats === 0,
-    "loading a newly populated Drive index does not synchronously read every shortcut",
-  );
-  runCacheCode(queryEffect);
-  assert(
-    discovered.includes(savedPaths[0]),
-    "the first typed query retains the cache loaded at startup",
-  );
-  const rememberStart = source.indexOf("        void rememberDiscovered(");
-  const rememberEnd = source.indexOf(
-    "        setFound(shortlist);",
-    rememberStart,
-  );
-  const rememberCode = transformSync(source.slice(rememberStart, rememberEnd), {
-    loader: "ts",
-  }).code;
-  const newPaths = [...savedPaths, "/foo/foo_report"];
-  runCacheCode(rememberCode, {
-    ranked: [{ path: newPaths[1] }],
-    storageGeneration: "before",
-    cancelled: false,
-    rememberDiscovered: async () => newPaths,
-  });
-  await new Promise((resolve) => setImmediate(resolve));
-  assert(
-    discovered.includes(newPaths[1]),
-    "completed cache updates appear without editing the query again",
-  );
-  runCacheCode(queryEffect);
-  runCacheCode(queryEffect);
-  assert(
-    discovered.length === 2,
-    "backspace and retyping do not change an already published cache",
-  );
-  for (const stale of [
-    { cancelled: true },
-    { storageGeneration: "obsolete" },
-  ]) {
-    runCacheCode(rememberCode, {
-      ranked: [],
-      storageGeneration: "before",
-      cancelled: false,
-      rememberDiscovered: async () => ["/foo/obsolete"],
-      ...stale,
-    });
-    await new Promise((resolve) => setImmediate(resolve));
-    assert(
-      !discovered.includes("/foo/obsolete"),
-      "cancelled or pre-reset cache completions cannot update the current query",
-    );
-  }
-  runCacheCode(rememberCode, {
-    ranked: [],
-    storageGeneration: "before",
-    cancelled: false,
-    rememberDiscovered: async () => [],
-  });
-  await new Promise((resolve) => setImmediate(resolve));
-  assert(
-    discovered.length === 2,
-    "a failed cache save cannot discard already searchable paths",
-  );
   for (const stalled of ["loadSearches", "loadAbbreviations"]) {
     let reset = false;
     let latePublications = 0;
@@ -1556,19 +1331,13 @@ export async function browserChecks(
     const waiting = new Promise<void>((resolve) => {
       finish = resolve;
     });
-    const values = {
-      loadSearches: [],
-      loadAbbreviations: {},
-      loadShortcutIndex: { shortcuts: [], scannedAt: 0 },
-    };
+    const values = { loadSearches: [], loadAbbreviations: {} };
     const backgroundDependencies: Record<string, unknown> = {
       useEffect: (run: () => unknown) => run(),
       reloadKey: 0,
+      indexFile: "/tmp/index.sqlite",
       dataGeneration: () => (reset ? "after" : "before"),
-      statEntry: () => undefined,
-      loadSharedIndex: () => ({ paths: [] }),
-      driveIndexCaveat: () => undefined,
-      loadDiscovered: () => [],
+      readIndexCoverage: () => ({ status: "ok" }),
     };
     for (const [name, value] of Object.entries(values))
       backgroundDependencies[name] = async () => {
@@ -1578,12 +1347,9 @@ export async function browserChecks(
     for (const name of [
       "setBackgroundPending",
       "setHistory",
-      "setShortcuts",
-      "setShortcutsScannedAt",
-      "setDriveIndexMessage",
       "setAbbreviations",
-      "setDiscovered",
-      "setSharedIndex",
+      "setCoverage",
+      "setIndexStatus",
     ])
       backgroundDependencies[name] = () => {
         if (reset) latePublications++;
@@ -1600,17 +1366,45 @@ export async function browserChecks(
       `a reset during ${stalled} prevents all subsequent browser publications`,
     );
   }
-  const cached = source.slice(
-    source.indexOf("/** Previously-surfaced paths"),
-    source.indexOf("/** Hidden Home entries"),
+  // Every in-memory candidate source, from the first to the last.
+  const cached = between(
+    source,
+    "  const startingCandidates = useMemo",
+    "  /** Hidden Home entries",
   );
   const learnedCode = transformSync(
-    source.slice(
-      source.indexOf("  const learnedCache ="),
-      source.indexOf("  const learnedMatches ="),
-    ),
+    between(source, "  const learnedCache =", "  const learnedMatches ="),
     { loader: "ts" },
   ).code;
+  const startingCode = transformSync(
+    between(source, "  const startingCache =", "  const startingPoints ="),
+    { loader: "ts" },
+  ).code;
+  const memoryDeps = {
+    useCachedEntries: (candidates: { path: string }[], query: string) =>
+      createRecentValidator(async (full) => makeEntry(full))(candidates, {
+        query,
+        limit: 50,
+      }),
+    startingCandidates: [
+      ...Array.from({ length: 70 }, (_, i) => ({
+        path: `/pins/unrelated${i}`,
+      })),
+      { path: "/visited/zz-target" },
+    ],
+    query: "zz",
+    reloadKey: 0,
+    queryController: new AbortController(),
+    parsed: queryTools.parseQuery("zz"),
+  };
+  const memory = await new Function(
+    ...Object.keys(memoryDeps),
+    startingCode + "\nreturn startingCache;",
+  )(...Object.values(memoryDeps));
+  assert(
+    memory.entries.some((e: Entry) => e.path === "/visited/zz-target"),
+    "short queries find remembered matches beyond 50 nonmatching pins",
+  );
   const learned = await new Function(
     "useCachedEntries",
     "learnedCandidates",
@@ -1623,12 +1417,11 @@ export async function browserChecks(
     (candidates: { path: string }[], query: string) =>
       createRecentValidator(async (full) => makeEntry(full))(candidates, {
         query,
-        continuous: true,
       }),
     [{ path: "/foo/unrelated.txt" }],
     "baz",
     0,
-    queryController,
+    new AbortController(),
     queryTools.parseQuery("baz"),
   );
   assert(

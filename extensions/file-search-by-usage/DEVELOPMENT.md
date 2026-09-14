@@ -1,139 +1,273 @@
 # Development notes
 
-This document covers the implementation details needed to maintain and release File Search by Usage.
+Implementation notes for maintaining and releasing File Search by Usage. The [README](README.md) covers what the extension does; this document covers how.
+
+## Requirements and search backend
+
+File discovery uses `fd`. Name queries use an in-process SQLite FTS5 index. There is no Spotlight search: no `mdfind` calls and no fallback. One `mdls` call reads optional usage counts and last-used dates for folder ranking, never search results. See Caches and storage for its deadline and failure behaviour.
+
+- **Runtime:** Raycast on macOS, with the Node.js runtime it bundles, which exposes `node:sqlite` and SQLite FTS5. Verified against Raycast's Node 22.22.2 and SQLite 3.51.2. Recheck the distribution build in Raycast before release; a successful build does not verify runtime support.
+- **Crawler:** a separately installed `fd` (`brew install fd`, verify with `fd --version`). Required for rebuilds, not for querying an existing index. `src/lib/fd.ts` checks an explicit absolute `fdPath` preference first, then `PATH` and the common install directories. An invalid explicit path is an error, not a reason to silently pick another binary. Scopes and symlink targets must be readable with Raycast's permissions.
+- **Development:** Node.js with `node:sqlite` and FTS5 available without an experimental flag, plus npm. Node 22.22.2 matches the verified Raycast runtime. `npm ci` installs the locked dependencies. Install fd to exercise the real-crawler checks; they are skipped when the binary is absent.
+
+Users install nothing else, and the extension neither bundles nor installs fd.
 
 ## Project layout
 
 ```text
-src/search.tsx              whole-disk search command
-src/index-shortcuts.tsx     manual Google Drive indexing command
-src/populate-recents.tsx    opt-in recent-file import command
+src/search.tsx              search command
+src/rebuild-index.tsx       manual search-index rebuild command
+src/index-settings.tsx      scope, pattern and stats editor
 src/delete-data.tsx         standalone data-deletion command
 src/components/browser.tsx  shared search and navigation view
-src/components/hidden-files-action.tsx  shared hidden-file toggle action
 src/components/row.tsx      result row and action panel
+src/components/navigation-actions.tsx  up and return-to-start actions
+src/components/search-history-actions.tsx  previous and next query actions
+src/components/hidden-files-action.tsx  shared hidden-file toggle action
 src/components/search-options.tsx  independent type and sort choices in one dropdown
 src/components/native-search-navigation.tsx  bounded native root and active search route
-src/components/search-screen.tsx  per-route query owner and result prop store
+src/components/search-screen.tsx  per-location query owner and result prop store
 src/components/use-folder-selection.ts  initial focus and selection restoration
 src/components/use-event-handles.ts  stable callbacks released on view unmount
-src/components/setup-actions.tsx  shared setup, skip, and stop actions
 src/components/use-directory-listing.ts  watched folder-listing subscription
-src/components/use-search-setup.ts  command-owned setup and recent-file seed
-src/components/use-recent-files.ts  active-folder recent-result filtering and validation
-src/lib/recent-files.ts     bounded recent-document and parent-folder scan
-src/lib/recent-setup.ts     setup choice, recent cache, and locked import
-src/lib/search-setup.ts     sequential recent/Drive setup and independent skip choices
-src/lib/setup-progress.ts   phase messages and elapsed-time heartbeat
-src/lib/drive-setup.ts      shared Drive indexing workflow and setup completion
-src/lib/drive-reads.ts      cancellable Drive reads with a shared physical-read limit
-src/lib/recent-validation.ts  shared bounded pool for recent-result metadata
-src/lib/bounded-reads.ts    physical read limits and removable cancelled waiters
-src/lib/work-queue.ts       independent workers and cancellation-aware backpressure
-src/lib/storage-lock.ts     short storage transactions and reset generations
-src/lib/owned-lock.ts       ownership-checked lock acquisition and cleanup
+src/components/use-cached-entries.ts  one bounded validation pass per memory source
+src/components/use-standard-places.ts  start locations, read off the render path
+src/components/use-shared-cloud-folders.ts  unindexed Drive roots, read after the first frame
+src/components/use-path-bar-listing.ts  the typed-path listing and its exact-match entry
+src/components/use-search-history-recording.ts  settled-query recording and learned pairings
+src/lib/types.ts            shared entry, visit, and sort types
 src/lib/query.ts            parsing, filters, and match tiers
 src/lib/score.ts            ranking weights
 src/lib/result-order.ts     Usage and explicit sort comparators
+src/lib/rank-sources.ts     pure source merging, matching, scoring, and deduplication
 src/lib/display-rows.ts     bounded rendering with selection retention
+src/lib/accessory-columns.ts  fixed-width columns for the row accessories
+src/lib/list-view.ts        what the list shows, as one total function
+src/lib/status-line.ts      which caveat the status line shows, in priority order
+src/lib/search-history.ts   the query-history cursor, as one step function
+src/lib/use-navigation-tracing.ts  development-only navigation and heap samples
+src/lib/format.ts           scope label, size, duration, and relative time
 src/lib/folder-navigation.ts  active folder and obsolete-callback guards
-src/lib/search-limits.ts    live discovery, ranking, and display limits
+src/lib/search-limits.ts    ranking and display limits
+src/lib/progress.ts         search-stage model
 src/lib/history.ts          exponential usage history and abbreviations
 src/lib/read-dir.ts         directory reads, path helpers, and cloud locations
+src/lib/bounded-directory.ts  opendir read that stops one entry past its limit
 src/lib/directory-listing.ts  asynchronous metadata reads, watching, and polling
+src/lib/bounded-reads.ts    physical read limits and removable cancelled waiters
+src/lib/recent-validation.ts  shared bounded pool for recent-result metadata
+src/lib/work-queue.ts       independent workers and cancellation-aware backpressure
 src/lib/name-order.ts       shared numeric filename collation
-src/lib/spotlight.ts        mdfind search and mdls usage metadata
-src/lib/walk.ts             streaming live and bounded fallback directory walks
-src/lib/drive-shortcuts.ts  Google Drive shortcut scan
-src/lib/shared-scan.ts      Google Drive shared-folder scan
-src/lib/index-refresh.ts    complete replacement, partial union, and failure preservation
+src/lib/entry-identity.ts   storage paths and stable row ids
+src/lib/starting-paths.ts   standard and cloud start locations
+src/lib/spotlight.ts        the one mdls call, for usage metadata
+src/lib/usage-cache.ts      per-directory usage-metadata cache
+src/lib/fd.ts               fd discovery across install locations
+src/lib/index-db.ts         SQLite schema, pragmas, and connections
+src/lib/index-scan.ts       fd crawl, metadata collection, and refresh semantics
+src/lib/fts-query.ts        injection-safe FTS5 MATCH construction
+src/lib/db-search.ts        indexed name queries with filters pushed into SQL
+src/lib/index-reader.ts     cached read connection and coverage reporting
+src/lib/index-build.ts      rebuild orchestration, Raycast-free
+src/lib/index-rebuild.ts    support path, lock wiring, and shared rebuild feedback
+src/lib/index-settings.ts   scope and pattern rules, Raycast-free
+src/lib/index-settings-store.ts  LocalStorage half of the settings
 src/lib/indexing-lock.ts    cross-process exclusion for indexing and deletion
+src/lib/owned-lock.ts       ownership-checked lock acquisition and cleanup
+src/lib/storage-lock.ts     short storage transactions and reset generations
 src/lib/store.ts            LocalStorage persistence
-src/lib/*-index.ts          cached indexes
-src/lib/progress.ts         search-stage model
-harness/rank-harness.ts     synthetic tests and opt-in live diagnostics
-harness/performance-checks.ts  freshness, cancellation, and ordering regressions
-harness/indexing-checks.ts  index preservation and indexing/deletion overlap tests
-harness/recents-checks.ts   recent imports, query matching, and stalled metadata
-harness/live-search-checks.ts  streaming, large listings, and stalled reads
-harness/browser-checks.ts  browser cancellation, merging, and storage races
-harness/sort-checks.ts     dropdown state, stable values, and persisted choices
+src/lib/erase.ts            data deletion under both locks
+src/lib/discovered.ts       caches nothing writes, kept only so deletion removes them
+src/lib/navigation-diagnostics.ts  development-only navigation and heap logging
+harness/rank-harness.ts     synthetic checks and opt-in live diagnostics
+harness/source-slice.ts     anchored reads of shipped component source
+harness/rank-sources-checks.ts  pure ranking, metadata merging, filters, and aliases
+harness/result-order-checks.ts  Usage and explicit sort comparators
 harness/type-filter-checks.ts  type filtering and query-directive precedence
+harness/sort-checks.ts      dropdown state, stable values, and persisted choices
+harness/list-view-checks.ts  every list state shows something
+harness/list-render-checks.ts  bounded rendering and selection retention
+harness/row-render-checks.ts  row and action-panel rendering, including unmounted trees
+harness/accessory-column-checks.ts  accessory column widths
+harness/browser-checks.ts   browser cancellation, merging, and storage races
 harness/search-screen-checks.ts  controlled-input commits during live updates
 harness/folder-selection-checks.ts  initial focus and restored selections
-harness/navigation-memory-checks.ts  native route bounds, cleanup, setup continuity, and root input
+harness/folder-usage-checks.ts  frozen usage snapshots and nonblocking metadata warmup
+harness/cached-entry-checks.ts  bounded validation of remembered paths
+harness/event-handle-checks.ts  stable callbacks released on unmount
+harness/navigation-memory-checks.ts  native route bounds, cleanup, and root input
 harness/navigation-stack-checks.ts  active folder transitions and stale-callback guards
+harness/performance-checks.ts  freshness, cancellation, and ordering regressions
+harness/live-search-checks.ts  bounded queues, large listings, and stalled reads
+harness/index-checks.ts     fd lookup, FTS building, schema, scans, and queries
+harness/index-safety-checks.ts  cancellation boundaries, reader recovery, and failures
+harness/indexing-checks.ts  index preservation and indexing/deletion overlap
 ```
 
-The filesystem scans do not import `@raycast/api`, which lets the harness exercise them outside Raycast.
+The filesystem scans do not import `@raycast/api`, so the harness can exercise them outside Raycast.
 
 ## Search pipeline
 
-The UI deliberately separates fast local work from slow macOS metadata queries.
+Raycast's native `List` throttle coalesces typing for about 250 ms before it delivers the latest query to the extension. After that, name search is one synchronous SQLite query behind a 20 ms debounce. Nothing streams. The native delay applies to Everywhere and to folder filtering, and it is not part of worker timing samples.
 
-1. Load usage history and pins. These are the only stores that hold back the first useful frame.
-2. Show direct folder children, cached usage metadata, standard locations, remembered Spotlight paths, learned queries, and cached Google Drive entries. Imported recent files load independently and join these results after their paths are checked.
-3. In Everywhere, after a 420 ms pause in typing, ask Spotlight for the longest query token. For an alphanumeric token, follow the ordinary name search with a broader fuzzy-candidate pass.
-4. Stream paths as Spotlight returns them. Rank each arriving batch, validate candidates asynchronously, and apply type, size, and date filters using their metadata.
-5. Read Spotlight usage metadata in batches and merge it into the same ranked list while discovery continues.
+1. Load visits and pins, saved searches, learned pairings, and the index coverage summary. Their readiness, plus any applicable cached-path validation, is what the initial list waits on.
+2. Collect the applicable memory and direct-read sources: folder children, standard locations, visited and pinned paths, learned queries, discovered shared-folder roots, and explicit path listings. Attach previously cached usage to folder children.
+3. For a global name query, after the debounce, query the index with usable terms of at least three characters as ANDed filename-prefix phrases. SQL filters run before the 50 newest matches are selected. Folder, explicit-path, hidden-only, and filter-only searches skip the index.
+4. Merge, filter, deduplicate, and rank the applicable sources, keep at most 50 rows, and publish once no result-producing stage is running. A short global query issues no FTS lookup, so its memory results render while the index stage reports that it needs more characters.
+5. Warm optional folder usage metadata in the background for the next query, folder visit, or refresh. Do not publish it to the current list.
 
-Global Spotlight name search starts when the longest name term has at least three characters. Folder-scoped queries filter direct children at any query length. They do not start Spotlight name searches, recursive walks, matching-directory expansion, or hidden-root expansion. Direct-child usage metadata is still read. Cached candidates are restricted to immediate parents before validation, and the final ranker applies the same boundary to every source, including late results and canonical paths through symlinks.
+Folder listings and cached-path validation return a finished result rather than growing batches. Watcher refreshes and user actions still update the list. Filesystem work has deadlines: a folder listing gets three seconds, cached-path validation two. Whatever they do not read is reported as omitted or partial. Optional usage warmup has its own three-second deadline and a 50-path budget, and holds back neither results nor status. The SQLite statement has no deadline, so a broad match can exceed the latency target.
 
-Live search has no whole-query time cutoff, but has hard memory limits in `src/lib/search-limits.ts`: 500 retained live matches, 100 displayed rows, 500 returned entries per cached source, 5,000 scheduled discovery candidates, 1,000 recursive directories, and 100,000 raw Spotlight paths across both passes. Spotlight also caps accepted paths at 5,000 even if a caller requests more. Reaching a collection limit preserves existing results and reports partial coverage; the display cap has its own status message.
+The lookup and its publication run synchronously inside the debounce callback, with no awaited response that could arrive after a newer lookup. Superseding input clears the pending timer. A running SQLite statement blocks the worker until it returns; cancellation does not interrupt it. Asynchronous filesystem and storage results use abort and generation guards to reject obsolete work.
 
-The 500-result limit applies to the final ranked list and the live discovery map; it is not a limit on all entry objects in memory. A folder listing can retain 3,000 children, each cached source can return 500 entries, and the command-owned recent seed can hold 10,000 entries. The saved indexes have their own limits below. Navigation keeps only one result view mounted, rather than retaining these arrays for each visited folder.
+Indexed search starts when the longest name term reaches three characters. A folder-scoped query filters direct children at any length and never touches the index, though direct-child usage metadata is still read. Cached candidates are restricted to immediate parents before validation, and the final ranker applies the same limit to every source, including canonical paths reached through symlinks.
 
-Spotlight output is decoded as a NUL-delimited UTF-8 stream and delivered in batches of up to 60 paths. Eight independent validation workers let healthy files appear while another file is slow. The validation and usage queues apply backpressure to the producer. Result snapshots are throttled to 100 ms; rejected fuzzy candidates do not enter the metadata queues.
+### The index
 
-Changing the query cancels its `mdfind` process, pending `mdls` enrichment, and queued validation. Folder navigation cancels the old scope and unmounts its result view; each destination starts with a blank query. Cancelled work cannot publish late results. Selection, Quick Look, details, and window visibility do not cancel a search. The 420 ms debounce still limits how often a new Spotlight search starts.
+`fd` does the crawling. It already handles symlink loops, permission errors, and exclusions, which a JavaScript walker would have to reimplement. It is spawned with an argument array, never an interpolated shell string:
 
-`NativeSearchNavigation` uses Raycast's Navigation API with at most two routes: a lightweight empty root and one active search view. Each folder transition pops the old view before pushing its replacement, giving Raycast fresh native selection and scroll state without accumulating screens. The pop callback schedules owner updates in a microtask because Raycast invokes it inside a state updater. `FolderNavigation` stores only the active folder, its numeric ID, and any requested initial selection; it keeps no folder history. Fresh IDs reject old callbacks even after revisiting the same folder. Unmounting runs search, watcher, timer, and validation cleanups, making previous results eligible for garbage collection. `⌥⌘↑` requests selection of the folder just left. Native Back returns to the empty root and invalidates the old frame; typing there opens a fresh Everywhere search after 250 ms of inactivity, while Return starts immediately with the entered query.
+```
+fd --absolute-path --print0 --follow --show-errors --no-ignore --hidden
+   --exclude .git --exclude node_modules ... . <root>
+```
 
-**Return to Start** (`⌘⇧H`) resets `FolderNavigation` to a new global frame, clears the query and selection, and cancels the previous scope before replacing the native search route. The setup task, session hidden-file state, and cached sort/type choices survive. Stale reset callbacks are ignored. The action is available from result rows, setup, and empty lists, except at the already-empty global screen. Bare Escape remains host-controlled; native Back returns to the lightweight root rather than restoring an old folder.
+`--hidden` follows the hidden-files setting. `--no-ignore` is replaced by `--no-require-git` when ignore files are respected. The user's patterns are appended as further `--exclude` values.
 
-An empty query on the active Everywhere route still shows its initial results and any offered setup row; it is distinct from the empty root. The root exposes only Start Search and a text field, with no result rows, setup controls, or type/sort dropdown. Setup remains owned by `Browser` and can continue there; Return opens a results route where Stop Setup is available. Return passes the current root text, including when pressed before the 250 ms timer fires. Details visibility and the query-history cursor are per-result-view state and reset on a route replacement; saved queries, type/sort choices, and session hidden-file visibility survive.
+Output is a NUL-delimited stream, decoded with `StringDecoder` so a multi-byte character split across chunk boundaries survives. fd marks directories with a trailing separator, which is stripped before the path is stored. Metadata comes from one `lstat` per entry through a 16-worker pool; a symlink also gets a `stat` and a `realpath` so its target is recorded without losing the visible path. Broken links are kept. File contents are never read.
 
-`useSearchSetup` lives in the command owner and survives every folder transition. `useRecentFiles` filters and validates the shared recent-file seed only for the active result view. Setup progress and completion reach the current folder without keeping an old result view mounted; closing the command cancels setup.
+fd canonicalises the root it is given, so `/var/x` comes back as `/private/var/x`. `resolveRoots` realpaths the configured roots before the scan, which keeps exact-path lookups working and stops one root appearing under two spellings. `normalizeRoots` then drops any root contained in another, so overlapping configuration cannot double-index a subtree.
 
-`SearchScreenView` keeps the native `List` mounted within one route while its result producer publishes props through `SearchScreenContent`. Each route owns a new `SearchScreen`; cleanup drops its rows and callbacks. A separate small renderer store passes the latest session settings and setup state into the pushed route, without capturing obsolete session snapshots. Native event handlers use `useEventHandles`: the controls receive small stable functions whose targets are cleared when their result view unmounts. This prevents React DevTools' retained control props from keeping the old view's index arrays alive. Row setup props include only setup state and actions, never the recent-file seed or result arrays.
+Rows are written in `BEGIN IMMEDIATE` transactions of 1,000. Each scan takes a new `scan_id`. Stale-row deletion is scoped to one root and requires error-free completion. Every nonzero fd exit is a failure: exit 1 means "no matches" only with `--quiet`, which the crawler never passes. `--show-errors` also reports traversal diagnostics on successful exits, and those conservatively mark the root incomplete, including symlink-loop warnings. Cancellation is checked inside the loop and again after the final output and metadata flush. An unvisited root prevents a complete report, and with it the cleanup of unconfigured roots. Earlier roots that completed may already have removed their stale entries.
 
-`SearchScreen` owns query text separately from releasable result props, so React's development-mode effect replay cannot erase an initial query. Input events update it synchronously, in the same batch as Raycast's input-event counter. The result view subscribes with `useSyncExternalStore`; result publications preserve the text instead of writing back an older copy. Query-history changes use the frame-checked setter, and each folder route starts with empty text. Result-only publications do not rerender the query consumer. The harness covers rapid typing, backspace, stale publications, root typing and Return, effect replay, and 120 folder transitions with at most two routes and one mounted result view.
+### Configurable scope
 
-When `environment.isDevelopment` is true, the extension logs navigation transitions, result-view lifetimes, requested and reported selection positions, heap usage by space, and active resource counts. Samples contain counts and IDs, not filenames or paths. They appear in the development console and in `raycast-file-search-navigation.log` in the macOS temporary directory, bounded to roughly 256 KB. Post-unmount samples run after one second; garbage collection is controlled by the worker, so these samples do not imply immediate reclamation. Diagnostics are disabled when `environment.isDevelopment` is false; a locally installed build can still run in development mode.
+`src/lib/index-settings.ts` holds the scopes, the user's exclusion patterns, and three flags, as one JSON value in LocalStorage that is read on every rebuild. Parsing falls back per field rather than wholesale, because a corrupt or hand-edited value must not be what stops someone indexing. A field that is missing or is not a list falls back to its default, so a truncated file still indexes the home folder. A field holding an empty list stays empty, because a user who removed every scope meant it. Those two cases look alike and are not: treating a missing list as an empty one meant a truncated file indexed nothing. Lists are trimmed, deduplicated, and bounded at 32 scopes and 128 patterns.
 
-Shared cancellation signals belong to query and navigation events. Each effect owns the cleanup of its own work, so React's development-mode startup replay cannot disable later searches. An edit revision restarts a cancelled search even when rapid edits return to the same query before React renders.
+Scopes must be absolute. fd receives the root directly, so a relative path would resolve against whatever directory the Raycast process happens to have.
 
-The list renders at most 100 rows, including any retained selection. The pure `displayRows` helper keeps the first 100 ranked results, replacing the last row with the selected item when it falls outside that subset. This preserves order without mounting intervening rows. Action menus and detail panels are separate components: Raycast mounts them only for the selected item, so other rows do not build those trees. The harness checks these allocations and verifies that actions and details follow selection changes. Ordinary native selection notifications update a ref, not React state; only establishing or releasing initial focus changes selection state. There is no pagination state or load-more callback; collection does not depend on scrolling. Live folder walks have no time or depth cutoff, but share the directory ceiling and honor their result limit. Independent directory workers share a physical-read limit of eight, and overlapping expansion roots share a visited set. Recursive queues can hold at most the bounded set of admitted directories. Setup retains its separate limits.
+Defaults are the home folder plus detected Google Drive roots, with hidden indexing and ignore-file handling off. Normalization collapses contained roots, including descendants of `/`. `/Applications` is not a default scope. The editable default patterns exclude temporary files, caches, `Library/Application Support`, the three Containers directories, and Mail, while keeping document storage such as iCloud Drive. Turning off Drive detection does not exclude Drive paths under the home scope.
+
+Patterns are passed to fd verbatim as `--exclude` values, so fd's glob syntax is the syntax: nothing to translate, and no pattern language of our own to maintain. `INDEX_EXCLUSIONS` always applies on top, and the editor shows it read-only, so the effective scope is visible on one screen.
+
+`useIgnoreFiles` drops `--no-ignore` and adds `--no-require-git`. Without the second flag, fd applies gitignore rules only inside a repository, which would make the setting do nothing in an ordinary folder.
+
+The editor is a command rather than a preferences pane, because manifest preferences are static and single-valued. Its lists are in LocalStorage; the manifest keeps the hidden-file default, score visibility, and the fd path. Adding a scope pushes a one-field form using `Form.FilePicker` with `canChooseDirectories`.
+
+Every row's first action is non-destructive. The search bar doubles as the pattern input, so Return has to add rather than delete whichever row is selected; removal uses `Keyboard.Shortcut.Common.Remove`.
+
+A root removed from the configuration would otherwise keep its rows forever, because `scanRoot` only deletes stale rows for roots it scanned. `forgetUnconfiguredRoots` drops rows and coverage for any root outside the configured set, but only when every configured root completed. After a partial, failed, or cancelled run there is no way to tell a removed root from one the run did not reach, and deleting on that basis would throw away an index because a mount was slow.
+
+### Storage and queries
+
+`node:sqlite` ships with the Node runtime Raycast bundles, compiled with FTS5. No native module, no subprocess per query, no Python. The distribution build leaves `require("node:sqlite")` external.
+
+The database is in the extension's support directory. `files` holds one row per path. `files_fts` is an external-content FTS5 table over `name` alone, kept in sync by three triggers. External content means the index stores terms and reads column values back from `files`, which is what keeps the FTS data near 18 MB against a 360 MB table for roughly 479,000 paths. The tokenizer is `unicode61 remove_diacritics 2` with `prefix='2 3 4'`.
+
+The index is never loaded into JavaScript. Queries are `LIMIT`ed statements, and the rows they return are the only entries that exist as objects.
+
+Ordering inside SQL is `mtime_ms DESC`, which decides the 50 rows that survive the limit. The ranking the user sees is applied afterwards in JavaScript, which is where the visit log is. Recency is a useful proxy on its own, and it measured cheaper than `bm25` on every query tried, by a wider margin on broad terms. `db-search.ts` records those measurements.
+
+Folder browsing does not use the index. It reads direct children from the filesystem, so a folder shows current files whether or not a scan has seen them.
+
+Type, hidden-file, extension, date, and size filters are pushed into the SQL `WHERE` clause, so they decide which rows reach the 50-row cap instead of trimming the list afterwards.
+
+The read connection is cached per process in `index-reader.ts`. A local rebuild drops it; a statement failure closes it and reports `failed`. Missing and failed opens are retried on next access, so a rebuild launched elsewhere can make an absent index available without restarting search. A missing or wrong-version database falls back to memory. A connection opened before a failing pragma or schema read is closed explicitly.
+
+Bulk scans suspend FTS maintenance and restore it once after scanning, including after a partial scan. During a scan, committed rows can be newer than the name index, and new names become searchable when FTS is rebuilt. Finalization failures propagate as a failed build, connections close in `finally`, and the suspended marker lets the next writer recover. The standalone command and the search action share one progress and outcome path.
+
+Write connections use WAL with `synchronous=NORMAL`, a 5-second `busy_timeout`, and an 8 MB page cache. WAL is what lets a search read while a rebuild writes. `PRAGMA user_version` carries the schema version; a version mismatch or a corruption error rebuilds the file from scratch rather than failing the command.
+
+### FTS5 safety
+
+Everything typed is data. FTS5 has its own grammar, so an unquoted term goes through it: a bare `---` is a syntax error rather than an empty search, and `AND` is an operator rather than a word. `fts-query.ts` wraps every term in a double-quoted string literal with internal quotes doubled, and puts the prefix `*` outside the quotes. A term made only of punctuation produces no tokens, so it is dropped rather than ANDed in, which would empty an otherwise good result set.
+
+### Limits
+
+`src/lib/search-limits.ts` defines one 50-result budget, shared by SQLite candidates, retained ranked rows, and displayed rows. The SQL `LIMIT` is `50 + 1`, so truncation is distinguishable from an exact fit. The browser merges memory and index sources in one ranking pass and then caps, preserving the selected path. Temporary candidate arrays may exceed 50, because every admitted direct child has to be filtered and compared before the best 50 can be chosen.
+
+Other bounds sit with their owners: a folder listing retains 3,000 children, and each cached source returns 50 matching entries. Coverage status reads the small `index_roots` summaries the writer maintains rather than counting rows in `files`; a full-table count costs about 55 ms warm and 2.56 s on first access. Those summaries are saved scan totals, not live counts of uncheckpointed work during a rebuild. The settings screen can still request detailed index statistics.
+
+A crawl has a shared 15-minute budget and accepts an optional entry cap. A per-root abort timer stops fd at the remaining deadline even when stdout is idle, and the timer is cleared when that root finishes. Pending metadata reads and the final FTS rebuild are not preemptible, so this is not a hard deadline for the whole command. Reaching a limit marks unfinished coverage partial and preserves unseen rows.
+
+### Cancellation
+
+Changing the query clears the pending debounce timer and aborts the query controller. Changing hidden-file visibility rebuilds that controller, and the outgoing one is aborted in its own cleanup effect so cached reads holding its signal stop. React's development-mode effect replay renews an already-aborted query controller only while its scope is still live, so startup and initial route queries do not wait for another keystroke. Folder navigation cancels the old scope and unmounts its result view, and each destination starts with a blank query. Selection, Quick Look, details, and window visibility cancel nothing.
+
+A rebuild accepts an optional abort signal. Cancelling kills fd, and the flag is rechecked after the final metadata flush; the interrupted root keeps its unseen saved paths. Nothing in the shipped extension passes that signal: `src/rebuild-index.tsx` and the search action both call `rebuildWithFeedback`, which calls `rebuildSearchIndex` with progress callbacks only. No action cancels a rebuild in progress, and nothing schedules one. A root that completed earlier may already have removed stale rows before cancellation.
+
+### Navigation
+
+`NativeSearchNavigation` uses Raycast's Navigation API with at most two routes: global search at the root, and one reusable folder route above it. Only one result producer is mounted, so leaving the root releases its results before pushing the folder route. Later folder transitions reuse that route and its native input, replacing the keyed result producer and query owner, which avoids a native pop and push for every folder change. Native Back recreates default results with a fresh frame ID and an empty query. The pop callback schedules owner updates in a microtask, because Raycast invokes it inside a state updater.
+
+`FolderNavigation` stores the active folder, its numeric ID, and any requested initial selection, and no folder history. Fresh IDs reject old callbacks even after revisiting the same folder. Unmounting runs the search, watcher, timer, and validation cleanups, which makes previous results collectable. `⇧⌘↑` requests selection of the folder just left.
+
+**Return to Start** (`⇧⌘H`) resets `FolderNavigation` to a new global frame, clears the query and selection, and cancels the previous scope before returning to the default root. Session hidden-file state and cached sort and type choices survive. Stale reset callbacks are ignored. The action is available from result rows and empty lists, except on the already-empty global screen. Bare Escape stays host-controlled, including whether it clears text before navigating back; see the known exit issue below. Clearing an Everywhere query restores the default results in place, and clearing a folder query leaves the folder open.
+
+The default root uses the same result view as search, including recent items, pins, places, the dropdown, and the normal item actions. Typing and query-history actions reuse the same native input and result producer, with no delayed route replacement and no second round of initialization. Details visibility and the query-history cursor are per-result-view state and reset when the location is replaced; saved queries, type and sort choices, and session hidden-file visibility survive.
+
+`SearchScreenView` keeps the native `List` mounted within one route while its result producer publishes props through `SearchScreenContent`. Each location owns a new `SearchScreen`, and cleanup drops its rows and callbacks. While a folder is open, the root retains only its small, blank, inactive input shell. A small renderer store passes the latest session settings and folder frame into the pushed route. Native event handlers use `useEventHandles`: controls receive small stable functions whose targets are cleared when their result view unmounts, so retained control props cannot keep the old view's result arrays alive.
+
+Known live-test issue: Escape exits normally from a newly opened default screen, and folder Back restores the default results, but the next Escape after that restoration does not reliably exit. The React harness checks route bounds and cleanup, not host exit: the SDK retains its last route and relies on the native host to leave the command. A mocked root unmount is not verification of this.
+
+`SearchScreen` owns query text separately from releasable result props, so React's development-mode effect replay cannot erase an initial query. `SearchScreenView` always enables Raycast's native `throttle`, independently of published result props. Immediate result updates lose letters during rapid input on Raycast 2.4.1, even with title-only rows; native throttling keeps them with the complete interface. Raycast updates its text field at once and delivers the coalesced query after about 250 ms. On receipt, the extension updates its query synchronously in the same batch as Raycast's input-event counter. The result view subscribes with `useSyncExternalStore`, and result publications preserve the text instead of writing back an older copy. Query-history changes use the frame-checked setter, each folder location starts with empty text, and result-only publications do not rerender the query consumer. The harness covers all of that, plus the throttle contract and route bounds under repeated folder transitions. Native keystroke capture and command exit need live tests.
+
+The search effect depends on a memoized primitive query key rather than the parsed-query object, because depending on object identity lets any caller that reparses on every render produce an effect-render loop.
+
+When `environment.isDevelopment` is true, the extension logs navigation transitions, result-view lifetimes, requested and reported selection positions, heap usage by space, and active resource counts. Samples carry counts and IDs, not filenames or paths. They go to the development console and to `raycast-file-search-navigation.log` in the macOS temporary directory, bounded to roughly 256 KB. Post-unmount samples run after one second, and collection is up to the worker, so they do not imply immediate reclamation. Nothing is logged when `environment.isDevelopment` is false; a locally installed build can still run in development mode.
+
+`search-results-ready` records scope, query length, row count, and `elapsedMs` once per query controller. Timing starts when `SearchScreen` receives changed text, or when the screen is constructed for startup, and ends when ready result props are published. Result-only publications and rejected stale inputs do not reset the clock. This is worker input-to-results latency: it excludes the native throttle and compositor paint. To inspect samples without logging filenames or query text:
+
+```bash
+rg 'search-results-ready' "${TMPDIR%/}/raycast-file-search-navigation.log"
+```
+
+### What the list shows
+
+`chooseListView` is one total function in its own module, so its input space can be enumerated. The harness walks every combination of its boolean and error inputs across empty, single-row, and many-row lists with and without a query, and asserts that none returns nothing to show, and that every non-row state carries a title and a description. The failure it exists to prevent is a blank screen with no message.
+
+Rows win whenever anything will render: the state is how many rows the component will pass to Raycast, not how many it holds. A view being replaced is the one reason checked before the specific ones, because its rows were dropped on the way out and any other reason would describe the scope the user just left.
+
+Raycast withholds the empty view of a list that is loading, so a list with no children and `isLoading` set shows no rows, no message, and no reason why. `isLoading` is therefore derived by `listIsLoading`, which allows it only alongside rows, and `SearchScreen` drops the flag from any prop set with no children. The placeholder props a route holds before its result view publishes carry no loading flag either, so Raycast shows its own default empty view rather than nothing. The harness checks both: no state returns a message the loading bar would hide, and no prop set reaching the native list combines loading with nothing to show.
+
+The list renders at most 50 rows, including a retained selection. `displayRows` keeps the first 50 ranked results and replaces the last one with the selected item when it falls outside that subset. A query-keyed reader obtains the pending parent target or the live native selection before the upstream cap, so sorting cannot discard that row before the selection hook sees it. It stores no previous result arrays, and a new query cannot inherit the old selection. Action menus and detail panels are separate components that Raycast mounts only for the selected item, so other rows do not build those trees. Ordinary native selection notifications update a ref rather than React state; only establishing or releasing initial focus changes selection state. There is no pagination state and no load-more callback.
+
+Each row carries a pin slot, the open count, an optional usage score, and the modified date, in that order. `List.Item.Accessory` has no width or alignment field, and Raycast lays accessories out from the right at the size of their content, so a row whose cell is missing or merely shorter moves every column to its left. `accessory-columns.ts` measures one set of widths over the rows that will render and pads each cell with FIGURE SPACE, which is one digit wide. The padding sits between two zero-width characters so it is never leading or trailing, which a renderer that trims its labels would discard. The pin slot holds a transparent image when the item is not pinned, so it stays the same box as the icon it stands in for. Rows are published once, so the widths do not move while the list is on screen. Two things this cannot align: the date varies by less than a digit, because "4mo" and "6d" differ in the widths of their letters, and a cell wider than its column is left alone rather than truncated.
 
 ### Completion state
 
-`src/lib/progress.ts` defines four stages: memory, folder, Spotlight, and ranking. Every stage is `done`, `running`, `waiting`, `skipped`, `partial`, or `failed`. The progress bar, colored status light, and section heading all derive from this object. The heading combines a shortened location, count, and status in one text field; it does not use a wrapping subtitle. Long paths show their final two components, capped at 40 characters. Sorting remains visible in the dropdown.
+`src/lib/progress.ts` defines four stages: memory, folder, index, and ranking. Every stage is `done`, `running`, `waiting`, `skipped`, `partial`, or `failed`. The progress bar, the colored status light, and the section heading all derive from that object. The heading puts a shortened location, the count, and the status in one text field rather than a wrapping subtitle. A long path shows its final two components, capped at 40 characters.
 
-A search is fully complete only after every applicable stage is done or skipped. A partial stage takes precedence over pending stages in the status light, so orange can appear while other work is still running. A failed folder, Spotlight, or metadata stage takes precedence over both and uses red. Separate caveats do not determine the status light and can appear alongside green; these report:
+A search is complete only after every applicable stage is done or skipped. A partial stage outranks pending stages in the status light, so orange can appear while other work runs. A failed folder or index stage outranks both and shows red. Optional usage warmup takes no part in completion or error status. Caveats do not determine the light and can appear alongside green. They report:
 
-- An incomplete Google Drive index
-- A Google Drive shared folder being read directly because Spotlight has no index for it
-- The 100-row display cap
+- A missing index, or one whose last rebuild left a location incomplete
+- A folder being read directly rather than queried
+- The 50-row limit, which can appear with green when the folder read is complete but only a subset is shown
 
-Starting a new search clears pending usage metadata from the old one. Empty directories also finish their folder stage immediately.
+Starting a new search clears pending usage metadata from the old one. An empty directory finishes its folder stage at once.
 
-Partially cached folders stay pending while usage metadata arrives. Live enrichment allows five seconds per 25-path batch; a timed-out batch is partial, and later batches still run. A source failure is classified after queued validation finishes: partial if usable results arrived, failed if none did. Search history and cached indexes load without delaying the first useful frame, but keep the status yellow until they finish.
+A folder uses a snapshot of already-cached usage immediately. A background pass reads at most 50 uncached paths and writes only the cache, which the next query reuses. A successful empty metadata result is cached as checked too, so unused files cannot starve later children. A failed or incomplete read caches only returned values and leaves unknown paths retryable. Search history and cached indexes keep the status yellow until they finish, and the rows are held while they do. An index query that cannot run reports `failed`. A database that is absent or the wrong version reports `missing`, which is a caveat rather than a stage failure.
 
 ### Selection while results reorder
 
-Row IDs use `generation:path`.
+Row IDs are `generation:path`. The generation changes when the normalized name terms, the effective type, or the scope changes.
 
-The generation changes when normalized name terms, the effective type, or the scope changes. Initial selection is requested in an effect after publishing the rows; it does not depend on Raycast first reporting a selection. `BrowserView` supplies the highest-ranked `instantRows` path still admitted by the combined result cap, including direct folder listings. Selection waits until ranking data is loaded and the result view is active. While initial memory loading, cached-file validation, or directory enumeration is pending, one 200 ms timer gives the memory list time to fill in. Completed checks end the wait early. When only Spotlight rows are available, the timer runs for the full 200 ms from their first appearance. Further batches do not restart it; at the deadline the latest committed memory candidate takes priority over the top Spotlight row. Slow metadata validation or ongoing setup cannot extend this wait. The chosen path is then published within the 100-row display before a subsequent commit requests focus, even when an earlier native selection was elsewhere.
+One predicate decides whether rows render and whether a selection is requested, because they are one decision. `listReady` is true when the result view is active and `rowsCanChange` reports that no stage is still running. Rows render only then, and only then does the hook receive a source other than `waiting`. Holding rows and requesting selection together means the extension and Raycast both choose from the finished list, instead of Raycast selecting an unranked row before the initial request arrives. Optional `mdls` enrichment is excluded from that wait and never republishes the current rows, which keeps its latency and its late reranking out of the list.
 
-The chosen path is retained across reranking. Changing the query rearms initial selection and cancels the old timer; leaving the view also clears it. Repeated acknowledgements do not trigger renders. A native move after the requested row is acknowledged releases controlled selection. During the settling wait, the first native report is treated as automatic restoration; a subsequent different valid row is treated as user navigation and cancels automatic focus. Raycast does not identify the source of selection events, so this boundary still requires live UI testing. Up retains priority for the folder just left and releases its request when acknowledged. Late automatic reports rearm unacknowledged requests without changing their target. If Raycast reports no selection or the automatic target disappears, focus is rearmed after rows are available. Rearming briefly releases the controlled ID before requesting it again. Requests cannot select a target excluded by the effective filters or absent from the retained results. After the user takes control, the highlight follows the selected file during reranking as long as it remains among the retained results. The bounded display includes that file without rendering all intervening rows.
+Folder children are derived synchronously from the directory listing and the query's frozen usage snapshot. There is no effect-driven intermediate child state, so directory readiness and prepared rows arrive together, with no transient empty list and no premature initial focus.
+
+`rowsCanChange` asks only whether a stage is running, which is narrower than an unsettled list. An index below the character minimum reads `waiting`, meaning it will not be queried for this query at all, so a one- or two-character query's memory results are final and render at once.
+
+Initial selection is requested in an effect after the rows are published; it does not wait for Raycast to report a selection first. The chosen path is published within the 50-row display before a later commit requests focus, even when an earlier native selection was elsewhere. The browser marks ready rows as immediately selectable, skipping the hook's optional 200 ms delay for incremental callers.
+
+The chosen path is retained across reranking. Changing the query rearms initial selection and cancels the old timer; leaving the view clears it. Repeated acknowledgements do not trigger renders. The first native report is treated as automatic restoration; a later different valid row is treated as user navigation and cancels automatic focus, as does a native move after the requested row is acknowledged. Raycast does not identify the source of selection events, so that distinction still needs live UI testing. Up keeps priority for the folder just left and releases its request when acknowledged. Late automatic reports rearm unacknowledged requests without changing their target. If Raycast reports no selection, or the automatic target disappears, focus is rearmed once rows are available, briefly releasing the controlled ID first. A request cannot select a target excluded by the effective filters or absent from the retained results. After the user takes control, the highlight follows the selected file through reranking while it stays among the retained results, and the bounded display includes that file without rendering the rows in between.
 
 ## Query matching and filters
 
-`SearchOptions` groups type and sort choices in one dropdown. `sort-mode` and `type-filter` use separate `useCachedState` keys. The selected sort item includes the effective type in its title so the closed dropdown shows both settings. Item values stay fixed when either setting changes; replacing a selected value can make Raycast fall back to All Types. Change handlers ignore echoed values. Query directives override the saved type through `parseQuery`'s default-type argument; the original query text and learned-query key remain unchanged.
+`SearchOptions` groups type and sort choices in one dropdown. `sort-mode` and `type-filter` use separate `useCachedState` keys. The selected sort item includes the effective type in its title, so the closed dropdown shows both settings. Item values stay fixed when either setting changes, because replacing a selected value can make Raycast fall back to All Types. Change handlers ignore echoed values. Query directives override the saved type through `parseQuery`'s default-type argument, leaving the original query text and the learned-query key unchanged.
 
-The effective type is passed to cached-entry validation before its result cap and checked again during final ranking, including learned and path-bar matches. Changing the effective type cancels the obsolete query and resets row IDs without restarting the folder watcher. Empty-query recent-file selection still includes only genuinely recent entries. Path-bar parsing runs only in Everywhere and treats the text as a path, not a name query with appended directives.
+The effective type is passed to cached-entry validation before its result cap, and checked again during final ranking, including for learned and path-bar matches. Changing the effective type cancels the obsolete query and resets row IDs without restarting the folder watcher. Path-bar parsing runs only in Everywhere, and treats the text as a path rather than a name query with directives appended.
 
-The list disables Raycast's built-in filtering because it would replace the extension's ranking. `src/lib/query.ts` assigns these match tiers:
+The list disables Raycast's built-in filtering, which would replace the extension's ranking. `src/lib/query.ts` assigns these match tiers:
 
 | Tier | Match                                                            |
 | ---: | ---------------------------------------------------------------- |
@@ -145,47 +279,41 @@ The list disables Raycast's built-in filtering because it would replace the exte
 |   40 | Every token appears, but the best match is in the enclosing path |
 |   50 | Tight whole-path subsequence                                     |
 
-Match tiers are separated by 10. `ORDER_PENALTY` adds 5 when terms appear in a less natural path order, preserving the match while ranking the ordered form first.
+Tiers are separated by 10. `ORDER_PENALTY` adds 5 when terms appear in a less natural path order, which keeps the match while ranking the ordered form first.
 
-Filename subsequences allow arbitrary gaps. Only the whole-path fallback requires at least four query characters and a span no longer than three times the query length. Positional quality affects the score within a Usage tier, not whether a filename subsequence is admitted. Learned pairings bypass textual and extension matching, but still pass type, size, and modification-date checks.
+Filename subsequences allow arbitrary gaps. Only the whole-path fallback requires at least four query characters and a span no longer than three times the query length. Positional quality affects the score within a Usage tier, not whether a filename subsequence is admitted. A learned pairing skips textual and extension matching, but still passes the type, size, and modification-date checks.
 
-Spotlight accepts one name term. The longest token is used, with a tie going to the later token because queries are commonly typed as folder then item. Remaining terms and all attribute filters are applied after paths return.
+These tiers rank every source. What they cannot do is admit a row the index never returned, and the index is deliberately stricter than the ladder above: it stores filename words, not filename or path trigrams, and matches word prefixes only. Tiers 20 and 30, substring and subsequence, are therefore reachable for memory results and unreachable for a file the extension is seeing for the first time. Tier 40, a match in the enclosing path, is memory-only too, because the FTS table indexes `name` and not `path`.
 
-For alphanumeric terms, the second pass asks for filenames containing every distinct query character. `matchTier` then checks character order before any filesystem metadata reads. Results from both passes are deduplicated and share the caller's collection limit and cancellation signal. Only letters and numbers enter the generated predicate; punctuation stays in the ordinary literal-name request. The broader pass can be substantially slower than the first, but does not delay its results.
+Opening, entering, pinning, or explicitly learning an item can make its path a future memory candidate; merely displaying an index match does not save it. Memory is bounded: starting candidates are the top 40 recorded visits, pins, and standard locations, with learned pairings collected separately.
 
-Supported filters are:
+`parsed.longest` is the longest typed token, with a tie going to the later one. It informs status and positional quality. `buildFtsQuery` includes every usable term of at least three characters, not just the longest, and joins their prefix phrases with AND. Punctuation-only and shorter terms are dropped, so `rep 20` asks the index for `rep`. Separate terms may match in either order within the filename, while separators inside one typed term form an adjacent phrase, so `report-2026` is more restrictive than `report 2026`.
 
-- `-d` and `-f`, with `^` and `:` aliases; directory words are `d`, `dir`, `directory`, and `folder`, and file words are `f` and `file`
-- `ext:` with repeated, comma-separated, and multi-part extensions
-- `after:` and `before:` with validated calendar dates
-- `size:` with `b`, `kb`, `mb`, or `gb`
-- A leading dot for hidden entries
+The README lists the filter syntax. What matters here: every filter runs in SQL, and each file is its own row, so `foo ext:pdf` matches the file directly and needs no folder expansion. `-f` and `size:` exclude folders. `ext:` is a name-suffix check, so a folder named `foo.pdf` can match `ext:pdf` unless File or `-f` is also selected, and multi-part suffixes such as `tar.gz` are supported. Date bounds use midnight UTC, with `after:` inclusive and `before:` exclusive. Size bounds are strict comparisons over powers of 1024, and accept decimals. Inside a folder, filtering stays limited to direct children.
 
-`-f` and `size:` exclude folders. `ext:` is a name-suffix check, so a folder named `foo.pdf` can match `ext:pdf` unless File or `-f` is also selected. All three filters enable matching-folder expansion in Everywhere: when Spotlight returns a matching folder, `listUnder` reads beneath it so a query such as `foo ext:pdf` can find PDFs there. This walk is breadth-first and bounded by collection limits. Inside a folder, filtering stays limited to direct children.
+`Browser` initializes hidden-file visibility from the `showHidden` preference and keeps the toggle state for the command's lifetime, across folder changes. It is not persisted. Effective visibility is the session choice OR `parsed.hidden`, and the caller folds that into the `name NOT LIKE '.%'` clause. Changing it restarts directory reads and reruns the index query, with each effect cancelling its previous work, and cached dot-prefixed rows are filtered at ranking time too. Explicit path-bar targets stay reachable. This is about dot-prefixed names, not Finder's separate hidden-file attribute.
 
-Spotlight does not reliably index hidden content. In Everywhere, a dot-prefixed term such as `.config editor` turns matching hidden folders in the home directory into walk roots. A bare `.` lists hidden entries in the current scope. Inside a folder, dot-prefixed queries filter its direct children without walking below them; enter a hidden folder or use the path bar to browse it.
+A dot-prefixed term such as `.config` finds indexed hidden names beginning with `config`, but cannot discover names excluded at crawl time, since fd receives `--hidden` only when Include Hidden Files is on. `.config editor` asks for one hidden filename containing both words. A bare `.` skips the index and lists hidden home entries directly; inside a folder it filters direct children.
 
-`Browser` initializes hidden-file visibility from the `showHidden` preference and keeps the toggle state for the command's lifetime, across folder changes. It is not persisted. Effective visibility is the session choice OR the parsed query's hidden flag. Changing it restarts directory reads and discovery; each effect cancels its previous work. Cached dot-prefixed rows are filtered at ranking time too. Explicit path-bar targets remain accessible. The shared toggle action is available on result rows, the setup row, and empty lists. This controls dot-prefixed names, not Finder's separate hidden-file attribute.
-
-Filter-only whole-disk searches do not launch Spotlight. Asking for every file of a common extension can exceed the result cap before ranking. Include a name term for a full-disk filtered search.
+A filter-only query does not reach the index: `parsed.longest` is empty, so there is no term to ask for. Asking for every file of a common extension would exceed the result cap before ranking anyway.
 
 ## Ranking
 
-The main weights live together in `src/lib/score.ts`.
+The weights are in `src/lib/score.ts`. `rank-sources.ts` is pure: callers provide the wall clock, the usage clock, the source entries, the query, the scope, and the sort choice. It merges duplicate-path usage metadata without mutating its inputs, and deduplicates same-name filesystem identities through a map of result positions. The browser memoizes one merged ranking pass and uses a snapshot of cached folder usage per query, while background usage reads update only the cache.
 
 | Signal                         |        Weight | Decay                                  |
 | ------------------------------ | ------------: | -------------------------------------- |
 | Recorded opens                 |           100 | 120-action half-life on an event clock |
 | Modification time              |            40 | 14-day wall-clock half-life            |
-| Spotlight usage metadata       |            25 | 30-day wall-clock half-life            |
+| Usage metadata from `mdls`     |            25 | 30-day wall-clock half-life            |
 | Positional name quality        |            30 | None                                   |
 | Depth below the current folder | -12 per level | None                                   |
 
-Recorded usage uses an exponential moving sum. The clock advances for the primary Open action and Navigate into Folder, not while the extension is idle. Quick Look, Open With, copying, and Up do not record a visit. The score therefore adapts as new work replaces old work without decaying simply because the user took time away.
+Recorded usage is an exponential moving sum. The clock advances for the primary Open action and for Navigate into Folder, not while the extension is idle. Quick Look, Open With, copying, and Up record nothing. The score therefore adapts as new work replaces old work, without decaying because the user took time away.
 
-The usage contribution passes through `log2`, giving repeated opens diminishing returns. History is capped at 2,000 paths and entries whose decayed value falls below 0.01 are pruned.
+The usage contribution passes through `log2`, so repeated opens give diminishing returns. History is capped at 2,000 paths, and entries whose decayed value falls below 0.01 are pruned.
 
-In Usage mode, match tier comes before score, with learned query-to-item pairs ahead of textual matches. A strong name match cannot be buried solely by an unrelated item's usage count. Within the same tier, the combined score decides the order. Explicit Name, Date Modified, Date Created, and Size sorts bypass match-tier ordering and compare the selected field across admitted results. Ties use natural filename order, then the full path. The current direct-child-only folder view has no positive depth below its scope, so the depth penalty is normally zero.
+In Usage mode, match tier comes before score, with learned query-to-item pairs ahead of textual matches, so a strong name match cannot be buried by an unrelated item's usage count alone. Within a tier, the combined score decides the order. Explicit Name, Date Modified, Date Created, and Size sorts bypass tier ordering and compare the selected field across admitted results. Ties use natural filename order, then the full path. A direct-child-only folder view has no positive depth below its scope, so the depth penalty is normally zero.
 
 The approach draws on:
 
@@ -196,109 +324,122 @@ The approach draws on:
 - [fuzzy-file-search](https://github.com/raycast/extensions/tree/main/extensions/fuzzy-file-search) for multi-token path matching and `-d` / `-f`
 - Everything and [Alfred File Filters](https://www.alfredapp.com/help/features/file-search/) for attribute-filter syntax
 
-## Google Drive workaround
+## Google Drive
 
-Google Drive places shortcut targets under `.shortcut-targets-by-id`. Spotlight may catalog neither the shortcut nor the target contents.
+Google Drive puts shortcut targets under `.shortcut-targets-by-id`. Discovery reads the mounted filesystem rather than depending on Spotlight's coverage of those paths.
 
-The **Index Google Drive** command performs two bounded scans:
+fd always runs with `--follow`, independently of **Include Hidden Files**, which controls `--hidden` only. A visible Drive shortcut is therefore traversed even when it points into hidden `.shortcut-targets-by-id` storage, and its visible contents are indexed under the shortcut path. The shortcut itself is a row with `is_symlink = 1`, its visible `path`, and `storage_path` holding the resolved target, so a shared folder is findable by the name the user gave it in My Drive, and its contents by their own names. With hidden files off, hidden names inside linked folders are skipped and `.shortcut-targets-by-id` is not enumerated directly, so a target without a visible shortcut is not discovered. When the shortcut route and the direct target route are both indexed, they produce separate paths, and deduplication can collapse the aliases when filesystem identity is available.
 
-- `scanShortcuts` records symbolic links and the names shown in My Drive.
-- `scanSharedFolders` records paths inside shared folders.
-
-Both scans report progress after each breadth-first level. Setup and the standalone command merge readable checkpoints into the last successfully saved index and mark them partial. Unavailable or failed checkpoints do not change storage. Cancellation blocks subsequent writes but retains successful checkpoints. A bounded scan records whether it reached its time, depth, or item limit, and the UI reports that reason. Older saved indexes without a reason use a neutral “stopped early” message. Indexing runs only when the user starts setup or Index Google Drive; there is no scheduled scan.
-
-First-run setup allows ten minutes per Drive scan. The standalone command uses four minutes for shortcuts and two minutes for shared-folder contents. Both use the scanners' default `maxDepth = 8` for shortcuts and `maxDepth = 6` for shared folders. The action-panel Index Google Drive action allows twenty seconds per scan and uses `maxDepth = 6` for both, without saving intermediate checkpoints. Shared-folder scans collect at most 40,000 paths per scan; merging discoveries across runs can retain more within the storage byte limit. Deadlines and cancellation interrupt the caller's wait, including during root discovery. A shared pool caps outstanding Drive filesystem reads at eight per runtime; retries reuse pending reads for the same path and operation. Physical provider reads may finish later, but cancelled scans cannot start further reads or publish checkpoints.
-
-All indexing entry points hold the same `proper-lockfile` lock in Raycast's support directory throughout scanning and saving. Data deletion holds this lock too. A competing request reports that the data is busy without reading or changing the stores. The lock heartbeat runs every second. A lock older than ten minutes can be recovered only when its recorded owner process is confirmed dead; a live or unknown owner stays protected. Each write checks ownership, and the lock is released when the operation finishes or throws.
-
-Each scan also reports whether every traversed Drive directory remained readable. An unavailable result, an explicit scan error, or a thrown scan failure leaves the last successfully saved index intact, even when that index is empty. Successful checkpoints saved before a later failure remain available.
-
-`refreshShortcutIndex` and `refreshSharedIndex` implement the same policy: complete readable scans replace; partial readable scans merge; unavailable or failed scans preserve. Shared paths are deduplicated by exact path. Shortcuts are keyed by their visible `path`, with new observations updating the name and target for that path; distinct aliases to the same target remain distinct. A partial union keeps the incoming scan's timestamp, partial flag, and limit reason, even if the previous index was complete. Only a complete scan may remove paths, including by replacing the index with an empty one. Deleted paths can therefore remain indexed until a complete scan. Setup, standalone indexing, checkpoints, and action-panel refresh use these helpers. The browser publishes successfully saved merged entries and metadata, and refresh notices report merged counts rather than raw scan counts.
-
-The shortcut index and shared-folder cache each allow 8,000,000 serialized UTF-8 bytes. Both save functions check capacity before writing and return failure on storage errors. This preflight also prevents Raycast's shared-cache eviction policy from removing an oversized replacement and the old entry. An oversized union or replacement is rejected without truncation; the last saved index stays intact. Setup and standalone indexing stop and report a save failure, including when a checkpoint cannot be saved. The action-panel refresh does not display an unsaved index as a successful refresh. The two indexes are saved independently: a successful shortcut update can remain saved even if the subsequent shared-folder scan fails.
-
-Inside an unindexed shared folder, `useDirectoryListing` reads only direct children; neither `walkSearch` nor `mdfind` is used for name discovery. In Everywhere, matching-folder expansion and hidden-folder searches use continuous `listUnder` traversal. Read failures are reported without discarding matches already found.
+Inside a shared folder, `useDirectoryListing` reads direct children only. Recursive crawling happens during manual rebuilds and nowhere else. Read failures are reported without discarding matches already found.
 
 ### Alias identity
 
-A Drive shortcut and its resolved target have different paths but the same filesystem device and inode. Deduplication uses `dev:ino:name`, so identical routes collapse while a user-named shortcut can remain as a useful alternate result.
+A Drive shortcut and its resolved target have different paths but the same device and inode. Deduplication uses `dev:ino:name`, so identical routes collapse while a user-named shortcut can survive as a useful alternate result.
 
-`Entry.storagePath` contains the canonical path when resolved, including for entries beneath an aliased parent. Visit counts, pins, and learned-query lookups use that path while the row continues to display and open the familiar shortcut path. Individual candidate validation resolves the full path. Folder listings resolve the parent once and reuse it for ordinary children, resolving individual symbolic links separately.
-
-## First-run setup
-
-The active Everywhere results view offers **Set Up Search** when its query is empty, until a setup run starts. The lightweight native root does not display setup controls. The `search-setup-run` marker is written under the indexing lock before scanning, separately from each step's completion state. Declining confirmation, skipping sources, or being blocked by the lock does not count as a run. Existing `done` or `partial` step markers also establish that setup has run. Active scans retain their progress row in Everywhere with an empty query; after they finish or stop, setup remains in Actions for result rows and empty result lists. Partial or unavailable scans stay retryable without restoring the main prompt. If no unfinished steps remain, the action confirms a refresh of both sources and marks those steps pending before scanning. Setup and indexing never start automatically; ordinary search still reads folders and metadata without setup. The standalone **Populate from Recent Files** and **Index Google Drive** commands remain available.
-
-One indexing lock covers both setup steps and the transition between them. Setup captures the deletion generation before confirmation and checks it after acquiring the lock, so an old confirmation cannot recreate erased data. Closing the browser or choosing **Stop Setup** cancels the active scan and prevents the next step from starting. Recent-file checkpoints update the starting cache during import; Drive progress updates the setup row, and the browser reloads saved indexes when the run ends. A one-second heartbeat shows the phase, available counts, elapsed time, and phase budget without estimating a completion percentage. It stops in each helper's finally block. Recent imports distinguish time, document, parent-folder, per-folder, cache, and metadata limits in the final summary. Shortcut metadata is validated asynchronously for matching candidates, not synchronously for the whole new index.
-
-The import queries `kMDItemLastUsedDate` over the preceding seven days with `mdfind`, restricted to the user's home folder and common document/content types. It considers at most 500 returned paths and sorts them by available last-used metadata. First-run setup selects up to 500 documents; the standalone import keeps its 200-document limit. Neither is guaranteed to include the most recent documents if Spotlight exceeds the candidate cap or metadata is missing.
-
-Parent expansion is shallow. Setup allows 50 parent folders, 500 visible children per folder, and 10,000 total entries. The standalone import keeps its limits of 20 parents, 200 children per folder, and 3,000 entries per scan. Hidden and noisy paths are excluded, sibling symlinks are skipped, and resolved paths must remain within the home folder. Reads use batches of eight. First-run setup allows 60 seconds overall, including at most 15 seconds for Spotlight usage enrichment; the standalone recent-file import keeps its 15-second overall and 2.5-second metadata budgets. A shared import pool retains slots for unfinished filesystem reads across retries in the same runtime. Cancellation removes queued work and is checked between filesystem operations. Slow calls can finish later, but cannot publish or save results after the import stops. Checkpoints preserve progress.
-
-Saving and loading share a 10,000-entry cache limit. Existing entries are loaded once under the indexing lock and merged into checkpoints, so a smaller standalone import does not shrink the cache to its per-scan limit. A 16 MB byte check rejects an oversized replacement before writing, preserving the previous saved results.
-
-The recent-file cache is separate from recorded opens. Only documents returned by the recent query seed the empty-query list; parent folders and neighbors participate in typed searches. Name and path matching selects candidates first; type, size, and date filters run after metadata is refreshed. Each live cached source stops after 500 matching entries or after checking its candidates. The validator's bounded mode uses 60 results and one second by default; its uncapped continuous mode is not the browser's per-source limit.
-
-A shared pool limits metadata validation to eight outstanding reads across cached sources and queries, publishing successful rows incrementally. After one second, unchecked imported rows can use saved metadata while live checks remain pending. A provider or permission error also allows cached metadata, but settles as partial. Paths confirmed missing stay out of the results. Path-only indexes have no metadata fallback. Cancelled callers detach their listeners and queued work without releasing slots still occupied by physical reads. They cannot publish late results. The normal match-quality and usage ranking still applies.
-
-Imports, setup-choice writes, and deletion use the same cross-process lock as Google Drive indexing. Skipping a step does not start a scan. Deletion clears the setup-run marker, both step choices, and the recent cache; it never starts another scan.
-
-Normal history and cache writes use a separate, short-lived storage lock, so importing does not block them. Deletion takes the indexing lock first, then the storage lock. Writers capture a reset generation before starting work and check it with lock ownership immediately before saving. Deletion changes that generation before clearing storage; queued or delayed work from an older generation is rejected. Browser storage loads also check the generation before updating the display. The random generation marker contains no user data. Both locks protect heartbeat, release, and process-exit cleanup against stale owners. Cache persistence runs independently of result display.
-
-Each lock records a process ID and random owner ID. Unknown or legacy ownerless locks fail closed, as does a reused process ID. If one remains busy after restarting Raycast, verify that no extension command or recorded owner process is running before manually removing that specific lock directory. Never remove a lock just because its timestamp is old: a live writer may still be finishing a storage call.
+`Entry.storagePath` holds the canonical path when it resolves, including for entries under an aliased parent. Visit counts, pins, and learned-query lookups use that path, while the row still displays and opens the familiar shortcut path. Individual candidate validation resolves the full path. A folder listing resolves its parent once and reuses it for ordinary children, resolving individual symbolic links separately.
 
 ## Caches and storage
 
-| Store                                | Contents                                                      |
-| ------------------------------------ | ------------------------------------------------------------- |
-| `visits` in LocalStorage             | Event clock and per-path usage records                        |
-| `pins` in LocalStorage               | Pinned paths                                                  |
-| `searches` in LocalStorage           | Recent queries                                                |
-| `abbreviations` in LocalStorage      | Learned query-to-path pairs                                   |
-| `shortcuts` in LocalStorage          | Google Drive shortcut index                                   |
-| `recent-files-setup` in LocalStorage | Completed, partial, or skipped recent-file setup              |
-| `google-drive-setup` in LocalStorage | Completed, partial, or skipped Google Drive setup             |
-| `search-setup-run` in LocalStorage   | Whether setup has started; controls the one-time main prompt  |
-| `recent-files` Cache                 | Up to 10,000 imported paths and metadata; 16 MB capacity      |
-| `shared-folders` Cache               | Paths inside shared folders; 8 MB capacity                    |
-| `discovered` Cache                   | Up to 300 paths added per search; 20,000 paths; 4 MB capacity |
-| `usage-meta` Cache                   | Per-directory Spotlight usage metadata                        |
-| Default Cache (`useCachedState`)     | `sort-mode` and `type-filter`; retained by data deletion      |
+| Store                                   | Contents                                                 |
+| --------------------------------------- | -------------------------------------------------------- |
+| `visits` in LocalStorage                | Event clock and per-path usage records                   |
+| `pins` in LocalStorage                  | Pinned paths                                             |
+| `searches` in LocalStorage              | Recent queries                                           |
+| `abbreviations` in LocalStorage         | Learned query-to-path pairs                              |
+| `search-index-settings` in LocalStorage | Scopes, ignore patterns, and the three scan flags        |
+| `recent-files` Cache                    | Legacy imported metadata, retained only for cleanup      |
+| `usage-meta` Cache                      | Per-directory usage metadata from `mdls`                 |
+| `file-index.sqlite` in the support dir  | The fd-built name index; hundreds of MB for a full Drive |
+| Default Cache (`useCachedState`)        | `sort-mode` and `type-filter`; retained by data deletion |
 
-`readUsageMetaResult` processes paths in chunks of 25. Its bounded default is 250 ms overall; continuous mode allows five seconds per chunk and publishes completed chunks as it proceeds. If one path makes a chunk fail, that chunk is divided within its remaining budget to isolate the bad path. Timeouts and mixed successes/failures are partial; process failures or malformed output with no successful batch remain errors. The `readUsageMeta` wrapper is available when a caller needs only the metadata map.
+`readUsageMetaResult` processes paths in batches of 25, four processes at a time, under one overall deadline. The helper defaults to 250 ms; the browser allows 3,000 ms for its nonblocking warmup of at most 50 uncached paths. If one path makes a batch fail, that batch is divided within its remaining budget to isolate the bad path, reading both halves together. The first batch that does not finish cleanly stops the pass, and batches that finished alongside it keep their metadata. The helper reports partial and error status, but the browser does not turn optional warmup failures into search failures. Query changes, scope changes, and unmount abort the warmup, and a storage-generation check prevents writes after deletion.
 
-**Delete All Data and Cache…** clears all LocalStorage keys and the `discovered`, `shared-folders`, `recent-files`, and `usage-meta` Cache namespaces. It does not clear the default Cache used for type and sort choices, extension preferences, or the development diagnostic log. It does not delete user files. Any new namespace containing search data must be added explicitly to `eraseEverything`.
+This `mdls` pass is the only Spotlight call. It supplements the extension's own usage history and the filesystem modification dates, because the fd-built index collects neither macOS use counts nor last-used dates. When the metadata is unavailable, the folder's entries are still listed and ranking uses the other signals. No Spotlight search is attempted.
 
-Deletion acquires the indexing lock before reading or clearing stores, so an in-flight indexing run cannot write its results after deletion succeeds. If the lock is busy, nothing is deleted. Both deletion entry points report success only after the locked operation returns its deletion counts.
+**Delete All Data and Cache…** clears every LocalStorage key, the `recent-files` and `usage-meta` Cache namespaces, the legacy `discovered` and `shared-folders` namespaces, and the index database with its `-wal` and `-shm` files. It closes the cached read connection first, so a search running at that moment reports a missing index rather than reading an unlinked file. It removes those three paths by name and nothing else in that directory. It does not touch the default Cache used for type and sort choices, the extension preferences, the development diagnostic log, or any user file. Any new namespace holding search data has to be added to `eraseEverything` explicitly.
+
+`clearLegacyCaches` exists so deletion can remove the `discovered` and `shared-folders` namespaces from installations that still have them. Nothing writes to either. Delete that module once no install carries them.
+
+### Lock recovery
+
+All indexing entry points hold one `proper-lockfile` lock in Raycast's support directory for the whole of scanning and saving. Data deletion holds it too. A competing request reports that the data is busy without reading or changing the stores. The heartbeat runs every second. A lock older than ten minutes can be recovered only when its recorded owner process is confirmed dead; a live or unknown owner keeps the exclusion. Each write checks ownership, and the lock is released when the operation finishes or throws.
+
+Deletion acquires the lock before reading or clearing any store, so an in-flight indexing run cannot write its results after deletion succeeds. A deletion attempted mid-rebuild changes nothing and reports that the data is busy. If the lock is busy, nothing is deleted. Both deletion entry points report success only after the locked operation returns its counts.
 
 ## Performance notes
 
-Open folder listings use eight independent workers and stream the initial results, with a 3,000-entry cap. Directory names are read with `opendir`, stopping after one overflow entry rather than buffering the entire folder. The omission count is therefore a lower bound, not a full count of skipped files. Enumeration order comes from the filesystem; ranking sorts the admitted results. Typing filters the existing listing in memory. Cached direct children can supplement it, but uncached children beyond the listing cap may be absent even when their names match. A filesystem watcher refreshes changed entries; a five-second poll covers missed cloud-provider events and unavailable watchers. Refreshes retain the previous listing until its replacement is ready. Changing the directory, changing hidden-file visibility, or pressing Refresh starts a new subscription. Closing the subscription stops the watcher and polling and discards unfinished results.
+An open folder listing uses eight independent workers and publishes its initial result once, with a 3,000-entry cap and a three-second deadline. Names are read with `opendir`, stopping one entry past the cap rather than buffering the whole folder, so the omission count is a lower bound. Enumeration order comes from the filesystem, and ranking sorts what was admitted. Typing filters the listing in memory. A filesystem watcher refreshes changed entries, and a five-second poll covers missed events. Only the initial read is pending: a refresh keeps the previous listing until its replacement is ready, and an unchanged read reuses the entire snapshot. Children and their frozen cached usage are prepared synchronously in the same render, without an effect that would hide rows, which is what stops a background poll from resetting the selection. Changing directory, changing hidden visibility, or refreshing starts a new subscription; closing one stops the watcher and the poll and discards unfinished results.
 
-Filename sorting reuses one numeric `Intl.Collator`. Candidate metadata uses the `lstat` result directly for ordinary entries and follows the target for symbolic links. Cached-path checks and standard-location discovery run asynchronously, outside rendering. Standard cloud-location discovery has a one-second deadline. Starting candidates combine pins, the 40 highest-scoring visited paths, and standard locations; validation returns at most 500 matches for the selected type. Name filtering happens during final ranking. Learned abbreviations bypass textual matching when their paths are validated.
+Filename sorting reuses one numeric `Intl.Collator`. Candidate metadata uses the `lstat` result directly for ordinary entries and follows the target for symbolic links. Cached-path checks and standard-location discovery run asynchronously, outside rendering, and cloud-location discovery has a one-second deadline. Starting candidates are pins, the 40 highest-scoring visited paths, and standard locations; validation returns at most 50 matches for the current query and type, so nonmatching pins cannot crowd out matching visits.
 
-Storage identity resolves the entire path, including aliased parent folders. Directory listings resolve their parent once, rather than resolving each ordinary child. Scoped result merging checks both the displayed scope and its asynchronously resolved path, so unrelated cached shortcuts stay out while canonical direct children remain searchable through an alias.
+Scoped result merging checks the displayed scope and its asynchronously resolved path, so unrelated cached shortcuts stay out while canonical direct children stay searchable through an alias.
 
-Use `npm run harness:live` to measure the current machine. File Provider mounts, Spotlight state, disk size, and permissions can change timings substantially; a cold cloud-backed scan can take minutes.
+### Search latency (50 results, September 2026)
+
+Read-only measurements over a 936,420-entry index on Apple Silicon, with Raycast's Node 22.22.2 and SQLite 3.51.2. Lookup samples use 25 repetitions, ranking 100. The first observation is included in p95 and also called out, and these are not controlled cold-disk tests. Queries and folder names are omitted for privacy.
+
+| Stage                                                             | Observed time                                         |
+| ----------------------------------------------------------------- | ----------------------------------------------------- |
+| Coverage summary                                                  | 2.63 ms first; 0.015 ms median; 0.057 ms p95          |
+| Global lookup: four selective queries                             | 0.10-1.02 ms median; 0.46-1.70 ms p95; 10-83 ms first |
+| Broader lookup                                                    | 5.44 ms median; 6.06 ms p95; 201 ms first             |
+| Broad lookup                                                      | 67.4 ms median; 118.3 ms p95; 921 ms first            |
+| Ranking and capping 50 index candidates                           | 0.06-0.09 ms median                                   |
+| Validation of 28 remembered paths                                 | 0.65 ms median; 3.11 ms first                         |
+| Folder enumeration plus stats, 6-121 direct children              | 0.41-1.80 ms median; 0.98-39.5 ms first               |
+| Query filtering, ranking, and capping those already-read children | 0.02-0.15 ms median                                   |
+
+Live worker observations: about 46-57 ms for a global query, 12-20 ms for filtering an open folder, 43-75 ms for a folder transition, and 103-114 ms for a fresh default-screen load. Those measure worker input receipt, or location creation, through ready-result publication. They exclude native paint and do not establish a sub-100-ms guarantee.
+
+The optional `mdls` pass costs roughly 73-497 ms for the tested folders, which is why it warms the cache only and stays off the publication path.
+
+Cost tracks how many names match the prefix, not how many are indexed. A broad term has to visit every match before the 50 can be picked by recency, which is why it costs tens of milliseconds while a selective one costs under a millisecond. A first lookup in a fresh process adds a connection open of about 1.2 ms and a statement prepare of 0.05 ms. The very first access after a rebuild can reach 120 ms while pages are read from disk. A genuinely cold disk is untested, because clearing the page cache needs root.
+
+Memory: 400 query-and-rank cycles produce no measurable heap growth, at 113 MB resident. In the React harness, 200 searches stay under the 64 MB bound, and 120 folder transitions each carrying a query grow the heap by 1 MB.
+
+The target is **under 100 ms from the last input to visible results**. The native throttle adds about 250 ms before worker processing, to prevent lost keystrokes, so the extension does not meet that target. The function timings above exclude native rendering, and broad matches and cold storage add more. Use the development timing events plus a live Raycast check, and do not present SQLite or worker timings as end-to-end UI latency.
+
+### Indexing cost
+
+Indexing two Google Drive accounts from the default home scope, warm mounts, Apple Silicon:
+
+| Measurement      | Value                         |
+| ---------------- | ----------------------------- |
+| Entries indexed  | 936,166                       |
+| Wall clock       | 27.8s, about 30,000 entries/s |
+| Database on disk | 719 MB                        |
+
+Where the time goes: fd emits 789,000 paths in 2.3s, so the crawl is about 4% of a scan, and the `lstat` pass runs at roughly 90,000/s. The rest is insertion, which is why the FTS triggers are suspended for the duration: 200,000 rows take 8.7s with them and 4.6s without, plus 0.4s to rebuild the whole index afterwards. Over 815,000 entries that is the difference between 56.4s and 27.2s.
+
+Two settings dominate the total. With hidden files off, the default home scope is 936,166 entries at 27.8s; with them on it is 1,456,562 at 41.2s, because the extra half million are language and editor caches in dot-directories. `~/Library/Containers` and `~/Library/Daemon Containers` hold 4.5 million entries between them, an order of magnitude more than every document the user owns, so both are excluded.
+
+`npm run harness:live` measures the current machine. It builds a capped index over one real Drive root and queries it. File Provider mounts, disk size, and permissions change timings substantially, and a cold cloud-backed scan can take minutes.
 
 ## Keyboard shortcuts
 
-Result menus start with Open (Open in Finder for folders), Show in Finder, Quick Look, and Open With, matching File Search. Keep Show in Finder second: Raycast assigns `⌘↩` to that position, regardless of explicit shortcuts on later actions. Folder navigation follows in its own section, with its existing `⌥⌘↓` and `⌥⌘↑` bindings.
+Result menus start with Open (Open in Finder for a folder), Show in Finder, Quick Look, and Open With, matching File Search. Keep Show in Finder second: Raycast assigns `⌘↩` to that position whatever explicit shortcuts later actions carry. Folder navigation follows in its own section.
 
-Shortcuts are declared in `src/components/row.tsx`, `navigation-actions.tsx`, `hidden-files-action.tsx`, `search-history-actions.tsx`, and the empty view in `browser.tsx`. Navigation, hidden-file visibility, and query-history actions are shared between empty and populated result lists; the lightweight native root exposes only Start Search. Navigation into a folder, Up, Quick Look, Pin, Copy Path, Copy Name, Copy File, and Refresh use Raycast's common shortcuts. Open With uses `Common.Open` (`⌘O`), not `Common.OpenWith`, to match File Search. Show in Finder (`⌘↩`), Toggle Hidden Files (`⇧⌘.`), and Move to Trash (`⌃X`) use explicit bindings. `⌘P` opens the combined type and sort dropdown. See the [README shortcut table](README.md#keyboard-shortcuts) for the macOS bindings.
+Order matters on the empty list too, because whatever comes first is what Return invokes. `NavigationActions` renders nothing at the top level, where there is no parent to go up to and no start to return to. When the index is missing or unreadable, `Rebuild Search Index` comes first, matching the instruction the empty view displays. The harness evaluates that panel from source in both states and checks the first action carrying an `onAction`.
 
-The custom bindings are:
+Shortcuts are declared in `src/components/row.tsx`, `navigation-actions.tsx`, `hidden-files-action.tsx`, `search-history-actions.tsx`, and the empty view in `browser.tsx`. Navigation, hidden-file visibility, and query-history actions are shared between empty and populated result lists, including the default native root.
+
+These use Raycast's common shortcuts: Navigate into Folder (`Common.MoveDown`), Go to Parent Folder (`Common.MoveUp`), Quick Look, Pin, Copy Path, Copy Name, Copy File, Refresh, and Remove Search Scope in the settings editor. Open With uses `Common.Open` (`⌘O`) rather than `Common.OpenWith`, to match File Search. Show in Finder (`⌘↩`), Toggle Hidden Files (`⇧⌘.`), and Move to Trash (`⌃X`) have explicit bindings. `⌘P` is Raycast's own shortcut for opening the dropdown, which here holds the combined type and sort menu.
+
+The explicit bindings are:
 
 | Shortcut    | Action                                        |
 | ----------- | --------------------------------------------- |
+| `⌘↩`        | Show in Finder                                |
+| `⇧⌘.`       | Toggle hidden files                           |
+| `⌃X`        | Move to Trash                                 |
 | `⌘[` / `⌘]` | Previous / next query                         |
-| `⌘⇧H`       | Return to Everywhere with an empty query      |
+| `⇧⌘H`       | Return to Everywhere with an empty query      |
 | `⌘I`        | Toggle details                                |
-| `⌘⌥A`       | Learn the current query for the selected item |
-| `⌘⇧I`       | Index Google Drive                            |
-| `⌘⌥R`       | Reset one usage record                        |
+| `⌥⌘A`       | Learn the current query for the selected item |
+| `⇧⌘R`       | Rebuild Search Index                          |
+| `⌥⌘R`       | Reset one usage record                        |
 
-Raycast's list navigation keeps bare arrows, `⌥↑` / `⌥↓`, and `⌘↑` / `⌘↓`. Do not reuse them for query history.
+The [README table](README.md#keyboard-shortcuts) lists every binding a user sees, including the ones the common shortcuts resolve to. Raycast's list navigation keeps the bare arrows, `⌥↑` / `⌥↓`, and `⌘↑` / `⌘↓`. Do not reuse them for query history.
 
 ## Tests
 
@@ -308,7 +449,32 @@ Run the deterministic suite:
 npm run harness
 ```
 
-It uses temporary synthetic files and directories. It covers README query examples, fuzzy matching, ranking, exponential decay, progress and failure states, path handling, symlink identity, bounded walks, overlapping indexing, index preservation, directory freshness, process cancellation, hidden folders, and filter expansion. React tests cover controlled input updates, first-row focus, selection restoration, bounded rendering, and independent persisted type/sort choices. The dropdown regression checks that changing type keeps the selected value among already registered menu items. These tests do not enumerate or print the user's files; they do not replace live Raycast UI checks.
+It uses temporary synthetic files and directories. It covers the README query examples, ranking, exponential decay, progress and failure states, path handling, symlink identity, overlapping indexing, index preservation, directory freshness, process cancellation, and hidden entries. The React checks cover controlled input updates, first-row focus, selection restoration, bounded rendering, and independent persisted type and sort choices. The dropdown check confirms that changing the type keeps the selected value among the registered menu items. None of these enumerate or print the user's files, and none replace live Raycast UI checks.
+
+Use synthetic names, paths, and `example.com` accounts in fixtures, comments, documentation, and screenshots. Report live benchmark results with generic query labels, counts, and timings. Do not copy personal filenames, account identifiers, or search terms into the repository.
+
+Several checks compile a span of a shipped component and run it with stubbed dependencies, which is the only way to reach logic inside a React body. `harness/source-slice.ts` anchors those spans on declaration and comment text and throws when an anchor no longer matches, so editing that text produces a failure rather than an assertion that holds vacuously. Editing comments in `src/components/browser.tsx` can therefore break the harness.
+
+`harness/index-checks.ts` covers the index:
+
+- fd discovery across install locations, an absolute preference, and a missing binary
+- MATCH construction: FTS operators, quotes, punctuation-only terms, and the three-character policy
+- hostile queries that must return nothing without raising
+- schema creation, corruption recovery, and version-mismatch rebuild
+- the fd argument array, NUL framing split across chunk boundaries, and names containing quotes and tabs
+- refresh semantics: a complete scan removing stale rows, a partial scan merging, and failed, cancelled, time-limited, unavailable, and disappeared roots preserving
+- root normalization, and fd's canonicalization of the root it is given
+- a root dropped from the configuration, and an incomplete rescan leaving it alone
+- every filter in SQL, symlink `storagePath`, truncation reporting, and the 50-candidate budget
+- coverage reporting that does not count the full file table, and index stats counting each row once with the scan duration round-tripping
+- a reader querying while a writer holds a transaction
+- search, refresh, and deletion contending for one exclusion lock, and deletion leaving a real file in the same directory untouched
+- a real fd crawl over a tree with a symlink loop, a broken link, a hidden directory, and `node_modules`
+- settings parsing, including unparseable values, wrong-shaped values, missing fields, and dirty lists
+- scope and pattern editing, with duplicates, bounds, relative paths, and built-in patterns
+- configured settings reaching the real fd argument array, through `rebuildIndex`
+
+`harness/performance-checks.ts` covers bounded asynchronous directory reads, metadata parity, watcher and polling freshness, unchanged snapshot identity, cancellation, and scan subprocess cleanup. `harness/folder-usage-checks.ts` confirms that optional usage reads never block the initial list, that late metadata stays out of the current query, and that successful negative reads do not starve later candidates.
 
 Live diagnostics are explicit:
 
@@ -317,7 +483,7 @@ npm run harness:live
 npm run harness:live -- /folder/to/check
 ```
 
-The live mode checks macOS metadata, Spotlight, detected cloud locations, and Drive scans. Its output is limited to generic labels, counts, and timings so paths and filenames are not printed. Results depend on permissions, Spotlight state, and the available cloud providers; they are diagnostic rather than release-blocking.
+Live mode checks macOS metadata and detected cloud locations. It also builds a capped index over one real Drive root with real fd and queries it, including a check that a file outside the indexed scope is absent. Output is limited to generic labels, counts, and timings, so paths and filenames are not printed. Results depend on permissions and the available cloud providers, and are diagnostic rather than release-blocking.
 
 Before submitting a change, run:
 
@@ -331,9 +497,9 @@ npm run build
 
 ## Store release
 
-The manifest author must be the Raycast handle `raycast_file_search`. Keep the icon as a 512 × 512 PNG and screenshots as 2000 × 1250 PNG files. Review every screenshot for personal paths, filenames, and account labels before publishing.
+The manifest author must be the Raycast handle `raycast_file_search`. Keep the icon a 512 × 512 PNG and the screenshots 2000 × 1250 PNGs. Check every screenshot for personal paths, filenames, and account labels before publishing.
 
-Capture screenshots from the current build, including the combined type/sort dropdown and current action shortcuts. Use the same background and theme throughout. Do not submit older captures that show different bindings or status text.
+Capture screenshots from the current build, including the combined type and sort dropdown and the current action shortcuts. Use one background and theme throughout. Do not submit captures that show different bindings or status text.
 
 Update `CHANGELOG.md`, then run the verification commands above. Publish with:
 
@@ -341,8 +507,8 @@ Update `CHANGELOG.md`, then run the verification commands above. Publish with:
 npm run publish
 ```
 
-Before submitting, open the distribution build in Raycast and check search, delayed results, folder navigation, keyboard shortcuts, and file-opening actions. Keep `@raycast/api` current and commit the updated lockfile. Running the publisher again updates the existing PR; check its submitted files, complete the description and screenshots or screencast, and mark it ready for review after verification.
+Then open the distribution build in Raycast and check search, folder navigation, the keyboard shortcuts, and the file-opening actions. Run **Rebuild Search Index** there and confirm that `node:sqlite` loads in Raycast's runtime, that the toast reports counts and elapsed time, and that searching stays usable while the scan runs. Keep `@raycast/api` current and commit the updated lockfile. Running the publisher again updates the existing PR; check its submitted files, complete the description and screenshots or screencast, then mark it ready for review.
 
-Folder transitions use the public Navigation API, with a bounded root-plus-active-route design to avoid retaining a growing stack of result views. Local checks do not guarantee Store acceptance; reviewers still need to assess the submitted extension and its user experience.
+Two live-test caveats still need attention: recheck Escape after returning from a folder, and do not claim a universal sub-100-ms response time, because broad queries and cold startup exceed it in the recorded measurements. Passing the harness establishes neither native exit behaviour nor input-to-paint latency, and local checks do not guarantee Store acceptance.
 
 Raycast's publisher authenticates with GitHub and opens a pull request against the public extensions repository. See the official guides for [preparing an extension](https://developers.raycast.com/basics/prepare-an-extension-for-store), [contributing](https://developers.raycast.com/basics/contribute-to-an-extension), and [publishing](https://developers.raycast.com/basics/publish-an-extension).

@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execFile } from "node:child_process";
 import { isDeepStrictEqual } from "node:util";
 import { compareNames } from "../src/lib/name-order";
 import { MAX_ENTRIES, readDirectory, statEntry } from "../src/lib/read-dir";
@@ -12,7 +11,8 @@ import {
   readDirectoryAsync,
   statEntryAsync,
 } from "../src/lib/directory-listing";
-import { readUsageMetaResult, runSpotlightSearch } from "../src/lib/spotlight";
+import { readUsageMetaResult } from "../src/lib/spotlight";
+import { spawnFdDefault } from "../src/lib/index-scan";
 import { deriveProgress } from "../src/lib/progress";
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -146,10 +146,14 @@ export async function performanceChecks(
 
     let snapshot: DirectorySnapshot | undefined;
     let published = 0;
+    let settledOnce = false;
+    let restartedLoading = false;
     const stop = observeDirectory(
       root,
       false,
       (next) => {
+        if (settledOnce && next.pending) restartedLoading = true;
+        if (!next.pending) settledOnce = true;
         snapshot = next;
         published++;
       },
@@ -161,12 +165,21 @@ export async function performanceChecks(
       "the initial directory subscription settles",
     );
     const unchangedEntries = snapshot?.entries;
+    const unchangedSnapshot = snapshot;
     const initialPublications = published;
     assert(
       (await until(
         () => published > initialPublications && snapshot?.pending === false,
       )) && snapshot?.entries === unchangedEntries,
       "unchanged refreshes preserve entry identity so metadata and ranking can be reused",
+    );
+    assert(
+      !restartedLoading,
+      "background directory polls never hide an already published list or reset its selection",
+    );
+    assert(
+      snapshot === unchangedSnapshot,
+      "unchanged polls preserve the whole snapshot so typed-path validation stays ready",
     );
     fs.writeFileSync(path.join(root, "new.txt"), "new");
     assert(
@@ -255,53 +268,50 @@ export async function performanceChecks(
     fs.rmSync(root, { recursive: true, force: true });
   }
 
+  // The index crawl is the only search-time subprocess left. It must not start
+  // after cancellation, and must not outlive it.
   const beforeStart = new AbortController();
   beforeStart.abort();
-  let calls = 0;
-  const stopped = await runSpotlightSearch(
-    "foo",
-    { signal: beforeStart.signal },
-    async () => {
-      calls++;
-      return "";
-    },
-  );
-  assert(
-    calls === 0 && stopped.cancelled === true && stopped.error === undefined,
-    "a superseded search never starts a Spotlight process",
-  );
+  let yielded = 0;
+  for await (const _chunk of spawnFdDefault(
+    process.execPath,
+    ["-e", "process.stdout.write('x')"],
+    beforeStart.signal,
+  ))
+    yielded++;
+  assert(yielded === 0, "a cancelled scan never starts an fd process");
 
   const controller = new AbortController();
-  let childClosed = false;
-  let receivedSignal = false;
-  const stoppedDuring = await runSpotlightSearch(
-    "foo",
-    { signal: controller.signal },
-    (_args, signal) => {
-      receivedSignal = signal === controller.signal;
-      return new Promise<string>((resolve, reject) => {
-        const child = execFile(
-          process.execPath,
-          ["-e", "setInterval(() => {}, 1000)"],
-          { signal, timeout: 2000, killSignal: "SIGKILL" },
-          (error, stdout) => {
-            if (error) reject(error);
-            else resolve(stdout);
-          },
-        );
-        child.on("close", () => {
-          childClosed = true;
-        });
-        child.once("spawn", () => controller.abort());
-      });
-    },
-  );
+  let crawlFailed: unknown;
+  let childPid: number | undefined;
+  try {
+    for await (const chunk of spawnFdDefault(
+      process.execPath,
+      [
+        "-e",
+        "process.stdout.write(process.pid + '\\0'); setInterval(() => {}, 1000)",
+      ],
+      controller.signal,
+    )) {
+      childPid = Number.parseInt(String(chunk).split("\0")[0], 10);
+      controller.abort();
+    }
+  } catch (error) {
+    crawlFailed = error;
+  }
+  const gone = () => {
+    try {
+      process.kill(childPid!, 0);
+      return false;
+    } catch {
+      return true;
+    }
+  };
   assert(
-    receivedSignal &&
-      stoppedDuring.cancelled === true &&
-      stoppedDuring.error === undefined &&
-      (await until(() => childClosed)),
-    "cancelling an active search terminates its child process without a search-failed result",
+    crawlFailed === undefined &&
+      Number.isInteger(childPid) &&
+      (await until(gone)),
+    "cancelling an active scan kills fd without reporting a scan failure",
   );
 
   const metadataAbort = new AbortController();
@@ -340,7 +350,7 @@ export async function performanceChecks(
     rankingPending: false,
   });
   assert(
-    progress.folder === "running" && progress.spotlight === "skipped",
-    "an unfinished path listing keeps folder status running without starting Spotlight",
+    progress.folder === "running" && progress.index === "skipped",
+    "an unfinished path listing keeps folder status running without querying the index",
   );
 }

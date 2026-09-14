@@ -26,7 +26,6 @@ import {
 } from "react";
 import os from "node:os";
 import path from "node:path";
-import { setMaxListeners } from "node:events";
 import { Entry, SortMode, VisitLog } from "../lib/types";
 import { describeErased, eraseEverything } from "../lib/erase";
 import {
@@ -34,30 +33,17 @@ import {
   describeProgress,
   isSettled,
   missingUsagePaths,
+  rowsCanChange,
   statusLight,
 } from "../lib/progress";
 import {
   displayPath,
   normalizeDir,
   locationLabel,
-  relativeDepth,
-  sharedCloudFolders,
   splitPathQuery,
-  statEntry,
 } from "../lib/read-dir";
-import { readUsageMetaResult, searchPathResult } from "../lib/spotlight";
-import { isUnindexedScope, listUnder } from "../lib/walk";
-import { loadShortcutIndex, saveShortcutIndex } from "../lib/shortcut-index";
-import { scanShortcuts, Shortcut } from "../lib/drive-shortcuts";
-import { loadSharedIndex, saveSharedIndex } from "../lib/shared-index";
-import { loadDiscovered, rememberDiscovered } from "../lib/discovered";
+import { readUsageMetaResult } from "../lib/spotlight";
 import { dataGeneration } from "../lib/storage-lock";
-import { scanSharedFolders } from "../lib/shared-scan";
-import {
-  driveIndexCaveat,
-  refreshShortcutIndex,
-  refreshSharedIndex,
-} from "../lib/index-refresh";
 import { readCachedUsage, writeCachedUsage } from "../lib/usage-cache";
 import {
   clearVisits,
@@ -66,40 +52,25 @@ import {
   loadVisitLog,
   loadAbbreviations,
   recordAbbreviation,
-  recordSearch,
   recordVisit,
   resetVisit,
   togglePin,
 } from "../lib/store";
-import { ScoreParts, coarseScore, scoreEntry, visitScore } from "../lib/score";
-import {
-  MATCH,
-  hiddenOnly,
-  matchPath,
-  matchQuality,
-  matchTier,
-  dottedTerms,
-  excludesDirectories,
-  matchesStats,
-  parseQuery,
-  TypeFilter,
-} from "../lib/query";
+import { visitScore } from "../lib/score";
+import { hiddenOnly, parseQuery, TypeFilter } from "../lib/query";
 import { Row, RowHandlers } from "./row";
-import { SetupActions } from "./setup-actions";
 import { entryStoragePath, rowIdForEntry } from "../lib/entry-identity";
 import { compactScopeLabel, relativeTime } from "../lib/format";
-import { compareRankedEntries, RankedEntry } from "../lib/result-order";
+import { columnWidths } from "../lib/accessory-columns";
+import { rankSources as rankCandidates } from "../lib/rank-sources";
 import { displayRows } from "../lib/display-rows";
-import {
-  DirectorySnapshot,
-  readDirectoryAsync,
-} from "../lib/directory-listing";
+import { chooseListView, listIsLoading } from "../lib/list-view";
 import { useDirectoryListing } from "./use-directory-listing";
-import { withIndexingLock } from "../lib/indexing-lock";
-import { useRecentFiles } from "./use-recent-files";
-import { SearchSetup, useSearchSetup } from "./use-search-setup";
 import { useCachedEntries } from "./use-cached-entries";
 import { useStandardPlaces } from "./use-standard-places";
+import { usePathBarListing } from "./use-path-bar-listing";
+import { useSearchHistoryRecording } from "./use-search-history-recording";
+import { useSharedCloudFolders } from "./use-shared-cloud-folders";
 import { useFolderSelection } from "./use-folder-selection";
 import { FolderNavigation } from "../lib/folder-navigation";
 import {
@@ -117,34 +88,34 @@ import {
   SearchScreenContent,
   SearchScreenView,
 } from "./search-screen";
+import { enableNavigationDiagnostics } from "../lib/navigation-diagnostics";
+import { useNavigationTracing } from "../lib/use-navigation-tracing";
+import { LIVE_RESULTS, LIVE_RENDERED_RESULTS } from "../lib/search-limits";
 import {
-  enableNavigationDiagnostics,
-  traceNavigation,
-  traceNavigationAfterRelease,
-} from "../lib/navigation-diagnostics";
-import { validateRecentEntries } from "../lib/recent-validation";
-import { createWorkQueue } from "../lib/work-queue";
-import {
-  LIVE_RESULTS,
-  LIVE_RENDERED_RESULTS,
-  LIVE_CANDIDATES,
-  LIVE_DIRECTORIES,
-} from "../lib/search-limits";
+  IndexStatus,
+  IndexCoverage,
+  readIndexCoverage,
+  searchIndex,
+} from "../lib/index-reader";
+import { describeCaveat } from "../lib/status-line";
+import { stepSearchHistory } from "../lib/search-history";
+import { rebuildWithFeedback, searchIndexPath } from "../lib/index-rebuild";
 
 /** Minimum lengths for global discovery and scoped search history. */
 const MIN_QUERY_GLOBAL = 3;
 const MIN_QUERY_SCOPED = 2;
-/** Limits overlapping Spotlight processes while typing. */
-const DEBOUNCE_MS = 420;
-/** How long a query must sit unchanged before it is remembered as history. */
-const HISTORY_SETTLE_MS = 1500;
-
-type Props = {
-  /** Search scope; undefined searches all indexed locations. */
-  dir?: string;
-};
-
-type Ranked = RankedEntry & { score: ScoreParts };
+/**
+ * Pause before querying the index.
+ *
+ * The query itself is a synchronous SQLite call measured at 1-2ms, so this
+ * Short coalescing window; the remaining budget belongs to lookup and rendering.
+ */
+const INDEX_DEBOUNCE_MS = 20;
+/**
+ * How long the usage-metadata pass over a folder's children may take.
+ * This optional cache warmup never delays or reranks the current query.
+ */
+const FOLDER_USAGE_BUDGET_MS = 3000;
 
 function BrowserView({
   dir: rawDir,
@@ -154,12 +125,13 @@ function BrowserView({
   onReturnToStart,
   navigation,
   frameId,
-  setup,
   reloadKey,
   setReloadKey,
   includeHidden,
   onToggleHidden,
-}: Props & {
+}: {
+  /** Search scope; undefined searches all indexed locations. */
+  dir?: string;
   includeHidden: boolean;
   onToggleHidden: () => void;
   initialSelectionPath?: string;
@@ -172,7 +144,6 @@ function BrowserView({
   ) => void;
   navigation: FolderNavigation;
   frameId: number;
-  setup: SearchSetup;
   reloadKey: number;
   setReloadKey: Dispatch<SetStateAction<number>>;
 }) {
@@ -188,7 +159,6 @@ function BrowserView({
     (text: string) => screen.setSearchText(frameId, text),
     [screen, frameId],
   );
-  const [children, setChildren] = useState<Entry[]>([]);
   const [found, setFound] = useState<Entry[]>([]);
   const [visitLog, setVisitLog] = useState<VisitLog>({ tick: 0, items: {} });
   const visits = visitLog.items;
@@ -200,7 +170,6 @@ function BrowserView({
   const [backgroundPending, setBackgroundPending] = useState(true);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string>();
-  const [searchPartial, setSearchPartial] = useState<string>();
   const [searchActive, setSearchActive] = useState(true);
   const [sortMode, setSortMode] = useCachedState<SortMode>(
     "sort-mode",
@@ -211,11 +180,6 @@ function BrowserView({
     "all",
   );
   const [showingDetail, setShowingDetail] = useState(false);
-  /** True until scoped entries receive cached or fresh usage metadata. */
-  const [childrenUsagePending, setChildrenUsagePending] = useState(false);
-  const [folderError, setFolderError] = useState<string>();
-  const [folderMetaError, setFolderMetaError] = useState<string>();
-  const [folderMetaPartial, setFolderMetaPartial] = useState<string>();
 
   const query = searchText.trim();
   /** A leading / or ~/ activates the path bar in global mode. */
@@ -228,6 +192,27 @@ function BrowserView({
   const parsed = useMemo(
     () => parseQuery(searchText, typeFilter),
     [searchText, typeFilter],
+  );
+  /**
+   * Everything about the query that changes what the index returns, as one
+   * primitive. The search effect keys on this rather than on `parsed`: an
+   * object identity in a dependency array re-runs the effect on every render
+   * unless every caller memoises, and that failure mode is an unbounded
+   * render loop rather than a visible bug.
+   */
+  const queryKey = useMemo(
+    () =>
+      JSON.stringify([
+        parsed.tokens,
+        parsed.type,
+        parsed.extensions,
+        parsed.after ?? null,
+        parsed.before ?? null,
+        parsed.minSize ?? null,
+        parsed.maxSize ?? null,
+        parsed.hidden,
+      ]),
+    [parsed],
   );
   // Dot-prefixed queries temporarily include hidden entries.
   const showHidden = includeHidden || parsed.hidden;
@@ -249,6 +234,26 @@ function BrowserView({
       scopeController.signal.removeEventListener("abort", stop);
     };
   }, [scopeController, queryController, searchActive]);
+  /**
+   * A replaced query controller is aborted, not merely dropped.
+   *
+   * Changing hidden visibility rebuilds the scope controller and the query
+   * controller in the same render, so the outgoing query controller never sees
+   * an abort from its old scope. The cached-entry reads and the directory
+   * listing hold that signal, and without this they would run to completion for
+   * a query the user has already replaced.
+   */
+  useEffect(() => {
+    // Strict Mode replays setup after cleanup with the same memoized controller.
+    // Renew it only for a still-live scope; intentional navigation must stay cancelled.
+    if (
+      searchActive &&
+      !scopeController.signal.aborted &&
+      queryController.signal.aborted
+    )
+      setQueryRevision((revision) => revision + 1);
+    return () => queryController.abort();
+  }, [queryController, scopeController, searchActive]);
   const navigate = useCallback(
     (target: string, initialSelectionPath?: string) => {
       if (!navigation.canNavigate(frameId, target)) return;
@@ -273,20 +278,9 @@ function BrowserView({
     scopeCandidates,
     "-d",
     reloadKey,
-    Infinity,
     queryController.signal,
   );
   const canonicalDir = scopeCache.entries[0]?.storagePath ?? dir;
-  const recentFiles = useRecentFiles(
-    setup,
-    query,
-    dir,
-    showHidden,
-    reloadKey,
-    canonicalDir,
-    queryController.signal,
-    parsed.type,
-  );
   const directoryListing = useDirectoryListing(
     dir,
     showHidden,
@@ -297,41 +291,26 @@ function BrowserView({
   const minQuery = dir ? MIN_QUERY_SCOPED : MIN_QUERY_GLOBAL;
   const standardCache = useStandardPlaces(!dir && searchActive, reloadKey);
   const places = standardCache.entries;
-  const [sharedFolders, setSharedFolders] = useState<Entry[]>([]);
-  const [shortcutIndex, setShortcuts] = useState<Shortcut[]>([]);
-  const [shortcutsScannedAt, setShortcutsScannedAt] = useState(0);
-  const [driveIndexMessage, setDriveIndexMessage] = useState<string>();
-  /** Paths in Google Drive shared folders that Spotlight cannot index. */
-  const [sharedIndex, setSharedIndex] = useState<string[]>([]);
-  /** Paths earlier Spotlight passes surfaced. See lib/discovered.ts. */
-  const [discovered, setDiscovered] = useState<string[]>([]);
+  const sharedFolders = useSharedCloudFolders(dir, reloadKey);
 
   /** Changes when the result set changes; paths keep IDs stable while reranking. */
   const [generation, setGeneration] = useState(0);
 
-  /** True while the usage metadata for the Spotlight results is still coming. */
-  const [foundUsagePending, setFoundUsagePending] = useState(false);
-  const [foundUsageError, setFoundUsageError] = useState<string>();
-  const [foundUsagePartial, setFoundUsagePartial] = useState<string>();
+  /** Where the index lives; stable for the life of the command. */
+  const indexFile = useMemo(() => searchIndexPath(), []);
+  const [indexStatus, setIndexStatus] = useState<IndexStatus>("missing");
+  /** The index cannot answer anything, so rebuilding it is the useful action. */
+  const noIndex = indexStatus === "missing" || indexStatus === "failed";
+  /** True when the typed text is below the index minimum. */
+  const [indexTooShort, setIndexTooShort] = useState(false);
+  const [coverage, setCoverage] = useState<IndexCoverage>();
+  const [rebuilding, setRebuilding] = useState(false);
 
   /** Learned query-to-path associations. */
   const [abbreviations, setAbbreviations] = useState<
     Record<string, Record<string, number>>
   >({});
   const [resultsTruncated, setResultsTruncated] = useState(false);
-  const [folderEntriesOmitted, setFolderEntriesOmitted] = useState(0);
-
-  // Load unindexed Drive roots outside the initial render.
-  useEffect(() => {
-    if (dir) return; // only the whole-disk search needs to compensate for this
-    const timer = setTimeout(() => {
-      const found = sharedCloudFolders()
-        .map((place) => statEntry(place.path))
-        .filter((e): e is Entry => e !== undefined);
-      setSharedFolders(found);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [dir, reloadKey]);
 
   // Load only visits and pins before the first useful frame.
   useEffect(() => {
@@ -363,17 +342,14 @@ function BrowserView({
         if (!current()) return;
         setHistory(history);
 
-        const index = await loadShortcutIndex();
-        if (!current()) return;
-        setShortcuts(index.shortcuts);
-        setShortcutsScannedAt(index.scannedAt);
-        const shared = loadSharedIndex();
-        setDriveIndexMessage(driveIndexCaveat(index, shared));
         const abbreviations = await loadAbbreviations();
         if (!current()) return;
         setAbbreviations(abbreviations);
-        setDiscovered(loadDiscovered());
-        setSharedIndex(shared.paths);
+        // Coverage drives the status line and the rebuild prompt.
+        const indexCoverage = readIndexCoverage(indexFile);
+        if (!current()) return;
+        setCoverage(indexCoverage);
+        setIndexStatus(indexCoverage.status);
       } finally {
         if (current()) setBackgroundPending(false);
       }
@@ -381,19 +357,27 @@ function BrowserView({
     return () => {
       cancelled = true;
     };
-  }, [reloadKey]);
+  }, [reloadKey, indexFile]);
 
   // Show directory entries before loading usage metadata.
+  // Freeze optional usage for this query. A background cache write must not
+  // rerank visible rows, even if a filesystem event refreshes their stats.
+  const folderUsage = useMemo(
+    () => (dir ? readCachedUsage(dir) : new Map()),
+    [dir, showHidden, reloadKey, queryKey],
+  );
+  const children = useMemo(
+    () =>
+      folderUsage.size === 0
+        ? directoryListing.entries
+        : directoryListing.entries.map((entry) => {
+            const meta = folderUsage.get(entry.path);
+            return meta ? { ...entry, ...meta } : entry;
+          }),
+    [directoryListing.entries, folderUsage],
+  );
   useEffect(() => {
-    if (!dir) {
-      setChildren([]);
-      setChildrenUsagePending(false);
-      setFolderEntriesOmitted(0);
-      setFolderError(undefined);
-      setFolderMetaError(undefined);
-      setFolderMetaPartial(undefined);
-      return;
-    }
+    if (!dir) return;
     if (!searchActive || scopeController.signal.aborted) return;
     let cancelled = false;
     const controller = new AbortController();
@@ -404,67 +388,36 @@ function BrowserView({
     scopeController.signal.addEventListener("abort", stop, { once: true });
     const read = directoryListing;
     const storageGeneration = dataGeneration();
-    setFolderEntriesOmitted(read.truncated);
-    setFolderError(read.error);
-    setFolderMetaError(undefined);
-    setFolderMetaPartial(undefined);
-
-    // Seed the first frame with cached usage metadata.
+    // Use the latest cache when choosing work; rendering uses its frozen copy.
     const cached = readCachedUsage(dir);
     const missing = missingUsagePaths(
       read.entries.map((entry) => entry.path),
       cached,
-    );
-    setChildrenUsagePending(missing.length > 0);
-    setChildren(
-      cached.size === 0
-        ? read.entries
-        : read.entries.map((e) => {
-            const m = cached.get(e.path);
-            return m ? { ...e, ...m } : e;
-          }),
-    );
+    ).slice(0, LIVE_RESULTS);
 
     void (async () => {
-      if (read.entries.length === 0) {
-        setChildrenUsagePending(false);
-        return;
-      }
       // Fetch only uncached metadata so timed-out folders fill incrementally.
-      if (missing.length === 0) {
-        setChildrenUsagePending(false);
-        return;
-      }
+      if (missing.length === 0) return;
+      /*
+       * Warm only the cache. Applying late metadata to the current children
+       * would move their ranking and selection after the list has appeared.
+       * The next query, folder entry or explicit refresh uses the new values.
+       */
       const result = await readUsageMetaResult(missing, {
         signal: controller.signal,
-        continuous: true,
-        onProgress: (meta) => {
-          if (cancelled || storageGeneration !== dataGeneration()) return;
-          setChildren((previous) =>
-            previous.map((entry) => {
-              const usage = meta.get(entry.path);
-              return usage ? { ...entry, ...usage } : entry;
-            }),
-          );
-        },
+        timeoutMs: FOLDER_USAGE_BUDGET_MS,
       });
-      if (cancelled) return;
-      setChildrenUsagePending(false);
-      setFolderMetaError(result.error);
-      setFolderMetaPartial(result.partial);
-      const meta = result.meta;
+      if (cancelled || storageGeneration !== dataGeneration()) return;
+      const meta = new Map(result.meta);
+      // A successful read with no usage is still checked. Otherwise the same
+      // unused files can consume the entire warmup budget on every query.
+      if (result.complete)
+        for (const full of missing) if (!meta.has(full)) meta.set(full, {});
       if (meta.size === 0) return;
       void writeCachedUsage(
         dir,
         new Map([...cached, ...meta]),
         storageGeneration,
-      );
-      if (cancelled || storageGeneration !== dataGeneration()) return;
-      setChildren((prev) =>
-        prev.map((e) => {
-          const m = meta.get(e.path);
-          return m ? { ...e, ...m } : e;
-        }),
       );
     })();
 
@@ -476,6 +429,7 @@ function BrowserView({
     dir,
     showHidden,
     reloadKey,
+    queryKey,
     directoryListing.entries,
     directoryListing.error,
     directoryListing.truncated,
@@ -483,296 +437,76 @@ function BrowserView({
     searchActive,
   ]);
 
-  // Rank paths first within each arriving batch, then validate without a shortlist cutoff.
+  /**
+   * The indexed name search.
+   *
+   * One synchronous SQLite query produces one complete list, which is published
+   * once. Nothing arrives later to reorder it, so there is no incremental
+   * publication, no work queue and no window in which the selection can be
+   * pulled out from under the user.
+   *
+   * A newer query cannot be overtaken by an older one by construction: the
+   * query runs inside a debounce timer that a query change clears, and the call
+   * is synchronous, so there is no await between deciding to publish and
+   * publishing.
+   */
   useEffect(() => {
     setFound([]);
-    setFoundUsagePending(false);
-    setFoundUsageError(undefined);
-    setFoundUsagePartial(undefined);
     setSearchError(undefined);
-    setSearchPartial(undefined);
+    setIndexTooShort(false);
     if (
       !searchActive ||
       queryController.signal.aborted ||
+      // A folder shows its direct children; it never queries the index.
       dir !== undefined ||
       pathQuery ||
-      parsed.longest.length < minQuery
+      hiddenOnly(parsed) ||
+      parsed.tokens.length === 0
     ) {
       setSearching(false);
       setResultsTruncated(false);
       return;
     }
     let cancelled = false;
-    const controller = new AbortController();
-    const storageGeneration = dataGeneration();
-    // Eight validators, two processes, and the queues share this cancellation signal.
-    setMaxListeners(32, controller.signal);
-    const current = () =>
-      !cancelled &&
-      !controller.signal.aborted &&
-      storageGeneration === dataGeneration();
-    const matches = new Map<string, Entry>();
-    const expanded = new Set<string>();
-    const walkedDirectories = new Set<string>();
-    let publishTimer: ReturnType<typeof setTimeout> | undefined;
-    let lastPublished = 0;
-    let usageSucceeded = false;
-    let usageIncomplete = false;
-    let usageFailed = false;
-    let discoveryFailure: string | undefined;
-    const publish = (flush = false) => {
-      if (!current()) return;
-      if (flush || Date.now() - lastPublished >= 100) {
-        clearTimeout(publishTimer);
-        publishTimer = undefined;
-        lastPublished = Date.now();
-        setFound([...matches.values()]);
-      } else if (!publishTimer) {
-        publishTimer = setTimeout(() => publish(true), 100);
-      }
-    };
-    const add = (entries: Entry[]) => {
-      if (!current()) return;
-      for (const entry of entries)
-        if (matches.has(entry.path) || matches.size < LIVE_RESULTS)
-          matches.set(entry.path, { ...matches.get(entry.path), ...entry });
-      publish();
-    };
-    const usage = createWorkQueue<string>(
-      async (paths) => {
-        if (!current()) return;
-        setFoundUsagePending(true);
-        const result = await readUsageMetaResult(paths, {
-          timeoutMs: 5000,
-          signal: controller.signal,
-        });
-        if (!current()) return;
-        usageSucceeded ||= result.complete || result.meta.size > 0;
-        usageIncomplete ||= !result.complete;
-        usageFailed ||= !!result.error;
-        for (const [full, meta] of result.meta) {
-          const entry = matches.get(full);
-          if (entry) matches.set(full, { ...entry, ...meta });
-        }
-        publish();
-      },
-      controller.signal,
-      { batchSize: 25 },
-    );
-    const validation = createWorkQueue<{ path: string; expand: boolean }>(
-      async ([candidate]) => {
-        if (!current()) return;
-        const checked = await validateRecentEntries([candidate], {
-          continuous: true,
-          query: "",
-          signal: controller.signal,
-        });
-        if (!current()) return;
-        if (checked.partial)
-          setSearchPartial("Some matching files could not be checked");
-        const entry = checked.entries[0];
-        if (!entry) return;
-        if (
-          candidate.expand &&
-          entry.isDirectory &&
-          !expanded.has(entry.path)
-        ) {
-          if (expanded.size < LIVE_DIRECTORIES) {
-            expanded.add(entry.path);
-            await expansion.push([entry.path]);
-          } else setResultsTruncated(true);
-        }
-        if (
-          matchPath(parsed, entry.path, entry.isDirectory) === undefined ||
-          !matchesStats(parsed, entry)
-        )
-          return;
-        if (!matches.has(entry.path) && matches.size >= LIVE_RESULTS) {
-          setResultsTruncated(true);
-          return;
-        }
-        add([entry]);
-        await usage.push([entry.path]);
-      },
-      controller.signal,
-      { concurrency: 8 },
-    );
-    const scheduled = new Set<string>();
-    const consume = async (paths: string[], expand = false) => {
-      if (!current()) return;
-      const expanding = expand && excludesDirectories(parsed);
-      const ranked = paths
-        .flatMap((full) => {
-          if (scheduled.has(full)) return [];
-          const tier = matchPath(parsed, full);
-          // A matching folder can contain qualifying files even when it fails the file filters.
-          if (tier === undefined && !expanding) return [];
-          if (scheduled.size >= LIVE_CANDIDATES) {
-            setResultsTruncated(true);
-            return [];
-          }
-          scheduled.add(full);
-          return [
-            {
-              path: full,
-              expand: expanding,
-              tier: tier ?? Infinity,
-              coarse: coarseScore(
-                visits[full],
-                tick,
-                dir ? relativeDepth(dir, full) : 0,
-              ),
-            },
-          ];
-        })
-        .sort((a, b) => a.tier - b.tier || b.coarse - a.coarse);
-      await validation.push(ranked);
-    };
-    const expansion = createWorkQueue<string>(
-      async ([root]) => {
-        const result = await listUnder([root], {
-          showHidden,
-          continuous: true,
-          signal: controller.signal,
-          visited: walkedDirectories,
-          onBatch: consume,
-        });
-        if (current() && result.truncated) setResultsTruncated(true);
-        if (current() && result.error) setSearchPartial(result.error);
-      },
-      controller.signal,
-      { concurrency: 8, maxPending: Infinity },
-    );
     setSearching(true);
     setResultsTruncated(false);
     const timer = setTimeout(() => {
-      void (async () => {
-        const result = await searchPathResult(parsed.longest, {
-          fuzzy: true,
-          showHidden,
-          max: LIVE_CANDIDATES,
-          signal: controller.signal,
-          onBatch: (paths) => consume(paths, true),
-        });
-        if (!current()) return;
-        const report = (result: { truncated: boolean; error?: string }) => {
-          if (!current()) return;
-          if (result.truncated) setResultsTruncated(true);
-          if (result.error) {
-            discoveryFailure ??= result.error;
-            setSearchPartial(result.error);
-          }
-        };
-        report(result);
-        const dotted = dottedTerms(parsed);
-        if (dotted.length > 0 && current()) {
-          const listing = await readDirectoryAsync(
-            dir ?? os.homedir(),
-            true,
-            controller.signal,
-          );
-          if (!current()) return;
-          if (listing.truncated) setResultsTruncated(true);
-          if (listing.error) setSearchPartial(listing.error);
-          const roots = listing.entries
-            .filter(
-              (entry) =>
-                entry.isDirectory &&
-                entry.name.startsWith(".") &&
-                dotted.some((term) =>
-                  entry.name.toLowerCase().startsWith(term.toLowerCase()),
-                ),
-            )
-            .map((entry) => entry.path);
-          if (roots.length > 0) {
-            await consume(roots);
-            report(
-              await listUnder(roots, {
-                visited: walkedDirectories,
-                showHidden: true,
-                continuous: true,
-                signal: controller.signal,
-                onBatch: consume,
-              }),
-            );
-          }
-        }
-        await validation.drain();
-        await expansion.drain();
-        await validation.drain();
-        await usage.drain();
-        if (!current()) return;
-        const ranked = [...matches.keys()].map((path) => ({ path }));
-        const shortlist = [...matches.values()];
-        void rememberDiscovered(
-          ranked.map((r) => r.path),
-          storageGeneration,
-        ).then((remembered) => {
-          if (
-            !cancelled &&
-            storageGeneration === dataGeneration() &&
-            remembered.length > 0
-          )
-            setDiscovered(remembered);
-        });
-        setFound(shortlist);
-      })()
-        .catch(() => {
-          if (current()) {
-            publish(true);
-            setSearchError("Search could not finish");
-            controller.abort();
-          }
-        })
-        .finally(() => {
-          validation.dispose();
-          expansion.dispose();
-          usage.dispose();
-          if (cancelled || storageGeneration !== dataGeneration()) return;
-          publish(true);
-          clearTimeout(publishTimer);
-          setSearching(false);
-          setFoundUsagePending(false);
-          if (discoveryFailure) {
-            if (matches.size > 0) setSearchPartial(discoveryFailure);
-            else {
-              setSearchPartial(undefined);
-              setSearchError(discoveryFailure);
-            }
-          }
-          setFoundUsageError(
-            usageFailed && !usageSucceeded
-              ? "Spotlight usage metadata unavailable"
-              : undefined,
-          );
-          setFoundUsagePartial(
-            usageIncomplete && (!usageFailed || usageSucceeded)
-              ? "Usage metadata unavailable for some items"
-              : undefined,
-          );
-        });
-    }, DEBOUNCE_MS);
+      if (cancelled) return;
+      const result = searchIndex(indexFile, parsed, {
+        showHidden,
+        limit: LIVE_RESULTS,
+      });
+      if (cancelled) return;
+      setIndexStatus(result.status);
+      setFound(result.entries);
+      setResultsTruncated(result.truncated);
+      setIndexTooShort(result.tooShort);
+      setSearchError(
+        result.status === "failed"
+          ? "The search index could not be read"
+          : undefined,
+      );
+      setSearching(false);
+    }, INDEX_DEBOUNCE_MS);
     const stop = () => {
       cancelled = true;
-      controller.abort();
       clearTimeout(timer);
-      clearTimeout(publishTimer);
     };
     queryController.signal.addEventListener("abort", stop, { once: true });
     return () => {
       queryController.signal.removeEventListener("abort", stop);
       stop();
     };
-    // Visit changes affect local ranking and should not rerun Spotlight.
+    // Visit changes affect local ranking only and must not rerun the query.
   }, [
     dir,
-    query,
-    minQuery,
+    queryKey,
     pathQuery !== undefined,
     showHidden,
     reloadKey,
     queryController,
     searchActive,
+    indexFile,
   ]);
 
   /** Pinned, frequently used, and standard locations. */
@@ -790,79 +524,12 @@ function BrowserView({
   }, [dir, pins, visits, places, tick]);
   const startingCache = useCachedEntries(
     startingCandidates,
-    "",
+    query,
     reloadKey,
-    Infinity,
     queryController.signal,
     parsed.type,
   );
   const startingPoints = startingCache.entries;
-
-  /** Previously-surfaced paths, matched in memory. See lib/discovered.ts. */
-  const discoveredCandidates = useMemo(() => {
-    if (query === "") return [];
-    return discovered
-      .flatMap((p) => {
-        if (dir && path.dirname(p) !== dir && path.dirname(p) !== canonicalDir)
-          return [];
-        const tier = matchPath(parsed, p);
-        return tier === undefined ? [] : [{ path: p, tier }];
-      })
-      .sort((a, b) => a.tier - b.tier);
-  }, [dir, canonicalDir, query, parsed, discovered]);
-  const discoveredCache = useCachedEntries(
-    discoveredCandidates,
-    query,
-    reloadKey,
-    Infinity,
-    queryController.signal,
-    parsed.type,
-  );
-  const discoveredMatches = discoveredCache.entries;
-
-  /** Matches from the Google Drive shared-folder index. */
-  const sharedCandidates = useMemo(() => {
-    if (dir || query === "") return [];
-    return sharedIndex
-      .flatMap((p) => {
-        const tier = matchPath(parsed, p);
-        return tier === undefined ? [] : [{ path: p, tier }];
-      })
-      .sort((a, b) => a.tier - b.tier);
-  }, [dir, query, parsed, sharedIndex]);
-  const sharedCache = useCachedEntries(
-    sharedCandidates,
-    query,
-    reloadKey,
-    Infinity,
-    queryController.signal,
-    parsed.type,
-  );
-  const sharedMatches = sharedCache.entries;
-  const shortcutCandidates = useMemo(() => {
-    if (query === "") return [];
-    return shortcutIndex
-      .flatMap(({ path: full }) => {
-        if (
-          dir &&
-          path.dirname(full) !== dir &&
-          path.dirname(full) !== canonicalDir
-        )
-          return [];
-        const tier = matchPath(parsed, full);
-        return tier === undefined ? [] : [{ path: full, tier }];
-      })
-      .sort((a, b) => a.tier - b.tier);
-  }, [shortcutIndex, query, parsed, dir, canonicalDir]);
-  const shortcutCache = useCachedEntries(
-    shortcutCandidates,
-    query,
-    reloadKey,
-    Infinity,
-    queryController.signal,
-    parsed.type,
-  );
-  const shortcuts = shortcutCache.entries;
 
   /** Paths you have previously chosen after typing this exact query. */
   const learnedPaths = useMemo(
@@ -886,26 +553,19 @@ function BrowserView({
     learnedCandidates,
     "",
     reloadKey,
-    Infinity,
     queryController.signal,
     parsed.type,
   );
   const learnedMatches = learnedCache.entries;
   const cachedPending =
-    shortcutCache.pending ||
     scopeCache.pending ||
     standardCache.pending ||
     startingCache.pending ||
-    discoveredCache.pending ||
-    sharedCache.pending ||
     learnedCache.pending;
   const cachedPartial =
-    shortcutCache.partial ||
     scopeCache.partial ||
     standardCache.partial ||
     startingCache.partial ||
-    discoveredCache.partial ||
-    sharedCache.partial ||
     learnedCache.partial;
 
   /** Hidden Home entries shown for a bare dot in global mode. */
@@ -918,159 +578,30 @@ function BrowserView({
   );
   const hiddenHome = hiddenListing.entries;
 
-  /** Children of the typed directory, plus the directory itself if it exists. */
-  const typedDirectory = useDirectoryListing(
-    pathQuery?.dir,
+  const pathListing = usePathBarListing(
+    pathQuery,
     showHidden,
     reloadKey,
-    queryController.signal,
+    queryController,
     searchActive,
-  );
-  const exactPath = pathQuery
-    ? pathQuery.prefix === ""
-      ? pathQuery.dir
-      : path.join(pathQuery.dir, pathQuery.prefix)
-    : undefined;
-  const [exactEntry, setExactEntry] = useState<{
-    path: string;
-    listing: DirectorySnapshot;
-    entry?: Entry;
-    reloadKey: number;
-  }>();
-  useEffect(() => {
-    if (exactPath === undefined) return;
-    const controller = new AbortController();
-    const stop = () => controller.abort();
-    queryController.signal.addEventListener("abort", stop, { once: true });
-    if (queryController.signal.aborted) stop();
-    const listed = typedDirectory.entries.find(
-      (entry) => entry.path === exactPath,
-    );
-    const read = listed
-      ? Promise.resolve(listed)
-      : validateRecentEntries([{ path: exactPath }], {
-          continuous: true,
-          signal: controller.signal,
-        }).then((result) => result.entries[0]);
-    void read.then((entry) => {
-      if (!controller.signal.aborted)
-        setExactEntry({
-          path: exactPath,
-          listing: typedDirectory,
-          entry,
-          reloadKey,
-        });
-    });
-    return () => {
-      queryController.signal.removeEventListener("abort", stop);
-      stop();
-    };
-  }, [exactPath, typedDirectory, reloadKey, queryController]);
-  const exactReady =
-    exactPath === undefined ||
-    (exactEntry?.path === exactPath &&
-      exactEntry.listing === typedDirectory &&
-      exactEntry.reloadKey === reloadKey);
-  const pathListing = useMemo(
-    () => ({
-      rows: pathQuery
-        ? [
-            ...(exactReady && exactEntry?.entry ? [exactEntry.entry] : []),
-            ...typedDirectory.entries,
-          ]
-        : [],
-      omitted: typedDirectory.truncated,
-      error: typedDirectory.error,
-      pending: typedDirectory.pending || !exactReady,
-    }),
-    [pathQuery, exactReady, exactEntry, typedDirectory],
   );
   const pathRows = pathListing.rows;
 
-  const compare = useMemo(() => compareRankedEntries(sortMode), [sortMode]);
-
-  /** Ranks and deduplicates candidates; exclude removes rows already shown. */
   const rankSources = useCallback(
-    (sources: Entry[], exclude?: Set<string>) => {
-      const now = Date.now();
-      const byPath = new Map<string, Entry>();
-      for (const entry of sources) {
-        if (exclude?.has(entry.path)) continue;
-        // Path-bar listings filter separately and allow explicitly typed paths.
-        if (!showHidden && !pathQuery && entry.name.startsWith(".")) continue;
-        if (dir) {
-          // Every source must respect the folder boundary, including late results.
-          if (
-            path.dirname(entry.path) !== dir &&
-            path.dirname(entryStoragePath(entry)) !== (canonicalDir ?? dir)
-          )
-            continue;
-        }
-        const prev = byPath.get(entry.path);
-        // Prefer the copy that carries Spotlight usage metadata.
-        byPath.set(
-          entry.path,
-          prev
-            ? {
-                ...prev,
-                useCount: prev.useCount ?? entry.useCount,
-                lastUsedMs: prev.lastUsedMs ?? entry.lastUsedMs,
-              }
-            : entry,
-        );
-      }
-
-      const out: Ranked[] = [];
-      for (const entry of byPath.values()) {
-        if (entry.path === dir) continue;
-        // Learned associations outrank textual matches.
-        const storagePath = entryStoragePath(entry);
-        const learned = learnedSet.has(storagePath);
-        // Normal search may match path components; path-bar search matches names.
-        if (hiddenOnly(parsed) && !entry.name.startsWith(".")) continue;
-        const textual = pathQuery
-          ? matchTier(effectiveQuery, entry.name)
-          : matchPath(parsed, entry.path, entry.isDirectory);
-        const tier = learned ? MATCH.LEARNED : textual;
-        if (tier === undefined) continue;
-        if (!matchesStats(parsed, entry)) continue;
-        const below = dir ? relativeDepth(dir, entry.path) : 0;
-        out.push({
-          entry,
-          tier,
-          score: scoreEntry(entry, {
-            visit: visits[storagePath],
-            now,
-            tick,
-            depthBelow: below,
-            quality: matchQuality(parsed.longest, entry.name),
-          }),
-        });
-      }
-
-      // Deduplicate aliases by identity while preserving differently named shortcuts.
-      const byIdentity = new Map<string, Ranked>();
-      const deduped: Ranked[] = [];
-      for (const row of out) {
-        const { dev, ino } = row.entry;
-        if (dev === undefined || ino === undefined) {
-          deduped.push(row);
-          continue;
-        }
-        const key = `${dev}:${ino}:${row.entry.name.toLowerCase()}`;
-        const seen = byIdentity.get(key);
-        if (seen === undefined) {
-          byIdentity.set(key, row);
-          deduped.push(row);
-        } else if (row.score.total > seen.score.total) {
-          // Keep the higher-scoring route in place.
-          deduped[deduped.indexOf(seen)] = row;
-          byIdentity.set(key, row);
-        }
-      }
-
-      return deduped.sort(compare);
-    },
+    (sources: Entry[]) =>
+      rankCandidates(sources, {
+        now: Date.now(),
+        tick,
+        visits,
+        learned: learnedSet,
+        parsed,
+        effectiveQuery,
+        pathQuery: Boolean(pathQuery),
+        dir,
+        canonicalDir,
+        showHidden,
+        sortMode,
+      }),
     [
       learnedSet,
       pathQuery,
@@ -1080,52 +611,59 @@ function BrowserView({
       parsed,
       dir,
       canonicalDir,
-      compare,
+      sortMode,
       showHidden,
     ],
   );
 
-  /** Results available without a new Spotlight query. */
-  const instantRows = useMemo(() => {
-    if (pathQuery) return rankSources(pathRows);
-    return rankSources([
-      ...children,
-      ...startingPoints,
-      ...recentFiles.entries,
-      // Shared Drive roots are useful only when there is a query.
-      ...(query === "" ? [] : sharedFolders),
-      ...(query === "" ? [] : shortcuts),
-      ...sharedMatches,
-      ...discoveredMatches,
-      ...learnedMatches,
-      ...hiddenHome,
-    ]);
+  /** Delayed search results and memory are ranked once, then retained within one row budget. */
+  const selectionReader = useRef<
+    | {
+        query: string;
+        queryKey: string;
+        read: () => string | undefined;
+      }
+    | undefined
+  >(undefined);
+  // Read native selection before capping, including moves that did not render.
+  // Only the current query may retain a row; new queries choose their own top.
+  const preservedPath =
+    selectionReader.current?.query === query &&
+    selectionReader.current.queryKey === queryKey
+      ? selectionReader.current.read()
+      : query === ""
+        ? initialSelectionPath
+        : undefined;
+  const { rows, rowLimitReached } = useMemo(() => {
+    const collected = rankSources(
+      pathQuery
+        ? pathRows
+        : [
+            ...found,
+            ...children,
+            ...startingPoints,
+            ...(query === "" ? [] : sharedFolders),
+            ...learnedMatches,
+            ...hiddenHome,
+          ],
+    );
+    return {
+      rows: displayRows(collected, preservedPath),
+      rowLimitReached: collected.length > LIVE_RESULTS,
+    };
   }, [
     rankSources,
     pathQuery,
     pathRows,
     children,
     startingPoints,
-    recentFiles.entries,
     query,
     sharedFolders,
-    shortcuts,
-    sharedMatches,
-    discoveredMatches,
     learnedMatches,
     hiddenHome,
+    found,
+    preservedPath,
   ]);
-
-  /** Delayed search results and cached rows share metadata before ranking. */
-  const collectedRows = useMemo(
-    () =>
-      pathQuery
-        ? instantRows
-        : rankSources([...found, ...instantRows.map(({ entry }) => entry)]),
-    [pathQuery, found, instantRows, rankSources],
-  );
-  const rowLimitReached = collectedRows.length > LIVE_RESULTS;
-  const rows = collectedRows.slice(0, LIVE_RESULTS);
 
   const markVisited = useCallback(
     async (target: string, generation = dataGeneration()) => {
@@ -1135,46 +673,14 @@ function BrowserView({
     [],
   );
 
-  /** Records a query and optionally learns its selected target. */
-  const commitSearch = useCallback(
-    async (target?: string, storageGeneration = dataGeneration()) => {
-      if (query === "") return;
-      const history = await recordSearch(query, storageGeneration);
-      if (storageGeneration !== dataGeneration()) return;
-      setHistory(history);
-      if (target !== undefined) {
-        setAbbreviations(
-          await recordAbbreviation(
-            parsed.normalized,
-            target,
-            storageGeneration,
-          ),
-        );
-      }
-    },
-    [query, parsed.normalized],
-  );
-
-  // Record settled queries without storing every typed prefix.
-  useEffect(() => {
-    if (query.length < minQuery || pathQuery) return;
-    const storageGeneration = dataGeneration();
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      void recordSearch(query, storageGeneration)
-        .then((history) => {
-          if (!cancelled && storageGeneration === dataGeneration())
-            setHistory(history);
-        })
-        .catch(() => {
-          /* Background history is best-effort, including during deletion. */
-        });
-    }, HISTORY_SETTLE_MS);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [query, minQuery, pathQuery]);
+  const commitSearch = useSearchHistoryRecording({
+    query,
+    minQuery,
+    pathQuery,
+    normalizedQuery: parsed.normalized,
+    setHistory,
+    setAbbreviations,
+  });
 
   // SearchScreen updates text directly; only native input resets the history cursor.
   const setQueryProgrammatically = useCallback(
@@ -1213,42 +719,36 @@ function BrowserView({
           ? () => navigate(parent, dir)
           : undefined,
       onHistoryBack: () => {
-        if (history.length === 0) {
+        const step = stepSearchHistory(history, historyIndex, "back");
+        if (step.kind === "refuse")
           void showToast({
             style: Toast.Style.Failure,
-            title: "No earlier searches yet",
-            message:
-              "Searches are remembered once you open or enter something.",
+            title: step.title,
+            ...(step.message === undefined ? {} : { message: step.message }),
           });
-          return;
-        }
-        if (historyIndex >= history.length - 1) {
-          void showToast({
-            style: Toast.Style.Failure,
-            title: "That is the oldest search",
-          });
-          return;
-        }
-        const next = historyIndex + 1;
-        setHistoryIndex(next);
-        setQueryProgrammatically(history[next]);
-      },
-      onHistoryForward: () => {
-        if (history.length === 0) {
-          void showToast({
-            style: Toast.Style.Failure,
-            title: "No earlier searches yet",
-          });
-          return;
-        }
-        if (historyIndex <= 0) {
+        else if (step.kind === "clear") {
           setHistoryIndex(-1);
           setQueryProgrammatically("");
-          return;
+        } else {
+          setHistoryIndex(step.index);
+          setQueryProgrammatically(step.query);
         }
-        const next = historyIndex - 1;
-        setHistoryIndex(next);
-        setQueryProgrammatically(history[next]);
+      },
+      onHistoryForward: () => {
+        const step = stepSearchHistory(history, historyIndex, "forward");
+        if (step.kind === "refuse")
+          void showToast({
+            style: Toast.Style.Failure,
+            title: step.title,
+            ...(step.message === undefined ? {} : { message: step.message }),
+          });
+        else if (step.kind === "clear") {
+          setHistoryIndex(-1);
+          setQueryProgrammatically("");
+        } else {
+          setHistoryIndex(step.index);
+          setQueryProgrammatically(step.query);
+        }
       },
       onTogglePin: async (entry) => setPins(await togglePin(entry.path)),
       onLearn:
@@ -1263,66 +763,16 @@ function BrowserView({
                 title: `"${query}" will now find ${entry.name}`,
               });
             },
-      onReindexShortcuts: async () => {
-        await withIndexingLock(async (assertOwned) => {
-          const toast = await showToast({
-            style: Toast.Style.Animated,
-            title: "Indexing Google Drive…",
-          });
-          // Bound interactive indexing so a cold mount cannot block indefinitely.
-          const previousShortcuts = await loadShortcutIndex();
-          const index = await scanShortcuts({ maxDepth: 6, budgetMs: 20_000 });
-          if (!index.available || index.error) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Google Drive is unavailable";
-            toast.message = "The previous index was kept.";
-            return;
-          }
-          const activeShortcuts = refreshShortcutIndex(
-            previousShortcuts,
-            index,
-          );
-          assertOwned();
-          if (!(await saveShortcutIndex(activeShortcuts))) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Google Drive index could not be saved";
-            toast.message =
-              "The shortcut index is too large or storage failed. Previous saved results were kept.";
-            return;
-          }
-          setShortcuts(activeShortcuts.shortcuts);
-          setShortcutsScannedAt(activeShortcuts.scannedAt);
-
-          const previousShared = loadSharedIndex();
-          setDriveIndexMessage(
-            driveIndexCaveat(activeShortcuts, previousShared),
-          );
-          const shared = await scanSharedFolders({ budgetMs: 20_000 });
-          if (!shared.available || shared.error) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Google Drive shared folders are unavailable";
-            toast.message = "The previous index was kept.";
-            return;
-          }
-          const activeShared = refreshSharedIndex(previousShared, shared);
-          assertOwned();
-          if (!saveSharedIndex(activeShared)) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Google Drive index could not be saved";
-            toast.message =
-              "The shared-folder index is too large or storage failed. Previous saved results were kept.";
-            return;
-          }
-          setSharedIndex(activeShared.paths);
-          setDriveIndexMessage(driveIndexCaveat(activeShortcuts, activeShared));
-
-          toast.style = Toast.Style.Success;
-          const indexCaveat = driveIndexCaveat(index, shared);
-          toast.title = `${activeShared.paths.length} items in shared folders`;
-          toast.message = indexCaveat
-            ? `${activeShortcuts.shortcuts.length} shortcuts. Partial results merged with saved paths. ${indexCaveat}.`
-            : `${activeShortcuts.shortcuts.length} shortcuts indexed.`;
-        });
+      onRebuildIndex: async () => {
+        if (rebuilding) return;
+        setRebuilding(true);
+        try {
+          await rebuildWithFeedback();
+        } finally {
+          setRebuilding(false);
+          // Pick up the new coverage and drop the pre-rebuild snapshot.
+          setReloadKey((k) => k + 1);
+        }
       },
       onToggleDetail: () => setShowingDetail((v) => !v),
       onRefresh: () => setReloadKey((k) => k + 1),
@@ -1356,7 +806,6 @@ function BrowserView({
         const erased = await eraseEverything();
         if (!erased) return;
         // Rebuild component state from the cleared stores.
-        setDiscovered([]);
         setFound([]);
         setReloadKey((k) => k + 1);
 
@@ -1374,8 +823,6 @@ function BrowserView({
       historyIndex,
       query,
       parsed.normalized,
-      shortcuts,
-      shortcutsScannedAt,
       markVisited,
       commitSearch,
       setQueryProgrammatically,
@@ -1383,6 +830,8 @@ function BrowserView({
       onToggleHidden,
       returnToStart,
       searchText,
+      rebuilding,
+      setReloadKey,
     ],
   );
 
@@ -1407,34 +856,22 @@ function BrowserView({
   const searchLimitReached =
     resultsTruncated ||
     rowLimitReached ||
-    recentFiles.limited ||
-    [
-      scopeCache,
-      startingCache,
-      shortcutCache,
-      discoveredCache,
-      sharedCache,
-      learnedCache,
-    ].some((cache) => cache.limited);
+    [scopeCache, startingCache, learnedCache].some((cache) => cache.limited);
   const directoryPending =
     directoryListing.pending || pathListing.pending || hiddenListing.pending;
-  const visibleFolderError = folderError ?? hiddenListing.error;
+  const visibleFolderError = directoryListing.error ?? hiddenListing.error;
 
   // All search-status indicators derive from this shared progress model.
   const progress = deriveProgress({
     rankingReady,
-    backgroundPending:
-      backgroundPending || recentFiles.pending || cachedPending,
-    memoryPartial: recentFiles.partial || cachedPartial,
+    backgroundPending: backgroundPending || cachedPending,
+    memoryPartial: cachedPartial,
     scoped: dir !== undefined || hiddenOnly(parsed),
     directChildrenOnly: dir !== undefined,
-    folderMetaPending: childrenUsagePending || directoryPending,
+    folderMetaPending: directoryPending,
     folderFailed:
-      visibleFolderError !== undefined ||
-      folderMetaError !== undefined ||
-      pathListing.error !== undefined,
+      visibleFolderError !== undefined || pathListing.error !== undefined,
     folderPartial:
-      folderMetaPartial !== undefined ||
       directoryListing.truncated > 0 ||
       pathListing.omitted > 0 ||
       hiddenListing.truncated > 0,
@@ -1443,12 +880,10 @@ function BrowserView({
     isHiddenOnly: hiddenOnly(parsed),
     searching,
     searchFailed: searchError !== undefined,
-    searchPartial: searchPartial !== undefined || searchLimitReached,
+    searchPartial: searchLimitReached,
     termLength: parsed.longest.length,
     minQuery,
-    rankingPending: foundUsagePending,
-    rankingFailed: foundUsageError !== undefined,
-    rankingPartial: foundUsagePartial !== undefined,
+    rankingPending: false,
   });
   const settling = !isSettled(progress);
   const light = statusLight(progress);
@@ -1458,34 +893,21 @@ function BrowserView({
     ? pathListing.omitted
     : hiddenOnly(parsed) && !dir
       ? hiddenListing.truncated
-      : folderEntriesOmitted;
-  const caveat = searchLimitReached
-    ? "Search limit reached — narrow your query or search inside a folder"
-    : visibleFolderError
-      ? "this folder could not be read"
-      : pathListing.error
-        ? "this location could not be read"
-        : searchError
-          ? searchError
-          : searchPartial
-            ? searchPartial
-            : folderMetaError
-              ? folderMetaError
-              : folderMetaPartial
-                ? folderMetaPartial
-                : foundUsageError
-                  ? foundUsageError
-                  : foundUsagePartial
-                    ? foundUsagePartial
-                    : omittedEntries > 0
-                      ? "Folder listing capped — some children were not read"
-                      : resultsTruncated
-                        ? "search reached a time, depth, or result limit"
-                        : !dir && query !== "" && driveIndexMessage
-                          ? driveIndexMessage
-                          : dir && isUnindexedScope(dir)
-                            ? "read directly, not in Spotlight's index"
-                            : undefined;
+      : directoryListing.truncated;
+  const caveat = describeCaveat({
+    dir,
+    pathQuery,
+    indexStatus,
+    indexTooShort,
+    coverage,
+    query,
+    searchLimitReached,
+    visibleFolderError,
+    locationError: pathListing.error,
+    searchError,
+    omittedEntries,
+    resultsTruncated,
+  });
   const scopeLabel = dir ? displayPath(dir) : "Everywhere";
   const tooShort =
     !dir && !pathQuery && query !== "" && query.length < minQuery;
@@ -1507,138 +929,199 @@ function BrowserView({
       ? `Display limited to ${LIVE_RENDERED_RESULTS} items — narrow your query`
       : undefined,
     caveat,
-    recentFiles.partial || cachedPartial
-      ? "some cached files could not be checked"
-      : undefined,
+    cachedPartial ? "some cached files could not be checked" : undefined,
   ]
     .filter(Boolean)
     .join(" · ")
     .replace(/\s+/gu, " ");
 
-  // Prefer the best fast result still admitted by the combined result cap.
-  const admittedPaths = new Set(rows.map(({ entry }) => entry.path));
-  const firstMemoryPath = instantRows.find(({ entry }) =>
-    admittedPaths.has(entry.path),
-  )?.entry.path;
+  /**
+   * Whether rows render, and equally whether a selection is requested.
+   *
+   * One predicate for both, because they are one decision. Splitting them is
+   * what put the selection on the wrong row: rows rendered as soon as the
+   * folder listing arrived, while the selection request was withheld until
+   * every stage settled. In that window Raycast owns the selection, picks the
+   * first row of an unranked list, and keeps that same item selected as usage
+   * metadata re-ranks it downwards. Entering a folder for the first time
+   * selected whichever file happened to be newest.
+   *
+   * Holding rows until nothing can reorder them is also what makes the
+   * selection request right by construction rather than by timing: whoever
+   * chooses the first row, us or Raycast, is choosing from the finished list.
+   * Every stage is bounded, so the hold is too.
+   */
+  const listReady = searchActive && !rowsCanChange(progress);
   const { selectedId, retainedPath, getSelectedPath, onSelectionChange } =
-    useFolderSelection(initialSelectionPath, rows, generation, query, 0, true, {
-      source:
-        !rankingReady || !searchActive
-          ? "waiting"
-          : firstMemoryPath
-            ? "memory"
-            : "spotlight",
-      path: firstMemoryPath,
-      memoryPending:
-        backgroundPending ||
-        cachedPending ||
-        recentFiles.pending ||
-        directoryPending,
+    useFolderSelection({
+      initialPath: initialSelectionPath,
+      rows,
+      generation,
+      query,
+      selectFirst: true,
+      initialResult: {
+        source: listReady ? "memory" : "waiting",
+        memoryPending: false,
+      },
     });
+  selectionReader.current = {
+    query,
+    queryKey,
+    read: () => retainedPath ?? getSelectedPath(),
+  };
   const retainedSelectionPath = retainedPath ?? getSelectedPath();
   const renderedRows = useMemo(
     () => displayRows(rows, retainedSelectionPath),
     [rows, retainedSelectionPath],
   );
+  /*
+   * Exactly what will be rendered as rows.
+   *
+   * The branch below chooses on this rather than on `rows`, because a view
+   * that holds rows does not necessarily render them. Deciding on `rows` left
+   * a `List.Section` with no children: a blank screen with no message, and no
+   * empty view to explain it.
+   */
+  const visibleRows = listReady ? renderedRows : [];
   const rowHandlers = Object.fromEntries(
     Object.entries(handlers).map(([name, callback]) => [
       name,
       event(name, callback),
     ]),
   ) as RowHandlers;
-  useEffect(() => {
-    if (!environment.isDevelopment) return;
-    traceNavigation("selection-request", {
-      frameId,
-      generation,
-      rows: rows.length,
-      requestedIndex: rows.findIndex(
-        ({ entry }) => rowIdForEntry(generation, entry) === selectedId,
-      ),
-      restoring: initialSelectionPath !== undefined,
-    });
-  }, [frameId, generation, rows, selectedId]);
-  const setupActions = {
-    setup: recentFiles.setup,
-    importing: recentFiles.importing,
-    start: event("setupStart", recentFiles.start),
-    cancel: event("setupCancel", recentFiles.cancel),
-    skip: event("setupSkip", recentFiles.skip),
-  };
-  const payloadRef = useRef({
-    children: 0,
-    found: 0,
-    recent: 0,
-    cached: 0,
-    rendered: 0,
+  const traceSelectionReceived = useNavigationTracing({
+    isDevelopment: environment.isDevelopment,
+    frameId,
+    dir,
+    generation,
+    query,
+    rows,
+    selectedId,
+    initialSelectionPath,
+    listReady,
+    queryController,
+    screen,
+    payload: {
+      children: children.length,
+      found: found.length,
+      cached:
+        scopeCache.entries.length +
+        startingCache.entries.length +
+        learnedCache.entries.length,
+      rendered: renderedRows.length,
+    },
   });
-  payloadRef.current = {
-    children: children.length,
-    found: found.length,
-    recent: recentFiles.entries.length,
-    cached:
-      scopeCache.entries.length +
-      startingCache.entries.length +
-      discoveredMatches.length +
-      sharedMatches.length +
-      shortcuts.length +
-      learnedCache.entries.length,
-    rendered: renderedRows.length,
-  };
-  useEffect(() => {
-    traceNavigation("result-view-mounted", {
-      frameId,
-      scope: dir === undefined ? "global" : "folder",
-    });
-    return () => {
-      const payload = payloadRef.current;
-      traceNavigation("result-view-unmounted", {
-        frameId,
-        scope: dir === undefined ? "global" : "folder",
-        ...payload,
-      });
-      traceNavigationAfterRelease("result-view-released", {
-        frameId,
-        ...payload,
-      });
-    };
-  }, [frameId]);
+
+  /*
+   * One set of column widths for the whole list, measured over the rows that
+   * will render. Per-row widths would not be columns at all, and the rows are
+   * published once, so these do not move while the list is on screen.
+   */
+  const columns = useMemo(
+    () =>
+      columnWidths(
+        visibleRows.map(({ entry, score }) => ({
+          visits: visits[entryStoragePath(entry)]?.count,
+          score: prefs.showScores ? score.total : undefined,
+          time: relativeTime(entry.mtimeMs),
+        })),
+      ),
+    [visibleRows, visits, prefs.showScores],
+  );
+
+  /*
+   * One decision, made in one place, for what the list shows. `rows` is not
+   * the same question as `visibleRows`, and conflating them is what produced
+   * a section with nothing in it.
+   */
+  const listView = chooseListView({
+    rankingReady,
+    visibleRows: visibleRows.length,
+    leaving: !searchActive,
+    computing: rowsCanChange(progress),
+    directoryPending,
+    tooShort,
+    minQuery,
+    query,
+    folderError: visibleFolderError,
+    locationError: pathListing.error,
+    searchError,
+    limitReached: searchLimitReached || omittedEntries > 0,
+    noIndex,
+  });
+  const rebuildAction = (
+    <Action
+      title="Rebuild Search Index"
+      icon={Icon.Download}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      onAction={rowHandlers.onRebuildIndex}
+    />
+  );
+  const refreshAction = (
+    <Action
+      title="Refresh"
+      icon={Icon.ArrowClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={rowHandlers.onRefresh}
+    />
+  );
+  /**
+   * The action panel both empty views share.
+   *
+   * Shared so Command-K is never a dead end. The usage history loads before
+   * anything can be ranked, and during that moment the list is empty; without
+   * this it had no actions of its own.
+   */
+  const emptyActions = (
+    <ActionPanel>
+      {/*
+       * Whatever comes first here is what Return does, and
+       * NavigationActions renders nothing at the top level, where
+       * there is no parent to go up to and no start to return to. So
+       * the first action is chosen deliberately: rebuild when there is
+       * no index, since that is what the empty view tells the user to
+       * do, and otherwise refresh, which is the cheap way to retry an
+       * empty result. Never the hidden-file toggle, which has nothing
+       * to do with why the list is empty.
+       */}
+      {noIndex ? rebuildAction : refreshAction}
+      <NavigationActions
+        onUp={rowHandlers.onUp}
+        onReturnToStart={rowHandlers.onReturnToStart}
+      />
+      <HiddenFilesAction onToggle={rowHandlers.onToggleHidden} />
+      <SearchHistoryActions
+        onHistoryBack={rowHandlers.onHistoryBack}
+        onHistoryForward={rowHandlers.onHistoryForward}
+      />
+      {noIndex ? refreshAction : rebuildAction}
+      {/* Keep cache recovery available when no rows are shown. */}
+      <Action
+        title="Delete All Data and Cache…"
+        icon={Icon.Trash}
+        style={Action.Style.Destructive}
+        onAction={rowHandlers.onEraseEverything}
+      />
+    </ActionPanel>
+  );
 
   return (
     <SearchScreenContent
       screen={screen}
       frameId={frameId}
-      actions={
-        <ActionPanel>
-          <NavigationActions
-            onUp={rowHandlers.onUp}
-            onReturnToStart={rowHandlers.onReturnToStart}
-          />
-          <HiddenFilesAction onToggle={rowHandlers.onToggleHidden} />
-          <SetupActions {...setupActions} />
-        </ActionPanel>
-      }
-      // Keep the progress bar active while any stage can reorder results.
-      isLoading={!rankingReady || settling}
+      // The List's own panel applies whenever no row owns one. Reuse the
+      // deliberate ordering rather than leading with navigation, which renders
+      // nothing at the top level and left the hidden-file toggle first.
+      actions={emptyActions}
+      // Only ever while rows are on screen: see listIsLoading.
+      isLoading={listIsLoading(listView, settling)}
       // Raycast's own filter would re-rank by match score and wipe out the
       // usage ranking, so we filter and sort ourselves.
       filtering={false}
       selectedItemId={selectedId ?? undefined}
       onSelectionChange={event("selection", (id: string | null) => {
         if (!navigation.isCurrent(frameId)) return;
-        if (environment.isDevelopment)
-          traceNavigation("selection-received", {
-            frameId,
-            generation,
-            rows: rows.length,
-            selectedIndex: rows.findIndex(
-              ({ entry }) => rowIdForEntry(generation, entry) === id,
-            ),
-            requestedIndex: rows.findIndex(
-              ({ entry }) => rowIdForEntry(generation, entry) === selectedId,
-            ),
-            empty: id === null,
-          });
+        traceSelectionReceived(id);
         onSelectionChange(id);
       })}
       onSearchTextChange={event("query", onSearchTextChange)}
@@ -1663,134 +1146,24 @@ function BrowserView({
         />
       }
     >
-      {rankingReady &&
-        !dir &&
-        query === "" &&
-        (recentFiles.offered || recentFiles.importing) && (
-          <List.Section title="Optional Setup">
-            <List.Item
-              id="search-setup"
-              icon={Icon.Clock}
-              title={
-                recentFiles.importing
-                  ? recentFiles.stage === "drive"
-                    ? "Indexing Google Drive…"
-                    : "Populating from Recent Files…"
-                  : "Set Up Search"
-              }
-              subtitle={
-                recentFiles.importing
-                  ? recentFiles.progress
-                  : (!recentFiles.setup.recents && !recentFiles.setup.drive
-                      ? "Recent files · Google Drive indexing"
-                      : [
-                          recentFiles.setup.recents && "Recent files",
-                          recentFiles.setup.drive && "Google Drive indexing",
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")) + " · optional, stored on this Mac"
-              }
-              actions={
-                <ActionPanel>
-                  <SetupActions {...setupActions} />
-                  <NavigationActions
-                    onUp={rowHandlers.onUp}
-                    onReturnToStart={rowHandlers.onReturnToStart}
-                  />
-                  <HiddenFilesAction onToggle={rowHandlers.onToggleHidden} />
-                </ActionPanel>
-              }
-            />
-          </List.Section>
-        )}
-      {!rankingReady ? (
-        <List.EmptyView
-          icon={Icon.Clock}
-          title="Loading your usage history…"
-          description="Nothing can be ranked until it is read."
-        />
-      ) : rows.length === 0 && (!searching || directoryPending) ? (
+      {listView.kind !== "rows" ? (
         <List.EmptyView
           icon={
-            directoryPending
+            listView.kind === "loading"
               ? Icon.Clock
-              : tooShort
+              : listView.hint === "keys"
                 ? Icon.Keyboard
                 : Icon.MagnifyingGlass
           }
-          title={
-            directoryPending
-              ? "Reading folder…"
-              : visibleFolderError
-                ? "Folder could not be read"
-                : pathListing.error
-                  ? "Location could not be read"
-                  : searchError
-                    ? "Search failed"
-                    : searchLimitReached || omittedEntries > 0
-                      ? "Search limit reached"
-                      : tooShort
-                        ? `Keep typing — ${minQuery} characters minimum`
-                        : query === ""
-                          ? "Nothing to show yet"
-                          : `Nothing matching “${query}”`
-          }
-          description={
-            directoryPending
-              ? "You can keep typing while the folder loads."
-              : visibleFolderError
-                ? "Check that the folder still exists and that Raycast can access it."
-                : pathListing.error
-                  ? "Check that the location still exists and that Raycast can access it."
-                  : searchError
-                    ? "Check Spotlight and Raycast permissions, then try Refresh."
-                    : searchLimitReached || omittedEntries > 0
-                      ? "Only part of this location was checked. Use a more specific query or search inside a folder."
-                      : tooShort
-                        ? `The fast results are here already; a whole-disk search waits for ${minQuery} characters.`
-                        : shortcutsScannedAt === 0
-                          ? `Searched ${scopeLabel}. Google Drive is not indexed yet — run Index Google Drive from this panel.`
-                          : `Searched ${scopeLabel}. Drive shortcuts last indexed ${relativeTime(shortcutsScannedAt)}.`
-          }
-          actions={
-            <ActionPanel>
-              <NavigationActions
-                onUp={rowHandlers.onUp}
-                onReturnToStart={rowHandlers.onReturnToStart}
-              />
-              <HiddenFilesAction onToggle={rowHandlers.onToggleHidden} />
-              <SetupActions {...setupActions} />
-              <SearchHistoryActions
-                onHistoryBack={rowHandlers.onHistoryBack}
-                onHistoryForward={rowHandlers.onHistoryForward}
-              />
-              <Action
-                title="Index Google Drive"
-                icon={Icon.HardDrive}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-                onAction={rowHandlers.onReindexShortcuts}
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={rowHandlers.onRefresh}
-              />
-              {/* Keep cache recovery available when no rows are shown. */}
-              <Action
-                title="Delete All Data and Cache…"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={rowHandlers.onEraseEverything}
-              />
-            </ActionPanel>
-          }
+          title={listView.title}
+          description={listView.description}
+          actions={emptyActions}
         />
       ) : (
         <List.Section
           title={`${light}  ${compactScopeLabel(sectionTitle)} · ${sectionStatus}`}
         >
-          {(searchActive ? renderedRows : []).map(({ entry, score }) => (
+          {visibleRows.map(({ entry, score }) => (
             <Row
               key={entry.path}
               id={rowIdForEntry(generation, entry)}
@@ -1798,6 +1171,9 @@ function BrowserView({
               visit={visits[entryStoragePath(entry)]}
               score={score}
               showScore={prefs.showScores}
+              columns={columns}
+              // Usage metadata is read for a browsed folder's children only.
+              usageRead={dir !== undefined}
               showingDetail={showingDetail}
               pinned={pins.includes(entryStoragePath(entry))}
               subtitle={
@@ -1806,7 +1182,6 @@ function BrowserView({
                   : locationLabel(entry.path)
               }
               handlers={rowHandlers}
-              setupActions={setupActions}
             />
           ))}
         </List.Section>
@@ -1815,43 +1190,48 @@ function BrowserView({
   );
 }
 
-/** A native route owns its input, result arrays and selection for one location. */
+/** Reuse the route's input; replace its result producer for each location. */
 function BrowserFrame({
   frame,
   navigation,
   actions,
+  active,
   ...session
 }: {
   frame: SearchFrame;
   navigation: FolderNavigation;
   actions: FrameActions;
+  active: boolean;
   includeHidden: boolean;
   onToggleHidden: () => void;
-  setup: SearchSetup;
   reloadKey: number;
   setReloadKey: Dispatch<SetStateAction<number>>;
 }) {
-  const [screen] = useState(
+  const screen = useMemo(
     () => new SearchScreen(frame.id, frame.initialQuery),
+    [frame.id, frame.initialQuery],
   );
   return (
     <>
-      <SearchScreenView screen={screen} />
-      <BrowserView
-        {...session}
-        {...actions}
-        screen={screen}
-        navigation={navigation}
-        frameId={frame.id}
-        dir={frame.dir}
-        initialSelectionPath={frame.selectedPath}
-      />
+      <SearchScreenView screen={screen} active={active} />
+      {active && (
+        <BrowserView
+          key={frame.id}
+          {...session}
+          {...actions}
+          screen={screen}
+          navigation={navigation}
+          frameId={frame.id}
+          dir={frame.dir}
+          initialSelectionPath={frame.selectedPath}
+        />
+      )}
     </>
   );
 }
 
-/** Only session settings and setup survive replacement of a native route. */
-export function Browser(props: Props) {
+/** Only session settings survive replacement of a result view. */
+export function Browser() {
   enableNavigationDiagnostics(environment.isDevelopment);
   const [includeHidden, setIncludeHidden] = useState(
     () => getPreferenceValues<Preferences>().showHidden,
@@ -1860,32 +1240,22 @@ export function Browser(props: Props) {
     () => setIncludeHidden((hidden) => !hidden),
     [],
   );
-  const [navigation] = useState(
-    () =>
-      new FolderNavigation(
-        props.dir === undefined ? undefined : normalizeDir(props.dir),
-      ),
-  );
+  const [navigation] = useState(() => new FolderNavigation());
   const [reloadKey, setReloadKey] = useState(0);
-  const refreshAfterSetup = useCallback(
-    () => setReloadKey((key) => key + 1),
-    [],
-  );
-  const setup = useSearchSetup(reloadKey, refreshAfterSetup);
   const renderFrame = useCallback(
-    (frame: SearchFrame, actions: FrameActions) => (
+    (frame: SearchFrame, actions: FrameActions, active: boolean) => (
       <BrowserFrame
         frame={frame}
         navigation={navigation}
         actions={actions}
+        active={active}
         includeHidden={includeHidden}
         onToggleHidden={onToggleHidden}
-        setup={setup}
         reloadKey={reloadKey}
         setReloadKey={setReloadKey}
       />
     ),
-    [navigation, includeHidden, onToggleHidden, setup, reloadKey],
+    [navigation, includeHidden, onToggleHidden, reloadKey],
   );
   return (
     <NativeSearchNavigation navigation={navigation} renderFrame={renderFrame} />

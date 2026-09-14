@@ -15,7 +15,7 @@ export type ParsedQuery = {
   /** Byte bounds from `size:>10mb` / `size:<1kb`. */
   minSize?: number;
   maxSize?: number;
-  /** The most selective token, used as the Spotlight query. */
+  /** The most selective token. Gates the index query and grades match quality. */
   longest: string;
   /** Normalized whole query — the key under which abbreviations are learned. */
   normalized: string;
@@ -40,8 +40,7 @@ const PARTIAL_DIRECTIVE = /^[-^:]([a-z]*)$/i;
 const PARTIAL_ATTRIBUTE = /^(ext|after|before|size):/i;
 
 const EXT_FILTER = /^ext:(.+)$/i;
-const AFTER_FILTER = /^after:(.+)$/i;
-const BEFORE_FILTER = /^before:(.+)$/i;
+const DATE_FILTER = /^(after|before):(.+)$/i;
 const SIZE_FILTER = /^size:([<>])(\d+(?:\.\d+)?)(b|kb|mb|gb)?$/i;
 
 const SIZE_UNITS: Record<string, number> = {
@@ -108,21 +107,12 @@ export function parseQuery(
       continue;
     }
 
-    const afterMatch = AFTER_FILTER.exec(word);
-    if (afterMatch) {
-      const t = parseDate(afterMatch[1]);
+    const date = DATE_FILTER.exec(word);
+    if (date) {
+      const t = parseDate(date[2]);
       if (t !== undefined) {
-        after = t;
-        hasFilters = true;
-        continue;
-      }
-    }
-
-    const beforeMatch = BEFORE_FILTER.exec(word);
-    if (beforeMatch) {
-      const t = parseDate(beforeMatch[1]);
-      if (t !== undefined) {
-        before = t;
+        if (date[1].toLowerCase() === "after") after = t;
+        else before = t;
         hasFilters = true;
         continue;
       }
@@ -159,7 +149,7 @@ export function parseQuery(
     tokens.push(word);
   }
 
-  // Use the longest term for Spotlight; later terms win ties.
+  // The longest term is the most selective one; later terms win ties.
   const longest = tokens.reduce((a, b) => (b.length >= a.length ? b : a), "");
 
   return {
@@ -383,27 +373,6 @@ export function matchPath(
   if (ordered && lastOnName !== undefined) return bestOnName ?? lastOnName;
   if (bestOnName !== undefined) return bestOnName + ORDER_PENALTY;
   return MATCH.PATH;
-}
-
-/** Returns leading hidden path components that require direct scanning. */
-export function dottedTerms(parsed: ParsedQuery): string[] {
-  const out: string[] = [];
-  for (const token of parsed.tokens) {
-    if (!token.startsWith(".")) continue;
-    const head = token.split("/")[0];
-    if (head.length > 1 && !out.includes(head)) out.push(head);
-  }
-  return out;
-}
-
-/** True when matching folders may be scan roots but cannot be results. */
-export function excludesDirectories(parsed: ParsedQuery): boolean {
-  return (
-    parsed.extensions.length > 0 ||
-    parsed.type === "file" ||
-    parsed.minSize !== undefined ||
-    parsed.maxSize !== undefined
-  );
 }
 
 /**

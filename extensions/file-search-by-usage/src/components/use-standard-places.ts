@@ -28,7 +28,7 @@ export function useStandardPlaces(enabled: boolean, reloadKey: number) {
     () => (enabled ? [...standard, ...cloud.paths] : []),
     [enabled, standard, cloud.paths],
   );
-  const checked = useCachedEntries(candidates, "-d", reloadKey, Infinity);
+  const checked = useCachedEntries(candidates, "-d", reloadKey);
   return {
     entries: checked.entries,
     pending: enabled && (cloud.pending || checked.pending),

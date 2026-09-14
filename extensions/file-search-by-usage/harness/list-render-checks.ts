@@ -7,22 +7,28 @@ import { rowIdForEntry } from "../src/lib/entry-identity";
 import { LIVE_RENDERED_RESULTS } from "../src/lib/search-limits";
 import { displayRows } from "../src/lib/display-rows";
 import * as format from "../src/lib/format";
-import { describeProgress } from "../src/lib/progress";
+import {
+  deriveProgress,
+  describeProgress,
+  rowsCanChange,
+} from "../src/lib/progress";
+import { chooseListView } from "../src/lib/list-view";
+import { between, locate } from "./source-slice";
 
 /** Exercise the browser's bounded display and native selection boundary. */
 export async function listRenderChecks(
   assert: (ok: boolean, label: string) => void,
 ) {
   const source = fs.readFileSync("src/components/browser.tsx", "utf8");
-  const headingStart = source.indexOf("  const scopeLabel =");
   const sectionStart = source.lastIndexOf("<List.Section");
   const headingCode = transformSync(
-    source.slice(
-      headingStart,
-      source.indexOf("  // Prefer the best fast result"),
+    between(
+      source,
+      "  const scopeLabel =",
+      "  /**\n   * Whether rows render, and equally whether a selection",
     ) +
       "\nreturn (" +
-      source.slice(sectionStart, source.indexOf(">", sectionStart) + 1) +
+      source.slice(sectionStart, locate(source, ">", sectionStart) + 1) +
       "</List.Section>);",
     { loader: "tsx", jsxFactory: "React.createElement" },
   ).code;
@@ -70,21 +76,36 @@ export async function listRenderChecks(
     ),
     "shortening the header preserves search caveats",
   );
-  const start = source.indexOf("  // Prefer the best fast result");
-  const end = source.indexOf("\n  const rowHandlers", start);
-  const resetStart = source.indexOf("  // Reset row IDs for a new query;");
-  const reset = source.slice(
-    resetStart,
-    source.indexOf("  const onSearchTextChange", resetStart),
+  const rowsGate = between(
+    source,
+    "  /**\n   * Whether rows render, and equally whether a selection",
+    "\n  const rowHandlers",
+  );
+  const reset = between(
+    source,
+    "  // Reset row IDs for a new query;",
+    "  const onSearchTextChange",
   );
   const code = transformSync(
-    `return function View({ rows, instantRows = rows, rankingReady = true, searchActive = true, directoryPending = false, initialSelectionPath, query = "", restorationRevision = 0 }) {
+    `return function View({ rows: candidates, rankingReady = true, searchActive = true, searching = false, settling = false, computing = false, directoryPending = false, initialSelectionPath, query = "", restorationRevision = 0 }) {
     const [generation, setGeneration] = useState(0);
-    const parsed = { normalized: query }, dir = undefined;
-    const backgroundPending = false, cachedPending = false, recentFiles = { pending: false };
+    const parsed = { normalized: query }, dir = undefined, queryKey = query;
+    ${between(source, "  const selectionReader =", "  const { rows, rowLimitReached } =")}
+    const rows = displayRows(candidates, preservedPath);
+    const cachedPending = false, recentFiles = { pending: false };
+    // Built by the real deriveProgress and read by the real rowsCanChange, so
+    // the predicate gating both the rows and the selection is the shipped one.
+    // \`computing\` stands in for a still-running background read, which is what
+    // a first visit to a folder actually has running.
+    const progress = deriveProgress({ rankingReady, backgroundPending: computing,
+      scoped: false, directChildrenOnly: false, folderMetaPending: directoryPending,
+      isPathQuery: false, query, isHiddenOnly: false, searching,
+      termLength: query.length, minQuery: 3, rankingPending: false });
     ${reset}
-    ${source.slice(start, end)}
-    return <List entries={renderedRows}
+    ${rowsGate}
+    // visibleRows, not renderedRows: what the component renders, not what it
+    // holds. Asserting on the wrong one is why the held-rows gate was untested.
+    return <List entries={visibleRows}
       selectedId={selectedId} onSelectionChange={onSelectionChange} />;
   }`,
     { loader: "tsx", jsxFactory: "React.createElement" },
@@ -113,6 +134,9 @@ export async function listRenderChecks(
     "List",
     "LIVE_RENDERED_RESULTS",
     "displayRows",
+    "chooseListView",
+    "rowsCanChange",
+    "deriveProgress",
     code,
   )(
     React,
@@ -125,11 +149,14 @@ export async function listRenderChecks(
     ObservedList,
     LIVE_RENDERED_RESULTS,
     displayRows,
+    chooseListView,
+    rowsCanChange,
+    deriveProgress,
   );
   const rows = Array.from({ length: 2000 }, (_, i) => ({
     entry: { path: `/foo/bar${i}`, name: `bar${i}` },
   }));
-  for (const length of [0, 1, 99, 100, 101, 2000]) {
+  for (const length of [0, 1, 49, 50, 51, 100, 2000]) {
     const input = Object.freeze(rows.slice(0, length));
     for (const selected of [
       undefined,
@@ -140,7 +167,7 @@ export async function listRenderChecks(
     ]) {
       const output = displayRows(input, selected);
       assert(
-        output.length === Math.min(length, 100) &&
+        output.length === Math.min(length, 50) &&
           new Set(output).size === output.length &&
           output.every(
             (row, i) =>
@@ -151,8 +178,8 @@ export async function listRenderChecks(
     }
   }
   assert(
-    LIVE_RENDERED_RESULTS === 100,
-    "the live list has a 100-row memory ceiling",
+    displayRows(rows).length === 50,
+    "a large result set mounts only 50 rows",
   );
   const globals = globalThis as typeof globalThis & {
     IS_REACT_ACT_ENVIRONMENT?: boolean;
@@ -176,8 +203,8 @@ export async function listRenderChecks(
       "startup selects the first result when rows arrive",
     );
     assert(
-      list().entries.length === 100 && list().entries[99] === rows[99],
-      "the displayed subset preserves the first 100 ranked rows",
+      list().entries.length === 50 && list().entries[49] === rows[49],
+      "the displayed subset preserves the first 50 ranked rows",
     );
     await act(() => list().onSelectionChange("1:/foo/bar0"));
     assert(
@@ -211,8 +238,8 @@ export async function listRenderChecks(
       "reranking retains the selected item without mounting all 2,000 rows",
     );
     assert(
-      list().entries[98] === rows[1901] &&
-        list().entries[99] === rows[0] &&
+      list().entries[48] === rows[1951] &&
+        list().entries[49] === rows[0] &&
         rows.length === 2000,
       "selection replaces only the last visible row and leaves source results intact",
     );
@@ -220,7 +247,7 @@ export async function listRenderChecks(
       renderer!.update(React.createElement(View, { rows, query: "baz" })),
     );
     assert(
-      list().entries.length === 100,
+      list().entries.length === 50,
       "a new query retains the same display budget",
     );
     await act(() =>
@@ -263,8 +290,8 @@ export async function listRenderChecks(
       ),
     );
     assert(
-      list().selectedId === "1:/foo/bar4",
-      "the browser selects the highest-ranked admitted memory item, not the top Spotlight item",
+      list().selectedId === "1:/foo/bar0",
+      "the browser selects the first row of the settled list, whatever the source order",
     );
     await act(() =>
       renderer!.update(
@@ -291,42 +318,7 @@ export async function listRenderChecks(
     );
     assert(
       list().selectedId === "1:/foo/bar1999",
-      "the restored parent target takes priority over the top memory item once rows render",
-    );
-    await act(() =>
-      renderer!.update(
-        React.createElement(View, {
-          key: "offscreen-memory",
-          rows,
-          instantRows: [],
-          rankingReady: false,
-        }),
-      ),
-    );
-    await act(() => list().onSelectionChange("1:/foo/bar0"));
-    commits.length = 0;
-    await act(() =>
-      renderer!.update(
-        React.createElement(View, {
-          key: "offscreen-memory",
-          rows,
-          instantRows: [rows[1999]],
-        }),
-      ),
-    );
-    const focused = commits.findIndex(
-      (commit) => commit.selectedId === "1:/foo/bar1999",
-    );
-    assert(
-      focused > 0 &&
-        commits
-          .slice(0, focused)
-          .some(
-            (commit) =>
-              commit.paths.includes("/foo/bar1999") &&
-              commit.selectedId === null,
-          ),
-      "an offscreen memory target is rendered in an earlier commit than its focus request",
+      "the restored parent target takes priority over the first row once rows render",
     );
     await act(() =>
       renderer!.update(
@@ -362,56 +354,159 @@ export async function listRenderChecks(
           ),
       "a late parent target is also rendered before requesting focus despite an intermediate native selection",
     );
+    /*
+     * Selection waits for the settled list.
+     *
+     * The rows are held until no stage is still running, so there is no interim
+     * row to latch onto. One predicate gates the rows and the selection
+     * together; these check that an interim publication cannot take the
+     * selection and that the finished list's first row does.
+     */
     await act(() =>
       renderer!.update(
         React.createElement(View, {
-          key: "directory-batch",
+          key: "settling",
           rows: [rows[72]],
-          directoryPending: true,
+          computing: true,
         }),
       ),
     );
     assert(
       list().selectedId === null,
-      "the browser waits for an initial directory batch instead of latching the first enumerated file",
+      "no row is selected while the list is still settling",
+    );
+    await act(() =>
+      renderer!.update(React.createElement(View, { key: "settling", rows })),
+    );
+    assert(
+      list().selectedId === "1:/foo/bar0",
+      "the settled list selects its first row",
+    );
+    /*
+     * A memory result that ranks last does not take the selection.
+     *
+     * This is the shape that produced a selected bottom row: a frequently
+     * opened shared folder is the top memory candidate, but the merged ranking
+     * puts it last because the query only matches its name by letters in
+     * order. Selection used to target the first memory row, so it landed
+     * there, and `displayRows` then pinned it to the end of the list.
+     */
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "memory-ranks-last",
+          rows,
+          instantRows: [rows[1999]],
+          query: "ranks-last",
+        }),
+      ),
+    );
+    assert(
+      String(list().selectedId).endsWith(":/foo/bar0"),
+      `the top memory candidate ranking last does not take the selection (${String(list().selectedId)})`,
+    );
+    assert(
+      list().entries[0].entry.path === "/foo/bar0",
+      "row 1 of the merged ranking is what gets selected",
+    );
+
+    /*
+     * Row 1 stays selected even when a previous selection ranked far down.
+     *
+     * `displayRows` replaces the last visible row with the retained selection
+     * when that selection falls outside the first hundred, which is how a
+     * previously opened item can appear at the bottom of the list and hold the
+     * highlight. A new query must not inherit it.
+     */
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, { key: "stale-pick", rows, query: "one" }),
+      ),
+    );
+    const picked = String(list().selectedId).split(":")[0];
+    await act(() => list().onSelectionChange(`${picked}:/foo/bar1999`));
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, { key: "stale-pick", rows, query: "two" }),
+      ),
+    );
+    assert(
+      String(list().selectedId).endsWith(":/foo/bar0"),
+      `a new query selects row 1, not the row selected under the previous query (${String(list().selectedId)})`,
+    );
+    assert(
+      list().entries[0].entry.path === "/foo/bar0" &&
+        !list().entries.some(
+          (row: { entry: { path: string } }) =>
+            row.entry.path === "/foo/bar1999",
+        ),
+      "and the previous selection is no longer pinned to the end of the list",
+    );
+
+    /*
+     * Entering a folder for the first time.
+     *
+     * The reported shape: a small folder's listing finishes before the
+     * background reads do, so the rows exist while a stage is still running.
+     * Before the newest file is ranked it sorts first, and afterwards it sorts
+     * third. Rendering those rows while withholding the selection request let
+     * Raycast select row 1 of the unranked order and then keep that same item
+     * selected as the ranking moved it down, which is how the third row ended
+     * up selected on a first visit.
+     */
+    const unranked = [rows[3], rows[0], rows[1], rows[2]];
+    commits.length = 0;
+    await act(() =>
+      renderer!.update(
+        React.createElement(View, {
+          key: "first-visit",
+          rows: unranked,
+          computing: true,
+        }),
+      ),
+    );
+    assert(
+      list().entries.length === 0 && list().selectedId === null,
+      `rows are held while a stage can still reorder them (${list().entries.length} rendered)`,
     );
     await act(() =>
       renderer!.update(
         React.createElement(View, {
-          key: "directory-batch",
-          rows,
+          key: "first-visit",
+          rows: [rows[0], rows[1], rows[3], rows[2]],
         }),
       ),
     );
     assert(
       list().selectedId === "1:/foo/bar0",
-      "finishing the directory batch selects its ranked top item",
+      `the first visit selects row 1 of the ranked list (${String(list().selectedId)})`,
     );
-    function LaggingDirectory({ finished }: { finished: boolean }) {
+    assert(
+      !commits.some((commit) => commit.paths[0] === "/foo/bar3"),
+      "and the unranked order was never rendered for Raycast to select from",
+    );
+
+    function LaggingList({ finished }: { finished: boolean }) {
       const [entries, setEntries] = React.useState([rows[72]]);
       React.useEffect(() => {
         if (finished) setEntries(rows);
       }, [finished]);
       return React.createElement(View, {
         rows: entries,
-        directoryPending: !finished,
+        computing: !finished,
       });
     }
     await act(() =>
-      renderer!.update(
-        React.createElement(LaggingDirectory, { finished: false }),
-      ),
+      renderer!.update(React.createElement(LaggingList, { finished: false })),
     );
     commits.length = 0;
     await act(() =>
-      renderer!.update(
-        React.createElement(LaggingDirectory, { finished: true }),
-      ),
+      renderer!.update(React.createElement(LaggingList, { finished: true })),
     );
     assert(
       list().selectedId === "1:/foo/bar0" &&
         !commits.some((commit) => commit.selectedId === "1:/foo/bar72"),
-      "a directory publication queued by an effect updates the target before the first focus request",
+      "a publication queued by an effect never latches the interim row",
     );
   } finally {
     if (renderer) await act(() => renderer!.unmount());

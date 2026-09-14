@@ -13,7 +13,10 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { performanceChecks } from "./performance-checks";
 import { indexingChecks } from "./indexing-checks";
-import { recentsChecks } from "./recents-checks";
+import { indexChecks } from "./index-checks";
+import { indexSafetyChecks } from "./index-safety-checks";
+import { rankSourcesChecks } from "./rank-sources-checks";
+import { cachedEntryChecks } from "./cached-entry-checks";
 import { browserChecks } from "./browser-checks";
 import { eventHandleChecks } from "./event-handle-checks";
 import { searchScreenChecks } from "./search-screen-checks";
@@ -21,11 +24,11 @@ import { liveSearchChecks } from "./live-search-checks";
 import { resultOrderChecks } from "./result-order-checks";
 import { typeFilterChecks } from "./type-filter-checks";
 import { rowRenderChecks } from "./row-render-checks";
+import { caveatChecks, listViewChecks } from "./list-view-checks";
+import { accessoryColumnChecks } from "./accessory-column-checks";
 import {
   canonicalPath,
-  hiddenDirsMatching,
   isNoisyPath,
-  isSystemPath,
   locationLabel,
   sharedCloudFolderResult,
   sharedCloudFolders,
@@ -33,19 +36,17 @@ import {
   relativeDepth,
   normalizeDir,
   splitPathQuery,
-  standardPlaces,
   statEntry,
 } from "../src/lib/read-dir";
 import {
-  collectSearchPaths,
-  readUsageMeta,
-  readUsageMetaResult,
-  runSpotlightSearch,
-  searchPaths,
-} from "../src/lib/spotlight";
-import { isUnindexedScope, listUnder, walkSearch } from "../src/lib/walk";
-import { googleDriveRoots, scanShortcuts } from "../src/lib/drive-shortcuts";
-import { scanSharedFolders } from "../src/lib/shared-scan";
+  cloudPathCandidates,
+  standardPathCandidates,
+} from "../src/lib/starting-paths";
+import { readUsageMetaResult } from "../src/lib/spotlight";
+import { findFd, describeFdLookup } from "../src/lib/fd";
+import { googleDriveIndexRoots, rebuildIndex } from "../src/lib/index-build";
+import { closeIndexReader, searchIndex } from "../src/lib/index-reader";
+import { openIndexForRead } from "../src/lib/index-db";
 import { ScoreParts, scoreEntry } from "../src/lib/score";
 import {
   MATCH,
@@ -65,23 +66,19 @@ import {
   pruneVisits,
   recordEms,
 } from "../src/lib/history";
-import { dottedTerms, excludesDirectories, hiddenOnly } from "../src/lib/query";
+import { hiddenOnly } from "../src/lib/query";
 import {
   Progress,
   deriveProgress,
   describeProgress,
   isSettled,
+  rowsCanChange,
   missingUsagePaths,
   statusLight,
 } from "../src/lib/progress";
 import { VisitLog } from "../src/lib/types";
 import { Entry, Visit, Visits } from "../src/lib/types";
 import { entryStoragePath, rowIdForEntry } from "../src/lib/entry-identity";
-import {
-  driveIndexCaveat,
-  refreshShortcutIndex,
-  refreshSharedIndex,
-} from "../src/lib/index-refresh";
 
 let failures = 0;
 
@@ -143,13 +140,19 @@ function fake(name: string, ageDays: number): Entry {
 
 async function main() {
   await typeFilterChecks(assert);
-  await recentsChecks(assert);
+  await cachedEntryChecks(assert);
   await browserChecks(assert);
   await eventHandleChecks(assert);
   await searchScreenChecks(assert);
   resultOrderChecks(assert);
+  listViewChecks(assert);
+  caveatChecks(assert);
+  accessoryColumnChecks(assert);
   await rowRenderChecks(assert);
   await liveSearchChecks(assert);
+  await indexChecks(assert);
+  await indexSafetyChecks(assert);
+  rankSourcesChecks(assert);
   await indexingChecks(assert);
   await performanceChecks(assert);
   const live = process.argv.includes("--live");
@@ -361,30 +364,10 @@ async function main() {
   );
   assert(
     parseQuery("ext:txt").longest === "",
-    "a filter-only query does not start a global Spotlight search",
+    "a filter-only query has no term to ask the index for",
   );
 
-  console.log("\n=== bounded Spotlight results ===");
-  const cappedSpotlight = collectSearchPaths(
-    ["/example/one", "/example/two", "/example/three"],
-    { scope: "/example", max: 2 },
-  );
-  assert(
-    cappedSpotlight.paths.join(",") === "/example/one,/example/two",
-    "Spotlight keeps the requested number of usable paths",
-  );
-  assert(
-    cappedSpotlight.truncated,
-    "Spotlight reports when another usable path exists beyond the cap",
-  );
-  const failedSpotlight = await runSpotlightSearch("foo", {}, async () => {
-    throw new Error("synthetic failure");
-  });
-  assert(
-    failedSpotlight.error === "Spotlight search failed" &&
-      failedSpotlight.paths.length === 0,
-    "a Spotlight process failure is distinguishable from no matches",
-  );
+  console.log("\n=== usage metadata failures ===");
   const failedMetadata = await readUsageMetaResult(
     ["/example/foo"],
     { timeoutMs: 100 },
@@ -503,298 +486,32 @@ async function main() {
     "preferences come from Raycast's generated manifest types",
   );
 
-  console.log("\n=== index refresh preservation ===");
+  console.log("\n=== manifest ===");
   const manifest = JSON.parse(
     fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"),
   ) as { commands?: { name?: string; interval?: string }[] };
-  const indexCommand = manifest.commands?.find(
-    (command) => command.name === "index-shortcuts",
-  );
   assert(
     !manifest.commands?.some((command) => command.name === "browse-finder"),
     "the manifest does not expose the removed Finder-scoped search command",
   );
   assert(
-    indexCommand !== undefined && indexCommand.interval === undefined,
-    "Google Drive indexing runs only when the user starts it",
-  );
-  for (const savedPartial of [false, true]) {
-    const previous = {
-      paths: ["/old", "/overlap"],
-      scannedAt: 1,
-      available: true,
-      partial: savedPartial,
-    };
-    for (const paths of [
-      [],
-      ["/new"],
-      ["/new", "/overlap"],
-      ["/new", "/overlap", "/more"],
-    ]) {
-      const incoming = { paths, scannedAt: 2, available: true, partial: true };
-      const merged = refreshSharedIndex(previous, incoming);
-      assert(
-        merged.paths.includes("/old") &&
-          merged.paths.includes("/overlap") &&
-          paths.every((p) => merged.paths.includes(p)) &&
-          new Set(merged.paths).size === merged.paths.length &&
-          merged.partial &&
-          merged.scannedAt === 2,
-        `partial scans union paths regardless of count or previous completeness (${paths.length}, ${savedPartial})`,
-      );
-      assert(
-        previous.paths.join(",") === "/old,/overlap",
-        "merging does not mutate the previous index",
-      );
-    }
-    const complete = { ...previous, paths: [], scannedAt: 2, partial: false };
-    assert(
-      refreshSharedIndex(previous, complete) === complete,
-      "complete empty scans remove stale paths",
-    );
-    for (const failed of [
-      { ...complete, available: false },
-      { ...complete, error: "read failed" },
-    ]) {
-      assert(
-        refreshSharedIndex(previous, failed) === previous,
-        "failed scans preserve the saved index and metadata",
-      );
-    }
-  }
-  const oldShortcuts = {
-    shortcuts: [
-      { path: "/old", name: "old", target: "/target" },
-      { path: "/changed", name: "changed", target: "/old-target" },
-    ],
-    scannedAt: 1,
-    available: true,
-    partial: false,
-  };
-  const newShortcuts = {
-    ...oldShortcuts,
-    scannedAt: 2,
-    partial: true,
-    shortcuts: [
-      { path: "/changed", name: "renamed", target: "/new-target" },
-      { path: "/alias", name: "alias", target: "/target" },
-    ],
-  };
-  const mergedShortcuts = refreshShortcutIndex(oldShortcuts, newShortcuts);
-  assert(
-    JSON.stringify(mergedShortcuts.shortcuts) ===
-      JSON.stringify([
-        { path: "/old", name: "old", target: "/target" },
-        { path: "/changed", name: "renamed", target: "/new-target" },
-        { path: "/alias", name: "alias", target: "/target" },
-      ]),
-    "shortcut unions deduplicate by visible path, update targets, and keep distinct aliases",
+    !manifest.commands?.some((command) => command.name === "index-shortcuts"),
+    "the manifest does not expose the removed Google Drive shortcut command",
   );
   assert(
-    oldShortcuts.shortcuts[1].target === "/old-target",
-    "shortcut merging leaves saved objects untouched",
+    manifest.commands?.every((command) => command.interval === undefined),
+    "no command runs on a schedule; every scan is started by the user",
   );
-  const emptyShortcuts = { ...newShortcuts, shortcuts: [], partial: false };
-  assert(
-    refreshShortcutIndex(oldShortcuts, emptyShortcuts) === emptyShortcuts,
-    "complete shortcut scans can remove stale paths",
+  const rebuild = manifest.commands?.find(
+    (command) => command.name === "rebuild-index",
   );
-  for (const failed of [
-    { ...newShortcuts, available: false },
-    { ...newShortcuts, error: "read failed" },
-  ]) {
-    assert(
-      refreshShortcutIndex(oldShortcuts, failed) === oldShortcuts,
-      "failed shortcut scans preserve the saved index",
-    );
-  }
-  const syntheticCloud = fs.mkdtempSync(path.join(os.tmpdir(), "cloud-index-"));
-  const missingCloud = path.join(syntheticCloud, "missing");
-  assert(
-    !(await googleDriveRoots(missingCloud)).available,
-    "a missing cloud root is reported as unavailable",
+  const settings = manifest.commands?.find(
+    (command) => command.name === "index-settings",
   );
   assert(
-    !sharedCloudFolderResult(missingCloud).available,
-    "a missing shared-folder source is reported as unavailable",
+    rebuild !== undefined && settings !== undefined,
+    "the manifest exposes the rebuild and settings commands",
   );
-  const targetRoot = path.join(
-    syntheticCloud,
-    "GoogleDrive-foo@example.com",
-    ".shortcut-targets-by-id",
-    "123",
-    "Shared Foo",
-  );
-  fs.mkdirSync(targetRoot, { recursive: true });
-  assert(
-    (await googleDriveRoots(syntheticCloud)).available,
-    "an accessible Google Drive target root is available",
-  );
-  const syntheticShared = sharedCloudFolderResult(syntheticCloud);
-  assert(
-    syntheticShared.available && syntheticShared.folders.length === 1,
-    "accessible shared folders are discovered from a synthetic cloud root",
-  );
-
-  const nestedDriveFolder = path.join(
-    syntheticCloud,
-    "GoogleDrive-foo@example.com",
-    "My Drive",
-    "foo",
-  );
-  fs.mkdirSync(nestedDriveFolder, { recursive: true });
-  const depthLimitedShortcuts = await scanShortcuts({
-    cloudRoot: syntheticCloud,
-    maxDepth: 0,
-  });
-  assert(
-    depthLimitedShortcuts.partial &&
-      depthLimitedShortcuts.partialReason === "depth-limit",
-    "a shortcut scan records when its depth bound stops it",
-  );
-  const timedShortcuts = await scanShortcuts({
-    cloudRoot: syntheticCloud,
-    budgetMs: -1,
-  });
-  assert(
-    timedShortcuts.partial && timedShortcuts.partialReason === "time-limit",
-    "a shortcut scan records when its time bound stops it",
-  );
-
-  for (const name of ["foo.txt", "bar.txt", "baz.txt"])
-    fs.writeFileSync(path.join(targetRoot, name), "");
-  const flatCheckpoints: number[] = [];
-  const flatLimited = await scanSharedFolders({
-    cloudRoot: syntheticCloud,
-    limit: 2,
-    onProgress: (index) => {
-      flatCheckpoints.push(index.paths.length);
-    },
-  });
-  assert(
-    flatLimited.paths.length === 2 &&
-      flatLimited.partial &&
-      flatLimited.partialReason === "item-limit" &&
-      flatCheckpoints.every((count) => count <= 2),
-    "a final flat folder hitting the item limit stays partial and checkpoints remain bounded",
-  );
-  const nestedSharedFolder = path.join(targetRoot, "nested");
-  fs.mkdirSync(nestedSharedFolder, { recursive: true });
-  const depthLimitedShared = await scanSharedFolders({
-    cloudRoot: syntheticCloud,
-    maxDepth: 0,
-  });
-  assert(
-    depthLimitedShared.partial &&
-      depthLimitedShared.partialReason === "depth-limit",
-    "a shared-folder scan records when its depth bound stops it",
-  );
-  const itemLimitedShared = await scanSharedFolders({
-    cloudRoot: syntheticCloud,
-    limit: 1,
-  });
-  assert(
-    itemLimitedShared.partial &&
-      itemLimitedShared.partialReason === "item-limit",
-    "a shared-folder scan records when its item bound stops it",
-  );
-  const timedShared = await scanSharedFolders({
-    cloudRoot: syntheticCloud,
-    budgetMs: -1,
-  });
-  assert(
-    timedShared.partial && timedShared.partialReason === "time-limit",
-    "a shared-folder scan records when its time bound stops it",
-  );
-
-  assert(
-    driveIndexCaveat(
-      { partial: true, partialReason: "depth-limit" },
-      { partial: false },
-    ) === "Google Drive shortcut index excludes deeper folders",
-    "the shortcut depth-limit message names the actual bound",
-  );
-  assert(
-    driveIndexCaveat(
-      { partial: false },
-      { partial: true, partialReason: "item-limit" },
-    ) === "Google Drive shared-folder index reached its item limit",
-    "the shared item-limit message names the actual bound",
-  );
-  assert(
-    driveIndexCaveat(
-      { partial: true, partialReason: "time-limit" },
-      { partial: false },
-    ) === "Google Drive shortcut indexing stopped at the time limit",
-    "the time-limit message does not blame depth",
-  );
-  assert(
-    driveIndexCaveat({ partial: true }, { partial: false }) ===
-      "Google Drive index stopped early",
-    "a legacy partial index uses a neutral message",
-  );
-
-  const brokenTargets = path.join(
-    syntheticCloud,
-    "GoogleDrive-bar@example.com",
-    ".shortcut-targets-by-id",
-  );
-  fs.mkdirSync(path.dirname(brokenTargets), { recursive: true });
-  fs.writeFileSync(brokenTargets, "not a directory");
-  const mixedDriveRoots = await googleDriveRoots(syntheticCloud);
-  assert(
-    !mixedDriveRoots.available && mixedDriveRoots.roots.length === 1,
-    "one broken Drive account makes multi-account discovery unavailable",
-  );
-  assert(
-    !sharedCloudFolderResult(syntheticCloud).available,
-    "one broken Drive account prevents promotion of a partial shared index",
-  );
-  fs.rmSync(path.dirname(brokenTargets), { recursive: true, force: true });
-
-  const driveSubtree = path.join(
-    syntheticCloud,
-    "GoogleDrive-foo@example.com",
-    "My Drive",
-    "foo",
-  );
-  fs.mkdirSync(driveSubtree, { recursive: true });
-  let shortcutProgress = 0;
-  const interruptedShortcuts = await scanShortcuts({
-    cloudRoot: syntheticCloud,
-    maxDepth: 3,
-    onProgress: () => {
-      shortcutProgress++;
-      if (shortcutProgress === 1)
-        fs.rmSync(path.dirname(driveSubtree), { recursive: true, force: true });
-    },
-  });
-  assert(
-    !interruptedShortcuts.available,
-    "a Drive traversal failure cannot be promoted as a valid shortcut index",
-  );
-
-  const sharedSubtree = path.join(targetRoot, "foo", "bar");
-  fs.mkdirSync(sharedSubtree, { recursive: true });
-  let sharedProgress = 0;
-  const interruptedShared = await scanSharedFolders({
-    cloudRoot: syntheticCloud,
-    maxDepth: 3,
-    onProgress: () => {
-      sharedProgress++;
-      if (sharedProgress === 1)
-        fs.rmSync(path.dirname(sharedSubtree), {
-          recursive: true,
-          force: true,
-        });
-    },
-  });
-  assert(
-    !interruptedShared.available,
-    "a Drive traversal failure cannot be promoted as a valid shared index",
-  );
-  fs.rmSync(syntheticCloud, { recursive: true, force: true });
-
   console.log("\n=== stable row and storage identity ===");
   assert(
     rowIdForEntry(4, fake("one.txt", 0)) === "4:/fake/one.txt",
@@ -872,7 +589,7 @@ async function main() {
   );
   // Whole-path subsequences must remain tightly bounded.
   const longNoise =
-    "/Users/u/Library/CloudStorage/GoogleDrive-a@b.com/.shortcut-targets-by-id/1AbC/Shared Folder/Committee Papers";
+    "/Users/u/Library/CloudStorage/GoogleDrive-user@example.com/.shortcut-targets-by-id/example-id/Shared Folder/Committee Papers";
   assert(
     matchPath(parseQuery("bootcamp"), longNoise, true) === undefined,
     "letters scattered across a long path are not a match",
@@ -958,7 +675,7 @@ async function main() {
   );
   assert(
     parseQuery("alp widget").longest === "widget",
-    "the longest token is what Spotlight is asked for",
+    "the longest token is the one the length policy is measured against",
   );
 
   // Partial directives must not become search terms while typing.
@@ -1131,7 +848,7 @@ async function main() {
   const settled: Progress = {
     memory: "done",
     folder: "done",
-    spotlight: "done",
+    index: "done",
     ranking: "done",
   };
   assert(isSettled(settled), "everything done is settled");
@@ -1139,12 +856,36 @@ async function main() {
   assert(describeProgress(settled) === "complete", "and collapses to one word");
 
   assert(
-    isSettled({ ...settled, spotlight: "skipped", folder: "skipped" }),
+    isSettled({ ...settled, index: "skipped", folder: "skipped" }),
     "a skipped stage does not hold the list open",
   );
 
+  /*
+   * Which stages hold the rows back.
+   *
+   * `rowsCanChange` gates both the rendered rows and the selection request, so
+   * it has to be narrower than an unsettled list: a `waiting` index is one that
+   * will not be queried for this query at all, and treating that as pending
+   * would hold a one-character query's memory results forever.
+   */
+  assert(!rowsCanChange(settled), "a finished list is not still changing");
+  for (const stage of ["memory", "folder", "index", "ranking"] as const)
+    assert(
+      rowsCanChange({ ...settled, [stage]: "running" }),
+      `a running ${stage} stage can still reorder the rows`,
+    );
+  assert(
+    !rowsCanChange({ ...settled, index: "waiting" }),
+    "an index waiting for more characters will not run, so the rows are final",
+  );
+  for (const value of ["skipped", "partial", "failed"] as const)
+    assert(
+      !rowsCanChange({ ...settled, folder: value }),
+      `a ${value} stage cannot reorder anything either`,
+    );
+
   // Every unfinished stage must keep progress unsettled.
-  for (const stage of ["memory", "folder", "spotlight", "ranking"] as const) {
+  for (const stage of ["memory", "folder", "index", "ranking"] as const) {
     for (const value of ["running", "waiting"] as const) {
       const p: Progress = { ...settled, [stage]: value };
       assert(!isSettled(p), `${stage} ${value} is not settled`);
@@ -1174,21 +915,21 @@ async function main() {
     "a finished whole-disk search settles",
   );
   assert(
-    deriveProgress({ ...base, searching: true }).spotlight === "running",
+    deriveProgress({ ...base, searching: true }).index === "running",
     "an in-flight pass reads running",
   );
   assert(
-    deriveProgress({ ...base, termLength: 1 }).spotlight === "waiting" &&
+    deriveProgress({ ...base, termLength: 1 }).index === "waiting" &&
       deriveProgress({ ...base, termLength: 1 }).needed === 2,
     "a short term waits, and says how much is missing",
   );
   assert(
-    deriveProgress({ ...base, query: "" }).spotlight === "skipped",
-    "an empty query skips Spotlight rather than waiting on it",
+    deriveProgress({ ...base, query: "" }).index === "skipped",
+    "an empty query skips the index rather than waiting on it",
   );
   assert(
-    deriveProgress({ ...base, isPathQuery: true }).spotlight === "skipped",
-    "the path bar skips Spotlight",
+    deriveProgress({ ...base, isPathQuery: true }).index === "skipped",
+    "the path bar skips the index",
   );
   const directFolder = deriveProgress({
     ...base,
@@ -1199,12 +940,12 @@ async function main() {
     folderMetaPending: true,
   });
   assert(
-    directFolder.spotlight === "skipped" &&
+    directFolder.index === "skipped" &&
       directFolder.needed === undefined &&
       directFolder.folder === "running",
-    "short folder queries report direct-child metadata work without waiting for Spotlight",
+    "short folder queries report direct-child metadata work without waiting for the index",
   );
-  // A hidden-only query skips Spotlight.
+  // A hidden-only query skips the index.
   const bare = deriveProgress({
     ...base,
     query: ".",
@@ -1212,8 +953,8 @@ async function main() {
     termLength: 0,
   });
   assert(
-    bare.spotlight === "skipped" && bare.needed === undefined,
-    "a hidden-only query skips Spotlight instead of asking for more characters",
+    bare.index === "skipped" && bare.needed === undefined,
+    "a hidden-only query skips the index instead of asking for more characters",
   );
   assert(isSettled(bare), "and settles, because nothing is pending");
   assert(
@@ -1241,7 +982,7 @@ async function main() {
   const failedSearch = deriveProgress({ ...base, searchFailed: true });
   assert(
     isSettled(failedSearch) && statusLight(failedSearch) === "🔴",
-    "a failed Spotlight search settles with a red status instead of green",
+    "a failed index search settles with a red status instead of green",
   );
   const failedPathListing = deriveProgress({
     ...base,
@@ -1250,9 +991,9 @@ async function main() {
   });
   assert(
     failedPathListing.folder === "failed" &&
-      failedPathListing.spotlight === "skipped" &&
+      failedPathListing.index === "skipped" &&
       statusLight(failedPathListing) === "🔴" &&
-      !describeProgress(failedPathListing).includes("Spotlight failed"),
+      !describeProgress(failedPathListing).includes("index failed"),
     "an unreadable path-bar location is attributed to the folder stage",
   );
   const failedFolder = deriveProgress({
@@ -1289,86 +1030,43 @@ async function main() {
   const mid: Progress = {
     memory: "done",
     folder: "skipped",
-    spotlight: "running",
+    index: "running",
     ranking: "done",
   };
   assert(
-    describeProgress(mid) === "memory ✓ · Spotlight … · ranking ✓",
+    describeProgress(mid) === "memory ✓ · index … · ranking ✓",
     `named stages, skipping what does not apply (${describeProgress(mid)})`,
   );
   const short: Progress = {
     memory: "done",
     folder: "skipped",
-    spotlight: "waiting",
+    index: "waiting",
     ranking: "done",
     needed: 2,
   };
   assert(
-    describeProgress(short).includes("Spotlight needs 2 more"),
+    describeProgress(short).includes("index needs 2 more"),
     `a wait says what it is waiting for (${describeProgress(short)})`,
   );
 
-  console.log("\n=== searching inside a hidden folder ===");
-  // Dot-prefixed terms identify hidden roots for direct walking.
+  console.log("\n=== matching inside a hidden folder ===");
+  // Hidden entries are in the index; index-checks covers the showHidden filter.
+  // What matters here is how a dotted query ranks once the rows come back.
+  const dotted = parseQuery(".tool skills");
   assert(
-    dottedTerms(parseQuery(".config nvim")).join(",") === ".config",
-    "a dotted term names a folder to look inside",
-  );
-  assert(
-    dottedTerms(parseQuery(".config/nvim")).join(",") === ".config",
-    "only the leading component names the place",
-  );
-  assert(
-    dottedTerms(parseQuery("config nvim")).length === 0,
-    "without the dot, hidden folders are left alone",
+    matchPath(dotted, path.join("/example", ".tool", "skills")) ===
+      MATCH.PREFIX,
+    "a dotted query ranks top when its last term matches the last component",
   );
   assert(
-    dottedTerms(parseQuery("proj .")).length === 0,
-    "a bare dot names no folder — it is the hidden-only filter",
-  );
-
-  const hidden = fs.mkdtempSync(path.join(os.tmpdir(), "hidden-"));
-  fs.mkdirSync(path.join(hidden, ".tool", "skills", "deep"), {
-    recursive: true,
-  });
-  fs.writeFileSync(path.join(hidden, ".tool", "skills", "one.md"), "");
-  fs.mkdirSync(path.join(hidden, ".other"), { recursive: true });
-  fs.mkdirSync(path.join(hidden, "visible"), { recursive: true });
-
-  assert(
-    hiddenDirsMatching(hidden, [".tool"]).length === 1,
-    "an exact dotted name finds its folder",
+    matchPath(dotted, path.join("/example", ".tool", "skills", "one.md")) !==
+      undefined,
+    "and a file inside that folder still matches on the path",
   );
   assert(
-    hiddenDirsMatching(hidden, [".to"]).length === 1,
-    "a partial dotted name finds it too",
+    matchPath(dotted, path.join("/example", "visible", "skills")) === undefined,
+    "a folder without the dotted component does not match",
   );
-  assert(
-    hiddenDirsMatching(hidden, [".x"]).length === 0,
-    "a name that matches nothing finds nothing",
-  );
-  assert(
-    !hiddenDirsMatching(hidden, [".tool", ".other", ".visible"]).some((p) =>
-      p.endsWith("visible"),
-    ),
-    "a folder without a leading dot is never a hidden root",
-  );
-
-  const q = parseQuery(".tool skills");
-  const roots = hiddenDirsMatching(hidden, dottedTerms(q));
-  const walked = await listUnder(roots, { showHidden: true, maxDepth: 4 });
-  const found = [...new Set([...roots, ...walked.paths])].filter(
-    (p) => matchPath(q, p) !== undefined,
-  );
-  assert(
-    found.some((p) => p.endsWith(path.join(".tool", "skills"))),
-    `the folder inside the hidden folder is reached (${found.length} matches)`,
-  );
-  assert(
-    matchPath(q, path.join(hidden, ".tool", "skills")) === MATCH.PREFIX,
-    "and it ranks top: the last term matches the last path component",
-  );
-  fs.rmSync(hidden, { recursive: true, force: true });
 
   console.log("\n=== ext: accepts what people actually type ===");
   const multi = parseQuery("proj ext:cu,h");
@@ -1407,119 +1105,27 @@ async function main() {
     "a half-typed ext: adds nothing",
   );
 
-  console.log("\n=== a filter that excludes folders reaches inside them ===");
-  // File-only filters may require expanding matched folders.
-  const extQuery = parseQuery("proj ext:cu");
-  assert(excludesDirectories(extQuery), "ext: rules folders out");
-  assert(excludesDirectories(parseQuery("proj -f")), "-f rules folders out");
+  console.log("\n=== a file-only filter needs no folder expansion ===");
+  // Spotlight answered a query like "proj ext:cu" with the folder alone, so it
+  // extension had to list the folder to find the file. Every indexed file is
+  // its own row, so the filter runs in SQL against the file. index-checks
+  // asserts the SQL side; this asserts that the parse still rules folders out.
   assert(
-    excludesDirectories(parseQuery("proj size:>1mb")),
-    "a size bound rules folders out",
-  );
-  assert(!excludesDirectories(parseQuery("proj")), "a plain query does not");
-  assert(!excludesDirectories(parseQuery("proj -d")), "-d certainly does not");
-
-  const tree = fs.mkdtempSync(path.join(os.tmpdir(), "expand-"));
-  fs.mkdirSync(path.join(tree, "proj", "code"), { recursive: true });
-  fs.writeFileSync(path.join(tree, "proj", "code", "layer.cu"), "");
-  fs.writeFileSync(path.join(tree, "proj", "code", "notes.md"), "");
-  fs.mkdirSync(path.join(tree, "proj", ".git"), { recursive: true });
-  fs.writeFileSync(path.join(tree, "proj", ".git", "hidden.cu"), "");
-
-  const sharedQueryTree = fs.mkdtempSync(
-    path.join(os.tmpdir(), "shared-query-"),
-  );
-  fs.mkdirSync(path.join(sharedQueryTree, "foo", "bar"), { recursive: true });
-  fs.writeFileSync(path.join(sharedQueryTree, "foo", "bar", "baz.txt"), "");
-  const sharedMulti = await walkSearch(sharedQueryTree, parseQuery("foo baz"));
-  assert(
-    sharedMulti.paths.some((p) => p.endsWith(path.join("bar", "baz.txt"))),
-    "a direct shared-folder walk supports multi-token path queries",
-  );
-  const sharedFiltered = await walkSearch(
-    sharedQueryTree,
-    parseQuery("baz -f ext:txt after:2020 size:<1mb"),
+    parseQuery("proj ext:cu").extensions.join(",") === "cu",
+    "an extension filter survives alongside a term",
   );
   assert(
-    sharedFiltered.paths.some((p) => p.endsWith("baz.txt")),
-    "a direct shared-folder walk keeps candidates for parsed filters",
-  );
-  fs.rmSync(sharedQueryTree, { recursive: true, force: true });
-  const unreadableWalk = await walkSearch(
-    path.join(os.tmpdir(), "missing-shared-search-root"),
-    parseQuery("foo"),
-  );
-  assert(
-    unreadableWalk.error === "Folder search failed",
-    "an unreadable shared-folder walk reports an error",
-  );
-  const unreadableExpansion = await listUnder([
-    path.join(os.tmpdir(), "missing-expansion-root"),
-  ]);
-  assert(
-    unreadableExpansion.error === "Folder search failed",
-    "an unreadable folder expansion reports an error",
-  );
-  const mixedExpansion = fs.mkdtempSync(
-    path.join(os.tmpdir(), "mixed-expansion-"),
-  );
-  fs.writeFileSync(path.join(mixedExpansion, "foo.txt"), "");
-  fs.writeFileSync(path.join(mixedExpansion, "bar.txt"), "");
-  const failedThenBounded = await listUnder(
-    [path.join(mixedExpansion, "missing"), mixedExpansion],
-    { limit: 1 },
+    matchPath(
+      parseQuery("proj ext:cu"),
+      "/example/proj/code/layer.cu",
+      false,
+    ) !== undefined,
+    "the file inside the folder is what matches",
   );
   assert(
-    failedThenBounded.truncated &&
-      failedThenBounded.error === "Folder search failed",
-    "a bounded expansion retains earlier read failures",
+    matchPath(parseQuery("proj ext:cu"), "/example/proj", false) === undefined,
+    "the folder itself does not",
   );
-  fs.rmSync(mixedExpansion, { recursive: true, force: true });
-
-  // Model Spotlight returning the named folder without its descendants.
-  const fromSpotlight = [path.join(tree, "proj")];
-  assert(
-    fromSpotlight.filter((p) => matchPath(extQuery, p) !== undefined).length ===
-      0,
-    "Spotlight's own answer yields nothing — the bug being fixed",
-  );
-
-  const inside = await listUnder(fromSpotlight);
-  const merged = [...new Set([...fromSpotlight, ...inside.paths])];
-  const hits = merged.filter((p) => matchPath(extQuery, p) !== undefined);
-  assert(
-    hits.length === 1 && hits[0].endsWith("layer.cu"),
-    `expanding the folder finds the .cu file inside it (${hits.length} hit)`,
-  );
-  assert(
-    !merged.some((p) => p.includes(".git")),
-    "hidden entries stay out of the expansion by default",
-  );
-  const withHidden = await listUnder(fromSpotlight, { showHidden: true });
-  assert(
-    withHidden.paths.some((p) => p.endsWith("hidden.cu")),
-    "showHidden reaches them",
-  );
-  const bounded = await listUnder(fromSpotlight, { limit: 1 });
-  assert(
-    bounded.paths.length === 1 && bounded.truncated,
-    "the limit is honoured and reported",
-  );
-  const depthBounded = await listUnder(fromSpotlight, { maxDepth: 0 });
-  assert(
-    depthBounded.truncated,
-    "listUnder reports that a depth limit left directories unexplored",
-  );
-  const searchDepthBounded = await walkSearch(
-    path.join(tree, "proj"),
-    parseQuery("code"),
-    { maxDepth: 0 },
-  );
-  assert(
-    searchDepthBounded.truncated,
-    "walkSearch reports that a depth limit left directories unexplored",
-  );
-  fs.rmSync(tree, { recursive: true, force: true });
 
   console.log("\n=== partial usage metadata cache ===");
   const cachedUsage = new Map([["/x/one", { useCount: 2 }]]);
@@ -1777,7 +1383,7 @@ async function main() {
   );
 
   console.log("\n=== cloud storage is not noise ===");
-  const cloudPath = `${home}/Library/CloudStorage/GoogleDrive-a@b.com/My Drive/foo/bar`;
+  const cloudPath = `${home}/Library/CloudStorage/GoogleDrive-user@example.com/My Drive/foo/bar`;
   assert(
     !isNoisyPath(cloudPath, home, false),
     "Library/CloudStorage survives the filter",
@@ -1829,7 +1435,12 @@ async function main() {
   }
 
   console.log("\n=== detected places ===");
-  const places = standardPlaces();
+  // The same discovery the start screen runs: fixed local candidates plus a
+  // bounded read of the CloudStorage root.
+  const cloudDiscovery = await cloudPathCandidates(
+    new AbortController().signal,
+  );
+  const places = [...standardPathCandidates(), ...cloudDiscovery.paths];
   const cloudPlaces = places.filter((p) => p.path.includes("/CloudStorage/"));
   assert(
     places.some((p) => p.path === home),
@@ -1854,91 +1465,115 @@ async function main() {
     "all of them live behind a shortcut target",
   );
   if (shared.length > 0) {
-    const probe = shared[0];
-    const viaSpotlight = await searchPaths(probe.name, { showHidden: false });
     assert(
-      !viaSpotlight.includes(probe.path),
-      "Spotlight does not find the sampled shared folder",
-    );
-    assert(
-      locationLabel(probe.path).startsWith("shared folder · "),
+      locationLabel(shared[0].path).startsWith("shared folder · "),
       "the shared-folder label hides the raw shortcut id",
     );
   }
 
-  console.log("\n=== walking what Spotlight cannot see ===");
-  assert(
-    isUnindexedScope(shared[0].path),
-    "a shared folder is recognized as unindexed",
+  console.log("\n=== building a bounded index over a real Drive ===");
+  // A full crawl takes half a minute and hundreds of megabytes. This builds a
+  // capped index against real fd, a real mount, and real SQLite, which is
+  // enough to check that the pieces work together on this machine.
+  const fdLookup = findFd();
+  const driveRoots = await googleDriveIndexRoots();
+  const probeIndex = path.join(
+    fs.mkdtempSync(path.join(os.tmpdir(), "index-probe-")),
+    "files.sqlite",
   );
-  assert(!isUnindexedScope(`${home}/Documents`), "an ordinary folder is not");
-  // Derive the probe from available shared-folder contents.
-  const probeSubject = shared
-    .map((f) => ({ folder: f, children: readDirectory(f.path, false).entries }))
-    .find((c) => c.children.length > 0);
-  if (probeSubject) {
-    const probe =
-      probeSubject.children[0].name.split(/[\s._-]/)[0] ||
-      probeSubject.children[0].name;
-    const viaSpotlight = await searchPaths(probe, {
-      scope: probeSubject.folder.path,
-    });
-    const t = Date.now();
-    const walked = await walkSearch(
-      probeSubject.folder.path,
-      parseQuery(probe),
-      {
-        maxDepth: 3,
-        budgetMs: 20000,
-      },
-    );
-    const ms = Date.now() - t;
-    assert(
-      viaSpotlight.length === 0,
-      "Spotlight returns no hits inside the sampled shared folder",
-    );
-    assert(
-      walked.paths.length > 0,
-      `walking finds ${walked.paths.length} in ${ms}ms (truncated=${walked.truncated})`,
-    );
+  let indexBuilt = false;
+  if (fdLookup.kind !== "found") {
+    console.log(`  (${describeFdLookup(fdLookup)}, index checks skipped)`);
+  } else if (driveRoots.length === 0) {
+    console.log("  (no locally mounted Google Drive, index checks skipped)");
   } else {
-    console.log("  (no shared folder with contents on this machine, skipped)");
+    const started = Date.now();
+    const built = await rebuildIndex({
+      file: probeIndex,
+      withLock: (work) => work(() => {}),
+      roots: [driveRoots[0]],
+      maxEntries: 40_000,
+      budgetMs: 120_000,
+    });
+    const elapsed = Date.now() - started;
+    indexBuilt = built.kind === "done";
+    if (built.kind === "done") {
+      console.log(`  ${built.summary} (${elapsed}ms wall clock)`);
+      assert(
+        built.report.indexed > 0,
+        `real fd crawl indexed ${built.report.indexed} of ${built.report.scanned} scanned`,
+      );
+      assert(
+        built.report.indexed <= 40_000,
+        "the entry cap is honoured against a real mount",
+      );
+      assert(
+        !built.report.complete,
+        "a capped scan reports itself incomplete, so stale rows are kept",
+      );
+    } else {
+      console.log(`  index build did not run: ${built.message}`);
+      assert(false, "the bounded index build succeeds on this machine");
+    }
   }
 
-  console.log("\n=== shortcut scan (what the background job stores) ===");
-  const scanStarted = Date.now();
-  const idx = await scanShortcuts({ maxDepth: 3, budgetMs: 60000 });
-  console.log(
-    `  ${idx.shortcuts.length} shortcuts in ${Date.now() - scanStarted}ms (partial=${idx.partial}, reason=${idx.partialReason ?? "none"})`,
-  );
-  assert(idx.shortcuts.length > 0, "the scan finds Drive shortcuts");
-  const namedShortcut = idx.shortcuts[0];
-  assert(
-    namedShortcut !== undefined && namedShortcut.name.length > 0,
-    "each shortcut is recorded under the name you gave it in My Drive",
-  );
-  if (namedShortcut) {
-    const spotlightSees = await searchPaths(namedShortcut.name, {
-      showHidden: false,
-    });
-    assert(
-      !spotlightSees.includes(namedShortcut.path),
-      "…which Spotlight cannot find by that name, confirming why the scan exists",
-    );
+  const indexed = (query: string, showHidden = false) =>
+    searchIndex(probeIndex, parseQuery(query), { showHidden, limit: 500 });
+
+  if (indexBuilt) {
+    console.log("\n=== querying what Spotlight could not see ===");
+    const sharedInDrive = shared.find((f) => f.path.startsWith(driveRoots[0]));
+    const sampled = sharedInDrive
+      ? readDirectory(sharedInDrive.path, false).entries[0]
+      : undefined;
+    if (sampled) {
+      const token = sampled.name.split(/[\s._-]/)[0] || sampled.name;
+      const t = performance.now();
+      const hit = indexed(token);
+      const ms = performance.now() - t;
+      assert(
+        hit.status === "ready",
+        `the index answers in ${ms.toFixed(2)}ms (${hit.entries.length} rows)`,
+      );
+      console.log(
+        `  a name from inside a shared folder returned ${hit.entries.length} rows in ${ms.toFixed(2)}ms`,
+      );
+    } else {
+      console.log("  (no shared folder with contents inside that Drive)");
+    }
   }
-  // Ignore unrelated symlinks outside Google Drive shortcut targets.
-  const leaked = idx.shortcuts.filter(
-    (sc) => !sc.target.includes(".shortcut-targets-by-id"),
-  );
-  assert(
-    leaked.length === 0,
-    `no non-shortcut symlinks leak in (${leaked.length} did)`,
-  );
-  console.log("    all resolve into .shortcut-targets-by-id");
+
+  console.log("\n=== shortcuts, as the index records them ===");
+  // The index records a symlink with its visible path and its resolved target,
+  // which is what the separate shortcut scan used to provide.
+  let indexedLink: { path: string; storagePath?: string } | undefined;
+  if (indexBuilt) {
+    const linkReader = openIndexForRead(probeIndex);
+    if (linkReader.kind === "opened") {
+      indexedLink = linkReader.db
+        .prepare(
+          `SELECT path, storage_path AS storagePath FROM files
+           WHERE is_symlink = 1 AND storage_path IS NOT NULL LIMIT 1`,
+        )
+        .get() as { path: string; storagePath?: string } | undefined;
+      linkReader.db.close();
+    }
+    if (indexedLink) {
+      assert(
+        indexedLink.storagePath !== indexedLink.path,
+        "a link's visible path and its resolved target are both recorded",
+      );
+      console.log(
+        `  a shortcut is indexed under its visible name, resolving elsewhere`,
+      );
+    } else {
+      console.log("  (no symlink in the capped index, skipped)");
+    }
+  }
 
   console.log("\n=== one folder, two routes ===");
   // Verify that a shortcut and its target resolve to one storage key.
-  const viaShortcut = namedShortcut?.path;
+  const viaShortcut = indexedLink?.path;
   const viaTarget = viaShortcut ? canonicalPath(viaShortcut) : undefined;
   const a = viaTarget ? statEntry(viaTarget) : undefined;
   const b = viaShortcut ? statEntry(viaShortcut) : undefined;
@@ -1955,34 +1590,6 @@ async function main() {
     );
   } else {
     console.log("  (no Drive shortcut on this machine, skipped)");
-  }
-
-  console.log("\n=== shared-folder content index ===");
-  const sharedScanStarted = Date.now();
-  const sharedIdx = await scanSharedFolders({ maxDepth: 6, budgetMs: 60_000 });
-  console.log(
-    `  ${sharedIdx.paths.length} paths in ${Date.now() - sharedScanStarted}ms (partial=${sharedIdx.partial}, reason=${sharedIdx.partialReason ?? "none"})`,
-  );
-  assert(sharedIdx.paths.length > 0, "the shared-folder scan returns content");
-  // Derive the query token from the current index.
-  const deepEntry = sharedIdx.paths.find((p) => relativeDepth(home, p) > 4);
-  if (deepEntry) {
-    const token =
-      path.basename(deepEntry).split(/[\s._-]/)[0] || path.basename(deepEntry);
-    const found = sharedIdx.paths.filter(
-      (p) => matchTier(token, path.basename(p)) !== undefined,
-    );
-    assert(
-      found.length > 0,
-      `a name from deep inside a shared folder is in the index (${found.length} match)`,
-    );
-    const viaSpotlightAgain = await searchPaths(token, { showHidden: false });
-    assert(
-      !viaSpotlightAgain.includes(deepEntry),
-      "…and Spotlight still cannot see it, which is why the index exists",
-    );
-  } else {
-    console.log("  (nothing deep enough inside a shared folder, skipped)");
   }
 
   console.log("\n=== trailing slash paths ===");
@@ -2042,58 +1649,104 @@ async function main() {
     console.log("  (no cloud drive with folders, completion check skipped)");
   }
 
-  console.log("\n=== starting from an arbitrary folder ===");
+  console.log("\n=== what the index covers, and what it does not ===");
   if (cloudChild) {
-    const root = cloudChild.path;
     assert(
-      readDirectory(root, false).error === undefined,
+      readDirectory(cloudChild.path, false).error === undefined,
       "a folder inside a cloud drive is readable",
     );
-    const token = cloudChild.name.slice(0, 4);
-    const scoped = await searchPaths(token, { scope: root, showHidden: false });
-    const fromHome = await searchPaths(token, {
-      scope: home,
-      showHidden: false,
-    });
-    const cloudHits = fromHome.filter((p) => p.includes("/CloudStorage/"));
-    assert(
-      scoped.length >= 0,
-      `recursive search runs when rooted inside a cloud drive (${scoped.length} hits)`,
-    );
-    assert(
-      cloudHits.length > 0 || fromHome.length === 0,
-      `searching from ~ reaches cloud drives (${cloudHits.length} of ${fromHome.length} hits)`,
-    );
-  } else {
-    console.log("  (no cloud drive on this machine, skipped)");
   }
+  if (indexBuilt) {
+    // A capped scan sees whatever fd reached first, so read the probe terms out
+    // of the index itself. Guessing them from the filesystem produced terms
+    // that matched nothing, and an assertion that passes on zero rows checks
+    // nothing.
+    const reader = openIndexForRead(probeIndex);
+    const sampleNames: { name: string; depth: number }[] =
+      reader.kind === "opened"
+        ? (
+            reader.db
+              .prepare(
+                `SELECT name, path FROM files
+               WHERE is_dir = 0 AND length(name) >= 6 AND name NOT LIKE '.%'
+               LIMIT 400`,
+              )
+              .all() as { name: string; path: string }[]
+          ).map((row) => ({
+            name: row.name,
+            depth: relativeDepth(driveRoots[0], row.path),
+          }))
+        : [];
+    if (reader.kind === "opened") reader.db.close();
+    // Take a word of at least four letters, so the term is a real prefix.
+    const termOf = (name: string) =>
+      name.split(/[\s._\-()[\]]+/u).find((w) => /^[\p{L}]{4,}$/u.test(w));
+    const probe = sampleNames.map((r) => ({ ...r, term: termOf(r.name) }));
+    const anyTerm = probe.find((r) => r.term)?.term;
 
-  console.log("\n=== whole-disk search (no scope) ===");
-  assert(
-    isSystemPath("/System/Library/Fonts/Helvetica.ttc"),
-    "/System is excluded",
-  );
-  assert(isSystemPath("/usr/local/bin/node"), "/usr is excluded");
-  assert(
-    !isSystemPath("/Applications/Safari.app"),
-    "/Applications is kept — apps are legitimate hits",
-  );
-  assert(!isSystemPath(`${home}/Documents/x.pdf`), "the home folder is kept");
-  // Derive the search term from the current cloud drive.
-  const reachTarget = cloudChild?.path;
-  const everywhere = await searchPaths(
-    reachTarget ? path.basename(reachTarget) : "Documents",
-    { showHidden: false },
-  );
-  assert(
-    reachTarget === undefined || everywhere.includes(reachTarget),
-    "an unscoped search reaches into a cloud drive",
-  );
-  assert(
-    everywhere.every((p) => !isSystemPath(p)),
-    "no system paths in unscoped results",
-  );
-  console.log(`    ${everywhere.length} hits across the whole index`);
+    if (!anyTerm) {
+      console.log("  (no indexed name yielded a usable probe term, skipped)");
+    } else {
+      const sample = indexed(anyTerm);
+      assert(
+        sample.status === "ready" && sample.entries.length > 0,
+        `a term taken from an indexed name comes back (${sample.entries.length} rows)`,
+      );
+      assert(
+        sample.entries.every((e) => e.path.startsWith("/")),
+        "every indexed row carries an absolute visible path",
+      );
+      assert(
+        sample.entries.length <= 500,
+        `the ranked candidate cap holds (${sample.entries.length} rows)`,
+      );
+      assert(
+        sample.entries.every((e) =>
+          e.name.toLowerCase().includes(anyTerm.toLowerCase()),
+        ),
+        "and every returned name really contains the term",
+      );
+    }
+
+    // The index covers Google Drive only. A file elsewhere in the home folder
+    // is reachable through the memory sources and through the path bar, not
+    // through an indexed name query. This is the coverage limit, checked
+    // rather than assumed, and checked by exact path: a MATCH probe that
+    // happens to tokenize badly would report absence for the wrong reason.
+    const outside = readDirectory(`${home}/Documents`, false).entries.filter(
+      (entry) => !entry.isDirectory,
+    );
+    const offDriveReader = openIndexForRead(probeIndex);
+    if (outside.length > 0 && offDriveReader.kind === "opened") {
+      const lookup = offDriveReader.db.prepare(
+        "SELECT 1 AS present FROM files WHERE path = ? LIMIT 1",
+      );
+      const present = outside.filter(
+        (entry) => lookup.get(entry.path) !== undefined,
+      );
+      assert(
+        present.length === 0,
+        `the ${outside.length} file(s) under ~/Documents are absent from the index, as documented`,
+      );
+    } else {
+      console.log("  (no file under ~/Documents to check the coverage limit)");
+    }
+    if (offDriveReader.kind === "opened") offDriveReader.db.close();
+
+    // A name from several levels down answers without navigating there.
+    const deep = probe.find((r) => r.term && r.depth >= 2);
+    if (deep?.term) {
+      const deepRow = indexed(deep.term);
+      assert(
+        deepRow.entries.some((e) => e.name === deep.name),
+        `a name ${deep.depth + 1} levels inside the drive is answerable without navigating there (${deepRow.entries.length} rows)`,
+      );
+    } else {
+      console.log("  (no indexed name deep enough to probe, skipped)");
+    }
+  }
+  closeIndexReader();
+  fs.rmSync(path.dirname(probeIndex), { recursive: true, force: true });
 
   console.log("\n=== depth penalty ===");
   const shallow: Entry = {
@@ -2112,10 +1765,7 @@ async function main() {
     "with equal usage, the shallower hit wins",
   );
 
-  console.log(
-    "\n=== a nested folder is reachable from the folder above it ===",
-  );
-  // Verify that recursive search reaches beyond direct children.
+  console.log("\n=== ranking real nested entries ===");
   const parentWithSub = readDirectory(home, false)
     .entries.filter(
       (e) => e.isDirectory && !isNoisyPath(e.path + "/x", home, false),
@@ -2126,35 +1776,34 @@ async function main() {
     }))
     .find((c) => c.sub !== undefined);
 
+  // CloudStorage and Mobile Documents are allowed; other Library branches are
+  // app state and stay out of results.
+  const homeChildren = readDirectory(home, false).entries.map((e) => e.path);
+  const libraryNoise = homeChildren.filter(
+    (p) =>
+      p.includes("/Library/") &&
+      !/\/Library\/(CloudStorage|Mobile Documents)\//.test(p) &&
+      !isNoisyPath(`${p}/x`, home, false),
+  );
+  assert(
+    libraryNoise.length === 0,
+    `no Library app-state noise survives the filter (${libraryNoise.length} leaked)`,
+  );
+
   if (parentWithSub?.sub) {
     const subName = parentWithSub.sub.name;
     const token = subName.split(/[\s._-]/)[0] || subName;
-    const hits = await searchPaths(token, { scope: home, showHidden: false });
-    assert(
-      hits.includes(parentWithSub.sub.path),
-      "a folder two levels down is reachable from the home folder",
-    );
-    // CloudStorage is allowed; other Library branches are filtered.
-    const libraryNoise = hits.filter(
-      (p) =>
-        p.includes("/Library/") &&
-        !/\/Library\/(CloudStorage|Mobile Documents)\//.test(p),
-    );
-    assert(
-      libraryNoise.length === 0,
-      `no Library app-state noise survives (${libraryNoise.length} leaked of ${hits.length})`,
-    );
-    const nested = hits
-      .filter((p) => path.dirname(p) !== home)
+    const siblings = readDirectory(parentWithSub.parent.path, false)
+      .entries.map((e) => e.path)
       .map(statEntry)
       .filter((e): e is Entry => e !== undefined);
-    const ranked = rank(nested, {}, token, home);
+    const ranked = rank(siblings, {}, token, home);
     const position = ranked.findIndex(
       (r) => r.entry.path === parentWithSub.sub?.path,
     );
     assert(
       position >= 0,
-      `and it appears in the ranked list (position ${position + 1} of ${ranked.length})`,
+      `a real nested folder ranks for its own name (position ${position + 1} of ${ranked.length})`,
     );
   } else {
     console.log("  (no two-level folder under ~, skipped)");
@@ -2171,7 +1820,8 @@ async function main() {
   }
 
   const t1 = performance.now();
-  const meta = await readUsageMeta(read.entries.map((e) => e.path));
+  const meta = (await readUsageMetaResult(read.entries.map((e) => e.path)))
+    .meta;
   const tMeta = performance.now() - t1;
   const enriched: Entry[] = read.entries.map((e) => ({
     ...e,
@@ -2258,7 +1908,8 @@ function finish() {
   if (failures > 0) process.exitCode = 1;
 }
 
-void main().catch(() => {
+void main().catch((error) => {
+  console.error(error);
   console.error("\nLive diagnostics stopped because a local check failed.");
   process.exitCode = 1;
 });

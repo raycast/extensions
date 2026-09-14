@@ -18,16 +18,16 @@
       "mode": "view"
     },
     {
-      "name": "index-shortcuts",
-      "title": "Index Google Drive",
-      "description": "Index Google Drive shortcuts and shared-folder contents that Spotlight cannot find.",
+      "name": "rebuild-index",
+      "title": "Rebuild Search Index",
+      "description": "Scan configured local and cloud folders with fd and rebuild the search index. Runs only when you ask; nothing is scheduled.",
       "mode": "no-view"
     },
     {
-      "name": "populate-recents",
-      "title": "Populate from Recent Files",
-      "description": "Seed the search cache with recently opened documents and nearby files, without changing recorded usage.",
-      "mode": "no-view"
+      "name": "index-settings",
+      "title": "Search Index Settings",
+      "description": "Choose which folders the search index covers, and which names to ignore.",
+      "mode": "view"
     },
     {
       "name": "delete-data",
@@ -48,16 +48,24 @@
     },
     {
       "name": "showScores",
-      "title": "Listing",
+      "title": "",
       "label": "Show usage scores",
       "description": "Show each item's usage score in the list. Useful for understanding why results are ordered the way they are.",
       "type": "checkbox",
       "required": false,
       "default": false
+    },
+    {
+      "name": "fdPath",
+      "title": "Search Index",
+      "description": "Full path to the fd executable, if it is installed somewhere unusual. Leave empty to look on PATH and in the usual Homebrew locations.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/fd"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.3.1",
+    "@raycast/api": "^2.4.1",
     "@raycast/utils": "^2.3.1",
     "proper-lockfile": "^4.1.2"
   },

@@ -3,12 +3,19 @@ import { readEntryMetadata } from "./directory-listing";
 import { createReadPool } from "./bounded-reads";
 import { matchPath, matchesStats, parseQuery, TypeFilter } from "./query";
 
+/**
+ * Metadata deadline for cached-path validation, so the caller always settles.
+ * These are metadata reads on paths seen earlier, so most resolve at once;
+ * this binds the case where one lives on a cold network mount, whether it is
+ * the path bar's single typed path or a batch of cached candidates.
+ */
+export const CACHED_METADATA_BUDGET_MS = 2000;
+
 export type CachedCandidate = Pick<Entry, "path"> & Partial<Entry>;
 export type RecentValidation = {
   entries: Entry[];
   partial: boolean;
   limited?: boolean;
-  cancelled?: boolean;
 };
 
 /** Share physical reads across queries; only full cached rows can be fallbacks. */
@@ -22,26 +29,21 @@ export function createRecentValidator(stat = readEntryMetadata) {
       query?: string;
       typeFilter?: TypeFilter;
       limit?: number;
-      onProgress?: (entries: Entry[]) => void;
-      /** Continue validating while the query remains active. */
-      continuous?: boolean;
     } = {},
   ): Promise<RecentValidation> => {
-    if (options.signal?.aborted)
-      return { entries: [], partial: false, cancelled: true };
+    if (options.signal?.aborted) return { entries: [], partial: false };
     const active = new AbortController();
     const interrupt = () => active.abort();
-    const timer = options.continuous
-      ? undefined
-      : setTimeout(interrupt, options.budgetMs ?? 1000);
+    // Always bounded. The caller publishes one finished list, so an unbounded
+    // wait here would be an unbounded wait for the list.
+    const timer = setTimeout(interrupt, options.budgetMs ?? 1000);
     options.signal?.addEventListener("abort", interrupt, { once: true });
     const parsed = parseQuery(options.query ?? "", options.typeFilter);
-    const limit = options.limit ?? (options.continuous ? Infinity : 60);
+    const limit = options.limit ?? 60;
     const found = new Map<string, Entry>();
     const checked = new Set<string>();
     let cursor = 0;
     let partial = false;
-    let lastPublished = 0;
     const matches = (entry: Entry) =>
       matchPath(parsed, entry.path, entry.isDirectory) !== undefined &&
       matchesStats(parsed, entry);
@@ -86,22 +88,12 @@ export function createRecentValidator(stat = readEntryMetadata) {
               lastUsedMs: cached.lastUsedMs,
               useCount: cached.useCount,
             });
-            if (!options.continuous || Date.now() - lastPublished >= 100) {
-              lastPublished = Date.now();
-              options.onProgress?.(snapshot());
-            }
           }
         } catch {
           partial = true;
         }
       }
     };
-    // A slow provider may keep its physical slots; cached rows remain usable.
-    const fallback = options.continuous
-      ? setTimeout(() => {
-          if (!active.signal.aborted) options.onProgress?.(snapshot(true));
-        }, 1000)
-      : undefined;
     try {
       await Promise.all(
         Array.from({ length: Math.min(8, candidates.length) }, worker),
@@ -114,13 +106,11 @@ export function createRecentValidator(stat = readEntryMetadata) {
       return {
         entries: cancelled ? [] : snapshot(partial),
         partial: !cancelled && partial,
-        cancelled,
         limited: !cancelled && limited,
       };
     } finally {
       interrupt();
       clearTimeout(timer);
-      clearTimeout(fallback);
       options.signal?.removeEventListener("abort", interrupt);
     }
   };

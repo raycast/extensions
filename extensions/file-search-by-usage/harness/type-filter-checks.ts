@@ -76,7 +76,6 @@ export async function typeFilterChecks(
   const filtered = await validate(candidates, {
     typeFilter: "directory",
     limit: 1,
-    continuous: true,
   });
   assert(
     filtered.entries.length === 1 && filtered.entries[0].path === "/foo/bar",
@@ -85,7 +84,6 @@ export async function typeFilterChecks(
   const overridden = await validate([folder, file], {
     query: "-f",
     typeFilter: "directory",
-    continuous: true,
   });
   assert(
     overridden.entries.length === 1 && !overridden.entries[0].isDirectory,

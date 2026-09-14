@@ -1,63 +1,33 @@
 import { Cache } from "@raycast/api";
-import { dataGeneration, withStorageLock } from "./storage-lock";
 
-/** Path-only cache of results from earlier Spotlight queries. */
-const cache = new Cache({ namespace: "discovered", capacity: 4_000_000 });
-const KEY = "paths";
+/**
+ * Caches that are no longer written, retained only so they can be deleted.
+ *
+ * Nothing fills these now: `discovered` held paths earlier Spotlight passes had
+ * surfaced, `shared-folders` held the Google Drive shared-folder index, and
+ * `recent-files` held the imported recent-document seed. The fd index covers
+ * that ground. Existing installs still have the files, though, and "Delete All
+ * Data and Cache" should remove them rather than leave megabytes behind.
+ *
+ * Delete this module once enough time has passed that no install still carries
+ * these namespaces.
+ */
+const LEGACY = [
+  { namespace: "discovered", capacity: 4_000_000, key: "paths" },
+  { namespace: "shared-folders", capacity: 8_000_000, key: "index" },
+  { namespace: "recent-files", capacity: 16_000_000, key: "entries" },
+] as const;
 
-/** Maximum retained paths in recency order. */
-const MAX_PATHS = 20_000;
-/** Maximum paths added by one query. */
-const MAX_PER_PASS = 300;
-
-export function loadDiscovered(): string[] {
-  const raw = cache.get(KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed)
-      ? parsed.filter((p): p is string => typeof p === "string")
-      : [];
-  } catch {
-    return [];
+/** Bytes removed, for the deletion summary. */
+export function clearLegacyCaches(): number {
+  let bytes = 0;
+  for (const entry of LEGACY) {
+    const cache = new Cache({
+      namespace: entry.namespace,
+      capacity: entry.capacity,
+    });
+    bytes += cache.get(entry.key)?.length ?? 0;
+    cache.clear({ notifySubscribers: false });
   }
-}
-
-export async function rememberDiscovered(
-  paths: string[],
-  generation = dataGeneration(),
-): Promise<string[]> {
-  try {
-    return await withStorageLock(async () => remember(paths), generation);
-  } catch {
-    return [];
-  }
-}
-
-function remember(paths: string[]): string[] {
-  if (paths.length === 0) return loadDiscovered();
-
-  const fresh = paths.slice(0, MAX_PER_PASS);
-  const existing = loadDiscovered();
-  const seen = new Set(fresh);
-
-  // Refresh surfaced paths before applying the global cap.
-  const next = [...fresh, ...existing.filter((p) => !seen.has(p))].slice(
-    0,
-    MAX_PATHS,
-  );
-
-  try {
-    cache.set(KEY, JSON.stringify(next));
-  } catch {
-    // A cache write failure does not affect current results.
-  }
-  return next;
-}
-
-/** Clears the namespace and returns its serialized byte count. */
-export function clearDiscoveredCache(): number {
-  const bytes = cache.get(KEY)?.length ?? 0;
-  cache.clear({ notifySubscribers: false });
   return bytes;
 }

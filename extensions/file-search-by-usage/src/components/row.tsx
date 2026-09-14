@@ -3,8 +3,13 @@ import path from "node:path";
 import { Entry, Visit } from "../lib/types";
 import { ScoreParts } from "../lib/score";
 import { formatSize, relativeTime } from "../lib/format";
+import {
+  ColumnWidths,
+  pad,
+  scoreCell,
+  visitsCell,
+} from "../lib/accessory-columns";
 import { displayPath } from "../lib/read-dir";
-import { SetupActions, SetupActionsProps } from "./setup-actions";
 import { NavigationActions } from "./navigation-actions";
 import { SearchHistoryActions } from "./search-history-actions";
 import { HiddenFilesAction } from "./hidden-files-action";
@@ -12,7 +17,7 @@ import { HiddenFilesAction } from "./hidden-files-action";
 export type RowHandlers = {
   /** Opens a file in its default app or a folder in Finder. */
   onOpen: (entry: Entry) => void;
-  /** ⌥⌘↓ — navigate into a folder. */
+  /** ⇧⌘↓ navigates into a folder. */
   onDescend: (entry: Entry) => void;
   /** Navigates to the parent; undefined at the filesystem root or global scope. */
   onUp?: () => void;
@@ -23,8 +28,8 @@ export type RowHandlers = {
   onTogglePin: (entry: Entry) => void;
   /** Teach the current search text as a shortcut to this item. */
   onLearn?: (entry: Entry) => void;
-  /** Reindexes Google Drive shortcuts and shared-folder contents. */
-  onReindexShortcuts: () => void;
+  /** Rebuilds the fd + SQLite name index. Minutes on a large scope. */
+  onRebuildIndex: () => void;
   onToggleDetail: () => void;
   onToggleHidden: () => void;
   onRefresh: () => void;
@@ -41,12 +46,22 @@ type Props = {
   visit?: Visit;
   score: ScoreParts;
   showScore: boolean;
+  /** Column widths shared by every row, so the accessories line up. */
+  columns: ColumnWidths;
+  /**
+   * True when Spotlight usage metadata was read for this entry.
+   *
+   * It is read for the children of the folder being browsed and for nothing
+   * else, so an indexed search result has none. Without this the detail panel
+   * said "no metadata", which reads as "Spotlight had nothing" when the truth
+   * is that it was never asked.
+   */
+  usageRead: boolean;
   showingDetail: boolean;
   /** Where it lives. Shown for anything that is not a direct child of the scope. */
   subtitle?: string;
   pinned: boolean;
   handlers: RowHandlers;
-  setupActions: SetupActionsProps;
 };
 
 /** Builds native metadata rows for the detail panel. */
@@ -54,6 +69,7 @@ function detailPairs(
   entry: Entry,
   visit: Visit | undefined,
   score: ScoreParts,
+  usageRead: boolean,
 ): { section: string; rows: [string, string][] }[] {
   return [
     {
@@ -79,7 +95,9 @@ function detailPairs(
           "Spotlight use",
           entry.useCount !== undefined
             ? `${entry.useCount}× · last ${relativeTime(entry.lastUsedMs ?? 0)}`
-            : "no metadata",
+            : usageRead
+              ? "none recorded"
+              : "not read for indexed results",
         ],
       ],
     },
@@ -104,26 +122,42 @@ export function Row({
   visit,
   score,
   showScore,
+  columns,
+  usageRead,
   showingDetail,
   subtitle,
   pinned,
   handlers,
-  setupActions,
 }: Props) {
-  const accessories: List.Item.Accessory[] = [];
-  if (pinned) accessories.push({ icon: Icon.Pin, tooltip: "Pinned" });
+  /*
+   * Opens, then score, then modified date, in fixed-width columns.
+   *
+   * Every row carries every cell, even an empty one, and every cell is padded
+   * to its column's width. Raycast sizes accessories to their content and lays
+   * them out from the right, so a cell that is missing or merely shorter moves
+   * everything to its left. The pin slot holds a transparent image when the
+   * item is not pinned, for the same reason: it is the same box as the icon it
+   * stands in for.
+   */
+  const opens = visitsCell(visit?.count);
+  const total = scoreCell(showScore ? score.total : undefined);
+  const accessories: List.Item.Accessory[] = [
+    {
+      icon: pinned ? Icon.Pin : "blank.png",
+      tooltip: pinned ? "Pinned" : undefined,
+    },
+    {
+      text: pad(opens, columns.visits),
+      tooltip: opens === "" ? "Never opened" : `Opened ${visit?.count}×`,
+    },
+  ];
   if (showScore)
     accessories.push({
-      tag: score.total.toFixed(0),
+      tag: pad(total, columns.score),
       tooltip: "Usage score",
     });
-  if (visit)
-    accessories.push({
-      text: `${visit.count}×`,
-      tooltip: `Opened ${visit.count}×`,
-    });
   accessories.push({
-    text: relativeTime(entry.mtimeMs),
+    text: pad(relativeTime(entry.mtimeMs), columns.time),
     tooltip: "Last modified",
   });
 
@@ -138,7 +172,12 @@ export function Row({
       quickLook={{ path: entry.path, name: entry.name }}
       detail={
         showingDetail ? (
-          <RowDetail entry={entry} visit={visit} score={score} />
+          <RowDetail
+            entry={entry}
+            visit={visit}
+            score={score}
+            usageRead={usageRead}
+          />
         ) : undefined
       }
       actions={
@@ -147,7 +186,6 @@ export function Row({
           pinned={pinned}
           showingDetail={showingDetail}
           handlers={handlers}
-          setupActions={setupActions}
         />
       }
     />
@@ -159,23 +197,30 @@ function RowDetail({
   entry,
   visit,
   score,
-}: Pick<Props, "entry" | "visit" | "score">) {
+  usageRead,
+}: Pick<Props, "entry" | "visit" | "score" | "usageRead">) {
   return (
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          {detailPairs(entry, visit, score).flatMap(({ section, rows }) => [
-            ...(section
-              ? [<List.Item.Detail.Metadata.Separator key={`sep-${section}`} />]
-              : []),
-            ...rows.map(([title, text]) => (
-              <List.Item.Detail.Metadata.Label
-                key={`${section}-${title}`}
-                title={title}
-                text={text}
-              />
-            )),
-          ])}
+          {detailPairs(entry, visit, score, usageRead).flatMap(
+            ({ section, rows }) => [
+              ...(section
+                ? [
+                    <List.Item.Detail.Metadata.Separator
+                      key={`sep-${section}`}
+                    />,
+                  ]
+                : []),
+              ...rows.map(([title, text]) => (
+                <List.Item.Detail.Metadata.Label
+                  key={`${section}-${title}`}
+                  title={title}
+                  text={text}
+                />
+              )),
+            ],
+          )}
         </List.Item.Detail.Metadata>
       }
     />
@@ -187,11 +232,7 @@ function RowActions({
   pinned,
   showingDetail,
   handlers,
-  setupActions,
-}: Pick<
-  Props,
-  "entry" | "pinned" | "showingDetail" | "handlers" | "setupActions"
->) {
+}: Pick<Props, "entry" | "pinned" | "showingDetail" | "handlers">) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -271,13 +312,12 @@ function RowActions({
         />
       </ActionPanel.Section>
 
-      <SetupActions {...setupActions} />
-      <ActionPanel.Section title="Google Drive">
+      <ActionPanel.Section title="Search Index">
         <Action
-          title="Index Google Drive"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-          icon={Icon.Repeat}
-          onAction={handlers.onReindexShortcuts}
+          title="Rebuild Search Index"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          icon={Icon.Download}
+          onAction={handlers.onRebuildIndex}
         />
       </ActionPanel.Section>
 

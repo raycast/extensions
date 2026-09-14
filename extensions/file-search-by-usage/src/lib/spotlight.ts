@@ -1,21 +1,39 @@
-import { execFile, spawn } from "node:child_process";
-import { StringDecoder } from "node:string_decoder";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import path from "node:path";
-import { isNoisyPath, isSystemPath } from "./read-dir";
-import { matchTier } from "./query";
-import { LIVE_CANDIDATES, SPOTLIGHT_RAW_PATHS } from "./search-limits";
+
+/**
+ * Spotlight usage metadata.
+ *
+ * The only Spotlight call left in the extension. It reads `kMDItemUseCount` and
+ * `kMDItemLastUsedDate` for the entries of the folder being browsed, which the
+ * index cannot supply: those change every time the user opens a file, while the
+ * index records only what fd saw during the last scan.
+ *
+ * Every read is bounded by a deadline and reports whether it finished, so a
+ * slow or unavailable Spotlight degrades the ranking instead of blocking it.
+ */
 
 const exec = promisify(execFile);
 
-/** Small chunks allow partial metadata results before the deadline. */
+/*
+ * Batches exist to bound one failure, and they run several at a time.
+ *
+ * One mdls process costs about 85 ms whatever it is given, so a serial pass is
+ * priced by its batch count: 253 entries took 903 ms. Larger batches are worse
+ * rather than better, because a batch containing a path mdls cannot read is
+ * isolated by halving, and a home folder of cloud-service symlinks pays that on
+ * every visit. Four at a time, halving both sides together, brings 253 entries
+ * to 267 ms and that home folder from 767 ms to 262 ms, reading the same
+ * metadata in both cases. Eight at a time is no faster.
+ */
 const CHUNK = 25;
+const CONCURRENCY = 4;
 /** mdls emits attributes alphabetically, so positional parsing uses this order. */
 const ATTRS = ["kMDItemLastUsedDate", "kMDItemUseCount"].sort();
 const IDX_LAST_USED = ATTRS.indexOf("kMDItemLastUsedDate");
 const IDX_USE_COUNT = ATTRS.indexOf("kMDItemUseCount");
 const NULL_MARKER = "NULL";
-/** Record separator used by mdls -raw and mdfind -0. */
+/** Record separator used by mdls -raw. */
 const SEP = String.fromCharCode(0);
 
 export type UsageMeta = { useCount?: number; lastUsedMs?: number };
@@ -26,26 +44,6 @@ export type UsageMetaResult = {
   error?: string;
   cancelled?: boolean;
 };
-export type SearchPathResult = {
-  paths: string[];
-  truncated: boolean;
-  error?: string;
-  cancelled?: boolean;
-};
-type SearchOptions = {
-  scope?: string;
-  showHidden?: boolean;
-  max?: number;
-  /** Supplement literal results with fuzzy alphanumeric filename matches. */
-  fuzzy?: boolean;
-  signal?: AbortSignal;
-  /** Receives batches instead of retaining all paths in the returned result. */
-  onBatch?: (paths: string[]) => void | Promise<void>;
-};
-type SpotlightRunner = (
-  args: string[],
-  signal?: AbortSignal,
-) => Promise<string> | AsyncIterable<string | Buffer>;
 type MetadataRunner = (
   args: string[],
   timeoutMs: number,
@@ -82,8 +80,6 @@ export async function readUsageMetaResult(
   opts: {
     timeoutMs?: number;
     signal?: AbortSignal;
-    continuous?: boolean;
-    onProgress?: (meta: Map<string, UsageMeta>) => void;
   } = {},
   runner: MetadataRunner = async (args, timeoutMs, signal) => {
     const { stdout } = await exec("mdls", args, {
@@ -95,13 +91,11 @@ export async function readUsageMetaResult(
     return stdout;
   },
 ): Promise<UsageMetaResult> {
-  const { timeoutMs = opts.continuous ? 5000 : 250 } = opts;
-  let deadline = Date.now() + timeoutMs;
+  const { timeoutMs = 250 } = opts;
+  const deadline = Date.now() + timeoutMs;
   const out = new Map<string, UsageMeta>();
   let hadProcessFailure = false;
   let hadSuccessfulBatch = false;
-  let hadTimeout = false;
-  let hadInvalidBatch = false;
 
   const mergeChunk = (chunk: string[], stdout: string): boolean => {
     const values = stdout.split(SEP);
@@ -146,60 +140,59 @@ export async function readUsageMetaResult(
       hadProcessFailure = true;
       if (chunk.length === 1) return "done";
 
-      // Isolate a bad path while retaining metadata from the rest of the batch.
+      /*
+       * Isolate a bad path while retaining metadata from the rest of the batch.
+       * Both halves are read together: descending one path at a time was most
+       * of what a folder holding an unreadable path cost, and reading the far
+       * half anyway keeps metadata that stopping early used to discard.
+       */
       const middle = Math.ceil(chunk.length / 2);
-      const left = await readChunk(chunk.slice(0, middle));
-      if (left !== "done") return left;
-      return readChunk(chunk.slice(middle));
+      const [left, right] = await Promise.all([
+        readChunk(chunk.slice(0, middle)),
+        readChunk(chunk.slice(middle)),
+      ]);
+      return left !== "done" ? left : right;
     }
 
     if (opts.signal?.aborted) return "cancelled";
     return mergeChunk(chunk, stdout) ? "done" : "invalid";
   };
 
-  for (let i = 0; i < paths.length; i += CHUNK) {
-    if (opts.continuous) deadline = Date.now() + timeoutMs;
-    const result = await readChunk(paths.slice(i, i + CHUNK));
-    if (result === "cancelled")
-      return { meta: out, complete: false, cancelled: true };
-    if (opts.continuous) {
-      hadTimeout ||= result === "timeout";
-      hadInvalidBatch ||= result === "invalid";
-      opts.onProgress?.(new Map(out));
-      continue;
-    }
-    if (result === "timeout") {
-      if (hadProcessFailure && !hadSuccessfulBatch) {
-        return {
-          meta: out,
-          complete: false,
-          error: "Spotlight usage metadata failed",
-        };
-      }
-      return {
-        meta: out,
-        complete: false,
-        partial: hadProcessFailure
-          ? "usage metadata unavailable for some items"
-          : "usage metadata stopped at the time limit",
-      };
-    }
-    if (result === "invalid") {
-      return {
-        meta: out,
-        complete: false,
-        error: "Spotlight returned invalid usage metadata",
-      };
-    }
-  }
+  const batches: string[][] = [];
+  for (let i = 0; i < paths.length; i += CHUNK)
+    batches.push(paths.slice(i, i + CHUNK));
 
-  if (hadInvalidBatch && !hadSuccessfulBatch)
+  /*
+   * Batches run several at a time, and the first one that does not finish
+   * cleanly stops the rest. Workers share `next`, `out` and the status flags,
+   * which is safe because each only touches them between awaits.
+   */
+  let stopped: "timeout" | "invalid" | "cancelled" | undefined;
+  let next = 0;
+  const worker = async () => {
+    for (let i = next++; i < batches.length && !stopped; i = next++) {
+      const result = await readChunk(batches[i]);
+      if (result !== "done") {
+        stopped ??= result;
+        return;
+      }
+    }
+  };
+  await Promise.all(
+    Array.from({ length: Math.min(CONCURRENCY, batches.length) }, worker),
+  );
+
+  if (stopped === "cancelled")
+    return { meta: out, complete: false, cancelled: true };
+  if (stopped === "invalid")
     return {
       meta: out,
       complete: false,
       error: "Spotlight returned invalid usage metadata",
     };
-  if (hadProcessFailure) {
+  // A process failure outranks the deadline: both stop short, but only this
+  // one says which items are missing, and neither says it twice.
+  if (hadProcessFailure)
     return hadSuccessfulBatch
       ? {
           meta: out,
@@ -211,186 +204,11 @@ export async function readUsageMetaResult(
           complete: false,
           error: "Spotlight usage metadata failed",
         };
-  }
-  if (hadTimeout || hadInvalidBatch)
+  if (stopped === "timeout")
     return {
       meta: out,
       complete: false,
-      partial: "Usage metadata unavailable for some items",
+      partial: "usage metadata stopped at the time limit",
     };
-
   return { meta: out, complete: true };
-}
-
-export async function readUsageMeta(
-  paths: string[],
-  opts: { timeoutMs?: number } = {},
-): Promise<Map<string, UsageMeta>> {
-  return (await readUsageMetaResult(paths, opts)).meta;
-}
-
-/** Removes noisy paths and applies the caller's optional collection limit. */
-export function collectSearchPaths(
-  candidates: Iterable<string>,
-  opts: SearchOptions = {},
-): SearchPathResult {
-  const { scope, showHidden = false, max = 4000 } = opts;
-  const root = scope ?? path.sep;
-  const paths: string[] = [];
-
-  for (const candidate of candidates) {
-    if (candidate === "" || candidate === root) continue;
-    if (!scope && isSystemPath(candidate)) continue;
-    if (isNoisyPath(candidate, root, showHidden)) continue;
-    if (paths.length >= max) return { paths, truncated: true };
-    paths.push(candidate);
-  }
-
-  return { paths, truncated: false };
-}
-
-export async function runSpotlightSearch(
-  query: string,
-  opts: SearchOptions = {},
-  runner: SpotlightRunner,
-): Promise<SearchPathResult> {
-  const { scope } = opts;
-  const cancelled: SearchPathResult = {
-    paths: [],
-    truncated: false,
-    cancelled: true,
-  };
-  if (opts.signal?.aborted) return cancelled;
-  if (query.trim() === "") return { paths: [], truncated: false };
-
-  const args = ["-0"];
-  if (scope) args.push("-onlyin", scope);
-  const passes = [["-name", query]];
-  if (opts.fuzzy && /^[\p{L}\p{N}]+$/u.test(query)) {
-    // Spotlight does not support the matcher's arbitrary gaps within a name.
-    const predicate = [...new Set(query.toLowerCase())]
-      .map((character) => `kMDItemFSName == "*${character}*"cd`)
-      .join(" && ");
-    passes.push([predicate]);
-  }
-
-  const paths: string[] = [];
-  const seen = new Set<string>();
-  let count = 0;
-  let rawCount = 0;
-  const max = Math.min(opts.max ?? 4000, LIVE_CANDIDATES);
-  let truncated = false;
-  const emit = async (batch: string[], fuzzy: boolean) => {
-    if (opts.signal?.aborted || batch.length === 0) return;
-    const remaining = Math.max(0, SPOTLIGHT_RAW_PATHS - rawCount);
-    if (batch.length > remaining) truncated = true;
-    rawCount += Math.min(batch.length, remaining);
-    const accepted = collectSearchPaths(batch.slice(0, remaining), {
-      ...opts,
-      max: Infinity,
-    }).paths;
-    const filtered: string[] = [];
-    for (const full of accepted) {
-      if (seen.has(full)) continue;
-      if (fuzzy && matchTier(query, path.basename(full)) === undefined)
-        continue;
-      if (count >= max) {
-        truncated = true;
-        break;
-      }
-      if (passes.length > 1) seen.add(full);
-      count++;
-      filtered.push(full);
-    }
-    if (opts.onBatch) await opts.onBatch(filtered);
-    else paths.push(...filtered);
-  };
-  try {
-    for (const [pass, terms] of passes.entries()) {
-      if (opts.signal?.aborted) return cancelled;
-      const output = await runner([...args, ...terms], opts.signal);
-      const chunks = typeof output === "string" ? [output] : output;
-      const decoder = new StringDecoder("utf8");
-      let pending = "";
-      for await (const chunk of chunks) {
-        if (opts.signal?.aborted) return cancelled;
-        pending += typeof chunk === "string" ? chunk : decoder.write(chunk);
-        let start = 0;
-        let batch: string[] = [];
-        for (
-          let end = pending.indexOf(SEP);
-          end >= 0;
-          end = pending.indexOf(SEP, start)
-        ) {
-          batch.push(pending.slice(start, end));
-          start = end + 1;
-          if (batch.length === 60) {
-            await emit(batch, pass > 0);
-            batch = [];
-            if (opts.signal?.aborted) return cancelled;
-            if (truncated) return { paths, truncated };
-          }
-        }
-        pending = pending.slice(start);
-        await emit(batch, pass > 0);
-        if (truncated) return { paths, truncated };
-        // A path cannot legitimately consume an unbounded output buffer.
-        if (pending.length > 1 << 20) throw new Error("Invalid Spotlight path");
-      }
-      pending += decoder.end();
-      if (pending) await emit([pending], pass > 0);
-      if (truncated) return { paths, truncated };
-    }
-    return opts.signal?.aborted ? cancelled : { paths, truncated };
-  } catch {
-    if (opts.signal?.aborted) return cancelled;
-    return {
-      paths,
-      truncated,
-      error: "Spotlight search failed",
-    };
-  }
-}
-
-export async function searchPathResult(
-  query: string,
-  opts: SearchOptions = {},
-): Promise<SearchPathResult> {
-  return runSpotlightSearch(query, opts, (args, signal) =>
-    spotlightOutput(args, signal),
-  );
-}
-
-/** Reading stdout on demand supplies backpressure; cancellation kills mdfind. */
-async function* spotlightOutput(args: string[], signal?: AbortSignal) {
-  if (signal?.aborted) return;
-  const child = spawn("mdfind", args, { stdio: ["ignore", "pipe", "ignore"] });
-  const finished = new Promise<boolean>((resolve) => {
-    child.once("error", () => resolve(false));
-    child.once("close", (code) => resolve(code === 0));
-  });
-  const stop = () => {
-    child.kill("SIGKILL");
-  };
-  signal?.addEventListener("abort", stop, { once: true });
-  try {
-    if (signal?.aborted) stop();
-    for await (const chunk of child.stdout) {
-      if (signal?.aborted) return;
-      yield chunk as Buffer;
-    }
-    if (!(await finished) && !signal?.aborted)
-      throw new Error("Spotlight failed");
-  } finally {
-    signal?.removeEventListener("abort", stop);
-    if (child.exitCode === null && child.signalCode === null) stop();
-    await finished;
-  }
-}
-
-export async function searchPaths(
-  query: string,
-  opts: SearchOptions = {},
-): Promise<string[]> {
-  return (await searchPathResult(query, opts)).paths;
 }

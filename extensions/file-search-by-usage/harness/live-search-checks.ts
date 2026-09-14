@@ -1,187 +1,28 @@
-import { runSpotlightSearch, readUsageMetaResult } from "../src/lib/spotlight";
+import { readUsageMetaResult } from "../src/lib/spotlight";
 import { createRecentValidator } from "../src/lib/recent-validation";
 import { Entry } from "../src/lib/types";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { walkSearch, listUnder } from "../src/lib/walk";
-import { parseQuery } from "../src/lib/query";
-import { readDirectoryAsync } from "../src/lib/directory-listing";
+import {
+  DirectorySnapshot,
+  observeDirectory,
+  readDirectoryAsync,
+} from "../src/lib/directory-listing";
 import { createWorkQueue } from "../src/lib/work-queue";
+import { readBoundedDirectory } from "../src/lib/bounded-directory";
 
 const turn = () => new Promise<void>((resolve) => setImmediate(resolve));
 
-/** Catch whole-query cutoffs, buffering, and publications after cancellation. */
+/**
+ * The reads that still run during a search: the bounded work
+ * queue, folder listing, cached-path validation, and usage metadata. The index
+ * answers name queries now, so nothing here spawns a search process.
+ */
 export async function liveSearchChecks(
   assert: (ok: boolean, label: string) => void,
 ) {
-  const fuzzyQueries: string[][] = [];
-  const fuzzy = await runSpotlightSearch(
-    "foob",
-    { fuzzy: true, max: Infinity },
-    async (args) => {
-      fuzzyQueries.push(args);
-      if (args.includes("-name")) return "/foo/foob.txt\0";
-      if (
-        args.at(-1) ===
-        'kMDItemFSName == "*f*"cd && kMDItemFSName == "*o*"cd && kMDItemFSName == "*b*"cd'
-      )
-        return "/foo/foo_bar\0/foo/foob.txt\0/foo/bof.txt\0";
-      return "";
-    },
-  );
-  assert(
-    fuzzy.paths.join("\0") === "/foo/foob.txt\0/foo/foo_bar",
-    "a cold fuzzy search finds a separated name, deduplicates literal hits, and rejects wrong character order",
-  );
-  assert(
-    fuzzyQueries[0]?.join("\0") === "-0\0-name\0foob",
-    "ordinary Spotlight matches are requested before the broader fuzzy pass",
-  );
-  const cancelFuzzy = new AbortController();
-  let fuzzyStarts = 0;
-  await runSpotlightSearch(
-    "foob",
-    {
-      fuzzy: true,
-      signal: cancelFuzzy.signal,
-      onBatch: () => cancelFuzzy.abort(),
-    },
-    async () => {
-      fuzzyStarts++;
-      return "/foo/foob\0";
-    },
-  );
-  assert(
-    fuzzyStarts === 1,
-    "cancelling literal results prevents the fuzzy process from starting",
-  );
-  const unsafeArgs: string[][] = [];
-  await runSpotlightSearch('foo" || bar', { fuzzy: true }, async (args) => {
-    unsafeArgs.push(args);
-    return "";
-  });
-  assert(
-    unsafeArgs.length === 1 &&
-      unsafeArgs[0].at(-1) === 'foo" || bar' &&
-      unsafeArgs[0].includes("-name"),
-    "query punctuation stays a literal argument and cannot inject a Spotlight predicate",
-  );
-  let release = () => {};
-  const waiting = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  const batches: string[][] = [];
-  const active = new AbortController();
-  async function* output() {
-    yield "/foo/bar\0";
-    await waiting;
-    yield "/foo/baz\0";
-  }
-  const result = runSpotlightSearch(
-    "foo",
-    {
-      signal: active.signal,
-      max: Infinity,
-      onBatch: (paths: string[]) => {
-        batches.push(paths);
-      },
-    } as Parameters<typeof runSpotlightSearch>[1],
-    output as unknown as Parameters<typeof runSpotlightSearch>[2],
-  );
-  await turn();
-  assert(
-    batches.flat().includes("/foo/bar"),
-    "live Spotlight publishes an early path before the process exits",
-  );
-  active.abort();
-  release();
-  await result;
-  assert(
-    !batches.flat().includes("/foo/baz"),
-    "cancelled Spotlight cannot publish a late batch",
-  );
-
-  const encoded = Buffer.from("/foo/bár\0/foo/baz\nqux\0");
-  const unicode = await runSpotlightSearch(
-    "foo",
-    { max: Infinity },
-    async function* () {
-      for (const byte of encoded) yield Buffer.from([byte]);
-    },
-  );
-  assert(
-    unicode.paths.join("\0") === "/foo/bár\0/foo/baz\nqux",
-    "Spotlight streaming preserves split UTF-8 characters and filenames containing newlines",
-  );
-  const manyPaths = Array.from({ length: 4005 }, (_, i) => `/foo/bar${i}`);
-  let cappedCount = 0;
-  let producerClosed = false;
-  const capped = await runSpotlightSearch(
-    "foo",
-    {
-      max: Infinity,
-      onBatch: (batch) => {
-        cappedCount += batch.length;
-      },
-    },
-    async function* () {
-      try {
-        for (let i = 0; i < 10000; i++) yield `/foo/bar${i}\0`;
-      } finally {
-        producerClosed = true;
-      }
-    },
-  );
-  assert(
-    cappedCount === 5000 && capped.truncated && producerClosed,
-    "Spotlight closes its producer at the hard candidate cap even if a caller asks for unlimited results",
-  );
-  let streamed = 0;
-  let rawClosed = false;
-  let rawProduced = 0;
-  const rawLimited = await runSpotlightSearch(
-    "foob",
-    { fuzzy: true, max: Infinity },
-    async function* (args) {
-      if (args.includes("-name")) return;
-      try {
-        for (let i = 0; i < 200000; i += 60) {
-          rawProduced += 60;
-          yield Array.from({ length: 60 }, (_, j) => `/foo/zzz${i + j}`).join(
-            "\0",
-          ) + "\0";
-        }
-      } finally {
-        rawClosed = true;
-      }
-    },
-  );
-  assert(
-    rawLimited.truncated &&
-      rawLimited.paths.length === 0 &&
-      rawClosed &&
-      rawProduced <= 100020,
-    "fuzzy search stops excessive raw candidates even when none pass the filename matcher",
-  );
-  const many = await runSpotlightSearch(
-    "foo",
-    {
-      max: Infinity,
-      onBatch: (batch) => {
-        streamed += batch.length;
-      },
-    },
-    async function* () {
-      yield manyPaths.join("\0") + "\0";
-    },
-  );
-  assert(
-    streamed === 4005 && !many.truncated && many.paths.length === 0,
-    "live Spotlight passes its old four-thousand-path cap without retaining a duplicate path buffer",
-  );
-
   const queuedController = new AbortController();
   let releaseWork = () => {};
   const stalledWork = new Promise<void>((resolve) => {
@@ -229,119 +70,207 @@ export async function liveSearchChecks(
   }));
   const checked = await validate(candidates, {
     query: "bar",
-    continuous: true,
-  } as Parameters<typeof validate>[1]);
+    limit: Infinity,
+  });
   assert(
     checked.entries.length === 125,
-    "live cached search continues beyond its first sixty matches",
+    "a source that asks for every match gets more than the default sixty",
   );
+  /*
+   * A stalled batch among several running at once.
+   *
+   * Batches run concurrently, so one that hits the deadline stops the pass
+   * without discarding what its neighbours already returned. The result is
+   * partial rather than failed, and the ranking falls back to modification
+   * time for the paths it did not reach.
+   */
   let metadataCalls = 0;
-  const metadataProgress: number[] = [];
+  const usagePaths = Array.from(
+    { length: 400 },
+    (_, index) => `/foo/usage${index}`,
+  );
   const metadata = await readUsageMetaResult(
-    candidates.slice(0, 26).map((item) => item.path),
-    {
-      continuous: true,
-      onProgress: (meta: Map<string, unknown>) =>
-        metadataProgress.push(meta.size),
-    } as Parameters<typeof readUsageMetaResult>[1],
-    async () => {
+    usagePaths,
+    { timeoutMs: 5000 },
+    async (args) => {
+      // Everything before the paths: -raw, -nullMarker NULL, and two -name pairs.
+      const batch = args.length - 7;
       if (metadataCalls++ === 0) throw { code: "ETIMEDOUT" };
-      return "NULL\0" + "2\0";
+      return "NULL\x002\x00".repeat(batch);
     },
   );
   assert(
-    metadata.meta.has("/foo/bar25") &&
-      !metadata.complete &&
-      metadataProgress.length > 0,
-    "live metadata skips a stalled batch and continues checking later files",
+    metadataCalls > 1 && metadata.meta.size > 0,
+    `batches that finished alongside a stalled one keep their metadata (${metadata.meta.size} paths from ${metadataCalls} batches)`,
+  );
+  assert(
+    !metadata.complete &&
+      metadata.partial !== undefined &&
+      metadata.error === undefined,
+    "and the pass reports partial coverage rather than a failure",
+  );
+  assert(
+    metadata.meta.size < usagePaths.length,
+    "while the stalled batch's own paths are left without usage metadata",
   );
 
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "live-search-"));
   try {
     for (let i = 0; i < 3005; i++)
       fs.writeFileSync(path.join(root, `foo${i}.txt`), "foo");
-    const paths: string[] = [];
-    const walked = await walkSearch(root, parseQuery("foo"), {
-      continuous: true,
-      onBatch: (batch: string[]) => {
-        paths.push(...batch);
-      },
-    } as Parameters<typeof walkSearch>[2]);
+    const listing = await readDirectoryAsync(root, false);
     assert(
-      paths.length === 3000 && walked.truncated,
-      "live folder search bounds a large directory and reports that the scan was capped",
+      listing.entries.length === 3000 && listing.truncated > 0,
+      "a folder listing retains a bounded number of entries and reports omissions",
     );
-    let published = 0;
-    const listing = await readDirectoryAsync(root, false, undefined, {
-      continuous: true,
-      onProgress: (entries: Entry[]) => {
-        published = entries.length;
-      },
-    });
-    assert(
-      listing.entries.length === 3000 && listing.truncated > 0 && published > 0,
-      "live directory listing retains a bounded number of entries and reports omissions",
+    /*
+     * One publication of rows per read.
+     *
+     * The folder listing used to publish every 100ms, so the list grew and
+     * reordered while the user was reading it. A subscriber should see the
+     * pending marker and then the finished set, never a partial row list
+     * followed by a larger one.
+     */
+    const seen: DirectorySnapshot[] = [];
+    const stopObserving = observeDirectory(root, false, (snapshot) =>
+      seen.push(snapshot),
     );
-    const limited = await walkSearch(root, parseQuery("foo"), {
-      continuous: true,
-      limit: 25,
-    });
-    assert(
-      limited.paths.length === 25 && limited.truncated,
-      "a continuous folder search honors its collection limit and keeps the matches already found",
-    );
-    const names = await fsp.readdir(root);
+    try {
+      const settled = async () => {
+        for (let i = 0; i < 400; i++) {
+          if (seen.some((s) => !s.pending && s.entries.length > 0)) return true;
+          await new Promise((resolve) => setTimeout(resolve, 25));
+        }
+        return false;
+      };
+      assert(await settled(), "the folder listing settles");
+      const rowCounts = seen
+        .map((snapshot) => snapshot.entries.length)
+        .filter((count) => count > 0);
+      assert(
+        new Set(rowCounts).size === 1,
+        `rows are published at one size, not in growing batches (${[...new Set(rowCounts)].join(", ")})`,
+      );
+      assert(
+        seen.filter(
+          (snapshot) => snapshot.entries.length > 0 && !snapshot.pending,
+        ).length === 1,
+        "exactly one finished listing is published for one read",
+      );
+    } finally {
+      stopObserving();
+    }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+
+  /*
+   * One entry never returns. The listing publishes once, so the question is
+   * no longer whether later entries appear first; it is whether the listing
+   * settles at all. Its deadline is what guarantees that, and the entries
+   * it did not reach are reported as omitted.
+   *
+   * The folder holds fewer than MAX_ENTRIES names, so the reader stats every
+   * one of them and the blocked path is reached whatever order the two
+   * directory reads return. A folder larger than the cap would leave the
+   * blocked name among the ones the reader never touches.
+   */
+  const stallRoot = fs.mkdtempSync(path.join(os.tmpdir(), "live-stall-"));
+  try {
+    const stallCount = 200;
+    for (let i = 0; i < stallCount; i++)
+      fs.writeFileSync(path.join(stallRoot, `foo${i}.txt`), "foo");
+    const names = await fsp.readdir(stallRoot);
     const originalStat = fsp.stat;
     let releaseStat = () => {};
     const blocked = new Promise<void>((resolve) => {
       releaseStat = resolve;
     });
-    const listingController = new AbortController();
-    let laterFile = false;
     try {
       fsp.stat = (async (full, ...args: unknown[]) => {
-        if (String(full) === path.join(root, names[0])) await blocked;
+        if (String(full) === path.join(stallRoot, names[0])) await blocked;
         return Reflect.apply(originalStat, fsp, [full, ...args]);
       }) as typeof fsp.stat;
-      const pending = readDirectoryAsync(
-        root,
-        false,
-        listingController.signal,
-        {
-          continuous: true,
-          onProgress: (entries) => {
-            laterFile ||= entries.some((entry) => entry.name === names[100]);
-          },
-        },
-      );
-      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const started = Date.now();
+      const stalled = await readDirectoryAsync(stallRoot, false, undefined, {
+        budgetMs: 300,
+      });
+      const elapsed = Date.now() - started;
+
       assert(
-        laterFile,
-        "one stalled directory entry cannot block healthy later entries",
+        elapsed < 3000,
+        `a stalled entry cannot hold the listing open past its deadline (${elapsed}ms)`,
       );
-      listingController.abort();
-      releaseStat();
-      await pending;
+      assert(
+        stalled.entries.length > 0 &&
+          stalled.entries.length < stallCount &&
+          stalled.truncated > 0,
+        `the listing returns what it read and reports the rest as omitted (${stalled.entries.length} of ${stallCount})`,
+      );
+      assert(
+        !stalled.entries.some((entry) => entry.name === names[0]),
+        "the entry that never returned is not in the result",
+      );
     } finally {
       releaseStat();
       fsp.stat = originalStat;
     }
-    const child = path.join(root, "bar");
-    fs.mkdirSync(child);
-    fs.writeFileSync(path.join(child, "baz.txt"), "baz");
-    const nested: string[] = [];
-    await listUnder([root, child], {
-      continuous: true,
-      onBatch: (batch) => {
-        nested.push(...batch);
+  } finally {
+    fs.rmSync(stallRoot, { recursive: true, force: true });
+  }
+
+  /*
+   * The bound on one directory read.
+   *
+   * readBoundedDirectory stops after one entry past the limit, and it skips
+   * hidden names before it consults the limit. Both edges are invisible to a
+   * caller that filters and slices again afterwards, which the folder listing
+   * no longer does, so pin them here: a folder holding exactly the limit is
+   * complete, and dotfiles cannot take a visible row's place.
+   */
+  const boundedRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bounded-dir-"));
+  try {
+    const boundedCases = [
+      {
+        add: ["one.txt", "two.txt", "three.txt"],
+        limit: 3,
+        entries: 3,
+        label: "a folder holding exactly the limit reports no omissions",
       },
-    });
+      {
+        add: [".one", ".two", ".three", ".four", ".five"],
+        limit: 3,
+        entries: 3,
+        label:
+          "hidden names are skipped before the limit, so they cannot fill it",
+      },
+    ];
+    let bounded: Awaited<ReturnType<typeof readBoundedDirectory>> = {
+      entries: [],
+      truncated: false,
+    };
+    for (const boundedCase of boundedCases) {
+      for (const name of boundedCase.add)
+        fs.writeFileSync(path.join(boundedRoot, name), "foo");
+
+      bounded = await readBoundedDirectory(
+        boundedRoot,
+        boundedCase.limit,
+        false,
+      );
+
+      assert(
+        bounded.entries.length === boundedCase.entries &&
+          bounded.truncated === false,
+        `${boundedCase.label} (${bounded.entries.length} entries, truncated ${bounded.truncated})`,
+      );
+    }
     assert(
-      nested.filter((full) => full === path.join(child, "baz.txt")).length ===
-        1,
-      "nested expansion roots do not traverse or emit the same subtree twice",
+      !bounded.entries.some((entry) => entry.name.startsWith(".")),
+      "and no hidden name is returned as a row",
     );
   } finally {
-    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(boundedRoot, { recursive: true, force: true });
   }
 }

@@ -11,8 +11,6 @@ export const WEIGHTS = {
   /** Spotlight use count and last-used date. */
   spotlight: 25,
   spotlightHalfLife: 30,
-  /** Optional folder preference. */
-  folderBonus: 0,
   /** Points removed per level below the search scope. */
   depthPenalty: 12,
   /** Positional match quality within a tier. */
@@ -71,7 +69,6 @@ export function scoreEntry(entry: Entry, ctx: ScoreContext): ScoreParts {
       decay(age, WEIGHTS.spotlightHalfLife);
   }
 
-  const bonus = entry.isDirectory ? WEIGHTS.folderBonus : 0;
   const depthPart = -WEIGHTS.depthPenalty * Math.max(0, depthBelow);
   const matchPart = WEIGHTS.match * quality;
 
@@ -81,18 +78,6 @@ export function scoreEntry(entry: Entry, ctx: ScoreContext): ScoreParts {
     spotlight: spotlightPart,
     depth: depthPart,
     match: matchPart,
-    total:
-      visitPart + mtimePart + spotlightPart + bonus + depthPart + matchPart,
+    total: visitPart + mtimePart + spotlightPart + depthPart + matchPart,
   };
-}
-
-/** First-pass score used to choose which Spotlight paths to stat. */
-export function coarseScore(
-  visit: Visit | undefined,
-  now: number,
-  depthBelow: number,
-): number {
-  return (
-    visitScore(visit, now) - WEIGHTS.depthPenalty * Math.max(0, depthBelow)
-  );
 }

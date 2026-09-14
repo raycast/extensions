@@ -6,8 +6,8 @@ export default async function Command() {
   const confirmed = await confirmAlert({
     title: "Delete all data and cache?",
     message:
-      "Usage rankings, pins, search history, learned shortcuts and the Google " +
-      "Drive index. Your files are not touched. This cannot be undone.",
+      "Usage rankings, pins, search history, learned shortcuts and the search " +
+      "index. Your files are not touched. This cannot be undone.",
     primaryAction: {
       title: "Delete Everything",
       style: Alert.ActionStyle.Destructive,

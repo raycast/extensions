@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  CACHED_METADATA_BUDGET_MS,
   CachedCandidate,
   validateRecentEntries,
 } from "../lib/recent-validation";
@@ -15,11 +16,9 @@ export function useCachedEntries(
   candidates: CachedCandidate[],
   query: string,
   reloadKey: number,
-  limit = LIVE_RESULTS,
   signal?: AbortSignal,
   typeFilter: TypeFilter = "all",
 ) {
-  limit = Math.min(limit, LIVE_RESULTS);
   const [checked, setChecked] = useState<{
     candidates: CachedCandidate[];
     query: string;
@@ -39,26 +38,16 @@ export function useCachedEntries(
     const generation = dataGeneration();
     const current = () =>
       !active.signal.aborted && generation === dataGeneration();
+    // One publication per query. Validating cached paths used to publish every
+    // 100ms, which reordered the list while the user was reading it. The wait
+    // is bounded by the validator's own deadline, and what it did not reach is
+    // reported as partial.
     void validateRecentEntries(candidates, {
       query,
       typeFilter,
-      limit,
-      continuous: true,
+      limit: LIVE_RESULTS,
+      budgetMs: CACHED_METADATA_BUDGET_MS,
       signal: active.signal,
-      onProgress: (entries) => {
-        if (current())
-          setChecked({
-            candidates,
-            query,
-            reloadKey,
-            entries,
-            pending: true,
-            partial: false,
-            limited: false,
-            signal,
-            typeFilter,
-          });
-      },
     }).then((result) => {
       if (current())
         setChecked({
@@ -77,7 +66,7 @@ export function useCachedEntries(
       signal?.removeEventListener("abort", stop);
       stop();
     };
-  }, [candidates, query, reloadKey, limit, signal, typeFilter]);
+  }, [candidates, query, reloadKey, signal, typeFilter]);
   const current =
     checked?.candidates === candidates &&
     checked.query === query &&

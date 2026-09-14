@@ -52,18 +52,39 @@ export async function readEntryMetadata(
   }
 }
 
-/** Read metadata in small batches without blocking typing or following subfolders. */
+/**
+ * How long a folder listing may take before the rest is reported as omitted.
+ * Local folders finish in milliseconds; this only binds cold network mounts.
+ */
+const LISTING_BUDGET_MS = 3000;
+
+/**
+ * Read a folder's metadata in small batches without following subfolders.
+ *
+ * Returns one finished listing. It used to publish partial listings every
+ * 100ms, which made rows appear and reorder while the user was reading them.
+ * The caller now waits, so the wait is bounded: a cold network mount can take
+ * seconds per entry, and without a deadline "wait for the whole folder" is
+ * unbounded. Entries not read by the deadline are reported as omitted, the
+ * same way the name cap reports them.
+ */
 export async function readDirectoryAsync(
   dir: string,
   showHidden: boolean,
   signal?: AbortSignal,
-  options: {
-    continuous?: boolean;
-    onProgress?: (entries: Entry[]) => void;
-  } = {},
+  options: { budgetMs?: number } = {},
 ): Promise<ReadResult> {
-  const active = signal ?? new AbortController().signal;
-  if (active.aborted) return { entries: [], truncated: 0 };
+  const caller = signal ?? new AbortController().signal;
+  if (caller.aborted) return { entries: [], truncated: 0 };
+  // A deadline of its own, so one stalled entry cannot hold up the listing.
+  const bounded = new AbortController();
+  const stopForCaller = () => bounded.abort();
+  caller.addEventListener("abort", stopForCaller, { once: true });
+  const deadline = setTimeout(
+    () => bounded.abort(),
+    options.budgetMs ?? LISTING_BUDGET_MS,
+  );
+  const active = bounded.signal;
   let dirents: fs.Dirent[];
   let namesTruncated = false;
   try {
@@ -81,9 +102,6 @@ export async function readDirectoryAsync(
       error: error instanceof Error ? error.message : String(error),
     };
   }
-  const visible = showHidden
-    ? dirents
-    : dirents.filter((d) => !d.name.startsWith("."));
   const entries: Entry[] = [];
   if (active.aborted) return { entries: [], truncated: 0 };
   const storageDir = await directoryRead(
@@ -91,22 +109,7 @@ export async function readDirectoryAsync(
     () => fsp.realpath(dir),
     active,
   ).catch(() => dir);
-  const selected = visible.slice(0, MAX_ENTRIES);
-  let lastPublished = 0;
-  let publishTimer: ReturnType<typeof setTimeout> | undefined;
   const completed: (Entry | undefined)[] = [];
-  const publish = (flush = false) => {
-    if (active.aborted) return;
-    if (flush || Date.now() - lastPublished >= 100) {
-      clearTimeout(publishTimer);
-      publishTimer = undefined;
-      lastPublished = Date.now();
-      options.onProgress?.(
-        completed.filter((entry): entry is Entry => entry !== undefined),
-      );
-    } else if (!publishTimer)
-      publishTimer = setTimeout(() => publish(true), 100);
-  };
   const queue = createWorkQueue<{ dirent: fs.Dirent; index: number }>(
     async ([{ dirent, index }]) => {
       const full = path.join(dir, dirent.name);
@@ -163,28 +166,27 @@ export async function readDirectoryAsync(
         }
       }
 
-      if (!active.aborted) {
-        completed[index] = entry;
-        publish();
-      }
+      if (!active.aborted) completed[index] = entry;
     },
     active,
     { concurrency: 8 },
   );
   try {
-    await queue.push(selected.map((dirent, index) => ({ dirent, index })));
+    await queue.push(dirents.map((dirent, index) => ({ dirent, index })));
     await queue.drain();
     entries.push(
       ...completed.filter((entry): entry is Entry => entry !== undefined),
     );
-    if (!active.aborted) publish(true);
+    const unread = dirents.length - entries.length;
     return {
       entries,
-      truncated: namesTruncated ? 1 : 0,
+      // The caller shows one notice for omissions; a lower bound is enough.
+      truncated: (namesTruncated ? 1 : 0) + Math.max(0, unread),
     };
   } finally {
+    clearTimeout(deadline);
+    caller.removeEventListener("abort", stopForCaller);
     queue.dispose();
-    clearTimeout(publishTimer);
   }
 }
 
@@ -195,7 +197,7 @@ export function observeDirectory(
   dir: string,
   showHidden: boolean,
   publish: (snapshot: DirectorySnapshot) => void,
-  { pollMs = 5000, debounceMs = 80, continuous = false } = {},
+  { pollMs = 5000, debounceMs = 80 } = {},
 ): () => void {
   const controller = new AbortController();
   let watcher: fs.FSWatcher | undefined;
@@ -215,32 +217,39 @@ export function observeDirectory(
       return;
     }
     running = true;
-    publish({ ...snapshot, pending: true });
-    do {
-      dirty = false;
-      const result = await readDirectoryAsync(
-        dir,
-        showHidden,
-        controller.signal,
-        {
-          continuous,
-          onProgress:
-            snapshot.entries.length === 0
-              ? (entries) => {
-                  if (!controller.signal.aborted)
-                    publish({ entries, truncated: 0, pending: true });
-                }
-              : undefined,
-        },
-      );
-      if (controller.signal.aborted) return;
-      if (isDeepStrictEqual(result.entries, snapshot.entries)) {
-        result.entries = snapshot.entries;
-      }
-      snapshot = { ...result, pending: dirty };
-      publish(snapshot);
-    } while (dirty);
-    running = false;
+    // `finally`, because a throw anywhere below — including out of `publish`
+    // into React — would otherwise latch the flag and stop every later
+    // refresh for the rest of the command run.
+    try {
+      // Only the initial read withholds rows. Background polls must leave the
+      // finished listing visible, otherwise even an unchanged folder loses focus.
+      if (snapshot.pending) publish(snapshot);
+      do {
+        dirty = false;
+        // One publication per read. The `pending` marker above already told the
+        // caller work is in progress; partial rows would only move the list.
+        const result = await readDirectoryAsync(
+          dir,
+          showHidden,
+          controller.signal,
+        );
+        if (controller.signal.aborted) return;
+        if (isDeepStrictEqual(result.entries, snapshot.entries)) {
+          result.entries = snapshot.entries;
+        }
+        const next = { ...result, pending: snapshot.pending && dirty };
+        if (
+          next.entries !== snapshot.entries ||
+          next.error !== snapshot.error ||
+          next.truncated !== snapshot.truncated ||
+          next.pending !== snapshot.pending
+        )
+          snapshot = next;
+        publish(snapshot);
+      } while (dirty);
+    } finally {
+      running = false;
+    }
   };
   const schedule = () => {
     if (controller.signal.aborted) return;

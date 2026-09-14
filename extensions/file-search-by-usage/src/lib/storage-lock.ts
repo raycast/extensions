@@ -17,8 +17,25 @@ export function dataGeneration(): string {
   }
 }
 
+/**
+ * The generation moved under an operation that started before a deletion.
+ *
+ * Its own class so a caller can tell it apart from a storage write that simply
+ * failed. Reporting a failed write as a reset tells the user their data was
+ * erased when it was not.
+ */
+export class DataResetError extends Error {
+  constructor() {
+    super("Extension data was reset; this older operation was cancelled.");
+    this.name = "DataResetError";
+  }
+}
+
 /** Called only while deletion holds the storage lock. Contains no user data. */
 export function invalidateData(): void {
+  // The support directory may not exist yet: withStorageLock creates it, and
+  // on a first run nothing has taken that lock.
+  fs.mkdirSync(environment.supportPath, { recursive: true });
   const temporary = `${generationPath()}.${randomUUID()}`;
   fs.writeFileSync(temporary, randomUUID(), { mode: 0o600 });
   fs.renameSync(temporary, generationPath());
@@ -32,9 +49,7 @@ export async function withStorageLock<T>(
   fs.mkdirSync(environment.supportPath, { recursive: true });
   const checkGeneration = () => {
     if (generation !== undefined && generation !== dataGeneration())
-      throw new Error(
-        "Extension data was reset; this older operation was cancelled.",
-      );
+      throw new DataResetError();
   };
   const deadline = Date.now() + 5000;
   let owned: ReturnType<typeof acquireOwnedLock>;

@@ -20,15 +20,10 @@ export function useDirectoryListing(
   }>();
   useEffect(() => {
     if (dir === undefined || !enabled || signal?.aborted) return;
-    const stop = observeDirectory(
-      dir,
-      showHidden,
-      (snapshot) => {
-        if (signal?.aborted) return;
-        setState({ dir, showHidden, reloadKey, snapshot });
-      },
-      { continuous: true },
-    );
+    const stop = observeDirectory(dir, showHidden, (snapshot) => {
+      if (signal?.aborted) return;
+      setState({ dir, showHidden, reloadKey, snapshot });
+    });
     signal?.addEventListener("abort", stop, { once: true });
     return () => {
       signal?.removeEventListener("abort", stop);

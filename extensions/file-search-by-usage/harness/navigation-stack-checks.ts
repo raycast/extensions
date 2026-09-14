@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { transformSync } from "esbuild";
 import { FolderNavigation } from "../src/lib/folder-navigation";
+import { between } from "./source-slice";
 
 /** Exercise real folder transitions, cancellation, and obsolete callbacks. */
 export async function navigationStackChecks(
@@ -8,10 +9,7 @@ export async function navigationStackChecks(
 ) {
   const source = fs.readFileSync("src/components/browser.tsx", "utf8");
   const code = transformSync(
-    source.slice(
-      source.indexOf("  const navigate ="),
-      source.indexOf("  const scopeCandidates ="),
-    ),
+    between(source, "  const navigate =", "  const scopeCandidates ="),
     { loader: "tsx" },
   ).code;
   function fixture(startDir?: string) {

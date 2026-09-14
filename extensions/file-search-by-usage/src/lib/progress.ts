@@ -7,11 +7,11 @@ export type Progress = {
   memory: Stage;
   /** Reading the folder in scope, and its usage metadata. */
   folder: Stage;
-  /** The mdfind pass, or the walk that replaces it. */
-  spotlight: Stage;
-  /** Usage metadata for Spotlight results. */
+  /** The indexed name search. */
+  index: Stage;
+  /** Usage metadata for the current folder's entries. */
   ranking: Stage;
-  /** Characters still needed before a whole-disk search is worth running. */
+  /** Characters still needed before the index is worth querying. */
   needed?: number;
 };
 
@@ -26,16 +26,9 @@ export function missingUsagePaths(
 const ORDER: (keyof Omit<Progress, "needed">)[] = [
   "memory",
   "folder",
-  "spotlight",
+  "index",
   "ranking",
 ];
-
-const LABEL: Record<string, string> = {
-  memory: "memory",
-  folder: "folder",
-  spotlight: "Spotlight",
-  ranking: "ranking",
-};
 
 export function isSettled(p: Progress): boolean {
   return ORDER.every(
@@ -45,6 +38,18 @@ export function isSettled(p: Progress): boolean {
       p[k] === "partial" ||
       p[k] === "failed",
   );
+}
+
+/**
+ * Whether any stage can still change the rows.
+ *
+ * Narrower than the negation of `isSettled`, and deliberately so: a `waiting`
+ * index is one that will not be queried for this query at all, so a short
+ * query's memory results are already final and holding them back would hold
+ * them forever.
+ */
+export function rowsCanChange(p: Progress): boolean {
+  return ORDER.some((key) => p[key] === "running");
 }
 
 function hasFailure(p: Progress): boolean {
@@ -70,12 +75,12 @@ export function describeProgress(p: Progress): string {
   for (const key of ORDER) {
     const stage = p[key];
     if (stage === "skipped") continue;
-    if (stage === "waiting" && key === "spotlight" && p.needed !== undefined) {
-      parts.push(`Spotlight needs ${p.needed} more`);
+    if (stage === "waiting" && key === "index" && p.needed !== undefined) {
+      parts.push(`index needs ${p.needed} more`);
       continue;
     }
     parts.push(
-      `${LABEL[key]} ${stage === "done" ? "✓" : stage === "running" ? "…" : stage === "partial" ? "partial" : stage === "failed" ? "failed" : "◦"}`,
+      `${key} ${stage === "done" ? "✓" : stage === "running" ? "…" : stage === "partial" ? "partial" : stage === "failed" ? "failed" : "◦"}`,
     );
   }
   return parts.join(" · ");
@@ -89,9 +94,9 @@ export function deriveProgress(state: {
   backgroundPending?: boolean;
   /** Some cached paths could not be checked because of a deadline or read error. */
   memoryPartial?: boolean;
-  /** Searching inside a folder rather than the whole disk. */
+  /** Searching inside a folder rather than across the index. */
   scoped: boolean;
-  /** Folder browsing reads direct children; it does not run name discovery. */
+  /** Folder browsing reads direct children; it does not query the index. */
   directChildrenOnly?: boolean;
   /** The mdls pass over that folder's children. */
   folderMetaPending: boolean;
@@ -100,20 +105,20 @@ export function deriveProgress(state: {
   /** The search bar is being used as a path bar. */
   isPathQuery: boolean;
   query: string;
-  /** A bare `.`: hidden entries only, which Spotlight cannot answer. */
+  /** A bare `.`: hidden entries only, which the name index cannot answer. */
   isHiddenOnly: boolean;
   searching: boolean;
   searchFailed?: boolean;
   searchPartial?: boolean;
-  /** Length of the term Spotlight would be asked for. */
+  /** Length of the term the index would be asked for. */
   termLength: number;
   minQuery: number;
-  /** The mdls pass over what Spotlight returned. */
+  /** The mdls pass over the folder's entries. */
   rankingPending: boolean;
   rankingFailed?: boolean;
   rankingPartial?: boolean;
 }): Progress {
-  const spotlight: Stage = state.directChildrenOnly
+  const index: Stage = state.directChildrenOnly
     ? "skipped"
     : state.searchFailed
       ? "failed"
@@ -144,7 +149,7 @@ export function deriveProgress(state: {
               ? "running"
               : "done"
         : "skipped",
-    spotlight,
+    index,
     ranking: state.rankingFailed
       ? "failed"
       : state.rankingPartial
@@ -153,7 +158,7 @@ export function deriveProgress(state: {
           ? "running"
           : "done",
     needed:
-      spotlight === "waiting"
+      index === "waiting"
         ? Math.max(1, state.minQuery - state.termLength)
         : undefined,
   };
