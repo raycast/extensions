@@ -44,6 +44,7 @@ export interface LighthouseReport {
       displayValue?: string;
       score?: number | null;
       scoreDisplayMode?: string;
+      metricSavings?: Record<string, number>;
       details?: any;
     };
   };
@@ -105,13 +106,31 @@ function sanitizeCategories(categories: string[]): string[] {
 export async function findLighthousePath(
   customPath?: string
 ): Promise<string | null> {
-  if (customPath) {
-    const expandedPath = expandHomeDir(customPath);
+  if (customPath?.trim()) {
+    const expandedPath = expandHomeDir(customPath.trim());
+    const hint =
+      'Lighthouse Path must point to the Lighthouse CLI, not Chrome or another browser. Clear this preference to auto-detect Lighthouse.';
+    if (/\.app(?:\/|$)/i.test(expandedPath)) {
+      throw new Error(hint);
+    }
     try {
       await nodeFs.access(expandedPath, nodeFs.constants.X_OK);
+      const { stdout } = await execFilePromise(expandedPath, ['--version'], {
+        timeout: 10_000,
+        maxBuffer: 64 * 1024,
+        env: {
+          ...process.env,
+          PATH: `/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${process.env.PATH || ''}`,
+        },
+      });
+      if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(stdout.trim())) {
+        throw new Error('The executable did not return a Lighthouse version.');
+      }
       return expandedPath;
-    } catch {
-      // Continue to fallbacks
+    } catch (error) {
+      throw new Error(
+        `${hint} ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -303,10 +322,10 @@ export async function runLighthouseAudit(
         : '';
     const combined = `${message}\n${stderr}`;
 
+    // ENOENT can refer to the executable, Chrome, or the report file.
+    // Preserve the original diagnostic instead of blaming the output folder.
     if (combined.includes('ENOENT')) {
-      throw new Error(
-        `Lighthouse execution failed: Output path is not accessible. Verify the folder exists and is writable: ${outputDir}`
-      );
+      throw new Error(`Lighthouse execution failed: ${combined.trim()}`);
     }
     if (combined.includes('No Chrome installations found')) {
       throw new Error(

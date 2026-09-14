@@ -1,5 +1,59 @@
 import type { LighthouseReport } from './lighthouse';
 
+export function formatEvidence(details: unknown): string {
+  if (!details || typeof details !== 'object') return '';
+  const data = details as Record<string, unknown>;
+  const cell = (value: unknown): string => {
+    if (value && typeof value === 'object') {
+      const item = value as Record<string, unknown>;
+      value =
+        item.snippet ||
+        item.selector ||
+        item.url ||
+        item.value ||
+        JSON.stringify(value);
+    }
+    return escapeMarkdownCell(String(value ?? '—'))
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  };
+  if (
+    data.type === 'table' &&
+    Array.isArray(data.headings) &&
+    Array.isArray(data.items)
+  ) {
+    const headings = data.headings
+      .filter(h => h && typeof h.key === 'string')
+      .slice(0, 4);
+    if (headings.length) {
+      const rows = data.items
+        .slice(0, 15)
+        .map(
+          item =>
+            '| ' + headings.map(h => cell(item?.[h.key])).join(' | ') + ' |'
+        );
+      return (
+        '## Evidence\n\n| ' +
+        headings.map(h => cell(h.label || h.key)).join(' | ') +
+        ' |\n|' +
+        headings.map(() => ' --- ').join('|') +
+        '|\n' +
+        rows.join('\n') +
+        (data.items.length > 15
+          ? '\n\n_First 15 items shown. Full evidence is in the JSON report._'
+          : '')
+      );
+    }
+  }
+  const raw = JSON.stringify(details, null, 2);
+  return (
+    '## Evidence\n\n~~~~json\n' +
+    raw.slice(0, 12000) +
+    '\n~~~~' +
+    (raw.length > 12000 ? '\n\n_Preview truncated; see the JSON report._' : '')
+  );
+}
+
 export interface AuditWithContext {
   id: string;
   title?: string;
@@ -64,7 +118,14 @@ export function extractOpportunities(
   maxCount = 5
 ): OpportunityInfo[] {
   return Object.values(report.audits || {})
-    .filter(a => a.details && a.details.type === 'opportunity')
+    .filter(
+      a =>
+        (a.details?.type === 'opportunity' || a.id.endsWith('-insight')) &&
+        (isFailed(a) ||
+          Object.values(a.metricSavings || {}).some(
+            value => typeof value === 'number' && value > 0
+          ))
+    )
     .map(op => {
       const items = Array.isArray(op.details?.items) ? op.details.items : [];
       const firstUrl = items.find((i: any) => i?.url)?.url;
@@ -73,7 +134,17 @@ export function extractOpportunities(
         title: op.title,
         displayValue: op.displayValue,
         score: op.score,
-        savingsMs: op.details?.overallSavingsMs,
+        savingsMs:
+          op.details?.overallSavingsMs ??
+          Math.max(
+            0,
+            ...['LCP', 'FCP', 'INP', 'TBT'].map(key => {
+              const value = op.metricSavings?.[key];
+              return typeof value === 'number' && Number.isFinite(value)
+                ? value
+                : 0;
+            })
+          ),
         savingsBytes: op.details?.overallSavingsBytes,
         itemCount: items.length,
         exampleUrl: firstUrl,

@@ -20,6 +20,20 @@
   "license": "MIT",
   "preferences": [
     {
+      "name": "reportProfile",
+      "type": "dropdown",
+      "title": "Report Profile",
+      "description": "Prioritize dashboard metrics and recommendations for your role. All audit evidence remains available.",
+      "required": false,
+      "default": "general",
+      "data": [
+        { "title": "General / Other", "value": "general" },
+        { "title": "Marketing", "value": "marketing" },
+        { "title": "SEO", "value": "seo" },
+        { "title": "Development", "value": "developer" }
+      ]
+    },
+    {
       "name": "outputPath",
       "type": "directory",
       "title": "Output Path",
