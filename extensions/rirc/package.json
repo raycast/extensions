@@ -2,18 +2,21 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rirc",
   "title": "RIRC",
-  "description": "Search and paste GIFs from GIPHY or KLIPY.",
+  "description": "Search, save, copy, and paste reaction media from KLIPY or GIPHY.",
   "icon": "RIRC logo.png",
   "author": "ahmad_shahzad",
   "categories": [
-    "Productivity"
+    "Media"
+  ],
+  "platforms": [
+    "macOS"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Search GIFs",
-      "description": "Search GIFs from GIPHY or KLIPY.",
+      "title": "Search Reaction Media",
+      "description": "Search and reuse reaction GIFs and memes.",
       "mode": "view",
       "preferences": [
         {

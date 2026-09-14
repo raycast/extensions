@@ -13,10 +13,10 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { copyFile, readFile, writeFile } from "node:fs/promises";
+import { copyFile, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { promisify } from "node:util";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Provider = "klipy" | "giphy";
 type View = Provider | "saved";
@@ -66,9 +66,9 @@ type KlipyResponse = {
     id: string;
     title: string;
     itemurl?: string;
-    media_formats: {
-      gif: { url: string };
-      tinygif: { url: string };
+    media_formats?: {
+      gif?: { url: string };
+      tinygif?: { url: string };
     };
   }>;
 };
@@ -93,6 +93,8 @@ export default function Command() {
   const [gifs, setGifs] = useState<MediaItem[]>([]);
   const [memes, setMemes] = useState<MediaItem[]>([]);
   const [savedGifs, setSavedGifs] = useState<MediaItem[]>([]);
+  const savedGifsRef = useRef<MediaItem[]>([]);
+  const savedGifsWriteRef = useRef<Promise<void>>(Promise.resolve());
   const [queryEmbedding, setQueryEmbedding] = useState<number[] | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
@@ -104,13 +106,13 @@ export default function Command() {
       const items = value
         ? (JSON.parse(value) as Array<MediaItem & { gifUrl?: string }>)
         : [];
-      setSavedGifs(
-        items.map((item) => ({
-          ...item,
-          kind: item.kind ?? "gif",
-          mediaUrl: item.mediaUrl ?? item.gifUrl ?? "",
-        })),
-      );
+      const migratedItems = items.map((item) => ({
+        ...item,
+        kind: item.kind ?? "gif",
+        mediaUrl: item.mediaUrl ?? item.gifUrl ?? "",
+      }));
+      savedGifsRef.current = migratedItems;
+      setSavedGifs(migratedItems);
     });
   }, []);
 
@@ -211,10 +213,20 @@ export default function Command() {
     matchingSaved[0]?.provider,
   ]);
 
+  function persistSavedGifs(
+    update: (current: MediaItem[]) => MediaItem[],
+  ): Promise<void> {
+    const next = update(savedGifsRef.current);
+    savedGifsRef.current = next;
+    setSavedGifs(next);
+    savedGifsWriteRef.current = savedGifsWriteRef.current
+      .catch(() => undefined)
+      .then(() => LocalStorage.setItem(SAVED_GIFS_KEY, JSON.stringify(next)));
+    return savedGifsWriteRef.current;
+  }
+
   async function toggleSaved(gif: MediaItem) {
-    const isSaved = savedGifs.some(
-      (saved) => saved.id === gif.id && saved.provider === gif.provider,
-    );
+    const isSaved = savedGifsRef.current.some((saved) => sameMedia(saved, gif));
     let itemToSave = gif;
     if (!isSaved && preferences.jinaApiKey && !gif.embedding) {
       const toast = await showToast({
@@ -237,13 +249,15 @@ export default function Command() {
         toast.message = error instanceof Error ? error.message : String(error);
       }
     }
-    const next = isSaved
-      ? savedGifs.filter(
-          (saved) => saved.id !== gif.id || saved.provider !== gif.provider,
-        )
-      : [itemToSave, ...savedGifs];
-    setSavedGifs(next);
-    await LocalStorage.setItem(SAVED_GIFS_KEY, JSON.stringify(next));
+    await persistSavedGifs((current) => {
+      if (isSaved) return current.filter((saved) => !sameMedia(saved, gif));
+      return current.some((saved) => sameMedia(saved, gif))
+        ? current
+        : [itemToSave, ...current];
+    });
+    if (isSaved && gif.provider === "local") {
+      await rm(gif.mediaUrl, { force: true });
+    }
     await showToast({
       style: Toast.Style.Success,
       title: isSaved ? "Removed from Saved" : "Saved GIF",
@@ -263,7 +277,9 @@ export default function Command() {
         if (!response.ok)
           throw new Error(`Download returned ${response.status}`);
         const extension =
-          item.fileExtension ?? (item.kind === "image" ? "png" : "gif");
+          extensionFromContentType(response.headers.get("content-type")) ??
+          item.fileExtension ??
+          (item.kind === "image" ? "png" : "gif");
         file = join(
           environment.supportPath,
           `${item.provider}-${item.id.replace(/[^a-zA-Z0-9_-]/g, "-")}.${extension}`,
@@ -294,12 +310,25 @@ export default function Command() {
     try {
       const clipboard = await Clipboard.read();
       const id = `${Date.now()}`;
-      let source = clipboard.file ?? clipboard.text.trim();
-      let pathname =
-        source && source.startsWith("http") ? new URL(source).pathname : source;
-      let extension = extname(pathname).slice(1).toLowerCase();
-      let file = join(environment.supportPath, `saved-${id}.${extension}`);
-      if (!["gif", "png", "jpg", "jpeg", "webp"].includes(extension)) {
+      let source = clipboard.file ?? clipboard.text?.trim() ?? "";
+      const remoteUrl = /^https?:\/\//i.test(source) ? new URL(source) : null;
+      let pathname = remoteUrl?.pathname ?? source;
+      let extension = supportedExtension(pathname);
+      let file: string;
+      if (remoteUrl) {
+        const response = await fetch(remoteUrl);
+        if (!response.ok)
+          throw new Error(`Download returned ${response.status}`);
+        extension =
+          extensionFromContentType(response.headers.get("content-type")) ??
+          extension;
+        if (!extension) throw new Error("URL did not return a supported image");
+        file = join(environment.supportPath, `saved-${id}.${extension}`);
+        await writeFile(file, Buffer.from(await response.arrayBuffer()));
+      } else if (extension) {
+        file = join(environment.supportPath, `saved-${id}.${extension}`);
+        await copyFile(source, file);
+      } else {
         extension = "png";
         file = join(environment.supportPath, `saved-${id}.png`);
         await execFileAsync("/usr/bin/osascript", [
@@ -311,13 +340,6 @@ export default function Command() {
         ]);
         source = file;
         pathname = file;
-      } else if (source.startsWith("http")) {
-        const response = await fetch(source);
-        if (!response.ok)
-          throw new Error(`Download returned ${response.status}`);
-        await writeFile(file, Buffer.from(await response.arrayBuffer()));
-      } else {
-        await copyFile(source, file);
       }
 
       let item: MediaItem = {
@@ -342,9 +364,7 @@ export default function Command() {
           embeddingError = error;
         }
       }
-      const next = [item, ...savedGifs];
-      setSavedGifs(next);
-      await LocalStorage.setItem(SAVED_GIFS_KEY, JSON.stringify(next));
+      await persistSavedGifs((current) => [item, ...current]);
       toast.style = embeddingError ? Toast.Style.Failure : Toast.Style.Success;
       toast.title = embeddingError
         ? "Saved without semantic indexing"
@@ -360,9 +380,7 @@ export default function Command() {
 
   function renderItems(items: MediaItem[], section: string) {
     return items.map((item) => {
-      const isSaved = savedGifs.some(
-        (saved) => saved.id === item.id && saved.provider === item.provider,
-      );
+      const isSaved = savedGifs.some((saved) => sameMedia(saved, item));
       const label = item.kind === "image" ? "Image" : "GIF";
       return (
         <Grid.Item
@@ -560,16 +578,25 @@ async function fetchGifs(
   );
   if (!response.ok) throw new Error(`KLIPY returned ${response.status}`);
   const json = (await response.json()) as KlipyResponse;
-  return json.results.map((gif) => ({
-    id: gif.id,
-    provider: "klipy",
-    kind: "gif",
-    title: gif.title,
-    previewUrl: gif.media_formats.tinygif.url,
-    mediaUrl: gif.media_formats.gif.url,
-    fileExtension: "gif",
-    pageUrl: gif.itemurl,
-  }));
+  return json.results.flatMap((gif) => {
+    const previewUrl =
+      gif.media_formats?.tinygif?.url ?? gif.media_formats?.gif?.url;
+    const mediaUrl = gif.media_formats?.gif?.url ?? previewUrl;
+    return previewUrl && mediaUrl
+      ? [
+          {
+            id: gif.id,
+            provider: "klipy" as const,
+            kind: "gif" as const,
+            title: gif.title,
+            previewUrl,
+            mediaUrl,
+            fileExtension: "gif",
+            pageUrl: gif.itemurl,
+          },
+        ]
+      : [];
+  });
 }
 
 async function fetchKlipyMemes(
@@ -646,4 +673,27 @@ async function createJinaEmbedding(
 function dotProduct(a: number[], b: number[]): number {
   if (a.length !== b.length) return -1;
   return a.reduce((sum, value, index) => sum + value * b[index], 0);
+}
+
+function sameMedia(a: MediaItem, b: MediaItem): boolean {
+  return a.id === b.id && a.provider === b.provider && a.kind === b.kind;
+}
+
+function supportedExtension(path: string): string | undefined {
+  const extension = extname(path).slice(1).toLowerCase();
+  return ["gif", "png", "jpg", "jpeg", "webp"].includes(extension)
+    ? extension
+    : undefined;
+}
+
+function extensionFromContentType(
+  contentType: string | null,
+): string | undefined {
+  const mime = contentType?.split(";", 1)[0].trim().toLowerCase();
+  return {
+    "image/gif": "gif",
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/webp": "webp",
+  }[mime ?? ""];
 }
