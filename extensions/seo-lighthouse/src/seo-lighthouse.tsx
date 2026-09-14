@@ -569,7 +569,7 @@ Thanks,`;
               <Action
                 title="Copy Scorecard Image"
                 icon={Icon.Image}
-                shortcut={Keyboard.Shortcut.Common.CopyName}
+                shortcut={Keyboard.Shortcut.Common.Copy}
                 onAction={() => shareScorecardImage(scorecardSvg, 'copy')}
               />
               <Action
@@ -607,18 +607,18 @@ Thanks,`;
   );
 }
 
+function runReportAudit(options: LighthouseOptions, generation: number) {
+  return runLighthouseAudit({ ...options, force: generation > 0 });
+}
+
 function ReportLoader({ options }: { options: LighthouseOptions }) {
   const [reanalyzeCount, setReanalyzeCount] = useState(0);
-  const currentOptions = useMemo(
-    () => ({ ...options, force: reanalyzeCount > 0 }),
-    [options, reanalyzeCount]
-  );
   const [progressPct, setProgressPct] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { isLoading, data, error, revalidate } = usePromise(
-    runLighthouseAudit,
-    [currentOptions],
+    runReportAudit,
+    [options, reanalyzeCount],
     {
       onError: () => {},
     }
