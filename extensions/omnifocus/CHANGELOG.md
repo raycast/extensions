@@ -1,6 +1,6 @@
 # OmniFocus Changelog
 
-## [Planned Date support] - {PR_MERGE_DATE}
+## [Planned Date support] - 2026-09-14
 
 ### Added
 
