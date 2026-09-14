@@ -2,7 +2,7 @@
 
 - Keep every Activity Inbox entry when a scheduled check and one you start yourself overlap, by storing entries individually.
 - Seed your own account into the owner scope only once the saved configuration has loaded, so the scope, watched repositories and saved filters are never replaced by defaults.
-- Report a comment or reply whose response is interrupted or unreadable as unconfirmed rather than failed, without resending it.
+- Treat a comment GitHub returns alongside an error as posted, and report one whose response is interrupted, unreadable, missing its result, or carrying an error raised mid-mutation as unconfirmed rather than failed, without resending it.
 - Preserve personal and organization owner scopes across both menu layouts, and honor Search Everywhere after migration.
 - List your own account alongside the organizations when choosing the owner scope, selected by default and removable.
 - Refresh the menu bar automatically when a tracking setting changes, instead of waiting for Force Refresh.

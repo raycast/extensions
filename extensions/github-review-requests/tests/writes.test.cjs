@@ -40,6 +40,8 @@ const interruptedBody = () => () =>
   );
 const unreadableBody = () => () => new Response("<html>502 Bad Gateway</html>", { status: 200 });
 const emptyBody = () => () => new Response(JSON.stringify({}));
+/** A 200 carrying whatever GitHub answered a mutation with. */
+const payload = body => () => new Response(JSON.stringify(body));
 
 const COMMENT = { author: { login: "tester" }, bodyText: "looks good", createdAt: "2026-09-11T09:00:00Z" };
 
@@ -84,6 +86,69 @@ test("a write answered with neither data nor errors is reported unconfirmed", as
   const sent = respondWith(emptyBody());
   await assert.rejects(addComment("pr-node-id", "looks good"), UnconfirmedWriteError);
   assert.equal(sent.length, 1);
+});
+
+test("a write whose result GitHub left out is reported unconfirmed", async () => {
+  const sent = respondWith(json({ addComment: { commentEdge: { node: null } } }));
+  await assert.rejects(addComment("pr-node-id", "looks good"), UnconfirmedWriteError);
+  assert.equal(sent.length, 1, "the write must not be replayed");
+
+  const reply = respondWith(json({ addPullRequestReviewThreadReply: null }));
+  await assert.rejects(replyToThread("thread-id", "looks good"), UnconfirmedWriteError);
+  assert.equal(reply.length, 1);
+});
+
+test("a write answered with an error and no result is reported unconfirmed", async () => {
+  const sent = respondWith(
+    payload({
+      data: { addComment: null },
+      errors: [{ message: "Something went wrong while executing your query." }],
+    }),
+  );
+  await assert.rejects(addComment("pr-node-id", "looks good"), error => {
+    assert.ok(error instanceof UnconfirmedWriteError);
+    assert.match(error.message, /Something went wrong/);
+    assert.match(error.message, /check the pull request on GitHub/);
+    return true;
+  });
+  assert.equal(sent.length, 1, "the write must not be replayed");
+});
+
+test("a partial result counts as posted, since the comment is on the pull request", async () => {
+  const sent = respondWith(
+    payload({
+      data: { addComment: { commentEdge: { node: { author: null, bodyText: null, createdAt: null } } } },
+      errors: [{ message: "Something went wrong while executing your query." }],
+    }),
+  );
+  const posted = await addComment("pr-node-id", "looks good");
+  assert.equal(posted.body, "looks good", "the text that was sent stands in for the field GitHub dropped");
+  assert.equal(posted.author, "");
+  assert.ok(Date.parse(posted.createdAt) > 0);
+  assert.equal(sent.length, 1);
+});
+
+test("a write GitHub refused before running it stays an ordinary failure", async () => {
+  const sent = respondWith(
+    payload({
+      data: { addComment: null },
+      errors: [{ type: "NOT_FOUND", message: "Could not resolve to a node with the global id of 'pr-node-id'." }],
+    }),
+  );
+  await assert.rejects(replyToThread("thread-id", "looks good"), error => {
+    assert.equal(error.name, "GraphQLError");
+    assert.doesNotMatch(error.message, /did not confirm/);
+    return true;
+  });
+  assert.equal(sent.length, 1);
+});
+
+test("a read answered with partial data and an error still fails", async () => {
+  respondWith(payload({ data: { viewer: null }, errors: [{ message: "Something went wrong" }] }));
+  await assert.rejects(graphql("query { viewer { login } }"), error => {
+    assert.equal(error.name, "GraphQLError");
+    return true;
+  });
 });
 
 test("an unreadable response to a read stays an ordinary failure", async () => {

@@ -35,7 +35,8 @@ export class GraphQLError extends Error {
 /**
  * A write that failed without GitHub saying whether it landed — a dropped
  * connection, a 5xx returned after the mutation may already have been applied,
- * or a reply whose body was interrupted, unreadable, or carried no result.
+ * a reply whose body was interrupted or unreadable, a response that left the
+ * created object out, or an error GitHub raised somewhere mid-mutation.
  * Sending it again could post a duplicate, so the client stops and hands the
  * decision to the person, who can check the pull request first.
  */
@@ -57,6 +58,15 @@ export type RequestOptions = {
    * Defaults to `true`, which keeps every existing read on the retry loop.
    */
   idempotent?: boolean;
+  /**
+   * Reads a non-idempotent response and reports whether it carries the thing
+   * the mutation was asked to create. GitHub can answer a mutation with a
+   * partial result — the new comment alongside an error on some other part of
+   * the selection — and it can answer with the field missing or null. The
+   * first is a write that plainly landed; the second says nothing either way.
+   * Without this the client can only go by whether `data` is present at all.
+   */
+  confirmsWrite?: (data: unknown) => boolean;
 };
 
 /**
@@ -89,6 +99,33 @@ function isSamlRefusal(messages: string[], ssoHeader: string | null): boolean {
     const t = m.toLowerCase();
     return t.includes("saml") || t.includes("single sign-on") || t.includes("grant your oauth token access");
   });
+}
+
+/**
+ * The `type` values GitHub attaches to errors it raises while validating an
+ * operation — a node it can't resolve, a permission it won't grant, a body it
+ * won't accept. It answers those without touching any data, so a write that
+ * comes back carrying only these definitely did not land.
+ *
+ * Everything else is left open on purpose. GitHub's mid-flight failures, most
+ * visibly the untyped "Something went wrong while executing your query", can
+ * arrive after the mutation has been applied.
+ */
+const REJECTED_BEFORE_WRITE = new Set([
+  "NOT_FOUND",
+  "FORBIDDEN",
+  "UNAUTHORIZED",
+  "ACTOR_NOT_FOUND",
+  "INVALID",
+  "UNPROCESSABLE",
+  "TYPE_NOT_FOUND",
+  "MAX_NODE_LIMIT_EXCEEDED",
+  "RATE_LIMITED",
+]);
+
+/** Reports whether GitHub turned the whole operation away before running it. */
+function rejectedBeforeWrite(errors: { type?: string }[]): boolean {
+  return errors.every(error => error.type !== undefined && REJECTED_BEFORE_WRITE.has(error.type));
 }
 
 function endpoint(): string {
@@ -154,6 +191,9 @@ export async function graphql<T>(
   options: RequestOptions = {},
 ): Promise<T> {
   const idempotent = options.idempotent ?? true;
+  // Callers that don't describe their result fall back to the old bar: any
+  // `data` at all counts as confirmation.
+  const confirmsWrite = options.confirmsWrite ?? ((data: unknown) => data !== undefined && data !== null);
   const bearer = await token(host());
   const body = JSON.stringify({ query, variables });
 
@@ -234,6 +274,11 @@ export async function graphql<T>(
         if (!idempotent) throw new UnconfirmedWriteError("its response could not be read");
         throw new GraphQLError(`GitHub returned an unreadable response: ${text.trim().slice(0, 200)}`);
       }
+      // A write is only settled once the response actually carries what the
+      // mutation was asked to create; `data` alone can be there with the
+      // mutation field null or missing.
+      const written = idempotent || confirmsWrite(parsed.data);
+
       if (parsed.errors?.length) {
         const messages = parsed.errors.map(e => e.message);
         const joined = messages.join("; ");
@@ -244,13 +289,28 @@ export async function graphql<T>(
           // an error for the protected one. Throwing would discard perfectly
           // good data and show nothing; better to hand back what GitHub gave
           // us and let the view flag the gap.
-          if (parsed.data) return parsed.data;
+          if (parsed.data && written) return parsed.data;
+        }
+        if (!idempotent) {
+          // Partial result: GitHub answered with the comment it created and an
+          // error on something else in the selection. The write landed, which
+          // is the part the composer needs, so report it as posted.
+          if (written) return parsed.data as T;
+          // No result to go on. Only an error GitHub raised before running the
+          // mutation rules the write out; anything else leaves it open.
+          if (!rejectedBeforeWrite(parsed.errors)) {
+            throw new UnconfirmedWriteError(`GitHub answered with an error: ${joined}`);
+          }
         }
         throw new GraphQLError(joined, ssoHeader);
       }
-      // Valid JSON carrying neither data nor errors says nothing about what
-      // GitHub did with the mutation, so a write is unconfirmed here too.
-      if (!parsed.data && !idempotent) throw new UnconfirmedWriteError("its response carried no result");
+      // Valid JSON that says nothing about what GitHub did with the mutation —
+      // no data at all, or data without the comment — is unconfirmed too.
+      if (!written) {
+        throw new UnconfirmedWriteError(
+          parsed.data ? "its response left the result out" : "its response carried no result",
+        );
+      }
       return parsed.data as T;
     }
 

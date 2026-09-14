@@ -516,15 +516,38 @@ export async function pullRequestDetail(owner: string, name: string, number: num
 // ---------------------------------------------------------------------------
 
 /**
+ * The shape a posted comment comes back in. Every field is optional because an
+ * error partway through the selection nulls what it touched, and the fields we
+ * can do without are not what says the comment exists.
+ */
+type PostedComment = {
+  author?: { login?: string | null } | null;
+  bodyText?: string | null;
+  createdAt?: string | null;
+} | null;
+
+/**
+ * Maps a comment GitHub confirmed it created. The text that was sent and the
+ * current time stand in for anything the response left out — the comment is on
+ * the pull request either way, and the views reload from GitHub next anyway.
+ */
+function postedComment(node: PostedComment, sentBody: string): Comment {
+  return {
+    author: node?.author?.login ?? "",
+    body: node?.bodyText ?? sentBody,
+    createdAt: node?.createdAt ?? new Date().toISOString(),
+  };
+}
+
+type ReplyResult = { addPullRequestReviewThreadReply?: { comment?: PostedComment } | null };
+type CommentResult = { addComment?: { commentEdge?: { node?: PostedComment } | null } | null };
+
+/**
  * Posts a reply on an existing inline review thread. Not idempotent: a resend
  * would add a second reply, so the client refuses to retry it blindly.
  */
 export async function replyToThread(threadId: string, body: string): Promise<Comment> {
-  const data = await graphql<{
-    addPullRequestReviewThreadReply: {
-      comment: { author: { login: string } | null; bodyText: string; createdAt: string };
-    };
-  }>(
+  const data = await graphql<ReplyResult>(
     `
       mutation ($threadId: ID!, $body: String!) {
         addPullRequestReviewThreadReply(input: { pullRequestReviewThreadId: $threadId, body: $body }) {
@@ -539,10 +562,14 @@ export async function replyToThread(threadId: string, body: string): Promise<Com
       }
     `,
     { threadId, body },
-    { idempotent: false },
+    {
+      idempotent: false,
+      // The reply node is what proves the write landed; the rest of the
+      // selection can come back null without changing that.
+      confirmsWrite: data => Boolean((data as ReplyResult | undefined)?.addPullRequestReviewThreadReply?.comment),
+    },
   );
-  const c = data.addPullRequestReviewThreadReply.comment;
-  return { author: c.author?.login ?? "", body: c.bodyText, createdAt: c.createdAt };
+  return postedComment(data.addPullRequestReviewThreadReply?.comment ?? null, body);
 }
 
 /**
@@ -550,9 +577,7 @@ export async function replyToThread(threadId: string, body: string): Promise<Com
  * Not idempotent, for the same reason as `replyToThread`.
  */
 export async function addComment(subjectId: string, body: string): Promise<Comment> {
-  const data = await graphql<{
-    addComment: { commentEdge: { node: { author: { login: string } | null; bodyText: string; createdAt: string } } };
-  }>(
+  const data = await graphql<CommentResult>(
     `
       mutation ($subjectId: ID!, $body: String!) {
         addComment(input: { subjectId: $subjectId, body: $body }) {
@@ -569,10 +594,12 @@ export async function addComment(subjectId: string, body: string): Promise<Comme
       }
     `,
     { subjectId, body },
-    { idempotent: false },
+    {
+      idempotent: false,
+      confirmsWrite: data => Boolean((data as CommentResult | undefined)?.addComment?.commentEdge?.node),
+    },
   );
-  const c = data.addComment.commentEdge.node;
-  return { author: c.author?.login ?? "", body: c.bodyText, createdAt: c.createdAt };
+  return postedComment(data.addComment?.commentEdge?.node ?? null, body);
 }
 
 /**
