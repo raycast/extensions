@@ -76,6 +76,39 @@ const hasCompleteAssetPack = async (destination: string) => {
 // sequence. The lock file is created exclusively (O_EXCL) and carries a random
 // owner token; a heartbeat keeps its mtime fresh while the holder is working, so
 // a crashed holder is safely taken over after the stale interval.
+// Atomically claim the right to replace a stale lock. Two waiters can
+// observe the same stale lock concurrently, so an unconditional removal
+// would let one waiter delete the other's freshly acquired lock. Instead
+// the lock is renamed aside (rename(2) succeeds for one contender) and its
+// owner token is compared with the one observed as stale: only a match
+// grants takeover. If a fresh owner had already replaced the lock, its file
+// is moved back and the caller stands down.
+const claimStaleAssetPackLock = async (lockPath: string, staleToken: string) => {
+  const aside = path.join(
+    path.dirname(lockPath),
+    `${path.basename(lockPath)}.stale-${process.pid}-${Math.random().toString(36).slice(2, 8)}`,
+  );
+  try {
+    await fs.rename(lockPath, aside);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+    throw error;
+  }
+  const movedToken = await fs.readFile(aside, "utf8").catch(() => "");
+  if (movedToken && movedToken === staleToken) {
+    await fs.rm(aside, { force: true });
+    return true;
+  }
+  try {
+    await fs.rename(aside, lockPath);
+  } catch (restoreError) {
+    const code = (restoreError as NodeJS.ErrnoException).code;
+    if (code !== "EEXIST" && code !== "ENOENT") throw restoreError;
+    await fs.rm(aside, { force: true }).catch(() => {});
+  }
+  return false;
+};
+
 const withAssetPackLock = async <T>(work: () => Promise<T>) => {
   const lockPath = path.join(environment.assetsPath, assetPackLockName);
   const token = `${process.pid}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
@@ -127,8 +160,14 @@ const withAssetPackLock = async <T>(work: () => Promise<T>) => {
       try {
         const { mtimeMs } = await fs.stat(lockPath);
         if (Date.now() - mtimeMs > assetPackLockStaleMs) {
-          await fs.rm(lockPath, { force: true });
-          continue;
+          // Read the stale owner token first: claimStaleAssetPackLock only
+          // completes the takeover if the file it moves still carries this
+          // exact token, so concurrent stale observers cannot remove a lock
+          // that another contender has already re-acquired.
+          const staleToken = await fs.readFile(lockPath, "utf8").catch(() => "");
+          if (staleToken && (await claimStaleAssetPackLock(lockPath, staleToken))) {
+            continue;
+          }
         }
       } catch {
         // The lock disappeared (or was replaced); retry acquiring it.
@@ -287,9 +326,23 @@ export const copySvg = async ({ version, icon, pathOnly }: { version: string; ic
 export const cleanAssetPack = async () => {
   const directories = await fs.readdir(environment.assetsPath);
   await Promise.all(
-    directories
-      .filter((d) => d.startsWith("pack") || d.startsWith(".pack-staging"))
-      .map((d) => fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true })),
+    directories.map(async (d) => {
+      if (d.startsWith("pack")) {
+        await fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true });
+      } else if (d.startsWith(".pack-staging")) {
+        // Only remove staging directories abandoned before the stale
+        // threshold: an install still in progress keeps adding files, so a
+        // fresh mtime means this must never be swept as leftover.
+        try {
+          const { mtimeMs } = await fs.stat(path.join(environment.assetsPath, d));
+          if (Date.now() - mtimeMs > assetPackLockStaleMs) {
+            await fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true });
+          }
+        } catch {
+          // It vanished between readdir and stat; nothing to remove.
+        }
+      }
+    }),
   );
 };
 
