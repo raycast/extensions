@@ -1,6 +1,6 @@
 # ClearURLs Cleaner Changelog
 
-## [Initial Version] - 2026-09-14
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Clean tracking parameters from URLs using ClearURLs rules
 - Automatic background rule refresh every 24 hours

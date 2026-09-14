@@ -9,93 +9,51 @@ import { useEffect, useState } from "react";
 import { cleanUrl } from "./clear-urls";
 import { getRules } from "./cache";
 
-interface Preferences {
-  removeReferralMarketing?: boolean;
-}
+export default function Command(props: { arguments?: { url?: string } }) {
+  const [url, setUrl] = useState<string>("");
+  const [cleaned, setCleaned] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-function isValidHttpUrl(s: string): boolean {
-  try {
-    const u = new URL(s.trim());
-    return u.protocol === "http:" || u.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-export default function Command(props: { arguments: { url?: string } }) {
-  const [originalUrl, setOriginalUrl] = useState<string>("");
-  const [cleanedUrl, setCleanedUrl] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [info, setInfo] = useState<string>("");
+  const { removeReferralMarketing } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
+    async function init() {
       try {
-        const inputUrl =
-          props.arguments.url?.trim() ||
-          (await Clipboard.readText())?.trim() ||
-          "";
-        if (cancelled) return;
-
-        setOriginalUrl(inputUrl);
-
-        if (!isValidHttpUrl(inputUrl)) {
-          setInfo(
-            "Please provide a valid HTTP(S) URL as an argument or on the clipboard.",
-          );
-          setIsLoading(false);
-          return;
-        }
+        const input =
+          props.arguments?.url || (await Clipboard.readText()) || "";
+        setUrl(input);
 
         const rules = await getRules();
-        if (cancelled) return;
-
-        const prefs = getPreferenceValues<Preferences>();
-        const cleaned = cleanUrl(inputUrl, rules.data, {
-          removeReferralMarketing: prefs.removeReferralMarketing ?? true,
+        const result = await cleanUrl(input, rules, {
+          removeReferralMarketing,
         });
-
-        setCleanedUrl(cleaned);
-        setInfo(
-          `Rules source: ${rules.fromCache ? "cache" : "GitHub"} · updated ${new Date(
-            rules.fetchedAt,
-          ).toLocaleString()}`,
-        );
+        setCleaned(result);
       } catch (err) {
-        setInfo(`Error: ${err instanceof Error ? err.message : String(err)}`);
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
-        if (!cancelled) setIsLoading(false);
+        setLoading(false);
       }
     }
 
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [props.arguments.url]);
+    init();
+  }, [props.arguments?.url, removeReferralMarketing]);
 
-  const markdown =
-    originalUrl && cleanedUrl
-      ? `## Original URL\n\`\`\`\n${originalUrl}\n\`\`\`\n\n## Cleaned URL\n\`\`\`\n${cleanedUrl}\n\`\`\`\n\n_${info}_`
-      : `## ClearURLs Cleaner\n\nPaste a URL as an argument or copy one to the clipboard.\n\n${info}`;
+  if (loading) {
+    return <Detail markdown="Cleaning URL..." />;
+  }
+
+  if (error) {
+    return <Detail markdown={`**Error:** ${error}`} />;
+  }
 
   return (
     <Detail
-      isLoading={isLoading}
-      markdown={markdown}
+      markdown={`**Original:** ${url || "-"}\n\n**Cleaned:** ${cleaned || "-"}`}
       actions={
         <ActionPanel>
-          {cleanedUrl && (
-            <>
-              <Action.CopyToClipboard
-                content={cleanedUrl}
-                title="Copy Cleaned URL"
-              />
-              <Action.OpenInBrowser url={cleanedUrl} title="Open Cleaned URL" />
-            </>
-          )}
+          <Action.CopyToClipboard content={cleaned || ""} />
+          <Action.OpenInBrowser url={cleaned || ""} />
         </ActionPanel>
       }
     />

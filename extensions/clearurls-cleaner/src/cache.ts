@@ -1,68 +1,102 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { Cache, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { ClearUrlsData } from "./types";
 
+const CACHE_KEY = "clearurls-rules";
+const CACHE_TTL = 24 * 60 * 60 * 1000;
 const RULES_URL =
   "https://raw.githubusercontent.com/ClearURLs/Rules/refs/heads/master/data.min.json";
-const CACHE_KEY = "clearurls-rules-v1";
 
-export interface CachedRules {
-  data: string;
-  fetchedAt: number;
-}
-
-interface Preferences {
-  cacheTtlHours?: string;
-}
-
-function getTtlMs(): number {
-  const prefs = getPreferenceValues<Preferences>();
-  const hours = parseFloat(prefs.cacheTtlHours ?? "24");
-  return (isNaN(hours) ? 24 : hours) * 60 * 60 * 1000;
-}
-
-const cache = new Cache();
-
-export async function getRules(): Promise<{
-  data: ClearUrlsData;
-  fromCache: boolean;
-  fetchedAt: number;
-}> {
-  const ttl = getTtlMs();
+export async function getRules(): Promise<ClearUrlsData> {
+  const cache = new Cache();
   const cached = cache.get(CACHE_KEY);
+
+  let staleData: ClearUrlsData | undefined;
 
   if (cached) {
     try {
-      const parsed: CachedRules = JSON.parse(cached);
-      const age = Date.now() - parsed.fetchedAt;
-      if (age < ttl) {
-        return {
-          data: JSON.parse(parsed.data),
-          fromCache: true,
-          fetchedAt: parsed.fetchedAt,
-        };
+      const parsed = JSON.parse(cached) as {
+        timestamp: number;
+        data: ClearUrlsData;
+      };
+      staleData = parsed.data;
+      if (Date.now() - parsed.timestamp < CACHE_TTL) {
+        return parsed.data;
       }
     } catch {
-      // ignore invalid JSON
+      // ignore invalid cache
     }
   }
 
-  return fetchRules();
+  try {
+    const data = await fetchRules();
+    cache.set(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }));
+    return data;
+  } catch (error) {
+    if (staleData) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not refresh rules",
+        message: "Using cached rules instead",
+      });
+      return staleData;
+    }
+    throw error;
+  }
 }
 
-export async function fetchRules(): Promise<{
-  data: ClearUrlsData;
-  fromCache: false;
-  fetchedAt: number;
-}> {
-  const res = await fetch(RULES_URL);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
-  const data = JSON.parse(text) as ClearUrlsData;
-  const fetchedAt = Date.now();
-  cache.set(CACHE_KEY, JSON.stringify({ data: text, fetchedAt }));
-  return { data, fromCache: false, fetchedAt };
+export async function fetchRules(): Promise<ClearUrlsData> {
+  const { rulesUrl } = getPreferenceValues<Preferences>();
+  const url = (rulesUrl as string | undefined) || RULES_URL;
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch rules: ${response.statusText}`);
+  }
+
+  const text = await response.text();
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("Failed to parse rules JSON");
+  }
+
+  if (!isValidClearUrlsData(data)) {
+    throw new Error("Invalid ClearURLs rules format");
+  }
+
+  return data;
 }
 
-export function clearRulesCache(): void {
-  cache.remove(CACHE_KEY);
+function isValidClearUrlsData(data: unknown): data is ClearUrlsData {
+  if (typeof data !== "object" || data === null) return false;
+  const { providers } = data as Record<string, unknown>;
+  if (typeof providers !== "object" || providers === null) return false;
+  return Object.values(providers).every(isValidProvider);
+}
+
+function isValidProvider(provider: unknown): boolean {
+  if (typeof provider !== "object" || provider === null) return false;
+  const p = provider as Record<string, unknown>;
+  if (typeof p.urlPattern !== "string") return false;
+  if (
+    p.completeProvider !== undefined &&
+    typeof p.completeProvider !== "boolean"
+  )
+    return false;
+  if (p.rules !== undefined && !isStringArray(p.rules)) return false;
+  if (p.referralMarketing !== undefined && !isStringArray(p.referralMarketing))
+    return false;
+  if (p.exceptions !== undefined && !isStringArray(p.exceptions)) return false;
+  if (p.redirections !== undefined && !isStringArray(p.redirections))
+    return false;
+  if (p.forceRedirection !== undefined && !isStringArray(p.forceRedirection))
+    return false;
+  return true;
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
 }
