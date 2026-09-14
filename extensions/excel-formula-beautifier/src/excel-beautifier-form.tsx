@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Keyboard } from "@raycast/api";
 import { useState, useCallback, useEffect } from "react";
 import { ExcelFormulaBeautifier } from "./parser/excel-formula-parser";
 
@@ -60,19 +60,23 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action title="Clear" onAction={handleClear} shortcut={{ modifiers: ["cmd"], key: "l" }} />
+          <Action
+            title="Clear"
+            onAction={handleClear}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
+          />
           {beautifiedFormula && (
             <Action.CopyToClipboard
               title="Copy Beautified Formula"
               content={beautifiedFormula}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
             />
           )}
           {formula && (
             <Action.CopyToClipboard
               title="Copy Original Formula"
               content={formula.trim().startsWith("=") ? formula.trim() : "=" + formula.trim()}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
           )}
         </ActionPanel>
