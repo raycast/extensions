@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed `Search Tabs` becoming slow with many tabs by batching the AppleScript calls used to look up each tab's Space name, instead of issuing one call per tab.
+
 ## [Improvements] - 2026-09-07
 
 - Display the Space name in `Search Tabs` and `Search Arc` results to help distinguish tabs with identical names across different Spaces.
