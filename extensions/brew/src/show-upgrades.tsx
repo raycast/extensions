@@ -330,8 +330,11 @@ function ReviewActionPanel(props: {
   isCask: boolean;
   pinned: boolean;
   included: boolean;
-  /** Absent when nothing is selected — the panel then drops its upgrade
-      section entirely rather than offering an upgrade of zero packages. */
+  /**
+   * Present when at least one package is selected. Absent, the panel still
+   * occupies the run slot with a prompt rather than dropping it — otherwise
+   * Select All becomes the second action, and Raycast binds ⌘↩ to it.
+   */
   runTitle?: string;
   allSelected: boolean;
   onToggle: () => void;
@@ -342,13 +345,15 @@ function ReviewActionPanel(props: {
   onAction: (result: boolean) => void;
 }) {
   // The second action in the panel is where Raycast binds ⌘↩ — the run
-  // action sits there on every row that has an upgrade to offer, so the
-  // review is runnable from anywhere. With nothing selected there is nothing
-  // to run: the whole upgrade section goes, rather than the panel offering an
-  // upgrade of zero packages.
+  // action sits there on every row so the review is runnable from anywhere.
+  // With nothing selected there is nothing to run, but the slot still has to
+  // be occupied: dropping it would make Select All the second action, and
+  // ⌘↩ after a deliberate deselect would silently reselect everything.
   const runAction = props.runTitle ? (
     <Action title={props.runTitle} icon={Icon.ArrowUpCircle} onAction={props.onStart} />
-  ) : undefined;
+  ) : (
+    <Action title="Select Packages to Upgrade" icon={Icon.CheckCircle} onAction={props.onStart} />
+  );
   const toggleAllAction = (
     <Action
       title={props.allSelected ? "Deselect All" : "Select All"}
@@ -401,28 +406,25 @@ function ReviewActionPanel(props: {
   );
   // Select leads a deselected row, the way Unpin leads a pinned
   // one: ↩ on a package the user deliberately left out should put it back in,
-  // not upgrade it behind their back. With no upgrade section to lead, it
-  // simply stays with the other selection actions.
-  const toggleLeads = !props.included && runAction != undefined;
+  // not upgrade it behind their back.
+  const toggleLeads = !props.included;
 
   return (
     <ActionPanel>
-      {(props.included || runAction != undefined) && (
-        <ActionPanel.Section>
-          {props.included ? (
-            <OutdatedUpgradeAction
-              outdated={props.outdated}
-              isCask={props.isCask}
-              pinned={props.pinned}
-              onUpgrade={props.onUpgrade}
-              onAction={props.onAction}
-            />
-          ) : (
-            toggleAction
-          )}
-          {runAction}
-        </ActionPanel.Section>
-      )}
+      <ActionPanel.Section>
+        {props.included ? (
+          <OutdatedUpgradeAction
+            outdated={props.outdated}
+            isCask={props.isCask}
+            pinned={props.pinned}
+            onUpgrade={props.onUpgrade}
+            onAction={props.onAction}
+          />
+        ) : (
+          toggleAction
+        )}
+        {runAction}
+      </ActionPanel.Section>
       <OutdatedActionSections
         outdated={props.outdated}
         isCask={props.isCask}
