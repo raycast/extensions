@@ -12,6 +12,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Create Database
         - Deploy / Redeploy / Rebuild Service
         - Start / Stop / Reload Service
+        - View Service Logs
         - Delete Service
     - View Docker (Containers)
         - View Docker Config
