@@ -2131,6 +2131,7 @@
 /extensions/posthog                                                 @daibhin
 /extensions/postiz                                                  @xmok
 /extensions/postman                                                 @tarikyildizci @ridemountainpig
+/extensions/postproxy                                               @dmitrysereda
 /extensions/potter-db                                               @xmok
 /extensions/power-management                                        @sasivarnan @erics118 @bbatsche @iamyeizi
 /extensions/powertoys-tool-runner                                   @LostViking09 @iml885203 @mitsimi
