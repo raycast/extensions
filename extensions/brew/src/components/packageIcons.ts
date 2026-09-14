@@ -15,9 +15,9 @@
  * | Blue            | upgrade in progress              |
  * | Red             | upgrade failed                   |
  * | SecondaryText   | skipped, or not installed        |
- * | Yellow          | update available (this file)     |
+ * | Orange          | update available (this file)     |
  *
- * Yellow is the one free slot, and it reads as "there is something to do here"
+ * Orange is the one free slot, and it reads as "there is something to do here"
  * without the alarm of red — an available update is not an error.
  */
 
@@ -30,13 +30,13 @@ const notInstalledColor: Color.Dynamic = {
 };
 
 /** An installed package with a newer version available. */
-export const UPDATE_AVAILABLE_ICON = { source: Icon.ArrowUpCircle, tintColor: Color.Yellow };
+export const UPDATE_AVAILABLE_ICON = { source: Icon.ArrowUpCircle, tintColor: Color.Orange };
 
 /** An installed package on the current version. */
 export const UP_TO_DATE_ICON = { source: Icon.CheckCircle, tintColor: Color.Green };
 
 /** The colour of the "Outdated" tag, kept in step with the icon. */
-export const UPDATE_AVAILABLE_COLOR = Color.Yellow;
+export const UPDATE_AVAILABLE_COLOR = Color.Orange;
 
 /**
  * The list-item icon for a package, with the tooltip that explains it.

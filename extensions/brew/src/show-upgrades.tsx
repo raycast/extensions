@@ -51,9 +51,9 @@ import { OutdatedList, statusIcon } from "./components/outdatedList";
 // differ only in glyph — two different greys read as two unrelated things.
 // Blue means "in progress" in the icon vocabulary (see packageIcons.ts), so the
 // neutral primary tint is what is left for a selection.
-const SELECTION_TINT = Color.PrimaryText;
+const SELECTION_TINT = Color.Orange;
 const INCLUDED_ICON = { source: Icon.CheckCircle, tintColor: SELECTION_TINT };
-const EXCLUDED_ICON = { source: Icon.CircleDisabled, tintColor: SELECTION_TINT };
+const EXCLUDED_ICON = { source: Icon.CircleDisabled, tintColor: Color.SecondaryText };
 // A pinned row is excluded too — the pin accessory is what says why.
 const PINNED_ICON = EXCLUDED_ICON;
 
