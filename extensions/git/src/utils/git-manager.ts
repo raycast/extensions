@@ -67,9 +67,6 @@ export class GitManager {
     this.gitCommonDirPath = gitCommonDirPath;
 
     this.git = GitManager.createSimpleGit(repoPath).env(shellEnvironmentVariables);
-
-    // Global logging of all git commands for debugging
-    this.setupGlobalLogging();
   }
 
   /**
@@ -134,7 +131,7 @@ export class GitManager {
   }
 
   private static createSimpleGit(repoPath: string, unsafe?: SimpleGitOptions["unsafe"]): SimpleGit {
-    return simpleGit(repoPath, {
+    const git = simpleGit(repoPath, {
       binary: getPreferenceValues<Preferences>().binaryPath,
       unsafe,
       errors: (error, _result) => {
@@ -143,6 +140,22 @@ export class GitManager {
         }
         return error;
       },
+    });
+
+    // Global logging of all git commands for debugging
+    GitManager.setupGlobalLogging(git);
+    return git;
+  }
+
+  /**
+   * simple-git only accepts GIT_EDITOR and `-c sequence.editor` with allowUnsafeEditor, so commands that need them run on
+   * a separate instance with its own env copy (`this.git.env(name, value)` would write into shared shellEnvironmentVariables).
+   * GIT_EDITOR=true keeps the default commit message instead of opening an editor.
+   */
+  private createGitWithoutEditor(): SimpleGit {
+    return GitManager.createSimpleGit(this.repoPath, { allowUnsafeEditor: true }).env({
+      ...shellEnvironmentVariables,
+      GIT_EDITOR: "true",
     });
   }
 
@@ -184,8 +197,8 @@ export class GitManager {
   /**
    * Sets up global logging of git commands and streaming output.
    */
-  private setupGlobalLogging(): void {
-    this.git.outputHandler((command, stdout, stderr, args) => {
+  private static setupGlobalLogging(git: SimpleGit): void {
+    git.outputHandler((command, stdout, stderr, args) => {
       const ignoredCommands = ["ls-files", "ls-remote", "remote", "worktree"];
       // Skip logging for ls-files command
       if (ignoredCommands.some((command) => args.includes(command))) {
@@ -931,7 +944,7 @@ __REBASE_TODO__
       } else {
         options.push("--root");
       }
-      await this.git.raw(options);
+      await this.createGitWithoutEditor().raw(options);
     } finally {
       try {
         rmSync(tempDirectory, { recursive: true, force: true });
@@ -1543,11 +1556,7 @@ __REBASE_TODO__
    * Continues an ongoing rebase.
    */
   async continueRebase(): Promise<void> {
-    // simple-git only accepts GIT_EDITOR with allowUnsafeEditor. Use a separate instance with its own env copy:
-    // `this.git.env(name, value)` would write GIT_EDITOR into the shared shellEnvironmentVariables object.
-    await GitManager.createSimpleGit(this.repoPath, { allowUnsafeEditor: true })
-      .env({ ...shellEnvironmentVariables, GIT_EDITOR: "true" })
-      .rebase(["--continue"]);
+    await this.createGitWithoutEditor().rebase(["--continue"]);
   }
 
   /**
