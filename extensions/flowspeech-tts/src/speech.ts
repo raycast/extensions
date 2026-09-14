@@ -1,5 +1,6 @@
 import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { execFile } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -8,11 +9,6 @@ import { toWav } from "./audio";
 
 const execFileAsync = promisify(execFile);
 const MAX_TEXT_LENGTH = 10_000;
-
-interface Preferences {
-  apiKey: string;
-  voiceName: string;
-}
 
 export async function speakText(getText: () => Promise<string | undefined>): Promise<void> {
   let audioPath: string | undefined;
@@ -33,7 +29,7 @@ export async function speakText(getText: () => Promise<string | undefined>): Pro
     const wav = toWav(generatedAudio);
 
     await mkdir(environment.supportPath, { recursive: true });
-    audioPath = path.join(environment.supportPath, `flowspeech-${Date.now()}.wav`);
+    audioPath = path.join(environment.supportPath, `flowspeech-${randomUUID()}.wav`);
     await writeFile(audioPath, wav);
 
     await showToast({ style: Toast.Style.Success, title: "Playing with FlowSpeech" });

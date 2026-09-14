@@ -7,8 +7,7 @@
   "icon": "extension-icon.png",
   "author": "waeckerlinfederowicz66-sketch",
   "categories": [
-    "Productivity",
-    "Other"
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -76,6 +75,7 @@
     "typescript": "5.9.3"
   },
   "scripts": {
+    "prepublishOnly": "echo \"This extension is published through the Raycast Store, not npm.\" && exit 1",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
