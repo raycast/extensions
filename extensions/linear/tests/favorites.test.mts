@@ -3,29 +3,25 @@ import test from "node:test";
 
 import { getLabelOpenProps } from "../src/helpers/favorites.ts";
 
-const baseLinearUrl = "https://linear.app/acme";
+test("workspace-level labels open the URL provided by the favorite", () => {
+  const result = getLabelOpenProps("https://linear.app/acme/label/company-wide");
 
-test("workspace-level labels render without an open action", () => {
-  const result = getLabelOpenProps(baseLinearUrl, {
-    id: "label-workspace",
-    name: "company-wide",
-    color: "#ff0000",
-    team: null,
+  assert.deepEqual(result, {
+    title: "Open Label",
+    url: "https://linear.app/acme/label/company-wide",
   });
-
-  assert.equal(result, null);
 });
 
-test("team labels keep the team-scoped open action", () => {
-  const result = getLabelOpenProps(baseLinearUrl, {
-    id: "label-team",
-    name: "infra",
-    color: "#00ff00",
-    team: { key: "ENG" },
-  });
+test("team labels keep their team-scoped URL provided by the favorite", () => {
+  const result = getLabelOpenProps("https://linear.app/acme/team/ENG/label/infra");
 
   assert.deepEqual(result, {
     title: "Open Label",
     url: "https://linear.app/acme/team/ENG/label/infra",
   });
+});
+
+test("labels without a favorite URL render without an open action", () => {
+  assert.equal(getLabelOpenProps(undefined), null);
+  assert.equal(getLabelOpenProps(""), null);
 });

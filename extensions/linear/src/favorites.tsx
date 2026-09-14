@@ -26,7 +26,7 @@ function Favorites() {
   return (
     <List isLoading={isLoading}>
       {favorites.map(
-        ({ id, type, customView, cycle, document, issue, label, project, initiative, user, updatedAt }) => {
+        ({ id, type, url, customView, cycle, document, issue, label, project, initiative, user, updatedAt }) => {
           let props: Pick<List.Item.Props, "icon" | "title"> | null = null;
           let openInLinearProps: ComponentProps<typeof OpenInLinear> | null = null;
           let customAction: ReactElement | null = null;
@@ -96,7 +96,7 @@ function Favorites() {
               title: label.name,
             };
 
-            openInLinearProps = getLabelOpenProps(baseLinearUrl, label);
+            openInLinearProps = getLabelOpenProps(url);
           }
 
           if (type === "project" && project) {
