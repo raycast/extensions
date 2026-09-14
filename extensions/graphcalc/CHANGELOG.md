@@ -1,6 +1,6 @@
 # GraphCalc Changelog
 
-## [Themes and share as image] - {PR_MERGE_DATE}
+## [Themes and share as image] - 2026-09-14
 
 - The graph now paints its own card background, so grid, axes, labels and the curve keep legible contrast whatever Raycast theme is active (macOS and Windows)
 - The expression is drawn inside the card as its title instead of as a LaTeX heading above it, so it matches the theme
