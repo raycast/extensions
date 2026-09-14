@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add EmpirioLabs AI MCP Server] - 2026-09-14
+
+- Add EmpirioLabs AI to the community registry: 180+ AI models, media generation, web search and research, batch jobs, GPU Cloud and hosted agents as tools. Remote Streamable HTTP server at https://mcp.empiriolabs.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in or an EmpirioLabs API key.
+
 ## [Add Pixelesq MCP Server] - 2026-09-12
 
 - Add Pixelesq to the official registry: build and manage a Pixelesq website (pages, sections, content, SEO and analytics) with every edit saved as a draft until you publish. Remote Streamable HTTP server at https://mcp.pixelesq.app/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
