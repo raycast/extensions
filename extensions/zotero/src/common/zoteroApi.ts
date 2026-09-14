@@ -5,6 +5,8 @@ import { USER_LIBRARY_NAME } from "./library";
 import type { CollectionRef } from "./collections";
 import { collectionId } from "./collections";
 import * as utils from "./utils";
+import { resolveHome } from "./paths";
+export { resolveHome };
 import { existsSync, readFileSync, rmSync } from "fs";
 import { execFileSync } from "child_process";
 import { rankResults } from "./search";
@@ -201,13 +203,6 @@ const CACHE_VERSION = 7;
 // into searching. The personal library is always searched; group libraries are
 // opt-in (default none) so a paper shared to a group no longer double-lists.
 const INCLUDED_GROUPS_KEY = "included_group_libraries";
-
-export function resolveHome(filepath: string): string {
-  if (filepath[0] === "~") {
-    return path.join(process.env.HOME, filepath.slice(1));
-  }
-  return filepath;
-}
 
 function stripNoteHtml(note?: string): string {
   if (!note) {

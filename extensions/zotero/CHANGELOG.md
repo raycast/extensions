@@ -1,5 +1,9 @@
 # Zotero Changelog
 
+## [Show PDF in Finder] - 2026-09-14
+
+- Added a "Show PDF in Finder" action on references with a PDF, so you can reveal the file on disk in Finder without copying the path
+
 ## [Docs] - 2026-09-10
 
 - Updated the README to document fuzzy search, the "Search by BibTeX Citation Key" preference, group libraries, the collection filter, and the 100-result limit
