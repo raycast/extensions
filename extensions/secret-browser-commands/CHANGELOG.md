@@ -19,6 +19,7 @@
 * Fix: Open the browser you actually have installed, not a different app that happens to share its name
 * Fix: Perplexity Comet uses its own `comet://` scheme
 * Chore: Drop ChatGPT Atlas, which is no longer a going concern
+* Chore: `npm run build` and `npm run lint` now validate the generated command data
 * Chore: Update dependencies
 
 ## [1.1.0] - 2025-10-28

@@ -40,7 +40,7 @@
       "required": false,
       "title": "Hide Crash Commands",
       "label": "Hide commands that crash or hang the browser",
-      "description": "Hide the Command URLs for Debug — chrome://crash, chrome://hang, chrome://gpucrash and the rest. They deliberately crash, hang, or terminate the browser and will lose unsaved work. Internal debugging pages, which are harmless, are not affected by this.",
+      "description": "Hide the Command URLs for Debug \u2014 chrome://crash, chrome://hang, chrome://gpucrash and the rest. They deliberately crash, hang, or terminate the browser and will lose unsaved work. Internal debugging pages, which are harmless, are not affected by this.",
       "default": true
     },
     {
@@ -76,10 +76,11 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "npm run check-paths && ray build",
+    "check-paths": "node src/utils/check-paths.mjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
+    "lint": "ray lint && npm run check-paths",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

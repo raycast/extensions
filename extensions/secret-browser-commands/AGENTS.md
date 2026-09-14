@@ -8,7 +8,7 @@ A Raycast extension listing the internal commands of Chromium-based browsers (`c
 - `npm run dev` — run in development mode
 - `npm run build` — build the extension
 - `npm run lint` / `npm run fix-lint` — lint
-- `node src/utils/check-paths.mjs` — invariant check for the generated URL data (see below)
+- `npm run check-paths` — invariant check for the generated command data (see below); also runs as part of `build` and `lint`
 - `npm run publish` — publish to the Raycast Store
 
 ## Layout
@@ -51,10 +51,11 @@ Four flags model distinctions Chromium itself draws, and they are not interchang
   detail pane open the tag collapses to an orange warning glyph, since the pane already explains it
   and the list column is narrow.
 
-**After regenerating or hand-editing `paths.ts`, run `node src/utils/check-paths.mjs`.** It catches
-what generators produce: duplicate ids (which silently break starring, since stars key on id),
-browser keys that match no browser, contradictory flag combinations, and preferences read in code
-but absent from the manifest.
+`npm run build` and `npm run lint` both run this check, so invalid generated data fails the normal
+workflow rather than waiting for someone to remember it. Run `npm run check-paths` directly for the
+fast loop while regenerating. It catches what generators produce: duplicate ids (which silently
+break starring, since stars key on id), browser keys that match no browser, contradictory flag
+combinations, and preferences read in code but absent from the manifest.
 
 ## Conventions that are load-bearing
 
