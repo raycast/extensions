@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { useFetch } from "@raycast/utils";
+import { useFetch, usePromise } from "@raycast/utils";
 import { useProfiles } from "../lib/hooks";
 import { commentTargets } from "../lib/comments";
 import { formatNumber } from "../lib/format";
 import { api, authHeaders, normalizeList } from "../lib/postproxy";
 import { platformIcon, platformLabel } from "../lib/platforms";
-import { totalImpressions } from "../lib/stats";
-import type { Post, PostStatsResponse } from "../lib/types";
+import { loadPostStats, totalImpressions } from "../lib/stats";
+import type { Post } from "../lib/types";
 import { CommentsView } from "./CommentsView";
 import { ErrorView } from "./ErrorView";
 import { PostDetail } from "./PostDetail";
@@ -100,13 +100,9 @@ export function PostList({
   const threshold = dateThreshold(dateRange);
   const posts = threshold == null ? data : data.filter((post) => new Date(post.created_at).getTime() >= threshold);
 
-  // One batch stats call for the visible posts → total impressions per row.
+  // Stats for the visible posts → total impressions per row. Batched to the API's 50-id limit.
   const ids = posts.map((post) => post.id);
-  const { data: stats } = useFetch<PostStatsResponse>(api(`/posts/stats?post_ids=${ids.join(",")}`), {
-    headers: authHeaders(),
-    execute: ids.length > 0,
-    keepPreviousData: true,
-  });
+  const { data: stats } = usePromise(loadPostStats, [ids], { execute: ids.length > 0 });
 
   const platformOptions = Array.from(new Set(profiles.map((p) => p.platform)));
 

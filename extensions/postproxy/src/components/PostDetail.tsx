@@ -5,7 +5,7 @@ import { supportsComments } from "../lib/comments";
 import { useProfiles } from "../lib/hooks";
 import { api, APP_URL, authHeaders, deletePost, publishDraft } from "../lib/postproxy";
 import { formatDate, formatNumber, humanizeKey } from "../lib/format";
-import { ANALYTICS_PERIODS, impressionsOf, latestStatsByPlatform, periodFromIso, periodLabel } from "../lib/stats";
+import { ANALYTICS_PERIODS, periodFromIso, periodLabel, totalImpressions } from "../lib/stats";
 import { platformIcon, platformLabel } from "../lib/platforms";
 import type { MediaAttachment, PlatformOutcome, Post, PostStatsResponse } from "../lib/types";
 import { CommentsView } from "./CommentsView";
@@ -30,12 +30,6 @@ function mediaKind(media: MediaAttachment): string {
   return (media.content_type ?? "media").split("/")[0];
 }
 
-function metricsMarkdown(stats: Record<string, number>): string {
-  const entries = Object.entries(stats);
-  if (entries.length === 0) return "_No data yet._";
-  return entries.map(([key, value]) => `- ${humanizeKey(key)}: **${formatNumber(value)}**`).join("\n");
-}
-
 function postMarkdown(post: Post): string {
   return ["### Post", "", post.body ?? post.content ?? "_(no text)_"].join("\n");
 }
@@ -52,13 +46,13 @@ function mediaMarkdown(media: MediaAttachment, index: number): string {
   ].join("\n");
 }
 
-function outcomeMarkdown(outcome: PlatformOutcome, stats?: Record<string, number>): string {
+// Delivery status only — per-profile analytics live in the correctly-labeled Performance section.
+function outcomeMarkdown(outcome: PlatformOutcome): string {
   const lines = [`### ${platformLabel(outcome.platform)}`, "", `**Status:** ${outcome.status}`];
   if (outcome.attempted_at) lines.push(`**Attempted:** ${formatDate(outcome.attempted_at)}`);
   if (outcome.error) lines.push("", `**Error:** ${outcome.error}`);
   const link = outcome.permalink ?? outcome.url;
   if (link) lines.push("", `[Open on platform](${link})`);
-  if (stats && Object.keys(stats).length > 0) lines.push("", "**Insights**", metricsMarkdown(stats));
   return lines.join("\n");
 }
 
@@ -86,8 +80,8 @@ export function PostDetail({ post, onChange }: { post: Post; onChange?: () => vo
   );
 
   const statPlatforms = statsResponse?.data?.[post.id]?.platforms ?? [];
-  const latestByPlatform = latestStatsByPlatform(statsResponse, post.id);
-  const total = [...latestByPlatform.values()].reduce((sum, stats) => sum + impressionsOf(stats), 0);
+  const total = totalImpressions(statsResponse, post.id);
+  const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
 
   const profilesForPlatform = (platform: string) =>
     profiles.filter((profile) => profile.platform.toLowerCase() === platform.toLowerCase());
@@ -209,13 +203,20 @@ export function PostDetail({ post, onChange }: { post: Post; onChange?: () => vo
                       text={loadingStats ? "Loading…" : "No data yet"}
                     />
                   ) : (
-                    statPlatforms.map((sp) => {
+                    statPlatforms.map((sp, index) => {
                       const entries = Object.entries(sp.records.at(-1)?.stats ?? {});
+                      const profileName = profileById.get(sp.profile_id)?.name;
+                      // A thread can fold several deliveries of the same profile/platform into one
+                      // response, so include the index to keep the key unique.
                       return (
-                        <Fragment key={sp.platform}>
+                        <Fragment key={`${sp.profile_id}-${sp.platform}-${index}`}>
                           <List.Item.Detail.Metadata.Separator />
                           <List.Item.Detail.Metadata.Label
-                            title={platformLabel(sp.platform)}
+                            title={
+                              profileName
+                                ? `${platformLabel(sp.platform)} · ${profileName}`
+                                : platformLabel(sp.platform)
+                            }
                             icon={platformIcon(sp.platform)}
                           />
                           {entries.length > 0 ? (
@@ -252,7 +253,8 @@ export function PostDetail({ post, onChange }: { post: Post; onChange?: () => vo
       <List.Section title="Platforms">
         {current.platforms.map((outcome, index) => {
           const candidates = supportsComments(outcome.platform) ? profilesForPlatform(outcome.platform) : [];
-          const stats = latestByPlatform.get(outcome.platform.toLowerCase());
+          // Per-delivery impressions from this outcome (one profile), not the network aggregate.
+          const impressions = outcome.insights?.impressions;
           return (
             <List.Item
               key={`${outcome.platform}-${index}`}
@@ -260,10 +262,13 @@ export function PostDetail({ post, onChange }: { post: Post; onChange?: () => vo
               title={platformLabel(outcome.platform)}
               subtitle={outcome.error ?? undefined}
               accessories={[
-                ...(stats ? [{ text: `${formatNumber(impressionsOf(stats))} impr.` }] : []),
+                // Latest overall impressions for this delivery (not period-filtered like Performance).
+                ...(impressions != null
+                  ? [{ text: `${formatNumber(impressions)} impr.`, tooltip: "Latest impressions" }]
+                  : []),
                 { tag: { value: outcome.status, color: OUTCOME_COLOR[outcome.status] ?? Color.PrimaryText } },
               ]}
-              detail={<List.Item.Detail markdown={outcomeMarkdown(outcome, stats)} />}
+              detail={<List.Item.Detail markdown={outcomeMarkdown(outcome)} />}
               actions={
                 <ActionPanel>
                   {candidates.length === 1 ? (
