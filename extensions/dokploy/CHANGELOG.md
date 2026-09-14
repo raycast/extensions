@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [View Service Logs] - {PR_MERGE_DATE}
+## [View Service Logs] - 2026-09-14
 
 - Add a `View Logs` action to the **Services** screen, showing the last 200 lines of a service's logs with `Refresh` and `Copy Logs` actions. Not yet available for Compose stacks, which need a container to be picked first.
 
