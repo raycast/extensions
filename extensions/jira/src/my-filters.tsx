@@ -17,7 +17,7 @@ export function MyFilters() {
   const isSearching = filterQuery !== "";
 
   const { issues, isLoading, mutate } = useIssues(cachedFilter?.jql ?? "", {
-    execute: cachedFilter && cachedFilter.jql !== "" && !isSearching,
+    execute: !!cachedFilter && cachedFilter.jql !== "" && !isSearching,
   });
 
   const searchBarAccessory = filters ? (
