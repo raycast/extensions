@@ -218,16 +218,6 @@ export async function runLighthouseAudit(
     throw new Error('Invalid URL format. Must be a valid http or https URL.');
   }
 
-  try {
-    const { hostname } = new URL(formattedUrl);
-    if (!hostname) throw new Error('Missing hostname');
-    await dns.lookup(hostname);
-  } catch {
-    throw new Error(
-      'Could not resolve domain. Verify the URL exists and is correct.'
-    );
-  }
-
   const sanitizedCategories = sanitizeCategories(categories);
   if (sanitizedCategories.length === 0) {
     throw new Error(
@@ -267,6 +257,16 @@ export async function runLighthouseAudit(
     }
   }
 
+  try {
+    const { hostname } = new URL(formattedUrl);
+    if (!hostname) throw new Error('Missing hostname');
+    await dns.lookup(hostname);
+  } catch {
+    throw new Error(
+      'Could not resolve domain. Verify the URL exists and is correct.'
+    );
+  }
+
   const finalLighthousePath = await findLighthousePath(lighthousePath);
   if (!finalLighthousePath) {
     throw new Error(
@@ -288,7 +288,7 @@ export async function runLighthouseAudit(
     '--quiet',
     '--disable-full-page-screenshot',
     '--throttling-method=devtools',
-    '--chrome-flags=--headless --no-sandbox --disable-gpu',
+    '--chrome-flags=--headless --disable-gpu',
   ];
 
   if (device === 'desktop') {

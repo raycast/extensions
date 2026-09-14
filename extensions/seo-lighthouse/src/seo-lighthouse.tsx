@@ -542,6 +542,17 @@ Thanks,`;
       metadata={showMetadata ? generateMetadata() : undefined}
       actions={
         <ActionPanel>
+          <Action.Open
+            title="Open JSON Report"
+            target={reportPath}
+            icon={Icon.Code}
+          />
+          <Action.ShowInFinder
+            path={reportPath}
+            icon={Icon.Finder}
+            title="Show in Finder"
+          />
+          <Action.OpenWith path={reportPath} />
           <Action.Push
             title="Explore Audits"
             icon={Icon.List}
@@ -588,16 +599,6 @@ Thanks,`;
               title="Re-analyze"
               icon={Icon.ArrowClockwise}
               onAction={onReanalyze}
-            />
-            <Action.Open
-              title="Open JSON Report"
-              target={reportPath}
-              icon={Icon.Code}
-            />
-            <Action.ShowInFinder
-              path={reportPath}
-              icon={Icon.Finder}
-              title="Show in Finder"
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -756,6 +757,15 @@ export default function Command() {
       if (values.accessibility) categories.push('accessibility');
       if (values.bestPractices) categories.push('best-practices');
       if (values.seo) categories.push('seo');
+
+      if (categories.length === 0) {
+        void showToast({
+          style: Toast.Style.Failure,
+          title: 'Select at Least One Category',
+          message: 'Choose an analysis category before starting the audit.',
+        });
+        return;
+      }
 
       push(
         <ReportLoader
