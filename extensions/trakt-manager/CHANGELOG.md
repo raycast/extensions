@@ -1,6 +1,6 @@
 # Trakt Manager Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-14
 
 - Fixed sign-in failing with `invalid_grant` ("invalid code") when a command issued several requests at once. Each request triggered its own authorization, so the same single-use code was exchanged more than once; concurrent callers now share one in-flight authorization
 - Moved authorization, token exchange and refresh to the `auth.trakt.tv` host, which Trakt now requires for all OAuth requests
