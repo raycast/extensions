@@ -158,10 +158,14 @@ const Graph: React.FC<GraphProps> = ({ expression }) => {
         result === null && (
           <ActionPanel>
             <ActionPanel.Section>
-              <Action title="Zoom in" onAction={zoomIn} />
-              <Action title="Zoom out" onAction={zoomOut} />
+              {/* "In", "Out" and "Up" are part of the verb here, not prepositions, so Title Case keeps them capitalized. */}
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
+              <Action title="Zoom In" onAction={zoomIn} />
+              {/* eslint-disable-next-line @raycast/prefer-title-case */}
+              <Action title="Zoom Out" onAction={zoomOut} />
               <Action
-                title="Move up"
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Move Up"
                 onAction={moveUp}
                 shortcut={SHORTCUTS.moveUp}
               />
