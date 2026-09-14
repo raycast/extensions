@@ -1,6 +1,6 @@
 # QuickTime Recording Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-14
 - Fixed `Could not run AppleScript` when QuickTime Player was not already running
 
 ## [Enhancements] - 2024-09-04
