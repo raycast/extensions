@@ -1,6 +1,6 @@
 # Vitra Changelog
 
-## [Initial release] - {PR_MERGE_DATE}
+## [Initial release] - 2026-09-14
 
 - Today's readiness, sleep and activity, each against your own 30-day baseline
 - Last night's sleep duration, HRV, resting heart rate, body temperature, SpO₂
