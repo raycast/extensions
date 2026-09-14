@@ -365,41 +365,43 @@ public static extern bool SetProcessDPIAware();
     } catch { [void][ScreenOcrNative.Dpi]::SetProcessDPIAware() }
 
     $bitmap = $null
-    $captureMutex = $null
     try {
-        if ($Mode -eq 'area' -or $Mode -eq 'fullscreen') {
-            $captureMutex = Enter-CaptureMutex
-        }
-        if ($Mode -eq 'area') {
-            $frozen = Get-VirtualScreenBitmap
-            try {
-                $selection = Select-ScreenRegion $frozen
-                if (-not $selection) { throw 'SCREENOCR_CANCELLED' }
-                $bitmap = $frozen.Clone($selection, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
-            } finally { $frozen.Dispose() }
-        } elseif ($Mode -eq 'fullscreen') {
-            $bitmap = Get-VirtualScreenBitmap
-        } else {
-            $clipboard = Get-ClipboardBitmap
-            if ($clipboard.Kind -ne 'image') {
-                throw "SCREENOCR_CLIPBOARD_$($clipboard.Kind.ToUpperInvariant())"
+        $captureMutex = $null
+        try {
+            if ($Mode -eq 'area' -or $Mode -eq 'fullscreen') {
+                $captureMutex = Enter-CaptureMutex
             }
-            $bitmap = $clipboard.Bitmap
+            if ($Mode -eq 'area') {
+                $frozen = Get-VirtualScreenBitmap
+                try {
+                    $selection = Select-ScreenRegion $frozen
+                    if (-not $selection) { throw 'SCREENOCR_CANCELLED' }
+                    $bitmap = $frozen.Clone($selection, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+                } finally { $frozen.Dispose() }
+            } elseif ($Mode -eq 'fullscreen') {
+                $bitmap = Get-VirtualScreenBitmap
+            } else {
+                $clipboard = Get-ClipboardBitmap
+                if ($clipboard.Kind -ne 'image') {
+                    throw "SCREENOCR_CLIPBOARD_$($clipboard.Kind.ToUpperInvariant())"
+                }
+                $bitmap = $clipboard.Bitmap
+            }
+        }
+        finally {
+            # The overlay is closed and the captured pixels are independent of the screen.
+            # Allow the next capture while OCR processes this bitmap.
+            if ($captureMutex) {
+                try { $captureMutex.ReleaseMutex() }
+                finally { $captureMutex.Dispose() }
+            }
         }
         $text = Invoke-Ocr $bitmap $Language $IgnoreLineBreaks.IsPresent
         if ([string]::IsNullOrWhiteSpace($text)) { Write-ProtocolJson @{ status = 'no-text' } }
         else { Write-ProtocolJson @{ status = 'recognized'; text = $text } }
     }
     finally {
-        try {
-            if ($bitmap) { $bitmap.Dispose() }
-        }
-        finally {
-            if ($captureMutex) {
-                try { $captureMutex.ReleaseMutex() }
-                finally { $captureMutex.Dispose() }
-            }
-        }
+        if ($bitmap) { $bitmap.Dispose() }
     }
 }
 catch {

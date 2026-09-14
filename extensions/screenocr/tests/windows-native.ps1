@@ -62,12 +62,12 @@ function ConvertFrom-CodePoints {
 }
 
 function Invoke-HelperProcess {
-    param([string]$ScriptArguments)
+    param([string]$ScriptArguments, [string]$ScriptFile = $helperPath)
 
     $powerShellPath = Join-Path $PSHOME 'powershell.exe'
     $startInfo = New-Object System.Diagnostics.ProcessStartInfo
     $startInfo.FileName = $powerShellPath
-    $startInfo.Arguments = '-NoLogo -NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File "' + $helperPath + '" ' + $ScriptArguments
+    $startInfo.Arguments = '-NoLogo -NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File "' + $ScriptFile + '" ' + $ScriptArguments
     $startInfo.UseShellExecute = $false
     $startInfo.CreateNoWindow = $true
     $startInfo.RedirectStandardOutput = $true
@@ -283,6 +283,53 @@ Invoke-Test 'invalid language arguments are rejected before helper execution' {
     $result = Invoke-HelperProcess '-ListLanguages -Language "ja-JP;Write-Output bad"'
     Assert-True ($result.ExitCode -ne 0) 'An invalid language argument was accepted.'
     Assert-True ([string]::IsNullOrWhiteSpace($result.Stdout)) 'An invalid argument produced a protocol payload.'
+}
+
+Invoke-Test 'another process can capture while the first bitmap is being recognized' {
+    # Keep the shipped main control flow and real mutex operations. Replace only
+    # desktop capture/selection and OCR so this regression needs no interactive UI.
+    $replacements = @{
+        'Get-VirtualScreenBitmap' = @'
+function Get-VirtualScreenBitmap {
+    return [System.Drawing.Bitmap]::new(20, 20)
+}
+'@
+        'Select-ScreenRegion' = @'
+function Select-ScreenRegion {
+    param([System.Drawing.Bitmap]$Frozen)
+    return [System.Drawing.Rectangle]::new(0, 0, 10, 10)
+}
+'@
+        'Invoke-Ocr' = @'
+function Invoke-Ocr {
+    param([System.Drawing.Bitmap]$Bitmap, [string]$LanguageTag, [bool]$JoinLines)
+    if ($Bitmap.Width -lt 1) { throw 'The captured bitmap was disposed before recognition.' }
+    # A fresh process avoids recursive ownership by the existing mutex-owning thread.
+    $probe = '$mutex = [System.Threading.Mutex]::new($false, "Local\Raycast.ScreenOCR.Capture"); try { if (-not $mutex.WaitOne(0, $false)) { exit 6 }; $mutex.ReleaseMutex() } finally { $mutex.Dispose() }'
+    $encoded = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($probe))
+    & (Join-Path $PSHOME 'powershell.exe') -NoLogo -NoProfile -NonInteractive -EncodedCommand $encoded
+    if ($LASTEXITCODE -ne 0) { throw 'The capture lock was still held when OCR began.' }
+    return 'CAPTURE_RELEASED'
+}
+'@
+    }
+    $instrumented = [System.IO.File]::ReadAllText($helperPath)
+    foreach ($definition in @($functionAsts | Where-Object { $replacements.ContainsKey($_.Name) } | Sort-Object { $_.Extent.StartOffset } -Descending)) {
+        $instrumented = $instrumented.Remove($definition.Extent.StartOffset, $definition.Extent.EndOffset - $definition.Extent.StartOffset).Insert($definition.Extent.StartOffset, $replacements[$definition.Name])
+    }
+    $testHelper = Join-Path ([System.IO.Path]::GetTempPath()) ('screenocr-lock-' + [Guid]::NewGuid().ToString('N') + '.ps1')
+    try {
+        [System.IO.File]::WriteAllText($testHelper, $instrumented, [System.Text.Encoding]::ASCII)
+        foreach ($mode in @('area', 'fullscreen')) {
+            $result = Invoke-HelperProcess "-Mode $mode" $testHelper
+            Assert-Equal $result.ExitCode 0 "$mode retained the capture lock during recognition: $($result.Stderr)"
+            Assert-True ([string]::IsNullOrWhiteSpace($result.Stderr)) "$mode wrote unexpected diagnostics."
+            $payload = $result.Stdout.Trim() | ConvertFrom-Json
+            Assert-Equal $payload.status 'recognized' "$mode did not reach recognition."
+            Assert-Equal $payload.text 'CAPTURE_RELEASED' "$mode did not complete the lock probe."
+        }
+    }
+    finally { Remove-Item -LiteralPath $testHelper -Force -ErrorAction SilentlyContinue }
 }
 
 $script:WinRtReady = $false
