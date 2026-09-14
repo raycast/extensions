@@ -36,7 +36,7 @@ In **Search Index Settings** you can:
 
 Some exclusions always apply, including `.git` and `node_modules`. The settings screen lists them. Turning off automatic Google Drive detection does not exclude Drive folders that sit under another scope, such as your home folder.
 
-Changes take effect on the next rebuild. Visible symbolic links, including Google Drive shared-folder shortcuts, are followed even when their target lives in a hidden directory.
+Changes take effect on the next rebuild. Wait for any active rebuild to finish before saving settings. Visible symbolic links, including Google Drive shared-folder shortcuts, are followed even when their target lives in a hidden directory.
 
 You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. A large or cold cloud folder can take minutes to scan, and a large index can occupy hundreds of megabytes. A scan that fails partway keeps what it already had, so an unreachable mount does not empty your index.
 

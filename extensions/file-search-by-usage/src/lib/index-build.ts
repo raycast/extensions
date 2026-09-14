@@ -29,12 +29,12 @@ import {
  * at no other time.
  *
  * The exclusion lock is injected rather than imported: it is the same lock that
- * keeps index rebuilding and data deletion apart. Passing it keeps this module free of `@raycast/api`
+ * keeps rebuilding, settings changes, and data deletion apart. Passing it keeps this module free of `@raycast/api`
  * so the harness can exercise the orchestration directly. See index-rebuild.ts
  * for the wiring the commands use.
  */
 
-/** Serialises index writes and deletion. Returns undefined when busy. */
+/** Serialises index writes, settings changes, and deletion. Undefined when busy. */
 export type ExclusionLock = <T>(
   work: (assertOwned: () => void) => Promise<T>,
 ) => Promise<T | undefined>;
@@ -140,23 +140,27 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
   if (lookup.kind !== "found")
     return { kind: "no-fd", message: describeFdLookup(lookup) ?? "" };
 
-  const settings = options.loadSettings
-    ? await options.loadSettings()
-    : DEFAULT_SETTINGS;
-  const roots =
-    options.roots ?? configuredRoots(settings, await googleDriveIndexRoots());
-  if (roots.length === 0)
-    return {
-      kind: "no-roots",
-      message: settings.includeDrive
-        ? "No locally mounted Google Drive was found under ~/Library/CloudStorage. " +
-          "Open Google Drive and let it mount, or add a folder in Search Index Settings."
-        : "Nothing is set to be indexed. Add a folder in Search Index Settings, " +
-          "or turn Google Drive back on there.",
-    };
-
   const outcome = await options.withLock((assertOwned) =>
     captureBuildFailure(async () => {
+      // Settings saves hold this same lock. Read only after acquisition so
+      // complete-scan cleanup uses a configuration that cannot change mid-run.
+      const settings = options.loadSettings
+        ? await options.loadSettings()
+        : DEFAULT_SETTINGS;
+      const roots =
+        options.roots ??
+        configuredRoots(settings, await googleDriveIndexRoots());
+      if (roots.length === 0)
+        return {
+          kind: "no-roots",
+          message: settings.includeDrive
+            ? "No locally mounted Google Drive was found under ~/Library/CloudStorage. " +
+              "Open Google Drive and let it mount, or add a folder in Search Index Settings."
+            : "Nothing is set to be indexed. Add a folder in Search Index Settings, " +
+              "or turn Google Drive back on there.",
+        };
+
+      assertOwned();
       const opened = openIndexForWrite(options.file);
       if (opened.kind !== "opened")
         return {
@@ -225,7 +229,7 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
     outcome ?? {
       kind: "failed",
       message:
-        "Another indexing or deletion run is active. Try again once it finishes.",
+        "Another indexing, settings, or deletion operation is active. Try again once it finishes.",
     }
   );
 }

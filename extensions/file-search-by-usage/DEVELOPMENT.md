@@ -72,7 +72,7 @@ src/lib/index-build.ts      rebuild orchestration, Raycast-free
 src/lib/index-rebuild.ts    support path, lock wiring, and shared rebuild feedback
 src/lib/index-settings.ts   scope and pattern rules, Raycast-free
 src/lib/index-settings-store.ts  LocalStorage half of the settings
-src/lib/indexing-lock.ts    cross-process exclusion for indexing and deletion
+src/lib/indexing-lock.ts    cross-process exclusion for indexing, settings, and deletion
 src/lib/owned-lock.ts       ownership-checked lock acquisition and cleanup
 src/lib/storage-lock.ts     short storage transactions and reset generations
 src/lib/store.ts            LocalStorage persistence
@@ -362,7 +362,7 @@ This `mdls` pass is the only Spotlight call. It supplements the extension's own 
 
 ### Lock recovery
 
-All indexing entry points hold one `proper-lockfile` lock in Raycast's support directory for the whole of scanning and saving. Data deletion holds it too. A competing request reports that the data is busy without reading or changing the stores. The heartbeat runs every second. A lock older than ten minutes can be recovered only when its recorded owner process is confirmed dead; a live or unknown owner keeps the exclusion. Each write checks ownership, and the lock is released when the operation finishes or throws.
+All indexing entry points hold one `proper-lockfile` lock in Raycast's support directory for the whole of scanning and saving. Data deletion and index-settings saves hold it too. Rebuilds read settings and resolve roots only after acquiring it, so complete-scan cleanup cannot use a stale scope snapshot. Settings saves, including resetting defaults, take the indexing lock before the short storage lock, matching deletion's lock order. An edit attempted during a rebuild is refused; the editor restores the saved settings and asks the user to retry. The heartbeat runs every second. A lock older than ten minutes can be recovered only when its recorded owner process is confirmed dead; a live or unknown owner keeps the exclusion. Each write checks ownership, and the lock is released when the operation finishes or throws.
 
 Deletion acquires the lock before reading or clearing any store, so an in-flight indexing run cannot write its results after deletion succeeds. A deletion attempted mid-rebuild changes nothing and reports that the data is busy. If the lock is busy, nothing is deleted. Both deletion entry points report success only after the locked operation returns its counts.
 

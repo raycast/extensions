@@ -15,6 +15,7 @@ import {
 } from "@raycast/api";
 import {
   BUILT_IN_PATTERNS,
+  DEFAULT_SETTINGS,
   IndexSettings,
   addPattern,
   addScope,
@@ -24,7 +25,6 @@ import {
 } from "./lib/index-settings";
 import {
   loadIndexSettings,
-  resetIndexSettings,
   saveIndexSettings,
 } from "./lib/index-settings-store";
 import { IndexStats } from "./lib/index-db";
@@ -115,7 +115,7 @@ export default function Command() {
       message:
         outcome === "reset"
           ? "Extension data was reset while this screen was open."
-          : "The write did not go through. Your other data is untouched.",
+          : "Wait for any indexing or data deletion to finish, then retry. Your other data is untouched.",
     });
     setSettings(await loadIndexSettings());
     return false;
@@ -178,7 +178,7 @@ export default function Command() {
       },
     });
     if (!confirmed) return;
-    if (await resetIndexSettings()) {
+    if (await commit({ ...DEFAULT_SETTINGS })) {
       await reload();
       await showToast({
         style: Toast.Style.Success,
@@ -186,7 +186,7 @@ export default function Command() {
         message: "The next rebuild uses the defaults.",
       });
     }
-  }, [reload]);
+  }, [commit, reload]);
 
   const toggle = useCallback(
     (key: "includeDrive" | "includeHidden" | "useIgnoreFiles") => async () => {

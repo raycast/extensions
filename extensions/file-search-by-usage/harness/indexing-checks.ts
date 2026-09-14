@@ -5,15 +5,16 @@ import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { buildSync, transformSync } from "esbuild";
 import { DatabaseSync } from "node:sqlite";
+import { acquireOwnedLock } from "../src/lib/owned-lock";
+import { between } from "./source-slice";
 
 const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 /**
  * Wait for a condition rather than a fixed number of microtask turns.
  *
- * The rebuild reads the configured scope before it takes the lock, so "the
- * command has started" and "the command holds the lock" are several turns
- * apart. Tests that need the lock held have to wait for it.
+ * Command startup has asynchronous steps; tests that need a scan in progress
+ * wait for that state instead of assuming a fixed number of turns.
  */
 async function until(ready: () => boolean, label: string): Promise<void> {
   for (let i = 0; i < 2000; i++) {
@@ -1482,7 +1483,42 @@ async function indexSettingsStoreChecks(
     "saving into an empty store reports success and writes the settings",
   );
   const widened: Settings = { ...custom, scopes: [...custom.scopes, "/extra"] };
+  const indexing = acquireOwnedLock(
+    path.join(root, "index-settings-save", "google-drive-indexing"),
+  );
+  try {
+    assert(
+      (await fresh.settings.saveIndexSettings(widened)) === "failed" &&
+        fresh.storage.get(SETTINGS_KEY) === serializeSettings(custom),
+      "settings edits cannot change a running rebuild's scope snapshot",
+    );
+    assert(
+      (await fresh.settings.resetIndexSettings()) === "failed" &&
+        fresh.storage.get(SETTINGS_KEY) === serializeSettings(custom),
+      "resetting settings cannot change a running rebuild's scope snapshot",
+    );
+  } finally {
+    indexing.release();
+  }
+  let excludedDuringWrite = false;
+  fresh.writing.before = async () => {
+    let competing;
+    try {
+      competing = acquireOwnedLock(
+        path.join(root, "index-settings-save", "google-drive-indexing"),
+      );
+    } catch (error) {
+      excludedDuringWrite = (error as NodeJS.ErrnoException).code === "ELOCKED";
+    } finally {
+      competing?.release();
+    }
+  };
   const resaved = await fresh.settings.saveIndexSettings(widened);
+  fresh.writing.before = async () => {};
+  assert(
+    excludedDuringWrite,
+    "an in-flight settings write excludes rebuilds until the new configuration is saved",
+  );
   assert(
     resaved && fresh.storage.get(SETTINGS_KEY) === serializeSettings(widened),
     "saving again replaces the stored settings",
@@ -1555,6 +1591,48 @@ async function indexSettingsStoreChecks(
           serializeSettings(DEFAULT_SETTINGS) &&
         same(await test.settings.loadIndexSettings(), DEFAULT_SETTINGS),
       item.label,
+    );
+  }
+
+  // Run the real reset action without a Raycast window. A nonempty failure
+  // string used to be mistaken for success by this handler.
+  const resetSource = between(
+    fs.readFileSync("src/index-settings.tsx", "utf8"),
+    "  const onReset =",
+    "  const toggle =",
+  );
+  const { code } = transformSync(`${resetSource}\nreturn onReset;`, {
+    loader: "tsx",
+  });
+  for (const outcome of ["saved", "reset", "failed"] as const) {
+    const messages: { style: string }[] = [];
+    const runReset = new Function(
+      "useCallback",
+      "confirmAlert",
+      "Alert",
+      "resetIndexSettings",
+      "commit",
+      "DEFAULT_SETTINGS",
+      "reload",
+      "showToast",
+      "Toast",
+      code,
+    )(
+      (fn: unknown) => fn,
+      async () => true,
+      { ActionStyle: { Destructive: "destructive" } },
+      async () => outcome,
+      async () => outcome === "saved",
+      DEFAULT_SETTINGS,
+      async () => {},
+      async (message: { style: string }) => messages.push(message),
+      { Style: { Success: "success" } },
+    ) as () => Promise<void>;
+    await runReset();
+    assert(
+      messages.some((message) => message.style === "success") ===
+        (outcome === "saved"),
+      `settings reset action reports success only for a saved change (${outcome})`,
     );
   }
 }

@@ -41,7 +41,7 @@ export function invalidateData(): void {
   fs.renameSync(temporary, generationPath());
 }
 
-/** Short storage transactions never hold the long-running indexing lock. */
+/** Never acquire the indexing lock from inside a storage transaction. */
 export async function withStorageLock<T>(
   work: (assertCurrent: () => void) => Promise<T>,
   generation: string | undefined,

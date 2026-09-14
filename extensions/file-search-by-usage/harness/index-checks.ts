@@ -1485,6 +1485,42 @@ export async function indexChecks(assert: Assert) {
   );
   closeIndexReader();
 
+  // A settings edit wins if it finishes before the rebuild takes its lock.
+  // Exercise real scan cleanup: stale roots must neither delete re-added
+  // coverage nor keep a location that the latest configuration removed.
+  for (const [label, before, after] of [
+    ["re-added scope", [rootA], [rootA, rootB]],
+    ["removed scope", [rootA, rootB], [rootA]],
+    ["first scope", [], [rootB]],
+  ] as [string, string[], string[]][]) {
+    let scopes = before;
+    const updated = await rebuildIndex({
+      file: scopeFile,
+      withLock: async (work) => {
+        scopes = after;
+        return work(() => {});
+      },
+      loadSettings: async () => ({
+        ...DEFAULT_SETTINGS,
+        scopes,
+        includeDrive: false,
+      }),
+      lookupFd: foundFdStub,
+      spawnFd: (args) => fdOutput([path.join(args.at(-1)!, "doc.txt")]),
+    });
+    assert(
+      updated.kind === "done" &&
+        updated.report.complete &&
+        coverageRoots().sort().join("\0") === [...after].sort().join("\0"),
+      `${label}: a rebuild uses the configuration current at lock acquisition`,
+    );
+    assert(
+      searchIndex(scopeFile, parseQuery("doc")).entries.length === after.length,
+      `${label}: searchable coverage matches the latest configured scopes`,
+    );
+    closeIndexReader();
+  }
+
   // ------------------------------------- a scan killed before it finished
   const killedDir = tempDir("killed");
   const killedFile = path.join(killedDir, "index.sqlite");

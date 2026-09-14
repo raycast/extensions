@@ -11,6 +11,7 @@ import {
   dataGeneration,
   withStorageLock,
 } from "./storage-lock";
+import { withIndexingLock } from "./indexing-lock";
 
 /**
  * Raycast storage for the index settings.
@@ -43,15 +44,23 @@ export async function saveIndexSettings(
   settings: IndexSettings,
   generation = dataGeneration(),
 ): Promise<SaveOutcome> {
-  try {
-    return await withStorageLock(async (assertCurrent) => {
-      assertCurrent();
-      await LocalStorage.setItem(SETTINGS_KEY, serializeSettings(settings));
-      return "saved" as const;
-    }, generation);
-  } catch (error) {
-    return error instanceof DataResetError ? "reset" : "failed";
-  }
+  // Same order as deletion: indexing lock, then the short storage lock.
+  // Never let a settings write invalidate a running scan's cleanup scope.
+  return (
+    (await withIndexingLock(async (assertOwned): Promise<SaveOutcome> => {
+      try {
+        return await withStorageLock(async (assertCurrent) => {
+          assertOwned();
+          assertCurrent();
+          await LocalStorage.setItem(SETTINGS_KEY, serializeSettings(settings));
+          assertOwned();
+          return "saved" as const;
+        }, generation);
+      } catch (error) {
+        return error instanceof DataResetError ? "reset" : "failed";
+      }
+    }, "settings")) ?? "failed"
+  );
 }
 
 export async function resetIndexSettings(): Promise<SaveOutcome> {
