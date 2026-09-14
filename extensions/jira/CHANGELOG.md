@@ -1,5 +1,11 @@
 # Jira Changelog
 
+## [Fix React 19 suspension and issue type icons] - {PR_MERGE_DATE}
+
+- Fixed the infinite render suspension loop and associated 100MB JS Heap memory crash under React 19 by refactoring the `withJiraCredentials` wrapper. This ensures synchronous React components are not wrapped in uncached async promises, while preserving the error-catching wrapper for async AI tools.
+- Fixed Jira issue type icons rendering as white squares in Raycast by dynamically parsing the `content-type` response header (e.g., `image/svg+xml`, `image/png`) instead of hardcoding `"image/jpeg"`.
+- Added performance optimization for icon resolution using a Map-based `iconUriCache` cache to prevent duplicate concurrent network requests.
+
 ## [Fixed team field on issue creation] - 2026-08-25
 
 - Fixed the Team field showing up under "Unknown fields" (and not rendering as a dropdown) on the create-issue form for sites using the newer Atlassian Teams field (`atlassian-team`), so a team can now be selected and set on new issues

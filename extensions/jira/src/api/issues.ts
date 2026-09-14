@@ -262,16 +262,32 @@ export const resolveIssueTypeIconUris = async (issuetype: IssueType) => {
   return issuetype;
 };
 
+const iconUriCache = new Map<string, Promise<string>>();
+
 async function resolveIssueTypeIconUri(issuetype?: IssueType) {
   if (!issuetype?.iconUrl) {
     return;
   }
 
-  try {
-    issuetype.iconUrl = await getAuthenticatedUri(issuetype.iconUrl, "image/jpeg");
-  } catch {
-    // Keep the original Jira icon URL when Jira returns an HTML error page instead of image content.
+  const url = issuetype.iconUrl;
+
+  if (url.startsWith("data:")) {
+    return;
   }
+
+  let promise = iconUriCache.get(url);
+  if (!promise) {
+    promise = (async () => {
+      try {
+        return await getAuthenticatedUri(url, "image/jpeg");
+      } catch {
+        return url;
+      }
+    })();
+    iconUriCache.set(url, promise);
+  }
+
+  issuetype.iconUrl = await promise;
 }
 
 type GetIssuesResponse = {
