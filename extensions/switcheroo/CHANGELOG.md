@@ -8,6 +8,9 @@
 
 - **Add Remap** — create a new keyboard remapping rule from Raycast.
 
+- Recover from failed edits with **Discard Edits and Reload**, without
+  overwriting newer configuration changes or silently discarding unsaved input.
+
 - **Restart Switcheroo** — restart the Switcheroo service (auto-detects Homebrew
   and standalone install layouts and refuses ambiguous/foreign jobs).
 

@@ -21,6 +21,7 @@ import {
 } from "./lib/config";
 import { restartService } from "./lib/service";
 import { parsePositiveInt, validateChordKeys } from "./lib/config-pure.mjs";
+import { createReloadRemapsAction } from "./lib/remap-form-actions.mjs";
 import { ALL_KEYS, MODIFIER_KEYS, MODIFIER_NAMES } from "./lib/keys";
 
 const TYPE_OPTIONS: { value: RemapType; title: string }[] = [
@@ -105,6 +106,9 @@ export function AddRemapForm({
   const [timeoutError, setTimeoutError] = useState<string | null>(null);
   const [windowError, setWindowError] = useState<string | null>(null);
   const [keysError, setKeysError] = useState<string | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const reloadAction =
+    isEditing && onAdd ? createReloadRemapsAction(onAdd, pop) : undefined;
 
   async function handleSubmit(values: Record<string, string | string[]>) {
     // ── F5: validate BEFORE any config write ──────────────────────────
@@ -231,10 +235,12 @@ export function AddRemapForm({
         }
       }
     } catch (e) {
+      setSaveFailed(true);
       await showToast({
         style: Toast.Style.Failure,
         title: isEditing ? "Failed to update remap" : "Failed to add remap",
         message: e instanceof Error ? e.message : String(e),
+        primaryAction: reloadAction,
       });
       return;
     }
@@ -275,6 +281,7 @@ export function AddRemapForm({
             title={isEditing ? "Save Remap" : "Add Remap"}
             onSubmit={handleSubmit}
           />
+          {saveFailed && reloadAction && <Action {...reloadAction} />}
         </ActionPanel>
       }
     >
