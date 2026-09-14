@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Show PDF in Finder] - {PR_MERGE_DATE}
+## [Show PDF in Finder] - 2026-09-14
 
 - Added a "Show PDF in Finder" action on references with a PDF, so you can reveal the file on disk in Finder without copying the path
 
