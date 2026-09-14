@@ -1294,4 +1294,16 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://vibeprospecting.explorium.ai/mcp"],
     },
   },
+  {
+    name: "empiriolabs",
+    title: "EmpirioLabs AI",
+    description:
+      "Run 180+ AI models, image, video and speech generation, web search and research with citations, batch jobs, GPU Cloud and hosted agents as tools. Remote Streamable HTTP server with OAuth 2.1 sign-in through mcp-remote; an EmpirioLabs API key works as a bearer token too.",
+    icon: "https://empiriolabs.ai/images/icon-dark-512.png",
+    homepage: "https://docs.empiriolabs.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.empiriolabs.ai/mcp"],
+    },
+  },
 ];
