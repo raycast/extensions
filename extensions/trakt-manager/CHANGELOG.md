@@ -1,5 +1,12 @@
 # Trakt Manager Changelog
 
+## [Fix] - 2026-09-14
+
+- Fixed sign-in failing with `invalid_grant` ("invalid code") when a command issued several requests at once. Each request triggered its own authorization, so the same single-use code was exchanged more than once; concurrent callers now share one in-flight authorization
+- Moved authorization, token exchange and refresh to the `auth.trakt.tv` host, which Trakt now requires for all OAuth requests
+- Fixed the `redirect_uri` sent when refreshing, which used a package name that never matched the static redirect URL Raycast uses during authorization
+- Token errors now report Trakt's `error` and `error_description` instead of the raw response body
+
 ## [Fix] - 2026-07-03
 
 - Fixed token refresh failing because the `redirect_uri` sent to Trakt's token endpoint didn't match the one used during authorization
