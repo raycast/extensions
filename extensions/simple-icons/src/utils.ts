@@ -288,36 +288,49 @@ const pacoteAssetPack = async (version: string, assertOwner: () => Promise<void>
     }
   } catch (error) {
     await fs.rm(staging, { recursive: true, force: true });
-    if (error instanceof AssetPackLockLostError) return;
-    // The staging may have been reclaimed while this process was paused; if
-    // the lock was meanwhile taken over, the successor completes the install.
-    try {
-      await assertOwner();
-    } catch {
-      return;
-    }
+    // Re-raise displacement: the successor owns the destination. If the
+    // staging was reclaimed mid-pause this also converts the resulting ENOENT
+    // into lock loss once ownership is gone.
+    await assertOwner();
     throw error;
   }
 };
 
+// Wait for another holder to finish installing. Returns false after the
+// timeout so the caller can compete for the lock again (the successor may
+// itself have crashed, in which case its lock becomes recoverable).
+const waitForAssetPack = async (destination: string, timeoutMs: number) => {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await hasCompleteAssetPack(destination)) return true;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  return hasCompleteAssetPack(destination);
+};
+
 export const cacheAssetPack = async (version: string) => {
   const destination = getAssetPackDestination(version);
-  if (await hasCompleteAssetPack(destination)) return;
-  try {
-    await withAssetPackLock(async (assertOwner) => {
-      // Another instance may have completed the pack while we waited for the lock.
-      if (await hasCompleteAssetPack(destination)) return;
-      await assertOwner();
-      cache.set("cached-version", "");
-      await cleanAssetPack(assertOwner);
-      await assertOwner();
-      await pacoteAssetPack(version, assertOwner);
-      await assertOwner();
-      cache.set("cached-version", version);
-    });
-  } catch (error) {
-    // The lock was taken over by a successor; it completes the pack.
-    if (!(error instanceof AssetPackLockLostError)) throw error;
+  for (;;) {
+    if (await hasCompleteAssetPack(destination)) return;
+    try {
+      await withAssetPackLock(async (assertOwner) => {
+        // Another instance may have completed the pack while we waited for the lock.
+        if (await hasCompleteAssetPack(destination)) return;
+        await assertOwner();
+        cache.set("cached-version", "");
+        await cleanAssetPack(assertOwner);
+        await assertOwner();
+        await pacoteAssetPack(version, assertOwner);
+        await assertOwner();
+        cache.set("cached-version", version);
+      });
+    } catch (error) {
+      // A successor took over; fall through to waiting for its pack.
+      if (!(error instanceof AssetPackLockLostError)) throw error;
+    }
+    if (await waitForAssetPack(destination, assetPackLockHardStaleMs)) return;
+    // No completed pack within the hard-stale window: the successor stalled or
+    // died. Re-enter acquisition — wait as a contender or take over its lock.
   }
 };
 
