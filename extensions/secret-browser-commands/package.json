@@ -24,6 +24,10 @@
     "macOS",
     "Windows"
   ],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
   "commands": [
     {
       "name": "listCommands",
