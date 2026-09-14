@@ -152,12 +152,10 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5
 | OpenAI_GPT-4.1_mini | Balanced GPT-4.1 variant optimized for speed and cost efficiency. |
 | OpenAI_GPT-4.1_nano | Fastest and most cost-effective GPT-4.1 variant. |
 | OpenAI_GPT-4 | Previous generation GPT-4 model with broad knowledge and complex instruction handling. |
-| OpenAI_GPT-4_Turbo | Previous generation GPT-4 with expanded context window. |
 | OpenAI_GPT-4o | Advanced OpenAI model optimized for speed and complex problem solving. |
 | OpenAI_GPT-4o_mini | Fast and intelligent model for everyday tasks. |
 | OpenAI_GPT-5.1 | OpenAI's model with adaptive reasoning, great for coding and agentic tasks across domains. |
 | OpenAI_GPT-5.2 | OpenAI's most capable model for professional work and long-running agents with state-of-the-art tool-calling. |
-| OpenAI_GPT-5.2_Instant | OpenAI's fast, capable GPT-5.2-class model for everyday work with improved info-seeking, how-tos, and technical writing. |
 | OpenAI_GPT-5.3_Instant | OpenAI's fast, capable GPT-5.3-class model for everyday work with improved info-seeking, how-tos, and technical writing. |
 | OpenAI_GPT-5.3_Codex | A version of GPT-5.3 optimized for agentic coding tasks in Codex or similar environments. |
 | OpenAI_GPT-5.4 | OpenAI's high-performance GPT-5.4-class model for professional work and long-running agents with state-of-the-art tool-calling. |
@@ -168,8 +166,8 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5
 | OpenAI_GPT-5.6_Sol | OpenAI's frontier GPT-5.6 model for complex, professional-grade reasoning and long-running agentic work. |
 | OpenAI_GPT-5.6_Terra | OpenAI's balanced GPT-5.6 model for everyday work across writing, analysis, and coding. |
 | OpenAI_GPT-5.6_Luna | OpenAI's fastest GPT-5.6 model for responsive everyday tasks. |
+| OpenAI_GPT-6_Astra | OpenAI's frontier GPT-6 model for the hardest end-to-end reasoning, coding, and agentic work. |
 | OpenAI_o4-mini | Fast, efficient model optimized for coding and visual tasks. |
-| OpenAI_o1 | Advanced reasoning model for complex STEM problems. |
 | OpenAI_o3-mini | Fast reasoning model optimized for STEM tasks. |
 | Groq_GPT-OSS_20b | OpenAI's first open-source model, 20b variant. |
 | Groq_GPT-OSS_120b | OpenAI's first open-source model, 120b variant. |
@@ -179,6 +177,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5
 | Anthropic_Claude_Opus_4.7 | Anthropic's previous generation Opus model with combined reasoning and non-reasoning capabilities. |
 | Anthropic_Claude_Opus_4.8 | Anthropic's most powerful model with combined reasoning and non-reasoning capabilities. |
 | Anthropic_Claude_Opus_5 | Anthropic's most powerful model with combined reasoning and non-reasoning capabilities. |
+| Anthropic_Claude_Fable_5.1 | Anthropic's Mythos-class model for complex tasks, with safeguards for general use. |
 | Perplexity_Sonar | Fast Perplexity model with integrated search capabilities. |
 | Perplexity_Sonar_Pro | Advanced Perplexity model for complex queries with search integration. |
 | Mistral_Nemo | Small, Apache-licensed model built with NVIDIA. |
@@ -209,6 +208,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-5
 | Vercel_Inkling | Thinking Machines' open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
 | Vercel_Inkling_Small | Thinking Machines' smaller, faster open-weights multimodal MoE model with controllable thinking effort for reasoning, coding, and tool use. |
 | Vercel_DeepSeek_V4_Flash | DeepSeek's lightweight V4 MoE model tuned for fast, low-cost coding, reasoning, and agentic tasks. |
+| Vercel_DeepSeek_V4.1_Flash | DeepSeek's lightweight V4.1 MoE model tuned for fast, low-cost coding, reasoning, and agentic tasks. |
 | Vercel_DeepSeek_V4_Pro | DeepSeek's 1.6T parameter MoE model optimized for coding, reasoning, and agentic tasks with a 1M token context window. |
 | Vercel_Qwen3.8_Max | Alibaba's 2.4-trillion-parameter MoE flagship with native visual understanding for long-horizon coding and professional work. |
 
