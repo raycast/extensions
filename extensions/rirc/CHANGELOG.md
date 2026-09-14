@@ -1,6 +1,6 @@
 # RIRC Changelog
 
-## [Initial Version] - 2026-09-14
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search reaction GIFs and memes from KLIPY or GIPHY.
 - Copy, paste, and save media from search results or the clipboard.

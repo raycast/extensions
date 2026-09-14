@@ -276,8 +276,12 @@ export default function Command() {
         const response = await fetch(item.mediaUrl);
         if (!response.ok)
           throw new Error(`Download returned ${response.status}`);
+        const contentType = response.headers.get("content-type");
+        if (contentType && !contentType.toLowerCase().startsWith("image/")) {
+          throw new Error(`Download returned ${contentType}`);
+        }
         const extension =
-          extensionFromContentType(response.headers.get("content-type")) ??
+          extensionFromContentType(contentType) ??
           item.fileExtension ??
           (item.kind === "image" ? "png" : "gif");
         file = join(
@@ -319,9 +323,13 @@ export default function Command() {
         const response = await fetch(remoteUrl);
         if (!response.ok)
           throw new Error(`Download returned ${response.status}`);
+        const contentType = response.headers.get("content-type");
+        if (contentType && !contentType.toLowerCase().startsWith("image/")) {
+          throw new Error(`URL returned ${contentType}`);
+        }
         extension =
-          extensionFromContentType(response.headers.get("content-type")) ??
-          extension;
+          extensionFromContentType(contentType) ??
+          (contentType ? undefined : extension);
         if (!extension) throw new Error("URL did not return a supported image");
         file = join(environment.supportPath, `saved-${id}.${extension}`);
         await writeFile(file, Buffer.from(await response.arrayBuffer()));
