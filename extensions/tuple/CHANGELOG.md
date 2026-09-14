@@ -1,6 +1,6 @@
 # Tuple Changelog
 
-## [Canonical CLI Migration] - {PR_MERGE_DATE}
+## [Canonical CLI Migration] - 2026-09-14
 
 - Use canonical Call and Capture commands, complete Capture exports, and Connect prompts.
 - Preserve grouped search results and compact clock timestamps in Capture views and AI summaries.
