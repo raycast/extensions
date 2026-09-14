@@ -1,5 +1,6 @@
 ## [Update] - {PR_MERGE_DATE}
 
+- Keep every Activity Inbox entry when a scheduled check and one you start yourself overlap, by storing entries individually.
 - Seed your own account into the owner scope only once the saved configuration has loaded, so the scope, watched repositories and saved filters are never replaced by defaults.
 - Report a comment or reply whose response is interrupted or unreadable as unconfirmed rather than failed, without resending it.
 - Preserve personal and organization owner scopes across both menu layouts, and honor Search Everywhere after migration.

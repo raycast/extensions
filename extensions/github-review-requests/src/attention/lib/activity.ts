@@ -12,6 +12,16 @@ import type { ActivityKind } from "./config";
 import { demoActivity, isDemoMode } from "./demo";
 import type { PullRequest } from "./types";
 
+/**
+ * Entries are stored one per key, under this prefix. The inbox is written by
+ * the scheduled watcher and by a check you start yourself, in separate
+ * processes: holding them in a single array meant each run replaced the whole
+ * inbox with its own snapshot, so an entry recorded by the other run in the
+ * meantime was dropped — and, its baseline already advanced, never re-detected.
+ * A run now only ever writes the keys of its own entries.
+ */
+const ACTIVITY_PREFIX = "gh-review.activity.";
+/** Where the inbox lived when it was one array. Carried over on first read. */
 const ACTIVITY_KEY = "gh-review.activity";
 const SIGNATURES_KEY = "gh-review.watch-signatures";
 const LAST_RUN_KEY = "gh-review.watch-last-run";
@@ -57,13 +67,43 @@ export async function loadActivity(): Promise<ActivityEvent[]> {
   // replaced wholesale rather than filtered.
   if (await isDemoMode()) return demoActivity();
 
-  const raw = await LocalStorage.getItem<string>(ACTIVITY_KEY);
-  if (!raw) return [];
-  try {
-    return prune(JSON.parse(raw) as ActivityEvent[]);
-  } catch {
-    return [];
+  await adoptLegacyEntries();
+  return prune(await readEntries());
+}
+
+function keyFor(id: string): string {
+  return `${ACTIVITY_PREFIX}${id}`;
+}
+
+/** Every stored entry, in no particular order. Unreadable ones are skipped. */
+async function readEntries(): Promise<ActivityEvent[]> {
+  const items = await LocalStorage.allItems();
+  const events: ActivityEvent[] = [];
+  for (const [key, value] of Object.entries(items)) {
+    if (!key.startsWith(ACTIVITY_PREFIX) || typeof value !== "string") continue;
+    try {
+      events.push(JSON.parse(value) as ActivityEvent);
+    } catch {
+      // A half-written entry shouldn't take the rest of the inbox with it.
+    }
   }
+  return events;
+}
+
+/**
+ * Moves entries written under the old single key across to their own, once.
+ * An upgrade shouldn't look like an emptied inbox.
+ */
+async function adoptLegacyEntries(): Promise<void> {
+  const raw = await LocalStorage.getItem<string>(ACTIVITY_KEY);
+  if (!raw) return;
+  try {
+    const events = JSON.parse(raw) as ActivityEvent[];
+    await Promise.all(events.map(e => LocalStorage.setItem(keyFor(e.id), JSON.stringify(e))));
+  } catch {
+    // Unreadable: there is nothing to carry over, and the key still goes.
+  }
+  await LocalStorage.removeItem(ACTIVITY_KEY);
 }
 
 /** Drops entries older than the retention window and caps the total. */
@@ -73,36 +113,61 @@ function prune(events: ActivityEvent[]): ActivityEvent[] {
   return kept.slice(0, MAX_ENTRIES);
 }
 
-async function save(events: ActivityEvent[]): Promise<void> {
-  await LocalStorage.setItem(ACTIVITY_KEY, JSON.stringify(prune(events)));
+/**
+ * Deletes what falls outside the retention window or over the cap. Only the
+ * entries handed in are considered, so an entry another run added while this
+ * one was working is left alone rather than swept up as unknown.
+ */
+async function evict(events: ActivityEvent[]): Promise<void> {
+  const kept = new Set(prune(events).map(e => e.id));
+  const stale = events.filter(e => !kept.has(e.id));
+  await Promise.all(stale.map(e => LocalStorage.removeItem(keyFor(e.id))));
+}
+
+/** Rewrites one entry in place, leaving every other key untouched. */
+async function updateEntry(id: string, change: (event: ActivityEvent) => ActivityEvent): Promise<void> {
+  const raw = await LocalStorage.getItem<string>(keyFor(id));
+  if (!raw) return;
+  try {
+    await LocalStorage.setItem(keyFor(id), JSON.stringify(change(JSON.parse(raw) as ActivityEvent)));
+  } catch {
+    // Unreadable entries are dropped by the next read; nothing to mark.
+  }
 }
 
 /**
  * Adds new entries, skipping any whose id is already recorded. Returns the
  * entries that were genuinely new.
+ *
+ * Each entry goes to its own key, so a check running at the same time can
+ * neither lose these nor have its own lost. Two runs that both record the same
+ * event write the same bytes to the same key, which is harmless.
  */
 export async function recordActivity(events: ActivityEvent[]): Promise<ActivityEvent[]> {
   if (events.length === 0) return [];
-  const existing = await loadActivity();
+  await adoptLegacyEntries();
+  const existing = await readEntries();
   const seen = new Set(existing.map(e => e.id));
   const fresh = events.filter(e => !seen.has(e.id));
   if (fresh.length === 0) return [];
-  await save([...fresh, ...existing]);
+  await Promise.all(fresh.map(e => LocalStorage.setItem(keyFor(e.id), JSON.stringify(e))));
+  await evict([...existing, ...fresh]);
   return fresh;
 }
 
 export async function markActivityRead(ids: string[]): Promise<void> {
-  const wanted = new Set(ids);
-  const events = await loadActivity();
-  await save(events.map(e => (wanted.has(e.id) ? { ...e, read: true } : e)));
+  await Promise.all(ids.map(id => updateEntry(id, event => ({ ...event, read: true }))));
 }
 
 export async function markAllActivityRead(): Promise<void> {
-  const events = await loadActivity();
-  await save(events.map(e => ({ ...e, read: true })));
+  const events = await readEntries();
+  await Promise.all(events.filter(e => !e.read).map(e => updateEntry(e.id, event => ({ ...event, read: true }))));
 }
 
 export async function clearActivity(): Promise<void> {
+  const items = await LocalStorage.allItems();
+  const keys = Object.keys(items).filter(key => key.startsWith(ACTIVITY_PREFIX));
+  await Promise.all(keys.map(key => LocalStorage.removeItem(key)));
   await LocalStorage.removeItem(ACTIVITY_KEY);
 }
 

@@ -9,7 +9,9 @@ const {
   diffCandidates,
   recordActivity,
   loadActivity,
+  markActivityRead,
   markAllActivityRead,
+  clearActivity,
 } = require("../src/attention/lib/activity.ts");
 const watch = require("../src/attention/watch.ts").default;
 beforeEach(reset);
@@ -132,7 +134,7 @@ test("first run is silent, failed writes remain detectable, and committed events
   let diff = await diffCandidates(candidates);
   assert.equal(diff.changes.length, 1);
   const event = { id: "event-1", at: new Date().toISOString(), read: false };
-  state.failWrite = "gh-review.activity";
+  state.failWrite = "gh-review.activity.event-1";
   await assert.rejects(recordActivity([event]), /storage unavailable/);
   diff = await diffCandidates(candidates);
   assert.equal(diff.changes.length, 1);
@@ -143,4 +145,74 @@ test("first run is silent, failed writes remain detectable, and committed events
   assert.equal((await recordActivity([event])).length, 0);
   await markAllActivityRead();
   assert.equal((await loadActivity())[0].read, true);
+});
+
+// ---------------------------------------------------------------------------
+// Overlapping checks
+//
+// The scheduled watcher and a check you start yourself are separate processes
+// sharing storage. Neither may drop what the other just recorded.
+// ---------------------------------------------------------------------------
+
+const hoursAgo = h => new Date(Date.now() - h * 60 * 60 * 1000).toISOString();
+const entry = (id, at = new Date().toISOString()) => ({ id, at, read: false, summary: id });
+
+test("two checks running at once keep both of their entries", async () => {
+  const [scheduled, manual] = await Promise.all([
+    recordActivity([entry("scheduled")]),
+    recordActivity([entry("manual")]),
+  ]);
+  assert.equal(scheduled.length, 1);
+  assert.equal(manual.length, 1);
+
+  const inbox = await loadActivity();
+  assert.deepEqual(
+    inbox.map(e => e.id).sort(),
+    ["manual", "scheduled"],
+    "an entry recorded by the other run must survive",
+  );
+});
+
+test("reading the inbox while a check records does not swallow the new entry", async () => {
+  await recordActivity([entry("older")]);
+  await Promise.all([markActivityRead(["older"]), recordActivity([entry("newer")])]);
+
+  const inbox = await loadActivity();
+  assert.deepEqual(inbox.map(e => e.id).sort(), ["newer", "older"]);
+  assert.equal(inbox.find(e => e.id === "older").read, true);
+  assert.equal(inbox.find(e => e.id === "newer").read, false, "marking one entry read must not touch another");
+});
+
+test("recording the same event twice writes it once", async () => {
+  await recordActivity([entry("same")]);
+  assert.equal((await recordActivity([entry("same")])).length, 0);
+  assert.equal((await loadActivity()).length, 1);
+});
+
+test("entries past the retention window are deleted, not just hidden", async () => {
+  await recordActivity([entry("stale", hoursAgo(80))]);
+  await recordActivity([entry("fresh")]);
+
+  assert.deepEqual((await loadActivity()).map(e => e.id), ["fresh"]);
+  const stored = Object.keys(await api.LocalStorage.allItems()).filter(k => k.startsWith("gh-review.activity."));
+  assert.deepEqual(stored, ["gh-review.activity.fresh"], "the expired entry must leave storage too");
+});
+
+test("an inbox written under the old single key is carried over, once", async () => {
+  await api.LocalStorage.setItem("gh-review.activity", JSON.stringify([entry("legacy")]));
+
+  assert.deepEqual((await loadActivity()).map(e => e.id), ["legacy"]);
+  assert.equal(await api.LocalStorage.getItem("gh-review.activity"), undefined, "the old key is not left behind");
+
+  await recordActivity([entry("after")]);
+  assert.deepEqual((await loadActivity()).map(e => e.id).sort(), ["after", "legacy"]);
+});
+
+test("clearing the inbox leaves nothing behind", async () => {
+  await recordActivity([entry("one"), entry("two")]);
+  await clearActivity();
+
+  assert.deepEqual(await loadActivity(), []);
+  const left = Object.keys(await api.LocalStorage.allItems()).filter(k => k.startsWith("gh-review.activity"));
+  assert.deepEqual(left, []);
 });
