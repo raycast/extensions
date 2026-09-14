@@ -183,6 +183,23 @@ function Get-VirtualScreenBitmap {
     }
 }
 
+function Enter-CaptureMutex {
+    # The Local namespace coordinates ScreenOCR processes in this interactive session.
+    $mutex = [System.Threading.Mutex]::new($false, 'Local\Raycast.ScreenOCR.Capture')
+    $acquired = $false
+    try {
+        try { $acquired = $mutex.WaitOne(0, $false) }
+        # The mutex protects only the capture lifetime, so there is no shared state to recover.
+        catch [System.Threading.AbandonedMutexException] { $acquired = $true }
+        if (-not $acquired) { throw 'SCREENOCR_CAPTURE_BUSY' }
+        return $mutex
+    }
+    catch {
+        if (-not $acquired) { $mutex.Dispose() }
+        throw
+    }
+}
+
 function Select-ScreenRegion {
     param([System.Drawing.Bitmap]$Frozen)
     $bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
@@ -348,7 +365,11 @@ public static extern bool SetProcessDPIAware();
     } catch { [void][ScreenOcrNative.Dpi]::SetProcessDPIAware() }
 
     $bitmap = $null
+    $captureMutex = $null
     try {
+        if ($Mode -eq 'area' -or $Mode -eq 'fullscreen') {
+            $captureMutex = Enter-CaptureMutex
+        }
         if ($Mode -eq 'area') {
             $frozen = Get-VirtualScreenBitmap
             try {
@@ -368,7 +389,18 @@ public static extern bool SetProcessDPIAware();
         $text = Invoke-Ocr $bitmap $Language $IgnoreLineBreaks.IsPresent
         if ([string]::IsNullOrWhiteSpace($text)) { Write-ProtocolJson @{ status = 'no-text' } }
         else { Write-ProtocolJson @{ status = 'recognized'; text = $text } }
-    } finally { if ($bitmap) { $bitmap.Dispose() } }
+    }
+    finally {
+        try {
+            if ($bitmap) { $bitmap.Dispose() }
+        }
+        finally {
+            if ($captureMutex) {
+                try { $captureMutex.ReleaseMutex() }
+                finally { $captureMutex.Dispose() }
+            }
+        }
+    }
 }
 catch {
     if ($_.Exception.Message -eq 'SCREENOCR_CANCELLED') { $exitCode = 2 }
@@ -390,6 +422,9 @@ catch {
     }
     elseif ($_.Exception.Message -eq 'SCREENOCR_CLIPBOARD_UNREADABLE') {
         Write-ProtocolJson @{ status = 'error'; code = 'clipboard-unreadable' }; $exitCode = 4
+    }
+    elseif ($_.Exception.Message -eq 'SCREENOCR_CAPTURE_BUSY') {
+        Write-ProtocolJson @{ status = 'error'; code = 'capture-busy' }; $exitCode = 6
     }
     else { $exitCode = 5; [Console]::Error.WriteLine($_.Exception.ToString()) }
 }

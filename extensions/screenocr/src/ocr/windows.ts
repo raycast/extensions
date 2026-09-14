@@ -174,6 +174,13 @@ function processError(error: unknown, language?: string): RecognitionOutcome {
       message: "The clipboard does not contain a supported image.",
     };
   }
+  if (exitCode === 6) {
+    return {
+      status: "error",
+      message:
+        "Another Windows screen capture is already in progress. Finish or cancel it, then try again.",
+    };
+  }
   if (processFailure.code === "ENOENT") {
     return {
       status: "error",

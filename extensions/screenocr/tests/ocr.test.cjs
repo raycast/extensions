@@ -233,6 +233,12 @@ for (const [error, stdout, status, message] of [
     "error",
     /could not be read/,
   ],
+  [
+    { code: 6 },
+    "",
+    "error",
+    /Another Windows screen capture is already in progress.*cancel it.*try again/,
+  ],
   [{ code: "ENOENT" }, "", "error", /PowerShell 5.1/],
   [{ killed: true, signal: "SIGTERM" }, "", "error", /timed out/],
   [

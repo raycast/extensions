@@ -19,7 +19,15 @@ npm run build
 
 The existing Swift integration requires macOS and Xcode for `ray build` production compilation. Raycast CLI 1.104.20 skips Swift compilation during Windows development builds; a conditional runtime import does not remove the macOS production-build requirement.
 
-## Windows PowerShell verification — pending execution
+## Windows PowerShell verification
+
+Commit `a8a0cb304b3a99d9434294fde59d072660245d19` passed all 11 native tests with no failures or skips on a GitHub-hosted Windows 11 Enterprise ARM runner using Windows PowerShell 5.1.26100.9168 and the installed en-US OCR capability. The suite recognized its generated text image through the real Windows OCR engine. [Native test log](https://github.com/duckieeeduck/extensions/actions/runs/34206099847/job/101995812295).
+
+The same commit also passed the upstream macOS distribution build, including Swift compilation. [Build log](https://github.com/raycast/extensions/actions/runs/34187718101/job/101939312183).
+
+These results apply to that commit and those environments. They do not verify interactive Raycast behavior, mixed-DPI capture, or an x64 Windows desktop. Rerun the native suite after helper changes.
+
+The capture-concurrency fix and its native tests were verified at test-branch commit `d55be03a031806a72d323acb874c59819403b046`: all 13 native tests passed with zero failures or skips on Windows 11 Enterprise ARM. This includes separate-process area/fullscreen contention, non-capture mode independence, abandoned-lock recovery, and real OCR. The helper and test source applied to this PR are identical to that tested commit. [Concurrency verification log](https://github.com/duckieeeduck/extensions/actions/runs/34315945899/job/102352074340).
 
 From `extensions/screenocr` on Windows, run:
 

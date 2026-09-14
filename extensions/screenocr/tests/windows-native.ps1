@@ -12,6 +12,7 @@ if ($PSVersionTable.PSEdition -ne 'Desktop') {
 }
 
 $helperPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'assets\ocr.ps1'
+$captureMutexName = 'Local\Raycast.ScreenOCR.Capture'
 $script:Passed = 0
 $script:Failed = 0
 $script:Skipped = 0
@@ -118,7 +119,8 @@ $requiredFunctions = @(
     'Resize-Bitmap',
     'New-OcrEngine',
     'Normalize-OcrLine',
-    'Invoke-Ocr'
+    'Invoke-Ocr',
+    'Enter-CaptureMutex'
 )
 
 Invoke-Test 'helper parses as Windows PowerShell source' {
@@ -202,6 +204,78 @@ Invoke-Test 'language inventory uses one strict JSON protocol message' {
     foreach ($language in @($payload.languages)) {
         Assert-True ($language.tag -match '^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,3}$') 'Language inventory returned an invalid tag.'
         Assert-True (-not [string]::IsNullOrWhiteSpace($language.displayName)) 'Language inventory returned an empty display name.'
+    }
+}
+
+Invoke-Test 'screen capture contention exits immediately without affecting non-capture modes' {
+    $heldMutex = [System.Threading.Mutex]::new($false, $captureMutexName)
+    $ownsMutex = $false
+    try {
+        $ownsMutex = $heldMutex.WaitOne(0, $false)
+        Assert-True $ownsMutex 'The test could not acquire the capture mutex.'
+
+        foreach ($mode in @('area', 'fullscreen')) {
+            $timer = [System.Diagnostics.Stopwatch]::StartNew()
+            $result = Invoke-HelperProcess "-Mode $mode"
+            $timer.Stop()
+            Assert-Equal $result.ExitCode 6 "$mode contention returned the wrong exit code."
+            Assert-True ($timer.Elapsed.TotalSeconds -lt 10) "$mode contention did not exit promptly."
+            Assert-True ([string]::IsNullOrWhiteSpace($result.Stderr)) "$mode contention wrote diagnostics to stderr."
+            $payload = $result.Stdout.Trim() | ConvertFrom-Json
+            Assert-Equal $payload.status 'error' "$mode contention returned the wrong status."
+            Assert-Equal $payload.code 'capture-busy' "$mode contention returned the wrong protocol code."
+            Assert-Equal @($payload.PSObject.Properties).Count 2 "$mode contention returned unexpected protocol fields."
+        }
+
+        $languages = Invoke-HelperProcess '-ListLanguages'
+        Assert-Equal $languages.ExitCode 0 'Language inventory was blocked by a screen capture.'
+        Assert-Equal (($languages.Stdout.Trim() | ConvertFrom-Json).status) 'languages' 'Language inventory returned the wrong status during capture contention.'
+
+        $clipboard = Invoke-HelperProcess '-Mode clipboard'
+        Assert-True ($clipboard.ExitCode -ne 6) 'Clipboard recognition was blocked by a screen capture.'
+    }
+    finally {
+        if ($ownsMutex) { $heldMutex.ReleaseMutex() }
+        $heldMutex.Dispose()
+    }
+}
+
+Invoke-Test 'capture mutex accepts an abandoned owner while its named object remains alive' {
+    $keepAlive = [System.Threading.Mutex]::new($false, $captureMutexName)
+    $holder = $null
+    $recovered = $null
+    try {
+        $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+        $startInfo.FileName = Join-Path $PSHOME 'powershell.exe'
+        $startInfo.Arguments = '-NoLogo -NoProfile -NonInteractive -Command "$mutex = [System.Threading.Mutex]::new($false, ''Local\Raycast.ScreenOCR.Capture''); [void]$mutex.WaitOne(); [Console]::Out.Write(''held''); [Console]::Out.Flush(); [Environment]::Exit(0)"'
+        $startInfo.UseShellExecute = $false
+        $startInfo.CreateNoWindow = $true
+        $startInfo.RedirectStandardOutput = $true
+        $startInfo.RedirectStandardError = $true
+        $holder = New-Object System.Diagnostics.Process
+        $holder.StartInfo = $startInfo
+        [void]$holder.Start()
+        $stdoutTask = $holder.StandardOutput.ReadToEndAsync()
+        $stderrTask = $holder.StandardError.ReadToEndAsync()
+        if (-not $holder.WaitForExit(10000)) {
+            $holder.Kill()
+            $holder.WaitForExit()
+            throw 'The abandoned-mutex holder did not exit within 10 seconds.'
+        }
+        Assert-Equal $holder.ExitCode 0 'The abandoned-mutex holder failed.'
+        Assert-Equal $stdoutTask.Result 'held' 'The abandoned-mutex holder did not acquire the mutex.'
+        Assert-True ([string]::IsNullOrWhiteSpace($stderrTask.Result)) 'The abandoned-mutex holder wrote diagnostics to stderr.'
+
+        $recovered = Enter-CaptureMutex
+        Assert-True ($null -ne $recovered) 'The helper did not recover ownership of an abandoned mutex.'
+    }
+    finally {
+        if ($recovered) {
+            try { $recovered.ReleaseMutex() }
+            finally { $recovered.Dispose() }
+        }
+        if ($holder) { $holder.Dispose() }
+        $keepAlive.Dispose()
     }
 }
 
