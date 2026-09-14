@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix Reword Message Handling] - {PR_MERGE_DATE}
+
+### Fixed
+- **Rebase**: Keep reword messages literal in interactive rebase, so `$(...)` and backticks are no longer run by the shell, and multi-line messages no longer break the rebase
+
 ## [Fix Pager and Editor Environment Variables] - 2026-09-14
 
 ### Fixed

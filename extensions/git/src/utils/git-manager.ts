@@ -885,6 +885,14 @@ export class GitManager {
    * For reword, the new message will be applied using an exec amend step.
    */
   async interactiveRebase(startHash: string, plan: RebasePlanItem[]): Promise<void> {
+    const tempDirectory = mkdtempSync(join(tmpdir(), "raycast-git-"));
+    // Reword messages are never written into the todo, where `exec` would hand them to the shell. Each one is written to a
+    // file that the sequence editor copies into rebase-merge, so it outlives a rebase that stops early (edit, conflict)
+    // and Git removes it when the rebase finishes or is aborted.
+    const rebaseMergePath = join(this.gitDirPath, "rebase-merge");
+    const quoteForShell = (value: string) => `'${value.replace(/'/g, `'\\''`)}'`;
+    const messageCopyCommands: string[] = [];
+
     // Build rebase todo content based on plan
     const todoLines: string[] = [];
 
@@ -912,10 +920,13 @@ export class GitManager {
           // Use pick + exec amend to set message non-interactively
           todoLines.push(`pick ${hash}`);
           if (item.newMessage) {
-            // Escape double quotes and backslashes for safe shell embedding
-            const escaped = item.newMessage.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-            todoLines.push(`exec git commit --amend -m "${escaped}"`);
+            const messageFileName = `raycast-reword-${messageCopyCommands.length}`;
+            const messagePath = join(tempDirectory, messageFileName);
+            writeFileSync(messagePath, item.newMessage, { encoding: "utf-8" });
+            messageCopyCommands.push(`/bin/cp ${quoteForShell(messagePath)} ${quoteForShell(rebaseMergePath)}`);
+            todoLines.push(`exec git commit --amend -F ${quoteForShell(join(rebaseMergePath, messageFileName))}`);
           } else {
+            rmSync(tempDirectory, { recursive: true, force: true });
             throw new Error("No new message provided for reword action in interactive rebase plan");
           }
           break;
@@ -923,12 +934,11 @@ export class GitManager {
     }
 
     // Create temporary sequence editor script that writes our todo
-    const tempDirectory = mkdtempSync(join(tmpdir(), "raycast-git-"));
     const editorPath = join(tempDirectory, "sequence-editor.sh");
     // Use template literal to generate shell script for sequence editor
     const script = `#!/bin/sh
 TODO_FILE="$1"
-/bin/cat > "$TODO_FILE" <<'__REBASE_TODO__'
+${messageCopyCommands.map((command) => `${command} || exit 1\n`).join("")}/bin/cat > "$TODO_FILE" <<'__REBASE_TODO__'
 ${todoLines.join("\n")}
 __REBASE_TODO__
 `;
