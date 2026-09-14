@@ -165,11 +165,12 @@ export async function indexSafetyChecks(assert: Assert) {
     for (const code of [0, 1, 2]) {
       let failed = false;
       try {
-        for await (const _chunk of spawnFdDefault(process.execPath, [
+        for await (const chunk of spawnFdDefault(process.execPath, [
           "-e",
           `process.exit(${code})`,
         ])) {
           // Exercise the real child process exit handling without requiring fd.
+          void chunk;
         }
       } catch {
         failed = true;
@@ -181,11 +182,12 @@ export async function indexSafetyChecks(assert: Assert) {
     }
     let diagnosticFailure = false;
     try {
-      for await (const _chunk of spawnFdDefault(process.execPath, [
+      for await (const chunk of spawnFdDefault(process.execPath, [
         "-e",
         "process.stderr.write('Permission denied: unreadable folder\\n')",
       ])) {
         // fd can report a traversal error while still exiting zero.
+        void chunk;
       }
     } catch {
       diagnosticFailure = true;

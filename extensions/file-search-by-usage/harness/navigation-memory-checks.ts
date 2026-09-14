@@ -28,8 +28,11 @@ export async function navigationMemoryChecks(
   let liveRoutes = 1;
   let viewRenders = 0;
   type Route = { id: number; node: React.ReactNode; onPop?: () => void };
-  const Navigation = React.createContext({
-    push: (_node: React.ReactNode, _onPop?: () => void) => {},
+  const Navigation = React.createContext<{
+    push: (node: React.ReactNode, onPop?: () => void) => void;
+    pop: () => void;
+  }>({
+    push: () => {},
     pop: () => {},
   });
   let nativePop: () => void;

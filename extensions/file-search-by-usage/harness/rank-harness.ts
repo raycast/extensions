@@ -30,7 +30,6 @@ import {
   canonicalPath,
   isNoisyPath,
   locationLabel,
-  sharedCloudFolderResult,
   sharedCloudFolders,
   readDirectory,
   relativeDepth,

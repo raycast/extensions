@@ -37,9 +37,6 @@ function loadCommand(supportPath: string) {
   /** Resolvers for the rebuild each test holds open. */
   const scans: ((report: unknown) => void)[] = [];
   const failures: ((error: Error) => void)[] = [];
-  const indexScans: ((result: string) => void)[] = [];
-  /** Off by default so tests that do not care about the index are unaffected. */
-  const indexGate = { pending: false };
   const scanOptions: {
     index: { onProgress?: (message: string) => void }[];
   } = { index: [] };
@@ -802,8 +799,7 @@ async function visitWriteChecks(
 ) {
   console.log("\n=== visit log writes ===");
   const files = visitFixture(path.join(root, "visits"));
-  const { openedPath, otherPath, aliasPath, missingPath, opened, other } =
-    files;
+  const { openedPath, aliasPath, missingPath, opened, other } = files;
 
   const first = storeAt(path.join(root, "visits", "first"));
   const startedAt = Date.now();

@@ -309,12 +309,13 @@ export async function rowRenderChecks(
   const module = {
     exports: {} as { Row: React.ComponentType<Record<string, unknown>> },
   };
-  const element: typeof React.createElement = (
-    type: any,
-    props: any,
-    ...children: any[]
+  const element = (
+    ...[type, props, ...children]: Parameters<typeof React.createElement>
   ) => {
-    const name = typeof type === "string" ? type : (type.displayName ?? "");
+    const name =
+      typeof type === "string"
+        ? type
+        : ((type as { displayName?: string }).displayName ?? "");
     if (name.startsWith("action")) menuElements++;
     if (name.startsWith("metadata") || type === Item.Detail) detailElements++;
     return React.createElement(type, props, ...children);

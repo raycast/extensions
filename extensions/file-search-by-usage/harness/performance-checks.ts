@@ -273,12 +273,14 @@ export async function performanceChecks(
   const beforeStart = new AbortController();
   beforeStart.abort();
   let yielded = 0;
-  for await (const _chunk of spawnFdDefault(
+  for await (const chunk of spawnFdDefault(
     process.execPath,
     ["-e", "process.stdout.write('x')"],
     beforeStart.signal,
-  ))
+  )) {
+    void chunk;
     yielded++;
+  }
   assert(yielded === 0, "a cancelled scan never starts an fd process");
 
   const controller = new AbortController();

@@ -18,7 +18,6 @@ import {
   ftsSuspended,
   openIndexForRead,
   openIndexForWrite,
-  resumeFtsSync,
   suspendFtsSync,
   readIndexRoots,
   readIndexStats,
@@ -30,7 +29,6 @@ import {
   redundantLinks,
   resolveRoots,
   scanRoot,
-  scanRoots,
   describeScan,
   INDEX_EXCLUSIONS,
 } from "../src/lib/index-scan";

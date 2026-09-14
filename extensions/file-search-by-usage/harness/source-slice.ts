@@ -41,5 +41,8 @@ export function through(
   from = 0,
 ): string {
   const open = locate(source, start, from);
-  return source.slice(open, locate(source, end, open + start.length) + end.length);
+  return source.slice(
+    open,
+    locate(source, end, open + start.length) + end.length,
+  );
 }
