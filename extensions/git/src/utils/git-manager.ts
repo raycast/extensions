@@ -10,6 +10,7 @@ import {
   ResetMode,
   simpleGit,
   SimpleGit,
+  SimpleGitOptions,
 } from "simple-git";
 import { showToast, Toast, getPreferenceValues, Alert, confirmAlert, environment } from "@raycast/api";
 import { readFileSync, writeFileSync, mkdtempSync, chmodSync, rmSync, existsSync, statSync } from "fs";
@@ -65,17 +66,7 @@ export class GitManager {
     this.gitDirPath = gitDirPath;
     this.gitCommonDirPath = gitCommonDirPath;
 
-    this.git = simpleGit(repoPath, {
-      binary: getPreferenceValues<Preferences>().binaryPath,
-      errors: (error, _result) => {
-        if (error) {
-          showFailureToast(error, { title: `Error running command` });
-        }
-        return error;
-      },
-    });
-
-    this.git = this.git.env(shellEnvironmentVariables);
+    this.git = GitManager.createSimpleGit(repoPath).env(shellEnvironmentVariables);
 
     // Global logging of all git commands for debugging
     this.setupGlobalLogging();
@@ -140,6 +131,19 @@ export class GitManager {
    */
   get hasLinkedWorktrees(): boolean {
     return existsSync(join(this.gitCommonDirPath, "worktrees"));
+  }
+
+  private static createSimpleGit(repoPath: string, unsafe?: SimpleGitOptions["unsafe"]): SimpleGit {
+    return simpleGit(repoPath, {
+      binary: getPreferenceValues<Preferences>().binaryPath,
+      unsafe,
+      errors: (error, _result) => {
+        if (error) {
+          showFailureToast(error, { title: `Error running command` });
+        }
+        return error;
+      },
+    });
   }
 
   /**
@@ -1539,7 +1543,11 @@ __REBASE_TODO__
    * Continues an ongoing rebase.
    */
   async continueRebase(): Promise<void> {
-    await this.git.env("GIT_EDITOR", "true").rebase(["--continue"]);
+    // simple-git only accepts GIT_EDITOR with allowUnsafeEditor. Use a separate instance with its own env copy:
+    // `this.git.env(name, value)` would write GIT_EDITOR into the shared shellEnvironmentVariables object.
+    await GitManager.createSimpleGit(this.repoPath, { allowUnsafeEditor: true })
+      .env({ ...shellEnvironmentVariables, GIT_EDITOR: "true" })
+      .rebase(["--continue"]);
   }
 
   /**

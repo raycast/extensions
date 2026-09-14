@@ -4,6 +4,7 @@
 
 ### Fixed
 - **Git**: Fix "Use of PAGER is not permitted without enabling allowUnsafePager" (and the same error for `EDITOR`) when the shell exports a pager or editor
+- **Rebase**: Fix "Continue Rebase" failing with "Use of GIT_EDITOR is not permitted" and breaking every later Git command until the extension reloads
 
 ## [Update] - 2026-08-13
 
