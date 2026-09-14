@@ -2,6 +2,7 @@ import { ConnectorProvider, GetAgentConfigurationsResponseType, MeResponseType }
 import { Color, Icon, Image, LocalStorage } from "@raycast/api";
 import { jwtDecode } from "jwt-decode";
 import { marked, Token, Tokens } from "marked";
+import striptags from "striptags";
 import Asset = Image.Asset;
 
 export interface AgentType {
@@ -226,8 +227,9 @@ function renderTokenPlain(token: Token): string {
     case "hr":
       return "\n";
     case "space":
-    case "html":
       return "";
+    case "html":
+      return striptags(renderInlinePlain(token));
     default:
       return "raw" in token ? String(token.raw) : "";
   }

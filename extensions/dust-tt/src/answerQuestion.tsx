@@ -216,7 +216,7 @@ export async function answerQuestion({
           title: "Thinking...",
         });
 
-        let streamError = false;
+        let done = false;
         const processEvent = (eventData: Record<string, unknown>) => {
           const event = eventData.data as Record<string, unknown> | undefined;
           if (!event || !event.type) return;
@@ -227,7 +227,7 @@ export async function answerQuestion({
               console.error(`User message error: code: ${error.code} message: ${error.message}`);
               setDustAnswer(`**User message error** ${error.message}`);
               showToast({ style: Toast.Style.Failure, title: "User message error", message: error.message });
-              streamError = true;
+              done = true;
               break;
             }
             case "agent_error": {
@@ -235,7 +235,7 @@ export async function answerQuestion({
               console.error(`Agent message error: code: ${error.code} message: ${error.message}`);
               setDustAnswer(`**Dust API error** ${error.message}`);
               showToast({ style: Toast.Style.Failure, title: "Dust API error", message: error.message });
-              streamError = true;
+              done = true;
               break;
             }
             case "agent_action_success": {
@@ -279,6 +279,7 @@ export async function answerQuestion({
                 agent: agent.name,
               });
               finalAnswer = answer;
+              done = true;
               break;
             }
             default:
@@ -299,8 +300,8 @@ export async function answerQuestion({
 
         const decoder = new TextDecoder();
         for await (const chunk of res.body) {
-          if (streamError) break;
           parser.feed(decoder.decode(chunk as Buffer, { stream: true }));
+          if (done) break;
         }
       } catch (error) {
         const isAbort =
