@@ -10,10 +10,11 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   showToast,
+  trash,
   Keyboard,
 } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { copyFile, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, readFile, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { promisify } from "node:util";
 import { useEffect, useRef, useState } from "react";
@@ -256,7 +257,7 @@ export default function Command() {
         : [itemToSave, ...current];
     });
     if (isSaved && gif.provider === "local") {
-      await rm(gif.mediaUrl, { force: true });
+      await trash(gif.mediaUrl);
     }
     await showToast({
       style: Toast.Style.Success,
