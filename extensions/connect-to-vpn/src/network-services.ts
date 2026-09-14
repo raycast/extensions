@@ -92,6 +92,14 @@ export const getNetworkServices = async (favs: Record<string, boolean>, order: R
 const SETTLE_POLL_MS = 250;
 const SETTLE_MAX_CHECKS = 120;
 
+// macOS needs a moment to report a change it has just been asked to make, so the first checks can
+// still answer with the status from before the request. Treat that as "not yet" for about a second
+// rather than snapping the service back to where it started.
+const SETTLE_GRACE_CHECKS = 4;
+
+const statusBeforeTransition = (status: NetworkServiceStatus) =>
+  status === "connecting" ? "disconnected" : status === "disconnecting" ? "connected" : undefined;
+
 export function useNetworkServices() {
   const { sortBy, hideInvalidDevices } = getPreferenceValues<Preferences>();
   const [isLoading, setIsLoading] = useState(true);
@@ -131,32 +139,42 @@ export function useNetworkServices() {
   // from here rather than from the action callback matters: Raycast ends a session once the
   // callback returns, while this effect is part of the component and stops with it.
   useEffect(() => {
-    const settling = Object.values(networkServices).some(
+    const settling = Object.values(networkServices).filter(
       (service) => service.status === "connecting" || service.status === "disconnecting",
     );
 
-    if (!settling) {
+    if (settling.length === 0) {
       settleChecks.current = 0;
       return;
     }
 
     if (settleChecks.current >= SETTLE_MAX_CHECKS) return;
-    settleChecks.current += 1;
+    const check = (settleChecks.current += 1);
 
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
+        // currentStatus rather than the scutil map alone, so a service that map does not cover
+        // still settles through the networksetup fallback instead of staying in transition
         const statuses = await listVpnStatuses();
+        const resolved = await Promise.all(
+          settling.map(async (service) => [service.id, await currentStatus(service, statuses)] as const),
+        );
         if (cancelled) return;
 
-        setNetworkServices((currentServices) =>
-          Object.fromEntries(
-            Object.entries(currentServices).map(([id, service]) => [
-              id,
-              statuses[service.name] ? { ...service, status: statuses[service.name] } : service,
-            ]),
-          ),
-        );
+        setNetworkServices((currentServices) => {
+          const updated = { ...currentServices };
+
+          for (const [id, status] of resolved) {
+            const service = updated[id];
+            if (!service) continue;
+            if (check <= SETTLE_GRACE_CHECKS && status === statusBeforeTransition(service.status)) continue;
+
+            updated[id] = { ...service, status };
+          }
+
+          return updated;
+        });
       } catch (err) {
         if (!isSessionGone(err)) console.error("Error while waiting for a service to settle:", err);
       }

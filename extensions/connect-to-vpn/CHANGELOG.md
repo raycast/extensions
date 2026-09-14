@@ -1,6 +1,6 @@
 # Connect to VPN Changelog
 
-## [Bug fix] - 2026-09-14
+## [Bug fix] - {PR_MERGE_DATE}
 
 - Check service status without blocking, so the background refresh no longer stalls the extension for close to two seconds every 30 seconds
 - Stop the menu bar from signalling itself, which made it refresh every service in a loop and log a failed attempt to launch itself
