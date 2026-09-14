@@ -5,21 +5,45 @@ import { describe, it } from "node:test";
 import {
   AUTOMATIC_CLSID,
   CONHOST_CLSID,
-  WINDOWS_TERMINAL_CLSIDS,
-  chooseLauncher,
+  WINDOWS_TERMINAL_CLSID,
+  WINDOWS_TERMINAL_FAMILY,
+  WINDOWS_TERMINAL_PREVIEW_CLSID,
+  WINDOWS_TERMINAL_PREVIEW_FAMILY,
+  defaultWindowsTerminal,
   isWindowsTerminal,
   packageFamily,
+  packageFamilyFromStorePath,
   parseDelegationTerminal,
   startCommandLine,
   windowsTerminalAlias,
   windowsTerminalCandidates,
 } from "../src/windows.ts";
 
-const [WINDOWS_TERMINAL_CLSID, WINDOWS_TERMINAL_PREVIEW_CLSID] = WINDOWS_TERMINAL_CLSIDS;
 const THIRD_PARTY_CLSID = "{12345678-90AB-CDEF-1234-567890ABCDEF}";
 const LOCAL_APP_DATA = "C:\\Users\\anna\\AppData\\Local";
 const SHARED_ALIAS = `${LOCAL_APP_DATA}\\Microsoft\\WindowsApps\\wt.exe`;
-const PREVIEW_FAMILY = "Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe";
+const STABLE_FAMILY = WINDOWS_TERMINAL_FAMILY;
+const PREVIEW_FAMILY = WINDOWS_TERMINAL_PREVIEW_FAMILY;
+const STABLE_ALIAS = `${LOCAL_APP_DATA}\\Microsoft\\WindowsApps\\${STABLE_FAMILY}\\wt.exe`;
+const PREVIEW_ALIAS = `${LOCAL_APP_DATA}\\Microsoft\\WindowsApps\\${PREVIEW_FAMILY}\\wt.exe`;
+const STABLE_STORE_PATH = `C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.22.0.0_x64__8wekyb3d8bbwe\\wt.exe`;
+const PREVIEW_STORE_PATH = `C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminalPreview_1.23.0.0_x64__8wekyb3d8bbwe\\wt.exe`;
+
+const withLocalAppData = (fn) => {
+  const previous = process.env.LOCALAPPDATA;
+  process.env.LOCALAPPDATA = LOCAL_APP_DATA;
+  try {
+    return fn();
+  } finally {
+    if (previous === undefined) delete process.env.LOCALAPPDATA;
+    else process.env.LOCALAPPDATA = previous;
+  }
+};
+
+const installed =
+  (...exes) =>
+  (exe) =>
+    exes.includes(exe);
 
 describe("windowsTerminalAlias", () => {
   it("points at the shared app execution alias in the user's WindowsApps folder", () => {
@@ -48,43 +72,55 @@ describe("packageFamily", () => {
   });
 });
 
-describe("windowsTerminalCandidates", () => {
-  const withLocalAppData = (fn) => {
-    const previous = process.env.LOCALAPPDATA;
-    process.env.LOCALAPPDATA = LOCAL_APP_DATA;
-    try {
-      return fn();
-    } finally {
-      if (previous === undefined) delete process.env.LOCALAPPDATA;
-      else process.env.LOCALAPPDATA = previous;
-    }
-  };
-
-  it("uses only the shared alias when no app was chosen", () => {
-    assert.deepEqual(withLocalAppData(() => windowsTerminalCandidates()), [SHARED_ALIAS]);
+describe("packageFamilyFromStorePath", () => {
+  it("reads the family out of the package folder name", () => {
+    assert.equal(packageFamilyFromStorePath(STABLE_STORE_PATH), STABLE_FAMILY);
+    assert.equal(packageFamilyFromStorePath(PREVIEW_STORE_PATH), PREVIEW_FAMILY);
+    // A resource id between the architecture and the publisher hash is dropped like the version.
+    assert.equal(
+      packageFamilyFromStorePath("C:\\Program Files\\WindowsApps\\Vendor.App_2.0.1.0_arm64_neutral_abcdefghijklm\\app.exe"),
+      "Vendor.App_abcdefghijklm",
+    );
   });
 
-  // Regression: the shared alias could belong to stable while the user picked Preview.
-  it("tries the chosen package's own alias before the shared one", () => {
+  it("returns undefined for paths outside the package store", () => {
+    assert.equal(packageFamilyFromStorePath(undefined), undefined);
+    assert.equal(packageFamilyFromStorePath(""), undefined);
+    assert.equal(packageFamilyFromStorePath(SHARED_ALIAS), undefined);
+    assert.equal(packageFamilyFromStorePath("D:\\Tools\\WindowsTerminal\\wt.exe"), undefined);
+  });
+});
+
+describe("windowsTerminalCandidates", () => {
+  // Regression: the shared alias may belong to stable while the user picked Preview, or the
+  // other way round. A chosen build must never fall back to it, so a missing alias fails loudly.
+  it("uses only the chosen package's own alias when the app id names the package", () => {
     assert.deepEqual(
       withLocalAppData(() => windowsTerminalCandidates({ path: "", windowsAppId: `${PREVIEW_FAMILY}!App` })),
-      [`${LOCAL_APP_DATA}\\Microsoft\\WindowsApps\\${PREVIEW_FAMILY}\\wt.exe`, SHARED_ALIAS],
+      [PREVIEW_ALIAS],
+    );
+    assert.deepEqual(
+      withLocalAppData(() => windowsTerminalCandidates({ path: SHARED_ALIAS, windowsAppId: `${STABLE_FAMILY}!App` })),
+      [STABLE_ALIAS],
     );
   });
 
-  it("keeps a path outside the package store but skips one inside it", () => {
+  it("uses only the chosen package's own alias when the path points into the package store", () => {
+    assert.deepEqual(withLocalAppData(() => windowsTerminalCandidates({ path: PREVIEW_STORE_PATH })), [PREVIEW_ALIAS]);
+    assert.deepEqual(withLocalAppData(() => windowsTerminalCandidates({ path: STABLE_STORE_PATH })), [STABLE_ALIAS]);
+  });
+
+  it("uses the supplied executable alone when it is not a packaged build", () => {
     assert.deepEqual(withLocalAppData(() => windowsTerminalCandidates({ path: "D:\\Tools\\WindowsTerminal\\wt.exe" })), [
       "D:\\Tools\\WindowsTerminal\\wt.exe",
+    ]);
+  });
+
+  it("falls back to the shared alias only when nothing identifies a build", () => {
+    assert.deepEqual(withLocalAppData(() => windowsTerminalCandidates({ path: "" })), [SHARED_ALIAS]);
+    assert.deepEqual(withLocalAppData(() => windowsTerminalCandidates({ path: "C:\\Program Files\\WindowsApps\\" })), [
       SHARED_ALIAS,
     ]);
-    assert.deepEqual(
-      withLocalAppData(() =>
-        windowsTerminalCandidates({
-          path: "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.22.0.0_x64__8wekyb3d8bbwe\\wt.exe",
-        }),
-      ),
-      [SHARED_ALIAS],
-    );
   });
 });
 
@@ -134,26 +170,44 @@ describe("parseDelegationTerminal", () => {
   });
 });
 
-describe("chooseLauncher", () => {
-  it("starts Windows Terminal when it is the default or Windows decides", () => {
-    assert.equal(chooseLauncher(WINDOWS_TERMINAL_CLSID, true), "windows-terminal");
-    assert.equal(chooseLauncher(WINDOWS_TERMINAL_PREVIEW_CLSID, true), "windows-terminal");
-    assert.equal(chooseLauncher(AUTOMATIC_CLSID, true), "windows-terminal");
-    assert.equal(chooseLauncher(undefined, true), "windows-terminal");
+describe("defaultWindowsTerminal", () => {
+  const resolve = (clsid, ...exes) => withLocalAppData(() => defaultWindowsTerminal(clsid, installed(...exes)));
+  const both = [STABLE_ALIAS, PREVIEW_ALIAS, SHARED_ALIAS];
+
+  // Regression: stable and Preview used to collapse into one launcher that started the shared
+  // alias, so the setting could name Preview and the extension still open stable.
+  it("starts the build the setting names, through that package's own alias", () => {
+    assert.deepEqual(resolve(WINDOWS_TERMINAL_CLSID, ...both), { exe: STABLE_ALIAS, name: "Windows Terminal" });
+    assert.deepEqual(resolve(WINDOWS_TERMINAL_PREVIEW_CLSID, ...both), {
+      exe: PREVIEW_ALIAS,
+      name: "Windows Terminal Preview",
+    });
+  });
+
+  it("never substitutes the other build when the named one is missing", () => {
+    // Stable owns the shared alias, the setting says Preview: a PowerShell console it is.
+    assert.equal(resolve(WINDOWS_TERMINAL_PREVIEW_CLSID, STABLE_ALIAS, SHARED_ALIAS), undefined);
+    assert.equal(resolve(WINDOWS_TERMINAL_CLSID, PREVIEW_ALIAS, SHARED_ALIAS), undefined);
+  });
+
+  it("resolves the automatic choice to the stable build", () => {
+    assert.deepEqual(resolve(AUTOMATIC_CLSID, ...both), { exe: STABLE_ALIAS, name: "Windows Terminal" });
+    assert.deepEqual(resolve(undefined, ...both), { exe: STABLE_ALIAS, name: "Windows Terminal" });
+    assert.equal(resolve(AUTOMATIC_CLSID, PREVIEW_ALIAS, SHARED_ALIAS), undefined);
   });
 
   it("opens a PowerShell console when the console host is the default", () => {
-    assert.equal(chooseLauncher(CONHOST_CLSID, true), "powershell");
+    assert.equal(resolve(CONHOST_CLSID, ...both), undefined);
   });
 
   // A host we cannot start ourselves still gets the window: Windows delegates the console to it.
   it("opens a PowerShell console for a default terminal it does not recognise", () => {
-    assert.equal(chooseLauncher(THIRD_PARTY_CLSID, true), "powershell");
+    assert.equal(resolve(THIRD_PARTY_CLSID, ...both), undefined);
   });
 
   it("opens a PowerShell console when Windows Terminal is not installed, whatever the setting", () => {
-    assert.equal(chooseLauncher(WINDOWS_TERMINAL_CLSID, false), "powershell");
-    assert.equal(chooseLauncher(undefined, false), "powershell");
+    assert.equal(resolve(WINDOWS_TERMINAL_CLSID), undefined);
+    assert.equal(resolve(undefined), undefined);
   });
 });
 

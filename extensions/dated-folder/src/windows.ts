@@ -23,10 +23,11 @@ export const WINDOWS_POWERSHELL = join(SYSTEM32, "WindowsPowerShell", "v1.0", "p
  * Windows Terminal ships as an MSIX package (Store and winget alike), so its executable lives in
  * a per-version folder under `Program Files\WindowsApps` and cannot be run from there without
  * package activation. The stable entry point is the app execution alias in the user's
- * `WindowsApps` folder. The alias at the top level is shared: stable and preview both register
- * `wt.exe`, and only one of them owns it at a time. Each package also gets its own copy in a
- * subfolder named after the package family, which is the one to use when a specific build was
- * chosen in the app picker.
+ * `WindowsApps` folder. The alias at the top level is shared: stable and Preview both register
+ * `wt.exe`, and only one of them owns it at a time, so it never tells which build it starts.
+ * Each package also gets its own copy in a subfolder named after the package family, and that is
+ * the one to use whenever a specific build is meant — the shared alias is only for the case where
+ * no build was named at all.
  */
 export function windowsTerminalAlias(
   packageFamily?: string,
@@ -34,6 +35,11 @@ export function windowsTerminalAlias(
 ) {
   return join(localAppData, "Microsoft", "WindowsApps", ...(packageFamily ? [packageFamily] : []), "wt.exe");
 }
+
+export const WINDOWS_TERMINAL_FAMILY = "Microsoft.WindowsTerminal_8wekyb3d8bbwe";
+export const WINDOWS_TERMINAL_PREVIEW_FAMILY = "Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe";
+
+const PACKAGE_STORE = /\\Program Files\\WindowsApps\\/i;
 
 /**
  * The package family name out of a Windows app id such as
@@ -46,18 +52,32 @@ export function packageFamily(windowsAppId?: string): string | undefined {
 }
 
 /**
- * Where to look for the Windows Terminal that `app` stands for, most specific first: the alias
- * belonging to its package, then the path the picker supplied (skipped when it points into the
- * package store, which cannot be launched directly), then the shared alias.
+ * The package family name out of a path into the package store, such as
+ * `C:\Program Files\WindowsApps\Microsoft.WindowsTerminalPreview_1.23.0.0_x64__8wekyb3d8bbwe\wt.exe`.
+ * The folder carries the package full name — name, version, architecture, resource id (usually
+ * empty) and publisher hash joined by `_` — and the family is the name plus the hash. A package
+ * name itself cannot contain `_`, so the split is unambiguous.
  */
-export function windowsTerminalCandidates(app?: Pick<Application, "path" | "windowsAppId">): string[] {
-  const family = packageFamily(app?.windowsAppId);
-  const candidates = [
-    family && windowsTerminalAlias(family),
-    app?.path && /\.exe$/i.test(app.path) && !/\\Program Files\\WindowsApps\\/i.test(app.path) ? app.path : undefined,
-    windowsTerminalAlias(),
-  ];
-  return candidates.filter((path): path is string => Boolean(path));
+export function packageFamilyFromStorePath(path?: string): string | undefined {
+  const match =
+    /\\Program Files\\WindowsApps\\([a-z0-9.-]+)_\d+(?:\.\d+){0,3}_[a-z0-9]+_[^\\_]*_([a-z0-9]{13})\\/i.exec(
+      path ?? "",
+    );
+  return match ? `${match[1]}_${match[2]}` : undefined;
+}
+
+/**
+ * Where to look for the Windows Terminal that `app` stands for. When the picker identifies the
+ * package — through the app id, or through a path into the package store — only that package's
+ * own alias will do: the shared `wt.exe` may belong to the other build, and starting it would
+ * contradict the choice the HUD reports. Without a package identity there is no build to honour,
+ * so the supplied executable is used, or failing that the shared alias.
+ */
+export function windowsTerminalCandidates(app: Pick<Application, "path" | "windowsAppId">): string[] {
+  const family = packageFamily(app.windowsAppId) ?? packageFamilyFromStorePath(app.path);
+  if (family) return [windowsTerminalAlias(family)];
+  if (app.path && /\.exe$/i.test(app.path) && !PACKAGE_STORE.test(app.path)) return [app.path];
+  return [windowsTerminalAlias()];
 }
 
 /**
@@ -82,18 +102,26 @@ export function isWindowsTerminal(app: Pick<Application, "name" | "path" | "wind
  * Windows 11 exposes "Default terminal application" under Settings → System → For developers.
  * It stores the CLSID of the host that console programs are delegated to. The values below are
  * the ones Microsoft documents (see "Default terminal application" in the Windows Terminal
- * group policy reference): the all-zero "Let Windows decide", which resolves to Windows Terminal
- * whenever it is installed, the classic console host, and Windows Terminal stable and preview.
- * Anything else is a host we cannot start ourselves — but launching a console program through
- * `start` lets Windows delegate it there.
+ * group policy reference): the all-zero "Let Windows decide", which resolves to the stable
+ * Windows Terminal whenever it is installed, the classic console host, and Windows Terminal
+ * stable and Preview, each a package of its own. Anything else is a host we cannot start
+ * ourselves — but launching a console program through `start` lets Windows delegate it there.
  */
 const STARTUP_KEY = "HKCU\\Console\\%%Startup";
 export const AUTOMATIC_CLSID = "{00000000-0000-0000-0000-000000000000}";
 export const CONHOST_CLSID = "{B23D10C0-E52E-411E-9D5B-C09FDF709C7D}";
-export const WINDOWS_TERMINAL_CLSIDS = [
-  "{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}", // Windows Terminal
-  "{86633F1F-6454-40EC-89CE-DA4EBA977EE2}", // Windows Terminal Preview
-];
+export const WINDOWS_TERMINAL_CLSID = "{E12CFF52-A866-4C77-9A90-F570A7AA2C6B}";
+export const WINDOWS_TERMINAL_PREVIEW_CLSID = "{86633F1F-6454-40EC-89CE-DA4EBA977EE2}";
+
+export interface WindowsTerminalBuild {
+  name: string;
+  family: string;
+}
+
+export const WINDOWS_TERMINAL_BUILDS: ReadonlyMap<string, WindowsTerminalBuild> = new Map([
+  [WINDOWS_TERMINAL_CLSID, { name: "Windows Terminal", family: WINDOWS_TERMINAL_FAMILY }],
+  [WINDOWS_TERMINAL_PREVIEW_CLSID, { name: "Windows Terminal Preview", family: WINDOWS_TERMINAL_PREVIEW_FAMILY }],
+]);
 
 /** Extracts the DelegationTerminal CLSID from `reg query` output; undefined when it is unset. */
 export function parseDelegationTerminal(regOutput: string): string | undefined {
@@ -117,19 +145,25 @@ async function defaultTerminalClsid(): Promise<string | undefined> {
   }
 }
 
-export type Launcher = "windows-terminal" | "powershell";
-
 /**
- * Picks how to open the folder when no app is chosen. Windows Terminal is started directly so its
- * default profile applies. Every other host — the classic console, or one we do not recognise —
- * cannot be started on its own, so PowerShell is opened in a console window instead and Windows
- * hosts it wherever the setting says. An unset value means the setting was never touched, which
- * is the automatic choice.
+ * The Windows Terminal build the default terminal setting names, when no app is chosen: stable
+ * and Preview each map to their own package alias, so the build the setting picks is the one
+ * started, whichever of them owns the shared `wt.exe`. An unset value means the setting was
+ * never touched, which is the automatic choice, and that resolves to the stable build.
+ *
+ * Undefined means there is nothing to start directly: the named build is not installed, or the
+ * default is the classic console host or a host we do not recognise. PowerShell is then opened
+ * in a console window instead and Windows hosts it wherever the setting says.
  */
-export function chooseLauncher(clsid: string | undefined, windowsTerminalInstalled: boolean): Launcher {
-  if (!windowsTerminalInstalled) return "powershell";
+export function defaultWindowsTerminal(
+  clsid: string | undefined,
+  isInstalled: (exe: string) => boolean = existsSync,
+): { exe: string; name: string } | undefined {
   const wanted = clsid ?? AUTOMATIC_CLSID;
-  return wanted === AUTOMATIC_CLSID || WINDOWS_TERMINAL_CLSIDS.includes(wanted) ? "windows-terminal" : "powershell";
+  const build = WINDOWS_TERMINAL_BUILDS.get(wanted === AUTOMATIC_CLSID ? WINDOWS_TERMINAL_CLSID : wanted);
+  if (!build) return undefined;
+  const exe = windowsTerminalAlias(build.family);
+  return isInstalled(exe) ? { exe, name: build.name } : undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -217,16 +251,20 @@ export async function openInWindowsTerminal(target: string, app?: Application): 
     await startInFolder(target, app.path);
     return app.name;
   }
-  const wt = windowsTerminalCandidates(app).find((path) => existsSync(path));
   if (app) {
-    // The user asked for Windows Terminal by name; swapping in PowerShell would be a surprise.
-    if (!wt) throw new Error(`${app.name} was not found — is its app execution alias enabled?`);
+    // The user asked for this build of Windows Terminal by name: neither the other build nor
+    // PowerShell may stand in for it, so a missing alias is an error rather than a fallback.
+    const wt = windowsTerminalCandidates(app).find((path) => existsSync(path));
+    if (!wt) {
+      throw new Error(`${app.name} was not found — is it still installed, with its app execution alias enabled?`);
+    }
     await spawnDetached(wt, ["-d", target], target);
     return app.name;
   }
-  if (chooseLauncher(await defaultTerminalClsid(), wt !== undefined) === "windows-terminal" && wt) {
-    await spawnDetached(wt, ["-d", target], target);
-    return "Windows Terminal";
+  const wt = defaultWindowsTerminal(await defaultTerminalClsid());
+  if (wt) {
+    await spawnDetached(wt.exe, ["-d", target], target);
+    return wt.name;
   }
   await startInFolder(target, WINDOWS_POWERSHELL, ["-NoLogo"]);
   return "Windows PowerShell";
