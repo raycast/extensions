@@ -1,6 +1,6 @@
 # Dated Folder Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-09-14
 
 - Available on Windows: follows the Default Terminal Application setting, opening the folder in Windows Terminal or a PowerShell console
 - A terminal chosen in the preferences is launched with the new folder as its working directory
