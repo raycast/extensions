@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clearurls-cleaner",
+  "title": "ClearURLs Cleaner",
+  "description": "Remove tracking parameters from URLs using live ClearURLs rules",
+  "icon": "icon.png",
+  "author": "JoeDoe",
+  "categories": ["Productivity", "Security"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clean-url",
+      "title": "Clean URL",
+      "description": "Remove tracking parameters from a URL",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL to clean",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "removeReferralMarketing",
+          "type": "checkbox",
+          "title": "Remove referral marketing",
+          "description": "Also strip affiliate/referral parameters such as ref, tag, referrer",
+          "label": "Remove referral marketing parameters",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "refresh-rules",
+      "title": "Refresh ClearURLs Rules",
+      "description": "Download the latest ClearURLs rules from GitHub",
+      "mode": "no-view",
+      "interval": "24h"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cacheTtlHours",
+      "type": "textfield",
+      "title": "Rules cache TTL (hours)",
+      "description": "Download new rules when the cached copy is older than this",
+      "placeholder": "24",
+      "default": "24",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.14.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
