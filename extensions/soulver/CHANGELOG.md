@@ -1,6 +1,6 @@
 # Soulver Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-09-14
 
 - Add `Solve Expression` command to quickly evaluate math, currency, unit, and date calculations using Soulver CLI.
 - Add full suite of Raycast AI Tools for working with Soulver sheetbooks:
