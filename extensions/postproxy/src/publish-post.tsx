@@ -45,7 +45,17 @@ export default function PublishPost() {
         title: v.draft ? "Saving draft…" : scheduled ? "Scheduling…" : "Publishing…",
       });
       try {
-        const selectedNow = profiles.filter((p) => v.profiles.includes(p.id));
+        // A selected profile may have been disconnected since selection. Block if ANY is missing rather
+        // than silently narrowing the post's destinations (dropping one could remove the only profile on
+        // a whole network); the user reselects the still-connected profiles explicitly.
+        const requestedIds = new Set(v.profiles);
+        const selectedNow = profiles.filter((p) => requestedIds.has(p.id));
+        if (selectedNow.length !== requestedIds.size) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Profiles unavailable";
+          toast.message = "One or more selected profiles are no longer connected. Reselect and try again.";
+          return;
+        }
         const platforms = buildPlatforms(v.platformParams, networkPlacements, eligiblePlacementNetworks(selectedNow));
         // Validate the final payload against a fresh fetch for the current profiles: catches
         // multi-profile ambiguity, raw-JSON placements, and stale/invalid ids alike.
@@ -58,7 +68,7 @@ export default function PublishPost() {
         }
         const result = await createPost({
           body: v.body,
-          profiles: v.profiles,
+          profiles: selectedNow.map((profile) => profile.id),
           media: v.media,
           scheduledAt: scheduled?.toISOString(),
           draft: v.draft,
