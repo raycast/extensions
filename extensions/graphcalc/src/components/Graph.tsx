@@ -42,7 +42,7 @@ function shortcut(macOS: Keys, windows?: Keys): Keyboard.Shortcut {
     modifiers: macOS.modifiers.map((m) => (m === "cmd" ? "ctrl" : m)),
   };
   // Set under both `Windows` and the legacy lowercase key for older app builds.
-  return { macOS, Windows: win, windows: win };
+  return { macOS, Windows: win };
 }
 
 const SHORTCUTS = {
