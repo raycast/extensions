@@ -57,7 +57,6 @@ export async function answerQuestion({
   setDustDocuments,
   agent = DUST_AGENT,
   signal,
-  onAnswer,
 }: {
   question: string;
   dustApi: DustAPI;
@@ -68,8 +67,7 @@ export async function answerQuestion({
   setDustDocuments: (documents: DustDocument[]) => void;
   agent?: AgentType;
   signal: AbortSignal;
-  onAnswer?: (answer: string) => void;
-}) {
+}): Promise<string | undefined> {
   function removeCiteMention(message: string) {
     const regex = / ?:cite\[[a-zA-Z0-9, ]+\]/g;
     return message.replace(regex, "");
@@ -184,7 +182,7 @@ export async function answerQuestion({
         return;
       }
 
-      let onAnswerResult: Promise<void> | undefined;
+      let finalAnswer: string | undefined;
 
       try {
         // Stream SSE events directly using undici fetch + Node.js async iterable,
@@ -280,7 +278,7 @@ export async function answerQuestion({
                 date: new Date(),
                 agent: agent.name,
               });
-              onAnswerResult = Promise.resolve(onAnswer?.(answer));
+              finalAnswer = answer;
               break;
             }
             default:
@@ -320,23 +318,13 @@ export async function answerQuestion({
         }
       }
 
-      if (onAnswerResult) {
-        await onAnswerResult;
-      }
+      return finalAnswer;
     }
   }
 }
 
 export const AskDustQuestion = withPickedWorkspace(
-  ({
-    question,
-    agent = DUST_AGENT,
-    onAnswer,
-  }: {
-    question: string;
-    agent?: AgentType;
-    onAnswer?: (answer: string) => void;
-  }) => {
+  ({ question, agent = DUST_AGENT }: { question: string; agent?: AgentType }) => {
     const [conversationId, setConversationId] = useState<string | undefined>(undefined);
     const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
     const [dustAnswer, setDustAnswer] = useState<string | undefined>(undefined);
@@ -358,15 +346,12 @@ export const AskDustQuestion = withPickedWorkspace(
           setConversationTitle,
           setDustDocuments,
           signal: abortController.signal,
-          onAnswer,
         });
         return () => {
           abortController.abort();
         };
       }
-      // Note: context and onAnswer are intentionally omitted — context is a new object
-      // reference on every render (guaranteed non-null when isLoadingContext is false),
-      // and onAnswer is read via closure without needing to re-trigger the request.
+      // context is a new object reference every render, so it's intentionally omitted here.
     }, [question, isLoadingContext]);
 
     const dustAssistantUrl = `${dustApi.apiUrl()}/w/${dustApi.workspaceId()}/assistant`;

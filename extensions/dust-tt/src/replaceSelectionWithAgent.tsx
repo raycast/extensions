@@ -1,5 +1,6 @@
 import { DustAPI } from "@dust-tt/client";
 import {
+  Application,
   Clipboard,
   getFrontmostApplication,
   getSelectedText,
@@ -12,6 +13,10 @@ import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { answerQuestion, ConversationContext } from "./answerQuestion";
 import { getDustClient, provider } from "./dust_api/oauth";
 import { AgentType, getUser, getWorkspaceId, setUser, stripMarkdown } from "./utils";
+
+function sameApplication(a: Application | undefined, b: Application | undefined): boolean {
+  return a !== undefined && b !== undefined && a.bundleId === b.bundleId;
+}
 
 async function ensureUser(dustApi: DustAPI) {
   const cachedUser = await getUser();
@@ -94,7 +99,7 @@ export default withAccessToken(provider)(async function ReplaceSelectionWithAgen
     };
 
     const abortController = new AbortController();
-    await answerQuestion({
+    const answer = await answerQuestion({
       question,
       dustApi,
       context,
@@ -104,33 +109,28 @@ export default withAccessToken(provider)(async function ReplaceSelectionWithAgen
       setConversationId: () => {},
       setConversationTitle: () => {},
       setDustDocuments: () => {},
-      onAnswer: async (answer: string) => {
-        const plainAnswer = stripMarkdown(answer);
-
-        let selectionUnchanged = false;
-        try {
-          const [currentSelection, currentApp] = await Promise.all([
-            getSelectedText(),
-            getFrontmostApplication().catch(() => undefined),
-          ]);
-          selectionUnchanged = currentSelection === question && currentApp?.bundleId === sourceApp?.bundleId;
-        } catch {
-          selectionUnchanged = false;
-        }
-
-        if (selectionUnchanged) {
-          await Clipboard.paste(plainAnswer);
-          showToast({ style: Toast.Style.Success, title: "Replaced selected text with the answer" });
-        } else {
-          await Clipboard.copy(plainAnswer);
-          showToast({
-            style: Toast.Style.Success,
-            title: "Selection changed — answer copied instead",
-            message: "Paste it manually with ⌘V",
-          });
-        }
-      },
     });
+    if (!answer) {
+      return;
+    }
+
+    const plainAnswer = stripMarkdown(answer);
+    const [currentSelection, currentApp] = await Promise.all([
+      getSelectedText().catch(() => undefined),
+      getFrontmostApplication().catch(() => undefined),
+    ]);
+
+    if (currentSelection === question && sameApplication(sourceApp, currentApp)) {
+      await Clipboard.paste(plainAnswer);
+      showToast({ style: Toast.Style.Success, title: "Replaced selected text with the answer" });
+    } else {
+      await Clipboard.copy(plainAnswer);
+      showToast({
+        style: Toast.Style.Success,
+        title: "Selection changed — answer copied instead",
+        message: "Paste it manually with ⌘V",
+      });
+    }
   } catch (error) {
     showFailureToast(error, { title: "Could not replace selection" });
   }

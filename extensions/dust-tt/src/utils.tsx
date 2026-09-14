@@ -200,8 +200,6 @@ function renderTokenPlain(token: Token): string {
     case "text":
     case "escape":
     case "codespan":
-    case "code":
-      return renderInlinePlain(token);
     case "strong":
     case "em":
     case "del":
@@ -211,6 +209,7 @@ function renderTokenPlain(token: Token): string {
       return renderInlinePlain(token);
     case "heading":
     case "paragraph":
+    case "code":
       return `${renderInlinePlain(token)}\n\n`;
     case "list": {
       const list = token as Tokens.List;
