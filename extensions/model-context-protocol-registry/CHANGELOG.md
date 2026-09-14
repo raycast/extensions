@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add EmpirioLabs AI MCP Server] - {PR_MERGE_DATE}
+## [Add EmpirioLabs AI MCP Server] - 2026-09-14
 
 - Add EmpirioLabs AI to the community registry: 180+ AI models, media generation, web search and research, batch jobs, GPU Cloud and hosted agents as tools. Remote Streamable HTTP server at https://mcp.empiriolabs.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in or an EmpirioLabs API key.
 
