@@ -58,6 +58,7 @@ export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
 
 const assetPackCompleteMarker = ".raycast-complete";
 const assetPackLockName = ".pack-lock";
+const assetPackLockTakeoverName = ".pack-lock.takeover";
 const assetPackLockStaleMs = 60_000;
 
 const getAssetPackDestination = (version: string) => path.join(environment.assetsPath, "pack", version);
@@ -71,108 +72,140 @@ const hasCompleteAssetPack = async (destination: string) => {
   }
 };
 
-// Cross-process mutual exclusion: Raycast runs each command invocation in its
-// own Node process, so multiple instances can race the clean/extract/swap
-// sequence. The lock file is created exclusively (O_EXCL) and carries a random
-// owner token; a heartbeat keeps its mtime fresh while the holder is working, so
-// a crashed holder is safely taken over after the stale interval.
-// Atomically claim the right to replace a stale lock. Two waiters can
-// observe the same stale lock concurrently, so an unconditional removal
-// would let one waiter delete the other's freshly acquired lock. Instead
-// the lock is renamed aside (rename(2) succeeds for one contender) and its
-// owner token is compared with the one observed as stale: only a match
-// grants takeover. If a fresh owner had already replaced the lock, its file
-// is moved back and the caller stands down.
-const claimStaleAssetPackLock = async (lockPath: string, staleToken: string) => {
-  const aside = path.join(
-    path.dirname(lockPath),
-    `${path.basename(lockPath)}.stale-${process.pid}-${Math.random().toString(36).slice(2, 8)}`,
-  );
+// Whether a process is still running. Used as the abandonment signal for
+// stale locks and leftover staging: unlike directory mtimes, it stays valid
+// even when writes land deep inside extracted subdirectories. EPERM means the
+// process exists under another user, which is treated as alive.
+const isProcessAlive = (pid: number) => {
   try {
-    await fs.rename(lockPath, aside);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
-    throw error;
-  }
-  const movedToken = await fs.readFile(aside, "utf8").catch(() => "");
-  if (movedToken && movedToken === staleToken) {
-    await fs.rm(aside, { force: true });
+    process.kill(pid, 0);
     return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === "EPERM";
   }
-  try {
-    await fs.rename(aside, lockPath);
-  } catch (restoreError) {
-    const code = (restoreError as NodeJS.ErrnoException).code;
-    if (code !== "EEXIST" && code !== "ENOENT") throw restoreError;
-    await fs.rm(aside, { force: true }).catch(() => {});
-  }
-  return false;
 };
 
+const parseOwnerPid = (token: string) => {
+  const pid = Number(token.split(":")[0]);
+  return Number.isInteger(pid) && pid > 0 ? pid : undefined;
+};
+
+// A lock is recoverable only when its heartbeat is stale AND its owner
+// process is confirmed dead. A live but silent owner (slow disk, suspended
+// machine) keeps the lock rather than being evicted.
+const inspectAssetPackLock = async (lockPath: string) => {
+  try {
+    const [{ mtimeMs }, token] = await Promise.all([fs.stat(lockPath), fs.readFile(lockPath, "utf8").catch(() => "")]);
+    if (Date.now() - mtimeMs <= assetPackLockStaleMs) return { recoverable: false as const };
+    const pid = parseOwnerPid(token);
+    if (pid === undefined || isProcessAlive(pid)) return { recoverable: false as const };
+    return { recoverable: true as const };
+  } catch {
+    return { recoverable: false as const };
+  }
+};
+
+// Cross-process mutual exclusion: Raycast runs each command invocation in its
+// own Node process, so multiple instances can race the clean/extract/swap
+// sequence. The lock file is created exclusively (O_EXCL) and carries a
+// random owner token; a heartbeat keeps its mtime fresh while the holder is
+// working.
+//
+// Recovery from a dead holder never unlinks the lock path: a vacated path can
+// be acquired by a third process between removal and the successor's
+// re-creation. Instead, contenders elect one successor through a marker
+// created with O_EXCL, and the winner rewrites the lock contents in place so
+// an exclusive owner exists at every instant.
 const withAssetPackLock = async <T>(work: () => Promise<T>) => {
   const lockPath = path.join(environment.assetsPath, assetPackLockName);
+  const takeoverPath = path.join(environment.assetsPath, assetPackLockTakeoverName);
   const token = `${process.pid}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
+
+  const transferStaleLock = async () => {
+    // Electing a single successor: exactly one contender's O_EXCL create
+    // succeeds; losers wait while the elected owner is alive.
+    try {
+      await fs.writeFile(takeoverPath, token, { flag: "wx" });
+    } catch (createError) {
+      if ((createError as NodeJS.ErrnoException).code !== "EEXIST") throw createError;
+      // A takeover is already in progress. Reclaim the marker only when its
+      // owner is dead; a live successor may be about to transfer the lock.
+      if ((await inspectAssetPackLock(takeoverPath)).recoverable) {
+        await fs.rm(takeoverPath, { force: true });
+      }
+      return false;
+    }
+    try {
+      // In-place transfer: the lock path is never unlinked, so no third
+      // process can acquire it during recovery. The stale owner's PID was
+      // confirmed dead before election and O_EXCL picked this process as the
+      // sole successor, so nobody else can be writing this lock.
+      const file = await fs.open(lockPath, "r+");
+      try {
+        await file.truncate(0);
+        await file.writeFile(token, "utf8");
+        await file.utimes(new Date(), new Date());
+      } finally {
+        await file.close();
+      }
+    } catch (transferError) {
+      await fs.rm(takeoverPath, { force: true }).catch(() => {});
+      throw transferError;
+    }
+    await fs.rm(takeoverPath, { force: true }).catch(() => {});
+    return true;
+  };
+
   for (;;) {
     try {
       await fs.writeFile(lockPath, token, { flag: "wx" });
-      // Refreshes are owner-guarded: opening with "r+" requires the lock to
-      // exist (it can never recreate a deleted lock) and the token is verified
-      // before writing (a holder whose lock was taken over after a stale period
-      // can never overwrite the new owner). Writes are chained and awaited on
-      // release so none can land after the lock is removed.
-      let heartbeatChain: Promise<void> = Promise.resolve();
-      const refreshLock = async () => {
-        let file: Awaited<ReturnType<typeof fs.open>> | undefined;
-        try {
-          file = await fs.open(lockPath, "r+");
-          const current = (await file.readFile("utf8")) ?? "";
-          if (current === token) {
-            // Touch mtime without rewriting content: a content rewrite on an
-            // open handle keeps its offset and could pad/truncate the token.
-            await file.utimes(new Date(), new Date());
-          }
-        } catch {
-          // The lock is gone or was taken over; stop maintaining it.
-        } finally {
-          await file?.close();
-        }
-      };
-      const heartbeat = setInterval(() => {
-        heartbeatChain = heartbeatChain.then(refreshLock, refreshLock);
-      }, 10_000);
-      try {
-        return await work();
-      } finally {
-        clearInterval(heartbeat);
-        await heartbeatChain;
-        try {
-          if ((await fs.readFile(lockPath, "utf8").catch(() => "")) === token) {
-            await fs.rm(lockPath, { force: true });
-          }
-        } catch {
-          // Another holder may have taken over a stale lock; only remove our own.
-        }
-      }
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-      // No acquisition timeout: wait as long as a live holder keeps the
-      // heartbeat fresh. A dead holder is detected via the stale mtime below.
+      const transferred = (await inspectAssetPackLock(lockPath)).recoverable && (await transferStaleLock());
+      if (!transferred) {
+        // Wait while a live holder keeps the heartbeat fresh or a successor
+        // election is in progress; no acquisition timeout.
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        continue;
+      }
+    }
+    // Refreshes are owner-guarded: opening with "r+" requires the lock to
+    // exist and the token is verified before touching it (a holder whose lock
+    // was taken over after a stale period can never overwrite the new owner).
+    // Writes are chained and awaited on release so none land after the lock
+    // is removed.
+    let heartbeatChain: Promise<void> = Promise.resolve();
+    const refreshLock = async () => {
+      let file: Awaited<ReturnType<typeof fs.open>> | undefined;
       try {
-        const { mtimeMs } = await fs.stat(lockPath);
-        if (Date.now() - mtimeMs > assetPackLockStaleMs) {
-          // Read the stale owner token first: claimStaleAssetPackLock only
-          // completes the takeover if the file it moves still carries this
-          // exact token, so concurrent stale observers cannot remove a lock
-          // that another contender has already re-acquired.
-          const staleToken = await fs.readFile(lockPath, "utf8").catch(() => "");
-          if (staleToken && (await claimStaleAssetPackLock(lockPath, staleToken))) {
-            continue;
-          }
+        file = await fs.open(lockPath, "r+");
+        const current = (await file.readFile("utf8")) ?? "";
+        if (current === token) {
+          // Touch mtime without rewriting content: a content rewrite on an
+          // open handle keeps its offset and could pad/truncate the token.
+          await file.utimes(new Date(), new Date());
         }
       } catch {
-        // The lock disappeared (or was replaced); retry acquiring it.
+        // The lock is gone or was taken over; stop maintaining it.
+      } finally {
+        await file?.close();
       }
-      await new Promise((resolve) => setTimeout(resolve, 250));
+    };
+    const heartbeat = setInterval(() => {
+      heartbeatChain = heartbeatChain.then(refreshLock, refreshLock);
+    }, 10_000);
+    try {
+      return await work();
+    } finally {
+      clearInterval(heartbeat);
+      await heartbeatChain;
+      try {
+        if ((await fs.readFile(lockPath, "utf8").catch(() => "")) === token) {
+          await fs.rm(lockPath, { force: true });
+        }
+      } catch {
+        // Another holder may have taken over a stale lock; only remove our own.
+      }
     }
   }
 };
@@ -330,16 +363,15 @@ export const cleanAssetPack = async () => {
       if (d.startsWith("pack")) {
         await fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true });
       } else if (d.startsWith(".pack-staging")) {
-        // Only remove staging directories abandoned before the stale
-        // threshold: an install still in progress keeps adding files, so a
-        // fresh mtime means this must never be swept as leftover.
-        try {
-          const { mtimeMs } = await fs.stat(path.join(environment.assetsPath, d));
-          if (Date.now() - mtimeMs > assetPackLockStaleMs) {
-            await fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true });
-          }
-        } catch {
-          // It vanished between readdir and stat; nothing to remove.
+        // Reclaim staging only when its creating process is confirmed dead.
+        // Directory age is not evidence of abandonment: writes beneath
+        // extracted subdirectories (e.g. icons/) do not refresh the staging
+        // root's mtime. The PID is encoded in the staging name; a live owner
+        // always wins, even if the directory looks old.
+        const segments = d.split("-");
+        const ownerPid = Number(segments[segments.length - 2]);
+        if (Number.isInteger(ownerPid) && ownerPid > 0 && !isProcessAlive(ownerPid)) {
+          await fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true });
         }
       }
     }),
