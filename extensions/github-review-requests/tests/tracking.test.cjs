@@ -229,6 +229,33 @@ test("two checks committing at once keep both of their baselines", async () => {
   );
 });
 
+test("two checks starting from an empty baseline both keep their fingerprints", async () => {
+  const pr = number => ({
+    repository: "acme/repo",
+    number,
+    lastActivity: new Date().toISOString(),
+    comments: 0,
+    unresolved: 0,
+    awaitingReply: 0,
+    reviewDecision: "",
+  });
+  // An established baseline holding nothing: the next runs each bring their own
+  // pull request, and neither may save over the other's.
+  await (await diffCandidates([])).commit();
+
+  const [a, b] = await Promise.all([
+    diffCandidates([{ kind: "review-requested", pr: pr(1) }]),
+    diffCandidates([{ kind: "awaiting-reply", pr: pr(2) }]),
+  ]);
+  await Promise.all([a.commit(), b.commit()]);
+
+  const both = await diffCandidates([
+    { kind: "review-requested", pr: pr(1) },
+    { kind: "awaiting-reply", pr: pr(2) },
+  ]);
+  assert.deepEqual(both.changes, [], "both fingerprints must have survived");
+});
+
 test("fingerprints for pull requests no longer in scope are forgotten", async () => {
   const stale = JSON.stringify({
     "review-requested:acme/repo#9": { sig: "old", seen: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString() },
@@ -246,8 +273,30 @@ test("fingerprints for pull requests no longer in scope are forgotten", async ()
   };
   await (await diffCandidates([{ kind: "review-requested", pr }])).commit();
 
-  const saved = JSON.parse(await api.LocalStorage.getItem("gh-review.watch-signatures"));
-  assert.deepEqual(Object.keys(saved), ["review-requested:acme/repo#1"], "the merged map must not grow forever");
+  const keys = Object.keys(await api.LocalStorage.allItems()).filter(k => k.startsWith("gh-review.watch-signature."));
+  assert.deepEqual(keys, ["gh-review.watch-signature.review-requested:acme/repo#1"], "storage must not grow forever");
+});
+
+test("a fingerprint older than the retention window is refreshed, not forgotten", async () => {
+  const key = "gh-review.watch-signature.review-requested:acme/repo#1";
+  // Still in scope, but last seen long enough ago to be eviction material.
+  await api.LocalStorage.setItem(key, JSON.stringify({ sig: "old", seen: hoursAgo(31 * 24) }));
+  await api.LocalStorage.setItem("gh-review.watch-baseline", hoursAgo(31 * 24));
+
+  const pr = {
+    repository: "acme/repo",
+    number: 1,
+    lastActivity: new Date().toISOString(),
+    comments: 0,
+    unresolved: 0,
+    awaitingReply: 0,
+    reviewDecision: "",
+  };
+  const candidates = [{ kind: "review-requested", pr }];
+  await (await diffCandidates(candidates)).commit();
+
+  assert.ok(await api.LocalStorage.getItem(key), "a pull request this run saw must keep its fingerprint");
+  assert.deepEqual((await diffCandidates(candidates)).changes, [], "and not be re-detected as new");
 });
 
 test("a baseline written before entries carried a timestamp is kept", async () => {
@@ -278,13 +327,28 @@ test("activity older than the retention window is not reported as recorded", asy
   assert.deepEqual(stored, [], "it must not be written only to be swept up in the same call");
 });
 
-test("a full inbox makes room for a new entry instead of dropping it", async () => {
-  // 500 is the cap, and every one of these is newer than the entry that follows.
-  const full = Array.from({ length: 500 }, (_, i) => entry(`old-${i}`, hoursAgo(1)));
-  await recordActivity(full);
+/** Fills the inbox to the cap with entries written well before this run. */
+async function fillInbox() {
+  await Promise.all(
+    Array.from({ length: 500 }, (_, i) =>
+      api.LocalStorage.setItem(
+        `gh-review.activity.old-${i}`,
+        JSON.stringify({ ...entry(`old-${i}`, hoursAgo(1)), recordedAt: hoursAgo(1) }),
+      ),
+    ),
+  );
+}
 
+test("a full inbox makes room for a new entry instead of dropping it", async () => {
+  await fillInbox();
+
+  // Older than all 500, so the cap would have pushed it straight back out.
   const late = entry("late", hoursAgo(2));
-  assert.deepEqual(await recordActivity([late]), [late], "a kept entry is reported");
+  assert.deepEqual(
+    (await recordActivity([late])).map(e => e.id),
+    ["late"],
+    "a kept entry is reported",
+  );
 
   const inbox = await loadActivity();
   assert.equal(inbox.length, 500, "the cap still holds");
@@ -293,6 +357,23 @@ test("a full inbox makes room for a new entry instead of dropping it", async () 
     "the entry this run reported must be in the inbox",
   );
   assert.ok(await api.LocalStorage.getItem("gh-review.activity.late"), "and in storage");
+});
+
+test("a check cannot evict an entry another check just recorded", async () => {
+  await fillInbox();
+
+  // The other check records its entry and is about to commit its baseline.
+  await recordActivity([entry("other-run", hoursAgo(2))]);
+  // This check's snapshot of storage includes it, and the inbox is full.
+  await recordActivity([entry("this-run", hoursAgo(3))]);
+
+  assert.ok(
+    await api.LocalStorage.getItem("gh-review.activity.other-run"),
+    "an entry written moments ago is not the cap's to take",
+  );
+  assert.ok(await api.LocalStorage.getItem("gh-review.activity.this-run"));
+  const ids = (await loadActivity()).map(e => e.id);
+  assert.ok(ids.includes("other-run") && ids.includes("this-run"), "and both are in the inbox");
 });
 
 test("an inbox written under the old single key is carried over, once", async () => {

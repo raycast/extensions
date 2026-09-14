@@ -23,14 +23,42 @@ import type { PullRequest } from "./types";
 const ACTIVITY_PREFIX = "gh-review.activity.";
 /** Where the inbox lived when it was one array. Carried over on first read. */
 const ACTIVITY_KEY = "gh-review.activity";
+/**
+ * Fingerprints are stored one per key, under this prefix, for the same reason
+ * inbox entries are: two checks running at once would otherwise read the same
+ * map and write back their own copy, and the later write would drop whatever
+ * the other had recorded. Separate keys never collide, so neither run can lose
+ * the other's work — re-reading before a whole-map write only narrows the
+ * window, it doesn't close it.
+ */
+const SIGNATURE_PREFIX = "gh-review.watch-signature.";
+/** Where the baseline lived when it was one map. Carried over on first read. */
 const SIGNATURES_KEY = "gh-review.watch-signatures";
+/**
+ * Set once a baseline exists. Without it an empty set of fingerprints can't be
+ * told from never having run, and the first run must stay silent rather than
+ * announce every pull request already sitting there.
+ */
+const BASELINE_KEY = "gh-review.watch-baseline";
 const LAST_RUN_KEY = "gh-review.watch-last-run";
 
 /** How long inbox entries are kept, and how many at most. Matches the TUI. */
 const RETENTION_HOURS = 72;
 const MAX_ENTRIES = 500;
+/**
+ * How long an entry is safe from the cap after being written. Any run still
+ * working is well inside this, so the cap only ever trims entries whose
+ * recording run has long since finished.
+ */
+const RECENTLY_RECORDED_MINUTES = 10;
 /** How long a fingerprint outlives the last run that saw its pull request. */
 const SIGNATURE_RETENTION_DAYS = 30;
+/**
+ * How stale a fingerprint's last-seen date may get before a run rewrites it.
+ * Unchanged pull requests cost no writes in between, and the margin below the
+ * retention window is wide enough that one never expires while still in scope.
+ */
+const SEEN_REFRESH_DAYS = 7;
 
 /** One thing that happened, as recorded by the background watcher. */
 export type ActivityEvent = {
@@ -55,6 +83,13 @@ export type ActivityEvent = {
   summary: string;
   /** When the underlying GitHub activity happened (ISO 8601). */
   at: string;
+  /**
+   * When this extension wrote the entry, as opposed to when the activity
+   * happened. The cap leaves recently written entries alone whoever wrote
+   * them, so a check running alongside another can't delete what the other
+   * has just recorded and is about to report. Absent on older entries.
+   */
+  recordedAt?: string;
   read: boolean;
   /** Whether a banner actually fired, vs. recorded silently. */
   notified: boolean;
@@ -113,14 +148,21 @@ function retentionCutoff(): string {
   return new Date(Date.now() - RETENTION_HOURS * 60 * 60 * 1000).toISOString();
 }
 
+/** Reports whether an entry was written too recently for the cap to touch. */
+function recentlyRecorded(event: ActivityEvent): boolean {
+  if (!event.recordedAt) return false;
+  return Date.now() - Date.parse(event.recordedAt) < RECENTLY_RECORDED_MINUTES * 60 * 1000;
+}
+
 /**
  * Drops entries older than the retention window and caps the total, newest
- * first. Ids in `protect` are never dropped by the cap — a run hands in the
- * entries it has just recorded, and the cap trims the oldest of the rest
- * instead. An entry that arrives with an older timestamp than everything
- * already stored is still the one the run is about to report on.
+ * first. An entry written in the last few minutes is never dropped by the cap:
+ * a check running alongside this one may have just recorded it and be about to
+ * report it, and this run's view of storage is a snapshot taken before that.
+ * Whether an entry may go is decided entirely by the entry itself, never by
+ * which other entries this run happened to see.
  */
-function prune(events: ActivityEvent[], protect: ReadonlySet<string> = new Set()): ActivityEvent[] {
+function prune(events: ActivityEvent[]): ActivityEvent[] {
   const cutoff = retentionCutoff();
   const ordered = events.filter(e => e.at >= cutoff).sort((a, b) => b.at.localeCompare(a.at));
   if (ordered.length <= MAX_ENTRIES) return ordered;
@@ -128,7 +170,7 @@ function prune(events: ActivityEvent[], protect: ReadonlySet<string> = new Set()
   let overflow = ordered.length - MAX_ENTRIES;
   const dropped = new Set<string>();
   for (let i = ordered.length - 1; i >= 0 && overflow > 0; i--) {
-    if (protect.has(ordered[i].id)) continue;
+    if (recentlyRecorded(ordered[i])) continue;
     dropped.add(ordered[i].id);
     overflow--;
   }
@@ -140,8 +182,8 @@ function prune(events: ActivityEvent[], protect: ReadonlySet<string> = new Set()
  * entries handed in are considered, so an entry another run added while this
  * one was working is left alone rather than swept up as unknown.
  */
-async function evict(events: ActivityEvent[], protect?: ReadonlySet<string>): Promise<void> {
-  const kept = new Set(prune(events, protect).map(e => e.id));
+async function evict(events: ActivityEvent[]): Promise<void> {
+  const kept = new Set(prune(events).map(e => e.id));
   const stale = events.filter(e => !kept.has(e.id));
   await Promise.all(stale.map(e => LocalStorage.removeItem(keyFor(e.id))));
 }
@@ -177,12 +219,13 @@ export async function recordActivity(events: ActivityEvent[]): Promise<ActivityE
   // its last activity stays days old, and that entry has no place in a
   // 72-hour inbox — but the run must not claim to have recorded it.
   const cutoff = retentionCutoff();
-  const fresh = events.filter(e => !seen.has(e.id) && e.at >= cutoff);
+  const recordedAt = new Date().toISOString();
+  const fresh = events.filter(e => !seen.has(e.id) && e.at >= cutoff).map(e => ({ ...e, recordedAt }));
   if (fresh.length === 0) return [];
   await Promise.all(fresh.map(e => LocalStorage.setItem(keyFor(e.id), JSON.stringify(e))));
-  // These entries are exempt from the cap: with the inbox already full of
-  // newer ones, trimming the oldest of those keeps room for what just arrived.
-  await evict([...existing, ...fresh], new Set(fresh.map(e => e.id)));
+  // `recordedAt` is what keeps these out of the cap's reach, here and in any
+  // check running alongside this one.
+  await evict([...existing, ...fresh]);
   return fresh;
 }
 
@@ -222,36 +265,65 @@ export function signature(pr: PullRequest): string {
 type SignatureEntry = { sig: string; seen: string };
 type SignatureMap = Record<string, SignatureEntry>;
 
-async function loadSignatures(): Promise<SignatureMap | undefined> {
-  const raw = await LocalStorage.getItem<string>(SIGNATURES_KEY);
-  if (!raw) return undefined;
-  try {
-    const stored = JSON.parse(raw) as Record<string, SignatureEntry | string>;
-    const now = new Date().toISOString();
-    const map: SignatureMap = {};
-    for (const [key, value] of Object.entries(stored)) {
-      // Baselines written before entries carried a timestamp are kept, dated
-      // now, so upgrading never looks like a fresh install.
-      map[key] = typeof value === "string" ? { sig: value, seen: now } : value;
-    }
-    return map;
-  } catch {
-    return undefined;
-  }
-}
-
-async function saveSignatures(map: SignatureMap): Promise<void> {
-  await LocalStorage.setItem(SIGNATURES_KEY, JSON.stringify(map));
+function signatureKey(key: string): string {
+  return `${SIGNATURE_PREFIX}${key}`;
 }
 
 /**
- * Forgets fingerprints for pull requests no run has seen in a month. The
- * baseline is merged rather than replaced, so without this the map would keep
- * every pull request that ever passed through the scope.
+ * Moves a baseline written as one map across to a key per fingerprint, once.
+ * Values from before entries carried a timestamp are dated now, so upgrading
+ * never looks like a fresh install.
  */
-function pruneSignatures(map: SignatureMap): SignatureMap {
+async function adoptLegacySignatures(): Promise<void> {
+  const raw = await LocalStorage.getItem<string>(SIGNATURES_KEY);
+  if (!raw) return;
+  try {
+    const stored = JSON.parse(raw) as Record<string, SignatureEntry | string>;
+    const now = new Date().toISOString();
+    await Promise.all(
+      Object.entries(stored).map(([key, value]) =>
+        LocalStorage.setItem(
+          signatureKey(key),
+          JSON.stringify(typeof value === "string" ? { sig: value, seen: now } : value),
+        ),
+      ),
+    );
+    // Whatever was there was a baseline, even if it held nothing.
+    await LocalStorage.setItem(BASELINE_KEY, now);
+  } catch {
+    // Unreadable: nothing to carry over, and the key still goes.
+  }
+  await LocalStorage.removeItem(SIGNATURES_KEY);
+}
+
+/** The stored baseline, or undefined when no run has established one yet. */
+async function loadSignatures(): Promise<SignatureMap | undefined> {
+  await adoptLegacySignatures();
+  if (!(await LocalStorage.getItem<string>(BASELINE_KEY))) return undefined;
+
+  const items = await LocalStorage.allItems();
+  const map: SignatureMap = {};
+  for (const [key, value] of Object.entries(items)) {
+    if (!key.startsWith(SIGNATURE_PREFIX) || typeof value !== "string") continue;
+    try {
+      map[key.slice(SIGNATURE_PREFIX.length)] = JSON.parse(value) as SignatureEntry;
+    } catch {
+      // A half-written fingerprint only costs one re-detection.
+    }
+  }
+  return map;
+}
+
+/**
+ * Forgets fingerprints for pull requests no run has seen in a month. Each key
+ * is judged on its own timestamp, so this never depends on which fingerprints
+ * the current run happened to read — except that a pull request this run just
+ * saw is never forgotten, however old the fingerprint it replaced was.
+ */
+async function evictSignatures(previous: SignatureMap, current: SignatureMap): Promise<void> {
   const cutoff = new Date(Date.now() - SIGNATURE_RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
-  return Object.fromEntries(Object.entries(map).filter(([, entry]) => entry.seen >= cutoff));
+  const stale = Object.entries(previous).filter(([key, entry]) => !current[key] && entry.seen < cutoff);
+  await Promise.all(stale.map(([key]) => LocalStorage.removeItem(signatureKey(key))));
 }
 
 /** A PR the watcher found, tagged with which category surfaced it. */
@@ -278,9 +350,10 @@ export type Change = Candidate & { isNew: boolean };
  * one, so installing the extension never fires a wall of banners about pull
  * requests that were already sitting there.
  *
- * Committing merges into whatever is stored at that moment rather than
- * replacing it, because the scheduled watcher and a check you start yourself
- * run as separate processes over different candidates.
+ * Committing writes one key per fingerprint rather than a map, because the
+ * scheduled watcher and a check you start yourself run as separate processes
+ * over different candidates: a shared map means one of them saving over what
+ * the other just recorded.
  */
 export async function diffCandidates(
   candidates: Candidate[],
@@ -292,13 +365,19 @@ export async function diffCandidates(
   for (const { kind, pr } of candidates) {
     current[`${kind}:${pr.repository}#${pr.number}`] = { sig: signature(pr), seen };
   }
+
+  const refreshBefore = new Date(Date.now() - SEEN_REFRESH_DAYS * 24 * 60 * 60 * 1000).toISOString();
   const commit = async () => {
-    // Read again here rather than reusing the map loaded above: a check running
-    // alongside this one may have committed its own candidates in between, and
-    // writing this run's map whole would drop every fingerprint it recorded —
-    // leaving those pull requests to look new again on the next pass.
-    const stored = (await loadSignatures()) ?? {};
-    await saveSignatures(pruneSignatures({ ...stored, ...current }));
+    // One key per fingerprint, and only the ones that actually need writing:
+    // a run that finds nothing changed writes nothing, and a fingerprint this
+    // run never saw is left exactly as another run left it.
+    const changed = Object.entries(current).filter(([key, entry]) => {
+      const before = previous?.[key];
+      return !before || before.sig !== entry.sig || before.seen < refreshBefore;
+    });
+    await Promise.all(changed.map(([key, entry]) => LocalStorage.setItem(signatureKey(key), JSON.stringify(entry))));
+    await LocalStorage.setItem(BASELINE_KEY, seen);
+    if (previous) await evictSignatures(previous, current);
   };
 
   // Nothing to record on a first run, so the baseline can be taken immediately.
@@ -327,7 +406,11 @@ export function targetUrl(event: Pick<ActivityEvent, "url" | "commentUrl">): str
 
 /** Forgets the baseline, so the next run starts fresh without notifying. */
 export async function resetTracker(): Promise<void> {
+  const items = await LocalStorage.allItems();
+  const keys = Object.keys(items).filter(key => key.startsWith(SIGNATURE_PREFIX));
+  await Promise.all(keys.map(key => LocalStorage.removeItem(key)));
   await LocalStorage.removeItem(SIGNATURES_KEY);
+  await LocalStorage.removeItem(BASELINE_KEY);
 }
 
 export async function setLastRun(at: Date): Promise<void> {
