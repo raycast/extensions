@@ -14,4 +14,4 @@ compiled_raycast_rust
 .DS_Store
 dist
 npm-debug.log
-.windsurf/rules
+.claude
