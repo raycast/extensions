@@ -8,16 +8,50 @@ import {
   showToast,
   Toast,
   getPreferenceValues,
+  useNavigation,
+  AI,
+  Keyboard,
   openCommandPreferences,
 } from '@raycast/api';
-import { useState, useEffect } from 'react';
-import * as childProcess from 'node:child_process';
-import * as nodePath from 'node:path';
+import {
+  useForm,
+  FormValidation,
+  usePromise,
+  runAppleScript,
+} from '@raycast/utils';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import * as nodeOs from 'node:os';
-import * as nodeFs from 'node:fs/promises';
-import { promisify } from 'node:util';
-
-const execPromise = promisify(childProcess.exec);
+import {
+  runLighthouseAudit,
+  LighthouseReport,
+  LighthouseOptions,
+  processUrl,
+} from './utils/lighthouse';
+import {
+  extractOpportunities,
+  extractFailedAudits,
+  extractSeoFields,
+  extractVitals,
+  extractCategoryScores,
+  getStatusIcon,
+  formatScore,
+  formatRating,
+  formatSavings,
+  escapeMarkdownCell,
+  getAuditScore,
+  isFailed,
+  type OpportunityInfo,
+} from './utils/report';
+import {
+  DASHBOARD_W,
+  buildScorecard,
+  loadingDashboardSvg,
+} from './utils/charts';
+import { mdImg } from './utils/svg';
+import {
+  canShareScorecardImage,
+  shareScorecardImage,
+} from './utils/scorecard-image';
 
 interface FormValues {
   url: string;
@@ -29,576 +63,744 @@ interface FormValues {
   outputPath: string;
 }
 
-interface Preferences {
-  outputPath?: string;
-  lighthousePath?: string;
+const SCORE_COLORS: { threshold: number; color: Color }[] = [
+  { threshold: 0.9, color: Color.Green },
+  { threshold: 0.5, color: Color.Yellow },
+  { threshold: 0, color: Color.Red },
+];
+
+function getScoreColor(score: number): Color {
+  return SCORE_COLORS.find(s => score >= s.threshold)?.color ?? Color.Red;
 }
 
-interface LighthouseReport {
-  categories?: {
-    performance?: { score: number; title?: string };
-    accessibility?: { score: number; title?: string };
-    'best-practices'?: { score: number; title?: string };
-    seo?: { score: number; title?: string };
-  };
-  audits?: {
-    [key: string]: {
-      title?: string;
-      description?: string;
-      displayValue?: string;
-      score?: number | null;
-    };
-  };
-}
-
-function expandHomeDir(filePath: string): string {
-  if (filePath.startsWith('~')) {
-    return nodePath.join(nodeOs.homedir(), filePath.slice(1));
-  }
-  return filePath;
-}
-
-// Utility function to validate and process URL
-function processUrl(url: string): string {
-  // Trim whitespace
-  url = url.trim();
-
-  // Check if URL is already prefixed with http:// or https://
-  if (/^https?:\/\//i.test(url)) {
+function getHostname(url: string): string {
+  try {
+    return new URL(processUrl(url)).hostname;
+  } catch {
     return url;
   }
-
-  // Remove any leading www.
-  url = url.replace(/^www\./i, '');
-
-  // Add https:// by default
-  return `https://${url}`;
 }
 
-// Validate URL format
-function isValidUrl(url: string): boolean {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
+const PROGRESS_PHASES = [
+  { upTo: 20, text: 'Preparing environment and resolving DNS...' },
+  { upTo: 45, text: 'Measuring performance and critical times...' },
+  { upTo: 70, text: 'Auditing accessibility and best practices...' },
+  { upTo: 90, text: 'Evaluating SEO and metadata...' },
+  { upTo: 99, text: 'Compiling report...' },
+  { upTo: 100, text: 'Ready: presenting results' },
+] as const;
+
+const PERF_METRICS = [
+  {
+    id: 'largest-contentful-paint',
+    title: 'LCP (Largest Contentful Paint)',
+    bench: '< 2.5s',
+  },
+  {
+    id: 'interaction-to-next-paint',
+    title: 'INP (Interaction to Next Paint)',
+    bench: '< 200ms',
+  },
+  {
+    id: 'total-blocking-time',
+    title: 'TBT (Total Blocking Time)',
+    bench: '< 200ms',
+  },
+  { id: 'speed-index', title: 'Speed Index', bench: '< 3.4s' },
+  {
+    id: 'first-contentful-paint',
+    title: 'FCP (First Contentful Paint)',
+    bench: '< 1.8s',
+  },
+  {
+    id: 'server-response-time',
+    title: 'TTFB (Time to First Byte)',
+    bench: '< 0.8s',
+  },
+  {
+    id: 'cumulative-layout-shift',
+    title: 'CLS (Cumulative Layout Shift)',
+    bench: '< 0.1',
+  },
+  { id: 'main-thread-tasks', title: 'Main Thread Work', bench: '< 2s' },
+  { id: 'total-byte-weight', title: 'Total Byte Weight', bench: '< 1.6MB' },
+] as const;
+
+const DIAGNOSTICS = [
+  { id: 'dom-size', label: 'DOM Size (nodes)' },
+  { id: 'unused-javascript', label: 'Unused JavaScript' },
+  { id: 'unused-css-rules', label: 'Unused CSS' },
+  { id: 'third-party-summary', label: 'Third-Party Blocking Time' },
+  { id: 'offscreen-images', label: 'Offscreen Images' },
+] as const;
+
+const DESC_MAP: Record<string, string> = {
+  interactive:
+    'Time to Interactive is the time it takes for the page to become fully interactive.',
+  'first-contentful-paint':
+    'First Contentful Paint marks when the first text or image is painted.',
+  'largest-contentful-paint':
+    'Largest Contentful Paint marks when the largest text or image is painted.',
+  'speed-index':
+    'Speed Index shows how quickly the contents of a page are visibly populated.',
+  'total-blocking-time':
+    'Total Blocking Time measures how long the main thread was blocked by long tasks.',
+  'cumulative-layout-shift':
+    'Cumulative Layout Shift measures unexpected layout shift that affects visual stability.',
+  'main-thread-tasks':
+    'Main Thread Work measures time spent in JavaScript and style/layout tasks.',
+  'total-byte-weight':
+    'Total Byte Weight is the combined download size of all page resources.',
+};
+
+function DetailedAuditsView({ report }: { report: LighthouseReport }) {
+  const markdown = useMemo(() => {
+    let md = `# Detailed Field Guide\n\n`;
+
+    const categories = [
+      { id: 'performance', title: 'Performance' },
+      { id: 'accessibility', title: 'Accessibility' },
+      { id: 'best-practices', title: 'Best Practices' },
+      { id: 'seo', title: 'SEO' },
+    ];
+
+    categories.forEach(cat => {
+      md += `## ${cat.title}\n\n`;
+      const categoryAudits =
+        report.categories?.[cat.id as keyof typeof report.categories]
+          ?.auditRefs || [];
+      const audits = categoryAudits
+        .map(ref => report.audits?.[ref.id])
+        .filter((a): a is NonNullable<typeof a> => !!a && isFailed(a))
+        .sort((a, b) => getAuditScore(a) - getAuditScore(b));
+
+      if (audits.length === 0) {
+        md += `_No issues found in this category._\n\n`;
+      } else {
+        md += `| Status | Field | Description |\n|:---:|:---|:---|\n`;
+        audits.forEach(audit => {
+          const score = getAuditScore(audit);
+          const statusIcon = score >= 0.9 ? '🟢' : score >= 0.5 ? '🟡' : '🔴';
+          const descKey = (audit.id || '').replace(/_/g, '-');
+          const cleanDesc =
+            DESC_MAP[descKey] ||
+            audit.description
+              ?.replace(/\[Learn more\].*/, '')
+              .replace(/<br\s*\/?>/gi, ' ') ||
+            '';
+          md += `| ${statusIcon} | **${escapeMarkdownCell(audit.title)}** | ${escapeMarkdownCell(cleanDesc)} |\n`;
+        });
+        md += '\n';
+      }
+    });
+
+    return md;
+  }, [report]);
+
+  return <Detail markdown={markdown} />;
 }
 
-// Lighthouse Path Finding Function
-async function findLighthousePath(
-  preferences: Preferences
-): Promise<string | null> {
-  // First check preferences path if set
-  if (preferences.lighthousePath) {
-    const expandedPath = expandHomeDir(preferences.lighthousePath);
-    try {
-      await nodeFs.access(expandedPath, nodeFs.constants.X_OK);
-      return expandedPath;
-    } catch (error) {
-      // Silently continue if preference path is invalid
-    }
-  }
+function LighthouseReportView({
+  reportPath,
+  report,
+  originalUrl,
+  fromCache,
+  onReanalyze,
+}: {
+  reportPath: string;
+  report: LighthouseReport;
+  originalUrl: string;
+  fromCache: boolean;
+  onReanalyze: () => void;
+}) {
+  const [aiAnalysis, setAiAnalysis] = useState<string>('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
-  // Define all potential paths
-  const potentialPaths = [
-    // Global CLI paths first (most likely to exist)
-    '/opt/homebrew/bin/lighthouse',
-    '/usr/local/bin/lighthouse',
-    '/usr/bin/lighthouse',
-    `${nodeOs.homedir()}/.npm-global/bin/lighthouse`,
+  const hostname = getHostname(originalUrl);
+  const scorecardSvg = useMemo(
+    () => buildScorecard(report, hostname, fromCache),
+    [report, hostname, fromCache]
+  );
 
-    // Then check CLI index.js files
-    '/opt/homebrew/lib/node_modules/lighthouse/cli/index.js',
-    '/usr/local/lib/node_modules/lighthouse/cli/index.js',
-    '/usr/lib/node_modules/lighthouse/cli/index.js',
-    `${nodeOs.homedir()}/.npm-global/lib/node_modules/lighthouse/cli/index.js`,
-    nodePath.join(
-      nodeOs.homedir(),
-      '.npm/lib/node_modules/lighthouse/cli/index.js'
-    ),
+  const generateMarkdownContent = useMemo(() => {
+    return (): string => {
+      let markdown = `${mdImg(scorecardSvg, `Lighthouse ${hostname}`, DASHBOARD_W)}\n\n`;
 
-    // Local installation paths (least likely)
-    nodePath.join(__dirname, 'node_modules', '.bin', 'lighthouse'),
-    nodePath.join(__dirname, 'node_modules', 'lighthouse', 'cli', 'index.js'),
-  ];
+      if (aiAnalysis) {
+        markdown += `> [!TIP]\n> **AI Insights**\n>\n${aiAnalysis
+          .split('\n')
+          .map(l => `> ${l}`)
+          .join('\n')}\n\n---\n\n`;
+      } else if (isAiLoading) {
+        markdown += `> [!NOTE]\n> **AI is analyzing findings...**\n\n---\n\n`;
+      }
 
-  // Try all paths silently
-  for (const potentialPath of potentialPaths) {
-    try {
-      await nodeFs.access(potentialPath, nodeFs.constants.X_OK);
-      return potentialPath;
-    } catch {
-      // Silently continue to next path
-    }
-  }
+      if (fromCache) {
+        markdown += `> [!NOTE]\n> Loaded from cache (24h TTL). Use **Re-analyze** to force a fresh audit.\n\n`;
+      }
 
-  // Try using 'which' command as last resort
-  try {
-    const { stdout } = await execPromise('which lighthouse');
-    const path = stdout.trim();
-    if (path) {
-      await nodeFs.access(path, nodeFs.constants.X_OK);
-      return path;
-    }
-  } catch {
-    // Silently handle which command failure
-  }
-
-  // If no path is found but we know lighthouse is installed globally,
-  // return just 'lighthouse' as a fallback
-  try {
-    await execPromise('lighthouse --version');
-    return 'lighthouse';
-  } catch {
-    // Only log error if we truly can't find lighthouse anywhere
-    console.error('Lighthouse not found in system');
-    return null;
-  }
-}
-
-// Lighthouse Report View Component
-function LighthouseReportView({ reportPath }: { reportPath: string }) {
-  const [report, setReport] = useState<LighthouseReport | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadReport() {
-      try {
-        const reportContent = await nodeFs.readFile(reportPath, 'utf-8');
-        const parsedReport = JSON.parse(reportContent);
-
-        // Validate report structure
-        if (!parsedReport.categories && !parsedReport.audits) {
-          throw new Error('Invalid Lighthouse report format');
+      markdown += `## Performance & Core Metrics (Critical)\n\n`;
+      markdown += `| Status | Metric | Value | Benchmark |\n| :---: | :--- | :--- | :--- |\n`;
+      PERF_METRICS.forEach(m => {
+        const audit = report.audits?.[m.id];
+        if (audit) {
+          markdown += `| ${getStatusIcon(audit.score)} | ${m.title} | **${escapeMarkdownCell(audit.displayValue)}** | \`${m.bench}\` |\n`;
         }
+      });
 
-        setReport(parsedReport);
-      } catch (error) {
-        console.error('Failed to load report:', error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : 'Unknown error loading report'
-        );
+      markdown += `\n## SEO & Accessibility (Marketing)\n\n`;
+      markdown += `| Status | Field | Value |\n|:---:|:---|:---|\n`;
+      const seoScore = report.categories?.seo?.score;
+      const accScore = report.categories?.accessibility?.score;
+      if (seoScore !== undefined) {
+        markdown += `| ${getStatusIcon(seoScore)} | SEO (score) | ${formatScore(seoScore)}% |\n`;
       }
-    }
-    loadReport();
-  }, [reportPath]);
-
-  if (error) {
-    return <Detail markdown={`Error loading report: ${error}`} />;
-  }
-
-  if (!report) {
-    return <Detail markdown="Loading report..." />;
-  }
-
-  const renderScoreIcon = (score: number) => {
-    if (score >= 0.9)
-      return { source: Icon.CheckCircle, tintColor: Color.Green };
-    if (score >= 0.5) return { source: Icon.Warning, tintColor: Color.Yellow };
-    return { source: Icon.XMarkCircle, tintColor: Color.Red };
-  };
-
-  const formatScore = (score: number | undefined) =>
-    score !== undefined ? `${Math.round(score * 100)}%` : 'N/A';
-
-  // Dynamic markdown content generation
-  const generateMarkdownContent = () => {
-    let markdownContent =
-      '# Lighthouse Analysis Report\n\n## Overall Scores\n\n';
-    markdownContent += '| Category | Score | Status |\n';
-    markdownContent += '| -------- | ----- | ------ |\n';
-
-    const categories = [
-      { key: 'performance', name: 'Performance' },
-      { key: 'accessibility', name: 'Accessibility' },
-      { key: 'best-practices', name: 'Best Practices' },
-      { key: 'seo', name: 'SEO' },
-    ];
-
-    categories.forEach(({ key, name }) => {
-      const category =
-        report.categories?.[
-          key as 'performance' | 'accessibility' | 'best-practices' | 'seo'
-        ];
-      if (category) {
-        markdownContent += `| ${name} | ${formatScore(category.score)} | ${formatScore(category.score)} |\n`;
+      if (accScore !== undefined) {
+        markdown += `| ${getStatusIcon(accScore)} | Accessibility (score) | ${formatScore(accScore)}% |\n`;
       }
-    });
 
-    // Performance Metrics
-    markdownContent +=
-      '\n## Key Performance Metrics\n\n### Core Web Vitals\n\n';
+      const seoFields = extractSeoFields(report);
+      seoFields.forEach(f => {
+        const extra =
+          f.id === 'structured-data' && f.structuredDataTypes?.length
+            ? ` (${f.structuredDataTypes.join(', ')})`
+            : '';
+        markdown += `| ${getStatusIcon(f.score)} | ${f.label} | ${escapeMarkdownCell(f.displayValue || f.label)}${extra} |\n`;
+      });
 
-    const performanceMetrics = [
-      'first-contentful-paint',
-      'largest-contentful-paint',
-      'total-blocking-time',
-      'cumulative-layout-shift',
-      'interactive',
-      'speed-index',
-    ];
-
-    performanceMetrics.forEach(metric => {
-      const audit = report.audits?.[metric];
-      if (audit) {
-        markdownContent += `- **${audit.title || metric}**: ${audit.displayValue || 'N/A'}\n`;
+      const opportunities = extractOpportunities(report, 5);
+      if (opportunities.length > 0) {
+        markdown += `\n## Priority Opportunities (High ROI)\n`;
+        markdown += `| Status | Audit | Estimated Savings | Items |\n|:---:|:---|:---|:---|\n`;
+        opportunities.forEach(op => {
+          const itemsInfo = `${op.itemCount} ${op.exampleUrl ? `(${escapeMarkdownCell(op.exampleUrl)})` : ''}`;
+          markdown += `| ${getStatusIcon(op.score)} | **${escapeMarkdownCell(op.title)}** | ${formatSavings(op)} | ${itemsInfo} |\n`;
+        });
       }
-    });
 
-    return markdownContent;
-  };
+      const diagAudits = DIAGNOSTICS.map(d => ({
+        ...d,
+        audit: report.audits?.[d.id],
+      })).filter(d => d.audit);
+      if (diagAudits.length) {
+        markdown += `\n## Technical Diagnostics\n`;
+        diagAudits.forEach(d => {
+          const details = d.audit?.details;
+          const blocking =
+            d.id === 'third-party-summary' && details?.summary?.blockingTime
+              ? ` (${Math.round(details.summary.blockingTime)} ms)`
+              : '';
+          markdown += `- ${d.label}: ${escapeMarkdownCell(d.audit?.displayValue)}${blocking}\n`;
+        });
+      }
 
-  // Dynamic metadata generation
-  const generateMetadataLabels = () => {
-    const categories = [
-      { key: 'performance', name: 'Performance' },
-      { key: 'accessibility', name: 'Accessibility' },
-      { key: 'best-practices', name: 'Best Practices' },
-      { key: 'seo', name: 'SEO' },
-    ];
+      const warnings = report.runWarnings;
+      if (warnings && warnings.length) {
+        markdown += `\n### Execution Warnings\n`;
+        warnings.forEach(w => {
+          markdown += `- ⚠️ ${escapeMarkdownCell(w)}\n`;
+        });
+      }
 
-    return categories
-      .filter(
-        ({ key }) =>
-          report.categories?.[
-            key as 'performance' | 'accessibility' | 'best-practices' | 'seo'
-          ]
-      )
-      .map(({ key, name }) => {
-        const category =
-          report.categories?.[
-            key as 'performance' | 'accessibility' | 'best-practices' | 'seo'
-          ];
-        return category ? (
+      markdown += `\n---\n\n`;
+      markdown += `_Detailed Field Description in the actions menu (Cmd + D)._\n`;
+
+      return markdown;
+    };
+  }, [report, aiAnalysis, isAiLoading, fromCache, scorecardSvg, hostname]);
+
+  const generateMetadata = useMemo(() => {
+    return () => {
+      const categoriesToShow = [
+        { key: 'performance', name: 'Performance' },
+        { key: 'accessibility', name: 'Accessibility' },
+        { key: 'best-practices', name: 'Best Practices' },
+        { key: 'seo', name: 'SEO' },
+      ];
+
+      const reportCreatedText = (() => {
+        const ts = report.fetchTime;
+        const date = ts ? new Date(ts) : new Date();
+        return date.toLocaleString(undefined, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        });
+      })();
+      const lhVersion = report.lighthouseVersion;
+      const auditDuration = (() => {
+        const total = report.timing?.total;
+        return total ? `${Math.round(total / 1000)}s` : undefined;
+      })();
+
+      return (
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Overall Scores">
+            {categoriesToShow.map(catInfo => {
+              const cat =
+                report.categories?.[
+                  catInfo.key as keyof typeof report.categories
+                ];
+              if (!cat) return null;
+              const score = getAuditScore(cat);
+              return (
+                <Detail.Metadata.TagList.Item
+                  key={catInfo.key}
+                  text={`${catInfo.name}: ${formatScore(score)}%`}
+                  color={getScoreColor(score)}
+                />
+              );
+            })}
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.Separator />
           <Detail.Metadata.Label
-            key={key}
-            title={`${name} Score`}
-            text={formatScore(category.score)}
-            icon={renderScoreIcon(category.score)}
+            title="Analysis Domain"
+            text={getHostname(originalUrl)}
+            icon={Icon.Globe}
           />
-        ) : null;
-      })
-      .filter(Boolean);
+          <Detail.Metadata.Label
+            title="Device Mode"
+            text={
+              report.configSettings?.formFactor === 'mobile'
+                ? 'Mobile'
+                : 'Desktop'
+            }
+            icon={
+              report.configSettings?.formFactor === 'mobile'
+                ? Icon.Mobile
+                : Icon.Monitor
+            }
+          />
+          {fromCache ? (
+            <Detail.Metadata.Label
+              title="Source"
+              text="Cache (24h TTL)"
+              icon={Icon.Tray}
+            />
+          ) : null}
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label
+            title="Report Created"
+            text={reportCreatedText}
+          />
+          {lhVersion ? (
+            <Detail.Metadata.Label title="Lighthouse" text={`v${lhVersion}`} />
+          ) : null}
+          {auditDuration ? (
+            <Detail.Metadata.Label
+              title="Audit Duration"
+              text={auditDuration}
+              icon={Icon.Clock}
+            />
+          ) : null}
+        </Detail.Metadata>
+      );
+    };
+  }, [report, originalUrl, fromCache]);
+
+  const handleAskAI = async () => {
+    if (isAiLoading) return;
+    setIsAiLoading(true);
+    setAiAnalysis('');
+    try {
+      const vitals = extractVitals(report);
+      const opportunities = extractOpportunities(report, 5);
+      const issues = extractFailedAudits(report, 5);
+      const seoFields = extractSeoFields(report);
+      const categoryScores = extractCategoryScores(report);
+
+      const ctx = {
+        url: originalUrl,
+        finalUrl: report.finalUrl,
+        timestamp: report.fetchTime,
+        version: report.lighthouseVersion,
+        scores: Object.fromEntries(
+          categoryScores.map(c => [c.key, Math.round(c.score * 100)])
+        ),
+        vitals,
+        opportunities: opportunities.map((op: OpportunityInfo) => ({
+          id: op.id,
+          title: op.title,
+          impactMs: op.savingsMs,
+          impactBytes: op.savingsBytes,
+          priority: formatRating(op.score),
+          exampleUrl: op.exampleUrl,
+        })),
+        issues,
+        seo: {
+          title: seoFields.find(f => f.id === 'document-title')?.displayValue,
+          description: seoFields.find(f => f.id === 'meta-description')
+            ?.displayValue,
+          canonical: seoFields.find(f => f.id === 'canonical')?.displayValue,
+          lang: seoFields.find(f => f.id === 'html-has-lang')?.displayValue,
+          structuredDataTypes:
+            seoFields.find(f => f.id === 'structured-data')
+              ?.structuredDataTypes || [],
+        },
+        warnings: report.runWarnings || [],
+      };
+
+      const prompt = `Act as an expert SEO/Performance engineer. Here is the Lighthouse context (JSON):
+${JSON.stringify(ctx, null, 2)}
+
+Give a brief executive summary in English. Highlight the biggest bottleneck and 3 concrete fixes (short bullets). Focus on performance, accessibility, and SEO impact.`;
+
+      const answer = await AI.ask(prompt);
+      if (answer) {
+        setAiAnalysis(answer);
+      } else {
+        throw new Error('AI returned an empty response');
+      }
+    } catch {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'AI Insights Unavailable',
+        message: 'Could not reach AI services. Please try again.',
+      });
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
+  const getEmailBody = () => {
+    const categoryScores = extractCategoryScores(report);
+    const scoreLines = categoryScores
+      .map(c => `• ${c.name} — ${Math.round(c.score * 100)}%`)
+      .join('\n');
+
+    const aiBlock = aiAnalysis || 'No AI insights yet.';
+
+    const fullBody = `Hi team,
+
+I just ran a Lighthouse audit and here are the highlights: ${originalUrl}
+
+Scores:
+${scoreLines || 'N/A'}
+
+AI Findings:
+${aiBlock}
+
+Technical details:
+Report path: ${reportPath}
+
+Sent via SEO Lighthouse Raycast extension.
+Thanks,`;
+
+    if (fullBody.length > 1800) {
+      return fullBody.substring(0, 1797) + '...';
+    }
+    return fullBody;
+  };
+
+  const handleComposeMail = async () => {
+    const subject = `Lighthouse Analysis Report: ${getHostname(originalUrl)}`;
+    const body = getEmailBody();
+
+    try {
+      await runAppleScript(`
+        tell application "Mail"
+          set newMessage to make new outgoing message with properties {visible:true, subject:${JSON.stringify(subject)}, content:${JSON.stringify(body)} & "\\n\\n"}
+          tell newMessage
+            make new to recipient at end of to recipients with properties {address:""}
+            activate
+          end tell
+        end tell
+      `);
+      showToast({
+        style: Toast.Style.Success,
+        title: 'Send to Developer',
+        message: 'Draft created in Mail',
+      });
+    } catch {
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Could Not Create Draft',
+        message: 'Check that Mail app is installed',
+      });
+    }
   };
 
   return (
     <Detail
       markdown={generateMarkdownContent()}
-      metadata={<Detail.Metadata>{generateMetadataLabels()}</Detail.Metadata>}
+      metadata={generateMetadata()}
       actions={
         <ActionPanel>
-          <Action.Open
-            title="Open Json Report"
-            target={reportPath}
-            icon={Icon.Document}
-          />
-          <Action.ShowInFinder path={reportPath} title="Show in Finder" />
-          <Action.OpenWith path={reportPath} />
+          {canShareScorecardImage ? (
+            <ActionPanel.Section title="Scorecard">
+              <Action
+                title="Copy Scorecard Image"
+                icon={Icon.Image}
+                shortcut={Keyboard.Shortcut.Common.CopyName}
+                onAction={() => shareScorecardImage(scorecardSvg, 'copy')}
+              />
+              <Action
+                title="Save Scorecard Image"
+                icon={Icon.Download}
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 's' }}
+                onAction={() => shareScorecardImage(scorecardSvg, 'save')}
+              />
+            </ActionPanel.Section>
+          ) : null}
+          <ActionPanel.Section title="AI & Feedback">
+            <Action
+              title="Ask AI for Insights"
+              icon={Icon.Stars}
+              onAction={handleAskAI}
+              shortcut={{ modifiers: ['cmd'], key: 'i' }}
+            />
+            <Action.Push
+              title="Detailed Field Description"
+              icon={Icon.List}
+              target={<DetailedAuditsView report={report} />}
+              shortcut={{ modifiers: ['cmd'], key: 'd' }}
+            />
+            <Action
+              title="Send by Mail"
+              icon={Icon.Envelope}
+              onAction={handleComposeMail}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Report Management">
+            <Action
+              title="Re-analyze"
+              icon={Icon.ArrowClockwise}
+              onAction={onReanalyze}
+            />
+            <Action.Open
+              title="Open JSON Report"
+              target={reportPath}
+              icon={Icon.Code}
+            />
+            <Action.ShowInFinder
+              path={reportPath}
+              icon={Icon.Finder}
+              title="Show in Finder"
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
 }
 
-export default function Command() {
-  const preferences: Preferences = getPreferenceValues<Preferences>();
-  const [reportPath, setReportPath] = useState<string | null>(null);
-  const [outputPath, setOutputPath] = useState<string>(
-    preferences.outputPath || nodeOs.tmpdir()
+function ReportLoader({ options }: { options: LighthouseOptions }) {
+  const [reanalyzeCount, setReanalyzeCount] = useState(0);
+  const currentOptions = useMemo(
+    () => ({ ...options, force: reanalyzeCount > 0 }),
+    [options, reanalyzeCount]
   );
-  const [lighthousePath, setLighthousePath] = useState<string>(
-    preferences.lighthousePath || ''
+  const [progressPct, setProgressPct] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { isLoading, data, error, revalidate } = usePromise(
+    runLighthouseAudit,
+    [currentOptions],
+    {
+      onError: () => {},
+    }
   );
 
   useEffect(() => {
-    // If lighthousePath is not set, try to find it
-    if (!lighthousePath) {
-      const findPath = async () => {
-        const foundPath = await findLighthousePath(preferences);
-        if (foundPath) {
-          setLighthousePath(foundPath);
-        } else {
-          //console.error('Lighthouse CLI not found.');
-        }
-      };
-      findPath();
+    if (!isLoading && data) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      setProgressPct(100);
+      return;
     }
-  }, [lighthousePath, preferences]);
+    if (!isLoading && !data) return;
 
-  // If a report path exists, show the report view
-  if (reportPath) {
-    return <LighthouseReportView reportPath={reportPath} />;
-  }
-
-  async function handleChooseDirectory() {
-    try {
-      const { stdout } = await execPromise(`
-        osascript -e 'POSIX path of (choose folder with prompt "Select Output Directory")'
-      `);
-      const selectedPath = stdout.trim();
-      if (selectedPath) {
-        setOutputPath(selectedPath);
-        await showToast({
-          style: Toast.Style.Success,
-          title: 'Directory Selected',
-          message: `Output path set to: ${selectedPath}`,
-        });
-      }
-    } catch (error) {
-      console.error('Directory selection failed:', error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: 'Directory Selection Failed',
-        message: 'Could not set the output path.',
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setProgressPct(prev => {
+        const next =
+          prev < 20
+            ? prev + 2
+            : prev < 50
+              ? prev + 3
+              : prev < 70
+                ? prev + 5
+                : prev < 90
+                  ? prev + 7
+                  : prev + 5;
+        return Math.min(next, 98);
       });
-    }
+    }, 750);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    };
+  }, [isLoading, data]);
+
+  const handleReanalyze = () => {
+    setReanalyzeCount(c => c + 1);
+    revalidate();
+  };
+
+  if (error) {
+    const isInstallError = error.message.includes('npm install -g lighthouse');
+    const isChromeMissing = error.message.includes(
+      'No Chrome installations found'
+    );
+
+    return (
+      <Detail
+        markdown={
+          isInstallError
+            ? `# Lighthouse Missing\n\nGoogle Lighthouse CLI is required.\n\n\`\`\`bash\nnpm install -g lighthouse\n\`\`\``
+            : isChromeMissing
+              ? `# Chrome or Chromium Required\n\nLighthouse needs a Chromium-based browser to run in headless mode.\n\nInstall Chrome:\n\n\`\`\`bash\nbrew install --cask google-chrome\n\`\`\`\n\nOr set a custom path in extension preferences (Lighthouse Path) to a Chromium-based browser binary.`
+              : `# Audit Error\n\n${error.message}`
+        }
+        actions={
+          <ActionPanel>
+            {isInstallError ? (
+              <Action.CopyToClipboard
+                title="Copy Install Command"
+                content="npm install -g lighthouse"
+              />
+            ) : isChromeMissing ? (
+              <Action.CopyToClipboard
+                title="Copy Chrome Install Command"
+                content="brew install --cask google-chrome"
+              />
+            ) : null}
+            <Action
+              title="Try Again"
+              icon={Icon.ArrowClockwise}
+              onAction={revalidate}
+            />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
-  async function handleSubmit(values: FormValues): Promise<void> {
-    await showToast({
-      style: Toast.Style.Animated,
-      title: 'Running Lighthouse Analysis...',
+  if (isLoading || !data) {
+    const hostname = getHostname(options.url);
+    const phase =
+      PROGRESS_PHASES.find(p => progressPct <= p.upTo) ||
+      PROGRESS_PHASES[PROGRESS_PHASES.length - 1];
+    const pct = data ? 100 : Math.min(progressPct, 98);
+    const loadingSvg = loadingDashboardSvg({
+      hostname,
+      progress: pct,
+      phase: phase.text,
     });
 
-    try {
-      // Validate URL
-      if (!values.url) {
-        throw new Error('URL is required');
-      }
+    return (
+      <Detail
+        markdown={mdImg(
+          loadingSvg,
+          `Auditing ${hostname} ${Math.round(pct)}`,
+          DASHBOARD_W
+        )}
+      />
+    );
+  }
 
-      // Process and validate URL
-      const formattedUrl = processUrl(values.url);
-      if (!isValidUrl(formattedUrl)) {
-        throw new Error('Invalid URL format');
-      }
+  return (
+    <LighthouseReportView
+      reportPath={data.reportPath}
+      report={data.report}
+      originalUrl={options.url}
+      fromCache={data.fromCache}
+      onReanalyze={handleReanalyze}
+    />
+  );
+}
 
-      // Find Lighthouse path
-      const finalLighthousePath = await findLighthousePath(preferences);
-      if (!finalLighthousePath) {
-        if (!preferences.lighthousePath) {
-          throw new Error(
-            'Lighthouse CLI not found. Please set the path manually in settings or install globally using:\n\nnpm install -g lighthouse'
-          );
-        } else {
-          throw new Error(
-            'Specified Lighthouse CLI path is invalid. Please set the path manually in settings.'
-          );
-        }
-      }
+export default function Command() {
+  const preferences = getPreferenceValues();
+  const { push } = useNavigation();
 
-      // Prepare categories
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    initialValues: {
+      device: 'mobile',
+      performance: true,
+      accessibility: true,
+      bestPractices: true,
+      seo: true,
+      outputPath: preferences.outputPath || nodeOs.tmpdir(),
+    },
+    validation: {
+      url: FormValidation.Required,
+      outputPath: value => {
+        if (!value) return 'Output path is required';
+        return undefined;
+      },
+    },
+    onSubmit: values => {
       const categories: string[] = [];
       if (values.performance) categories.push('performance');
       if (values.accessibility) categories.push('accessibility');
       if (values.bestPractices) categories.push('best-practices');
       if (values.seo) categories.push('seo');
 
-      // Fallback to all categories if none selected
-      const finalCategories =
-        categories.length > 0
-          ? categories
-          : ['performance', 'accessibility', 'best-practices', 'seo'];
-
-      // Prepare output path from form or preferences or fallback to temp directory
-      const finalOutputDirectory =
-        values.outputPath || preferences.outputPath || nodeOs.tmpdir();
-
-      // Create the output directory if it doesn't exist
-      try {
-        await nodeFs.mkdir(finalOutputDirectory, { recursive: true });
-        const stats = await nodeFs.stat(finalOutputDirectory);
-        if (!stats.isDirectory()) {
-          throw new Error('Selected output path is not a directory.');
-        }
-      } catch (error) {
-        console.error('Output directory validation failed:', error);
-        throw new Error(
-          'Invalid output path. Please provide a valid directory.'
-        );
-      }
-
-      const outputFilePath = nodePath.join(
-        finalOutputDirectory,
-        `lighthouse-report-${Date.now()}.json`
+      push(
+        <ReportLoader
+          options={{
+            url: values.url,
+            device: values.device,
+            categories,
+            outputPath: values.outputPath,
+            lighthousePath: preferences.lighthousePath,
+          }}
+        />
       );
-
-      // Construct Lighthouse CLI command with enhanced configuration
-      const command = [
-        `"${finalLighthousePath}"`,
-        `"${formattedUrl}"`,
-        `--output=json`,
-        `--output-path="${outputFilePath}"`,
-        `--only-categories=${finalCategories.join(',')}`,
-        '--quiet',
-        '--disable-full-page-screenshot',
-        '--disable-storage-reset',
-        '--throttling-method=devtools',
-        '--max-wait-for-load=45000', // Increase max wait time
-        '--max-timeout=90000', // Increase overall timeout
-        '--chrome-flags="--headless --no-sandbox --disable-gpu --disable-web-security --allow-insecure-localhost"',
-      ];
-
-      // Add device-specific settings
-      if (values.device === 'desktop') {
-        command.push('--preset=desktop');
-      } else {
-        command.push('--form-factor=mobile');
-      }
-
-      const fullCommand = command.join(' ');
-      console.log('Executing Lighthouse command:', fullCommand);
-
-      try {
-        // Execute Lighthouse with enhanced error handling
-        await execPromise(fullCommand, {
-          env: {
-            ...process.env,
-            PATH: `/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${process.env.PATH || ''}`,
-          },
-          shell: '/bin/bash', // Specify the shell
-          maxBuffer: 1024 * 1024 * 10, // Increase buffer size
-          timeout: 120000, // 2-minute timeout
-        });
-
-        // Check if report was created
-        try {
-          await nodeFs.access(outputFilePath);
-        } catch (error) {
-          console.error('Report generation failed:', error);
-          throw new Error('Failed to generate Lighthouse report');
-        }
-
-        // Update success toast
-        await showToast({
-          style: Toast.Style.Success,
-          title: 'Analysis Complete',
-          message: `JSON Report saved to: ${outputFilePath}`,
-        });
-
-        // Set the report path to trigger report view
-        setReportPath(outputFilePath);
-      } catch (execError: any) {
-        // More detailed error handling for Lighthouse execution
-        console.error('Lighthouse Execution Error:', execError);
-
-        // Specific error handling for common scenarios
-        const errorMessage = execError.stderr || execError.message;
-
-        if (
-          errorMessage.includes('503') ||
-          errorMessage.includes('Unable to reliably load the page')
-        ) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: 'Website Unavailable',
-            message:
-              'The website is temporarily unavailable or blocking the analysis. Please try again later.',
-          });
-          return; // Prevent further error handling
-        }
-
-        // Generic error handling
-        await showToast({
-          style: Toast.Style.Failure,
-          title: 'Lighthouse Analysis Failed',
-          message: errorMessage || 'An unexpected error occurred',
-        });
-      }
-    } catch (error) {
-      console.error('Lighthouse Analysis Error:', error);
-
-      // Detailed error handling
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : 'Failed to run Lighthouse analysis';
-
-      // Update failure toast with specific guidance
-      await showToast({
-        style: Toast.Style.Failure,
-        title: 'Analysis Failed',
-        message: errorMessage,
-      });
-
-      // Additional specific error handling
-      if (
-        errorMessage.includes('Lighthouse CLI not found') ||
-        errorMessage.includes('invalid')
-      ) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: 'Lighthouse CLI Path Issue',
-          message:
-            'Please set the Lighthouse CLI path manually in the extension settings.',
-        });
-      }
-    }
-  }
-
-  async function handleChangeLighthousePath(): Promise<void> {
-    await openCommandPreferences();
-  }
+    },
+  });
 
   return (
     <Form
       actions={
-        <ActionPanel title="Extension Preferences">
+        <ActionPanel>
           <Action.SubmitForm
-            title="Run Lighthouse Analysis"
-            icon={Icon.MagnifyingGlass}
+            title="Run Lighthouse Audit"
+            icon={Icon.Check}
             onSubmit={handleSubmit}
           />
           <Action
-            title="Open Extension Preferences"
-            onAction={handleChangeLighthousePath}
+            title="Open Preferences"
             icon={Icon.Gear}
-          />
-          <Action
-            title="Choose Output Directory"
-            onAction={handleChooseDirectory}
-            icon={Icon.Folder}
+            onAction={openCommandPreferences}
           />
         </ActionPanel>
       }
     >
+      <Form.Description text="Basic Configuration" />
       <Form.TextField
-        id="url"
         title="Website URL"
-        placeholder="example.com"
-        autoFocus
+        placeholder="https://example.com"
+        {...itemProps.url}
       />
-
-      <Form.Dropdown id="device" title="Device" defaultValue="mobile">
-        <Form.Dropdown.Item value="mobile" title="Mobile" />
-        <Form.Dropdown.Item value="desktop" title="Desktop" />
+      <Form.Dropdown title="Device Mode" {...itemProps.device}>
+        <Form.Dropdown.Item value="mobile" title="Mobile" icon={Icon.Mobile} />
+        <Form.Dropdown.Item
+          value="desktop"
+          title="Desktop"
+          icon={Icon.Monitor}
+        />
       </Form.Dropdown>
 
-      <Form.Checkbox id="performance" label="Performance" defaultValue={true} />
+      <Form.Separator />
+      <Form.Description text="Analysis Categories" />
+      <Form.Checkbox label="Performance Analysis" {...itemProps.performance} />
       <Form.Checkbox
-        id="accessibility"
-        label="Accessibility"
-        defaultValue={true}
+        label="Accessibility Analysis"
+        {...itemProps.accessibility}
       />
       <Form.Checkbox
-        id="bestPractices"
-        label="Best Practices"
-        defaultValue={true}
+        label="Best Practices Analysis"
+        {...itemProps.bestPractices}
       />
-      <Form.Checkbox id="seo" label="SEO" defaultValue={true} />
-      <Form.TextField
-        id="outputPath"
-        title="Download Report Path"
-        placeholder="Enter directory path or use the button above"
-        value={outputPath}
-        onChange={newValue => setOutputPath(newValue)}
-      />
-      <Form.Description
-        title="Choose Output Directory"
-        text="Click the 'Choose Output Directory' button in the actions panel above to select a folder where the JSON report will be saved."
-      />
+      <Form.Checkbox label="SEO Analysis" {...itemProps.seo} />
+
+      <Form.Separator />
+      <Form.Description text="Advanced Settings" />
+      <Form.TextField title="Output Folder" {...itemProps.outputPath} />
+      <Form.Description text="JSON reports are saved to this folder. Change the default in extension preferences." />
     </Form>
   );
 }
