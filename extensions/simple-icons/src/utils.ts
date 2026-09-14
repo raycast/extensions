@@ -128,12 +128,24 @@ const inspectAssetPackLock = async (lockPath: string) => {
 // re-creation. Instead, contenders elect one successor through a marker
 // created with O_EXCL, and the winner rewrites the lock contents in place so
 // an exclusive owner exists at every instant.
-const withAssetPackLock = async <T>(work: () => Promise<T>) => {
+//
+// The election winner only takes over after re-reading the lock and matching
+// the stale token it observed: another successor may have completed a whole
+// transfer (removing its election marker) while this process was paused.
+//
+// assertOwner is handed to the locked work: the holder fences itself at every
+// shared-state boundary, and a heartbeat that finds a foreign token marks the
+// lock lost. A live owner that was paused past the hard-stale threshold and
+// succeeded therefore stops touching the cache the moment it resumes, so
+// cleanup and installation always have exactly one acting owner.
+class AssetPackLockLostError extends Error {}
+
+const withAssetPackLock = async <T>(work: (assertOwner: () => Promise<void>) => Promise<T>) => {
   const lockPath = path.join(environment.assetsPath, assetPackLockName);
   const takeoverPath = path.join(environment.assetsPath, assetPackLockTakeoverName);
   const token = `${process.pid}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
 
-  const transferStaleLock = async () => {
+  const transferStaleLock = async (staleToken: string) => {
     // Electing a single successor: exactly one contender's O_EXCL create
     // succeeds; losers wait while the elected owner is alive.
     try {
@@ -148,10 +160,17 @@ const withAssetPackLock = async <T>(work: () => Promise<T>) => {
       return false;
     }
     try {
+      // Revalidate before writing: the staleness observation happened before
+      // the election, and a paused process can reach this point after another
+      // successor already replaced the stale token and removed its marker.
+      const currentToken = await fs.readFile(lockPath, "utf8").catch(() => "");
+      if (currentToken !== staleToken || !(await inspectAssetPackLock(lockPath)).recoverable) {
+        await fs.rm(takeoverPath, { force: true }).catch(() => {});
+        return false;
+      }
       // In-place transfer: the lock path is never unlinked, so no third
-      // process can acquire it during recovery. The stale owner's PID was
-      // confirmed dead before election and O_EXCL picked this process as the
-      // sole successor, so nobody else can be writing this lock.
+      // process can acquire it during recovery, and holding the election
+      // marker means no other successor can be rewriting the lock.
       const file = await fs.open(lockPath, "r+");
       try {
         await file.truncate(0);
@@ -173,7 +192,9 @@ const withAssetPackLock = async <T>(work: () => Promise<T>) => {
       await fs.writeFile(lockPath, token, { flag: "wx" });
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-      const transferred = (await inspectAssetPackLock(lockPath)).recoverable && (await transferStaleLock());
+      const inspection = await inspectAssetPackLock(lockPath);
+      const staleToken = await fs.readFile(lockPath, "utf8").catch(() => "");
+      const transferred = inspection.recoverable && (await transferStaleLock(staleToken));
       if (!transferred) {
         // Wait while a live holder keeps the heartbeat fresh or a successor
         // election is in progress; no acquisition timeout.
@@ -181,9 +202,19 @@ const withAssetPackLock = async <T>(work: () => Promise<T>) => {
         continue;
       }
     }
+    let ownershipLost = false;
+    const assertOwner = async () => {
+      if (ownershipLost) throw new AssetPackLockLostError();
+      const current = await fs.readFile(lockPath, "utf8").catch(() => "");
+      if (current !== token) {
+        ownershipLost = true;
+        throw new AssetPackLockLostError();
+      }
+    };
     // Refreshes are owner-guarded: opening with "r+" requires the lock to
     // exist and the token is verified before touching it (a holder whose lock
     // was taken over after a stale period can never overwrite the new owner).
+    // A foreign token flips ownershipLost so the fenced work stands down.
     // Writes are chained and awaited on release so none land after the lock
     // is removed.
     let heartbeatChain: Promise<void> = Promise.resolve();
@@ -196,6 +227,8 @@ const withAssetPackLock = async <T>(work: () => Promise<T>) => {
           // Touch mtime without rewriting content: a content rewrite on an
           // open handle keeps its offset and could pad/truncate the token.
           await file.utimes(new Date(), new Date());
+        } else {
+          ownershipLost = true;
         }
       } catch {
         // The lock is gone or was taken over; stop maintaining it.
@@ -207,7 +240,7 @@ const withAssetPackLock = async <T>(work: () => Promise<T>) => {
       heartbeatChain = heartbeatChain.then(refreshLock, refreshLock);
     }, 10_000);
     try {
-      return await work();
+      return await work(assertOwner);
     } finally {
       clearInterval(heartbeat);
       await heartbeatChain;
@@ -222,7 +255,7 @@ const withAssetPackLock = async <T>(work: () => Promise<T>) => {
   }
 };
 
-const pacoteAssetPack = async (version: string) => {
+const pacoteAssetPack = async (version: string, assertOwner: () => Promise<void>) => {
   await showToast({
     style: Toast.Style.Animated,
     title: "Downloading asset pack",
@@ -239,6 +272,10 @@ const pacoteAssetPack = async (version: string) => {
   try {
     await pacote.extract(releaseVersion, staging);
     await fs.writeFile(path.join(staging, assetPackCompleteMarker), version, "utf8");
+    // A download spanning the hard-stale threshold may have allowed a
+    // successor to take over while this process was paused. Only the current
+    // owner may move a pack into the destination.
+    await assertOwner();
     await fs.mkdir(path.dirname(destination), { recursive: true });
     try {
       await fs.rename(staging, destination);
@@ -251,6 +288,14 @@ const pacoteAssetPack = async (version: string) => {
     }
   } catch (error) {
     await fs.rm(staging, { recursive: true, force: true });
+    if (error instanceof AssetPackLockLostError) return;
+    // The staging may have been reclaimed while this process was paused; if
+    // the lock was meanwhile taken over, the successor completes the install.
+    try {
+      await assertOwner();
+    } catch {
+      return;
+    }
     throw error;
   }
 };
@@ -258,14 +303,22 @@ const pacoteAssetPack = async (version: string) => {
 export const cacheAssetPack = async (version: string) => {
   const destination = getAssetPackDestination(version);
   if (await hasCompleteAssetPack(destination)) return;
-  await withAssetPackLock(async () => {
-    // Another instance may have completed the pack while we waited for the lock.
-    if (await hasCompleteAssetPack(destination)) return;
-    cache.set("cached-version", "");
-    await cleanAssetPack();
-    await pacoteAssetPack(version);
-    cache.set("cached-version", version);
-  });
+  try {
+    await withAssetPackLock(async (assertOwner) => {
+      // Another instance may have completed the pack while we waited for the lock.
+      if (await hasCompleteAssetPack(destination)) return;
+      await assertOwner();
+      cache.set("cached-version", "");
+      await cleanAssetPack(assertOwner);
+      await assertOwner();
+      await pacoteAssetPack(version, assertOwner);
+      await assertOwner();
+      cache.set("cached-version", version);
+    });
+  } catch (error) {
+    // The lock was taken over by a successor; it completes the pack.
+    if (!(error instanceof AssetPackLockLostError)) throw error;
+  }
 };
 
 export const loadCachedJson = async (version: string) => {
@@ -385,28 +438,38 @@ const newestFileMtimeMs = async (directory: string): Promise<number> => {
   return newest;
 };
 
-export const cleanAssetPack = async () => {
+const cleanAssetPack = async (assertOwner: () => Promise<void>) => {
+  await assertOwner();
   const directories = await fs.readdir(environment.assetsPath);
-  await Promise.all(
-    directories.map(async (d) => {
-      const directoryPath = path.join(environment.assetsPath, d);
-      if (d.startsWith("pack")) {
-        await fs.rm(directoryPath, { recursive: true, force: true });
-      } else if (d.startsWith(".pack-staging")) {
-        // Prefer PID liveness; when the PID answers but no file beneath the
-        // staging tree has been written within the hard-stale window, the PID
-        // was recycled (or the owner wedged) and the staging is abandoned.
-        const segments = d.split("-");
-        const ownerPid = Number(segments[segments.length - 2]);
-        const ownerDead = !Number.isInteger(ownerPid) || ownerPid <= 0 || !isProcessAlive(ownerPid);
-        const contentStale =
-          Date.now() - (await newestFileMtimeMs(directoryPath).catch(() => 0)) > assetPackLockHardStaleMs;
-        if (ownerDead || contentStale) {
-          await fs.rm(directoryPath, { recursive: true, force: true });
-        }
+  for (const d of directories) {
+    const directoryPath = path.join(environment.assetsPath, d);
+    if (d === "pack") {
+      // Remove one version directory at a time, re-checking ownership
+      // between each: a paused holder that lost the lock must not resume into
+      // deleting the successor's freshly installed pack.
+      const versions = await fs.readdir(directoryPath).catch(() => [] as string[]);
+      for (const v of versions) {
+        await assertOwner();
+        await fs.rm(path.join(directoryPath, v), { recursive: true, force: true });
       }
-    }),
-  );
+    } else if (d.startsWith("pack")) {
+      await assertOwner();
+      await fs.rm(directoryPath, { recursive: true, force: true });
+    } else if (d.startsWith(".pack-staging")) {
+      // Prefer PID liveness; when the PID answers but no file beneath the
+      // staging tree has been written within the hard-stale window, the PID
+      // was recycled (or the owner wedged) and the staging is abandoned.
+      const segments = d.split("-");
+      const ownerPid = Number(segments[segments.length - 2]);
+      const ownerDead = !Number.isInteger(ownerPid) || ownerPid <= 0 || !isProcessAlive(ownerPid);
+      const contentStale =
+        Date.now() - (await newestFileMtimeMs(directoryPath).catch(() => 0)) > assetPackLockHardStaleMs;
+      if (ownerDead || contentStale) {
+        await assertOwner();
+        await fs.rm(directoryPath, { recursive: true, force: true });
+      }
+    }
+  }
 };
 
 export const makeCopyToDownload = async ({
