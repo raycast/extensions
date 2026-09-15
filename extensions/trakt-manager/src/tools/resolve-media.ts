@@ -1,3 +1,4 @@
+import { TraktIdLookupEntry } from "../lib/schema";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 export type ResolvedMedia = {
@@ -99,4 +100,87 @@ export async function resolveShow(title: string, year?: number): Promise<Resolve
 
 export async function resolveMovie(title: string, year?: number): Promise<ResolvedMatch | undefined> {
   return pickBestMatch(await searchMovieCandidates(title), title, year);
+}
+
+export type MediaKind = "movie" | "show" | "season" | "episode";
+
+function withYear(title: string, year?: number): string {
+  return year ? `${title} (${year})` : title;
+}
+
+function episodeCode(season?: number, number?: number): string | undefined {
+  if (season === undefined || number === undefined) return undefined;
+  return `S${String(season).padStart(2, "0")}E${String(number).padStart(2, "0")}`;
+}
+
+function buildLabel(kind: MediaKind, traktId: number, entry: TraktIdLookupEntry): string {
+  if (kind === "movie" && entry.movie) {
+    return withYear(entry.movie.title ?? `Movie ${traktId}`, entry.movie.year);
+  }
+
+  if (kind === "show" && entry.show) {
+    return withYear(entry.show.title ?? `Show ${traktId}`, entry.show.year);
+  }
+
+  if (kind === "season" && entry.season) {
+    const showTitle = entry.show?.title ?? `Show ${traktId}`;
+    const number = entry.season.number;
+    return number === undefined ? `${showTitle}, a season` : `${showTitle}, season ${number}`;
+  }
+
+  if (kind === "episode" && entry.episode) {
+    const showTitle = entry.show?.title;
+    const code = episodeCode(entry.episode.season, entry.episode.number);
+    const parts = [showTitle, code].filter(Boolean).join(" ");
+    const episodeTitle = entry.episode.title;
+
+    if (parts && episodeTitle) return `${parts} "${episodeTitle}"`;
+    if (parts) return parts;
+    return episodeTitle ?? `Episode ${traktId}`;
+  }
+
+  throw new Error(`Trakt ID ${traktId} is not a ${kind}. Re-resolve the item before writing.`);
+}
+
+/**
+ * Describe the item a Trakt ID actually points at, using Trakt as the source of truth.
+ *
+ * Write tools receive an ID and a separate human-readable label from the caller, and nothing
+ * ties the two together. Confirmations must therefore describe the ID that is about to be
+ * written rather than the caller's label, otherwise a user can approve "Dune (2021)" while a
+ * different item gets modified. A failed lookup propagates and blocks the write, which is the
+ * safe outcome.
+ */
+export async function describeMedia(kind: MediaKind, traktId: number): Promise<string> {
+  const res = await executeToolCall(
+    (signal) =>
+      toolTraktClient.search.lookupById({
+        params: { id: traktId },
+        query: { type: kind },
+        fetchOptions: { signal },
+      }),
+    `Failed to look up the Trakt ${kind} with ID ${traktId}`,
+  );
+
+  const match = res.body.find((entry) => entry.type === kind) ?? res.body[0];
+  if (!match) {
+    throw new Error(`No Trakt ${kind} exists with ID ${traktId}. Re-resolve the title before writing.`);
+  }
+
+  return buildLabel(kind, traktId, match);
+}
+
+/**
+ * Describe several IDs of the same kind, capped so a large batch cannot fan out into an
+ * unbounded number of lookups. Returns the labels resolved plus how many were left out.
+ */
+export async function describeMediaBatch(
+  kind: MediaKind,
+  traktIds: number[],
+  cap = 5,
+): Promise<{ labels: string[]; remaining: number }> {
+  const head = traktIds.slice(0, cap);
+  const labels = await Promise.all(head.map((traktId) => describeMedia(kind, traktId)));
+
+  return { labels, remaining: Math.max(traktIds.length - head.length, 0) };
 }

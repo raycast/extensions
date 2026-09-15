@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { removeMovieIdFromWatchlist, removeShowIdFromWatchlist } from "../lib/media-mutations";
+import { describeMedia } from "./resolve-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -25,13 +26,14 @@ type Output = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const mediaLabel = input.type === "movie" ? "Movie" : "TV Show";
+  const verified = await describeMedia(input.type, input.traktId);
+
   return {
     style: Action.Style.Destructive,
-    message: `Remove "${input.title}" from your Trakt watchlist?`,
+    message: `Remove ${verified} from your Trakt watchlist?`,
     info: [
-      { name: "Title", value: input.title },
-      { name: "Type", value: mediaLabel },
+      { name: "Title", value: verified },
+      { name: "Type", value: input.type === "movie" ? "Movie" : "TV Show" },
       { name: "Trakt ID", value: String(input.traktId) },
     ],
   };

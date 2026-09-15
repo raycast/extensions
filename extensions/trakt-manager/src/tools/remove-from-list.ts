@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
-import { describeSelection, parseTraktIds } from "./add-to-list";
+import { summarizeSelection } from "./add-to-list";
+import { describeList, parseTraktIds } from "./list-matching";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -20,11 +21,6 @@ type Input = {
    * Comma-separated Trakt IDs of the TV shows to remove, e.g. "154784,1388".
    */
   showTraktIds?: string;
-  /**
-   * Optional titles matching the IDs above, in the same order, separated by a pipe "|".
-   * Shown in the confirmation dialog so the user can check what will be removed.
-   */
-  titles?: string;
 };
 
 type Output = {
@@ -40,18 +36,20 @@ type Output = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const movieCount = parseTraktIds(input.movieTraktIds).length;
-  const showCount = parseTraktIds(input.showTraktIds).length;
-  const total = movieCount + showCount;
+  const movieIds = parseTraktIds(input.movieTraktIds);
+  const showIds = parseTraktIds(input.showTraktIds);
+  const total = movieIds.length + showIds.length;
+
+  const [listName, items] = await Promise.all([describeList(input.listId), summarizeSelection(movieIds, showIds)]);
 
   return {
     style: Action.Style.Destructive,
-    message: `Remove ${total} item(s) from the Trakt list "${input.listName ?? input.listId}"?`,
+    message: `Remove ${total} item(s) from the Trakt list "${listName}"?`,
     info: [
-      { name: "List", value: input.listName ?? input.listId },
-      { name: "Movies", value: String(movieCount) },
-      { name: "TV Shows", value: String(showCount) },
-      { name: "Items", value: describeSelection(input.titles, total) },
+      { name: "List", value: listName },
+      { name: "Movies", value: String(movieIds.length) },
+      { name: "TV Shows", value: String(showIds.length) },
+      { name: "Items", value: items },
     ],
   };
 };

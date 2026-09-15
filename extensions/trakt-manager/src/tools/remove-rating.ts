@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { removeMediaRating } from "../lib/media-mutations";
+import { describeMedia } from "./resolve-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -32,11 +33,13 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     episode: "Episode",
   };
 
+  const verified = await describeMedia(input.type, input.traktId);
+
   return {
     style: Action.Style.Destructive,
-    message: `Remove your rating for "${input.title}" on Trakt?`,
+    message: `Remove your rating for ${verified} on Trakt?`,
     info: [
-      { name: "Title", value: input.title },
+      { name: "Title", value: verified },
       { name: "Type", value: typeMap[input.type] ?? input.type },
       { name: "Trakt ID", value: String(input.traktId) },
     ],

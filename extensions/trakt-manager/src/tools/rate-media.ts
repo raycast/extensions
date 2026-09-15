@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { rateMedia } from "../lib/media-mutations";
+import { describeMedia } from "./resolve-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -18,8 +19,8 @@ type Input = {
    */
   title: string;
   /**
-   * Rating score from 1 to 10 (integer).
-   * 1 is weakest, 10 is highest.
+   * Rating score as a whole number from 1 to 10.
+   * 1 is weakest, 10 is highest. Decimal values are rejected, so round before calling.
    */
   rating: number;
   /**
@@ -34,7 +35,22 @@ type Output = {
   rating: number;
 };
 
+/**
+ * Trakt only stores whole-number ratings. A decimal is rejected instead of rounded so that
+ * the score shown in the confirmation is always the score that gets saved.
+ */
+function assertIntegerRating(rating: number): number {
+  if (!Number.isInteger(rating) || rating < 1 || rating > 10) {
+    throw new Error(`Rating must be a whole number between 1 and 10 (received ${rating}).`);
+  }
+
+  return rating;
+}
+
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const rating = assertIntegerRating(input.rating);
+  const verified = await describeMedia(input.type, input.traktId);
+
   const typeMap: Record<string, string> = {
     movie: "Movie",
     show: "TV Show",
@@ -43,11 +59,11 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 
   return {
     style: Action.Style.Regular,
-    message: `Rate "${input.title}" ${input.rating}/10 on Trakt?`,
+    message: `Rate ${verified} ${rating}/10 on Trakt?`,
     info: [
-      { name: "Title", value: input.title },
+      { name: "Title", value: verified },
       { name: "Type", value: typeMap[input.type] ?? input.type },
-      { name: "Rating", value: `${input.rating} / 10` },
+      { name: "Rating", value: `${rating} / 10` },
       { name: "Trakt ID", value: String(input.traktId) },
     ],
   };
@@ -61,19 +77,16 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 export default async function tool(input: Input): Promise<Output> {
   const { type, traktId, title, rating, ratedAt } = input;
 
-  const intRating = Math.round(rating);
-  if (intRating < 1 || intRating > 10) {
-    throw new Error(`Rating must be an integer between 1 and 10 (received ${rating}).`);
-  }
+  const validRating = assertIntegerRating(rating);
 
   await executeToolCall(
-    (signal) => rateMedia(toolTraktClient, { type, traktId, rating: intRating, ratedAt }, { signal }),
+    (signal) => rateMedia(toolTraktClient, { type, traktId, rating: validRating, ratedAt }, { signal }),
     `Failed to rate ${type} "${title}" (ID: ${traktId})`,
   );
 
   return {
     success: true,
-    message: `Successfully rated "${title}" ${intRating}/10 on Trakt.`,
-    rating: intRating,
+    message: `Successfully rated "${title}" ${validRating}/10 on Trakt.`,
+    rating: validRating,
   };
 }

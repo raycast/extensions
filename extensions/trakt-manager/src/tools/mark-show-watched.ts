@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { addShowIdToHistory } from "../lib/media-mutations";
+import { describeMedia } from "./resolve-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -26,11 +27,13 @@ type Output = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const verified = await describeMedia("show", input.traktId);
+
   return {
     style: Action.Style.Destructive,
-    message: `WARNING: Mark ALL seasons and episodes of "${input.title}" as watched on Trakt?`,
+    message: `WARNING: Mark ALL seasons and episodes of ${verified} as watched on Trakt?`,
     info: [
-      { name: "Show", value: input.title },
+      { name: "Show", value: verified },
       { name: "Scope", value: "Entire show (all seasons & episodes)" },
       { name: "Trakt ID", value: String(input.traktId) },
     ],

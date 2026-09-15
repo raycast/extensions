@@ -1,4 +1,5 @@
 import { CompactList, CompactListEntry, toCompactList, toCompactListEntry } from "./compact-media";
+import { listNameContains, listNameEquals } from "./list-matching";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -33,15 +34,6 @@ type Output = {
   totalItems?: number;
 };
 
-function normalize(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
 /**
  * Get the personal lists on your Trakt account, and optionally the items inside one of them.
  * Use this before `add-to-list` to find the `listId` of an existing list.
@@ -66,9 +58,8 @@ export default async function tool(input: Input): Promise<Output> {
     const target = String(listId);
     lists = allLists.filter((list) => String(list.traktId) === target || list.slug === target);
   } else if (query) {
-    const normalizedQuery = normalize(query);
-    const exact = allLists.filter((list) => normalize(list.name) === normalizedQuery);
-    lists = exact.length > 0 ? exact : allLists.filter((list) => normalize(list.name).includes(normalizedQuery));
+    const exact = allLists.filter((list) => listNameEquals(list.name, query));
+    lists = exact.length > 0 ? exact : allLists.filter((list) => listNameContains(list.name, query));
   }
 
   const found = lists.length > 0;

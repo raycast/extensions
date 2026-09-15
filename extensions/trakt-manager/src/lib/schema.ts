@@ -45,6 +45,37 @@ export const TraktSearchSchema = TraktPaginationSchema.merge(TraktExtendedSchema
   fields: z.enum(["title", "title,aliases", "title,aliases,translations"]).optional(),
 });
 
+export const TraktIdLookupQuerySchema = z.object({
+  type: z.enum(["movie", "show", "season", "episode"]),
+});
+
+const TraktLookupEntitySchema = z.object({
+  title: z.string().optional(),
+  year: z.number().optional(),
+  ids: z.object({
+    trakt: z.number(),
+  }),
+});
+
+/**
+ * Response of Trakt's ID lookup. Only the fields needed to name an item are modelled, since
+ * this is used to tell a user which item a write action is about to touch.
+ */
+export const TraktIdLookupSchema = z.array(
+  z.object({
+    type: z.string(),
+    movie: TraktLookupEntitySchema.optional(),
+    show: TraktLookupEntitySchema.optional(),
+    season: TraktLookupEntitySchema.extend({ number: z.number().optional() }).optional(),
+    episode: TraktLookupEntitySchema.extend({
+      season: z.number().optional(),
+      number: z.number().optional(),
+    }).optional(),
+  }),
+);
+
+export type TraktIdLookupEntry = z.infer<typeof TraktIdLookupSchema>[number];
+
 export const TraktPaginationWithSortingSchema = TraktPaginationSchema.merge(TraktSortingSchema);
 
 export const TraktHistoryQuerySchema = TraktPaginationSchema.merge(TraktExtendedSchema);

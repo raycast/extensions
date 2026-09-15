@@ -76,55 +76,75 @@ type Candidate = {
   year?: number;
 };
 
+type CandidateSelection = {
+  candidates: Candidate[];
+  /**
+   * Years that do exist for the requested title, filled in only when the caller asked for a
+   * year that matched nothing. Lets the caller report the mismatch instead of guessing.
+   */
+  missedYears: number[];
+};
+
+function uniqueYears(candidates: Candidate[]): number[] {
+  const years = candidates.map((candidate) => candidate.year).filter((year): year is number => year !== undefined);
+  return [...new Set(years)].sort((a, b) => a - b);
+}
+
 /**
  * Keep the results worth checking: exact title matches when available,
  * otherwise the two best-ranked results.
  */
-function pickCandidates(candidates: Candidate[], query: string, year?: number): Candidate[] {
+function pickCandidates(candidates: Candidate[], query: string, year?: number): CandidateSelection {
   const normalizedQuery = normalizeTitle(query);
   let pool = candidates;
 
   if (year !== undefined) {
     const sameYear = pool.filter((candidate) => candidate.year === year);
-    if (sameYear.length > 0) pool = sameYear;
+    // Falling back to another release here would hand back an "exhaustive" verdict about a
+    // different film, so report the mismatch and let the caller disambiguate instead.
+    if (sameYear.length === 0) {
+      return { candidates: [], missedYears: uniqueYears(pool) };
+    }
+    pool = sameYear;
   }
 
   const exact = pool.filter((candidate) => normalizeTitle(candidate.title) === normalizedQuery);
-  if (exact.length > 0) return exact.slice(0, 3);
+  if (exact.length > 0) return { candidates: exact.slice(0, 3), missedYears: [] };
 
-  return pool.slice(0, 2);
+  return { candidates: pool.slice(0, 2), missedYears: [] };
 }
 
 async function resolveCandidates(
   query: string,
   year: number | undefined,
   type: "movies" | "shows" | "all",
-): Promise<Candidate[]> {
+): Promise<CandidateSelection> {
   const resolved: Candidate[] = [];
+  const missed = new Set<number>();
 
   if (type === "movies" || type === "all") {
     const found = await searchMovieCandidates(query);
-    resolved.push(
-      ...pickCandidates(
-        found.map((item) => ({ type: "movie" as const, ...item })),
-        query,
-        year,
-      ),
+    const selection = pickCandidates(
+      found.map((item) => ({ type: "movie" as const, ...item })),
+      query,
+      year,
     );
+    resolved.push(...selection.candidates);
+    selection.missedYears.forEach((value) => missed.add(value));
   }
 
   if (type === "shows" || type === "all") {
     const found = await searchShowCandidates(query);
-    resolved.push(
-      ...pickCandidates(
-        found.map((item) => ({ type: "show" as const, ...item })),
-        query,
-        year,
-      ),
+    const selection = pickCandidates(
+      found.map((item) => ({ type: "show" as const, ...item })),
+      query,
+      year,
     );
+    resolved.push(...selection.candidates);
+    selection.missedYears.forEach((value) => missed.add(value));
   }
 
-  return resolved;
+  return { candidates: resolved, missedYears: [...missed].sort((a, b) => a - b) };
 }
 
 /**
@@ -158,7 +178,9 @@ async function checkCandidate(candidate: Candidate): Promise<{ check: WatchCheck
         watched: plays > 0,
         plays,
         lastWatchedAt: timestamps[0],
-        firstWatchedAt: timestamps[timestamps.length - 1],
+        // Only the first page is loaded, so the oldest event here is the true first watch
+        // only when every play fits on it.
+        firstWatchedAt: plays <= events.length ? timestamps[timestamps.length - 1] : undefined,
       },
       events,
     };
@@ -214,6 +236,7 @@ export default async function tool(input: Input): Promise<Output> {
   // Lookup mode: exhaustive per-item history check
   if (query || traktId !== undefined) {
     let candidates: Candidate[] = [];
+    let missedYears: number[] = [];
 
     if (traktId !== undefined) {
       if (type === "movies" || type === "all") {
@@ -223,10 +246,27 @@ export default async function tool(input: Input): Promise<Output> {
         candidates.push({ type: "show", traktId, title: query ?? `Show ${traktId}`, year });
       }
     } else if (query) {
-      candidates = await resolveCandidates(query, year, type);
+      const selection = await resolveCandidates(query, year, type);
+      candidates = selection.candidates;
+      missedYears = selection.missedYears;
     }
 
     const target = query ? `"${query}"` : `Trakt ID ${traktId}`;
+
+    if (candidates.length === 0 && year !== undefined && missedYears.length > 0) {
+      return {
+        mode: "lookup",
+        exhaustive: false,
+        found: false,
+        message:
+          `${target} has no ${year} release on Trakt. Known year(s) for that title: ${missedYears.join(", ")}. ` +
+          `Ask the user which release they mean, or call again without a year. Do not report a watched or ` +
+          `not-watched verdict, because none of the releases above was checked.`,
+        checked: [],
+        history: [],
+        hasMore: false,
+      };
+    }
 
     if (candidates.length === 0) {
       return {

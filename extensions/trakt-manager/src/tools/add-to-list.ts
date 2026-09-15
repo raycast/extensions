@@ -1,4 +1,6 @@
 import { Action, Tool } from "@raycast/api";
+import { describeList, parseTraktIds } from "./list-matching";
+import { describeMediaBatch } from "./resolve-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -21,11 +23,6 @@ type Input = {
    * Put EVERY show in this one field; never call this tool once per show.
    */
   showTraktIds?: string;
-  /**
-   * Optional titles matching the IDs above, in the same order, separated by a pipe "|".
-   * Shown in the confirmation dialog so the user can check what will be added.
-   */
-  titles?: string;
 };
 
 type Output = {
@@ -44,41 +41,41 @@ type Output = {
   listItemCount?: number;
 };
 
-export function parseTraktIds(value?: string): number[] {
-  if (!value) return [];
+/**
+ * Turn the IDs that will actually be written into a readable summary, resolving each one
+ * against Trakt so the confirmation cannot name a different item than the one being added.
+ */
+export async function summarizeSelection(movieIds: number[], showIds: number[]): Promise<string> {
+  const total = movieIds.length + showIds.length;
+  if (total === 0) return "nothing";
 
-  const ids = value
-    .split(/[,;]/)
-    .map((part) => Number(part.trim()))
-    .filter((id) => Number.isInteger(id) && id > 0);
+  const [movies, shows] = await Promise.all([
+    describeMediaBatch("movie", movieIds),
+    describeMediaBatch("show", showIds),
+  ]);
 
-  return [...new Set(ids)];
-}
+  const labels = [...movies.labels, ...shows.labels];
+  const remaining = movies.remaining + shows.remaining;
 
-export function describeSelection(titles: string | undefined, total: number): string {
-  const parsed = (titles ?? "")
-    .split("|")
-    .map((title) => title.trim())
-    .filter(Boolean);
-
-  if (parsed.length === 0) return `${total} item(s)`;
-  if (parsed.length <= 5) return parsed.join(", ");
-  return `${parsed.slice(0, 5).join(", ")} and ${parsed.length - 5} more`;
+  if (labels.length === 0) return `${total} item(s)`;
+  return remaining > 0 ? `${labels.join(", ")} and ${remaining} more` : labels.join(", ");
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const movieCount = parseTraktIds(input.movieTraktIds).length;
-  const showCount = parseTraktIds(input.showTraktIds).length;
-  const total = movieCount + showCount;
+  const movieIds = parseTraktIds(input.movieTraktIds);
+  const showIds = parseTraktIds(input.showTraktIds);
+  const total = movieIds.length + showIds.length;
+
+  const [listName, items] = await Promise.all([describeList(input.listId), summarizeSelection(movieIds, showIds)]);
 
   return {
     style: Action.Style.Regular,
-    message: `Add ${total} item(s) to the Trakt list "${input.listName ?? input.listId}"?`,
+    message: `Add ${total} item(s) to the Trakt list "${listName}"?`,
     info: [
-      { name: "List", value: input.listName ?? input.listId },
-      { name: "Movies", value: String(movieCount) },
-      { name: "TV Shows", value: String(showCount) },
-      { name: "Items", value: describeSelection(input.titles, total) },
+      { name: "List", value: listName },
+      { name: "Movies", value: String(movieIds.length) },
+      { name: "TV Shows", value: String(showIds.length) },
+      { name: "Items", value: items },
     ],
   };
 };

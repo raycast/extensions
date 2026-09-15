@@ -30,6 +30,8 @@ import {
   TraktListItemIdSchema,
   TraktListItemsUpdateSchema,
   TraktListPrivacySchema,
+  TraktIdLookupQuerySchema,
+  TraktIdLookupSchema,
 } from "./schema";
 
 const c = initContract();
@@ -507,12 +509,28 @@ const TraktUserContract = c.router({
   },
 });
 
+const TraktSearchContract = c.router({
+  lookupById: {
+    method: "GET",
+    path: "/search/trakt/:id",
+    responses: {
+      200: TraktIdLookupSchema,
+    },
+    pathParams: z.object({
+      id: z.coerce.number(),
+    }),
+    query: TraktIdLookupQuerySchema,
+    summary: "Look up a movie, show, season or episode by its Trakt ID",
+  },
+});
+
 export const TraktContract = c.router(
   {
     movies: TraktMovieContract,
     shows: TraktShowContract,
     sync: TraktSyncContract,
     users: TraktUserContract,
+    search: TraktSearchContract,
   },
   {
     strictStatusCodes: true,

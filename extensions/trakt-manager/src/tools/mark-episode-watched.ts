@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { addEpisodeIdToHistory } from "../lib/media-mutations";
+import { describeMedia } from "./resolve-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -9,8 +10,8 @@ type Input = {
    */
   showTraktId: number;
   /**
-   * The title of the TV show (e.g. "Severance", "Breaking Bad").
-   * Required for the confirmation dialog presented to the user.
+   * The title of the TV show, used only for the message reported back to the user.
+   * The confirmation dialog always shows the title Trakt holds for `showTraktId`.
    */
   showTitle: string;
   /**
@@ -21,15 +22,6 @@ type Input = {
    * The episode number within the season (e.g. 3 for Episode 3).
    */
   episodeNumber: number;
-  /**
-   * The title of the episode (optional).
-   */
-  episodeTitle?: string;
-  /**
-   * The specific Trakt ID of the episode if already known (e.g. from `get-up-next`).
-   * If not provided, the tool will automatically resolve it.
-   */
-  episodeTraktId?: number;
   /**
    * Optional watched date in ISO format (e.g. "2026-09-15T12:00:00Z").
    * Defaults to current timestamp if omitted.
@@ -43,63 +35,74 @@ type Output = {
   episodeTraktId: number;
 };
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const s = String(input.seasonNumber).padStart(2, "0");
-  const e = String(input.episodeNumber).padStart(2, "0");
-  const epLabel = input.episodeTitle ? ` "${input.episodeTitle}"` : "";
+function episodeCode(seasonNumber: number, episodeNumber: number): string {
+  return `S${String(seasonNumber).padStart(2, "0")}E${String(episodeNumber).padStart(2, "0")}`;
+}
 
-  const info = [
-    { name: "Show", value: input.showTitle },
-    { name: "Episode", value: `S${s}E${e}${epLabel}` },
-  ];
+/**
+ * Resolve the episode from the show, season and episode numbers.
+ *
+ * The episode ID is always derived from these three values rather than accepted from the
+ * caller, so the episode written to the history is necessarily the one named in the
+ * confirmation dialog.
+ */
+async function resolveEpisode(showTraktId: number, seasonNumber: number, episodeNumber: number) {
+  const response = await executeToolCall(
+    (signal) =>
+      toolTraktClient.shows.getEpisode({
+        params: {
+          showid: showTraktId,
+          seasonNumber,
+          episodeNumber,
+        },
+        query: {
+          extended: "full",
+        },
+        fetchOptions: { signal },
+      }),
+    `Failed to find episode ${episodeCode(seasonNumber, episodeNumber)} for the show with Trakt ID ${showTraktId}`,
+  );
+
+  return response.body;
+}
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const code = episodeCode(input.seasonNumber, input.episodeNumber);
+  const [showLabel, episode] = await Promise.all([
+    describeMedia("show", input.showTraktId),
+    resolveEpisode(input.showTraktId, input.seasonNumber, input.episodeNumber),
+  ]);
 
   return {
     style: Action.Style.Regular,
-    message: `Mark S${s}E${e} of "${input.showTitle}" as watched on Trakt?`,
-    info,
+    message: `Mark ${code} of ${showLabel} as watched on Trakt?`,
+    info: [
+      { name: "Show", value: showLabel },
+      { name: "Episode", value: episode.title ? `${code} "${episode.title}"` : code },
+      { name: "Trakt ID", value: String(episode.ids.trakt) },
+    ],
   };
 };
 
 /**
  * Mark a single TV show episode as watched in your Trakt history.
- * If you do not have the episode's Trakt ID, supply `showTraktId`, `seasonNumber`, and `episodeNumber`.
+ * Supply `showTraktId`, `seasonNumber` and `episodeNumber`; the episode is resolved from them.
  * A confirmation dialog is shown to the user before recording the watch.
  */
 export default async function tool(input: Input): Promise<Output> {
   const { showTraktId, showTitle, seasonNumber, episodeNumber, watchedAt } = input;
-  let resolvedEpisodeId = input.episodeTraktId;
+  const code = episodeCode(seasonNumber, episodeNumber);
 
-  if (!resolvedEpisodeId) {
-    const episodeResponse = await executeToolCall(
-      (signal) =>
-        toolTraktClient.shows.getEpisode({
-          params: {
-            showid: showTraktId,
-            seasonNumber,
-            episodeNumber,
-          },
-          query: {
-            extended: "full",
-          },
-          fetchOptions: { signal },
-        }),
-      `Failed to find episode S${seasonNumber}E${episodeNumber} for show "${showTitle}" (ID: ${showTraktId})`,
-    );
-
-    resolvedEpisodeId = episodeResponse.body.ids.trakt;
-  }
+  const episode = await resolveEpisode(showTraktId, seasonNumber, episodeNumber);
 
   await executeToolCall(
-    (signal) => addEpisodeIdToHistory(toolTraktClient, resolvedEpisodeId!, { signal, watchedAt }),
-    `Failed to mark episode S${seasonNumber}E${episodeNumber} (ID: ${resolvedEpisodeId}) as watched`,
+    (signal) => addEpisodeIdToHistory(toolTraktClient, episode.ids.trakt, { signal, watchedAt }),
+    `Failed to mark episode ${code} (ID: ${episode.ids.trakt}) as watched`,
   );
-
-  const s = String(seasonNumber).padStart(2, "0");
-  const e = String(episodeNumber).padStart(2, "0");
 
   return {
     success: true,
-    message: `"${showTitle}" S${s}E${e} has been successfully marked as watched in your Trakt history.`,
-    episodeTraktId: resolvedEpisodeId,
+    message: `"${showTitle}" ${code} has been successfully marked as watched in your Trakt history.`,
+    episodeTraktId: episode.ids.trakt,
   };
 }

@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { CompactList, toCompactList } from "./compact-media";
+import { listNameEquals } from "./list-matching";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -43,15 +44,6 @@ type Output = {
   listId: string;
 };
 
-function normalize(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const info = [
     { name: "Name", value: input.name },
@@ -94,7 +86,7 @@ export default async function tool(input: Input): Promise<Output> {
     "Failed to check your existing Trakt lists",
   );
 
-  const duplicate = existingRes.body.find((list) => normalize(list.name) === normalize(trimmedName));
+  const duplicate = existingRes.body.find((list) => listNameEquals(list.name, trimmedName));
   if (duplicate) {
     const existing = toCompactList(duplicate);
     return {

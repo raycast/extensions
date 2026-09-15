@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { addMovieIdToWatchlist, addShowIdToWatchlist } from "../lib/media-mutations";
+import { describeMedia } from "./resolve-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -13,14 +14,10 @@ type Input = {
    */
   traktId: number;
   /**
-   * The title of the movie or show.
-   * Required for the confirmation dialog presented to the user.
+   * The title of the movie or show, used only for the message reported back to the user.
+   * The confirmation dialog always shows the title Trakt holds for `traktId`.
    */
   title: string;
-  /**
-   * The release year of the movie or show (optional).
-   */
-  year?: number;
 };
 
 type Output = {
@@ -29,21 +26,16 @@ type Output = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const mediaLabel = input.type === "movie" ? "Movie" : "TV Show";
-  const info = [
-    { name: "Title", value: input.title },
-    { name: "Type", value: mediaLabel },
-    { name: "Trakt ID", value: String(input.traktId) },
-  ];
-
-  if (input.year) {
-    info.splice(2, 0, { name: "Year", value: String(input.year) });
-  }
+  const verified = await describeMedia(input.type, input.traktId);
 
   return {
     style: Action.Style.Regular,
-    message: `Add "${input.title}" to your Trakt watchlist?`,
-    info,
+    message: `Add ${verified} to your Trakt watchlist?`,
+    info: [
+      { name: "Title", value: verified },
+      { name: "Type", value: input.type === "movie" ? "Movie" : "TV Show" },
+      { name: "Trakt ID", value: String(input.traktId) },
+    ],
   };
 };
 
