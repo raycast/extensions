@@ -361,7 +361,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 
 	const screenActions = (
 		<>
-			{fixable > 0 && (
+			{fixable > 0 && !pending && (
 				<Action
 					title={`Fix ${fixable} ${fixable === 1 ? "Issue" : "Issues"} Automatically`}
 					icon={{ source: Icon.Hammer, tintColor: Color.Red }}
@@ -423,7 +423,13 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 			isShowingDetail={(data?.results.length ?? 0) > 0}
 			navigationTitle={
 				counts
-					? `Security Audit: ${counts.pass} pass, ${counts.warn} warn, ${counts.fail} fail`
+					? pending
+						? // A count is a verdict, and a verdict before every check
+							// has run is the worst thing this screen could say: "0
+							// fail" while FileVault and SIP have not been looked at
+							// yet reads as a clean bill of health.
+							`Security Audit: still checking ${pending}`
+						: `Security Audit: ${counts.pass} pass, ${counts.warn} warn, ${counts.fail} fail`
 					: "Security Audit"
 			}
 			filtering={false}

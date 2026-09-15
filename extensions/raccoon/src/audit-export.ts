@@ -12,15 +12,11 @@ export const EXPORT_NEEDS_UPGRADE = "Exporting the report needs rcc 1.0.1 or new
  * the spreadsheet, the machine's copy.
  */
 export const AUDIT_EXPORT_FORMATS = [
-	{ id: "md", title: "Markdown", subtitle: "Client-ready document" },
-	{ id: "rtf", title: "RTF", subtitle: "Opens in TextEdit or Word" },
-	{ id: "html", title: "HTML", subtitle: "Report as a web page" },
-	{
-		id: "csv",
-		title: "CSV",
-		subtitle: "One row per check, for a spreadsheet",
-	},
-	{ id: "json", title: "JSON", subtitle: "Machine-readable" },
+	{ id: "md", title: "Markdown" },
+	{ id: "rtf", title: "RTF" },
+	{ id: "html", title: "HTML" },
+	{ id: "csv", title: "CSV" },
+	{ id: "json", title: "JSON" },
 ] as const;
 
 export type AuditExportFormat = (typeof AUDIT_EXPORT_FORMATS)[number]["id"];

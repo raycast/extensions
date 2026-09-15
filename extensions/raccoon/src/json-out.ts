@@ -128,9 +128,9 @@ export const JSON_TIMEOUT_MS = 60_000;
 type ExecResult = {
 	stdout: string;
 	stderr: string;
-	error?: Error;
 	exitCode: number | null;
 	signal: NodeJS.Signals | null;
+	timedOut?: boolean;
 };
 
 /**
@@ -148,15 +148,15 @@ type ExecResult = {
  * output stopped early.
  */
 export function readJson<T>(command: string, parse: (stdout: string) => T): (result: ExecResult) => T {
-	return ({ stdout, signal, error }) => {
-		if (signal || error) {
-			const why = signal ? ` (${signal})` : "";
+	return ({ stdout, signal, timedOut }) => {
+		// A run can end three ways short of finishing: killed, out of time, or
+		// both. Only the signal used to be looked at, because the old runner
+		// reported nothing else; this one says when the deadline was what
+		// ended it, and a truncated document must never reach the parser.
+		if (signal || timedOut) {
+			const why = signal ? ` (${signal})` : timedOut ? " (out of time)" : "";
 			throw new Error(
-				[
-					`rcc ${command} was cut off after ${JSON_TIMEOUT_MS / 1000}s${why} ` +
-						"and its report is incomplete.",
-					error?.message ?? "",
-				]
+				[`rcc ${command} was cut off after ${JSON_TIMEOUT_MS / 1000}s${why} ` + "and its report is incomplete."]
 					.join("\n")
 					.trim(),
 			);

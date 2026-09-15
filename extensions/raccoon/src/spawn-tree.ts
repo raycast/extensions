@@ -73,6 +73,13 @@ export function spawnTree(
 	},
 ): Promise<RccExit> {
 	return new Promise((resolve, reject) => {
+		// Asked to stop before it began. Callers await other things first - the
+		// login shell's PATH, for one - so the screen can be gone by the time
+		// this runs, and starting anyway leaves a process nobody will stop.
+		if (signal?.aborted) {
+			resolve({ code: 0, signal: "SIGTERM" });
+			return;
+		}
 		const child = spawn(file, args, { env, stdio: ["ignore", "pipe", "pipe"] });
 
 		const signalAll = (pids: number[], killSignal: NodeJS.Signals) => {
@@ -95,6 +102,12 @@ export function spawnTree(
 			// away: a half-written brew install is worse than a slow one.
 			const tree = [...descendants(child.pid).reverse(), child.pid];
 			signalAll(tree, "SIGTERM");
+			// The same list, not a fresh walk. By the time this fires the direct
+			// child is usually gone and its children have been re-parented away
+			// from it, so a second walk finds nothing and the process that
+			// ignored the SIGTERM lives on - which is the whole point of the
+			// grace window. The cost is that a pid recycled inside these few
+			// seconds would be signalled in error.
 			escalation = setTimeout(() => signalAll(tree, "SIGKILL"), graceMs);
 			// Waiting to kill something must not be a reason to stay alive.
 			escalation.unref();

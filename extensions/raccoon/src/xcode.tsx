@@ -185,7 +185,7 @@ export default function Command() {
 			navigationTitle={(x) => {
 				if (!x || !x.installed) return "Xcode";
 				const size = humanBytes(x.derived_data.bytes);
-				return `Xcode ${x.version ?? ""}: DerivedData ${size}`.replace("  ", " ");
+				return x.version ? `Xcode ${x.version}: DerivedData ${size}` : `Xcode: DerivedData ${size}`;
 			}}
 			searchBarPlaceholder="Search simulators and platforms"
 			emptyIcon={Icon.Hammer}

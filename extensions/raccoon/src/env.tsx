@@ -72,6 +72,7 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 								tintColor: Color.Orange,
 							}}
 							title={tilde(p.path)}
+							keywords={[p.path]}
 							accessories={[
 								{
 									tag: {
@@ -156,6 +157,7 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 							tintColor: Color.SecondaryText,
 						}}
 						title={tilde(p.path)}
+						keywords={[p.path]}
 						// Position matters: the first match on the PATH is the one that runs.
 						accessories={[{ text: `#${i + 1}` }]}
 						actions={

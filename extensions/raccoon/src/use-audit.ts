@@ -50,7 +50,11 @@ export function useAudit({ rcc, deep, timeout }: { rcc: string | null; deep: boo
 
 	const slow = useRccExec(rcc ?? "rcc", [...base, "--only", split?.slow ?? "core", "--json"], {
 		execute: ready && split !== undefined,
-		timeout,
+		// Its own ceiling, four times the other: this is the group that waits
+		// on Apple's servers, and 615s was measured on one Mac in one
+		// afternoon. The whole-run timeout would cut it off at five minutes
+		// and lose the six checks a reader opens this screen for.
+		timeout: timeout * 4,
 		path: RUNTIME_PATH,
 		parseOutput: readAuditRun,
 	});
@@ -59,7 +63,7 @@ export function useAudit({ rcc, deep, timeout }: { rcc: string | null; deep: boo
 	// are the checks a reader opens this screen for, and a list that reorders
 	// itself under the cursor is worse than one that waits.
 	const data = useMemo<AuditReport | undefined>(() => {
-		if (!quick.data) return undefined;
+		if (!quick.data) return slow.data;
 		if (!slow.data) return quick.data;
 		const results = [...slow.data.results, ...quick.data.results];
 		return {
@@ -81,7 +85,11 @@ export function useAudit({ rcc, deep, timeout }: { rcc: string | null; deep: boo
 		pendingError: split && !slow.isLoading ? slow.error : undefined,
 		revalidate: () => {
 			quick.revalidate();
-			slow.revalidate();
+			// Only when there is a split. usePromise's revalidate does not
+			// consult `execute`, so on an rcc that ignores --only this would
+			// run the whole audit a second time and the merge would list every
+			// check twice.
+			if (split) slow.revalidate();
 		},
 	};
 }
