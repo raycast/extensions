@@ -11,3 +11,7 @@
 - Create a folder named after today's date and open it in a terminal
 - Preferences for parent folder, terminal app, folder name format, and revealing in Finder
 - Follows the system default terminal when no app is chosen
+
+## [New Icon] - 2026-09-15
+
+- A refreshed extension icon: a calendar on a blue gradient, redrawn with the Raycast Icon Maker.
