@@ -10,20 +10,20 @@ import {
   popToRoot,
   Icon,
   closeMainWindow,
-} from '@raycast/api';
-import { useState } from 'react';
-import path from 'path';
-import { processImageOcr, captureAndExtractText } from './utils/ocr';
-import { CaptureMode } from './utils/screenshot';
+} from "@raycast/api";
+import { useState } from "react";
+import path from "path";
+import { processImageOcr, captureAndExtractText } from "./utils/ocr";
+import { CaptureMode } from "./utils/screenshot";
 
-type ExtractStep = 'MENU' | 'CHOOSE_FILE';
+type ExtractStep = "MENU" | "CHOOSE_FILE";
 
 export default function Command() {
-  const [step, setStep] = useState<ExtractStep>('MENU');
+  const [step, setStep] = useState<ExtractStep>("MENU");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const fileName = selectedFile ? path.basename(selectedFile) : '';
+  const fileName = selectedFile ? path.basename(selectedFile) : "";
 
   function handleRemoveImage() {
     setSelectedFile(null);
@@ -41,7 +41,7 @@ export default function Command() {
         await Clipboard.copy(result.text);
         await showToast({
           style: Toast.Style.Success,
-          title: 'Text Copied to Clipboard!',
+          title: "Text Copied to Clipboard!",
           message: result.text.length > 60 ? `${result.text.substring(0, 60)}...` : result.text,
         });
         await popToRoot({ clearSearchBar: true }).catch(() => {});
@@ -49,15 +49,15 @@ export default function Command() {
       } else if (result.success && !result.text) {
         await showToast({
           style: Toast.Style.Failure,
-          title: 'No Text Found',
-          message: 'The selected image contains no readable text',
+          title: "No Text Found",
+          message: "The selected image contains no readable text",
         });
         setIsLoading(false);
       } else {
         await showToast({
           style: Toast.Style.Failure,
-          title: 'OCR Failed',
-          message: result.message || 'Could not process selected image',
+          title: "OCR Failed",
+          message: result.message || "Could not process selected image",
         });
         setIsLoading(false);
       }
@@ -65,15 +65,15 @@ export default function Command() {
       const err = error as Error;
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Error',
-        message: err.message || 'Failed to run Windows OCR',
+        title: "Error",
+        message: err.message || "Failed to run Windows OCR",
       });
       setIsLoading(false);
     }
   }
 
   // STATE 2: CHOOSE / DISPLAY EXISTING IMAGE
-  if (step === 'CHOOSE_FILE') {
+  if (step === "CHOOSE_FILE") {
     if (selectedFile) {
       return (
         <Detail
@@ -85,16 +85,16 @@ export default function Command() {
               <Action
                 title="Choose Different Image"
                 icon={Icon.Image}
-                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={handleRemoveImage}
               />
               <Action
                 title="Back to Options"
                 icon={Icon.ArrowLeft}
-                shortcut={{ modifiers: ['cmd'], key: '[' }}
+                shortcut={{ modifiers: ["cmd"], key: "[" }}
                 onAction={() => {
                   setSelectedFile(null);
-                  setStep('MENU');
+                  setStep("MENU");
                 }}
               />
             </ActionPanel>
@@ -112,10 +112,10 @@ export default function Command() {
             <Action
               title="Back to Options"
               icon={Icon.ArrowLeft}
-              shortcut={{ modifiers: ['cmd'], key: '[' }}
+              shortcut={{ modifiers: ["cmd"], key: "[" }}
               onAction={() => {
                 setSelectedFile(null);
-                setStep('MENU');
+                setStep("MENU");
               }}
             />
           </ActionPanel>
@@ -149,16 +149,16 @@ export default function Command() {
         subtitle="Capture a new screenshot and extract its text"
         actions={
           <ActionPanel>
-            <Action title="Take Screenshot (region)" icon={Icon.Crop} onAction={() => handleTakeScreenshot('region')} />
+            <Action title="Take Screenshot (region)" icon={Icon.Crop} onAction={() => handleTakeScreenshot("region")} />
             <Action
               title="Take Screenshot (window)"
               icon={Icon.Window}
-              onAction={() => handleTakeScreenshot('window')}
+              onAction={() => handleTakeScreenshot("window")}
             />
             <Action
               title="Take Screenshot (full Screen)"
               icon={Icon.Monitor}
-              onAction={() => handleTakeScreenshot('screen')}
+              onAction={() => handleTakeScreenshot("screen")}
             />
           </ActionPanel>
         }
@@ -169,7 +169,7 @@ export default function Command() {
         subtitle="Select an image file already saved on your computer"
         actions={
           <ActionPanel>
-            <Action title="Extract Text from Image" icon={Icon.Image} onAction={() => setStep('CHOOSE_FILE')} />
+            <Action title="Extract Text from Image" icon={Icon.Image} onAction={() => setStep("CHOOSE_FILE")} />
           </ActionPanel>
         }
       />
@@ -177,8 +177,9 @@ export default function Command() {
   );
 }
 
-async function handleTakeScreenshot(mode: CaptureMode = 'region') {
-  closeMainWindow({ clearRootSearch: true }).catch(() => {});
+async function handleTakeScreenshot(mode: CaptureMode = "region") {
+  await closeMainWindow({ clearRootSearch: true }).catch(() => {});
+  await new Promise((resolve) => setTimeout(resolve, 150));
 
   try {
     const result = await captureAndExtractText(mode);
@@ -192,28 +193,28 @@ async function handleTakeScreenshot(mode: CaptureMode = 'region') {
       await Clipboard.copy(result.text);
       await showToast({
         style: Toast.Style.Success,
-        title: 'Text Copied to Clipboard!',
+        title: "Text Copied to Clipboard!",
         message: result.text.length > 60 ? `${result.text.substring(0, 60)}...` : result.text,
       });
     } else if (result.success && !result.text) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'No Text Found',
-        message: 'The captured screenshot contains no readable text',
+        title: "No Text Found",
+        message: "The captured screenshot contains no readable text",
       });
     } else {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'OCR Failed',
-        message: result.message || 'Could not process captured screenshot',
+        title: "OCR Failed",
+        message: result.message || "Could not process captured screenshot",
       });
     }
   } catch (error) {
     const err = error as Error;
     await showToast({
       style: Toast.Style.Failure,
-      title: 'Error',
-      message: err.message || 'Failed to run screenshot OCR',
+      title: "Error",
+      message: err.message || "Failed to run screenshot OCR",
     });
   } finally {
     await popToRoot({ clearSearchBar: true }).catch(() => {});

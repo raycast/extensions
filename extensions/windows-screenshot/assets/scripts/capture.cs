@@ -549,12 +549,6 @@ public class NativeCapture {
         }
 
         string pictures = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-        string cand1 = Path.Combine(pictures, "Screenshots 1");
-        if (Directory.Exists(cand1)) return cand1;
-
-        string cand2 = Path.Combine(pictures, "Screenshots");
-        if (Directory.Exists(cand2)) return cand2;
-
         return Path.Combine(pictures, "Screenshots");
     }
 
@@ -865,9 +859,8 @@ public class CaptureOverlayForm : Form {
                 selectionRect = new Rectangle(e.X, e.Y, 0, 0);
                 this.Invalidate();
             } else if (currentMode == CaptureOverlayMode.Window) {
-                this.Hide(); // Instantly unbind overlay from DWM composition stack
-
                 if (selectedWindow != null && selectedWindow.Handle != IntPtr.Zero) {
+                    this.Hide(); // Instantly unbind overlay from DWM composition stack
                     CroppedResult = NativeCapture.CaptureSpecificWindow(selectedWindow.Handle, selectedWindow.Bounds);
                     if (CroppedResult != null) {
                         IsCancelled = false;
@@ -876,12 +869,11 @@ public class CaptureOverlayForm : Form {
                         IsCancelled = true;
                         this.DialogResult = DialogResult.Cancel;
                     }
+                    this.Close();
                 } else {
-                    CroppedResult = fullScreenBmp.Clone(new Rectangle(0, 0, fullScreenBmp.Width, fullScreenBmp.Height), fullScreenBmp.PixelFormat);
-                    IsCancelled = false;
-                    this.DialogResult = DialogResult.OK;
+                    // Ignore clicks when no valid window is hovered so desktop is not captured as success
+                    return;
                 }
-                this.Close();
             }
         }
     }

@@ -8,7 +8,7 @@ A Windows-native screenshot extension for [Raycast](https://www.raycast.com), pr
 
 - **Capture Screen**: Instantly captures the entire screen across single or multi-monitor setups.
 - **Capture Region**: Interactive full-screen selection overlay with real-time dimension indicators (`W × H px`), blue selection border, and `ESC` or right-click cancellation.
-- **Capture Window**: Captures the active foreground window using Win32 DWM frame APIs, excluding invisible drop-shadow margins.
+- **Capture Window**: Interactively select and capture any application window with real-time hover highlight and DWM frame precision, excluding invisible drop-shadow margins.
 - **Extract Text (OCR)**: Native Windows WinRT OCR engine extracts text locally and offline from screen captures or image files directly into your clipboard.
 - **Flexible Output**: Configure output to Save to disk, Copy image directly to the clipboard, or both simultaneously (`Save + Copy`).
 - **High-DPI & Multi-Monitor**: Fully DPI-aware coordinate calculation matching actual screen resolution.
@@ -22,7 +22,7 @@ A Windows-native screenshot extension for [Raycast](https://www.raycast.com), pr
 | :--- | :--- | :--- |
 | **Capture Screen** | Capture a screenshot of the entire screen | `no-view` |
 | **Capture Region** | Select a rectangular area of the screen to capture | `no-view` |
-| **Capture Window** | Capture the currently active foreground window | `no-view` |
+| **Capture Window** | Select and capture an application window | `no-view` |
 | **Extract Text** | Extract text from an image or screenshot using local Windows OCR | `view` |
 
 ---
