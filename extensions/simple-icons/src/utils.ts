@@ -58,7 +58,13 @@ export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
 
 const assetPackCompleteMarker = ".raycast-complete";
 const assetPackLockName = ".pack-lock";
+// Gate for lock membership changes. Filling a vacancy, replacing a stale
+// owner, and releasing all happen while holding it, so those transitions are
+// serialized across processes.
 const assetPackLockTakeoverName = ".pack-lock.takeover";
+// The lock is created once and never unlinked afterwards. Its content is the
+// holder's token, or this mark when the lock is free.
+const assetPackLockVacantToken = "-";
 const assetPackLockStaleMs = 60_000;
 // Hard ceiling on heartbeat silence: past this age the lock is reclaimed even
 // when the owner PID answers. A dead owner's PID can have been recycled for an
@@ -67,6 +73,10 @@ const assetPackLockStaleMs = 60_000;
 // not functioning; takeover stays safe because extraction uses per-process
 // staging and a rename that loses the race discards its own pack.
 const assetPackLockHardStaleMs = 5 * 60_000;
+// The gate is held only across a lock membership change (a few filesystem
+// operations), so its stale thresholds are short. The hard tier bounds a
+// holder that is alive but suspended.
+const assetPackGateStaleMs = 30_000;
 
 const getAssetPackDestination = (version: string) => path.join(environment.assetsPath, "pack", version);
 
@@ -117,140 +127,208 @@ const inspectAssetPackLock = async (lockPath: string) => {
   }
 };
 
+// Whether the gate (or any token-carrying lock file) has been abandoned past
+// its soft threshold: the holder PID must be dead in the soft..hard window,
+// while the hard ceiling reclaims regardless of PID liveness.
+const isAssetPackGateStale = async (gatePath: string) => {
+  try {
+    const stat = await fs.stat(gatePath);
+    const ageMs = Date.now() - stat.mtimeMs;
+    if (ageMs > assetPackLockHardStaleMs) return true;
+    if (ageMs <= assetPackGateStaleMs) return false;
+    const pid = parseOwnerPid(await fs.readFile(gatePath, "utf8").catch(() => ""));
+    return pid === undefined || !isProcessAlive(pid);
+  } catch {
+    return false;
+  }
+};
+
+// Acquire the single gate that guards every lock membership change. A stale
+// gate (holder crashed or is suspended past the hard ceiling) is reclaimed.
+const holdAssetPackGate = async (gatePath: string, token: string) => {
+  for (;;) {
+    try {
+      await fs.writeFile(gatePath, token, { flag: "wx" });
+      return;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      if (await isAssetPackGateStale(gatePath)) {
+        await fs.rm(gatePath, { force: true });
+        continue;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+  }
+};
+
+// Release the gate only while it still carries this process's token. A process
+// whose gate was reclaimed during a hard-tier pause leaves the successor's
+// gate in place.
+const dropAssetPackGate = async (gatePath: string, token: string) => {
+  try {
+    const file = await fs.open(gatePath, "r+");
+    try {
+      if ((await file.readFile("utf8")) === token) {
+        await fs.rm(gatePath, { force: true });
+      }
+    } finally {
+      await file.close();
+    }
+  } catch {
+    // The gate vanished (reclaimed after a hard-tier pause); nothing to drop.
+  }
+};
+
+// Inode-checked compare-and-set on the persistent lock content. The expected
+// predecessor token AND an unchanged inode are verified before writing, and
+// the new content AND inode after writing. A process paused anywhere past its
+// final identity check therefore fails this transition instead of overwriting
+// a lock that was unlinked and recreated (new inode) or rewritten (new token)
+// by another owner. Reads go through the path so the r+ handle stays at
+// offset 0 for the truncate/write.
+const compareAndSetAssetPackLock = async (lockPath: string, expected: string, next: string) => {
+  let file: Awaited<ReturnType<typeof fs.open>> | undefined;
+  try {
+    file = await fs.open(lockPath, "r+");
+  } catch {
+    return false;
+  }
+  try {
+    const fdStat = await file.stat();
+    const pathStat = await fs.stat(lockPath).catch(() => null);
+    const current = await fs.readFile(lockPath, "utf8").catch(() => "");
+    if (!pathStat || fdStat.ino !== pathStat.ino || current !== expected) return false;
+    await file.truncate(0);
+    await file.writeFile(next, "utf8");
+    await file.utimes(new Date(), new Date());
+    const afterStat = await fs.stat(lockPath).catch(() => null);
+    const after = await fs.readFile(lockPath, "utf8").catch(() => "");
+    return afterStat !== null && afterStat.ino === fdStat.ino && after === next;
+  } finally {
+    await file.close();
+  }
+};
+
 // Cross-process mutual exclusion: Raycast runs each command invocation in its
 // own Node process, so multiple instances can race the clean/extract/swap
-// sequence. The lock file is created exclusively (O_EXCL) and carries a
-// random owner token; a heartbeat keeps its mtime fresh while the holder is
-// working.
+// sequence. The lock file is created exclusively (O_EXCL) and afterwards is
+// NEVER unlinked: its content is an owner token while work runs and the vacant
+// mark in between holders.
 //
-// Recovery from a dead holder never unlinks the lock path: a vacated path can
-// be acquired by a third process between removal and the successor's
-// re-creation. Instead, contenders elect one successor through a marker
-// created with O_EXCL, and the winner rewrites the lock contents in place so
-// an exclusive owner exists at every instant.
+// Normal acquisition (vacant -> own token), stale takeover
+// (stale token -> own token), and release (own token -> vacant) are all the
+// same gated transition: hold the gate, compare-and-set the lock content,
+// release the gate. The gate serializes the boundaries, and the CAS re-checks
+// the token and the inode right before and right after writing, so a pause
+// after the final identity check can never remove or overwrite a newer
+// owner's lock — even if a hard-tier pause let another process reclaim the
+// gate itself.
 //
-// The election winner only takes over after re-reading the lock and matching
-// the stale token it observed: another successor may have completed a whole
-// transfer (removing its election marker) while this process was paused.
-//
-// assertOwner is handed to the locked work: the holder fences itself at every
-// shared-state boundary, and a heartbeat that finds a foreign token marks the
-// lock lost. A live owner that was paused past the hard-stale threshold and
-// succeeded therefore stops touching the cache the moment it resumes, so
-// cleanup and installation always have exactly one acting owner.
+// assertOwner fences the holder at every shared-state boundary, and a
+// heartbeat that finds a foreign token or a vanished lock marks ownership
+// lost. A live owner displaced across the hard-stale threshold therefore
+// stops touching the cache the moment it resumes, so cleanup and installation
+// always have exactly one acting owner.
 class AssetPackLockLostError extends Error {}
 
 const withAssetPackLock = async <T>(work: (assertOwner: () => Promise<void>) => Promise<T>) => {
   const lockPath = path.join(environment.assetsPath, assetPackLockName);
-  const takeoverPath = path.join(environment.assetsPath, assetPackLockTakeoverName);
+  const gatePath = path.join(environment.assetsPath, assetPackLockTakeoverName);
   const token = `${process.pid}:${Date.now()}:${Math.random().toString(36).slice(2)}`;
 
-  const transferStaleLock = async (staleToken: string) => {
-    // Electing a single successor: exactly one contender's O_EXCL create
-    // succeeds; losers wait while the elected owner is alive.
-    try {
-      await fs.writeFile(takeoverPath, token, { flag: "wx" });
-    } catch (createError) {
-      if ((createError as NodeJS.ErrnoException).code !== "EEXIST") throw createError;
-      // A takeover is already in progress. Reclaim the marker only when its
-      // owner is dead; a live successor may be about to transfer the lock.
-      if ((await inspectAssetPackLock(takeoverPath)).recoverable) {
-        await fs.rm(takeoverPath, { force: true });
-      }
-      return false;
-    }
-    try {
-      // Revalidate before writing: the staleness observation happened before
-      // the election, and a paused process can reach this point after another
-      // successor already replaced the stale token and removed its marker.
-      const currentToken = await fs.readFile(lockPath, "utf8").catch(() => "");
-      if (currentToken !== staleToken || !(await inspectAssetPackLock(lockPath)).recoverable) {
-        await fs.rm(takeoverPath, { force: true }).catch(() => {});
-        return false;
-      }
-      // In-place transfer: the lock path is never unlinked, so no third
-      // process can acquire it during recovery, and holding the election
-      // marker means no other successor can be rewriting the lock.
-      const file = await fs.open(lockPath, "r+");
-      try {
-        await file.truncate(0);
-        await file.writeFile(token, "utf8");
-        await file.utimes(new Date(), new Date());
-      } finally {
-        await file.close();
-      }
-    } catch (transferError) {
-      await fs.rm(takeoverPath, { force: true }).catch(() => {});
-      throw transferError;
-    }
-    await fs.rm(takeoverPath, { force: true }).catch(() => {});
-    return true;
-  };
-
   for (;;) {
+    let acquired = false;
     try {
+      // Bootstrap: first holder ever creates the persistent lock.
       await fs.writeFile(lockPath, token, { flag: "wx" });
+      acquired = true;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-      const inspection = await inspectAssetPackLock(lockPath);
-      const staleToken = await fs.readFile(lockPath, "utf8").catch(() => "");
-      const transferred = inspection.recoverable && (await transferStaleLock(staleToken));
-      if (!transferred) {
-        // Wait while a live holder keeps the heartbeat fresh or a successor
-        // election is in progress; no acquisition timeout.
-        await new Promise((resolve) => setTimeout(resolve, 250));
-        continue;
+      // Every later membership change goes through the gate. Re-inspect
+      // staleness INSIDE it: a fresh heartbeat from the owner during the gate
+      // wait flips recoverable to false and aborts this takeover.
+      await holdAssetPackGate(gatePath, token);
+      try {
+        const current = await fs.readFile(lockPath, "utf8").catch(() => "");
+        if (current === assetPackLockVacantToken) {
+          acquired = await compareAndSetAssetPackLock(lockPath, assetPackLockVacantToken, token);
+        } else if ((await inspectAssetPackLock(lockPath)).recoverable) {
+          acquired = await compareAndSetAssetPackLock(lockPath, current, token);
+        }
+      } finally {
+        await dropAssetPackGate(gatePath, token);
       }
     }
-    let ownershipLost = false;
-    const assertOwner = async () => {
-      if (ownershipLost) throw new AssetPackLockLostError();
-      const current = await fs.readFile(lockPath, "utf8").catch(() => "");
-      if (current !== token) {
-        ownershipLost = true;
-        throw new AssetPackLockLostError();
-      }
-    };
-    // Refreshes are owner-guarded: opening with "r+" requires the lock to
-    // exist and the token is verified before touching it (a holder whose lock
-    // was taken over after a stale period can never overwrite the new owner).
-    // A foreign token flips ownershipLost so the fenced work stands down.
-    // Writes are chained and awaited on release so none land after the lock
-    // is removed.
-    let heartbeatChain: Promise<void> = Promise.resolve();
-    const refreshLock = async () => {
-      let file: Awaited<ReturnType<typeof fs.open>> | undefined;
-      try {
-        file = await fs.open(lockPath, "r+");
-        const current = (await file.readFile("utf8")) ?? "";
-        if (current === token) {
-          // Touch mtime without rewriting content: a content rewrite on an
-          // open handle keeps its offset and could pad/truncate the token.
-          await file.utimes(new Date(), new Date());
-        } else {
-          ownershipLost = true;
-        }
-      } catch {
-        // The lock is gone or was taken over; stop maintaining it.
-      } finally {
-        await file?.close();
-      }
-    };
-    const heartbeat = setInterval(() => {
-      heartbeatChain = heartbeatChain.then(refreshLock, refreshLock);
-    }, 10_000);
+    if (acquired) break;
+    // Live owner, lost gate race, or a CAS that failed after a pause: wait as
+    // a contender and re-enter acquisition.
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+
+  // Ownership acquired. Set up fencing, heartbeat, and release.
+  let ownershipLost = false;
+  const assertOwner = async () => {
+    if (ownershipLost) throw new AssetPackLockLostError();
+    // A missing lock reads as the vacant mark: this process no longer owns it
+    // under any circumstances.
+    const current = await fs.readFile(lockPath, "utf8").catch(() => assetPackLockVacantToken);
+    if (current !== token) {
+      ownershipLost = true;
+      throw new AssetPackLockLostError();
+    }
+  };
+  // Refreshes are owner-guarded: opening with "r+" requires the persistent
+  // lock to exist and the token is verified before touching it (a holder whose
+  // lock was taken over after a stale period can never overwrite the new
+  // owner). A foreign token or a vanished lock flips ownershipLost so the
+  // fenced work stands down. Writes are chained and awaited on release so none
+  // land after ownership ends.
+  let heartbeatChain: Promise<void> = Promise.resolve();
+  const refreshLock = async () => {
+    let file: Awaited<ReturnType<typeof fs.open>> | undefined;
     try {
-      return await work(assertOwner);
-    } finally {
-      clearInterval(heartbeat);
-      await heartbeatChain;
-      try {
-        if ((await fs.readFile(lockPath, "utf8").catch(() => "")) === token) {
-          await fs.rm(lockPath, { force: true });
-        }
-      } catch {
-        // Another holder may have taken over a stale lock; only remove our own.
+      file = await fs.open(lockPath, "r+");
+      const current = (await file.readFile("utf8")) ?? "";
+      if (current === token) {
+        // Touch mtime without rewriting content: a content rewrite on an open
+        // handle keeps its offset and could pad/truncate the token.
+        await file.utimes(new Date(), new Date());
+      } else {
+        ownershipLost = true;
       }
+    } catch (error) {
+      // The persistent lock vanished (removed out from under us) or was
+      // replaced: an r+ open can never recreate ownership.
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") ownershipLost = true;
+    } finally {
+      await file?.close();
+    }
+  };
+  const heartbeat = setInterval(() => {
+    heartbeatChain = heartbeatChain.then(refreshLock, refreshLock);
+  }, 10_000);
+  try {
+    return await work(assertOwner);
+  } finally {
+    clearInterval(heartbeat);
+    await heartbeatChain;
+    // Release is the same gated compare-and-set as acquisition. The token can
+    // only pass to vacant while this process holds the gate, so a successor
+    // cannot transfer in between reading our token and rewriting the lock; the
+    // inode check makes a hard-tier pause harmless as well.
+    try {
+      await holdAssetPackGate(gatePath, token);
+      try {
+        const current = await fs.readFile(lockPath, "utf8").catch(() => "");
+        if (current === token) {
+          await compareAndSetAssetPackLock(lockPath, token, assetPackLockVacantToken);
+        }
+      } finally {
+        await dropAssetPackGate(gatePath, token);
+      }
+    } catch {
+      // If the gate cannot be taken, ownership was already reclaimed elsewhere;
+      // leave that owner's state untouched.
     }
   }
 };
@@ -299,19 +377,16 @@ const pacoteAssetPack = async (version: string, assertOwner: () => Promise<void>
 // Wait for another holder to finish installing. Returns as soon as the pack
 // is complete, or earlier when the holder's lock becomes recoverable (a
 // crashed successor's lock is reclaimable after the soft-stale threshold, far
-// sooner than the hard timeout) or disappears, so the caller can compete
-// again instead of idling through the whole timeout.
+// sooner than the hard timeout), is vacant, or has vanished, so the caller can
+// compete again instead of idling through the whole timeout.
 const waitForAssetPack = async (destination: string, lockPath: string, timeoutMs: number) => {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await hasCompleteAssetPack(destination)) return true;
     const inspection = await inspectAssetPackLock(lockPath).catch(() => ({ recoverable: false as const }));
     if (inspection.recoverable) return false;
-    const lockMissing = await fs
-      .access(lockPath)
-      .then(() => false)
-      .catch(() => true);
-    if (lockMissing) return false;
+    const current = await fs.readFile(lockPath, "utf8").catch(() => "");
+    if (current === "" || current === assetPackLockVacantToken) return false;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   return hasCompleteAssetPack(destination);
