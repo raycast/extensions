@@ -1,0 +1,332 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "academic",
+  "title": "Academic",
+  "description": "Find, access, organize, and cite academic books, papers, and reference works",
+  "icon": "icon.png",
+  "author": "kgracher",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-library",
+      "title": "Search",
+      "subtitle": "Academic",
+      "description": "Find bibliographic records, citations, selected text, PDFs, encyclopedias, and access sources",
+      "mode": "view"
+    },
+    {
+      "name": "browse-library",
+      "title": "Library",
+      "subtitle": "Academic",
+      "description": "Browse saved works, reading lists, collections, and tags",
+      "mode": "view"
+    },
+    {
+      "name": "configure-academic",
+      "title": "Config",
+      "subtitle": "Academic",
+      "description": "Configure sources, metadata, languages, country marketplaces, formats, and behavior",
+      "mode": "view"
+    },
+    {
+      "name": "index-local-library",
+      "title": "Index",
+      "subtitle": "Academic",
+      "description": "Incrementally index configured local and cloud-synced research folders",
+      "mode": "no-view",
+      "interval": "30m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "contactEmail",
+      "title": "Contact Email",
+      "description": "Optional. Sent to APIs that offer a polite pool for identified clients.",
+      "type": "textfield",
+      "placeholder": "you@example.com",
+      "required": false
+    },
+    {
+      "name": "googleBooksApiKey",
+      "title": "Google Books API Key",
+      "description": "Required only when Google Books is enabled in Config.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "semanticScholarApiKey",
+      "title": "Semantic Scholar API Key",
+      "description": "Required only when Semantic Scholar is enabled in Config.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "coreApiKey",
+      "title": "CORE API Key",
+      "description": "Optional. Registered users receive better API limits",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "openUrlResolver",
+      "title": "Institutional OpenURL Resolver",
+      "description": "Optional library link-resolver base URL used to check institutional access",
+      "type": "textfield",
+      "placeholder": "https://your-library.example/openurl",
+      "required": false
+    },
+    {
+      "name": "openAIApiKey",
+      "title": "OpenAI API Key",
+      "description": "Optional. Used only when OpenAI API is selected and external analysis is authorized.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "openAIModel",
+      "title": "OpenAI Model",
+      "description": "Optional model identifier used by the OpenAI API provider.",
+      "type": "textfield",
+      "placeholder": "gpt-5.6-luna",
+      "required": false
+    },
+    {
+      "name": "anthropicApiKey",
+      "title": "Anthropic API Key",
+      "description": "Optional. Used only when Anthropic is selected and external analysis is authorized.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "anthropicModel",
+      "title": "Anthropic Model",
+      "description": "Optional model identifier used by the Anthropic API provider.",
+      "type": "textfield",
+      "placeholder": "claude-haiku-4-5-20251001",
+      "required": false
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Optional. Used only when Gemini is selected and external analysis is authorized.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "geminiModel",
+      "title": "Gemini Model",
+      "description": "Optional model identifier used by the Gemini API provider.",
+      "type": "textfield",
+      "placeholder": "gemini-3.8-flash",
+      "required": false
+    },
+    {
+      "name": "enableBookSources",
+      "title": "Book Sources",
+      "label": "Enable basic book sources",
+      "description": "Open Library, Internet Archive and Project Gutenberg. Fine-tune providers in Config.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableArticleSources",
+      "title": "Article Sources",
+      "label": "Enable basic article sources",
+      "description": "Major scholarly APIs and open repositories. Fine-tune providers in Config.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableMetadataSources",
+      "title": "Metadata Sources",
+      "label": "Enable basic metadata sources",
+      "description": "Trusted bibliographic enrichment providers. Fine-tune providers in Config.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableEncyclopedias",
+      "title": "Encyclopedias",
+      "label": "Enable basic encyclopedias",
+      "description": "SEP, IEP, Encyclopedia of Mathematics and NCBI Bookshelf.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeUnknownLanguage",
+      "title": "Unknown Languages",
+      "label": "Include records with unknown language",
+      "description": "Language details are configured inside Config.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showWorksWithoutAcceptedFiles",
+      "title": "Metadata-only Works",
+      "label": "Keep metadata-only works",
+      "description": "Keep catalog records even when no accepted full-text file is found.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "hideLowConfidenceResults",
+      "title": "Result Quality",
+      "label": "Hide weak matches",
+      "description": "Remove weak and merely related results from simple search.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showUnavailableSources",
+      "title": "Unavailable Sources",
+      "label": "Show unavailable sources",
+      "description": "Display provider errors below search results. Disabled by default so only found sources are shown.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "defaultCitationStyle",
+      "title": "Default Citation Style",
+      "description": "Style used first by Bib and citation actions.",
+      "type": "dropdown",
+      "default": "abnt",
+      "required": false,
+      "data": [
+        {
+          "title": "ABNT",
+          "value": "abnt"
+        },
+        {
+          "title": "APA",
+          "value": "apa"
+        },
+        {
+          "title": "Chicago",
+          "value": "chicago"
+        },
+        {
+          "title": "MLA",
+          "value": "mla"
+        }
+      ]
+    },
+    {
+      "name": "enableExperimentalAnalysis",
+      "title": "Experimental Analysis",
+      "label": "Enable experimental summaries, key points and semantic relationships",
+      "description": "Disabled by default. Basic indexing, OCR, metadata matching and safe rename checks remain available.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "analysisEngine",
+      "title": "Experimental Analysis Engine",
+      "description": "Used only when Experimental Analysis is enabled. Detailed options are available in Config.",
+      "type": "dropdown",
+      "default": "local",
+      "required": false,
+      "data": [
+        {
+          "title": "Local Basic (Private)",
+          "value": "local"
+        },
+        {
+          "title": "Ollama (Local)",
+          "value": "ollama"
+        },
+        {
+          "title": "Raycast AI",
+          "value": "raycast"
+        },
+        {
+          "title": "OpenAI API",
+          "value": "openai"
+        },
+        {
+          "title": "Anthropic Claude API",
+          "value": "anthropic"
+        },
+        {
+          "title": "Google Gemini API",
+          "value": "gemini"
+        }
+      ]
+    },
+    {
+      "name": "allowExternalAnalysis",
+      "title": "Experimental External AI",
+      "label": "Allow extracted document text to be sent to the selected external provider",
+      "description": "Used only by the experimental feature. Required for Raycast AI, OpenAI, Anthropic or Gemini. Ollama and Local Basic remain on-device.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "renameMode",
+      "title": "File Renaming",
+      "description": "Automatic mode still requires exact identifier, metadata, OCR title and OCR author agreement.",
+      "type": "dropdown",
+      "default": "suggest",
+      "required": false,
+      "data": [
+        {
+          "title": "Suggestions Only",
+          "value": "suggest"
+        },
+        {
+          "title": "Off",
+          "value": "off"
+        },
+        {
+          "title": "Automatic When Strictly Verified",
+          "value": "automatic"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "cheerio": "^1.1.2",
+    "fast-xml-parser": "^5.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "sync:preferences": "tsx scripts/sync-manifest-preferences.ts",
+    "test:sources": "tsx scripts/test-sources.ts",
+    "test:merge": "tsx scripts/test-merge.ts",
+    "test:processing": "tsx scripts/test-processing.ts",
+    "test:staged": "tsx scripts/test-staged.ts",
+    "test:local-library": "tsx scripts/test-local-library.ts",
+    "test:encyclopedias": "tsx scripts/test-encyclopedias.ts",
+    "publish": "npx -y @raycast/api@latest publish"
+  }
+}
