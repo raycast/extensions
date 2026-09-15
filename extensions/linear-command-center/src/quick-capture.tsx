@@ -80,12 +80,7 @@ function QuickCapture() {
       }
     >
       {buildError ? <Form.Description title="Linear could not load" text={buildError.message} /> : null}
-      <Form.Dropdown
-        id="teamId"
-        title="Team"
-        defaultValue={selectedTeam?.id || ""}
-        onChange={setSelectedTeamId}
-      >
+      <Form.Dropdown id="teamId" title="Team" value={selectedTeam?.id || ""} onChange={setSelectedTeamId}>
         {model?.teams.map((team) => (
           <Form.Dropdown.Item key={team.id} value={team.id} title={`${team.name} (${team.key})`} />
         ))}

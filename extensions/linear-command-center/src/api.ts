@@ -126,7 +126,7 @@ export async function linearRequest<T>(query: string, variables: Record<string, 
 
 export async function loadDashboard(): Promise<DashboardResponse> {
   const preferences = getPreferenceValues<Preferences>();
-  if (preferences.demoMode || process.env.LINEAR_COMMAND_CENTER_DEMO === "1") return demoDashboard();
+  if (preferences.demoMode) return demoDashboard();
 
   const issues = new Map<string, Issue>();
   const delegatedIssues = new Map<string, { id: string }>();
@@ -156,9 +156,12 @@ export async function loadDashboard(): Promise<DashboardResponse> {
     const sessionsMore = data.agentSessions.pageInfo.hasNextPage;
     if (!issuesMore && !delegatedMore && !sessionsMore) break;
 
-    if (issuesMore) issuesAfter = data.viewer.assignedIssues.pageInfo.endCursor;
-    if (delegatedMore) delegatedAfter = data.viewer.delegatedIssues.pageInfo.endCursor;
-    if (sessionsMore) sessionsAfter = data.agentSessions.pageInfo.endCursor;
+    // Advance every cursor, including exhausted ones: a connection that has
+    // no next page returns nothing after its last cursor, instead of the same
+    // page again on every loop.
+    issuesAfter = data.viewer.assignedIssues.pageInfo.endCursor ?? issuesAfter;
+    delegatedAfter = data.viewer.delegatedIssues.pageInfo.endCursor ?? delegatedAfter;
+    sessionsAfter = data.agentSessions.pageInfo.endCursor ?? sessionsAfter;
   }
 
   return {
