@@ -202,7 +202,15 @@ function AdvancedResults({ request }: { request: SearchRequest }) {
     request,
     providers,
     options,
-    encyclopediaSearch ? { ...settings, sources: [] } : settings,
+    encyclopediaSearch
+      ? {
+          ...settings,
+          // Encyclopedia entries use their record URL as both the result and
+          // the open reading location. Keep those provider IDs enabled for
+          // access while getEnabledProviders still excludes normal sources.
+          sources: providers.map((provider) => provider.id),
+        }
+      : settings,
   );
   const { results, isLoading, notice } = staged.metadata;
   const failures = staged.preliminary.failures;

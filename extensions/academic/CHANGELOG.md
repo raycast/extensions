@@ -3,7 +3,7 @@
 ## [Store Review Fixes] - {PR_MERGE_DATE}
 
 - Merge metadata, repository and local results before applying advanced open-access and accepted-file filters.
-- Route Advanced Encyclopedia searches exclusively through the configured encyclopedia registry.
+- Route Advanced Encyclopedia searches exclusively through the configured encyclopedia registry while retaining each entry's open reading link.
 - Normalize and validate imported Library records before they reach the user interface.
 - Protect the persistent local index with cross-process transactions and atomic file replacement.
 - Use Raycast's generated preference types throughout the extension.
