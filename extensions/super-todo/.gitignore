@@ -1,0 +1,16 @@
+node_modules/
+.build/
+dist/
+*.log
+.DS_Store
+.swiftpm/
+raycast-env.d.ts
+.context/
+.pi/
+context-os/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+.env
+.env.*

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "super-todo",
+  "title": "super todo",
+  "description": "A quiet, keyboard-first todo list with a pinned floating companion for your Mac.",
+  "icon": "icon.png",
+  "author": "myksyut",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "today",
+      "title": "Show Todos",
+      "subtitle": "super todo",
+      "description": "Add, complete, and reorder your todos. Unfinished tasks stay for tomorrow.",
+      "mode": "view"
+    },
+    {
+      "name": "open-floating-list",
+      "title": "Open Floating List",
+      "subtitle": "super todo",
+      "description": "Keep your todos in a small window above your work.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "companionPath",
+      "type": "appPicker",
+      "required": false,
+      "title": "Companion App",
+      "description": "Install super todo.app from the project releases, then select it here. Also detected in /Applications or ~/Applications."
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist -o dist/raycast",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test Tests/*.test.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "2.4.1",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.9.0"
+  }
+}
