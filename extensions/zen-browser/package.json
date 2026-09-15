@@ -71,7 +71,7 @@
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
       "subtitle": "Zen Browser",
-      "description": "Search browser bookmarks.",
+      "description": "Search browser bookmarks, pinned tabs, and essentials.",
       "mode": "view"
     }
   ],

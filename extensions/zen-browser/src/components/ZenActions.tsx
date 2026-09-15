@@ -1,11 +1,25 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, open, popToRoot } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  Icon,
+  open,
+  popToRoot,
+} from "@raycast/api";
 import { HistoryEntry, Shortcut, WorkspaceEntry } from "../interfaces";
 import { SEARCH_ENGINE } from "../constants";
 import { runShortcut } from "../actions";
 import { platform } from "os";
 import { runPowerShellScript } from "@raycast/utils";
 
+import { switchPinnedTab } from "../actions/switch-pinned-tab";
+import { PinnedTabEntry } from "../util/pinned-tabs";
+
 export class ZenActions {
+  public static PinnedItem = PinnedItemAction;
   public static NewTab = NewTabAction;
   public static HistoryItem = HistoryItemAction;
   public static WorkspaceItem = WorkspaceItemAction;
@@ -69,5 +83,33 @@ function ZenGoToWorkspace(props: { workspace: WorkspaceEntry }) {
         closeMainWindow();
       }}
     />
+  );
+}
+
+function PinnedItemAction({ entry }: { entry: PinnedTabEntry }) {
+  return (
+    <ActionPanel title={entry.title}>
+      <Action
+        title="Switch to Pinned Tab"
+        icon={Icon.Pin}
+        onAction={async () => {
+          try {
+            await switchPinnedTab(entry);
+          } catch (error) {
+            console.error(error);
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Could Not Switch to Tab",
+              message: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }}
+      />
+      <Action.CopyToClipboard
+        title="Copy URL"
+        content={entry.url}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      />
+    </ActionPanel>
   );
 }
