@@ -7,8 +7,8 @@ export function finderPathInput(path: string): string {
 }
 
 export function normalizeLocalPath(input: string): string {
-  const value = input.trim();
-  if (!value || value.includes("\n") || value.includes("\0")) {
+  const value = input;
+  if (!value.trim() || value.includes("\n") || value.includes("\0")) {
     throw new Error("Enter one local path");
   }
 

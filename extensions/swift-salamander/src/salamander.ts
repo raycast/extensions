@@ -31,7 +31,7 @@ export async function send(
   verb: string,
   fields: ReadonlyArray<readonly [string, string]> = [],
 ): Promise<void> {
-  await open(link(verb, fields));
+  await open(link(verb, fields), "ch.raciborski.swiftsalamander");
   await showHUD("Sent to Swift Salamander");
 }
 
