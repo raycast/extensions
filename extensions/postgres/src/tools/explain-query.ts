@@ -1,6 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { runQuery } from "../lib/client";
-import { connectionInfoRows } from "../lib/confirm";
+import { assertConfirmedTarget, connectionInfoRows } from "../lib/confirm";
 import { resolveConnection } from "../lib/connections";
 import { describeError } from "../lib/format";
 import { isReadOnly, normalizeForClassification } from "../lib/sql";
@@ -28,18 +28,25 @@ function plannedStatement(input: Input): string {
 }
 
 /** Only `EXPLAIN ANALYZE` on a non-read statement can change anything, so only that asks. */
+function changesData(input: Input): boolean {
+  return Boolean(input.analyze) && !isReadOnly(input.sql);
+}
+
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  if (!input.analyze || isReadOnly(input.sql)) return undefined;
+  if (!changesData(input)) return undefined;
   return {
     style: Action.Style.Destructive,
     message: "EXPLAIN ANALYZE runs this statement for real. Continue?",
-    info: [...(await connectionInfoRows(input.connection)), { name: "SQL", value: input.sql }],
+    info: [...(await connectionInfoRows(input)), { name: "SQL", value: input.sql }],
   };
 };
 
 /** Returns the query plan as PostgreSQL prints it. */
 export default async function (input: Input) {
   const connection = await resolveConnection(input.connection);
+  // Same race as the write tool: an approval that named one database must not execute against
+  // another. Only the confirmed path has a promise to keep, so only it is checked.
+  if (changesData(input)) await assertConfirmedTarget(input, connection);
 
   // The statement is concatenated after EXPLAIN, so a second statement riding along would run
   // unexplained and unconfirmed.

@@ -1,6 +1,7 @@
 import { Client, type ClientConfig, type FieldDef } from "pg";
 import type { Connection } from "./connections";
 import { maxRows, statementTimeoutMs } from "./connections";
+import { isCursorEligible } from "./sql";
 
 export type Row = Record<string, unknown>;
 
@@ -12,8 +13,13 @@ export interface QueryResult {
   command: string;
   /** Rows affected for a write; `null` when the server reports none. */
   rowCount: number | null;
-  /** How many rows the statement actually produced, before the Row Limit was applied. */
+  /** How many rows the statement produced — a lower bound rather than a count when `!totalIsExact`. */
   totalRows: number;
+  /**
+   * False when the fetch stopped at the Row Limit and so never learned the real total. Anything
+   * shown or handed to the model has to say "at least this many" rather than quote `totalRows`.
+   */
+  totalIsExact: boolean;
   /** True when `rows` holds fewer rows than the statement produced. */
   truncated: boolean;
   durationMs: number;
@@ -61,9 +67,14 @@ export async function runQuery(
     if (options.readOnly) {
       await client.query("BEGIN TRANSACTION READ ONLY");
       try {
-        const result = await client.query(sql);
+        // A cursor needs the transaction that is already open here, which is why capping the fetch
+        // is only possible on this path; everything else falls back to capping the buffered result.
+        const limit = maxRows();
+        const result = isCursorEligible(sql)
+          ? toCursorResult(await fetchWithCursor(client, sql, limit), Date.now() - start, limit)
+          : toResult(await client.query(sql), Date.now() - start);
         await client.query("COMMIT");
-        return toResult(result, Date.now() - start);
+        return result;
       } catch (error) {
         await client.query("ROLLBACK").catch(() => {});
         throw error;
@@ -73,6 +84,32 @@ export async function runQuery(
     return toResult(result, Date.now() - start);
   } finally {
     await client.end().catch(() => {});
+  }
+}
+
+const CURSOR_NAME = "raycast_row_limit_cursor";
+
+/**
+ * Fetches at most `limit` rows of `sql`, leaving the rest on the server.
+ *
+ * The Row Limit used to be a slice taken after the driver had already buffered the whole result, so
+ * `SELECT * FROM events` still pulled every row across the wire and into memory before 500 of them
+ * were kept — the preference capped what was displayed, not what was fetched, and a big enough
+ * table made the extension unresponsive well inside the statement timeout. A cursor moves the cap
+ * to where the rows are produced. One row beyond the limit is fetched, purely so `truncated` can be
+ * answered without asking for the rest.
+ *
+ * Only ever called inside the read-only transaction opened above, and only for the statements
+ * {@link isCursorEligible} accepts.
+ */
+async function fetchWithCursor(client: Client, sql: string, limit: number): Promise<PgResult> {
+  // A trailing semicolon would end the DECLARE early; a second statement is rejected upstream.
+  const statement = sql.replace(/;\s*$/, "");
+  await client.query(`DECLARE ${CURSOR_NAME} NO SCROLL CURSOR FOR ${statement}`);
+  try {
+    return await client.query(`FETCH FORWARD ${limit + 1} FROM ${CURSOR_NAME}`);
+  } finally {
+    await client.query(`CLOSE ${CURSOR_NAME}`).catch(() => {});
   }
 }
 
@@ -94,6 +131,28 @@ function toResult(result: PgResult | PgResult[], durationMs: number): QueryResul
     command: last?.command ?? "",
     rowCount: last?.rowCount ?? null,
     totalRows: all.length,
+    // This path saw the whole result before capping it, so the count is the real one.
+    totalIsExact: true,
+    truncated,
+    durationMs,
+  };
+}
+
+/** The same shape from a {@link fetchWithCursor} result, which stopped one row past the limit. */
+function toCursorResult(result: PgResult, durationMs: number, limit: number): QueryResult {
+  const fetched = Array.isArray(result.rows) ? (result.rows as Row[]) : [];
+  // The extra row is evidence that more exist, nothing more — it is not part of the result.
+  const truncated = fetched.length > limit;
+  const rows = truncated ? fetched.slice(0, limit) : fetched;
+  return {
+    rows,
+    fields: result.fields ?? [],
+    // FETCH reports its own command tag. Everything a cursor can wrap reports SELECT when run
+    // directly, so that is what the user and the history entry should see.
+    command: "SELECT",
+    rowCount: rows.length,
+    totalRows: rows.length,
+    totalIsExact: !truncated,
     truncated,
     durationMs,
   };

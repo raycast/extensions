@@ -1,6 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { runQuery } from "../lib/client";
-import { connectionInfoRows } from "../lib/confirm";
+import { assertConfirmedTarget, connectionInfoRows } from "../lib/confirm";
 import { resolveConnection } from "../lib/connections";
 import { describeError, summarizeWrite } from "../lib/format";
 import { recordHistory } from "../lib/history";
@@ -27,13 +27,15 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   return {
     style: Action.Style.Destructive,
     message: "Run this statement against PostgreSQL?",
-    info: [...(await connectionInfoRows(input.connection)), { name: "SQL", value: input.sql }],
+    info: [...(await connectionInfoRows(input)), { name: "SQL", value: input.sql }],
   };
 };
 
 /** Runs a data- or schema-changing statement against the active connection. */
 export default async function (input: Input) {
   const connection = await resolveConnection(input.connection);
+  // Resolving again here can land somewhere else than the dialog said, so check before writing.
+  await assertConfirmedTarget(input, connection);
 
   try {
     const result = await runQuery(connection, input.sql);

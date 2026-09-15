@@ -49,6 +49,11 @@ export default async function (input: Input) {
       database: connection.database,
       warning: await defaultConnectionWarning(connection, Boolean(input.connection)),
       rowCount: result.totalRows,
+      // The fetch stops at the Row Limit, so `rowCount` is then a floor. Said plainly, because a
+      // model that reads it as the answer to "how many" reports a capped number as a fact.
+      rowCountNote: result.totalIsExact
+        ? undefined
+        : `Only the first ${result.rows.length} rows were fetched — the Row Limit preference stopped there and the statement has more. rowCount is a lower bound, not a total: if the user asked how many, run a COUNT(*) query instead of counting these rows.`,
       durationMs: result.durationMs,
       truncated,
       rows: result.rows.slice(0, MAX_TOOL_ROWS),

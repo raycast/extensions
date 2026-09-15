@@ -16,10 +16,15 @@ export function ResultView({
   const { markdown, truncated } = toMarkdownTable(result.rows, PREVIEW_ROWS);
   const hasRows = result.rows.length > 0;
 
+  // A capped fetch stops before the statement runs out of rows, so the total is a floor, not a count.
+  const total = result.totalIsExact ? `${result.totalRows}` : `${result.totalRows}+`;
+
   // Two caps can bite: the Row Limit preference, applied when the rows were fetched, and the
   // preview cap on how many of those are rendered as a table. Say which one is in play.
   const note = result.truncated
-    ? `\n_Showing ${Math.min(PREVIEW_ROWS, result.rows.length)} of ${result.totalRows} rows — the Row Limit preference kept the first ${result.rows.length}._`
+    ? result.totalIsExact
+      ? `\n_Showing ${Math.min(PREVIEW_ROWS, result.rows.length)} of ${result.totalRows} rows — the Row Limit preference kept the first ${result.rows.length}._`
+      : `\n_Showing ${Math.min(PREVIEW_ROWS, result.rows.length)} of the first ${result.rows.length} rows — the Row Limit preference stopped the fetch there, and the statement has more._`
     : truncated
       ? `\n_Showing the first ${PREVIEW_ROWS} of ${result.rows.length} rows._`
       : "";
@@ -31,14 +36,14 @@ export function ResultView({
   return (
     <Detail
       markdown={body}
-      navigationTitle={`${result.totalRows} row${result.totalRows === 1 ? "" : "s"} · ${result.durationMs} ms`}
+      navigationTitle={`${total} row${result.totalRows === 1 && result.totalIsExact ? "" : "s"} · ${result.durationMs} ms`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Connection" text={connectionName} />
           <Detail.Metadata.Label title="Command" text={result.command || "—"} />
           <Detail.Metadata.Label
             title="Rows"
-            text={result.truncated ? `${result.rows.length} of ${result.totalRows}` : String(result.totalRows)}
+            text={result.truncated && result.totalIsExact ? `${result.rows.length} of ${result.totalRows}` : total}
           />
           <Detail.Metadata.Label title="Duration" text={`${result.durationMs} ms`} />
         </Detail.Metadata>
