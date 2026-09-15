@@ -1,5 +1,15 @@
 # Academic Changelog
 
+## [Store Review Fixes] - {PR_MERGE_DATE}
+
+- Merge metadata, repository and local results before applying advanced open-access and accepted-file filters.
+- Route Advanced Encyclopedia searches exclusively through the configured encyclopedia registry.
+- Normalize and validate imported Library records before they reach the user interface.
+- Protect the persistent local index with cross-process transactions and atomic file replacement.
+- Use Raycast's generated preference types throughout the extension.
+- Adopt the current Raycast ESLint flat configuration and add the Documentation category.
+- Remove the unused XML parser dependency and stop the local installer from executing a mutable remote Homebrew script.
+
 ## [Local Research Library] - {PR_MERGE_DATE}
 
 - Mark summaries, key points, keywords and semantic relationships as experimental, disabled by default behind an explicit opt-in checkbox.

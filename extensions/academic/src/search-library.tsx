@@ -12,7 +12,7 @@ import { StagedWorkItem } from "./components/staged-work-item";
 import { useAcademicSettings } from "./hooks/use-academic-settings";
 import { useStagedSearch } from "./hooks/use-staged-search";
 import { getEnabledProviders } from "./providers";
-import { getSearchOptions, type ExtensionPreferences } from "./preferences";
+import { getSearchOptions } from "./preferences";
 import type { LaunchProps } from "@raycast/api";
 import { AdvancedSearch } from "./advanced-search";
 import { EncyclopediaSearch } from "./search-encyclopedias";
@@ -48,7 +48,7 @@ function SimpleSearch({
   onModeChange: (mode: SearchMode) => void;
 }) {
   const [query, setQuery] = useState(initialQuery);
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const { settings, isLoading: settingsLoading } = useAcademicSettings();
   const providers = useMemo(
     () => getEnabledProviders(settings.metadataSources),

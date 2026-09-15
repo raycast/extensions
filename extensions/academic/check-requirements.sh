@@ -40,8 +40,7 @@ fi
 if command -v brew >/dev/null 2>&1; then
   printf '✓ %-22s %s\n' "Homebrew" "$(brew --version | head -1)"
 else
-  printf '✗ %-22s não instalado; será usado para instalar o Node.js\n' "Homebrew"
-  RAYCAST_MISSING=1
+  printf '• %-22s não instalado (opcional)\n' "Homebrew"
 fi
 
 report_command "Node.js 22.22.2+" "node" node --version

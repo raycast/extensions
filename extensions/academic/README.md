@@ -122,7 +122,7 @@ Background runs pause on battery by default, process only a configurable small b
 ./install-local.sh
 ```
 
-The installer checks Raycast, Node.js 22.22.2+, npm and required macOS development tools, installs project dependencies, builds the extension and starts local Raycast development mode.
+The installer checks Raycast, Node.js 22.22.2+, npm and required macOS development tools, installs project dependencies, builds the extension and starts local Raycast development mode. It can use an existing Homebrew installation for missing prerequisites, but it never downloads or installs Homebrew itself; when Homebrew is absent, it links to the official installation instructions.
 
 ## Development and Verification
 

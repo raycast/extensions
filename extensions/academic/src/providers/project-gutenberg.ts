@@ -1,4 +1,4 @@
-import { fetchJsonViaHttps, uniqueHttpUrls } from "../lib/http";
+import { fetchJson, uniqueHttpUrls } from "../lib/http";
 import type { AccessLink, SearchProvider, WorkResult } from "../types";
 
 type GutendexResponse = {
@@ -23,7 +23,7 @@ export const projectGutenbergProvider: SearchProvider = {
   name: "Project Gutenberg",
   async search(query, context) {
     const params = new URLSearchParams({ search: query, copyright: "false" });
-    const data = await fetchJsonViaHttps<GutendexResponse>(
+    const data = await fetchJson<GutendexResponse>(
       `https://gutendex.com/books/?${params}`,
       context.signal,
     );

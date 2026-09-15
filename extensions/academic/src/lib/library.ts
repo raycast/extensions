@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import type { SearchRequest, WorkResult } from "../types";
+import { normalizeSavedWork } from "./library-normalization";
 
 const LIBRARY_KEY = "academic.library.v1";
 const LIBRARY_NAMES_KEY = "academic.library-names.v1";
@@ -17,7 +18,10 @@ export async function loadLibrary(): Promise<SavedWork[]> {
   const value = await LocalStorage.getItem<string>(LIBRARY_KEY);
   if (!value) return [];
   try {
-    return JSON.parse(value) as SavedWork[];
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed)
+      ? parsed.map(normalizeSavedWork).filter(isDefined)
+      : [];
   } catch {
     return [];
   }
@@ -162,16 +166,19 @@ export async function exportLibraryJson(library?: string): Promise<string> {
 export async function importLibraryJson(
   value: string,
 ): Promise<{ libraries: number; works: number }> {
-  const parsed = JSON.parse(value) as
-    { format?: string; libraries?: unknown; works?: unknown } | SavedWork[];
+  const parsed: unknown = JSON.parse(value);
+  const exported = isRecord(parsed) ? parsed : undefined;
+  if (
+    !Array.isArray(parsed) &&
+    (!exported || exported.format !== "academic-library")
+  )
+    throw new Error("Not an Academic library export");
   const incoming = Array.isArray(parsed)
     ? parsed
-    : parsed.format === "academic-library" && Array.isArray(parsed.works)
-      ? parsed.works
+    : Array.isArray(exported?.works)
+      ? exported.works
       : [];
-  const valid = incoming.filter(isSavedWork);
-  if (!Array.isArray(parsed) && parsed.format !== "academic-library")
-    throw new Error("Not an Academic library export");
+  const valid = incoming.map(normalizeSavedWork).filter(isDefined);
   const existing = await loadLibrary();
   for (const entry of valid) {
     const index = existing.findIndex(
@@ -183,8 +190,8 @@ export async function importLibraryJson(
     else existing.push(entry);
   }
   const declared =
-    !Array.isArray(parsed) && Array.isArray(parsed.libraries)
-      ? parsed.libraries.filter(
+    !Array.isArray(parsed) && Array.isArray(exported?.libraries)
+      ? exported.libraries.filter(
           (name): name is string => typeof name === "string",
         )
       : [];
@@ -214,14 +221,10 @@ function samePrimaryIdentifier(left: WorkResult, right: WorkResult): boolean {
   );
 }
 
-function isSavedWork(value: unknown): value is SavedWork {
-  if (!value || typeof value !== "object") return false;
-  const entry = value as Partial<SavedWork>;
-  return Boolean(
-    entry.work &&
-    typeof entry.work.id === "string" &&
-    typeof entry.work.title === "string" &&
-    typeof entry.collection === "string" &&
-    Array.isArray(entry.tags),
-  );
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function isDefined<T>(value: T | undefined): value is T {
+  return value !== undefined;
 }

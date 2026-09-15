@@ -32,7 +32,6 @@ import {
   saveSettings,
   type AcademicSettings,
 } from "./lib/settings";
-import type { ExtensionPreferences } from "./preferences";
 import { detectOllama } from "./local-library/analysis";
 import {
   indexProgress,
@@ -50,7 +49,7 @@ type ArrayField =
   | "formats";
 
 export default function Command() {
-  const nativePreferences = getPreferenceValues<ExtensionPreferences>();
+  const nativePreferences = getPreferenceValues<Preferences>();
   const [settings, setSettings] = useState<AcademicSettings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
   const [localStatus, setLocalStatus] = useState("Not indexed yet");
@@ -562,7 +561,7 @@ function BehaviorForm({
 function countSelected(selected: string[], options: Option[]): number {
   return options.filter((option) => selected.includes(option.id)).length;
 }
-function credentialSummary(preferences: ExtensionPreferences): string {
+function credentialSummary(preferences: Preferences): string {
   const count = [
     preferences.contactEmail,
     preferences.googleBooksApiKey,

@@ -2,7 +2,6 @@ import { createHash } from "node:crypto";
 import { access, readdir, rename, stat } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import type { ExtensionPreferences } from "../preferences";
 import { mergeAndRankResults } from "../lib/merge-results";
 import { searchProviderWithFallback } from "../lib/provider-search";
 import type { AcademicSettings } from "../lib/settings";
@@ -10,7 +9,7 @@ import { getEnabledProviders } from "../providers";
 import type { SearchContext, WorkKind, WorkResult } from "../types";
 import { analyzeDocument, createEmbedding } from "./analysis";
 import { extractDocumentEvidence } from "./extract";
-import { loadLocalIndex, saveLocalIndex } from "./storage";
+import { loadLocalIndex, updateLocalIndex } from "./storage";
 import type { AnalysisInput, LocalDocument, LocalIndex } from "./types";
 import { renderRenameTemplate, validateRenameCandidate } from "./validation";
 
@@ -33,54 +32,54 @@ export type ScanOptions = {
 
 export async function scanLocalLibrary(
   settings: AcademicSettings,
-  preferences: ExtensionPreferences,
+  preferences: Preferences,
   options: ScanOptions = {},
 ): Promise<LocalIndex> {
-  const index = await loadLocalIndex();
   const { reachable, unreachable } = await classifyFolders(
     settings.localFolders,
   );
   const discovered = await discover(reachable);
-  const previous = new Map(
-    index.documents.map((document) => [document.path, document]),
-  );
   const now = new Date().toISOString();
-  const documents = discovered.map((file) => {
-    const existing = previous.get(file.path);
-    if (existing?.fingerprint === file.fingerprint) return existing;
-    return {
-      id: createHash("sha256").update(file.path).digest("hex").slice(0, 20),
-      ...file,
-      stage: "discovered" as const,
-      discoveredAt: existing?.discoveredAt ?? now,
-      updatedAt: now,
-    };
-  });
-  for (const document of index.documents) {
-    if (
-      unreachable.some(
-        (folder) =>
-          document.path === folder || document.path.startsWith(`${folder}/`),
-      ) &&
-      !documents.some((candidate) => candidate.id === document.id)
-    )
-      documents.push(document);
-  }
-  if (!settings.enableExperimentalAnalysis) {
-    for (const document of documents) {
-      document.analysis = undefined;
-      document.embedding = undefined;
-      if (document.stage === "enriched")
-        document.stage = document.validation?.safe ? "verified" : "review";
+  let index = await updateLocalIndex((current) => {
+    const previous = new Map(
+      current.documents.map((document) => [document.path, document]),
+    );
+    const documents = discovered.map((file) => {
+      const existing = previous.get(file.path);
+      if (existing?.fingerprint === file.fingerprint) return existing;
+      return {
+        id: createHash("sha256").update(file.path).digest("hex").slice(0, 20),
+        ...file,
+        stage: "discovered" as const,
+        discoveredAt: existing?.discoveredAt ?? now,
+        updatedAt: now,
+      };
+    });
+    for (const document of current.documents) {
+      if (
+        unreachable.some(
+          (folder) =>
+            document.path === folder || document.path.startsWith(`${folder}/`),
+        ) &&
+        !documents.some((candidate) => candidate.id === document.id)
+      )
+        documents.push(document);
     }
-  }
-  index.folders = [...settings.localFolders];
-  index.analysisEnabled = settings.enableExperimentalAnalysis;
-  index.documents = documents;
-  index.lastScanAt = now;
-  await saveLocalIndex(index);
+    if (!settings.enableExperimentalAnalysis) {
+      for (const document of documents) {
+        document.analysis = undefined;
+        document.embedding = undefined;
+        if (document.stage === "enriched")
+          document.stage = document.validation?.safe ? "verified" : "review";
+      }
+    }
+    current.folders = [...settings.localFolders];
+    current.analysisEnabled = settings.enableExperimentalAnalysis;
+    current.documents = documents;
+    current.lastScanAt = now;
+  });
 
-  const pending = documents.filter(
+  const pending = index.documents.filter(
     (document) =>
       document.stage === "discovered" ||
       document.stage === "error" ||
@@ -91,10 +90,29 @@ export async function scanLocalLibrary(
     Math.min(options.maxDocuments ?? settings.documentsPerRun, pending.length),
   );
   for (let position = 0; position < limit; position += 1) {
-    const document = pending[position];
+    const queued = pending[position];
+    const expectedUpdatedAt = queued.updatedAt;
+    const document = structuredClone(queued);
     options.onProgress?.(`Indexing ${document.filename}`, position, limit);
     await processDocument(document, settings, preferences);
-    await saveLocalIndex(index);
+    index = await updateLocalIndex((current) => {
+      const existing = current.documents.findIndex(
+        (candidate) => candidate.id === document.id,
+      );
+      if (existing < 0) current.documents.push(document);
+      else {
+        const latest = current.documents[existing];
+        const wasRequeuedWhileProcessing =
+          latest.updatedAt !== expectedUpdatedAt &&
+          latest.stage === "discovered";
+        if (
+          !wasRequeuedWhileProcessing &&
+          latest.fingerprint === document.fingerprint
+        )
+          current.documents[existing] = document;
+      }
+      current.analysisEnabled = settings.enableExperimentalAnalysis;
+    });
   }
   options.onProgress?.("Local index is up to date", limit, limit);
   return index;
@@ -103,7 +121,7 @@ export async function scanLocalLibrary(
 export async function analyzeOneDocument(
   path: string,
   settings: AcademicSettings,
-  preferences: ExtensionPreferences,
+  preferences: Preferences,
 ): Promise<LocalDocument> {
   const info = await stat(path);
   const document: LocalDocument = {
@@ -119,21 +137,21 @@ export async function analyzeOneDocument(
     updatedAt: new Date().toISOString(),
   };
   await processDocument(document, settings, preferences);
-  const index = await loadLocalIndex();
-  index.analysisEnabled = settings.enableExperimentalAnalysis;
-  const existing = index.documents.findIndex(
-    (item) => item.path === path || item.id === document.id,
-  );
-  if (existing >= 0) index.documents[existing] = document;
-  else index.documents.unshift(document);
-  await saveLocalIndex(index);
+  await updateLocalIndex((index) => {
+    index.analysisEnabled = settings.enableExperimentalAnalysis;
+    const existing = index.documents.findIndex(
+      (item) => item.path === path || item.id === document.id,
+    );
+    if (existing >= 0) index.documents[existing] = document;
+    else index.documents.unshift(document);
+  });
   return document;
 }
 
 async function processDocument(
   document: LocalDocument,
   settings: AcademicSettings,
-  preferences: ExtensionPreferences,
+  preferences: Preferences,
 ): Promise<void> {
   try {
     const evidence = await extractDocumentEvidence(document.path);
@@ -208,7 +226,7 @@ async function resolveMetadata(
   evidence: NonNullable<LocalDocument["evidence"]>,
   document: LocalDocument,
   settings: AcademicSettings,
-  preferences: ExtensionPreferences,
+  preferences: Preferences,
 ): Promise<WorkResult | undefined> {
   const inferredTitle =
     evidence.ocrTitle ||
@@ -355,46 +373,50 @@ async function renameDocument(document: LocalDocument): Promise<void> {
 }
 
 export async function applyVerifiedRename(id: string): Promise<LocalDocument> {
-  const index = await loadLocalIndex();
-  const document = index.documents.find((item) => item.id === id);
-  if (!document) throw new Error("The indexed document no longer exists");
-  if (!document.validation?.safe)
-    throw new Error(
-      "Rename blocked: identifier, metadata and OCR evidence do not all agree",
-    );
-  if (!document.suggestedFilename)
-    throw new Error("No safe filename suggestion is available");
-  await renameDocument(document);
-  await saveLocalIndex(index);
-  return document;
+  let renamed: LocalDocument | undefined;
+  await updateLocalIndex(async (index) => {
+    const document = index.documents.find((item) => item.id === id);
+    if (!document) throw new Error("The indexed document no longer exists");
+    if (!document.validation?.safe)
+      throw new Error(
+        "Rename blocked: identifier, metadata and OCR evidence do not all agree",
+      );
+    if (!document.suggestedFilename)
+      throw new Error("No safe filename suggestion is available");
+    await renameDocument(document);
+    renamed = structuredClone(document);
+  });
+  return renamed!;
 }
 
 export async function undoDocumentRename(id: string): Promise<LocalDocument> {
-  const index = await loadLocalIndex();
-  const document = index.documents.find((item) => item.id === id);
-  if (!document?.renamedFrom)
-    throw new Error("No recorded rename can be undone");
-  try {
-    await access(document.renamedFrom);
-    throw new Error("The original filename is already occupied");
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === "The original filename is already occupied"
-    )
-      throw error;
-  }
-  const current = document.path;
-  await rename(current, document.renamedFrom);
-  document.path = document.renamedFrom;
-  document.filename = basename(document.renamedFrom);
-  document.renamedFrom = current;
-  const info = await stat(document.path);
-  document.modifiedAt = info.mtimeMs;
-  document.fingerprint = fingerprint(info.size, info.mtimeMs);
-  document.updatedAt = new Date().toISOString();
-  await saveLocalIndex(index);
-  return document;
+  let restored: LocalDocument | undefined;
+  await updateLocalIndex(async (index) => {
+    const document = index.documents.find((item) => item.id === id);
+    if (!document?.renamedFrom)
+      throw new Error("No recorded rename can be undone");
+    try {
+      await access(document.renamedFrom);
+      throw new Error("The original filename is already occupied");
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === "The original filename is already occupied"
+      )
+        throw error;
+    }
+    const current = document.path;
+    await rename(current, document.renamedFrom);
+    document.path = document.renamedFrom;
+    document.filename = basename(document.renamedFrom);
+    document.renamedFrom = current;
+    const info = await stat(document.path);
+    document.modifiedAt = info.mtimeMs;
+    document.fingerprint = fingerprint(info.size, info.mtimeMs);
+    document.updatedAt = new Date().toISOString();
+    restored = structuredClone(document);
+  });
+  return restored!;
 }
 
 function addLocalAccess(work: WorkResult, path: string): WorkResult {

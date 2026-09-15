@@ -4,7 +4,22 @@ import type { AcademicSettings } from "../lib/settings";
 import type { SearchProvider, SearchRequest } from "../types";
 import { useFederatedSearch } from "./use-federated-search";
 import { useLocalLibrarySearch } from "./use-local-library-search";
-import { mergeAndRankResults } from "../lib/merge-results";
+import type { FileFormat } from "../types";
+import { combineStagedResults } from "../lib/staged-results";
+
+const ALL_FILE_FORMATS: FileFormat[] = [
+  "pdf",
+  "tex",
+  "doc",
+  "txt",
+  "epub",
+  "html",
+  "djvu",
+  "rtf",
+  "xml",
+  "mobi",
+  "unknown",
+];
 
 export type SearchOptions = {
   contactEmail?: string;
@@ -20,6 +35,19 @@ export function useStagedSearch(
   settings: AcademicSettings,
 ) {
   const request = typeof input === "string" ? { text: input } : input;
+  const discoveryRequest = useMemo(
+    () => ({
+      ...request,
+      advanced: request.advanced
+        ? {
+            ...request.advanced,
+            openAccessOnly: false,
+            withAcceptedFilesOnly: false,
+          }
+        : undefined,
+    }),
+    [JSON.stringify(request)],
+  );
   const localResults = useLocalLibrarySearch(request.text);
   const accessProviders = useMemo(
     () => getEnabledProviders(settings.sources),
@@ -43,6 +71,11 @@ export function useStagedSearch(
       metadataSources: metadataProviders.map((provider) => provider.id),
       countries: [],
       marketplaces: [],
+      languages: [],
+      includeUnknownLanguage: true,
+      showWorksWithoutAcceptedFiles: true,
+      hideLowConfidenceResults: false,
+      formats: ALL_FILE_FORMATS,
     }),
     [JSON.stringify(settings), metadataProviderKey],
   );
@@ -52,6 +85,11 @@ export function useStagedSearch(
       metadataSources: [],
       countries: [],
       marketplaces: [],
+      languages: [],
+      includeUnknownLanguage: true,
+      showWorksWithoutAcceptedFiles: true,
+      hideLowConfidenceResults: false,
+      formats: ALL_FILE_FORMATS,
     }),
     [JSON.stringify(settings)],
   );
@@ -59,37 +97,55 @@ export function useStagedSearch(
     () => ({ ...settings, metadataSources: [] }),
     [JSON.stringify(settings)],
   );
-  const remoteMetadata = useFederatedSearch(input, metadataProviders, {
-    ...options,
-    settings: metadataSettings,
-  });
-  const access = useFederatedSearch(input, backgroundProviders, {
+  const remoteMetadata = useFederatedSearch(
+    discoveryRequest,
+    metadataProviders,
+    {
+      ...options,
+      settings: metadataSettings,
+    },
+  );
+  const access = useFederatedSearch(discoveryRequest, backgroundProviders, {
     ...options,
     settings: accessSettings,
   });
-  const metadata = useMemo(
-    () => ({
-      ...remoteMetadata,
-      results: mergeAndRankResults(
-        [...remoteMetadata.results, ...localResults],
-        request.matchText ?? request.text,
-        request.advanced,
-      ),
-    }),
-    [
+  const metadata = useMemo(() => {
+    const final = !remoteMetadata.isLoading && !access.isLoading;
+    const processed = combineStagedResults(
       remoteMetadata.results,
-      remoteMetadata.failures,
-      remoteMetadata.isLoading,
-      remoteMetadata.notice,
+      access.results,
       localResults,
-      JSON.stringify(request),
-    ],
-  );
+      request,
+      settings,
+      final,
+    );
+    const waitsForAccess = Boolean(
+      request.advanced?.openAccessOnly ||
+      request.advanced?.withAcceptedFilesOnly ||
+      !settings.showWorksWithoutAcceptedFiles,
+    );
+    return {
+      ...remoteMetadata,
+      ...processed,
+      isLoading:
+        remoteMetadata.isLoading || (waitsForAccess && access.isLoading),
+    };
+  }, [
+    remoteMetadata.results,
+    remoteMetadata.failures,
+    remoteMetadata.isLoading,
+    remoteMetadata.notice,
+    access.results,
+    access.isLoading,
+    localResults,
+    JSON.stringify(request),
+    JSON.stringify(settings),
+  ]);
   return {
     metadata,
     access,
     preliminary: {
-      results: [...metadata.results, ...access.results],
+      results: metadata.results,
       failures: [...metadata.failures, ...access.failures],
       isLoading: metadata.isLoading || access.isLoading,
     },

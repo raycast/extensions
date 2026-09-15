@@ -1,6 +1,5 @@
 import { AI, environment } from "@raycast/api";
 import { createHash } from "node:crypto";
-import type { ExtensionPreferences } from "../preferences";
 import type { AcademicSettings } from "../lib/settings";
 import type {
   AnalysisEngine,
@@ -30,7 +29,7 @@ const ANALYSIS_SCHEMA = {
 export async function analyzeDocument(
   input: AnalysisInput,
   settings: AcademicSettings,
-  preferences: ExtensionPreferences,
+  preferences: Preferences,
 ): Promise<DocumentAnalysis> {
   const requested = settings.analysisEngine;
   let engine: AnalysisEngine = requested;

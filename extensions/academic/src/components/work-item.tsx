@@ -11,7 +11,6 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { loadLibraryNames, saveWork } from "../lib/library";
-import type { ExtensionPreferences } from "../preferences";
 import type { AccessLink, WorkResult } from "../types";
 import { CitationActions } from "./citation-actions";
 import { fileURLToPath } from "node:url";
@@ -37,7 +36,7 @@ export function WorkItem({
     : work.accessLinks.filter((link) => link.kind === "purchase");
   const primaryLink = accessLinks[0];
   const authorText = work.authors.join(", ") || "Unknown author";
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const institutionalLink =
     !suppressAccess && preferences.openUrlResolver
       ? makeOpenUrl(work, preferences.openUrlResolver)

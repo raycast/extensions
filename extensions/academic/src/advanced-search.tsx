@@ -14,8 +14,9 @@ import { StagedWorkItem } from "./components/staged-work-item";
 import { LANGUAGES } from "./config/catalog";
 import { useAcademicSettings } from "./hooks/use-academic-settings";
 import { useStagedSearch } from "./hooks/use-staged-search";
-import { getSearchOptions, type ExtensionPreferences } from "./preferences";
+import { getSearchOptions } from "./preferences";
 import { getEnabledProviders } from "./providers";
+import { ENCYCLOPEDIA_PROVIDERS } from "./providers/encyclopedias";
 import type { AdvancedSearchQuery, SearchRequest, WorkKind } from "./types";
 import type { SearchMode } from "./components/search-mode-dropdown";
 import { SearchModeFormDropdown } from "./components/search-mode-dropdown";
@@ -172,11 +173,21 @@ export function AdvancedSearch({
 }
 
 function AdvancedResults({ request }: { request: SearchRequest }) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const { settings, isLoading: settingsLoading } = useAcademicSettings();
+  const encyclopediaSearch = request.advanced?.kind === "encyclopedia";
   const providers = useMemo(
-    () => getEnabledProviders(settings.metadataSources),
-    [settings.metadataSources.join(",")],
+    () =>
+      encyclopediaSearch
+        ? ENCYCLOPEDIA_PROVIDERS.filter((provider) =>
+            settings.encyclopediaSources.includes(provider.id),
+          )
+        : getEnabledProviders(settings.metadataSources),
+    [
+      encyclopediaSearch,
+      settings.metadataSources.join(","),
+      settings.encyclopediaSources.join(","),
+    ],
   );
   const options = useMemo(
     () => getSearchOptions(preferences),
@@ -187,7 +198,12 @@ function AdvancedResults({ request }: { request: SearchRequest }) {
       preferences.coreApiKey,
     ],
   );
-  const staged = useStagedSearch(request, providers, options, settings);
+  const staged = useStagedSearch(
+    request,
+    providers,
+    options,
+    encyclopediaSearch ? { ...settings, sources: [] } : settings,
+  );
   const { results, isLoading, notice } = staged.metadata;
   const failures = staged.preliminary.failures;
   return (
@@ -195,14 +211,22 @@ function AdvancedResults({ request }: { request: SearchRequest }) {
       filtering
       isLoading={isLoading || settingsLoading}
       isShowingDetail={results.length > 0}
-      navigationTitle="Advanced Results"
+      navigationTitle={
+        encyclopediaSearch
+          ? "Advanced Encyclopedia Results"
+          : "Advanced Results"
+      }
       searchBarPlaceholder="Filter consolidated results…"
     >
       {!isLoading && !results.length ? (
         <List.EmptyView
           icon={Icon.XMarkCircle}
           title="No exact results"
-          description="Relax one or more advanced fields and try again."
+          description={
+            encyclopediaSearch && !providers.length
+              ? "Enable at least one encyclopedia source in Config."
+              : "Relax one or more advanced fields and try again."
+          }
         />
       ) : null}
       {results.length ? (

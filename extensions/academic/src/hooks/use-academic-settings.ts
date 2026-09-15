@@ -6,14 +6,13 @@ import {
   settingsPreferenceFingerprint,
   type AcademicSettings,
 } from "../lib/settings";
-import type { ExtensionPreferences } from "../preferences";
 
 export function useAcademicSettings(): {
   settings: AcademicSettings;
   isLoading: boolean;
   reload: () => void;
 } {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const preferencesFingerprint = settingsPreferenceFingerprint(preferences);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);

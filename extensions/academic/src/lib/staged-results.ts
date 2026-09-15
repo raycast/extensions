@@ -1,5 +1,27 @@
+import type { AcademicSettings } from "./settings";
 import type { SearchRequest, WorkResult } from "../types";
 import { mergeAndRankResults } from "./merge-results";
+import { processResults, type ProcessedResults } from "./result-processing";
+
+export function combineStagedResults(
+  metadataResults: WorkResult[],
+  accessResults: WorkResult[],
+  localResults: WorkResult[],
+  request: SearchRequest,
+  settings: AcademicSettings,
+  final: boolean,
+): ProcessedResults {
+  return processResults(
+    mergeAndRankResults(
+      [...metadataResults, ...accessResults, ...localResults],
+      request.matchText ?? request.text,
+      request.advanced,
+    ),
+    request,
+    settings,
+    final,
+  );
+}
 
 export function mergeAccessIntoSelected(
   work: WorkResult,

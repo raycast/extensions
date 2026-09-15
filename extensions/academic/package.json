@@ -7,6 +7,7 @@
   "author": "kgracher",
   "license": "MIT",
   "categories": [
+    "Documentation",
     "Productivity",
     "Web"
   ],
@@ -302,8 +303,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^2.4.1",
-    "cheerio": "^1.1.2",
-    "fast-xml-parser": "^5.2.5"
+    "cheerio": "^1.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

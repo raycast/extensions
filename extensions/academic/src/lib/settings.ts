@@ -19,7 +19,6 @@ import {
   marketplaceId,
 } from "../config/catalog";
 import type { FileFormat } from "../types";
-import type { ExtensionPreferences } from "../preferences";
 import type { AnalysisEngine, RenameMode } from "../local-library/types";
 
 const STORAGE_KEY = "academic.settings.v4";
@@ -91,7 +90,7 @@ type StoredSettings = {
 };
 
 export async function loadSettings(
-  nativePreferences?: ExtensionPreferences,
+  nativePreferences?: Preferences,
 ): Promise<AcademicSettings> {
   const currentStored = await LocalStorage.getItem<string>(STORAGE_KEY);
   const legacyStored = currentStored
@@ -201,14 +200,14 @@ function sameSet(left: string[], right: string[]): boolean {
 }
 
 export function settingsPreferenceFingerprint(
-  preferences: ExtensionPreferences,
+  preferences: Preferences,
 ): string {
   return JSON.stringify(nativeSnapshot(preferences));
 }
 
 export async function saveSettings(
   settings: AcademicSettings,
-  nativePreferences?: ExtensionPreferences,
+  nativePreferences?: Preferences,
 ): Promise<void> {
   await persist(
     settings,
@@ -235,7 +234,7 @@ export function preferenceName(
 }
 
 function nativeSnapshot(
-  preferences: ExtensionPreferences,
+  preferences: Preferences,
 ): Record<string, string | boolean> {
   const result: Record<string, string | boolean> = {};
   for (const key of [
@@ -252,7 +251,7 @@ function nativeSnapshot(
     "analysisEngine",
     "allowExternalAnalysis",
     "renameMode",
-  ]) {
+  ] as const) {
     const value = preferences[key];
     if (typeof value === "boolean" || typeof value === "string")
       result[key] = value;

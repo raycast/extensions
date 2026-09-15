@@ -14,7 +14,7 @@ import {
 import { StagedWorkItem } from "./components/staged-work-item";
 import { useAcademicSettings } from "./hooks/use-academic-settings";
 import { useStagedSearch } from "./hooks/use-staged-search";
-import { getSearchOptions, type ExtensionPreferences } from "./preferences";
+import { getSearchOptions } from "./preferences";
 import { getEnabledProviders } from "./providers";
 import {
   SearchModeFormDropdown,
@@ -33,7 +33,7 @@ export function IdentifyPdf({
   onModeChange?: (mode: SearchMode) => void;
 }) {
   const { push } = useNavigation();
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const { settings } = useAcademicSettings();
   return (
     <Form
@@ -98,7 +98,7 @@ export function IdentifyPdf({
 }
 
 function PdfResults({ query, filename }: { query: string; filename: string }) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const { settings, isLoading: settingsLoading } = useAcademicSettings();
   const providers = useMemo(
     () => getEnabledProviders(settings.metadataSources),

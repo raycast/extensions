@@ -28,39 +28,16 @@ if [[ "$(uname -s)" != "Darwin" ]]; then
   exit 1
 fi
 
-if ! command -v curl >/dev/null 2>&1; then
-  echo "Erro: cURL não foi encontrado no macOS."
-  exit 1
-fi
-
 RAYCAST_NEEDS_HOMEBREW=false
 if ! open -Ra "Raycast" >/dev/null 2>&1 || ! node_is_supported || ! npm_is_supported; then
   RAYCAST_NEEDS_HOMEBREW=true
 fi
 
 if [[ "$RAYCAST_NEEDS_HOMEBREW" == true ]] && ! command -v brew >/dev/null 2>&1; then
-  if ! xcode-select -p >/dev/null 2>&1; then
-    echo "As Command Line Tools da Apple precisam ser instaladas primeiro."
-    echo "Uma janela do macOS será aberta. Quando a instalação terminar, execute este script novamente."
-    xcode-select --install
-    exit 0
-  fi
-
-  echo "Instalando Homebrew pelo instalador oficial…"
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-  if [[ -x /opt/homebrew/bin/brew ]]; then
-    RAYCAST_BREW_BIN="/opt/homebrew/bin/brew"
-    add_profile_line 'eval "$(/opt/homebrew/bin/brew shellenv)"'
-  elif [[ -x /usr/local/bin/brew ]]; then
-    RAYCAST_BREW_BIN="/usr/local/bin/brew"
-    add_profile_line 'eval "$(/usr/local/bin/brew shellenv)"'
-  else
-    echo "Erro: o Homebrew terminou, mas o executável não foi encontrado."
-    exit 1
-  fi
-
-  eval "$("$RAYCAST_BREW_BIN" shellenv)"
+  echo "Erro: faltam pré-requisitos e o Homebrew não está instalado."
+  echo "Instale o Homebrew separadamente seguindo https://brew.sh/ ou instale Raycast e Node.js diretamente de seus sites oficiais."
+  echo "Depois, execute este instalador novamente."
+  exit 1
 fi
 
 if command -v brew >/dev/null 2>&1; then

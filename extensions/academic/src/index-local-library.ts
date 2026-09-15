@@ -11,12 +11,11 @@ import {
 import { loadSettings } from "./lib/settings";
 import { scanLocalLibrary } from "./local-library/indexer";
 import { indexProgress } from "./local-library/storage";
-import type { ExtensionPreferences } from "./preferences";
 
 const run = promisify(execFile);
 
 export default async function Command() {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const settings = await loadSettings(preferences);
   const background = environment.launchType === LaunchType.Background;
   if (!settings.localFolders.length) {
