@@ -1,12 +1,12 @@
 # Multi AI Chat
 
-Send one prompt to ChatGPT, Claude, Grok, and Perplexity from Raycast. Multi AI Chat opens each selected provider in your browser with the prompt included in its query URL, letting you use your existing browser sessions without configuring API keys.
+Open one prompt in ChatGPT, Claude, Grok, and Perplexity from Raycast. Multi AI Chat opens each selected provider in your browser with the prompt included in its query URL, letting you use your existing browser sessions without configuring API keys.
 
 This extension is designed for comparing or delegating work across separate provider websites. It does not combine responses inside Raycast or call model APIs directly.
 
 ## Why Multi AI Chat?
 
-- Send the same prompt to several provider websites in one action.
+- Open the same prompt on several provider websites in one action.
 - Reuse existing browser sessions without API keys or a Raycast AI subscription.
 - Save parameterized prompt templates and launch them from Raycast Quicklinks.
 
@@ -14,7 +14,7 @@ This extension is designed for comparing or delegating work across separate prov
 
 ### Multi AI Chat
 
-Enter a prompt, choose how many tabs to open for each provider, and submit it. Every provider defaults to one tab and can be set from zero (off) to five tabs.
+Enter a prompt, choose how many tabs to open for each provider, and open the chats. Every provider defaults to one tab and can be set from zero (off) to five tabs.
 
 Tabs open sequentially in this order:
 
@@ -41,7 +41,7 @@ Summarize the latest developments in {topic} for an audience of {audience}.
 
 Each unique argument becomes a field when the saved prompt runs. Repeated arguments reuse the same value.
 
-You can also create a Raycast Quicklink for a saved prompt. Saved prompts without arguments run immediately from their Quicklinks; saved prompts with arguments open a form first. Saved prompts are stored locally by Raycast.
+You can also create a Raycast Quicklink for a saved prompt. Saved prompts without arguments open the configured chats directly from their Quicklinks; saved prompts with arguments open a form first. Saved prompts are stored locally by Raycast.
 
 ## Browser Preference
 
@@ -58,6 +58,8 @@ By default, tabs open in your system browser. You can select one of these browse
 The selected browser must be installed. Provider authentication is handled by the browser, so you may need to sign in to the provider websites before using the extension.
 
 ## Privacy and Delivery
+
+Query URLs open or prefill prompts depending on the provider. Some providers, such as Grok, may ask you to confirm before sending the message. Opening a tab does not guarantee immediate submission.
 
 The complete prompt is placed in the `q` query parameter of every provider URL. As a result, prompts may be retained in browser history, synced between devices, logged by network infrastructure, or handled according to each provider's policies. Avoid sending secrets or sensitive information unless you accept those risks.
 

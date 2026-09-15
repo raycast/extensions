@@ -65,7 +65,7 @@ export default function MultiAIChatCommand() {
     await showToast({
       style: Toast.Style.Animated,
       title: `Opening ${totalTabs} tab${totalTabs === 1 ? "" : "s"}…`,
-      message: "Sending your prompt through each chat URL",
+      message: "Opening AI chats with your prompt",
     });
 
     try {
@@ -105,7 +105,7 @@ export default function MultiAIChatCommand() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Send Prompt to AI Chats"
+            title="Open Prompt in AI Chats"
             icon={Icon.Airplane}
             onSubmit={handleSubmit}
           />
@@ -128,7 +128,7 @@ export default function MultiAIChatCommand() {
 
       <Form.Description
         title="Delivery"
-        text="Opening the query URLs sends the prompt immediately. It may appear in browser history and sync."
+        text="Opens or prefills prompts; providers may ask you to send. URLs may appear in browser history and sync."
       />
 
       {AI_SERVICES.map(({ id, name }) => (

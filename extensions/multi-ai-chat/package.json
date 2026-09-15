@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "multi-ai-chat",
   "title": "Multi AI Chat",
-  "description": "Send one prompt to ChatGPT, Claude, Grok, and Perplexity by opening query URLs in your browser.",
+  "description": "Open or prefill one prompt in ChatGPT, Claude, Grok, and Perplexity using query URLs in your browser.",
   "icon": "icon.png",
   "author": "matheuscoelho3006",
   "categories": [
