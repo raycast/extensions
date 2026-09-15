@@ -15,6 +15,7 @@ export interface HisterDocument {
 }
 
 let cachedBinary: string | null = null;
+let cachedPref: string | undefined = undefined;
 const isWindows = process.platform === "win32";
 const binName = isWindows ? "hister.exe" : "hister";
 
@@ -28,16 +29,56 @@ function isExecutable(filePath: string): boolean {
   }
 }
 
+export function expandTilde(filePath: string): string {
+  if (filePath === "~") {
+    return os.homedir();
+  }
+  if (filePath.startsWith("~/") || filePath.startsWith("~\\")) {
+    return path.join(os.homedir(), filePath.slice(2));
+  }
+  return filePath;
+}
+
 export function getBinaryPath(): string {
+  const prefs = getPreferenceValues<Preferences.Search>();
+  const pref = prefs.histerBinaryPath?.trim();
+
+  if (pref !== cachedPref) {
+    cachedPref = pref;
+    cachedBinary = null;
+  }
+
   if (cachedBinary && isExecutable(cachedBinary)) {
     return cachedBinary;
   }
 
-  const prefs = getPreferenceValues<Preferences.Search>();
-  if (prefs.histerBinaryPath?.trim()) {
-    const custom = prefs.histerBinaryPath.trim();
+  if (pref) {
+    let raw = pref;
+    if (raw.length >= 2 && ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'")))) {
+      raw = raw.slice(1, -1).trim();
+    }
+    if (raw.length > 1 && (raw.endsWith("/") || raw.endsWith("\\"))) {
+      raw = raw.replace(/[/\\]+$/, "");
+    }
+    const custom = expandTilde(raw);
     if (isExecutable(custom)) {
-      return (cachedBinary = custom);
+      return (cachedBinary = path.resolve(custom));
+    }
+    if (isWindows && !custom.toLowerCase().endsWith(".exe") && isExecutable(`${custom}.exe`)) {
+      return (cachedBinary = path.resolve(`${custom}.exe`));
+    }
+    if (custom && !custom.includes("/") && !custom.includes("\\")) {
+      const names = isWindows && !custom.toLowerCase().endsWith(".exe") ? [custom, `${custom}.exe`] : [custom];
+      const pathDirs = (process.env.PATH ?? "").split(path.delimiter);
+      for (const dir of pathDirs) {
+        if (!dir) continue;
+        for (const name of names) {
+          const fullPath = path.join(dir, name);
+          if (isExecutable(fullPath)) {
+            return (cachedBinary = fullPath);
+          }
+        }
+      }
     }
     throw new Error(`Custom Hister binary not found or not executable at: ${custom}`);
   }
