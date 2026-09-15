@@ -42,10 +42,7 @@ export function stampToDate(stamp: string): Date | undefined {
 }
 
 /** One run, from the JSON rcc saved for it. */
-export function summarise(
-	file: string,
-	contents: string,
-): PastAudit | undefined {
+export function summarise(file: string, contents: string): PastAudit | undefined {
 	const stamp = FILE.exec(file)?.[1];
 	if (!stamp) return undefined;
 	let parsed: unknown;
@@ -58,8 +55,7 @@ export function summarise(
 	}
 	if (typeof parsed !== "object" || parsed === null) return undefined;
 	const run = parsed as Record<string, unknown>;
-	const count = (key: string): number =>
-		typeof run[key] === "number" ? (run[key] as number) : 0;
+	const count = (key: string): number => (typeof run[key] === "number" ? (run[key] as number) : 0);
 	return {
 		stamp: typeof run.timestamp === "string" ? run.timestamp : stamp,
 		at: stampToDate(stamp),
@@ -77,9 +73,7 @@ export function newestFirst(a: PastAudit, b: PastAudit): number {
 }
 
 /** Every run rcc has kept, or an empty list on a machine that has none. */
-export async function readHistory(
-	dir: string = HISTORY_DIR,
-): Promise<PastAudit[]> {
+export async function readHistory(dir: string = HISTORY_DIR): Promise<PastAudit[]> {
 	let names: string[];
 	try {
 		names = await readdir(dir);
@@ -93,16 +87,11 @@ export async function readHistory(
 			.filter((name) => FILE.test(name))
 			.map(async (name) => {
 				try {
-					return summarise(
-						name,
-						await readFile(join(dir, name), "utf8"),
-					);
+					return summarise(name, await readFile(join(dir, name), "utf8"));
 				} catch {
 					return undefined;
 				}
 			}),
 	);
-	return runs
-		.filter((run): run is PastAudit => run !== undefined)
-		.sort(newestFirst);
+	return runs.filter((run): run is PastAudit => run !== undefined).sort(newestFirst);
 }

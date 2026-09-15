@@ -1,13 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import {
-	keyLevel,
-	parseSsh,
-	problemCount,
-	reason,
-	sortKeys,
-	type SshKey,
-} from "./ssh-json.ts";
+import { keyLevel, parseSsh, problemCount, reason, sortKeys, type SshKey } from "./ssh-json.ts";
 
 const key = (over: Partial<SshKey> = {}): SshKey => ({
 	name: "id_ed25519",
@@ -30,9 +23,7 @@ test("parses the report rcc ssh --json prints", () => {
 });
 
 test("a Mac with no ~/.ssh parses as an empty report, not a failure", () => {
-	const parsed = parseSsh(
-		'{"ssh_dir_present":false,"ssh_dir_perms":"000","keys":[]}',
-	);
+	const parsed = parseSsh('{"ssh_dir_present":false,"ssh_dir_perms":"000","keys":[]}');
 	assert.equal(parsed.ssh_dir_present, false);
 	assert.deepEqual(parsed.keys, []);
 	assert.equal(problemCount(parsed), 0);
@@ -41,17 +32,11 @@ test("a Mac with no ~/.ssh parses as an empty report, not a failure", () => {
 test("a key with no passphrase is the worst case, whatever its permissions", () => {
 	assert.equal(keyLevel(key({ passphrase: false })), "unprotected");
 	// Mode 600 does not redeem it: the file is still a usable credential.
-	assert.equal(
-		keyLevel(key({ passphrase: false, perms: "600", perms_ok: true })),
-		"unprotected",
-	);
+	assert.equal(keyLevel(key({ passphrase: false, perms: "600", perms_ok: true })), "unprotected");
 });
 
 test("loose permissions rank above a missing .pub", () => {
-	const sorted = sortKeys([
-		key({ name: "b", public_key: false }),
-		key({ name: "a", perms: "644", perms_ok: false }),
-	]);
+	const sorted = sortKeys([key({ name: "b", public_key: false }), key({ name: "a", perms: "644", perms_ok: false })]);
 	assert.deepEqual(
 		sorted.map((k) => k.name),
 		["a", "b"],
@@ -59,10 +44,7 @@ test("loose permissions rank above a missing .pub", () => {
 });
 
 test("the reason names the mode that is wrong, not just that it is wrong", () => {
-	assert.equal(
-		reason(key({ perms: "644", perms_ok: false })),
-		"mode 644, ssh requires 600",
-	);
+	assert.equal(reason(key({ perms: "644", perms_ok: false })), "mode 644, ssh requires 600");
 });
 
 test("a healthy key is not counted as a problem", () => {

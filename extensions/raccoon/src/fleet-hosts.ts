@@ -72,15 +72,12 @@ export async function readHosts(path: string = FLEET_CONF): Promise<Host[]> {
 }
 
 /** `name host1 host2 ...`, one group per line. */
-export async function readGroups(
-	path: string = FLEET_GROUPS,
-): Promise<Map<string, string[]>> {
+export async function readGroups(path: string = FLEET_GROUPS): Promise<Map<string, string[]>> {
 	let contents: string;
 	try {
 		contents = await readFile(path, "utf8");
 	} catch (error) {
-		if ((error as NodeJS.ErrnoException).code === "ENOENT")
-			return new Map();
+		if ((error as NodeJS.ErrnoException).code === "ENOENT") return new Map();
 		throw error;
 	}
 	const groups = new Map<string, string[]>();

@@ -23,9 +23,7 @@ export function parseHistory(stdout: string): HistoryReport {
 			fish: num(c.fish),
 			total: num(c.total),
 		},
-		recent: Array.isArray(r.recent)
-			? r.recent.filter((x): x is string => typeof x === "string")
-			: [],
+		recent: Array.isArray(r.recent) ? r.recent.filter((x): x is string => typeof x === "string") : [],
 	};
 }
 

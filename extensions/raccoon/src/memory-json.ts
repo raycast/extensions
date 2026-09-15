@@ -5,7 +5,7 @@ import { expectArray, expectObject, extractJson } from "./json-out.ts";
  *
  * Two things: what the machine as a whole is holding, and which processes
  * cost the most. Cost is physical footprint — compressed pages included —
- * because that is what a Mac pays for a process. An rcc before 0.19 ranked by
+ * because that is what a Mac pays for a process. An rcc before 1.0.0 ranked by
  * RSS, which leaves compressed memory out: the process costing 23 GB on one
  * Mac had 110 MB of RSS and never made the top ten.
  */
@@ -46,7 +46,7 @@ function process(value: unknown, index: number): MemoryProcess {
 	if (typeof p?.pid !== "number" || typeof p?.command !== "string") {
 		throw new Error(`Process ${index + 1} is not shaped like a process.`);
 	}
-	// footprint_kb arrived in 0.19; before it the only figure was rss.
+	// footprint_kb arrived in 1.0.0; before it the only figure was rss.
 	const rss = num(p.rss_kb ?? p.rss);
 	const footprint = typeof p.footprint_kb === "number" ? p.footprint_kb : rss;
 	return {
@@ -114,8 +114,7 @@ export function weight(kb: number): Weight {
  * spending CPU to pretend it has not.
  */
 export function pressure(m: MachineMemory): Weight {
-	if (m.swap_used_mb > 1024 || m.compressed_mb > m.total_mb / 4)
-		return "huge";
+	if (m.swap_used_mb > 1024 || m.compressed_mb > m.total_mb / 4) return "huge";
 	if (m.swap_used_mb > 0 || m.compressed_mb > m.total_mb / 8) return "heavy";
 	return "light";
 }

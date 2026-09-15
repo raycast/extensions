@@ -15,9 +15,9 @@
  */
 
 const UPGRADE =
-	"An rcc older than 0.17.0 prints its report before the JSON, and its ports " +
-	"output is not valid JSON at all. Upgrade with `brew upgrade rcc`, or point " +
-	"the Raccoon CLI preference at a newer binary.";
+	"An rcc older than 0.18.0 does not answer --json on every screen that asks " +
+	"for it, and older ones print their report before the JSON. Upgrade with " +
+	"`brew upgrade rcc`, or point the Raccoon CLI preference at a newer binary.";
 
 /** The first stretch of output, enough to see what went wrong, short enough to read. */
 function excerpt(text: string): string {
@@ -98,19 +98,10 @@ export function extractJson(stdout: string, command: string): unknown {
 	}
 }
 
-export function expectObject(
-	stdout: string,
-	command: string,
-): Record<string, unknown> {
+export function expectObject(stdout: string, command: string): Record<string, unknown> {
 	const parsed = extractJson(stdout, command);
-	if (
-		typeof parsed !== "object" ||
-		parsed === null ||
-		Array.isArray(parsed)
-	) {
-		throw new Error(
-			`rcc ${command} printed JSON, but not a report object.`,
-		);
+	if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+		throw new Error(`rcc ${command} printed JSON, but not a report object.`);
 	}
 	return parsed as Record<string, unknown>;
 }
@@ -156,10 +147,7 @@ type ExecResult = {
  * way and its document is complete. Only a signal or a spawn error means the
  * output stopped early.
  */
-export function readJson<T>(
-	command: string,
-	parse: (stdout: string) => T,
-): (result: ExecResult) => T {
+export function readJson<T>(command: string, parse: (stdout: string) => T): (result: ExecResult) => T {
 	return ({ stdout, signal, error }) => {
 		if (signal || error) {
 			const why = signal ? ` (${signal})` : "";

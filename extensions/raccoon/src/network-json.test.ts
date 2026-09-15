@@ -29,9 +29,7 @@ test("the primary address is the routable one, not loopback", () => {
 });
 
 test("a Mac with only loopback has no primary address to show", () => {
-	const n = parseNetwork(
-		'{"interfaces":[{"name":"lo0","family":"inet","address":"127.0.0.1","kind":"Loopback"}]}',
-	);
+	const n = parseNetwork('{"interfaces":[{"name":"lo0","family":"inet","address":"127.0.0.1","kind":"Loopback"}]}');
 	assert.equal(primaryAddress(n), null);
 });
 
@@ -53,8 +51,5 @@ test("an unknown vpn state is read as configured, not as connected", () => {
 });
 
 test("output that is not JSON says so", () => {
-	assert.throws(
-		() => parseNetwork("-- Network Status"),
-		/did not print JSON/,
-	);
+	assert.throws(() => parseNetwork("-- Network Status"), /did not print JSON/);
 });

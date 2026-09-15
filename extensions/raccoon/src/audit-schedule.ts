@@ -9,12 +9,7 @@ const execFileAsync = promisify(execFile);
 export type Frequency = "daily" | "weekly" | "monthly";
 
 /** The plist `rcc audit --schedule` writes, and the label launchd knows it by. */
-export const SCHEDULE_PLIST = join(
-	homedir(),
-	"Library",
-	"LaunchAgents",
-	"com.raccoon.audit.plist",
-);
+export const SCHEDULE_PLIST = join(homedir(), "Library", "LaunchAgents", "com.raccoon.audit.plist");
 const SCHEDULE_LABEL = "com.raccoon.audit";
 
 /**
@@ -40,15 +35,11 @@ export async function readSchedule(): Promise<Frequency | undefined> {
 	try {
 		plist = await readFile(SCHEDULE_PLIST, "utf8");
 	} catch (error) {
-		if ((error as NodeJS.ErrnoException).code === "ENOENT")
-			return undefined;
+		if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
 		throw error;
 	}
 	try {
-		await execFileAsync("/bin/launchctl", [
-			"print",
-			`gui/${process.getuid?.() ?? 501}/${SCHEDULE_LABEL}`,
-		]);
+		await execFileAsync("/bin/launchctl", ["print", `gui/${process.getuid?.() ?? 501}/${SCHEDULE_LABEL}`]);
 	} catch {
 		// The file is there but launchd does not run it: not scheduled.
 		return undefined;

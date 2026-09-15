@@ -3,13 +3,7 @@ import { useMemo } from "react";
 import { whichAll } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
-import {
-	byClash,
-	clashLevel,
-	groupByName,
-	parseOverlap,
-	type NameGroup,
-} from "./simple-json";
+import { byClash, clashLevel, groupByName, parseOverlap, type NameGroup } from "./simple-json";
 
 const TINT = {
 	single: Color.SecondaryText,
@@ -23,13 +17,7 @@ const ICON = {
 	worse: Icon.ExclamationMark,
 } as const;
 
-function Rows({
-	groups,
-	actions,
-}: {
-	groups: NameGroup[];
-	actions: React.ReactNode;
-}) {
+function Rows({ groups, actions }: { groups: NameGroup[]; actions: React.ReactNode }) {
 	// Worst first: three copies of a name is the reason to open this screen.
 	const sorted = useMemo(() => [...groups].sort(byClash), [groups]);
 	return (
@@ -44,10 +32,7 @@ function Rows({
 						title={group.name}
 						// The copy that actually runs, decided by PATH order.
 						subtitle={winner.path}
-						keywords={group.entries.flatMap((e) => [
-							e.manager,
-							e.path,
-						])}
+						keywords={group.entries.flatMap((e) => [e.manager, e.path])}
 						accessories={[
 							// One tag per manager, on one row, rather than one row per
 							// copy: the point is that the same name has several owners.
@@ -67,10 +52,7 @@ function Rows({
 								}}
 								shared={actions}
 							>
-								<Action.CopyToClipboard
-									title="Copy Winning Path"
-									content={winner.path}
-								/>
+								<Action.CopyToClipboard title="Copy Winning Path" content={winner.path} />
 							</RowActions>
 						}
 					/>

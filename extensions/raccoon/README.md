@@ -11,7 +11,7 @@ commands, each with a view built for what that command actually reports.
 Every list is grouped and ordered by what you came for, and colour means the
 same thing in all of them:
 
-|        |                           |
+| Colour | What it means             |
 | ------ | ------------------------- |
 | red    | needs doing now           |
 | orange | deserves attention        |
@@ -29,7 +29,7 @@ credential in plain text, and it comes before one with loose permissions.
 **Enter** resolves the row under the cursor. **Cmd+Enter** resolves everything on
 screen. What that means differs per command, because the commands differ:
 
-|                | Enter                             | Cmd+Enter                          |
+| Command        | Enter                             | Cmd+Enter                          |
 | -------------- | --------------------------------- | ---------------------------------- |
 | Security Audit | apply that one fix                | fix everything shown               |
 | Memory         | quit that process                 | quit the listed ones               |
@@ -57,7 +57,7 @@ should leave a record of what it removed.
 This extension drives the `rcc` command-line tool. Install it once:
 
 ```sh
-brew install thousandflowers/raccoon/rcc
+brew install thousandflowers/tap/rcc
 ```
 
 The extension finds `rcc` in the usual Homebrew locations. If yours lives

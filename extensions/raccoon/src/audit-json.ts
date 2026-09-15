@@ -76,11 +76,7 @@ export function parseAuditReport(stdout: string): AuditReport {
 
 	const parsed = extractJson(stdout, "audit");
 
-	if (
-		typeof parsed !== "object" ||
-		parsed === null ||
-		Array.isArray(parsed)
-	) {
+	if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
 		throw new Error("rcc audit printed JSON, but not a report object.");
 	}
 	const report = parsed as Record<string, unknown>;
@@ -89,9 +85,7 @@ export function parseAuditReport(stdout: string): AuditReport {
 	}
 	const bad = report.results.findIndex((r) => !isCheck(r));
 	if (bad !== -1) {
-		throw new Error(
-			`Result ${bad + 1} of ${report.results.length} is not shaped like a check.`,
-		);
+		throw new Error(`Result ${bad + 1} of ${report.results.length} is not shaped like a check.`);
 	}
 	return parsed as AuditReport;
 }
@@ -116,17 +110,13 @@ export function readAuditRun(outcome: ExecOutcome): AuditReport {
 	};
 	if (isFailure(["audit"], exit, outcome.stdout.trim() !== "")) {
 		const reason = outcome.stderr.trim();
-		throw new Error(
-			`rcc audit exited with status ${exit.code}.${reason ? `\n${reason}` : ""}`,
-		);
+		throw new Error(`rcc audit exited with status ${exit.code}.${reason ? `\n${reason}` : ""}`);
 	}
 	return parseAuditReport(outcome.stdout);
 }
 
 /** The counts a screen shows above the list. Derived, never trusted from the JSON. */
-export function countByStatus(
-	report: AuditReport,
-): Record<AuditStatus, number> {
+export function countByStatus(report: AuditReport): Record<AuditStatus, number> {
 	const counts: Record<AuditStatus, number> = { pass: 0, warn: 0, fail: 0 };
 	for (const check of report.results) counts[check.status] += 1;
 	return counts;
@@ -140,11 +130,6 @@ export function countByStatus(
  * carry it — fix_available is recorded before the opt-out is consulted, which is
  * what lets a consumer see the skipped ones at all.
  */
-export function fixableCount(
-	report: AuditReport,
-	skipped: ReadonlySet<string> = new Set(),
-): number {
-	return report.results.filter(
-		(check) => check.fix_available && !skipped.has(check.name),
-	).length;
+export function fixableCount(report: AuditReport, skipped: ReadonlySet<string> = new Set()): number {
+	return report.results.filter((check) => check.fix_available && !skipped.has(check.name)).length;
 }

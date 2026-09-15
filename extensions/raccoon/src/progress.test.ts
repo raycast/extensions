@@ -37,10 +37,7 @@ test("output with no markers reports no progress", () => {
 });
 
 test("an info field containing colons survives whole", () => {
-	assert.equal(
-		progressOf("__RCC_PROGRESS__:1:2:pip: checking outdated...")?.info,
-		"pip: checking outdated...",
-	);
+	assert.equal(progressOf("__RCC_PROGRESS__:1:2:pip: checking outdated...")?.info, "pip: checking outdated...");
 });
 
 test("the bar shows how far along it is, and says so in numbers", () => {

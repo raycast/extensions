@@ -18,8 +18,7 @@ const PROGRESS = /^__RCC_PROGRESS__:(\d+):(\d+):(.*)$/;
 /** `brew: updating...` — the manager, and what it was doing. */
 const STEP = /^([a-z][a-z0-9+-]*):\s*(.*)$/i;
 
-export type ManagerState =
-	"checking" | "updating" | "previewed" | "done" | "absent" | "unknown";
+export type ManagerState = "checking" | "updating" | "previewed" | "done" | "absent" | "unknown";
 
 export type Manager = {
 	name: string;
@@ -36,8 +35,7 @@ function stateOf(detail: string): ManagerState {
 	if (text.includes("not installed") || text.includes("not found")) {
 		return "absent";
 	}
-	if (text.includes("up to date") || text.includes("up-to-date"))
-		return "done";
+	if (text.includes("up to date") || text.includes("up-to-date")) return "done";
 	// `--dry-run` reports what a manager would do and stops there.
 	if (text.includes("dry run")) return "previewed";
 	if (text.includes("updating") || text.includes("upgrading")) {
@@ -101,7 +99,5 @@ export function managersFrom(output: string): Manager[] {
 
 /** Whether the run still has managers it has not finished. */
 export function stillWorking(managers: Manager[]): boolean {
-	return managers.some(
-		(m) => m.state === "checking" || m.state === "updating",
-	);
+	return managers.some((m) => m.state === "checking" || m.state === "updating");
 }

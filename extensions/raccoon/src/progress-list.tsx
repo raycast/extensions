@@ -1,23 +1,10 @@
-import {
-	Action,
-	ActionPanel,
-	Color,
-	Icon,
-	Keyboard,
-	List,
-	openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import type { ReactNode } from "react";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
 import { RccNotFoundError } from "./rcc";
 import { useRccStream } from "./use-rcc-stream";
 import { withoutProgress } from "./markdown";
-import {
-	managersFrom,
-	stillWorking,
-	type Manager,
-	type ManagerState,
-} from "./upgrade-progress";
+import { managersFrom, stillWorking, type Manager, type ManagerState } from "./upgrade-progress";
 
 /**
  * The screen for a long rcc action that narrates itself.
@@ -106,8 +93,7 @@ export function ProgressList({
 	/** Actions this particular command adds, e.g. running it for real. */
 	extraActions?: ReactNode;
 }) {
-	const { output, stderrOutput, exit, isLoading, error, reload, stop } =
-		useRccStream(args);
+	const { output, stderrOutput, exit, isLoading, error, reload, stop } = useRccStream(args);
 
 	if (error instanceof RccNotFoundError) return <MissingRcc />;
 
@@ -132,17 +118,10 @@ export function ProgressList({
 			<Action.CopyToClipboard
 				title="Copy Whole Run"
 				content={withoutProgress(output)}
-				shortcut={Keyboard.Shortcut.Common.CopyName}
+				shortcut={Keyboard.Shortcut.Common.Copy}
 			/>
-			<Action
-				title="Set Rcc Path"
-				icon={Icon.Gear}
-				onAction={openExtensionPreferences}
-			/>
-			<Action.OpenInBrowser
-				title="Open Raccoon on GitHub"
-				url={REPO_URL}
-			/>
+			<Action title="Set Raccoon CLI Path" icon={Icon.Gear} onAction={openExtensionPreferences} />
+			<Action.OpenInBrowser title="Open Raccoon on GitHub" url={REPO_URL} />
 		</>
 	);
 
@@ -158,9 +137,7 @@ export function ProgressList({
 		<List
 			isLoading={isLoading}
 			isShowingDetail={rows.length > 0}
-			navigationTitle={
-				working ? `${title} — ${done} of ${rows.length} done` : title
-			}
+			navigationTitle={working ? `${title} — ${done} of ${rows.length} done` : title}
 			searchBarPlaceholder={`Search ${unit}`}
 		>
 			<List.EmptyView
@@ -175,18 +152,27 @@ export function ProgressList({
 			{rows.map((row) => (
 				<Row key={row.name} manager={row} actions={shared} />
 			))}
-			{exit && exit.code !== 0 && !isLoading ? (
+			{exit && (exit.signal !== null || exit.code !== 0) && !isLoading ? (
 				<List.Item
-					icon={{ source: Icon.Warning, tintColor: Color.Orange }}
-					title="Finished with errors"
-					subtitle={`${command} exited with status ${exit.code}`}
+					icon={
+						exit.signal !== null
+							? { source: Icon.Stop, tintColor: Color.SecondaryText }
+							: { source: Icon.Warning, tintColor: Color.Orange }
+					}
+					// A stopped run is reported as stopped, never as a clean
+					// finish: it was cut off partway, and what it had already
+					// done to the machine is still done.
+					title={exit.signal !== null ? "Stopped partway" : "Finished with errors"}
+					subtitle={
+						exit.signal !== null
+							? `${command} was stopped with ${exit.signal}. Whatever it had already changed stays changed.`
+							: `${command} exited with status ${exit.code}`
+					}
 					detail={
 						<List.Item.Detail
 							markdown={
 								stderrOutput.trim()
-									? ["```", stderrOutput.trim(), "```"].join(
-											"\n",
-										)
+									? ["```", stderrOutput.trim(), "```"].join("\n")
 									: "Nothing was written to stderr."
 							}
 						/>

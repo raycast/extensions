@@ -1,13 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-	displayName,
-	gigabytes,
-	megabytes,
-	parseMemory,
-	pressure,
-	weight,
-} from "./memory-json.ts";
+import { displayName, gigabytes, megabytes, parseMemory, pressure, weight } from "./memory-json.ts";
 
 test("the machine's figures and the process list are both read", () => {
 	const r = parseMemory(
@@ -39,10 +32,8 @@ test("the machine's figures and the process list are both read", () => {
 	assert.equal(megabytes(r.processes[0].rss_kb), 108);
 });
 
-test("an rcc before 0.19 sent the process list alone, ranked by rss", () => {
-	const r = parseMemory(
-		JSON.stringify([{ pid: 1, rss: 586256, command: "claude" }]),
-	);
+test("an rcc before 1.0.0 sent the process list alone, ranked by rss", () => {
+	const r = parseMemory(JSON.stringify([{ pid: 1, rss: 586256, command: "claude" }]));
 	assert.equal(r.memory, null);
 	assert.equal(r.processes[0].footprint_kb, 586256);
 	assert.equal(r.processes[0].rss_kb, 586256);
@@ -76,25 +67,16 @@ test("pressure reads swap and the compressor, not free memory", () => {
 	assert.equal(pressure(idle), "light");
 	assert.equal(pressure({ ...idle, swap_used_mb: 300 }), "heavy");
 	// 7.4 GB compressed on 16 GB, 8.4 GB of swap: the machine that froze.
-	assert.equal(
-		pressure({ ...idle, compressed_mb: 7381, swap_used_mb: 8483 }),
-		"huge",
-	);
+	assert.equal(pressure({ ...idle, compressed_mb: 7381, swap_used_mb: 8483 }), "huge");
 });
 
 test("the name is the last path component, not the whole path", () => {
-	assert.equal(
-		displayName("/Applications/Safari.app/Contents/MacOS/Safari"),
-		"Safari",
-	);
+	assert.equal(displayName("/Applications/Safari.app/Contents/MacOS/Safari"), "Safari");
 	assert.equal(displayName("claude"), "claude");
 	assert.equal(displayName("/"), "/");
 });
 
 test("output that is not a memory report says so", () => {
 	assert.throws(() => parseMemory("-- Memory Usage"), /did not print JSON/);
-	assert.throws(
-		() => parseMemory(JSON.stringify({ processes: [{ pid: 1 }] })),
-		/Process 1 is not shaped/,
-	);
+	assert.throws(() => parseMemory(JSON.stringify({ processes: [{ pid: 1 }] })), /Process 1 is not shaped/);
 });

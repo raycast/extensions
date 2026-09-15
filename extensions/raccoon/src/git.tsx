@@ -70,17 +70,13 @@ function Rows({ g, actions }: { g: GitReport; actions: React.ReactNode }) {
 	// The bulk form only takes the repositories where pushing is the whole
 	// answer. A repository with uncommitted work is left out on purpose: the
 	// keystroke has to mean the same thing for every row it touches.
-	const pushable = sorted.filter(
-		(r) => r.unpushed > 0 && r.uncommitted === 0,
-	);
+	const pushable = sorted.filter((r) => r.unpushed > 0 && r.uncommitted === 0);
 	const pushAll =
 		pushable.length > 0
 			? {
 					title: `Push ${pushable.length} Clean ${pushable.length === 1 ? "Repository" : "Repositories"}`,
 					command: gitPushAll(pushable.map((r) => r.path)),
-					detail: pushable
-						.map((r) => `${r.name} (${r.unpushed})`)
-						.join(", "),
+					detail: pushable.map((r) => `${r.name} (${r.unpushed})`).join(", "),
 					count: pushable.length,
 				}
 			: undefined;
@@ -90,14 +86,8 @@ function Rows({ g, actions }: { g: GitReport; actions: React.ReactNode }) {
 			<List.Section title="Scanned">
 				<List.Item
 					icon={{
-						source:
-							g.repos_with_issues === 0
-								? Icon.CheckCircle
-								: Icon.Folder,
-						tintColor:
-							g.repos_with_issues === 0
-								? Color.Green
-								: Color.SecondaryText,
+						source: g.repos_with_issues === 0 ? Icon.CheckCircle : Icon.Folder,
+						tintColor: g.repos_with_issues === 0 ? Color.Green : Color.SecondaryText,
 					}}
 					title={
 						g.repos_with_issues === 0
@@ -113,11 +103,7 @@ function Rows({ g, actions }: { g: GitReport; actions: React.ReactNode }) {
 				const group = sorted.filter((r) => repoLevel(r) === level);
 				if (group.length === 0) return null;
 				return (
-					<List.Section
-						key={level}
-						title={SECTION[level]}
-						subtitle={`${group.length}`}
-					>
+					<List.Section key={level} title={SECTION[level]} subtitle={`${group.length}`}>
 						{group.map((repo) => (
 							<List.Item
 								key={repo.path}
@@ -136,18 +122,12 @@ function Rows({ g, actions }: { g: GitReport; actions: React.ReactNode }) {
 									},
 								]}
 								actions={
-									<RowActions
-										one={repoFix(repo)}
-										all={pushAll}
-										shared={actions}
-									>
+									<RowActions one={repoFix(repo)} all={pushAll} shared={actions}>
 										<Action.ShowInFinder path={repo.path} />
 										<Action.CopyToClipboard
 											title="Copy Path"
 											content={repo.path}
-											shortcut={
-												Keyboard.Shortcut.Common.Pin
-											}
+											shortcut={Keyboard.Shortcut.Common.CopyPath}
 										/>
 									</RowActions>
 								}

@@ -3,9 +3,7 @@ import assert from "node:assert/strict";
 import { parseHistory, used } from "./history-json.ts";
 
 test("counts and recent commands are read", () => {
-	const h = parseHistory(
-		'{"counts":{"zsh":1525,"bash":545,"fish":0,"total":2070},"recent":["gh","brew"]}',
-	);
+	const h = parseHistory('{"counts":{"zsh":1525,"bash":545,"fish":0,"total":2070},"recent":["gh","brew"]}');
 	assert.equal(h.counts.zsh, 1525);
 	assert.deepEqual(h.recent, ["gh", "brew"]);
 });

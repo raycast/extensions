@@ -25,7 +25,12 @@ export function useRccStream(args: string[]) {
 	const [runCount, setRunCount] = useState(0);
 	const controllerRef = useRef<AbortController>(undefined);
 
+	// The joined form is the dependency - a new array every render must not
+	// restart the run - but the run itself is given the real argv: splitting
+	// the key back apart would cut any argument that contains a space.
 	const key = args.join(" ");
+	const argv = useRef(args);
+	argv.current = args;
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -38,7 +43,7 @@ export function useRccStream(args: string[]) {
 		setIsLoading(true);
 
 		streamRcc(
-			key.split(" "),
+			argv.current,
 			(chunk) => {
 				const append = (previous: string) => previous + chunk.text;
 				setOutput(append);

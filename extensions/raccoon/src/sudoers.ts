@@ -33,8 +33,7 @@ export function isValidUsername(name: string): boolean {
  * keys the record to the user instead, so one Touch ID covers them all.
  */
 export function buildDropIn(username: string, session: SudoSession): string {
-	if (!isValidUsername(username))
-		throw new Error(`Refusing to write sudoers for username: ${username}`);
+	if (!isValidUsername(username)) throw new Error(`Refusing to write sudoers for username: ${username}`);
 	return [
 		"# Installed by the Raccoon Raycast extension.",
 		"#",

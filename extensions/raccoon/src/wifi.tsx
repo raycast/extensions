@@ -44,10 +44,7 @@ export default function Command() {
 					forgettable.length > 0
 						? {
 								title: `Forget ${forgettable.length} Networks`,
-								command: forgetNetworks(
-									w.interface,
-									forgettable,
-								),
+								command: forgetNetworks(w.interface, forgettable),
 								detail: known
 									? `Keeps ${w.active_ssid}. Needs administrator rights.`
 									: "Needs administrator rights.",
@@ -75,9 +72,7 @@ export default function Command() {
 									},
 								]}
 								actions={<RowActions shared={actions} />}
-								detail={
-									<List.Item.Detail markdown={HIDDEN_NOTE} />
-								}
+								detail={<List.Item.Detail markdown={HIDDEN_NOTE} />}
 							/>
 						) : null}
 						{w.known_networks.map((ssid) => {
@@ -87,12 +82,8 @@ export default function Command() {
 								<List.Item
 									key={ssid}
 									icon={{
-										source: active
-											? Icon.Wifi
-											: Icon.WifiDisabled,
-										tintColor: active
-											? Color.Green
-											: Color.SecondaryText,
+										source: active ? Icon.Wifi : Icon.WifiDisabled,
+										tintColor: active ? Color.Green : Color.SecondaryText,
 									}}
 									title={ssid}
 									subtitle={active ? w.interface : undefined}
@@ -114,14 +105,10 @@ export default function Command() {
 												title: active
 													? "Forget This Network and Disconnect"
 													: "Forget This Network",
-												command: forgetNetworks(
-													w.interface,
-													[ssid],
-												),
+												command: forgetNetworks(w.interface, [ssid]),
 												detail: active
 													? `${ssid} is the network you are on. Forgetting it disconnects you.`
-													: w.connected &&
-														  !w.active_ssid
+													: w.connected && !w.active_ssid
 														? `This may be the network you are on: ${HIDDEN_NOTE} Needs administrator rights.`
 														: "Needs administrator rights.",
 												destructive: true,

@@ -39,17 +39,14 @@ export function parseEnv(stdout: string): EnvReport {
 					};
 				})
 			: [],
-		duplicates: Array.isArray(r.duplicates)
-			? r.duplicates.filter((d): d is string => typeof d === "string")
-			: [],
+		duplicates: Array.isArray(r.duplicates) ? r.duplicates.filter((d): d is string => typeof d === "string") : [],
 		tools: Array.isArray(r.tools)
 			? r.tools.map((v) => {
 					const t = (v ?? {}) as Record<string, unknown>;
 					return {
 						name: str(t.name),
 						found: t.found === true,
-						version:
-							typeof t.version === "string" ? t.version : null,
+						version: typeof t.version === "string" ? t.version : null,
 					};
 				})
 			: [],
@@ -58,11 +55,7 @@ export function parseEnv(stdout: string): EnvReport {
 
 /** How many things are actually wrong, which is what the title should say. */
 export function problems(e: EnvReport): number {
-	return (
-		e.broken_symlinks.length +
-		e.path.filter((p) => !p.exists).length +
-		e.duplicates.length
-	);
+	return e.broken_symlinks.length + e.path.filter((p) => !p.exists).length + e.duplicates.length;
 }
 
 /**

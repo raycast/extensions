@@ -2,12 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { openSettings, SETTINGS } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
-import {
-	isNoise,
-	parseNetwork,
-	primaryAddress,
-	type NetworkReport,
-} from "./network-json";
+import { isNoise, parseNetwork, primaryAddress, type NetworkReport } from "./network-json";
 
 function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 	// A VPN, a proxy or a DNS server is not wrong, it is chosen — and every one
@@ -46,10 +41,7 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 						icon={{ source: Icon.Globe, tintColor: Color.Green }}
 						title={i.address}
 						subtitle={i.name}
-						accessories={[
-							{ tag: { value: i.kind } },
-							{ text: i.family },
-						]}
+						accessories={[{ tag: { value: i.kind } }, { text: i.family }]}
 						actions={row}
 					/>
 				))}
@@ -63,10 +55,7 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 							key={`vpn-${v.name}`}
 							icon={{
 								source: Icon.Lock,
-								tintColor:
-									v.state === "connected"
-										? Color.Orange
-										: Color.SecondaryText,
+								tintColor: v.state === "connected" ? Color.Orange : Color.SecondaryText,
 							}}
 							title={v.name}
 							subtitle="VPN"
@@ -74,10 +63,7 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 								{
 									tag: {
 										value: v.state,
-										color:
-											v.state === "connected"
-												? Color.Orange
-												: Color.SecondaryText,
+										color: v.state === "connected" ? Color.Orange : Color.SecondaryText,
 									},
 								},
 							]}
@@ -125,18 +111,11 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 				<List.Item
 					icon={{ source: firewallIcon, tintColor: firewallTint }}
 					title="Application firewall"
-					subtitle={
-						n.firewall.application === "unknown"
-							? "socketfilterfw did not answer"
-							: undefined
-					}
+					subtitle={n.firewall.application === "unknown" ? "socketfilterfw did not answer" : undefined}
 					accessories={[
 						{
 							tag: {
-								value:
-									n.firewall.application === "unknown"
-										? "not checked"
-										: n.firewall.application,
+								value: n.firewall.application === "unknown" ? "not checked" : n.firewall.application,
 								color: firewallTint,
 							},
 						},
@@ -148,10 +127,7 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 				<List.Item
 					icon={{
 						source: Icon.Shield,
-						tintColor:
-							n.firewall.pf === "enabled"
-								? Color.Green
-								: Color.SecondaryText,
+						tintColor: n.firewall.pf === "enabled" ? Color.Green : Color.SecondaryText,
 					}}
 					title="Packet filter (pf)"
 					subtitle={
@@ -163,14 +139,8 @@ function Rows({ n, actions }: { n: NetworkReport; actions: React.ReactNode }) {
 						{
 							tag: {
 								value:
-									n.firewall.pf === "unknown" ||
-									n.firewall.pf === ""
-										? "not checked"
-										: n.firewall.pf,
-								color:
-									n.firewall.pf === "enabled"
-										? Color.Green
-										: Color.SecondaryText,
+									n.firewall.pf === "unknown" || n.firewall.pf === "" ? "not checked" : n.firewall.pf,
+								color: n.firewall.pf === "enabled" ? Color.Green : Color.SecondaryText,
 							},
 						},
 					]}
@@ -210,9 +180,7 @@ export default function Command() {
 			navigationTitle={(n) => {
 				if (!n) return "Network";
 				const primary = primaryAddress(n);
-				return primary
-					? `Network — ${primary.address} on ${primary.name}`
-					: "Network — no routable address";
+				return primary ? `Network — ${primary.address} on ${primary.name}` : "Network — no routable address";
 			}}
 			searchBarPlaceholder="Search addresses, DNS, VPNs and proxies"
 			emptyIcon={Icon.Globe}

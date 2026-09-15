@@ -28,14 +28,7 @@ export function fixCommand(rcc: string, checkNames: string[]): string {
 	// One comma-separated list rather than one run per check: an audit takes
 	// about eight seconds, and fixing what is on screen would otherwise mean
 	// running it once per row. No check name contains a comma.
-	return [
-		shellQuote(rcc),
-		"audit",
-		"--fix",
-		"--force",
-		"--fix-only",
-		shellQuote(checkNames.join(",")),
-	].join(" ");
+	return [shellQuote(rcc), "audit", "--fix", "--force", "--fix-only", shellQuote(checkNames.join(","))].join(" ");
 }
 
 /**

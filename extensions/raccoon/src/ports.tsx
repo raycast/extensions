@@ -8,20 +8,14 @@ import {
 	openExtensionPreferences,
 	useNavigation,
 } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { useRccExec } from "./use-rcc-exec";
 import { JSON_TIMEOUT_MS, readJson } from "./json-out.ts";
 import { useMemo } from "react";
 import { killPids, portsAsRoot } from "./fixes";
-import { ResolveActions } from "./resolve";
+import { offered, ResolveActions } from "./resolve";
 import { findCommand } from "./commands";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
-import {
-	type Exposure,
-	type Port,
-	byInterest,
-	exposure,
-	parsePorts,
-} from "./ports-json";
+import { type Exposure, type Port, byInterest, exposure, parsePorts } from "./ports-json";
 import { RccDetail } from "./rcc-detail";
 import { RccNotFoundError, resolveRcc, RUNTIME_PATH } from "./rcc";
 
@@ -57,16 +51,12 @@ export default function Command() {
 		resolveError = error;
 	}
 
-	const { isLoading, data, error, revalidate } = useExec(
-		rccPath ?? "rcc",
-		["ports", "--json"],
-		{
-			execute: rccPath !== null,
-			env: { ...process.env, NO_COLOR: "1", PATH: RUNTIME_PATH },
-			timeout: JSON_TIMEOUT_MS,
-			parseOutput: readJson("ports", parsePorts),
-		},
-	);
+	const { isLoading, data, error, revalidate } = useRccExec(rccPath ?? "rcc", ["ports", "--json"], {
+		execute: rccPath !== null,
+		path: RUNTIME_PATH,
+		timeout: JSON_TIMEOUT_MS,
+		parseOutput: readJson("ports", parsePorts),
+	});
 
 	// Reachable first: an open door matters more than a conversation in progress.
 	const ports = useMemo(() => [...(data ?? [])].sort(byInterest), [data]);
@@ -74,27 +64,26 @@ export default function Command() {
 
 	if (resolveError instanceof RccNotFoundError) return <MissingRcc />;
 
+	// Anything else that went wrong finding rcc is shown, not swallowed: an
+	// empty screen here reads as a clean result, which on a report about this
+	// machine is the worst thing it could say.
+	const failure = error ?? (resolveError instanceof Error ? resolveError : undefined);
+
 	// Closing a port means stopping whatever is holding it open; there is no
 	// other way to close one. The bulk form takes only the ports reachable from
 	// off this Mac — those are the ones that are a decision rather than a
 	// detail, and quitting every listener on the machine would take loopback
 	// services down with them.
-	const exposedWithPid = ports.filter(
-		(p) => exposure(p) === "exposed" && p.pid !== null,
-	);
+	const exposedWithPid = ports.filter((p) => exposure(p) === "exposed" && p.pid !== null);
 	const closeAll =
 		exposedWithPid.length > 0
-			? {
+			? offered(() => ({
 					title: `Close ${exposedWithPid.length} Reachable Ports`,
-					command: killPids(
-						exposedWithPid.map((p) => p.pid as number),
-					),
-					detail: exposedWithPid
-						.map((p) => `${p.port} — ${p.process}`)
-						.join("\n"),
+					command: killPids(exposedWithPid.map((p) => p.pid as number)),
+					detail: exposedWithPid.map((p) => `${p.port} — ${p.process}`).join("\n"),
 					destructive: true,
 					count: exposedWithPid.length,
-				}
+				}))
 			: undefined;
 
 	const actions = (port: Port | null) => (
@@ -102,12 +91,12 @@ export default function Command() {
 			<ResolveActions
 				one={
 					port && port.pid !== null
-						? {
+						? offered(() => ({
 								title: `Close Port ${port.port}`,
-								command: killPids([port.pid]),
+								command: killPids([port.pid as number]),
 								detail: `Quits ${port.process} (pid ${port.pid}), which is what is holding ${port.port} open.`,
 								destructive: true,
-							}
+							}))
 						: undefined
 				}
 				all={closeAll}
@@ -119,15 +108,9 @@ export default function Command() {
 							content={port.port}
 							shortcut={Keyboard.Shortcut.Common.Copy}
 						/>
-						<Action.CopyToClipboard
-							title="Copy Address"
-							content={port.address}
-						/>
+						<Action.CopyToClipboard title="Copy Address" content={port.address} />
 						{port.pid !== null ? (
-							<Action.CopyToClipboard
-								title="Copy PID"
-								content={String(port.pid)}
-							/>
+							<Action.CopyToClipboard title="Copy PID" content={String(port.pid)} />
 						) : null}
 					</>
 				) : null}
@@ -141,30 +124,21 @@ export default function Command() {
 					title="Show Raw Output"
 					icon={Icon.Text}
 					shortcut={{ modifiers: ["cmd"], key: "t" }}
-					onAction={() =>
-						push(<RccDetail command={findCommand("ports")} />)
-					}
+					onAction={() => push(<RccDetail command={findCommand("ports")} />)}
 				/>
-				<Action
-					title="Set Rcc Path"
-					icon={Icon.Gear}
-					onAction={openExtensionPreferences}
-				/>
-				<Action.OpenInBrowser
-					title="Open Raccoon on GitHub"
-					url={REPO_URL}
-				/>
+				<Action title="Set Raccoon CLI Path" icon={Icon.Gear} onAction={openExtensionPreferences} />
+				<Action.OpenInBrowser title="Open Raccoon on GitHub" url={REPO_URL} />
 			</ResolveActions>
 		</ActionPanel>
 	);
 
-	if (error) {
+	if (failure) {
 		return (
 			<List>
 				<List.EmptyView
 					icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
 					title="The port list could not be read"
-					description={error.message}
+					description={failure.message}
 					actions={actions(null)}
 				/>
 			</List>
@@ -174,11 +148,7 @@ export default function Command() {
 	return (
 		<List
 			isLoading={isLoading}
-			navigationTitle={
-				ports.length > 0
-					? `Ports — ${reachable} reachable, ${ports.length} sockets`
-					: "Ports"
-			}
+			navigationTitle={ports.length > 0 ? `Ports — ${reachable} reachable, ${ports.length} sockets` : "Ports"}
 			searchBarPlaceholder="Search by port, process or address"
 		>
 			<List.EmptyView
@@ -216,12 +186,7 @@ export default function Command() {
 						icon={{ source: ICON[e], tintColor: TINT[e] }}
 						title={port.port === "*" ? "unbound" : port.port}
 						subtitle={port.process}
-						keywords={[
-							port.address,
-							port.proto,
-							port.state,
-							port.user,
-						].filter(Boolean)}
+						keywords={[port.address, port.proto, port.state, port.user].filter(Boolean)}
 						accessories={[
 							port.state ? { text: port.state } : {},
 							{ tag: { value: LABEL[e], color: TINT[e] } },

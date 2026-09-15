@@ -6,7 +6,7 @@ test("both lists and the counts are read", () => {
 	const s = parseStartup(
 		'{"user_agents":["mailbrief"],"login_items":["Raycast","Tailscale"],"counts":{"system_agents":7,"daemons":14,"running_services":544},"uptime":"2 days, 13:14","load":"3.21 2.84 2.19"}',
 	);
-	// An rcc before 0.19 listed agents by short name: readable, but with no
+	// An rcc before 1.0.0 listed agents by short name: readable, but with no
 	// label there is nothing to stop them by.
 	assert.equal(s.user_agents[0].name, "mailbrief");
 	assert.equal(s.user_agents[0].label, "");
@@ -43,16 +43,14 @@ test("an agent carries launchd's label, whether it is loaded, and by which plist
 					name: "GC.Invoker-1.0",
 					file: "/Users/me/Library/LaunchAgents/com.adobe.GC.Invoker-1.0.plist",
 					loaded: true,
-					loaded_from:
-						"/Users/me/Library/LaunchAgents/com.adobe.GC.Invoker-1.0.plist",
+					loaded_from: "/Users/me/Library/LaunchAgents/com.adobe.GC.Invoker-1.0.plist",
 				},
 				{
 					label: "com.adobe.ccxprocess",
 					name: "ccxprocess",
 					file: "/Users/me/Library/LaunchAgents/com.adobe.ccxprocess.plist",
 					loaded: false,
-					loaded_from:
-						"/Library/LaunchAgents/com.adobe.ccxprocess.plist",
+					loaded_from: "/Library/LaunchAgents/com.adobe.ccxprocess.plist",
 				},
 			],
 			background_items: [

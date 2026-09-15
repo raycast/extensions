@@ -43,9 +43,7 @@ test("a Mac with no battery is a report, not a failure", () => {
 });
 
 test("an rcc older than 0.17.0 has no present field, and is not called absent", () => {
-	const b = parseBattery(
-		JSON.stringify({ cycle_count: 12, max_capacity_percent: 99 }),
-	);
+	const b = parseBattery(JSON.stringify({ cycle_count: 12, max_capacity_percent: 99 }));
 	assert.equal(b.present, true);
 });
 
@@ -83,10 +81,7 @@ test("only Normal is a good condition, and case does not decide it", () => {
 });
 
 test("output that is not JSON says so", () => {
-	assert.throws(
-		() => parseBattery("-- Battery Status"),
-		/did not print JSON/,
-	);
+	assert.throws(() => parseBattery("-- Battery Status"), /did not print JSON/);
 	assert.throws(() => parseBattery("   "), /printed nothing/);
 	assert.throws(() => parseBattery("[1,2]"), /not a report object/);
 });
@@ -103,10 +98,7 @@ test("on AC and not charging is holding the charge, not running on battery", () 
 		charge_percent: 83,
 	};
 	assert.match(chargingLabel(base), /on AC/);
-	assert.equal(
-		chargingLabel({ ...base, power_source: "battery" }),
-		"No, on battery",
-	);
+	assert.equal(chargingLabel({ ...base, power_source: "battery" }), "No, on battery");
 	// An rcc that did not say where the power comes from gets no guess.
 	assert.equal(chargingLabel({ ...base, power_source: null }), "No");
 	assert.equal(chargingLabel({ ...base, charging: true }), "Yes");

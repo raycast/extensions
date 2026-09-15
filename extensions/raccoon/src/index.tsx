@@ -30,14 +30,8 @@ export default function Command() {
 					actions={
 						<ActionPanel>
 							<Action.Push
-								title={
-									hasView(command) ? "Open" : "Show Output"
-								}
-								icon={
-									hasView(command)
-										? Icon.AppWindowList
-										: Icon.Text
-								}
+								title={hasView(command) ? "Open" : "Show Output"}
+								icon={hasView(command) ? Icon.AppWindowList : Icon.Text}
 								target={viewFor(command)}
 							/>
 							<Action.CopyToClipboard

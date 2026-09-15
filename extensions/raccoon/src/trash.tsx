@@ -35,9 +35,7 @@ export default function Command() {
 								count: t.count,
 							}
 						: undefined;
-				const rowActions = (
-					<RowActions one={empty} all={empty} shared={actions} />
-				);
+				const rowActions = <RowActions one={empty} all={empty} shared={actions} />;
 				return [
 					<List.Item
 						key="size"
@@ -46,9 +44,7 @@ export default function Command() {
 							tintColor: weight(t.count),
 						}}
 						title="Size"
-						accessories={[
-							{ tag: { value: t.size, color: weight(t.count) } },
-						]}
+						accessories={[{ tag: { value: t.size, color: weight(t.count) } }]}
 						actions={rowActions}
 					/>,
 					<List.Item

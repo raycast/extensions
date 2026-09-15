@@ -41,10 +41,7 @@ test("an existing file keeps its comments and its order", async () => {
 	await writeFile(path, before);
 	assert.equal(await skipCheck("Firewall", path), "added");
 	const after = await readFile(path, "utf8");
-	assert.ok(
-		after.startsWith(before),
-		"the file was rewritten, not appended to",
-	);
+	assert.ok(after.startsWith(before), "the file was rewritten, not appended to");
 	assert.equal(after, before + "Firewall\n");
 });
 
@@ -80,10 +77,7 @@ test("a directory that cannot be created throws the reason", async () => {
 	const locked = join(dir, "locked");
 	await mkdir(locked);
 	await chmod(locked, 0o555);
-	await assert.rejects(
-		() => skipCheck("Firewall", join(locked, "sub", "audit.conf")),
-		/EACCES|EPERM/,
-	);
+	await assert.rejects(() => skipCheck("Firewall", join(locked, "sub", "audit.conf")), /EACCES|EPERM/);
 });
 
 test("something that is not a check name is refused", async () => {
@@ -106,10 +100,7 @@ test("a file that is not there is an empty list, not an error", async () => {
 
 test("comments and blank lines are not check names", async () => {
 	const path = await scratch();
-	await writeFile(
-		path,
-		"# a note\n\nFirewall\n   \n# another\nStealth Mode\n",
-	);
+	await writeFile(path, "# a note\n\nFirewall\n   \n# another\nStealth Mode\n");
 	assert.deepEqual(await readSkipList(path), ["Firewall", "Stealth Mode"]);
 });
 

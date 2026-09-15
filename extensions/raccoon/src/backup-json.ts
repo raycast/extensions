@@ -46,9 +46,7 @@ export function parseBackup(stdout: string): BackupReport {
 			available: snap.available === true,
 			count: typeof snap.count === "number" ? snap.count : 0,
 		},
-		exclusions: Array.isArray(r.exclusions)
-			? r.exclusions.filter((e): e is string => typeof e === "string")
-			: [],
+		exclusions: Array.isArray(r.exclusions) ? r.exclusions.filter((e): e is string => typeof e === "string") : [],
 	};
 }
 

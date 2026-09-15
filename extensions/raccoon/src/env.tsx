@@ -15,9 +15,7 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 		e.broken_symlinks.length > 0
 			? {
 					title: `Remove ${e.broken_symlinks.length} Broken Symlinks`,
-					command: removeSymlink(
-						e.broken_symlinks.map((b) => b.link),
-					),
+					command: removeSymlink(e.broken_symlinks.map((b) => b.link)),
 					detail: e.broken_symlinks.map((b) => b.name).join(", "),
 					destructive: true,
 					count: e.broken_symlinks.length,
@@ -28,10 +26,7 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 			{/* A command on the PATH that still fails: the most surprising of the
 			    three, so it goes first even when the list is empty elsewhere. */}
 			{e.broken_symlinks.length > 0 ? (
-				<List.Section
-					title="Broken symlinks"
-					subtitle={`${e.broken_symlinks.length}`}
-				>
+				<List.Section title="Broken symlinks" subtitle={`${e.broken_symlinks.length}`}>
 					{e.broken_symlinks.map((b) => (
 						<List.Item
 							key={b.link}
@@ -67,10 +62,7 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 			) : null}
 
 			{missing.length > 0 ? (
-				<List.Section
-					title="Missing from disk"
-					subtitle={`${missing.length}`}
-				>
+				<List.Section title="Missing from disk" subtitle={`${missing.length}`}>
 					{missing.map((p) => (
 						<List.Item
 							key={p.path}
@@ -93,10 +85,7 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 									    or in /etc/paths.d — 6 of 14 here did —
 									    and only the reader knows which, so this
 									    copies it rather than editing. */}
-									<Action.CopyToClipboard
-										title="Copy Path Entry"
-										content={p.path}
-									/>
+									<Action.CopyToClipboard title="Copy Path Entry" content={p.path} />
 								</RowActions>
 							}
 						/>
@@ -105,10 +94,7 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 			) : null}
 
 			{e.duplicates.length > 0 ? (
-				<List.Section
-					title="Listed twice"
-					subtitle={`${e.duplicates.length}`}
-				>
+				<List.Section title="Listed twice" subtitle={`${e.duplicates.length}`}>
 					{e.duplicates.map((d, i) => (
 						<List.Item
 							key={`${d}-${i}`}
@@ -138,16 +124,10 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 						key={t.name}
 						icon={{
 							source: t.found ? Icon.CheckCircle : Icon.Minus,
-							tintColor: t.found
-								? Color.Green
-								: Color.SecondaryText,
+							tintColor: t.found ? Color.Green : Color.SecondaryText,
 						}}
 						title={t.name}
-						subtitle={
-							t.version
-								? shortVersion(t.version)
-								: "not installed"
-						}
+						subtitle={t.version ? shortVersion(t.version) : "not installed"}
 						actions={
 							<RowActions
 								one={

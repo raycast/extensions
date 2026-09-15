@@ -49,11 +49,7 @@ export default function Command() {
 	return (
 		<List
 			isLoading={isLoading}
-			navigationTitle={
-				runs.length > 0
-					? `Audit History — ${runs.length} runs`
-					: "Audit History"
-			}
+			navigationTitle={runs.length > 0 ? `Audit History — ${runs.length} runs` : "Audit History"}
 			searchBarPlaceholder="Search past audits"
 		>
 			<List.EmptyView
@@ -95,10 +91,7 @@ export default function Command() {
 					]}
 					actions={
 						<ActionPanel>
-							<Action.ShowInFinder
-								title="Show Saved Run in Finder"
-								path={join(HISTORY_DIR, run.file)}
-							/>
+							<Action.ShowInFinder title="Show Saved Run in Finder" path={join(HISTORY_DIR, run.file)} />
 							<Action.CopyToClipboard
 								title="Copy Timestamp"
 								content={run.stamp}

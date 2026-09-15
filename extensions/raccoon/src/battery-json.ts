@@ -29,14 +29,8 @@ export function parseBattery(stdout: string): BatteryReport {
 	return {
 		// present arrived with the no-battery fix; an older rcc that reports a
 		// cycle count clearly has one.
-		present:
-			typeof r.present === "boolean"
-				? r.present
-				: num(r.cycle_count) !== null,
-		power_source:
-			r.power_source === "ac" || r.power_source === "battery"
-				? r.power_source
-				: null,
+		present: typeof r.present === "boolean" ? r.present : num(r.cycle_count) !== null,
+		power_source: r.power_source === "ac" || r.power_source === "battery" ? r.power_source : null,
 		cycle_count: num(r.cycle_count),
 		max_capacity_percent: num(r.max_capacity_percent),
 		condition: typeof r.condition === "string" ? r.condition : null,
@@ -77,9 +71,7 @@ export function cycleHealth(cycles: number | null): Health {
  */
 export function chargingLabel(b: BatteryReport): string {
 	if (b.fully_charged) {
-		return b.power_source === "ac"
-			? "No, full and on AC"
-			: "No, fully charged";
+		return b.power_source === "ac" ? "No, full and on AC" : "No, fully charged";
 	}
 	if (b.charging) return "Yes";
 	if (b.power_source === "ac") return "No, on AC and holding the charge";

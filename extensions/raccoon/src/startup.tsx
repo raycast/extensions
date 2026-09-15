@@ -1,18 +1,8 @@
 import { Color, Icon, List } from "@raycast/api";
-import {
-	bootoutAgents,
-	openSettings,
-	removeLoginItems,
-	SETTINGS,
-} from "./fixes";
+import { bootoutAgents, openSettings, removeLoginItems, SETTINGS } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
-import {
-	loadNow,
-	parseStartup,
-	type StartupReport,
-	type UserAgent,
-} from "./startup-json";
+import { loadNow, parseStartup, type StartupReport, type UserAgent } from "./startup-json";
 
 /** Busy relative to nothing in particular, but 4 and 8 are where a Mac feels it. */
 function loadTint(load: string): Color {
@@ -76,11 +66,7 @@ function Rows({ s, actions }: { s: StartupReport; actions: React.ReactNode }) {
 			{/* What a person installed, and can remove. */}
 			<List.Section
 				title="Login items"
-				subtitle={
-					s.login_items_error
-						? "not checked"
-						: `${s.login_items.length}`
-				}
+				subtitle={s.login_items_error ? "not checked" : `${s.login_items.length}`}
 			>
 				{s.login_items_error ? (
 					<List.Item
@@ -97,9 +83,7 @@ function Rows({ s, actions }: { s: StartupReport; actions: React.ReactNode }) {
 						key={`login-${item}`}
 						icon={{
 							source: Icon.Person,
-							tintColor: missing.has(item)
-								? Color.Orange
-								: Color.Green,
+							tintColor: missing.has(item) ? Color.Orange : Color.Green,
 						}}
 						title={item}
 						accessories={[
@@ -115,9 +99,7 @@ function Rows({ s, actions }: { s: StartupReport; actions: React.ReactNode }) {
 						actions={
 							<RowActions
 								one={{
-									title: missing.has(item)
-										? "Remove the Dead Entry"
-										: "Stop It Opening at Login",
+									title: missing.has(item) ? "Remove the Dead Entry" : "Stop It Opening at Login",
 									command: removeLoginItems([item]),
 									detail: missing.has(item)
 										? `${item} points at something that no longer exists, so nothing opens. This removes the entry.`
@@ -131,10 +113,7 @@ function Rows({ s, actions }: { s: StartupReport; actions: React.ReactNode }) {
 					/>
 				))}
 			</List.Section>
-			<List.Section
-				title="Your launch agents"
-				subtitle={`${s.user_agents.length}`}
-			>
+			<List.Section title="Your launch agents" subtitle={`${s.user_agents.length}`}>
 				{s.user_agents.map((agent) => {
 					const state = agentState(agent);
 					return (
@@ -142,9 +121,7 @@ function Rows({ s, actions }: { s: StartupReport; actions: React.ReactNode }) {
 							key={`agent-${agent.file || agent.name}`}
 							icon={{
 								source: Icon.Gear,
-								tintColor: agent.loaded
-									? Color.Green
-									: Color.SecondaryText,
+								tintColor: agent.loaded ? Color.Green : Color.SecondaryText,
 							}}
 							title={agent.name}
 							subtitle={agent.file || "~/Library/LaunchAgents"}
@@ -156,9 +133,7 @@ function Rows({ s, actions }: { s: StartupReport; actions: React.ReactNode }) {
 										stoppable(agent)
 											? {
 													title: "Stop This Agent",
-													command: bootoutAgents([
-														agent.label,
-													]),
+													command: bootoutAgents([agent.label]),
 													detail: `Unloads ${agent.label} for this login session. Its plist stays, so it loads again at next login.`,
 													destructive: true,
 												}
@@ -174,19 +149,13 @@ function Rows({ s, actions }: { s: StartupReport; actions: React.ReactNode }) {
 			</List.Section>
 			{/* Registered by apps through System Settings, not by a plist the
 			    reader put anywhere: the pane that owns them is the fix. */}
-			<List.Section
-				title="Background items registered by apps"
-				subtitle={`${s.background_items.length}`}
-			>
+			<List.Section title="Background items registered by apps" subtitle={`${s.background_items.length}`}>
 				{s.background_items.map((item) => (
 					<List.Item
 						key={`bg-${item.label}`}
 						icon={{
 							source: Icon.Gear,
-							tintColor:
-								item.pid !== null
-									? Color.Green
-									: Color.SecondaryText,
+							tintColor: item.pid !== null ? Color.Green : Color.SecondaryText,
 						}}
 						title={item.label}
 						accessories={[

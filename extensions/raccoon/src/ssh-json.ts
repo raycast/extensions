@@ -70,8 +70,7 @@ export function parseSsh(stdout: string): SshReport {
 	const raw = expectObject(stdout, "ssh");
 	return {
 		ssh_dir_present: raw.ssh_dir_present === true,
-		ssh_dir_perms:
-			typeof raw.ssh_dir_perms === "string" ? raw.ssh_dir_perms : "000",
+		ssh_dir_perms: typeof raw.ssh_dir_perms === "string" ? raw.ssh_dir_perms : "000",
 		keys: Array.isArray(raw.keys)
 			? raw.keys.map((entry) => {
 					const k = (entry ?? {}) as Record<string, unknown>;

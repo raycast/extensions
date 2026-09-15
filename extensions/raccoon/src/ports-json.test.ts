@@ -45,15 +45,9 @@ test("an established connection is a conversation, not an open door", () => {
 		process: "claude",
 	});
 	assert.equal(exposure(outbound), "connected");
-	assert.equal(
-		exposure(port({ address: "127.0.0.1:52000", state: "CLOSE_WAIT" })),
-		"connected",
-	);
+	assert.equal(exposure(port({ address: "127.0.0.1:52000", state: "CLOSE_WAIT" })), "connected");
 	// UDP has no state, so a wildcard UDP socket stays a door.
-	assert.equal(
-		exposure(port({ proto: "UDP", address: "*:5353", state: "" })),
-		"exposed",
-	);
+	assert.equal(exposure(port({ proto: "UDP", address: "*:5353", state: "" })), "exposed");
 });
 
 test("exposed sorts before local, and numbers sort as numbers", () => {
@@ -72,9 +66,6 @@ test("exposed sorts before local, and numbers sort as numbers", () => {
 
 test("output that is not a list of ports says so", () => {
 	assert.throws(() => parsePorts("-- Network Ports"), /did not print JSON/);
-	assert.throws(
-		() => parsePorts("{}"),
-		/rcc ports printed JSON, but not a list/,
-	);
+	assert.throws(() => parsePorts("{}"), /rcc ports printed JSON, but not a list/);
 	assert.throws(() => parsePorts("[{}]"), /Port 1 is not shaped/);
 });

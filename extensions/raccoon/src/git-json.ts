@@ -63,19 +63,13 @@ export function summarise(repo: GitRepo): string {
 	if (repo.uncommitted > 0) parts.push(`${repo.uncommitted} uncommitted`);
 	if (repo.stashed > 0) parts.push(`${repo.stashed} stashed`);
 	if (repo.no_upstream > 0)
-		parts.push(
-			`${repo.no_upstream} ${repo.no_upstream === 1 ? "branch" : "branches"} with no upstream`,
-		);
+		parts.push(`${repo.no_upstream} ${repo.no_upstream === 1 ? "branch" : "branches"} with no upstream`);
 	return parts.join(", ");
 }
 
 /** ~/Desktop/x rather than /Users/someone/Desktop/x. */
 export function shortPath(path: string, home: string): string {
-	return path === home
-		? "~"
-		: path.startsWith(`${home}/`)
-			? `~${path.slice(home.length)}`
-			: path;
+	return path === home ? "~" : path.startsWith(`${home}/`) ? `~${path.slice(home.length)}` : path;
 }
 
 function number(value: unknown): number {

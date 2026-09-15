@@ -20,8 +20,7 @@ export type XcodeReport = {
 };
 
 const num = (v: unknown) => (typeof v === "number" ? v : 0);
-const strOrNull = (v: unknown) =>
-	typeof v === "string" && v !== "" ? v : null;
+const strOrNull = (v: unknown) => (typeof v === "string" && v !== "" ? v : null);
 
 export function parseXcode(stdout: string): XcodeReport {
 	const r = expectObject(stdout, "xcode");
@@ -42,9 +41,7 @@ export function parseXcode(stdout: string): XcodeReport {
 			bytes: num(d.bytes),
 			projects: num(d.projects),
 		},
-		platforms: Array.isArray(r.platforms)
-			? r.platforms.filter((p): p is string => typeof p === "string")
-			: [],
+		platforms: Array.isArray(r.platforms) ? r.platforms.filter((p): p is string => typeof p === "string") : [],
 		version: strOrNull(r.version),
 		build: strOrNull(r.build),
 	};

@@ -2,12 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { clearDerivedData, openApp, shutdownSimulators } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
-import {
-	derivedLevel,
-	humanBytes,
-	parseXcode,
-	type XcodeReport,
-} from "./xcode-json";
+import { derivedLevel, humanBytes, parseXcode, type XcodeReport } from "./xcode-json";
 
 const DERIVED_TINT = {
 	empty: Color.SecondaryText,
@@ -26,9 +21,7 @@ function Rows({ x, actions }: { x: XcodeReport; actions: React.ReactNode }) {
 				title: "Reclaim Everything Shown",
 				command: `${shutdownSimulators()}; ${clearDerivedData()}`,
 				detail: [
-					x.derived_data.bytes > 0
-						? `DerivedData: ${humanBytes(x.derived_data.bytes)}`
-						: null,
+					x.derived_data.bytes > 0 ? `DerivedData: ${humanBytes(x.derived_data.bytes)}` : null,
 					booted.length > 0
 						? `${booted.length} booted ${booted.length === 1 ? "simulator" : "simulators"}`
 						: null,
@@ -132,10 +125,7 @@ function Rows({ x, actions }: { x: XcodeReport; actions: React.ReactNode }) {
 				</List.Section>
 			) : null}
 
-			<List.Section
-				title="Simulators"
-				subtitle={`${x.simulators.length} installed`}
-			>
+			<List.Section title="Simulators" subtitle={`${x.simulators.length} installed`}>
 				{x.simulators
 					.filter((s) => !s.booted)
 					.map((s, i) => (
@@ -146,9 +136,7 @@ function Rows({ x, actions }: { x: XcodeReport; actions: React.ReactNode }) {
 								tintColor: Color.SecondaryText,
 							}}
 							title={s.name}
-							actions={
-								<RowActions all={reclaimAll} shared={actions} />
-							}
+							actions={<RowActions all={reclaimAll} shared={actions} />}
 						/>
 					))}
 			</List.Section>
@@ -181,9 +169,7 @@ function Rows({ x, actions }: { x: XcodeReport; actions: React.ReactNode }) {
 							tintColor: Color.SecondaryText,
 						}}
 						title={p}
-						actions={
-							<RowActions all={reclaimAll} shared={actions} />
-						}
+						actions={<RowActions all={reclaimAll} shared={actions} />}
 					/>
 				))}
 			</List.Section>
@@ -199,10 +185,7 @@ export default function Command() {
 			navigationTitle={(x) => {
 				if (!x || !x.installed) return "Xcode";
 				const size = humanBytes(x.derived_data.bytes);
-				return `Xcode ${x.version ?? ""} — DerivedData ${size}`.replace(
-					"  ",
-					" ",
-				);
+				return `Xcode ${x.version ?? ""} — DerivedData ${size}`.replace("  ", " ");
 			}}
 			searchBarPlaceholder="Search simulators and platforms"
 			emptyIcon={Icon.Hammer}

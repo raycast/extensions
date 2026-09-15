@@ -1,13 +1,4 @@
-import {
-	Action,
-	ActionPanel,
-	Alert,
-	Color,
-	confirmAlert,
-	Icon,
-	showToast,
-	Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import type { ReactNode } from "react";
 import { runInTerminal } from "./terminal";
 
@@ -40,6 +31,23 @@ export type Resolution = {
 	count?: number;
 };
 
+/**
+ * A resolution built from what the CLI reported, or nothing.
+ *
+ * The command builders refuse input they cannot make a safe command out of - a
+ * pid that is not above 1, a hash that is not a hash - and they run while the
+ * list renders. A refusal used to take the whole screen down with it, so a
+ * single malformed row cost the report. An action that cannot be built is left
+ * out instead.
+ */
+export function offered(build: () => Resolution): Resolution | undefined {
+	try {
+		return build();
+	} catch {
+		return undefined;
+	}
+}
+
 /** Confirm, run in Terminal, say it started. */
 export async function runResolution(r: Resolution): Promise<void> {
 	const confirmed = await confirmAlert({
@@ -51,9 +59,7 @@ export async function runResolution(r: Resolution): Promise<void> {
 		},
 		primaryAction: {
 			title: r.title,
-			style: r.destructive
-				? Alert.ActionStyle.Destructive
-				: Alert.ActionStyle.Default,
+			style: r.destructive ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
 		},
 	});
 	if (!confirmed) return;
@@ -89,15 +95,7 @@ async function nothingToDo(what: string) {
  * its own Cmd+Enter, and Enter falls through to Run Again — which is the honest
  * answer for a row that is only information.
  */
-export function ResolveActions({
-	one,
-	all,
-	children,
-}: {
-	one?: Resolution;
-	all?: Resolution;
-	children?: ReactNode;
-}) {
+export function ResolveActions({ one, all, children }: { one?: Resolution; all?: Resolution; children?: ReactNode }) {
 	const oneAction = one ? (
 		<Action
 			title={one.title}
@@ -115,9 +113,7 @@ export function ResolveActions({
 			icon={{ source: Icon.Hammer, tintColor: Color.Orange }}
 			shortcut={{ modifiers: ["cmd"], key: "return" }}
 			onAction={() =>
-				all.count === 0
-					? nothingToDo("Nothing on screen has an automatic fix.")
-					: runResolution(all)
+				all.count === 0 ? nothingToDo("Nothing on screen has an automatic fix.") : runResolution(all)
 			}
 		/>
 	) : null;

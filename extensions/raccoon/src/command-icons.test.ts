@@ -10,9 +10,7 @@ import { COMMANDS } from "./commands.ts";
 // that has no import.meta. The last test below fails if this read comes back
 // empty, so a wrong path cannot make the coverage checks pass vacuously.
 const source = readFileSync("src/command-icons.ts", "utf8");
-const mapped = new Set(
-	[...source.matchAll(/^\t"?([a-z-]+)"?:\s*Icon\./gm)].map((m) => m[1]),
-);
+const mapped = new Set([...source.matchAll(/^\t"?([a-z-]+)"?:\s*Icon\./gm)].map((m) => m[1]));
 
 test("every command the CLI offers has an icon of its own", () => {
 	// commands.ts is regenerated from `rcc --help`. A command added there and

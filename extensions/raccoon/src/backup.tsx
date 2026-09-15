@@ -2,13 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { openSettings, reveal, SETTINGS, startBackup } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
-import {
-	health,
-	humanAge,
-	parseBackup,
-	type BackupHealth,
-	type BackupReport,
-} from "./backup-json";
+import { health, humanAge, parseBackup, type BackupHealth, type BackupReport } from "./backup-json";
 
 const TINT: Record<BackupHealth, Color> = {
 	never: Color.Red,
@@ -36,12 +30,8 @@ function Rows({ b, actions }: { b: BackupReport; actions: React.ReactNode }) {
 	const fix = b.destination.configured
 		? {
 				title: b.running ? "Open Time Machine Settings" : "Back Up Now",
-				command: b.running
-					? openSettings(SETTINGS.timeMachine)
-					: startBackup(),
-				detail: b.running
-					? undefined
-					: `Writes to ${b.destination.name || "the configured destination"}.`,
+				command: b.running ? openSettings(SETTINGS.timeMachine) : startBackup(),
+				detail: b.running ? undefined : `Writes to ${b.destination.name || "the configured destination"}.`,
 				count: 1,
 			}
 		: {
@@ -57,10 +47,7 @@ function Rows({ b, actions }: { b: BackupReport; actions: React.ReactNode }) {
 			<List.Section title="Backup">
 				<List.Item
 					icon={{
-						source:
-							state === "fresh"
-								? Icon.CheckCircle
-								: Icon.ExclamationMark,
+						source: state === "fresh" ? Icon.CheckCircle : Icon.ExclamationMark,
 						tintColor: TINT[state],
 					}}
 					title={HEADLINE[state]}
@@ -82,9 +69,7 @@ function Rows({ b, actions }: { b: BackupReport; actions: React.ReactNode }) {
 					icon={{ source: Icon.Clock, tintColor: Color.Green }}
 					title={`${b.local_snapshots.count} local snapshots`}
 					subtitle="Hourly copies Time Machine keeps on this disk when the backup drive is away"
-					accessories={[
-						{ tag: { value: "on this Mac", color: Color.Green } },
-					]}
+					accessories={[{ tag: { value: "on this Mac", color: Color.Green } }]}
 					actions={row}
 				/>
 			) : null}
@@ -92,40 +77,26 @@ function Rows({ b, actions }: { b: BackupReport; actions: React.ReactNode }) {
 			<List.Section title="Destination">
 				<List.Item
 					icon={{
-						source: b.destination.configured
-							? Icon.HardDrive
-							: Icon.XMarkCircle,
-						tintColor: b.destination.configured
-							? Color.Green
-							: Color.Red,
+						source: b.destination.configured ? Icon.HardDrive : Icon.XMarkCircle,
+						tintColor: b.destination.configured ? Color.Green : Color.Red,
 					}}
-					title={
-						b.destination.configured
-							? b.destination.name || "Configured"
-							: "No destination configured"
-					}
+					title={b.destination.configured ? b.destination.name || "Configured" : "No destination configured"}
 					subtitle={
-						b.destination.configured
-							? b.destination.kind || undefined
-							: "Time Machine has nowhere to write"
+						b.destination.configured ? b.destination.kind || undefined : "Time Machine has nowhere to write"
 					}
 					actions={row}
 				/>
 				<List.Item
 					icon={{
 						source: b.running ? Icon.CircleProgress50 : Icon.Pause,
-						tintColor: b.running
-							? Color.Orange
-							: Color.SecondaryText,
+						tintColor: b.running ? Color.Orange : Color.SecondaryText,
 					}}
 					title="Status"
 					accessories={[
 						{
 							tag: {
 								value: b.running ? "backing up now" : "idle",
-								color: b.running
-									? Color.Orange
-									: Color.SecondaryText,
+								color: b.running ? Color.Orange : Color.SecondaryText,
 							},
 						},
 					]}
@@ -134,10 +105,7 @@ function Rows({ b, actions }: { b: BackupReport; actions: React.ReactNode }) {
 			</List.Section>
 
 			{b.exclusions.length > 0 ? (
-				<List.Section
-					title="Excluded from backup"
-					subtitle={`${b.exclusions.length}`}
-				>
+				<List.Section title="Excluded from backup" subtitle={`${b.exclusions.length}`}>
 					{b.exclusions.map((path) => (
 						<List.Item
 							key={path}
@@ -169,11 +137,7 @@ export default function Command() {
 		<RccList
 			command="backup"
 			parse={parseBackup}
-			navigationTitle={(b) =>
-				b
-					? `Time Machine — ${HEADLINE[health(b)].toLowerCase()}`
-					: "Time Machine"
-			}
+			navigationTitle={(b) => (b ? `Time Machine — ${HEADLINE[health(b)].toLowerCase()}` : "Time Machine")}
 			searchBarPlaceholder="Search backup details"
 			emptyIcon={Icon.HardDrive}
 			emptyTitle="No Time Machine information"

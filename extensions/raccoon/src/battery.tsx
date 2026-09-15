@@ -8,7 +8,7 @@ import {
 	openExtensionPreferences,
 	useNavigation,
 } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { useRccExec } from "./use-rcc-exec";
 import { JSON_TIMEOUT_MS, readJson } from "./json-out.ts";
 import {
 	type BatteryReport,
@@ -97,10 +97,7 @@ function rows(b: BatteryReport): Row[] {
 			id: "charging",
 			title: "Charging",
 			value: chargingLabel(b),
-			icon:
-				b.charging || b.power_source === "ac"
-					? Icon.Bolt
-					: Icon.BoltDisabled,
+			icon: b.charging || b.power_source === "ac" ? Icon.Bolt : Icon.BoltDisabled,
 			health: "neutral",
 		},
 	];
@@ -117,18 +114,19 @@ export default function Command() {
 		resolveError = error;
 	}
 
-	const { isLoading, data, error, revalidate } = useExec(
-		rccPath ?? "rcc",
-		["battery", "--json"],
-		{
-			execute: rccPath !== null,
-			env: { ...process.env, NO_COLOR: "1", PATH: RUNTIME_PATH },
-			timeout: JSON_TIMEOUT_MS,
-			parseOutput: readJson("battery", parseBattery),
-		},
-	);
+	const { isLoading, data, error, revalidate } = useRccExec(rccPath ?? "rcc", ["battery", "--json"], {
+		execute: rccPath !== null,
+		path: RUNTIME_PATH,
+		timeout: JSON_TIMEOUT_MS,
+		parseOutput: readJson("battery", parseBattery),
+	});
 
 	if (resolveError instanceof RccNotFoundError) return <MissingRcc />;
+
+	// Anything else that went wrong finding rcc is shown, not swallowed: an
+	// empty screen here reads as a clean result, which on a report about this
+	// machine is the worst thing it could say.
+	const failure = error ?? (resolveError instanceof Error ? resolveError : undefined);
 
 	// A battery is a reading, not a setting: nothing here is put right by a
 	// command, and a cycle count is not a thing to fix. What is actually
@@ -156,30 +154,21 @@ export default function Command() {
 					title="Show Raw Output"
 					icon={Icon.Text}
 					shortcut={{ modifiers: ["cmd"], key: "t" }}
-					onAction={() =>
-						push(<RccDetail command={findCommand("battery")} />)
-					}
+					onAction={() => push(<RccDetail command={findCommand("battery")} />)}
 				/>
-				<Action
-					title="Set Rcc Path"
-					icon={Icon.Gear}
-					onAction={openExtensionPreferences}
-				/>
-				<Action.OpenInBrowser
-					title="Open Raccoon on GitHub"
-					url={REPO_URL}
-				/>
+				<Action title="Set Raccoon CLI Path" icon={Icon.Gear} onAction={openExtensionPreferences} />
+				<Action.OpenInBrowser title="Open Raccoon on GitHub" url={REPO_URL} />
 			</ResolveActions>
 		</ActionPanel>
 	);
 
-	if (error) {
+	if (failure) {
 		return (
 			<List>
 				<List.EmptyView
 					icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
 					title="The battery report could not be read"
-					description={error.message}
+					description={failure.message}
 					actions={actions}
 				/>
 			</List>
@@ -187,11 +176,7 @@ export default function Command() {
 	}
 
 	return (
-		<List
-			isLoading={isLoading}
-			navigationTitle="Battery"
-			searchBarPlaceholder="Search battery details"
-		>
+		<List isLoading={isLoading} navigationTitle="Battery" searchBarPlaceholder="Search battery details">
 			{(data ? rows(data) : []).map((row) => (
 				<List.Item
 					key={row.id}

@@ -28,26 +28,20 @@ test("one row per package manager, in the order rcc reached them", () => {
 });
 
 test("the last thing said about a manager is its state", () => {
-	const byName = Object.fromEntries(
-		managersFrom(RUN).map((m) => [m.name, m]),
-	);
+	const byName = Object.fromEntries(managersFrom(RUN).map((m) => [m.name, m]));
 	assert.equal(byName.brew.state, "updating");
 	assert.equal(byName.pip.state, "done");
 	assert.equal(byName.npm.state, "updating");
 });
 
 test("a manager that is not installed is not a failure, and says so", () => {
-	const byName = Object.fromEntries(
-		managersFrom(RUN).map((m) => [m.name, m]),
-	);
+	const byName = Object.fromEntries(managersFrom(RUN).map((m) => [m.name, m]));
 	assert.equal(byName.pnpm.state, "absent");
 	assert.equal(byName.bun.state, "absent");
 });
 
 test("the plain output between markers belongs to the manager running then", () => {
-	const byName = Object.fromEntries(
-		managersFrom(RUN).map((m) => [m.name, m]),
-	);
+	const byName = Object.fromEntries(managersFrom(RUN).map((m) => [m.name, m]));
 	assert.match(byName.brew.log, /Already up-to-date/);
 	assert.match(byName.npm.log, /changed 134 packages/);
 	// "Initializing..." precedes every manager and belongs to none.

@@ -25,16 +25,10 @@ test("a hostile name reaches the program as one argument, unchanged", () => {
 		"$(whoami)",
 		"`id`",
 	]) {
-		const out = execFileSync("/bin/sh", [
-			"-c",
-			`printf %s ${shellQuote(name)}`,
-		]).toString();
+		const out = execFileSync("/bin/sh", ["-c", `printf %s ${shellQuote(name)}`]).toString();
 		assert.equal(out, name, `mangled: ${name}`);
 	}
-	assert.ok(
-		!existsSync("/tmp/rcc-should-not-exist"),
-		"the quoted name executed something",
-	);
+	assert.ok(!existsSync("/tmp/rcc-should-not-exist"), "the quoted name executed something");
 });
 
 test("a quote or a backslash cannot break out of the AppleScript literal", () => {
@@ -44,10 +38,7 @@ test("a quote or a backslash cannot break out of the AppleScript literal", () =>
 
 test("the fix command names one check and widens to nothing else", () => {
 	const cmd = fixCommand("/opt/homebrew/bin/rcc", ["Stealth Mode"]);
-	assert.equal(
-		cmd,
-		"'/opt/homebrew/bin/rcc' audit --fix --force --fix-only 'Stealth Mode'",
-	);
+	assert.equal(cmd, "'/opt/homebrew/bin/rcc' audit --fix --force --fix-only 'Stealth Mode'");
 	// --only would have taken the group, which holds six checks.
 	assert.ok(!cmd.includes("--only "), cmd);
 });
@@ -58,15 +49,8 @@ test("a path with a space is quoted too", () => {
 });
 
 test("several checks travel as one comma-separated argument", () => {
-	const cmd = fixCommand("/usr/local/bin/rcc", [
-		"Stealth Mode",
-		"Bluetooth",
-		".ssh Permissions",
-	]);
-	assert.equal(
-		cmd,
-		"'/usr/local/bin/rcc' audit --fix --force --fix-only 'Stealth Mode,Bluetooth,.ssh Permissions'",
-	);
+	const cmd = fixCommand("/usr/local/bin/rcc", ["Stealth Mode", "Bluetooth", ".ssh Permissions"]);
+	assert.equal(cmd, "'/usr/local/bin/rcc' audit --fix --force --fix-only 'Stealth Mode,Bluetooth,.ssh Permissions'");
 });
 
 test("fixing nothing is refused rather than widened to everything", () => {

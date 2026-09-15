@@ -36,10 +36,7 @@ test("a stamp that is not a date stays undefined rather than becoming a wrong on
 });
 
 test("a half-written run is skipped, not thrown", () => {
-	assert.equal(
-		summarise("audit_2026-01-01_09:00:00.json", '{"pass": 2'),
-		undefined,
-	);
+	assert.equal(summarise("audit_2026-01-01_09:00:00.json", '{"pass": 2'), undefined);
 });
 
 test("a file that is not a saved run is not one", () => {

@@ -79,7 +79,10 @@ export const COMMANDS: RccCommand[] = [
 		id: "audit-fix",
 		args: ["audit", "fix"],
 		title: "Audit Fix",
-		description: "audit --fix",
+		// Opening it reads; the fixes are offered on the rows, each confirmed.
+		// The old subtitle said `audit --fix`, which promised a run this row
+		// never performs.
+		description: "Deep audit, with each fix confirmed",
 		needsRoot: true,
 	},
 	{

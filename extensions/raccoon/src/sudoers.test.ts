@@ -26,8 +26,5 @@ test("only sudoers-safe usernames are accepted", () => {
 });
 
 test("an unsafe username is refused rather than escaped", () => {
-	assert.throws(
-		() => buildDropIn("root ALL=(ALL) NOPASSWD: ALL", "60"),
-		/Refusing to write sudoers/,
-	);
+	assert.throws(() => buildDropIn("root ALL=(ALL) NOPASSWD: ALL", "60"), /Refusing to write sudoers/);
 });

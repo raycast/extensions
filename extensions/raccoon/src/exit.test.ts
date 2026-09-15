@@ -36,12 +36,6 @@ test("a status audit never uses to report is still a failure", () => {
 });
 
 test("a command the user stopped has not failed", () => {
-	assert.equal(
-		isFailure(["upgrade"], { code: 0, signal: "SIGTERM" }, true),
-		false,
-	);
-	assert.equal(
-		isFailure(["audit"], { code: 0, signal: "SIGTERM" }, false),
-		false,
-	);
+	assert.equal(isFailure(["upgrade"], { code: 0, signal: "SIGTERM" }, true), false);
+	assert.equal(isFailure(["audit"], { code: 0, signal: "SIGTERM" }, false), false);
 });

@@ -1,3 +1,6 @@
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { keyLevel, type SshKey } from "./ssh-json.ts";
 import { appleScriptQuote, shellQuote } from "./terminal.ts";
 
 /**
@@ -59,12 +62,7 @@ export function removeSymlink(links: string[]): string {
 /** Forget a remembered Wi-Fi network. Needs admin rights, always. */
 export function forgetNetworks(iface: string, ssids: string[]): string {
 	if (ssids.length === 0) throw new Error("No network to forget.");
-	return ssids
-		.map(
-			(s) =>
-				`sudo networksetup -removepreferredwirelessnetwork ${q(iface)} ${q(s)}`,
-		)
-		.join(" && ");
+	return ssids.map((s) => `sudo networksetup -removepreferredwirelessnetwork ${q(iface)} ${q(s)}`).join(" && ");
 }
 
 /** Remove an item from Login Items, the same list System Settings shows. */
@@ -74,10 +72,7 @@ export function removeLoginItems(names: string[]): string {
 	// script as one shell argument. A name with an apostrophe in it used to end
 	// the shell quote early and run whatever followed it.
 	return names
-		.map(
-			(n) =>
-				`osascript -e ${q(`tell application "System Events" to delete login item ${appleScriptQuote(n)}`)}`,
-		)
+		.map((n) => `osascript -e ${q(`tell application "System Events" to delete login item ${appleScriptQuote(n)}`)}`)
 		.join("; ");
 }
 
@@ -90,9 +85,7 @@ export function removeLoginItems(names: string[]): string {
  */
 export function bootoutAgents(labels: string[]): string {
 	if (labels.length === 0) throw new Error("No agent to stop.");
-	return labels
-		.map((l) => `launchctl bootout gui/$(id -u)/${q(l)}`)
-		.join("; ");
+	return labels.map((l) => `launchctl bootout gui/$(id -u)/${q(l)}`).join("; ");
 }
 
 /**
@@ -107,12 +100,7 @@ export function bootoutAgents(labels: string[]): string {
 export function deleteCertificates(sha256s: string[]): string {
 	const valid = sha256s.filter((h) => /^[0-9A-Fa-f]{64}$/.test(h));
 	if (valid.length === 0) throw new Error("No certificate to delete.");
-	return valid
-		.map(
-			(h) =>
-				`security delete-certificate -Z ${q(h)} ~/Library/Keychains/login.keychain-db`,
-		)
-		.join("; ");
+	return valid.map((h) => `security delete-certificate -Z ${q(h)} ~/Library/Keychains/login.keychain-db`).join("; ");
 }
 
 /** Reclaim Docker's disk: stopped containers, dangling images, unused volumes. */
@@ -168,8 +156,7 @@ export const SETTINGS = {
 	storage: "x-apple.systempreferences:com.apple.settings.Storage",
 	network: "x-apple.systempreferences:com.apple.Network-Settings.extension",
 	timeMachine: "x-apple.systempreferences:com.apple.settings.TimeMachine",
-	loginItems:
-		"x-apple.systempreferences:com.apple.LoginItems-Settings.extension",
+	loginItems: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension",
 } as const;
 
 export function openSettings(pane: string): string {
@@ -184,4 +171,31 @@ export function reveal(path: string): string {
 /** Open an application by name. */
 export function openApp(app: string): string {
 	return `open -a ${q(app)}`;
+}
+
+/** Where a key by that name lives. The CLI reports the name, not the path. */
+export const sshKeyPath = (name: string) => join(homedir(), ".ssh", name);
+
+/**
+ * What to do about one SSH key, or nothing when it is already right.
+ *
+ * Here rather than in the view for the reason every other builder is: the key
+ * name comes from the CLI's report, so it is quoted rather than trusted, and
+ * that is the part worth a test.
+ */
+export function sshFix(key: SshKey): { title: string; command: string } | undefined {
+	const path = q(sshKeyPath(key.name));
+	switch (keyLevel(key)) {
+		case "unprotected":
+			return { title: "Add a Passphrase", command: `ssh-keygen -p -f ${path}` };
+		case "loose-perms":
+			return { title: "Set Mode to 600", command: `chmod 600 ${path} && ls -l ${path}` };
+		case "orphan":
+			return {
+				title: "Regenerate the Public Key",
+				command: `ssh-keygen -y -f ${path} | tee ${q(`${sshKeyPath(key.name)}.pub`)}`,
+			};
+		case "ok":
+			return undefined;
+	}
 }

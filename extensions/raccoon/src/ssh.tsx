@@ -1,9 +1,7 @@
 import { Action, Color, Icon, List } from "@raycast/api";
-import { join } from "node:path";
-import { homedir } from "node:os";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
-import { shellQuote } from "./terminal";
+import { sshFix, sshKeyPath } from "./fixes";
 import {
 	keyLevel,
 	parseSsh,
@@ -38,45 +36,16 @@ const SECTION: Record<KeyLevel, string> = {
 
 const ORDER: KeyLevel[] = ["unprotected", "loose-perms", "orphan", "ok"];
 
-const sshPath = (name: string) => join(homedir(), ".ssh", name);
-
-/**
- * What resolves each problem, run in Terminal because two of the three need an
- * answer: ssh-keygen -p asks for the new passphrase twice, and there is nowhere
- * in a Raycast view to type it.
- */
-function fixFor(key: SshKey): { title: string; command: string } | undefined {
-	switch (keyLevel(key)) {
-		case "unprotected":
-			return {
-				title: "Add a Passphrase",
-				command: `ssh-keygen -p -f ${shellQuote(sshPath(key.name))}`,
-			};
-		case "loose-perms":
-			return {
-				title: "Set Mode to 600",
-				command: `chmod 600 ${shellQuote(sshPath(key.name))} && ls -l ${shellQuote(sshPath(key.name))}`,
-			};
-		case "orphan":
-			return {
-				title: "Regenerate the Public Key",
-				command: `ssh-keygen -y -f ${shellQuote(sshPath(key.name))} | tee ${shellQuote(`${sshPath(key.name)}.pub`)}`,
-			};
-		case "ok":
-			return undefined;
-	}
-}
-
 /** Every key on screen that has something to put right, as one command. */
 function fixAll(keys: SshKey[]) {
 	const fixable = keys
-		.map((key) => ({ key, fix: fixFor(key) }))
+		.map((key) => ({ key, fix: sshFix(key) }))
 		.filter(
 			(
 				f,
 			): f is {
 				key: SshKey;
-				fix: NonNullable<ReturnType<typeof fixFor>>;
+				fix: NonNullable<ReturnType<typeof sshFix>>;
 			} => Boolean(f.fix),
 		);
 	if (fixable.length === 0) return undefined;
@@ -86,20 +55,14 @@ function fixAll(keys: SshKey[]) {
 		// permissions fix on the next one.
 		title: `Fix ${fixable.length} ${fixable.length === 1 ? "Key" : "Keys"}`,
 		command: fixable.map((f) => f.fix.command).join("; "),
-		detail: fixable
-			.map((f) => `${f.key.name}: ${f.fix.title.toLowerCase()}`)
-			.join("\n"),
+		detail: fixable.map((f) => `${f.key.name}: ${f.fix.title.toLowerCase()}`).join("\n"),
 		destructive: true,
 		count: fixable.length,
 	};
 }
 
-function keyActions(
-	key: SshKey,
-	all: ReturnType<typeof fixAll>,
-	shared: React.ReactNode,
-) {
-	const fix = fixFor(key);
+function keyActions(key: SshKey, all: ReturnType<typeof fixAll>, shared: React.ReactNode) {
+	const fix = sshFix(key);
 	return (
 		<RowActions
 			one={
@@ -119,12 +82,9 @@ function keyActions(
 			shared={shared}
 		>
 			{key.public_key ? (
-				<Action.CopyToClipboard
-					title="Copy Public Key Path"
-					content={`${sshPath(key.name)}.pub`}
-				/>
+				<Action.CopyToClipboard title="Copy Public Key Path" content={`${sshKeyPath(key.name)}.pub`} />
 			) : null}
-			<Action.ShowInFinder path={sshPath(key.name)} />
+			<Action.ShowInFinder path={sshKeyPath(key.name)} />
 		</RowActions>
 	);
 }
@@ -151,8 +111,7 @@ function Rows({ s, actions }: { s: SshReport; actions: React.ReactNode }) {
 			<List.Section title="~/.ssh">
 				<List.Item
 					icon={{
-						source:
-							problems === 0 ? Icon.CheckCircle : Icon.Warning,
+						source: problems === 0 ? Icon.CheckCircle : Icon.Warning,
 						tintColor: problems === 0 ? Color.Green : Color.Orange,
 					}}
 					title={
@@ -178,11 +137,7 @@ function Rows({ s, actions }: { s: SshReport; actions: React.ReactNode }) {
 				const group = sorted.filter((k) => keyLevel(k) === level);
 				if (group.length === 0) return null;
 				return (
-					<List.Section
-						key={level}
-						title={SECTION[level]}
-						subtitle={`${group.length}`}
-					>
+					<List.Section key={level} title={SECTION[level]} subtitle={`${group.length}`}>
 						{group.map((key) => (
 							<List.Item
 								key={key.name}
@@ -218,9 +173,7 @@ export default function Command() {
 			navigationTitle={(s) => {
 				if (!s) return "SSH Keys";
 				const problems = problemCount(s);
-				return problems === 0
-					? "SSH keys — all in good order"
-					: `SSH keys — ${problems} need attention`;
+				return problems === 0 ? "SSH keys — all in good order" : `SSH keys — ${problems} need attention`;
 			}}
 			searchBarPlaceholder="Search keys"
 			emptyIcon={Icon.Key}

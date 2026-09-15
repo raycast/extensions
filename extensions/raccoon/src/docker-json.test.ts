@@ -3,17 +3,13 @@ import assert from "node:assert/strict";
 import { containerState, parseDocker } from "./docker-json.ts";
 
 test("a Mac without Docker is a report, not a failure", () => {
-	const d = parseDocker(
-		'{"installed":false,"running":false,"images":[],"containers":[],"volumes":[],"space":[]}',
-	);
+	const d = parseDocker('{"installed":false,"running":false,"images":[],"containers":[],"volumes":[],"space":[]}');
 	assert.equal(d.installed, false);
 	assert.equal(d.images.length, 0);
 });
 
 test("installed but not running is a third state, not the same as absent", () => {
-	const d = parseDocker(
-		'{"installed":true,"running":false,"images":[],"containers":[],"volumes":[],"space":[]}',
-	);
+	const d = parseDocker('{"installed":true,"running":false,"images":[],"containers":[],"volumes":[],"space":[]}');
 	assert.equal(d.installed, true);
 	assert.equal(d.running, false);
 });

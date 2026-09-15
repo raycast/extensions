@@ -21,18 +21,9 @@ export type RccExit = {
  *
  * A command the user stopped exits on a signal; that is not a failure either.
  */
-export function isFailure(
-	args: string[],
-	exit: RccExit,
-	printedReport: boolean,
-): boolean {
+export function isFailure(args: string[], exit: RccExit, printedReport: boolean): boolean {
 	if (exit.signal !== null) return false;
 	if (exit.code === 0) return false;
-	if (
-		args[0] === "audit" &&
-		printedReport &&
-		(exit.code === 1 || exit.code === 2)
-	)
-		return false;
+	if (args[0] === "audit" && printedReport && (exit.code === 1 || exit.code === 2)) return false;
 	return true;
 }

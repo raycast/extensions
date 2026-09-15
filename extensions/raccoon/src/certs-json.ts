@@ -14,7 +14,7 @@ export type Certificate = {
 	expires: string;
 	status: CertStatus;
 	self_signed: boolean;
-	/** Where it lives. Empty from an rcc older than 0.19. */
+	/** Where it lives. Empty from an rcc older than 1.0.0. */
 	keychain: string;
 	/** Its SHA-256, which is how it is addressed: names repeat, hashes do not. */
 	sha256: string;
@@ -66,9 +66,7 @@ export function parseCerts(stdout: string): CertsReport {
 					};
 				})
 			: [],
-		keychains: Array.isArray(r.keychains)
-			? r.keychains.filter((k): k is string => typeof k === "string")
-			: [],
+		keychains: Array.isArray(r.keychains) ? r.keychains.filter((k): k is string => typeof k === "string") : [],
 	};
 }
 
@@ -82,16 +80,11 @@ export function parseCerts(stdout: string): CertsReport {
  * certificate sharing its name with the expired one.
  */
 export function isRemovable(cert: Certificate): boolean {
-	return (
-		cert.status === "expired" &&
-		cert.sha256 !== "" &&
-		/\/login\.keychain(-db)?$/.test(cert.keychain)
-	);
+	return cert.status === "expired" && cert.sha256 !== "" && /\/login\.keychain(-db)?$/.test(cert.keychain);
 }
 
 /** Expired first, then expiring, then the rest. Alphabetical inside each. */
 export function byUrgency(a: Certificate, b: Certificate): number {
-	const rank = (c: Certificate) =>
-		c.status === "expired" ? 0 : c.status === "expiring" ? 1 : 2;
+	const rank = (c: Certificate) => (c.status === "expired" ? 0 : c.status === "expiring" ? 1 : 2);
 	return rank(a) - rank(b) || a.name.localeCompare(b.name);
 }

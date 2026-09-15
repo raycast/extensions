@@ -24,9 +24,7 @@ export type DockerReport = {
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
 function list<T>(value: unknown, map: (r: Record<string, unknown>) => T): T[] {
-	return Array.isArray(value)
-		? value.map((v) => map((v ?? {}) as Record<string, unknown>))
-		: [];
+	return Array.isArray(value) ? value.map((v) => map((v ?? {}) as Record<string, unknown>)) : [];
 }
 
 export function parseDocker(stdout: string): DockerReport {

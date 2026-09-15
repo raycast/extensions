@@ -7,9 +7,7 @@ const full = JSON.stringify({
 		{ path: "/usr/bin", exists: true },
 		{ path: "/gone", exists: false },
 	],
-	broken_symlinks: [
-		{ name: "cagent", link: "/usr/local/bin/cagent", target: "/nowhere" },
-	],
+	broken_symlinks: [{ name: "cagent", link: "/usr/local/bin/cagent", target: "/nowhere" }],
 	duplicates: ["/usr/bin"],
 	tools: [
 		{ name: "git", found: true, version: "git version 2.55.0" },
@@ -28,20 +26,12 @@ test("every section is read", () => {
 test("the count is what is wrong, not what was looked at", () => {
 	// One missing entry, one broken link, one duplicate.
 	assert.equal(problems(parseEnv(full)), 3);
-	assert.equal(
-		problems(
-			parseEnv('{"path":[{"path":"/usr/bin","exists":true}],"tools":[]}'),
-		),
-		0,
-	);
+	assert.equal(problems(parseEnv('{"path":[{"path":"/usr/bin","exists":true}],"tools":[]}')), 0);
 });
 
 test("a version is trimmed to the part that identifies it", () => {
 	assert.equal(shortVersion("git version 2.55.0"), "git version 2.55.0");
-	assert.equal(
-		shortVersion("curl 8.7.1 (x86_64-apple-darwin25.0) libcurl/8.7.1 zlib"),
-		"curl 8.7.1",
-	);
+	assert.equal(shortVersion("curl 8.7.1 (x86_64-apple-darwin25.0) libcurl/8.7.1 zlib"), "curl 8.7.1");
 	assert.ok(shortVersion("x".repeat(100)).length <= 60);
 });
 

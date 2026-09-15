@@ -14,10 +14,7 @@ function Rows({ h, actions }: { h: HistoryReport; actions: React.ReactNode }) {
 	];
 	return (
 		<>
-			<List.Section
-				title="Commands recorded"
-				subtitle={`${h.counts.total}`}
-			>
+			<List.Section title="Commands recorded" subtitle={`${h.counts.total}`}>
 				{shells.map(([name, count]) => (
 					<List.Item
 						key={name}
@@ -25,18 +22,14 @@ function Rows({ h, actions }: { h: HistoryReport; actions: React.ReactNode }) {
 							source: Icon.Terminal,
 							// A shell with no history is one you do not use: grey, not zero
 							// dressed up as a result.
-							tintColor: used(count)
-								? Color.Green
-								: Color.SecondaryText,
+							tintColor: used(count) ? Color.Green : Color.SecondaryText,
 						}}
 						title={name}
 						accessories={[
 							{
 								tag: {
 									value: String(count),
-									color: used(count)
-										? Color.Green
-										: Color.SecondaryText,
+									color: used(count) ? Color.Green : Color.SecondaryText,
 								},
 							},
 						]}
@@ -55,10 +48,7 @@ function Rows({ h, actions }: { h: HistoryReport; actions: React.ReactNode }) {
 						title={cmd}
 						actions={
 							<RowActions shared={actions}>
-								<Action.CopyToClipboard
-									title="Copy This Command"
-									content={cmd}
-								/>
+								<Action.CopyToClipboard title="Copy This Command" content={cmd} />
 								<Action.CopyToClipboard
 									title={`Copy All ${h.recent.length} Commands`}
 									content={h.recent.join("\n")}
@@ -81,11 +71,7 @@ export default function Command() {
 		<RccList
 			command="history"
 			parse={parseHistory}
-			navigationTitle={(h) =>
-				h
-					? `Shell history — ${h.counts.total} commands`
-					: "Shell history"
-			}
+			navigationTitle={(h) => (h ? `Shell history — ${h.counts.total} commands` : "Shell history")}
 			searchBarPlaceholder="Search shells and recent commands"
 			emptyIcon={Icon.Terminal}
 			emptyTitle="No shell history"

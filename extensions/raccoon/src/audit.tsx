@@ -14,21 +14,12 @@ import {
 	Toast,
 	useNavigation,
 } from "@raycast/api";
-import { showFailureToast, useExec, usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
+import { useRccExec } from "./use-rcc-exec";
 import { useMemo, useState } from "react";
 import { AUDIT_CONF, readSkipList, skipCheck } from "./audit-conf";
-import {
-	AUDIT_EXPORT_FORMATS,
-	type AuditExportFormat,
-	exportAudit,
-} from "./audit-export";
-import {
-	type AuditCheck,
-	type AuditStatus,
-	countByStatus,
-	fixableCount,
-	readAuditRun,
-} from "./audit-json";
+import { AUDIT_EXPORT_FORMATS, type AuditExportFormat, exportAudit } from "./audit-export";
+import { type AuditCheck, type AuditStatus, countByStatus, fixableCount, readAuditRun } from "./audit-json";
 import { findCommand } from "./commands";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
 import { RccDetail } from "./rcc-detail";
@@ -66,42 +57,19 @@ const LABEL: Record<AuditStatus, string> = {
 	fail: "Fail",
 };
 
-function CheckDetail({
-	check,
-	skipped,
-}: {
-	check: AuditCheck;
-	skipped: boolean;
-}) {
+function CheckDetail({ check, skipped }: { check: AuditCheck; skipped: boolean }) {
 	return (
 		<List.Item.Detail
 			metadata={
 				<List.Item.Detail.Metadata>
 					<List.Item.Detail.Metadata.TagList title="Status">
-						<List.Item.Detail.Metadata.TagList.Item
-							text={LABEL[check.status]}
-							color={TINT[check.status]}
-						/>
+						<List.Item.Detail.Metadata.TagList.Item text={LABEL[check.status]} color={TINT[check.status]} />
 					</List.Item.Detail.Metadata.TagList>
-					<List.Item.Detail.Metadata.Label
-						title="Category"
-						text={check.category}
-					/>
-					<List.Item.Detail.Metadata.Label
-						title="Value"
-						text={check.value}
-					/>
-					{check.cis ? (
-						<List.Item.Detail.Metadata.Label
-							title="CIS"
-							text={check.cis}
-						/>
-					) : null}
+					<List.Item.Detail.Metadata.Label title="Category" text={check.category} />
+					<List.Item.Detail.Metadata.Label title="Value" text={check.value} />
+					{check.cis ? <List.Item.Detail.Metadata.Label title="CIS" text={check.cis} /> : null}
 					<List.Item.Detail.Metadata.Separator />
-					<List.Item.Detail.Metadata.Label
-						title="Verify with"
-						text={check.command}
-					/>
+					<List.Item.Detail.Metadata.Label title="Verify with" text={check.command} />
 					<List.Item.Detail.Metadata.Label
 						title="Fix available"
 						text={
@@ -115,15 +83,8 @@ function CheckDetail({
 						}
 						icon={{
 							source:
-								check.fix_available === false
-									? Icon.Minus
-									: skipped
-										? Icon.MinusCircle
-										: Icon.Hammer,
-							tintColor:
-								check.fix_available && !skipped
-									? Color.Orange
-									: Color.SecondaryText,
+								check.fix_available === false ? Icon.Minus : skipped ? Icon.MinusCircle : Icon.Hammer,
+							tintColor: check.fix_available && !skipped ? Color.Orange : Color.SecondaryText,
 						}}
 					/>
 				</List.Item.Detail.Metadata>
@@ -155,19 +116,18 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 	// from where it is written rather than waited for in the report: the JSON
 	// cannot say which checks are skipped, because fix_available is recorded
 	// before the opt-out is consulted.
-	const { data: skipList, revalidate: revalidateSkipList } =
-		usePromise(readSkipList);
+	const { data: skipList, revalidate: revalidateSkipList } = usePromise(readSkipList);
 	const skipped = useMemo(() => new Set(skipList ?? []), [skipList]);
 
-	const { isLoading, data, error, revalidate } = useExec(
+	const { isLoading, data, error, revalidate } = useRccExec(
 		rccPath ?? "rcc",
 		deep ? ["audit", "--deep", "--json"] : ["audit", "--json"],
 		{
 			execute: rccPath !== null,
 			timeout: AUDIT_TIMEOUT_MS,
-			env: { ...process.env, NO_COLOR: "1", PATH: RUNTIME_PATH },
-			// The exit code is classified here, not by useExec: audit spends 1 on
-			// "a check failed" and 2 on "warnings only", and both are reports.
+			path: RUNTIME_PATH,
+			// The exit code is classified here, not by the hook: audit spends 1
+			// on "a check failed" and 2 on "warnings only", and both are reports.
 			parseOutput: readAuditRun,
 		},
 	);
@@ -180,10 +140,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 		const all = data?.results ?? [];
 		if (query === "") return all;
 		return all.filter((check) =>
-			[check.name, check.category, check.value, check.status]
-				.join(" ")
-				.toLowerCase()
-				.includes(query),
+			[check.name, check.category, check.value, check.status].join(" ").toLowerCase().includes(query),
 		);
 	}, [data, searchText]);
 
@@ -192,23 +149,25 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 	const fixableVisible = useMemo(
 		() =>
 			visible.filter(
-				(check) =>
-					check.status !== "pass" &&
-					check.fix_available !== false &&
-					!skipped.has(check.name),
+				(check) => check.status !== "pass" && check.fix_available !== false && !skipped.has(check.name),
 			),
 		[visible, skipped],
 	);
 
 	if (resolveError instanceof RccNotFoundError) return <MissingRcc />;
 
-	if (error) {
+	// Anything else that went wrong finding rcc is shown, not swallowed: an
+	// empty screen here reads as a clean result, which on a report about this
+	// machine is the worst thing it could say.
+	const failure = error ?? (resolveError instanceof Error ? resolveError : undefined);
+
+	if (failure) {
 		return (
 			<List>
 				<List.EmptyView
 					icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
 					title="The audit could not be read"
-					description={error.message}
+					description={failure.message}
 					actions={
 						<ActionPanel>
 							<Action
@@ -220,23 +179,11 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 							<Action
 								title="Show Raw Output"
 								icon={Icon.Text}
-								onAction={() =>
-									push(
-										<RccDetail
-											command={findCommand("audit")}
-										/>,
-									)
-								}
+								shortcut={{ modifiers: ["cmd"], key: "t" }}
+								onAction={() => push(<RccDetail command={findCommand("audit")} />)}
 							/>
-							<Action
-								title="Set Rcc Path"
-								icon={Icon.Gear}
-								onAction={openExtensionPreferences}
-							/>
-							<Action.OpenInBrowser
-								title="Open Raccoon on GitHub"
-								url={REPO_URL}
-							/>
+							<Action title="Set Raccoon CLI Path" icon={Icon.Gear} onAction={openExtensionPreferences} />
+							<Action.OpenInBrowser title="Open Raccoon on GitHub" url={REPO_URL} />
 						</ActionPanel>
 					}
 				/>
@@ -291,8 +238,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 			await showToast({
 				style: Toast.Style.Failure,
 				title: "rcc not found",
-				message:
-					"Set the Raccoon CLI path in the extension preferences.",
+				message: "Set the Raccoon CLI path in the extension preferences.",
 			});
 			return undefined;
 		}
@@ -312,6 +258,21 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 		const rcc = await usableRcc();
 		if (!rcc) return;
 
+		// Asked for even though it is one check: Enter is the cheapest key on
+		// the row, and what it changes is a security setting on this Mac. The
+		// screen promises that opening it acts on nothing; the same promise has
+		// to hold for the keystroke that lands on a row by accident.
+		const confirmed = await confirmAlert({
+			title: `Fix ${check.name}?`,
+			message: `Raccoon will change this security setting on this Mac. Found: ${check.value}`,
+			icon: { source: Icon.Hammer, tintColor: Color.Red },
+			primaryAction: {
+				title: `Fix ${check.name}`,
+				style: Alert.ActionStyle.Destructive,
+			},
+		});
+		if (!confirmed) return;
+
 		await runInTerminal(fixCommand(rcc, [check.name]));
 		await showToast({
 			style: Toast.Style.Success,
@@ -329,8 +290,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 			await showToast({
 				style: Toast.Style.Failure,
 				title: "Nothing to fix here",
-				message:
-					"None of the checks on screen has a fix available right now.",
+				message: "None of the checks on screen has a fix available right now.",
 			});
 			return;
 		}
@@ -446,7 +406,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 				{AUDIT_EXPORT_FORMATS.map((format) => (
 					<Action
 						key={format.id}
-						title={`${format.title} — ${format.subtitle}`}
+						title={format.title}
 						icon={Icon.Document}
 						onAction={() => exportReport(format.id)}
 					/>
@@ -455,15 +415,10 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 			<Action
 				title="Show Raw Output"
 				icon={Icon.Text}
-				onAction={() =>
-					push(<RccDetail command={findCommand("audit")} />)
-				}
+				shortcut={{ modifiers: ["cmd"], key: "t" }}
+				onAction={() => push(<RccDetail command={findCommand("audit")} />)}
 			/>
-			<Action
-				title="Set Rcc Path"
-				icon={Icon.Gear}
-				onAction={openExtensionPreferences}
-			/>
+			<Action title="Set Raccoon CLI Path" icon={Icon.Gear} onAction={openExtensionPreferences} />
 		</>
 	);
 
@@ -509,11 +464,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 							tintColor: TINT[check.status],
 						}}
 						title={check.name}
-						keywords={[
-							check.category,
-							check.value,
-							...(isSkipped ? ["skipped"] : []),
-						]}
+						keywords={[check.category, check.value, ...(isSkipped ? ["skipped"] : [])]}
 						accessories={[
 							...(isSkipped
 								? [
@@ -532,15 +483,11 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 								},
 							},
 						]}
-						detail={
-							<CheckDetail check={check} skipped={isSkipped} />
-						}
+						detail={<CheckDetail check={check} skipped={isSkipped} />}
 						actions={
 							<ActionPanel>
 								<ActionPanel.Section title={check.name}>
-									{check.status !== "pass" &&
-									check.fix_available !== false &&
-									!isSkipped ? (
+									{check.status !== "pass" && check.fix_available !== false && !isSkipped ? (
 										<Action
 											title={`Fix ${check.name}`}
 											icon={{
@@ -571,16 +518,9 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 										}}
 									/>
 									{check.cis ? (
-										<Action.CopyToClipboard
-											title="Copy CIS Reference"
-											content={check.cis}
-											shortcut={
-												Keyboard.Shortcut.Common.Copy
-											}
-										/>
+										<Action.CopyToClipboard title="Copy CIS Reference" content={check.cis} />
 									) : null}
-									{check.fix_available !== false &&
-									!isSkipped ? (
+									{check.fix_available !== false && !isSkipped ? (
 										<Action
 											title="Never Offer to Fix This"
 											icon={Icon.MinusCircle}
@@ -588,9 +528,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 										/>
 									) : null}
 								</ActionPanel.Section>
-								<ActionPanel.Section>
-									{screenActions}
-								</ActionPanel.Section>
+								<ActionPanel.Section>{screenActions}</ActionPanel.Section>
 							</ActionPanel>
 						}
 					/>

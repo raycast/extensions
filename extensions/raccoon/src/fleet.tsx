@@ -1,12 +1,4 @@
-import {
-	Action,
-	ActionPanel,
-	Color,
-	Icon,
-	Keyboard,
-	List,
-	confirmAlert,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, confirmAlert } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { FLEET_CONF, readGroups, readHosts, type Host } from "./fleet-hosts";
@@ -70,7 +62,8 @@ export default function Command() {
 			message:
 				"Raccoon opens an SSH connection to each machine, copies its audit " +
 				"script across and runs it there. Machines that are asleep or " +
-				"unreachable hold the run up until they time out.",
+				"unreachable hold the run up until they time out.\n\n" +
+				`rcc ${args.join(" ")}`,
 			primaryAction: { title: "Start the Scan" },
 		});
 		if (confirmed) setScan(scanCommand(args, what));
@@ -90,21 +83,14 @@ export default function Command() {
 			<Action
 				title={`Audit All ${hosts.length} Machines`}
 				icon={{ source: Icon.Monitor, tintColor: Color.Orange }}
-				onAction={() =>
-					confirmScan(
-						["fleet", "audit"],
-						`all ${hosts.length} configured machines`,
-					)
-				}
+				onAction={() => confirmScan(["fleet", "audit"], `all ${hosts.length} configured machines`)}
 			/>
 		) : null;
 
 	return (
 		<List
 			isLoading={isLoading}
-			navigationTitle={
-				hosts.length > 0 ? `Fleet — ${hosts.length} machines` : "Fleet"
-			}
+			navigationTitle={hosts.length > 0 ? `Fleet — ${hosts.length} machines` : "Fleet"}
 			searchBarPlaceholder="Search configured machines"
 		>
 			<List.EmptyView
@@ -127,11 +113,7 @@ export default function Command() {
 							subtitle={members.join(", ")}
 							accessories={[
 								{
-									text: `${members.length} ${
-										members.length === 1
-											? "machine"
-											: "machines"
-									}`,
+									text: `${members.length} ${members.length === 1 ? "machine" : "machines"}`,
 								},
 							]}
 							actions={
@@ -144,12 +126,7 @@ export default function Command() {
 										}}
 										onAction={() =>
 											confirmScan(
-												[
-													"fleet",
-													"audit",
-													"--group",
-													name,
-												],
+												["fleet", "audit", "--group", name],
 												`the ${members.length} machines in ${name}`,
 											)
 										}
@@ -163,12 +140,7 @@ export default function Command() {
 				</List.Section>
 			) : null}
 
-			<List.Section
-				title="Machines"
-				subtitle={
-					hosts.length > 0 ? "Nothing has been contacted" : undefined
-				}
-			>
+			<List.Section title="Machines" subtitle={hosts.length > 0 ? "Nothing has been contacted" : undefined}>
 				{hosts.map((host) => (
 					<List.Item
 						key={host.line}
@@ -189,17 +161,7 @@ export default function Command() {
 										source: Icon.Monitor,
 										tintColor: Color.Orange,
 									}}
-									onAction={() =>
-										confirmScan(
-											[
-												"fleet",
-												"audit",
-												"--host",
-												host.name,
-											],
-											host.name,
-										)
-									}
+									onAction={() => confirmScan(["fleet", "audit", "--host", host.name], host.name)}
 								/>
 								{scanAll}
 								<Action.CopyToClipboard
@@ -207,10 +169,7 @@ export default function Command() {
 									content={host.name}
 									shortcut={Keyboard.Shortcut.Common.Copy}
 								/>
-								<Action.ShowInFinder
-									title="Show Fleet Config in Finder"
-									path={FLEET_CONF}
-								/>
+								<Action.ShowInFinder title="Show Fleet Config in Finder" path={FLEET_CONF} />
 								{refresh}
 							</ActionPanel>
 						}

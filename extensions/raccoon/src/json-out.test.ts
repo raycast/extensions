@@ -1,11 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import {
-	expectObject,
-	extractJson,
-	readJson,
-	JSON_TIMEOUT_MS,
-} from "./json-out.ts";
+import { expectObject, extractJson, readJson, JSON_TIMEOUT_MS } from "./json-out.ts";
 
 test("a report printed before the JSON is still read", () => {
 	const parsed = extractJson('[1/3] scanning...\n{"a":1}', "certs");
@@ -25,17 +20,11 @@ test("a malformed document is NOT blamed on the version", () => {
 	// rcc fonts --json wrote an empty count into an otherwise well-formed
 	// report, and the reader was told to upgrade a CLI that was already current.
 	try {
-		extractJson(
-			'{\n  "fontconfig": {"fonts": , "families": 3}\n}',
-			"fonts",
-		);
+		extractJson('{\n  "fontconfig": {"fonts": , "families": 3}\n}', "fonts");
 		assert.fail("should have thrown");
 	} catch (e) {
 		const m = (e as Error).message;
-		assert.ok(
-			!m.includes("brew upgrade rcc"),
-			"must not blame the version",
-		);
+		assert.ok(!m.includes("brew upgrade rcc"), "must not blame the version");
 		assert.match(m, /defect in rcc/);
 	}
 });
@@ -56,10 +45,7 @@ test("a very long output is cut, and says it was cut", () => {
 		assert.fail("should have thrown");
 	} catch (e) {
 		const m = (e as Error).message;
-		assert.ok(
-			m.length < long.length,
-			"excerpt must be shorter than the output",
-		);
+		assert.ok(m.length < long.length, "excerpt must be shorter than the output");
 		assert.match(m, /…/);
 	}
 });
@@ -76,8 +62,7 @@ test("a command killed by its timeout is reported as cut off, not as bad JSON", 
 	// The shape that reached a user: `fonts --json` outran useExec's timeout,
 	// Raycast killed it, and the document stopped one line before its closing
 	// brace. Parsing that fragment blamed rcc for a defect it does not have.
-	const truncated =
-		'{\n  "installed": 812,\n  "fontconfig": {"fonts": 940},\n';
+	const truncated = '{\n  "installed": 812,\n  "fontconfig": {"fonts": 940},\n';
 	assert.throws(
 		() =>
 			readJson("fonts", (s) => expectObject(s, "fonts"))({

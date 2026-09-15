@@ -37,7 +37,10 @@ export function DryRunFirst({
 	const runForReal = async () => {
 		const confirmed = await confirmAlert({
 			title: confirm.title,
-			message: confirm.message,
+			// With the command itself: every other confirmation in the
+			// extension shows what it is about to run, and these two are the
+			// ones that change the most.
+			message: `${confirm.message}\n\nrcc ${command}`,
 			primaryAction: {
 				title: confirm.action,
 				style: Alert.ActionStyle.Destructive,
@@ -50,9 +53,7 @@ export function DryRunFirst({
 	return (
 		<ProgressList
 			args={live ? [command] : [command, "--dry-run"]}
-			title={
-				live ? `Updating ${subject}` : `${subject} — what would change`
-			}
+			title={live ? `Updating ${subject}` : `${subject} — what would change`}
 			unit={unit}
 			idleIcon={idleIcon}
 			extraActions={

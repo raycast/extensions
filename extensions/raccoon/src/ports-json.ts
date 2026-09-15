@@ -27,8 +27,7 @@ export type Exposure = "exposed" | "local" | "connected" | "idle";
 export function parsePorts(stdout: string): Port[] {
 	return expectArray(stdout, "ports").map((value, index) => {
 		const p = value as Record<string, unknown>;
-		const str = (key: string) =>
-			typeof p?.[key] === "string" ? (p[key] as string) : "";
+		const str = (key: string) => (typeof p?.[key] === "string" ? (p[key] as string) : "");
 		if (typeof p !== "object" || p === null || str("port") === "") {
 			throw new Error(`Port ${index + 1} is not shaped like a port.`);
 		}

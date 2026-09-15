@@ -1,16 +1,5 @@
-import {
-	Action,
-	ActionPanel,
-	Alert,
-	Color,
-	Icon,
-	Keyboard,
-	List,
-	Toast,
-	confirmAlert,
-	showToast,
-} from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Alert, Color, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { type Frequency, readSchedule } from "./audit-schedule";
 import { runRcc } from "./rcc";
 
@@ -44,11 +33,22 @@ export default function Command() {
 			message:
 				"Raccoon installs a launchd agent that runs `rcc audit --deep` " +
 				`${WHEN[frequency].toLowerCase()}, whether or not you are at the ` +
-				"Mac. It stays until you remove it.",
+				"Mac. It stays until you remove it.\n\n" +
+				`rcc audit schedule ${frequency}`,
 			primaryAction: { title: "Schedule It" },
 		});
 		if (!confirmed) return;
-		await runRcc(["audit", "schedule", frequency]);
+		// The success toast used to fire whatever happened, so a launchd agent
+		// that was refused still read as scheduled - and the screen behind it
+		// then said "Not scheduled", having asked launchd itself.
+		try {
+			await runRcc(["audit", "schedule", frequency]);
+		} catch (error) {
+			await showFailureToast(error, {
+				title: `Could not schedule the audit ${frequency}`,
+			});
+			return;
+		}
 		await showToast({
 			style: Toast.Style.Success,
 			title: `Audit scheduled ${frequency}`,
@@ -61,15 +61,22 @@ export default function Command() {
 		const confirmed = await confirmAlert({
 			title: "Stop the scheduled audit?",
 			message:
-				"The launchd agent is removed. Nothing already kept in the audit " +
-				"history is deleted.",
+				"The launchd agent is removed. Nothing already kept in the audit history is deleted." +
+				"\n\nrcc audit schedule remove",
 			primaryAction: {
 				title: "Remove Schedule",
 				style: Alert.ActionStyle.Destructive,
 			},
 		});
 		if (!confirmed) return;
-		await runRcc(["audit", "schedule", "remove"]);
+		try {
+			await runRcc(["audit", "schedule", "remove"]);
+		} catch (error) {
+			await showFailureToast(error, {
+				title: "Could not remove the scheduled audit",
+			});
+			return;
+		}
 		await showToast({
 			style: Toast.Style.Success,
 			title: "Scheduled audit removed",
@@ -78,11 +85,7 @@ export default function Command() {
 	};
 
 	const stop = active ? (
-		<Action
-			title="Remove the Schedule"
-			icon={{ source: Icon.Trash, tintColor: Color.Red }}
-			onAction={remove}
-		/>
+		<Action title="Remove the Schedule" icon={{ source: Icon.Trash, tintColor: Color.Red }} onAction={remove} />
 	) : null;
 
 	const refresh = (
@@ -97,9 +100,7 @@ export default function Command() {
 	return (
 		<List
 			isLoading={isLoading}
-			navigationTitle={
-				active ? `Scheduled Audit — ${active}` : "Scheduled Audit"
-			}
+			navigationTitle={active ? `Scheduled Audit — ${active}` : "Scheduled Audit"}
 			searchBarPlaceholder="Search frequencies"
 		>
 			<List.Section
@@ -112,12 +113,8 @@ export default function Command() {
 						<List.Item
 							key={frequency}
 							icon={{
-								source: isActive
-									? Icon.CheckCircle
-									: Icon.Circle,
-								tintColor: isActive
-									? Color.Green
-									: Color.SecondaryText,
+								source: isActive ? Icon.CheckCircle : Icon.Circle,
+								tintColor: isActive ? Color.Green : Color.SecondaryText,
 							}}
 							title={frequency}
 							subtitle={WHEN[frequency]}

@@ -37,9 +37,7 @@ export function isListed(contents: string, name: string): boolean {
  * whole-line. A file that is not there yet is an empty list, not an error —
  * most machines never write one.
  */
-export async function readSkipList(
-	path: string = AUDIT_CONF,
-): Promise<string[]> {
+export async function readSkipList(path: string = AUDIT_CONF): Promise<string[]> {
 	let contents: string;
 	try {
 		contents = await readFile(path, "utf8");
@@ -65,10 +63,7 @@ export async function readSkipList(
  * cannot be created, a file that cannot be written) is thrown with the reason
  * the filesystem gave, because "could not skip the check" on its own is useless.
  */
-export async function skipCheck(
-	name: string,
-	path: string = AUDIT_CONF,
-): Promise<SkipOutcome> {
+export async function skipCheck(name: string, path: string = AUDIT_CONF): Promise<SkipOutcome> {
 	if (name === "" || name.includes("\n")) {
 		throw new Error(`Not a check name: ${JSON.stringify(name)}`);
 	}
@@ -80,15 +75,11 @@ export async function skipCheck(
 		if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
 	}
 
-	if (contents !== undefined && isListed(contents, name))
-		return "already-listed";
+	if (contents !== undefined && isListed(contents, name)) return "already-listed";
 
 	// A file that does not end in a newline would otherwise glue the new name to
 	// whatever the last line was, and a whole-line match would never find either.
-	const separator =
-		contents !== undefined && contents !== "" && !contents.endsWith("\n")
-			? "\n"
-			: "";
+	const separator = contents !== undefined && contents !== "" && !contents.endsWith("\n") ? "\n" : "";
 	const preamble = contents === undefined ? HEADER : "";
 
 	await mkdir(dirname(path), { recursive: true });

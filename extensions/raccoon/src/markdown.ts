@@ -67,10 +67,7 @@ const BAR_WIDTH = 20;
 
 /** That step as a line a Detail can show while the command is still running. */
 export function progressBar({ current, total, info }: Progress): string {
-	const filled =
-		total > 0
-			? Math.min(BAR_WIDTH, Math.round((current / total) * BAR_WIDTH))
-			: 0;
+	const filled = total > 0 ? Math.min(BAR_WIDTH, Math.round((current / total) * BAR_WIDTH)) : 0;
 	const bar = "█".repeat(filled) + "░".repeat(BAR_WIDTH - filled);
 	return `\`${bar}\`  **${current}/${total}**${info ? ` · ${info}` : ""}`;
 }
@@ -86,8 +83,7 @@ function boxRanges(lines: string[]): Array<[number, number]> {
 		}
 		let end = index;
 		while (end < lines.length && BOXISH.test(lines[end])) end += 1;
-		if (lines.slice(index, end).some((line) => BOX_BORDER.test(line)))
-			ranges.push([index, end]);
+		if (lines.slice(index, end).some((line) => BOX_BORDER.test(line))) ranges.push([index, end]);
 		index = end;
 	}
 	return ranges;
@@ -99,9 +95,7 @@ function boxRanges(lines: string[]): Array<[number, number]> {
  * line gets a hard break so status lines do not collapse into one paragraph.
  */
 export function toMarkdown(output: string): string {
-	const lines = output
-		.split("\n")
-		.filter((line) => !DEAD_PROMPT.test(line) && !PROGRESS.test(line));
+	const lines = output.split("\n").filter((line) => !DEAD_PROMPT.test(line) && !PROGRESS.test(line));
 	const inBox = new Array<boolean>(lines.length).fill(false);
 	const opens = new Set<number>();
 	const closes = new Set<number>();
@@ -152,7 +146,5 @@ export const SUDO_HINT = [
 ].join("\n");
 
 export function withSudoHint(markdown: string): string {
-	return SUDO_UNAVAILABLE.test(markdown)
-		? `${markdown}\n${SUDO_HINT}`
-		: markdown;
+	return SUDO_UNAVAILABLE.test(markdown) ? `${markdown}\n${SUDO_HINT}` : markdown;
 }

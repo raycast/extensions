@@ -35,17 +35,13 @@ export function parseWifi(stdout: string): WifiReport {
 		interface: typeof r.interface === "string" ? r.interface : "",
 		active_ssid: typeof r.active_ssid === "string" ? r.active_ssid : "",
 		connected:
-			typeof r.connected === "boolean"
-				? r.connected
-				: typeof r.active_ssid === "string" && r.active_ssid !== "",
+			typeof r.connected === "boolean" ? r.connected : typeof r.active_ssid === "string" && r.active_ssid !== "",
 		ssid_hidden: r.ssid_hidden === true,
 		known_networks: Array.isArray(r.known_networks)
 			? r.known_networks.filter((n): n is string => typeof n === "string")
 			: [],
 		passwords:
-			typeof r.passwords === "object" && r.passwords !== null
-				? (r.passwords as Record<string, string>)
-				: {},
+			typeof r.passwords === "object" && r.passwords !== null ? (r.passwords as Record<string, string>) : {},
 	};
 }
 
@@ -60,9 +56,7 @@ export function parseOverlap(stdout: string): PathEntry[] {
 	return expectArray(stdout, "overlap").map((value, index) => {
 		const e = value as Record<string, unknown>;
 		if (typeof e?.name !== "string" || typeof e?.manager !== "string") {
-			throw new Error(
-				`Entry ${index + 1} is not shaped like a PATH entry.`,
-			);
+			throw new Error(`Entry ${index + 1} is not shaped like a PATH entry.`);
 		}
 		return {
 			name: e.name,

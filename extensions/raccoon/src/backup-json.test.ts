@@ -26,12 +26,7 @@ test("a Mac that has never been backed up is not one backed up zero hours ago", 
 });
 
 test("a day is fine, a week is late, beyond that it is overdue", () => {
-	const at = (hours: number) =>
-		health(
-			parseBackup(
-				report({ last_backup: { date: "x", hours_ago: hours } }),
-			),
-		);
+	const at = (hours: number) => health(parseBackup(report({ last_backup: { date: "x", hours_ago: hours } })));
 	assert.equal(at(0), "fresh");
 	assert.equal(at(23), "fresh");
 	assert.equal(at(24), "late");

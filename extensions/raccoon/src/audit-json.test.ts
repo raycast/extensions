@@ -1,12 +1,7 @@
 // Zero-dependency check: node --test src/audit-json.test.ts
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import {
-	countByStatus,
-	fixableCount,
-	parseAuditReport,
-	readAuditRun,
-} from "./audit-json.ts";
+import { countByStatus, fixableCount, parseAuditReport, readAuditRun } from "./audit-json.ts";
 
 const check = (over = {}) => ({
 	status: "pass",
@@ -60,10 +55,7 @@ test("stdout that is not JSON says so", () => {
 	assert.equal(noisy.results.length, 1);
 
 	// Output with no JSON anywhere still fails, and says what to do about it.
-	assert.throws(
-		() => parseAuditReport("+-----+\n| Core |\n+-----+"),
-		/did not print JSON/,
-	);
+	assert.throws(() => parseAuditReport("+-----+\n| Core |\n+-----+"), /did not print JSON/);
 });
 
 test("JSON that is not a report object says so", () => {
@@ -76,10 +68,7 @@ test("a result missing a field is named, not rendered as undefined", () => {
 	// 0.17.0 does not emit it. command is still required.
 	const broken = { ...check() } as Record<string, unknown>;
 	delete broken.command;
-	assert.throws(
-		() => parseAuditReport(report([check(), broken])),
-		/Result 2 of 2/,
-	);
+	assert.throws(() => parseAuditReport(report([check(), broken])), /Result 2 of 2/);
 });
 
 test("a report from an rcc older than 0.17.0 still renders", () => {
@@ -92,10 +81,7 @@ test("a report from an rcc older than 0.17.0 still renders", () => {
 });
 
 test("an unknown status is not a status", () => {
-	assert.throws(
-		() => parseAuditReport(report([check({ status: "maybe" })])),
-		/not shaped like a check/,
-	);
+	assert.throws(() => parseAuditReport(report([check({ status: "maybe" })])), /not shaped like a check/);
 });
 
 // --- exit codes -------------------------------------------------------------
@@ -120,10 +106,7 @@ test("exit 2 with a report is a report, not a failure", () => {
 test("exit 2 with nothing on stdout is a failure", () => {
 	// `rcc audit --only nonesuch`: usage error, same status, no report.
 	assert.throws(
-		() =>
-			readAuditRun(
-				run({ exitCode: 2, stdout: "", stderr: "unknown check group" }),
-			),
+		() => readAuditRun(run({ exitCode: 2, stdout: "", stderr: "unknown check group" })),
 		/exited with status 2/,
 	);
 });
@@ -143,36 +126,23 @@ test("the failure carries what stderr said", () => {
 });
 
 test("a run the user stopped is not a failure", () => {
-	assert.equal(
-		readAuditRun(run({ exitCode: null, signal: "SIGTERM" })).results.length,
-		1,
-	);
+	assert.equal(readAuditRun(run({ exitCode: null, signal: "SIGTERM" })).results.length, 1);
 });
 
 test("a run that timed out says so rather than failing to parse", () => {
-	assert.throws(
-		() => readAuditRun(run({ timedOut: true, stdout: "" })),
-		/ran out of time/,
-	);
+	assert.throws(() => readAuditRun(run({ timedOut: true, stdout: "" })), /ran out of time/);
 });
 
 // --- derived counts ---------------------------------------------------------
 
 test("counts come from the results, not from the header", () => {
-	const parsed = parseAuditReport(
-		report([check(), check({ status: "warn" }), check({ status: "fail" })]),
-	);
+	const parsed = parseAuditReport(report([check(), check({ status: "warn" }), check({ status: "fail" })]));
 	assert.deepEqual(countByStatus(parsed), { pass: 1, warn: 1, fail: 1 });
 });
 
 test("a machine with nothing to fix reports zero, not an error", () => {
 	assert.equal(fixableCount(parseAuditReport(report())), 0);
-	assert.equal(
-		fixableCount(
-			parseAuditReport(report([check({ fix_available: true })])),
-		),
-		1,
-	);
+	assert.equal(fixableCount(parseAuditReport(report([check({ fix_available: true })]))), 1);
 });
 
 test("a skipped check is not counted among the fixable", () => {
@@ -187,10 +157,7 @@ test("a skipped check is not counted among the fixable", () => {
 	);
 	assert.equal(fixableCount(parsed), 2);
 	assert.equal(fixableCount(parsed, new Set(["Firewall"])), 1);
-	assert.equal(
-		fixableCount(parsed, new Set(["Firewall", "Stealth Mode"])),
-		0,
-	);
+	assert.equal(fixableCount(parsed, new Set(["Firewall", "Stealth Mode"])), 0);
 	// A name in the list that no check carries changes nothing.
 	assert.equal(fixableCount(parsed, new Set(["Nonesuch"])), 2);
 });
