@@ -57,9 +57,20 @@ export function useRccStream(args: string[]) {
 			},
 			controller.signal,
 		)
-			.then(setExit)
-			.catch((caught: Error) => setError(caught))
-			.finally(() => setIsLoading(false));
+			// The same rule as the chunks above, and for the same reason: a run
+			// that has been superseded finishes in its own time, and its ending
+			// must not become the new run's. Left unguarded it could report the
+			// old exit status, or clear the spinner while the new command was
+			// still going.
+			.then((finished) => {
+				if (controllerRef.current === controller) setExit(finished);
+			})
+			.catch((caught: Error) => {
+				if (controllerRef.current === controller) setError(caught);
+			})
+			.finally(() => {
+				if (controllerRef.current === controller) setIsLoading(false);
+			});
 
 		return () => controller.abort();
 	}, [key, runCount]);
