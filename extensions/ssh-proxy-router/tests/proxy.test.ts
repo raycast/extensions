@@ -47,6 +47,7 @@ async function harness(t: { after: (fn: () => Promise<void>) => void }, active =
       { url: active ? pacURL(config) : "https://old.example/proxy.pac", enabled: active },
     ]),
   );
+  const disabledServices = new Set<string>();
   const calls: string[][] = [];
   let failure: (args: string[]) => boolean = () => false;
   let content = buildPac(config);
@@ -91,7 +92,7 @@ async function harness(t: { after: (fn: () => Promise<void>) => void }, active =
       }
       if (file.endsWith("networksetup")) {
         if (args[0] === "-listallnetworkservices")
-          return "An asterisk denotes disabled services\nWi-Fi\nEthernet\n*Disabled";
+          return `An asterisk denotes disabled services\n${[...services.keys()].map((name) => (disabledServices.has(name) ? `*${name}` : name)).join("\n")}`;
         const service = services.get(args[1]);
         if (!service) throw new Error("unknown service");
         if (args[0] === "-getautoproxyurl") return `URL: ${service.url}\nEnabled: ${service.enabled ? "Yes" : "No"}`;
@@ -116,6 +117,7 @@ async function harness(t: { after: (fn: () => Promise<void>) => void }, active =
     backup,
     jobs,
     services,
+    disabledServices,
     calls,
     dependencies,
     proxy: createProxyController(config, dependencies),
@@ -602,4 +604,136 @@ test("launchctl inspection failure is not mistaken for an unloaded job", async (
     h.calls.some((call) => ["bootstrap", "bootout", "disable"].includes(call[1])),
     false,
   );
+});
+
+test("Stop skips deleted services and restores every remaining service", async (t) => {
+  const h = await harness(t);
+  const original = structuredClone(h.services.get("Wi-Fi"));
+  await h.proxy.startProxy();
+  h.services.delete("Ethernet");
+  h.calls.length = 0;
+  await h.proxy.stopProxy();
+  assert.deepEqual(h.services.get("Wi-Fi"), original);
+  assert.equal(
+    h.calls.some((call) => call[2] === "Ethernet"),
+    false,
+  );
+  assert.equal(h.jobs.size, 0);
+  await assert.rejects(fs.access(h.backup));
+});
+
+test("Stop cleans up when all backed-up services were deleted", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  h.services.clear();
+  await h.proxy.stopProxy();
+  assert.equal(h.jobs.size, 0);
+  await assert.rejects(fs.access(h.backup));
+});
+
+test("disabled services still exist and their saved proxy settings are restored", async (t) => {
+  const h = await harness(t);
+  const original = structuredClone([...h.services]);
+  await h.proxy.startProxy();
+  h.disabledServices.add("Ethernet");
+  await h.proxy.stopProxy();
+  assert.deepEqual([...h.services], original);
+  assert.equal(h.jobs.size, 0);
+});
+
+for (const invalidInventory of [false, true]) {
+  test(`inventory ${invalidInventory ? "malformation" : "failure"} retains the backup and agents`, async (t) => {
+    const h = await harness(t);
+    await h.proxy.startProxy();
+    h.calls.length = 0;
+    const execute = h.dependencies.execute!;
+    const proxy = createProxyController(config, {
+      ...h.dependencies,
+      execute: async (file, args, timeout) => {
+        if (args[0] === "-listallnetworkservices") {
+          if (invalidInventory) return "You cannot use this command.";
+          throw new Error("inventory unavailable");
+        }
+        return execute(file, args, timeout);
+      },
+    });
+    await assert.rejects(proxy.stopProxy(), /inventory/);
+    assert.equal(h.jobs.size, 2);
+    await fs.access(h.backup);
+    assert.equal(
+      h.calls.some((call) => call[1].startsWith("-set") || ["disable", "bootout"].includes(call[1])),
+      false,
+    );
+  });
+}
+
+test("deleted services do not hide restoration failures for existing services", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  h.services.delete("Ethernet");
+  h.setFailure((args) => args[0] === "-setautoproxyurl" && args[1] === "Wi-Fi");
+  await assert.rejects(h.proxy.stopProxy(), /Wi-Fi.*simulated failure/);
+  await fs.access(h.backup);
+  assert.equal(h.jobs.size, 2);
+  h.setFailure(() => false);
+  await h.proxy.stopProxy();
+  assert.equal(h.jobs.size, 0);
+});
+
+test("Repair and status ignore deleted historical services after updating the selection", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  h.services.delete("Ethernet");
+  const proxy = createProxyController(
+    { ...config, networkServices: ["Wi-Fi"], sshHost: "new.example" },
+    h.dependencies,
+  );
+  await proxy.startProxy();
+  assert.equal((await proxy.getProxyStatus()).running, true);
+  await proxy.stopProxy();
+  assert.equal(h.jobs.size, 0);
+});
+
+test("renamed services are detached from the router without guessing their original settings", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  h.services.set("Renamed Ethernet", h.services.get("Ethernet")!);
+  h.services.delete("Ethernet");
+  const result = await h.proxy.stopProxy();
+  assert.match(result, /untracked services: Renamed Ethernet/);
+  assert.equal(h.services.get("Renamed Ethernet")!.enabled, false);
+  assert.equal(h.jobs.size, 0);
+  await assert.rejects(fs.access(h.backup));
+});
+
+test("failed recovery of a renamed service retains agents and backup", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  h.services.set("Renamed Ethernet", h.services.get("Ethernet")!);
+  h.services.delete("Ethernet");
+  h.setFailure((args) => args[0] === "-setautoproxystate" && args[1] === "Renamed Ethernet");
+  await assert.rejects(h.proxy.stopProxy(), /Renamed Ethernet.*simulated failure/);
+  assert.equal(h.jobs.size, 2);
+  await fs.access(h.backup);
+});
+
+test("untracked unrelated proxy settings are preserved during Stop", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  const other = { url: "https://company.example/proxy.pac", enabled: true };
+  h.services.set("Other Network", { ...other });
+  await h.proxy.stopProxy();
+  assert.deepEqual(h.services.get("Other Network"), other);
+});
+
+test("Repair after a rename cannot save a router PAC that Stop leaves enabled", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  h.services.set("Renamed Ethernet", h.services.get("Ethernet")!);
+  h.services.delete("Ethernet");
+  const proxy = createProxyController({ ...config, networkServices: ["Wi-Fi", "Renamed Ethernet"] }, h.dependencies);
+  await proxy.startProxy();
+  await proxy.stopProxy();
+  assert.equal(h.services.get("Renamed Ethernet")!.enabled, false);
+  assert.equal(h.jobs.size, 0);
 });

@@ -99,7 +99,7 @@ When started, the extension:
 4. Saves the current automatic-proxy settings for each selected macOS network service.
 5. Enables the localhost PAC URL.
 
-Stopping the extension restores the saved proxy settings before unloading and disabling either LaunchAgent. If restoration fails for any service, the backup and agents are retained; correct the reported issue and retry **Stop and Restore Proxy Settings** in the menu. This recovery action is available while routing is degraded. Their stable plist files remain installed so macOS does not treat every later start as newly installed background software. Raycast itself does not need to stay open for the tunnel to remain active.
+Stopping the extension restores the saved proxy settings before unloading and disabling either LaunchAgent. If restoration fails for any service, the backup and agents are retained; correct the reported issue and retry **Stop and Restore Proxy Settings** in the menu. This recovery action is available while routing is degraded. Stop checks the current macOS service inventory and skips deleted services, while still restoring disabled services. If a renamed or otherwise untracked service still uses this router’s PAC endpoint, Stop disables that PAC setting and reports the service so you can recheck any previous proxy configuration; it does not guess the service’s former name. Their stable plist files remain installed so macOS does not treat every later start as newly installed background software. Raycast itself does not need to stay open for the tunnel to remain active.
 
 ### Background activity and battery use
 

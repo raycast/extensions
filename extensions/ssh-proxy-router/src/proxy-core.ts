@@ -405,14 +405,23 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     }
   }
 
+  async function networkServiceInventory(): Promise<{ name: string; enabled: boolean }[]> {
+    const output = await execute(NETWORKSETUP, ["-listallnetworkservices"]);
+    const [header, ...lines] = output.split("\n");
+    // An unsuccessful inventory must never be interpreted as all services being deleted.
+    if (!header.startsWith("An asterisk")) throw new Error("Could not read the macOS network service inventory.");
+    return lines
+      .map((line) => line.trimEnd())
+      .filter(Boolean)
+      .map((line) => ({
+        name: line.startsWith("*") ? line.slice(1) : line,
+        enabled: !line.startsWith("*"),
+      }));
+  }
+
   async function listNetworkServices(config: RoutingConfig): Promise<string[]> {
     if (config.networkServices) return config.networkServices;
-    const output = await execute(NETWORKSETUP, ["-listallnetworkservices"]);
-    return output
-      .split("\n")
-      .slice(1)
-      .map((service) => service.trimEnd())
-      .filter((service) => service.length > 0 && !service.startsWith("*"));
+    return (await networkServiceInventory()).filter((service) => service.enabled).map((service) => service.name);
   }
 
   async function getAutomaticProxy(service: string): Promise<SavedProxySetting> {
@@ -430,7 +439,10 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     if (!settings.every((setting) => setting.enabled && setting.url === expectedURL)) return false;
     const backup = await readBackup();
     if (!backup || !services.every((service) => backup.some((setting) => setting.service === service))) return false;
-    for (const saved of backup.filter((setting) => !services.includes(setting.service))) {
+    const existing = new Set((await networkServiceInventory()).map((service) => service.name));
+    for (const saved of backup.filter(
+      (setting) => !services.includes(setting.service) && existing.has(setting.service),
+    )) {
       const current = await getAutomaticProxy(saved.service);
       if (current.enabled !== saved.enabled || (saved.url !== null && current.url !== saved.url)) return false;
     }
@@ -470,27 +482,52 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     await atomicPrivateWrite(PROXY_BACKUP_FILE, `${JSON.stringify(settings, null, 2)}\n`, fs);
   }
 
-  async function restoreProxySettings(config: RoutingConfig, retain = false): Promise<void> {
-    let settings = await readBackup();
-    if (!settings) {
-      const services = await listNetworkServices(config);
-      const current = await Promise.all(services.map(getAutomaticProxy));
-      settings = current
-        .filter((setting) => {
-          try {
-            const url = new URL(setting.url ?? "");
-            return url.origin === `http://127.0.0.1:${config.pacPort}` && url.pathname === "/proxy.pac";
-          } catch {
-            return false;
-          }
-        })
-        .map((setting) => ({ ...setting, enabled: false }));
+  async function restoreProxySettings(config: RoutingConfig, retain = false): Promise<string[]> {
+    const settings = (await readBackup()) ?? [];
+    const existing = new Set((await networkServiceInventory()).map((service) => service.name));
+    const recovered: string[] = [];
+    const ports = new Set([config.pacPort]);
+    try {
+      const instance: unknown = JSON.parse(await fs.readFile(PAC_INSTANCE_FILE, "utf8"));
+      if (instance && typeof instance === "object" && "port" in instance && typeof instance.port === "number")
+        ports.add(instance.port);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+    function isRouterURL(value: string | null): boolean {
+      try {
+        const url = new URL(value ?? "");
+        return (
+          url.protocol === "http:" &&
+          url.hostname === "127.0.0.1" &&
+          ports.has(Number(url.port)) &&
+          url.pathname === "/proxy.pac"
+        );
+      } catch {
+        return false;
+      }
+    }
+    // A renamed service keeps its proxy settings but has no matching backup name.
+    // Only detach untracked services still pointing to our endpoint; never guess
+    // which missing service's original settings belong to the new name.
+    for (const service of existing) {
+      if (settings.some((setting) => setting.service === service)) continue;
+      const current = await getAutomaticProxy(service);
+      if (isRouterURL(current.url) && current.enabled) {
+        settings.push({ ...current, enabled: false });
+        recovered.push(service);
+      }
     }
     const errors: string[] = [];
     for (const setting of settings) {
+      if (!existing.has(setting.service)) continue;
+      // Older backups or a newly selected renamed service can themselves contain
+      // our PAC URL. Never leave such an endpoint enabled after stopping it.
+      const enabled = setting.enabled && !isRouterURL(setting.url);
+      if (setting.enabled && !enabled && !recovered.includes(setting.service)) recovered.push(setting.service);
       try {
         if (setting.url) await execute(NETWORKSETUP, ["-setautoproxyurl", setting.service, setting.url]);
-        await execute(NETWORKSETUP, ["-setautoproxystate", setting.service, setting.enabled ? "on" : "off"]);
+        await execute(NETWORKSETUP, ["-setautoproxystate", setting.service, enabled ? "on" : "off"]);
       } catch (error) {
         errors.push(`${setting.service}: ${errorMessage(error)}`);
       }
@@ -500,6 +537,7 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
         `Could not restore proxy settings: ${errors.join("; ")}. Agents and backup retained; retry Stop.`,
       );
     if (!retain) await fs.rm(PROXY_BACKUP_FILE, { force: true });
+    return recovered;
   }
 
   async function enableRouting(config: RoutingConfig, services: string[]): Promise<void> {
@@ -754,7 +792,7 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
   }
 
   async function stopProxy(): Promise<string> {
-    await restoreProxySettings(config);
+    const recovered = await restoreProxySettings(config);
     const errors: string[] = [];
     try {
       await stopPacServer();
@@ -767,7 +805,9 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
       errors.push(errorMessage(error));
     }
     if (errors.length) throw new Error(`Could not fully stop SSH Proxy Router: ${errors.join("; ")}`);
-    return "Stopped — previous macOS proxy settings restored.";
+    return recovered.length
+      ? `Stopped — saved proxy settings restored. Disabled router PAC on untracked services: ${recovered.join(", ")}. Recheck any prior proxy settings for renamed services.`
+      : "Stopped — previous macOS proxy settings restored.";
   }
 
   async function toggleProxy(): Promise<{ running: boolean; message: string }> {
