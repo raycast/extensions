@@ -1,5 +1,10 @@
 # Ploi Changelog
 
+## [Fix Pagination and Sites Loading] - {PR_MERGE_DATE}
+
+- Fixed Servers pagination replacing the loaded servers with an empty list
+- Opening a server now waits for its sites to load, so the list no longer jumps under the cursor
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.
