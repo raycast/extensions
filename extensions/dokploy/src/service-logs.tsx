@@ -27,6 +27,7 @@ export default function ServiceLogs({ service }: { service: { id: string; type: 
   const {
     isLoading,
     data: logs,
+    error,
     revalidate,
   } = useFetch<string, string>(requestUrl, {
     headers,
@@ -35,11 +36,17 @@ export default function ServiceLogs({ service }: { service: { id: string; type: 
     keepPreviousData: true,
   });
 
+  const markdown = error
+    ? `**Could not load logs.**\n\n${error}`
+    : logs
+      ? `\`\`\`\n${logs.replace(/```/g, "\\`\\`\\`")}\n\`\`\``
+      : "No logs yet.";
+
   return (
     <Detail
       navigationTitle={`${service.name} Logs`}
       isLoading={isLoading}
-      markdown={logs ? `\`\`\`\n${logs.replace(/```/g, "\\`\\`\\`")}\n\`\`\`` : "No logs yet."}
+      markdown={markdown}
       actions={
         <ActionPanel>
           <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />

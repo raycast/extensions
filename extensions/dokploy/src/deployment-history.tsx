@@ -42,6 +42,7 @@ export default function DeploymentHistory({
   const {
     isLoading,
     data: deployments,
+    error,
     revalidate,
   } = useFetch<Deployment[], Deployment[]>(
     `${url}${ENDPOINTS[service.type]}?${ID_FIELDS[service.type]}=${service.id}`,
@@ -52,6 +53,16 @@ export default function DeploymentHistory({
   );
 
   async function cancelDeployment(deployment: Deployment) {
+    const options: Alert.Options = {
+      title: `Cancel "${deployment.title}"?`,
+      message: "This forcibly terminates the running deployment process.",
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Cancel Deployment",
+      },
+    };
+    if (!(await confirmAlert(options))) return;
+
     const toast = await showToast(Toast.Style.Animated, "Cancelling", deployment.title);
     try {
       const response = await fetch(url + "deployment.killProcess", {
@@ -110,7 +121,7 @@ export default function DeploymentHistory({
   async function deleteDeployment(deployment: Deployment) {
     const options: Alert.Options = {
       title: "Delete this deployment record?",
-      message: "This only removes the history entry, not anything it deployed.",
+      message: "This removes the history entry and its build logs, not anything it deployed.",
       primaryAction: {
         style: Alert.ActionStyle.Destructive,
         title: "Delete",
@@ -141,45 +152,49 @@ export default function DeploymentHistory({
 
   return (
     <List navigationTitle={`${service.name} Deployments`} isLoading={isLoading}>
-      {deployments.map((deployment) => (
-        <List.Item
-          key={deployment.deploymentId}
-          icon={{ source: Icon.CircleFilled, tintColor: STATUS_COLORS[deployment.status] }}
-          title={deployment.title}
-          subtitle={deployment.errorMessage ?? deployment.description ?? undefined}
-          accessories={[{ date: new Date(deployment.createdAt) }, { tag: deployment.status }]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                icon={Icon.Terminal}
-                title="View Build Logs"
-                target={<DeploymentLogs deployment={deployment} />}
-              />
-              {deployment.rollbackId && (
-                <Action
-                  icon={Icon.ArrowCounterClockwise}
-                  title="Roll Back"
-                  onAction={() => rollbackDeployment(deployment)}
+      {error ? (
+        <List.EmptyView icon={Icon.ExclamationMark} title="Could not load deployments" description={`${error}`} />
+      ) : (
+        deployments.map((deployment) => (
+          <List.Item
+            key={deployment.deploymentId}
+            icon={{ source: Icon.CircleFilled, tintColor: STATUS_COLORS[deployment.status] }}
+            title={deployment.title}
+            subtitle={deployment.errorMessage ?? deployment.description ?? undefined}
+            accessories={[{ date: new Date(deployment.createdAt) }, { tag: deployment.status }]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  icon={Icon.Terminal}
+                  title="View Build Logs"
+                  target={<DeploymentLogs deployment={deployment} />}
                 />
-              )}
-              {deployment.status === "running" && (
+                {deployment.rollbackId && (
+                  <Action
+                    icon={Icon.ArrowCounterClockwise}
+                    title="Roll Back"
+                    onAction={() => rollbackDeployment(deployment)}
+                  />
+                )}
+                {deployment.status === "running" && (
+                  <Action
+                    icon={Icon.XmarkCircle}
+                    title="Cancel"
+                    style={Action.Style.Destructive}
+                    onAction={() => cancelDeployment(deployment)}
+                  />
+                )}
                 <Action
-                  icon={Icon.XmarkCircle}
-                  title="Cancel"
+                  icon={Icon.Trash}
+                  title="Delete"
                   style={Action.Style.Destructive}
-                  onAction={() => cancelDeployment(deployment)}
+                  onAction={() => deleteDeployment(deployment)}
                 />
-              )}
-              <Action
-                icon={Icon.Trash}
-                title="Delete"
-                style={Action.Style.Destructive}
-                onAction={() => deleteDeployment(deployment)}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }

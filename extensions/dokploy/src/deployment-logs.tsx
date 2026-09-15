@@ -16,6 +16,7 @@ export default function DeploymentLogs({ deployment }: { deployment: { deploymen
   const {
     isLoading,
     data: logs,
+    error,
     revalidate,
   } = useFetch<string, string>(requestUrl, {
     headers,
@@ -24,11 +25,17 @@ export default function DeploymentLogs({ deployment }: { deployment: { deploymen
     keepPreviousData: true,
   });
 
+  const markdown = error
+    ? `**Could not load logs.**\n\n${error}`
+    : logs
+      ? `\`\`\`\n${logs.replace(/```/g, "\\`\\`\\`")}\n\`\`\``
+      : "No logs yet.";
+
   return (
     <Detail
       navigationTitle={`${deployment.title} Logs`}
       isLoading={isLoading}
-      markdown={logs ? `\`\`\`\n${logs.replace(/```/g, "\\`\\`\\`")}\n\`\`\`` : "No logs yet."}
+      markdown={markdown}
       actions={
         <ActionPanel>
           <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />
