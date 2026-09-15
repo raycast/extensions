@@ -28,16 +28,27 @@ export function useRccExec<T>(
 	},
 ) {
 	const abortable = useRef<AbortController>(null);
+
+	// The dependency is the joined form, never the array. `args` is built fresh
+	// on every render, so passing it here restarted the command on every
+	// render: three audits were measured running at once, each one killing the
+	// last, and the screen stayed on its spinner for good. The run itself is
+	// given the real argv out of a ref, because splitting the key back apart
+	// would cut any argument containing a space.
+	const argv = useRef(args);
+	argv.current = args;
+	const key = args.join("\u0000");
+
 	return usePromise(
-		async (argv: string[], path: string) =>
+		async (_key: string, binary: string, path: string) =>
 			options.parseOutput(
-				await collect(file, argv, {
+				await collect(binary, argv.current, {
 					path,
 					timeoutMs: options.timeout,
 					signal: abortable.current?.signal,
 				}),
 			),
-		[args, options.path],
+		[key, file, options.path],
 		{ execute: options.execute, abortable },
 	);
 }
