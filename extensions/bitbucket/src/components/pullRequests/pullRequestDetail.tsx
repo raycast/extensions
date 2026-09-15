@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Toast, showToast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import { getPullRequest, getCurrentUserUuid } from "./../../queries";
@@ -16,6 +16,7 @@ interface State {
 
 export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => void; onDone?: () => void }) {
   const { pr } = props;
+  const { pop } = useNavigation();
   const [state, setState] = useState<State>({ isLoading: true });
   // `undefined` = untouched this session (defer to real data); any ReviewState
   // value, including `null`, means an action fired and must override stale data.
@@ -61,11 +62,12 @@ export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => v
 
   const reviewers = state.reviewers ?? [];
   const reviewState = localReviewState !== undefined ? localReviewState : findMyReviewState(reviewers, myUuid);
-  const labeledReviewers = reviewers.map((r) => (myUuid && r.uuid === myUuid ? { ...r, nickname: "You" } : r));
-  const displayedReviewers: Reviewer[] =
-    !labeledReviewers.some((r) => r.nickname === "You") && reviewState
-      ? [{ nickname: "You", state: reviewState }, ...labeledReviewers]
-      : labeledReviewers;
+  // Trust the merged `reviewState` over the viewer's own raw entry, which can be
+  // stale immediately after an action changes it (nothing refetches right away).
+  const otherReviewers = reviewers.filter((r) => !(myUuid && r.uuid === myUuid));
+  const displayedReviewers: Reviewer[] = reviewState
+    ? [{ nickname: "You", state: reviewState }, ...otherReviewers]
+    : otherReviewers;
 
   return (
     <Detail
@@ -97,7 +99,13 @@ export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => v
           </ActionPanel.Section>
           <ActionPanel.Section>
             <ApprovePullRequestAction pr={pr} reviewState={reviewState} onReviewStateChange={setLocalReviewState} />
-            <DeclinePullRequestAction pr={pr} onDeclined={props.onDeclined} />
+            <DeclinePullRequestAction
+              pr={pr}
+              onDeclined={() => {
+                props.onDeclined?.();
+                pop();
+              }}
+            />
             <RequestChangesAction pr={pr} reviewState={reviewState} onReviewStateChange={setLocalReviewState} />
           </ActionPanel.Section>
         </ActionPanel>

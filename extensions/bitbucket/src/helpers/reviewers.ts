@@ -41,18 +41,18 @@ interface ReviewAccessory {
   tooltip: string;
 }
 
-// Relabels the viewer's own real reviewer entry (matched by uuid) as "You". If no
-// real entry exists yet but `myReviewState` is set, that's the instant-feedback gap
-// right after firing an action, before the next refetch would surface it for real —
-// synthesize a "You" entry for that case instead.
+// `myReviewState` is the caller's already-merged effective state (session-local
+// override if one exists this session, else the real per-viewer state derived via
+// `findMyReviewState`) — always trust it over the viewer's own raw entry in
+// `reviewers`, which can be stale immediately after an action changes that state
+// (e.g. unapproving) since nothing refetches the PR list right away.
 export function buildReviewAccessories(
   reviewers: Reviewer[],
   myUuid: string | null,
   myReviewState: ReviewState,
 ): ReviewAccessory[] {
-  const labeled = reviewers.map((r) => (myUuid && r.uuid === myUuid ? { ...r, nickname: "You" } : r));
-  const hasMe = labeled.some((r) => r.nickname === "You");
-  const withMe = !hasMe && myReviewState ? [{ nickname: "You", state: myReviewState }, ...labeled] : labeled;
+  const others = reviewers.filter((r) => !(myUuid && r.uuid === myUuid));
+  const withMe = myReviewState ? [{ nickname: "You", state: myReviewState }, ...others] : others;
 
   const approvedBy = withMe.filter((r) => r.state === "approved").map((r) => r.nickname);
   const changesRequestedBy = withMe.filter((r) => r.state === "changes_requested").map((r) => r.nickname);

@@ -68,10 +68,10 @@ export function SearchMyPullRequests() {
     });
   }
 
-  function removePullRequest(id: number) {
+  function removePullRequest(key: string) {
     setState((current) => ({
       ...current,
-      pullRequests: current.pullRequests?.filter((pr) => pr.id !== id),
+      pullRequests: current.pullRequests?.filter((pr) => getPullRequestKey(pr) !== key),
     }));
   }
 
@@ -96,11 +96,11 @@ export function SearchMyPullRequests() {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <ShowPullRequestDetailAction pr={pr} onDeclined={() => removePullRequest(pr.id)} />
                     <Action.OpenInBrowser
                       title="Open Pull Request in Browser"
                       url={`https://bitbucket.org/${pr.repo.fullName}/pull-requests/${pr.id}`}
                     />
+                    <ShowPullRequestDetailAction pr={pr} onDeclined={() => removePullRequest(key)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <ApprovePullRequestAction
@@ -108,7 +108,7 @@ export function SearchMyPullRequests() {
                       reviewState={reviewState}
                       onReviewStateChange={onReviewStateChange}
                     />
-                    <DeclinePullRequestAction pr={pr} onDeclined={() => removePullRequest(pr.id)} />
+                    <DeclinePullRequestAction pr={pr} onDeclined={() => removePullRequest(key)} />
                     <RequestChangesAction pr={pr} reviewState={reviewState} onReviewStateChange={onReviewStateChange} />
                   </ActionPanel.Section>
                 </ActionPanel>

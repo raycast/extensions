@@ -102,17 +102,28 @@ export function DeclinePullRequestAction(props: { pr: PullRequest; onDeclined?: 
           onSubmit={async (reason) => {
             try {
               await declinePullRequest(props.pr.repo.slug, props.pr.id);
-              if (reason.trim().length > 0) {
-                await addPullRequestComment(props.pr.repo.slug, props.pr.id, reason);
-              }
-              await showToast({ style: Toast.Style.Success, title: "Pull request declined" });
-              props.onDeclined?.();
             } catch (error) {
               await showToast({
                 style: Toast.Style.Failure,
                 title: "Failed to decline pull request",
                 message: error instanceof Error ? error.message : "Unknown error",
               });
+              return;
+            }
+
+            await showToast({ style: Toast.Style.Success, title: "Pull request declined" });
+            props.onDeclined?.();
+
+            if (reason.trim().length > 0) {
+              try {
+                await addPullRequestComment(props.pr.repo.slug, props.pr.id, reason);
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Pull request declined, but failed to post comment",
+                  message: error instanceof Error ? error.message : "Unknown error",
+                });
+              }
             }
           }}
         />
@@ -174,18 +185,29 @@ export function RequestChangesAction(props: {
           onSubmit={async (reason) => {
             try {
               await requestChangesOnPullRequest(pr.repo.slug, pr.id);
-              await clearOppositeReviewState(pr, reviewState, "approved");
-              if (reason.trim().length > 0) {
-                await addPullRequestComment(pr.repo.slug, pr.id, reason);
-              }
-              await showToast({ style: Toast.Style.Success, title: "Requested changes" });
-              onReviewStateChange("changes_requested");
             } catch (error) {
               await showToast({
                 style: Toast.Style.Failure,
                 title: "Failed to request changes",
                 message: error instanceof Error ? error.message : "Unknown error",
               });
+              return;
+            }
+
+            await clearOppositeReviewState(pr, reviewState, "approved");
+            await showToast({ style: Toast.Style.Success, title: "Requested changes" });
+            onReviewStateChange("changes_requested");
+
+            if (reason.trim().length > 0) {
+              try {
+                await addPullRequestComment(pr.repo.slug, pr.id, reason);
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Requested changes, but failed to post comment",
+                  message: error instanceof Error ? error.message : "Unknown error",
+                });
+              }
             }
           }}
         />
