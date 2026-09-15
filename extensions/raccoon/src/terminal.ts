@@ -40,11 +40,20 @@ export function fixCommand(rcc: string, checkNames: string[]): string {
  * cannot narrow the fix must not run it at all.
  */
 export async function supportsFixOnly(rcc: string): Promise<boolean> {
+	return supportsAuditFlag(rcc, "--fix-only");
+}
+
+/**
+ * Whether this rcc's `audit` documents a flag.
+ *
+ * Asked of the binary rather than worked out from its version number, because
+ * the help is what the binary itself says it can do. A flag it does not know is
+ * not refused - it is ignored - so a caller that needs one has to check.
+ */
+export async function supportsAuditFlag(rcc: string, flag: string): Promise<boolean> {
 	try {
-		const { stdout } = await run(rcc, ["audit", "--help"], {
-			timeout: 15_000,
-		});
-		return stdout.includes("--fix-only");
+		const { stdout } = await run(rcc, ["audit", "--help"], { timeout: 15_000 });
+		return stdout.includes(flag);
 	} catch {
 		return false;
 	}

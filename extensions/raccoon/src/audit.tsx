@@ -15,15 +15,15 @@ import {
 	useNavigation,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { useRccExec } from "./use-rcc-exec";
+import { useAudit } from "./use-audit";
 import { useMemo, useState } from "react";
 import { AUDIT_CONF, readSkipList, skipCheck } from "./audit-conf";
 import { AUDIT_EXPORT_FORMATS, type AuditExportFormat, exportAudit } from "./audit-export";
-import { type AuditCheck, type AuditStatus, countByStatus, fixableCount, readAuditRun } from "./audit-json";
+import { type AuditCheck, type AuditStatus, countByStatus, fixableCount } from "./audit-json";
 import { findCommand } from "./commands";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
 import { RccDetail } from "./rcc-detail";
-import { RccNotFoundError, resolveRcc, RUNTIME_PATH } from "./rcc";
+import { RccNotFoundError, resolveRcc } from "./rcc";
 import { fixCommand, runInTerminal, supportsFixOnly } from "./terminal";
 
 /**
@@ -119,18 +119,11 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 	const { data: skipList, revalidate: revalidateSkipList } = usePromise(readSkipList);
 	const skipped = useMemo(() => new Set(skipList ?? []), [skipList]);
 
-	const { isLoading, data, error, revalidate } = useRccExec(
-		rccPath ?? "rcc",
-		deep ? ["audit", "--deep", "--json"] : ["audit", "--json"],
-		{
-			execute: rccPath !== null,
-			timeout: AUDIT_TIMEOUT_MS,
-			path: RUNTIME_PATH,
-			// The exit code is classified here, not by the hook: audit spends 1
-			// on "a check failed" and 2 on "warnings only", and both are reports.
-			parseOutput: readAuditRun,
-		},
-	);
+	const { isLoading, data, error, revalidate, pending, pendingError } = useAudit({
+		rcc: rccPath,
+		deep,
+		timeout: AUDIT_TIMEOUT_MS,
+	});
 
 	// Filtering is taken over from Raycast so that "everything shown" has a
 	// meaning the code can read. Same fields the placeholder promises.
@@ -450,6 +443,23 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 						: undefined
 				}
 			/>
+			{pending ? (
+				<List.Item
+					icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
+					title={`Still checking ${pending}`}
+					subtitle="Software Updates asks Apple's servers, which can take minutes. The rest is below."
+					accessories={[{ tag: { value: "Running", color: Color.SecondaryText } }]}
+					actions={<ActionPanel>{screenActions}</ActionPanel>}
+				/>
+			) : null}
+			{pendingError ? (
+				<List.Item
+					icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+					title="One group of checks could not be read"
+					subtitle={pendingError.message}
+					actions={<ActionPanel>{screenActions}</ActionPanel>}
+				/>
+			) : null}
 			{visible.map((check, index) => {
 				const isSkipped = skipped.has(check.name);
 				return (
