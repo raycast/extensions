@@ -1,0 +1,7 @@
+{
+  "plugins": {
+    "github": {
+      "enabled": true
+    }
+  }
+}
