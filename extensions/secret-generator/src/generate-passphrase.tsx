@@ -17,10 +17,7 @@ export default function GeneratePassphrase() {
 
   async function submit(values: PassphraseValues) {
     const count = Number.parseInt(values.wordCount, 10);
-    const phrase = Array.from(
-      { length: count },
-      () => PASSPHRASE_WORDS[randomIndex(PASSPHRASE_WORDS.length)],
-    )
+    const phrase = Array.from({ length: count }, () => PASSPHRASE_WORDS[randomIndex(PASSPHRASE_WORDS.length)])
       .map((word) => (values.capitalize ? `${word[0].toUpperCase()}${word.slice(1)}` : word))
       .join(separators[values.separator]);
     await deliverSecret(phrase, `${count}-word passphrase`);

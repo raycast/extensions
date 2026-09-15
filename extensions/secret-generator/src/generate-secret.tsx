@@ -15,16 +15,18 @@ const formatLabels: Record<SecretFormValues["format"], string> = {
   uuid: "UUID v4",
 };
 
+function parseLength(value: string): number {
+  return /^\d+$/.test(value) ? Number(value) : Number.NaN;
+}
+
 export default function GenerateSecret() {
   const [format, setFormat] = useState<SecretFormValues["format"]>("base64url");
   const [length, setLength] = useState("32");
-  const parsedLength = Number.parseInt(length, 10);
+  const parsedLength = parseLength(length);
   const bits =
     format === "uuid"
       ? 122
-      : Math.floor(
-          (Number.isInteger(parsedLength) ? parsedLength : 0) * (format === "hex" ? 4 : 6),
-        );
+      : Math.floor((Number.isInteger(parsedLength) ? parsedLength : 0) * (format === "hex" ? 4 : 6));
 
   async function submit(values: SecretFormValues) {
     if (values.format === "uuid") {
@@ -32,7 +34,7 @@ export default function GenerateSecret() {
       return;
     }
 
-    const requestedLength = Number.parseInt(values.length, 10);
+    const requestedLength = parseLength(values.length);
     if (!Number.isInteger(requestedLength) || requestedLength < 8 || requestedLength > 512) {
       await showToast({
         style: Toast.Style.Failure,
@@ -81,13 +83,7 @@ export default function GenerateSecret() {
         <Form.Dropdown.Item value="uuid" title="UUID v4" />
       </Form.Dropdown>
       {format !== "uuid" && (
-        <Form.TextField
-          id="length"
-          title="Length"
-          placeholder="8–512"
-          value={length}
-          onChange={setLength}
-        />
+        <Form.TextField id="length" title="Length" placeholder="8–512" value={length} onChange={setLength} />
       )}
     </Form>
   );

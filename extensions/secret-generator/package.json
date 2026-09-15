@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "secret-generator",
   "version": "1.0.0",
   "packageManager": "npm@11.16.0",
@@ -69,7 +70,7 @@
       "type": "checkbox",
       "label": "Use easy-to-read characters only",
       "required": false,
-      "default": false
+      "default": true
     }
   ],
   "commands": [

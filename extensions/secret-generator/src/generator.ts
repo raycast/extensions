@@ -1,13 +1,7 @@
 import { Clipboard, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomInt } from "node:crypto";
 
-type Delivery = "copy-and-close" | "copy" | "paste";
 type SecretKind = "password" | "simple password" | "webhook secret";
-
-interface Preferences {
-  delivery: Delivery;
-  easyToRead: boolean;
-}
 
 const PASSWORD_CHARACTERS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%^&*-_";
 const EASY_TO_READ_PASSWORD_CHARACTERS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
@@ -37,19 +31,13 @@ export function randomString(length: number, characters: string): string {
 }
 
 export function randomIndex(maxExclusive: number): number {
-  const maximumUnbiasedByte = 256 - (256 % maxExclusive);
-  let byte: number;
-  do {
-    byte = randomBytes(1)[0];
-  } while (byte >= maximumUnbiasedByte);
-  return byte % maxExclusive;
+  return randomInt(0, maxExclusive);
 }
 
 /** Generates a password containing at least one character from every selected group. */
 export function randomPassword(length: number, characterGroups: string[]): string {
   if (characterGroups.length === 0) throw new Error("Choose at least one character group.");
-  if (length < characterGroups.length)
-    throw new Error(`Choose a length of at least ${characterGroups.length}.`);
+  if (length < characterGroups.length) throw new Error(`Choose a length of at least ${characterGroups.length}.`);
 
   const characters = characterGroups.join("");
   const result = characterGroups.map((group) => randomString(1, group));
