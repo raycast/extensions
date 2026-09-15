@@ -15,6 +15,10 @@ import { buildDashboard, statesForIssue } from "./dashboard";
 import { IssueMenu } from "./components";
 import { Preferences } from "./types";
 
+// A template-style glyph: white on transparent, tinted to the menu bar's text colour.
+const MENU_BAR_GLYPH = "menu-bar-icon.png";
+const MENU_BAR_ICON = { source: MENU_BAR_GLYPH, tintColor: Color.PrimaryText };
+
 function LinearPulse() {
   const preferences = getPreferenceValues<Preferences>();
   const { data, isLoading, error, revalidate } = useCachedPromise(loadDashboard, [], {
@@ -23,11 +27,7 @@ function LinearPulse() {
 
   if (error && !data) {
     return (
-      <MenuBarExtra
-        title="L !"
-        icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-        tooltip={error.message}
-      >
+      <MenuBarExtra icon={{ source: MENU_BAR_GLYPH, tintColor: Color.Red }} tooltip={error.message}>
         <MenuBarExtra.Item title="Linear could not refresh" subtitle={error.message} />
         <MenuBarExtra.Item title="Try Again" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
       </MenuBarExtra>
@@ -35,9 +35,7 @@ function LinearPulse() {
   }
 
   if (!data) {
-    return (
-      <MenuBarExtra title="L …" icon={Icon.Circle} isLoading={isLoading} tooltip="Loading Linear work" />
-    );
+    return <MenuBarExtra icon={MENU_BAR_ICON} isLoading={isLoading} tooltip="Loading Linear work" />;
   }
 
   let model;
@@ -46,11 +44,7 @@ function LinearPulse() {
   } catch (buildError) {
     const message = buildError instanceof Error ? buildError.message : String(buildError);
     return (
-      <MenuBarExtra
-        title="L !"
-        icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-        tooltip={message}
-      >
+      <MenuBarExtra icon={{ source: MENU_BAR_GLYPH, tintColor: Color.Red }} tooltip={message}>
         <MenuBarExtra.Item title={message} />
       </MenuBarExtra>
     );
@@ -58,10 +52,8 @@ function LinearPulse() {
 
   const limit = Math.max(1, Number(preferences.menuItemLimit) || 6);
   const attentionCount = model.needsYou.length + model.reviews.length;
-  const title = attentionCount ? `L ${attentionCount}` : "L ✓";
-  const icon = attentionCount
-    ? { source: Icon.ExclamationMark, tintColor: Color.Orange }
-    : { source: Icon.CheckCircle, tintColor: Color.Green };
+  // The glyph stays monochrome and follows the menu bar; the count is the signal.
+  const title = attentionCount ? String(attentionCount) : undefined;
   const refresh = async () => {
     await revalidate();
     await showToast({ style: Toast.Style.Success, title: "Linear refreshed" });
@@ -70,7 +62,7 @@ function LinearPulse() {
   return (
     <MenuBarExtra
       title={title}
-      icon={icon}
+      icon={MENU_BAR_ICON}
       isLoading={isLoading}
       tooltip={`${attentionCount} need attention · ${model.agentWork.length} agents active`}
     >

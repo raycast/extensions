@@ -8,7 +8,7 @@ The official Linear extension is a full client: browse issues, projects, and cyc
 
 ## Commands
 
-- **Linear Pulse** shows work needing attention, reviews, active agent sessions, and active issues in the menu bar. It refreshes every 15 minutes.
+- **Linear Pulse** lives in the menu bar and shows a count of what needs you. Open it for the queue: attention items, reviews, active agent sessions, and active issues. It refreshes every 15 minutes.
 - **Linear Work Dashboard** is a searchable queue with actions to open an issue, follow its agent session, change its status, or add a progress note.
 - **Quick Capture Linear Issue** creates an issue with a team, workflow status, project, and priority.
 
