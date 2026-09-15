@@ -18,5 +18,6 @@ Create, access and modify issues and sprints. Supports **Jira Server and Data Ce
 ## Notes
 
 - This extension targets **Jira Server / Data Center only**. Jira Cloud (`*.atlassian.net`) is not supported.
+- **Recently Updated Issues** can show all projects or one project and remembers the last selection.
 - User identities use the Jira **username** (`name` field), not `accountId`.
 - The minimum supported Jira version is **9.0**. Use **Basic** (username and password or API token) or **Bearer** with a Personal Access Token where your admin allows it.

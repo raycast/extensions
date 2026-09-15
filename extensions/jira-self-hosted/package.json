@@ -240,7 +240,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/authentication.test.mjs"
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mjs"
   },
   "platforms": [
     "macOS",
