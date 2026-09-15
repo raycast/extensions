@@ -2,7 +2,7 @@
 
 ## [1.2.0] - {PR_MERGE_DATE}
 
-* Feature: Browser compatibility is now verified per browser instead of assumed — every command's support list comes from reading that browser's own `chrome://chrome-urls` page
+* Feature: Browser compatibility is now verified per browser instead of assumed — every command's support list comes from reading that browser's own `chrome://chrome-urls` page, or, for the few commands no browser advertises, from navigating to them browser by browser
 * Feature: Add 129 commands, including browser-specific ones for Brave, Opera, Edge, Comet, Arc, and Dia
 * Feature: Commands that no longer exist stay searchable, tagged **Removed**, with a note on what replaced them
 * Feature: Commands the browser lists but won't actually load are tagged **Don't Use**, and ⌘⇧H hides them

@@ -90,9 +90,14 @@ macOS `open`. Rather than offer actions that always fail, Windows hides them; th
 
 Every browser's own `chrome://chrome-urls` page (with _Internal debugging pages_ enabled) was
 scraped over the DevTools Protocol on 2026-09-09, and each browser's list became that browser's
-support set. Where a URL is not advertised but still resolves — `chrome://about`, `chrome://help`,
-`chrome://interstitials/ssl` — it was verified by navigating to it directly. Nothing in the
-compatibility data is inferred from a shared Chromium version.
+support set.
+
+Six commands are not advertised by any browser and so could not be measured that way. Four were
+verified by navigating to them in each browser individually; two are Windows/Linux-only and could not
+be verified on macOS at all, so their support is narrowed to what Chromium's own source declares.
+Which is which, and which browsers went unverified, is recorded in
+[docs/paths.md](docs/paths.md#entries-not-derived-from-the-census) — a support set is a claim, and
+the ones that were not measured say so.
 
 Every URL was then navigated to in Chrome 152 to separate three cases that a listing alone
 cannot tell apart: pages that open, pages that no longer exist, and the 22 pages Chrome

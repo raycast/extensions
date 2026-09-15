@@ -34,7 +34,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "about",
     description: (preferredBrowser: { title: string }) =>
       `Provides a list of all ${preferredBrowser.title} URLs, including ones for troubleshooting and debugging.`,
-    supportedBrowsers: ALL_BROWSERS,
+    supportedBrowsers: ["arc", "brave", "chrome", "dia", "edge", "opera"],
   },
 
   {
@@ -641,7 +641,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Conflicts",
     path: "conflicts",
     description: "Displays information about software conflicts that may affect browser stability.",
-    supportedBrowsers: ALL_BROWSERS,
+    supportedBrowsers: ["chrome"],
     platforms: ["windows"],
   },
 
@@ -1225,7 +1225,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "help",
     description: (preferredBrowser: { title: string }) =>
       `Displays ${preferredBrowser.title} version information and about page.`,
-    supportedBrowsers: ALL_BROWSERS,
+    supportedBrowsers: ["arc", "brave", "chrome", "dia", "edge"],
   },
 
   {
@@ -1389,7 +1389,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Internals Session Service",
     path: "internals/session-service",
     description: "Provides diagnostic information about the browser's session service.",
-    supportedBrowsers: CHROMIUM_CORE,
+    supportedBrowsers: ["arc", "brave", "chrome", "dia"],
   },
 
   {
@@ -1406,7 +1406,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Interstitials SSL",
     path: "interstitials/ssl",
     description: "Shows examples of SSL certificate warning pages for testing and debugging purposes.",
-    supportedBrowsers: ALL_BROWSERS,
+    supportedBrowsers: ["arc", "brave", "chrome", "comet", "dia"],
   },
 
   {
@@ -2040,7 +2040,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Sandbox",
     path: "sandbox",
     description: "Displays information about the browser's sandbox security implementation.",
-    supportedBrowsers: ALL_BROWSERS,
+    supportedBrowsers: ["chrome"],
     platforms: ["windows", "linux"],
   },
 
