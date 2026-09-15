@@ -20,7 +20,13 @@ The companion activates an existing tab using `browser.tabs.update(id, { active:
 
 ### Setup
 
-The companion and its tests live in [Zen-Browser-Bridge](https://github.com/sandzhaj/Zen-Browser-Bridge). Follow that repository's installation instructions for the browser add-on and macOS native host. Then open **Search Bookmarks** in Raycast.
+To include pinned tabs in **Search Bookmarks**:
+
+1. Install [Zen Browser Bridge from Mozilla Add-ons](https://addons.mozilla.org/firefox/addon/zen-browser-bridge/) in **Zen Browser**.
+2. Install its [macOS native host](https://github.com/sandzhaj/Zen-Browser-Bridge#install-macos). The browser add-on alone is not sufficient.
+3. Keep Zen running and open **Search Bookmarks** in Raycast.
+
+Ordinary bookmarks do not require the companion. The companion source and tests live in [Zen-Browser-Bridge](https://github.com/sandzhaj/Zen-Browser-Bridge).
 
 ### Scope and privacy
 
