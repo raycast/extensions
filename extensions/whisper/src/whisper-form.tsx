@@ -22,23 +22,23 @@ interface FormValues {
 
 // Mirrors the web UI's multivalue rules exactly: same JSON shape, same validation.
 export function buildMultiValuePayload(rows: KvRow[], sections: KvSection[]): { json?: string; error?: string } {
-  const obj: Record<string, unknown> = {};
+  const obj: Record<string, unknown> = Object.create(null);
   for (const row of rows) {
     const key = row.key.trim();
     if (!key || row.value === "") continue;
-    if (key in obj) return { error: `Duplicate key: "${key}". Each key must be unique.` };
+    if (Object.hasOwn(obj, key)) return { error: `Duplicate key: "${key}". Each key must be unique.` };
     obj[key] = row.value;
   }
 
   const seenSectionNames = new Set<string>();
   for (const section of sections) {
     const name = section.name.trim();
-    const sectionObj: Record<string, string> = {};
+    const sectionObj: Record<string, string> = Object.create(null);
     let duplicateKey: string | null = null;
     for (const row of section.rows) {
       const key = row.key.trim();
       if (!key || row.value === "") continue;
-      if (key in sectionObj) {
+      if (Object.hasOwn(sectionObj, key)) {
         duplicateKey = duplicateKey ?? key;
         continue;
       }
@@ -48,7 +48,7 @@ export function buildMultiValuePayload(rows: KvRow[], sections: KvSection[]): { 
     // Error precedence mirrors the web UI: name-required -> duplicate-name -> duplicate-key.
     if (isEmpty && !name) continue; // empty + unnamed: silently drop
     if (!name) return { error: "Section name is required (or remove the empty section)." };
-    if (name in obj || seenSectionNames.has(name)) {
+    if (Object.hasOwn(obj, name) || seenSectionNames.has(name)) {
       return {
         error: `Duplicate name: "${name}". Section names cannot collide with top-level keys or other sections.`,
       };

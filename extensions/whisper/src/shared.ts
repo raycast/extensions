@@ -70,7 +70,8 @@ async function encryptSecret(plaintext: string): Promise<{ keyB64: string; paylo
 /**
  * Creates a zero-knowledge secret: encrypted locally with AES-256-GCM, the key
  * only ever lives in the link's #k= fragment (never sent to any server).
- * Falls back to the legacy server-encrypted endpoint for older self-hosted servers.
+ * The plaintext never leaves the device: servers without the zero-knowledge
+ * endpoint are rejected instead of falling back to server-side encryption.
  */
 export async function createSecret(
   secret: string,
@@ -97,8 +98,9 @@ export async function createSecret(
   }
 
   if (response.status === 404 || response.status === 405) {
-    // Older self-hosted server without the zero-knowledge endpoint.
-    return createSecretLegacy(secret, expirationTimestamp, selfDestruct);
+    throw new Error(
+      "This server does not support zero-knowledge secrets (Whisper 1.3 or newer required). Upgrade it or point the extension to the hosted instance.",
+    );
   }
   if (response.status !== 201) {
     const body = await response.text();
@@ -108,45 +110,4 @@ export async function createSecret(
 
   const { id } = (await response.json()) as { id: string };
   return `${base}/get_secret?shared_secret_id=${id}#k=${keyB64}`;
-}
-
-async function createSecretLegacy(secret: string, expirationTimestamp: number, selfDestruct: boolean): Promise<string> {
-  const formData = new URLSearchParams();
-  formData.set("secret", secret);
-  formData.set("expiration", expirationTimestamp.toString());
-  if (selfDestruct) {
-    formData.set("self_destruct", "true");
-  }
-
-  let response: Response;
-  try {
-    response = await fetch(`${getWhisperUrl()}/secret?source=raycast`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData.toString(),
-      redirect: "manual",
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Network request failed";
-    throw new Error(`Could not reach Whisper server: ${message}`);
-  }
-
-  const location = response.headers.get("location");
-  if (!location) {
-    const body = await response.text();
-    const detail = body.trim().slice(0, 100);
-    throw new Error(
-      response.ok
-        ? `Unexpected response from Whisper server (${response.status}). ${detail ? detail : "No details."}`
-        : `Whisper server error (${response.status}). ${detail ? detail : "Please try again later."}`,
-    );
-  }
-
-  const url = new URL(location, getWhisperUrl());
-  const secretId = url.searchParams.get("shared_secret_id");
-  if (!secretId) {
-    throw new Error(`Could not extract secret ID from redirect: ${location}`);
-  }
-
-  return `${getWhisperUrl()}/get_secret?shared_secret_id=${secretId}`;
 }

@@ -3,7 +3,7 @@
 ## [Zero-Knowledge Encryption & Multiple Values] - {PR_MERGE_DATE}
 
 - Secrets are now encrypted on your Mac with AES-256-GCM before anything leaves it; the decryption key travels only in the link's `#` fragment and is never sent to any server
-- Automatic fallback to the previous behavior for older self-hosted servers
+- Self-hosted servers without the zero-knowledge endpoint (older than Whisper 1.3) are rejected with a clear error instead of receiving the plaintext
 - New Multiple Values mode in Create Secret: structured key/value entries with optional sections, encrypted locally and shared as one secret
 
 ## [Initial Version] - 2026-03-27

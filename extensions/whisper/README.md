@@ -10,7 +10,7 @@ A Raycast extension to share passwords, API keys, and private notes securely. Wh
 - **Multiple Values Mode** — Share several key/value pairs (with optional sections) as one structured secret, e.g. a set of database credentials
 - **Configurable Expiration** — Choose how long the link stays alive: 30 minutes, 1 hour, 24 hours, or 7 days
 - **Self-Destruct** — Optionally delete the secret after the first view, ensuring it can only be read once
-- **Self-Hosted Support** — Point the extension to your own Whisper server instance via preferences. Older self-hosted servers without the zero-knowledge endpoint automatically fall back to server-side encryption at rest
+- **Self-Hosted Support** — Point the extension to your own Whisper server instance via preferences (Whisper 1.3 or newer; the extension never sends plaintext to a server that lacks the zero-knowledge endpoint)
 - **AI Tool** — Create secret links directly through Raycast AI
 
 ## Configuration
