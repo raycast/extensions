@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "windows-screenshot",
+  "title": "Windows Screenshot",
+  "description": "Capture full screen, selected region, or active window on Windows.",
+  "icon": "icon.png",
+  "author": "afaan_mushtaq",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Media",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "capture-screen",
+      "title": "Capture Screen",
+      "icon": "icon.png",
+      "description": "Capture a screenshot of the entire screen",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "icon": "icon.png",
+      "description": "Select and capture a window",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-region",
+      "title": "Capture Region",
+      "icon": "icon.png",
+      "description": "Select an area of the screen to capture",
+      "mode": "no-view"
+    },
+    {
+      "name": "extract-text",
+      "title": "Extract Text",
+      "icon": "icon.png",
+      "description": "Extract text from an image using native local Windows OCR and copy to clipboard",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "output",
+      "title": "Screenshot Output",
+      "description": "Choose what happens after a screenshot is captured",
+      "type": "dropdown",
+      "required": false,
+      "default": "save-and-copy",
+      "data": [
+        {
+          "title": "Save + Copy",
+          "value": "save-and-copy"
+        },
+        {
+          "title": "Save",
+          "value": "save"
+        },
+        {
+          "title": "Copy",
+          "value": "copy"
+        }
+      ]
+    },
+    {
+      "name": "saveLocation",
+      "title": "Screenshot Save Location",
+      "description": "Directory where screenshots are saved",
+      "type": "directory",
+      "required": false,
+      "default": "~/Pictures/Screenshots"
+    },
+    {
+      "name": "showMagnifier",
+      "title": "Show Magnifier",
+      "label": "Show cursor magnifying glass in Region mode",
+      "description": "Show a magnified pixel preview and crosshair guides around cursor during Region capture",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
