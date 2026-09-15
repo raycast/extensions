@@ -10,7 +10,13 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { summarizeTodayFromIcloud, type DaySummary } from "./lib/glance";
+import {
+  fmtClock,
+  fmtDistance,
+  fmtHm,
+  summarizeTodayFromIcloud,
+  type DaySummary,
+} from "./lib/glance";
 import {
   checkIcloudSetup,
   ICLOUD_SETTINGS_URL,
@@ -41,16 +47,6 @@ function formatFriendlyDate(dateStr: string): string {
   });
 }
 
-function placesLine(summary: DaySummary): string | null {
-  if (summary.first_place && summary.last_place) {
-    if (summary.first_place === summary.last_place) {
-      return summary.first_place;
-    }
-    return `${summary.first_place} → ${summary.last_place}`;
-  }
-  return summary.first_place || summary.last_place || null;
-}
-
 function notePreview(notes: string[]): string | null {
   if (!notes.length) return null;
   const first = notes[0].replace(/\s+/g, " ").trim();
@@ -58,12 +54,20 @@ function notePreview(notes: string[]): string | null {
   return notes.length === 1 ? clipped : `${clipped} (+${notes.length - 1})`;
 }
 
+function placesSubtitle(summary: DaySummary): string | null {
+  if (!summary.places.length) return null;
+  const path = summary.placesSummary;
+  if (!path) return null;
+  if (path.length <= 48) return path;
+  return `${summary.places.length} places`;
+}
+
 function hasDayData(summary: DaySummary): boolean {
   return Boolean(
     summary.sleep ||
-    summary.first_place ||
-    summary.last_place ||
+    summary.places.length ||
     summary.distance ||
+    summary.distanceByActivity.length ||
     summary.notes.length,
   );
 }
@@ -71,8 +75,7 @@ function hasDayData(summary: DaySummary): boolean {
 function oneLiner(summary: DaySummary): string {
   const parts: string[] = [];
   if (summary.sleep) parts.push(`${summary.sleep} sleep`);
-  const places = placesLine(summary);
-  if (places) parts.push(places);
+  if (summary.placesSummary) parts.push(summary.placesSummary);
   if (summary.distance) parts.push(summary.distance);
   if (summary.notes.length) {
     parts.push(
@@ -100,8 +103,6 @@ function notesMarkdown(notes: string[]): string {
 }
 
 function overviewMarkdown(dateStr: string, summary: DaySummary): string {
-  const places = placesLine(summary);
-
   if (!hasDayData(summary)) {
     return [
       `# ${formatFriendlyDate(dateStr)}`,
@@ -122,11 +123,11 @@ function overviewMarkdown(dateStr: string, summary: DaySummary): string {
   if (summary.sleep) {
     lines.push(`- **Sleep** — ${summary.sleep}`);
   }
-  if (places) {
-    lines.push(`- **Places** — ${places}`);
+  if (summary.placesSummary) {
+    lines.push(`- **Places** — ${summary.placesSummary}`);
   }
   if (summary.distance) {
-    lines.push(`- **Distance** — ${summary.distance}`);
+    lines.push(`- **Distance** — ${summary.distance} active`);
   }
   if (summary.notes.length) {
     lines.push(
@@ -141,19 +142,117 @@ function overviewMarkdown(dateStr: string, summary: DaySummary): string {
     }
   }
 
-  lines.push(`_${oneLiner(summary)}_`);
+  lines.push("", `_${oneLiner(summary)}_`);
   return lines.join("\n");
 }
 
-function metricMarkdown(
-  title: string,
-  value: string | null,
-  emptyHint: string,
-): string {
-  if (!value) {
-    return `# ${title}\n\n_${emptyHint}_`;
+function sleepMarkdown(summary: DaySummary): string {
+  if (!summary.sleepSegments.length) {
+    return `# Sleep\n\n_No sleep recorded for today._`;
   }
-  return `# ${title}\n\n**${value}**`;
+
+  const lines = [`# Sleep`, ""];
+  if (summary.sleep) {
+    lines.push(`**${summary.sleep}** asleep (Core + Deep + REM)`, "");
+  }
+
+  if (summary.sleepByType.length) {
+    lines.push("## By stage", "");
+    for (const row of summary.sleepByType) {
+      if (!row.asleepSecs && row.typeName === "Awake") {
+        lines.push(`- **${row.typeName}** — interruptions only`);
+        continue;
+      }
+      lines.push(`- **${row.typeName}** — ${fmtHm(row.asleepSecs)}`);
+    }
+    lines.push("");
+  }
+
+  lines.push("## Timeline", "");
+  for (const seg of summary.sleepSegments) {
+    const span = `${fmtClock(seg.start)}–${fmtClock(seg.end)}`;
+    const dur = seg.asleepSecs ? fmtHm(seg.asleepSecs) : "—";
+    const mark = seg.countsTowardTotal ? "" : " _(excluded from total)_";
+    lines.push(`- **${seg.typeName}** · ${span} · ${dur}${mark}`);
+  }
+
+  return lines.join("\n");
+}
+
+function placesMarkdown(summary: DaySummary): string {
+  if (!summary.places.length) {
+    return `# Places\n\n_No place visits for today._`;
+  }
+
+  const lines = [
+    `# Places`,
+    "",
+    `_${summary.places.length} visit${summary.places.length === 1 ? "" : "s"}_`,
+    "",
+  ];
+
+  if (summary.placesSummary) {
+    lines.push(`**${summary.placesSummary}**`, "");
+  }
+
+  lines.push("## Visits", "");
+  summary.places.forEach((p, i) => {
+    const span = `${fmtClock(p.start)}–${fmtClock(p.end)}`;
+    lines.push(`${i + 1}. **${p.name}** · ${span}`);
+    if (p.secondaryName) {
+      lines.push(`   ${p.secondaryName}`);
+    }
+  });
+
+  return lines.join("\n");
+}
+
+function distanceMarkdown(summary: DaySummary): string {
+  if (!summary.distanceByActivity.length) {
+    return `# Distance\n\n_No movement distance for today._`;
+  }
+
+  const lines = [`# Distance`, ""];
+
+  if (summary.activeDistanceMeters) {
+    lines.push(`**${fmtDistance(summary.activeDistanceMeters)}** active`, "");
+  }
+  if (summary.totalDistanceMeters > summary.activeDistanceMeters) {
+    lines.push(`_All modes: ${fmtDistance(summary.totalDistanceMeters)}_`, "");
+  }
+
+  lines.push("## By activity", "");
+  for (const bucket of summary.distanceByActivity) {
+    const bits = [fmtDistance(bucket.distanceMeters)];
+    if (bucket.durationSecs) bits.push(fmtHm(bucket.durationSecs));
+    if (bucket.steps) bits.push(`${bucket.steps} steps`);
+    const kind = bucket.isActive ? "active" : "other";
+    lines.push(`- **${bucket.activityName}** (${kind}) — ${bits.join(" · ")}`);
+  }
+
+  lines.push("", "## Individual segments", "");
+  for (const bucket of summary.distanceByActivity) {
+    lines.push(`### ${bucket.activityName}`, "");
+    bucket.segments.forEach((seg, i) => {
+      const parts: string[] = [];
+      if (seg.start != null) {
+        const end =
+          seg.durationSecs != null ? seg.start + seg.durationSecs : undefined;
+        parts.push(
+          end != null
+            ? `${fmtClock(seg.start)}–${fmtClock(end)}`
+            : fmtClock(seg.start),
+        );
+      }
+      if (seg.distanceMeters) parts.push(fmtDistance(seg.distanceMeters));
+      if (seg.durationSecs) parts.push(fmtHm(seg.durationSecs));
+      if (seg.steps) parts.push(`${seg.steps} steps`);
+      lines.push(`${i + 1}. ${parts.join(" · ") || "—"}`);
+    });
+    lines.push("");
+  }
+
+  return lines.join("\n");
 }
 
 function setupEmptyIcon(issue: IcloudSetupFail["issue"]): Icon {
@@ -212,7 +311,7 @@ export default function Command() {
   }, [load]);
 
   const summary = state.kind === "ready" ? state.summary : null;
-  const places = summary ? placesLine(summary) : null;
+  const placesSub = summary ? placesSubtitle(summary) : null;
   const notesPreview = summary ? notePreview(summary.notes) : null;
   const line = summary ? oneLiner(summary) : "";
   const notesText = summary?.notes.join("\n\n") ?? "";
@@ -226,38 +325,29 @@ export default function Command() {
     const id = (selected || "overview") as MetricId;
 
     if (id === "sleep") {
-      return (
-        <List.Item.Detail
-          markdown={metricMarkdown(
-            "Sleep",
-            summary.sleep,
-            "No sleep recorded for today.",
-          )}
-        />
-      );
+      return <List.Item.Detail markdown={sleepMarkdown(summary)} />;
     }
 
     if (id === "places") {
       return (
         <List.Item.Detail
-          markdown={metricMarkdown(
-            "Places",
-            places,
-            "No place visits for today.",
-          )}
+          markdown={placesMarkdown(summary)}
           metadata={
-            places ? (
+            summary.places.length ? (
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label
-                  title="First"
-                  text={summary.first_place ?? "—"}
+                  title="Visits"
+                  text={String(summary.places.length)}
                   icon={Icon.Pin}
                 />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
+                  title="First"
+                  text={summary.places[0]?.name ?? "—"}
+                />
+                <List.Item.Detail.Metadata.Label
                   title="Last"
-                  text={summary.last_place ?? "—"}
-                  icon={Icon.Pin}
+                  text={summary.places[summary.places.length - 1]?.name ?? "—"}
                 />
               </List.Item.Detail.Metadata>
             ) : undefined
@@ -269,11 +359,31 @@ export default function Command() {
     if (id === "distance") {
       return (
         <List.Item.Detail
-          markdown={metricMarkdown(
-            "Distance",
-            summary.distance,
-            "No movement distance for today.",
-          )}
+          markdown={distanceMarkdown(summary)}
+          metadata={
+            summary.distanceByActivity.length ? (
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label
+                  title="Active"
+                  text={
+                    summary.activeDistanceMeters
+                      ? fmtDistance(summary.activeDistanceMeters)
+                      : "—"
+                  }
+                  icon={Icon.Footprints}
+                />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label
+                  title="All modes"
+                  text={
+                    summary.totalDistanceMeters
+                      ? fmtDistance(summary.totalDistanceMeters)
+                      : "—"
+                  }
+                />
+              </List.Item.Detail.Metadata>
+            ) : undefined
+          }
         />
       );
     }
@@ -283,7 +393,7 @@ export default function Command() {
     }
 
     return <List.Item.Detail markdown={overviewMarkdown(today, summary)} />;
-  }, [places, selected, summary, today]);
+  }, [selected, summary, today]);
 
   const readyActions = (
     <ActionPanel>
@@ -405,10 +515,19 @@ export default function Command() {
         <List.Item
           id="places"
           title="Places"
-          subtitle={places ?? "—"}
+          subtitle={placesSub ?? "—"}
           icon={{ source: Icon.Pin, tintColor: Color.Blue }}
           accessories={
-            places ? [{ tag: { value: places, color: Color.Blue } }] : undefined
+            summary?.places.length
+              ? [
+                  {
+                    tag: {
+                      value: String(summary.places.length),
+                      color: Color.Blue,
+                    },
+                  },
+                ]
+              : undefined
           }
           detail={detail}
           actions={readyActions}

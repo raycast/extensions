@@ -50,7 +50,10 @@ message PlaceVisit {
 
 message MoveActivity {
   string activity = 1;
+  TimestampWithOffset start_at = 2;
+  uint32 duration_secs = 3;
   uint32 distance_meters = 4;
+  uint32 steps = 5;
 }
 
 message Movement {
@@ -59,6 +62,7 @@ message Movement {
 
 message Sleep {
   uint32 asleep_secs = 2;
+  SleepType type = 3;
 }
 
 enum EventType {
@@ -71,4 +75,14 @@ enum EventType {
   SLEEP = 6;
   EVENT_GROUP = 7;
   TRIP = 8;
+}
+
+enum SleepType {
+  ST_NOT_SPECIFIED = 0;
+  IN_BED = 1;
+  ASLEEP = 2;
+  AWAKE = 3;
+  CORE = 4;
+  DEEP = 5;
+  REM = 6;
 }

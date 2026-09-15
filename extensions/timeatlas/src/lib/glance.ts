@@ -10,6 +10,102 @@ export const EventType = {
   SLEEP: 6,
 } as const;
 
+/** Matches timeatlas.proto SleepType / glance.proto SleepType. */
+export const SleepType = {
+  ST_NOT_SPECIFIED: 0,
+  IN_BED: 1,
+  ASLEEP: 2,
+  AWAKE: 3,
+  CORE: 4,
+  DEEP: 5,
+  REM: 6,
+} as const;
+
+const SLEEP_TYPE_NAMES: Record<number, string> = {
+  [SleepType.ST_NOT_SPECIFIED]: "Unknown",
+  [SleepType.IN_BED]: "In bed",
+  [SleepType.ASLEEP]: "Asleep",
+  [SleepType.AWAKE]: "Awake",
+  [SleepType.CORE]: "Core",
+  [SleepType.DEEP]: "Deep",
+  [SleepType.REM]: "REM",
+};
+
+/** Stages used for the overview sleep total (avoids double-counting IN_BED). */
+const SLEEP_STAGE_TYPES = new Set<number>([
+  SleepType.CORE,
+  SleepType.DEEP,
+  SleepType.REM,
+]);
+
+const ACTIVITY_NAMES: Record<string, string> = {
+  wlk: "Walk",
+  run: "Run",
+  cyc: "Bicycle",
+  stu: "Stairs Up",
+  std: "Stairs Down",
+  sta: "Stationary",
+  bus: "Bus",
+  car: "Car",
+  mtc: "Motorcycle",
+  ski: "Cross-country Ski",
+  mtr: "Metro",
+  sub: "Subway",
+  trm: "Tram",
+  trn: "Train",
+  boa: "Boating",
+  sct: "Scooting",
+  trp: "Transport",
+  non: "None",
+  mcy: "Maybe Cycling",
+  ndt: "Undetermined",
+  air: "Airplane",
+  dhs: "Downhill Skiing",
+  sbd: "Snowboarding",
+  rol: "Rollerskating",
+  hoo: "Hoops",
+  row: "Rowing",
+  slb: "Sailing",
+  pdl: "Paddling",
+  aeb: "Assisted E-Bike",
+  swm: "Swimming",
+  pub: "Public Transport",
+  hke: "Hike",
+};
+
+/** Modes counted toward the overview “active distance” figure. */
+const ACTIVE_ACTIVITY_CODES = new Set([
+  "wlk",
+  "run",
+  "cyc",
+  "mcy",
+  "aeb",
+  "sct",
+  "stu",
+  "std",
+  "ski",
+  "dhs",
+  "sbd",
+  "rol",
+  "hoo",
+  "row",
+  "slb",
+  "pdl",
+  "boa",
+  "swm",
+  "hke",
+]);
+
+export interface MoveActivityDetail {
+  activity: string;
+  activityName: string;
+  distanceMeters: number;
+  start?: number;
+  durationSecs?: number;
+  steps?: number;
+  isActive: boolean;
+}
+
 export interface GlanceEvent {
   id: string;
   type: number;
@@ -17,8 +113,10 @@ export interface GlanceEvent {
   end?: number;
   date?: string;
   placeName?: string;
+  placeSecondaryName?: string;
   asleepSecs?: number;
-  distanceMeters?: number;
+  sleepType?: number;
+  activities?: MoveActivityDetail[];
 }
 
 export interface GlanceNote {
@@ -33,14 +131,52 @@ interface GlanceState {
   notes: Record<string, GlanceNote>;
 }
 
+export interface PlaceVisitSummary {
+  name: string;
+  secondaryName?: string;
+  start?: number;
+  end?: number;
+}
+
+export interface SleepSegmentSummary {
+  type: number;
+  typeName: string;
+  asleepSecs: number;
+  start?: number;
+  end?: number;
+  /** Included in the overview sleep total (Core / Deep / REM). */
+  countsTowardTotal: boolean;
+}
+
+export interface DistanceByActivity {
+  activity: string;
+  activityName: string;
+  distanceMeters: number;
+  steps: number;
+  durationSecs: number;
+  isActive: boolean;
+  segments: MoveActivityDetail[];
+}
+
 export interface DaySummary {
   date: string;
+  /** Overview: stage sleep only (Core+Deep+REM), formatted. */
   sleep: string | null;
-  first_place: string | null;
-  last_place: string | null;
+  /** Overview: active-mode distance only, formatted. */
   distance: string | null;
+  /** Overview / one-liner: visit path with consecutive dupes collapsed. */
+  placesSummary: string | null;
   /** Day notes: timeline journal entries + pending note_*.json files. */
   notes: string[];
+
+  places: PlaceVisitSummary[];
+  sleepSegments: SleepSegmentSummary[];
+  /** Stage totals for detail (Core / Deep / REM / …). */
+  sleepByType: Array<{ typeName: string; asleepSecs: number }>;
+  /** Per-mode rollup + individual segments for the Distance detail. */
+  distanceByActivity: DistanceByActivity[];
+  activeDistanceMeters: number;
+  totalDistanceMeters: number;
 }
 
 export interface GlancePaths {
@@ -90,14 +226,44 @@ function placeName(pv: { name?: string; secondaryName?: string }): string {
   return pv.name || pv.secondaryName || "(unnamed)";
 }
 
-function movementDistance(movement: {
-  moveActivities?: Array<{ distanceMeters?: number }>;
-}): number {
-  let total = 0;
+function activityName(code: string): string {
+  return ACTIVITY_NAMES[code] || code;
+}
+
+function isActiveActivity(code: string): boolean {
+  return ACTIVE_ACTIVITY_CODES.has(code);
+}
+
+function parseActivities(movement: {
+  moveActivities?: Array<{
+    activity?: string;
+    startAt?: {
+      UTCTimestamp?: { seconds?: number | string; nanos?: number };
+    };
+    durationSecs?: number;
+    distanceMeters?: number;
+    steps?: number;
+  }>;
+}): MoveActivityDetail[] {
+  const out: MoveActivityDetail[] = [];
   for (const a of movement.moveActivities ?? []) {
-    if (a.distanceMeters) total += a.distanceMeters;
+    const code = (a.activity ?? "").trim();
+    if (!code) continue;
+    const meters = Number(a.distanceMeters ?? 0);
+    const steps = Number(a.steps ?? 0);
+    const durationSecs = Number(a.durationSecs ?? 0);
+    if (!meters && !steps && !durationSecs) continue;
+    out.push({
+      activity: code,
+      activityName: activityName(code),
+      distanceMeters: meters,
+      start: tsoToUnix(a.startAt as never),
+      durationSecs: durationSecs || undefined,
+      steps: steps || undefined,
+      isActive: isActiveActivity(code),
+    });
   }
-  return total;
+  return out;
 }
 
 type MetaObj = {
@@ -128,13 +294,20 @@ function toGlanceEvent(raw: Record<string, unknown>): GlanceEvent | null {
     const dateEvent = raw.dateEvent as { date?: string } | undefined;
     event.date = dateEvent?.date;
   } else if (type === EventType.PLACEVISIT) {
-    event.placeName = placeName((raw.placeVisit as never) ?? {});
+    const pv =
+      (raw.placeVisit as { name?: string; secondaryName?: string }) ?? {};
+    event.placeName = placeName(pv);
+    if (pv.secondaryName && pv.name) {
+      event.placeSecondaryName = pv.secondaryName;
+    }
   } else if (type === EventType.MOVEMENT) {
-    const meters = movementDistance((raw.movement as never) ?? {});
-    if (meters) event.distanceMeters = meters;
+    const activities = parseActivities((raw.movement as never) ?? {});
+    if (activities.length) event.activities = activities;
   } else if (type === EventType.SLEEP) {
-    const sleep = raw.sleep as { asleepSecs?: number } | undefined;
+    const sleep = raw.sleep as
+      { asleepSecs?: number; type?: number } | undefined;
     if (sleep?.asleepSecs) event.asleepSecs = sleep.asleepSecs;
+    if (sleep?.type != null) event.sleepType = Number(sleep.type);
   }
 
   return event;
@@ -320,15 +493,24 @@ async function loadPendingJsonNotes(
   return pending.sort((a, b) => a.timestampMs - b.timestampMs);
 }
 
-function fmtHm(totalSecs: number): string {
+export function fmtHm(totalSecs: number): string {
   const h = Math.floor(totalSecs / 3600);
   const m = Math.floor((totalSecs % 3600) / 60);
   return `${h}h${String(m).padStart(2, "0")}m`;
 }
 
-function fmtDistance(meters: number): string {
+export function fmtDistance(meters: number): string {
   if (meters >= 1000) return `${(meters / 1000).toFixed(2)} km`;
   return `${Math.floor(meters)} m`;
+}
+
+export function fmtClock(unix?: number): string {
+  if (unix == null) return "—";
+  const d = new Date(unix * 1000);
+  return d.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function localDayBounds(dateStr: string): { start: number; end: number } {
@@ -353,6 +535,18 @@ function normalizeNoteText(text: string): string {
   return text.replace(/\s+/g, " ").trim();
 }
 
+/** Collapse consecutive duplicate place names: Home, Work, Work, Home → Home → Work → Home */
+export function placesPath(places: PlaceVisitSummary[]): string | null {
+  if (!places.length) return null;
+  const names: string[] = [];
+  for (const p of places) {
+    if (!names.length || names[names.length - 1] !== p.name) {
+      names.push(p.name);
+    }
+  }
+  return names.join(" → ");
+}
+
 export function summarizeDay(
   state: GlanceState,
   dateStr: string,
@@ -361,10 +555,15 @@ export function summarizeDay(
   const summary: DaySummary = {
     date: dateStr,
     sleep: null,
-    first_place: null,
-    last_place: null,
     distance: null,
+    placesSummary: null,
     notes: [],
+    places: [],
+    sleepSegments: [],
+    sleepByType: [],
+    distanceByActivity: [],
+    activeDistanceMeters: 0,
+    totalDistanceMeters: 0,
   };
 
   const all = Object.values(state.events);
@@ -383,33 +582,118 @@ export function summarizeDay(
     to = bounds.end;
   }
 
-  const places = all
+  const placeEvents = all
     .filter(
       (e) =>
         e.type === EventType.PLACEVISIT && overlaps(e.start, e.end, from, to),
     )
     .sort((a, b) => (a.start ?? 0) - (b.start ?? 0));
 
-  if (places.length) {
-    summary.first_place = places[0].placeName ?? "(unnamed)";
-    summary.last_place = places[places.length - 1].placeName ?? "(unnamed)";
-  }
+  summary.places = placeEvents.map((e) => ({
+    name: e.placeName ?? "(unnamed)",
+    secondaryName: e.placeSecondaryName,
+    start: e.start,
+    end: e.end,
+  }));
+  summary.placesSummary = placesPath(summary.places);
 
-  let distance = 0;
+  const activityBuckets = new Map<string, DistanceByActivity>();
   for (const e of all) {
     if (e.type !== EventType.MOVEMENT) continue;
     if (!overlaps(e.start, e.end, from, to)) continue;
-    distance += e.distanceMeters ?? 0;
-  }
-  if (distance) summary.distance = fmtDistance(distance);
+    for (const act of e.activities ?? []) {
+      // Prefer activity start inside the day; fall back to parent movement overlap.
+      if (act.start != null && (act.start < from || act.start > to)) continue;
 
-  let sleepSecs = 0;
-  for (const e of all) {
-    if (e.type !== EventType.SLEEP) continue;
-    if (!overlaps(e.start, e.end, from, to)) continue;
-    sleepSecs += e.asleepSecs ?? 0;
+      summary.totalDistanceMeters += act.distanceMeters;
+      if (act.isActive) summary.activeDistanceMeters += act.distanceMeters;
+
+      let bucket = activityBuckets.get(act.activity);
+      if (!bucket) {
+        bucket = {
+          activity: act.activity,
+          activityName: act.activityName,
+          distanceMeters: 0,
+          steps: 0,
+          durationSecs: 0,
+          isActive: act.isActive,
+          segments: [],
+        };
+        activityBuckets.set(act.activity, bucket);
+      }
+      bucket.distanceMeters += act.distanceMeters;
+      bucket.steps += act.steps ?? 0;
+      bucket.durationSecs += act.durationSecs ?? 0;
+      bucket.segments.push(act);
+    }
   }
-  if (sleepSecs) summary.sleep = fmtHm(sleepSecs);
+
+  summary.distanceByActivity = [...activityBuckets.values()].sort((a, b) => {
+    if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
+    return b.distanceMeters - a.distanceMeters;
+  });
+  for (const bucket of summary.distanceByActivity) {
+    bucket.segments.sort((a, b) => (a.start ?? 0) - (b.start ?? 0));
+  }
+  if (summary.activeDistanceMeters) {
+    summary.distance = fmtDistance(summary.activeDistanceMeters);
+  }
+
+  const sleepEvents = all
+    .filter(
+      (e) => e.type === EventType.SLEEP && overlaps(e.start, e.end, from, to),
+    )
+    .sort((a, b) => (a.start ?? 0) - (b.start ?? 0));
+
+  const byTypeSecs = new Map<string, number>();
+  let stageSecs = 0;
+  for (const e of sleepEvents) {
+    const type = e.sleepType ?? SleepType.ST_NOT_SPECIFIED;
+    const typeName = SLEEP_TYPE_NAMES[type] ?? "Unknown";
+    const secs = e.asleepSecs ?? 0;
+    const countsTowardTotal = SLEEP_STAGE_TYPES.has(type);
+    if (countsTowardTotal) stageSecs += secs;
+    byTypeSecs.set(typeName, (byTypeSecs.get(typeName) ?? 0) + secs);
+    summary.sleepSegments.push({
+      type,
+      typeName,
+      asleepSecs: secs,
+      start: e.start,
+      end: e.end,
+      countsTowardTotal,
+    });
+  }
+
+  // If no typed stages exist (legacy / unknown), fall back to summing segments
+  // that aren't IN_BED / ASLEEP parents — or all asleepSecs when type is missing.
+  if (!stageSecs && sleepEvents.length) {
+    const hasTypedStages = sleepEvents.some(
+      (e) => e.sleepType != null && SLEEP_STAGE_TYPES.has(e.sleepType),
+    );
+    if (!hasTypedStages) {
+      const hasParent = sleepEvents.some(
+        (e) =>
+          e.sleepType === SleepType.IN_BED || e.sleepType === SleepType.ASLEEP,
+      );
+      for (const e of sleepEvents) {
+        const type = e.sleepType ?? SleepType.ST_NOT_SPECIFIED;
+        if (
+          hasParent &&
+          (type === SleepType.IN_BED || type === SleepType.ASLEEP)
+        ) {
+          continue;
+        }
+        if (type === SleepType.AWAKE) continue;
+        stageSecs += e.asleepSecs ?? 0;
+      }
+    }
+  }
+
+  if (stageSecs) summary.sleep = fmtHm(stageSecs);
+
+  summary.sleepByType = [...byTypeSecs.entries()]
+    .map(([typeName, asleepSecs]) => ({ typeName, asleepSecs }))
+    .sort((a, b) => b.asleepSecs - a.asleepSecs);
 
   const journalNotes = dateEvent
     ? Object.values(state.notes)
