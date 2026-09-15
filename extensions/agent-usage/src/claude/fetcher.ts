@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -27,6 +28,8 @@ export interface ClaudeCredentials {
   source: CredentialSource;
   credentialsPath?: string;
   keychainAccount?: string;
+  /** The Keychain service this came from, so a refresh writes back to the same item. */
+  keychainService?: string;
   raw: {
     claudeAiOauth?: {
       accessToken?: string;
@@ -232,6 +235,8 @@ export interface ClaudeOAuthAccount {
   id: string;
   label: string;
   token: string;
+  /** Symlinks resolved, so two spellings of one home collapse to a single account. */
+  configDir: string;
   credentials: ClaudeCredentials;
   scopeError: ClaudeError | null;
 }
@@ -241,6 +246,7 @@ function buildClaudeCredentials(
   source: CredentialSource,
   credentialsPath?: string,
   keychainAccount?: string,
+  keychainService?: string,
 ): ClaudeCredentials | null {
   const oauth = parsed.claudeAiOauth;
   const accessToken = normalizeAccessToken(oauth?.accessToken || "");
@@ -258,6 +264,7 @@ function buildClaudeCredentials(
     source,
     credentialsPath,
     keychainAccount,
+    keychainService,
     raw: parsed,
   };
 }
@@ -284,7 +291,62 @@ export function deriveClaudeAccountLabel(configDir: string): string {
   return suffix || base;
 }
 
-function readAccountFromConfigDir(configDir: string): ClaudeOAuthAccount | null {
+function expandHome(target: string, homeDir: string): string {
+  if (target === "~") return path.resolve(homeDir);
+  if (target.startsWith("~/")) return path.resolve(path.join(homeDir, target.slice(2)));
+  return path.resolve(target);
+}
+
+/**
+ * The Keychain service holding a config dir's credentials.
+ *
+ * Claude Code keys non-default homes by the first 8 hex characters of the
+ * SHA-256 of the absolute config dir, and uses the bare service name for the
+ * stock `~/.claude`. The scheme is undocumented, so a miss degrades to the
+ * credentials file rather than failing.
+ */
+export function claudeKeychainService(configDir: string, homeDir: string = os.homedir()): string {
+  const resolved = expandHome(configDir, homeDir);
+  if (resolved === path.resolve(homeDir, ".claude")) return KEYCHAIN_SERVICE;
+
+  return `${KEYCHAIN_SERVICE}-${createHash("sha256").update(resolved).digest("hex").slice(0, 8)}`;
+}
+
+export type KeychainReader = (service: string) => { password: string | null; account: string | null };
+
+const defaultReadKeychain: KeychainReader = (service) => {
+  if (process.platform !== "darwin") return { password: null, account: null };
+
+  const password = readKeychainPassword(service);
+  return { password, account: password ? readKeychainAccount(service) : null };
+};
+
+function readAccountFromKeychainService(
+  configDir: string,
+  readKeychain: KeychainReader,
+  homeDir: string,
+): ClaudeOAuthAccount | null {
+  const service = claudeKeychainService(configDir, homeDir);
+  const { password, account } = readKeychain(service);
+  if (!password) return null;
+
+  const parsed = tryParseCredentialJSON(password);
+  if (!parsed?.claudeAiOauth?.accessToken) return null;
+
+  const credentials = buildClaudeCredentials(parsed, "keychain", undefined, account ?? undefined, service);
+  if (!credentials) return null;
+
+  return {
+    id: `keychain:${service}`,
+    label: deriveClaudeAccountLabel(configDir),
+    token: credentials.accessToken,
+    configDir: resolveConfigDirIdentity(configDir),
+    credentials,
+    scopeError: validateClaudeScopes(credentials),
+  };
+}
+
+function readAccountFromFile(configDir: string): ClaudeOAuthAccount | null {
   const credentialsPath = path.resolve(configDir, CLAUDE_CREDENTIALS_FILE);
   if (!fs.existsSync(credentialsPath)) return null;
 
@@ -299,6 +361,7 @@ function readAccountFromConfigDir(configDir: string): ClaudeOAuthAccount | null 
       id: credentialsPath,
       label: deriveClaudeAccountLabel(configDir),
       token: credentials.accessToken,
+      configDir: resolveConfigDirIdentity(configDir),
       credentials,
       scopeError: validateClaudeScopes(credentials),
     };
@@ -307,37 +370,47 @@ function readAccountFromConfigDir(configDir: string): ClaudeOAuthAccount | null 
   }
 }
 
-function readAccountFromKeychain(): ClaudeOAuthAccount | null {
-  if (process.platform !== "darwin") return null;
-
-  const keychainValue = readKeychainPassword(KEYCHAIN_SERVICE);
-  if (!keychainValue) return null;
-
-  const parsed = tryParseCredentialJSON(keychainValue);
-  if (!parsed?.claudeAiOauth?.accessToken) return null;
-
-  const keychainAccount = readKeychainAccount(KEYCHAIN_SERVICE) ?? undefined;
-  const credentials = buildClaudeCredentials(parsed, "keychain", undefined, keychainAccount);
-  if (!credentials) return null;
-
-  return {
-    id: `keychain:${KEYCHAIN_SERVICE}`,
-    label: "Default",
-    token: credentials.accessToken,
-    credentials,
-    scopeError: validateClaudeScopes(credentials),
-  };
+/**
+ * On macOS the Keychain is authoritative: Claude Code writes there, and a
+ * `.credentials.json` left next to it can be days stale. Reading the file first
+ * reports a dead token while a live one sits in the Keychain.
+ */
+function readAccountFromConfigDir(
+  configDir: string,
+  readKeychain: KeychainReader,
+  homeDir: string,
+): ClaudeOAuthAccount | null {
+  return readAccountFromKeychainService(configDir, readKeychain, homeDir) ?? readAccountFromFile(configDir);
 }
 
-/** The same login reached through two config dirs is one account, not two rows. */
+/**
+ * The same login reached twice is one account, not two rows.
+ *
+ * Matching on the token alone is not enough: `~/.claude` symlinked to a profile
+ * directory yields two Keychain items for one account, each with its own token,
+ * so the resolved config dir has to count as the same identity.
+ */
 export function dedupeClaudeAccounts(accounts: ClaudeOAuthAccount[]): ClaudeOAuthAccount[] {
-  const seen = new Set<string>();
+  const seenTokens = new Set<string>();
+  const seenDirs = new Set<string>();
 
   return accounts.filter((account) => {
-    if (seen.has(account.token)) return false;
-    seen.add(account.token);
+    if (seenTokens.has(account.token)) return false;
+    if (account.configDir && seenDirs.has(account.configDir)) return false;
+
+    seenTokens.add(account.token);
+    if (account.configDir) seenDirs.add(account.configDir);
     return true;
   });
+}
+
+/** Symlinks resolved where possible; a missing directory falls back to the literal path. */
+function resolveConfigDirIdentity(configDir: string): string {
+  try {
+    return fs.realpathSync(path.resolve(configDir));
+  } catch {
+    return path.resolve(configDir);
+  }
 }
 
 /**
@@ -350,23 +423,25 @@ export function dedupeClaudeAccounts(accounts: ClaudeOAuthAccount[]): ClaudeOAut
  * hashed suffixes, so only the canonical service name is read.
  */
 export function listClaudeOAuthAccounts(
-  options: { configDir?: string; env?: NodeJS.ProcessEnv } = {},
+  options: {
+    configDir?: string;
+    env?: NodeJS.ProcessEnv;
+    homeDir?: string;
+    readKeychain?: KeychainReader;
+  } = {},
 ): ClaudeOAuthAccount[] {
-  const { configDir, env = process.env } = options;
+  const { configDir, env = process.env, homeDir = os.homedir(), readKeychain = defaultReadKeychain } = options;
 
   if (configDir) {
-    const account = readAccountFromConfigDir(configDir);
+    const account = readAccountFromConfigDir(configDir, readKeychain, homeDir);
     return account ? [account] : [];
   }
 
   const accounts = resolveClaudeCredentialsPaths(env)
-    .map((credentialsPath) => readAccountFromConfigDir(path.dirname(credentialsPath)))
+    .map((credentialsPath) => readAccountFromConfigDir(path.dirname(credentialsPath), readKeychain, homeDir))
     .filter((account): account is ClaudeOAuthAccount => account !== null);
 
-  if (accounts.length > 0) return dedupeClaudeAccounts(accounts);
-
-  const keychainAccount = readAccountFromKeychain();
-  return keychainAccount ? [keychainAccount] : [];
+  return dedupeClaudeAccounts(accounts);
 }
 
 function persistRefreshedCredentials(credentials: ClaudeCredentials, refreshed: OAuthRefreshResponse) {
@@ -390,7 +465,11 @@ function persistRefreshedCredentials(credentials: ClaudeCredentials, refreshed: 
 
     // Minified JSON — macOS `security -w` hex-encodes values with newlines,
     // which Claude Code can't read back, causing it to invalidate the session.
-    writeKeychainPassword(KEYCHAIN_SERVICE, credentials.keychainAccount, JSON.stringify(next));
+    writeKeychainPassword(
+      credentials.keychainService ?? KEYCHAIN_SERVICE,
+      credentials.keychainAccount,
+      JSON.stringify(next),
+    );
   } else {
     try {
       const credentialsPath = credentials.credentialsPath ?? resolveClaudeCredentialsPaths()[0];
