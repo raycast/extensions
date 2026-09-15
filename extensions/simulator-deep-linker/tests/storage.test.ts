@@ -157,6 +157,34 @@ test("does not reclaim an existing lock solely because it is old", async (t) => 
   assert.equal(await readFile(ownerPath, "utf8"), "replacement-writer\n");
 });
 
+test("recovers a lock whose recorded writer is no longer running", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  await writeFile(storagePath, "[]\n");
+  await mkdir(lockPath);
+  await writeFile(
+    path.join(lockPath, "owner"),
+    `${JSON.stringify({ schemaVersion: 1, token: "abandoned-writer", pid: 2_147_483_647 })}\n`,
+  );
+
+  await withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 100 });
+
+  await assert.rejects(() => lstat(lockPath), /ENOENT/);
+});
+
+test("recovers an empty lock left before owner metadata was written", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  await writeFile(storagePath, "[]\n");
+  await mkdir(lockPath);
+
+  await withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 100 });
+
+  await assert.rejects(() => lstat(lockPath), /ENOENT/);
+});
+
 test("does not release a lock that was replaced by another writer", async (t) => {
   const directory = await temporaryDirectory(t);
   const storagePath = path.join(directory, "deeplinks.json");

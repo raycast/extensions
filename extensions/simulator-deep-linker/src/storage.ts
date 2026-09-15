@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { access, mkdir, readFile, realpath, rename, rmdir, stat, unlink, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, readdir, realpath, rename, rmdir, stat, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -172,6 +172,12 @@ type StorageLockOptions = {
   timeoutMilliseconds?: number;
 };
 
+type StorageLockOwner = {
+  schemaVersion: 1;
+  token: string;
+  pid: number;
+};
+
 export async function withStorageLock<T>(
   storagePath: string,
   operation: (storagePath: string) => Promise<T>,
@@ -180,7 +186,7 @@ export async function withStorageLock<T>(
   const destinationPath = await realpath(storagePath);
   const lockPath = `${destinationPath}.simulator-deep-linker.lock`;
   const ownerPath = path.join(lockPath, "owner");
-  const ownerToken = randomUUID();
+  const owner: StorageLockOwner = { schemaVersion: 1, token: randomUUID(), pid: process.pid };
   const retryMilliseconds = options.retryMilliseconds ?? storageLockRetryMilliseconds;
   const timeoutMilliseconds = options.timeoutMilliseconds ?? storageLockTimeoutMilliseconds;
   const deadline = Date.now() + timeoutMilliseconds;
@@ -189,7 +195,7 @@ export async function withStorageLock<T>(
     try {
       await mkdir(lockPath);
       try {
-        await writeFile(ownerPath, `${ownerToken}\n`, { encoding: "utf8", flag: "wx" });
+        await writeFile(ownerPath, `${JSON.stringify(owner)}\n`, { encoding: "utf8", flag: "wx" });
       } catch (error) {
         await unlink(ownerPath).catch(() => undefined);
         await rmdir(lockPath).catch(() => undefined);
@@ -198,6 +204,7 @@ export async function withStorageLock<T>(
       break;
     } catch (error) {
       if (!isNodeError(error, "EEXIST")) throw error;
+      await recoverAbandonedStorageLock(lockPath, ownerPath);
       if (Date.now() >= deadline) {
         throw new Error(
           "Timed out waiting for another Simulator Deep Linker writer to finish. If no writer is running, remove the abandoned storage lock manually.",
@@ -218,7 +225,7 @@ export async function withStorageLock<T>(
   }
 
   try {
-    await releaseStorageLock(lockPath, ownerPath, ownerToken);
+    await releaseStorageLock(lockPath, ownerPath, owner);
   } catch (releaseError) {
     if (!operationFailed) throw releaseError;
   }
@@ -227,20 +234,135 @@ export async function withStorageLock<T>(
   return operationResult as T;
 }
 
-async function releaseStorageLock(lockPath: string, ownerPath: string, ownerToken: string): Promise<void> {
-  let currentOwner: string;
+async function releaseStorageLock(lockPath: string, ownerPath: string, owner: StorageLockOwner): Promise<void> {
+  const releasePath = path.join(lockPath, `.release.${owner.token}`);
   try {
-    currentOwner = (await readFile(ownerPath, "utf8")).trim();
+    await rename(ownerPath, releasePath);
   } catch (error) {
     throw new Error(`Could not verify storage lock ownership: ${errorMessage(error)}`);
   }
 
-  if (currentOwner !== ownerToken) {
+  const currentOwner = await readStorageLockOwner(releasePath).catch(() => undefined);
+  if (!currentOwner || currentOwner.token !== owner.token || currentOwner.pid !== owner.pid) {
+    await restoreStorageLockOwner(releasePath, ownerPath);
     throw new Error("Storage lock ownership changed while updating deep links; the replacement lock was left intact.");
   }
 
-  await unlink(ownerPath);
-  await rmdir(lockPath);
+  await removeClaimedStorageLock(lockPath, ownerPath, releasePath, currentOwner);
+}
+
+async function recoverAbandonedStorageLock(lockPath: string, ownerPath: string): Promise<void> {
+  let observedOwner: StorageLockOwner | undefined;
+  try {
+    observedOwner = await readStorageLockOwner(ownerPath);
+  } catch (error) {
+    if (!isNodeError(error, "ENOENT")) return;
+  }
+
+  if (!observedOwner) {
+    await recoverOwnerlessStorageLock(lockPath, ownerPath);
+    return;
+  }
+  if (isProcessAlive(observedOwner.pid)) return;
+
+  const recoveryPath = path.join(lockPath, `.recovery.${randomUUID()}`);
+  try {
+    await rename(ownerPath, recoveryPath);
+  } catch (error) {
+    if (!isNodeError(error, "ENOENT")) throw error;
+    return;
+  }
+
+  const claimedOwner = await readStorageLockOwner(recoveryPath).catch(() => undefined);
+  if (
+    !claimedOwner ||
+    claimedOwner.token !== observedOwner.token ||
+    claimedOwner.pid !== observedOwner.pid ||
+    isProcessAlive(claimedOwner.pid)
+  ) {
+    await restoreStorageLockOwner(recoveryPath, ownerPath);
+    return;
+  }
+
+  await removeClaimedStorageLock(lockPath, ownerPath, recoveryPath, claimedOwner);
+}
+
+async function recoverOwnerlessStorageLock(lockPath: string, ownerPath: string): Promise<void> {
+  let entries: string[];
+  try {
+    entries = await readdir(lockPath);
+  } catch (error) {
+    if (!isNodeError(error, "ENOENT")) throw error;
+    return;
+  }
+
+  if (entries.length === 0) {
+    await rmdir(lockPath).catch((error) => {
+      if (!isNodeError(error, "ENOENT") && !isNodeError(error, "ENOTEMPTY")) throw error;
+    });
+    return;
+  }
+
+  const transitionNames = entries.filter((entry) => entry.startsWith(".recovery.") || entry.startsWith(".release."));
+  if (transitionNames.length !== 1 || entries.length !== 1) return;
+
+  const transitionPath = path.join(lockPath, transitionNames[0]);
+  const transitionOwner = await readStorageLockOwner(transitionPath).catch(() => undefined);
+  if (!transitionOwner || isProcessAlive(transitionOwner.pid)) return;
+
+  try {
+    await rename(transitionPath, ownerPath);
+  } catch (error) {
+    if (!isNodeError(error, "ENOENT") && !isNodeError(error, "EEXIST")) throw error;
+  }
+}
+
+async function removeClaimedStorageLock(
+  lockPath: string,
+  ownerPath: string,
+  claimPath: string,
+  owner: StorageLockOwner,
+): Promise<void> {
+  await unlink(claimPath);
+  try {
+    await rmdir(lockPath);
+  } catch (error) {
+    await writeFile(ownerPath, `${JSON.stringify(owner)}\n`, { encoding: "utf8", flag: "wx" }).catch(() => undefined);
+    throw error;
+  }
+}
+
+async function restoreStorageLockOwner(claimPath: string, ownerPath: string): Promise<void> {
+  try {
+    await rename(claimPath, ownerPath);
+  } catch (error) {
+    if (!isNodeError(error, "ENOENT")) throw error;
+  }
+}
+
+async function readStorageLockOwner(ownerPath: string): Promise<StorageLockOwner | undefined> {
+  const parsed: unknown = JSON.parse(await readFile(ownerPath, "utf8"));
+  if (
+    !isRecord(parsed) ||
+    parsed.schemaVersion !== 1 ||
+    typeof parsed.token !== "string" ||
+    !parsed.token ||
+    !Number.isSafeInteger(parsed.pid) ||
+    (parsed.pid as number) <= 0
+  ) {
+    return undefined;
+  }
+  return parsed as StorageLockOwner;
+}
+
+function isProcessAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    if (isNodeError(error, "ESRCH")) return false;
+    return true;
+  }
 }
 
 function delay(milliseconds: number): Promise<void> {

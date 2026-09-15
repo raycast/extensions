@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simulator-deep-linker",
   "title": "Simulator Deep Linker",
-  "description": "Requires the free Simulator Deep Linker 0.2.2+ macOS app; search and open saved links on iOS and Android devices.",
+  "description": "Requires the free Simulator Deep Linker 0.2.3+ macOS app; search and open saved links on iOS and Android devices.",
   "icon": "icon.png",
   "author": "shtefan_boblik",
   "platforms": [
