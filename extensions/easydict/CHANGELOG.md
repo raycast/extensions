@@ -1,11 +1,34 @@
 # `Easydict` Changelog
 
+## [v3.2.0] - 2026-09-09
+
+### ⚠️ Behavioral Changes
+
+#### 🆕 Custom AI Providers
+
+- Connect LLMs through Raycast AI or any OpenAI-compatible endpoint for translation and word lookup.
+- **Existing settings migrate automatically.** Open Search Word or Manage Providers to convert configured OpenAI and Gemini settings into ordinary AI providers, preserving connection settings, enablement, and ordering. Previously imported providers keep their edits; previously retired providers stay removed.
+- **Manage AI providers in Manage Providers.** Old Extension Settings remain available as import sources, but no longer run separate providers. Editing, disabling, or deleting an AI provider does not restore an old service. Use **Add from Legacy OpenAI/Gemini Settings…** to create another copy, initially disabled.
+- **Provider ordering is now managed in Manage Providers.** Built-in and AI providers share one order and can be moved together with the **Move Up**/**Move Down** actions or Cmd+Shift+Up/Down on macOS and Ctrl+Shift+Up/Down on Windows. The **Legacy Service List Order** preference only initializes this order until it is saved.
+
+### ✨ New Features
+
+#### AI-Generated Dictionary Entries
+
+- For each provider, choose Plain Translation or AI-Generated Dictionary Entry in Word & Term Results.
+- Dictionary mode applies to words and terms; other input remains plain translation. New or connection-related provider changes offer Test & Save by default, with Save Without Testing still available. JSON output defaults follow provider presets. Explicitly unsupported native JSON switches the provider to prompt-based output and shows a notice; malformed output is retried once without changing the setting. Dictionary generation may take longer.
+
+#### Chinese Stroke Order
+
+- Use **Show Stroke Order** from live or saved translation results to view stroke-order diagrams for Chinese characters.
+  - Thanks to [@MagEk1511](https://github.com/MagEk1511)
+
 ## [v3.1.0] - 2026-08-12
 
 ### ✨ New Features
 
 - Added favorite words: save translation results and browse/manage them in the favorites list.
-  - Thanks for @[TTsWorld](https://github.com/TTsWorld)
+  - Thanks to [@TTsWorld](https://github.com/TTsWorld)
 
 ### 🔧 Maintenance
 

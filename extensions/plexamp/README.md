@@ -26,6 +26,8 @@ Raycast extension for browsing Plex music libraries and controlling a Plexamp pl
 - Toggle between list and grid view for artist albums (`Cmd+Shift+V`), with albums grouped by release type (Albums, EPs, Singles, Compilations, etc.) and sorted by release year in grid view. Grid column count is configurable in extension preferences.
 - Search the library the way Plex does, with grouped results for artists, albums, and songs.
 - Play immediately in Plexamp, add to queue, or insert as play next from browse and search results.
+- Jump from any track to its album (`Cmd+G`), landing on that track, or to its artist (`Cmd+Shift+G`), landing on that album.
+- In album track lists, `Enter` plays the album from the selected track and `Cmd+Enter` plays it from the start; playing, queueing, or inserting just the track stays available in the action panel.
 - Inspect the active Plexamp queue and use transport controls from Raycast in `Now Playing`.
 - Jump to tracks, reorder the queue, and remove queue items from `Now Playing`.
 - Show the active album art and a customizable now playing string in the menu bar, refreshed every 10 seconds.

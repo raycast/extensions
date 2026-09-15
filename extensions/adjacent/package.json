@@ -1,0 +1,190 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "adjacent",
+  "version": "0.1.0",
+  "title": "Adjacent",
+  "description": "Browse, search, and read news on Adjacent prediction markets, indices, and rates.",
+  "icon": "icon.png",
+  "author": "Lucas-Kohorst",
+  "categories": [
+    "Finance",
+    "News",
+    "Web"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "prediction markets",
+    "kalshi",
+    "polymarket",
+    "indices",
+    "adjacent",
+    "forecasting"
+  ],
+  "commands": [
+    {
+      "name": "browse",
+      "title": "Browse",
+      "subtitle": "Adjacent",
+      "description": "Browse events, markets, indices, and rates.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Adjacent",
+      "description": "Find events, markets, indices, and rates.",
+      "mode": "view"
+    },
+    {
+      "name": "news",
+      "title": "News",
+      "subtitle": "Adjacent",
+      "description": "Latest headlines and related markets. API key required.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "subtitle": "Adjacent",
+      "description": "Live index levels in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "tools": [
+    {
+      "name": "find",
+      "title": "Find",
+      "description": "Discover markets, events, indices, rates, or news by topic when you do not have an id yet."
+    },
+    {
+      "name": "get",
+      "title": "Get",
+      "description": "Fetch full detail for one Adjacent entity by type and id."
+    },
+    {
+      "name": "list",
+      "title": "List",
+      "description": "Browse Adjacent events, markets, indices, rates, or latest news."
+    },
+    {
+      "name": "price",
+      "title": "Price",
+      "description": "Price history for an index, rate, market, or event over a human timeframe."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Optional Adjacent API key (ak_…). Without a key, lists and prices use the 15-minute-delayed public snapshot. News, candles, similar markets, trades, and quotes need a key.",
+      "placeholder": "ak_…"
+    },
+    {
+      "name": "defaultTimeframe",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Price Window",
+      "description": "Used when opening price history from a detail view.",
+      "default": "30d",
+      "data": [
+        {
+          "title": "15 minutes",
+          "value": "15m"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30m"
+        },
+        {
+          "title": "1 hour",
+          "value": "1h"
+        },
+        {
+          "title": "6 hours",
+          "value": "6h"
+        },
+        {
+          "title": "12 hours",
+          "value": "12h"
+        },
+        {
+          "title": "24 hours",
+          "value": "24h"
+        },
+        {
+          "title": "7 days",
+          "value": "7d"
+        },
+        {
+          "title": "30 days",
+          "value": "30d"
+        },
+        {
+          "title": "90 days",
+          "value": "90d"
+        }
+      ]
+    },
+    {
+      "name": "cycleSeconds",
+      "type": "dropdown",
+      "required": false,
+      "title": "Menu Bar Cycle",
+      "description": "How long each index stays in the menu bar before the next one.",
+      "default": "15",
+      "data": [
+        {
+          "title": "5 seconds",
+          "value": "5"
+        },
+        {
+          "title": "10 seconds",
+          "value": "10"
+        },
+        {
+          "title": "15 seconds",
+          "value": "15"
+        },
+        {
+          "title": "30 seconds",
+          "value": "30"
+        },
+        {
+          "title": "60 seconds",
+          "value": "60"
+        },
+        {
+          "title": "Off",
+          "value": "0"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "echarts": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

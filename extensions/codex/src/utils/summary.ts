@@ -13,11 +13,12 @@ import {
   tildeifyPath,
 } from "./format";
 
-const summaryModel = AI.Model["Anthropic_Claude_4.5_Haiku"];
+const summaryModel = AI.Model["Google_Gemini_3.6_Flash"];
+const titleModel = AI.Model["Google_Gemini_3.5_Flash_Lite"];
 
-const maxTranscriptCharactersPerCall = 32_000;
+const maxTranscriptCharactersPerCall = 200_000;
 const rateLimitRetryDelaysMs = [12_000, 30_000];
-const maxTitleWords = 6;
+const maxTitleWords = 5;
 const maxTitleLength = 64;
 const titleFillerWords = new Set([
   "a",
@@ -32,30 +33,28 @@ const titleFillerWords = new Set([
   "to",
   "with",
 ]);
-const titleWeakActionWords = new Set([
-  "add",
-  "adding",
-  "build",
-  "building",
-  "continue",
-  "continuing",
-  "create",
-  "creating",
-  "fix",
-  "fixing",
-  "implement",
-  "implementing",
-  "improve",
-  "improving",
-  "make",
-  "making",
-  "refactor",
-  "refactoring",
-  "review",
-  "reviewing",
-  "update",
-  "updating",
-]);
+const titleRules = [
+  "Use 3 to 5 words.",
+  "Capture the central subject and the specific work, question, decision, or outcome.",
+  "Lead with the most distinguishing concept, not automatically the repo or product name.",
+  "Include the repo, product, or domain only when it materially disambiguates the thread.",
+  "Use an action word when it clarifies the work or state, such as Fix, Remove, Migrate, Compare, Audit, or Design.",
+  "Prefer concrete feature names, components, files, commands, identifiers, and failure modes over broad category words.",
+  "Reflect the thread's dominant or latest meaningful purpose, not merely its opening request or existing title.",
+  "For unresolved work, name the investigation or decision. For completed work, name the concrete result.",
+  "Avoid generic words such as thread, chat, conversation, work, task, help, and discussion.",
+  "Never begin with Thread, Conversation, Help with, or Summary.",
+  "Use sentence case: capitalize only the first word, plus proper nouns, identifiers, package names, and acronyms.",
+  "Do not use dates unless the date is essential for distinguishing the thread.",
+  "Do not use quotes, Markdown, or trailing punctuation.",
+] as const;
+const titleExamples = [
+  "Search Threads progressive results",
+  "Codex usage reset credits",
+  "Aside bookmark loading flash",
+  "Agent Usage keychain auth",
+  "MCP server manager",
+] as const;
 
 export type CodexThreadSummary = {
   title: string;
@@ -102,6 +101,7 @@ export async function generateCodexThreadTitle(
       : titleSignals.join("\n\n---\n\n");
   const rawTitle = await askSummaryAi(
     buildTitlePrompt(thread, source, preparedTranscript.chunks.length),
+    titleModel,
   );
 
   return parseThreadTitleResponse(rawTitle, thread);
@@ -142,6 +142,7 @@ async function processChunks(
     index: number,
     total: number,
   ) => string,
+  model: AI.Model = summaryModel,
 ): Promise<string[]> {
   const total = chunks.length;
   const results: string[] = [];
@@ -149,6 +150,7 @@ async function processChunks(
   for (const [index, chunk] of chunks.entries()) {
     const result = await askSummaryAi(
       buildPrompt(thread, chunk, index + 1, total),
+      model,
     );
     results.push(result.trim());
   }
@@ -167,15 +169,18 @@ function summarizeTitleSignalChunks(
   thread: CodexThread,
   chunks: string[],
 ): Promise<string[]> {
-  return processChunks(thread, chunks, buildTitleSignalChunkPrompt);
+  return processChunks(thread, chunks, buildTitleSignalChunkPrompt, titleModel);
 }
 
-async function askSummaryAi(prompt: string): Promise<string> {
+async function askSummaryAi(
+  prompt: string,
+  model: AI.Model = summaryModel,
+): Promise<string> {
   for (let attempt = 0; ; attempt += 1) {
     try {
       return await AI.ask(prompt, {
         creativity: "low",
-        model: summaryModel,
+        model,
       });
     } catch (error) {
       const delayMs = rateLimitRetryDelaysMs[attempt];
@@ -213,9 +218,10 @@ function buildTitleSignalChunkPrompt(
   chunkCount: number,
 ) {
   return [
-    "Extract only title-worthy signals from this Codex conversation chunk.",
-    "Preserve the repo/product/domain, task type, main object, and concrete outcome.",
-    "Ignore generic assistant phrasing, AGENTS instructions, and implementation noise that would not help future search.",
+    "Extract only the signals needed to name this Codex thread clearly.",
+    "Preserve the central subject and the specific work, question, decision, failure, or outcome that distinguishes it.",
+    "Treat the repo, product, and existing title as context, not mandatory title prefixes.",
+    "Ignore generic assistant phrasing, AGENTS instructions, and implementation noise that would not help someone recognize the thread.",
     "Return concise bullets only. Do not propose a final title yet.",
     "",
     "Thread metadata:",
@@ -261,25 +267,15 @@ function buildTitlePrompt(
   chunkCount: number,
 ) {
   return [
-    "Name this Codex conversation for a searchable Raycast thread browser.",
+    "Create the canonical title for this Codex thread. The title appears everywhere the thread is shown, so it must let someone immediately recognize and distinguish the conversation.",
     "Return ONLY this plain-text format:",
-    "TITLE: <semantic thread name>",
+    "TITLE: <thread title>",
     "",
     "Rules:",
-    "- 3 to 6 words. Never exceed 6 words.",
-    "- Put the repo, product, or domain first when known.",
-    "- Prefer compact noun phrases over sentences.",
-    "- Omit filler verbs like improve, review, add, implement, update, help, or make.",
-    "- Include the concrete object or outcome, not generic words like thread, chat, work, or conversation.",
-    "- No dates unless the date is central to the work.",
-    "- Use Title Case while preserving established casing for identifiers, package names, and acronyms.",
-    "- No Markdown formatting.",
+    ...titleRules.map((rule) => `- ${rule}`),
     "",
-    "Good examples:",
-    "- Browser Tab Grouping Shortcut",
-    "- Calendar Event Conflict Detection",
-    "- Codex Extension Debugging",
-    "- Documents PDF Ingestion Plan",
+    "Examples:",
+    ...titleExamples.map((example) => `- ${example}`),
     "",
     "Thread metadata:",
     buildThreadMetadataBlock(thread),
@@ -329,13 +325,7 @@ function buildFinalSummaryPrompt(
     "- <compact comma-separated retrieval terms>",
     "",
     "Title rules:",
-    "- 3 to 6 words. Never exceed 6 words.",
-    "- Lead with the repo, product, or domain when known.",
-    "- Compact noun phrases beat verb-led sentences. Use a verb only when the verb is the work itself.",
-    "- Never begin with Thread, Conversation, Help with, or Summary.",
-    "- No dates unless the date is central to the work.",
-    "- Use Title Case while preserving established casing for identifiers, package names, and acronyms.",
-    "- No quotes, markdown, or trailing punctuation.",
+    ...titleRules.map((rule) => `- ${rule}`),
     "",
     "Bullet rules:",
     "- 6 to 18 words per bullet. No multi-sentence bullets.",
@@ -361,11 +351,7 @@ function buildFinalSummaryPrompt(
     'For exploratory or abandoned threads with no concrete output, still produce every heading; use "- None noted" wherever grounded content is absent. Do not pad with generic statements like "discussed the topic" or "explored options".',
     "",
     "Title examples that work:",
-    "- Browser Tab Grouping Shortcut",
-    "- Calendar Event Conflict Detection",
-    "- Codex Extension Debugging",
-    "- Documents PDF Ingestion Plan",
-    "- Codex Thread Search",
+    ...titleExamples.map((example) => `- ${example}`),
     "",
     "Thread metadata:",
     buildThreadMetadataBlock(thread),
@@ -399,7 +385,7 @@ async function prepareThreadTranscript(
 
 function buildThreadMetadataBlock(thread: CodexThread) {
   return [
-    `title: ${getThreadDisplayTitle(thread)}`,
+    `existing_title: ${getThreadDisplayTitle(thread)}`,
     `project: ${getProjectName(thread.cwd)} (${tildeifyPath(thread.cwd)})`,
     `branch: ${thread.gitInfo?.branch ?? "unknown"}`,
     `source: ${getCodexSourceDescriptor(thread.source).label}`,
@@ -552,19 +538,12 @@ function capTitleWords(title: string): string {
     return title;
   }
 
-  const compactWords = words.filter((word, index) => {
+  const compactWords = words.filter((word) => {
     const normalizedWord = word
       .toLowerCase()
       .replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, "");
 
     if (titleFillerWords.has(normalizedWord)) {
-      return false;
-    }
-
-    if (
-      (index === 0 || index === 1) &&
-      titleWeakActionWords.has(normalizedWord)
-    ) {
       return false;
     }
 

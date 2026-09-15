@@ -29,6 +29,7 @@ vi.mock("@/core/config", () => ({
 
 const initialState: QueryState = {
   activeGeneration: 0,
+  listEpoch: 0,
   queryResults: [],
   queryRecordList: [],
   isLoading: false,
@@ -37,7 +38,7 @@ const initialState: QueryState = {
   autoSelectedTargetLanguageItem: languageItemList[1], // Chinese
 };
 
-function createTranslationResult(type: TranslationType): TranslationQueryResult {
+function createTranslationResult(type: TranslationType, serviceId = `static:${type}`): TranslationQueryResult {
   const queryWordInfo = { word: "test", fromLanguage: "en", toLanguage: "zh-CHS" };
   const displayItem: ListDisplayItem = {
     queryType: type,
@@ -48,6 +49,9 @@ function createTranslationResult(type: TranslationType): TranslationQueryResult 
   };
 
   return {
+    serviceId,
+    serviceLabel: type,
+    serviceOrder: 0,
     type,
     queryWordInfo,
     result: {},
@@ -69,6 +73,9 @@ function createLingueeResult(): DictionaryQueryResult {
   };
 
   return {
+    serviceId: "static:linguee",
+    serviceLabel: DictionaryType.Linguee,
+    serviceOrder: 0,
     type: DictionaryType.Linguee,
     queryWordInfo,
     result: {},
@@ -78,21 +85,21 @@ function createLingueeResult(): DictionaryQueryResult {
 
 describe("queryReducer", () => {
   it("FINISH_QUERY removes only its provider and stops loading only after the final pending provider finishes", () => {
-    let state = queryReducer(initialState, { type: "START_QUERY", queryType: TranslationType.DeepL, generation: 0 });
-    state = queryReducer(state, { type: "START_QUERY", queryType: DictionaryType.Linguee, generation: 0 });
-    expect(state.queryRecordList).toEqual([TranslationType.DeepL, DictionaryType.Linguee]);
+    let state = queryReducer(initialState, { type: "START_QUERY", serviceId: "static:deepl", generation: 0 });
+    state = queryReducer(state, { type: "START_QUERY", serviceId: "static:linguee", generation: 0 });
+    expect(state.queryRecordList).toEqual(["static:deepl", "static:linguee"]);
     expect(state.isLoading).toBe(true);
 
-    state = queryReducer(state, { type: "FINISH_QUERY", queryType: TranslationType.DeepL, generation: 0 });
-    expect(state.queryRecordList).toEqual([DictionaryType.Linguee]);
+    state = queryReducer(state, { type: "FINISH_QUERY", serviceId: "static:deepl", generation: 0 });
+    expect(state.queryRecordList).toEqual(["static:linguee"]);
     expect(state.isLoading).toBe(true);
 
-    state = queryReducer(state, { type: "FINISH_QUERY", queryType: DictionaryType.Linguee, generation: 0 });
+    state = queryReducer(state, { type: "FINISH_QUERY", serviceId: "static:linguee", generation: 0 });
     expect(state.queryRecordList).toEqual([]);
     expect(state.isLoading).toBe(false);
   });
 
-  it("SET_RESULT replaces an earlier result of the same provider type", () => {
+  it("SET_RESULT replaces an earlier result of the same service", () => {
     const result1 = createTranslationResult(TranslationType.DeepL);
     const result2 = createTranslationResult(TranslationType.DeepL);
     result2.translations = ["updated"];
@@ -104,6 +111,35 @@ describe("queryReducer", () => {
     state = queryReducer(state, { type: "SET_RESULT", queryResult: result2, generation: 0 });
     expect(state.queryResults).toHaveLength(1);
     expect(state.queryResults[0]).toHaveProperty("translations", ["updated"]);
+  });
+
+  it("keeps independent results and pending records for services with the same semantic type", () => {
+    const first = createTranslationResult(TranslationType.OpenAI, "profile:first");
+    const second = createTranslationResult(TranslationType.OpenAI, "profile:second");
+    second.serviceOrder = 1;
+
+    let state = queryReducer(initialState, { type: "START_QUERY", serviceId: first.serviceId, generation: 0 });
+    state = queryReducer(state, { type: "START_QUERY", serviceId: second.serviceId, generation: 0 });
+    state = queryReducer(state, { type: "SET_RESULT", queryResult: second, generation: 0 });
+    state = queryReducer(state, { type: "SET_RESULT", queryResult: first, generation: 0 });
+
+    expect(state.queryRecordList).toEqual(["profile:first", "profile:second"]);
+    expect(state.queryResults.map((result) => result.serviceId)).toEqual(["profile:first", "profile:second"]);
+
+    state = queryReducer(state, { type: "FINISH_QUERY", serviceId: first.serviceId, generation: 0 });
+    expect(state.queryRecordList).toEqual(["profile:second"]);
+  });
+
+  it("sorts results by global service order across semantic provider types", () => {
+    const google = createTranslationResult(TranslationType.Google, "static:google");
+    google.serviceOrder = 0;
+    const ai = createTranslationResult(TranslationType.OpenAI, "profile:ai");
+    ai.serviceOrder = 1;
+
+    let state = queryReducer(initialState, { type: "SET_RESULT", queryResult: ai, generation: 0 });
+    state = queryReducer(state, { type: "SET_RESULT", queryResult: google, generation: 0 });
+
+    expect(state.queryResults.map((result) => result.serviceId)).toEqual(["static:google", "profile:ai"]);
   });
 
   it("a DeepL + Linguee result pair applies the existing title/copy coupling", () => {
@@ -131,7 +167,7 @@ describe("queryReducer", () => {
     });
     state = queryReducer(state, {
       type: "START_QUERY",
-      queryType: TranslationType.Google,
+      serviceId: "static:google",
       generation: 0,
     });
 
@@ -145,6 +181,7 @@ describe("queryReducer", () => {
     expect(state.isLoading).toBe(true);
     expect(state.isShowDetail).toBe(false);
     expect(state.activeGeneration).toBe(1);
+    expect(state.listEpoch).toBe(0);
   });
 
   it("CLEAR_ALL empties results and pending providers and resets detail/loading", () => {
@@ -153,7 +190,7 @@ describe("queryReducer", () => {
       queryResult: createTranslationResult(TranslationType.DeepL),
       generation: 0,
     });
-    state = queryReducer(state, { type: "START_QUERY", queryType: TranslationType.Google, generation: 0 });
+    state = queryReducer(state, { type: "START_QUERY", serviceId: "static:google", generation: 0 });
 
     state = queryReducer(state, { type: "CLEAR_ALL", generation: 2 });
     expect(state.queryResults).toEqual([]);
@@ -161,6 +198,53 @@ describe("queryReducer", () => {
     expect(state.isLoading).toBe(false);
     expect(state.isShowDetail).toBe(false);
     expect(state.activeGeneration).toBe(2);
+    expect(state.listEpoch).toBe(0);
+  });
+
+  it("changes the native list epoch only when a query first produces a visible item", () => {
+    let state = queryReducer(initialState, { type: "RESET_FOR_NEW_QUERY", generation: 1 });
+    expect(state.activeGeneration).toBe(1);
+    expect(state.listEpoch).toBe(0);
+
+    const hiddenResult = createTranslationResult(TranslationType.DeepL);
+    hiddenResult.hideDisplay = true;
+    state = queryReducer(state, { type: "SET_RESULT", queryResult: hiddenResult, generation: 1 });
+    expect(state.listEpoch).toBe(0);
+
+    const emptyResult = createTranslationResult(TranslationType.OpenAI);
+    emptyResult.displaySections = [{ type: TranslationType.OpenAI, items: [] }];
+    state = queryReducer(state, { type: "SET_RESULT", queryResult: emptyResult, generation: 1 });
+    expect(state.listEpoch).toBe(0);
+
+    state = queryReducer(state, {
+      type: "SET_RESULT",
+      queryResult: createTranslationResult(TranslationType.Google),
+      generation: 1,
+    });
+    expect(state.listEpoch).toBe(1);
+
+    state = queryReducer(state, {
+      type: "SET_RESULT",
+      queryResult: createTranslationResult(TranslationType.Bing),
+      generation: 1,
+    });
+    expect(state.listEpoch).toBe(1);
+
+    state = queryReducer(state, { type: "CLEAR_ALL", generation: 2 });
+    state = queryReducer(state, { type: "CLEAR_ALL", generation: 3 });
+    expect(state.activeGeneration).toBe(3);
+    expect(state.listEpoch).toBe(1);
+
+    state = queryReducer(state, { type: "RESET_FOR_NEW_QUERY", generation: 4 });
+    expect(state.activeGeneration).toBe(4);
+    expect(state.listEpoch).toBe(1);
+
+    state = queryReducer(state, {
+      type: "SET_RESULT",
+      queryResult: createTranslationResult(TranslationType.Google),
+      generation: 4,
+    });
+    expect(state.listEpoch).toBe(4);
   });
 
   describe("stale generation behaviors", () => {
@@ -173,15 +257,16 @@ describe("queryReducer", () => {
       });
       expect(newState).toBe(state); // returns same state
       expect(newState.queryResults).toEqual([]);
+      expect(newState.listEpoch).toBe(0);
     });
 
     it("stale FINISH_QUERY cannot remove the active generation's pending provider or stop loading", () => {
       let state = queryReducer(initialState, { type: "RESET_FOR_NEW_QUERY", generation: 1 });
-      state = queryReducer(state, { type: "START_QUERY", queryType: TranslationType.DeepL, generation: 1 });
+      state = queryReducer(state, { type: "START_QUERY", serviceId: "static:deepl", generation: 1 });
 
-      const newState = queryReducer(state, { type: "FINISH_QUERY", queryType: TranslationType.DeepL, generation: 0 });
+      const newState = queryReducer(state, { type: "FINISH_QUERY", serviceId: "static:deepl", generation: 0 });
       expect(newState).toBe(state);
-      expect(newState.queryRecordList).toEqual([TranslationType.DeepL]);
+      expect(newState.queryRecordList).toEqual(["static:deepl"]);
       expect(newState.isLoading).toBe(true);
     });
 

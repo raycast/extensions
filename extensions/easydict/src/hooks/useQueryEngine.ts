@@ -15,13 +15,19 @@ import type { QueryAction, QueryState } from "@/core/query/queryReducer";
 import { queryReducer } from "@/core/query/queryReducer";
 import { getAutoSelectedTargetLanguageItem } from "@/core/query/utils";
 import type { DictionaryServiceConfig } from "@/providers/dictionary";
-import { dictionaryProviderServices } from "@/providers/dictionary";
+import { builtinDictionaryProviderServices, builtinTranslationServices } from "@/providers/registry";
 import type { TranslationServiceConfig } from "@/providers/translation";
-import { translationServices } from "@/providers/translation";
 import { TranslationType } from "@/types/api";
 import type { DisplaySection, ListDisplayItem } from "@/types/display";
-import type { DictionaryQueryResult, QueryInput, TranslationQueryResult, TranslationResult } from "@/types/query";
-import { showErrorToast } from "@/utils/errors";
+import type {
+  DictionaryQueryResult,
+  QueryInput,
+  RuntimeServiceConfig,
+  RuntimeServiceMetadata,
+  TranslationQueryResult,
+  TranslationResult,
+} from "@/types/query";
+import { RequestError, showErrorToast } from "@/utils/errors";
 import { logTrace, logWarn } from "@/utils/logger";
 
 logTrace("UseQueryEngine", "module loaded");
@@ -30,6 +36,25 @@ interface QuerySession {
   generation: number;
   signal: AbortSignal;
 }
+
+function createRuntimeServiceMetadata(service: RuntimeServiceConfig): RuntimeServiceMetadata {
+  return {
+    serviceId: service.id,
+    serviceLabel: service.label,
+    serviceOrder: service.order,
+    serviceIcon: service.icon,
+  };
+}
+
+export interface QueryServiceSnapshot {
+  translationServices: TranslationServiceConfig[];
+  dictionaryServices: DictionaryServiceConfig[];
+}
+
+const defaultQueryServiceSnapshot: QueryServiceSnapshot = {
+  translationServices: builtinTranslationServices,
+  dictionaryServices: builtinDictionaryProviderServices,
+};
 
 // Initial State
 
@@ -42,6 +67,7 @@ function createInitialState({
 }): QueryState {
   return {
     activeGeneration: 0,
+    listEpoch: 0,
     queryResults: [],
     queryRecordList: [],
     isLoading: false,
@@ -54,10 +80,13 @@ function createInitialState({
 // Hook
 
 function createStreamDebouncer(
-  configType: TranslationType,
+  service: TranslationServiceConfig,
   queryWordInfo: QueryInput,
   dispatch: React.Dispatch<QueryAction>,
-  buildTranslationDisplay: (rawResult: TranslationResult) => TranslationQueryResult | null,
+  buildTranslationDisplay: (
+    rawResult: TranslationResult,
+    service: TranslationServiceConfig,
+  ) => TranslationQueryResult | null,
   generation: number,
   delay = 80,
 ) {
@@ -67,12 +96,12 @@ function createStreamDebouncer(
   const flushUpdate = () => {
     if (accumulatedText) {
       const result: TranslationResult = {
-        type: configType,
+        type: service.type,
         queryWordInfo,
         translations: [accumulatedText],
         result: { translatedText: accumulatedText },
       };
-      const displayResult = buildTranslationDisplay(result);
+      const displayResult = buildTranslationDisplay(result, service);
       if (displayResult) {
         dispatch({ type: "SET_RESULT", queryResult: displayResult, generation });
       }
@@ -101,7 +130,11 @@ function createStreamDebouncer(
   };
 }
 
-export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetLanguage: LanguageItem) {
+export function useQueryEngine(
+  initialFromLanguage: LanguageItem,
+  initialTargetLanguage: LanguageItem,
+  serviceSnapshot: QueryServiceSnapshot = defaultQueryServiceSnapshot,
+) {
   const [state, dispatch] = useReducer(
     queryReducer,
     { initialFromLanguage, initialTargetLanguage },
@@ -113,6 +146,10 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
   const hasPlayedAudioRef = useRef(false);
   const generationRef = useRef(0);
   const isEffectMountedRef = useRef(false);
+  const currentQueryWordInfoRef = useRef<QueryInput | undefined>(undefined);
+  const serviceSnapshotRef = useRef(serviceSnapshot);
+  serviceSnapshotRef.current = serviceSnapshot;
+  const previousServiceSnapshotRef = useRef(serviceSnapshot);
 
   const beginQuerySession = useCallback((): QuerySession => {
     generationRef.current += 1;
@@ -120,6 +157,7 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
     abortControllerRef.current = new AbortController();
     isCurrentQueryRef.current = true;
     hasPlayedAudioRef.current = false;
+    currentQueryWordInfoRef.current = undefined;
     const session = {
       generation: generationRef.current,
       signal: abortControllerRef.current.signal,
@@ -142,53 +180,50 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
     };
   }, []);
 
-  const buildTranslationDisplay = useCallback((queryResult: TranslationResult): TranslationQueryResult | null => {
-    const { type, translations, queryWordInfo } = queryResult;
+  const buildTranslationDisplay = useCallback(
+    (queryResult: TranslationResult, service: TranslationServiceConfig): TranslationQueryResult | null => {
+      const { type, translations, queryWordInfo } = queryResult;
 
-    if (translations.length === 0) {
-      logWarn("UseQueryEngine", `${type} result is empty.`);
-      return null;
-    }
+      const oneLineTranslation = translations.join(", ");
+      if (!oneLineTranslation.trim()) {
+        logWarn("UseQueryEngine", `${service.label} result is empty.`);
+        return null;
+      }
 
-    const oneLineTranslation = translations.join(", ");
-    const copyText = translations.join("\n");
-    const isStreamingProvider = type === TranslationType.OpenAI || type === TranslationType.Gemini;
+      const copyText = translations.join("\n");
+      const isStreamingProvider = type === TranslationType.OpenAI || type === TranslationType.Gemini;
 
-    const displayItem: ListDisplayItem = {
-      queryType: type,
-      key: isStreamingProvider ? type : `${oneLineTranslation}-${type}`,
-      title: oneLineTranslation,
-      copyText,
-      queryWordInfo,
-    };
-    const displaySections: DisplaySection[] = [{ type, sectionTitle: type, items: [displayItem] }];
+      const displayItem: ListDisplayItem = {
+        queryType: type,
+        key: isStreamingProvider ? service.id : `${service.id}:${oneLineTranslation}`,
+        title: oneLineTranslation,
+        copyText,
+        queryWordInfo,
+      };
+      const displaySections: DisplaySection[] = [{ type, sectionTitle: service.label, items: [displayItem] }];
 
-    return {
-      ...queryResult,
-      displaySections,
-      hideDisplay: computeHideDisplay(type),
-    };
-  }, []);
+      return {
+        ...queryResult,
+        ...createRuntimeServiceMetadata(service),
+        displaySections,
+        hideDisplay: computeHideDisplay(type),
+      };
+    },
+    [],
+  );
 
   const runTranslationQuery = useCallback(
     async (config: TranslationServiceConfig, queryWordInfo: QueryInput, session: QuerySession) => {
-      const enabled = config.isEnabled?.(queryWordInfo) ?? myPreferences[config.preference];
-      if (!enabled) return;
+      if (!config.enabled(queryWordInfo)) return;
 
-      dispatch({ type: "START_QUERY", queryType: config.type, generation: session.generation });
+      dispatch({ type: "START_QUERY", serviceId: config.id, generation: session.generation });
 
-      const instance = new config.provider();
+      const instance = config.createProvider();
       let debouncer: ReturnType<typeof createStreamDebouncer> | undefined;
 
       try {
         const iterator = instance.request(queryWordInfo, { signal: session.signal });
-        debouncer = createStreamDebouncer(
-          config.type,
-          queryWordInfo,
-          dispatch,
-          buildTranslationDisplay,
-          session.generation,
-        );
+        debouncer = createStreamDebouncer(config, queryWordInfo, dispatch, buildTranslationDisplay, session.generation);
         let finalResult: TranslationResult | undefined;
 
         while (true) {
@@ -201,7 +236,7 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
         }
 
         if (finalResult) {
-          const displayResult = buildTranslationDisplay(finalResult);
+          const displayResult = buildTranslationDisplay(finalResult, config);
           if (displayResult) {
             dispatch({ type: "SET_RESULT", queryResult: displayResult, generation: session.generation });
           }
@@ -210,9 +245,11 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
         debouncer.clear();
       } catch (error) {
         debouncer?.clear(false);
-        showErrorToast(error);
+        showErrorToast(
+          error instanceof RequestError ? new RequestError(config.label, error.message, error.code) : error,
+        );
       } finally {
-        dispatch({ type: "FINISH_QUERY", queryType: config.type, generation: session.generation });
+        dispatch({ type: "FINISH_QUERY", serviceId: config.id, generation: session.generation });
       }
     },
     [buildTranslationDisplay],
@@ -220,17 +257,20 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
 
   const runDictionaryQuery = useCallback(
     async (config: DictionaryServiceConfig, queryWordInfo: QueryInput, session: QuerySession) => {
-      const enabled = config.isEnabled?.(queryWordInfo) ?? myPreferences[config.preference];
-      if (!enabled) return;
+      if (!config.enabled(queryWordInfo)) return;
 
-      dispatch({ type: "START_QUERY", queryType: config.type, generation: session.generation });
-      const instance = new config.provider();
+      dispatch({ type: "START_QUERY", serviceId: config.id, generation: session.generation });
+      const instance = config.createProvider();
 
       try {
         const result = await instance.request(queryWordInfo, { signal: session.signal });
         const displaySections = result.displaySections;
         if (displaySections?.length) {
-          const queryResult: DictionaryQueryResult = { ...result, displaySections };
+          const queryResult: DictionaryQueryResult = {
+            ...result,
+            ...createRuntimeServiceMetadata(config),
+            displaySections,
+          };
           dispatch({ type: "SET_RESULT", queryResult, generation: session.generation });
 
           const wordInfo = queryResult.queryWordInfo;
@@ -241,7 +281,8 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
             session.generation === generationRef.current &&
             !session.signal.aborted &&
             isCurrentQueryRef.current &&
-            !hasPlayedAudioRef.current;
+            !hasPlayedAudioRef.current &&
+            config.canTriggerAutomaticAudio;
 
           if (shouldAutoPlay) {
             hasPlayedAudioRef.current = true;
@@ -254,9 +295,11 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
           }
         }
       } catch (error) {
-        showErrorToast(error);
+        showErrorToast(
+          error instanceof RequestError ? new RequestError(config.label, error.message, error.code) : error,
+        );
       } finally {
-        dispatch({ type: "FINISH_QUERY", queryType: config.type, generation: session.generation });
+        dispatch({ type: "FINISH_QUERY", serviceId: config.id, generation: session.generation });
       }
     },
     [],
@@ -264,11 +307,11 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
 
   const runAllProviders = useCallback(
     (queryWordInfo: QueryInput, session: QuerySession) => {
-      for (const config of dictionaryProviderServices) {
+      for (const config of serviceSnapshotRef.current.dictionaryServices) {
         runDictionaryQuery(config, queryWordInfo, session);
       }
 
-      for (const config of translationServices) {
+      for (const config of serviceSnapshotRef.current.translationServices) {
         runTranslationQuery(config, queryWordInfo, session);
       }
 
@@ -282,6 +325,7 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
   const queryTextWithTextInfo = useCallback(
     (queryWordInfo: QueryInput) => {
       const session = beginQuerySession();
+      currentQueryWordInfoRef.current = queryWordInfo;
 
       const { word, fromLanguage, toLanguage } = queryWordInfo;
       logTrace("UseQueryEngine", `query text: ${word}`);
@@ -323,6 +367,7 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
         fromLanguage: fromYoudaoLangCode,
         toLanguage: targetLangCode,
       };
+      currentQueryWordInfoRef.current = queryTextInfo;
       runAllProviders(queryTextInfo, session);
     },
     [runAllProviders],
@@ -359,7 +404,37 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
     [beginQuerySession, queryTextWithDetectedLanguage],
   );
 
+  useEffect(() => {
+    // Only newly added service IDs join an active query. Existing IDs keep
+    // their in-flight request; profile edits apply on the next query.
+    const previousSnapshot = previousServiceSnapshotRef.current;
+    previousServiceSnapshotRef.current = serviceSnapshot;
+    if (previousSnapshot === serviceSnapshot) return;
+    const queryWordInfo = currentQueryWordInfoRef.current;
+    const signal = abortControllerRef.current?.signal;
+    if (!queryWordInfo || !signal || signal.aborted) return;
+
+    const previousTranslationServiceIds = new Set(previousSnapshot.translationServices.map((service) => service.id));
+    const addedTranslationServices = serviceSnapshot.translationServices.filter(
+      (service) => !previousTranslationServiceIds.has(service.id),
+    );
+    const previousDictionaryServiceIds = new Set(previousSnapshot.dictionaryServices.map((service) => service.id));
+    const addedDictionaryServices = serviceSnapshot.dictionaryServices.filter(
+      (service) => !previousDictionaryServiceIds.has(service.id),
+    );
+    if (addedTranslationServices.length === 0 && addedDictionaryServices.length === 0) return;
+
+    const session = { generation: generationRef.current, signal };
+    for (const service of addedDictionaryServices) {
+      runDictionaryQuery(service, queryWordInfo, session);
+    }
+    for (const service of addedTranslationServices) {
+      runTranslationQuery(service, queryWordInfo, session);
+    }
+  }, [runDictionaryQuery, runTranslationQuery, serviceSnapshot]);
+
   const clearQueryResult = useCallback(() => {
+    currentQueryWordInfoRef.current = undefined;
     const activeController = abortControllerRef.current;
     if (activeController) {
       logTrace("UseQueryEngine", "clearQueryResult");
@@ -380,6 +455,8 @@ export function useQueryEngine(initialFromLanguage: LanguageItem, initialTargetL
 
   return {
     displaySections,
+    queryGeneration: state.activeGeneration,
+    listEpoch: state.listEpoch,
     isLoading: state.isLoading,
     isShowDetail: state.isShowDetail,
     currentFromLanguageItem: state.currentFromLanguageItem,

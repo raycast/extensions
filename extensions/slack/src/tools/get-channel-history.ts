@@ -1,6 +1,6 @@
 import { getSlackWebClient } from "../shared/client/WebClient";
 import { withSlackClient } from "../shared/withSlackClient";
-import { isValidChannelId } from "../shared/utils";
+import { formatSlackFiles, isValidChannelId } from "../shared/utils";
 
 type Input = {
   /**
@@ -126,6 +126,7 @@ async function getChannelHistory(input: Input) {
     user: message.user ?? message.bot_profile?.name ?? message.username,
     ts: message.ts,
     date: message.ts ? new Date(parseInt(message.ts, 10) * 1000).toISOString() : undefined,
+    files: formatSlackFiles(message.files),
   }));
 }
 

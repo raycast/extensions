@@ -10,10 +10,11 @@
 export const openGhosttyWindow = `
 set wasRunning to application "Ghostty" is running
 tell application "Ghostty"
-    activate
     if wasRunning then
         set newWin to new window
         activate window newWin
+    else
+        activate
     end if
 end tell`;
 

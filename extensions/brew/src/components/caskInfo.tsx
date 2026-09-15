@@ -5,11 +5,9 @@ import { Cask, brewName, brewFetchCaskInfo, uiLogger, ensureError } from "../uti
 import { DetailMetadata, caskMetadataRows } from "./packageMetadata";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
-/**
- * Check if a cask has minimal data (from fast list) vs full data.
- */
+/** Whether this cask looks like a summary record and should be refetched. */
 function hasMinimalData(cask: Cask): boolean {
-  // Minimal casks have missing or empty homepage, tap, or desc
+  // A summary record has missing or empty homepage, tap, or desc
   return !cask.homepage || !cask.tap || !cask.desc;
 }
 

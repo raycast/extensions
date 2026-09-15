@@ -61,7 +61,7 @@ function extractMessages(
       message.role === "user"
         ? {
             ...message,
-            text: cleanCodexUserMessage(message.text, "preserve").trim(),
+            text: cleanCodexUserMessage(message.text, "preserve"),
           }
         : message,
     )
@@ -101,7 +101,6 @@ function buildMarkdown(
   return header + body;
 }
 
-// Local month.day.year at hour:minute am/pm in local timezone.
 function formatHumanTime(date: Date): string {
   if (Number.isNaN(date.getTime())) return "";
   const month = String(date.getMonth() + 1).padStart(2, "0");

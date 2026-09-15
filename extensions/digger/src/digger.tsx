@@ -8,7 +8,9 @@ import { HTTPHeaders } from "./components/HTTPHeaders";
 import { MetadataSemantics } from "./components/MetadataSemantics";
 import { Overview } from "./components/Overview";
 import { ResourcesAssets } from "./components/ResourcesAssets";
+import { Theme } from "./components/Theme";
 import { WaybackMachine } from "./components/WaybackMachine";
+import { WellKnown } from "./components/WellKnown";
 import { LoadingProgress, useFetchSite } from "./hooks/useFetchSite";
 import { extractUrl, validateUrl } from "./utils/urlUtils";
 
@@ -114,7 +116,9 @@ export default function Command(props: { arguments: Arguments.Digger }) {
       <Overview data={data} onRefresh={refetch} overallProgress={overallProgress} />
       <MetadataSemantics data={data} onRefresh={refetch} progress={progress.metadata} />
       <Discoverability data={data} onRefresh={refetch} progress={progress.discoverability} />
+      <WellKnown data={data} onRefresh={refetch} progress={progress.wellKnown} />
       <ResourcesAssets data={data} onRefresh={refetch} progress={progress.resources} />
+      <Theme data={data} onRefresh={refetch} progress={progress.theme} />
       <HTTPHeaders data={data} onRefresh={refetch} progress={progress.networking} />
       <DNSCertificates data={data} onRefresh={refetch} certificateInfo={certificateInfo} progress={progress.dns} />
       <DataFeedsAPI data={data} onRefresh={refetch} progress={progress.dataFeeds} />

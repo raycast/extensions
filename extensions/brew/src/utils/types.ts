@@ -24,7 +24,8 @@ export interface Nameable {
 }
 
 interface Installable {
-  tap: string;
+  /** Null for a formula loaded from a path or URL, and for a tapless cask. */
+  tap: string | null;
   desc?: string;
   homepage: string;
   versions: Versions;
@@ -47,12 +48,19 @@ export interface Cask extends Installable {
   /** Unix seconds when this cask was installed or last upgraded. */
   installed_time?: number;
   auto_updates: boolean;
+  /** Casks have been pinnable since Homebrew 5.1.12. */
+  pinned: boolean;
+  pinned_version?: string | null;
   depends_on: CaskDependency;
   conflicts_with?: { cask: string[] };
 }
 
 export interface CaskDependency {
   macos?: { [key: string]: string[] };
+  /** Casks can depend on formulae and other casks, not just an OS version. */
+  formula?: string[];
+  cask?: string[];
+  arch?: { type: string; bits?: number }[];
 }
 
 /// Formula Types
@@ -64,16 +72,20 @@ export interface Formula extends Installable, Nameable {
   build_dependencies: string[];
   installed: InstalledVersion[];
   keg_only: boolean;
-  linked_key: string;
+  linked_keg: string | null;
   pinned: boolean;
   conflicts_with?: string[];
 }
 
 export interface InstalledVersion {
   version: string;
-  installed_as_dependency: boolean;
+  /**
+   * False when Homebrew installed this only to satisfy another package's
+   * dependency. Homebrew removed `installed_as_dependency` in 5.1.9 and treats
+   * this as the source of truth, so derive "is a dependency" from `!installed_on_request`.
+   */
   installed_on_request: boolean;
-  /** Unix seconds when this version was installed. Absent on the fast list path. */
+  /** Unix seconds when this version was installed. Absent from the web API. */
   time?: number;
 }
 
@@ -82,6 +94,15 @@ export interface Versions {
   head?: string;
   bottle: boolean;
 }
+
+/**
+ * Anything the extension can pin. `OutdatedCask` carries only the token that
+ * `normalizeOutdatedResults` synthesises, so pin operations take an explicit
+ * kind rather than depending on that normalization having run.
+ */
+export type Pinnable = Formula | OutdatedFormula | Cask | OutdatedCask;
+
+export type PinKind = "formula" | "cask";
 
 /// Outdated Types
 
@@ -97,11 +118,25 @@ export interface OutdatedFormula extends Outdated {
 
 export interface OutdatedCask extends Outdated {
   /**
+   * Synthesised, not reported by brew: `brew outdated --json=v2` gives casks a
+   * `name` and no `token`, but `isCask()` — and therefore `brewCaskOption`,
+   * `brewIdentifier` and every argv built from them — keys off `token`. Without
+   * it an outdated cask is indistinguishable from a formula and gets
+   * formula-shaped brew commands.
+   *
+   * `normalizeOutdatedResults` fills it in. EVERY ingress must call it: both
+   * parsers of that payload, and any read of a cached snapshot that may predate
+   * this field. A path that skips it silently reintroduces the bug.
+   */
+  token: string;
+  /**
    * Array of installed versions, same shape as for formulae.
    * `brew outdated --json=v2` returns an array for casks; this was previously
    * (incorrectly) declared as a string.
    */
   installed_versions: string[];
+  pinned_version?: string;
+  pinned: boolean;
 }
 
 /// Result Types

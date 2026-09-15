@@ -1,27 +1,22 @@
 import { execFile } from "node:child_process";
 import { constants, existsSync } from "node:fs";
 import { access, stat } from "node:fs/promises";
+import { homedir } from "node:os";
 import nodePath from "node:path";
 import { promisify } from "node:util";
 import { getPreferenceValues } from "@raycast/api";
+import {
+  buildCodexCliCandidatePaths,
+  bundledCodexCliPath,
+  userInstalledCodexCliPaths,
+} from "./cli-paths";
 import { getErrorMessage } from "./format";
 import { expandTildePath } from "./shell";
 
 const execFileAsync = promisify(execFile);
 
-const bundledCodexCliPath =
-  "/Applications/ChatGPT.app/Contents/Resources/codex";
-
-const userInstalledCodexCliPaths = [
-  "/opt/homebrew/bin/codex",
-  "/usr/local/bin/codex",
-];
-
-const commonCodexCliPaths = [
-  bundledCodexCliPath,
-  ...userInstalledCodexCliPaths,
-];
 let cachedCodexCliPath: string | undefined;
+let cachedShellCliCommand: string | undefined;
 let codexCliResolution: Promise<string> | undefined;
 
 class CodexCliResolutionError extends Error {
@@ -39,14 +34,21 @@ function getPreferredCodexCliPath(): string {
 
 // Command for the user's own shell, which has a full PATH: prefer plain
 // `codex` when a user install exists, and the bundled binary only as fallback.
+// Preferences and installed binaries hold still for the life of a command run,
+// so resolve this once rather than on every rendered row.
 export function shellCliCommand(): string {
+  cachedShellCliCommand ??= resolveShellCliCommand();
+  return cachedShellCliCommand;
+}
+
+function resolveShellCliCommand(): string {
   const preferences = getPreferenceValues<Preferences>();
   const configuredPath = preferences.codexCliPath?.trim();
   if (configuredPath) {
     return expandTildePath(configuredPath);
   }
 
-  if (userInstalledCodexCliPaths.some((path) => existsSync(path))) {
+  if (userInstalledCodexCliPaths(homedir()).some((path) => existsSync(path))) {
     return "codex";
   }
 
@@ -80,9 +82,7 @@ async function resolveCodexCliPathUncached(): Promise<string> {
   const searchedPaths: string[] = [];
   const rejectedPaths: string[] = [];
   const preferredPath = getPreferredCodexCliPath();
-  const candidatePaths = Array.from(
-    new Set([preferredPath, ...commonCodexCliPaths]),
-  );
+  const candidatePaths = buildCodexCliCandidatePaths(preferredPath, homedir());
 
   for (const candidatePath of candidatePaths) {
     searchedPaths.push(candidatePath);

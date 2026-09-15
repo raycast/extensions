@@ -1,5 +1,9 @@
 # Browser Tabs Changelog
 
+## [Fix Maximized Windows on Windows] - 2026-09-09
+
+- Fix switching to or closing a tab shrinking a maximized browser window on Windows: a window that is already on screen is no longer shown again, only brought to the front
+
 ## [Windows Support] - 2026-08-12
 
 - Add Windows support: tabs are read from running browsers with UI Automation through a native helper, so no browser extension is needed

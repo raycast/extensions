@@ -1,5 +1,13 @@
 # Zotero Changelog
 
+## [Show PDF in Finder] - 2026-09-14
+
+- Added a "Show PDF in Finder" action on references with a PDF, so you can reveal the file on disk in Finder without copying the path
+
+## [Docs] - 2026-09-10
+
+- Updated the README to document fuzzy search, the "Search by BibTeX Citation Key" preference, group libraries, the collection filter, and the 100-result limit
+
 ## [Group libraries, fuzzy search, and BibTeX-key search] - 2026-08-30
 
 - Search now uses a subsequence fuzzy finder (fuzzysort) instead of near-exact matching, so typing `qsim` finds "Quantum Simulation". Results are ranked by how well they match, and the most recent items show for an empty query.

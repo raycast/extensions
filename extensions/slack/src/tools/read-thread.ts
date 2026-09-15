@@ -1,4 +1,5 @@
 import { getSlackWebClient } from "../shared/client/WebClient";
+import { formatSlackFiles } from "../shared/utils";
 import { withSlackClient } from "../shared/withSlackClient";
 
 type Input = {
@@ -157,6 +158,7 @@ async function readThread(input: Input) {
       ts: message.ts,
       date: timestampToIsoDate(message.ts),
       isParentMessage: message.ts === input.threadTs,
+      files: formatSlackFiles(message.files),
     })),
     hasMore,
     nextCursor,

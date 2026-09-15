@@ -9,5 +9,7 @@ export default async function (input: { device_mac_address: string }) {
     throw new Error("Could not find 'blueutil'!");
   }
 
-  devicesService.disconnectDevice(input.device_mac_address);
+  if (!devicesService.disconnectDevice(input.device_mac_address)) {
+    throw new Error("Failed to disconnect Bluetooth device.");
+  }
 }

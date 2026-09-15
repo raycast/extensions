@@ -33,9 +33,9 @@ export function useFavoriteWords() {
     setValue(latestRef.current.filter((f) => favoriteKeyOf(f) !== favoriteKeyOf(identity)));
   };
 
-  const toggle = (entry: FavoriteWord): void => {
+  const toggle = (entry: FavoriteWord): Promise<void> => {
     const current = latestRef.current;
-    setValue(
+    return setValue(
       current.some((f) => favoriteKeyOf(f) === favoriteKeyOf(entry))
         ? current.filter((f) => favoriteKeyOf(f) !== favoriteKeyOf(entry))
         : [entry, ...current],

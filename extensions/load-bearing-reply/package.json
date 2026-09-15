@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "load-bearing-reply",
+  "title": "Load-Bearing Reply",
+  "description": "Paste a confidently over-engineered reply into the frontmost app.",
+  "icon": "load-bearing-reply-icon.png",
+  "author": "chris_deeming",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paste-random-reply",
+      "title": "Paste Random Load-Bearing Reply",
+      "description": "Paste a random confidently over-engineered reply.",
+      "icon": "load-bearing-reply-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "browse-replies",
+      "title": "Browse Load-Bearing Replies",
+      "description": "Choose a confidently over-engineered reply to paste.",
+      "icon": "load-bearing-reply-icon.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.5.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

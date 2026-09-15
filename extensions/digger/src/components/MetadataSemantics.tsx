@@ -1,6 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { Actions } from "../actions";
+import { Actions, CopyIndividualActions } from "../actions";
 import { DiggerResult } from "../types";
 import { getDeniedAccessMessage } from "../utils/botDetection";
 import { truncateText } from "../utils/formatters";
@@ -64,7 +64,23 @@ export function MetadataSemantics({ data, onRefresh, progress }: MetadataSemanti
           isChallengePage={isChallengePage}
         />
       }
-      actions={<Actions data={data} url={data.url} onRefresh={onRefresh} />}
+      actions={
+        <Actions
+          data={data}
+          url={data.url}
+          onRefresh={onRefresh}
+          sectionActions={
+            <CopyIndividualActions
+              title={data.overview?.title}
+              description={data.overview?.description}
+              ogDescription={data.metadata?.openGraph?.description}
+              ogImage={data.metadata?.openGraph?.image}
+              favicon={data.overview?.favicon}
+              canonical={data.discoverability?.canonical}
+            />
+          }
+        />
+      }
     />
   );
 }
@@ -152,13 +168,37 @@ function MetadataSemanticsDetail({
           )}
           <List.Item.Detail.Metadata.Label
             title="Language"
-            text={overview?.language || "N/A"}
+            text={
+              overview?.language
+                ? overview.languageNegotiated
+                  ? `${overview.language} (one of several)`
+                  : overview.language
+                : "N/A"
+            }
             icon={
               overview?.language
                 ? { source: Icon.Check, tintColor: Color.Green }
                 : { source: Icon.Xmark, tintColor: Color.Red }
             }
           />
+          {/* `Content-Language` is a separate declaration and may disagree with
+              `<html lang>` — github.com sends en-US while its markup says en.
+              Only worth a row when it actually differs. */}
+          {overview?.contentLanguage && overview.contentLanguage !== overview.language && (
+            <List.Item.Detail.Metadata.Label title="Content-Language" text={overview.contentLanguage} />
+          )}
+          {overview?.languageAlternates !== undefined && (
+            <List.Item.Detail.Metadata.Label
+              title="Translations"
+              text={`${overview.languageAlternates} declared via hreflang`}
+            />
+          )}
+          {/* The received variant is only meaningful next to what was asked for.
+              Shown only when the server negotiates, so an unambiguous page keeps
+              a single clean row. */}
+          {overview?.languageNegotiated && overview.languageRequested && (
+            <List.Item.Detail.Metadata.Label title="Requested" text={overview.languageRequested} />
+          )}
 
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label

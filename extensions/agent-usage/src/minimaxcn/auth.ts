@@ -29,6 +29,12 @@ function extractMarkedValue(output: string, startMarker: string, endMarker: stri
 }
 
 async function readShellEnvTokens(envKey: string): Promise<string | null> {
+  // The lookup below uses POSIX `printf` plus the `-ilc` flag, which Windows shells
+  // do not implement. On Windows, env vars set in the user's profile are usually
+  // inherited directly into the Raycast process via process.env, so falling back
+  // to that is enough — returning null here means the caller will simply not see
+  // a shell-side value rather than throwing on a missing binary.
+  if (process.platform === "win32") return null;
   try {
     const shell = process.env.SHELL || "/bin/zsh";
     const lookupScript = `printf '${MINIMAX_START_MARKER}%s${MINIMAX_END_MARKER}\\n' "\${${envKey}}"`;

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gatus-status",
+  "title": "Gatus Status",
+  "description": "View the status of endpoints monitored by your Gatus instance.",
+  "icon": "gatus-logo.png",
+  "author": "romain_lajeunesse",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-statuses",
+      "title": "Gatus Statuses",
+      "subtitle": "Gatus",
+      "description": "View the status of your monitored Gatus endpoints.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gatusUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Gatus Base URL",
+      "description": "Gatus instance URL (ex: https://status.twin.sh)",
+      "placeholder": "https://status.twin.sh"
+    },
+    {
+      "name": "authToken",
+      "type": "password",
+      "required": false,
+      "title": "Bearer Token (optional)",
+      "description": "If auth is needed"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

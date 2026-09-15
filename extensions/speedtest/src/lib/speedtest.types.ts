@@ -88,3 +88,9 @@ export interface ResultProgress {
   download: number | undefined;
   upload: number | undefined;
 }
+
+/** Bandwidth (bytes/s) reported by every progress event, in arrival order. */
+export interface SpeedSamples {
+  download: number[];
+  upload: number[];
+}

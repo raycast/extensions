@@ -1,3 +1,4 @@
+import { existsSync } from "fs";
 import { getEnhancedNodePaths, resolveFnmBaseDir } from "./node-path-resolver";
 import { dirname } from "path";
 import { getCustomNpxPath } from "../preferences";
@@ -26,8 +27,11 @@ export const getExecOptions = () => {
         env.FNM_DIR = fnmBaseDir;
       }
     }
-    if (!process.env.npm_config_prefix) {
-      env.npm_config_prefix = `${process.env.HOME}/.npm-global`;
+    // Pointing npm at a prefix directory that does not exist makes npx fail
+    // with ENOENT (exit code 254), so only opt in when the user actually has one.
+    const npmGlobalPrefix = `${process.env.HOME}/.npm-global`;
+    if (!process.env.npm_config_prefix && existsSync(npmGlobalPrefix)) {
+      env.npm_config_prefix = npmGlobalPrefix;
     }
   }
 

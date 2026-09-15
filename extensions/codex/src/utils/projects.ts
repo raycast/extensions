@@ -1,21 +1,22 @@
 import { readdir, stat } from "node:fs/promises";
 import nodePath from "node:path";
 import {
-  threadListLookbackDays,
   threadListMaxResults,
   type CodexThread,
   listThreads,
 } from "./app-server";
-import { getErrorMessage, getProjectName, tildeifyPath } from "./format";
+import {
+  formatCount,
+  getErrorMessage,
+  getProjectName,
+  tildeifyPath,
+} from "./format";
 import { expandTildePath } from "./shell";
-
-type WorkingDirectoryRecordSource = "recent" | "projects-folder";
 
 export type WorkingDirectoryRecord = {
   cwd: string;
   count: number;
   updatedAt: number;
-  source: WorkingDirectoryRecordSource;
 };
 
 export type WorkingDirectoryOption = {
@@ -24,7 +25,6 @@ export type WorkingDirectoryOption = {
   count: number;
   updatedAt: number;
   keywords: string[];
-  sources: WorkingDirectoryRecordSource[];
 };
 
 export type ProjectsFolderScan = {
@@ -41,7 +41,6 @@ export function buildWorkingDirectoryOptionsFromThreads(
       cwd: thread.cwd,
       count: 1,
       updatedAt: thread.updatedAt,
-      source: "recent",
     })),
     selectedCwd,
   );
@@ -82,7 +81,6 @@ function buildProjectOptions(
       cwd: string;
       count: number;
       updatedAt: number;
-      sources: Set<WorkingDirectoryRecordSource>;
     }
   >();
   const cwdsByBasename = new Map<string, Set<string>>();
@@ -102,7 +100,6 @@ function buildProjectOptions(
     if (project) {
       project.count += record.count;
       project.updatedAt = Math.max(project.updatedAt, record.updatedAt);
-      project.sources.add(record.source);
       continue;
     }
 
@@ -110,7 +107,6 @@ function buildProjectOptions(
       cwd: normalizedCwd,
       count: record.count,
       updatedAt: record.updatedAt,
-      sources: new Set([record.source]),
     });
   }
 
@@ -125,7 +121,6 @@ function buildProjectOptions(
       cwd: normalizedSelectedCwd,
       count: 0,
       updatedAt: 0,
-      sources: new Set(["recent"]),
     });
   }
 
@@ -138,9 +133,7 @@ function buildProjectOptions(
         ? `${basename} - ${pathLabel}`
         : basename;
       const threadCount =
-        project.count > 0
-          ? ` (${project.count} ${project.count === 1 ? "thread" : "threads"})`
-          : "";
+        project.count > 0 ? ` (${formatCount(project.count, "thread")})` : "";
 
       return {
         cwd: project.cwd,
@@ -148,7 +141,6 @@ function buildProjectOptions(
         count: project.count,
         updatedAt: project.updatedAt,
         keywords: [basename, pathLabel, project.cwd],
-        sources: Array.from(project.sources).sort(),
       };
     })
     .sort(
@@ -163,23 +155,14 @@ export async function loadRecentWorkingDirectoryRecords(): Promise<
   WorkingDirectoryRecord[]
 > {
   const [activeThreads, archivedThreads] = await Promise.all([
-    listThreads({
-      archived: false,
-      maxResults: threadListMaxResults,
-      windowDays: threadListLookbackDays,
-    }),
-    listThreads({
-      archived: true,
-      maxResults: threadListMaxResults,
-      windowDays: threadListLookbackDays,
-    }),
+    listThreads({ archived: false, maxResults: threadListMaxResults }),
+    listThreads({ archived: true, maxResults: threadListMaxResults }),
   ]);
 
   return [...activeThreads, ...archivedThreads].map((thread) => ({
     cwd: thread.cwd,
     count: 1,
     updatedAt: thread.updatedAt,
-    source: "recent",
   }));
 }
 
@@ -215,7 +198,6 @@ export async function loadProjectsFolderRecords(
               cwd,
               count: 0,
               updatedAt: Math.floor(stats.mtimeMs / 1000),
-              source: "projects-folder" as const,
             };
           }),
       )

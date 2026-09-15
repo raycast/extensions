@@ -1,47 +1,48 @@
 import { useState } from "react";
-import { showFailureToast } from "@raycast/utils";
-import type { OmitData, PveVm, WithShowErrorScreen } from "@/types";
-import { type PveFetchResult, usePveFetch } from "@/hooks/use-pve-fetch";
-import { getMockPveVmData } from "@/utils/mock";
+import type { PveServer, PveVm, WithServer } from "@/types";
+import { useMultiPveFetch } from "@/hooks/use-multi-pve-fetch";
+import { getMockPveVmResults } from "@/utils/mock";
 
-const useVmListInternal = (enabled = true): WithShowErrorScreen<PveFetchResult<PveVm[]>> => {
-  const [showErrorScreen, setShowErrorScreen] = useState<boolean>(false);
+export type VmListGroup = {
+  server: PveServer;
+  vms: WithServer<PveVm>[];
+  error?: string;
+};
+
+/**
+ * Hook to get the list of VMs of every configured server
+ *
+ * @param mock - If true, use mock data instead of fetching from the API
+ */
+export const useVmList = (mock = false) => {
+  const [type, setType] = useState<string>("all");
+
   const url = "api2/json/cluster/resources";
   const search = new URLSearchParams({
     type: "vm",
   });
 
-  const result = usePveFetch<PveVm[]>(`${url}?${search.toString()}`, {
-    execute: enabled,
-    onError: (error) => {
-      showFailureToast(error);
-      setShowErrorScreen(true);
-    },
+  const { data, servers, isLoading, revalidate, mutate } = useMultiPveFetch<PveVm[]>(`${url}?${search.toString()}`, {
+    execute: !mock,
   });
 
-  return {
-    ...result,
-    showErrorScreen,
-  };
-};
+  const results = mock ? getMockPveVmResults() : (data ?? []);
+  const groups: VmListGroup[] = results.map((result) => ({
+    server: result.server,
+    error: result.error,
+    vms: (result.data ?? [])
+      .filter((vm) => (type === "all" ? true : vm.type === type))
+      .map((vm) => ({ ...vm, server: result.server })),
+  }));
 
-/**
- * Hook to get the list of VMs
- *
- * @param mock - If true, use mock data instead of fetching from the API
- */
-export const useVmList = (
-  mock = false,
-): OmitData<ReturnType<typeof useVmListInternal>> & { setType: (type: string) => void; data: PveVm[] } => {
-  const [type, setType] = useState<string>("all");
-
-  const { data, ...rest } = useVmListInternal(!mock);
-  const filteredData =
-    (mock ? getMockPveVmData() : data)?.filter((vm) => (type === "all" ? true : vm.type === type)) ?? [];
+  const hasServers = mock || servers.length > 0;
 
   return {
-    ...rest,
-    data: filteredData,
+    isLoading: !mock && isLoading,
+    groups,
+    hasServers,
+    revalidate,
+    mutate,
     setType,
   };
 };

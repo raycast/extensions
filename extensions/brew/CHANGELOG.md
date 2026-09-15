@@ -1,12 +1,31 @@
 # Brew Changelog
 
+## [Cask pinning, Homebrew 6] - 2026-09-08
+
+- **Casks can now be pinned**, just like formulae — pin a cask and it is locked out of upgrades, gets its own section in Show Installed, and shows the same pin icon everywhere. Homebrew has supported this since 5.1.12
+- Pinning a cask that updates itself now says so: the pin holds for brew, but the app can still self-update, so the toast says "Pinning may be overridden by auto-updates" instead of implying the version is frozen
+- Uninstalling a pinned package used to surface a raw brew error — brew refuses this for pinned formulae as well as casks. It now says the package is pinned and offers "Unpin and Force Uninstall" as an explicit choice
+- Fixed: a pinned cask was included in Upgrade All and reported as a **failed** upgrade. Pinned packages are now skipped, matching how pinned formulae are handled
+- Fixed: pinning or unpinning a cask did not refresh the installed list — cask pins live in a separate directory that the cache was not watching
+- Fixed: the "D" dependency badge never appeared. Homebrew removed the field it read in 5.1.9; it now reads the field brew actually reports
+- The upgrade progress toast now reports the download phase as a batch rather than naming one package: brew announces every package up front, then downloads them concurrently, so a per-package label there was not true
+- A pinned cask now shows "Pinned: Yes" in the metadata panel, as pinned formulae already did — the list's tack accessory is hidden while that panel is open, so it was the only place the state could be seen. Formula metadata also gained the Tap row casks already had
+- A package Homebrew declines to upgrade is no longer reported as upgraded. Brew warns and skips a disabled, unavailable, already-current or un-upgradable package while still exiting 0, and each reason is now shown as its own outcome rather than one generic skip
+- Upgrading a single package that Homebrew declines now shows it as skipped, with the reason, rather than a red failure — and the "N of M" progress counter no longer stalls a step behind when a package is skipped mid-run
+- A cask that belongs to no tap no longer offers a "Copy Tap Name" action that would copy nothing
+- Pin state is now read from Homebrew's own pin directory immediately before an upgrade or uninstall, so a package pinned in another command — or outside Raycast — is respected rather than trusted from a cached snapshot. One directory read per run, ~20µs
+- If Homebrew refuses an upgrade or uninstall because the package is pinned, the toast now offers to unpin, instead of showing the raw error
+- Cask details now list the formulae and casks a cask depends on, and the architectures it requires — formula details have always shown dependencies, so casks were missing information brew reports (`gcloud-cli` needs `python@3.14`, for one)
+- Removed the unused two-phase loading path (`brew list --versions`, added in 5.0 support). It had no caller and its cache read duplicated the main loader; installed packages already paint from cache
+- **This extension now requires Homebrew 6.0 or later.** The "Use internal API" preference is gone — Homebrew 6 uses that API by default and deprecates the setting, which made brew abort outright under `HOMEBREW_DEVELOPER`
+
 ## [Show Upgrades: reviewed, selective upgrading] - 2026-09-01
 
 - **Show Outdated is now Show Upgrades**: the outdated list has grown into a review surface — ↩ toggles a package (formula or cask) in or out of the upgrade, **⌘↩ runs it from any row** ("Upgrade All" with the default full selection, "Upgrade N Selected" once narrowed) and ⌘⇧A selects or deselects everything upgradable. The default selection is everything not pinned — exactly what a plain `brew upgrade` would do. Every per-package action the view offered (single upgrade, pin, copy/terminal commands, uninstall) remains on each row, and the command still answers to "outdated" in search
 - A reviewed run upgrades exactly the selected packages: each is upgraded individually by name, so deselected packages are simply left out — nothing is pinned, held or otherwise touched on their behalf. Packages that become outdated during the run's own `brew update` are not upgraded unreviewed; they remain visible — and selectable for a follow-up run — in the list afterwards
 - A pin is a lock, matching brew's own behaviour: pinned formulae cannot be selected, and upgrading one means unpinning it — ↩ on a pinned row unpins and selects it in one step. Pinning from the review (⌘.) deselects
 - Refreshing mid-review (⌘R) keeps the selections you have already made; a formula pinned outside the extension is deselected on refresh — the lock always wins
-- Casks are selectable exactly like formulae. Cask *pinning* (the lock semantics) waits on Homebrew 6's `brew pin --cask` and ships in a follow-up
+- Casks are selectable exactly like formulae. Cask *pinning* (the lock semantics) ships in a follow-up
 - Running the upgrade cancels the review's in-flight background `brew update` (and waits for it to release Homebrew's update lock) instead of asking the user to try again in a moment
 - Reopening either upgrade command after a run no longer flashes the pre-run list: a snapshot the run made stale is withheld until fresh data lands
 - A failed check-for-upgrades now shows a failure screen with a Retry action instead of a blank list (Show Upgrades) or a stuck checking placeholder (Upgrade); with cached packages still on screen the failure arrives as a toast instead, and with nothing outdated the empty screen offers a route to Show Installed

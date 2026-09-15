@@ -45,9 +45,11 @@ function partitionFeatured(items: LingueeWordExplanation[]): [LingueeWordExplana
   return [featured, unfeatured];
 }
 
-function buildTitleSection(queryWordInfo: QueryWordInfo, wordItems: LingueeWordItem[]): DisplaySection {
+function buildTitleSection(queryWordInfo: QueryWordInfo, wordItems: LingueeWordItem[]): DisplaySection | undefined {
   const word = queryWordInfo.word;
-  const translation = wordItems[0]?.translationItems[0]?.translation ?? word;
+  const translation = wordItems[0]?.translationItems?.[0]?.translation;
+  if (!translation?.trim()) return undefined;
+
   return {
     type: LingueeListItemType.Translation,
     sectionTitle: DictionaryType.Linguee,

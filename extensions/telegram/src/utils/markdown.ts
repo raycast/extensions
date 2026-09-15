@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import { pathToFileURL } from "url";
 
 interface MediaInfo {
   filePath?: string;
@@ -17,11 +18,14 @@ export function buildMarkdownWithMedia({ prefix = "", text, media }: BuildMarkdo
 
   if (media?.filePath && ["photo", "image"].includes(media.type)) {
     try {
+      // Reference the cached file rather than inlining it. Raycast's markdown
+      // renderer silently drops images embedded as base64 data URIs once they
+      // grow large, and a Telegram photo is comfortably past that point -- the
+      // detail pane rendered blank for every photo. pathToFileURL handles the
+      // percent-encoding the support path needs, and the drive letter and
+      // backslashes on Windows.
       if (fs.existsSync(media.filePath)) {
-        const imageBuffer = fs.readFileSync(media.filePath);
-        const base64Image = imageBuffer.toString("base64");
-        const mimeType = media.mimeType || "image/jpeg";
-        markdown += `![](data:${mimeType};base64,${base64Image})`;
+        markdown += `![](${pathToFileURL(media.filePath).href})`;
       }
     } catch (error) {
       console.error("Failed to read media file:", error);

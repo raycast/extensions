@@ -1,8 +1,7 @@
-import { getPreferenceValues } from "@raycast/api";
+import type { PveServer } from "@/types";
 
-export function buildHeaders() {
-  const preferences = getPreferenceValues<Preferences>();
+export function buildHeaders(server: PveServer) {
   return {
-    Authorization: `PVEAPIToken=${preferences.tokenId}=${preferences.tokenSecret}`,
+    Authorization: `PVEAPIToken=${server.tokenId}=${server.tokenSecret}`,
   };
 }

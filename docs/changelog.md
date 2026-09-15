@@ -1,5 +1,129 @@
 # Changelog
 
+## 2.3.0
+
+### 💎 Improvements
+
+- **Rendering**: Reduced memory usage and the amount of data sent when updating extension views, and improved compression of large updates.
+
+### 🐞 Fixes
+
+- **AI**: `AI.ask` now respects a numeric `creativity` value.
+
+## 2.0.0
+
+Raycast 2.0 brings the extension API to the new Raycast desktop app on macOS and Windows. The CLI requires Node.js 22.22.2 or later.
+
+### ✨ New
+
+- **Environment**: Extensions can now identify the entry point they're running with `environment.entryPointType` (`"command"` or `"tool"`), `environment.entryPointName`, and `environment.entryPointMode`. This is useful for sharing code between commands and AI tools. `environment.commandName` and `environment.commandMode` remain available as deprecated aliases for `entryPointName` and `entryPointMode`.
+- **OAuth**: Added `OAuth.RedirectMethod.ClientIdMetadataDocument` for providers that support OAuth Client ID Metadata Documents. Create an `OAuth.PKCEClient` with this redirect method to use Raycast's hosted metadata document as the default client ID; you can omit `clientId` when calling `authorizationRequest`. The document URL is also available as `OAuth.clientIdMetadataDocument`. Token scopes now accept an array of strings as well as a space-separated string.
+
+#### Help users get started with `help.md`
+
+Explain how to configure your extension right where users need it. Add a `help.md` file next to `package.json`, and Raycast will display its Markdown beside the setup form when a command or tool is missing required preferences. Use it to walk users through obtaining an API key, finding an account ID, or enabling a setting in another application.
+
+For example:
+
+```markdown
+# Connect your account
+
+1. Open your account settings and create an API key with read access.
+2. Copy the key into the API Key field.
+3. Save your preferences to start searching.
+```
+
+See [Help for Required Preferences](./api-reference/preferences.md#help-for-required-preferences) for more details.
+
+#### Track down out-of-memory errors
+
+When an extension exceeds its JavaScript heap limit, Raycast now reports a **Command Out of Memory** error with the limit that was reached. For view commands, the new **Reload with Memory Reporting** action lets you rerun the command and collect diagnostic information while reproducing the problem.
+
+Use [`captureMemorySnapshot(label)`](./api-reference/utilities.md#capturememorysnapshot) to record heap usage before and after operations you want to investigate:
+
+```typescript
+import { captureMemorySnapshot } from "@raycast/api";
+
+captureMemorySnapshot("Before loading records");
+// Fetch, parse, or transform your data here.
+captureMemorySnapshot("After loading records");
+```
+
+With memory reporting enabled, Raycast records these labeled measurements alongside automatic measurements around initialization and callbacks. Development commands also collect periodic samples. The error view's **Memory Diagnostics** section shows the latest and peak heap usage, plus recent measurements, to help you narrow down where memory grew. Calls to `captureMemorySnapshot` do nothing when memory reporting is disabled, so you can leave useful checkpoints in your code.
+
+### 💎 Improvements
+
+- **Keyboard**: `Keyboard.Shortcut.Common` now provides macOS and Windows bindings. Some common shortcuts have also changed on macOS to match Raycast 2.0: `CopyName` uses `⌘⌥C`, `CopyPath` uses `⌘⌃C`, `Pin` uses `⌘.`, and `MoveUp` / `MoveDown` use `⌘⌥↑` / `⌘⌥↓`. Use the common shortcuts to follow the platform's bindings automatically.
+
+## 1.104.24 - 2026-07-31
+
+### 🐞 Fixes
+
+- **CLI**: Fixed the organization upgrade link shown when publishing an extension exceeds the free plan's command limit.
+
+## 1.104.13 - 2026-04-22
+
+### 💎 Improvements
+
+- **Runtime**: Updated the extension runtime to Node.js 22.22.2. The CLI now requires Node.js 22.22.2 or later.
+
+## 1.104.10 - 2026-03-16
+
+### 🐞 Fixes
+
+- **CLI**: Fixed publishing private extensions from repositories without commits or a remote origin.
+
+## 1.104.9 - 2026-03-10
+
+### 🐞 Fixes
+
+- **Rust**: Generated TypeScript definitions now respect `#[serde(rename = "...")]` field names and allow `undefined` for `Option<T>` values.
+
+## 1.104.6 - 2026-02-11
+
+### 💎 Improvements
+
+- **Swift and Rust**: Generate TypeScript declarations and loader stubs even when native compilation is skipped on the current platform, allowing extensions with platform-specific code to build on the other platform.
+
+## 1.104.4 - 2026-02-02
+
+### 🐞 Fixes
+
+- **Markdown**: Improved parsing of LaTeX equations inside tables.
+
+## 1.104.2 - 2026-01-21
+
+### ✨ New
+
+- **Keyboard**: Added `Keyboard.Shortcut.Common.Save`.
+
+### 🐞 Fixes
+
+- **Toast**: Fixed platform-specific shortcuts on toast actions.
+
+## 1.103.6 - 2025-11-05
+
+### 💎 Improvements
+
+- **Keyboard**: Platform-specific shortcuts now use the `Windows` key, matching the manifest's platform naming. The lowercase `windows` key is deprecated.
+
+## 1.103.5 - 2025-10-28
+
+### 🐞 Fixes
+
+- **CLI**: Fixed the "refusing to merge unrelated histories" error when publishing or pulling contributions.
+
+## 1.103.3 - 2025-10-07
+
+### 💎 Improvements
+
+- **CLI**: Extension publishing and contribution workflows now work on Windows.
+
+### 🐞 Fixes
+
+- **CLI**: Prefer `README.md` when multiple README files exist and ignore directories when reading README and changelog files.
+- **CLI**: Skip checks for missing ESLint or Prettier installations when running without `--fix`.
+
 ## 1.103.0 - 2025-09-15
 
 Over the past few releases, we've made some additions to the API to better support it:
@@ -25,6 +149,35 @@ Over the past few releases, we've made some additions to the API to better suppo
 
 - We've also updated the `@raycast/utils` to make it cross platform and added a `runPowerShellScript` function.
 
+### Rust in Windows extensions
+
+You can now call Rust functions from your extension to access native Windows APIs or handle work better suited to Rust. The CLI compiles your Cargo package into a Windows executable, bundles it with the extension, and generates TypeScript declarations and async wrappers for the functions you expose.
+
+Create a binary Cargo package in a `rust` folder next to `src`, following the [Rust tools setup guide](https://github.com/raycast/extensions-rust-tools#using-the-package) to add the runtime and macro dependencies. Install the Windows target with `rustup target add x86_64-pc-windows-msvc`, then mark functions in `rust/src/main.rs` with `#[raycast]`:
+
+```rust
+use raycast_rust_macros::raycast;
+
+#[raycast]
+fn double(value: i32) -> i32 {
+    value * 2
+}
+```
+
+Import them from a command using the `rust:` prefix and a relative path to the folder containing `Cargo.toml`:
+
+```typescript
+import { showToast } from "@raycast/api";
+import { double } from "rust:../rust";
+
+export default async function Command() {
+  const result = await double(21);
+  await showToast({ title: `The result is ${result}` });
+}
+```
+
+Run `npm run dev` on Windows to build and try the command. Rust functions run on Windows; for a cross-platform extension, keep the macOS implementation separate and select it with `process.platform`.
+
 ## 1.98.0 - 2025-05-08
 
 ### ✨ New
@@ -43,8 +196,7 @@ Over the past few releases, we've made some additions to the API to better suppo
 
 ### ✨ New
 
-- The extensions now run on Nodejs 22 and react 19. Among other benefits, this makes `fetch` globally available. There shouldn’t be any breaking change - but if you find some, please let us know!
-  Additionally, new extensions will be bootstrapped with ESLint 9
+- The extensions now run on Nodejs 22 and react 19. Among other benefits, this makes `fetch` globally available. There shouldn’t be any breaking change - but if you find some, please let us know! Additionally, new extensions will be bootstrapped with ESLint 9
 - **Tools**: Tools can now specify some preferences, the same way Commands can
 
 ### 💎 Improvements
@@ -70,8 +222,7 @@ Over the past few releases, we've made some additions to the API to better suppo
   - xAI Grok-2² model
   - Perplexity Sonar¹, Sonar Pro² and Sonar Reasoning¹ models
 
-¹ available with Raycast Pro
-² available with Raycast Pro + Advanced AI
+¹ available with Raycast Pro ² available with Raycast Pro + Advanced AI
 
 ### 🐞 Fixes
 
@@ -526,8 +677,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 ### ✨ New
 
-- Raycast now provides 2 global TypeScript namespaces called `**Preferences**` and `**Arguments**` which respectively contain the types of the preferences and the types of the arguments of all the commands of the extensions.
-  For example, if a command named `show-todos` has some preferences, its `getPreferenceValues`'s return type can be specified with `getPreferenceValues<Preferences.ShowTodos>()`. This will make sure that the types used in the command stay in sync with the manifest.
+- Raycast now provides 2 global TypeScript namespaces called `**Preferences**` and `**Arguments**` which respectively contain the types of the preferences and the types of the arguments of all the commands of the extensions. For example, if a command named `show-todos` has some preferences, its `getPreferenceValues`'s return type can be specified with `getPreferenceValues<Preferences.ShowTodos>()`. This will make sure that the types used in the command stay in sync with the manifest.
 - It is now possible to add commands that are disabled by default. A user will have to enable it manually before it shows up in Raycast's root search. This can be useful to provide commands for specific workflows without overwhelming everybody's root search.
 - **Markdown Tables** are now properly supported.
 - **Markdown** code blocks now support syntax highlighting. To enable it, make sure you specify the programming language at the start of the block.
@@ -651,8 +801,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 - **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user's "Pop to Root Search" preference in Raycast. `PopToRootType.Immediate` closes the window _and_ immediately pops back to root, regardless of the user's setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system 00ity and then return the user back to the launching command.
 - **Clipboard:** We added new options to copy and paste HTML content, which is useful for sharing formatted text, e.g. a link to a Notion page in Slack.
-- **Markdown**: Markdown in a `Detail` component now supports convenience image references for icons and asset folder files such as:
-  `![built-in icon](${Icon.AddPerson})` or `![local-assets-image](example.png)` (absolute URLs and user folder paths via `~` are also supported)
+- **Markdown**: Markdown in a `Detail` component now supports convenience image references for icons and asset folder files such as: `![built-in icon](${Icon.AddPerson})` or `![local-assets-image](example.png)` (absolute URLs and user folder paths via `~` are also supported)
 - **OAuth**: The client's `providerIcon` is now optional (extension icon as default) and accepts an `Image.ImageLike` type.
 - **List and Detail Metadata**: Now show tooltips when labels get truncated.
 - **Action.ToggleQuickLook**: Now also expands paths starting with `~`.
@@ -750,8 +899,7 @@ The new Extension Issues Dashboard is designed to help you quickly troubleshoot 
 
 ### 🐞 Fixes
 
-- **Forms**: The type of the `DatePicker`'s value is now `Date | null` (`null` happens when selecting `No Date`).
-  ⚠️ This might cause some TypeScript errors but it will now reflect what is really happening, preventing bugs at runtime.
+- **Forms**: The type of the `DatePicker`'s value is now `Date | null` (`null` happens when selecting `No Date`). ⚠️ This might cause some TypeScript errors but it will now reflect what is really happening, preventing bugs at runtime.
 - Fixed an issue where `List.Item.Detail.Metadata` titles sometimes being cropped despite there being enough room.
 - **Menu Bar Extra** `Item` and `Submenu` icons now change based on the system's dark / light mode, not Raycast's.
 - **Forms**: Fixed a bug where the initial value for a controlled TextArea could not be deleted.

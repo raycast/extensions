@@ -1,5 +1,9 @@
 # Deepcast Changelog
 
+## [Respect Translation Action Preference] - 2026-09-10
+
+- Fix the main Translate form ignoring `On Translation Action` and always copying the translated text to the clipboard ([#30932](https://github.com/raycast/extensions/issues/30932))
+
 ## [Fix Close Window Preference] - 2026-09-03
 
 - Fix `Close Raycast After Translation` preference being ignored when `On Translation Action` is not set: the `default` case in `sendTranslateRequest` was not calling `delayedCloseWindow`, so the window would close even when the preference was off ([#30609](https://github.com/raycast/extensions/issues/30609))

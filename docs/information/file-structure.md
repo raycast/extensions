@@ -6,35 +6,62 @@ description: Understand the file structure of an extension.
 
 An extension consists of at least an entry point file (e.g. `src/index.ts`) and a `package.json` manifest file. We add a few more support files when scaffolding an extension to streamline development with modern JavaScript tooling.
 
-The typical directory structure of a newly created extension looks like this:
+An extension's directory structure can look like this, including optional files for AI features, setup help, and Store screenshots:
 
 ```bash
 extension
 ├── .prettierrc
+├── ai.json
 ├── assets
 │   └── icon.png
 ├── eslint.config.js
+├── help.md
+├── metadata
+│   └── screenshot.png
 ├── node_modules
 ├── package-lock.json
 ├── package.json
+├── README.md
 ├── src
 │   ├── command.tsx
+│   └── tools
+│       └── tool.ts
 └── tsconfig.json
 ```
 
 The directory contains all source files, assets, and a few support files. Let's go over each of them:
 
+## Manifest
+
+**package.json** is the most important file in your extension. It defines the extension's metadata, including its title, commands, tools, preferences, and dependencies. See the [manifest reference](./manifest.md) for all supported properties.
+
 ## Sources
 
 Put all your source files into the `src` folder. We recommend using TypeScript as a programming language. Our API is fully typed, which helps you catch errors at compile time rather than runtime. `ts`, `tsx`, `js` and `jsx` are supported as file extensions. As a rule of thumb, use `tsx` or `jsx` for commands with a UI.
 
-An extension consists of at least an entry point file (e.g. `src/command.ts`) per command and a `package.json` manifest file holding metadata about the extension, its commands, and its tools. The format of the manifest file is very similar to [that of npm packages](https://docs.npmjs.com/cli/v7/configuring-npm/package-json). In addition to some of the standard properties, there are some [additional properties](./manifest.md), in particular, the `commands` properties which describes the entry points exposed by the extension.
+An extension consists of at least an entry point file (e.g. `src/command.ts`) per command and a `package.json` manifest file holding metadata about the extension, its commands and tools. The format of the manifest file is very similar to [that of npm packages](https://docs.npmjs.com/cli/v7/configuring-npm/package-json). In addition to some of the standard properties, there are some [additional properties](./manifest.md), in particular, the `commands` properties which describes the entry points exposed by the extension.
 
 Each command has a property `name` that maps to its main entry point file in the `src` folder. For example, a command with the name `create` in the `package.json` file, maps to the file `src/create{.ts,.tsx,.js,.jsx}`.
+
+### Tools
+
+Put tool entry points in `src/tools`. Tools expose functionality that Raycast AI can call, such as searching data or creating an item. Declare each tool in the `tools` array in `package.json`; its `name` maps to a `.ts` or `.tsx` file in this folder. For example, a tool named `search` maps to `src/tools/search.ts`. See [Create an AI Extension](../ai/create-an-ai-extension.md) for a walkthrough.
 
 ## Assets
 
 The optional `assets` folder can contain icons that will be packaged into the extension archive. All bundled assets can be referenced at runtime. Additionally, icons can be used in the `package.json` as extension or command icons.
+
+## Help
+
+The optional **help.md** file contains Markdown instructions for configuring required preferences, such as obtaining an API key. Place it next to `package.json`. Raycast bundles it automatically and displays its contents beside the setup form when required preferences are missing. See [Help for Required Preferences](../api-reference/preferences.md#help-for-required-preferences) for an example.
+
+## AI Configuration
+
+The optional **ai.yaml** file contains AI configuration, including additional `instructions` and `evals` to test your AI extension. Place it next to `package.json` to keep this configuration separate from the manifest. You can also use `ai.json5`, `ai.yaml`, or `ai.yml`; choose one format for your extension. See [AI File](../ai/learn-core-concepts-of-ai-extensions.md#ai-file) and [Write Evals for Your AI Extension](../ai/write-evals-for-your-ai-extension.md).
+
+## Metadata
+
+The optional `metadata` folder contains PNG screenshots for your extension's Store listing. These are uploaded when publishing. Put images needed at runtime in `assets`, and images linked from your README in a top-level `media` folder. See [Adding Screenshots](../basics/prepare-an-extension-for-store.md#adding-screenshots) for capture instructions and image requirements.
 
 ## Support files
 
@@ -44,5 +71,4 @@ The directory contains a few more files that setup common JavaScript tooling:
 - **.prettierrc** contains default rules for [Prettier](https://prettier.io) to format your code. We recommend to setup the [VS Code extension](https://prettier.io/docs/en/editors.html#visual-studio-code) to keep your code pretty automatically.
 - **node_modules** contains all installed dependencies. You shouldn't make any manual changes to this folder.
 - **package-lock.json** is a file generated by npm to install your dependencies. You shouldn't make any manual changes to this file.
-- **package.json** is the [manifest file](./manifest.md) containing metadata about your extension such as its title, the commands, and its dependencies.
 - **tsconfig.json** configures your project to use TypeScript. Most likely, you don't have to edit this file.

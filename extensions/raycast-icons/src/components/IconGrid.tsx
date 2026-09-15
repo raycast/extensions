@@ -54,6 +54,7 @@ export function IconGrid() {
       inset={Grid.Inset.Large}
       isLoading={isAILoading}
       navigationTitle={selectedIconName ? `Search Raycast Icons – ${selectedIconName}` : "Search Raycast Icons"}
+      filtering={false}
       onSearchTextChange={handleSearchTextChange}
       onSelectionChange={handleSelectionChange}
       throttle

@@ -19,7 +19,11 @@ function InstalledContent() {
   const [showDescription, setShowDescription] = useCachedState("show-description", true);
   const { isLoading, data: installed, revalidate } = useBrewInstalled();
   const [excludeDependencies] = useBrewDependencies();
-  const { formulae, pinnedFormulae, casks } = showInstalledPackages(installed, filter, excludeDependencies);
+  const { formulae, pinnedFormulae, casks, pinnedCasks } = showInstalledPackages(
+    installed,
+    filter,
+    excludeDependencies,
+  );
 
   // Log rendering statistics
   if (installed && !isLoading) {
@@ -28,7 +32,8 @@ function InstalledContent() {
       formulaeDisplayed: formulae.length,
       pinnedFormulaeDisplayed: pinnedFormulae.length,
       casksDisplayed: casks.length,
-      totalDisplayed: formulae.length + pinnedFormulae.length + casks.length,
+      pinnedCasksDisplayed: pinnedCasks.length,
+      totalDisplayed: formulae.length + pinnedFormulae.length + casks.length + pinnedCasks.length,
       totalAvailable: (installed.formulae?.size ?? 0) + (installed.casks?.size ?? 0),
     });
   }
@@ -41,6 +46,7 @@ function InstalledContent() {
       formulae={formulae}
       pinnedFormulae={pinnedFormulae}
       casks={casks}
+      pinnedCasks={pinnedCasks}
       searchBarPlaceholder={searchBarPlaceholder}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}

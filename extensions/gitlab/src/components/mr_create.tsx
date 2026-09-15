@@ -17,6 +17,7 @@ interface MRFormValues {
   labels: string[];
   milestone_id: number;
   remove_source_branch: boolean;
+  squash: boolean;
 }
 
 const NO_TEMPLATE = "no_template";
@@ -133,6 +134,17 @@ export function MRCreateForm(props: {
   );
   const previousTemplateNameRef = useRef(selectedTemplateName);
 
+  const squashFlagOrDefault = (val?: boolean) => {
+    if (val !== undefined) {
+      return val;
+    }
+    return project?.squash_option === "default_on";
+  };
+
+  const [squash, setSquash] = useState<boolean | undefined>(() =>
+    props.draftValues?.squash !== undefined ? Boolean(props.draftValues.squash) : undefined,
+  );
+
   const { data: selectedTemplateDetail } = useCachedPromise(
     async (templateName: string): Promise<TemplateDetail | undefined> => {
       if (templateName === NO_TEMPLATE) return undefined;
@@ -185,6 +197,7 @@ export function MRCreateForm(props: {
         projects={projects || []}
         setSelectedProject={(newValue) => {
           setRemoveBranch(undefined);
+          setSquash(undefined);
           setSelectedProject(newValue);
           if (!props.branch || props.project?.id.toString() !== newValue) {
             setSourceBranch("");
@@ -284,6 +297,14 @@ export function MRCreateForm(props: {
         value={removeBranch !== undefined ? removeBranch : (project?.remove_source_branch_after_merge ?? true)}
         onChange={setRemoveBranch}
       />
+      {(project?.squash_option === "default_on" || project?.squash_option === "default_off") && (
+        <Form.Checkbox
+          id="squash"
+          label="Squash commits when merge request is accepted"
+          value={squashFlagOrDefault(squash)}
+          onChange={setSquash}
+        />
+      )}
     </Form>
   );
 }
@@ -298,6 +319,7 @@ interface MREditFormValues {
   labels: string[];
   milestone_id: string;
   remove_source_branch: boolean;
+  squash: boolean;
   is_draft: boolean;
 }
 
@@ -345,6 +367,7 @@ export function MREditForm(props: { mr: MergeRequest; onUpdated?: () => void }) 
   const [sourceBranch, setSourceBranch] = useState(props.mr.source_branch);
   const [targetBranch, setTargetBranch] = useState(props.mr.target_branch);
   const [removeBranch, setRemoveBranch] = useState(props.mr.force_remove_source_branch ?? false);
+  const [squash, setSquash] = useState(props.mr.squash_on_merge ?? false);
 
   function handleDraftChange(value: boolean) {
     setIsDraft(value);
@@ -368,9 +391,6 @@ export function MREditForm(props: { mr: MergeRequest; onUpdated?: () => void }) 
         title: finalTitle,
       } as unknown as Record<string, unknown>);
       delete formValues.is_draft;
-      if (values.remove_source_branch === false) {
-        formValues.remove_source_branch = "false";
-      }
       await showToast({ style: Toast.Style.Animated, title: "Updating Merge Request..." });
       await gitlab.updateMR(props.mr.project_id, props.mr.iid, formValues);
       await showToast(Toast.Style.Success, "Merge Request updated", "Merge Request update successful");
@@ -466,6 +486,14 @@ export function MREditForm(props: { mr: MergeRequest; onUpdated?: () => void }) 
         value={removeBranch}
         onChange={setRemoveBranch}
       />
+      {(project?.squash_option === "default_on" || project?.squash_option === "default_off") && (
+        <Form.Checkbox
+          id="squash"
+          label="Squash commits when merge request is accepted"
+          value={squash}
+          onChange={setSquash}
+        />
+      )}
     </Form>
   );
 }

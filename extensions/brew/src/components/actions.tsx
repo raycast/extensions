@@ -4,21 +4,47 @@ import {
   type BrewProgress,
   brewInstallWithProgress,
   brewName,
+  brewIdentifier,
+  brewPinnedIdentifiers,
+  isPinnedPackage,
   isCask,
-  brewPinFormula,
+  brewPin,
   brewUninstall,
-  brewUnpinFormula,
+  brewUnpin,
   brewUpgradeAll,
   brewUpgradeSingleWithProgress,
   type Cask,
   ensureError,
+  isPinnedRefusal,
+  upgradeSkipReason,
   type Formula,
   type Nameable,
-  type OutdatedFormula,
+  type PinKind,
+  type Pinnable,
   preferences,
   showActionToast,
   showBrewFailureToast,
 } from "../utils";
+
+/**
+ * Read Homebrew's pin state, reporting a read failure rather than throwing past
+ * the caller's error handling.
+ *
+ * `brewPinnedIdentifiers` deliberately throws on anything but a missing
+ * directory: an unreadable pin directory is not evidence that nothing is
+ * pinned. But these reads happen BEFORE the try/catch that owns an action's
+ * failure toast, so an escaping error rejected the action callback with no HUD
+ * and no diagnostic. Fail closed and say so — running the command anyway could
+ * hand a pinned package to a brew that refuses it.
+ */
+async function readPins(operation: string): Promise<{ formulae: Set<string>; casks: Set<string> } | undefined> {
+  try {
+    return await brewPinnedIdentifiers();
+  } catch (err) {
+    showBrewFailureToast(`${operation} failed`, ensureError(err));
+    return undefined;
+  }
+}
 
 export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }) {
   // TD: Support installing other versions?
@@ -34,7 +60,16 @@ export function FormulaInstallAction(props: { formula: Cask | Formula; onAction:
   );
 }
 
-export function FormulaUninstallAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }) {
+export function FormulaUninstallAction(props: {
+  formula: Cask | Nameable;
+  /**
+   * Effective pin state, when the caller tracks it live. The payload's own
+   * `pinned` can be a stale snapshot from an in-flight fetch, so a view that
+   * knows better says so rather than letting a guard read the stale value.
+   */
+  pinned?: boolean;
+  onAction: (result: boolean) => void;
+}) {
   return (
     <Action
       title="Uninstall"
@@ -42,7 +77,7 @@ export function FormulaUninstallAction(props: { formula: Cask | Nameable; onActi
       shortcut={Keyboard.Shortcut.Common.Remove}
       style={Action.Style.Destructive}
       onAction={async () => {
-        const result = await uninstall(props.formula);
+        const result = await uninstall(props.formula, false, props.pinned, props.onAction);
         props.onAction(result);
       }}
     />
@@ -52,11 +87,14 @@ export function FormulaUninstallAction(props: { formula: Cask | Nameable; onActi
 /**
  * Upgrade a single package.
  *
- * A PINNED formula is skipped rather than attempted. `brew upgrade` refuses it
- * outright — "Error: Not upgrading 1 pinned package" — so running it would
- * surface a failure toast for a package the user deliberately froze. Upgrade
- * All already skips pinned formulae and reports them as skipped; this makes the
- * single-package action say the same thing, in every view that offers it.
+ * `brew upgrade` refuses a PINNED package outright — "Error: Not upgrading 1
+ * pinned package" — so the action never simply attempts one.
+ *
+ * Where the caller tracks per-package status (the upgrade run), it stays a
+ * skip: a row that reports "skipped" should not quietly unpin itself. Elsewhere
+ * (Search, Show Installed) the only sensible reading of pressing Upgrade on a
+ * pinned row is "do the thing" — so the action says "Unpin and Upgrade" and
+ * does both, rather than refusing and naming a shortcut to press instead.
  */
 export function FormulaUpgradeAction(props: {
   formula: Cask | Nameable;
@@ -68,39 +106,69 @@ export function FormulaUpgradeAction(props: {
    * no status (Search, Show Installed) leave it undefined and rely on the toast.
    */
   onSkip?: () => void;
+  /** Effective pin state, when the caller tracks it live. See FormulaUninstallAction. */
+  pinned?: boolean;
   onAction: (result: boolean) => void;
 }) {
+  const pinned = props.pinned ?? isPinned(props.formula);
+  const cask = isCask(props.formula);
+  const unpinAndUpgrade = pinned && !props.onSkip;
+  // Name the package: this action sits beside "Upgrade All" in the same panel,
+  // so "Upgrade" alone leaves the scope of what is about to run ambiguous.
+  const name = brewName(props.formula);
+
   return (
     <Action
-      title="Upgrade"
-      icon={Icon.ArrowUpCircle}
+      title={unpinAndUpgrade ? `Unpin ${cask ? "Cask" : "Formula"} and Upgrade ${name}` : `Upgrade ${name}`}
+      icon={unpinAndUpgrade ? Icon.TackDisabled : Icon.ArrowUpCircle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
       onAction={async () => {
-        if (isPinned(props.formula)) {
-          props.onSkip?.();
-          await showToast({
-            style: Toast.Style.Success,
-            title: "Skipping Pinned Formulae Upgrades",
-            message: `${brewName(props.formula)} is pinned. Unpin it (⌘ .) to upgrade.`,
-          });
+        // The title above is drawn from the payload, which is fine for display.
+        // The DECISION reads Homebrew's own pin directory: a package pinned in
+        // another command or outside Raycast is pinned whatever this snapshot
+        // says, and brew errors rather than warns when we name it. ~20µs.
+        const pins = await readPins("Upgrade");
+        if (!pins) {
           return;
+        }
+        // Identity, not display name: `brewName` gives a cask its title.
+        const reallyPinned = isPinnedPackage(pins, brewIdentifier(props.formula), cask);
+
+        if (reallyPinned) {
+          if (!unpinAndUpgrade) {
+            props.onSkip?.();
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Skipping Pinned Upgrades",
+              message: `${brewName(props.formula)} is pinned. Unpin it (⌘ .) to upgrade.`,
+            });
+            return;
+          }
+          // The pin is the only thing standing in the way, and the user just
+          // asked for the upgrade — so lift it, then proceed.
+          if (!(await unpin(props.formula as Pinnable, cask ? "cask" : "formula"))) {
+            return;
+          }
         }
 
         props.onStart?.();
         const result = await upgrade(props.formula);
+        if (result === DECLINED) {
+          // Brew declined rather than failed. Report it the way the batch run
+          // does — and the way the pinned branch above does — instead of
+          // painting the row red for something that is not an error.
+          props.onSkip?.();
+          return;
+        }
         props.onAction(result);
       }}
     />
   );
 }
 
-/**
- * Pinning is formula-only. A cask is never treated as pinned even if the API
- * hands one a `pinned` field — there is no Unpin action in the cask panel, so
- * the toast would name a remedy the user cannot reach.
- */
+/** Formulae and casks are both pinnable (casks since Homebrew 5.1.12). */
 function isPinned(item: Cask | Nameable): boolean {
-  return !isCask(item) && (item as Formula).pinned === true;
+  return (item as Formula | Cask).pinned === true;
 }
 
 export function FormulaUpgradeAllAction(props: {
@@ -125,18 +193,19 @@ export function FormulaUpgradeAllAction(props: {
   );
 }
 
-export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; onAction: (result: boolean) => void }) {
-  const isPinned = props.formula.pinned;
+export function PinAction(props: { item: Pinnable; kind: PinKind; onAction: (result: boolean) => void }) {
+  const pinned = props.item.pinned;
+  const noun = props.kind === "cask" ? "Cask" : "Formula";
   return (
     <Action
-      title={isPinned ? "Unpin" : "Pin"}
-      icon={isPinned ? Icon.TackDisabled : Icon.Tack}
+      title={`${pinned ? "Unpin" : "Pin"} ${noun}`}
+      icon={pinned ? Icon.TackDisabled : Icon.Tack}
       shortcut={Keyboard.Shortcut.Common.Pin}
       onAction={async () => {
-        if (isPinned) {
-          props.onAction(await unpin(props.formula));
+        if (pinned) {
+          props.onAction(await unpin(props.item, props.kind));
         } else {
-          props.onAction(await pin(props.formula));
+          props.onAction(await pin(props.item, props.kind));
         }
       }}
     />
@@ -190,26 +259,92 @@ async function install(formula: Cask | Formula): Promise<boolean> {
   }
 }
 
-async function uninstall(formula: Cask | Nameable): Promise<boolean> {
+/**
+ * Homebrew refuses to uninstall a pinned package of either kind. Say so, and
+ * offer the one thing that gets past it — which unpins, so it needs an explicit
+ * confirmation rather than a silent `--force`.
+ */
+async function offerForcedUninstall(
+  formula: Cask | Nameable,
+  name: string,
+  cask: boolean,
+  effectivePinned: boolean | undefined,
+  onComplete?: (result: boolean) => void,
+): Promise<void> {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: `Can't uninstall pinned ${cask ? "cask" : "formula"} ${name}`,
+    message: "It is pinned. Unpin it first, or force the uninstall.",
+    primaryAction: {
+      title: `Unpin ${cask ? "Cask" : "Formula"} and Force Uninstall`,
+      onAction: async (toast) => {
+        await toast.hide();
+        // Tell the caller the row changed: without this the view revalidates
+        // only after the refused attempt, leaving the removed package on screen.
+        onComplete?.(await uninstall(formula, true, effectivePinned));
+      },
+    },
+  });
+}
+
+async function uninstall(
+  formula: Cask | Nameable,
+  force = false,
+  effectivePinned?: boolean,
+  onComplete?: (result: boolean) => void,
+): Promise<boolean> {
   const name = brewName(formula);
+  const cask = isCask(formula);
+  // Ask Homebrew, not the cached payload — see FormulaUpgradeAction. The caller's
+  // effective value still wins when it has one (a live pin change in the review).
+  // Only ask about pins when the caller has not already decided.
+  let pinned = effectivePinned;
+  if (pinned === undefined) {
+    const pins = await readPins("Uninstall");
+    if (!pins) {
+      return false;
+    }
+    pinned = isPinnedPackage(pins, brewIdentifier(formula), cask);
+  }
+
+  // Homebrew refuses to uninstall a pinned package — casks in
+  // cask/uninstall.rb (`unpin_for_removal?`) and formulae in uninstall.rb
+  // ("is pinned. You must unpin it to uninstall."). Rather than let that
+  // surface as a raw brew error, say what happened and offer the remedy, which
+  // unpins as part of the removal and so needs explicit confirmation.
+  if (!force && pinned) {
+    await offerForcedUninstall(formula, name, cask, effectivePinned, onComplete);
+    return false;
+  }
+
   const handle = showActionToast({
     title: `Uninstalling ${name}`,
     message: "",
     cancelable: true,
   });
   try {
-    await brewUninstall(formula, handle.abort?.signal);
+    await brewUninstall(formula, handle.abort?.signal, force);
     await handle.showSuccessHUD(`Uninstalled ${name}`);
     return true;
   } catch (err) {
     const error = ensureError(err);
+    // Only reached when brew actually FAILS. An ordinary pinned uninstall uses
+    // `onoe` and exits 0, so it never lands here — see TODO.md.
+    if (!force && isPinnedRefusal(error)) {
+      await handle.hide();
+      await offerForcedUninstall(formula, name, cask, effectivePinned, onComplete);
+      return false;
+    }
     await handle.showFailureHUD(`Failed to uninstall ${name}`);
     showBrewFailureToast("Uninstall failed", error);
     return false;
   }
 }
 
-async function upgrade(formula: Cask | Nameable): Promise<boolean> {
+/** Homebrew ran, exited 0, and chose not to upgrade — neither success nor failure. */
+const DECLINED = "declined" as const;
+
+async function upgrade(formula: Cask | Nameable): Promise<boolean | typeof DECLINED> {
   const name = brewName(formula);
   const handle = showActionToast({
     title: `Upgrading ${name}`,
@@ -218,13 +353,23 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean> {
   });
   try {
     // Use progress-enabled upgrade to show download progress
-    await brewUpgradeSingleWithProgress(
+    const result = await brewUpgradeSingleWithProgress(
       formula,
       (progress: BrewProgress) => {
         handle.updateMessage(progress.message);
       },
       handle.abort?.signal,
     );
+
+    // Exit 0 is not proof of an upgrade — brew warns and skips a disabled,
+    // unavailable or already-current package.
+    const declined = upgradeSkipReason(`${result.stderr ?? ""}\n${result.stdout ?? ""}`, brewIdentifier(formula));
+    if (declined) {
+      await handle.hide();
+      await showToast({ style: Toast.Style.Failure, title: `Did not upgrade ${name}`, message: declined });
+      return DECLINED;
+    }
+
     await handle.showSuccessHUD(`Upgraded ${name}`);
     return true;
   } catch (err) {
@@ -253,28 +398,40 @@ async function upgradeAll(): Promise<boolean> {
   }
 }
 
-export async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
-  showToast(Toast.Style.Animated, `Pinning ${brewName(formula)}`);
+export async function pin(item: Pinnable, kind: PinKind): Promise<boolean> {
+  const name = brewName(item as Cask | Nameable);
+  showToast(Toast.Style.Animated, `Pinning ${name}`);
   try {
-    await brewPinFormula(formula);
-    formula.pinned = true;
-    showToast(Toast.Style.Success, `Pinned ${brewName(formula)}`);
+    const mayAutoUpdate = await brewPin(item, kind);
+    item.pinned = true;
+    // A cask that updates itself ignores the pin: Homebrew pins it anyway and
+    // warns (cmd/pin.rb). Say so rather than implying the version is frozen.
+    if (mayAutoUpdate) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Pinned ${name}`,
+        message: "Pinning may be overridden by auto-updates",
+      });
+    } else {
+      showToast(Toast.Style.Success, `Pinned ${name}`);
+    }
     return true;
   } catch (err) {
-    showBrewFailureToast("Pin formula failed", ensureError(err));
+    showBrewFailureToast(`Pin ${kind} failed`, ensureError(err));
     return false;
   }
 }
 
-export async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
-  showToast(Toast.Style.Animated, `Unpinning ${brewName(formula)}`);
+export async function unpin(item: Pinnable, kind: PinKind): Promise<boolean> {
+  const name = brewName(item as Cask | Nameable);
+  showToast(Toast.Style.Animated, `Unpinning ${name}`);
   try {
-    await brewUnpinFormula(formula);
-    formula.pinned = false;
-    showToast(Toast.Style.Success, `Unpinned ${brewName(formula)}`);
+    await brewUnpin(item, kind);
+    item.pinned = false;
+    showToast(Toast.Style.Success, `Unpinned ${name}`);
     return true;
   } catch (err) {
-    showBrewFailureToast("Unpin formula failed", ensureError(err));
+    showBrewFailureToast(`Unpin ${kind} failed`, ensureError(err));
     return false;
   }
 }

@@ -451,9 +451,11 @@ function applyInstalledStatus(results: InstallableResults, installed?: Installed
     if (info && isCask(info)) {
       cask.installed = info.installed;
       cask.outdated = info.outdated;
+      cask.pinned = info.pinned;
     } else {
       cask.installed = undefined;
       cask.outdated = false;
+      cask.pinned = false;
     }
   }
 }
@@ -465,7 +467,9 @@ function isCask(installable: Installable): installable is Cask {
 }
 
 function isFormula(installable: Installable): installable is Formula {
-  return (installable as Formula).pinned != undefined;
+  // Not `pinned`: casks report that too since cask pinning landed. `token` is
+  // the discriminator (see isCask), so its ABSENCE identifies a formula.
+  return (installable as Cask).token === undefined;
 }
 
 /**

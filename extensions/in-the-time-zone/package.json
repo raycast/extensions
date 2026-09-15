@@ -5,6 +5,9 @@
   "description": "Visualize and scrub time across multiple time zones",
   "icon": "icon.png",
   "author": "i_idz",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -42,6 +45,28 @@
         }
       ],
       "default": "system",
+      "required": false
+    },
+    {
+      "name": "cityOrder",
+      "type": "dropdown",
+      "title": "City Order",
+      "description": "How cities are ordered. Custom keeps your own arrangement via the Move Up/Down actions.",
+      "data": [
+        {
+          "title": "GMT Offset (West → East)",
+          "value": "offset-asc"
+        },
+        {
+          "title": "GMT Offset (East → West)",
+          "value": "offset-desc"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
+        }
+      ],
+      "default": "offset-asc",
       "required": false
     },
     {

@@ -11,7 +11,7 @@
  */
 
 import type { LanguageItem } from "@/core/language/types";
-import type { QueryResult, QueryType } from "@/types/query";
+import type { QueryResult } from "@/types/query";
 
 import { COUPLING_RULES } from "./couplingRules";
 import { checkIfShowTranslationDetail, sortedQueryResults } from "./utils";
@@ -30,7 +30,7 @@ export interface QueryState {
    * all queries have finished and isLoading becomes false.
    * Updated by START_QUERY / FINISH_QUERY actions.
    */
-  queryRecordList: QueryType[];
+  queryRecordList: string[];
 
   isLoading: boolean;
 
@@ -56,6 +56,13 @@ export interface QueryState {
    * Actions from older generations are ignored.
    */
   activeGeneration: number;
+
+  /**
+   * Generation whose visible results mounted the native List. It changes only
+   * when a query first produces a visible item, so the List mounts with content
+   * without remounting the search field while the user types.
+   */
+  listEpoch: number;
 }
 
 /**
@@ -64,9 +71,9 @@ export interface QueryState {
  */
 export type QueryAction =
   /** A new query started (e.g., Bing Translate request fired). Add to pending list. */
-  | { type: "START_QUERY"; queryType: QueryType; generation: number }
+  | { type: "START_QUERY"; serviceId: string; generation: number }
   /** A query finished (success or error). Remove from pending list. */
-  | { type: "FINISH_QUERY"; queryType: QueryType; generation: number }
+  | { type: "FINISH_QUERY"; serviceId: string; generation: number }
   /** API returned a result. Add/update in queryResults, trigger cross-service coupling. */
   | { type: "SET_RESULT"; queryResult: QueryResult; generation: number }
   /** Language detection completed. Update source and target language display. */
@@ -104,18 +111,17 @@ export function queryReducer(state: QueryState, action: QueryAction): QueryState
 
   switch (action.type) {
     case "START_QUERY": {
-      // Dedup: don't add if already tracking this query type
-      if (state.queryRecordList.includes(action.queryType)) return state;
+      if (state.queryRecordList.includes(action.serviceId)) return state;
       return {
         ...state,
-        queryRecordList: [...state.queryRecordList, action.queryType],
+        queryRecordList: [...state.queryRecordList, action.serviceId],
         isLoading: true,
       };
     }
 
     case "FINISH_QUERY": {
       // Remove from pending list; if list becomes empty, all queries finished
-      const newList = state.queryRecordList.filter((t) => t !== action.queryType);
+      const newList = state.queryRecordList.filter((id) => id !== action.serviceId);
       if (newList.length === state.queryRecordList.length) return state;
       return { ...state, queryRecordList: newList, isLoading: newList.length > 0 };
     }
@@ -123,8 +129,7 @@ export function queryReducer(state: QueryState, action: QueryAction): QueryState
     case "SET_RESULT": {
       const { queryResult } = action;
 
-      // Replace existing result of same type (or add new one)
-      let results = state.queryResults.filter((r) => r.type !== queryResult.type);
+      let results = state.queryResults.filter((result) => result.serviceId !== queryResult.serviceId);
       results.push(queryResult);
 
       // Sort by user preference order
@@ -140,6 +145,7 @@ export function queryReducer(state: QueryState, action: QueryAction): QueryState
       return {
         ...state,
         queryResults: results,
+        listEpoch: hasVisibleListItems(results) ? action.generation : state.listEpoch,
         isShowDetail: checkIfShowTranslationDetail(results),
       };
     }
@@ -193,4 +199,12 @@ export function queryReducer(state: QueryState, action: QueryAction): QueryState
     default:
       return state;
   }
+}
+
+function hasVisibleListItems(results: QueryResult[]): boolean {
+  return results.some(
+    (result) =>
+      (!("hideDisplay" in result) || !result.hideDisplay) &&
+      result.displaySections.some((section) => section.items.length > 0),
+  );
 }

@@ -79,6 +79,10 @@ export default function HistoryCommand() {
       : { source: Icon.XMarkCircle, tintColor: Color.Red };
   }
 
+  // status icons fill the tile edge to edge, real thumbnails should not be padded
+  const padStatusIcons =
+    process.platform !== "darwin" && !history.some((e) => e.thumbnailUrl && fs.existsSync(e.thumbnailUrl));
+
   const groupedHistory = history.reduce(
     (groups, entry) => {
       const date = new Date(entry.timestamp).toDateString();
@@ -102,7 +106,11 @@ export default function HistoryCommand() {
   }
 
   return (
-    <Grid isLoading={loading} searchBarPlaceholder="Search download history...">
+    <Grid
+      isLoading={loading}
+      searchBarPlaceholder="Search download history..."
+      inset={padStatusIcons ? Grid.Inset.Large : undefined}
+    >
       {Object.entries(groupedHistory).map(([date, entries]) => (
         <Grid.Section key={date} title={date}>
           {entries.map((entry) => {
@@ -117,11 +125,7 @@ export default function HistoryCommand() {
                   <ActionPanel>
                     {entryExists && <Action.Open title="Open File" target={entry.downloadPath} icon={Icon.Play} />}
                     {entryExists && (
-                      <Action.ShowInFinder
-                        title="Show in Finder"
-                        path={entry.downloadPath}
-                        shortcut={Keyboard.Shortcut.Common.Open}
-                      />
+                      <Action.ShowInFinder path={entry.downloadPath} shortcut={Keyboard.Shortcut.Common.Open} />
                     )}
                     <Action.CopyToClipboard
                       title="Copy URL"
@@ -145,7 +149,7 @@ export default function HistoryCommand() {
                       icon={Icon.ExclamationMark}
                       style={Action.Style.Destructive}
                       onAction={clearHistory}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                      shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     />
                   </ActionPanel>
                 }

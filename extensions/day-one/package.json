@@ -6,9 +6,13 @@
   "icon": "day-one.png",
   "author": "AntonNiklasson",
   "contributors": [
-    "bestemic"
+    "bestemic",
+    "Fizzbow"
   ],
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "add-entry",

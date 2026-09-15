@@ -7,7 +7,7 @@
 import React from "react";
 import { Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { OutdatedCask, OutdatedFormula, OutdatedResults, type UpgradePackageStatus } from "../utils";
+import { OutdatedCask, OutdatedFormula, OutdatedResults, preferences, type UpgradePackageStatus } from "../utils";
 import type { PackageState } from "../hooks/useBrewUpgrade";
 import { OutdatedActionPanel } from "./actionPanels";
 import { OutdatedErrorView } from "./outdatedErrorView";
@@ -71,14 +71,14 @@ export function statusIcon(state?: PackageState): React.ComponentProps<typeof Li
 
   switch (state.status) {
     case "upgrading":
-      return { value: { source: Icon.ArrowDownCircle, tintColor: Color.Blue }, tooltip: "Upgrading…" };
+      return { value: { source: getProgressIcon(0.5, Color.Blue), tintColor: Color.Blue }, tooltip: "Upgrading…" };
     case "upgraded":
       return { value: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Upgraded" };
     case "failed":
       return { value: { source: Icon.XMarkCircle, tintColor: Color.Red }, tooltip: state.message ?? "Upgrade failed" };
     case "skipped":
       return {
-        value: { source: Icon.MinusCircle, tintColor: Color.SecondaryText },
+        value: { source: Icon.MinusCircleFilled, tintColor: Color.SecondaryText },
         tooltip: state.message ?? "Skipped",
       };
   }
@@ -86,7 +86,7 @@ export function statusIcon(state?: PackageState): React.ComponentProps<typeof Li
 
 export function OutdatedList(props: OutdatedListProps) {
   const allFormulae = props.filterType != InstallableFilterType.casks ? (props.outdated?.formulae ?? []) : [];
-  const casks = props.filterType != InstallableFilterType.formulae ? (props.outdated?.casks ?? []) : [];
+  const allCasks = props.filterType != InstallableFilterType.formulae ? (props.outdated?.casks ?? []) : [];
 
   // Pinned formulae are separated out the way Show Installed separates them.
   // Here it also carries meaning: a pinned formula is one `brew upgrade` will
@@ -94,11 +94,48 @@ export function OutdatedList(props: OutdatedListProps) {
   // that without needing the row to explain itself.
   const formulae = allFormulae.filter((formula) => !formula.pinned);
   const pinnedFormulae = allFormulae.filter((formula) => formula.pinned);
-  const hasResults = allFormulae.length > 0 || casks.length > 0;
+  const unpinnedCasks = allCasks.filter((cask) => !cask.pinned);
+  const pinnedCasks = allCasks.filter((cask) => cask.pinned);
+  const hasResults = allFormulae.length > 0 || allCasks.length > 0;
 
   // Determine search bar placeholder based on loading state
   const searchBarPlaceholder =
     props.searchBarPlaceholder ?? (props.isLoading ? "Checking for outdated packages…" : placeholder(props.filterType));
+
+  const pinnedSections = (
+    <>
+      {pinnedFormulae.length > 0 && (
+        <List.Section title="Pinned Formulae" subtitle={`${pinnedFormulae.length}`}>
+          {pinnedFormulae.map((formula) => (
+            <OutdatedFormulaeListItem
+              key={formula.name}
+              outdated={formula}
+              icon={props.icon}
+              actions={props.actions}
+              onUpgrade={props.onUpgrade}
+              onUpgradeAll={props.onUpgradeAll}
+              onAction={props.onAction}
+            />
+          ))}
+        </List.Section>
+      )}
+      {pinnedCasks.length > 0 && (
+        <List.Section title="Pinned Casks" subtitle={`${pinnedCasks.length}`}>
+          {pinnedCasks.map((cask) => (
+            <OutdatedCaskListItem
+              key={cask.name}
+              outdated={cask}
+              icon={props.icon}
+              actions={props.actions}
+              onUpgrade={props.onUpgrade}
+              onUpgradeAll={props.onUpgradeAll}
+              onAction={props.onAction}
+            />
+          ))}
+        </List.Section>
+      )}
+    </>
+  );
 
   return (
     <List
@@ -133,35 +170,10 @@ export function OutdatedList(props: OutdatedListProps) {
       {/* Results */}
       {hasResults && (
         <>
-          <List.Section title="Formulae">
-            {formulae.map((formula) => (
-              <OutdatedFormulaeListItem
-                key={formula.name}
-                outdated={formula}
-                icon={props.icon}
-                actions={props.actions}
-                onUpgrade={props.onUpgrade}
-                onUpgradeAll={props.onUpgradeAll}
-                onAction={props.onAction}
-              />
-            ))}
-          </List.Section>
-          <List.Section title="Casks">
-            {casks.map((cask) => (
-              <OutdatedCaskListItem
-                key={cask.name}
-                outdated={cask}
-                icon={props.icon}
-                actions={props.actions}
-                onUpgrade={props.onUpgrade}
-                onUpgradeAll={props.onUpgradeAll}
-                onAction={props.onAction}
-              />
-            ))}
-          </List.Section>
-          {pinnedFormulae.length > 0 && (
-            <List.Section title="Pinned Formulae" subtitle={`${pinnedFormulae.length}`}>
-              {pinnedFormulae.map((formula) => (
+          {preferences.pinnedFirst && pinnedSections}
+          {formulae.length > 0 && (
+            <List.Section title="Formulae">
+              {formulae.map((formula) => (
                 <OutdatedFormulaeListItem
                   key={formula.name}
                   outdated={formula}
@@ -174,6 +186,22 @@ export function OutdatedList(props: OutdatedListProps) {
               ))}
             </List.Section>
           )}
+          {unpinnedCasks.length > 0 && (
+            <List.Section title="Casks">
+              {unpinnedCasks.map((cask) => (
+                <OutdatedCaskListItem
+                  key={cask.name}
+                  outdated={cask}
+                  icon={props.icon}
+                  actions={props.actions}
+                  onUpgrade={props.onUpgrade}
+                  onUpgradeAll={props.onUpgradeAll}
+                  onAction={props.onAction}
+                />
+              ))}
+            </List.Section>
+          )}
+          {!preferences.pinnedFirst && pinnedSections}
         </>
       )}
     </List>
@@ -199,12 +227,13 @@ function OutdatedCaskListItem(props: OutdatedListItemProps & { outdated: Outdate
     <List.Item
       id={outdated.name}
       title={outdated.name}
-      accessories={[{ text: version }]}
+      accessories={[...(outdated.pinned ? [{ icon: Icon.Tack, tooltip: "Pinned" }] : []), { text: version }]}
       icon={props.icon?.(outdated, true) ?? PENDING_ICON}
       actions={
         props.actions?.(outdated, true) ?? (
           <OutdatedActionPanel
             outdated={outdated}
+            isCask
             onUpgrade={(status) => props.onUpgrade?.(outdated, true, status)}
             onUpgradeAll={props.onUpgradeAll}
             onAction={props.onAction}
@@ -237,6 +266,7 @@ function OutdatedFormulaeListItem(props: OutdatedListItemProps & { outdated: Out
         props.actions?.(outdated, false) ?? (
           <OutdatedActionPanel
             outdated={outdated}
+            isCask={false}
             onUpgrade={(status) => props.onUpgrade?.(outdated, false, status)}
             onUpgradeAll={props.onUpgradeAll}
             onAction={props.onAction}

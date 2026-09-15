@@ -1,0 +1,1187 @@
+{
+  "t": 10,
+  "i": 0,
+  "p": {
+    "k": ["result", "error", "context"],
+    "v": [
+      {
+        "t": 10,
+        "i": 1,
+        "p": {
+          "k": ["status", "updatedAt", "forecastStatus", "forecast", "history", "ingestion", "evidence"],
+          "v": [
+            { "t": 1, "s": "live" },
+            { "t": 1, "s": "2026-09-09T06:28:14.263Z" },
+            { "t": 1, "s": "current" },
+            {
+              "t": 10,
+              "i": 351,
+              "p": {
+                "k": [
+                  "activeFeatures",
+                  "algorithmVersion",
+                  "baseScore24h",
+                  "baseScore48h",
+                  "calculationBreakdown",
+                  "calibrationSampleSize",
+                  "calibrationState",
+                  "horizonCalibration",
+                  "forecastConfidence",
+                  "model",
+                  "nextReassessmentAt",
+                  "reasoningEffort",
+                  "score24h",
+                  "score48h",
+                  "semanticSignals",
+                  "semanticSummary",
+                  "telemetryInterpretation",
+                  "verification"
+                ],
+                "v": [
+                  {
+                    "t": 9,
+                    "i": 352,
+                    "a": [
+                      {
+                        "t": 10,
+                        "i": 353,
+                        "p": {
+                          "k": ["evidenceKind", "historicalOccurrences", "hits24h", "hits48h"],
+                          "v": [
+                            { "t": 1, "s": "capacity-context" },
+                            { "t": 0, "s": 60 },
+                            { "t": 0, "s": 16 },
+                            { "t": 0, "s": 28 }
+                          ]
+                        },
+                        "o": 0
+                      },
+                      {
+                        "t": 10,
+                        "i": 354,
+                        "p": {
+                          "k": ["evidenceKind", "historicalOccurrences", "hits24h", "hits48h"],
+                          "v": [
+                            { "t": 1, "s": "negative-signal" },
+                            { "t": 0, "s": 10 },
+                            { "t": 0, "s": 2 },
+                            { "t": 0, "s": 6 }
+                          ]
+                        },
+                        "o": 0
+                      }
+                    ],
+                    "o": 0
+                  },
+                  { "t": 1, "s": "gpt-5.6-medium-hybrid-v2" },
+                  { "t": 0, "s": 27 },
+                  { "t": 0, "s": 47 },
+                  {
+                    "t": 10,
+                    "i": 355,
+                    "p": {
+                      "k": ["method", "previousScore24h", "previousScore48h", "verificationState"],
+                      "v": [
+                        { "t": 1, "s": "gpt-direct" },
+                        { "t": 0, "s": 27 },
+                        { "t": 0, "s": 47 },
+                        { "t": 1, "s": "not-required" }
+                      ]
+                    },
+                    "o": 0
+                  },
+                  { "t": 0, "s": 45 },
+                  { "t": 1, "s": "experimental" },
+                  {
+                    "t": 10,
+                    "i": 356,
+                    "p": {
+                      "k": ["24h", "48h"],
+                      "v": [
+                        {
+                          "t": 10,
+                          "i": 357,
+                          "p": {
+                            "k": ["brierScore", "calibrationSampleSize", "calibrationState"],
+                            "v": [
+                              { "t": 0, "s": 0.19160652173913056 },
+                              { "t": 0, "s": 46 },
+                              { "t": 1, "s": "calibrated" }
+                            ]
+                          },
+                          "o": 0
+                        },
+                        {
+                          "t": 10,
+                          "i": 358,
+                          "p": {
+                            "k": ["brierScore", "calibrationSampleSize", "calibrationState"],
+                            "v": [
+                              { "t": 0, "s": 0.2786977777777778 },
+                              { "t": 0, "s": 45 },
+                              { "t": 1, "s": "experimental" }
+                            ]
+                          },
+                          "o": 0
+                        }
+                      ]
+                    },
+                    "o": 0
+                  },
+                  { "t": 1, "s": "medium" },
+                  { "t": 1, "s": "gpt-5.6-sol" },
+                  { "t": 1, "s": "2026-09-10T06:00:00.000Z" },
+                  { "t": 1, "s": "medium" },
+                  { "t": 0, "s": 24 },
+                  { "t": 0, "s": 43 },
+                  {
+                    "t": 9,
+                    "i": 359,
+                    "a": [
+                      {
+                        "t": 10,
+                        "i": 360,
+                        "p": {
+                          "k": [
+                            "direction",
+                            "evidenceId",
+                            "horizon",
+                            "impact24hPoints",
+                            "impact48hPoints",
+                            "interpretation",
+                            "strength",
+                            "sourceUrl"
+                          ],
+                          "v": [
+                            { "t": 1, "s": "decrease" },
+                            { "t": 1, "s": "2097175062566846501" },
+                            { "t": 1, "s": "both" },
+                            { "t": 0, "s": -3 },
+                            { "t": 0, "s": -4 },
+                            {
+                              "t": 1,
+                              "s": "The Codex engineering lead's joking statement that there is no reset schedule provides modest negative evidence against a specifically imminent reset, but it does not deny that unscheduled resets occur."
+                            },
+                            { "t": 0, "s": 2 },
+                            { "t": 1, "s": "https://x.com/thsottiaux/status/2097175062566846501" }
+                          ]
+                        },
+                        "o": 0
+                      },
+                      {
+                        "t": 10,
+                        "i": 361,
+                        "p": {
+                          "k": [
+                            "direction",
+                            "evidenceId",
+                            "horizon",
+                            "impact24hPoints",
+                            "impact48hPoints",
+                            "interpretation",
+                            "strength",
+                            "sourceUrl"
+                          ],
+                          "v": [
+                            { "t": 1, "s": "neutral" },
+                            { "t": 1, "s": "2097415471251464582" },
+                            { "t": 1, "s": "both" },
+                            { "t": 0, "s": 0 },
+                            { "t": 0, "s": 0 },
+                            {
+                              "t": 1,
+                              "s": "This describes request scheduling and routing optimization, not a shared Codex usage reset or its timing."
+                            },
+                            { "t": 0, "s": 0 },
+                            { "t": 1, "s": "https://x.com/thsottiaux/status/2097415471251464582" }
+                          ]
+                        },
+                        "o": 0
+                      },
+                      {
+                        "t": 10,
+                        "i": 362,
+                        "p": {
+                          "k": [
+                            "direction",
+                            "evidenceId",
+                            "horizon",
+                            "impact24hPoints",
+                            "impact48hPoints",
+                            "interpretation",
+                            "strength",
+                            "sourceUrl"
+                          ],
+                          "v": [
+                            { "t": 1, "s": "neutral" },
+                            { "t": 1, "s": "2097494113012863197" },
+                            { "t": 1, "s": "both" },
+                            { "t": 0, "s": 0 },
+                            { "t": 0, "s": 0 },
+                            {
+                              "t": 1,
+                              "s": "The diagnostic question concerns Astra usage configuration and supplies no evidence about a global Codex reset."
+                            },
+                            { "t": 0, "s": 0 },
+                            { "t": 1, "s": "https://x.com/thsottiaux/status/2097494113012863197" }
+                          ]
+                        },
+                        "o": 0
+                      },
+                      {
+                        "t": 10,
+                        "i": 363,
+                        "p": {
+                          "k": [
+                            "direction",
+                            "evidenceId",
+                            "horizon",
+                            "impact24hPoints",
+                            "impact48hPoints",
+                            "interpretation",
+                            "strength",
+                            "sourceUrl"
+                          ],
+                          "v": [
+                            { "t": 1, "s": "neutral" },
+                            { "t": 1, "s": "2097559315150426222" },
+                            { "t": 1, "s": "both" },
+                            { "t": 0, "s": 0 },
+                            { "t": 0, "s": 0 },
+                            {
+                              "t": 1,
+                              "s": "Astra demand and subscription-capacity pressure do not establish plans for a shared Codex allowance reset."
+                            },
+                            { "t": 0, "s": 0 },
+                            { "t": 1, "s": "https://x.com/thsottiaux/status/2097559315150426222" }
+                          ]
+                        },
+                        "o": 0
+                      },
+                      {
+                        "t": 10,
+                        "i": 364,
+                        "p": {
+                          "k": [
+                            "direction",
+                            "evidenceId",
+                            "horizon",
+                            "impact24hPoints",
+                            "impact48hPoints",
+                            "interpretation",
+                            "strength",
+                            "sourceUrl"
+                          ],
+                          "v": [
+                            { "t": 1, "s": "neutral" },
+                            { "t": 1, "s": "2097572672788156868" },
+                            { "t": 1, "s": "both" },
+                            { "t": 0, "s": 0 },
+                            { "t": 0, "s": 0 },
+                            {
+                              "t": 1,
+                              "s": "The celebratory Astra demand post contains no reset commitment, policy change, or timing signal."
+                            },
+                            { "t": 0, "s": 0 },
+                            { "t": 1, "s": "https://x.com/romainhuet/status/2097572672788156868" }
+                          ]
+                        },
+                        "o": 0
+                      }
+                    ],
+                    "o": 0
+                  },
+                  {
+                    "t": 1,
+                    "s": "Starting from the 27%/47% empirical hazard, the only material semantic evidence is an authoritative but joking statement that resets have no schedule. That modestly lowers the near-term forecast because there is no announced or implied imminent global reset. The remaining posts concern Astra performance, configuration, demand, and capacity and are not predictive of the defined event."
+                  },
+                  {
+                    "t": 1,
+                    "s": "The observed restoration aligns with the already completed September 8 reset and cannot count as a new future global reset. The displayed September 15 account reset time is a personal quota window, while 69% remaining and early-restoration telemetry provide no reliable evidence of another shared reset within 24 or 48 hours."
+                  },
+                  {
+                    "t": 10,
+                    "i": 365,
+                    "p": {
+                      "k": ["agreementTolerancePoints", "state", "trigger"],
+                      "v": [
+                        { "t": 0, "s": 10 },
+                        { "t": 1, "s": "not-required" },
+                        { "t": 2, "s": 0 }
+                      ]
+                    },
+                    "o": 0
+                  }
+                ]
+              },
+              "o": 0
+            },
+            {
+              "t": 9,
+              "i": 775,
+              "a": [
+                {
+                  "t": 10,
+                  "i": 776,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2097174560412246215" },
+                      { "t": 1, "s": "SEP 8 \u00b7 2026" },
+                      { "t": 1, "s": "2026-09-08T04:05:53.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly states that everything has been reset for everyone, indicating a completed shared/global quota reset rather than future intent, a personal window, or banked credit."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Shared/global Codex quota for all users" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2097174560412246215" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 777,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2097043464538264003" },
+                      { "t": 1, "s": "SEP 8 \u00b7 2026" },
+                      { "t": 1, "s": "2026-09-08T02:00:00.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly announces a future global usage reset for all paid subscriptions and states that it will land around 6pm PST that day. This is a next-new-reset signal, not confirmation that the reset has already occurred. The reset appears to restore usage directly rather than create a redeemable banked reset. A monitored seven-day quota restoration observed at 2026-09-08T02:00:09.579Z corroborated the announced reset."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Shared/global Codex usage for all paid subscriptions" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2097043464538264003" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 778,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2094252447271366730" },
+                      { "t": 1, "s": "AUG 31 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-31T02:34:27.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly states that usage has now been reset for all paid subscriptions for ChatGPT Work and Codex. This describes a completed platform-wide reset for the specified paid subscription scope, not a future signal, personal quota window, or promotional credit."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "All paid subscriptions for ChatGPT Work and Codex" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2094252447271366730" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 779,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2094251180121854309" },
+                      { "t": 1, "s": "AUG 31 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-31T02:29:25.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly states that usage has now been reset for all paid subscriptions for ChatGPT Work and Codex. This describes a completed shared/global quota reset, not future intent, personal quota timing, promotional credits, or a banked reset."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "All paid subscriptions for ChatGPT Work and Codex" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2094251180121854309" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 780,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2093801758665715784" },
+                      { "t": 1, "s": "AUG 29 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-29T20:43:34.000Z" },
+                      { "t": 1, "s": "Global Codex compensation reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly states twice that usage is being reset for all paid users of Codex and ChatGPT Work. This is a current, platform-wide compensatory reset associated with usage-consuming bugs and fixes, not a future signal, personal quota window, promotional credit, or banked reset."
+                      },
+                      { "t": 1, "s": "compensation" },
+                      { "t": 1, "s": "Usage limits for all paid users of Codex and ChatGPT Work" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2093801758665715784" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 781,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2093014447833116908" },
+                      { "t": 1, "s": "AUG 27 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-27T16:35:05.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly says there is \u201cbrand new usage for all ChatGPT Work and Codex users\u201d and attributes it to a button press. Despite the playful framing about sleep and youth, this indicates a completed shared/global quota reset, not merely future intent or a personal quota window."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "All ChatGPT Work and Codex users" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2093014447833116908" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 782,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2092316228497063958" },
+                      { "t": 1, "s": "AUG 25 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-25T18:20:36.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The reply explicitly answers \u201cyes\u201d to the parent\u2019s question asking whether \u201cwe\u201d just received a Codex reset, while clarifying that it was not random. This confirms a completed shared Codex quota reset rather than announcing a future reset or a personal quota window."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Shared/global Codex quota" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2092316228497063958" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 783,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2092311059197808936" },
+                      { "t": 1, "s": "AUG 25 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-25T18:00:04.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The parent directly asks whether Tibo reset the shared quota, and the monitored author replies affirmatively (\u201cAh yeah\u201d), adding that he forgot to announce it. This confirms a reset already occurred rather than signaling a future reset."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Shared/global Codex usage quota" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2092311059197808936" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 784,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2091688655828246890" },
+                      { "t": 1, "s": "AUG 24 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-24T00:46:51.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly states that a reset \\\"has been propagated to accounts,\\\" describing a completed broadly shared reset rather than future intent, speculation, personal quota timing, or redeemable credits. The accompanying usage fixes are additional context."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Shared/global Codex account usage quotas" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2091688655828246890" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 785,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2087423996115681767" },
+                      { "t": 1, "s": "AUG 13 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-13T00:00:00.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author recalls a prior policy of shared Codex resets tied to active-user milestones, says growth has continued beyond the last milestone, and announces a related surprise for tomorrow. In this context, this is a forward-looking signal of a new global Codex reset, not confirmation that one has already occurred. A monitored seven-day quota restoration observed at 2026-08-13T04:00:35.435Z corroborated the announced reset."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Shared/global Codex usage quota" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2087423996115681767" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 786,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2086972933566857393" },
+                      { "t": 1, "s": "AUG 11 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-11T00:28:16.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The monitored author explicitly states that usage limits have already been reset for all paid ChatGPT Work and Codex users. This is a completed shared/global quota reset, not a future signal or a personal quota-window observation."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "All paid ChatGPT Work and Codex users" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2086972933566857393" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 787,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2086188036493344823" },
+                      { "t": 1, "s": "AUG 8 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-08T20:29:22.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly states that they have reset usage limits for all paid users of ChatGPT Work and Codex, describing a completed shared/global quota reset rather than a future plan, personal window, or promotional credit."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "All paid users of ChatGPT Work and Codex" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2086188036493344823" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 788,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2083395449814229287" },
+                      { "t": 1, "s": "AUG 1 \u00b7 2026" },
+                      { "t": 1, "s": "2026-08-01T03:32:37.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly states, in completed-action language, \u201cI have reset usage limits for Codex.\u201d This confirms a shared/global Codex quota reset already performed, rather than a future intention, personal quota window, or redeemable banked reset."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      {
+                        "t": 1,
+                        "s": "Shared/global Codex usage limits; the post separately also mentions ChatGPT Work."
+                      },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2083395449814229287" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 789,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2082317452755751098" },
+                      { "t": 1, "s": "JUL 29 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-29T04:09:02.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly states, \u201cI've reset usage limits for all ChatGPT Work and Codex users,\u201d describing a completed shared/global quota reset. The separate promise to restore the five-hour limit tomorrow is a future policy/capacity change, not the next new reset."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "All ChatGPT Work and Codex users" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2082317452755751098" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 790,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2081940052154933696" },
+                      { "t": 1, "s": "JUL 28 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-28T03:09:23.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly states that usage limits have been reset for all paid users of Codex and ChatGPT Work, confirming a completed shared/global reset rather than a future plan or personal quota renewal."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "All paid users of Codex and ChatGPT Work" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2081940052154933696" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 791,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2081096447718723984" },
+                      { "t": 1, "s": "JUL 25 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-25T19:17:12.000Z" },
+                      { "t": 1, "s": "Global Codex compensation reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly states that usage limits have been reset for all Codex and ChatGPT Work users. This describes a completed shared/global quota reset, apparently as compensation following an outage."
+                      },
+                      { "t": 1, "s": "compensation" },
+                      { "t": 1, "s": "All Codex and ChatGPT Work users" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2081096447718723984" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 792,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2079609157934886975" },
+                      { "t": 1, "s": "JUL 21 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-21T17:47:15.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The author explicitly announces a new usage reset for paid Codex and ChatGPT Work users and states that it will land within the next hour. This is a future signal for a shared user cohort, not a personal quota window, promotional credit, or banked reset. A monitored seven-day quota restoration observed at 2026-07-21T18:00:01.401Z corroborated the announced reset."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Paid users of Codex and ChatGPT Work" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2079609157934886975" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 793,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2078320950488297917" },
+                      { "t": 1, "s": "JUL 18 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-18T03:28:22.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The post explicitly states that usage limits were reset for all paid users of Codex and ChatGPT Work. \u201cOops... I did it again\u201d and \u201cEnjoy\u201d indicate a completed reset, not a question, condition, joke, future intention, personal quota window, banked credit, capacity-only update, or mere policy change."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Shared/global usage limits for all paid Codex and ChatGPT Work users" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2078320950488297917" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 794,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "nine-million-users" },
+                      { "t": 1, "s": "JUL 16 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-16T04:14:09.822Z" },
+                      { "t": 1, "s": "9M active users hard reset" },
+                      {
+                        "t": 1,
+                        "s": "Tibo announced another reset for Codex and ChatGPT Work users, with weekly usage returning to 100% within minutes."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Codex and ChatGPT Work users" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2077607697487188198" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 795,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "eight-million-users" },
+                      { "t": 1, "s": "JUL 14 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-14T19:34:54.638Z" },
+                      { "t": 1, "s": "8M active users celebration reset" },
+                      {
+                        "t": 1,
+                        "s": "ChatGPT Work and Codex usage limits were reset after the combined products reached eight million active users."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "All paid plans" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2077114635308986427" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 796,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "seven-million-users" },
+                      { "t": 1, "s": "JUL 13 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-13T18:29:31.013Z" },
+                      { "t": 1, "s": "7M milestone banked reset" },
+                      {
+                        "t": 1,
+                        "s": "One manual reset credit was granted to paid Codex users instead of immediately forcing every account back to full quota."
+                      },
+                      { "t": 1, "s": "banked-reset" },
+                      { "t": 1, "s": "Go, Plus and Pro" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2076735790567338203" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 797,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "six-million-users" },
+                      { "t": 1, "s": "JUL 12 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-12T17:59:57.945Z" },
+                      { "t": 1, "s": "6M active users forced reset" },
+                      {
+                        "t": 1,
+                        "s": "Tibo announced another reset within the hour while the team responded to exceptional Codex and ChatGPT Work demand."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "All paid plans" },
+                      { "t": 1, "s": "Tibo on X" },
+                      { "t": 1, "s": "https://x.com/thsottiaux/status/2076365965915467978" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 798,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "reset:2075657265508647008" },
+                      { "t": 1, "s": "JUL 10 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-10T19:03:50.000Z" },
+                      { "t": 1, "s": "Global Codex quota reset" },
+                      {
+                        "t": 1,
+                        "s": "The repost explicitly states, \u201cWe have reset usage limits across Codex and ChatGPT Work,\u201d confirming a completed shared reset that includes Codex. \u201cAnother one will come later\u201d is only future intent and is not counted as an additional completed reset."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Shared usage limits across Codex and ChatGPT Work" },
+                      { "t": 1, "s": "OpenAI on X" },
+                      { "t": 1, "s": "https://x.com/OpenAI/status/2075657265508647008" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 799,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "gpt-5-6-launch" },
+                      { "t": 1, "s": "JUL 10 \u00b7 2026" },
+                      { "t": 1, "s": "2026-07-10T05:30:00.000Z" },
+                      { "t": 1, "s": "GPT-5.6 launch double-reset window" },
+                      {
+                        "t": 1,
+                        "s": "OpenAI scheduled two usage-limit resets across a 24-hour launch window for ChatGPT Work and Codex."
+                      },
+                      { "t": 1, "s": "forced-reset" },
+                      { "t": 1, "s": "Paid Codex users" },
+                      { "t": 1, "s": "Tibo / Codex Radar" },
+                      { "t": 1, "s": "https://codex-reset-radar.pages.dev/en/" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 800,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "usage-depletion-incident" },
+                      { "t": 1, "s": "JUN 29 \u00b7 2026" },
+                      { "t": 1, "s": "2026-06-29T00:00:00.000Z" },
+                      { "t": 1, "s": "Usage depletion compensation" },
+                      {
+                        "t": 1,
+                        "s": "A usage-limit consumption issue triggered an investigation and a compensating Codex reset for affected capacity."
+                      },
+                      { "t": 1, "s": "compensation" },
+                      { "t": 1, "s": "Paid Codex users" },
+                      { "t": 1, "s": "OpenAI Status" },
+                      { "t": 1, "s": "https://status.openai.com/incidents/6enf4645" }
+                    ]
+                  },
+                  "o": 0
+                },
+                {
+                  "t": 10,
+                  "i": 801,
+                  "p": {
+                    "k": [
+                      "id",
+                      "date",
+                      "dateTime",
+                      "title",
+                      "description",
+                      "type",
+                      "scope",
+                      "sourceLabel",
+                      "sourceUrl"
+                    ],
+                    "v": [
+                      { "t": 1, "s": "banked-reset-launch" },
+                      { "t": 1, "s": "JUN 10 \u00b7 2026" },
+                      { "t": 1, "s": "2026-06-10T00:00:00.000Z" },
+                      { "t": 1, "s": "Banked resets introduced" },
+                      {
+                        "t": 1,
+                        "s": "Eligible users could save a rate-limit reset and use it later, changing the reset cycle from a shared moment to an account-specific one."
+                      },
+                      { "t": 1, "s": "banked-reset" },
+                      { "t": 1, "s": "Eligible paid plans" },
+                      { "t": 1, "s": "OpenAI Help" },
+                      { "t": 1, "s": "https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan" }
+                    ]
+                  },
+                  "o": 0
+                }
+              ],
+              "o": 0
+            },
+            {
+              "t": 10,
+              "i": 802,
+              "p": {
+                "k": ["accountsRequested", "accountsSucceeded", "completedAt", "postsInserted", "startedAt", "status"],
+                "v": [
+                  { "t": 0, "s": 5 },
+                  { "t": 0, "s": 5 },
+                  { "t": 1, "s": "2026-09-09T07:00:37.737Z" },
+                  { "t": 0, "s": 0 },
+                  { "t": 1, "s": "2026-09-09T07:00:21.172Z" },
+                  { "t": 1, "s": "succeeded" }
+                ]
+              },
+              "o": 0
+            },
+            { "t": 9, "i": 10000, "a": [], "o": 0 }
+          ]
+        },
+        "o": 0
+      },
+      { "t": 2, "s": 1 },
+      { "t": 11, "i": 2697, "p": { "k": [], "v": [] }, "o": 0 }
+    ]
+  },
+  "o": 0
+}

@@ -3,6 +3,10 @@ type PaginatedEntryOptions<T> = {
   isEntry: (value: unknown) => value is T;
   description: string;
   maxPages?: number;
+  onPage?: (
+    pageEntries: readonly T[],
+    accumulatedEntries: readonly T[],
+  ) => void;
   shouldStop?: (entries: readonly T[]) => boolean;
 };
 
@@ -11,6 +15,7 @@ export async function collectPaginatedEntries<T>({
   isEntry,
   description,
   maxPages = Number.POSITIVE_INFINITY,
+  onPage,
   shouldStop,
 }: PaginatedEntryOptions<T>): Promise<T[]> {
   if (maxPages < 1) {
@@ -34,6 +39,7 @@ export async function collectPaginatedEntries<T>({
     }
 
     entries.push(...response.data);
+    onPage?.(response.data, entries);
     pageCount += 1;
 
     cursor = response.nextCursor;

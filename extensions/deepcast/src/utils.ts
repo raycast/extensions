@@ -130,12 +130,14 @@ export async function sendTranslateRequest({
   sourceLanguage,
   targetLanguage,
   onTranslateAction,
+  viewInCurrentCommand,
   formality,
 }: {
   text?: string;
   sourceLanguage?: SourceLanguage;
   targetLanguage: TargetLanguage;
   onTranslateAction?: Preferences["onTranslateAction"] | "none";
+  viewInCurrentCommand?: boolean;
   formality: Formality;
 }) {
   try {
@@ -146,7 +148,7 @@ export async function sendTranslateRequest({
     const source: { text: string; html?: string } = initialText ? { text: initialText } : await readContent();
     const { text, isHtml } = prepareTranslationPayload(source.text, source.html);
 
-    await showToast(Toast.Style.Animated, "Fetching translation...");
+    const loadingToast = await showToast(Toast.Style.Animated, "Fetching translation...");
     try {
       const {
         translations: [{ text: translation, detected_source_language: detectedSourceLanguage }],
@@ -164,6 +166,7 @@ export async function sendTranslateRequest({
           },
         })
         .json<{ translations: { text: string; detected_source_language: SourceLanguage }[] }>();
+      await loadingToast.hide();
       switch (onTranslateAction) {
         case "clipboard":
           await copyTranslatedText(translation, isHtml);
@@ -171,6 +174,10 @@ export async function sendTranslateRequest({
           await delayedCloseWindow(closeRaycastAfterTranslation);
           break;
         case "view":
+          if (viewInCurrentCommand) {
+            await delayedCloseWindow(closeRaycastAfterTranslation);
+            break;
+          }
           try {
             await launchCommand({
               name: "index",
@@ -204,6 +211,7 @@ export async function sendTranslateRequest({
       }
       return { translation, detectedSourceLanguage, isHtml };
     } catch (error) {
+      await loadingToast.hide();
       await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));
     }
   } catch {

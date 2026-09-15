@@ -2,14 +2,14 @@
 export const THREADS_BASE_URL = "https://www.threads.com";
 export const THREADS_INTENT_URL = `${THREADS_BASE_URL}/intent`;
 
-// External API endpoints for media download
-export const THREADS_PHOTO_DOWNLOADER_API = "https://api.threadsphotodownloader.com/v2/media";
-export const DOLPHIN_RADAR_API = "https://www.dolphinradar.com/api/threads/post_detail";
-
-// File extensions
-export const IMAGE_EXTENSION = "jpg";
-export const VIDEO_EXTENSION = "mp4";
+// Hosts we accept a post URL from.
+export const THREADS_HOSTS = ["threads.com", "www.threads.com", "threads.net", "www.threads.net"];
 
 // HTTP headers
-export const DEFAULT_USER_AGENT =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+//
+// Threads serves an empty JS shell to ordinary browser user agents: the post's media
+// only appears in the HTML for a crawler UA. The same UA is also what makes a
+// `/share/<id>/` link redirect server-side to its canonical `/@user/post/<code>` URL —
+// with a browser UA it answers 200 and never redirects. Both behaviours are load-bearing;
+// see `resolveThreadsPost`.
+export const CRAWLER_USER_AGENT = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";

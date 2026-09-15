@@ -36,6 +36,13 @@
       "icon": "brave.png"
     },
     {
+      "app": "Brave Origin",
+      "type": "CHROMIUM",
+      "title": "Brave Origin",
+      "path": "/Library/Application Support/BraveSoftware/Brave-Origin",
+      "icon": "brave-origin.png"
+    },
+    {
       "app": "Microsoft Edge",
       "type": "CHROMIUM",
       "title": "Microsoft Edge",

@@ -39,7 +39,11 @@ const formatDate = (value?: string): string => {
   return date.toLocaleDateString();
 };
 
-export default function Command() {
+import { withGranolaAuth } from "./utils/withGranolaAuth";
+
+export default withGranolaAuth(Command);
+
+function Command() {
   const { noteData, isLoading, hasError, error } = useGranolaData();
 
   // Handle loading and error states

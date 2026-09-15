@@ -20,7 +20,7 @@ import {
   resolveTimeFormat,
 } from "./time-utils";
 import { TimelineView } from "./timeline-view";
-import { DEFAULT_TIME_ZONES, getCityName, getTimezone } from "./timezones";
+import { CityOrderPreference, DEFAULT_TIME_ZONES, getCityName, getTimezone, sortZoneIds } from "./timezones";
 
 const STORAGE_KEY = "selectedTimeZones";
 const BASE_CITY_KEY = "baseCityId";
@@ -37,6 +37,7 @@ export default function Command() {
   const scrubMinutes = parseInt(preferences.defaultScrubMinutes, 10) || 60;
   const optionScrubMinutes = parseInt(preferences.optionScrubMinutes, 10) || 30;
   const timeFormat = resolveTimeFormat(preferences.timeFormat as ClockFormatPreference);
+  const cityOrder = (preferences.cityOrder as CityOrderPreference) ?? "offset-asc";
 
   useEffect(() => {
     const load = async () => {
@@ -109,15 +110,33 @@ export default function Command() {
     await saveSelectedZones(currentIds.filter((id) => id !== cityId));
   }
 
+  async function moveCity(cityId: string, delta: -1 | 1) {
+    const currentIds = [...(selectedZoneIds ?? [])];
+    const from = currentIds.indexOf(cityId);
+    if (from === -1) return;
+    let to = from + delta;
+    // Skip over the base city, which is displayed in its own section
+    while (to >= 0 && to < currentIds.length && currentIds[to] === baseCityId) to += delta;
+    if (to < 0 || to >= currentIds.length) return;
+    currentIds.splice(from, 1);
+    currentIds.splice(to, 0, cityId);
+    await saveSelectedZones(currentIds);
+  }
+
   // Use selected base city or fall back to system timezone
   const baseZoneId = baseCityId ? getTimezone(baseCityId) : Intl.DateTimeFormat().resolvedOptions().timeZone;
   const base = useMemo(() => DateTime.fromISO(baseISO).setZone(baseZoneId), [baseISO, baseZoneId]);
 
+  // Apply the configured ordering (GMT offset or custom arrangement)
+  const sortedZoneIds = useMemo(
+    () => sortZoneIds(selectedZoneIds ?? [], baseISO, cityOrder),
+    [selectedZoneIds, baseISO, cityOrder],
+  );
+
   // Filter out the base city from the list (it's shown separately)
   const otherCities = useMemo(() => {
-    const zoneIds = selectedZoneIds ?? [];
-    return zoneIds.filter((id) => id !== baseCityId);
-  }, [selectedZoneIds, baseCityId]);
+    return sortedZoneIds.filter((id) => id !== baseCityId);
+  }, [sortedZoneIds, baseCityId]);
 
   // Search results
   const searchResults = useMemo(() => {
@@ -173,7 +192,7 @@ export default function Command() {
       <TimelineView
         baseISO={baseISO}
         baseCityId={baseCityId}
-        selectedZoneIds={selectedZoneIds ?? []}
+        selectedZoneIds={sortedZoneIds}
         onShiftMinutes={shiftMinutes}
         onSetBaseISO={setBaseISO}
         onToggleView={() => setViewMode("list")}
@@ -316,6 +335,22 @@ export default function Command() {
                       onAction={() => setViewMode("timeline")}
                       shortcut={{ modifiers: ["cmd"], key: "l" }}
                     />
+                    {cityOrder === "custom" && (
+                      <ActionPanel.Section title="Arrange">
+                        <Action
+                          title="Move up"
+                          icon={Icon.ArrowUp}
+                          onAction={() => void moveCity(row.key, -1)}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                        />
+                        <Action
+                          title="Move Down"
+                          icon={Icon.ArrowDown}
+                          onAction={() => void moveCity(row.key, 1)}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                        />
+                      </ActionPanel.Section>
+                    )}
                     <ActionPanel.Section title="Scrub Time">
                       <Action
                         title={formatScrubTitle(-scrubMinutes)}

@@ -1,8 +1,14 @@
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { getPreferenceValues } from "@raycast/api";
 
 const userDataDirectoryPath = () => {
+  if (process.platform === "win32") {
+    const appData = process.env.APPDATA ?? path.join(os.homedir(), "AppData", "Roaming");
+    return path.join(appData, "Mozilla", "Firefox", "Profiles");
+  }
+
   if (!process.env.HOME) {
     throw new Error("$HOME environment variable is not set.");
   }
@@ -11,6 +17,10 @@ const userDataDirectoryPath = () => {
 };
 
 const NON_PROFILE_ENTRIES = new Set(["Crash Reports", "Pending Pings", "installs.ini", "profiles.ini"]);
+
+const VARIANT_SPECIFIC_SUFFIXES = [".default-release", ".default-nightly", ".default-esr", ".dev-edition-default"];
+
+const DEFAULT_PROFILE_SUFFIX = "default-release";
 
 const getProfileName = (userDirectoryPath: string) => {
   let profiles: string[];
@@ -22,26 +32,37 @@ const getProfileName = (userDirectoryPath: string) => {
 
   const preferences = getPreferenceValues<Preferences>();
 
-  const customProfile = profiles.filter((profile) => profile.endsWith(preferences.profileDirectorySuffix))[0];
-  const releaseProfile = profiles.filter((profile) => profile.endsWith(".default-release"))[0];
-  const nightlyProfile = profiles.filter((profile) => profile.endsWith(".default-nightly"))[0];
-  const esrProfile = profiles.filter((profile) => profile.endsWith(".default-esr"))[0];
-  const defaultProfile = profiles.filter((profile) => profile.endsWith(".default"))[0];
-
-  if (customProfile) {
-    return customProfile;
-  } else if (releaseProfile) {
-    return releaseProfile;
-  } else if (nightlyProfile) {
-    return nightlyProfile;
-  } else if (esrProfile) {
-    return esrProfile;
-  } else if (defaultProfile) {
-    return defaultProfile;
+  const suffix = preferences.profileDirectorySuffix;
+  if (suffix && suffix !== DEFAULT_PROFILE_SUFFIX) {
+    const customProfile = profiles.find((profile) => profile.endsWith(suffix));
+    if (customProfile) return customProfile;
   }
+
+  const releaseProfile = profiles.find((profile) => profile.endsWith(".default-release"));
+  const nightlyProfile = profiles.find((profile) => profile.endsWith(".default-nightly"));
+  const esrProfile = profiles.find((profile) => profile.endsWith(".default-esr"));
+  const devProfile = profiles.find((profile) => profile.endsWith(".dev-edition-default"));
+  const defaultProfile = profiles.find((profile) => profile.endsWith(".default"));
+
+  const browserApp = preferences.browserApp;
+  if (browserApp === "Firefox Nightly" && nightlyProfile) return nightlyProfile;
+  if (browserApp === "Firefox ESR" && esrProfile) return esrProfile;
+  if (browserApp === "Firefox Developer Edition" && devProfile) return devProfile;
+
+  const isNonReleaseVariant =
+    browserApp === "Firefox Nightly" || browserApp === "Firefox ESR" || browserApp === "Firefox Developer Edition";
+  const variantProfile = isNonReleaseVariant
+    ? undefined
+    : (releaseProfile ?? nightlyProfile ?? esrProfile ?? devProfile ?? defaultProfile);
+  if (variantProfile) return variantProfile;
 
   const fallback = profiles
     .filter((entry) => !NON_PROFILE_ENTRIES.has(entry))
+    .filter((entry) => {
+      if (isNonReleaseVariant && VARIANT_SPECIFIC_SUFFIXES.some((s) => entry.endsWith(s))) return false;
+      if (isNonReleaseVariant && entry.endsWith(".default")) return false;
+      return true;
+    })
     .filter((entry) => {
       try {
         return fs.statSync(path.join(userDirectoryPath, entry)).isDirectory();
@@ -59,11 +80,6 @@ export const getHistoryDbPath = (): string => {
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "places.sqlite");
 };
 
-export const getBookmarksDirectoryPath = (): string => {
-  const userDirectoryPath = userDataDirectoryPath();
-  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "bookmarkbackups");
-};
-
 export const getSessionManagerExtensionPath = (extensionId: string) => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(
@@ -76,83 +92,25 @@ export const getSessionManagerExtensionPath = (extensionId: string) => {
   );
 };
 
-export const getSessionInactivePath = async () => {
+export const getSessionInactivePath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore.jsonlz4");
 };
 
-export const getSessionActivePath = async () => {
+export const getSessionActivePath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
-  return path.join(
-    userDirectoryPath,
-    await getProfileName(userDirectoryPath),
-    "sessionstore-backups",
-    "recovery.jsonlz4",
-  );
+  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore-backups", "recovery.jsonlz4");
 };
 
-export function decodeLZ4(buffer: Buffer) {
-  const u8sz = buffer.slice(8, 12);
-  const origLen = u8sz[0] + u8sz[1] * 256 + u8sz[2] * 256 * 256 + u8sz[3] * 256 * 256 * 256;
-  // Extract compressed data (past mozilla jsonlz4 header of 12 bytes)
-  const jsonStart = 12;
-  const u8Comp = buffer.slice(jsonStart);
-  // Create LZ4 buffer
-  const comp = Buffer.from(u8Comp);
-  const orig = Buffer.alloc(origLen);
-  // perform lz4 decompression
-  const decompressedLen = decodeBlock(comp, orig);
-  const data = orig.subarray(0, decompressedLen);
-  return JSON.parse(data.toString());
-}
+// Escape ' for SQL and the LIKE wildcards % and _ (plus the escape char itself) so they match literally.
+const escapeLike = (term: string) => term.replace(/'/g, "''").replace(/[\\%_]/g, "\\$&");
 
-function decodeBlock(input: Buffer, output: Buffer, sIdx?: number, eIdx?: number) {
-  sIdx = sIdx || 0;
-  eIdx = eIdx || input.length - sIdx;
-  let a;
-  // Process each sequence in the incoming data
-  for (let i = sIdx, n = eIdx, j = 0; i < n; ) {
-    a = j;
-    const token = input[i++];
-
-    // Literals
-    let literals_length = token >> 4;
-    if (literals_length > 0) {
-      // length of literals
-      let l = literals_length + 240;
-      while (l === 255) {
-        l = input[i++];
-        literals_length += l;
-      }
-
-      // Copy the literals
-      const end = i + literals_length;
-      while (i < end) output[j++] = input[i++];
-
-      // End of buffer?
-      if (i === n) return j;
-    }
-
-    // Match copy
-    // 2 bytes offset (little endian)
-    const offset = input[i++] | (input[i++] << 8);
-
-    // 0 is an invalid offset value
-    if (offset === 0 || offset > j) return -(i - 2);
-
-    // length of match copy
-    let match_length = token & 0xf;
-    let l = match_length + 240;
-    while (l === 255) {
-      l = input[i++];
-      match_length += l;
-    }
-
-    // Copy the match
-    let pos = j - offset; // position of the match copy in the current output
-    const end = j + match_length + 4; // minmatch = 4
-    while (j < end) output[j++] = output[pos++];
-  }
-
-  return a;
-}
+export const searchWhereClause = (query: string | undefined, titleColumn: string, urlColumn: string): string => {
+  const terms = query?.trim().split(/\s+/).filter(Boolean) ?? [];
+  return terms
+    .map(
+      (t) =>
+        `AND (${titleColumn} LIKE '%${escapeLike(t)}%' ESCAPE '\\' OR ${urlColumn} LIKE '%${escapeLike(t)}%' ESCAPE '\\')`,
+    )
+    .join(" ");
+};

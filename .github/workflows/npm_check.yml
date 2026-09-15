@@ -67,3 +67,7 @@ jobs:
           if [ $EXIT_CODE -ne 0 ]; then
             echo "::warning::npm-check found issues in dependencies."
           fi
+      - name: Test Printer Status
+        if: matrix.extension_dir == 'extensions/printer-status' || matrix.extension_dir == 'extensions/printer-status/'
+        working-directory: ${{ matrix.extension_dir }}
+        run: npm test

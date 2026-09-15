@@ -1,5 +1,9 @@
 # Raycast Icons Changelog
 
+## [Improvement] - 2026-09-11
+
+- Find icons by keywords such as email, settings, flight, and attachment without an AI search.
+
 ## [Improvement] - 2026-08-11
 
 - Add missing keyboard shortcuts

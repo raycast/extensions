@@ -5,7 +5,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { brewFetchOutdated, brewUpdate, OutdatedResults, isBrewLockError, brewLogger } from "../utils";
+import {
+  brewFetchOutdated,
+  brewUpdate,
+  normalizeOutdatedResults,
+  OutdatedResults,
+  isBrewLockError,
+  brewLogger,
+} from "../utils";
 import { preferences, isOutdatedSnapshotDirty, clearOutdatedSnapshotDirty, outdatedFetchFailureCopy } from "../utils";
 
 /**
@@ -180,7 +187,11 @@ export function useBrewOutdated(options?: { backgroundRefresh?: boolean }) {
   const withholding = wasDirtyAtMount && !hasFreshFetchRef.current;
   return {
     ...result,
-    data: withholding ? undefined : result.data,
+    // `useCachedPromise` persists between command runs, so `data` can be a
+    // snapshot written before outdated casks carried a `token` — without which
+    // every brew argv built from these rows loses its `--cask`. Normalizing on
+    // read migrates those in place; it is idempotent for fresh data.
+    data: withholding ? undefined : result.data && normalizeOutdatedResults(result.data),
     // While withholding with no failure yet, the commands must read as
     // loading — data alone being undefined would render neither rows, nor an
     // empty state, nor an error.

@@ -1,6 +1,5 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { type TranslationItem } from "@/types/api";
 import type { DisplaySection } from "@/types/display";
 import type { TranslationQueryResult } from "@/types/query";
 
@@ -15,12 +14,12 @@ import {
 export function computeDisplaySections(state: QueryState): DisplaySection[] {
   const { queryResults, isShowDetail } = state;
 
-  const translations: TranslationItem[] = [];
+  const translations: Array<{ serviceId: string; text: string }> = [];
   for (const qr of queryResults) {
     if ("translations" in qr) {
       if (qr.hideDisplay) continue;
-      const markdown = getTranslationMarkdown(qr);
-      translations.push({ type: qr.type, text: markdown });
+      const markdown = getTranslationMarkdown(qr, qr.serviceLabel);
+      translations.push({ serviceId: qr.serviceId, text: markdown });
     }
   }
 
@@ -30,12 +29,12 @@ export function computeDisplaySections(state: QueryState): DisplaySection[] {
   for (const queryResult of queryResults) {
     if ("hideDisplay" in queryResult && queryResult.hideDisplay) continue;
 
-    const { type } = queryResult;
+    const { serviceId, serviceLabel, serviceIcon } = queryResult;
     const isTrans = "translations" in queryResult;
     let isFirstDictSection = true;
 
     for (const section of queryResult.displaySections) {
-      let sectionTitle: string | undefined = `${type}`;
+      let sectionTitle: string | undefined = serviceLabel;
       const wordInfo = queryResult.queryWordInfo;
       const fromTo = getFromToLanguageTitle(wordInfo.fromLanguage, wordInfo.toLanguage, isShowDetail);
       if (isTrans) {
@@ -57,9 +56,11 @@ export function computeDisplaySections(state: QueryState): DisplaySection[] {
 
       displaySections.push({
         ...section,
+        serviceId,
         sectionTitle,
         items: section.items.map((item, idx) => {
-          const displayItem = idx === 0 ? { ...item, detailsMarkdown } : item;
+          const identifiedItem = { ...item, serviceId, serviceLabel, serviceIcon };
+          const displayItem = idx === 0 ? { ...identifiedItem, detailsMarkdown } : identifiedItem;
           const showMoreDetailsMarkdown = isTrans
             ? getTranslationShowMoreDetailsMarkdown(displayItem)
             : getDictionaryShowMoreDetailsMarkdown(displayItem);
@@ -75,9 +76,12 @@ export function computeDisplaySections(state: QueryState): DisplaySection[] {
 /**
  * Build detail markdown for translation type. Puts current type's translation first.
  */
-function buildDetailMarkdown(translations: TranslationItem[], queryResult: TranslationQueryResult): string {
+function buildDetailMarkdown(
+  translations: Array<{ serviceId: string; text: string }>,
+  queryResult: TranslationQueryResult,
+): string {
   const sorted = [...translations];
-  const idx = sorted.findIndex((t) => t.type === queryResult.type);
+  const idx = sorted.findIndex((translation) => translation.serviceId === queryResult.serviceId);
   if (idx > 0) {
     const [item] = sorted.splice(idx, 1);
     sorted.unshift(item);

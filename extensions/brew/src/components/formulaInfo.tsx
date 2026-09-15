@@ -5,11 +5,9 @@ import { Formula, brewPrefix, brewFetchFormulaInfo, uiLogger, ensureError } from
 import { DetailMetadata, formulaMetadataRows } from "./packageMetadata";
 import { usePackageDetail } from "../hooks/usePackageDetail";
 
-/**
- * Check if a formula has minimal data (from fast list) vs full data.
- */
+/** Whether this formula looks like a summary record and should be refetched. */
 function hasMinimalData(formula: Formula): boolean {
-  // Minimal formulae have missing or empty homepage, tap, or desc
+  // A summary record has missing or empty homepage, tap, or desc
   return !formula.homepage || !formula.tap || !formula.desc;
 }
 

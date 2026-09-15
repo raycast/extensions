@@ -3,9 +3,8 @@
  *
  * Provides functions for fetching installed and outdated packages.
  *
- * Performance optimization: Uses a two-phase loading strategy:
- * 1. Fast initial load with `brew list --versions` (returns minimal data quickly)
- * 2. Background fetch with `brew info --json=v2 --installed` for full metadata
+ * Installed packages come from `brew info --json=v2 --installed`, served from a
+ * cache invalidated by watching brew's own state (see `readCache`).
  */
 
 import * as fs from "fs/promises";
@@ -34,6 +33,7 @@ import {
   CHUNKED_CACHE_VERSION,
 } from "../cache";
 import { brewPath, brewCachePrefix } from "./paths";
+import { normalizeOutdatedResults } from "./helpers";
 import { execBrew } from "./commands";
 import { brewLogger, cacheLogger } from "../logger";
 
@@ -96,154 +96,6 @@ export async function hasSearchCache(): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-/**
- * Minimal installed package info parsed from `brew list --versions`.
- * This is much faster than `brew info --json=v2 --installed`.
- */
-interface InstalledListItem {
-  name: string;
-  version: string;
-  installed_on_request: boolean;
-}
-
-/**
- * Parse `brew list --versions` output into InstalledListItem array.
- * Format: "package_name version1 version2 ..." (one per line)
- */
-function parseListVersionsOutput(output: string): InstalledListItem[] {
-  const items: InstalledListItem[] = [];
-  const lines = output
-    .trim()
-    .split("\n")
-    .filter((line) => line.length > 0);
-
-  for (const line of lines) {
-    const parts = line.split(/\s+/);
-    if (parts.length >= 2) {
-      const name = parts[0];
-      // Use the first (most recent) version
-      const version = parts[1];
-      items.push({
-        name,
-        version,
-        // We don't know this from list output, default to true
-        installed_on_request: true,
-      });
-    }
-  }
-
-  return items;
-}
-
-/**
- * Fetch a fast list of installed packages (names and versions only).
- * Uses `brew list --versions` which is significantly faster than `brew info --json=v2 --installed`.
- *
- * @returns Minimal installed package data for quick initial display
- */
-export async function brewFetchInstalledFast(cancel?: AbortSignal): Promise<InstalledMap | undefined> {
-  const startTime = Date.now();
-
-  try {
-    // Try to read from cache first
-    const cacheBuffer = await fs.readFile(installedCachePath);
-    const cached = JSON.parse(cacheBuffer.toString()) as InstallableResults;
-    const mapped = brewMapInstalled(cached);
-    const duration = Date.now() - startTime;
-
-    cacheLogger.log("Fast load from cache", {
-      formulaeCount: mapped?.formulae.size ?? 0,
-      casksCount: mapped?.casks.size ?? 0,
-      durationMs: duration,
-    });
-
-    return mapped;
-  } catch {
-    // Cache miss - fall back to fast list command
-    const listStartTime = Date.now();
-
-    try {
-      // brew list --versions is fast and gives us name + version
-      // Note: --versions output is "name version1 version2 ..." per line
-      const [formulaeOutput, casksOutput] = await Promise.all([
-        execBrew(`list --formula --versions`, cancel ? { signal: cancel } : undefined),
-        execBrew(`list --cask --versions`, cancel ? { signal: cancel } : undefined),
-      ]);
-
-      const formulaeList = parseListVersionsOutput(formulaeOutput.stdout);
-      const casksList = parseListVersionsOutput(casksOutput.stdout);
-
-      // Create minimal Formula/Cask objects for display
-      const formulae = new Map<string, Formula>();
-      for (const item of formulaeList) {
-        formulae.set(item.name, createMinimalFormula(item));
-      }
-
-      const casks = new Map<string, Cask>();
-      for (const item of casksList) {
-        casks.set(item.name, createMinimalCask(item));
-      }
-
-      const duration = Date.now() - listStartTime;
-      brewLogger.log("Fast list fetched", {
-        formulaeCount: formulae.size,
-        casksCount: casks.size,
-        durationMs: duration,
-      });
-
-      return { formulae, casks };
-    } catch (err) {
-      brewLogger.error("Fast list fetch failed", { error: err });
-      return undefined;
-    }
-  }
-}
-
-/**
- * Create a minimal Formula object from list data.
- */
-function createMinimalFormula(item: InstalledListItem): Formula {
-  return {
-    name: item.name,
-    tap: "",
-    homepage: "",
-    versions: { stable: item.version, bottle: false },
-    outdated: false,
-    license: null,
-    aliases: [],
-    dependencies: [],
-    build_dependencies: [],
-    installed: [
-      {
-        version: item.version,
-        installed_as_dependency: !item.installed_on_request,
-        installed_on_request: item.installed_on_request,
-      },
-    ],
-    keg_only: false,
-    linked_key: "",
-    pinned: false,
-  };
-}
-
-/**
- * Create a minimal Cask object from list data.
- */
-function createMinimalCask(item: InstalledListItem): Cask {
-  return {
-    token: item.name,
-    name: [item.name],
-    tap: "",
-    homepage: "",
-    version: item.version,
-    versions: { stable: item.version, bottle: false },
-    outdated: false,
-    installed: item.version,
-    auto_updates: false,
-    depends_on: {},
-  };
 }
 
 /**
@@ -340,12 +192,11 @@ export async function brewFetchInstallableResults(
     const caskroomTime = await mtimeMs(brewPath("Caskroom"));
 
     // 'var/homebrew/pinned' is updated after pin/unpin actions (but does not exist if there are no pinned formula).
-    let pinnedTime;
-    try {
-      pinnedTime = await mtimeMs(brewPath("var/homebrew/pinned"));
-    } catch {
-      pinnedTime = 0;
-    }
+    const pinnedTime = await mtimeMsOrZero(brewPath("var/homebrew/pinned"));
+    // Cask pins live in a SEPARATE directory (startup/config.rb: HOMEBREW_PINNED_CASKS),
+    // which unpin removes when it empties. The parent check below only catches the
+    // first cask pin — creating the directory bumps var/homebrew — so probe it too.
+    const pinnedCasksTime = await mtimeMsOrZero(brewPath("var/homebrew/pinned_casks"));
     // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
     const homebrewTime = await mtimeMs(brewPath("var/homebrew"));
 
@@ -363,6 +214,7 @@ export async function brewFetchInstallableResults(
       caskroomTime < cacheTime &&
       locksTime < cacheTime &&
       pinnedTime < cacheTime &&
+      pinnedCasksTime < cacheTime &&
       apiIndexTime < cacheTime &&
       fetchHeadTime < cacheTime
     ) {
@@ -383,6 +235,7 @@ export async function brewFetchInstallableResults(
         caskroomTime,
         locksTime,
         pinnedTime,
+        pinnedCasksTime,
         cacheTime,
       });
       return await updateCache();
@@ -458,7 +311,7 @@ export async function brewFetchOutdated(
     await brewUpdate(cancel);
   }
   const output = await execBrew(cmd, cancel ? { signal: cancel } : undefined);
-  const results = JSON.parse(output.stdout) as OutdatedResults;
+  const results = normalizeOutdatedResults(JSON.parse(output.stdout) as OutdatedResults);
   brewLogger.log("Outdated packages fetched", {
     formulaeCount: results.formulae.length,
     casksCount: results.casks.length,
@@ -844,7 +697,9 @@ export async function brewFetchCaskInfo(token: string, cancel?: AbortSignal): Pr
   brewLogger.log("Fetching cask info", { token });
 
   try {
-    const output = await execBrew(`info --json=v2 ${token}`, cancel ? { signal: cancel } : undefined);
+    // `--cask` is required, not decorative: without it brew's resolver prefers a
+    // same-named FORMULA (cli/named_args.rb), returning an empty `casks` array.
+    const output = await execBrew(`info --json=v2 --cask ${token}`, cancel ? { signal: cancel } : undefined);
     const results = JSON.parse(output.stdout) as InstallableResults;
     const duration = Date.now() - startTime;
 

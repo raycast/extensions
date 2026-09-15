@@ -1,5 +1,9 @@
 # Changelog
 
+## [Ownership Transfer] - {PR_MERGE_DATE}
+
+- Extension ownership transferred from chad_walters to the MuteDeck organisation — now the official MuteDeck extension.
+
 ## [Meeting Deck Overhaul] - 2026-08-12
 
 Major overhaul, contributed by the MuteDeck team.

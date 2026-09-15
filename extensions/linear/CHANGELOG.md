@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Favorites Crash Fix] - 2026-09-14
+
+- Fix the Favorites command crashing when a favorite is a workspace-level label (no team); both workspace and team labels now open through the favorite's Linear-provided URL.
+
 ## [AI Comment Reliability] - 2026-09-02
 
 - Prevent AI comment tools from retrying successful writes and creating duplicate comments.

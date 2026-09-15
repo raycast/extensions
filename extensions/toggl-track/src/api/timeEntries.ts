@@ -71,6 +71,8 @@ type CreateTimeEntryParameters = {
   tags: string[];
   taskId?: number;
   billable?: boolean;
+  /** Minutes to back-date the start time by. Callers must pass a non-negative value. */
+  startTimeOffset?: number;
 };
 export async function createTimeEntry({
   projectId,
@@ -79,8 +81,19 @@ export async function createTimeEntry({
   tags,
   taskId,
   billable,
+  startTimeOffset,
 }: CreateTimeEntryParameters) {
   const now = new Date();
+  // Back-date before the duration is derived below — a running entry encodes its
+  // start as -1 * (Unix start time), so both fields must agree.
+  //
+  // Shift the absolute timestamp rather than calling setMinutes(): setMinutes() is
+  // local calendar arithmetic, so across a DST transition it lands somewhere other
+  // than the requested offset (back-dating 10 minutes over a spring-forward gap
+  // puts the start 50 minutes into the future, producing a negative duration).
+  if (startTimeOffset) {
+    now.setTime(now.getTime() - startTimeOffset * 60 * 1000);
+  }
   // Toggl v9 returns the TimeEntry directly (not wrapped in { data: TimeEntry })
   const response = await post<TimeEntry>(`/workspaces/${workspaceId}/time_entries`, {
     billable,

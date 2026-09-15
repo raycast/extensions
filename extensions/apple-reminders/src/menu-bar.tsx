@@ -23,7 +23,15 @@ import {
   setDueDate as setReminderDueDate,
 } from "swift:../swift/AppleReminders";
 
-import { getAttachedUrls, getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
+import {
+  formatReminderTime,
+  getAttachedUrls,
+  getPriorityIcon,
+  isOverdue,
+  isToday,
+  isTomorrow,
+  truncate,
+} from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 import { sortByDate } from "./hooks/useViewReminders";
 
@@ -182,7 +190,9 @@ export default function Command() {
   const displayReminderTitle = titleType === "firstReminder" && remindersCount > 0;
   if (displayReminderTitle) {
     const firstReminder = sections[0].items[0];
-    title = truncate(addPriorityToTitle(firstReminder.title, firstReminder.priority), 30);
+    const formattedTime = formatReminderTime(firstReminder);
+    const timePrefix = formattedTime ? `${formattedTime}  ` : "";
+    title = truncate(`${timePrefix}${addPriorityToTitle(firstReminder.title, firstReminder.priority)}`, 30);
   }
 
   return (
@@ -216,17 +226,20 @@ export default function Command() {
           {section.items.map((reminder) => {
             const attachedUrls = getAttachedUrls(reminder);
 
+            const formattedTime = formatReminderTime(reminder);
+            const timePrefix = formattedTime ? `${formattedTime}  ` : "";
+
             return (
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
                 title={truncate(
-                  addPriorityToTitle(
+                  `${timePrefix}${addPriorityToTitle(
                     displayListTitleForMenuBarReminders
                       ? addListTitle(reminder.title, reminder.list?.title)
                       : reminder.title,
                     reminder.priority,
-                  ),
+                  )}`,
                 )}
               >
                 <MenuBarExtra.Item

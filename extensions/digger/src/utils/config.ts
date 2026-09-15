@@ -1,3 +1,8 @@
+import { CACHE_SCHEMA } from "./cacheSchema";
+
+/** See CACHE.SALT. Bump this string when behaviour changes but types do not. */
+const CACHE_SALT = "1";
+
 /**
  * Centralized timeout configuration for all network requests.
  * All values are in milliseconds.
@@ -20,6 +25,14 @@ export const TIMEOUTS = {
    *  and their retries. Without it a hung archive.org cost 4 requests x 2
    *  attempts x WAYBACK_FETCH — over a minute of spinner for one section. */
   WAYBACK_TOTAL: 15000,
+  /** Budget for the WHOLE well-known sweep, across all 110 probes. Measured at
+   *  0.6-2.4s for the full catalog against four hosts, so this only trips when
+   *  a host is stalling connections rather than answering them. */
+  WELL_KNOWN_TOTAL: 20000,
+  /** One conditional GET of the IANA registry CSV. Off the dig's critical path. */
+  REGISTRY_FETCH: 8000,
+  /** One stylesheet fetched for its colour tokens. */
+  STYLESHEET: 6000,
 } as const;
 
 /**
@@ -33,18 +46,48 @@ export const CACHE = {
   /** Key used to store the cache index in LocalStorage */
   INDEX_KEY: "digger_cache_index",
   /**
-   * Prefix for cached entries. BUMP THE VERSION whenever the cached shape
-   * changes — v2 arrived when robotsTxt/llmsTxt became a ResourceStatus string
-   * rather than a boolean. Entries under an older prefix are purged on the next
-   * index read (see getCacheIndex).
+   * Prefix for cached entries.
+   *
+   * The version half is COMPUTED, not typed: `CACHE_SCHEMA` is a hash of
+   * `src/types/index.ts`, so any change to the cached shape produces a new key
+   * and purges every entry written under the old one.
+   *
+   * It works this way because the manual version was forgotten three times in a
+   * single release — for `wellKnown`, for `theme`, and for `ThemeColor.hex` —
+   * and each time an entry cached under the old shape rendered a missing field
+   * as an established absence ("None published", "No theme declared", a token
+   * with no swatch) for the full 48h TTL. Every one passed tsc, ray build and
+   * ray lint, because a missing optional field is perfectly valid.
+   *
+   * The lesson generalises past caching: when the correctness of a change
+   * depends on a human remembering a second, unrelated edit, the remembering IS
+   * the defect. Derive it instead. See scripts/cache-schema.mjs.
    */
-  KEY_PREFIX: "digger_cache_v2_",
+  /**
+   * Bumped BY HAND when behaviour changes but the shape does not.
+   *
+   * The hash cannot see this case, and pretending otherwise is worse than
+   * admitting it: correcting a classifier to report "unavailable" where it used
+   * to report "absent" touches no type, so every cached wrong verdict would
+   * survive its full TTL under an unchanged key. This is the one remaining
+   * deliberate step — and it is deliberate because no derivation can detect a
+   * change of meaning.
+   */
+  SALT: CACHE_SALT,
+  KEY_PREFIX: `digger_cache_${CACHE_SCHEMA}.${CACHE_SALT}_`,
   /**
    * Shared prefix across ALL cache-key versions, used to find entries left by
    * earlier versions. INDEX_KEY starts with this too, so it must be excluded
    * explicitly wherever this is used to identify payloads.
    */
   KEY_FAMILY: "digger_cache_",
+  /**
+   * How often to ask IANA whether the well-known registry changed. It gains a
+   * few entries a year, and the request is conditional — the steady state is a
+   * 304 with no body — so a week is frequent enough to stay current and rare
+   * enough to be invisible.
+   */
+  REGISTRY_CHECK_INTERVAL_MS: 7 * 24 * 60 * 60 * 1000,
 } as const;
 
 /**
@@ -61,6 +104,31 @@ export const LIMITS = {
   MAX_RESOURCES: 50,
   /** Maximum entries to display in sitemap views */
   MAX_DISPLAY_ENTRIES: 100,
+  /** Bytes read before judging what a resource IS. Enough for a doctype, an
+   *  XML declaration or an opening brace; far short of downloading the file. */
+  SNIFF_BYTES: 1024,
+  /** Simultaneous `/.well-known/` probes. The catalog is ~110 paths and firing
+   *  them all at once is scanner behaviour; a cap keeps one dig comparable to
+   *  loading an ordinary web page. */
+  WELL_KNOWN_CONCURRENCY: 10,
+  /** Rows an export will build from one resource. A sitemap's size is the
+   *  server's choice, and the extraction runs synchronously during render. */
+  MAX_EXPORT_ROWS: 50000,
+  /** Stylesheets fetched per dig for theme tokens. Sites link up to 54 of them;
+   *  fetching all would dwarf the rest of the dig for diminishing returns. */
+  MAX_STYLESHEETS: 3,
+  /** Bytes read per stylesheet. Custom properties live in the opening rules
+   *  (`:root`, `@layer theme`), so the tail is almost never where they are. */
+  MAX_CSS_BYTES: 512 * 1024,
+  /** Tokens kept. primer.style publishes 842 — past a point it is a data dump,
+   *  and every one of them is persisted into a 50-entry LocalStorage cache. */
+  MAX_THEME_TOKENS: 200,
+  /** Sheets and tokens for the on-demand "View All Color Tokens" scan. The user
+   *  asked for the whole palette and nothing here is cached, so the limits that
+   *  keep the dig fast and the cache small do not apply — these exist only so a
+   *  pathological site cannot run forever. */
+  MAX_STYLESHEETS_DEEP: 40,
+  MAX_THEME_TOKENS_DEEP: 2000,
 } as const;
 
 /**

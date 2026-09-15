@@ -82,12 +82,21 @@ View your account insights and analytics.
 
 ### Download Threads Media
 
-Download media (images/videos) from a Threads post.
+Download media from a Threads post — images, videos, and voice posts. Every item in a
+carousel is saved, at the highest resolution available.
 
 **Arguments:**
 
-- **Threads URL** (required) - The URL of the Threads post containing media
+- **Threads URL** (required) - The URL of the Threads post containing media. Accepts a
+  canonical post link (`threads.com/@username/post/ABC123`), a link with tracking
+  parameters attached, and a `threads.com/share/…` short link.
 
 **Preferences:**
 
-- **Video Download Path** - Custom directory to save downloaded media (optional)
+- **Media Download Path** - Custom directory to save downloaded media (optional, defaults
+  to your Downloads folder)
+- **Image Format** - Threads serves images as WebP. Keep the original, or convert to JPEG or
+  PNG for wider app compatibility (macOS only)
+
+Posts that Threads only shows to signed-in users — private accounts, age-restricted posts —
+cannot be downloaded, and are reported as such.

@@ -17,6 +17,33 @@ describe("agentName", () => {
     expect(name).toBe("project");
   });
 
+  it("prefers the session title the agent set over the working directory", () => {
+    const name = agentName({
+      agent: "claude",
+      cwd: "/home/user/src/octant",
+      terminal_title_stripped: "Task dispatcher plugin for octant",
+    });
+    expect(name).toBe("Task dispatcher plugin for octant");
+  });
+
+  it("ignores a title that is only the agent's own product name", () => {
+    const name = agentName({
+      agent: "claude",
+      cwd: "/home/user/src/project",
+      terminal_title_stripped: "Claude Code",
+    });
+    expect(name).toBe("project");
+  });
+
+  it("keeps an explicit name ahead of the session title", () => {
+    const name = agentName({
+      name: "billing-fix",
+      agent: "claude",
+      terminal_title_stripped: "Something else entirely",
+    });
+    expect(name).toBe("billing-fix");
+  });
+
   it("uses the foreground cwd over the pane cwd", () => {
     const name = agentName({
       agent: "claude",

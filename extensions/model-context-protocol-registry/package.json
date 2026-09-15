@@ -6,7 +6,8 @@
   "icon": "extension.png",
   "author": "thomas",
   "contributors": [
-    "nagauta"
+    "nagauta",
+    "pernielsentikaer"
   ],
   "owner": "raycast",
   "access": "public",

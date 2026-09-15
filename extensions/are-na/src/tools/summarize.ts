@@ -8,6 +8,9 @@ export function channelSummary(c: Channel) {
     owner_slug: c.owner_slug,
     status: c.status,
     block_count: c.length,
+    description: c.description,
+    updated_at: c.updated_at,
+    connection_id: c.connection?.id ?? null,
     url: `https://www.are.na/${c.owner_slug}/${c.slug}`,
   };
 }
@@ -19,6 +22,8 @@ export function userSummary(u: User) {
     full_name: u.full_name,
     username: u.username ?? u.slug,
     channel_count: u.channel_count,
+    follower_count: u.follower_count,
+    following_count: u.following_count,
     url: `https://www.are.na/${u.slug}`,
   };
 }
@@ -35,6 +40,7 @@ export function blockSummary(b: Block) {
     title: b.title ?? b.generated_title,
     preview: preview || null,
     source_url: b.source?.url ?? null,
+    connection_id: b.connection?.id ?? null,
     url,
   };
 }
@@ -52,8 +58,11 @@ export function blockDetail(b: Block) {
     class: b.class,
     title: b.title ?? b.generated_title,
     content: clip(b.content, 4000),
+    content_truncated: (b.content?.length ?? 0) > 4000,
     description: clip(b.description, 2000),
+    description_truncated: (b.description?.length ?? 0) > 2000,
     source_url: b.source?.url ?? null,
+    connection_id: b.connection?.id ?? null,
     visibility: b.visibility,
     url,
     author: userSummary(b.user),

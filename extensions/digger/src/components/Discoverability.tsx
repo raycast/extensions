@@ -291,7 +291,7 @@ function DiscoverabilityDetail({
                 />
               ))}
           {hasAlternates && discoverability!.alternates!.length > 5 && (
-            <List.Item.Detail.Metadata.Label title="" text={`...and ${discoverability!.alternates!.length - 5} more`} />
+            <List.Item.Detail.Metadata.Label title={`…and ${discoverability!.alternates!.length - 5} more`} />
           )}
           {!hasAlternates && <List.Item.Detail.Metadata.Label title="" text="No language alternates found" />}
         </List.Item.Detail.Metadata>

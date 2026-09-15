@@ -37,5 +37,6 @@ coverage/
 # Archives
 *.tgz
 
-# AI agents
-.agents
+# Synced Skills
+.agents/skills/raycast-extension
+.agents/skills/review-pr

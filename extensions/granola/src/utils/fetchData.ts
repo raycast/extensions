@@ -1,7 +1,8 @@
-import { useFetch, showFailureToast } from "@raycast/utils";
-import { useState, useEffect, useMemo } from "react";
+import { granolaFetch } from "./granolaFetch";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
+import { useState, useEffect } from "react";
 import getAccessToken from "./getAccessToken";
-import { isAbortError, toError, toErrorMessage } from "./errorUtils";
+import { isAbortError, toError } from "./errorUtils";
 import {
   GetDocumentsResponse,
   TranscriptSegment,
@@ -35,114 +36,38 @@ function stripLargeFields(docs: Document[]): Doc[] {
 const documentsByIdCache = new Map<string, Document>();
 
 export function fetchGranolaData(route: string) {
-  const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
-  const [error, setError] = useState<Error | undefined>(undefined);
-
+  const [accessToken, setAccessToken] = useState<string>();
+  const [authError, setAuthError] = useState<Error>();
   useEffect(() => {
     let mounted = true;
     getAccessToken()
       .then((token) => {
-        if (mounted) {
-          setAccessToken(token);
-        }
+        if (mounted) setAccessToken(token);
       })
-      .catch((err) => {
-        if (mounted) {
-          setError(new Error(`Failed to get access token: ${toErrorMessage(err)}`, { cause: err }));
-        }
+      .catch((error) => {
+        if (mounted) setAuthError(toError(error));
       });
     return () => {
       mounted = false;
     };
   }, []);
-
-  const url = `https://api.granola.ai/v2/${route}`;
-
-  // Use parseResponse to transform data BEFORE useFetch caches it
-  // This ensures only stripped data is cached, reducing memory usage
-  const {
-    isLoading,
-    data,
-    error: fetchError,
-    revalidate,
-  } = useFetch<GetDocumentsResponse<Document | Doc>>(url, {
-    headers: accessToken
-      ? {
-          Authorization: `Bearer ${accessToken}`,
-        }
-      : undefined,
-    execute: !!accessToken,
-    // parseResponse transforms data before caching - this is the key optimization!
-    // Only apply to get-documents route which contains large fields
-    ...(route === "get-documents" && {
-      parseResponse: async (response: Response) => {
-        if (!response.ok) {
-          let errorText = "";
-          try {
-            errorText = await response.text();
-          } catch {
-            // Ignore read errors and fall back to status text
-          }
-          if (errorText) {
-            try {
-              const errorJson = JSON.parse(errorText) as { message?: string; error?: string };
-              errorText = errorJson.message || errorJson.error || errorText;
-            } catch {
-              // Use raw text if parsing fails
-            }
-          }
-          const statusText = response.statusText || "Request failed";
-          const detail = errorText ? errorText : statusText;
-          throw new Error(`API request failed with status ${response.status}: ${detail}`);
-        }
-        const json = (await response.json()) as GetDocumentsResponse<Document>;
-        // Strip large fields immediately before caching
-        if (json.docs && Array.isArray(json.docs)) {
-          return {
-            ...json,
-            docs: stripLargeFields(json.docs),
-          };
-        }
-        return json;
-      },
-    }),
-  });
-
-  // Fallback transformation if parseResponse is not supported
-  // This ensures compatibility even if parseResponse doesn't work
-  const transformedData = useMemo<GetDocumentsResponse<Doc> | undefined>(() => {
-    // Only transform for get-documents route which contains large fields
-    if (route !== "get-documents" || !data) {
-      return data as GetDocumentsResponse<Doc> | undefined;
-    }
-
-    // If docs array exists, strip large fields immediately
-    if (data.docs && Array.isArray(data.docs)) {
-      const docs = data.docs as Array<Document | Doc>;
-      const sampleDoc = docs[0];
-      const alreadyStripped = !!sampleDoc && !("notes_markdown" in sampleDoc) && !("people" in sampleDoc);
-      const strippedDocs = alreadyStripped ? (docs as Doc[]) : stripLargeFields(docs as Document[]);
-      return {
-        ...data,
-        docs: strippedDocs,
-      };
-    }
-
-    return data as GetDocumentsResponse<Doc>;
-  }, [data, route]);
-
-  if (error) {
-    throw error;
-  }
-
-  if (fetchError) {
-    throw toError(fetchError);
-  }
-
-  // Return transformed data (or original if transformation not needed)
-  // For get-documents, transformedData will have stripped fields
-  // For other routes, transformedData === data
-  return { isLoading: isLoading || !accessToken, data: transformedData, revalidate };
+  const result = useCachedPromise(
+    async (route: string, token?: string) => {
+      if (!token) return undefined;
+      const response = await granolaFetch(`https://api.granola.ai/v2/${route}`, {
+        method: "POST",
+        body: "{}",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      const data = (await response.json()) as GetDocumentsResponse<Document>;
+      return { ...data, docs: data.docs ? stripLargeFields(data.docs) : undefined };
+    },
+    [route, accessToken],
+    { execute: !!accessToken },
+  );
+  if (authError) throw authError;
+  if (result.error) throw toError(result.error);
+  return { isLoading: result.isLoading || !accessToken, data: result.data, revalidate: result.revalidate };
 }
 
 const TRANSCRIPT_NOT_FOUND_MESSAGE = "Transcript not available for this note.";
@@ -157,7 +82,7 @@ export async function getTranscriptSegments(docId: string): Promise<TranscriptSe
     const token = await getAccessToken();
     const requestBody = { document_id: docId };
 
-    const response = await fetch(url, {
+    const response = await granolaFetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -271,7 +196,7 @@ export async function getMeetingDuration(docId: string): Promise<string | null> 
 export async function getDocumentCreator(docId: string): Promise<string | null> {
   try {
     const token = await getAccessToken();
-    const response = await fetch("https://api.granola.ai/v1/get-document-metadata", {
+    const response = await granolaFetch("https://api.granola.ai/v1/get-document-metadata", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -300,7 +225,7 @@ export async function getFolders(signal?: AbortSignal): Promise<FoldersResponse>
       include_only_joined_lists: false,
     };
 
-    const response = await fetch(url, {
+    const response = await granolaFetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -341,9 +266,12 @@ export async function getDocumentsList(): Promise<Document[]> {
   try {
     const url = `https://api.granola.ai/v2/get-documents`;
     const token = await getAccessToken();
-    const response = await fetch(url, {
+    const response = await granolaFetch(url, {
+      method: "POST",
+      body: "{}",
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
 
@@ -402,7 +330,7 @@ export async function getSharedDocuments(): Promise<Doc[]> {
 async function getIndividuallySharedDocuments(token: string): Promise<Doc[]> {
   const url = `https://api.granola.ai/v1/get-document-set`;
   try {
-    const response = await fetch(url, {
+    const response = await granolaFetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -513,7 +441,7 @@ export async function getDocumentsByIds(documentIds: string[], batchSize: number
     for (let i = 0; i < missingIds.length; i += batchSize) {
       const batch = missingIds.slice(i, i + batchSize);
       try {
-        const response = await fetch(`https://api.granola.ai/v1/get-documents-batch`, {
+        const response = await granolaFetch(`https://api.granola.ai/v1/get-documents-batch`, {
           method: "POST",
           headers,
           body: JSON.stringify({ document_ids: batch }),
@@ -569,7 +497,7 @@ export async function getRecipesFromApi(): Promise<RecipesListResult> {
   try {
     const url = `https://api.granola.ai/v1/get-recipes`;
     const token = await getAccessToken();
-    const response = await fetch(url, {
+    const response = await granolaFetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

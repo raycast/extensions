@@ -1,5 +1,20 @@
 # Skills Changelog
 
+## [Fix Commands Waiting Forever Behind Each Other] - 2026-09-12
+
+- Stop a second command from waiting indefinitely behind a running one: opening Manage Skills during "Update All Skills" now either gets its turn or reports that another skills command is still running, instead of showing an empty list and spinning for minutes
+- Fail immediately on a permanent problem such as a support directory that cannot be written, which was previously retried forever
+- Stop the running command when it loses its lock, rather than letting it keep changing the same skills another process is now free to change, and stop a failed lock release from replacing the real error
+- Give read-only commands room for the initial download of the `skills` CLI, so an ordinary first run on a slow connection no longer fails
+- Point a timed-out command at the custom package registry setup as well as the network, since a proxied registry is a common cause
+
+## [Fix Update All Skills Timing Out] - 2026-09-11
+
+- Allow `add`, `remove`, and `update` up to 5 minutes instead of 30 seconds, so "Update All Skills" no longer fails with a bare "Command failed: npx -y skills@latest update -g -y" once checking every installed skill's source takes longer than that
+- Report that the `skills` CLI timed out, including whatever it printed before being stopped, instead of only the command that failed
+- Include the CLI output in the logs copied by the failure toast's "Report Error" action, which previously carried only the original message
+- Stop retrying a timed-out `bunx` run through `npx`, which only doubled the wait
+
 ## [Serialize Concurrent CLI Commands] - 2026-08-24
 
 - Prevent simultaneous Raycast commands from racing in the shared `npx` cache and intermittently failing with `ENOTEMPTY`

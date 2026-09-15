@@ -14,22 +14,21 @@ import {
   useNavigation,
 } from '@raycast/api';
 
-import Service, { Zone } from './service';
-import {
-  getToken,
-  getSiteStatusIcon,
-  getSiteUrl,
-  handleNetworkError,
-} from './utils';
+import { Zone } from './service';
+import { getSiteStatusIcon, getSiteUrl, handleNetworkError } from './utils';
+import { getCloudflareService, withCloudflareAccessToken } from './oauth';
 import { CachePurgeView, purgeEverything } from './view-cache-purge';
+import {
+  canEditDnsRecord,
+  DuplicateDnsRecordView,
+  EditDnsRecordView,
+} from './dns-record-form';
 import {
   FormValidation,
   useCachedPromise,
   useForm,
   useLocalStorage,
 } from '@raycast/utils';
-
-const service = new Service(getToken());
 
 const FAVORITES_STORAGE_KEY = 'favorite-zone-ids';
 
@@ -39,11 +38,11 @@ function Command() {
     data: { accounts, sites },
   } = useCachedPromise(
     async () => {
-      const accounts = await service.listAccounts();
+      const accounts = await getCloudflareService().listAccounts();
       // load zones of each account simultaneously
       const sites: Record<string, Zone[]> = {};
       const zoneRequests = accounts.map(async (account) => {
-        const zones = await service.listZones(account);
+        const zones = await getCloudflareService().listZones(account);
         sites[account.id] = zones;
       });
       await Promise.all(zoneRequests);
@@ -212,7 +211,7 @@ function SiteView(props: SiteProps) {
   const { accountId, id } = props;
 
   const { isLoading, data: site } = useCachedPromise(
-    async () => service.getZone(id),
+    async () => getCloudflareService().getZone(id),
     [],
     {
       onError: handleNetworkError,
@@ -298,19 +297,26 @@ function DnsRecordView(props: DnsRecordProps) {
     data: records,
     revalidate,
     mutate,
-  } = useCachedPromise(async () => await service.listDnsRecords(siteId), [], {
-    initialData: [],
-    onError: handleNetworkError,
-  });
+  } = useCachedPromise(
+    async () => await getCloudflareService().listDnsRecords(siteId),
+    [],
+    {
+      initialData: [],
+      onError: handleNetworkError,
+    },
+  );
 
   return (
     <List isLoading={isLoading}>
-      {records.map((record, index) => (
+      {records.map((record) => (
         <List.Item
-          key={index}
+          key={record.id}
           title={record.name}
           subtitle={record.content}
-          accessories={[{ text: record.type }]}
+          accessories={[
+            { tag: record.type },
+            { text: record.ttl === 1 ? 'Auto TTL' : `${record.ttl}s TTL` },
+          ]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
@@ -334,6 +340,30 @@ function DnsRecordView(props: DnsRecordProps) {
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
+                {canEditDnsRecord(record) && (
+                  <Action.Push
+                    icon={Icon.Pencil}
+                    title="Edit Record"
+                    target={
+                      <EditDnsRecordView
+                        zoneId={siteId}
+                        record={record}
+                        onSave={revalidate}
+                      />
+                    }
+                  />
+                )}
+                <Action.Push
+                  icon={Icon.Duplicate}
+                  title="Duplicate Record"
+                  target={
+                    <DuplicateDnsRecordView
+                      zoneId={siteId}
+                      record={record}
+                      onCreate={revalidate}
+                    />
+                  }
+                />
                 <Action.Push
                   icon={Icon.Plus}
                   title="Add Record"
@@ -363,7 +393,10 @@ function DnsRecordView(props: DnsRecordProps) {
                           );
                           try {
                             await mutate(
-                              service.deleteDnsRecord(siteId, record.id),
+                              getCloudflareService().deleteDnsRecord(
+                                siteId,
+                                record.id,
+                              ),
                               {
                                 optimisticUpdate(data) {
                                   return data.filter((d) => d.id !== record.id);
@@ -410,6 +443,7 @@ function CreateDnsRecordView({
   const TYPES: Record<string, string> = {
     A: 'IPv4 address',
     AAAA: 'IPv6 address',
+    CNAME: 'Target',
     TXT: 'Content',
   };
   const TTLS = {
@@ -436,10 +470,17 @@ function CreateDnsRecordView({
       );
       try {
         const record = values;
-        const content = `"${record.content}"`; // if we do not add quotation marks it will still work but shows a warning on Dash
-        const ttl = values.type !== 'TXT' ? 1 : +record.ttl; // errors out if we do not pass a number
+        const content =
+          record.type === 'TXT'
+            ? JSON.stringify(record.content.trim())
+            : record.content.trim();
+        const ttl = +record.ttl;
 
-        await service.createDnsRecord(siteId, { ...record, content, ttl });
+        await getCloudflareService().createDnsRecord(siteId, {
+          ...record,
+          content,
+          ttl,
+        });
         toast.style = Toast.Style.Success;
         toast.title = 'Created DNS Record';
         onCreate();
@@ -480,21 +521,20 @@ function CreateDnsRecordView({
         placeholder="Use @ for root"
         {...itemProps.name}
       />
-      {values.type !== 'TXT' ? (
+      {values.type === 'TXT' ? (
         <>
-          <Form.TextField title={TYPES[values.type]} {...itemProps.content} />
-          <Form.Description title="TTL" text="Auto" />
+          <Form.TextArea title="Content" {...itemProps.content} />
         </>
       ) : (
         <>
-          <Form.TextArea title="Content" {...itemProps.content} />
-          <Form.Dropdown title="TTL" {...itemProps.ttl}>
-            {Object.entries(TTLS).map(([ttl, title]) => (
-              <Form.Dropdown.Item key={ttl} title={title} value={ttl} />
-            ))}
-          </Form.Dropdown>
+          <Form.TextField title={TYPES[values.type]} {...itemProps.content} />
         </>
       )}
+      <Form.Dropdown title="TTL" {...itemProps.ttl}>
+        {Object.entries(TTLS).map(([ttl, title]) => (
+          <Form.Dropdown.Item key={ttl} title={title} value={ttl} />
+        ))}
+      </Form.Dropdown>
 
       <Form.Separator />
       <Form.Description
@@ -511,7 +551,7 @@ function CreateDnsRecordView({
 }
 
 async function clearSiteCache() {
-  service.clearCache();
+  getCloudflareService().clearCache();
   showToast({
     style: Toast.Style.Success,
     title: 'Local site cache cleared',
@@ -519,4 +559,4 @@ async function clearSiteCache() {
   popToRoot({ clearSearchBar: true });
 }
 
-export default Command;
+export default withCloudflareAccessToken(Command);

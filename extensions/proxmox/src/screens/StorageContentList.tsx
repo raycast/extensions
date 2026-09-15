@@ -1,15 +1,17 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import type { PveServer } from "@/types";
 import { useStorageContent } from "@/hooks/use-storage-content";
 import { formatStorageSize } from "@/utils/format";
 import { ErrorGuard } from "@/components/ErrorGuard";
 
 type StorageContentListProps = {
+  server: PveServer;
   node: string;
   id: string;
 };
 
-export const StorageContentList = ({ node, id }: StorageContentListProps) => {
-  const { data, isLoading, showErrorScreen, revalidate } = useStorageContent(node, id);
+export const StorageContentList = ({ server, node, id }: StorageContentListProps) => {
+  const { data, isLoading, showErrorScreen, revalidate } = useStorageContent(server, node, id);
 
   return (
     <ErrorGuard showErrorScreen={showErrorScreen}>

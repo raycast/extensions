@@ -113,6 +113,11 @@
       "name": "continue-timer",
       "title": "Continue Timer",
       "description": "Continues the paused pomodoro timer"
+    },
+    {
+      "name": "skip-timer",
+      "title": "Skip Timer",
+      "description": "Skips the current interval and starts the next one"
     }
   ],
   "ai": {
@@ -203,6 +208,19 @@
           }
         ],
         "input": "@pomodoro continue the timer"
+      },
+      {
+        "mocks": {
+          "skip-timer": "Skipped to Short Break"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "skip-timer"
+            }
+          }
+        ],
+        "input": "@pomodoro skip to the next interval"
       },
       {
         "input": "@pomodoro start a 4min 30 sec timer",

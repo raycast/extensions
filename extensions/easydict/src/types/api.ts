@@ -19,6 +19,7 @@ export enum DictionaryType {
   Youdao = "Youdao Dictionary",
   Eudic = "Eudic Dictionary",
   Linguee = "Linguee Dictionary",
+  AI = "AI Dictionary",
 }
 
 export enum LanguageDetectType {

@@ -6,10 +6,10 @@ import { ListItemMetadata } from "./list-item-metadata";
 type ISPListItemProps = {
   name: string;
   isp: ISPInterface;
-  children: JSX.Element;
+  children?: React.ReactNode;
 };
 
-export function ISPListItem({ name, isp, children }: ISPListItemProps): JSX.Element {
+export function ISPListItem({ name, isp, children }: ISPListItemProps) {
   return (
     <List.Item
       title="ISP"

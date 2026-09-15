@@ -7,6 +7,11 @@ export async function disconnectDevice(device: Device) {
   const { bluetoothBackend } = getPreferenceValues<ExtensionPreferences>();
   const devicesService = getDevicesService(bluetoothBackend);
 
+  if (!device.controllable) {
+    await showErrorMessage("This Bluetooth profile is managed by Windows.");
+    return false;
+  }
+
   await showAnimatedMessage("Disconnecting...");
   const result = devicesService?.disconnectDevice(device.macAddress);
   if (result) {

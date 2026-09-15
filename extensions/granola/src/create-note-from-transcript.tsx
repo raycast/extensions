@@ -10,7 +10,11 @@ interface TranscriptFormValues {
   input: string;
 }
 
-export default function Command() {
+import { withGranolaAuth } from "./utils/withGranolaAuth";
+
+export default withGranolaAuth(Command);
+
+function Command() {
   const [isCreating, setIsCreating] = useState(false);
   const [progress, setProgress] = useState<CreateNoteProgress | null>(null);
   const [result, setResult] = useState<CreateNoteResult | null>(null);

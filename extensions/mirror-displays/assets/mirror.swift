@@ -20,7 +20,7 @@ func getDisplays() -> [CGDirectDisplayID] {
 
 let args = CommandLine.arguments
 if args.count < 2 {
-    fputs("Usage: swift mirror.swift [mac|external|off]\n", stderr)
+    fputs("Usage: swift mirror.swift [mac|external|off|toggle] [mac|external]\n", stderr)
     exit(1)
 }
 
@@ -97,6 +97,30 @@ if mode == "mac" {
     configureMirror(mac, kCGNullDirectDisplay)
     for ext in extDisplays {
         configureMirror(ext, kCGNullDirectDisplay)
+    }
+} else if mode == "toggle" {
+    // Flip mirroring on or off based on the current state.
+    let isMirroring = CGDisplayMirrorsDisplay(mac) != kCGNullDirectDisplay
+        || extDisplays.contains { CGDisplayMirrorsDisplay($0) != kCGNullDirectDisplay }
+    if isMirroring {
+        configureMirror(mac, kCGNullDirectDisplay)
+        for ext in extDisplays {
+            configureMirror(ext, kCGNullDirectDisplay)
+        }
+    } else {
+        // args[2] picks the direction to turn mirroring on with; defaults to "mac".
+        let direction = args.count > 2 ? args[2] : "mac"
+        if direction == "external" {
+            let primaryExt = extDisplays[0]
+            configureMirror(mac, primaryExt)
+            for ext in extDisplays.dropFirst() {
+                configureMirror(ext, primaryExt)
+            }
+        } else {
+            for ext in extDisplays {
+                configureMirror(ext, mac)
+            }
+        }
     }
 } else {
     fputs("Unknown mode\n", stderr)

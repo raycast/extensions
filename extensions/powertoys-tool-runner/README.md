@@ -20,6 +20,7 @@ Launch any PowerToys tool instantly:
 - **Environment Variables** - Edit system environment variables
 - **Crop and Lock** - Reparent and Thumbnail modes
 - **Awake** - Keep your computer awake
+- **Light Switch** - Toggle between light and dark themes
 
 ## Settings
 

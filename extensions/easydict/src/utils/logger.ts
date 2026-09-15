@@ -3,11 +3,21 @@
 import { environment } from "@raycast/api";
 
 const MAX_LOG_TEXT_LENGTH = 150;
+const TRUNCATED_MARKER = "[truncated]";
 const isDev = environment.isDevelopment;
 
 function truncate(text: string, maxLen = MAX_LOG_TEXT_LENGTH): string {
   if (text.length <= maxLen) return text;
-  return text.substring(0, maxLen) + "[truncated]";
+  return text.substring(0, maxLen) + TRUNCATED_MARKER;
+}
+
+function formatTimedSummary(summary: string, duration: string): string {
+  const durationSuffix = ` (${duration}ms)`;
+  if (summary.length + durationSuffix.length <= MAX_LOG_TEXT_LENGTH) {
+    return `${summary}${durationSuffix}`;
+  }
+  const summaryLength = MAX_LOG_TEXT_LENGTH - TRUNCATED_MARKER.length - durationSuffix.length;
+  return `${summary.substring(0, summaryLength)}${TRUNCATED_MARKER}${durationSuffix}`;
 }
 
 function formatMsg(prefix: string, label: string, text: string): string {
@@ -48,11 +58,11 @@ export function createTimer(label: string) {
   return {
     done(summary: string) {
       const duration = (performance.now() - start).toFixed(0);
-      logTrace(label, `${summary} (${duration}ms)`);
+      logTrace(label, formatTimedSummary(summary, duration));
     },
-    fail() {
+    fail(summary = "request failed") {
       const duration = (performance.now() - start).toFixed(0);
-      logTrace(label, `request failed (${duration}ms)`);
+      logTrace(label, formatTimedSummary(summary, duration));
     },
   };
 }

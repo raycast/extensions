@@ -42,8 +42,15 @@ function parseMinimaxCNApiResponse(data: unknown): { usage: MinimaxCNUsage | nul
       };
     }
 
+    if (!Array.isArray(response.model_remains)) {
+      return {
+        usage: null,
+        error: { type: "parse_error", message: "Invalid model remains format" },
+      };
+    }
+
     const usage: MinimaxCNUsage = {
-      modelRemains: response.model_remains || [],
+      modelRemains: response.model_remains,
       planName: null,
     };
 

@@ -1,198 +1,323 @@
-import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { useState } from "react";
-import { LDFlag } from "../types";
+import { LDFlag, StoredFlagRef } from "../types";
 import { useShowNamePreference } from "../hooks/useShowNamePreference";
-import { useLDFlags } from "../hooks/useLDFlags";
+import { FlagFilterValue, useLDFlags } from "../hooks/useLDFlags";
+import { useProjectKey } from "../hooks/useProjectKey";
+import { useEnvironments, useFlagTags, useMe } from "../hooks/useLDMetadata";
+import { useFavorites, useRecents, toFlagRef } from "../hooks/useStoredFlags";
 import { getFullName } from "../utils/avatarUtils";
-import { getLDUrlWithEnvs } from "../utils/ld-urls";
+import { getFlagUrl } from "../utils/ld-urls";
 import FlagDetails from "../components/FlagDetails";
+import SwitchProject from "../components/SwitchProject";
+import RecentChanges from "./RecentChanges";
+import { FlagActionContext, FlagOpenActions, FlagSecondaryActions } from "../components/FlagActions";
+import { FlagMetadata } from "../components/FlagDetailsHeader";
+import { RECENT_CHANGES_SHORTCUT, SWITCH_PROJECT_SHORTCUT, TOGGLE_NAME_SHORTCUT } from "../utils/shortcuts";
 
-interface FetchPagination {
-  hasMore: boolean;
-  pageSize: number;
-  onLoadMore: () => void;
+interface ViewActionsProps {
+  showName: boolean;
+  onToggleShowName: () => void;
+  onRefresh: () => void;
+}
+
+/** Actions that apply to the whole list rather than a single flag. */
+function ViewActions({ showName, onToggleShowName, onRefresh }: ViewActionsProps) {
+  return (
+    <ActionPanel.Section title="View">
+      {/* Push the command wrapper, not AuditLogList with a fixed projectKey, so
+          switching projects from inside the history view updates it too. */}
+      <Action.Push
+        icon={Icon.Clock}
+        title="Show Recent Changes"
+        shortcut={RECENT_CHANGES_SHORTCUT}
+        target={<RecentChanges />}
+      />
+      <Action.Push
+        icon={Icon.Switch}
+        title="Switch Project"
+        shortcut={SWITCH_PROJECT_SHORTCUT}
+        target={<SwitchProject />}
+      />
+      <Action
+        icon={Icon.Text}
+        title={showName ? "Show Flag Keys" : "Show Flag Names"}
+        shortcut={TOGGLE_NAME_SHORTCUT}
+        onAction={onToggleShowName}
+      />
+      <Action
+        icon={Icon.ArrowClockwise}
+        title="Refresh"
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={onRefresh}
+      />
+    </ActionPanel.Section>
+  );
+}
+
+interface FlagListItemProps extends FlagActionContext {
+  flag: LDFlag;
+  showName: boolean;
+  envKeys: string[];
+  viewActions: React.ReactNode;
+}
+
+function FlagListItem({ flag, showName, envKeys, viewActions, ...context }: FlagListItemProps) {
+  const { isFavorite } = useFavorites(context.projectKey);
+  const { recordVisit } = useRecents(context.projectKey);
+  const maintainer = flag._maintainer;
+  const icon = maintainer ? getAvatarIcon(getFullName(maintainer) || "?") : Icon.Person;
+  const url = getFlagUrl(context.projectKey, flag.key, envKeys);
+  const accessories: List.Item.Accessory[] = [];
+  if (isFavorite(flag)) accessories.push({ icon: Icon.Star, tooltip: "Favorite" });
+  if (flag.temporary) accessories.push({ tag: "Temporary" });
+
+  return (
+    <List.Item
+      id={flag.key}
+      icon={icon}
+      title={showName ? flag.name || flag.key : flag.key}
+      subtitle={showName ? undefined : flag.name}
+      keywords={[flag.key, flag.name, ...(flag.tags ?? [])]}
+      accessories={accessories}
+      detail={<List.Item.Detail metadata={<FlagMetadata flag={flag} />} />}
+      actions={
+        <ActionPanel>
+          <Action.Push
+            icon={Icon.Sidebar}
+            title="Show Details"
+            target={<FlagDetails flagKey={flag.key} initialFlag={flag} {...context} />}
+            onPush={() => recordVisit(toFlagRef(context.projectKey, flag))}
+          />
+          <FlagOpenActions flag={flag} url={url} {...context} />
+          <FlagSecondaryActions flag={flag} url={url} {...context} />
+          {viewActions}
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+interface StoredFlagItemProps extends FlagActionContext {
+  flagRef: StoredFlagRef;
+  icon: Icon;
+  envKeys: string[];
+  viewActions: React.ReactNode;
+  extraActions?: React.ReactNode;
+}
+
+/** A favorite or recently viewed flag; only the key and name are known until details are opened. */
+function StoredFlagItem({ flagRef: ref, icon, envKeys, viewActions, extraActions, ...context }: StoredFlagItemProps) {
+  const { recordVisit } = useRecents(context.projectKey);
+  const url = getFlagUrl(context.projectKey, ref.key, envKeys);
+  return (
+    <List.Item
+      id={`${icon}:${ref.key}`}
+      icon={icon}
+      title={ref.name || ref.key}
+      subtitle={ref.key}
+      keywords={[ref.key]}
+      detail={
+        <List.Item.Detail
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label title="Name" text={ref.name || ref.key} />
+              <List.Item.Detail.Metadata.Label title="Key" text={ref.key} />
+              {ref.visitedAt && (
+                <List.Item.Detail.Metadata.Label title="Last Viewed" text={new Date(ref.visitedAt).toLocaleString()} />
+              )}
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label title="" text="Press ↵ to load the full flag details" />
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
+      actions={
+        <ActionPanel>
+          <Action.Push
+            icon={Icon.Sidebar}
+            title="Show Details"
+            target={<FlagDetails flagKey={ref.key} {...context} />}
+            onPush={() => recordVisit(ref)}
+          />
+          <Action.OpenInBrowser
+            icon={Icon.Globe}
+            title="Open in LaunchDarkly"
+            url={url}
+            onOpen={() => recordVisit(ref)}
+          />
+          <Action.CopyToClipboard
+            title="Copy Feature Flag Key"
+            content={ref.key}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
+          {extraActions}
+          {viewActions}
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 export default function ListFeatureFlags() {
   const [searchText, setSearchText] = useState("");
-  const [stateFilter, setStateFilter] = useState("live");
-
+  const [filter, setFilter] = useState<FlagFilterValue>("state:live");
   const { showName, toggleShowName } = useShowNamePreference();
 
-  const { flags, totalCount, isLoading, error, pagination, revalidate } = useLDFlags({ searchText, stateFilter }) as {
-    flags: LDFlag[];
-    totalCount: number;
-    isLoading: boolean;
-    error: Error | undefined;
-    pagination: FetchPagination;
-    revalidate: () => void;
-  };
+  const { projectKey, isLoading: projectLoading } = useProjectKey();
+  const { me, isLoading: meLoading } = useMe();
+  const tags = useFlagTags();
+  const { environments } = useEnvironments(projectKey, !projectLoading);
+  const { favorites, toggleFavorite } = useFavorites(projectKey);
+  const { recents, clearRecents } = useRecents(projectKey);
 
-  const [selectedFlagKey, setSelectedFlagKey] = useState<string>();
+  // "My Flags" needs the caller's member ID; if that lookup fails (e.g. a service
+  // token), fall back to Live rather than showing an empty list forever.
+  const effectiveFilter: FlagFilterValue = filter === "mine" && !me && !meLoading ? "state:live" : filter;
 
-  const handleSelectionChange = (id: string | null) => {
-    setSelectedFlagKey(id || undefined);
-  };
+  const { flags, totalCount, isLoading, error, pagination, revalidate } = useLDFlags({
+    projectKey,
+    searchText,
+    filter: effectiveFilter,
+    memberId: me?._id,
+    enabled: !projectLoading,
+  });
 
-  function getVariationLabel(flag: LDFlag, index: number): string {
-    const variation = flag.variations[index];
-    const isOnVariation = flag.defaults?.onVariation === index;
-    const isOffVariation = flag.defaults?.offVariation === index;
-    let label = JSON.stringify(variation.value);
+  const context: FlagActionContext = { projectKey };
+  const envKeys = environments.map((env) => env.key);
+  const showStored = searchText.trim() === "" && filter === "state:live";
+  const favoriteKeys = new Set(favorites.map((f) => f.key));
+  const recentsToShow = recents.filter((r) => !favoriteKeys.has(r.key)).slice(0, 5);
 
-    if (isOnVariation) label += " (Default ON)";
-    if (isOffVariation) label += " (Default OFF)";
-    return label;
-  }
-
-  if (error) {
-    return (
-      <List>
-        <List.EmptyView title="Error" description={error.message} />
-      </List>
-    );
-  }
-
-  const selectedFlag = selectedFlagKey ? flags.find((f) => f.key === selectedFlagKey) : undefined;
+  const viewActions = <ViewActions showName={showName} onToggleShowName={toggleShowName} onRefresh={revalidate} />;
 
   return (
     <List
-      isLoading={isLoading}
-      searchText={searchText || ""}
-      onSearchTextChange={(value) => setSearchText(value || "")}
-      selectedItemId={selectedFlagKey}
-      onSelectionChange={handleSelectionChange}
+      isLoading={isLoading || projectLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder={`Search flags in ${projectKey}…`}
+      navigationTitle={`Feature Flags · ${projectKey}`}
       isShowingDetail
-      pagination={{
-        pageSize: 20,
-        hasMore: pagination?.hasMore || false,
-        onLoadMore: () => pagination?.onLoadMore?.(),
-      }}
       filtering={false}
+      throttle
+      pagination={pagination}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by State"
-          onChange={(newValue) => {
-            setStateFilter(newValue);
-            revalidate();
-          }}
-        >
-          <List.Dropdown.Item title="Live" value="live" />
-          <List.Dropdown.Item title="Deprecated" value="deprecated" />
-          <List.Dropdown.Item title="Archived" value="archived" />
+        <List.Dropdown tooltip="Filter Flags" storeValue onChange={(value) => setFilter(value as FlagFilterValue)}>
+          <List.Dropdown.Section title="State">
+            <List.Dropdown.Item title="Live" value="state:live" icon={Icon.Circle} />
+            <List.Dropdown.Item title="Deprecated" value="state:deprecated" icon={Icon.Warning} />
+            <List.Dropdown.Item title="Archived" value="state:archived" icon={Icon.Tray} />
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Type">
+            <List.Dropdown.Item title="Temporary" value="type:temporary" icon={Icon.Hourglass} />
+            <List.Dropdown.Item title="Permanent" value="type:permanent" icon={Icon.Lock} />
+          </List.Dropdown.Section>
+          {me && (
+            <List.Dropdown.Section title="Ownership">
+              <List.Dropdown.Item title="My Flags" value="mine" icon={Icon.Person} />
+            </List.Dropdown.Section>
+          )}
+          {tags.length > 0 && (
+            <List.Dropdown.Section title="Tags">
+              {tags.map((tag) => (
+                <List.Dropdown.Item key={tag} title={tag} value={`tag:${tag}`} icon={Icon.Tag} />
+              ))}
+            </List.Dropdown.Section>
+          )}
         </List.Dropdown>
       }
     >
-      <List.Section title="Feature Flags" subtitle={`${totalCount} flags found`}>
-        {flags.map((flag) => {
-          const maintainer = flag._maintainer;
-          const icon = maintainer ? { source: getAvatarIcon(getFullName(maintainer)) } : Icon.Person;
-          const displayTitle = showName === undefined ? flag.name : showName ? flag.name : flag.key;
-
-          return (
-            <List.Item
-              key={flag.key}
-              id={flag.key}
-              icon={icon}
-              title={displayTitle}
+      {error ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load flags"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Retry" onAction={revalidate} />
+              <Action.Push icon={Icon.Switch} title="Switch Project" target={<SwitchProject />} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <>
+          {showStored && favorites.length > 0 && (
+            <List.Section title="Favorites">
+              {favorites.map((ref) => (
+                <StoredFlagItem
+                  key={`fav:${ref.key}`}
+                  flagRef={ref}
+                  icon={Icon.Star}
+                  envKeys={envKeys}
+                  viewActions={viewActions}
+                  extraActions={
+                    <Action
+                      icon={Icon.StarDisabled}
+                      title="Remove from Favorites"
+                      shortcut={Keyboard.Shortcut.Common.Pin}
+                      onAction={() => toggleFavorite(ref)}
+                    />
+                  }
+                  {...context}
+                />
+              ))}
+            </List.Section>
+          )}
+          {showStored && recentsToShow.length > 0 && (
+            <List.Section title="Recently Viewed">
+              {recentsToShow.map((ref) => (
+                <StoredFlagItem
+                  key={`recent:${ref.key}`}
+                  flagRef={ref}
+                  icon={Icon.Clock}
+                  envKeys={envKeys}
+                  viewActions={viewActions}
+                  extraActions={
+                    <Action
+                      icon={Icon.Trash}
+                      title="Clear Recently Viewed"
+                      style={Action.Style.Destructive}
+                      shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                      onAction={clearRecents}
+                    />
+                  }
+                  {...context}
+                />
+              ))}
+            </List.Section>
+          )}
+          <List.Section title="Feature Flags" subtitle={totalCount ? `${totalCount} flags` : undefined}>
+            {flags.map((flag) => (
+              <FlagListItem
+                key={flag.key}
+                flag={flag}
+                showName={showName}
+                envKeys={envKeys}
+                viewActions={viewActions}
+                {...context}
+              />
+            ))}
+          </List.Section>
+          {!isLoading && flags.length === 0 && (
+            <List.EmptyView
+              icon={Icon.MagnifyingGlass}
+              title="No flags found"
+              description={
+                searchText
+                  ? `Nothing matches "${searchText}" in ${projectKey}`
+                  : `No flags in ${projectKey} for this filter`
+              }
               actions={
                 <ActionPanel>
-                  <Action.Push icon={Icon.Sidebar} title="Show Details" target={<FlagDetails flag={flag} />} />
-                  <Action.OpenInBrowser
-                    icon={Icon.Globe}
-                    title="Open in Browser"
-                    url={getLDUrlWithEnvs(flag, [], undefined)}
-                  />
-                  <Action.CopyToClipboard title="Copy Feature Flag Key" content={flag.key} />
-                  <Action
-                    icon={Icon.Switch}
-                    title={`Show ${showName ? "Key" : "Name"}`}
-                    onAction={() => toggleShowName()}
-                  />
+                  <Action.Push icon={Icon.Switch} title="Switch Project" target={<SwitchProject />} />
                 </ActionPanel>
               }
-              detail={
-                <List.Item.Detail
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title="Name"
-                        text={selectedFlag?.name || selectedFlag?.key || ""}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Description"
-                        text={selectedFlag?.description || "No description"}
-                      />
-                      <List.Item.Detail.Metadata.Label title="Kind" text={selectedFlag?.kind || "N/A"} />
-                      {selectedFlag?.creationDate && (
-                        <List.Item.Detail.Metadata.Label
-                          title="Created"
-                          text={new Date(selectedFlag.creationDate).toLocaleDateString()}
-                        />
-                      )}
-
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.TagList title="Status">
-                        {selectedFlag?.archived && (
-                          <List.Item.Detail.Metadata.TagList.Item text="Archived" color={Color.Yellow} />
-                        )}
-                        {selectedFlag?.temporary && (
-                          <List.Item.Detail.Metadata.TagList.Item text="Temporary" color={Color.Orange} />
-                        )}
-                        {selectedFlag?.deprecated && (
-                          <List.Item.Detail.Metadata.TagList.Item text="Deprecated" color={Color.Red} />
-                        )}
-                      </List.Item.Detail.Metadata.TagList>
-
-                      <List.Item.Detail.Metadata.TagList title="Tags">
-                        {selectedFlag?.tags && selectedFlag.tags.length > 0 ? (
-                          selectedFlag.tags.map((tag) => (
-                            <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />
-                          ))
-                        ) : (
-                          <List.Item.Detail.Metadata.TagList.Item text="No tags" color={Color.SecondaryText} />
-                        )}
-                      </List.Item.Detail.Metadata.TagList>
-
-                      {selectedFlag?._maintainer && (
-                        <>
-                          <List.Item.Detail.Metadata.Separator />
-                          <List.Item.Detail.Metadata.Label title="Maintainer" />
-                          <List.Item.Detail.Metadata.Label
-                            title="Name"
-                            text={
-                              `${selectedFlag._maintainer.firstName || ""} ${
-                                selectedFlag._maintainer.lastName || ""
-                              }`.trim() || "N/A"
-                            }
-                          />
-                          {selectedFlag._maintainerTeam && (
-                            <List.Item.Detail.Metadata.Label
-                              title="Team"
-                              text={selectedFlag._maintainerTeam.name || selectedFlag._maintainerTeam.key}
-                            />
-                          )}
-                        </>
-                      )}
-
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label title="Variations" />
-                      {selectedFlag?.variations?.map((variation, index) => (
-                        <List.Item.Detail.Metadata.Label
-                          key={index}
-                          title={`Variation ${index + 1}`}
-                          text={getVariationLabel(selectedFlag, index)}
-                        />
-                      ))}
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
             />
-          );
-        })}
-      </List.Section>
+          )}
+        </>
+      )}
     </List>
   );
 }

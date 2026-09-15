@@ -6,6 +6,7 @@ const BROWSER_ALIASES: Record<string, SupportedBrowser> = {
   Safari: "Safari",
   "Google Chrome": "Google Chrome",
   Arc: "Arc",
+  Aside: "Aside",
   Dia: "Dia",
   Zen: "Zen",
   zen: "Zen",
@@ -63,27 +64,11 @@ async function getSafariTab(): Promise<ActiveTab> {
 }
 
 /**
- * Get the active tab from Chrome
+ * Get the active tab from a browser that uses Chrome's AppleScript dictionary (Chrome, Arc, Aside)
  */
-async function getChromeTab(): Promise<ActiveTab> {
+async function getChromiumTab(appName: SupportedBrowser): Promise<ActiveTab> {
   const script = `
-    tell application "Google Chrome"
-      set tabTitle to title of active tab of front window
-      set tabURL to URL of active tab of front window
-    end tell
-    return tabTitle & "|||" & tabURL
-  `;
-  const result = await runAppleScript(script);
-  const [title, url] = result.split("|||");
-  return { title: title.trim(), url: url.trim() };
-}
-
-/**
- * Get the active tab from Arc
- */
-async function getArcTab(): Promise<ActiveTab> {
-  const script = `
-    tell application "Arc"
+    tell application "${appName}"
       set tabTitle to title of active tab of front window
       set tabURL to URL of active tab of front window
     end tell
@@ -161,9 +146,9 @@ async function getActiveTab(browser: SupportedBrowser): Promise<ActiveTab> {
     case "Safari":
       return await getSafariTab();
     case "Google Chrome":
-      return await getChromeTab();
     case "Arc":
-      return await getArcTab();
+    case "Aside":
+      return await getChromiumTab(browser);
     case "Dia":
       return await getDiaTab();
     case "Zen":

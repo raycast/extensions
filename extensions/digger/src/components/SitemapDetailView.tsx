@@ -1,7 +1,9 @@
 import * as cheerio from "cheerio";
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { ResourceExportActions } from "../actions/ResourceExportActions";
 import { LIMITS } from "../utils/config";
+import { Exportable, inferRows } from "../utils/exportUtils";
 import { formatDate, truncateText } from "../utils/formatters";
 
 interface SitemapEntry {
@@ -134,24 +136,28 @@ export function SitemapDetailView({ url, title = "View Sitemap" }: SitemapDetail
     markdown = `# ${title}\n\nLoading sitemap...`;
   }
 
+  // Every <url> entry becomes a CSV/Markdown row, which is the shape people
+  // actually want a sitemap in.
+  const resource: Exportable | undefined = data
+    ? { name: "sitemap.xml", text: data, rows: inferRows("sitemap.xml", data), language: "xml" }
+    : undefined;
+
   return (
     <Detail
       isLoading={isLoading}
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={url}
-            icon={Icon.Globe}
-            shortcut={Keyboard.Shortcut.Common.Open}
-          />
-          <Action.CopyToClipboard
-            title="Copy Sitemap URL"
-            content={url}
-            icon={Icon.Clipboard}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-          />
+          <ResourceExportActions resource={resource} />
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Open in Browser"
+              url={url}
+              icon={Icon.Globe}
+              shortcut={Keyboard.Shortcut.Common.Open}
+            />
+            <Action.CopyToClipboard title="Copy Sitemap URL" content={url} icon={Icon.Link} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
