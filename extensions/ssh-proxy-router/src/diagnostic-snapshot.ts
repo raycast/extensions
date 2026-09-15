@@ -1,7 +1,7 @@
 import { promises as fs } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
-import { randomUUID } from "node:crypto";
+import { atomicPrivateWrite, privateDirectory } from "./private-state";
 import { DiagnosticConfig, parsePreferences } from "./proxy-core";
 
 export const SNAPSHOT_PATH = path.join(
@@ -70,17 +70,12 @@ export async function readSnapshot(file = SNAPSHOT_PATH): Promise<DiagnosticConf
 
 export async function writeSnapshot(config: DiagnosticConfig, file = SNAPSHOT_PATH): Promise<void> {
   const text = `${JSON.stringify(validateSnapshot(config), null, 2)}\n`;
+  await privateDirectory(path.dirname(file));
   try {
+    await fs.chmod(file, 0o600);
     if ((await fs.readFile(file, "utf8")) === text) return;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
-  await fs.mkdir(path.dirname(file), { recursive: true });
-  const temporary = `${file}.${randomUUID()}.tmp`;
-  try {
-    await fs.writeFile(temporary, text, { mode: 0o600, flag: "wx" });
-    await fs.rename(temporary, file);
-  } finally {
-    await fs.rm(temporary, { force: true });
-  }
+  await atomicPrivateWrite(file, text);
 }

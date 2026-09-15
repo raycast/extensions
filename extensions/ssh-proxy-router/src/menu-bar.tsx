@@ -7,6 +7,7 @@ import {
   ProxyStatus,
   shouldOpenInSafari,
   startProxy,
+  stopProxy,
   testProxy,
   toggleProxy,
 } from "./proxy";
@@ -36,10 +37,10 @@ export default function Command() {
     void refresh();
   }, [refresh]);
 
-  async function toggle() {
+  async function toggle(stop = false) {
     setIsLoading(true);
     try {
-      const result = await toggleProxy();
+      const result = stop ? { running: false, message: await stopProxy() } : await toggleProxy();
       await showToast({
         style: Toast.Style.Success,
         title: result.running ? "SSH Proxy Router active" : "SSH Proxy Router stopped",
@@ -116,8 +117,15 @@ export default function Command() {
       <MenuBarExtra.Item
         title={running ? "Stop SSH Proxy Router" : degraded ? "Repair SSH Proxy Router" : "Start SSH Proxy Router"}
         icon={running ? Icon.StopFilled : degraded ? Icon.Hammer : Icon.PlayFilled}
-        onAction={toggle}
+        onAction={() => toggle()}
       />
+      {degraded && (
+        <MenuBarExtra.Item
+          title="Stop and Restore Proxy Settings"
+          icon={Icon.StopFilled}
+          onAction={() => toggle(true)}
+        />
+      )}
       <MenuBarExtra.Item title="Open Primary Website" icon={Icon.Globe} onAction={() => openWebsite(getPrimaryURL())} />
       <MenuBarExtra.Submenu title="Open Routed Website" icon={Icon.Globe}>
         {routedWebsites.map((website) => (

@@ -85,7 +85,9 @@ Rules are separated with commas or semicolons.
 
 Only matching hosts use the SSH tunnel. The PAC file returns `DIRECT` for all other traffic.
 
-After editing routing or connection settings, choose **Repair SSH Proxy Router** from the menu-bar item (or stop and start it) to regenerate the tunnel and PAC configuration.
+After editing routing or connection settings, choose **Repair SSH Proxy Router** from the menu-bar item (or stop and start it). Repair applies the new PAC configuration and restarts SSH when the gateway, user, port, identity-file path, or SOCKS port changes. It saves original settings for newly selected network services and restores services removed from the selection. Repair briefly restores saved network settings before replacing listeners.
+
+Only one Start, Stop, or Repair operation can run at a time, including actions from the separate Toggle command. If another action is in progress, wait for it to finish and retry.
 
 ## How it works
 
@@ -97,7 +99,7 @@ When started, the extension:
 4. Saves the current automatic-proxy settings for each selected macOS network service.
 5. Enables the localhost PAC URL.
 
-Stopping the extension restores the saved proxy settings, unloads both LaunchAgents, and marks them disabled. Their stable plist files remain installed so macOS does not treat every later start as newly installed background software. Raycast itself does not need to stay open for the tunnel to remain active.
+Stopping the extension restores the saved proxy settings before unloading and disabling either LaunchAgent. If restoration fails for any service, the backup and agents are retained; correct the reported issue and retry **Stop and Restore Proxy Settings** in the menu. This recovery action is available while routing is degraded. Their stable plist files remain installed so macOS does not treat every later start as newly installed background software. Raycast itself does not need to stay open for the tunnel to remain active.
 
 ### Background activity and battery use
 
@@ -116,6 +118,8 @@ Stopping the router unloads and disables both LaunchAgents. To compare energy us
 - Runtime logs are stored in `~/.local/state/raycast-ssh-proxy-router/`.
 - A **Reconnecting** status means the SSH LaunchAgent is loaded but its local SOCKS port is not ready. Check `ssh-tunnel.log` for DNS, authentication, or gateway failures; retries are limited to once per minute.
 - If settings were changed while active, use **Repair SSH Proxy Router**.
+- If a local port is occupied, stop the conflicting application or choose another port. The router verifies its own PAC server before enabling routing.
+- The localhost HTTP server serves only `proxy.pac`; logs, saved settings, and diagnostic snapshots are private files and cannot be fetched through it.
 - On the first activation, macOS may disclose that `ssh` and `python3` can run in the background. These are the two local LaunchAgents used for the tunnel and PAC server. Later stop/start cycles reuse those registrations instead of recreating them.
 
 ## Development
@@ -135,14 +139,15 @@ npm run dev
 ### Testing without the GUI
 
 ```sh
-npm test           # Offline behavior tests; no SSH or system changes
+npm run build      # Generate Raycast types and build into ./dist
+npm test           # Local behavior tests; no SSH or system proxy changes
 npm run check      # Formatting, lint, offline tests, and Raycast build
 npm run test:live  # Read-only diagnostics against the active router (macOS)
 ```
 
-Offline tests use Node's built-in test runner and temporary state directories with simulated system commands. They cover host matching, PAC generation, status detection, startup failures, and restoration of previous proxy settings. Test compilation uses the existing TypeScript dependency and writes to the ignored `.test-dist/` directory. The full `check` command also needs access to Raycast's online manifest validation and local extension build directory.
+Tests use Node's built-in test runner and temporary state directories with simulated system commands. They cover routing, listener identity, backup preservation, restoration failures, changed SSH preferences, and concurrent operations. Runtime tests also launch a temporary Python HTTP server on a random localhost port and exercise OS locks from independent processes; Python 3 and permission to bind localhost are required. They never change system proxy settings or start SSH connections. Run `npm run build` once after a clean checkout to generate Raycast's preference types. Test compilation writes to `.test-dist/`, and the distribution build writes to `dist/`; both are ignored. The full `check` command also needs access to Raycast's online manifest validation.
 
-The live test uses `~/.local/state/raycast-ssh-proxy-router/diagnostic-config.json`. The updated Raycast extension saves this minimal snapshot after a successful start or healthy status refresh. For the first run after updating, load the extension with `npm run dev` and refresh its menu-bar status once (or allow the scheduled refresh to run). An already-active tunnel does not need restarting. Once the snapshot exists, repeat live tests entirely from the terminal.
+The live test uses `~/.local/state/raycast-ssh-proxy-router/diagnostic-config.json`. The updated Raycast extension saves this minimal snapshot after a successful start or healthy status refresh. For the first run after updating, load the extension with `npm run dev` and refresh its menu-bar status once (or allow the scheduled refresh to run). For a router started by an older extension version, run **Repair SSH Proxy Router** once to activate the restricted PAC server and record its instance identity. Once the snapshot exists, repeat live tests entirely from the terminal.
 
 The snapshot records the active host rules, primary URL, local ports, and network services. It excludes SSH connection credentials and identity-file paths, is written with owner-only permissions, and is retained when routing stops. A live test verifies the actual running state rather than treating an existing snapshot as proof that routing is active. Changes made only in Raycast preferences are not active settings until the router is repaired or restarted.
 

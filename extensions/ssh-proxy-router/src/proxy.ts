@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
-import { createProxyController, parsePreferences, Preferences } from "./proxy-core";
+import { createProxyController, parsePreferences } from "./proxy-core";
 import { writeSnapshot } from "./diagnostic-snapshot";
-export type { Preferences, ProxyStatus, RoutedWebsite } from "./proxy-core";
+export type { ProxyStatus, RoutedWebsite } from "./proxy-core";
 
 function controller() {
   return createProxyController(parsePreferences(getPreferenceValues<Preferences>()));

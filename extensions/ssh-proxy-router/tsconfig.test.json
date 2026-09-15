@@ -1,5 +1,11 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": { "rootDir": ".", "outDir": ".test-dist" },
-  "include": ["src/proxy-core.ts", "src/diagnostic-snapshot.ts", "scripts/test-live.ts", "tests/**/*.ts"]
+  "include": [
+    "raycast-env.d.ts",
+    "src/proxy-core.ts",
+    "src/diagnostic-snapshot.ts",
+    "scripts/test-live.ts",
+    "tests/**/*.ts"
+  ]
 }

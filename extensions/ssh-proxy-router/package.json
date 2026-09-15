@@ -140,7 +140,7 @@
     "typescript": "^5.8.0"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "format": "prettier --write .",
@@ -148,7 +148,7 @@
     "test:build": "node scripts/clean-tests.mjs && tsc -p tsconfig.test.json",
     "test": "npm run test:build && node --test .test-dist/tests/*.test.js",
     "test:live": "npm run test:build && node .test-dist/scripts/test-live.js",
-    "check": "npm run format:check && npm run lint && npm run lint:all && npm test && npm run build",
+    "check": "npm run format:check && npm run lint && npm run lint:all && npm run build && npm test",
     "lint:all": "eslint .",
     "bundle": "ray bundle -o release/ssh-proxy-router.rayext",
     "store:export": "node scripts/export-store.mjs"

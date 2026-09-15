@@ -1,11 +1,15 @@
 import { execFile } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { promises as nativeFs } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import net from "node:net";
 import { promisify } from "node:util";
 import { runInNewContext } from "node:vm";
+
+import { atomicPrivateWrite, privateDirectory } from "./private-state";
+import { acquireLifecycleLock, LifecycleLock } from "./lifecycle-lock";
+import { PAC_SERVER_SOURCE } from "./pac-server";
 
 const execFileAsync = promisify(execFile);
 
@@ -19,20 +23,6 @@ const PAC_LAUNCHD_LABEL = "com.raycast.ssh-proxy-router.pac";
 const SSH_LAUNCHD_LABEL = "com.raycast.ssh-proxy-router.ssh";
 const LAUNCHD_THROTTLE_SECONDS = 60;
 const SSH_SERVER_ALIVE_INTERVAL_SECONDS = 60;
-
-export type Preferences = {
-  sshUser: string;
-  sshHost: string;
-  sshPort: string;
-  identityFile?: string;
-  routedHosts: string;
-  primaryURL?: string;
-  socksPort: string;
-  pacPort: string;
-  startTimeout: string;
-  networkServices?: string;
-  openInSafari: boolean;
-};
 
 export type Config = {
   sshUser: string;
@@ -174,6 +164,7 @@ export type ProxyDependencies = {
   execute: typeof systemExecute;
   isPortOpen: typeof systemIsPortOpen;
   waitUntil: typeof systemWaitUntil;
+  acquireLock: typeof acquireLifecycleLock;
 };
 
 async function systemExecute(file: string, args: string[], timeout = 15_000): Promise<string> {
@@ -242,8 +233,25 @@ export function buildPac(config: RoutingConfig): string {
 export function createProxyController(config: Config | RoutingConfig, overrides: Partial<ProxyDependencies> = {}) {
   const home = overrides.home ?? homedir();
   const uid = overrides.uid ?? process.getuid?.() ?? 0;
-  const fs = overrides.fs ?? nativeFs;
-  const execute = overrides.execute ?? systemExecute;
+  let lock: LifecycleLock | undefined;
+  const io = overrides.fs ?? nativeFs;
+  const fs = new Proxy(io, {
+    get(target, key) {
+      const value = Reflect.get(target, key);
+      if (["writeFile", "mkdir", "rm", "rename", "chmod", "open"].includes(String(key))) {
+        return (...args: unknown[]) => {
+          lock?.assertHeld();
+          return Reflect.apply(value, target, args);
+        };
+      }
+      return value;
+    },
+  });
+  const execute: typeof systemExecute = (file, args, timeout) => {
+    if ((file === LAUNCHCTL && !["print"].includes(args[0])) || (file === NETWORKSETUP && args[0].startsWith("-set")))
+      lock?.assertHeld();
+    return (overrides.execute ?? systemExecute)(file, args, timeout);
+  };
   const isPortOpen = overrides.isPortOpen ?? systemIsPortOpen;
   const waitUntil = overrides.waitUntil ?? systemWaitUntil;
   const STATE_DIR = path.join(home, ".local", "state", "raycast-ssh-proxy-router");
@@ -251,16 +259,61 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
   const PAC_SERVER_FILE = path.join(STATE_DIR, "pac-server.py");
   const PAC_LOG_FILE = path.join(STATE_DIR, "pac-server.log");
   const SSH_LOG_FILE = path.join(STATE_DIR, "ssh-tunnel.log");
+  const PAC_INSTANCE_FILE = path.join(STATE_DIR, "pac-instance.json");
+  const SSH_ACTIVE_FILE = path.join(STATE_DIR, "ssh-active.json");
   const PROXY_BACKUP_FILE = path.join(STATE_DIR, "automatic-proxy-backup.json");
   const PAC_LAUNCH_AGENT_FILE = path.join(home, "Library", "LaunchAgents", `${PAC_LAUNCHD_LABEL}.plist`);
   const SSH_LAUNCH_AGENT_FILE = path.join(home, "Library", "LaunchAgents", `${SSH_LAUNCHD_LABEL}.plist`);
-  async function succeeds(file: string, args: string[], timeout = 5_000): Promise<boolean> {
+  async function withLock<T>(action: () => Promise<T>): Promise<T> {
+    await privateDirectory(STATE_DIR, io);
+    const held = await (overrides.acquireLock ?? acquireLifecycleLock)(path.join(STATE_DIR, "operation.lock"));
+    lock = held;
     try {
-      await execute(file, args, timeout);
-      return true;
-    } catch {
-      return false;
+      held.assertHeld();
+      for (const entry of await fs.readdir(STATE_DIR, { withFileTypes: true })) {
+        if (entry.isFile()) {
+          try {
+            await fs.chmod(path.join(STATE_DIR, entry.name), 0o600);
+          } catch (error) {
+            // A concurrent read-only status refresh can finish an atomic snapshot write.
+            if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+          }
+        }
+      }
+      for (const file of [PAC_LAUNCH_AGENT_FILE, SSH_LAUNCH_AGENT_FILE]) {
+        if (await fileExists(file)) await fs.chmod(file, 0o600);
+      }
+      return await action();
+    } finally {
+      await held.release();
+      lock = undefined;
     }
+  }
+
+  function sshSettings(config: Config): string {
+    return JSON.stringify([
+      config.sshUser,
+      config.sshHost,
+      config.sshPort,
+      config.identityFile ?? null,
+      config.socksPort,
+    ]);
+  }
+
+  async function sshSettingsMatch(): Promise<boolean> {
+    if (!("sshUser" in config)) return true;
+    try {
+      return (await fs.readFile(SSH_ACTIVE_FILE, "utf8")) === sshSettings(config);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+      throw error;
+    }
+  }
+
+  async function privateLog(file: string) {
+    const handle = await fs.open(file, "a", 0o600);
+    await handle.close();
+    await fs.chmod(file, 0o600);
   }
 
   function launchdTarget(label: string): string {
@@ -271,8 +324,9 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     let output: string;
     try {
       output = await execute(LAUNCHCTL, ["print", launchdTarget(label)]);
-    } catch {
-      return { loaded: false };
+    } catch (error) {
+      if (/Could not find service/i.test(errorMessage(error))) return { loaded: false };
+      throw error;
     }
 
     const parseNumber = (pattern: RegExp): number | undefined => {
@@ -306,11 +360,49 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
   }
 
   async function tunnelRunning(config: RoutingConfig): Promise<boolean> {
-    return (await launchdJobInfo(SSH_LAUNCHD_LABEL)).loaded && (await isPortOpen(config.socksPort));
+    return (await launchdJobInfo(SSH_LAUNCHD_LABEL)).state === "running" && (await isPortOpen(config.socksPort));
+  }
+
+  async function verifiedPac(config: RoutingConfig): Promise<string> {
+    const instance = JSON.parse(await fs.readFile(PAC_INSTANCE_FILE, "utf8")) as { id: string; port: number };
+    if (!instance.id || instance.port !== config.pacPort) throw new Error("PAC instance is stale; repair the router.");
+    const response = await execute(
+      CURL,
+      [
+        "-q",
+        "--noproxy",
+        "*",
+        "--proxy",
+        "",
+        "--silent",
+        "--show-error",
+        "--fail",
+        "--include",
+        "--max-time",
+        "2",
+        pacURL(config),
+      ],
+      3_000,
+    );
+    const separator = response.search(/\r?\n\r?\n/);
+    if (separator < 0) throw new Error("Missing PAC response headers.");
+    const headers = response.slice(0, separator);
+    const body = response.slice(separator).replace(/^\r?\n\r?\n/, "");
+    if (headers.match(/^X-Router-Instance: (.+)$/im)?.[1].trim() !== instance.id)
+      throw new Error("PAC listener belongs to another instance; repair the router.");
+    if (body.trim() !== buildPac(config).trim())
+      throw new Error("Served PAC differs from the active snapshot; repair the router.");
+    return body;
   }
 
   async function pacServerRunning(config: RoutingConfig): Promise<boolean> {
-    return (await launchdJobInfo(PAC_LAUNCHD_LABEL)).loaded && (await isPortOpen(config.pacPort));
+    try {
+      if ((await launchdJobInfo(PAC_LAUNCHD_LABEL)).state !== "running") return false;
+      await verifiedPac(config);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async function listNetworkServices(config: RoutingConfig): Promise<string[]> {
@@ -335,83 +427,96 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     if (services.length === 0) return false;
     const settings = await Promise.all(services.map(getAutomaticProxy));
     const expectedURL = pacURL(config);
-    return settings.every((setting) => setting.enabled && setting.url === expectedURL);
-  }
-
-  async function saveProxySettings(config: RoutingConfig): Promise<void> {
-    try {
-      await fs.access(PROXY_BACKUP_FILE);
-      return;
-    } catch {
-      // No existing backup; capture the current settings below.
+    if (!settings.every((setting) => setting.enabled && setting.url === expectedURL)) return false;
+    const backup = await readBackup();
+    if (!backup || !services.every((service) => backup.some((setting) => setting.service === service))) return false;
+    for (const saved of backup.filter((setting) => !services.includes(setting.service))) {
+      const current = await getAutomaticProxy(saved.service);
+      if (current.enabled !== saved.enabled || (saved.url !== null && current.url !== saved.url)) return false;
     }
-
-    const services = await listNetworkServices(config);
-    if (services.length === 0) throw new Error("No enabled macOS network services were found.");
-    const settings = await Promise.all(services.map(getAutomaticProxy));
-    await fs.mkdir(STATE_DIR, { recursive: true });
-    await fs.writeFile(PROXY_BACKUP_FILE, `${JSON.stringify(settings, null, 2)}\n`, { flag: "wx" });
+    return true;
   }
 
-  async function restoreProxySettings(config: RoutingConfig): Promise<void> {
-    let settings: SavedProxySetting[];
+  async function readBackup(): Promise<SavedProxySetting[] | undefined> {
     try {
-      settings = JSON.parse(await fs.readFile(PROXY_BACKUP_FILE, "utf8")) as SavedProxySetting[];
+      const value: unknown = JSON.parse(await fs.readFile(PROXY_BACKUP_FILE, "utf8"));
+      if (
+        !Array.isArray(value) ||
+        !value.length ||
+        !value.every(
+          (entry) =>
+            entry &&
+            typeof entry.service === "string" &&
+            entry.service.length > 0 &&
+            (entry.url === null || typeof entry.url === "string") &&
+            typeof entry.enabled === "boolean",
+        ) ||
+        new Set(value.map((entry) => entry.service)).size !== value.length
+      )
+        throw new Error("Invalid proxy backup.");
+      return value;
     } catch (error) {
-      const detail = error as NodeJS.ErrnoException;
-      if (detail.code !== "ENOENT") throw new Error(`Could not read saved proxy settings: ${errorMessage(error)}`);
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+      throw new Error(`Could not read saved proxy settings: ${errorMessage(error)}`);
+    }
+  }
 
-      // Recovery path for a crash before the backup was written: only disable
-      // services that still point at this extension's localhost PAC endpoint.
+  async function saveProxySettings(services: string[]): Promise<void> {
+    const settings = (await readBackup()) ?? [];
+    if (services.length === 0) throw new Error("No enabled macOS network services were found.");
+    for (const service of services) {
+      if (!settings.some((setting) => setting.service === service)) settings.push(await getAutomaticProxy(service));
+    }
+    await atomicPrivateWrite(PROXY_BACKUP_FILE, `${JSON.stringify(settings, null, 2)}\n`, fs);
+  }
+
+  async function restoreProxySettings(config: RoutingConfig, retain = false): Promise<void> {
+    let settings = await readBackup();
+    if (!settings) {
       const services = await listNetworkServices(config);
       const current = await Promise.all(services.map(getAutomaticProxy));
       settings = current
-        .filter((setting) => setting.url?.startsWith(`http://127.0.0.1:${config.pacPort}/proxy.pac`))
+        .filter((setting) => {
+          try {
+            const url = new URL(setting.url ?? "");
+            return url.origin === `http://127.0.0.1:${config.pacPort}` && url.pathname === "/proxy.pac";
+          } catch {
+            return false;
+          }
+        })
         .map((setting) => ({ ...setting, enabled: false }));
     }
-
     const errors: string[] = [];
     for (const setting of settings) {
       try {
-        if (setting.url) {
-          await execute(NETWORKSETUP, ["-setautoproxyurl", setting.service, setting.url]);
-        }
+        if (setting.url) await execute(NETWORKSETUP, ["-setautoproxyurl", setting.service, setting.url]);
         await execute(NETWORKSETUP, ["-setautoproxystate", setting.service, setting.enabled ? "on" : "off"]);
       } catch (error) {
         errors.push(`${setting.service}: ${errorMessage(error)}`);
       }
     }
-    if (errors.length) throw new Error(`Could not restore proxy settings: ${errors.join("; ")}`);
-    await fs.rm(PROXY_BACKUP_FILE, { force: true });
+    if (errors.length)
+      throw new Error(
+        `Could not restore proxy settings: ${errors.join("; ")}. Agents and backup retained; retry Stop.`,
+      );
+    if (!retain) await fs.rm(PROXY_BACKUP_FILE, { force: true });
   }
 
-  async function enableRouting(config: RoutingConfig): Promise<void> {
-    await saveProxySettings(config);
-    const services = await listNetworkServices(config);
-    try {
-      for (const service of services) {
-        await execute(NETWORKSETUP, ["-setautoproxyurl", service, pacURL(config)]);
-        await execute(NETWORKSETUP, ["-setautoproxystate", service, "on"]);
-      }
-    } catch (error) {
-      await restoreProxySettings(config);
-      throw error;
+  async function enableRouting(config: RoutingConfig, services: string[]): Promise<void> {
+    for (const service of services) {
+      await execute(NETWORKSETUP, ["-setautoproxyurl", service, pacURL(config)]);
+      await execute(NETWORKSETUP, ["-setautoproxystate", service, "on"]);
     }
-  }
-
-  async function writePacFile(config: RoutingConfig): Promise<void> {
-    await fs.mkdir(STATE_DIR, { recursive: true });
-    await fs.writeFile(PAC_FILE, buildPac(config));
   }
 
   async function writeFileIfChanged(filePath: string, contents: string): Promise<void> {
     try {
+      await fs.chmod(filePath, 0o600);
       if ((await fs.readFile(filePath, "utf8")) === contents) return;
     } catch (error) {
-      const detail = error as NodeJS.ErrnoException;
-      if (detail.code !== "ENOENT") throw error;
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
-    await fs.writeFile(filePath, contents);
+    await atomicPrivateWrite(filePath, contents, fs);
   }
 
   async function enableLaunchAgent(label: string): Promise<void> {
@@ -430,30 +535,16 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
   }
 
   async function startPacServer(config: RoutingConfig): Promise<void> {
-    await writePacFile(config);
     await fs.mkdir(path.dirname(PAC_LAUNCH_AGENT_FILE), { recursive: true });
-
-    if (await succeeds(LAUNCHCTL, ["print", launchdTarget(PAC_LAUNCHD_LABEL)])) {
-      await succeeds(LAUNCHCTL, ["bootout", launchdTarget(PAC_LAUNCHD_LABEL)]);
-    }
-
-    const pacServer = [
-      "from functools import partial",
-      "from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer",
-      "import sys",
-      "",
-      "class QuietHandler(SimpleHTTPRequestHandler):",
-      "    def log_message(self, format, *args):",
-      "        pass",
-      "",
-      "handler = partial(QuietHandler, directory=sys.argv[2])",
-      'server = ThreadingHTTPServer(("127.0.0.1", int(sys.argv[1])), handler)',
-      "server.serve_forever()",
-      "",
-    ].join("\n");
-    await writeFileIfChanged(PAC_SERVER_FILE, pacServer);
-
-    const argumentsList = [PYTHON, PAC_SERVER_FILE, String(config.pacPort), STATE_DIR];
+    await stopPacServer();
+    if (await isPortOpen(config.pacPort))
+      throw new Error(`Port ${config.pacPort} is already in use by another process.`);
+    await atomicPrivateWrite(PAC_FILE, buildPac(config), fs);
+    await writeFileIfChanged(PAC_SERVER_FILE, PAC_SERVER_SOURCE);
+    await privateLog(PAC_LOG_FILE);
+    const instance = { id: randomUUID(), port: config.pacPort };
+    await atomicPrivateWrite(PAC_INSTANCE_FILE, JSON.stringify(instance), fs);
+    const argumentsList = [PYTHON, PAC_SERVER_FILE, String(config.pacPort), PAC_FILE, instance.id];
     const plist = [
       '<?xml version="1.0" encoding="UTF-8"?>',
       '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
@@ -483,22 +574,28 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     }
   }
 
-  async function stopPacServer(): Promise<void> {
-    await disableLaunchAgent(PAC_LAUNCHD_LABEL, PAC_LAUNCH_AGENT_FILE);
-    if (await succeeds(LAUNCHCTL, ["print", launchdTarget(PAC_LAUNCHD_LABEL)])) {
-      await succeeds(LAUNCHCTL, ["bootout", launchdTarget(PAC_LAUNCHD_LABEL)]);
+  async function unloadAgent(label: string, file: string): Promise<void> {
+    await disableLaunchAgent(label, file);
+    const info = await launchdJobInfo(label);
+    if (info.loaded) {
+      await execute(LAUNCHCTL, ["bootout", launchdTarget(label)]);
+      if (!(await waitUntil(async () => !(await launchdJobInfo(label)).loaded, 5_000)))
+        throw new Error(`Could not unload ${label}.`);
     }
   }
 
-  async function startTunnel(config: Config): Promise<boolean> {
-    if (await tunnelRunning(config)) return false;
+  async function stopPacServer(): Promise<void> {
+    await unloadAgent(PAC_LAUNCHD_LABEL, PAC_LAUNCH_AGENT_FILE);
+  }
+
+  async function startTunnel(config: Config): Promise<void> {
+    if ((await tunnelRunning(config)) && (await sshSettingsMatch())) return;
+    await stopTunnel();
     if (await isPortOpen(config.socksPort)) {
       throw new Error(`Port ${config.socksPort} is already in use by another process.`);
     }
-
-    if (await succeeds(LAUNCHCTL, ["print", launchdTarget(SSH_LAUNCHD_LABEL)])) {
-      await succeeds(LAUNCHCTL, ["bootout", launchdTarget(SSH_LAUNCHD_LABEL)]);
-    }
+    await fs.rm(SSH_ACTIVE_FILE, { force: true });
+    await privateLog(SSH_LOG_FILE);
 
     const argumentsList = [
       SSH,
@@ -549,17 +646,14 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     await execute(LAUNCHCTL, ["bootstrap", `gui/${uid}`, SSH_LAUNCH_AGENT_FILE]);
     const ready = await waitUntil(() => tunnelRunning(config), config.startTimeoutMs);
     if (!ready) {
-      await stopTunnel();
       throw new Error(`The SSH tunnel did not become ready on port ${config.socksPort}.`);
     }
-    return true;
+    await atomicPrivateWrite(SSH_ACTIVE_FILE, sshSettings(config), fs);
   }
 
   async function stopTunnel(): Promise<void> {
-    await disableLaunchAgent(SSH_LAUNCHD_LABEL, SSH_LAUNCH_AGENT_FILE);
-    if (await succeeds(LAUNCHCTL, ["print", launchdTarget(SSH_LAUNCHD_LABEL)])) {
-      await succeeds(LAUNCHCTL, ["bootout", launchdTarget(SSH_LAUNCHD_LABEL)]);
-    }
+    await unloadAgent(SSH_LAUNCHD_LABEL, SSH_LAUNCH_AGENT_FILE);
+    await fs.rm(SSH_ACTIVE_FILE, { force: true });
   }
 
   function getPrimaryURL(): string {
@@ -597,10 +691,10 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
 
     const [socksPort, pacPort, routing] = await Promise.all([
       isPortOpen(config.socksPort),
-      isPortOpen(config.pacPort),
+      pacServerRunning(config),
       routingConfigured(config),
     ]);
-    const tunnel = sshAgent.loaded && socksPort;
+    const tunnel = sshAgent.state === "running" && socksPort && (await sshSettingsMatch());
     const pacServer = pacAgent.loaded && pacPort;
     const running = tunnel && pacServer && routing;
     const degraded = !running;
@@ -625,19 +719,26 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     if (alreadyRunning.running)
       return `Already running with ${config.routedHosts.length} routed host rule${config.routedHosts.length === 1 ? "" : "s"}.`;
 
-    let startedTunnel = false;
+    const services = [...new Set(await listNetworkServices(config))];
+    // Validate and persist the complete backup before any agent or network changes.
+    await saveProxySettings(services);
+    // Keep the first-start backup, and detach all services before replacing listeners.
+    // This also restores services removed from the selection during Repair.
+    await restoreProxySettings(config, true);
     try {
-      startedTunnel = await startTunnel(config);
+      await startTunnel(config);
       await startPacServer(config);
-      await enableRouting(config);
+      await enableRouting(config, services);
     } catch (error) {
       try {
         await restoreProxySettings(config);
-      } catch {
-        // Keep the original startup error.
+      } catch (restoreError) {
+        throw new Error(
+          `Could not start SSH Proxy Router: ${errorMessage(error)}; restoration: ${errorMessage(restoreError)}`,
+        );
       }
       const cleanupErrors: string[] = [];
-      for (const cleanup of [stopPacServer, ...(startedTunnel ? [stopTunnel] : [])]) {
+      for (const cleanup of [stopPacServer, stopTunnel]) {
         try {
           await cleanup();
         } catch (cleanupError) {
@@ -653,12 +754,8 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
   }
 
   async function stopProxy(): Promise<string> {
+    await restoreProxySettings(config);
     const errors: string[] = [];
-    try {
-      await restoreProxySettings(config);
-    } catch (error) {
-      errors.push(errorMessage(error));
-    }
     try {
       await stopPacServer();
     } catch (error) {
@@ -738,25 +835,8 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     if (pacLoaded && pacOpen) {
       let script = "";
       const contentMatches = await check("PAC content", async () => {
-        script = await execute(
-          CURL,
-          [
-            "-q",
-            "--noproxy",
-            "*",
-            "--proxy",
-            "",
-            "--silent",
-            "--show-error",
-            "--fail",
-            "--max-time",
-            "5",
-            pacURL(config),
-          ],
-          6_000,
-        );
-        if (script.trim() !== buildPac(config).trim())
-          throw new Error("Served PAC differs from the active snapshot; repair the router.");
+        if ((await launchdJobInfo(PAC_LAUNCHD_LABEL)).state !== "running") throw new Error("PAC job is not running.");
+        script = await verifiedPac(config);
         return "Matches expected routing configuration";
       });
       if (contentMatches) {
@@ -826,9 +906,9 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     getPrimaryURL,
     getRoutedWebsites,
     getProxyStatus,
-    startProxy,
-    stopProxy,
-    toggleProxy,
+    startProxy: () => withLock(startProxy),
+    stopProxy: () => withLock(stopProxy),
+    toggleProxy: () => withLock(toggleProxy),
     diagnosticConfig,
     runDiagnostics,
   };
