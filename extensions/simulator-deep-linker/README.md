@@ -1,6 +1,6 @@
 # Simulator Deep Linker
 
-> This extension requires version 0.2.1 or later of the [free, open-source Simulator Deep Linker macOS app](https://github.com/StefanBoblic/SimulatorDeepLinker) and macOS 15.7 or later. Install the app with Homebrew or download it from [GitHub Releases](https://github.com/StefanBoblic/SimulatorDeepLinker/releases/latest).
+> This extension requires version 0.2.2 or later of the [free, open-source Simulator Deep Linker macOS app](https://github.com/StefanBoblic/SimulatorDeepLinker) and macOS 15.7 or later. Install the app with Homebrew or download it from [GitHub Releases](https://github.com/StefanBoblic/SimulatorDeepLinker/releases/latest).
 
 Search your saved deep-link library from Raycast, switch environments, copy resolved URLs, and open links on iOS or Android developer devices.
 

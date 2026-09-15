@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { lstat, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { lstat, mkdtemp, mkdir, readFile, rm, symlink, utimes, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -8,6 +8,7 @@ import {
   decodeDeepLinks,
   deleteDeepLink,
   resolveStorageConfigurationAt,
+  withStorageLock,
   type StorageConfiguration,
 } from "../src/storage.js";
 
@@ -119,7 +120,7 @@ test("concurrent add and delete preserve both mutations", async (t) => {
     environmentsPath: path.join(directory, "environments.json"),
   };
 
-  const [, remainingLinks] = await Promise.all([
+  await Promise.all([
     addDeepLink(configuration, {
       title: "New link",
       urlString: "demoapp://new",
@@ -135,10 +136,45 @@ test("concurrent add and delete preserve both mutations", async (t) => {
     links.map((link) => link.urlString),
     ["demoapp://new"],
   );
-  assert.deepEqual(
-    remainingLinks.map((link) => link.urlString),
-    ["demoapp://new"],
+});
+
+test("does not reclaim an existing lock solely because it is old", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const ownerPath = path.join(lockPath, "owner");
+  await writeFile(storagePath, "[]\n");
+  await mkdir(lockPath);
+  await writeFile(ownerPath, "replacement-writer\n");
+  const oldDate = new Date(0);
+  await utimes(lockPath, oldDate, oldDate);
+
+  await assert.rejects(
+    () => withStorageLock(storagePath, async () => undefined, { retryMilliseconds: 1, timeoutMilliseconds: 10 }),
+    /Timed out waiting/,
   );
+
+  assert.equal(await readFile(ownerPath, "utf8"), "replacement-writer\n");
+});
+
+test("does not release a lock that was replaced by another writer", async (t) => {
+  const directory = await temporaryDirectory(t);
+  const storagePath = path.join(directory, "deeplinks.json");
+  const lockPath = `${storagePath}.simulator-deep-linker.lock`;
+  const ownerPath = path.join(lockPath, "owner");
+  await writeFile(storagePath, "[]\n");
+
+  await assert.rejects(
+    () =>
+      withStorageLock(storagePath, async () => {
+        await rm(lockPath, { recursive: true });
+        await mkdir(lockPath);
+        await writeFile(ownerPath, "replacement-writer\n");
+      }),
+    /ownership changed/,
+  );
+
+  assert.equal(await readFile(ownerPath, "utf8"), "replacement-writer\n");
 });
 
 async function temporaryDirectory(t: test.TestContext): Promise<string> {

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { access, mkdir, readFile, realpath, rename, rm, stat, unlink, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, realpath, rename, rmdir, stat, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -166,45 +166,81 @@ export async function deleteDeepLink(configuration: StorageConfiguration, id: st
 
 const storageLockRetryMilliseconds = 25;
 const storageLockTimeoutMilliseconds = 10_000;
-const staleStorageLockMilliseconds = 120_000;
 
-async function withStorageLock<T>(storagePath: string, operation: (storagePath: string) => Promise<T>): Promise<T> {
+type StorageLockOptions = {
+  retryMilliseconds?: number;
+  timeoutMilliseconds?: number;
+};
+
+export async function withStorageLock<T>(
+  storagePath: string,
+  operation: (storagePath: string) => Promise<T>,
+  options: StorageLockOptions = {},
+): Promise<T> {
   const destinationPath = await realpath(storagePath);
   const lockPath = `${destinationPath}.simulator-deep-linker.lock`;
-  const deadline = Date.now() + storageLockTimeoutMilliseconds;
+  const ownerPath = path.join(lockPath, "owner");
+  const ownerToken = randomUUID();
+  const retryMilliseconds = options.retryMilliseconds ?? storageLockRetryMilliseconds;
+  const timeoutMilliseconds = options.timeoutMilliseconds ?? storageLockTimeoutMilliseconds;
+  const deadline = Date.now() + timeoutMilliseconds;
 
   while (true) {
     try {
       await mkdir(lockPath);
+      try {
+        await writeFile(ownerPath, `${ownerToken}\n`, { encoding: "utf8", flag: "wx" });
+      } catch (error) {
+        await unlink(ownerPath).catch(() => undefined);
+        await rmdir(lockPath).catch(() => undefined);
+        throw error;
+      }
       break;
     } catch (error) {
       if (!isNodeError(error, "EEXIST")) throw error;
-      await removeStaleStorageLock(lockPath);
       if (Date.now() >= deadline) {
-        throw new Error("Timed out waiting for another Simulator Deep Linker writer to finish.");
+        throw new Error(
+          "Timed out waiting for another Simulator Deep Linker writer to finish. If no writer is running, remove the abandoned storage lock manually.",
+        );
       }
-      await delay(storageLockRetryMilliseconds);
+      await delay(retryMilliseconds);
     }
   }
 
+  let operationResult: T | undefined;
+  let operationError: unknown;
+  let operationFailed = false;
   try {
-    return await operation(destinationPath);
-  } finally {
-    await rm(lockPath, { recursive: true, force: true });
+    operationResult = await operation(destinationPath);
+  } catch (error) {
+    operationFailed = true;
+    operationError = error;
   }
+
+  try {
+    await releaseStorageLock(lockPath, ownerPath, ownerToken);
+  } catch (releaseError) {
+    if (!operationFailed) throw releaseError;
+  }
+
+  if (operationFailed) throw operationError;
+  return operationResult as T;
 }
 
-async function removeStaleStorageLock(lockPath: string): Promise<void> {
+async function releaseStorageLock(lockPath: string, ownerPath: string, ownerToken: string): Promise<void> {
+  let currentOwner: string;
   try {
-    const lockStats = await stat(lockPath);
-    if (Date.now() - lockStats.mtimeMs <= staleStorageLockMilliseconds) return;
-
-    const stalePath = `${lockPath}.stale.${randomUUID()}`;
-    await rename(lockPath, stalePath);
-    await rm(stalePath, { recursive: true, force: true });
+    currentOwner = (await readFile(ownerPath, "utf8")).trim();
   } catch (error) {
-    if (!isNodeError(error, "ENOENT")) throw error;
+    throw new Error(`Could not verify storage lock ownership: ${errorMessage(error)}`);
   }
+
+  if (currentOwner !== ownerToken) {
+    throw new Error("Storage lock ownership changed while updating deep links; the replacement lock was left intact.");
+  }
+
+  await unlink(ownerPath);
+  await rmdir(lockPath);
 }
 
 function delay(milliseconds: number): Promise<void> {
