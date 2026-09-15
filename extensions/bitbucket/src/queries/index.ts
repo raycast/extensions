@@ -80,6 +80,63 @@ export async function pullRequestsGetQuery(repoSlug: string) {
   });
 }
 
+export async function getPullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.get({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function approvePullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.createApproval({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function declinePullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.decline({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function unapprovePullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.deleteApproval({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function requestChangesOnPullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.addChangeRequest({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function undoRequestChangesOnPullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.deleteChangeRequest({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function addPullRequestComment(repoSlug: string, pullRequestId: number, comment: string) {
+  return await bitbucket.pullrequests.createComment({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+    _body: { type: "pullrequest_comment", content: { raw: comment } },
+  });
+}
+
 export async function getCommitNames(repoSlug: string) {
   return await bitbucket.pipelines.list({
     ...defaults,
@@ -114,6 +171,7 @@ const PullRequestsResponseSchema = z.object({
   values: z.array(
     z.object({
       id: z.number(),
+      state: z.enum(["OPEN", "MERGED", "DECLINED", "SUPERSEDED"]),
       author: z.object({
         nickname: z.string(),
         links: z.object({
@@ -125,6 +183,7 @@ const PullRequestsResponseSchema = z.object({
         repository: z.object({
           name: z.string(),
           full_name: z.string(),
+          slug: z.string(),
         }),
       }),
       comment_count: z.number(),
@@ -210,6 +269,7 @@ async function listOpenPullRequestsForRepo(repo: {
       pullRequests.push({
         id: pr.id,
         title: pr.title,
+        state: (pr.state as OpenPullRequest["state"]) ?? "OPEN",
         comment_count: (pr.comment_count as number) ?? 0,
         created_on: pr.created_on,
         author: {
@@ -227,6 +287,7 @@ async function listOpenPullRequestsForRepo(repo: {
               (pr.destination?.repository?.full_name as string) ??
               repo.full_name ??
               `${preferences.workspace}/${repo.slug}`,
+            slug: (pr.destination?.repository?.slug as string) ?? repo.slug,
           },
         },
       });

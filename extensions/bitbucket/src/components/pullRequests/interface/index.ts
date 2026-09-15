@@ -4,10 +4,12 @@ export interface PullRequest {
   repo: {
     name: string;
     fullName: string;
+    slug: string;
   };
   commentCount: number;
   author: {
     url: string;
     nickname: string;
   };
+  state: "OPEN" | "MERGED" | "DECLINED" | "SUPERSEDED";
 }

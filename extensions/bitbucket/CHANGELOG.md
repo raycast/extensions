@@ -1,5 +1,9 @@
 # Bitbucket Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add Approve / Decline / Request Changes actions for pull requests
+
 ## [Update] - 2026-08-22
 
 - Added Search All Open Pull Requests command to browse open PRs across the workspace

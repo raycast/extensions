@@ -1,10 +1,18 @@
-import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Action, Icon, Image, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import { Repository } from "./interface";
+import {
+  ApprovePullRequestAction,
+  DeclinePullRequestAction,
+  RequestChangesAction,
+  ShowPullRequestDetailAction,
+} from "../pullRequests/actions";
 import { PullRequest } from "../pullRequests/interface";
 
 import { pullRequestsGetQuery } from "./../../queries";
+import { getPullRequestKey } from "./../../helpers/pullRequestKey";
+import { ReviewState, setReviewState } from "./../../helpers/reviewState";
 
 interface State {
   pullRequests?: PullRequest[];
@@ -13,6 +21,7 @@ interface State {
 
 export function PullRequestsList(props: { repo: Repository; pageNumber: number }) {
   const [state, setState] = useState<State>({});
+  const [reviewStates, setReviewStates] = useState<Map<string, ReviewState>>(new Map());
 
   useEffect(() => {
     async function fetchPRs() {
@@ -23,9 +32,11 @@ export function PullRequestsList(props: { repo: Repository; pageNumber: number }
           data.values?.map((pr) => ({
             id: pr.id as number,
             title: pr.title as string,
+            state: (pr.state as PullRequest["state"]) ?? "OPEN",
             repo: {
               name: pr.destination?.repository?.name as string,
               fullName: pr?.destination?.repository?.full_name as string,
+              slug: (pr.destination?.repository?.slug as string) ?? props.repo.slug,
             },
             commentCount: pr.comment_count as number,
             author: {
@@ -50,33 +61,64 @@ export function PullRequestsList(props: { repo: Repository; pageNumber: number }
     });
   }
 
+  function removePullRequest(id: number) {
+    setState((current) => ({
+      ...current,
+      pullRequests: current.pullRequests?.filter((pr) => pr.id !== id),
+    }));
+  }
+
   return (
     <List isLoading={!state.pullRequests && !state.error} searchBarPlaceholder="Search by name...">
       <List.Section title="Open Pull Requests" subtitle={state.pullRequests?.length + ""}>
-        {state.pullRequests?.map((pr) => (
-          <List.Item
-            key={pr.id}
-            title={pr.title}
-            subtitle={pr.repo?.fullName}
-            icon={{ source: "icon-pr.png", tintColor: Color.PrimaryText }}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action.OpenInBrowser
-                    title="Open Pull Request in Browser"
-                    url={`https://bitbucket.org/${pr.repo.fullName}/pull-requests/${pr.id}`}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-            accessories={[
-              {
-                text: `${pr.commentCount} 💬  ·  Created by ${pr.author.nickname}`,
-                icon: { source: pr.author.url, mask: Image.Mask.Circle },
-              },
-            ]}
-          />
-        ))}
+        {state.pullRequests?.map((pr) => {
+          const key = getPullRequestKey(pr);
+          const reviewState = reviewStates.get(key) ?? null;
+          const onReviewStateChange = (next: ReviewState) =>
+            setReviewStates((current) => setReviewState(current, key, next));
+          const reviewAccessory =
+            reviewState === "changes_requested"
+              ? { icon: { source: Icon.ExclamationMark, tintColor: Color.Orange }, tooltip: "You requested changes" }
+              : reviewState === "approved"
+                ? { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "You approved" }
+                : undefined;
+
+          return (
+            <List.Item
+              key={key}
+              title={pr.title}
+              subtitle={pr.repo?.fullName}
+              icon={{ source: "icon-pr.png", tintColor: Color.PrimaryText }}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <ShowPullRequestDetailAction pr={pr} onDeclined={() => removePullRequest(pr.id)} />
+                    <Action.OpenInBrowser
+                      title="Open Pull Request in Browser"
+                      url={`https://bitbucket.org/${pr.repo.fullName}/pull-requests/${pr.id}`}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <ApprovePullRequestAction
+                      pr={pr}
+                      reviewState={reviewState}
+                      onReviewStateChange={onReviewStateChange}
+                    />
+                    <DeclinePullRequestAction pr={pr} onDeclined={() => removePullRequest(pr.id)} />
+                    <RequestChangesAction pr={pr} reviewState={reviewState} onReviewStateChange={onReviewStateChange} />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+              accessories={[
+                ...(reviewAccessory ? [reviewAccessory] : []),
+                {
+                  text: `${pr.commentCount} 💬  ·  Created by ${pr.author.nickname}`,
+                  icon: { source: pr.author.url, mask: Image.Mask.Circle },
+                },
+              ]}
+            />
+          );
+        })}
       </List.Section>
     </List>
   );
