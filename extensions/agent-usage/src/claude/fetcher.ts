@@ -17,7 +17,7 @@ const CLAUDE_OAUTH_BETA_HEADER = "oauth-2025-04-20";
 
 type CredentialSource = "file" | "keychain";
 
-interface ClaudeCredentials {
+export interface ClaudeCredentials {
   accessToken: string;
   refreshToken?: string;
   expiresAt?: number;
@@ -227,91 +227,146 @@ function writeKeychainPassword(service: string, account: string, value: string):
   }
 }
 
-function extractCredentials(
+/** An account discovered on disk (or in the Keychain), ready for the accounts hook. */
+export interface ClaudeOAuthAccount {
+  id: string;
+  label: string;
+  token: string;
+  credentials: ClaudeCredentials;
+  scopeError: ClaudeError | null;
+}
+
+function buildClaudeCredentials(
   parsed: CredentialsParsed,
   source: CredentialSource,
   credentialsPath?: string,
   keychainAccount?: string,
-): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
+): ClaudeCredentials | null {
   const oauth = parsed.claudeAiOauth;
   const accessToken = normalizeAccessToken(oauth?.accessToken || "");
+  if (!accessToken) return null;
+
   const refreshToken = oauth?.refreshToken?.trim() || "";
-  const expiresAt = typeof oauth?.expiresAt === "number" ? oauth.expiresAt : undefined;
-
-  if (!accessToken) {
-    return {
-      credentials: null,
-      error: {
-        type: "not_configured",
-        message: "Claude OAuth token missing. Run 'claude' to authenticate.",
-      },
-    };
-  }
-
-  const scopes = Array.isArray(oauth?.scopes) ? oauth.scopes : [];
-  const rateLimitTier = pickString(oauth?.rateLimitTier, oauth?.rate_limit_tier);
-  const subscriptionType = pickString(oauth?.subscriptionType, oauth?.subscription_type);
-  if (!scopes.includes("user:profile")) {
-    return {
-      credentials: null,
-      error: {
-        type: "missing_scope",
-        message: "Claude OAuth token missing 'user:profile' scope. Run 'claude setup-token'.",
-      },
-    };
-  }
 
   return {
-    credentials: {
-      accessToken,
-      refreshToken: refreshToken || undefined,
-      expiresAt,
-      scopes,
-      rateLimitTier,
-      subscriptionType,
-      source,
-      credentialsPath,
-      keychainAccount,
-      raw: parsed,
-    },
-    error: null,
+    accessToken,
+    refreshToken: refreshToken || undefined,
+    expiresAt: typeof oauth?.expiresAt === "number" ? oauth.expiresAt : undefined,
+    scopes: Array.isArray(oauth?.scopes) ? oauth.scopes : [],
+    rateLimitTier: pickString(oauth?.rateLimitTier, oauth?.rate_limit_tier),
+    subscriptionType: pickString(oauth?.subscriptionType, oauth?.subscription_type),
+    source,
+    credentialsPath,
+    keychainAccount,
+    raw: parsed,
   };
 }
 
-export function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
-  // Strategy 1: Try configured/default credential paths first
-  for (const credentialsPath of resolveClaudeCredentialsPaths()) {
-    if (!fs.existsSync(credentialsPath)) continue;
-
-    try {
-      const text = fs.readFileSync(credentialsPath, "utf-8");
-      const parsed = tryParseCredentialJSON(text);
-      if (parsed?.claudeAiOauth?.accessToken) {
-        return extractCredentials(parsed, "file", credentialsPath);
-      }
-    } catch {
-      // Fall through to keychain
-    }
-  }
-
-  // Strategy 2: Keychain fallback (macOS)
-  if (process.platform === "darwin") {
-    const keychainValue = readKeychainPassword(KEYCHAIN_SERVICE);
-    if (keychainValue) {
-      const parsed = tryParseCredentialJSON(keychainValue);
-      if (parsed?.claudeAiOauth?.accessToken) {
-        return extractCredentials(parsed, "keychain", undefined, readKeychainAccount(KEYCHAIN_SERVICE) ?? undefined);
-      }
-    }
-  }
+/**
+ * A token without `user:profile` still identifies a real account, so the scope
+ * check is reported against that account's row instead of hiding it.
+ */
+export function validateClaudeScopes(credentials: ClaudeCredentials): ClaudeError | null {
+  if (credentials.scopes.includes("user:profile")) return null;
 
   return {
-    credentials: null,
-    error: {
-      type: "not_configured",
-      message: "Claude CLI not configured. Run 'claude' to authenticate.",
-    },
+    type: "missing_scope",
+    message: "Claude OAuth token missing 'user:profile' scope. Run 'claude setup-token'.",
   };
+}
+
+/** `.claude` is the stock home; any other directory is labelled by its suffix. */
+export function deriveClaudeAccountLabel(configDir: string): string {
+  const base = path.basename(path.resolve(configDir)).replace(/^\./, "");
+  if (!base || base.toLowerCase() === "claude") return "Default";
+
+  const suffix = base.replace(/^claude[-_.]?/i, "");
+  return suffix || base;
+}
+
+function readAccountFromConfigDir(configDir: string): ClaudeOAuthAccount | null {
+  const credentialsPath = path.resolve(configDir, CLAUDE_CREDENTIALS_FILE);
+  if (!fs.existsSync(credentialsPath)) return null;
+
+  try {
+    const parsed = tryParseCredentialJSON(fs.readFileSync(credentialsPath, "utf-8"));
+    if (!parsed?.claudeAiOauth?.accessToken) return null;
+
+    const credentials = buildClaudeCredentials(parsed, "file", credentialsPath);
+    if (!credentials) return null;
+
+    return {
+      id: credentialsPath,
+      label: deriveClaudeAccountLabel(configDir),
+      token: credentials.accessToken,
+      credentials,
+      scopeError: validateClaudeScopes(credentials),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function readAccountFromKeychain(): ClaudeOAuthAccount | null {
+  if (process.platform !== "darwin") return null;
+
+  const keychainValue = readKeychainPassword(KEYCHAIN_SERVICE);
+  if (!keychainValue) return null;
+
+  const parsed = tryParseCredentialJSON(keychainValue);
+  if (!parsed?.claudeAiOauth?.accessToken) return null;
+
+  const keychainAccount = readKeychainAccount(KEYCHAIN_SERVICE) ?? undefined;
+  const credentials = buildClaudeCredentials(parsed, "keychain", undefined, keychainAccount);
+  if (!credentials) return null;
+
+  return {
+    id: `keychain:${KEYCHAIN_SERVICE}`,
+    label: "Default",
+    token: credentials.accessToken,
+    credentials,
+    scopeError: validateClaudeScopes(credentials),
+  };
+}
+
+/** The same login reached through two config dirs is one account, not two rows. */
+export function dedupeClaudeAccounts(accounts: ClaudeOAuthAccount[]): ClaudeOAuthAccount[] {
+  const seen = new Set<string>();
+
+  return accounts.filter((account) => {
+    if (seen.has(account.token)) return false;
+    seen.add(account.token);
+    return true;
+  });
+}
+
+/**
+ * Discover Claude accounts. Config dirs are accumulated rather than
+ * short-circuited at the first hit, so a personal and a work login can be shown
+ * side by side.
+ *
+ * The Keychain is only a fallback for the default lookup and stays
+ * single-account: Claude Code writes per-profile services under undocumented
+ * hashed suffixes, so only the canonical service name is read.
+ */
+export function listClaudeOAuthAccounts(
+  options: { configDir?: string; env?: NodeJS.ProcessEnv } = {},
+): ClaudeOAuthAccount[] {
+  const { configDir, env = process.env } = options;
+
+  if (configDir) {
+    const account = readAccountFromConfigDir(configDir);
+    return account ? [account] : [];
+  }
+
+  const accounts = resolveClaudeCredentialsPaths(env)
+    .map((credentialsPath) => readAccountFromConfigDir(path.dirname(credentialsPath)))
+    .filter((account): account is ClaudeOAuthAccount => account !== null);
+
+  if (accounts.length > 0) return dedupeClaudeAccounts(accounts);
+
+  const keychainAccount = readAccountFromKeychain();
+  return keychainAccount ? [keychainAccount] : [];
 }
 
 function persistRefreshedCredentials(credentials: ClaudeCredentials, refreshed: OAuthRefreshResponse) {

@@ -1,5 +1,21 @@
 # Agent Usage Changelog
 
+## [Multiple Claude accounts] - {PR_MERGE_DATE}
+
+### New Features
+
+- Show every Claude account side by side instead of only the first one found. Claude now uses the same multi-account rendering as Codex and Copilot, in the list, the menu bar, and background refresh
+- Add an **Additional Claude Homes** preference for extra `CLAUDE_CONFIG_DIR` directories (e.g. `~/.claude-personal, ~/.claude-work`), mirroring **Additional Codex Homes**. Accounts are labelled from their directory (`~/.claude-work` → "Claude • work"), and the stock `~/.claude` stays plain "Claude"
+
+### Improvements
+
+- An account whose token is missing the `user:profile` scope now shows that error on its own row instead of hiding the account
+- Share the additional-home parsing between Claude and Codex, with test coverage it did not have before
+
+### Known Limitations
+
+- The macOS Keychain fallback stays single-account. Claude Code writes per-profile Keychain services under undocumented hashed suffixes, so only the canonical service is read; multi-account discovery requires the credentials files on disk
+
 ## [Add Percentage Display preference] - 2026-09-14
 
 ### New Features
