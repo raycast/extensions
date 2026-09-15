@@ -21,6 +21,26 @@ const ALLOWED_CATEGORIES = [
 ] as const;
 type AllowedCategory = (typeof ALLOWED_CATEGORIES)[number];
 
+export interface AuditDetailItem {
+  url?: string;
+  type?: string;
+  name?: string;
+  snippet?: string;
+  selector?: string;
+  value?: unknown;
+  [key: string]: unknown;
+}
+
+export interface AuditDetails {
+  type?: string;
+  items?: AuditDetailItem[];
+  headings?: Array<{ key?: string; label?: string; valueType?: string }>;
+  overallSavingsMs?: number;
+  overallSavingsBytes?: number;
+  summary?: { blockingTime?: number };
+  [key: string]: unknown;
+}
+
 export interface LighthouseReport {
   requestedUrl?: string;
   finalUrl?: string;
@@ -45,7 +65,7 @@ export interface LighthouseReport {
       score?: number | null;
       scoreDisplayMode?: string;
       metricSavings?: Record<string, number>;
-      details?: any;
+      details?: AuditDetails;
     };
   };
   runWarnings?: string[];

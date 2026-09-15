@@ -10,7 +10,9 @@
 - Removed the `--disable-web-security` Chrome flag
 - Added a 24h cache TTL, expired-cache cleanup, and temp-file cleanup on error
 - Added Chrome-missing detection with install instructions
+- Added report profiles (General, Marketing, SEO, Development) and a searchable audit explorer
 - Exposed an `audit-page` AI tool for programmatic website audits
+- Updated to `@raycast/api` 2, `@raycast/utils` 2, and ESLint 10 with flat config
 
 ## [1.1.0 - Update] - 2024-01-21
 

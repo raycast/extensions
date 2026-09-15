@@ -54,14 +54,6 @@ export function formatEvidence(details: unknown): string {
   );
 }
 
-export interface AuditWithContext {
-  id: string;
-  title?: string;
-  displayValue?: string;
-  score?: number | null;
-  details?: any;
-}
-
 export function getAuditScore(
   audit: { score?: number | null } | undefined
 ): number {
@@ -128,7 +120,7 @@ export function extractOpportunities(
     )
     .map(op => {
       const items = Array.isArray(op.details?.items) ? op.details.items : [];
-      const firstUrl = items.find((i: any) => i?.url)?.url;
+      const firstUrl = items.find(item => item?.url)?.url;
       return {
         id: op.id,
         title: op.title,
@@ -213,8 +205,8 @@ export function extractSeoFields(report: LighthouseReport): SeoFieldInfo[] {
     const structuredDataTypes =
       f.id === 'structured-data'
         ? (audit?.details?.items || [])
-            .map((i: any) => i?.type || i?.name)
-            .filter(Boolean)
+            .map(item => item?.type || item?.name)
+            .filter((value): value is string => typeof value === 'string')
         : undefined;
     return {
       id: f.id,

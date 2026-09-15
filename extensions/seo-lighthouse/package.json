@@ -88,17 +88,16 @@
     "macOS"
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.18.1"
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.0.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
     "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.0",
-    "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

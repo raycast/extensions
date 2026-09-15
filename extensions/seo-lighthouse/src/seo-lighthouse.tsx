@@ -230,7 +230,7 @@ function LighthouseReportView({
       }
 
       if (fromCache) {
-        markdown += `> [!NOTE]\n> Loaded from cache (24h TTL). Use **Re-analyze** to force a fresh audit.\n\n`;
+        markdown += `> [!NOTE]\n> Loaded from cache (24h TTL). Use **Re-Analyze** to force a fresh audit.\n\n`;
       }
 
       markdown += profileSummary(report, profile);
@@ -575,7 +575,7 @@ Thanks,`;
               <Action
                 title="Save Scorecard Image"
                 icon={Icon.Download}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 's' }}
+                shortcut={Keyboard.Shortcut.Common.Save}
                 onAction={() => shareScorecardImage(scorecardSvg, 'save')}
               />
             </ActionPanel.Section>
@@ -596,7 +596,7 @@ Thanks,`;
           </ActionPanel.Section>
           <ActionPanel.Section title="Report Management">
             <Action
-              title="Re-analyze"
+              title="Re-Analyze"
               icon={Icon.ArrowClockwise}
               onAction={onReanalyze}
             />
