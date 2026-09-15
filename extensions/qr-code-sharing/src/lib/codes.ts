@@ -18,7 +18,7 @@ export interface Box {
   height: number;
 }
 
-type QRSize = "small" | "medium" | "large";
+type QRSize = Preferences["qrSize"];
 
 /**
  * Raycast sizes its own window and offers no API to resize it, and the `raycast-height`
@@ -36,8 +36,8 @@ const BOXES: Record<QRSize, { detail: Box; preview: Box }> = {
 };
 
 export function codeBoxes(): { detail: Box; preview: Box } {
-  const { qrSize } = getPreferenceValues<{ qrSize?: QRSize }>();
-  return BOXES[qrSize ?? "medium"];
+  const { qrSize } = getPreferenceValues<Preferences>();
+  return BOXES[qrSize];
 }
 
 export interface RenderResult {
