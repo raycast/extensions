@@ -1,23 +1,11 @@
-import { ActionPanel, Icon, List, Action, LocalStorage } from "@raycast/api";
+import { ActionPanel, Icon, List, Action } from "@raycast/api";
 import { useState } from "react";
 import { Site } from "./api/Site";
 import { IServer, ServerCommands } from "./Server";
 import { siteStatusState, useIsMounted, usePolling } from "./helpers";
 import { PLOI_PANEL_URL } from "./config";
 
-export const SitesList = ({ server: server, sites: sitesArray }: { server: IServer; sites: ISite[] }) => {
-  const [sites, setSites] = useState<ISite[]>(sitesArray);
-  const isMounted = useIsMounted();
-  usePolling(() =>
-    Site.getAll(server).then(async (sites: ISite[] | undefined) => {
-      if (isMounted.current && sites?.length) {
-        setSites(sites);
-
-        await LocalStorage.setItem(`ploi-sites-${server.id}`, JSON.stringify(sites));
-      }
-    }),
-  );
-
+export const SitesList = ({ server, sites }: { server: IServer; sites: ISite[] }) => {
   return (
     <>
       {sites.map((site: ISite) => (
