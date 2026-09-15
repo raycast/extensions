@@ -45,6 +45,11 @@ export function useRccStream(args: string[]) {
 		streamRcc(
 			argv.current,
 			(chunk) => {
+				// Only the run that is still the current one may write. A
+				// stopped run keeps delivering what it had already buffered,
+				// and those late chunks used to land on the state the next run
+				// had just cleared: the same block appeared twice in one log.
+				if (controllerRef.current !== controller) return;
 				const append = (previous: string) => previous + chunk.text;
 				setOutput(append);
 				if (chunk.source === "stderr") setStderrOutput(append);
