@@ -32,6 +32,19 @@ const cases = [
     description: "Wikipedia",
   },
   {
+    name: "reads nested parentheses in a URL",
+    line: "- [Foo](https://example.com/Foo_(bar_(baz))) - Nested (example)",
+    title: "Foo",
+    url: "https://example.com/Foo_(bar_(baz))",
+    description: "Nested (example)",
+  },
+  {
+    name: "keeps a dash inside nested URL parentheses out of the description",
+    line: "- [Foo](https://example.com/Foo_((bar)-baz))",
+    title: "Foo",
+    url: "https://example.com/Foo_((bar)-baz)",
+  },
+  {
     name: "preserves legacy URLs with an unmatched opening parenthesis",
     line: "- [Search](https://example.com/search?q=f(x)",
     title: "Search",
