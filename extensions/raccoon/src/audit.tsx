@@ -446,9 +446,22 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 			{pending ? (
 				<List.Item
 					icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
-					title={`Still checking ${pending}`}
-					subtitle="Software Updates asks Apple's servers, which can take minutes. The rest is below."
+					// Short, because the list pane is narrow whenever the detail
+					// pane is open: the first version of this row read
+					// "Still ch… Softwa… Running".
+					title={`${pending[0].toUpperCase()}${pending.slice(1)} checks`}
 					accessories={[{ tag: { value: "Running", color: Color.SecondaryText } }]}
+					detail={
+						<List.Item.Detail
+							markdown={[
+								`## The ${pending} checks are still running`,
+								"",
+								"One of them asks Apple's servers whether this Mac has updates. How long that takes is theirs rather than the audit's: usually seconds, occasionally minutes.",
+								"",
+								"Everything else is already below. These join the top of the list when they land.",
+							].join("\n")}
+						/>
+					}
 					actions={<ActionPanel>{screenActions}</ActionPanel>}
 				/>
 			) : null}
