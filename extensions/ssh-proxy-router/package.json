@@ -1,0 +1,160 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ssh-proxy-router",
+  "title": "SSH Proxy Router",
+  "description": "Route selected websites through an SSH SOCKS proxy while all other traffic remains direct.",
+  "icon": "tunnel-route-icon.png",
+  "author": "mariusrueve",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "SSH Proxy Router",
+      "subtitle": "Menu Bar",
+      "description": "Show and control selective SSH proxy routing in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle SSH Proxy Router",
+      "subtitle": "Selective Website Routing",
+      "description": "Start or stop selective website routing through SSH",
+      "mode": "no-view",
+      "keywords": [
+        "proxy",
+        "ssh",
+        "safari",
+        "tunnel",
+        "socks",
+        "pac"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sshUser",
+      "title": "SSH User",
+      "description": "User account on the SSH gateway",
+      "type": "textfield",
+      "placeholder": "username",
+      "required": true
+    },
+    {
+      "name": "sshHost",
+      "title": "SSH Gateway",
+      "description": "SSH gateway used to reach the routed websites",
+      "type": "textfield",
+      "placeholder": "gateway.example.com",
+      "required": true
+    },
+    {
+      "name": "sshPort",
+      "title": "SSH Port",
+      "description": "Port used to connect to the SSH gateway",
+      "type": "textfield",
+      "default": "22",
+      "required": true
+    },
+    {
+      "name": "identityFile",
+      "title": "SSH Identity File",
+      "description": "Optional private-key path; leave empty to use your SSH agent/config",
+      "type": "textfield",
+      "placeholder": "~/.ssh/id_ed25519",
+      "required": false
+    },
+    {
+      "name": "routedHosts",
+      "title": "Routed Websites",
+      "description": "Comma-separated exact hosts or wildcards; URLs are also accepted",
+      "type": "textfield",
+      "placeholder": "internal.example.com, *.corp.example.com",
+      "required": true
+    },
+    {
+      "name": "primaryURL",
+      "title": "Primary Website URL",
+      "description": "Optional website opened by the main menu action; defaults to the first routed host",
+      "type": "textfield",
+      "placeholder": "https://internal.example.com",
+      "required": false
+    },
+    {
+      "name": "socksPort",
+      "title": "Local SOCKS Port",
+      "description": "Local port for the SSH dynamic forward",
+      "type": "textfield",
+      "default": "1080",
+      "required": true
+    },
+    {
+      "name": "pacPort",
+      "title": "Local PAC Port",
+      "description": "Local port serving Safari's host-specific proxy configuration",
+      "type": "textfield",
+      "default": "18080",
+      "required": true
+    },
+    {
+      "name": "startTimeout",
+      "title": "Start Timeout",
+      "description": "Seconds to wait for the SSH tunnel",
+      "type": "textfield",
+      "default": "15",
+      "required": true
+    },
+    {
+      "name": "networkServices",
+      "title": "Network Services",
+      "description": "Optional comma-separated macOS network services; empty means every enabled service",
+      "type": "textfield",
+      "placeholder": "Wi-Fi, Dell Universal Dock D6000",
+      "required": false
+    },
+    {
+      "name": "openInSafari",
+      "title": "Open in Safari",
+      "description": "Use Safari for the Open Website menu actions",
+      "type": "checkbox",
+      "label": "Open routed websites specifically in Safari",
+      "default": true,
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:build": "node scripts/clean-tests.mjs && tsc -p tsconfig.test.json",
+    "test": "npm run test:build && node --test .test-dist/tests/*.test.js",
+    "test:live": "npm run test:build && node .test-dist/scripts/test-live.js",
+    "check": "npm run format:check && npm run lint && npm run lint:all && npm test && npm run build",
+    "lint:all": "eslint .",
+    "bundle": "ray bundle -o release/ssh-proxy-router.rayext",
+    "store:export": "node scripts/export-store.mjs"
+  },
+  "categories": [
+    "Developer Tools",
+    "System"
+  ]
+}
