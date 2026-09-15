@@ -50,7 +50,7 @@ function repoFix(repo: GitRepo) {
 		return {
 			title: `Push ${repo.unpushed} ${repo.unpushed === 1 ? "Commit" : "Commits"}`,
 			command: gitPush(repo.path),
-			detail: `${repo.name} — the working tree is clean, so pushing is the whole of it.`,
+			detail: `${repo.name}: the working tree is clean, so pushing is the whole of it.`,
 		};
 	}
 	return {
@@ -148,8 +148,8 @@ export default function Command() {
 			navigationTitle={(g) =>
 				g
 					? g.repos_with_issues === 0
-						? "Git — all clean"
-						: `Git — ${g.repos_with_issues} of ${g.repos_total} need attention`
+						? "Git: all clean"
+						: `Git: ${g.repos_with_issues} of ${g.repos_total} need attention`
 					: "Git"
 			}
 			searchBarPlaceholder="Search repositories"

@@ -137,7 +137,7 @@ export default function Command() {
 		<RccList
 			command="backup"
 			parse={parseBackup}
-			navigationTitle={(b) => (b ? `Time Machine — ${HEADLINE[health(b)].toLowerCase()}` : "Time Machine")}
+			navigationTitle={(b) => (b ? `Time Machine: ${HEADLINE[health(b)].toLowerCase()}` : "Time Machine")}
 			searchBarPlaceholder="Search backup details"
 			emptyIcon={Icon.HardDrive}
 			emptyTitle="No Time Machine information"

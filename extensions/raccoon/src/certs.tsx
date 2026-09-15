@@ -102,7 +102,7 @@ export default function Command() {
 			parse={parseCerts}
 			navigationTitle={(c) =>
 				c
-					? `Certificates — ${c.counts.expired} expired, ${c.counts.expiring} expiring within ${c.expiring_window_days} days`
+					? `Certificates: ${c.counts.expired} expired, ${c.counts.expiring} expiring within ${c.expiring_window_days} days`
 					: "Certificates"
 			}
 			searchBarPlaceholder="Search by name, issuer or status"

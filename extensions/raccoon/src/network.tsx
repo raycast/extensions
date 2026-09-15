@@ -180,7 +180,7 @@ export default function Command() {
 			navigationTitle={(n) => {
 				if (!n) return "Network";
 				const primary = primaryAddress(n);
-				return primary ? `Network — ${primary.address} on ${primary.name}` : "Network — no routable address";
+				return primary ? `Network: ${primary.address} on ${primary.name}` : "Network: no routable address";
 			}}
 			searchBarPlaceholder="Search addresses, DNS, VPNs and proxies"
 			emptyIcon={Icon.Globe}

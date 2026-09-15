@@ -124,7 +124,7 @@ export default function Command() {
 			command="fonts"
 			parse={parseFonts}
 			navigationTitle={(f) =>
-				f ? `Fonts — ${f.installed} installed${f.corrupted > 0 ? `, ${f.corrupted} broken` : ""}` : "Fonts"
+				f ? `Fonts: ${f.installed} installed${f.corrupted > 0 ? `, ${f.corrupted} broken` : ""}` : "Fonts"
 			}
 			searchBarPlaceholder="Search font sources and checks"
 			emptyIcon={Icon.Text}

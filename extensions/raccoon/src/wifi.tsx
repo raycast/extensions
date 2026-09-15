@@ -9,9 +9,9 @@ const HIDDEN_NOTE =
 
 function title(w: WifiReport | undefined): string {
 	if (!w) return "Wi-Fi";
-	if (w.active_ssid) return `Wi-Fi — ${w.active_ssid}`;
-	if (w.connected) return "Wi-Fi — connected, name withheld by macOS";
-	return "Wi-Fi — not connected";
+	if (w.active_ssid) return `Wi-Fi: ${w.active_ssid}`;
+	if (w.connected) return "Wi-Fi: connected, name withheld by macOS";
+	return "Wi-Fi: not connected";
 }
 
 export default function Command() {

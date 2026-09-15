@@ -53,7 +53,7 @@ export function DryRunFirst({
 	return (
 		<ProgressList
 			args={live ? [command] : [command, "--dry-run"]}
-			title={live ? `Updating ${subject}` : `${subject} — what would change`}
+			title={live ? `Updating ${subject}` : `${subject}: what would change`}
 			unit={unit}
 			idleIcon={idleIcon}
 			extraActions={

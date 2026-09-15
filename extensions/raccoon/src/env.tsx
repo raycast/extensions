@@ -183,8 +183,8 @@ export default function Command() {
 				if (!e) return "Environment";
 				const n = problems(e);
 				return n === 0
-					? `Environment — ${e.path.length} PATH entries, nothing wrong`
-					: `Environment — ${n} ${n === 1 ? "problem" : "problems"}`;
+					? `Environment: ${e.path.length} PATH entries, nothing wrong`
+					: `Environment: ${n} ${n === 1 ? "problem" : "problems"}`;
 			}}
 			searchBarPlaceholder="Search PATH entries, symlinks and tools"
 			emptyIcon={Icon.Terminal}

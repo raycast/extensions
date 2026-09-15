@@ -49,7 +49,7 @@ export default function Command() {
 	return (
 		<List
 			isLoading={isLoading}
-			navigationTitle={runs.length > 0 ? `Audit History — ${runs.length} runs` : "Audit History"}
+			navigationTitle={runs.length > 0 ? `Audit History: ${runs.length} runs` : "Audit History"}
 			searchBarPlaceholder="Search past audits"
 		>
 			<List.EmptyView

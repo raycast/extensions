@@ -147,9 +147,9 @@ export default function Command() {
 			isLoading={isLoading}
 			navigationTitle={
 				machine
-					? `Memory — ${gigabytes(machine.used_mb)} of ${gigabytes(machine.total_mb)} GB in use`
+					? `Memory: ${gigabytes(machine.used_mb)} of ${gigabytes(machine.total_mb)} GB in use`
 					: processes.length > 0
-						? `Memory — ${processes.length} processes`
+						? `Memory: ${processes.length} processes`
 						: "Memory"
 			}
 			searchBarPlaceholder="Search processes by name"

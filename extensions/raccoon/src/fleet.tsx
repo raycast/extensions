@@ -90,7 +90,7 @@ export default function Command() {
 	return (
 		<List
 			isLoading={isLoading}
-			navigationTitle={hosts.length > 0 ? `Fleet — ${hosts.length} machines` : "Fleet"}
+			navigationTitle={hosts.length > 0 ? `Fleet: ${hosts.length} machines` : "Fleet"}
 			searchBarPlaceholder="Search configured machines"
 		>
 			<List.EmptyView

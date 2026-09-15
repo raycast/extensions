@@ -423,7 +423,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 			isShowingDetail={(data?.results.length ?? 0) > 0}
 			navigationTitle={
 				counts
-					? `Security Audit — ${counts.pass} pass, ${counts.warn} warn, ${counts.fail} fail`
+					? `Security Audit: ${counts.pass} pass, ${counts.warn} warn, ${counts.fail} fail`
 					: "Security Audit"
 			}
 			filtering={false}

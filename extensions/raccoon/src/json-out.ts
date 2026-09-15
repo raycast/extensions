@@ -90,7 +90,7 @@ export function extractJson(stdout: string, command: string): unknown {
 				looksLikeProse(text)
 					? UPGRADE
 					: "This is a defect in rcc, not a version you can upgrade past. " +
-						"The output it printed is below — please report it.",
+						"The output it printed is below. Please report it.",
 				"",
 				excerpt(text),
 			].join("\n"),

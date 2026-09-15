@@ -80,7 +80,7 @@ export default function Command() {
 			? offered(() => ({
 					title: `Close ${exposedWithPid.length} Reachable Ports`,
 					command: killPids(exposedWithPid.map((p) => p.pid as number)),
-					detail: exposedWithPid.map((p) => `${p.port} — ${p.process}`).join("\n"),
+					detail: exposedWithPid.map((p) => `${p.port}: ${p.process}`).join("\n"),
 					destructive: true,
 					count: exposedWithPid.length,
 				}))
@@ -148,7 +148,7 @@ export default function Command() {
 	return (
 		<List
 			isLoading={isLoading}
-			navigationTitle={ports.length > 0 ? `Ports — ${reachable} reachable, ${ports.length} sockets` : "Ports"}
+			navigationTitle={ports.length > 0 ? `Ports: ${reachable} reachable, ${ports.length} sockets` : "Ports"}
 			searchBarPlaceholder="Search by port, process or address"
 		>
 			<List.EmptyView

@@ -218,7 +218,7 @@ export default function Command() {
 			navigationTitle={(d) => {
 				if (!d || d.volumes.length === 0) return "Disk";
 				const worst = d.volumes.reduce((a, b) => (fillLevel(a.percent) === "full" ? a : b));
-				return `Disk — ${worst.name} at ${worst.percent}, ${worst.free} free`;
+				return `Disk: ${worst.name} at ${worst.percent}, ${worst.free} free`;
 			}}
 			searchBarPlaceholder="Search volumes, disks and mounts"
 			emptyIcon={Icon.HardDrive}

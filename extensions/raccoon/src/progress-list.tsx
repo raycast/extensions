@@ -137,7 +137,7 @@ export function ProgressList({
 		<List
 			isLoading={isLoading}
 			isShowingDetail={rows.length > 0}
-			navigationTitle={working ? `${title} — ${done} of ${rows.length} done` : title}
+			navigationTitle={working ? `${title}: ${done} of ${rows.length} done` : title}
 			searchBarPlaceholder={`Search ${unit}`}
 		>
 			<List.EmptyView

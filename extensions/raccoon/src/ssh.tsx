@@ -173,7 +173,7 @@ export default function Command() {
 			navigationTitle={(s) => {
 				if (!s) return "SSH Keys";
 				const problems = problemCount(s);
-				return problems === 0 ? "SSH keys — all in good order" : `SSH keys — ${problems} need attention`;
+				return problems === 0 ? "SSH keys: all in good order" : `SSH keys: ${problems} need attention`;
 			}}
 			searchBarPlaceholder="Search keys"
 			emptyIcon={Icon.Key}

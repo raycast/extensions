@@ -71,7 +71,7 @@ export default function Command() {
 		<RccList
 			command="history"
 			parse={parseHistory}
-			navigationTitle={(h) => (h ? `Shell history — ${h.counts.total} commands` : "Shell history")}
+			navigationTitle={(h) => (h ? `Shell history: ${h.counts.total} commands` : "Shell history")}
 			searchBarPlaceholder="Search shells and recent commands"
 			emptyIcon={Icon.Terminal}
 			emptyTitle="No shell history"

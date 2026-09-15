@@ -152,7 +152,7 @@ export default function Command() {
 			command="docker"
 			parse={parseDocker}
 			navigationTitle={(d) =>
-				!d || !d.installed ? "Docker" : `Docker — ${d.containers.length} containers, ${d.images.length} images`
+				!d || !d.installed ? "Docker" : `Docker: ${d.containers.length} containers, ${d.images.length} images`
 			}
 			searchBarPlaceholder="Search containers, images and volumes"
 			emptyIcon={Icon.Box}

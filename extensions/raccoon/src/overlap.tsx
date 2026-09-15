@@ -70,7 +70,7 @@ export default function Command() {
 			navigationTitle={(g) => {
 				if (!g) return "PATH";
 				const clashing = g.filter((x) => x.entries.length > 1).length;
-				return `PATH — ${g.length} names, ${clashing} from more than one place`;
+				return `PATH: ${g.length} names, ${clashing} from more than one place`;
 			}}
 			searchBarPlaceholder="Search by name, manager or path"
 			emptyIcon={Icon.Terminal}

@@ -16,7 +16,7 @@ export default function Command() {
 		<RccList
 			command="trash"
 			parse={parseTrash}
-			navigationTitle={(t) => (t ? `Trash — ${t.size}` : "Trash")}
+			navigationTitle={(t) => (t ? `Trash: ${t.size}` : "Trash")}
 			searchBarPlaceholder="Search trash details"
 			emptyIcon={Icon.Trash}
 			emptyTitle="Nothing in the trash"

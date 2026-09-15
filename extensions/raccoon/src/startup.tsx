@@ -238,7 +238,7 @@ export default function Command() {
 			parse={parseStartup}
 			navigationTitle={(s) =>
 				s
-					? `Startup — ${s.login_items.length + s.user_agents.length + s.background_items.length} things this Mac starts`
+					? `Startup: ${s.login_items.length + s.user_agents.length + s.background_items.length} things this Mac starts`
 					: "Startup"
 			}
 			searchBarPlaceholder="Search login items, launch agents and background items"

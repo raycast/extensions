@@ -51,7 +51,7 @@ export function sortKeys(keys: SshKey[]): SshKey[] {
 export function reason(key: SshKey): string {
 	switch (keyLevel(key)) {
 		case "unprotected":
-			return "no passphrase — usable by anything that reads the file";
+			return "no passphrase: usable by anything that reads the file";
 		case "loose-perms":
 			return `mode ${key.perms}, ssh requires 600`;
 		case "orphan":
