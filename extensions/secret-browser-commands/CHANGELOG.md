@@ -1,5 +1,9 @@
 # Secret Browser Commands Changelog
 
+## [1.2.1] - {PR_MERGE_DATE}
+
+* Fix: 1.2.0 declared `@raycast/api` 2.4.1, which is newer than released Raycast can run, so the update failed to install with "requires Raycast API v2.4.1". Back to 2.2.1
+
 ## [1.2.0] - 2026-09-15
 
 * Feature: Browser compatibility is now verified per browser instead of assumed — every command's support list comes from reading that browser's own `chrome://chrome-urls` page, or, for the few commands no browser advertises, from navigating to them browser by browser
