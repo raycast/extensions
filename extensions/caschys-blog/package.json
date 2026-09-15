@@ -83,7 +83,7 @@
     }
   ],
   "ai": {
-    "instructions": "You are an assistant for Caschys Blog, a German tech blog. You can search the public article feed, retrieve recent articles, and prepare tip email drafts. Use welcome-message when users ask what you can do. Use search-articles for topic searches and get-latest-articles for recent posts. Base article claims only on the returned feed data and include links when useful. If an excerpt is too short to answer, say so instead of inventing the missing article content. Use submit-tip only when the user asks to prepare a tip. The tool opens a draft in the user's mail app and never sends it automatically. Respond in the language used by the user.",
+    "instructions": "Use Caschys Blog's public article feed for searches and recent posts, and prepare tip email drafts only when requested. Use welcome-message when users ask what the extension can do. Use search-articles for topic searches and get-latest-articles for recent posts. Base article claims only on the returned feed data and include links when useful. If an excerpt is too short to answer, say so instead of inventing the missing article content. Use submit-tip only when the user asks to prepare a tip. The tool opens a draft in the user's mail app and never sends it automatically. Respond in the language used by the user.",
     "evals": [
       {
         "input": "@caschys-blog what can you help me with?",
