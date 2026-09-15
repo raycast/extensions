@@ -1,3 +1,5 @@
+import { Reviewer } from "../../../helpers/reviewers";
+
 export interface PullRequest {
   id: number;
   title: string;
@@ -12,4 +14,5 @@ export interface PullRequest {
     nickname: string;
   };
   state: "OPEN" | "MERGED" | "DECLINED" | "SUPERSEDED";
+  reviewers: Reviewer[];
 }

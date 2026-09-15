@@ -1,28 +1,43 @@
-import { Action, ActionPanel, Detail, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { getPullRequest } from "./../../queries";
+import { getPullRequest, getCurrentUserUuid } from "./../../queries";
 import { ApprovePullRequestAction, DeclinePullRequestAction, RequestChangesAction } from "./actions";
 import { PullRequest } from "./interface";
 import { ReviewState } from "./../../helpers/reviewState";
+import { extractReviewers, findMyReviewState, Reviewer } from "./../../helpers/reviewers";
 
 interface State {
   isLoading: boolean;
   markdown?: string;
+  reviewers?: Reviewer[];
   error?: Error;
 }
 
 export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => void; onDone?: () => void }) {
   const { pr } = props;
   const [state, setState] = useState<State>({ isLoading: true });
-  const [reviewState, setReviewState] = useState<ReviewState>(null);
+  // `undefined` = untouched this session (defer to real data); any ReviewState
+  // value, including `null`, means an action fired and must override stale data.
+  const [localReviewState, setLocalReviewState] = useState<ReviewState | undefined>(undefined);
+  const [myUuid, setMyUuid] = useState<string | null>(null);
+
+  useEffect(() => {
+    getCurrentUserUuid()
+      .then(setMyUuid)
+      .catch(() => setMyUuid(null));
+  }, []);
 
   useEffect(() => {
     async function fetchPullRequest() {
       try {
         const { data } = await getPullRequest(pr.repo.slug, pr.id);
         const description = data.rendered?.description?.raw ?? data.summary?.raw ?? "_No description provided._";
-        setState({ isLoading: false, markdown: `# ${data.title ?? pr.title}\n\n${description}` });
+        setState({
+          isLoading: false,
+          markdown: `# ${data.title ?? pr.title}\n\n${description}`,
+          reviewers: extractReviewers(data.participants),
+        });
       } catch (error) {
         setState({
           isLoading: false,
@@ -44,6 +59,14 @@ export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => v
 
   const url = `https://bitbucket.org/${pr.repo.fullName}/pull-requests/${pr.id}`;
 
+  const reviewers = state.reviewers ?? [];
+  const reviewState = localReviewState !== undefined ? localReviewState : findMyReviewState(reviewers, myUuid);
+  const labeledReviewers = reviewers.map((r) => (myUuid && r.uuid === myUuid ? { ...r, nickname: "You" } : r));
+  const displayedReviewers: Reviewer[] =
+    !labeledReviewers.some((r) => r.nickname === "You") && reviewState
+      ? [{ nickname: "You", state: reviewState }, ...labeledReviewers]
+      : labeledReviewers;
+
   return (
     <Detail
       isLoading={state.isLoading}
@@ -54,6 +77,17 @@ export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => v
           <Detail.Metadata.Label title="Author" text={pr.author.nickname} icon={pr.author.url} />
           <Detail.Metadata.Label title="Comments" text={`${pr.commentCount}`} />
           <Detail.Metadata.Label title="Repository" text={pr.repo.fullName} />
+          {displayedReviewers.length > 0 && (
+            <Detail.Metadata.TagList title="Reviewers">
+              {displayedReviewers.map((reviewer) => (
+                <Detail.Metadata.TagList.Item
+                  key={reviewer.nickname}
+                  text={reviewer.nickname}
+                  color={reviewer.state === "approved" ? Color.Green : Color.Orange}
+                />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
         </Detail.Metadata>
       }
       actions={
@@ -62,9 +96,9 @@ export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => v
             <Action.OpenInBrowser title="Open Pull Request in Browser" url={url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ApprovePullRequestAction pr={pr} reviewState={reviewState} onReviewStateChange={setReviewState} />
+            <ApprovePullRequestAction pr={pr} reviewState={reviewState} onReviewStateChange={setLocalReviewState} />
             <DeclinePullRequestAction pr={pr} onDeclined={props.onDeclined} />
-            <RequestChangesAction pr={pr} reviewState={reviewState} onReviewStateChange={setReviewState} />
+            <RequestChangesAction pr={pr} reviewState={reviewState} onReviewStateChange={setLocalReviewState} />
           </ActionPanel.Section>
         </ActionPanel>
       }

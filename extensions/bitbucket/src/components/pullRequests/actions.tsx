@@ -54,6 +54,10 @@ export function ApprovePullRequestAction(props: {
         source: isApproved ? Icon.XMarkCircle : Icon.CheckCircle,
         tintColor: isApproved ? Color.Red : Color.Green,
       }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "a" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+      }}
       onAction={async () => {
         try {
           if (isApproved) {
@@ -87,6 +91,10 @@ export function DeclinePullRequestAction(props: { pr: PullRequest; onDeclined?: 
     <Action.Push
       title="Decline Pull Request"
       icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "d" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+      }}
       target={
         <ReasonForm
           title="Decline Pull Request"
@@ -130,6 +138,10 @@ export function RequestChangesAction(props: {
       <Action
         title="Undo Request Changes"
         icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "r" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+        }}
         onAction={async () => {
           try {
             await undoRequestChangesOnPullRequest(pr.repo.slug, pr.id);
@@ -151,6 +163,10 @@ export function RequestChangesAction(props: {
     <Action.Push
       title="Request Changes"
       icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "r" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+      }}
       target={
         <ReasonForm
           title="Request Changes"

@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, Color, Action, Icon, Image, Toast } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import { Repository } from "./interface";
@@ -10,9 +10,10 @@ import {
 } from "../pullRequests/actions";
 import { PullRequest } from "../pullRequests/interface";
 
-import { pullRequestsGetQuery } from "./../../queries";
+import { pullRequestsGetQuery, getCurrentUserUuid } from "./../../queries";
 import { getPullRequestKey } from "./../../helpers/pullRequestKey";
 import { ReviewState, setReviewState } from "./../../helpers/reviewState";
+import { buildReviewAccessories, extractReviewers, findMyReviewState } from "./../../helpers/reviewers";
 
 interface State {
   pullRequests?: PullRequest[];
@@ -22,6 +23,13 @@ interface State {
 export function PullRequestsList(props: { repo: Repository; pageNumber: number }) {
   const [state, setState] = useState<State>({});
   const [reviewStates, setReviewStates] = useState<Map<string, ReviewState>>(new Map());
+  const [myUuid, setMyUuid] = useState<string | null>(null);
+
+  useEffect(() => {
+    getCurrentUserUuid()
+      .then(setMyUuid)
+      .catch(() => setMyUuid(null));
+  }, []);
 
   useEffect(() => {
     async function fetchPRs() {
@@ -43,6 +51,7 @@ export function PullRequestsList(props: { repo: Repository; pageNumber: number }
               url: pr.author?.links?.avatar?.href as string,
               nickname: pr.author?.nickname as string,
             },
+            reviewers: extractReviewers(pr.participants),
           })) ?? [];
         setState({ pullRequests: prs });
       } catch (error) {
@@ -73,15 +82,12 @@ export function PullRequestsList(props: { repo: Repository; pageNumber: number }
       <List.Section title="Open Pull Requests" subtitle={state.pullRequests?.length + ""}>
         {state.pullRequests?.map((pr) => {
           const key = getPullRequestKey(pr);
-          const reviewState = reviewStates.get(key) ?? null;
+          const reviewState = reviewStates.has(key)
+            ? (reviewStates.get(key) ?? null)
+            : findMyReviewState(pr.reviewers, myUuid);
           const onReviewStateChange = (next: ReviewState) =>
             setReviewStates((current) => setReviewState(current, key, next));
-          const reviewAccessory =
-            reviewState === "changes_requested"
-              ? { icon: { source: Icon.ExclamationMark, tintColor: Color.Orange }, tooltip: "You requested changes" }
-              : reviewState === "approved"
-                ? { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "You approved" }
-                : undefined;
+          const reviewAccessories = buildReviewAccessories(pr.reviewers, myUuid, reviewState);
 
           return (
             <List.Item
@@ -110,7 +116,7 @@ export function PullRequestsList(props: { repo: Repository; pageNumber: number }
                 </ActionPanel>
               }
               accessories={[
-                ...(reviewAccessory ? [reviewAccessory] : []),
+                ...reviewAccessories,
                 {
                   text: `${pr.commentCount} 💬  ·  Created by ${pr.author.nickname}`,
                   icon: { source: pr.author.url, mask: Image.Mask.Circle },
