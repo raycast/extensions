@@ -75,13 +75,14 @@
     "@raycast/utils": "^1.18.0",
     "date-fns": "^3.0.0-alpha.2",
     "eventsource-parser": "^1.1.1",
+    "html-to-text": "^9.0.5",
     "jwt-decode": "^4.0.0",
     "marked": "^18.0.13",
-    "striptags": "^3.2.0",
     "undici": "^6.20.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@types/html-to-text": "^9.0.4",
     "@types/node": "22.14.0",
     "@types/react": "19.0.10",
     "eslint": "^8.51.0",

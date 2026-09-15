@@ -1,8 +1,8 @@
 import { ConnectorProvider, GetAgentConfigurationsResponseType, MeResponseType } from "@dust-tt/client";
 import { Color, Icon, Image, LocalStorage } from "@raycast/api";
 import { jwtDecode } from "jwt-decode";
+import { convert as convertHtmlToText } from "html-to-text";
 import { marked, Token, Tokens } from "marked";
-import striptags from "striptags";
 import Asset = Image.Asset;
 
 export interface AgentType {
@@ -227,16 +227,19 @@ function renderTokenPlain(token: Token): string {
     case "hr":
       return "\n";
     case "space":
+    case "def":
       return "";
     case "html":
-      return striptags(renderInlinePlain(token));
+      return convertHtmlToText(renderInlinePlain(token), { selectors: [{ selector: "img", format: "skip" }] });
     default:
       return "raw" in token ? String(token.raw) : "";
   }
 }
 
 export function stripMarkdown(text: string): string {
-  return renderTokensPlain(marked.lexer(text)).trim();
+  return renderTokensPlain(marked.lexer(text))
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 export async function extractAndStoreRegion(token: string) {
