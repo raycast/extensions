@@ -19,7 +19,8 @@
     "frederik_obe",
     "bsradcliffe",
     "aditi_bhagat",
-    "muhammadrizo"
+    "muhammadrizo",
+    "aaronjensen"
   ],
   "pastContributors": [
     "Visual-Studio-Coder"
@@ -89,7 +90,27 @@
       "title": "Caffeinate for ...",
       "subtitle": "Coffee",
       "description": "Prevent your computer from sleeping for a certain time",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "hours",
+          "placeholder": "Hours",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "minutes",
+          "placeholder": "Minutes",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "seconds",
+          "placeholder": "Seconds",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "caffeinateUntil",

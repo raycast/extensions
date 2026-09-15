@@ -1,12 +1,13 @@
-import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { popToRoot, showToast, Toast } from "@raycast/api";
+import { useEffect, useRef } from "react";
 import { startCaffeinate, deviceName } from "./utils";
 
-function getValidationError(values: { hours?: string; minutes?: string; seconds?: string }): string | null {
-  const { hours, minutes, seconds } = values;
+async function caffeinateFor({ hours, minutes, seconds }: Arguments.CaffeinateFor) {
   const hasValue = hours || minutes || seconds;
 
   if (!hasValue) {
-    return "No values set for caffeinate length";
+    await showToast(Toast.Style.Failure, "No values set for caffeinate length");
+    return;
   }
 
   const validInput =
@@ -15,21 +16,16 @@ function getValidationError(values: { hours?: string; minutes?: string; seconds?
     (!seconds || (Number.isInteger(Number(seconds)) && Number(seconds) >= 0));
 
   if (!validInput) {
-    return "Please ensure all fields are whole numbers";
+    await showToast(Toast.Style.Failure, "Please ensure all arguments are whole numbers");
+    return;
   }
 
   const totalSeconds = Number(hours || 0) * 3600 + Number(minutes || 0) * 60 + Number(seconds || 0);
   if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) {
-    return "Please enter a duration greater than zero";
+    await showToast(Toast.Style.Failure, "Please enter a duration greater than zero");
+    return;
   }
 
-  return null;
-}
-
-async function caffeinateFor(values: { hours?: string; minutes?: string; seconds?: string }) {
-  const { hours, minutes, seconds } = values;
-
-  const totalSeconds = Number(hours || 0) * 3600 + Number(minutes || 0) * 60 + Number(seconds || 0);
   const formattedTime = `${hours ? `${hours}h` : ""}${minutes ? `${minutes}m` : ""}${seconds ? `${seconds}s` : ""}`;
 
   await startCaffeinate(
@@ -40,32 +36,18 @@ async function caffeinateFor(values: { hours?: string; minutes?: string; seconds
   );
 }
 
-export default function Command() {
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Caffeinate"
-            onSubmit={async (values: { hours?: string; minutes?: string; seconds?: string }) => {
-              const error = getValidationError(values);
-              if (error) {
-                await showToast(Toast.Style.Failure, error);
-                return;
-              }
-              // Reset nav first so popToRoot doesn't race with showHUD inside
-              // startCaffeinate and cut the HUD short. The caffeinate work
-              // continues asynchronously after the view unmounts.
-              await popToRoot();
-              await caffeinateFor({ hours: values.hours, minutes: values.minutes, seconds: values.seconds });
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="hours" title="Hours" placeholder="0" />
-      <Form.TextField id="minutes" title="Minutes" placeholder="0" />
-      <Form.TextField id="seconds" title="Seconds" placeholder="0" />
-    </Form>
-  );
+export default function Command(props: { arguments: Arguments.CaffeinateFor }) {
+  const started = useRef(false);
+
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    caffeinateFor(props.arguments)
+      .catch((error: unknown) =>
+        showToast(Toast.Style.Failure, "Failed to caffeinate", error instanceof Error ? error.message : String(error)),
+      )
+      .finally(() => popToRoot());
+  }, [props.arguments]);
+
+  return null;
 }
