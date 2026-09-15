@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -30,7 +30,7 @@ import {
 import { IndexStats } from "./lib/index-db";
 import { readStats } from "./lib/index-reader";
 import { searchIndexPath } from "./lib/index-rebuild";
-import { googleDriveIndexRoots } from "./lib/index-build";
+import { cloudStorageIndexRoots } from "./lib/index-build";
 import { displayPath } from "./lib/read-dir";
 import { formatDuration, formatIndexBytes } from "./lib/format";
 
@@ -85,17 +85,17 @@ function AddScopeForm({ onAdd }: { onAdd: (folders: string[]) => void }) {
 export default function Command() {
   const [settings, setSettings] = useState<IndexSettings>();
   const [stats, setStats] = useState<IndexStats>();
-  const [driveRoots, setDriveRoots] = useState<string[]>([]);
+  const [cloudRoots, setCloudRoots] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
 
   const reload = useCallback(async () => {
     const [loaded, roots] = await Promise.all([
       loadIndexSettings(),
-      googleDriveIndexRoots(),
+      cloudStorageIndexRoots(),
     ]);
     setSettings(loaded);
-    setDriveRoots(roots);
+    setCloudRoots(roots);
     setStats(readStats(searchIndexPath()));
     setLoading(false);
   }, []);
@@ -104,21 +104,36 @@ export default function Command() {
     void reload();
   }, [reload]);
 
+  // A synchronous gate also catches back-to-back actions before React renders.
+  const saving = useRef(false);
   const commit = useCallback(async (next: IndexSettings) => {
-    // Show the change immediately, then keep it only if the write succeeds.
-    setSettings(next);
-    const outcome = await saveIndexSettings(next);
-    if (outcome === "saved") return true;
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Settings could not be saved",
-      message:
-        outcome === "reset"
-          ? "Extension data was reset while this screen was open."
-          : "Wait for any indexing or data deletion to finish, then retry. Your other data is untouched.",
-    });
-    setSettings(await loadIndexSettings());
-    return false;
+    if (saving.current) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Settings are being saved",
+        message: "Wait for the current change to finish, then retry.",
+      });
+      return false;
+    }
+    saving.current = true;
+    try {
+      // Keep other edits out until saving or restoring the old value finishes.
+      setSettings(next);
+      const outcome = await saveIndexSettings(next);
+      if (outcome === "saved") return true;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Settings could not be saved",
+        message:
+          outcome === "reset"
+            ? "Extension data was reset while this screen was open."
+            : "Wait for any indexing or data deletion to finish, then retry. Your other data is untouched.",
+      });
+      setSettings(await loadIndexSettings());
+      return false;
+    } finally {
+      saving.current = false;
+    }
   }, []);
 
   const onAddScope = useCallback(
@@ -179,14 +194,13 @@ export default function Command() {
     });
     if (!confirmed) return;
     if (await commit({ ...DEFAULT_SETTINGS })) {
-      await reload();
       await showToast({
         style: Toast.Style.Success,
         title: "Settings reset",
         message: "The next rebuild uses the defaults.",
       });
     }
-  }, [commit, reload]);
+  }, [commit]);
 
   const toggle = useCallback(
     (key: "includeDrive" | "includeHidden" | "useIgnoreFiles") => async () => {
@@ -223,8 +237,8 @@ export default function Command() {
         <Action
           title={
             settings.includeDrive
-              ? "Stop Indexing Google Drive"
-              : "Index Google Drive"
+              ? "Exclude Cloud Storage"
+              : "Include Cloud Storage"
           }
           icon={Icon.HardDrive}
           onAction={toggle("includeDrive")}
@@ -273,11 +287,11 @@ export default function Command() {
             subtitle={describeSettings(settings)}
           >
             {settings.includeDrive &&
-              (driveRoots.length === 0 ? (
+              (cloudRoots.length === 0 ? (
                 <List.Item
-                  key="drive-missing"
+                  key="cloud-missing"
                   icon={{ source: Icon.HardDrive, tintColor: Color.Orange }}
-                  title="Google Drive"
+                  title="Cloud Storage"
                   subtitle="Detected automatically · none mounted right now"
                   actions={
                     <ActionPanel>
@@ -287,13 +301,13 @@ export default function Command() {
                   }
                 />
               ) : (
-                driveRoots.map((root) => (
+                cloudRoots.map((root) => (
                   <List.Item
                     key={root}
                     icon={Icon.HardDrive}
                     title={displayPath(root)}
                     subtitle="Detected automatically"
-                    accessories={[{ text: "Google Drive" }]}
+                    accessories={[{ text: "Cloud Storage" }]}
                     actions={
                       <ActionPanel>
                         {addActions}
@@ -332,7 +346,7 @@ export default function Command() {
                 key="nothing"
                 icon={{ source: Icon.Warning, tintColor: Color.Red }}
                 title="Nothing is set to be indexed"
-                subtitle="Add a folder, or turn Google Drive back on"
+                subtitle="Add a folder, or turn Include Cloud Storage back on"
                 actions={
                   <ActionPanel>
                     {addActions}

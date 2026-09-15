@@ -29,7 +29,7 @@ export async function withIndexingLock<T>(
           ? "Data deletion stopped"
           : operation === "settings"
             ? "Settings could not be saved"
-            : "Google Drive indexing stopped",
+            : "Search indexing stopped",
       message: busy
         ? "Wait for indexing, settings changes, or data deletion to finish, then retry. Crash recovery can take ten minutes. If it stays busy after restarting Raycast, see lock recovery in DEVELOPMENT.md."
         : operation === "deletion"

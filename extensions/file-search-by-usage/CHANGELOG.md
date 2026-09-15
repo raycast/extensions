@@ -8,6 +8,8 @@
 - Add All Types, Directory, and File filters alongside independent, remembered sort choices in the top-right dropdown.
 - Build a name index with `fd` and query it with SQLite full-text search; requires `fd` and runs only when you ask for it with Rebuild Search Index (`⌘⇧R`).
 - Choose which folders the index covers and which names to ignore in Search Index Settings, with the built-in exclusions listed alongside your own and index stats for disk usage, entry counts, and the last scan duration.
+- Automatically include all provider folders under `~/Library/CloudStorage`, not just Google Drive, and list them in Search Index Settings.
+- Keep nested scopes independent, so excluding `~/Library` from the home scan does not suppress explicitly included CloudStorage providers; avoid duplicate traversal and preserve child coverage during incomplete scans.
 - Pass ignore patterns to `fd` unchanged, so its glob syntax works, and optionally respect `.gitignore`, `.ignore`, and `.fdignore` files found while indexing.
 - Drop entries for a folder removed from the scope on the next rebuild that reaches the end of every remaining folder; a rebuild that stops early keeps them.
 - Rank history, pins, cached results, and indexed names together, and publish one finished list per query.
@@ -25,7 +27,7 @@
 - Query the index at three characters and say how many more are needed below that; keep memory results available at any length.
 - Keep healthy folder reads moving past stalled files; collection does not depend on scrolling.
 - Coordinate deletion with pending history and cache writes; bound cached-path metadata reads and retain cached results when metadata stalls.
-- Navigate folders with `⇧⌘↓` and `⇧⌘↑`, or type an absolute or home-relative path.
+- Navigate folders with `⌥⌘↓` and `⌥⌘↑`, or type an absolute or home-relative path.
 - Use native navigation with a lightweight root and one active search route, without saved folder history; release each previous result view.
 - Return to the empty start screen with native Back; preserve typed queries when restarting search, including during development-mode effect replay.
 - Detach native control callbacks when results are discarded so development tools cannot retain their index arrays.

@@ -42,8 +42,9 @@ export async function indexSafetyChecks(assert: Assert) {
 
   try {
     assert(
-      normalizeRoots(["/", "/Users/example", "/Applications"]).join() === "/",
-      "filesystem root absorbs nested scopes without scanning them twice",
+      normalizeRoots(["/", "/Users/example", "/Applications"]).join() ===
+        "/Users/example,/Applications,/",
+      "filesystem root does not absorb explicit nested scopes",
     );
 
     // A separate command can create the index without notifying this reader.

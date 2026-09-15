@@ -20,11 +20,11 @@ export const MAX_SCOPES = 32;
 export const MAX_PATTERNS = 128;
 
 export type IndexSettings = {
-  /** Extra roots to index, beyond the detected Google Drive mounts. */
+  /** Extra roots to index, beyond the detected CloudStorage folders. */
   scopes: string[];
   /** fd --exclude globs, in addition to the built-in list. */
   patterns: string[];
-  /** Index the detected Google Drive mounts. */
+  /** Include all CloudStorage folders; retain the legacy key for saved settings. */
   includeDrive: boolean;
   /** Index dot-prefixed files and folders. */
   includeHidden: boolean;
@@ -43,9 +43,8 @@ export type IndexSettings = {
  * 1,139,015 entries for /Applications against 36,721 with bundle contents
  * skipped. This index is for the user's own files.
  *
- * The home folder contains ~/Library/CloudStorage, so when Google Drive is
- * also enabled the scan drops the Drive roots as contained in the home root.
- * The result is the same paths under one root.
+ * Cloud roots remain independent of the home scope, so excluding Library from
+ * the home scan does not suppress an explicitly included cloud provider.
  */
 export function defaultScopes(home = os.homedir()): string[] {
   return [home];
@@ -247,16 +246,15 @@ export function removePattern(
 /**
  * The roots a scan should cover.
  *
- * Detected Drive mounts come first so their rows are written before an
- * entry-capped scan runs out, since Drive is what the extension is mainly for.
- * Normalising and resolving happens in the scan, which drops contained and
- * duplicate roots.
+ * Detected cloud folders come first, before extra scopes.
+ * Normalising and resolving happens in the scan, which deduplicates aliases
+ * while retaining nested scopes as independent entry points.
  */
 export function configuredRoots(
   settings: IndexSettings,
-  driveRoots: string[],
+  cloudRoots: string[],
 ): string[] {
-  const roots = settings.includeDrive ? [...driveRoots] : [];
+  const roots = settings.includeDrive ? [...cloudRoots] : [];
   for (const scope of settings.scopes)
     if (!roots.includes(scope)) roots.push(scope);
   return roots;
@@ -265,7 +263,7 @@ export function configuredRoots(
 /** One line describing the configured scope, for the settings header. */
 export function describeSettings(settings: IndexSettings): string {
   const parts = [
-    settings.includeDrive ? "Google Drive" : undefined,
+    settings.includeDrive ? "Cloud Storage" : undefined,
     settings.scopes.length === 1
       ? "1 extra folder"
       : settings.scopes.length > 1

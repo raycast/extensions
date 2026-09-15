@@ -30,6 +30,7 @@ export const INDEX_EXCLUSIONS = [
   ...NOISE_SEGMENTS,
   ".Trash",
   ".DS_Store",
+  "**/CloudStorage/.locator",
 ] as const;
 
 /** Paths stat'ed at once. Bounded so a slow mount cannot queue unboundedly. */
@@ -95,23 +96,14 @@ export type ScanOptions = {
 };
 
 /**
- * Drop any root contained in another.
- *
- * Overlapping roots would let one path be written under two different `root`
- * values, and a later complete scan of the outer root would not recognise the
- * rows the inner scan relabelled. Removing the overlap keeps each path owned by
- * exactly one root, which is what makes stale removal scope-safe.
+ * Deduplicate scopes, keeping explicit children before their parents.
+ * A child is an independent entry point: its parent's ignore rules must not
+ * prevent it being scanned. Parent walks and cleanup exclude these children.
  */
 export function normalizeRoots(roots: readonly string[]): string[] {
-  const cleaned = [
+  return [
     ...new Set(roots.map((root) => path.resolve(root)).filter(Boolean)),
-  ].sort((a, b) => a.length - b.length);
-  const kept: string[] = [];
-  for (const root of cleaned) {
-    const inside = kept.some((existing) => containsPath(existing, root));
-    if (!inside) kept.push(root);
-  }
-  return kept;
+  ].sort((a, b) => b.length - a.length);
 }
 
 function containsPath(root: string, candidate: string): boolean {
@@ -119,6 +111,15 @@ function containsPath(root: string, candidate: string): boolean {
     candidate === root ||
     candidate.startsWith(root.endsWith(path.sep) ? root : root + path.sep)
   );
+}
+
+function nestedRoots(root: string, roots: readonly string[]): string[] {
+  return roots.filter((other) => other !== root && containsPath(root, other));
+}
+
+/** Anchor a literal path for fd's glob parser, including names containing brackets. */
+function excludePath(root: string, target: string): string {
+  return `/${path.relative(root, target).replace(/[\\*?[\]{}]/gu, "\\$&")}`;
 }
 
 /**
@@ -157,9 +158,8 @@ export async function resolveRoots(
  * Which spelling to keep is not arbitrary. `~/Shared Documents` is a
  * link the user made and recognises; `~/Library/CloudStorage/Dropbox-...` is
  * machinery. So when a link inside this root points somewhere else inside the
- * same root, the link wins and the target is excluded. When it points into a
- * different root, that root's own scan owns those files and the link is
- * excluded instead.
+ * same scope, the link wins and the target is excluded. When an explicitly
+ * configured nested scope owns the target, its own scan wins instead.
  *
  * Returned as gitignore-anchored paths relative to the root: `/Name` or
  * `/Library/CloudStorage`. Anchoring matters twice over. It confines the
@@ -178,6 +178,7 @@ export async function redundantLinks(
     return [];
   }
   const out = new Set<string>();
+  const scopes = normalizeRoots(roots);
   for (const entry of entries) {
     if (!entry.isSymbolicLink()) continue;
     let target: string;
@@ -187,15 +188,24 @@ export async function redundantLinks(
       // A broken link costs nothing to walk; leave it to the scan.
       continue;
     }
-    if (containsPath(root, target)) {
+    const owner = scopes.find((scope) => containsPath(scope, target));
+    if (owner !== undefined && owner !== root) {
+      out.add(excludePath(root, path.join(root, entry.name)));
+    } else {
       // Keep the link the user made, drop the path it points at.
-      const relative = path.relative(root, target);
-      if (relative !== "") out.add(`/${relative}`);
-      continue;
+      if (target !== root && containsPath(root, target)) {
+        out.add(excludePath(root, target));
+      }
+      // The retained alias must also yield any independently scanned descendants.
+      for (const child of nestedRoots(target, scopes)) {
+        out.add(
+          excludePath(
+            root,
+            path.join(root, entry.name, path.relative(target, child)),
+          ),
+        );
+      }
     }
-    // Owned by another root's scan, so this spelling is the duplicate.
-    if (roots.some((other) => other !== root && containsPath(other, target)))
-      out.add(`/${entry.name}`);
   }
   return [...out];
 }
@@ -423,7 +433,7 @@ export async function scanRoot(
   root: string,
   options: ScanOptions,
   deadline: number,
-  /** Anchored names to skip, from `redundantLinks`. */
+  /** Anchored paths owned by another scope or reached through another alias. */
   linkExclusions: readonly string[] = [],
 ): Promise<RootOutcome> {
   const {
@@ -493,10 +503,17 @@ export async function scanRoot(
   const fdArgs = fdArguments(root, {
     showHidden,
     useIgnoreFiles: options.useIgnoreFiles,
-    // Anchored link exclusions come first so they cannot be confused with the
-    // user's own name globs.
-    patterns: [...linkExclusions, ...(options.patterns ?? [])],
+    // Ownership exclusions stay last so user include globs cannot cause overlap.
+    patterns: [...(options.patterns ?? []), ...linkExclusions],
   });
+  // Parent walks skip the nested root itself; fd does not emit its search root.
+  if (
+    maxEntries > 0 &&
+    options.roots.some((other) => other !== root && containsPath(other, root))
+  ) {
+    pending.push({ path: root, isDir: true });
+    scanned++;
+  }
   // A quiet or stalled fd process must not outlive the budget merely because
   // there is no next chunk at which to check the clock.
   const timeLimit = new AbortController();
@@ -592,10 +609,18 @@ export async function scanRoot(
     assertOwned?.();
     db.exec("BEGIN IMMEDIATE");
     try {
-      db.prepare("DELETE FROM files WHERE root = ? AND scan_id != ?").run(
-        root,
-        scanId,
-      );
+      // Path-based cleanup also handles rows still owned by an older parent.
+      // Never use a successful parent scan to infer absence inside a child scope.
+      const subtree = "(path = ? OR (path >= ? AND path < ?))";
+      const bounds = (scope: string) => {
+        const prefix = scope.endsWith(path.sep) ? scope : scope + path.sep;
+        return [scope, prefix, prefix.slice(0, -1) + "0"];
+      };
+      const children = nestedRoots(root, options.roots);
+      db.prepare(
+        `DELETE FROM files WHERE scan_id != ? AND (root = ? OR ${subtree})` +
+          children.map(() => ` AND NOT ${subtree}`).join(""),
+      ).run(scanId, root, ...bounds(root), ...children.flatMap(bounds));
       db.exec("COMMIT");
     } catch (deleteError) {
       rollback(db);
@@ -704,6 +729,7 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
   const aggregated: ScanOptions = report
     ? {
         ...options,
+        roots,
         onProgress: (progress) =>
           report({
             root: progress.root,
@@ -712,7 +738,7 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
             elapsedMs: Date.now() - started,
           }),
       }
-    : options;
+    : { ...options, roots };
 
   for (const root of roots) {
     if (options.signal?.aborted || Date.now() > deadline) {
@@ -726,12 +752,10 @@ export async function scanRoots(options: ScanOptions): Promise<ScanReport> {
       });
       continue;
     }
-    const outcome = await scanRoot(
-      root,
-      aggregated,
-      deadline,
-      await redundantLinks(root, roots),
-    );
+    const outcome = await scanRoot(root, aggregated, deadline, [
+      ...(await redundantLinks(root, roots)),
+      ...nestedRoots(root, roots).map((child) => excludePath(root, child)),
+    ]);
     doneScanned += outcome.scanned;
     doneIndexed += outcome.indexed;
     outcomes.push(outcome);

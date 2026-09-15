@@ -6,6 +6,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { transformSync } from "esbuild";
 import { between } from "./source-slice";
+import { scopeExceptionChecks } from "./scope-exception-checks";
 import { findFd, FD_DIRECTORIES } from "../src/lib/fd";
 import { formatSize } from "../src/lib/format";
 import { buildFtsQuery, MIN_INDEX_TERM } from "../src/lib/fts-query";
@@ -49,7 +50,7 @@ import {
   removeScope,
   serializeSettings,
 } from "../src/lib/index-settings";
-import { googleDriveIndexRoots, rebuildIndex } from "../src/lib/index-build";
+import { cloudStorageIndexRoots, rebuildIndex } from "../src/lib/index-build";
 import {
   IndexCoverage,
   closeIndexReader,
@@ -106,6 +107,7 @@ function rowPaths(db: DatabaseSync): string[] {
 }
 
 export async function indexChecks(assert: Assert) {
+  await scopeExceptionChecks(assert);
   // ---------------------------------------------------------------- fd lookup
   const fakeProbe = (allowed: string[]) => (candidate: string) =>
     allowed.includes(candidate);
@@ -459,7 +461,7 @@ export async function indexChecks(assert: Assert) {
       { ...DEFAULT_SETTINGS, includeDrive: false, scopes: ["/extra"] },
       ["/Drive/A"],
     ).join(",") === "/extra",
-    "turning Google Drive off leaves only the configured scopes",
+    "turning Cloud Storage off leaves only the configured scopes",
   );
   assert(
     configuredRoots({ ...DEFAULT_SETTINGS, scopes: ["/Drive/A"] }, [
@@ -473,7 +475,7 @@ export async function indexChecks(assert: Assert) {
     "with nothing configured there is nothing to scan, which the caller reports",
   );
   assert(
-    describeSettings(empty) === "Google Drive" &&
+    describeSettings(empty) === "Cloud Storage" &&
       describeSettings({ ...empty, scopes: ["/a"] }).includes(
         "1 extra folder",
       ) &&
@@ -922,8 +924,8 @@ export async function indexChecks(assert: Assert) {
   );
 
   assert(
-    normalizeRoots(["/a", "/a/b", "/c"]).join(",") === "/a,/c",
-    "a root inside another is dropped so stale removal stays scope-safe",
+    normalizeRoots(["/a", "/a/b", "/c"]).join(",") === "/a/b,/a,/c",
+    "explicit nested scopes are retained before their parents",
   );
   assert(
     normalizeRoots(["/a/", "/a"]).length === 1,
@@ -1188,7 +1190,7 @@ export async function indexChecks(assert: Assert) {
   });
   assert(
     wired.kind === "done",
-    "a scan runs from the configured scopes with Google Drive off",
+    "a scan runs from the configured scopes with Cloud Storage off",
   );
   assert(
     seenArgs.length === 1 && seenArgs[0].at(-1) === wiredScope,
@@ -1969,23 +1971,86 @@ export async function indexChecks(assert: Assert) {
   if (builtRead.kind === "opened") builtRead.db.close();
   fs.rmSync(buildDir, { recursive: true, force: true });
 
-  const driveRoots = await googleDriveIndexRoots(
+  const cloudRoots = await cloudStorageIndexRoots(
     path.join(tempDir("cloud"), "absent"),
   );
   assert(
-    driveRoots.length === 0,
+    cloudRoots.length === 0,
     "a missing CloudStorage directory yields no roots",
   );
   const cloud = tempDir("cloud2");
-  fs.mkdirSync(path.join(cloud, "GoogleDrive-someone@example.com"));
-  fs.mkdirSync(path.join(cloud, "Dropbox"));
+  const providers = [
+    "GoogleDrive-someone@example.com",
+    "Dropbox",
+    "OneDrive-Example",
+    "CustomProvider",
+  ];
+  for (const provider of providers) fs.mkdirSync(path.join(cloud, provider));
+  fs.mkdirSync(path.join(cloud, ".locator"));
   fs.writeFileSync(path.join(cloud, "GoogleDrive-file"), "not a directory");
-  const detected = await googleDriveIndexRoots(cloud);
+  fs.symlinkSync(path.join(cloud, "absent"), path.join(cloud, "Unavailable"));
+  const linkedProvider = tempDir("linked-provider");
+  fs.symlinkSync(linkedProvider, path.join(cloud, "LinkedProvider"));
+  const detected = await cloudStorageIndexRoots(cloud);
   assert(
-    detected.length === 1 &&
-      detected[0].endsWith("GoogleDrive-someone@example.com"),
-    "Google Drive roots are detected by directory name, not a hardcoded account",
+    !detected.includes(path.join(cloud, ".locator")),
+    "CloudStorage metadata .locator is not an automatic search scope",
   );
+  assert(
+    providers.every((provider) =>
+      detected.includes(path.join(cloud, provider)),
+    ),
+    "CloudStorage discovery includes every provider, not only Google Drive",
+  );
+  assert(
+    detected.includes(path.join(cloud, "LinkedProvider")) &&
+      detected.length === providers.length + 1,
+    "CloudStorage discovery follows directory links and skips files and unavailable targets",
+  );
+  assert(
+    (await cloudStorageIndexRoots(path.join(cloud, "GoogleDrive-file")))
+      .length === 0,
+    "an unreadable CloudStorage listing yields no detected roots",
+  );
+  for (const enabled of [true, false]) {
+    const saved = parseSettings(
+      JSON.stringify({ scopes: [], includeDrive: enabled }),
+    );
+    const roots = configuredRoots(saved, detected);
+    assert(
+      enabled
+        ? roots.length === providers.length + 1 &&
+            providers.every((provider) =>
+              roots.includes(path.join(cloud, provider)),
+            )
+        : roots.length === 0,
+      `the saved automatic-scope choice (${enabled}) applies to all cloud providers without a home scope`,
+    );
+  }
+
+  // Exercise discovery through indexing and search, without relying on a home scope.
+  for (const root of detected)
+    fs.writeFileSync(path.join(root, "report.txt"), "r");
+  const cloudIndex = path.join(cloud, "index.sqlite");
+  const cloudBuild = await rebuildIndex({
+    file: cloudIndex,
+    withLock: async (work) => work(() => {}),
+    lookupFd: foundFd,
+    roots: configuredRoots({ ...DEFAULT_SETTINGS, scopes: [] }, detected),
+    spawnFd: (args) => fdOutput([path.join(args.at(-1)!, "report.txt")]),
+  });
+  const cloudRead = openIndexForRead(cloudIndex);
+  assert(
+    cloudBuild.kind === "done" &&
+      cloudBuild.report.complete &&
+      cloudRead.kind === "opened" &&
+      queryIndex(cloudRead.db, parseQuery("report")).entries.length ===
+        providers.length + 1,
+    "all detected provider scopes contribute searchable files without a home scope",
+  );
+  if (cloudRead.kind === "opened") cloudRead.db.close();
+  fs.rmSync(cloud, { recursive: true, force: true });
+  fs.rmSync(linkedProvider, { recursive: true, force: true });
 
   const report = describeScan({
     roots: [
@@ -2035,6 +2100,43 @@ export async function indexChecks(assert: Assert) {
   // --------------------------------------------------- real fd, when installed
   const realFd = findFd();
   if (realFd.kind === "found") {
+    const locatorDir = tempDir("locator-exclusion");
+    try {
+      const home = path.join(locatorDir, "home");
+      const cloud = path.join(home, "Library", "CloudStorage");
+      const excluded = path.join(cloud, ".locator");
+      const provider = path.join(cloud, "ExampleProvider");
+      const unrelated = path.join(home, "Documents", ".locator");
+      for (const folder of [excluded, provider, unrelated]) {
+        fs.mkdirSync(folder, { recursive: true });
+        fs.writeFileSync(path.join(folder, "report.txt"), "r");
+      }
+      const db = openWritable(locatorDir);
+      try {
+        const outcome = await scanRoot(
+          home,
+          { fd: realFd.path, roots: [home], db, showHidden: true },
+          Date.now() + 60_000,
+        );
+        const paths = rowPaths(db);
+        assert(
+          outcome.complete &&
+            !paths.some(
+              (p) => p === excluded || p.startsWith(excluded + path.sep),
+            ),
+          "a hidden-enabled home scan excludes CloudStorage .locator and its contents",
+        );
+        assert(
+          paths.includes(path.join(provider, "report.txt")) &&
+            paths.includes(path.join(unrelated, "report.txt")),
+          "the locator exclusion preserves provider files and unrelated same-named folders",
+        );
+      } finally {
+        db.close();
+      }
+    } finally {
+      fs.rmSync(locatorDir, { recursive: true, force: true });
+    }
     const shortcutDir = tempDir("hidden-shortcut");
     const shortcutRoot = path.join(shortcutDir, "tree");
     const target = path.join(

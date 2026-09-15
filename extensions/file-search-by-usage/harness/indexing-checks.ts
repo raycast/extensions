@@ -1594,6 +1594,110 @@ async function indexSettingsStoreChecks(
     );
   }
 
+  // Exercise the actual editor callback with real settings storage and locks.
+  const commitSource = between(
+    fs.readFileSync("src/index-settings.tsx", "utf8"),
+    "  const commit =",
+    "  const onAddScope =",
+  );
+  const commitCode = transformSync(`${commitSource}\nreturn commit;`, {
+    loader: "tsx",
+  }).code;
+  function editor(store: ReturnType<typeof loadCommand>) {
+    let displayed = custom;
+    const messages: { style: string }[] = [];
+    const commit = new Function(
+      "useCallback",
+      "saving",
+      "setSettings",
+      "saveIndexSettings",
+      "loadIndexSettings",
+      "showToast",
+      "Toast",
+      commitCode,
+    )(
+      (fn: unknown) => fn,
+      { current: false },
+      (next: Settings) => {
+        displayed = next;
+      },
+      store.settings.saveIndexSettings,
+      store.settings.loadIndexSettings,
+      async (message: { style: string }) => {
+        messages.push(message);
+      },
+      { Style: { Failure: "failure" } },
+    ) as (next: Settings) => Promise<boolean>;
+    return { commit, displayed: () => displayed, messages };
+  }
+
+  const overlap = storeAt(path.join(root, "editor-overlap"));
+  overlap.storage.set(SETTINGS_KEY, serializeSettings(custom));
+  let finishWrite!: () => void;
+  overlap.writing.before = () =>
+    new Promise<void>((resolve) => {
+      finishWrite = resolve;
+    });
+  const view = editor(overlap);
+  const firstEdit = view.commit(widened);
+  await until(() => !!finishWrite, "the editor's first settings write");
+  const secondEdit = await view.commit({
+    ...view.displayed(),
+    includeHidden: false,
+  });
+  finishWrite();
+  await firstEdit;
+  assert(
+    !secondEdit &&
+      same(view.displayed(), widened) &&
+      overlap.storage.get(SETTINGS_KEY) === serializeSettings(widened),
+    "a rejected overlapping edit cannot roll the editor back over a successful save",
+  );
+  assert(
+    view.messages.some((message) => message.style === "failure"),
+    "an overlapping edit is visibly refused rather than silently dropped",
+  );
+  overlap.writing.before = async () => {};
+  await view.commit({ ...view.displayed(), includeHidden: false });
+  assert(
+    overlap.storage.get(SETTINGS_KEY) ===
+      serializeSettings({ ...widened, includeHidden: false }),
+    "the next settings edit retains the successfully added scope",
+  );
+
+  const rollback = storeAt(path.join(root, "editor-rollback"));
+  rollback.storage.set(SETTINGS_KEY, serializeSettings(custom));
+  fs.mkdirSync(path.join(root, "editor-rollback"), { recursive: true });
+  const heldIndex = acquireOwnedLock(
+    path.join(root, "editor-rollback", "google-drive-indexing"),
+  );
+  let finishRead!: () => void;
+  rollback.reading.before = () =>
+    new Promise<void>((resolve) => {
+      finishRead = resolve;
+    });
+  const failedView = editor(rollback);
+  const failedEdit = failedView.commit(widened);
+  await until(() => !!finishRead, "the editor's failed-save rollback");
+  heldIndex.release();
+  const duringRollback = await failedView.commit({
+    ...custom,
+    includeHidden: false,
+  });
+  finishRead();
+  await failedEdit;
+  assert(
+    !duringRollback &&
+      same(failedView.displayed(), custom) &&
+      rollback.storage.get(SETTINGS_KEY) === serializeSettings(custom),
+    "edits remain excluded until a failed save has restored the stored settings",
+  );
+  rollback.reading.before = async () => {};
+  assert(
+    await failedView.commit(widened),
+    "the editor accepts a retry after a failed save and rollback",
+  );
+
   // Run the real reset action without a Raycast window. A nonempty failure
   // string used to be mistaken for success by this handler.
   const resetSource = between(
@@ -1606,6 +1710,7 @@ async function indexSettingsStoreChecks(
   });
   for (const outcome of ["saved", "reset", "failed"] as const) {
     const messages: { style: string }[] = [];
+    let displayed = custom;
     const runReset = new Function(
       "useCallback",
       "confirmAlert",
@@ -1622,9 +1727,15 @@ async function indexSettingsStoreChecks(
       async () => true,
       { ActionStyle: { Destructive: "destructive" } },
       async () => outcome,
-      async () => outcome === "saved",
+      async () => {
+        // A subsequent edit starts just after the reset save finishes.
+        if (outcome === "saved") displayed = widened;
+        return outcome === "saved";
+      },
       DEFAULT_SETTINGS,
-      async () => {},
+      async () => {
+        displayed = { ...DEFAULT_SETTINGS };
+      },
       async (message: { style: string }) => messages.push(message),
       { Style: { Success: "success" } },
     ) as () => Promise<void>;
@@ -1634,5 +1745,10 @@ async function indexSettingsStoreChecks(
         (outcome === "saved"),
       `settings reset action reports success only for a saved change (${outcome})`,
     );
+    if (outcome === "saved")
+      assert(
+        same(displayed, widened),
+        "a finished settings reset does not reload an older snapshot over a subsequent edit",
+      );
   }
 }

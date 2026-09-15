@@ -25,20 +25,23 @@ Before the first rebuild, search uses remembered paths and standard locations. F
 
 ## Index scope and rebuilding
 
-By default the index covers your home folder and any Google Drive mounts it detects, skipping hidden names, common caches, and your ignore patterns. `/Applications` is not included.
+By default the index covers your home folder and every detected folder under `~/Library/CloudStorage`, including Dropbox, OneDrive, Google Drive, and other providers. Hidden names, common caches, and your ignore patterns are skipped. `/Applications` is not included.
 
 In **Search Index Settings** you can:
 
-- Add a scope with `⌘N`, and remove one you added with `⌃D`.
+- Add a scope with `⌘N`, and remove one you added with `⌃X`.
+- Use **Include Cloud Storage** to detect all provider folders, even without the home-folder scope. Each appears as an automatically detected scope.
 - Add fd ignore patterns such as `*.tmp`, `build`, or `**/tmp/**`.
 - Turn on **Include Hidden Files** to index dot-prefixed names.
 - Turn on **Use Ignore Files** to respect `.gitignore`, `.ignore`, and `.fdignore`. This is off by default.
 
-Some exclusions always apply, including `.git` and `node_modules`. The settings screen lists them. Turning off automatic Google Drive detection does not exclude Drive folders that sit under another scope, such as your home folder.
+Some exclusions always apply, including `.git`, `node_modules`, and CloudStorage's internal `.locator` folder. The settings screen lists them. `.locator` is also omitted from automatically detected scopes. Turning off automatic Cloud Storage inclusion does not exclude folders that sit under another scope, such as your home folder.
 
-Changes take effect on the next rebuild. Wait for any active rebuild to finish before saving settings. Visible symbolic links, including Google Drive shared-folder shortcuts, are followed even when their target lives in a hidden directory.
+To skip `~/Library` in the home scan while keeping cloud files, add `**/Library/**` and leave **Include Cloud Storage** enabled. Each cloud provider is scanned separately; the home scan skips those provider folders to avoid duplicates. Ignore patterns match the traversed path, not a symbolic link's resolved target: a differently named link elsewhere can still expose excluded content. Exclude that link path separately if needed. Ignore patterns still apply within each provider scope.
 
-You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. A large or cold cloud folder can take minutes to scan, and a large index can occupy hundreds of megabytes. A scan that fails partway keeps what it already had, so an unreachable mount does not empty your index.
+Changes take effect on the next rebuild. Settings edits are saved one at a time; if a save, rebuild, or data deletion is active, wait and retry. Visible symbolic links, including Google Drive shared-folder shortcuts, are followed even when their target lives in a hidden directory.
+
+You can keep searching during a rebuild. New names may not be searchable until the final index write; change the query or press `⌘R` after it finishes. Large cloud folders can take minutes to scan and produce indexes of hundreds of megabytes. Each fully scanned scope can remove stale entries; an incomplete or unreachable scope keeps its previously indexed paths.
 
 ## Searching
 
@@ -70,8 +73,8 @@ Opening an item or entering a folder records usage and remembers the query you u
 ## Folder navigation and results
 
 - `⏎` opens the selected item. For a folder it opens Finder.
-- `⇧⌘↓` browses inside a folder. Queries there match **direct children only**, never deeper.
-- `⇧⌘↑` goes up and selects the folder you just left.
+- `⌥⌘↓` browses inside a folder. Queries there match **direct children only**, never deeper.
+- `⌥⌘↑` goes up and selects the folder you just left.
 - `⇧⌘H` returns to Everywhere with an empty query. Sort, type, and session hidden-file choices stay as they were.
 
 Changing folders clears the query. No folder history is kept. Folder contents refresh on their own, with a five-second poll to catch change notifications that were missed. `⌘R` refreshes by hand.
@@ -82,7 +85,7 @@ The status line shows the location, the count, and progress: yellow while waitin
 
 **Hidden files:** `⇧⌘.` changes visibility for this run of the command; reopening it restores your preference. A dot-prefixed query also includes hidden names. Neither adds names to the index: for that, turn on **Include Hidden Files** and rebuild. Direct folder browsing shows hidden children without an index.
 
-**Escape:** Raycast owns clear-text and Back. Back from a folder returns to the extension's default screen. Known issue: the next Escape after that does not reliably exit to Raycast. `⇧⌘H` returns to the start screen but does not exit.
+**Escape:** Raycast owns clear-text and Back. Back from a folder returns to the extension's default screen. When leaving the extension, Escape returns to Raycast's main screen if you launched it there, or closes the Raycast window if you launched it with a hotkey. `⇧⌘H` returns to the extension's start screen but does not exit.
 
 ## Keyboard shortcuts
 
@@ -92,7 +95,7 @@ The status line shows the location, the count, and progress: yellow while waitin
 | `⌘↩`          | Show in Finder                     |
 | `⌘Y`          | Quick Look                         |
 | `⌘O`          | Open With…                         |
-| `⇧⌘↓` / `⇧⌘↑` | Enter folder / go to parent        |
+| `⌥⌘↓` / `⌥⌘↑` | Enter folder / go to parent        |
 | `⇧⌘H`         | Return to Start                    |
 | `⌘[` / `⌘]`   | Previous / next search             |
 | `⇧⌘.`         | Toggle hidden files for this run   |

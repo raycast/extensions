@@ -4,7 +4,7 @@ Implementation notes for maintaining and releasing File Search by Usage. The [RE
 
 ## Requirements and search backend
 
-File discovery uses `fd`. Name queries use an in-process SQLite FTS5 index. There is no Spotlight search: no `mdfind` calls and no fallback. One `mdls` call reads optional usage counts and last-used dates for folder ranking, never search results. See Caches and storage for its deadline and failure behaviour.
+File discovery uses `fd`. Name queries use an in-process SQLite FTS5 index. There is no Spotlight search: no `mdfind` calls and no fallback. Batched `mdls` calls read optional usage counts and last-used dates for folder ranking, never search results. See Caches and storage for their deadline and failure behaviour.
 
 - **Runtime:** Raycast on macOS, with the Node.js runtime it bundles, which exposes `node:sqlite` and SQLite FTS5. Verified against Raycast's Node 22.22.2 and SQLite 3.51.2. Recheck the distribution build in Raycast before release; a successful build does not verify runtime support.
 - **Crawler:** a separately installed `fd` (`brew install fd`, verify with `fd --version`). Required for rebuilds, not for querying an existing index. `src/lib/fd.ts` checks an explicit absolute `fdPath` preference first, then `PATH` and the common install directories. An invalid explicit path is an error, not a reason to silently pick another binary. Scopes and symlink targets must be readable with Raycast's permissions.
@@ -60,7 +60,7 @@ src/lib/work-queue.ts       independent workers and cancellation-aware backpress
 src/lib/name-order.ts       shared numeric filename collation
 src/lib/entry-identity.ts   storage paths and stable row ids
 src/lib/starting-paths.ts   standard and cloud start locations
-src/lib/spotlight.ts        the one mdls call, for usage metadata
+src/lib/spotlight.ts        batched mdls reads for usage metadata
 src/lib/usage-cache.ts      per-directory usage-metadata cache
 src/lib/fd.ts               fd discovery across install locations
 src/lib/index-db.ts         SQLite schema, pragmas, and connections
@@ -80,6 +80,7 @@ src/lib/erase.ts            data deletion under both locks
 src/lib/discovered.ts       caches nothing writes, kept only so deletion removes them
 src/lib/navigation-diagnostics.ts  development-only navigation and heap logging
 harness/rank-harness.ts     synthetic checks and opt-in live diagnostics
+harness/scope-exception-checks.ts  real-fd nested-scope exclusions, aliases, and cleanup
 harness/source-slice.ts     anchored reads of shipped component source
 harness/rank-sources-checks.ts  pure ranking, metadata merging, filters, and aliases
 harness/result-order-checks.ts  Usage and explicit sort comparators
@@ -101,7 +102,7 @@ harness/performance-checks.ts  freshness, cancellation, and ordering regressions
 harness/live-search-checks.ts  bounded queues, large listings, and stalled reads
 harness/index-checks.ts     fd lookup, FTS building, schema, scans, and queries
 harness/index-safety-checks.ts  cancellation boundaries, reader recovery, and failures
-harness/indexing-checks.ts  index preservation and indexing/deletion overlap
+harness/indexing-checks.ts  index preservation, settings races, and shared locks
 ```
 
 The filesystem scans do not import `@raycast/api`, so the harness can exercise them outside Raycast.
@@ -135,7 +136,13 @@ fd --absolute-path --print0 --follow --show-errors --no-ignore --hidden
 
 Output is a NUL-delimited stream, decoded with `StringDecoder` so a multi-byte character split across chunk boundaries survives. fd marks directories with a trailing separator, which is stripped before the path is stored. Metadata comes from one `lstat` per entry through a 16-worker pool; a symlink also gets a `stat` and a `realpath` so its target is recorded without losing the visible path. Broken links are kept. File contents are never read.
 
-fd canonicalises the root it is given, so `/var/x` comes back as `/private/var/x`. `resolveRoots` realpaths the configured roots before the scan, which keeps exact-path lookups working and stops one root appearing under two spellings. `normalizeRoots` then drops any root contained in another, so overlapping configuration cannot double-index a subtree.
+fd canonicalises the root it is given, so `/var/x` comes back as `/private/var/x`. `resolveRoots` realpaths the configured roots before the scan, which keeps exact-path lookups working and stops one root appearing under two spellings. `normalizeRoots` removes exact duplicates and orders nested scopes before parents; it does not discard explicit child scopes. Parent walks receive anchored, glob-escaped exclusions for each child scope, and parent-level symlink aliases yield to an independently configured target. A nested root gets its own directory row because fd does not emit the search root.
+
+Ignore patterns apply relative to each scan root. With the home folder and CloudStorage providers enabled, `**/Library/**` excludes Library from the home walk without suppressing the separate provider walks. Patterns within a provider still apply normally. Ownership exclusions are appended last so an include glob cannot make a parent traverse a child scope twice.
+
+Exclusions match traversed paths rather than resolved symlink targets. For example, a link at `~/Documents/Mail Archive` pointing into `~/Library/Mail` can still be crawled despite `**/Library/**`; exclude the alias path separately to omit it. Scope ownership exclusions prevent duplicate walks through root-level aliases, but are not a general resolved-target exclusion policy.
+
+Stale cleanup covers the completed scope's path range as well as its recorded owner, excluding every configured child scope. This removes obsolete rows inherited from an older parent-only index, while a failed or partial child scan keeps its saved paths even if its parent completes. Removing a child scope lets a completed parent scan apply its exclusions again. Cleanup never treats a mere path-prefix match as containment.
 
 Rows are written in `BEGIN IMMEDIATE` transactions of 1,000. Each scan takes a new `scan_id`. Stale-row deletion is scoped to one root and requires error-free completion. Every nonzero fd exit is a failure: exit 1 means "no matches" only with `--quiet`, which the crawler never passes. `--show-errors` also reports traversal diagnostics on successful exits, and those conservatively mark the root incomplete, including symlink-loop warnings. Cancellation is checked inside the loop and again after the final output and metadata flush. An unvisited root prevents a complete report, and with it the cleanup of unconfigured roots. Earlier roots that completed may already have removed their stale entries.
 
@@ -145,7 +152,7 @@ Rows are written in `BEGIN IMMEDIATE` transactions of 1,000. Each scan takes a n
 
 Scopes must be absolute. fd receives the root directly, so a relative path would resolve against whatever directory the Raycast process happens to have.
 
-Defaults are the home folder plus detected Google Drive roots, with hidden indexing and ignore-file handling off. Normalization collapses contained roots, including descendants of `/`. `/Applications` is not a default scope. The editable default patterns exclude temporary files, caches, `Library/Application Support`, the three Containers directories, and Mail, while keeping document storage such as iCloud Drive. Turning off Drive detection does not exclude Drive paths under the home scope.
+Defaults are the home folder plus every detected folder under `~/Library/CloudStorage`, with hidden indexing and ignore-file handling off. `cloudStorageIndexRoots` accepts all provider names, follows directory links, and skips files, unavailable targets, and the internal `.locator` folder. The built-in `**/CloudStorage/.locator` exclusion also prevents indexing that folder through a home-folder scan, including when hidden indexing is enabled. The settings screen lists detected folders even when no home scope is configured. **Include Cloud Storage** retains the serialized `includeDrive` key, so existing on/off choices survive the upgrade. Normalization deduplicates aliases while retaining explicit nested scopes, including descendants of `/`. `/Applications` is not a default scope. The editable default patterns exclude temporary files, caches, `Library/Application Support`, the three Containers directories, and Mail, while keeping document storage such as iCloud Drive. Turning off cloud detection does not exclude cloud paths under the home scope.
 
 Patterns are passed to fd verbatim as `--exclude` values, so fd's glob syntax is the syntax: nothing to translate, and no pattern language of our own to maintain. `INDEX_EXCLUSIONS` always applies on top, and the editor shows it read-only, so the effective scope is visible on one screen.
 
@@ -153,7 +160,7 @@ Patterns are passed to fd verbatim as `--exclude` values, so fd's glob syntax is
 
 The editor is a command rather than a preferences pane, because manifest preferences are static and single-valued. Its lists are in LocalStorage; the manifest keeps the hidden-file default, score visibility, and the fd path. Adding a scope pushes a one-field form using `Form.FilePicker` with `canChooseDirectories`.
 
-Every row's first action is non-destructive. The search bar doubles as the pattern input, so Return has to add rather than delete whichever row is selected; removal uses `Keyboard.Shortcut.Common.Remove`.
+Every row's first action is non-destructive. The search bar doubles as the pattern input, so Return has to add rather than delete whichever row is selected; removal uses `Keyboard.Shortcut.Common.Remove`. The editor accepts one settings save at a time, including any failure rollback; overlapping edits ask the user to retry without changing the displayed settings. Reset uses the same save path and does not reload settings after completion.
 
 A root removed from the configuration would otherwise keep its rows forever, because `scanRoot` only deletes stale rows for roots it scanned. `forgetUnconfiguredRoots` drops rows and coverage for any root outside the configured set, but only when every configured root completed. After a partial, failed, or cancelled run there is no way to tell a removed root from one the run did not reach, and deleting on that basis would throw away an index because a mount was slow.
 
@@ -199,15 +206,15 @@ A rebuild accepts an optional abort signal. Cancelling kills fd, and the flag is
 
 `NativeSearchNavigation` uses Raycast's Navigation API with at most two routes: global search at the root, and one reusable folder route above it. Only one result producer is mounted, so leaving the root releases its results before pushing the folder route. Later folder transitions reuse that route and its native input, replacing the keyed result producer and query owner, which avoids a native pop and push for every folder change. Native Back recreates default results with a fresh frame ID and an empty query. The pop callback schedules owner updates in a microtask, because Raycast invokes it inside a state updater.
 
-`FolderNavigation` stores the active folder, its numeric ID, and any requested initial selection, and no folder history. Fresh IDs reject old callbacks even after revisiting the same folder. Unmounting runs the search, watcher, timer, and validation cleanups, which makes previous results collectable. `⇧⌘↑` requests selection of the folder just left.
+`FolderNavigation` stores the active folder, its numeric ID, and any requested initial selection, and no folder history. Fresh IDs reject old callbacks even after revisiting the same folder. Unmounting runs the search, watcher, timer, and validation cleanups, which makes previous results collectable. `⌥⌘↑` requests selection of the folder just left.
 
-**Return to Start** (`⇧⌘H`) resets `FolderNavigation` to a new global frame, clears the query and selection, and cancels the previous scope before returning to the default root. Session hidden-file state and cached sort and type choices survive. Stale reset callbacks are ignored. The action is available from result rows and empty lists, except on the already-empty global screen. Bare Escape stays host-controlled, including whether it clears text before navigating back; see the known exit issue below. Clearing an Everywhere query restores the default results in place, and clearing a folder query leaves the folder open.
+**Return to Start** (`⇧⌘H`) resets `FolderNavigation` to a new global frame, clears the query and selection, and cancels the previous scope before returning to the default root. Session hidden-file state and cached sort and type choices survive. Stale reset callbacks are ignored. The action is available from result rows and empty lists, except on the already-empty global screen. Bare Escape stays host-controlled, including whether it clears text before navigating back. Clearing an Everywhere query restores the default results in place, and clearing a folder query leaves the folder open.
 
 The default root uses the same result view as search, including recent items, pins, places, the dropdown, and the normal item actions. Typing and query-history actions reuse the same native input and result producer, with no delayed route replacement and no second round of initialization. Details visibility and the query-history cursor are per-result-view state and reset when the location is replaced; saved queries, type and sort choices, and session hidden-file visibility survive.
 
 `SearchScreenView` keeps the native `List` mounted within one route while its result producer publishes props through `SearchScreenContent`. Each location owns a new `SearchScreen`, and cleanup drops its rows and callbacks. While a folder is open, the root retains only its small, blank, inactive input shell. A small renderer store passes the latest session settings and folder frame into the pushed route. Native event handlers use `useEventHandles`: controls receive small stable functions whose targets are cleared when their result view unmounts, so retained control props cannot keep the old view's result arrays alive.
 
-Known live-test issue: Escape exits normally from a newly opened default screen, and folder Back restores the default results, but the next Escape after that restoration does not reliably exit. The React harness checks route bounds and cleanup, not host exit: the SDK retains its last route and relies on the native host to leave the command. A mocked root unmount is not verification of this.
+The author verified that Escape's exit behavior depends on how the command was launched: launching from Raycast's main screen returns there, while launching with a hotkey closes the Raycast window. Folder Back first restores the extension's default screen. The React harness checks route bounds and cleanup, not host exit: the SDK retains its last route and relies on the native host to leave the command. A mocked root unmount is not verification of this.
 
 `SearchScreen` owns query text separately from releasable result props, so React's development-mode effect replay cannot erase an initial query. `SearchScreenView` always enables Raycast's native `throttle`, independently of published result props. Immediate result updates lose letters during rapid input on Raycast 2.4.1, even with title-only rows; native throttling keeps them with the complete interface. Raycast updates its text field at once and delivers the coalesced query after about 250 ms. On receipt, the extension updates its query synchronously in the same batch as Raycast's input-event counter. The result view subscribes with `useSyncExternalStore`, and result publications preserve the text instead of writing back an older copy. Query-history changes use the frame-checked setter, each folder location starts with empty text, and result-only publications do not rerender the query consumer. The harness covers all of that, plus the throttle contract and route bounds under repeated folder transitions. Native keystroke capture and command exit need live tests.
 
@@ -336,6 +343,8 @@ Inside a shared folder, `useDirectoryListing` reads direct children only. Recurs
 
 A Drive shortcut and its resolved target have different paths but the same device and inode. Deduplication uses `dev:ino:name`, so identical routes collapse while a user-named shortcut can survive as a useful alternate result.
 
+At scan time, root-level aliases yield to explicitly configured target scopes. An alias to an ancestor of a separate scope keeps its unrelated contents but excludes the child scope's projected alias path, avoiding duplicate traversal.
+
 `Entry.storagePath` holds the canonical path when it resolves, including for entries under an aliased parent. Visit counts, pins, and learned-query lookups use that path, while the row still displays and opens the familiar shortcut path. Individual candidate validation resolves the full path. A folder listing resolves its parent once and reuses it for ordinary children, resolving individual symbolic links separately.
 
 ## Caches and storage
@@ -453,7 +462,7 @@ It uses temporary synthetic files and directories. It covers the README query ex
 
 Use synthetic names, paths, and `example.com` accounts in fixtures, comments, documentation, and screenshots. Report live benchmark results with generic query labels, counts, and timings. Do not copy personal filenames, account identifiers, or search terms into the repository.
 
-Several checks compile a span of a shipped component and run it with stubbed dependencies, which is the only way to reach logic inside a React body. `harness/source-slice.ts` anchors those spans on declaration and comment text and throws when an anchor no longer matches, so editing that text produces a failure rather than an assertion that holds vacuously. Editing comments in `src/components/browser.tsx` can therefore break the harness.
+Several checks compile a span of a shipped component and run it with stubbed dependencies to exercise logic inside a React body. `harness/source-slice.ts` anchors those spans on declaration and comment text and throws when an anchor no longer matches, so editing that text produces a failure rather than an assertion that holds vacuously. Editing comments in `src/components/browser.tsx` can therefore break the harness.
 
 `harness/index-checks.ts` covers the index:
 
@@ -473,8 +482,11 @@ Several checks compile a span of a shipped component and run it with stubbed dep
 - settings parsing, including unparseable values, wrong-shaped values, missing fields, and dirty lists
 - scope and pattern editing, with duplicates, bounds, relative paths, and built-in patterns
 - configured settings reaching the real fd argument array, through `rebuildIndex`
+- detection and indexing of multiple CloudStorage providers without a home scope, directory links, unavailable targets, and saved automatic-scope choices
 
 `harness/performance-checks.ts` covers bounded asynchronous directory reads, metadata parity, watcher and polling freshness, unchanged snapshot identity, cancellation, and scan subprocess cleanup. `harness/folder-usage-checks.ts` confirms that optional usage reads never block the initial list, that late metadata stays out of the current query, and that successful negative reads do not starve later candidates.
+
+`harness/indexing-checks.ts` exercises shared locking across rebuilds, settings saves, and deletion. Its settings regressions cover configuration changes before lock acquisition, overlapping editor saves, failed-save rollback, retries, and resetting defaults without a stale reload.
 
 Live diagnostics are explicit:
 
@@ -489,10 +501,12 @@ Before submitting a change, run:
 
 ```bash
 npx prettier --check .
+npx eslint src harness
 npm run typecheck
 npm run harness
 npm run lint
 npm run build
+npm audit
 ```
 
 ## Store release
@@ -501,14 +515,16 @@ The manifest author must be the Raycast handle `raycast_file_search`. Keep the i
 
 Capture screenshots from the current build, including the combined type and sort dropdown and the current action shortcuts. Use one background and theme throughout. Do not submit captures that show different bindings or status text.
 
-Update `CHANGELOG.md`, then run the verification commands above. Publish with:
+Update `CHANGELOG.md`, then run the verification commands above. Open the distribution build in Raycast and check search, rapid typing, folder navigation, selection, keyboard shortcuts, and file-opening actions. Run **Rebuild Search Index** there and confirm that `node:sqlite` loads in Raycast's runtime, that the toast reports counts and elapsed time, and that searching stays usable while the scan runs. Keep `@raycast/api` current and commit the updated lockfile.
+
+After those checks, publish with:
 
 ```bash
 npm run publish
 ```
 
-Then open the distribution build in Raycast and check search, folder navigation, the keyboard shortcuts, and the file-opening actions. Run **Rebuild Search Index** there and confirm that `node:sqlite` loads in Raycast's runtime, that the toast reports counts and elapsed time, and that searching stays usable while the scan runs. Keep `@raycast/api` current and commit the updated lockfile. Running the publisher again updates the existing PR; check its submitted files, complete the description and screenshots or screencast, then mark it ready for review.
+Running the publisher again updates the existing PR; check its submitted files, complete the description and screenshots or screencast, then mark it ready for review.
 
-Two live-test caveats still need attention: recheck Escape after returning from a folder, and do not claim a universal sub-100-ms response time, because broad queries and cold startup exceed it in the recorded measurements. Passing the harness establishes neither native exit behaviour nor input-to-paint latency, and local checks do not guarantee Store acceptance.
+Include both launch modes in future Escape regression checks: launching from Raycast's main screen and launching with a hotkey have different exit behavior, as verified by the author. Do not claim a universal sub-100-ms response time, because broad queries and cold startup exceed it in the recorded measurements. Passing the harness establishes neither native exit behaviour nor input-to-paint latency, and local checks do not guarantee Store acceptance.
 
 Raycast's publisher authenticates with GitHub and opens a pull request against the public extensions repository. See the official guides for [preparing an extension](https://developers.raycast.com/basics/prepare-an-extension-for-store), [contributing](https://developers.raycast.com/basics/contribute-to-an-extension), and [publishing](https://developers.raycast.com/basics/publish-an-extension).

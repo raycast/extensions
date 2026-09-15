@@ -43,7 +43,7 @@ import {
 } from "../src/lib/starting-paths";
 import { readUsageMetaResult } from "../src/lib/spotlight";
 import { findFd, describeFdLookup } from "../src/lib/fd";
-import { googleDriveIndexRoots, rebuildIndex } from "../src/lib/index-build";
+import { cloudStorageIndexRoots, rebuildIndex } from "../src/lib/index-build";
 import { closeIndexReader, searchIndex } from "../src/lib/index-reader";
 import { openIndexForRead } from "../src/lib/index-db";
 import { ScoreParts, scoreEntry } from "../src/lib/score";
@@ -1475,7 +1475,10 @@ async function main() {
   // capped index against real fd, a real mount, and real SQLite, which is
   // enough to check that the pieces work together on this machine.
   const fdLookup = findFd();
-  const driveRoots = await googleDriveIndexRoots();
+  // This optional live probe specifically checks Google Drive shortcuts.
+  const driveRoots = (await cloudStorageIndexRoots()).filter((root) =>
+    path.basename(root).startsWith("GoogleDrive"),
+  );
   const probeIndex = path.join(
     fs.mkdtempSync(path.join(os.tmpdir(), "index-probe-")),
     "files.sqlite",

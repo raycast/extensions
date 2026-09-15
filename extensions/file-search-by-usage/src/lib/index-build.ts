@@ -49,14 +49,12 @@ export type BuildOutcome =
   | { kind: "failed"; message: string };
 
 /**
- * Locally mounted Google Drive accounts.
+ * All locally mounted provider folders under CloudStorage.
  *
- * Detected rather than configured: the account name is part of the directory
- * name, so hardcoding one would only ever work on one Mac. Presence of
- * `.shortcut-targets-by-id` is deliberately *not* required here — a Drive with
- * no shared folders is still worth indexing.
+ * Provider and account names vary; only the internal .locator folder is skipped.
+ * stat follows directory links and skips files and unavailable targets.
  */
-export async function googleDriveIndexRoots(
+export async function cloudStorageIndexRoots(
   cloudRoot = path.join(os.homedir(), "Library", "CloudStorage"),
 ): Promise<string[]> {
   let entries;
@@ -67,7 +65,7 @@ export async function googleDriveIndexRoots(
   }
   const roots: string[] = [];
   for (const entry of entries) {
-    if (!entry.name.startsWith("GoogleDrive")) continue;
+    if (entry.name === ".locator") continue;
     const full = path.join(cloudRoot, entry.name);
     try {
       // A mount that has gone away leaves the directory entry behind.
@@ -97,7 +95,7 @@ export type BuildOptions = {
   fdPreference?: string;
   /**
    * Explicit roots. When absent, the configured scopes are combined with the
-   * detected Google Drive mounts.
+   * detected CloudStorage folders.
    */
   roots?: string[];
   /** Injection point for tests; defaults to reading the saved settings. */
@@ -149,15 +147,15 @@ async function buildIndex(options: BuildOptions): Promise<BuildOutcome> {
         : DEFAULT_SETTINGS;
       const roots =
         options.roots ??
-        configuredRoots(settings, await googleDriveIndexRoots());
+        configuredRoots(settings, await cloudStorageIndexRoots());
       if (roots.length === 0)
         return {
           kind: "no-roots",
           message: settings.includeDrive
-            ? "No locally mounted Google Drive was found under ~/Library/CloudStorage. " +
-              "Open Google Drive and let it mount, or add a folder in Search Index Settings."
+            ? "No cloud folders were found under ~/Library/CloudStorage. " +
+              "Open your cloud provider and let it mount, or add a folder in Search Index Settings."
             : "Nothing is set to be indexed. Add a folder in Search Index Settings, " +
-              "or turn Google Drive back on there.",
+              "or turn Include Cloud Storage back on there.",
         };
 
       assertOwned();
