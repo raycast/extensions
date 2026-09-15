@@ -132,15 +132,34 @@ const REJECTED_BEFORE_WRITE = new Set([
  * or at most the mutation field itself; anything deeper means execution had
  * already begun, and the write stays unconfirmed.
  */
-function rejectedBeforeWrite(errors: GraphQLErrorEntry[]): boolean {
-  return errors.every(
-    error => error.type !== undefined && REJECTED_BEFORE_WRITE.has(error.type) && (error.path ?? []).length <= 1,
-  );
+function rejectedBeforeWrite(errors: unknown[]): boolean {
+  // An entry that can't be read establishes nothing, and neither does an empty
+  // list that claimed to hold errors: both leave the write unconfirmed.
+  if (errors.length === 0) return false;
+  return errors.every(error => {
+    if (!isEnvelope(error)) return false;
+    const { type, path } = error as GraphQLErrorEntry;
+    if (typeof type !== "string" || !REJECTED_BEFORE_WRITE.has(type)) return false;
+    return !Array.isArray(path) || path.length <= 1;
+  });
 }
 
 /** Reports whether a parsed body is shaped like a GraphQL result at all. */
 function isEnvelope(value: unknown): value is GraphQLResponse<unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * The message out of one error entry. GitHub always sends a string, but a
+ * malformed or truncated list can hold anything — including `null`, which
+ * reading `.message` off would turn into a failure of its own.
+ */
+function errorMessage(error: unknown): string {
+  if (isEnvelope(error)) {
+    const { message } = error as { message?: unknown };
+    if (typeof message === "string") return message;
+  }
+  return "unspecified error";
 }
 
 function endpoint(): string {
@@ -308,7 +327,7 @@ export async function graphql<T>(
       const written = idempotent || confirmsWrite(parsed.data);
 
       if (errors?.length) {
-        const messages = errors.map(e => String(e.message));
+        const messages = errors.map(errorMessage);
         const joined = messages.join("; ");
 
         if (isSamlRefusal(messages, ssoHeader)) {

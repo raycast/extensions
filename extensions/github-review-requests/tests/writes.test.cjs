@@ -178,6 +178,22 @@ test("an error raised after the mutation ran leaves the write unconfirmed", asyn
   assert.equal(sent.length, 1);
 });
 
+test("a write answered with a malformed errors list is reported unconfirmed", async () => {
+  // An entry that can't be read establishes nothing about the write, and
+  // reading `.message` off it must not become the failure itself.
+  const sent = respondWith(payload({ data: { addComment: null }, errors: [null] }));
+  await assert.rejects(addComment("pr-node-id", "looks good"), error => {
+    assert.ok(error instanceof UnconfirmedWriteError);
+    assert.match(error.message, /check the pull request on GitHub/);
+    return true;
+  });
+  assert.equal(sent.length, 1, "the write must not be replayed");
+
+  const empty = respondWith(payload({ data: { addComment: null }, errors: [] }));
+  await assert.rejects(replyToThread("thread-id", "looks good"), UnconfirmedWriteError);
+  assert.equal(empty.length, 1);
+});
+
 test("a read answered with partial data and an error still fails", async () => {
   respondWith(payload({ data: { viewer: null }, errors: [{ message: "Something went wrong" }] }));
   await assert.rejects(graphql("query { viewer { login } }"), error => {
