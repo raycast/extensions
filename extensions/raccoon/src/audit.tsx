@@ -119,7 +119,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 	const { data: skipList, revalidate: revalidateSkipList } = usePromise(readSkipList);
 	const skipped = useMemo(() => new Set(skipList ?? []), [skipList]);
 
-	const { isLoading, data, error, revalidate, pending, pendingError } = useAudit({
+	const { isLoading, data, error, revalidate, pending, pendingError, whole } = useAudit({
 		rcc: rccPath,
 		deep,
 		timeout: AUDIT_TIMEOUT_MS,
@@ -361,7 +361,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 
 	const screenActions = (
 		<>
-			{fixable > 0 && !pending && (
+			{fixable > 0 && whole && (
 				<Action
 					title={`Fix ${fixable} ${fixable === 1 ? "Issue" : "Issues"} Automatically`}
 					icon={{ source: Icon.Hammer, tintColor: Color.Red }}
@@ -423,12 +423,12 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 			isShowingDetail={(data?.results.length ?? 0) > 0}
 			navigationTitle={
 				counts
-					? pending
+					? !whole
 						? // A count is a verdict, and a verdict before every check
 							// has run is the worst thing this screen could say: "0
 							// fail" while FileVault and SIP have not been looked at
 							// yet reads as a clean bill of health.
-							`Security Audit: still checking ${pending}`
+							`Security Audit: still checking${pending ? ` ${pending}` : ""}`
 						: `Security Audit: ${counts.pass} pass, ${counts.warn} warn, ${counts.fail} fail`
 					: "Security Audit"
 			}

@@ -77,8 +77,17 @@ export function useAudit({ rcc, deep, timeout }: { rcc: string | null; deep: boo
 
 	return {
 		data,
-		isLoading: plan.isLoading || quick.isLoading,
+		isLoading: plan.isLoading || quick.isLoading || (split !== undefined && slow.isLoading),
 		error: quick.error,
+		/**
+		 * Whether every group has reported.
+		 *
+		 * Asked of both halves, not just the slow one: either can land first,
+		 * and a count drawn from one of them is not a verdict. Six core checks
+		 * with "0 fail" under them says this Mac is in order when twenty-four
+		 * have not been run.
+		 */
+		whole: quick.data !== undefined && (split === undefined || slow.data !== undefined),
 		/** The group still running, once the rest is on screen. */
 		pending: split && slow.isLoading ? split.slow : undefined,
 		/** A failure in the slow group alone, which must not empty the screen. */
