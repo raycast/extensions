@@ -146,7 +146,7 @@ export const useClaudeAccounts = createAccountsHook<
   },
   fetcher: async (account) => {
     if (account.scopeError) return { usage: null, error: account.scopeError };
-    return fetchClaudeUsage(account.credentials);
+    return fetchClaudeUsage(account.credentials, account.identity);
   },
   noAccountsError: {
     type: "not_configured",

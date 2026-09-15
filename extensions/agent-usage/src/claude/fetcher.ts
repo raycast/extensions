@@ -4,11 +4,12 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 
-import type { ClaudeUsage, ClaudeError } from "./types.ts";
+import type { ClaudeUsage, ClaudeError, ClaudeAccountIdentity } from "./types.ts";
 
 const CLAUDE_CONFIG_DIR_ENV = "CLAUDE_CONFIG_DIR";
 const DEFAULT_CLAUDE_CONFIG_DIR = path.join(os.homedir(), ".claude");
 const CLAUDE_CREDENTIALS_FILE = ".credentials.json";
+const CLAUDE_CONFIG_FILE = ".claude.json";
 const CLAUDE_USAGE_API = "https://api.anthropic.com/api/oauth/usage";
 const KEYCHAIN_SERVICE = "Claude Code-credentials";
 const REQUEST_TIMEOUT = 10000;
@@ -239,6 +240,7 @@ export interface ClaudeOAuthAccount {
   configDir: string;
   credentials: ClaudeCredentials;
   scopeError: ClaudeError | null;
+  identity: ClaudeAccountIdentity | null;
 }
 
 function buildClaudeCredentials(
@@ -282,10 +284,48 @@ export function validateClaudeScopes(credentials: ClaudeCredentials): ClaudeErro
   };
 }
 
-/** `.claude` is the stock home; any other directory is labelled by its suffix. */
-export function deriveClaudeAccountLabel(configDir: string): string {
+/**
+ * Who this config dir is signed in as.
+ *
+ * Credentials carry the plan but not the identity, so the account name comes
+ * from Claude Code's own `.claude.json`. It is a large file, but only
+ * `oauthAccount` is read and the accounts hook caches the result.
+ */
+export function readClaudeAccountIdentity(configDir: string): ClaudeAccountIdentity | null {
+  try {
+    const configPath = path.resolve(configDir, CLAUDE_CONFIG_FILE);
+    if (!fs.existsSync(configPath)) return null;
+
+    const parsed = JSON.parse(fs.readFileSync(configPath, "utf-8")) as {
+      oauthAccount?: { emailAddress?: string; displayName?: string; organizationName?: string };
+    };
+    const account = parsed.oauthAccount;
+    if (!account) return null;
+
+    const identity = {
+      email: pickString(account.emailAddress) ?? null,
+      displayName: pickString(account.displayName) ?? null,
+      organizationName: pickString(account.organizationName) ?? null,
+    };
+
+    return identity.email || identity.displayName || identity.organizationName ? identity : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Directory names carry the user's own meaning (`~/.claude-work` → "work"), so
+ * they win. The stock `~/.claude` names nothing, so it falls back to the signed-in
+ * account rather than rendering as a bare, unattributable "Claude" row.
+ */
+export function deriveClaudeAccountLabel(configDir: string, identity?: ClaudeAccountIdentity | null): string {
   const base = path.basename(path.resolve(configDir)).replace(/^\./, "");
-  if (!base || base.toLowerCase() === "claude") return "Default";
+
+  if (!base || base.toLowerCase() === "claude") {
+    const fromAccount = identity?.displayName ?? identity?.email?.split("@")[0];
+    return fromAccount || "Default";
+  }
 
   const suffix = base.replace(/^claude[-_.]?/i, "");
   return suffix || base;
@@ -336,13 +376,16 @@ function readAccountFromKeychainService(
   const credentials = buildClaudeCredentials(parsed, "keychain", undefined, account ?? undefined, service);
   if (!credentials) return null;
 
+  const identity = readClaudeAccountIdentity(configDir);
+
   return {
     id: `keychain:${service}`,
-    label: deriveClaudeAccountLabel(configDir),
+    label: deriveClaudeAccountLabel(configDir, identity),
     token: credentials.accessToken,
     configDir: resolveConfigDirIdentity(configDir),
     credentials,
     scopeError: validateClaudeScopes(credentials),
+    identity,
   };
 }
 
@@ -357,13 +400,16 @@ function readAccountFromFile(configDir: string): ClaudeOAuthAccount | null {
     const credentials = buildClaudeCredentials(parsed, "file", credentialsPath);
     if (!credentials) return null;
 
+    const identity = readClaudeAccountIdentity(configDir);
+
     return {
       id: credentialsPath,
-      label: deriveClaudeAccountLabel(configDir),
+      label: deriveClaudeAccountLabel(configDir, identity),
       token: credentials.accessToken,
       configDir: resolveConfigDirIdentity(configDir),
       credentials,
       scopeError: validateClaudeScopes(credentials),
+      identity,
     };
   } catch {
     return null;
@@ -513,6 +559,7 @@ async function refreshClaudeAccessToken(credentials: ClaudeCredentials): Promise
 
 export async function fetchClaudeUsage(
   credentials: ClaudeCredentials,
+  identity: ClaudeAccountIdentity | null = null,
 ): Promise<{ usage: ClaudeUsage | null; error: ClaudeError | null }> {
   try {
     const controller = new AbortController();
@@ -677,6 +724,7 @@ export async function fetchClaudeUsage(
           : null,
       modelWindows,
       extraUsage,
+      identity,
     };
 
     return { usage, error: null };

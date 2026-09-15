@@ -6,6 +6,7 @@
 
 - Show every Claude account side by side instead of only the first one found. Claude now uses the same multi-account rendering as Codex and Copilot, in the list, the menu bar, and background refresh
 - Add an **Additional Claude Homes** preference for extra `CLAUDE_CONFIG_DIR` directories (e.g. `~/.claude-personal, ~/.claude-work`), mirroring **Additional Codex Homes**. Accounts are labelled from their directory (`~/.claude-work` → "Claude • work"), and the stock `~/.claude` stays plain "Claude"
+- Name each row after the account it belongs to. A directory name carries the user's own meaning, so `~/.claude-work` stays "Claude • work"; the stock `~/.claude` names nothing, so it falls back to the signed-in account ("Claude • yourname") instead of an unattributable bare "Claude" row. The account email and organization are shown in the detail pane, the tooltip and the copied usage text
 
 ### Fixes
 

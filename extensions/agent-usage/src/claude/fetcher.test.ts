@@ -29,6 +29,14 @@ test("resolveClaudeCredentialsPaths de-duplicates CLAUDE_CONFIG_DIR when it matc
   ]);
 });
 
+function writeClaudeConfig(configDir: string, oauthAccount: Record<string, unknown> | null): void {
+  fs.writeFileSync(
+    path.join(configDir, ".claude.json"),
+    JSON.stringify(oauthAccount === null ? { projects: {} } : { projects: {}, oauthAccount }),
+    "utf-8",
+  );
+}
+
 function makeClaudeHome(dirName: string, oauth: Record<string, unknown> | null): { parent: string; configDir: string } {
   const parent = fs.mkdtempSync(path.join(os.tmpdir(), "claude-home-test-"));
   const configDir = path.join(parent, dirName);
@@ -231,4 +239,80 @@ test("dedupeClaudeAccounts collapses config dirs that resolve to the same direct
     dedupeClaudeAccounts(accounts).map((account) => account.label),
     ["Default", "work"],
   );
+});
+
+test("readClaudeAccountIdentity pulls the signed-in account out of .claude.json", async () => {
+  const { readClaudeAccountIdentity } = await import("./fetcher.ts");
+  const { parent, configDir } = makeClaudeHome(".claude", VALID_OAUTH);
+  writeClaudeConfig(configDir, {
+    emailAddress: "someone@example.com",
+    displayName: "someone",
+    organizationName: "Example Org",
+  });
+
+  try {
+    assert.deepEqual(readClaudeAccountIdentity(configDir), {
+      email: "someone@example.com",
+      displayName: "someone",
+      organizationName: "Example Org",
+    });
+  } finally {
+    fs.rmSync(parent, { recursive: true, force: true });
+  }
+});
+
+test("readClaudeAccountIdentity returns null when the config has no signed-in account", async () => {
+  const { readClaudeAccountIdentity } = await import("./fetcher.ts");
+  const { parent, configDir } = makeClaudeHome(".claude", VALID_OAUTH);
+  writeClaudeConfig(configDir, null);
+
+  try {
+    assert.equal(readClaudeAccountIdentity(configDir), null);
+  } finally {
+    fs.rmSync(parent, { recursive: true, force: true });
+  }
+});
+
+test("the stock .claude home is labelled by its account instead of the generic Default", async () => {
+  const { listClaudeOAuthAccounts } = await import("./fetcher.ts");
+  const { parent, configDir } = makeClaudeHome(".claude", VALID_OAUTH);
+  writeClaudeConfig(configDir, { emailAddress: "someone@example.com", displayName: "someone" });
+
+  try {
+    const [account] = listClaudeOAuthAccounts({ configDir, readKeychain: () => ({ password: null, account: null }) });
+
+    assert.equal(account.label, "someone");
+    assert.equal(account.identity?.email, "someone@example.com");
+  } finally {
+    fs.rmSync(parent, { recursive: true, force: true });
+  }
+});
+
+test("the stock home falls back to the email local part when the account has no display name", async () => {
+  const { listClaudeOAuthAccounts } = await import("./fetcher.ts");
+  const { parent, configDir } = makeClaudeHome(".claude", VALID_OAUTH);
+  writeClaudeConfig(configDir, { emailAddress: "no.display.name@example.com" });
+
+  try {
+    const [account] = listClaudeOAuthAccounts({ configDir, readKeychain: () => ({ password: null, account: null }) });
+
+    assert.equal(account.label, "no.display.name");
+  } finally {
+    fs.rmSync(parent, { recursive: true, force: true });
+  }
+});
+
+test("a named config dir keeps its directory label even when an account identity is available", async () => {
+  const { listClaudeOAuthAccounts } = await import("./fetcher.ts");
+  const { parent, configDir } = makeClaudeHome(".claude-flex", VALID_OAUTH);
+  writeClaudeConfig(configDir, { emailAddress: "work@example.com", displayName: "Someone Else" });
+
+  try {
+    const [account] = listClaudeOAuthAccounts({ configDir, readKeychain: () => ({ password: null, account: null }) });
+
+    assert.equal(account.label, "flex");
+    assert.equal(account.identity?.email, "work@example.com");
+  } finally {
+    fs.rmSync(parent, { recursive: true, force: true });
+  }
 });
