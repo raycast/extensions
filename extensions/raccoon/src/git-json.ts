@@ -67,7 +67,6 @@ export function summarise(repo: GitRepo): string {
 	return parts.join(", ");
 }
 
-/** ~/Desktop/x rather than /Users/someone/Desktop/x. */
 function number(value: unknown): number {
 	return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }

@@ -43,8 +43,8 @@ screen. What that means differs per command, because the commands differ:
 | Xcode          | delete DerivedData                | that, and shut the simulators down |
 | Trash          | empty it                          | the same; there is one trash       |
 
-Where nothing is put right by a command — battery, disk, network, backup, fonts,
-PATH overlaps — both keystrokes open the one place the setting actually lives.
+Where nothing is put right by a command (battery, disk, network, backup, fonts,
+PATH overlaps) both keystrokes open the one place the setting actually lives.
 
 Anything that changes the machine asks first and shows the exact command. It then
 runs in Terminal rather than silently: several of these need administrator
