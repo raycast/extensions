@@ -19,6 +19,8 @@ const MODULE_POWER_STATION_FAMILIES: readonly DeviceFamily[] = [
 const DELTA_3_MAX_FAMILIES: readonly DeviceFamily[] = ["delta-3-max", "delta-3-max-plus"];
 
 export function getDeviceCommands(device: DeviceSnapshot): DeviceCommandDefinition[] {
+  if (!hasVerifiedSerialPrefix(device)) return [];
+
   const { family } = device.profile;
 
   if (LEGACY_TCP_FAMILIES.includes(family)) return legacyTcpCommands();
@@ -34,6 +36,11 @@ export function getDeviceCommands(device: DeviceSnapshot): DeviceCommandDefiniti
   if (family === "wave") return waveCommands();
   if (family === "glacier") return glacierCommands();
   return [];
+}
+
+function hasVerifiedSerialPrefix(device: DeviceSnapshot): boolean {
+  const serialNumber = device.serialNumber.toUpperCase();
+  return device.profile.prefixes.some((prefix) => serialNumber.startsWith(prefix.toUpperCase()));
 }
 
 function deltaProUltraCommands(serialNumber: string): DeviceCommandDefinition[] {

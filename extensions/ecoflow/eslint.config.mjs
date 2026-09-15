@@ -1,3 +1,4 @@
+import { defineConfig } from "eslint/config";
 import raycastConfig from "@raycast/eslint-config";
 
-export default [...raycastConfig, { ignores: ["dist/**", ".build/**", "coverage/**"] }];
+export default defineConfig([...raycastConfig, { ignores: ["dist/**", ".build/**", "coverage/**"] }]);

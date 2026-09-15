@@ -12,6 +12,18 @@ function device(serialNumber: string) {
 }
 
 describe("verified device controls", () => {
+  it("keeps name-detected devices read-only until the serial prefix is verified", () => {
+    const unverifiedWave = buildDeviceSnapshot({
+      sn: "UNKNOWN123456",
+      online: 1,
+      deviceName: "Bedroom WAVE",
+      productName: "WAVE 2",
+    });
+
+    expect(unverifiedWave.profile.family).toBe("wave");
+    expect(findDeviceCommand(unverifiedWave, "set_temperature")).toBeUndefined();
+  });
+
   it("uses human-readable values and flags disruptive controls", () => {
     const wave = device("KT21TEST1234");
     const powerState = findDeviceCommand(wave, "set_power_state");
