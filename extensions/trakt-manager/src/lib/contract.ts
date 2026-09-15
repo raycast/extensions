@@ -19,19 +19,8 @@ import {
   TraktShowRecommendationList,
   TraktShowDetailedProgressSchema,
   TraktShowProgressQuerySchema,
-  TraktRatingItemSchema,
   TraktUpNextQuerySchema,
-  TraktPaginationSchema,
-  TraktUserRatingListSchema,
   TraktUserStatsSchema,
-  TraktListSchema,
-  TraktListsSchema,
-  TraktListEntriesSchema,
-  TraktListItemIdSchema,
-  TraktListItemsUpdateSchema,
-  TraktListPrivacySchema,
-  TraktIdLookupQuerySchema,
-  TraktIdLookupSchema,
 } from "./schema";
 
 const c = initContract();
@@ -355,63 +344,6 @@ const TraktShowContract = c.router({
   },
 });
 
-const TraktSyncContract = c.router({
-  addRatings: {
-    method: "POST",
-    path: "/sync/ratings",
-    responses: {
-      200: z.unknown(),
-      201: z.unknown(),
-    },
-    body: z.object({
-      movies: z.array(TraktRatingItemSchema).optional(),
-      shows: z.array(TraktRatingItemSchema).optional(),
-      seasons: z.array(TraktRatingItemSchema).optional(),
-      episodes: z.array(TraktRatingItemSchema).optional(),
-    }),
-    summary: "Add ratings for movies, shows, seasons, or episodes",
-  },
-  removeRatings: {
-    method: "POST",
-    path: "/sync/ratings/remove",
-    responses: {
-      200: z.unknown(),
-    },
-    body: z.object({
-      movies: z.array(TraktIdSchema).optional(),
-      shows: z.array(TraktIdSchema).optional(),
-      seasons: z.array(TraktIdSchema).optional(),
-      episodes: z.array(TraktIdSchema).optional(),
-    }),
-    summary: "Remove ratings",
-  },
-  getRatings: {
-    method: "GET",
-    path: "/sync/ratings/:type",
-    responses: {
-      200: TraktUserRatingListSchema,
-    },
-    pathParams: z.object({
-      type: z.enum(["movies", "shows", "seasons", "episodes", "all"]),
-    }),
-    query: TraktPaginationSchema.partial().merge(TraktExtendedSchema.partial()),
-    summary: "Get user ratings",
-  },
-  getRatingsByRating: {
-    method: "GET",
-    path: "/sync/ratings/:type/:rating",
-    responses: {
-      200: TraktUserRatingListSchema,
-    },
-    pathParams: z.object({
-      type: z.enum(["movies", "shows", "seasons", "episodes", "all"]),
-      rating: z.coerce.number(),
-    }),
-    query: TraktPaginationSchema.partial().merge(TraktExtendedSchema.partial()),
-    summary: "Get user ratings filtered by rating score",
-  },
-});
-
 const TraktUserContract = c.router({
   getUserStats: {
     method: "GET",
@@ -424,113 +356,13 @@ const TraktUserContract = c.router({
     }),
     summary: "Get user stats",
   },
-  getLists: {
-    method: "GET",
-    path: "/users/:id/lists",
-    responses: {
-      200: TraktListsSchema,
-    },
-    pathParams: z.object({
-      id: z.string().default("me"),
-    }),
-    summary: "Get personal lists",
-  },
-  createList: {
-    method: "POST",
-    path: "/users/:id/lists",
-    responses: {
-      200: TraktListSchema,
-      201: TraktListSchema,
-    },
-    pathParams: z.object({
-      id: z.string().default("me"),
-    }),
-    body: z.object({
-      name: z.string(),
-      description: z.string().optional(),
-      privacy: TraktListPrivacySchema.optional(),
-      display_numbers: z.boolean().optional(),
-      allow_comments: z.boolean().optional(),
-      sort_by: z.string().optional(),
-      sort_how: z.string().optional(),
-    }),
-    summary: "Create a personal list",
-  },
-  getListItems: {
-    method: "GET",
-    path: "/users/:id/lists/:listId/items",
-    responses: {
-      200: TraktListEntriesSchema,
-    },
-    pathParams: z.object({
-      id: z.string().default("me"),
-      listId: z.string(),
-    }),
-    query: TraktExtendedSchema.partial(),
-    summary: "Get items on a personal list",
-  },
-  addListItems: {
-    method: "POST",
-    path: "/users/:id/lists/:listId/items",
-    responses: {
-      200: TraktListItemsUpdateSchema,
-      201: TraktListItemsUpdateSchema,
-    },
-    pathParams: z.object({
-      id: z.string().default("me"),
-      listId: z.string(),
-    }),
-    body: z.object({
-      movies: z.array(TraktListItemIdSchema).optional(),
-      shows: z.array(TraktListItemIdSchema).optional(),
-      seasons: z.array(TraktListItemIdSchema).optional(),
-      episodes: z.array(TraktListItemIdSchema).optional(),
-    }),
-    summary: "Add items to a personal list",
-  },
-  removeListItems: {
-    method: "POST",
-    path: "/users/:id/lists/:listId/items/remove",
-    responses: {
-      200: TraktListItemsUpdateSchema,
-      201: TraktListItemsUpdateSchema,
-    },
-    pathParams: z.object({
-      id: z.string().default("me"),
-      listId: z.string(),
-    }),
-    body: z.object({
-      movies: z.array(TraktListItemIdSchema).optional(),
-      shows: z.array(TraktListItemIdSchema).optional(),
-      seasons: z.array(TraktListItemIdSchema).optional(),
-      episodes: z.array(TraktListItemIdSchema).optional(),
-    }),
-    summary: "Remove items from a personal list",
-  },
-});
-
-const TraktSearchContract = c.router({
-  lookupById: {
-    method: "GET",
-    path: "/search/trakt/:id",
-    responses: {
-      200: TraktIdLookupSchema,
-    },
-    pathParams: z.object({
-      id: z.coerce.number(),
-    }),
-    query: TraktIdLookupQuerySchema,
-    summary: "Look up a movie, show, season or episode by its Trakt ID",
-  },
 });
 
 export const TraktContract = c.router(
   {
     movies: TraktMovieContract,
     shows: TraktShowContract,
-    sync: TraktSyncContract,
     users: TraktUserContract,
-    search: TraktSearchContract,
   },
   {
     strictStatusCodes: true,

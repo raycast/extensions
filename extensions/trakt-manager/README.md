@@ -38,15 +38,15 @@ Lists recommended movies and shows.
 
 ## AI
 
-Raycast AI can act on your Trakt account using the same sign-in as the commands above, so there is nothing extra to configure. Ask in plain language:
+Raycast AI can read your Trakt account using the same sign-in as the commands above, so there is nothing extra to configure. Ask in plain language:
 
 - _"Have I already watched Dune?"_
-- _"Add Severance to my watchlist"_
+- _"Is Severance in my watchlist?"_
 - _"What episode am I on in Breaking Bad?"_
-- _"Rate The Bear 9 out of 10"_
-- _"Create a list called Emmy 2025 winners and add these shows to it"_
+- _"What should I watch next?"_
+- _"How many hours have I watched this year?"_
 
-Anything that changes your account — marking as watched, rating, editing the watchlist or your lists — asks for confirmation first, and shows exactly which title it resolved so it cannot act on the wrong one.
+These tools only read your account; use the commands above to make changes.
 
 When several titles share a name, mention the year (_"Butterfly 2025"_) to remove the ambiguity.
 

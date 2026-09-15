@@ -4,10 +4,8 @@
 
 ### Added
 
-- **AI tools** — Raycast AI can now act on your Trakt account directly, reusing the existing OAuth session. Ask it to search a title, check whether you have already watched something, see what to watch next, or update your account in plain language.
-- Browsing tools: search movies and shows, watchlist, watch history, ratings, up next, show progress, season episodes, personalised recommendations, and account statistics.
-- Updating tools: add to and remove from the watchlist, mark movies, shows and episodes as watched, rate and unrate, and remove history entries. Every action that changes your account asks for confirmation first, and resolves the exact title beforehand so it cannot act on the wrong item.
-- Personal list tools: list, create, add to and remove from your Trakt lists.
+- **AI tools for browsing your account** — Raycast AI can now read your Trakt account directly, reusing the existing OAuth session. Ask it in plain language to search a title, check whether you have already watched something, or see what to watch next.
+- Nine read-only tools: search movies and shows, watchlist, watch history, up next, show progress, season episodes, personalised recommendations, and account statistics. None of them modify your account.
 
 ### Fixed
 
