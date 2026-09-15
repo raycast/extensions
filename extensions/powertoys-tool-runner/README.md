@@ -21,6 +21,7 @@ Launch any PowerToys tool instantly:
 - **Crop and Lock** - Reparent and Thumbnail modes
 - **Awake** - Keep your computer awake
 - **Light Switch** - Toggle between light and dark themes
+- **Keyboard Manager** - Manage keyboard shortcuts with the new PowerToys Keyboard Manager utility
 
 ## Settings
 
