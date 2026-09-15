@@ -2,11 +2,12 @@
 
 ## [Archive Search and Reliability] - {PR_MERGE_DATE}
 
-- Fixed multi-page loading when WordPress caps RSS responses below the requested page size.
+- Fixed multi-page loading for small page sizes and when WordPress caps RSS responses.
 - Search now queries the public WordPress feed instead of only the recent local cache.
 - Added a dedicated archive-search command and category filtering for recent articles.
 - Cleaned RSS HTML before rendering article details or returning excerpts to Raycast AI.
-- Validated cached article data and hardened HTML entity decoding.
+- Validated cached article data, migrated the existing cache, and hardened HTML entity decoding.
+- Rejected malformed feed redirects so stale cached articles remain available.
 - Tightened AI instructions so answers stay within returned feed data and expose missing context.
 - Kept stale cached articles available when the network refresh fails.
 - Fixed double-encoded subjects and bodies in tip email drafts.

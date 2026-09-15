@@ -26,9 +26,9 @@ interface FeedOptions {
 
 const FEED_URL = "https://www.stadt-bremerhaven.de/feed/";
 const CACHE_KEY = "cached_articles_v2";
+const LEGACY_CACHE_KEY = "cached_articles";
 const CACHE_EXPIRATION = 10 * 60 * 1000;
 const FEED_HOSTS = new Set(["stadt-bremerhaven.de", "www.stadt-bremerhaven.de"]);
-const MAX_FEED_PAGES = 20;
 const MAX_REDIRECTS = 5;
 const MAX_RESPONSE_BYTES = 5 * 1024 * 1024;
 
@@ -158,7 +158,13 @@ export function fetchData(urlOrParams: string, redirectCount = 0): Promise<strin
             reject(new Error("The feed redirected too many times"));
             return;
           }
-          const redirectUrl = new URL(response.headers.location, parsedUrl).toString();
+          let redirectUrl: string;
+          try {
+            redirectUrl = new URL(response.headers.location, parsedUrl).toString();
+          } catch {
+            reject(new Error("The feed returned an invalid redirect URL"));
+            return;
+          }
           void fetchData(redirectUrl, redirectCount + 1).then(resolve, reject);
           return;
         }
@@ -250,7 +256,8 @@ async function fetchFeedArticles({ maxPosts, postsPerPage, query }: FeedOptions)
   const articles: Article[] = [];
   const seen = new Set<string>();
 
-  for (let page = 1; page <= MAX_FEED_PAGES && articles.length < maxPosts; page++) {
+  // Each useful page adds at least one unique article, so maxPosts is also a safe request bound.
+  for (let page = 1; page <= maxPosts && articles.length < maxPosts; page++) {
     const pageArticles = await fetchArticlePage(page, postsPerPage, query);
     if (pageArticles.length === 0) break;
 
@@ -286,8 +293,7 @@ function isArticle(value: unknown): value is Article {
   );
 }
 
-async function readCache(): Promise<CachedData | undefined> {
-  const cached = await LocalStorage.getItem<string>(CACHE_KEY);
+function parseCachedData(cached: string | undefined): CachedData | undefined {
   if (!cached) return undefined;
 
   try {
@@ -304,6 +310,18 @@ async function readCache(): Promise<CachedData | undefined> {
   } catch {
     return undefined;
   }
+}
+
+async function readCache(): Promise<CachedData | undefined> {
+  const current = parseCachedData(await LocalStorage.getItem<string>(CACHE_KEY));
+  if (current) return current;
+
+  const legacy = parseCachedData(await LocalStorage.getItem<string>(LEGACY_CACHE_KEY));
+  if (!legacy) return undefined;
+
+  await LocalStorage.setItem(CACHE_KEY, JSON.stringify(legacy));
+  await LocalStorage.removeItem(LEGACY_CACHE_KEY);
+  return legacy;
 }
 
 export async function fetchArticles(forceRefresh = false): Promise<Article[]> {

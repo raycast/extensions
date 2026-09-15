@@ -3,11 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const storage = new Map<string, string>();
 const httpsGet = vi.fn();
+const preferences = { postsPerPage: "30", maxPosts: "35" };
 
 vi.mock("node:https", () => ({ get: httpsGet }));
 vi.mock("https", () => ({ get: httpsGet }));
 vi.mock("@raycast/api", () => ({
-  getPreferenceValues: () => ({ postsPerPage: "30", maxPosts: "35" }),
+  getPreferenceValues: () => preferences,
   LocalStorage: {
     getItem: vi.fn(async (key: string) => storage.get(key)),
     removeItem: vi.fn(async (key: string) => storage.delete(key)),
@@ -25,7 +26,7 @@ function feed(page: number, count = 20) {
   return `<?xml version="1.0"?><rss><channel>${items}</channel></rss>`;
 }
 
-function mockFeedServer() {
+function mockFeedServer(countPerPage = 20) {
   httpsGet.mockImplementation((url: string, _options: unknown, callback: (response: EventEmitter) => void) => {
     const request = new EventEmitter() as EventEmitter & {
       destroy: () => void;
@@ -50,7 +51,7 @@ function mockFeedServer() {
 
     queueMicrotask(() => {
       callback(response);
-      response.emit("data", feed(page));
+      response.emit("data", feed(page, countPerPage));
       response.emit("end");
     });
 
@@ -62,6 +63,8 @@ describe("fetchArticles", () => {
   beforeEach(() => {
     storage.clear();
     httpsGet.mockReset();
+    preferences.postsPerPage = "30";
+    preferences.maxPosts = "35";
     mockFeedServer();
   });
 
@@ -72,6 +75,19 @@ describe("fetchArticles", () => {
 
     expect(articles).toHaveLength(35);
     expect(httpsGet).toHaveBeenCalledTimes(2);
+  });
+
+  it("honors the maximum when each feed page contains one article", async () => {
+    preferences.postsPerPage = "1";
+    preferences.maxPosts = "200";
+    httpsGet.mockReset();
+    mockFeedServer(1);
+    const { fetchArticles } = await import("../src/utils");
+
+    const articles = await fetchArticles(false);
+
+    expect(articles).toHaveLength(200);
+    expect(httpsGet).toHaveBeenCalledTimes(200);
   });
 
   it("ignores a structurally invalid cached article list", async () => {
@@ -107,6 +123,69 @@ describe("fetchArticles", () => {
     const { fetchArticles } = await import("../src/utils");
 
     await expect(fetchArticles(false)).resolves.toEqual([cachedArticle]);
+  });
+
+  it("migrates released cache data and uses it when refresh fails", async () => {
+    const cachedArticle = {
+      title: "Legacy cached article",
+      link: "https://stadt-bremerhaven.de/legacy-cached",
+      pubDate: "Mon, 15 Sep 2026 08:00:00 GMT",
+      description: "Legacy cached body",
+    };
+    storage.set(
+      "cached_articles",
+      JSON.stringify({ articles: [cachedArticle], timestamp: Date.now() - 11 * 60 * 1000 }),
+    );
+    httpsGet.mockReset();
+    httpsGet.mockImplementation(() => {
+      const request = new EventEmitter() as EventEmitter & {
+        destroy: () => void;
+        setTimeout: () => void;
+      };
+      request.destroy = vi.fn();
+      request.setTimeout = vi.fn();
+      queueMicrotask(() => request.emit("error", new Error("offline")));
+      return request;
+    });
+    const { fetchArticles } = await import("../src/utils");
+
+    await expect(fetchArticles(false)).resolves.toEqual([cachedArticle]);
+    expect(storage.has("cached_articles")).toBe(false);
+    expect(JSON.parse(storage.get("cached_articles_v2") ?? "{}")).toEqual({
+      articles: [cachedArticle],
+      timestamp: expect.any(Number),
+    });
+  });
+});
+
+describe("fetchData", () => {
+  beforeEach(() => {
+    httpsGet.mockReset();
+  });
+
+  it("rejects a malformed redirect location", async () => {
+    httpsGet.mockImplementation((_url: string, _options: unknown, callback: (response: EventEmitter) => void) => {
+      const request = new EventEmitter() as EventEmitter & {
+        destroy: () => void;
+        setTimeout: () => void;
+      };
+      request.destroy = vi.fn();
+      request.setTimeout = vi.fn();
+
+      const response = new EventEmitter() as EventEmitter & {
+        headers: Record<string, string>;
+        resume: () => void;
+        statusCode: number;
+      };
+      response.headers = { location: "https://[invalid" };
+      response.resume = vi.fn();
+      response.statusCode = 302;
+      queueMicrotask(() => callback(response));
+      return request;
+    });
+    const { fetchData } = await import("../src/utils");
+
+    await expect(fetchData("feed=rss2&paged=1")).rejects.toThrow("invalid redirect URL");
   });
 });
 
