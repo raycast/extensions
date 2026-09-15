@@ -1,4 +1,5 @@
 import { Action, Color, Icon, List } from "@raycast/api";
+import { tilde } from "./paths.ts";
 import { useMemo } from "react";
 import { whichAll } from "./fixes";
 import { RccList } from "./rcc-list";
@@ -31,7 +32,7 @@ function Rows({ groups, actions }: { groups: NameGroup[]; actions: React.ReactNo
 						icon={{ source: ICON[level], tintColor: TINT[level] }}
 						title={group.name}
 						// The copy that actually runs, decided by PATH order.
-						subtitle={winner.path}
+						subtitle={tilde(winner.path)}
 						keywords={group.entries.flatMap((e) => [e.manager, e.path])}
 						accessories={[
 							// One tag per manager, on one row, rather than one row per

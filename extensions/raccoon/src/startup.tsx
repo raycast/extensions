@@ -1,4 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
+import { tilde } from "./paths.ts";
 import { bootoutAgents, openSettings, removeLoginItems, SETTINGS } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
@@ -124,7 +125,7 @@ function Rows({ s, actions }: { s: StartupReport; actions: React.ReactNode }) {
 								tintColor: agent.loaded ? Color.Green : Color.SecondaryText,
 							}}
 							title={agent.name}
-							subtitle={agent.file || "~/Library/LaunchAgents"}
+							subtitle={agent.file ? tilde(agent.file) : "~/Library/LaunchAgents"}
 							keywords={[agent.label]}
 							accessories={state ? [{ tag: state }] : []}
 							actions={

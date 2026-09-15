@@ -1,4 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
+import { tilde } from "./paths.ts";
 import { openSettings, reveal, SETTINGS, startBackup } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
@@ -113,7 +114,7 @@ function Rows({ b, actions }: { b: BackupReport; actions: React.ReactNode }) {
 								source: Icon.Minus,
 								tintColor: Color.SecondaryText,
 							}}
-							title={path}
+							title={tilde(path)}
 							actions={
 								<RowActions
 									one={{

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parseGit, repoLevel, shortPath, sortRepos, summarise, type GitRepo } from "./git-json.ts";
+import { parseGit, repoLevel, sortRepos, summarise, type GitRepo } from "./git-json.ts";
+import { shortPath } from "./paths.ts";
 
 const repo = (over: Partial<GitRepo> = {}): GitRepo => ({
 	name: "r",

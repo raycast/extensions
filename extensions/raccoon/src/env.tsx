@@ -1,4 +1,5 @@
 import { Action, Color, Icon, List } from "@raycast/api";
+import { tilde } from "./paths.ts";
 import { removeSymlink, reveal, whichAll } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
@@ -70,7 +71,7 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 								source: Icon.Folder,
 								tintColor: Color.Orange,
 							}}
-							title={p.path}
+							title={tilde(p.path)}
 							accessories={[
 								{
 									tag: {
@@ -154,7 +155,7 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 							source: Icon.Folder,
 							tintColor: Color.SecondaryText,
 						}}
-						title={p.path}
+						title={tilde(p.path)}
 						// Position matters: the first match on the PATH is the one that runs.
 						accessories={[{ text: `#${i + 1}` }]}
 						actions={

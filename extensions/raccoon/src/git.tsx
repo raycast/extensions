@@ -1,18 +1,9 @@
 import { Action, Color, Icon, Keyboard, List } from "@raycast/api";
-import { homedir } from "node:os";
+import { tilde } from "./paths.ts";
 import { RccList } from "./rcc-list";
 import { gitPush, gitPushAll, repoStatus } from "./fixes";
 import { RowActions } from "./resolve";
-import {
-	parseGit,
-	repoLevel,
-	shortPath,
-	sortRepos,
-	summarise,
-	type GitReport,
-	type GitRepo,
-	type RepoLevel,
-} from "./git-json";
+import { parseGit, repoLevel, sortRepos, summarise, type GitReport, type GitRepo, type RepoLevel } from "./git-json";
 
 const TINT: Record<RepoLevel, Color> = {
 	unpushed: Color.Red,
@@ -64,7 +55,6 @@ function repoFix(repo: GitRepo) {
 }
 
 function Rows({ g, actions }: { g: GitReport; actions: React.ReactNode }) {
-	const home = homedir();
 	const sorted = sortRepos(g.repos);
 	const clean = g.repos_total - g.repos_with_issues;
 	// The bulk form only takes the repositories where pushing is the whole
@@ -112,7 +102,7 @@ function Rows({ g, actions }: { g: GitReport; actions: React.ReactNode }) {
 									tintColor: TINT[level],
 								}}
 								title={repo.name}
-								subtitle={shortPath(repo.path, home)}
+								subtitle={tilde(repo.path)}
 								accessories={[
 									{
 										tag: {

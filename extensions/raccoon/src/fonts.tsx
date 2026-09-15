@@ -1,4 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
+import { tilde } from "./paths.ts";
 import { openApp, reveal } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
@@ -30,7 +31,7 @@ function Rows({ f, actions }: { f: FontsReport; actions: React.ReactNode }) {
 							tintColor: Color.SecondaryText,
 						}}
 						title={sourceLabel(s.path)}
-						subtitle={s.path}
+						subtitle={tilde(s.path)}
 						accessories={[{ text: String(s.count) }]}
 						actions={
 							<RowActions

@@ -68,10 +68,6 @@ export function summarise(repo: GitRepo): string {
 }
 
 /** ~/Desktop/x rather than /Users/someone/Desktop/x. */
-export function shortPath(path: string, home: string): string {
-	return path === home ? "~" : path.startsWith(`${home}/`) ? `~${path.slice(home.length)}` : path;
-}
-
 function number(value: unknown): number {
 	return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
