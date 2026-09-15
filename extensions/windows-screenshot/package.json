@@ -5,9 +5,7 @@
   "description": "Capture full screen, selected region, or active window on Windows.",
   "icon": "icon.png",
   "author": "afaan_mushtaq",
-  "platforms": [
-    "Windows"
-  ],
+  "platforms": ["Windows"],
   "categories": [
     "Media",
     "System"

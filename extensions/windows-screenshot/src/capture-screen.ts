@@ -1,5 +1,5 @@
-import { executeCapture } from "./utils/screenshot";
+import { executeCapture } from './utils/screenshot';
 
 export default async function Command() {
-  await executeCapture("screen");
+  await executeCapture('screen');
 }

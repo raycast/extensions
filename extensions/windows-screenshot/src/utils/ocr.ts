@@ -1,10 +1,10 @@
-import { getPreferenceValues, environment } from "@raycast/api";
-import { execFile } from "child_process";
-import { promisify } from "util";
-import path from "path";
-import fs from "fs";
-import os from "os";
-import { captureScreenshot, CaptureMode } from "./screenshot";
+import { getPreferenceValues, environment } from '@raycast/api';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import path from 'path';
+import fs from 'fs';
+import os from 'os';
+import { captureScreenshot, CaptureMode } from './screenshot';
 
 const execFileAsync = promisify(execFile);
 
@@ -22,32 +22,32 @@ export function getOcrExePath(): string | null {
   }
 
   if (environment.assetsPath) {
-    const assetExe = path.join(environment.assetsPath, "bin", "ocr.exe");
+    const assetExe = path.join(environment.assetsPath, 'bin', 'ocr.exe');
     if (fs.existsSync(assetExe)) {
       cachedOcrExePath = assetExe;
       return assetExe;
     }
   }
 
-  const cwdExe = path.join(process.cwd(), "assets", "bin", "ocr.exe");
+  const cwdExe = path.join(process.cwd(), 'assets', 'bin', 'ocr.exe');
   if (fs.existsSync(cwdExe)) {
     cachedOcrExePath = cwdExe;
     return cwdExe;
   }
 
-  const candidate1 = path.join(__dirname, "..", "assets", "bin", "ocr.exe");
+  const candidate1 = path.join(__dirname, '..', 'assets', 'bin', 'ocr.exe');
   if (fs.existsSync(candidate1)) {
     cachedOcrExePath = candidate1;
     return candidate1;
   }
 
-  const candidate2 = path.join(__dirname, "..", "..", "assets", "bin", "ocr.exe");
+  const candidate2 = path.join(__dirname, '..', '..', 'assets', 'bin', 'ocr.exe');
   if (fs.existsSync(candidate2)) {
     cachedOcrExePath = candidate2;
     return candidate2;
   }
 
-  const absoluteFallback = "c:\\Coding\\MyProjects\\Raycast Screenshot Extention\\assets\\bin\\ocr.exe";
+  const absoluteFallback = 'c:\\Coding\\MyProjects\\Raycast Screenshot Extention\\assets\\bin\\ocr.exe';
   if (fs.existsSync(absoluteFallback)) {
     cachedOcrExePath = absoluteFallback;
     return absoluteFallback;
@@ -58,28 +58,28 @@ export function getOcrExePath(): string | null {
 
 export function getOcrScriptPath(): string | null {
   if (environment.assetsPath) {
-    const assetScript = path.join(environment.assetsPath, "scripts", "ocr.ps1");
+    const assetScript = path.join(environment.assetsPath, 'scripts', 'ocr.ps1');
     if (fs.existsSync(assetScript)) {
       return assetScript;
     }
   }
 
-  const cwdScript = path.join(process.cwd(), "assets", "scripts", "ocr.ps1");
+  const cwdScript = path.join(process.cwd(), 'assets', 'scripts', 'ocr.ps1');
   if (fs.existsSync(cwdScript)) {
     return cwdScript;
   }
 
-  const candidate1 = path.join(__dirname, "..", "assets", "scripts", "ocr.ps1");
+  const candidate1 = path.join(__dirname, '..', 'assets', 'scripts', 'ocr.ps1');
   if (fs.existsSync(candidate1)) {
     return candidate1;
   }
 
-  const candidate2 = path.join(__dirname, "..", "..", "assets", "scripts", "ocr.ps1");
+  const candidate2 = path.join(__dirname, '..', '..', 'assets', 'scripts', 'ocr.ps1');
   if (fs.existsSync(candidate2)) {
     return candidate2;
   }
 
-  const absoluteFallback = "c:\\Coding\\MyProjects\\Raycast Screenshot Extention\\assets\\scripts\\ocr.ps1";
+  const absoluteFallback = 'c:\\Coding\\MyProjects\\Raycast Screenshot Extention\\assets\\scripts\\ocr.ps1';
   if (fs.existsSync(absoluteFallback)) {
     return absoluteFallback;
   }
@@ -91,7 +91,7 @@ export async function processImageOcr(imagePath: string): Promise<OcrResult> {
   if (!imagePath || !fs.existsSync(imagePath)) {
     return {
       success: false,
-      message: `Image file not found at path: ${imagePath || "(empty)"}`,
+      message: `Image file not found at path: ${imagePath || '(empty)'}`,
     };
   }
 
@@ -99,34 +99,34 @@ export async function processImageOcr(imagePath: string): Promise<OcrResult> {
 
   if (ocrExePath && fs.existsSync(ocrExePath)) {
     try {
-      const { stdout } = await execFileAsync(ocrExePath, ["-ImagePath", imagePath], {
+      const { stdout } = await execFileAsync(ocrExePath, ['-ImagePath', imagePath], {
         windowsHide: true,
         timeout: 15000,
       });
 
       const output = stdout.trim();
 
-      if (output.startsWith("SUCCESS|TEXT|")) {
-        const text = output.substring("SUCCESS|TEXT|".length).trim();
+      if (output.startsWith('SUCCESS|TEXT|')) {
+        const text = output.substring('SUCCESS|TEXT|'.length).trim();
         return {
           success: true,
           text,
         };
       }
 
-      if (output.startsWith("SUCCESS|NO_TEXT")) {
+      if (output.startsWith('SUCCESS|NO_TEXT')) {
         return {
           success: true,
-          text: "",
-          message: "No readable text found in image",
+          text: '',
+          message: 'No readable text found in image',
         };
       }
 
-      if (output.startsWith("ERROR|")) {
-        const errorMsg = output.substring("ERROR|".length).trim();
+      if (output.startsWith('ERROR|')) {
+        const errorMsg = output.substring('ERROR|'.length).trim();
         return {
           success: false,
-          message: errorMsg || "Failed to extract text from image",
+          message: errorMsg || 'Failed to extract text from image',
         };
       }
     } catch {
@@ -144,40 +144,40 @@ export async function processImageOcr(imagePath: string): Promise<OcrResult> {
 
   try {
     const { stdout } = await execFileAsync(
-      "powershell.exe",
-      ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", scriptPath, "-ImagePath", imagePath],
+      'powershell.exe',
+      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', scriptPath, '-ImagePath', imagePath],
       { timeout: 30000 },
     );
 
     const output = stdout.trim();
 
-    if (output.startsWith("SUCCESS|TEXT|")) {
-      const text = output.substring("SUCCESS|TEXT|".length).trim();
+    if (output.startsWith('SUCCESS|TEXT|')) {
+      const text = output.substring('SUCCESS|TEXT|'.length).trim();
       return {
         success: true,
         text,
       };
     }
 
-    if (output.startsWith("SUCCESS|NO_TEXT")) {
+    if (output.startsWith('SUCCESS|NO_TEXT')) {
       return {
         success: true,
-        text: "",
-        message: "No readable text found in image",
+        text: '',
+        message: 'No readable text found in image',
       };
     }
 
-    if (output.startsWith("ERROR|")) {
-      const errorMsg = output.substring("ERROR|".length).trim();
+    if (output.startsWith('ERROR|')) {
+      const errorMsg = output.substring('ERROR|'.length).trim();
       return {
         success: false,
-        message: errorMsg || "Failed to extract text from image",
+        message: errorMsg || 'Failed to extract text from image',
       };
     }
 
     return {
       success: false,
-      message: `Unexpected output from OCR process: ${output || "(empty stdout)"}`,
+      message: `Unexpected output from OCR process: ${output || '(empty stdout)'}`,
     };
   } catch (error) {
     const err = error as Error;
@@ -189,11 +189,11 @@ export async function processImageOcr(imagePath: string): Promise<OcrResult> {
 }
 
 export async function captureAndExtractText(
-  mode: CaptureMode = "region",
+  mode: CaptureMode = 'region',
 ): Promise<OcrResult & { cancelled?: boolean }> {
   const preferences = getPreferenceValues<Preferences>();
-  const outputMode = preferences.output || "save-and-copy";
-  const isCopyOnly = outputMode === "copy";
+  const outputMode = preferences.output || 'save-and-copy';
+  const isCopyOnly = outputMode === 'copy';
 
   const captureRes = await captureScreenshot(mode, {
     forceSave: true,
@@ -207,7 +207,7 @@ export async function captureAndExtractText(
   if (!captureRes.success || !captureRes.filePath) {
     return {
       success: false,
-      message: captureRes.error || "Failed to capture screenshot for OCR",
+      message: captureRes.error || 'Failed to capture screenshot for OCR',
     };
   }
 
