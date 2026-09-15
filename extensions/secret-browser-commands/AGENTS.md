@@ -17,7 +17,7 @@ A Raycast extension listing the internal commands of Chromium-based browsers (`c
 | ---------------------------------- | -------------------------------------------------------------- |
 | `src/listCommands.tsx`             | The single command: list, filters, detail pane, ActionPanel    |
 | `src/components/OpenInActions.tsx` | The "Open in…" submenu                                         |
-| `src/data/paths.ts`                | **Generated.** 307 URL entries — see _The URL data_ below      |
+| `src/data/paths.ts`                | **Generated.** 307 command entries — see _The command data_ below |
 | `src/types/types.ts`               | `BrowserCommand`, the shape of every entry in `paths.ts`       |
 | `src/types/browsers.ts`            | `SUPPORTED_BROWSERS` — key, title, scheme, app name, bundle id |
 | `src/utils/browserApps.ts`         | Which browsers are installed; which icon each gets             |
@@ -25,8 +25,10 @@ A Raycast extension listing the internal commands of Chromium-based browsers (`c
 | `src/utils/openUrlInBrowser.ts`    | Launching, macOS only                                          |
 | `src/utils/check-paths.mjs`        | Invariant check over the generated data                        |
 | `docs/paths.md`                    | The census this data came from, per browser                    |
+| `docs/solutions/`                  | Durable learnings from solved problems — read before re-solving |
+| `CONCEPTS.md`                      | Glossary of the terms that mean something specific here        |
 
-## The URL data
+## The command data
 
 `src/data/paths.ts` is **generated from a census**, not hand-maintained. Each browser's own
 `chrome://chrome-urls` page was read over the DevTools Protocol (2026-09-09), with _Internal
@@ -84,6 +86,12 @@ combinations, and preferences read in code but absent from the manifest.
   linter checks that two actions in one panel resolve to the same key — check by hand.
 - **Every failure toast carries a Copy Error action** (`showError` / `failToast` from
   `@chrismessina/raycast-kit`).
+- **An optimistic value goes in React state, never a ref assigned during render.** `useLocalStorage`
+  does not update its returned `value` until the write is re-read, so a handler that computes from
+  that value clobbers an in-flight write. A ref looks like the fix and is not — the render body
+  reassigns it. The starred-commands code is the worked example, and
+  `docs/solutions/logic-errors/uselocalstorage-stale-value-clobbers-rapid-writes.md` is the full
+  account, including why `if (isLoading) return` is the wrong guard.
 
 ## Documentation
 
@@ -91,6 +99,15 @@ combinations, and preferences read in code but absent from the manifest.
 they were agent-specific names for the same content, and this file replaces both. Cite paths
 repo-relative here: this file is published to the public monorepo, so an absolute path would leak a
 machine path.
+
+Two companions ship alongside it:
+
+- **`docs/solutions/`** — one file per solved problem, with what was tried, what failed, and the rule
+  that prevents a recurrence. Written by `ce-compound`. Worth a look before re-solving something in
+  an area it covers; the *What Didn't Work* sections are the point, because a plausible fix that
+  fails quietly is the expensive kind.
+- **`CONCEPTS.md`** — the glossary. Terms whose meaning here is narrower than their ordinary one, and
+  the settled distinctions between words this project uses interchangeably elsewhere.
 
 ## Terminology
 
