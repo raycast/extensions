@@ -25,11 +25,16 @@ const SELECT_INTO = /\binto\b/i;
  * Functions that change something outside the rows they return.
  *
  * The `READ ONLY` transaction behind this classifier covers writes to *tables* — it is error 25006
- * on an INSERT, not a sandbox. PostgreSQL runs `SELECT pg_terminate_backend(…)`, `SELECT setval(…)`,
- * `SELECT pg_stat_reset()` and a `dblink` call inside a read-only transaction quite happily, so a
- * statement calling one of these would otherwise reach the server having asked nobody. Calling one
- * counts as a write here: the statement is routed to the write tool, which names the target
- * database and waits for the user.
+ * on an INSERT, not a sandbox. Measured against PostgreSQL 17, all of `pg_terminate_backend()`,
+ * `pg_cancel_backend()`, `set_config()`, `pg_advisory_lock()`, `pg_notify()`, `pg_stat_reset()`,
+ * `pg_read_file()`, `pg_ls_dir()`, `pg_reload_conf()`, `pg_switch_wal()` and `query_to_xml()` run
+ * to completion inside a read-only transaction. A statement calling one of those would otherwise
+ * reach the server having asked nobody, so calling one counts as a write here: it routes to the
+ * write tool, which names the target database and waits for the user.
+ *
+ * Some entries below the transaction *does* refuse (`setval`, `nextval`, `lo_create` all raise
+ * 25006). They stay listed anyway, because a confirmation the user can act on beats a bare "cannot
+ * execute in a read-only transaction" for something they plainly meant to do.
  *
  * Grouped by what each one touches. Deliberately broad — a false positive costs a confirmation
  * prompt, a false negative costs a terminated backend.
@@ -40,10 +45,11 @@ const SIDE_EFFECT_FUNCTION = new RegExp(
       // Other sessions.
       "pg_terminate_backend",
       "pg_cancel_backend",
-      // Sequences and session state — both are exempt from the read-only transaction check.
+      // Session state. Not covered by the read-only transaction.
+      "set_config",
+      // Sequences. Refused by the transaction, listed so the user gets a prompt instead of 25006.
       "setval",
       "nextval",
-      "set_config",
       // Locks and signals that outlive the statement.
       "pg_\\w*advisory\\w*",
       "pg_notify",
@@ -54,7 +60,8 @@ const SIDE_EFFECT_FUNCTION = new RegExp(
       "pg_stat_reset\\w*",
       // Reaches a different server entirely, where none of these gates apply.
       "dblink\\w*",
-      // Large objects: pg_largeobject rows, and lo_import/lo_export touch the server filesystem.
+      // Large objects: pg_largeobject rows, plus the server filesystem for lo_import/lo_export.
+      // The row-creating calls raise 25006; the group is listed so every one of them asks first.
       "lo_\\w+",
       "lowrite",
       // The server filesystem, outside the database altogether.
