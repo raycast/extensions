@@ -12,6 +12,7 @@ const {
   markActivityRead,
   markAllActivityRead,
   clearActivity,
+  signature,
 } = require("../src/attention/lib/activity.ts");
 const watch = require("../src/attention/watch.ts").default;
 beforeEach(reset);
@@ -193,7 +194,10 @@ test("entries past the retention window are deleted, not just hidden", async () 
   await recordActivity([entry("stale", hoursAgo(80))]);
   await recordActivity([entry("fresh")]);
 
-  assert.deepEqual((await loadActivity()).map(e => e.id), ["fresh"]);
+  assert.deepEqual(
+    (await loadActivity()).map(e => e.id),
+    ["fresh"],
+  );
   const stored = Object.keys(await api.LocalStorage.allItems()).filter(k => k.startsWith("gh-review.activity."));
   assert.deepEqual(stored, ["gh-review.activity.fresh"], "the expired entry must leave storage too");
 });
@@ -256,6 +260,18 @@ test("two checks starting from an empty baseline both keep their fingerprints", 
   assert.deepEqual(both.changes, [], "both fingerprints must have survived");
 });
 
+/** The pull requests storage holds a fingerprint for, whatever day it is under. */
+function fingerprints(items) {
+  const prefix = "gh-review.watch-fingerprint.";
+  return (
+    Object.keys(items)
+      .filter(key => key.startsWith(prefix))
+      // `<prefix><YYYY-MM-DD>.<pull request>`
+      .map(key => key.slice(prefix.length + 11))
+      .sort()
+  );
+}
+
 test("fingerprints for pull requests no longer in scope are forgotten", async () => {
   const stale = JSON.stringify({
     "review-requested:acme/repo#9": { sig: "old", seen: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString() },
@@ -273,30 +289,57 @@ test("fingerprints for pull requests no longer in scope are forgotten", async ()
   };
   await (await diffCandidates([{ kind: "review-requested", pr }])).commit();
 
-  const keys = Object.keys(await api.LocalStorage.allItems()).filter(k => k.startsWith("gh-review.watch-signature."));
-  assert.deepEqual(keys, ["gh-review.watch-signature.review-requested:acme/repo#1"], "storage must not grow forever");
+  assert.deepEqual(fingerprints(await api.LocalStorage.allItems()), ["review-requested:acme/repo#1"]);
+});
+
+/**
+ * Writes a fingerprint as a check would have left it `days` ago — in the shape
+ * an installed extension has on disk, so upgrading is part of what is tested.
+ */
+async function seedFingerprint(prKey, sig, days) {
+  const seen = hoursAgo(days * 24);
+  await api.LocalStorage.setItem(`gh-review.watch-signature.${prKey}`, JSON.stringify({ sig, seen }));
+  await api.LocalStorage.setItem("gh-review.watch-baseline", seen);
+}
+
+const trackedPr = number => ({
+  repository: "acme/repo",
+  number,
+  lastActivity: "2026-09-01T00:00:00Z",
+  comments: 0,
+  unresolved: 0,
+  awaitingReply: 0,
+  reviewDecision: "",
 });
 
 test("a fingerprint older than the retention window is refreshed, not forgotten", async () => {
-  const key = "gh-review.watch-signature.review-requested:acme/repo#1";
+  const candidates = [{ kind: "review-requested", pr: trackedPr(1) }];
   // Still in scope, but last seen long enough ago to be eviction material.
-  await api.LocalStorage.setItem(key, JSON.stringify({ sig: "old", seen: hoursAgo(31 * 24) }));
-  await api.LocalStorage.setItem("gh-review.watch-baseline", hoursAgo(31 * 24));
-
-  const pr = {
-    repository: "acme/repo",
-    number: 1,
-    lastActivity: new Date().toISOString(),
-    comments: 0,
-    unresolved: 0,
-    awaitingReply: 0,
-    reviewDecision: "",
-  };
-  const candidates = [{ kind: "review-requested", pr }];
+  await seedFingerprint("review-requested:acme/repo#1", signature(trackedPr(1)), 31);
   await (await diffCandidates(candidates)).commit();
 
-  assert.ok(await api.LocalStorage.getItem(key), "a pull request this run saw must keep its fingerprint");
+  assert.deepEqual(
+    fingerprints(await api.LocalStorage.allItems()),
+    ["review-requested:acme/repo#1"],
+    "a pull request this run saw must keep its fingerprint",
+  );
   assert.deepEqual((await diffCandidates(candidates)).changes, [], "and not be re-detected as new");
+});
+
+test("a fingerprint another check refreshes survives this one's eviction", async () => {
+  // Last seen a month ago, so a check that doesn't see it will evict it.
+  await seedFingerprint("review-requested:acme/repo#9", signature(trackedPr(9)), 31);
+
+  // Both checks read the same month-old baseline before either writes.
+  const sweeping = await diffCandidates([{ kind: "review-requested", pr: trackedPr(1) }]);
+  const refreshing = await diffCandidates([{ kind: "review-requested", pr: trackedPr(9) }]);
+
+  // The check that refreshes #9 commits first; the one that never saw it follows.
+  await refreshing.commit();
+  await sweeping.commit();
+
+  const after = await diffCandidates([{ kind: "review-requested", pr: trackedPr(9) }]);
+  assert.deepEqual(after.changes, [], "an unchanged pull request must not come back as new");
 });
 
 test("a baseline written before entries carried a timestamp is kept", async () => {
@@ -379,7 +422,10 @@ test("a check cannot evict an entry another check just recorded", async () => {
 test("an inbox written under the old single key is carried over, once", async () => {
   await api.LocalStorage.setItem("gh-review.activity", JSON.stringify([entry("legacy")]));
 
-  assert.deepEqual((await loadActivity()).map(e => e.id), ["legacy"]);
+  assert.deepEqual(
+    (await loadActivity()).map(e => e.id),
+    ["legacy"],
+  );
   assert.equal(await api.LocalStorage.getItem("gh-review.activity"), undefined, "the old key is not left behind");
 
   await recordActivity([entry("after")]);

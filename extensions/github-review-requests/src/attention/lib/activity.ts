@@ -24,13 +24,17 @@ const ACTIVITY_PREFIX = "gh-review.activity.";
 /** Where the inbox lived when it was one array. Carried over on first read. */
 const ACTIVITY_KEY = "gh-review.activity";
 /**
- * Fingerprints are stored one per key, under this prefix, for the same reason
- * inbox entries are: two checks running at once would otherwise read the same
- * map and write back their own copy, and the later write would drop whatever
- * the other had recorded. Separate keys never collide, so neither run can lose
- * the other's work — re-reading before a whole-map write only narrows the
- * window, it doesn't close it.
+ * Fingerprints are stored one per key, under this prefix, with the day they
+ * were written as part of the key: `<prefix><YYYY-MM-DD>.<pull request>`.
+ *
+ * Two checks run as separate processes, so a key one of them may delete must
+ * never be a key the other may write. A run only ever writes today's key, and
+ * eviction only ever deletes keys from before the retention cutoff — a month
+ * back — so the two can't collide. Re-reading a key before deleting it would
+ * not give that: the other check can always refresh it in between.
  */
+const FINGERPRINT_PREFIX = "gh-review.watch-fingerprint.";
+/** Where fingerprints lived when the key carried no date. Carried over once. */
 const SIGNATURE_PREFIX = "gh-review.watch-signature.";
 /** Where the baseline lived when it was one map. Carried over on first read. */
 const SIGNATURES_KEY = "gh-review.watch-signatures";
@@ -261,38 +265,78 @@ export function signature(pr: PullRequest): string {
   return [pr.lastActivity, pr.comments, pr.unresolved, pr.awaitingReply, pr.reviewDecision].join("|");
 }
 
-/** A fingerprint, and when a run last saw the pull request it belongs to. */
+/**
+ * A fingerprint, and the day a run last saw the pull request it belongs to —
+ * `YYYY-MM-DD`, read back off the key it was stored under. Baselines written
+ * by earlier versions carry a full timestamp here instead, and are reduced to
+ * a day as they are carried over.
+ */
 type SignatureEntry = { sig: string; seen: string };
 type SignatureMap = Record<string, SignatureEntry>;
 
-function signatureKey(key: string): string {
-  return `${SIGNATURE_PREFIX}${key}`;
+/** The day part of a key, as `YYYY-MM-DD`. */
+function dayStamp(at: number): string {
+  return new Date(at).toISOString().slice(0, 10);
+}
+
+function fingerprintKey(day: string, prKey: string): string {
+  return `${FINGERPRINT_PREFIX}${day}.${prKey}`;
+}
+
+/** Splits a stored key back into the day it was written and what it describes. */
+function readFingerprintKey(key: string): { day: string; prKey: string } | undefined {
+  const rest = key.slice(FINGERPRINT_PREFIX.length);
+  // `YYYY-MM-DD.`, then the pull request, which may itself contain dots.
+  if (!/^\d{4}-\d{2}-\d{2}\./.test(rest)) return undefined;
+  return { day: rest.slice(0, 10), prKey: rest.slice(11) };
 }
 
 /**
- * Moves a baseline written as one map across to a key per fingerprint, once.
- * Values from before entries carried a timestamp are dated now, so upgrading
- * never looks like a fresh install.
+ * Moves a baseline written in either earlier shape — one map, or a key per
+ * fingerprint without the date — across to dated keys, once. Each value keeps
+ * the date it carried, so nothing is granted a fresh month; only the oldest
+ * shape, which recorded none, is dated today. Upgrading never reads as a fresh
+ * install, and a pull request still in scope is rewritten under today's key by
+ * the commit that follows before anything sweeps the old one.
  */
 async function adoptLegacySignatures(): Promise<void> {
+  const today = dayStamp(Date.now());
+  /** `[day, pull request, fingerprint]`, ready to be written under a dated key. */
+  const carried: [string, string, string][] = [];
+  /** Keeps a value's own date where it had one, so nothing gains a month. */
+  const dayOf = (entry: SignatureEntry | string) =>
+    typeof entry === "string" || !entry.seen ? today : dayStamp(Date.parse(entry.seen));
+
   const raw = await LocalStorage.getItem<string>(SIGNATURES_KEY);
-  if (!raw) return;
-  try {
-    const stored = JSON.parse(raw) as Record<string, SignatureEntry | string>;
-    const now = new Date().toISOString();
-    await Promise.all(
-      Object.entries(stored).map(([key, value]) =>
-        LocalStorage.setItem(
-          signatureKey(key),
-          JSON.stringify(typeof value === "string" ? { sig: value, seen: now } : value),
-        ),
-      ),
-    );
-    // Whatever was there was a baseline, even if it held nothing.
-    await LocalStorage.setItem(BASELINE_KEY, now);
-  } catch {
-    // Unreadable: nothing to carry over, and the key still goes.
+  if (raw) {
+    try {
+      const stored = JSON.parse(raw) as Record<string, SignatureEntry | string>;
+      for (const [prKey, value] of Object.entries(stored)) {
+        carried.push([dayOf(value), prKey, typeof value === "string" ? value : value.sig]);
+      }
+    } catch {
+      // Unreadable: nothing to carry over, and the key still goes.
+    }
   }
+
+  const items = await LocalStorage.allItems();
+  const undated = Object.entries(items).filter(([key]) => key.startsWith(SIGNATURE_PREFIX));
+  for (const [key, value] of undated) {
+    if (typeof value !== "string") continue;
+    try {
+      const entry = JSON.parse(value) as SignatureEntry;
+      carried.push([dayOf(entry), key.slice(SIGNATURE_PREFIX.length), entry.sig]);
+    } catch {
+      // A half-written fingerprint only costs one re-detection.
+    }
+  }
+
+  if (!raw && undated.length === 0) return;
+
+  await Promise.all(carried.map(([day, prKey, sig]) => LocalStorage.setItem(fingerprintKey(day, prKey), sig)));
+  // Whatever was there was a baseline, even if it held nothing.
+  await LocalStorage.setItem(BASELINE_KEY, new Date().toISOString());
+  await Promise.all(undated.map(([key]) => LocalStorage.removeItem(key)));
   await LocalStorage.removeItem(SIGNATURES_KEY);
 }
 
@@ -304,26 +348,35 @@ async function loadSignatures(): Promise<SignatureMap | undefined> {
   const items = await LocalStorage.allItems();
   const map: SignatureMap = {};
   for (const [key, value] of Object.entries(items)) {
-    if (!key.startsWith(SIGNATURE_PREFIX) || typeof value !== "string") continue;
-    try {
-      map[key.slice(SIGNATURE_PREFIX.length)] = JSON.parse(value) as SignatureEntry;
-    } catch {
-      // A half-written fingerprint only costs one re-detection.
-    }
+    if (!key.startsWith(FINGERPRINT_PREFIX) || typeof value !== "string") continue;
+    const parsed = readFingerprintKey(key);
+    if (!parsed) continue;
+    // A pull request keeps one key per day it was written on, so the newest
+    // day is the fingerprint that counts and the others are on their way out.
+    const held = map[parsed.prKey];
+    if (!held || held.seen < parsed.day) map[parsed.prKey] = { sig: value, seen: parsed.day };
   }
   return map;
 }
 
 /**
- * Forgets fingerprints for pull requests no run has seen in a month. Each key
- * is judged on its own timestamp, so this never depends on which fingerprints
- * the current run happened to read — except that a pull request this run just
- * saw is never forgotten, however old the fingerprint it replaced was.
+ * Forgets fingerprints written more than a month ago.
+ *
+ * Nothing is read to decide this: the day is in the key, and a run only ever
+ * writes today's. A check refreshing a fingerprint this one considers stale
+ * therefore writes a key this deletion cannot name, and the refreshed value
+ * survives. Reading a key and then deleting it would not hold — the refresh
+ * can always land in between.
  */
-async function evictSignatures(previous: SignatureMap, current: SignatureMap): Promise<void> {
-  const cutoff = new Date(Date.now() - SIGNATURE_RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
-  const stale = Object.entries(previous).filter(([key, entry]) => !current[key] && entry.seen < cutoff);
-  await Promise.all(stale.map(([key]) => LocalStorage.removeItem(signatureKey(key))));
+async function evictSignatures(): Promise<void> {
+  const cutoff = dayStamp(Date.now() - SIGNATURE_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const items = await LocalStorage.allItems();
+  const stale = Object.keys(items).filter(key => {
+    if (!key.startsWith(FINGERPRINT_PREFIX)) return false;
+    const parsed = readFingerprintKey(key);
+    return parsed !== undefined && parsed.day < cutoff;
+  });
+  await Promise.all(stale.map(key => LocalStorage.removeItem(key)));
 }
 
 /** A PR the watcher found, tagged with which category surfaced it. */
@@ -360,24 +413,26 @@ export async function diffCandidates(
 ): Promise<{ changes: Change[]; commit: () => Promise<void> }> {
   const previous = await loadSignatures();
 
+  const today = dayStamp(Date.now());
   const current: SignatureMap = {};
-  const seen = new Date().toISOString();
   for (const { kind, pr } of candidates) {
-    current[`${kind}:${pr.repository}#${pr.number}`] = { sig: signature(pr), seen };
+    current[`${kind}:${pr.repository}#${pr.number}`] = { sig: signature(pr), seen: today };
   }
 
-  const refreshBefore = new Date(Date.now() - SEEN_REFRESH_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const refreshBefore = dayStamp(Date.now() - SEEN_REFRESH_DAYS * 24 * 60 * 60 * 1000);
   const commit = async () => {
-    // One key per fingerprint, and only the ones that actually need writing:
-    // a run that finds nothing changed writes nothing, and a fingerprint this
-    // run never saw is left exactly as another run left it.
+    // Only the fingerprints that actually need writing: a run that finds
+    // nothing changed writes nothing, and one this run never saw is left
+    // exactly as another run left it.
     const changed = Object.entries(current).filter(([key, entry]) => {
       const before = previous?.[key];
       return !before || before.sig !== entry.sig || before.seen < refreshBefore;
     });
-    await Promise.all(changed.map(([key, entry]) => LocalStorage.setItem(signatureKey(key), JSON.stringify(entry))));
-    await LocalStorage.setItem(BASELINE_KEY, seen);
-    if (previous) await evictSignatures(previous, current);
+    // Under today's key, always: it is the one key eviction can never name,
+    // so a fingerprint refreshed here outlives another check's sweep.
+    await Promise.all(changed.map(([key, entry]) => LocalStorage.setItem(fingerprintKey(today, key), entry.sig)));
+    await LocalStorage.setItem(BASELINE_KEY, new Date().toISOString());
+    await evictSignatures();
   };
 
   // Nothing to record on a first run, so the baseline can be taken immediately.
@@ -407,7 +462,7 @@ export function targetUrl(event: Pick<ActivityEvent, "url" | "commentUrl">): str
 /** Forgets the baseline, so the next run starts fresh without notifying. */
 export async function resetTracker(): Promise<void> {
   const items = await LocalStorage.allItems();
-  const keys = Object.keys(items).filter(key => key.startsWith(SIGNATURE_PREFIX));
+  const keys = Object.keys(items).filter(key => key.startsWith(FINGERPRINT_PREFIX) || key.startsWith(SIGNATURE_PREFIX));
   await Promise.all(keys.map(key => LocalStorage.removeItem(key)));
   await LocalStorage.removeItem(SIGNATURES_KEY);
   await LocalStorage.removeItem(BASELINE_KEY);
