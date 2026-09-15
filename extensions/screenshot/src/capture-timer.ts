@@ -1,5 +1,5 @@
 import { closeMainWindow } from "@raycast/api";
-import { Form, LaunchProps } from "@raycast/api";
+import { LaunchProps } from "@raycast/api";
 
 import { exec } from "child_process";
 
