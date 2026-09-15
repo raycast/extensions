@@ -1,6 +1,6 @@
 # Secret Browser Commands Changelog
 
-## [1.2.1] - {PR_MERGE_DATE}
+## [1.2.1] - 2026-09-15
 
 * Fix: 1.2.0 declared `@raycast/api` 2.4.1, which is newer than released Raycast can run, so the update failed to install with "requires Raycast API v2.4.1". Back to 2.2.1
 
