@@ -105,6 +105,10 @@ function finiteOrNull(value: number | null | undefined): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function allNumbers(values: Array<number | null>): values is number[] {
+  return values.every((value) => value !== null);
+}
+
 function sumSeries(series: RealtimeValueSeries | undefined): number | null {
   if (!series) return null;
   const values = Object.values(series.Values).filter((value): value is number => finiteOrNull(value) !== null);
@@ -170,11 +174,13 @@ export function createSnapshot({
           state: finiteOrNull(ohmpilot.CodeOfState),
           temperatureCelsius: finiteOrNull(ohmpilot.Temperature_Channel_1),
         }));
-  const legacyOhmpilotEnergies = legacyOhmpilotEntries
-    .map(([, ohmpilot]) => finiteOrNull(ohmpilot.EnergyReal_WAC_Sum_Consumed))
-    .filter((energy): energy is number => energy !== null);
+  const legacyOhmpilotEnergies = legacyOhmpilotEntries.map(([, ohmpilot]) =>
+    finiteOrNull(ohmpilot.EnergyReal_WAC_Sum_Consumed),
+  );
   const legacyOhmpilotEnergy =
-    legacyOhmpilotEnergies.length > 0 ? legacyOhmpilotEnergies.reduce((sum, energy) => sum + energy, 0) : null;
+    legacyOhmpilotEnergies.length > 0 && allNumbers(legacyOhmpilotEnergies)
+      ? legacyOhmpilotEnergies.reduce((sum, energy) => sum + energy, 0)
+      : null;
   const storageStateOfCharge = storages.find((storage) => storage.stateOfChargePercent !== null)?.stateOfChargePercent;
   const originalSite = powerResponse.Body.Data.Site;
   const site: SiteData = {
@@ -191,7 +197,7 @@ export function createSnapshot({
     inverters,
     meters,
     ohmpilotEnergy:
-      legacyOhmpilotEnergy !== null
+      legacyOhmpilotEntries.length > 0
         ? legacyOhmpilotEnergy
         : ohmpilots.some((ohmpilot) => ohmpilot.energyWattHours !== null)
           ? ohmpilots.reduce((sum, ohmpilot) => sum + (ohmpilot.energyWattHours ?? 0), 0)

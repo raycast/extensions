@@ -1,14 +1,12 @@
-export function createSingleFlight<Arguments extends unknown[], Result>(
-  operation: (...arguments_: Arguments) => Promise<Result>,
-): (...arguments_: Arguments) => Promise<Result> {
+export function createSingleFlight<Result>(operation: () => Promise<Result>): () => Promise<Result> {
   let active: Promise<Result> | undefined;
 
-  return (...arguments_: Arguments) => {
+  return () => {
     if (active) return active;
 
     let request: Promise<Result>;
     try {
-      request = operation(...arguments_);
+      request = operation();
     } catch (error) {
       return Promise.reject(error);
     }

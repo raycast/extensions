@@ -182,4 +182,23 @@ describe("createSnapshot", () => {
     expect(snapshot.ohmpilotEnergy).toBeNull();
     expect(snapshot.ohmpilots[0]?.energyWattHours).toBeNull();
   });
+
+  it("does not publish a partial Ohmpilot energy sum as the total", () => {
+    const response: PowerFlowRealtimeDataResponse = {
+      ...powerResponse,
+      Body: {
+        Data: {
+          Site: powerResponse.Body.Data.Site,
+          Ohmpilots: {
+            "1": { CodeOfState: 0, EnergyReal_WAC_Sum_Consumed: 1200 },
+            "2": { CodeOfState: 0 },
+          },
+        },
+      },
+    };
+
+    const snapshot = createSnapshot({ inverterResponse, powerResponse: response });
+
+    expect(snapshot.ohmpilotEnergy).toBeNull();
+  });
 });

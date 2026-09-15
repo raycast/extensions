@@ -4,8 +4,8 @@ import { normalizeBaseUrlOrUndefined } from "./api";
 import { formatCompactPower, formatTimestamp } from "./format";
 import { createMetricSections } from "./metrics";
 import { FroniusSnapshot, hasInverterError, inverterDisplayName } from "./model";
+import { createRefreshController, RefreshResult } from "./refresh-controller";
 import { fetchFroniusSnapshot } from "./service";
-import { createSingleFlight } from "./single-flight";
 
 export default function Watch() {
   const { baseUrl } = getPreferenceValues<Preferences>();
@@ -13,24 +13,31 @@ export default function Watch() {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const performLoad = useCallback(
-    async (notify = false) => {
-      setIsLoading(true);
-      try {
-        setSnapshot(await fetchFroniusSnapshot(baseUrl));
-        setErrorMessage(undefined);
-        if (notify) await showToast({ style: Toast.Style.Success, title: "Fronius data refreshed" });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        setErrorMessage(message);
-        if (notify) await showToast({ style: Toast.Style.Failure, title: "Could not refresh Fronius data", message });
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [baseUrl],
+  const performLoad = useCallback(async (): Promise<RefreshResult> => {
+    setIsLoading(true);
+    try {
+      setSnapshot(await fetchFroniusSnapshot(baseUrl));
+      setErrorMessage(undefined);
+      return {};
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setErrorMessage(message);
+      return { errorMessage: message };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [baseUrl]);
+  const showRefreshResult = useCallback(async ({ errorMessage: refreshError }: RefreshResult) => {
+    await showToast(
+      refreshError
+        ? { style: Toast.Style.Failure, title: "Could not refresh Fronius data", message: refreshError }
+        : { style: Toast.Style.Success, title: "Fronius data refreshed" },
+    );
+  }, []);
+  const loadData = useMemo(
+    () => createRefreshController(performLoad, showRefreshResult),
+    [performLoad, showRefreshResult],
   );
-  const loadData = useMemo(() => createSingleFlight(performLoad), [performLoad]);
   const browserUrl = normalizeBaseUrlOrUndefined(baseUrl);
 
   useEffect(() => {
