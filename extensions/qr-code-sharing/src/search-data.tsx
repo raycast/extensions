@@ -92,11 +92,14 @@ export default function Command() {
   );
 
   async function create() {
-    if (result?.error) {
+    // Re-validate against the exact values being saved: the cached preview can lag behind
+    // the latest keystroke or type change, so it must not be trusted for this check.
+    const { error } = await renderCode(trimmed, newFormat, box);
+    if (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: `Cannot encode as ${getFormat(newFormat).title}`,
-        message: result.error,
+        message: error,
       });
       return;
     }
