@@ -2,7 +2,7 @@ import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast,
 import { useFetch } from "@raycast/utils";
 import { useToken } from "./instances";
 import DeploymentLogs from "./deployment-logs";
-import { ErrorResult } from "./interfaces";
+import { parseTrpcJsonResponse, trpcMutate, trpcQueryUrl } from "./trpc";
 
 interface Deployment {
   deploymentId: string;
@@ -45,9 +45,10 @@ export default function DeploymentHistory({
     error,
     revalidate,
   } = useFetch<Deployment[], Deployment[]>(
-    `${url}${ENDPOINTS[service.type]}?${ID_FIELDS[service.type]}=${service.id}`,
+    trpcQueryUrl(url, ENDPOINTS[service.type], { [ID_FIELDS[service.type]]: service.id }),
     {
       headers,
+      parseResponse: (response) => parseTrpcJsonResponse<Deployment[]>(response),
       initialData: [],
     },
   );
@@ -65,15 +66,7 @@ export default function DeploymentHistory({
 
     const toast = await showToast(Toast.Style.Animated, "Cancelling", deployment.title);
     try {
-      const response = await fetch(url + "deployment.killProcess", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ deploymentId: deployment.deploymentId }),
-      });
-      if (!response.ok) {
-        const err = (await response.json()) as ErrorResult;
-        throw new Error(err.message);
-      }
+      await trpcMutate(url, headers, "deployment.killProcess", { deploymentId: deployment.deploymentId });
       toast.style = Toast.Style.Success;
       toast.title = "Cancelled";
       revalidate();
@@ -99,15 +92,7 @@ export default function DeploymentHistory({
 
     const toast = await showToast(Toast.Style.Animated, "Rolling back", deployment.title);
     try {
-      const response = await fetch(url + "rollback.rollback", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ rollbackId: deployment.rollbackId }),
-      });
-      if (!response.ok) {
-        const err = (await response.json()) as ErrorResult;
-        throw new Error(err.message);
-      }
+      await trpcMutate(url, headers, "rollback.rollback", { rollbackId: deployment.rollbackId });
       toast.style = Toast.Style.Success;
       toast.title = "Rolled back";
       revalidate();
@@ -131,15 +116,7 @@ export default function DeploymentHistory({
 
     const toast = await showToast(Toast.Style.Animated, "Deleting", deployment.title);
     try {
-      const response = await fetch(url + "deployment.removeDeployment", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ deploymentId: deployment.deploymentId }),
-      });
-      if (!response.ok) {
-        const err = (await response.json()) as ErrorResult;
-        throw new Error(err.message);
-      }
+      await trpcMutate(url, headers, "deployment.removeDeployment", { deploymentId: deployment.deploymentId });
       toast.style = Toast.Style.Success;
       toast.title = "Deleted";
       revalidate();
