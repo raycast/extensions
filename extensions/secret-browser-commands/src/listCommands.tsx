@@ -116,7 +116,13 @@ export default function Command() {
   // than offer actions that always fail, the extension drops to reference mode: browse and copy.
   const canLaunchBrowsers = userPlatform === "mac";
   // Optimistic until discovery answers — see browserIcon for why undefined is not "absent".
-  const isBrowserInstalled = (key: string) => isBrowserAvailable(installedBrowsers, key);
+  const currentBrowserInstalled = isBrowserAvailable(installedBrowsers, currentBrowser.key);
+  // Nothing here varies per row, so it is resolved once rather than per rendered command.
+  // Non-undefined only when we have both a browser we can name and permission to launch it.
+  const launchApp =
+    canLaunchBrowsers && currentBrowser.appName && currentBrowserInstalled
+      ? (browserAppPath(installedBrowsers, currentBrowser.key) ?? currentBrowser.appName)
+      : undefined;
   const query = searchText.toLowerCase();
 
   // Does the command match what the user asked for — search, browser, platform?
@@ -159,13 +165,8 @@ export default function Command() {
   const filteredCommands = relevantCommands
     .filter(({ reasons }) => reasons.length === 0)
     .map(({ command }) => command)
-    .sort((a, b) => {
-      // Starred first, then the file's own ordering
-      const aIsStarred = starredSet.has(a.id);
-      const bIsStarred = starredSet.has(b.id);
-      if (aIsStarred !== bIsStarred) return aIsStarred ? -1 : 1;
-      return 0;
-    });
+    // Starred first; sort is stable, so everything else keeps the file's own ordering.
+    .sort((a, b) => Number(starredSet.has(b.id)) - Number(starredSet.has(a.id)));
 
   // Only commands that WOULD have matched and are being withheld. A preference being switched on
   // is not by itself a reason to mention it — for a search nothing matches, nothing is hidden.
@@ -215,11 +216,6 @@ export default function Command() {
         const description = describe(command) || "No description available.";
         const fullUrl = getFullUrl(command.path);
         const kind = commandKind(command);
-        // Non-undefined only when we have both a browser we can name and permission to launch it.
-        const launchApp =
-          canLaunchBrowsers && currentBrowser.appName && isBrowserInstalled(currentBrowser.key)
-            ? (browserAppPath(installedBrowsers, currentBrowser.key) ?? currentBrowser.appName)
-            : undefined;
 
         const accessories: List.Item.Accessory[] = [];
         if (command.isDeprecated) accessories.push({ tag: { value: "Removed", color: Color.SecondaryText } });
@@ -314,7 +310,7 @@ export default function Command() {
                         />
                       </>
                     ) : (
-                      !isBrowserInstalled(currentBrowser.key) && (
+                      !currentBrowserInstalled && (
                         <>
                           <List.Item.Detail.Metadata.Separator />
                           <List.Item.Detail.Metadata.Label
