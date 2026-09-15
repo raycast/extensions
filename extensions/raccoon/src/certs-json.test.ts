@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { byUrgency, isRemovable, parseCerts, type Certificate } from "./certs-json.ts";
+import { byUrgency, isRemovable, parseCerts, type Certificate, certLabel } from "./certs-json.ts";
 
 const report = (certs: unknown[]) =>
 	JSON.stringify({
@@ -78,4 +78,15 @@ test("only an expired certificate in the login keychain, with a hash, can be rem
 	assert.equal(isRemovable({ ...base, keychain: "" }), false);
 	assert.equal(isRemovable({ ...base, sha256: "" }), false);
 	assert.equal(isRemovable({ ...base, status: "expiring" }), false);
+});
+
+test("a fingerprint is shortened for the row, a real name is left alone", () => {
+	// Sixty-four hex characters is what a certificate with no common name is
+	// reported as, and it pushed the issuer and every tag off the row.
+	assert.equal(certLabel("4c7ea6879711d2713a4cce418ca8e7edbc19e86fc0d3f093b9a8aca730c753d1"), "4c7ea687…30c753d1");
+	assert.equal(
+		certLabel("Apple Worldwide Developer Relations Certification Authority"),
+		"Apple Worldwide Developer Relations Certification Authority",
+	);
+	assert.equal(certLabel("*.branch.io"), "*.branch.io");
 });

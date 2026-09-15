@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { deleteCertificates, openApp } from "./fixes";
 import { RccList } from "./rcc-list";
 import { offered, RowActions } from "./resolve";
-import { byUrgency, isRemovable, parseCerts, type CertStatus, type CertsReport } from "./certs-json";
+import { byUrgency, isRemovable, parseCerts, type CertStatus, type CertsReport, certLabel } from "./certs-json";
 
 const TINT: Record<CertStatus, Color> = {
 	expired: Color.Red,
@@ -46,9 +46,9 @@ function Rows({ c, actions }: { c: CertsReport; actions: React.ReactNode }) {
 						source: ICON[cert.status],
 						tintColor: TINT[cert.status],
 					}}
-					title={cert.name}
+					title={certLabel(cert.name)}
 					subtitle={cert.issuer}
-					keywords={[cert.status, cert.expires]}
+					keywords={[cert.name, cert.status, cert.expires]}
 					accessories={[
 						{ text: cert.expires },
 						...(cert.keychain && !/login\.keychain/.test(cert.keychain)

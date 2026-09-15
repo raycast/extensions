@@ -88,3 +88,15 @@ export function byUrgency(a: Certificate, b: Certificate): number {
 	const rank = (c: Certificate) => (c.status === "expired" ? 0 : c.status === "expiring" ? 1 : 2);
 	return rank(a) - rank(b) || a.name.localeCompare(b.name);
 }
+
+/**
+ * What to put in the row's title.
+ *
+ * A certificate with no common name is reported by its fingerprint, sixty-four
+ * hexadecimal characters that push the issuer and every tag off the end of the
+ * row. Shortened, the row fits; the whole thing stays searchable, and the two
+ * ends are what a person compares anyway.
+ */
+export function certLabel(name: string): string {
+	return /^[0-9a-f]{32,}$/i.test(name) ? `${name.slice(0, 8)}…${name.slice(-8)}` : name;
+}
