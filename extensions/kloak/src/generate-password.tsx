@@ -151,10 +151,18 @@ function calculateStrength(secret: string, mode: string): StrengthAnalysis {
   let entropy = 0;
 
   if (mode === "passphrase") {
-    const words = secret.split(/[- _.+/]/).filter(Boolean);
-    // EFF wordlist has ~7776 words => ~12.92 bits per word + ~6 bits if number appended
-    const wordBits = words.length * 12.9;
-    entropy = Math.round(wordBits + 6);
+    const tokens = secret.split(/[- _.+/]/).filter(Boolean);
+    const bitsPerWord = Math.log2(EFF_WORDLIST.length);
+    let wordTokens = 0;
+    let numberEntropy = 0;
+    for (const token of tokens) {
+      if (/^\d+$/.test(token)) {
+        numberEntropy += Math.log2(Math.max(10, Math.pow(10, token.length)));
+      } else {
+        wordTokens++;
+      }
+    }
+    entropy = Math.round(wordTokens * bitsPerWord + numberEntropy);
   } else if (mode === "pin") {
     // 10 digits = log2(10) ≈ 3.32 bits per digit
     entropy = Math.round(secret.length * 3.32);
@@ -352,7 +360,7 @@ export default function GeneratePasswordCommand() {
 
     let clearSeconds = 30;
     try {
-      const prefs = getPreferenceValues<{ autoClearClipboardSeconds?: string }>();
+      const prefs = getPreferenceValues<Preferences>();
       if (prefs.autoClearClipboardSeconds) {
         const parsed = parseInt(prefs.autoClearClipboardSeconds, 10);
         if (!isNaN(parsed) && parsed > 0) clearSeconds = parsed;

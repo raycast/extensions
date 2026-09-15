@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kloak",
   "title": "Kloak Password Manager",
-  "description": "Zero-knowledge, local-first password manager with instant search, auto-clear clipboard, and generator.",
+  "description": "Local-first password manager with instant search, auto-clear clipboard, and generator.",
   "icon": "icon.png",
   "author": "naetik_arvind",
   "categories": [
@@ -15,7 +15,7 @@
       "name": "search-vault",
       "title": "Search Vault",
       "subtitle": "Kloak",
-      "description": "Fuzzy search passwords and copy credentials instantly",
+      "description": "Search passwords and copy credentials instantly",
       "mode": "view",
       "icon": "icon.png"
     },
@@ -80,7 +80,7 @@
     "typescript": "^5.7.0"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

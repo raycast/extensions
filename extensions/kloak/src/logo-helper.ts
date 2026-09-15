@@ -1,4 +1,5 @@
 import { Image, Icon, Color } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { KloakItem } from "./kloak-ipc.js";
 
 const BRAND_MAP: Record<string, string> = {
@@ -191,11 +192,10 @@ export function getItemIcon(item: KloakItem): Image.ImageLike {
   const domain = extractDomain(item);
 
   if (domain && (item.type === "login" || item.type === "authenticator" || !item.type)) {
-    return {
-      source: `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`,
+    return getFavicon(`https://${domain}`, {
       fallback: item.type === "authenticator" ? Icon.Lock : Icon.Key,
       mask: Image.Mask.RoundedRectangle
-    };
+    });
   }
 
   switch (item.type) {

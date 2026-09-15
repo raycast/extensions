@@ -58,9 +58,11 @@ export default function AddEntryCommand() {
   // Authenticator fields
   const [authIssuer, setAuthIssuer] = useState<string>("");
   const [authSecret, setAuthSecret] = useState<string>("");
-  const [authAlgorithm, setAuthAlgorithm] = useState<string>("TOTP");
+  const [authType, setAuthType] = useState<string>("totp");
+  const [authAlgorithm, setAuthAlgorithm] = useState<string>("SHA1");
   const [authDigits, setAuthDigits] = useState<string>("6");
   const [authPeriod, setAuthPeriod] = useState<string>("30");
+  const [authCounter, setAuthCounter] = useState<string>("0");
 
   async function handleSubmit() {
     if (!title.trim() && !username.trim() && !url.trim() && !cardholderName.trim() && !aliasEmail.trim() && !authSecret.trim() && !notes.trim()) {
@@ -130,9 +132,11 @@ export default function AddEntryCommand() {
         itemPayload.totpSecret = authSecret.trim().replace(/\s+/g, "") || undefined;
         itemPayload.authenticatorDetails = {
           issuer: authIssuer.trim() || undefined,
+          type: authType as "totp" | "hotp",
           algorithm: authAlgorithm,
           digits: parseInt(authDigits, 10) || 6,
-          period: parseInt(authPeriod, 10) || 30
+          period: parseInt(authPeriod, 10) || 30,
+          counter: authType === "hotp" ? (parseInt(authCounter, 10) || 0) : undefined
         };
       }
 
@@ -255,18 +259,28 @@ export default function AddEntryCommand() {
         <>
           <Form.TextField id="authIssuer" title="Issuer / Service" placeholder="e.g. AWS, GitHub, Google" value={authIssuer} onChange={setAuthIssuer} />
           <Form.TextField id="authSecret" title="Secret Key (Base32)" placeholder="JBSWY3DPEHPK3PXP" value={authSecret} onChange={setAuthSecret} />
+          <Form.Dropdown id="authType" title="Type" value={authType} onChange={setAuthType}>
+            <Form.Dropdown.Item value="totp" title="TOTP (Time-based)" icon={Icon.Clock} />
+            <Form.Dropdown.Item value="hotp" title="HOTP (Counter-based)" icon={Icon.Clock} />
+          </Form.Dropdown>
           <Form.Dropdown id="authAlgorithm" title="Algorithm" value={authAlgorithm} onChange={setAuthAlgorithm}>
-            <Form.Dropdown.Item value="TOTP" title="TOTP (Time-based)" icon={Icon.Clock} />
-            <Form.Dropdown.Item value="HOTP" title="HOTP (Counter-based)" icon={Icon.Clock} />
+            <Form.Dropdown.Item value="SHA1" title="SHA-1 (Default)" icon={Icon.Shield} />
+            <Form.Dropdown.Item value="SHA256" title="SHA-256" icon={Icon.Shield} />
+            <Form.Dropdown.Item value="SHA512" title="SHA-512" icon={Icon.Shield} />
           </Form.Dropdown>
           <Form.Dropdown id="authDigits" title="Digits" value={authDigits} onChange={setAuthDigits}>
-            <Form.Dropdown.Item value="6" title="6 digits" icon={Icon.Number00} />
+            <Form.Dropdown.Item value="6" title="6 digits (Default)" icon={Icon.Number00} />
             <Form.Dropdown.Item value="8" title="8 digits" icon={Icon.Number00} />
           </Form.Dropdown>
-          <Form.Dropdown id="authPeriod" title="Period (Seconds)" value={authPeriod} onChange={setAuthPeriod}>
-            <Form.Dropdown.Item value="30" title="30 seconds" icon={Icon.Clock} />
-            <Form.Dropdown.Item value="60" title="60 seconds" icon={Icon.Clock} />
-          </Form.Dropdown>
+          {authType === "totp" ? (
+            <Form.Dropdown id="authPeriod" title="Period (Seconds)" value={authPeriod} onChange={setAuthPeriod}>
+              <Form.Dropdown.Item value="30" title="30 seconds (Default)" icon={Icon.Clock} />
+              <Form.Dropdown.Item value="60" title="60 seconds" icon={Icon.Clock} />
+              <Form.Dropdown.Item value="15" title="15 seconds" icon={Icon.Clock} />
+            </Form.Dropdown>
+          ) : (
+            <Form.TextField id="authCounter" title="Initial Counter" placeholder="0" value={authCounter} onChange={setAuthCounter} />
+          )}
         </>
       )}
 

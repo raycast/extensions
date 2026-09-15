@@ -102,7 +102,7 @@ async function copyWithAutoClear(text: string, label: string, isSecret = true) {
 
   let clearSeconds = 30;
   try {
-    const prefs = getPreferenceValues<{ autoClearClipboardSeconds?: string }>();
+    const prefs = getPreferenceValues<Preferences>();
     if (prefs.autoClearClipboardSeconds) {
       const parsed = parseInt(prefs.autoClearClipboardSeconds, 10);
       if (!isNaN(parsed) && parsed > 0) clearSeconds = parsed;
@@ -133,18 +133,22 @@ async function copyTotpCode(item: KloakItem, fallbackToken?: string) {
     showToast({ style: Toast.Style.Failure, title: "No 2FA configured for this item" });
     return;
   }
-  const result = generateLocalTotp(item.totpSecret);
+  const result = generateLocalTotp(item.totpSecret, item.authenticatorDetails);
   const token = result?.token || fallbackToken;
+  const otpType = item.authenticatorDetails?.type === "hotp" ? "HOTP" : "TOTP";
   if (token) {
-    await copyWithAutoClear(token, `2FA TOTP Code (${token})`, true);
+    await copyWithAutoClear(token, `2FA ${otpType} Code (${token})`, true);
   } else {
     try {
-      const res = await requestDaemon("vault.generateTotp", { secret: item.totpSecret });
+      const res = await requestDaemon("vault.generateTotp", {
+        secret: item.totpSecret,
+        details: item.authenticatorDetails
+      });
       if (res?.token) {
-        await copyWithAutoClear(res.token, `2FA TOTP Code (${res.token})`, true);
+        await copyWithAutoClear(res.token, `2FA ${otpType} Code (${res.token})`, true);
       }
     } catch (e: any) {
-      showToast({ style: Toast.Style.Failure, title: "Failed to generate 2FA TOTP", message: e.message });
+      showToast({ style: Toast.Style.Failure, title: `Failed to generate 2FA ${otpType}`, message: e.message });
     }
   }
 }
@@ -158,21 +162,21 @@ interface ItemDetailScreenProps {
 export function ItemDetailScreen({ item, onToggleFavorite, onReload }: ItemDetailScreenProps) {
   const [revealed, setRevealed] = useState<boolean>(false);
   const [totp, setTotp] = useState<TotpResult | null>(() => {
-    return item.totpSecret ? generateLocalTotp(item.totpSecret) : null;
+    return item.totpSecret ? generateLocalTotp(item.totpSecret, item.authenticatorDetails) : null;
   });
 
   useEffect(() => {
     if (!item.totpSecret) return;
     function update() {
       if (item.totpSecret) {
-        const res = generateLocalTotp(item.totpSecret);
+        const res = generateLocalTotp(item.totpSecret, item.authenticatorDetails);
         setTotp(res);
       }
     }
     update();
     const timer = setInterval(update, 1000);
     return () => clearInterval(timer);
-  }, [item.totpSecret]);
+  }, [item.totpSecret, item.authenticatorDetails]);
 
   const strength = item.password ? evaluatePasswordStrength(item.password) : null;
 
@@ -537,7 +541,7 @@ export default function SearchVaultCommand() {
       const newTokens: Record<string, TotpResult> = {};
       for (const item of items) {
         if (item.totpSecret) {
-          const res = generateLocalTotp(item.totpSecret);
+          const res = generateLocalTotp(item.totpSecret, item.authenticatorDetails);
           if (res) newTokens[item.id] = res;
         }
       }
@@ -705,14 +709,16 @@ export default function SearchVaultCommand() {
             {totp && (
               <>
                 <List.Item.Detail.Metadata.Label
-                  title="2FA TOTP Code"
+                  title={totp.type === "hotp" ? "2FA HOTP Code" : "2FA TOTP Code"}
                   text={totp.token}
                   icon={Icon.Clock}
                 />
-                <List.Item.Detail.Metadata.Label
-                  title="2FA Expires In"
-                  text={`${totp.secondsRemaining}s`}
-                />
+                {totp.type !== "hotp" && (
+                  <List.Item.Detail.Metadata.Label
+                    title="2FA Expires In"
+                    text={`${totp.secondsRemaining}s`}
+                  />
+                )}
               </>
             )}
           </>
@@ -819,20 +825,41 @@ export default function SearchVaultCommand() {
             {totp && (
               <>
                 <List.Item.Detail.Metadata.Label
-                  title="Live 2FA Code"
+                  title={totp.type === "hotp" ? "Live HOTP Code" : "Live 2FA Code"}
                   text={totp.token}
                   icon={Icon.Clock}
                 />
-                <List.Item.Detail.Metadata.Label
-                  title="Expires In"
-                  text={`${totp.secondsRemaining}s`}
-                />
+                {totp.type !== "hotp" && (
+                  <List.Item.Detail.Metadata.Label
+                    title="Expires In"
+                    text={`${totp.secondsRemaining}s`}
+                  />
+                )}
               </>
             )}
             <List.Item.Detail.Metadata.Label
-              title="Algorithm"
-              text={item.authenticatorDetails?.algorithm || "TOTP"}
+              title="Type"
+              text={item.authenticatorDetails?.type === "hotp" ? "Counter-based (HOTP)" : "Time-based (TOTP)"}
             />
+            <List.Item.Detail.Metadata.Label
+              title="Algorithm"
+              text={item.authenticatorDetails?.algorithm || "SHA1"}
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Digits"
+              text={`${item.authenticatorDetails?.digits || 6} digits`}
+            />
+            {item.authenticatorDetails?.type !== "hotp" ? (
+              <List.Item.Detail.Metadata.Label
+                title="Period"
+                text={`${item.authenticatorDetails?.period || 30}s`}
+              />
+            ) : (
+              <List.Item.Detail.Metadata.Label
+                title="Counter"
+                text={`${item.authenticatorDetails?.counter ?? 0}`}
+              />
+            )}
           </>
         )}
 
@@ -981,7 +1008,7 @@ export default function SearchVaultCommand() {
               accessories.push({
                 tag: { value: liveTotp.token, color: Color.Green },
                 icon: Icon.Clock,
-                tooltip: `2FA Active (${liveTotp.secondsRemaining}s)`
+                tooltip: liveTotp.type === "hotp" ? "2FA HOTP Code" : `2FA Active (${liveTotp.secondsRemaining}s)`
               });
             }
 

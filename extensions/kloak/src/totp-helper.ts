@@ -25,29 +25,93 @@ function base32Decode(base32: string): Buffer {
   return Buffer.from(bytes);
 }
 
+export interface OtpConfig {
+  issuer?: string;
+  type?: 'totp' | 'hotp';
+  algorithm?: string;
+  digits?: number;
+  period?: number;
+  counter?: number;
+}
+
 export interface TotpResult {
   token: string;
   secondsRemaining: number;
   period: number;
+  type?: 'totp' | 'hotp';
+  algorithm?: string;
+  digits?: number;
 }
 
 /**
- * Generate instantaneous TOTP code with time remaining
+ * Normalize hashing algorithm to node crypto identifier
  */
-export function generateLocalTotp(secretBase32: string, period = 30, digits = 6): TotpResult | null {
+function normalizeAlgorithm(algo?: string): string {
+  if (!algo) return "sha1";
+  const cleaned = algo.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (cleaned.includes("512")) return "sha512";
+  if (cleaned.includes("256")) return "sha256";
+  return "sha1";
+}
+
+/**
+ * Generate instantaneous TOTP or HOTP code with time remaining
+ */
+export function generateLocalTotp(
+  secretBase32: string,
+  optionsOrPeriod: OtpConfig | number = 30,
+  digitsParam = 6
+): TotpResult | null {
   try {
     if (!secretBase32 || secretBase32.trim().length === 0) return null;
     const key = base32Decode(secretBase32);
     if (key.length === 0) return null;
 
-    const epoch = Math.floor(Date.now() / 1000);
-    const counter = Math.floor(epoch / period);
-    const secondsRemaining = period - (epoch % period);
+    let period = 30;
+    let digits = digitsParam;
+    let algorithm = "sha1";
+    let isHotp = false;
+    let hotpCounter = 0;
+
+    if (typeof optionsOrPeriod === "object" && optionsOrPeriod !== null) {
+      if (optionsOrPeriod.period && optionsOrPeriod.period > 0) {
+        period = optionsOrPeriod.period;
+      }
+      if (optionsOrPeriod.digits && optionsOrPeriod.digits > 0) {
+        digits = optionsOrPeriod.digits;
+      }
+      if (optionsOrPeriod.algorithm) {
+        algorithm = normalizeAlgorithm(optionsOrPeriod.algorithm);
+      }
+      if (optionsOrPeriod.type === "hotp") {
+        isHotp = true;
+        hotpCounter = optionsOrPeriod.counter ?? 0;
+      }
+    } else if (typeof optionsOrPeriod === "number") {
+      period = optionsOrPeriod;
+      digits = digitsParam;
+    }
+
+    // Clamp digits between 6 and 8
+    const finalDigits = Math.max(6, Math.min(8, digits));
+
+    let counter: bigint;
+    let secondsRemaining = 0;
+
+    if (isHotp) {
+      counter = BigInt(hotpCounter);
+      secondsRemaining = 0;
+    } else {
+      const epoch = Math.floor(Date.now() / 1000);
+      const step = Math.floor(epoch / period);
+      counter = BigInt(step);
+      secondsRemaining = period - (epoch % period);
+    }
 
     const buf = Buffer.alloc(8);
-    buf.writeBigUInt64BE(BigInt(counter), 0);
+    buf.writeBigUInt64BE(counter, 0);
 
-    const hmac = crypto.createHmac("sha1", key);
+    const hmac = crypto.createHmac(algorithm, key);
     hmac.update(buf);
     const digest = hmac.digest();
 
@@ -58,8 +122,15 @@ export function generateLocalTotp(secretBase32: string, period = 30, digits = 6)
       ((digest[offset + 2] & 0xff) << 8) |
       (digest[offset + 3] & 0xff);
 
-    const strCode = (code % Math.pow(10, digits)).toString().padStart(digits, "0");
-    return { token: strCode, secondsRemaining, period };
+    const strCode = (code % Math.pow(10, finalDigits)).toString().padStart(finalDigits, "0");
+    return {
+      token: strCode,
+      secondsRemaining,
+      period,
+      type: isHotp ? "hotp" : "totp",
+      algorithm: algorithm.toUpperCase(),
+      digits: finalDigits
+    };
   } catch {
     return null;
   }
