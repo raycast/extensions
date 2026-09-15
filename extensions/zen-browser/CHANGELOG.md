@@ -1,6 +1,6 @@
 # Zen Changelog
 
-## Search Pinned Tabs - {PR_MERGE_DATE}
+## [Search Pinned Tabs] - {PR_MERGE_DATE}
 
 - Add live pinned tabs to Search Bookmarks through an optional Zen companion; preserve ordinary bookmarks.
 - Activate existing tabs through the browser API and a local Native Messaging bridge on macOS.
