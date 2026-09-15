@@ -3,11 +3,11 @@ import { ProviderResult, UIComponent, UILibrary } from "../types";
 import { fetchWithFallback, slugToTitle as toDisplayName } from "./provider-helpers";
 
 /**
- * Fetch Taiga UI components by parsing the sitemap.xml.
- * The sitemap contains URLs like https://taiga-ui.dev/components/{slug}/
- * We extract unique component slugs from these URLs.
+ * taiga-ui.dev no longer serves a usable sitemap.xml, so the component list is
+ * read from the demo app route registry (`demo-routes.ts`, plain TS) on GitHub.
+ * It maps route names to paths like `/components/{slug}`.
  *
- * Fallback: on any network error, non-OK response, or unparseable markup,
+ * Fallback: on any network error, non-OK response, or unparseable data,
  * the bundled static list is used and the result is marked as fallback.
  */
 function fetchComponents(): Promise<ProviderResult> {
@@ -15,21 +15,20 @@ function fetchComponents(): Promise<ProviderResult> {
 }
 
 async function scrape(): Promise<UIComponent[]> {
-  const res = await fetch(LIBRARY_URLS.taiga.sitemap);
+  const res = await fetch(LIBRARY_URLS.taiga.routes);
   if (!res.ok) {
     throw new Error(`Failed to fetch Taiga UI: ${res.statusText}`);
   }
-  const xml = await res.text();
+  const source = await res.text();
 
-  // Extract component slugs from sitemap URLs like /components/{slug}/
-  const locRegex = /<loc>https:\/\/taiga-ui\.dev\/components\/([a-z][a-z0-9-]*)\/<\/loc>/g;
+  // Extract component slugs from route values like '/components/{slug}'.
+  const routeRegex = /'\/components\/([a-z][a-z0-9-]*)'/g;
   const slugs = new Set<string>();
   let match;
 
-  while ((match = locRegex.exec(xml)) !== null) {
+  while ((match = routeRegex.exec(source)) !== null) {
     const slug = match[1];
-    // Filter out deprecated and legacy components
-    if (!slug.endsWith("-deprecated") && !slug.endsWith("-old") && !slug.endsWith("-legacy")) {
+    if (!slug.endsWith("-experimental")) {
       slugs.add(slug);
     }
   }
