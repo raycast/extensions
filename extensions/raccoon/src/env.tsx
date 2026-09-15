@@ -36,7 +36,8 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 								tintColor: Color.Red,
 							}}
 							title={b.name}
-							subtitle={`→ ${b.target}`}
+							keywords={[b.link, b.target]}
+							subtitle={`→ ${tilde(b.target)}`}
 							accessories={[
 								{
 									tag: {
