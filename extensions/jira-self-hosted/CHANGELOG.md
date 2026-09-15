@@ -1,10 +1,11 @@
 # Jira (Self-Hosted) Changelog
 
-## [Improve issue reliability] - {PR_MERGE_DATE}
+## [Improve issue reliability and authentication setup] - {PR_MERGE_DATE}
 
 - Prevent issue details from crashing when search results omit custom-field schemas.
 - Fix missing Jira icons and preserve their returned image content types.
 - Reduce Active Sprints memory use by removing per-issue child queries.
+- Require an explicit choice between Basic and Bearer authentication during setup.
 
 ## [Jira 9+ API] - 2026-05-16
 
