@@ -1,6 +1,6 @@
 # Secret Browser Commands Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2026-09-15
 
 * Feature: Browser compatibility is now verified per browser instead of assumed — every command's support list comes from reading that browser's own `chrome://chrome-urls` page, or, for the few commands no browser advertises, from navigating to them browser by browser
 * Feature: Add 129 commands, including browser-specific ones for Brave, Opera, Edge, Comet, Arc, and Dia
