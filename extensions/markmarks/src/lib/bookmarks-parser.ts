@@ -6,7 +6,13 @@ const HEADING_REGEX = /^(#{1,6})\s+(.+)$/;
 // Regex to match markdown links with optional description
 // Format: - [Title](url) - description
 // or: - [Title](url)
-const BOOKMARK_REGEX = /^-\s*\[([^\]]+)\]\(([^)]+)\)(?:\s*-\s*(.+))?$/;
+// The title may contain brackets (e.g. "[PDF] Title") as long as "]" is not followed by "(",
+// and the url may contain balanced parentheses (e.g. "https://en.wikipedia.org/wiki/Foo_(bar)")
+// Exclude whitespace from the url so it cannot consume the description
+const BOOKMARK_REGEX = /^-\s*\[((?:[^\]]|\](?!\())+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)(?:\s*-\s*(.+))?$/;
+
+// Previous pattern, kept as a fallback so lines it matched (e.g. urls with an unbalanced "(") still parse
+const LEGACY_BOOKMARK_REGEX = /^-\s*\[([^\]]+)\]\(([^)]+)\)(?:\s*-\s*(.+))?$/;
 
 /**
  * Parse a markdown file content into a structured bookmark tree
@@ -51,7 +57,7 @@ export function parseBookmarks(content: string): ParsedBookmarks {
       continue;
     }
 
-    const bookmarkMatch = line.match(BOOKMARK_REGEX);
+    const bookmarkMatch = line.match(BOOKMARK_REGEX) ?? line.match(LEGACY_BOOKMARK_REGEX);
     if (bookmarkMatch) {
       const bookmark: Bookmark = {
         title: bookmarkMatch[1],
