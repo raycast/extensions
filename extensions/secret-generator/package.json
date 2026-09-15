@@ -1,0 +1,345 @@
+{
+  "name": "secret-generator",
+  "version": "1.0.0",
+  "packageManager": "npm@11.16.0",
+  "description": "Generate rule-compliant passwords, memorable passphrases, and developer secrets in Raycast.",
+  "title": "Secret Generator",
+  "icon": "shield.png",
+  "author": "yakir_reznik",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Security"
+  ],
+  "keywords": [
+    "password",
+    "passphrase",
+    "secret",
+    "token",
+    "random",
+    "webhook",
+    "api key"
+  ],
+  "main": "src/generate-password-8.ts",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "fix-lint": "ray lint --fix"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.13.14",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "preferences": [
+    {
+      "name": "delivery",
+      "title": "After Generating",
+      "description": "Copy the new value, optionally close Raycast, or paste it into the previously focused app.",
+      "type": "dropdown",
+      "required": true,
+      "default": "copy-and-close",
+      "data": [
+        {
+          "title": "Copy and Close Raycast",
+          "value": "copy-and-close"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste into Previous App",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "easyToRead",
+      "title": "Character Set",
+      "description": "Avoid look-alike characters such as O, 0, I, l, and 1. This makes secrets easier to read and type manually.",
+      "type": "checkbox",
+      "label": "Use easy-to-read characters only",
+      "required": false,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "description": "Create a password with a custom length and character groups.",
+      "mode": "view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "custom password",
+        "strong password",
+        "entropy"
+      ]
+    },
+    {
+      "name": "generate-passphrase",
+      "title": "Generate Passphrase",
+      "description": "Create a memorable multi-word passphrase.",
+      "mode": "view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "memorable password",
+        "words",
+        "diceware"
+      ]
+    },
+    {
+      "name": "generate-secret",
+      "title": "Generate Secret",
+      "description": "Create a Base64URL, hexadecimal, URL-safe, or UUID secret.",
+      "mode": "view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "api key",
+        "token",
+        "uuid",
+        "hex",
+        "base64"
+      ]
+    },
+    {
+      "name": "generate-password-8",
+      "title": "Generate 8-Character Password",
+      "description": "Generate and copy an 8-character password.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "8 chars",
+        "8 characters",
+        "8",
+        "short password"
+      ]
+    },
+    {
+      "name": "generate-password-12",
+      "title": "Generate 12-Character Password",
+      "description": "Generate and copy a 12-character password.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "12 chars",
+        "12 characters",
+        "12"
+      ]
+    },
+    {
+      "name": "generate-password-16",
+      "title": "Generate 16-Character Password",
+      "description": "Generate and copy a 16-character password.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "16 chars",
+        "16 characters",
+        "16"
+      ]
+    },
+    {
+      "name": "generate-password-20",
+      "title": "Generate 20-Character Password",
+      "description": "Generate and copy a 20-character password.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "20 chars",
+        "20 characters",
+        "20"
+      ]
+    },
+    {
+      "name": "generate-password-24",
+      "title": "Generate 24-Character Password",
+      "description": "Generate and copy a 24-character password.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "24 chars",
+        "24 characters",
+        "24",
+        "long password"
+      ]
+    },
+    {
+      "name": "generate-simple-password-8",
+      "title": "Generate Simple Password (8 Characters)",
+      "description": "Generate and copy an easy-to-read 8-character password using letters and digits only.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "8 chars",
+        "8 characters",
+        "simple",
+        "readable",
+        "8"
+      ]
+    },
+    {
+      "name": "generate-simple-password-12",
+      "title": "Generate Simple Password (12 Characters)",
+      "description": "Generate and copy an easy-to-read 12-character password using letters and digits only.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "12 chars",
+        "12 characters",
+        "simple",
+        "readable",
+        "12"
+      ]
+    },
+    {
+      "name": "generate-simple-password-16",
+      "title": "Generate Simple Password (16 Characters)",
+      "description": "Generate and copy an easy-to-read 16-character password using letters and digits only.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "16 chars",
+        "16 characters",
+        "simple",
+        "readable",
+        "16"
+      ]
+    },
+    {
+      "name": "generate-simple-password-24",
+      "title": "Generate Simple Password (24 Characters)",
+      "description": "Generate and copy an easy-to-read 24-character password using letters and digits only.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "24 chars",
+        "24 characters",
+        "simple",
+        "readable",
+        "24"
+      ]
+    },
+    {
+      "name": "generate-simple-password-32",
+      "title": "Generate Simple Password (32 Characters)",
+      "description": "Generate and copy an easy-to-read 32-character password using letters and digits only.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "32 chars",
+        "32 characters",
+        "simple",
+        "readable",
+        "32"
+      ]
+    },
+    {
+      "name": "generate-webhook-secret",
+      "title": "Generate Webhook Secret",
+      "description": "Generate and copy a 32-character URL-safe webhook secret.",
+      "mode": "no-view",
+      "keywords": [
+        "gen",
+        "generate",
+        "random",
+        "pass",
+        "password",
+        "string",
+        "secret",
+        "32 chars",
+        "32 characters",
+        "url safe",
+        "api secret",
+        "token"
+      ]
+    }
+  ]
+}
