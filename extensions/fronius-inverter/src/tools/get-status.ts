@@ -47,6 +47,7 @@ export default async function getStatus() {
     meters: snapshot.meters,
     batteries: snapshot.storages,
     ohmpilots: snapshot.ohmpilots,
+    totalOhmpilotEnergyWattHours: snapshot.ohmpilotEnergy,
     partialDataWarnings: snapshot.warnings,
   };
 }

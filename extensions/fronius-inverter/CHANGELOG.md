@@ -11,8 +11,10 @@
 - Added AI instructions and evals that require live data and prohibit invented diagnoses, forecasts, or trend claims.
 - Added request timeouts, URL normalization, API-status validation, and clearer failures.
 - Paced realtime requests to the Solar API's documented one-request-per-second limit.
+- Prevented overlapping refreshes and kept malformed URLs from crashing error views.
 - Added dashboard refresh and direct access to the inverter web interface.
 - Preserved signs for bidirectional power-flow values and handled missing battery fields.
+- Kept Ohmpilot component readings separate from the device-level energy total when API identifiers differ.
 - Distinguished connected PV capacity from current production.
 - Added live-device checks and regression tests.
 - Updated Raycast, React, TypeScript, ESLint, and test dependencies.

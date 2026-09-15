@@ -157,7 +157,7 @@ export function createSnapshot({
   const ohmpilots: OhmpilotSnapshot[] =
     smartloadOhmpilotEntries.length > 0
       ? smartloadOhmpilotEntries.map(([id, ohmpilot]) => ({
-          energyWattHours: finiteOrNull(powerResponse.Body.Data.Ohmpilots?.[id]?.EnergyReal_WAC_Sum_Consumed),
+          energyWattHours: null,
           id,
           powerWatts: finiteOrNull(ohmpilot.P_AC_Total),
           state: ohmpilot.State ?? null,
@@ -170,11 +170,11 @@ export function createSnapshot({
           state: finiteOrNull(ohmpilot.CodeOfState),
           temperatureCelsius: finiteOrNull(ohmpilot.Temperature_Channel_1),
         }));
-  const legacyOhmpilots = legacyOhmpilotEntries.map(([, ohmpilot]) => ohmpilot);
-  const legacyOhmpilotEnergy = legacyOhmpilots.reduce(
-    (sum, ohmpilot) => sum + (finiteOrNull(ohmpilot.EnergyReal_WAC_Sum_Consumed) ?? 0),
-    0,
-  );
+  const legacyOhmpilotEnergies = legacyOhmpilotEntries
+    .map(([, ohmpilot]) => finiteOrNull(ohmpilot.EnergyReal_WAC_Sum_Consumed))
+    .filter((energy): energy is number => energy !== null);
+  const legacyOhmpilotEnergy =
+    legacyOhmpilotEnergies.length > 0 ? legacyOhmpilotEnergies.reduce((sum, energy) => sum + energy, 0) : null;
   const storageStateOfCharge = storages.find((storage) => storage.stateOfChargePercent !== null)?.stateOfChargePercent;
   const originalSite = powerResponse.Body.Data.Site;
   const site: SiteData = {
@@ -191,7 +191,7 @@ export function createSnapshot({
     inverters,
     meters,
     ohmpilotEnergy:
-      legacyOhmpilots.length > 0
+      legacyOhmpilotEnergy !== null
         ? legacyOhmpilotEnergy
         : ohmpilots.some((ohmpilot) => ohmpilot.energyWattHours !== null)
           ? ohmpilots.reduce((sum, ohmpilot) => sum + (ohmpilot.energyWattHours ?? 0), 0)

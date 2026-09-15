@@ -1,21 +1,22 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { normalizeBaseUrl } from "./api";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { normalizeBaseUrlOrUndefined } from "./api";
 import { formatCompactPower, formatTimestamp } from "./format";
 import { createMetricSections } from "./metrics";
 import { FroniusSnapshot, hasInverterError, inverterDisplayName } from "./model";
 import { fetchFroniusSnapshot } from "./service";
+import { createSingleFlight } from "./single-flight";
 
 interface DataActionsProps {
-  baseUrl: string;
+  browserUrl: string | undefined;
   onRefresh: () => Promise<void>;
 }
 
-function DataActions({ baseUrl, onRefresh }: DataActionsProps) {
+function DataActions({ browserUrl, onRefresh }: DataActionsProps) {
   return (
     <ActionPanel>
       <Action title="Refresh Data" icon={Icon.ArrowClockwise} onAction={onRefresh} />
-      <Action.OpenInBrowser title="Open Inverter Web Interface" url={normalizeBaseUrl(baseUrl)} />
+      {browserUrl ? <Action.OpenInBrowser title="Open Inverter Web Interface" url={browserUrl} /> : null}
     </ActionPanel>
   );
 }
@@ -26,7 +27,7 @@ export default function Dashboard() {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = useCallback(async () => {
+  const performLoad = useCallback(async () => {
     setIsLoading(true);
     try {
       setSnapshot(await fetchFroniusSnapshot(baseUrl));
@@ -39,13 +40,14 @@ export default function Dashboard() {
       setIsLoading(false);
     }
   }, [baseUrl]);
+  const loadData = useMemo(() => createSingleFlight(performLoad), [performLoad]);
 
   useEffect(() => {
     void loadData();
   }, [loadData]);
 
   const metricSections = snapshot ? createMetricSections(snapshot) : [];
-  const actions = <DataActions baseUrl={baseUrl} onRefresh={loadData} />;
+  const actions = <DataActions browserUrl={normalizeBaseUrlOrUndefined(baseUrl)} onRefresh={loadData} />;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search inverter data…">

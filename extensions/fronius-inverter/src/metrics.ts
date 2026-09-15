@@ -112,6 +112,14 @@ export function createMetricSections(snapshot: FroniusSnapshot): MetricSection[]
           : { label: "Temperature", value: formatMeasurement(ohmpilot.temperatureCelsius, "°C"), icon: "T" },
       ]),
     })),
+    ...(snapshot.ohmpilotEnergy !== null && snapshot.ohmpilots.every((ohmpilot) => ohmpilot.energyWattHours === null)
+      ? [
+          {
+            title: "Ohmpilot Energy",
+            items: [{ label: "All Devices", value: formatEnergy(snapshot.ohmpilotEnergy), icon: "∑" }],
+          },
+        ]
+      : []),
     {
       title: "System",
       items: items([

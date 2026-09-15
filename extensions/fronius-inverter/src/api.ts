@@ -52,6 +52,14 @@ export function normalizeBaseUrl(baseUrl: string): string {
   return parsed.toString().replace(/\/$/, "");
 }
 
+export function normalizeBaseUrlOrUndefined(baseUrl: string): string | undefined {
+  try {
+    return normalizeBaseUrl(baseUrl);
+  } catch {
+    return undefined;
+  }
+}
+
 function assertEnvelope(value: unknown): asserts value is ApiEnvelope {
   if (!value || typeof value !== "object") throw new Error("Fronius returned an invalid JSON response");
   const head = (value as { Head?: unknown }).Head;

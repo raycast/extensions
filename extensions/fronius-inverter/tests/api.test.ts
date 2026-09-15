@@ -45,6 +45,13 @@ describe("Fronius API client", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("returns no browser URL for malformed saved configuration", async () => {
+    const { normalizeBaseUrlOrUndefined } = await loadApi();
+
+    expect(normalizeBaseUrlOrUndefined("not a URL")).toBeUndefined();
+    expect(normalizeBaseUrlOrUndefined("http://inverter.local/")).toBe("http://inverter.local");
+  });
+
   it("discovers the API version outside the versioned base path", async () => {
     fetchMock.mockResolvedValue({
       ok: true,

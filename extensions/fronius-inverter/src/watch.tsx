@@ -1,10 +1,11 @@
 import { LaunchType, MenuBarExtra, Toast, getPreferenceValues, launchCommand, open, showToast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { normalizeBaseUrl } from "./api";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { normalizeBaseUrlOrUndefined } from "./api";
 import { formatCompactPower, formatTimestamp } from "./format";
 import { createMetricSections } from "./metrics";
 import { FroniusSnapshot, hasInverterError, inverterDisplayName } from "./model";
 import { fetchFroniusSnapshot } from "./service";
+import { createSingleFlight } from "./single-flight";
 
 export default function Watch() {
   const { baseUrl } = getPreferenceValues<Preferences>();
@@ -12,7 +13,7 @@ export default function Watch() {
   const [errorMessage, setErrorMessage] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = useCallback(
+  const performLoad = useCallback(
     async (notify = false) => {
       setIsLoading(true);
       try {
@@ -29,6 +30,8 @@ export default function Watch() {
     },
     [baseUrl],
   );
+  const loadData = useMemo(() => createSingleFlight(performLoad), [performLoad]);
+  const browserUrl = normalizeBaseUrlOrUndefined(baseUrl);
 
   useEffect(() => {
     void loadData();
@@ -99,7 +102,9 @@ export default function Watch() {
           onAction={() => launchCommand({ name: "dashboard", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item title="Refresh" onAction={() => loadData(true)} />
-        <MenuBarExtra.Item title="Open Inverter Web Interface" onAction={() => open(normalizeBaseUrl(baseUrl))} />
+        {browserUrl ? (
+          <MenuBarExtra.Item title="Open Inverter Web Interface" onAction={() => open(browserUrl)} />
+        ) : null}
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

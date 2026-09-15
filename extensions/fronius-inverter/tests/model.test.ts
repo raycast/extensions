@@ -137,6 +137,7 @@ describe("createSnapshot", () => {
     expect(snapshot.meters[0]?.voltageAverageVolts).toBe(231);
     expect(snapshot.storages[0]?.temperatureCelsius).toBe(24.5);
     expect(snapshot.ohmpilots[0]?.powerWatts).toBe(900);
+    expect(snapshot.ohmpilots[0]?.energyWattHours).toBeNull();
     expect(snapshot.ohmpilotEnergy).toBe(2000);
     expect(snapshot.timestamp).toBe("2026-09-15T08:01:00Z");
 
@@ -150,6 +151,9 @@ describe("createSnapshot", () => {
     expect(sections.find((section) => section.title === "Ohmpilot")?.items).toContainEqual(
       expect.objectContaining({ label: "Current Power", value: "900.0 W" }),
     );
+    expect(sections.find((section) => section.title === "Ohmpilot Energy")?.items).toContainEqual(
+      expect.objectContaining({ label: "All Devices", value: "2.00 kWh" }),
+    );
   });
 
   it("keeps the core snapshot usable when optional endpoint data is absent", () => {
@@ -160,5 +164,22 @@ describe("createSnapshot", () => {
     expect(snapshot.storages).toEqual([]);
     expect(snapshot.site.StateOfCharge_Relative).toBeNull();
     expect(snapshot.warnings).toEqual(["Battery: unsupported"]);
+  });
+
+  it("does not report zero Ohmpilot energy when the legacy counter is unavailable", () => {
+    const response: PowerFlowRealtimeDataResponse = {
+      ...powerResponse,
+      Body: {
+        Data: {
+          Site: powerResponse.Body.Data.Site,
+          Ohmpilots: { "1": { CodeOfState: 0 } },
+        },
+      },
+    };
+
+    const snapshot = createSnapshot({ inverterResponse, powerResponse: response });
+
+    expect(snapshot.ohmpilotEnergy).toBeNull();
+    expect(snapshot.ohmpilots[0]?.energyWattHours).toBeNull();
   });
 });
