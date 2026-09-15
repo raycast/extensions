@@ -46,8 +46,13 @@ const normalizeTimeEntry = (e: TimeEntry): TimeEntry => ({ ...e, tags: e.tags ??
 
 async function getRunningTimeEntryFromApi() {
   const result = await get<TimeEntry | null>("/me/time_entries/current");
+  // The API is authoritative in both directions: "nothing is running" has to evict
+  // the cached entry, or cache-backed views (the menu bar, Low Data Mode reads)
+  // keep showing a timer that has already been stopped elsewhere.
   if (result) {
     cacheHelper.set("runningTimeEntry", normalizeTimeEntry(result));
+  } else {
+    cacheHelper.remove("runningTimeEntry");
   }
   if (extensionUpdateScript) {
     runTrigger(extensionUpdateScript, result);

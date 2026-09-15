@@ -1,20 +1,18 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
 
-import { getRunningTimeEntry, refetchRunningTimeEntry, stopTimeEntry } from "@/api";
+import { refetchRunningTimeEntry, stopTimeEntry } from "@/api";
 import { refreshMenuBar } from "@/helpers/common";
 import { formatSeconds } from "@/helpers/formatSeconds";
-import { liteMode } from "@/helpers/preferences";
 
 export default async function Command() {
   let runningTimeEntry;
   try {
-    // Low Data Mode serves the cache for up to an hour, so for a destructive action
-    // both a miss AND a hit can be wrong: a timer stopped or replaced in another
-    // client leaves a stale entry behind, and stopping that one reports a failure
-    // while the real timer keeps running. Confirm against the API. Normal mode
-    // already reaches the API on a miss, so it pays nothing extra here.
-    runningTimeEntry = liteMode ? await refetchRunningTimeEntry() : await getRunningTimeEntry();
+    // Never read the cache on a destructive path. Any cached entry can be stale —
+    // Low Data Mode serves one for up to an hour, and normal mode for the TTL — so a
+    // timer stopped or replaced in another client leaves a stale entry behind, and
+    // stopping that one reports a failure while the real timer keeps running.
+    runningTimeEntry = await refetchRunningTimeEntry();
   } catch {
     await showToast(Toast.Style.Failure, "Failed to reach Toggl", "Could not check for a running time entry.");
     return;
