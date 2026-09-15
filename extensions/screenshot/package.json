@@ -5,6 +5,9 @@
   "description": "Capture full screen, selected region, or active window on Windows.",
   "icon": "icon.png",
   "author": "afaan_mushtaq",
+  "platforms": [
+    "Windows"
+  ],
   "categories": [
     "Media",
     "System"
@@ -82,8 +85,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.24",
-    "@raycast/utils": "^1.18.0"
+    "@raycast/api": "^1.104.24"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
