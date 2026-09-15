@@ -1,6 +1,6 @@
 # Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-09-15
 
 - Create and edit AI commands in Models, including creating a command from the selected model.
 - Remove the standalone Create AI Command entry. Create commands through the Models action menu; replace shortcuts or deep links to the removed entry with Models.
