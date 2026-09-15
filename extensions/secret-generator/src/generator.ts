@@ -73,7 +73,8 @@ export async function deliverSecret(secret: string, label: string): Promise<void
     return;
   }
 
-  await Clipboard.copy(secret);
+  // Generated values are credentials; keep them out of Raycast Clipboard History.
+  await Clipboard.copy(secret, { concealed: true });
 
   if (preferences.delivery === "copy-and-close") {
     await showHUD(`${label} copied`);

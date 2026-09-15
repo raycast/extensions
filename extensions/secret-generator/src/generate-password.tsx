@@ -74,7 +74,13 @@ export default function GeneratePassword() {
       <Form.Description
         text={`${entropy(Number.isInteger(parsedLength) ? parsedLength : 0, selectedGroups)}. Every selected group is guaranteed to appear.`}
       />
-      <Form.TextField id="length" title="Length" value={length} onChange={setLength} />
+      <Form.TextField
+        id="length"
+        title="Length"
+        placeholder="4–256"
+        value={length}
+        onChange={setLength}
+      />
       <Form.Separator />
       <Form.Checkbox
         id="uppercase"

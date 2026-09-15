@@ -2,8 +2,8 @@
   "name": "secret-generator",
   "version": "1.0.0",
   "packageManager": "npm@11.16.0",
-  "description": "Generate rule-compliant passwords, memorable passphrases, and developer secrets in Raycast.",
-  "title": "Secret Generator",
+  "description": "Generate local passwords, passphrases, and developer-ready secrets in Raycast.",
+  "title": "Random Password & Secret Generator",
   "icon": "shield.png",
   "author": "yakir_reznik",
   "license": "MIT",
@@ -29,7 +29,7 @@
     "fix-lint": "ray lint --fix"
   },
   "dependencies": {
-    "@raycast/api": "^1.103.0"
+    "@raycast/api": "^2.4.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.0",

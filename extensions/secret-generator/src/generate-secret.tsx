@@ -81,7 +81,13 @@ export default function GenerateSecret() {
         <Form.Dropdown.Item value="uuid" title="UUID v4" />
       </Form.Dropdown>
       {format !== "uuid" && (
-        <Form.TextField id="length" title="Length" value={length} onChange={setLength} />
+        <Form.TextField
+          id="length"
+          title="Length"
+          placeholder="8–512"
+          value={length}
+          onChange={setLength}
+        />
       )}
     </Form>
   );
