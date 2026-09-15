@@ -1,6 +1,6 @@
 # Dated Folder Changelog
 
-## [New Icon] - {PR_MERGE_DATE}
+## [New Icon] - 2026-09-15
 
 - A refreshed extension icon: a calendar on a blue gradient, redrawn with the Raycast Icon Maker.
 
