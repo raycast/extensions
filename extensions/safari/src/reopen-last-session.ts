@@ -1,10 +1,11 @@
 import { closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { safariAppIdentifier } from "./utils";
 
 const script = `
 on clickReopenItem()
   tell application "System Events"
-    tell process "Safari"
+    tell process "${safariAppIdentifier}"
       -- The History menu is always the 6th menu bar item
       -- (Apple, Safari, File, Edit, View, History), regardless of locale.
       set historyMenu to menu 1 of menu bar item 6 of menu bar 1
@@ -49,14 +50,14 @@ end clickReopenItem
 on run
   -- "launch" starts Safari without its initial start-page window, so the
   -- restored session windows are the only ones that ever appear.
-  tell application "Safari" to launch
+  tell application "${safariAppIdentifier}" to launch
 
   tell application "System Events"
     repeat 100 times
-      if exists process "Safari" then exit repeat
+      if exists process "${safariAppIdentifier}" then exit repeat
       delay 0.1
     end repeat
-    tell process "Safari"
+    tell process "${safariAppIdentifier}"
       repeat 100 times
         if exists menu bar 1 then exit repeat
         delay 0.1
@@ -64,24 +65,24 @@ on run
     end tell
   end tell
 
-  tell application "Safari" to set windowCountBefore to count of windows
+  tell application "${safariAppIdentifier}" to set windowCountBefore to count of windows
 
   set clickResult to clickReopenItem()
   if clickResult is not "ok" then
     -- Still bring Safari forward so the user isn't left with an invisible app.
-    tell application "Safari" to activate
+    tell application "${safariAppIdentifier}" to activate
     return clickResult
   end if
 
   -- Wait for the restored windows to appear, then bring them to the front.
   repeat 50 times
-    tell application "Safari"
+    tell application "${safariAppIdentifier}"
       if (count of windows) > windowCountBefore then exit repeat
     end tell
     delay 0.1
   end repeat
 
-  tell application "Safari" to activate
+  tell application "${safariAppIdentifier}" to activate
 
   return "ok"
 end run
@@ -90,12 +91,12 @@ end run
 // Raycast may hand focus back to the previously frontmost app once the
 // command finishes, so Safari is raised again after the HUD is shown.
 const refocusScript = `
-tell application "Safari"
+tell application "${safariAppIdentifier}"
   if it is running then activate
 end tell
 `;
 
-export default async function main() {
+export default async function Command() {
   await closeMainWindow();
 
   try {
@@ -115,17 +116,21 @@ export default async function main() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Couldn't find the menu item",
-          message: "Safari's History menu has no “Reopen All Windows from Last Session” entry.",
+          message: `${safariAppIdentifier}'s History menu has no “Reopen All Windows from Last Session” entry.`,
         });
     }
   } catch (error) {
+    console.error(error);
+
     await showToast({
       style: Toast.Style.Failure,
       title: "Failed to reopen last session",
       message:
         error instanceof Error && /not allowed assistive access|1002/i.test(error.message)
           ? "Grant Raycast Accessibility access in System Settings → Privacy & Security."
-          : String(error),
+          : error instanceof Error
+            ? error.message
+            : undefined,
     });
   }
 }

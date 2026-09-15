@@ -20,7 +20,8 @@
     "xmok",
     "niksite",
     "ojowwalker77",
-    "gumadeiras"
+    "gumadeiras",
+    "adrenalin"
   ],
   "pastContributors": [
     "axsuul",
@@ -177,6 +178,13 @@
       "title": "Close Other Tabs",
       "subtitle": "Safari",
       "description": "Close all Safari tabs except the current one",
+      "mode": "no-view"
+    },
+    {
+      "name": "reopen-last-session",
+      "title": "Reopen Last Session",
+      "subtitle": "Safari",
+      "description": "Launch Safari and reopen all windows from the last session",
       "mode": "no-view"
     }
   ],
