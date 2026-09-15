@@ -32,11 +32,14 @@ export function EntryEditor({ entry, onSaved }: { entry: QRCodeEntry; onSaved: (
       await showToast({ style: Toast.Style.Failure, title: "The content cannot be empty" });
       return;
     }
-    if (result?.error) {
+    // Re-validate against the exact values being saved: the cached preview can lag behind
+    // the latest keystroke or type change, so it must not be trusted for this check.
+    const { error } = await renderCode(trimmed, format, box);
+    if (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: `Cannot encode as ${getFormat(format).title}`,
-        message: result.error,
+        message: error,
       });
       return;
     }
