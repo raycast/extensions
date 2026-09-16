@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+All generated comments in the project must be in English.
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to

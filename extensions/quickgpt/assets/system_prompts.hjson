@@ -1,0 +1,44 @@
+{
+  // System-level prompts like Settings
+  title: "Settings"
+  icon: "⚙️"
+  identifier: "settings" // Unique identifier for the settings root
+  pinned: true // Keep settings easily accessible
+  subprompts: [
+    {
+      title: "Extension Preferences"
+      icon: ""
+      identifier: "open-preferences"
+      actions: ["open-preferences"] // Action to trigger opening preferences
+    }
+    {
+      title: "Create My Prompt Library"
+      icon: ""
+      identifier: "create-prompt-library"
+    }
+    {
+      title: "Scripts Directory"
+      icon: ""
+      identifier: "open-scripts-dir"
+      actions: ["open-scripts-dir"] // Action to open the scripts directory
+    }
+    {
+      title: "Prompts Directory"
+      icon: ""
+      identifier: "open-custom-prompts-dir"
+      actions: ["open-custom-prompts-dir"] // Action to open the custom prompts directory
+    }
+    {
+      title: "Temporary Prompts Directory"
+      icon: "Clock"
+      identifier: "manage-temporary-directory"
+      // No content, actions handled specially in PromptListItem
+    }
+    {
+      title: "Prompt Stats"
+      icon: ""
+      identifier: "prompt-usage-stats"
+      // No content, actions handled specially in PromptListItem
+    }
+  ]
+}
