@@ -172,6 +172,18 @@ const pacoteAssetPack = async (version: string) => {
           // Another instance in this same branch already moved it aside.
           movedAside = false;
         }
+        if (movedAside && (await hasCompleteAssetPack(stale))) {
+          // The directory we moved aside was completed in the gap by another
+          // instance. Restore it and stand down — a marker-bearing directory
+          // is never deleted.
+          try {
+            await fs.rename(stale, destination);
+          } catch {
+            await fs.rm(stale, { recursive: true, force: true }).catch(() => {});
+          }
+          await fs.rm(staging, { recursive: true, force: true });
+          return;
+        }
         try {
           await fs.rename(staging, destination);
         } catch (renameError) {
@@ -195,11 +207,11 @@ const pacoteAssetPack = async (version: string) => {
 
 export const cacheAssetPack = async (version: string) => {
   const destination = getAssetPackDestination(version);
-  if (await hasCompleteAssetPack(destination)) return;
-  // An incomplete destination is moved aside inside the rename's error path,
-  // not removed here: removing after a marker check leaves a gap where another
-  // instance's rename can publish a complete pack that this then deletes.
+  // Sweep before the early return: a crash between the two renames leaves a
+  // .pack-stale-* directory that would otherwise never be reclaimed while
+  // the destination stays complete.
   await reclaimDeadStaging();
+  if (await hasCompleteAssetPack(destination)) return;
   await pacoteAssetPack(version);
   cache.set("cached-version", version);
 };
