@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Service Environment Variables] - {PR_MERGE_DATE}
+
+- Add a `View Environment` action to the **Services** screen, showing a service's environment variables (masked until revealed), and for Applications its build arguments and build secrets. `Edit Variables` opens a form to change them, and `Copy Environment File` copies the raw `.env` content.
+
 ## [Database Connection Actions] - 2026-09-16
 
 - Add `Copy Internal Connection String`, `Copy External Connection String` and `Copy Password` actions to database services (PostgreSQL, MySQL, MariaDB, MongoDB, Redis), matching the URIs Dokploy's own dashboard shows.

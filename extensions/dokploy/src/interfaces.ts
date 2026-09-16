@@ -123,6 +123,24 @@ export interface DatabaseDetail {
   replicaSets?: boolean | null;
 }
 
+/**
+ * A service's environment, as read from and written back to Dokploy.
+ *
+ * `null` and `""` are kept apart all the way through: Dokploy distinguishes "never set" from "set
+ * to nothing", and a save that doesn't preserve that distinction quietly rewrites one as the other.
+ */
+export interface ServiceEnvironment {
+  env: string | null;
+  /** Applications only. `--build-arg` values, in the same `KEY=value` format as `env`. */
+  buildArgs: string | null;
+  /** Applications only. BuildKit secrets - mounted during the build, never baked into the image. */
+  buildSecrets: string | null;
+  /** Whether Dokploy materialises `env` into a `.env` file next to the source. */
+  createEnvFile: boolean;
+  /** False for every kind but applications, which are the only one with a build to configure. */
+  supportsBuildFields: boolean;
+}
+
 interface Issue {
   code?: string;
   expected?: string;
