@@ -1,5 +1,5 @@
 import { TraktMovieListItem, TraktShowListItem } from "../lib/schema";
-import { executeToolCall, toolTraktClient } from "./tool-client";
+import { executeToolCall, executeToolCallAllowingNotFound, toolTraktClient } from "./tool-client";
 
 export type ResolvedMedia = {
   traktId: number;
@@ -250,4 +250,40 @@ export function describeYearFilter(
   }
 
   return total > 0 ? `"${title}" exists on Trakt, but has no ${year} release.` : undefined;
+}
+
+export type TraktIdKind = "movie" | "show";
+
+/**
+ * Trakt movie IDs and show IDs share a numeric space but are not interchangeable.
+ * 287071 is Dune (2021) and also a different show. A 404 from one history namespace
+ * means the ID does not exist there; a 200 (even an empty history) means it does.
+ */
+export async function identifyTraktIdKinds(id: number): Promise<TraktIdKind[]> {
+  const query = { page: 1, limit: 1 } as const;
+  const [movie, show] = await Promise.all([
+    executeToolCallAllowingNotFound(
+      (signal) =>
+        toolTraktClient.movies.getMovieHistoryForItem({
+          params: { id },
+          query,
+          fetchOptions: { signal },
+        }),
+      `Failed to identify movie ID ${id}`,
+    ),
+    executeToolCallAllowingNotFound(
+      (signal) =>
+        toolTraktClient.shows.getShowHistoryForItem({
+          params: { id },
+          query,
+          fetchOptions: { signal },
+        }),
+      `Failed to identify show ID ${id}`,
+    ),
+  ]);
+
+  const kinds: TraktIdKind[] = [];
+  if (movie) kinds.push("movie");
+  if (show) kinds.push("show");
+  return kinds;
 }

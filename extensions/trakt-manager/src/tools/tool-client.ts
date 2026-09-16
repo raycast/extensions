@@ -8,13 +8,7 @@ export function getToolSignal(): AbortSignal {
   return AbortSignal.timeout(TOOL_TIMEOUT_MS);
 }
 
-export async function executeToolCall<T extends { status: number; body: unknown }>(
-  call: (signal: AbortSignal) => Promise<T>,
-  errorMessage = "Trakt API request failed",
-): Promise<T> {
-  const signal = getToolSignal();
-  const response = await call(signal);
-
+function assertToolSuccess<T extends { status: number; body: unknown }>(response: T, errorMessage: string): T {
   if (response.status === 401) {
     throw new Error("Authentication failed. Please check your Trakt account connection in Raycast.");
   }
@@ -34,4 +28,25 @@ export async function executeToolCall<T extends { status: number; body: unknown 
   }
 
   return response;
+}
+
+export async function executeToolCall<T extends { status: number; body: unknown }>(
+  call: (signal: AbortSignal) => Promise<T>,
+  errorMessage = "Trakt API request failed",
+): Promise<T> {
+  return assertToolSuccess(await call(getToolSignal()), errorMessage);
+}
+
+/**
+ * Same as `executeToolCall`, but a 404 is a missing resource rather than a tool failure.
+ * Needed because Trakt movie and show IDs overlap: `/sync/history/shows/684` 404s while
+ * `/sync/history/movies/684` is a real film.
+ */
+export async function executeToolCallAllowingNotFound<T extends { status: number; body: unknown }>(
+  call: (signal: AbortSignal) => Promise<T>,
+  errorMessage = "Trakt API request failed",
+): Promise<T | undefined> {
+  const response = await call(getToolSignal());
+  if (response.status === 404) return undefined;
+  return assertToolSuccess(response, errorMessage);
 }

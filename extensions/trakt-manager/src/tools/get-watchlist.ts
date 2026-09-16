@@ -1,6 +1,6 @@
 import { withPagination } from "../lib/schema";
 import { CompactMovie, CompactShow, toCompactMovie, toCompactShow } from "./compact-media";
-import { normalizeTitle } from "./resolve-media";
+import { identifyTraktIdKinds, normalizeTitle } from "./resolve-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -12,11 +12,14 @@ type Input = {
   /**
    * Search for a specific title or keyword directly within your watchlist.
    * ALWAYS use this when checking if a movie or TV show is in the watchlist (e.g. "is DTF in my watchlist?").
-   * Do NOT paginate manually when looking for a title; use this parameter instead.
+   * The scan is local (it pages through the watchlist and filters here), not a server-side
+   * title search. A negative is definitive only when `exhaustive` is true. Do NOT paginate
+   * the listing path to find a title; use this parameter instead.
    */
   query?: string;
   /**
    * Optional Trakt ID to check if a specific item is in the watchlist.
+   * Movie and show IDs overlap: pass `type` ("movies" or "shows") with this field.
    */
   traktId?: number;
   /**
@@ -114,6 +117,52 @@ export default async function tool(input: Input): Promise<Output> {
 
   // Fast path: search for a specific item in the watchlist
   if (query || traktId) {
+    let scanMovies = type === "movies" || type === "all";
+    let scanShows = type === "shows" || type === "all";
+
+    if (traktId !== undefined && type !== "all") {
+      const kinds = await identifyTraktIdKinds(traktId);
+      const wanted = type === "movies" ? "movie" : "show";
+      if (kinds.length > 0 && !kinds.includes(wanted)) {
+        const actual = kinds[0] === "movie" ? "movie" : "show";
+        return {
+          found: false,
+          inWatchlist: false,
+          exhaustive: false,
+          message:
+            `Trakt ID ${traktId} is a ${actual}, not a ${wanted}. ` +
+            `Call again with \`type: "${actual === "movie" ? "movies" : "shows"}"\`. Do not answer from this call.`,
+          hasMore: false,
+        };
+      }
+    }
+
+    if (traktId !== undefined && type === "all") {
+      const kinds = await identifyTraktIdKinds(traktId);
+      if (kinds.length === 2) {
+        return {
+          found: false,
+          inWatchlist: false,
+          exhaustive: false,
+          message:
+            `Trakt ID ${traktId} is used by both a movie and a show; those namespaces are not interchangeable. ` +
+            `Pass \`type: "movies"\` or \`type: "shows"\` instead of answering from this ID.`,
+          hasMore: false,
+        };
+      }
+      if (kinds.length === 0) {
+        return {
+          found: false,
+          inWatchlist: false,
+          exhaustive: true,
+          message: `Confirmed: Trakt ID ${traktId} does not exist as a movie or a show, so it cannot be in your watchlist.`,
+          hasMore: false,
+        };
+      }
+      scanMovies = kinds[0] === "movie";
+      scanShows = kinds[0] === "show";
+    }
+
     const normalizedQuery = query ? normalizeTitle(query) : undefined;
 
     /**
@@ -140,7 +189,7 @@ export default async function tool(input: Input): Promise<Output> {
     let totalShows = 0;
     let exhaustive = true;
 
-    if (type === "movies" || type === "all") {
+    if (scanMovies) {
       const result = await fetchAllPagesForQuery(
         (p, l, signal) =>
           toolTraktClient.movies.getWatchlistMovies({
@@ -160,7 +209,7 @@ export default async function tool(input: Input): Promise<Output> {
       exhaustive = exhaustive && result.exhaustive;
     }
 
-    if (type === "shows" || type === "all") {
+    if (scanShows) {
       const result = await fetchAllPagesForQuery(
         (p, l, signal) =>
           toolTraktClient.shows.getWatchlistShows({

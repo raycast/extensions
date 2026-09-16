@@ -6,13 +6,14 @@ instructions: |
   - The ONLY authoritative way to check a title is a targeted lookup with the `query` parameter. Trust a negative answer ONLY when the response has `exhaustive: true`.
   - For "have I watched X?" or "when did I watch X?", call `get-history` with `query` (e.g. `query: "Green Book"`). This resolves the title to its Trakt ID and inspects that item's COMPLETE history, so its answers are definitive whenever `exhaustive: true`. Read the `checked` array for the per-title verdict.
   - Add the `year` parameter when a title has several versions (e.g. `query: "Dune", year: 2021`). When no release matches that year, `get-history` returns `exhaustive: false` and lists the years it does know about: ask the user which release they mean instead of reporting a verdict.
-  - Titles carried by many identically named releases (e.g. "Godzilla", "Hamlet") can exceed what one lookup probes, or even what Trakt's search can return. `get-history` then answers `exhaustive: false` and says which releases it left out. Ask which release is meant, or pass its `year`. If `year` is already set, resolve the release with `search-movies` / `search-shows` and retry with its `traktId` — do not ask for the year again, and do not answer "not watched".
+  - Titles carried by many identically named releases (e.g. "Godzilla", "Hamlet") can exceed what one lookup probes, or even what Trakt's search can return. `get-history` then answers `exhaustive: false` and says which releases it left out. Ask which release is meant, or pass its `year`. If `year` is already set, resolve the release with `search-movies` / `search-shows` and retry with its `traktId` AND `type: "movies"` or `type: "shows"` — movie and show IDs overlap and must not be sent as a bare `traktId`. Do not ask for the year again, and do not answer "not watched".
   - When checking many titles (e.g. "all Best Picture winners since 2018"), make ONE targeted `get-history` call per title. That is the correct usage, not a pagination loop.
   - If a tool reports `exhaustive: false`, say the result is inconclusive rather than presenting it as a fact.
 
   CRITICAL - Anti-Looping & Efficiency Rules:
-  - NEVER walk through paginated tools (`get-watchlist`, `get-history`, `get-up-next`) page after page to find an item. Use the `query` parameter instead; it searches server-side for you.
-  - To check if a specific title is in the watchlist (e.g. "DTF est dans ma watchlist ?", "Is Inception in my watchlist?"), call `get-watchlist` ONCE with the `query` parameter (e.g. `query: "DTF"`). `inWatchlist` covers that exact title only; entries that merely contain it (a sequel, a spin-off) come back in `matchedMovies` / `matchedShows`, so mention them instead of answering with a flat no.
+  - NEVER walk through paginated tools (`get-watchlist`, `get-history`, `get-up-next`) page after page to find an item. Use the `query` parameter instead.
+  - To check if a specific title is in the watchlist (e.g. "DTF est dans ma watchlist ?", "Is Inception in my watchlist?"), call `get-watchlist` ONCE with the `query` parameter (e.g. `query: "DTF"`). That scan pages through the watchlist locally and stops at a page cap — it is not a server-side title search. Trust a negative ONLY when `exhaustive` is true. `inWatchlist` covers that exact title only; entries that merely contain it (a sequel, a spin-off) come back in `matchedMovies` / `matchedShows`, so mention them instead of answering with a flat no.
+  - When retrying a lookup with a `traktId` from `search-movies` or `search-shows`, always pass `type: "movies"` or `type: "shows"` to match the tool that produced the ID. Never send a bare `traktId` with the default `type: "all"`.
   - When the user asks to simply see their watchlist or watch history, fetch only page 1 and summarize it. Mention the total item count and offer the next page instead of querying page after page.
 
   Media Resolution & Lookups:
@@ -183,3 +184,28 @@ evals:
           arguments:
             title: "Dune"
             year: 1723
+
+  # Movie and show IDs overlap: an ID fallback must carry the media type.
+  - input: "@trakt-manager have I watched the movie with trakt id 468289?"
+    mocks:
+      get-history:
+        mode: "lookup"
+        exhaustive: true
+        found: false
+        wasWatched: false
+        message: 'Confirmed: no watch event exists for Trakt ID 468289 (checked the complete history of "Movie 468289"). This result is exhaustive, do not assume otherwise.'
+        checked:
+          - type: "movie"
+            title: "Dune"
+            year: 1989
+            traktId: 468289
+            watched: false
+            plays: 0
+        history: []
+        hasMore: false
+    expected:
+      - callsTool:
+          name: "get-history"
+          arguments:
+            traktId: 468289
+            type: movies

@@ -1,7 +1,7 @@
 import { withPagination } from "../lib/schema";
 import { CompactHistoryItem, toCompactMovieHistory, toCompactShowHistory } from "./compact-media";
 import { normalizeTitle, searchMovieCandidates, searchShowCandidates } from "./resolve-media";
-import { executeToolCall, toolTraktClient } from "./tool-client";
+import { executeToolCall, executeToolCallAllowingNotFound, toolTraktClient } from "./tool-client";
 
 type Input = {
   /**
@@ -23,6 +23,9 @@ type Input = {
   year?: number;
   /**
    * Optional Trakt ID of a movie or show to look up directly. Skips title resolution.
+   * Movie and show IDs overlap and are not interchangeable: always pass `type` ("movies"
+   * or "shows") with this field. A bare ID with the default `type: "all"` is resolved to
+   * one namespace, and refused when the number exists in both.
    */
   traktId?: number;
   /**
@@ -217,9 +220,11 @@ async function resolveCandidates(
  * Trakt returns an empty array when the ID is valid but was never watched,
  * which makes a negative result definitive.
  */
-async function checkCandidate(candidate: Candidate): Promise<{ check: WatchCheck; events: CompactHistoryItem[] }> {
+async function probeCandidate(
+  candidate: Candidate,
+): Promise<{ check: WatchCheck; events: CompactHistoryItem[] } | undefined> {
   if (candidate.type === "movie") {
-    const res = await executeToolCall(
+    const res = await executeToolCallAllowingNotFound(
       (signal) =>
         toolTraktClient.movies.getMovieHistoryForItem({
           params: { id: candidate.traktId },
@@ -228,6 +233,7 @@ async function checkCandidate(candidate: Candidate): Promise<{ check: WatchCheck
         }),
       `Failed to look up watch history for "${candidate.title}"`,
     );
+    if (!res) return undefined;
 
     const paginated = withPagination(res);
     const events = paginated.data.map(toCompactMovieHistory);
@@ -251,7 +257,7 @@ async function checkCandidate(candidate: Candidate): Promise<{ check: WatchCheck
     };
   }
 
-  const res = await executeToolCall(
+  const res = await executeToolCallAllowingNotFound(
     (signal) =>
       toolTraktClient.shows.getShowHistoryForItem({
         params: { id: candidate.traktId },
@@ -260,6 +266,7 @@ async function checkCandidate(candidate: Candidate): Promise<{ check: WatchCheck
       }),
     `Failed to look up watch history for "${candidate.title}"`,
   );
+  if (!res) return undefined;
 
   const paginated = withPagination(res);
   const events = paginated.data.map(toCompactShowHistory);
@@ -279,6 +286,14 @@ async function checkCandidate(candidate: Candidate): Promise<{ check: WatchCheck
     },
     events,
   };
+}
+
+async function checkCandidate(candidate: Candidate): Promise<{ check: WatchCheck; events: CompactHistoryItem[] }> {
+  const result = await probeCandidate(candidate);
+  if (!result) {
+    throw new Error(`Requested media or resource was not found on Trakt.`);
+  }
+  return result;
 }
 
 function sortNewestFirst(items: CompactHistoryItem[]): CompactHistoryItem[] {
@@ -307,12 +322,69 @@ export default async function tool(input: Input): Promise<Output> {
     let exactTruncated = false;
     let titleExists = false;
 
+    let prechecked: { check: WatchCheck; events: CompactHistoryItem[] }[] | undefined;
+
     if (traktId !== undefined) {
-      if (type === "movies" || type === "all") {
-        candidates.push({ type: "movie", traktId, title: query ?? `Movie ${traktId}`, year });
-      }
-      if (type === "shows" || type === "all") {
-        candidates.push({ type: "show", traktId, title: query ?? `Show ${traktId}`, year });
+      const movieCandidate: Candidate = {
+        type: "movie",
+        traktId,
+        title: query ?? `Movie ${traktId}`,
+        year,
+      };
+      const showCandidate: Candidate = {
+        type: "show",
+        traktId,
+        title: query ?? `Show ${traktId}`,
+        year,
+      };
+
+      const refuseId = (message: string): Output => ({
+        mode: "lookup",
+        exhaustive: false,
+        found: false,
+        message,
+        checked: [],
+        history: [],
+        hasMore: false,
+      });
+
+      if (type === "movies") {
+        const movie = await probeCandidate(movieCandidate);
+        if (movie) {
+          prechecked = [movie];
+        } else {
+          const show = await probeCandidate(showCandidate);
+          if (show) {
+            return refuseId(
+              `Trakt ID ${traktId} is a show, not a movie. Call again with \`type: "shows"\`. ` +
+                `Do not report a watched or not-watched verdict from this call.`,
+            );
+          }
+        }
+      } else if (type === "shows") {
+        const show = await probeCandidate(showCandidate);
+        if (show) {
+          prechecked = [show];
+        } else {
+          const movie = await probeCandidate(movieCandidate);
+          if (movie) {
+            return refuseId(
+              `Trakt ID ${traktId} is a movie, not a show. Call again with \`type: "movies"\`. ` +
+                `Do not report a watched or not-watched verdict from this call.`,
+            );
+          }
+        }
+      } else {
+        const [movie, show] = await Promise.all([probeCandidate(movieCandidate), probeCandidate(showCandidate)]);
+        if (movie && show) {
+          return refuseId(
+            `Trakt ID ${traktId} is used by both a movie and a show; those namespaces are not interchangeable. ` +
+              `Pass \`type: "movies"\` or \`type: "shows"\` (from \`search-movies\` / \`search-shows\`) instead of ` +
+              `reporting a watched or not-watched verdict.`,
+          );
+        }
+        if (movie) prechecked = [movie];
+        else if (show) prechecked = [show];
       }
     } else if (query) {
       const selection = await resolveCandidates(query, year, type);
@@ -326,7 +398,7 @@ export default async function tool(input: Input): Promise<Output> {
 
     const target = query ? `"${query}"` : `Trakt ID ${traktId}`;
 
-    if (candidates.length === 0 && year !== undefined && titleExists) {
+    if (!prechecked && candidates.length === 0 && year !== undefined && titleExists) {
       const knownYears = missedYears.length > 0 ? ` Known year(s) for that title: ${missedYears.join(", ")}.` : "";
       return {
         mode: "lookup",
@@ -346,7 +418,7 @@ export default async function tool(input: Input): Promise<Output> {
       };
     }
 
-    if (candidates.length === 0) {
+    if (!prechecked && candidates.length === 0) {
       return {
         mode: "lookup",
         exhaustive: true,
@@ -359,15 +431,10 @@ export default async function tool(input: Input): Promise<Output> {
       };
     }
 
-    const results = await Promise.all(candidates.map(checkCandidate));
-    // When looking up by bare traktId the same ID is probed as movie and show; keep only real hits.
-    const meaningful =
-      traktId !== undefined && results.some((result) => result.check.watched)
-        ? results.filter((result) => result.check.watched)
-        : results;
+    const results = prechecked ?? (await Promise.all(candidates.map(checkCandidate)));
 
-    const checked = meaningful.map((result) => result.check);
-    const events = sortNewestFirst(meaningful.flatMap((result) => result.events));
+    const checked = results.map((result) => result.check);
+    const events = sortNewestFirst(results.flatMap((result) => result.events));
     const watchedItems = checked.filter((item) => item.watched);
     const wasWatched = watchedItems.length > 0;
 
@@ -409,7 +476,7 @@ export default async function tool(input: Input): Promise<Output> {
         `more identically named releases than Trakt's exact search can return, so some were never seen. ` +
         `This is NOT a definitive not-watched answer. ` +
         (year !== undefined
-          ? `The year is already set: resolve the release with \`search-movies\` / \`search-shows\` and call again with its \`traktId\`.`
+          ? `The year is already set: resolve the release with \`search-movies\` / \`search-shows\` and call again with its \`traktId\` and \`type\`.`
           : `Ask the user which release they mean, or pass its \`year\`.`);
     } else {
       message =
