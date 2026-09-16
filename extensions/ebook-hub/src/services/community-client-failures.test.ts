@@ -63,6 +63,30 @@ describe("community client failures", () => {
     );
   });
 
+  it("refuses entries that list too many files", async () => {
+    const files = Array.from({ length: 201 }, (_, index) => ({
+      path: `chapters/${String(index).padStart(4, "0")}.md`,
+      sha256: sha256("x"),
+    }));
+
+    await expect(downloadCommunityBook(entry(files), INDEX_URL, respond("x"))).rejects.toThrow(
+      "walden lists more than 200 files.",
+    );
+  });
+
+  it("stops once a book exceeds the total download limit", async () => {
+    // Three files of 20 MB each pass the per-file limit and the checksum, but not the 50 MB total.
+    const digest = createHash("sha256").update(new Uint8Array(LIMIT_BYTES)).digest("hex");
+    const files = Array.from({ length: 3 }, (_, index) => ({
+      path: `chapters/${String(index).padStart(4, "0")}.md`,
+      sha256: digest,
+    }));
+
+    await expect(downloadCommunityBook(entry(files), INDEX_URL, sizedResponse(LIMIT_BYTES))).rejects.toThrow(
+      /walden is larger than the 50 MB limit/,
+    );
+  });
+
   it("requires book.json in the downloaded files", async () => {
     await expect(
       downloadCommunityBook(entry([{ path: "chapters/0001.md", sha256: sha256("x") }]), INDEX_URL, respond("x")),

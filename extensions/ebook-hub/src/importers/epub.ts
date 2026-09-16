@@ -14,6 +14,20 @@ const ARRAY_TAGS = new Set(["rootfile", "item", "itemref", "title", "creator", "
 const HTML_MEDIA_TYPES = new Set(["application/xhtml+xml", "text/html"]);
 /** Font obfuscation is not DRM; any other algorithm means encrypted content. */
 const FONT_OBFUSCATION_ALGORITHMS = new Set(["http://www.idpf.org/2008/embedding", "http://ns.adobe.com/pdf/enc#RC"]);
+const MB = 1024 * 1024;
+
+export interface EpubLimits {
+  maxEntries: number;
+  maxEntryBytes: number;
+  maxTotalBytes: number;
+}
+
+/** A small archive can expand into gigabytes, so decompression is bounded. */
+export const DEFAULT_EPUB_LIMITS: EpubLimits = {
+  maxEntries: 5_000,
+  maxEntryBytes: 8 * MB,
+  maxTotalBytes: 60 * MB,
+};
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -21,6 +35,39 @@ const parser = new XMLParser({
   removeNSPrefix: true,
   isArray: (tagName: string) => ARRAY_TAGS.has(tagName),
 });
+
+class ExpansionBudget {
+  private used = 0;
+
+  constructor(private readonly limits: EpubLimits) {}
+
+  /** Refuse an entry before decompressing it when the archive declares its size. */
+  reserve(path: string, declaredBytes: number | null): void {
+    if (declaredBytes !== null) {
+      this.check(path, declaredBytes);
+    }
+  }
+
+  spend(path: string, bytes: number): void {
+    this.check(path, bytes);
+    this.used += bytes;
+  }
+
+  private check(path: string, bytes: number): void {
+    if (bytes > this.limits.maxEntryBytes) {
+      throw new ImportError(`${path} expands to more than ${this.limits.maxEntryBytes / MB} MB.`);
+    }
+    if (this.used + bytes > this.limits.maxTotalBytes) {
+      throw new ImportError(`This EPUB expands to more than ${this.limits.maxTotalBytes / MB} MB.`);
+    }
+  }
+}
+
+/** JSZip keeps the uncompressed size while parsing; it is not part of its public API. */
+function declaredSize(file: JSZip.JSZipObject): number | null {
+  const data = (file as unknown as { _data?: { uncompressedSize?: unknown } })._data;
+  return typeof data?.uncompressedSize === "number" ? data.uncompressedSize : null;
+}
 
 function child(node: unknown, key: string): unknown {
   return isRecord(node) ? node[key] : undefined;
@@ -49,9 +96,15 @@ function textOf(node: unknown): string {
   return isRecord(node) ? textOf(node["#text"]) : "";
 }
 
-async function readZipText(zip: JSZip, path: string): Promise<string | null> {
+async function readZipText(zip: JSZip, path: string, budget: ExpansionBudget): Promise<string | null> {
   const file = zip.file(path);
-  return file ? file.async("string") : null;
+  if (!file) {
+    return null;
+  }
+  budget.reserve(path, declaredSize(file));
+  const text = await file.async("string");
+  budget.spend(path, Buffer.byteLength(text, "utf8"));
+  return text;
 }
 
 export function hasContentEncryption(encryptionXml: string): boolean {
@@ -81,7 +134,7 @@ function firstHeading(markdown: string): string | null {
   return match ? markdownToPlainText(match[1]) : null;
 }
 
-export const importEpub: Importer = async (data, fallbackTitle) => {
+export async function importEpubWithLimits(data: Uint8Array, fallbackTitle: string, limits: EpubLimits) {
   let zip: JSZip;
   try {
     zip = await JSZip.loadAsync(data);
@@ -89,18 +142,25 @@ export const importEpub: Importer = async (data, fallbackTitle) => {
     throw new ImportError("This file is not a valid EPUB archive.", { cause: error });
   }
 
-  const encryption = await readZipText(zip, "META-INF/encryption.xml");
+  // JSZip also lists folder entries; only real files count against the limit.
+  const entryCount = Object.values(zip.files).filter((entry) => !entry.dir).length;
+  if (entryCount > limits.maxEntries) {
+    throw new ImportError(`This EPUB contains more than ${limits.maxEntries} files.`);
+  }
+  const budget = new ExpansionBudget(limits);
+
+  const encryption = await readZipText(zip, "META-INF/encryption.xml", budget);
   if (encryption !== null && hasContentEncryption(encryption)) {
     throw new ImportError("This EPUB is DRM-protected and cannot be imported.");
   }
 
-  const containerXml = await readZipText(zip, "META-INF/container.xml");
+  const containerXml = await readZipText(zip, "META-INF/container.xml", budget);
   if (containerXml === null) {
     throw new ImportError("This EPUB is missing META-INF/container.xml.");
   }
   const rootfile = children(child(child(parser.parse(containerXml), "container"), "rootfiles"), "rootfile")[0];
   const opfPath = attribute(rootfile, "full-path");
-  const opfXml = opfPath ? await readZipText(zip, opfPath) : null;
+  const opfXml = opfPath ? await readZipText(zip, opfPath, budget) : null;
   if (!opfPath || opfXml === null) {
     throw new ImportError("This EPUB has no readable package document.");
   }
@@ -134,7 +194,7 @@ export const importEpub: Importer = async (data, fallbackTitle) => {
       continue;
     }
     const path = posix.normalize(opfDir === "." ? decodeHref(item.href) : posix.join(opfDir, decodeHref(item.href)));
-    const html = await readZipText(zip, path);
+    const html = await readZipText(zip, path, budget);
     if (html === null) {
       warnings.push(`Missing chapter file ${path}.`);
       continue;
@@ -159,4 +219,7 @@ export const importEpub: Importer = async (data, fallbackTitle) => {
     chapters,
     warnings,
   };
-};
+}
+
+export const importEpub: Importer = (data, fallbackTitle) =>
+  importEpubWithLimits(data, fallbackTitle, DEFAULT_EPUB_LIMITS);

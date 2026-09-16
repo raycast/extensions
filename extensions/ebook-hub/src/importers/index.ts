@@ -10,13 +10,14 @@ import { ImportError, type ImportedBook, type Importer } from "./types";
 
 export const MAX_IMPORT_BYTES = 100 * 1024 * 1024;
 
-const FORMAT_BY_EXTENSION: Readonly<Record<string, BookFormat>> = {
-  ".md": "md",
-  ".markdown": "md",
-  ".txt": "txt",
-  ".epub": "epub",
-  ".pdf": "pdf",
-};
+/** A Map keeps lookups free of inherited object keys. */
+const FORMAT_BY_EXTENSION = new Map<string, BookFormat>([
+  [".md", "md"],
+  [".markdown", "md"],
+  [".txt", "txt"],
+  [".epub", "epub"],
+  [".pdf", "pdf"],
+]);
 
 const IMPORTERS: Readonly<Record<BookFormat, Importer>> = {
   md: importMarkdown,
@@ -25,7 +26,7 @@ const IMPORTERS: Readonly<Record<BookFormat, Importer>> = {
   pdf: importPdf,
 };
 
-export const SUPPORTED_EXTENSIONS = Object.keys(FORMAT_BY_EXTENSION);
+export const SUPPORTED_EXTENSIONS = [...FORMAT_BY_EXTENSION.keys()];
 
 export interface ImportResult {
   format: BookFormat;
@@ -34,7 +35,7 @@ export interface ImportResult {
 }
 
 export function detectFormat(filePath: string): BookFormat | null {
-  return FORMAT_BY_EXTENSION[extname(filePath).toLowerCase()] ?? null;
+  return FORMAT_BY_EXTENSION.get(extname(filePath).toLowerCase()) ?? null;
 }
 
 export async function importFile(filePath: string): Promise<ImportResult> {

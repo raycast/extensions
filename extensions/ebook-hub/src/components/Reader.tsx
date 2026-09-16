@@ -27,6 +27,7 @@ import { READER_KEYS } from "../keymap";
 import { readPreferences } from "../preferences";
 import { getLibraryStore, rememberLastOpened } from "../storage";
 import { LibraryError, type LibraryStore } from "../storage/library-store";
+import { ProgressWriter } from "../storage/progress-writer";
 import { CommandMode } from "./CommandMode";
 import { ApplyHueThemeSubmenu } from "./ThemeActions";
 
@@ -76,6 +77,11 @@ interface ReaderViewProps {
 /** Owns reading state and loads one chapter at a time. See ADR-0002. */
 function ReaderView({ store, book, initialProgress }: ReaderViewProps) {
   const preferences = useMemo(readPreferences, []);
+  // One writer per book keeps progress writes ordered across chapter loads.
+  const progressWriter = useMemo(
+    () => new ProgressWriter((progress) => store.writeProgress(book.id, progress)),
+    [store, book.id],
+  );
   const [position, setPosition] = useState<ReadingPosition>(() =>
     clampPosition(book, initialProgress?.position ?? START_POSITION),
   );
@@ -118,7 +124,7 @@ function ReaderView({ store, book, initialProgress }: ReaderViewProps) {
   }
   return (
     <ReaderPage
-      store={store}
+      progressWriter={progressWriter}
       book={book}
       chapter={chapter}
       position={position}
@@ -132,7 +138,7 @@ function ReaderView({ store, book, initialProgress }: ReaderViewProps) {
 }
 
 interface ReaderPageProps {
-  store: LibraryStore;
+  progressWriter: ProgressWriter;
   book: BookManifest;
   chapter: PaginatedChapter;
   position: ReadingPosition;
@@ -143,7 +149,7 @@ interface ReaderPageProps {
   onBookmarksChange: BookmarksUpdate;
 }
 
-function ReaderPage({ store, book, chapter, position, bookmarks, focusMode, ...handlers }: ReaderPageProps) {
+function ReaderPage({ progressWriter, book, chapter, position, bookmarks, focusMode, ...handlers }: ReaderPageProps) {
   const { push } = useNavigation();
   const { chapterIndex } = position;
   const pageIndex = pageIndexForBlock(chapter.pages, position.blockIndex);
@@ -167,10 +173,10 @@ function ReaderPage({ store, book, chapter, position, bookmarks, focusMode, ...h
       bookmarks,
       updatedAt: new Date().toISOString(),
     };
-    store.writeProgress(book.id, progress).catch((writeError: unknown) => {
+    progressWriter.save(progress).catch((writeError: unknown) => {
       void showFailureToast(writeError, { title: "Could not save reading progress" });
     });
-  }, [store, book.id, chapterIndex, pageStart, percent, bookmarks]);
+  }, [progressWriter, chapterIndex, pageStart, percent, bookmarks]);
 
   function run(result: NavigationResult) {
     if (result.kind === "move") {

@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import { describe, expect, it } from "vitest";
 
-import { hasContentEncryption, importEpub } from "./epub";
+import { DEFAULT_EPUB_LIMITS, hasContentEncryption, importEpub, importEpubWithLimits } from "./epub";
 import { ImportError } from "./types";
 
 const container = (fullPath = "OEBPS/content.opf") => `<?xml version="1.0"?>
@@ -137,6 +137,40 @@ describe("importEpub", () => {
 
   it("rejects files that are not EPUB archives", async () => {
     await expect(importEpub(new TextEncoder().encode("not a zip"), "x")).rejects.toBeInstanceOf(ImportError);
+  });
+});
+
+describe("importEpubWithLimits", () => {
+  const tinyLimits = { maxEntries: 8, maxEntryBytes: 4 * 1024, maxTotalBytes: 12 * 1024 };
+
+  it("rejects archives with too many entries", async () => {
+    const extra: Record<string, string> = {};
+    for (let index = 0; index < 10; index += 1) {
+      extra[`OEBPS/extra-${index}.txt`] = "x";
+    }
+
+    await expect(importEpubWithLimits(await buildEpub(extra), "x", tinyLimits)).rejects.toThrow(
+      "This EPUB contains more than 8 files.",
+    );
+  });
+
+  it("rejects an entry that expands beyond the per-file limit", async () => {
+    const huge = await buildEpub({ "OEBPS/text/c2.xhtml": xhtml("Big", `<p>${"word ".repeat(2000)}</p>`) });
+
+    await expect(importEpubWithLimits(huge, "x", tinyLimits)).rejects.toThrow(/expands to more than/);
+  });
+
+  it("rejects an archive that expands beyond the total limit", async () => {
+    const chunk = xhtml("Chunk", `<p>${"word ".repeat(600)}</p>`);
+    const epub = await buildEpub({ "OEBPS/text/chapter 1.xhtml": chunk, "OEBPS/text/c2.xhtml": chunk });
+
+    await expect(importEpubWithLimits(epub, "x", { ...tinyLimits, maxTotalBytes: 6 * 1024 })).rejects.toThrow(
+      /This EPUB expands to more than/,
+    );
+  });
+
+  it("imports normally within the default limits", async () => {
+    expect((await importEpubWithLimits(await buildEpub(), "x", DEFAULT_EPUB_LIMITS)).chapters).toHaveLength(2);
   });
 });
 

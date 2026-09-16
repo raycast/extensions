@@ -26,6 +26,9 @@ describe("detectFormat", () => {
     ["paper.PDF", "pdf"],
     ["archive.mobi", null],
     ["README", null],
+    ["book.constructor", null],
+    ["constructor", null],
+    ["book.toString", null],
   ])("%s → %s", (path, expected) => {
     expect(detectFormat(path)).toBe(expected);
   });

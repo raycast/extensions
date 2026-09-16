@@ -8,11 +8,16 @@ import {
   type CommunityBookEntry,
   type ParsedCommunityIndex,
 } from "../domain/community";
+import { mapWithConcurrency } from "../domain/concurrency";
 import { normalizeLanguageTag } from "../domain/languages";
 import { errorMessage } from "../errors";
 
 const REQUEST_TIMEOUT_MS = 20_000;
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
+const MAX_BOOK_BYTES = 50 * 1024 * 1024;
+const MAX_FILES_PER_BOOK = 200;
+const MAX_CONCURRENT_DOWNLOADS = 5;
+const MB = 1024 * 1024;
 
 export type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 
@@ -48,11 +53,11 @@ async function fetchBytes(url: string, fetcher: Fetcher): Promise<Uint8Array> {
   }
   const declaredLength = Number(response.headers.get("content-length") ?? 0);
   if (declaredLength > MAX_FILE_BYTES) {
-    throw new CommunityError(`${url} is larger than the ${MAX_FILE_BYTES / 1024 / 1024} MB limit.`);
+    throw new CommunityError(`${url} is larger than the ${MAX_FILE_BYTES / MB} MB limit.`);
   }
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (bytes.byteLength > MAX_FILE_BYTES) {
-    throw new CommunityError(`${url} is larger than the ${MAX_FILE_BYTES / 1024 / 1024} MB limit.`);
+    throw new CommunityError(`${url} is larger than the ${MAX_FILE_BYTES / MB} MB limit.`);
   }
   return bytes;
 }
@@ -76,23 +81,33 @@ export async function fetchCommunityIndex(indexUrl: string, fetcher: Fetcher = f
   return parseJson(await fetchBytes(url, fetcher), "The community index", parseCommunityIndex);
 }
 
-/** Download every file of a book, verify SHA-256 digests, and build a draft for the library. */
+/**
+ * Download every file of a book and verify SHA-256 digests. An index is remote input, so the
+ * download is bounded by file count, total size, and how many requests run at once.
+ */
 export async function downloadCommunityBook(
   entry: CommunityBookEntry,
   indexUrl: string,
   fetcher: Fetcher = fetch,
 ): Promise<NewBook> {
   const base = new URL("./", assertHttpsUrl(indexUrl));
-  const downloads = await Promise.all(
-    entry.files.map(async (file) => {
-      const bytes = await fetchBytes(new URL(`${entry.path}/${file.path}`, base).toString(), fetcher);
-      const digest = createHash("sha256").update(bytes).digest("hex");
-      if (digest !== file.sha256) {
-        throw new CommunityError(`Checksum mismatch for ${file.path}. The library may be updating; try again later.`);
-      }
-      return [file.path, bytes] as const;
-    }),
-  );
+  if (entry.files.length > MAX_FILES_PER_BOOK) {
+    throw new CommunityError(`${entry.slug} lists more than ${MAX_FILES_PER_BOOK} files.`);
+  }
+
+  let downloadedBytes = 0;
+  const downloads = await mapWithConcurrency(entry.files, MAX_CONCURRENT_DOWNLOADS, async (file) => {
+    const bytes = await fetchBytes(new URL(`${entry.path}/${file.path}`, base).toString(), fetcher);
+    downloadedBytes += bytes.byteLength;
+    if (downloadedBytes > MAX_BOOK_BYTES) {
+      throw new CommunityError(`${entry.slug} is larger than the ${MAX_BOOK_BYTES / MB} MB limit.`);
+    }
+    const digest = createHash("sha256").update(bytes).digest("hex");
+    if (digest !== file.sha256) {
+      throw new CommunityError(`Checksum mismatch for ${file.path}. The library may be updating; try again later.`);
+    }
+    return [file.path, bytes] as const;
+  });
   const files = new Map(downloads);
 
   const bookBytes = files.get(BOOK_FILE);
