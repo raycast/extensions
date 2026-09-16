@@ -1,6 +1,6 @@
 # Tmux Sessioner Changelog
 
-## [Save Tmux Sessions on demand] - {PR_MERGE_DATE}
+## [Save Tmux Sessions on demand] - 2026-09-16
 
 ### Added
 
