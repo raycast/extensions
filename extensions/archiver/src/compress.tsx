@@ -12,7 +12,6 @@ import {
   popToRoot,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import path from "node:path";
 import { compress, ensureBinary, processingAlert } from "./common/utils";
 import { ICompressPreferences } from "./common/types";
 import { CompressFormat, COMPRESS_FORMAT_METADATA } from "./common/const";
@@ -110,10 +109,11 @@ export default function Command() {
         ))}
       </Form.Dropdown>
       <Form.FilePicker
+        key={files.join("|")}
         id="files"
         title="Files"
         info="Files to be compressed"
-        value={files}
+        defaultValue={files}
         canChooseDirectories
         onChange={(values) => {
           if (isLoading) {
@@ -122,10 +122,6 @@ export default function Command() {
           }
           updateFilesState(values);
         }}
-      />
-      <Form.Description
-        title="Selected"
-        text={files.length ? files.map((file) => path.basename(file)).join(", ") : "No files selected"}
       />
       {pwdOptional && <Form.PasswordField id="password" title="Password" placeholder="Enter password(Optional)" />}
     </Form>
