@@ -1,6 +1,6 @@
 # UniFi Changelog
 
-## [Network, Protect, Platform, and AI] - {PR_MERGE_DATE}
+## [Network, Protect, Platform, and AI] - 2026-09-16
 
 - Added a customer-focused Network and Protect health overview for offline hardware, firmware updates, low batteries, camera connectivity, and alarm mode.
 - Added Protect inventory, working file-backed camera snapshots, NVR status, and confirmed physical controls including arm and disarm.
