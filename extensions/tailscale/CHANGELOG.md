@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [List Services] - 2026-09-13
+
+- Added a command to list and open services available in the tailnet.
+
 ## [Fix] - 2026-08-21
 
 - Reduced background connection-status refreshes to once per minute.
