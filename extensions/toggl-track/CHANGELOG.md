@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Quickstop Timer] - {PR_MERGE_DATE}
+## [Quickstop Timer] - 2026-09-16
 
 - Added a "Quickstop Timer" command that stops the running time entry with no UI, so it can be bound to a global hotkey
 - In Low Data Mode the command confirms the running entry against the API before stopping, so it never acts on a stale cached timer
