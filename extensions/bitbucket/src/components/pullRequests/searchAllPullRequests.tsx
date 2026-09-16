@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Action, Icon, Image, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useSWR, { SWRConfig } from "swr";
 
@@ -144,6 +144,7 @@ function SearchAllPullRequestsList() {
                 </ActionPanel>
               }
               accessories={[
+                { icon: Icon.Globe, tooltip: "Open in Browser  ⌘↵" },
                 ...reviewAccessories,
                 {
                   text: `${pr.commentCount} 💬  ·  Created by ${pr.author.nickname}`,

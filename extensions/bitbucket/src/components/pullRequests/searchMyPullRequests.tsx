@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Action, Icon, Image, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import { getMyOpenPullRequests, getCurrentUserUuid } from "./../../queries";
@@ -118,6 +118,7 @@ export function SearchMyPullRequests() {
                 </ActionPanel>
               }
               accessories={[
+                { icon: Icon.Globe, tooltip: "Open in Browser  ⌘↵" },
                 ...reviewAccessories,
                 {
                   text: `${pr.commentCount} 💬  ·  Created by ${pr.author.nickname}`,
