@@ -1,5 +1,9 @@
 import OpenAI from "openai";
-import { ToneType } from "../types";
+import { AIProvider, ToneType } from "../types";
+import { getAIProvider } from "../utils";
+import { cleanOutput } from "./cleanOutput";
+import { logDebug } from "./debugLog";
+import { AIRequest, changeTonePrompt, continueTextPrompt, fixGrammarPrompt, paraphrasePrompt } from "./prompts";
 import { AI } from "@raycast/api";
 import { environment } from "@raycast/api";
 
@@ -11,48 +15,82 @@ class OpenAIModule {
   }
 
   async fixGrammer(inputText: string): Promise<string> {
-    const prompt = `The following text has grammar mistakes and is in its original language. Please correct the grammar mistakes without translating it: "${inputText}" and return only the corrected version without any context`;
-    return await this.aiRequest(prompt);
+    return await this.aiRequest(fixGrammarPrompt(inputText));
   }
 
   async paraphraseGrammer(inputText: string): Promise<string> {
-    const prompt = `Please paraphrase the following sentence in its original language without translating it: "${inputText}" and return only the paraphrased version without any context`;
-    return await this.aiRequest(prompt);
+    return await this.aiRequest(paraphrasePrompt(inputText));
   }
 
   async changeTone(inputText: string, toneType: ToneType) {
-    const prompt = `Transform the following sentence to have a "${toneType}" tone, but keep it in its original language: "${inputText}" and return only the transformed version without any context`;
-    return await this.aiRequest(prompt);
+    return await this.aiRequest(changeTonePrompt(inputText, toneType));
   }
 
   async continueText(inputText: string) {
-    const prompt = `Based on the following information in its original language, continue the text: "${inputText}" and return only the continued version without any context`;
-    return await this.aiRequest(prompt);
+    return await this.aiRequest(continueTextPrompt(inputText));
   }
 
-  private async aiRequest(prompt: string): Promise<string> {
-    if (environment.canAccess(AI)) return await this.raycastAiRequest(prompt);
-    else if (this.openai != null) return await this.gptRequest(prompt);
-    else throw new Error("AI module not initialized");
+  private async aiRequest(request: AIRequest): Promise<string> {
+    const provider = getAIProvider();
+    const canUseRaycastAI = environment.canAccess(AI);
+    const canUseOpenAI = this.openai != null;
+
+    const raycastProvider = { name: "Raycast AI", run: () => this.raycastAiRequest(request) };
+    const openAIProvider = { name: "OpenAI", run: () => this.gptRequest(request) };
+
+    // Ordered by preference. In Auto, a configured OpenAI key wins: canAccess(AI) stays
+    // true once Raycast AI credits are spent, and Raycast shows its own "no credits"
+    // message as soon as AI.ask is called, so the key has to be used instead of after.
+    const raycastFirst = provider === AIProvider.RaycastAI || (provider === AIProvider.Auto && !canUseOpenAI);
+    const preferred = raycastFirst ? [raycastProvider, openAIProvider] : [openAIProvider, raycastProvider];
+    const providers = preferred.filter((candidate) => (candidate === openAIProvider ? canUseOpenAI : canUseRaycastAI));
+
+    const context = `preference=${provider} canUseRaycastAI=${canUseRaycastAI} hasOpenAIKey=${canUseOpenAI}`;
+
+    if (provider === AIProvider.OpenAI && !canUseOpenAI) {
+      throw new Error("OpenAI is selected as the AI provider but no OpenAI access token is set in the preferences");
+    }
+
+    if (providers.length === 0) throw new Error("AI module not initialized");
+
+    const failures: string[] = [];
+    for (const candidate of providers) {
+      try {
+        const answer = await candidate.run();
+        if (answer.trim()) return answer;
+        logDebug(`${candidate.name} returned an empty response (${context})`);
+        failures.push(`${candidate.name}: empty response`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        logDebug(`${candidate.name} request failed: ${message} (${context})`);
+        failures.push(`${candidate.name}: ${message}`);
+      }
+    }
+
+    throw new Error(failures.join(" | "));
   }
-  private async gptRequest(prompt: string): Promise<string> {
+
+  private async gptRequest(request: AIRequest): Promise<string> {
     const response = await this.openai?.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
-      model: "gpt-5-nano",
+      messages: [
+        { role: "system", content: request.system },
+        { role: "user", content: request.user },
+      ],
+      model: "gpt-5.6-luna",
+      // Low reasoning, not none: editing well needs the model to weigh what the author
+      // meant, and the cheapest tier thinking beats a pricier one guessing. Costs ~1s.
+      reasoning_effort: "low",
     });
 
-    return response?.choices[0]?.message.content ? this.trimQuotes(response.choices[0]?.message.content) : "";
+    const content = response?.choices[0]?.message.content;
+    return content ? cleanOutput(content) : "";
   }
 
-  private async raycastAiRequest(prompt: string): Promise<string> {
-    const answer = await AI.ask(prompt);
-    return this.trimQuotes(answer);
+  private async raycastAiRequest(request: AIRequest): Promise<string> {
+    // AI.ask takes a single prompt, so the rules are prepended to the text itself.
+    const answer = await AI.ask(`${request.system}\n\n${request.user}`, { creativity: request.creativity });
+    return cleanOutput(answer);
   }
-
-  private trimQuotes: (input: string) => string = (input) => {
-    const regex = new RegExp(`^${'"'}|${'"'}$`, "g");
-    return input.replace(regex, "");
-  };
 }
 
 export { OpenAIModule };
