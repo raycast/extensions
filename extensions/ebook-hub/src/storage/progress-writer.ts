@@ -21,14 +21,25 @@ export class ProgressWriter {
       return;
     }
     this.running = true;
+    let failure: unknown = null;
     try {
       while (this.pending !== null) {
         const next = this.pending;
         this.pending = null;
-        await this.write(next);
+        try {
+          await this.write(next);
+          failure = null;
+        } catch (error) {
+          // Keep draining: a queued newer snapshot still has to reach disk, and writing it
+          // makes this failure irrelevant.
+          failure = error;
+        }
       }
     } finally {
       this.running = false;
+    }
+    if (failure !== null) {
+      throw failure;
     }
   }
 }

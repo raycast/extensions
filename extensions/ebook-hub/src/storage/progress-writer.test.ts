@@ -60,6 +60,44 @@ describe("ProgressWriter", () => {
     expect(write).toHaveBeenCalledTimes(2);
   });
 
+  it("still writes a queued snapshot after a failed write", async () => {
+    const first = deferred();
+    const written: number[] = [];
+    const write = vi.fn(async (value: ReadingProgress) => {
+      written.push(value.position.blockIndex);
+      if (written.length === 1) {
+        await first.promise;
+        throw new Error("disk full");
+      }
+    });
+    const writer = new ProgressWriter(write);
+
+    const running = writer.save(progress(1));
+    await writer.save(progress(2));
+    first.resolve();
+
+    // The newer snapshot reached disk, so the earlier failure is not reported.
+    await expect(running).resolves.toBeUndefined();
+    expect(written).toEqual([1, 2]);
+  });
+
+  it("reports the last failure when every queued write fails", async () => {
+    const first = deferred();
+    const writer = new ProgressWriter(async (value) => {
+      if (value.position.blockIndex === 1) {
+        await first.promise;
+        throw new Error("first failed");
+      }
+      throw new Error("second failed");
+    });
+
+    const running = writer.save(progress(1));
+    await writer.save(progress(2));
+    first.resolve();
+
+    await expect(running).rejects.toThrow("second failed");
+  });
+
   it("writes sequentially when calls do not overlap", async () => {
     const written: number[] = [];
     const writer = new ProgressWriter(async (value) => {
