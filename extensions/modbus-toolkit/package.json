@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "modbus-toolkit",
+  "title": "Modbus Toolkit",
+  "description": "Parse, build, decode, and validate Modbus RTU, TCP, and ASCII frames",
+  "icon": "icon.png",
+  "author": "TwoMental",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "modbus",
+    "rtu",
+    "tcp",
+    "ascii",
+    "protocol",
+    "hex"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "parse-modbus",
+      "title": "Parse Modbus",
+      "description": "Parse Modbus RTU, TCP, and ASCII application data units",
+      "keywords": [
+        "modbus",
+        "rtu",
+        "tcp",
+        "ascii",
+        "hex",
+        "protocol"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "build-modbus-frame",
+      "title": "Build Modbus Frame",
+      "description": "Build validated Modbus RTU, TCP, and ASCII request frames",
+      "keywords": [
+        "modbus",
+        "build",
+        "generate",
+        "request",
+        "frame"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "decode-register-values",
+      "title": "Decode Register Values",
+      "description": "Decode Modbus register bytes using common data types and byte orders",
+      "keywords": [
+        "modbus",
+        "register",
+        "float",
+        "integer",
+        "endianness"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "calculate-modbus-checksum",
+      "title": "Calculate Modbus Checksum",
+      "description": "Calculate or verify Modbus RTU CRC16 and Modbus ASCII LRC checksums",
+      "keywords": [
+        "modbus",
+        "crc",
+        "lrc",
+        "checksum",
+        "verify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "modbus-reference",
+      "title": "Modbus Reference",
+      "description": "Look up Modbus data areas, function codes, and address rules",
+      "keywords": [
+        "modbus",
+        "reference",
+        "function code",
+        "register",
+        "address"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
