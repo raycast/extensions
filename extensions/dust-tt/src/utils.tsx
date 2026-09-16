@@ -1,6 +1,8 @@
 import { ConnectorProvider, GetAgentConfigurationsResponseType, MeResponseType } from "@dust-tt/client";
 import { Color, Icon, Image, LocalStorage } from "@raycast/api";
 import { jwtDecode } from "jwt-decode";
+import { convert as convertHtmlToText } from "html-to-text";
+import { marked, Token, Tokens } from "marked";
 import Asset = Image.Asset;
 
 export interface AgentType {
@@ -180,6 +182,64 @@ export async function setWorkspaceId(workspaceId: string) {
 
 export async function getWorkspaceId(): Promise<string | undefined> {
   return await LocalStorage.getItem("workspaceId");
+}
+
+function renderTokensPlain(tokens: Token[]): string {
+  return tokens.map(renderTokenPlain).join("");
+}
+
+// Prefer parsed children (respects escapes and nested emphasis/links) over the raw text.
+function renderInlinePlain(token: { text?: string; tokens?: Token[]; raw?: string }): string {
+  if (token.tokens) {
+    return renderTokensPlain(token.tokens);
+  }
+  return token.text ?? token.raw ?? "";
+}
+
+function renderTokenPlain(token: Token): string {
+  switch (token.type) {
+    case "text":
+    case "escape":
+    case "codespan":
+    case "strong":
+    case "em":
+    case "del":
+    case "link":
+    case "image":
+    case "blockquote":
+      return renderInlinePlain(token);
+    case "heading":
+    case "paragraph":
+    case "code":
+      return `${renderInlinePlain(token)}\n\n`;
+    case "list": {
+      const list = token as Tokens.List;
+      return list.items.map((item) => `${renderInlinePlain(item)}\n`).join("") + "\n";
+    }
+    case "list_item":
+      return renderInlinePlain(token);
+    case "table": {
+      const table = token as Tokens.Table;
+      const rows = [table.header, ...table.rows];
+      return rows.map((row) => row.map((cell) => renderTokensPlain(cell.tokens)).join(" | ")).join("\n") + "\n\n";
+    }
+    case "br":
+    case "hr":
+      return "\n";
+    case "space":
+    case "def":
+      return "";
+    case "html":
+      return convertHtmlToText(renderInlinePlain(token), { selectors: [{ selector: "img", format: "skip" }] });
+    default:
+      return "raw" in token ? String(token.raw) : "";
+  }
+}
+
+export function stripMarkdown(text: string): string {
+  return renderTokensPlain(marked.lexer(text))
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 export async function extractAndStoreRegion(token: string) {
