@@ -2,7 +2,7 @@
 
 ## [Use the built-in fetch client] - {PR_MERGE_DATE}
 
-- Switched translation, token, and text-to-speech requests to the platform's global `fetch`; `undici` and `https-proxy-agent` are now loaded lazily and only when an HTTP proxy is set
+- Switched translation and token requests to the platform's global `fetch`; `undici` (translation proxy) and `https-proxy-agent` (text-to-speech proxy) are now loaded lazily and only when an HTTP proxy is set
 
 ## [Fix translations failing with JSON parse error] - 2026-08-24
 

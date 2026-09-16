@@ -65,7 +65,7 @@ export async function translate(text: string, options?: TranslateOption): Promis
     // A browser-like UA so Google's endpoint doesn't reject the request.
     const userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     let requestUrl = url;
-    let method = "GET";
+    let method: "GET" | "POST" = "GET";
     let requestBody: string | undefined;
     const headers: Record<string, string> = { "User-Agent": userAgent };
     // If request URL is greater than 2048 characters, use POST method.
@@ -81,14 +81,16 @@ export async function translate(text: string, options?: TranslateOption): Promis
     // proxy is configured, so the common path never pulls it in.
     let body: any;
     if (options.proxy) {
-        const { fetch: undiciFetch, ProxyAgent } = await import("undici");
-        const response = await undiciFetch(requestUrl, {
+        // Global fetch stays the default; only the proxy path pulls in undici, and it
+        // uses undici's own request() (not an imported fetch) so a dispatcher can be set.
+        const { request, ProxyAgent } = await import("undici");
+        const response = await request(requestUrl, {
             method,
             body: requestBody,
             headers,
             dispatcher: new ProxyAgent(options.proxy),
         });
-        body = await response.json();
+        body = await response.body.json();
     } else {
         const response = await fetch(requestUrl, { method, body: requestBody, headers });
         body = await response.json();
