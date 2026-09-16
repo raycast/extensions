@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Deployment History and Rollback] - {PR_MERGE_DATE}
+## [Deployment History and Rollback] - 2026-09-16
 
 - Add a `View Deployments` action to Applications and Compose stacks, listing past deployments with their status, build logs, and a `Roll Back` action for deployments that produced a rollback point. Running deployments can be cancelled, and history entries deleted.
 
