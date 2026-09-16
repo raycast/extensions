@@ -8,3 +8,5 @@ export const vsCodeBundleIds = [
 ];
 
 export const firefoxBrowsers = ["firefox", "zen"];
+
+export const spotifyBundleId = "com.spotify.client";

@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Support Spotify] - {PR_MERGE_DATE}
+
+- Add Spotify: copy the link of the playing track (or album, via a new preference) or podcast episode
+
 ## [Update extension icon] - 2026-08-08
 
 - Updated the extension icon with a clear `~/` path mark designed to remain legible at Raycast's UI sizes.

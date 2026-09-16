@@ -263,3 +263,40 @@ export const copySafariWebAppPath = async (app: string) => {
     return "";
   }
 };
+
+// spotify: current track or podcast episode
+const SPOTIFY_FIELD_SEPARATOR = "|||";
+
+export const scriptSpotifyCurrentTrack = `
+if application "Spotify" is not running then
+  return ""
+end if
+tell application "Spotify"
+  try
+    set t to current track
+    return (spotify url of t) & "${SPOTIFY_FIELD_SEPARATOR}" & (name of t) & "${SPOTIFY_FIELD_SEPARATOR}" & (artist of t) & "${SPOTIFY_FIELD_SEPARATOR}" & (album of t)
+  on error
+    return ""
+  end try
+end tell
+`;
+
+export interface SpotifyTrack {
+  uri: string;
+  name: string;
+  artist: string;
+  album: string;
+}
+
+export const getSpotifyCurrentTrack = async (): Promise<SpotifyTrack | undefined> => {
+  try {
+    const raw = await runAppleScript(scriptSpotifyCurrentTrack, { timeout: APPLESCRIPT_TIMEOUT_MS });
+    const [uri, name, artist, album] = raw.split(SPOTIFY_FIELD_SEPARATOR);
+    if (!uri || !uri.startsWith("spotify:")) {
+      return undefined;
+    }
+    return { uri: uri.trim(), name: name ?? "", artist: artist ?? "", album: album ?? "" };
+  } catch (e) {
+    return undefined;
+  }
+};
