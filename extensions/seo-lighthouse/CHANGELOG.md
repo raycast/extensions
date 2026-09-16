@@ -1,5 +1,19 @@
 # SEO Lighthouse Changelog
 
+## [Scorecard Dashboard] - {PR_MERGE_DATE}
+
+- Added a Speedtest-style SVG scorecard with category gauges and Core Web Vitals
+- Added copy/save scorecard image actions on macOS
+- Dropped unused Lighthouse/chrome-launcher libraries — the extension uses the CLI
+- Removed custom i18n (Raycast Store is English-only)
+- Switched Lighthouse invocation from `exec` to `execFile`
+- Removed the `--disable-web-security` Chrome flag
+- Added a 24h cache TTL, expired-cache cleanup, and temp-file cleanup on error
+- Added Chrome-missing detection with install instructions
+- Added report profiles (General, Marketing, SEO, Development) and a searchable audit explorer
+- Exposed an `audit-page` AI tool for programmatic website audits
+- Updated to `@raycast/api` 2, `@raycast/utils` 2, and ESLint 10 with flat config
+
 ## [1.1.0 - Update] - 2024-01-21
 
 - Improved Lighthouse path finding mechanism
