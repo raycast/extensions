@@ -92,17 +92,22 @@ type CandidateSelection = {
    */
   unchecked: Candidate[];
   /**
-   * True when Trakt's search could not enumerate every release sharing the title, so the
-   * candidate set is incomplete before any filtering of ours. A "not watched" verdict then
-   * rests on releases we never saw, which rules out calling it final.
+   * True when either search page is full, so a requested year may exist under a related
+   * title that ranked out of reach. Used only for the year-mismatch path.
    */
   truncated: boolean;
+  /**
+   * True when the exact-title search itself hit its cap. A "not watched" verdict then
+   * rests on same-title releases we never saw. A full relevance page alone does not set
+   * this — all four films titled "Dune" come back from `/exact`.
+   */
+  exactTruncated: boolean;
 };
 
 /**
  * What a single search yields, before the search's own completeness is known.
  */
-type CandidatePick = Omit<CandidateSelection, "truncated">;
+type CandidatePick = Omit<CandidateSelection, "truncated" | "exactTruncated">;
 
 /**
  * Upper bound on how many same-title releases are probed in one lookup. Every candidate costs
@@ -159,6 +164,7 @@ async function resolveCandidates(
   const missed = new Set<number>();
   const unchecked: Candidate[] = [];
   let truncated = false;
+  let exactTruncated = false;
 
   if (type === "movies" || type === "all") {
     const found = await searchMovieCandidates(query);
@@ -171,6 +177,7 @@ async function resolveCandidates(
     selection.missedYears.forEach((value) => missed.add(value));
     unchecked.push(...selection.unchecked);
     truncated = truncated || found.truncated;
+    exactTruncated = exactTruncated || found.exactTruncated;
   }
 
   if (type === "shows" || type === "all") {
@@ -184,6 +191,7 @@ async function resolveCandidates(
     selection.missedYears.forEach((value) => missed.add(value));
     unchecked.push(...selection.unchecked);
     truncated = truncated || found.truncated;
+    exactTruncated = exactTruncated || found.exactTruncated;
   }
 
   return {
@@ -191,6 +199,7 @@ async function resolveCandidates(
     missedYears: [...missed].sort((a, b) => a - b),
     unchecked,
     truncated,
+    exactTruncated,
   };
 }
 
@@ -286,6 +295,7 @@ export default async function tool(input: Input): Promise<Output> {
     let missedYears: number[] = [];
     let unchecked: Candidate[] = [];
     let truncated = false;
+    let exactTruncated = false;
 
     if (traktId !== undefined) {
       if (type === "movies" || type === "all") {
@@ -300,6 +310,7 @@ export default async function tool(input: Input): Promise<Output> {
       missedYears = selection.missedYears;
       unchecked = selection.unchecked;
       truncated = selection.truncated;
+      exactTruncated = selection.exactTruncated;
     }
 
     const target = query ? `"${query}"` : `Trakt ID ${traktId}`;
@@ -358,7 +369,7 @@ export default async function tool(input: Input): Promise<Output> {
     // A positive verdict rests on a real watch event, so releases left out cannot invalidate it.
     // A negative one is only exhaustive once every release sharing the title has been probed,
     // which also requires the search to have enumerated them all in the first place.
-    const exhaustive = wasWatched || (!hasUnchecked && !truncated);
+    const exhaustive = wasWatched || (!hasUnchecked && !exactTruncated);
 
     let message: string;
     if (wasWatched) {
@@ -371,7 +382,7 @@ export default async function tool(input: Input): Promise<Output> {
         )
         .join(" ");
       message =
-        hasUnchecked || truncated
+        hasUnchecked || exactTruncated
           ? `${confirmed} Other releases share that title and were not checked` +
             `${hasUnchecked ? ` (${uncheckedLabels})` : ""}, so name the release this answer refers to.`
           : confirmed;
@@ -380,7 +391,7 @@ export default async function tool(input: Input): Promise<Output> {
         `No watch event exists for ${target} among the releases checked (${checkedLabels}), but other releases ` +
         `share that exact title and were NOT checked: ${uncheckedLabels}. Ask the user which release ` +
         `they mean instead of reporting a not-watched verdict.`;
-    } else if (truncated) {
+    } else if (exactTruncated) {
       message =
         `No watch event exists for ${target} among the releases checked (${checkedLabels}), but that title has ` +
         `more releases than Trakt's search can return, so some were never seen. This is NOT a definitive ` +

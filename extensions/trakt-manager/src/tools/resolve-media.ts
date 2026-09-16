@@ -31,13 +31,26 @@ export type ResolvedMatch = ResolvedMedia & {
 export const SEARCH_RESULT_CAP = 50;
 
 /**
- * True when either search filled a whole page. Further releases then exist out of reach —
- * including a year that only lives under a related title in the relevance ranking — so a
- * negative conclusion drawn from this set is a guess.
+ * Completeness of a merged title search. The two flags answer different questions and must
+ * not be collapsed: a full relevance page can hide a year under a related title, while the
+ * exact-title set is only incomplete when the exact search itself hits its cap.
  */
-type Truncated = { truncated: boolean };
+type SearchCompleteness = {
+  /**
+   * True when either page is full. A requested year can live under a related title that
+   * ranked outside the relevance window, so year filters must not treat an empty result as
+   * proof that the year does not exist.
+   */
+  truncated: boolean;
+  /**
+   * True when the exact-title search filled a page. Further releases sharing that title
+   * then exist out of reach. A full relevance page alone does not imply this — Dune's four
+   * exact matches all come back from `/exact` even though relevance returns 50.
+   */
+  exactTruncated: boolean;
+};
 
-export type TitleSearch = Truncated & {
+export type TitleSearch = SearchCompleteness & {
   /**
    * Every release reachable for the query, the exact-title ones first.
    */
@@ -48,7 +61,7 @@ export type TitleSearch = Truncated & {
  * The same reachable releases as `TitleSearch`, kept as Trakt returned them for callers that
  * need more than an identifier, a title and a year.
  */
-export type TitleSearchResults<T> = Truncated & { items: T[] };
+export type TitleSearchResults<T> = SearchCompleteness & { items: T[] };
 
 function mergeById<T>(idOf: (item: T) => number, ...groups: T[][]): T[] {
   const byId = new Map<number, T>();
@@ -135,6 +148,7 @@ export async function searchMovieResults(
   return {
     items: mergeById((item) => item.movie.ids.trakt, exact.body, broad.body),
     truncated: exact.body.length >= limit || broad.body.length >= limit,
+    exactTruncated: exact.body.length >= limit,
   };
 }
 
@@ -164,11 +178,12 @@ export async function searchShowResults(
   return {
     items: mergeById((item) => item.show.ids.trakt, exact.body, broad.body),
     truncated: exact.body.length >= limit || broad.body.length >= limit,
+    exactTruncated: exact.body.length >= limit,
   };
 }
 
 export async function searchMovieCandidates(query: string, limit = SEARCH_RESULT_CAP): Promise<TitleSearch> {
-  const { items, truncated } = await searchMovieResults(query, limit);
+  const { items, truncated, exactTruncated } = await searchMovieResults(query, limit);
 
   return {
     candidates: items.map((item) => ({
@@ -177,11 +192,12 @@ export async function searchMovieCandidates(query: string, limit = SEARCH_RESULT
       year: item.movie.year,
     })),
     truncated,
+    exactTruncated,
   };
 }
 
 export async function searchShowCandidates(query: string, limit = SEARCH_RESULT_CAP): Promise<TitleSearch> {
-  const { items, truncated } = await searchShowResults(query, limit);
+  const { items, truncated, exactTruncated } = await searchShowResults(query, limit);
 
   return {
     candidates: items.map((item) => ({
@@ -190,6 +206,7 @@ export async function searchShowCandidates(query: string, limit = SEARCH_RESULT_
       year: item.show.year,
     })),
     truncated,
+    exactTruncated,
   };
 }
 
