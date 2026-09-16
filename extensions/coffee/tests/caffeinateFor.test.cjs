@@ -139,13 +139,20 @@ for (const args of [
   });
 }
 
-test("shows the HUD before waiting for background updates", async () => {
-  const { command, api } = loadCommand();
+test("starts caffeination and finishes background updates before showing the HUD", async () => {
+  // Raycast 2 unloads a view command's process when the window closes, and
+  // showHUD closes the window. Everything the command still needs (spawn,
+  // reason persistence, menu-bar/status updates) must happen before the HUD.
+  const { command, api, processes } = loadCommand();
   const events = [];
   api.launchCommand.mock.mockImplementation(async ({ name }) => events.push(name));
   api.showHUD.mock.mockImplementation(async () => events.push("HUD"));
+  processes.spawn.mock.mockImplementation(() => {
+    events.push("spawn");
+    return { unref: () => events.push("unref") };
+  });
   await command({ arguments: { seconds: "30" } });
-  assert.deepEqual(events, ["HUD", "index", "status"]);
+  assert.deepEqual(events, ["spawn", "unref", "index", "status", "HUD"]);
   assert.equal(api.popToRoot.mock.callCount(), 1);
 });
 

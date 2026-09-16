@@ -51,9 +51,6 @@ export async function startCaffeinate(
   additionalArgs?: string,
   reason?: CaffeinationReason,
 ) {
-  if (hudMessage) {
-    await showHUD(hudMessage);
-  }
   await stopCaffeinate({ menubar: false, status: false });
 
   if (process.platform === "win32") {
@@ -66,6 +63,12 @@ export async function startCaffeinate(
 
   await setCaffeinationReason(reason);
   await update(updates, true);
+
+  // showHUD closes the window and Raycast 2 unloads a view command's process
+  // on window close, so the HUD must come last or the work above never runs.
+  if (hudMessage) {
+    await showHUD(hudMessage);
+  }
 }
 
 export async function stopCaffeinate(
