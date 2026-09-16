@@ -6,6 +6,7 @@ import { ISite, SitesList } from "./Site";
 import { useIsMounted, usePolling } from "./helpers";
 import { PLOI_PANEL_URL } from "./config";
 import { usePromise } from "@raycast/utils";
+import { OpenSshAction, sshCommandLabel } from "./SshAction";
 
 export const ServersList = () => {
   const [servers, setServers] = useState<IServer[]>([]);
@@ -172,10 +173,10 @@ const SingleServerView = ({ server, sites: cachedSites }: { server: IServer; sit
           key="open-in-ssh"
           title={`Open SSH Connection (${sshUser})`}
           icon={Icon.Terminal}
-          accessories={[{ text: `ssh://${sshUser}@${server.ipAddress}` }]}
+          accessories={[{ text: sshCommandLabel(sshUser, server) }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title={`SSH In As User ${sshUser}`} url={`ssh://${sshUser}@${server.ipAddress}`} />
+              <OpenSshAction title={`Open SSH Connection (${sshUser})`} user={sshUser} server={server} />
             </ActionPanel>
           }
         />
@@ -187,7 +188,10 @@ const SingleServerView = ({ server, sites: cachedSites }: { server: IServer; sit
           accessories={[{ text: `sftp://${sshUser}@${server.ipAddress}` }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title={`SFTP As User ${sshUser}`} url={`sftp://${sshUser}@${server.ipAddress}`} />
+              <Action.OpenInBrowser
+                title={`Open SFTP Connection (${sshUser})`}
+                url={`sftp://${sshUser}@${server.ipAddress}`}
+              />
             </ActionPanel>
           }
         />
@@ -302,14 +306,10 @@ const SingleServerView = ({ server, sites: cachedSites }: { server: IServer; sit
 };
 
 export const ServerCommands = ({ server }: { server: IServer }) => {
-  const sshUser = getPreferenceValues()?.ploi_ssh_user?.value ?? "ploi";
+  const sshUser = getPreferenceValues<Preferences>().ploi_ssh_user ?? "ploi";
   return (
     <>
-      <Action.OpenInBrowser
-        icon={Icon.Terminal}
-        title={`SSH As User ${sshUser}`}
-        url={`ssh://${sshUser}@${server.ipAddress}:${server.sshPort}`}
-      />
+      <OpenSshAction title={`Open SSH Connection (${sshUser})`} user={sshUser} server={server} />
       <ActionPanel.Item
         icon={Icon.ArrowClockwise}
         title="Reboot Server"

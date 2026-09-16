@@ -4,6 +4,7 @@ import { Site } from "./api/Site";
 import { IServer, ServerCommands } from "./Server";
 import { siteStatusState, useIsMounted, usePolling } from "./helpers";
 import { PLOI_PANEL_URL } from "./config";
+import { OpenSshAction, sshCommandLabel } from "./SshAction";
 
 export const SitesList = ({ server, sites }: { server: IServer; sites: ISite[] }) => {
   return (
@@ -94,12 +95,13 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
             key="open-in-ssh"
             title={`Open SSH Connection (${site.systemUser})`}
             icon={Icon.Terminal}
-            accessories={[{ text: `ssh://${site.systemUser}@${server.ipAddress}` }]}
+            accessories={[{ text: sshCommandLabel(site.systemUser, server) }]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  title={`SSH In As User ${site.systemUser}`}
-                  url={`ssh://${site.systemUser}@${server.ipAddress}`}
+                <OpenSshAction
+                  title={`Open SSH Connection (${site.systemUser})`}
+                  user={site.systemUser}
+                  server={server}
                 />
               </ActionPanel>
             }

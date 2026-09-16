@@ -1,5 +1,11 @@
 # Ploi Changelog
 
+## [SSH Terminal Preference] - 2026-09-16
+
+- Added an "SSH Terminal" preference to open SSH connections in Terminal, Ghostty or iTerm2
+- Fixed the server "Open SSH (ploi)" action ignoring the "Ploi SSH User" preference
+- SSH connections from the server and site views now use the server's SSH port
+
 ## [Fix Pagination and Sites Loading] - 2026-09-16
 
 - Fixed Servers pagination replacing the loaded servers with an empty list
