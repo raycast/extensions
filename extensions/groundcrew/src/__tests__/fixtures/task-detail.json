@@ -1,0 +1,22 @@
+{
+  "id": "tracker:TEM-3895",
+  "source": "work-tracker",
+  "title": "Build the Groundcrew task browser",
+  "description": "## Goal\n\nRender every configured source through the canonical Groundcrew model.",
+  "status": "todo",
+  "repository": "ClipboardHealth/groundcrew-raycast",
+  "agent": "codex",
+  "assignee": "Shubham",
+  "updatedAt": "2026-08-20T10:05:00.000Z",
+  "blockers": [
+    {
+      "id": "queue:DEP-2",
+      "title": "Publish shared contract",
+      "status": "in-progress",
+      "nativeStatus": "Started"
+    }
+  ],
+  "hasMoreBlockers": true,
+  "url": "https://tasks.example.test/TEM-3895",
+  "priority": 1
+}
