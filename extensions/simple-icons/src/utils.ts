@@ -62,6 +62,9 @@ const assetPackCompleteMarker = ".raycast-complete";
 // per-process staging and a rename that loses the race discards its own pack,
 // so takeover stays safe.
 const assetPackHardStaleMs = 5 * 60_000;
+// How long a superseded pack version is kept after the current one landed,
+// so a command window that is still open on the old version keeps working.
+const assetPackRetentionMs = 24 * 60 * 60_000;
 
 const getAssetPackDestination = (version: string) => path.join(environment.assetsPath, "pack", version);
 
@@ -178,15 +181,15 @@ const pacoteAssetPack = async (version: string) => {
           // is never deleted.
           try {
             await fs.rename(stale, destination);
-          } catch {
-            // The restore failed. Only delete the stale pack if the destination
-            // is now complete (someone else published in this gap too). If the
-            // destination is not complete, leave the stale pack — it's a
-            // complete pack with nowhere to go, and reclaimDeadStaging will
-            // sweep it if it stays abandoned.
-            if (await hasCompleteAssetPack(destination)) {
-              await fs.rm(stale, { recursive: true, force: true }).catch(() => {});
-            }
+          } catch (restoreError) {
+            // The restore failed. If someone else published a complete pack
+            // in this gap too, the stale copy is redundant and can go. If the
+            // destination is not complete, nothing usable is installed:
+            // surface the failure (the outer catch discards staging) rather
+            // than report success and let cacheAssetPack persist a version
+            // that has no pack. The stale pack is left for reclaimDeadStaging.
+            if (!(await hasCompleteAssetPack(destination))) throw restoreError;
+            await fs.rm(stale, { recursive: true, force: true }).catch(() => {});
           }
           await fs.rm(staging, { recursive: true, force: true });
           return;
@@ -212,15 +215,64 @@ const pacoteAssetPack = async (version: string) => {
   }
 };
 
+// Age of a pack directory: its marker mtime (when it was published), falling
+// back to the directory mtime for marker-less legacy packs.
+const assetPackAgeMs = async (packPath: string) => {
+  const stat =
+    (await fs.stat(path.join(packPath, assetPackCompleteMarker)).catch(() => null)) ??
+    (await fs.stat(packPath).catch(() => null));
+  return stat ? Date.now() - stat.mtimeMs : 0;
+};
+
+// Remove packs of other versions so they don't accumulate (~16 MB each).
+// A command that launched on an older version keeps reading it for as long
+// as its window stays open, so a superseded pack is only removed once the
+// current pack has been in place for the retention period (no new window
+// can still start on the old version) and the old pack itself is older than
+// the retention period (it wasn't just installed by a peer pinned to it).
+// Each removal renames the pack aside first so this process only ever
+// deletes a directory it owns: a concurrent publish of the same version
+// renames into the freed path instead of into the tree being deleted, and a
+// pack that turns out to have been republished in the gap is put back.
+const removeSupersededPacks = async (currentVersion: string) => {
+  const packRoot = path.dirname(getAssetPackDestination(currentVersion));
+  if ((await assetPackAgeMs(getAssetPackDestination(currentVersion))) < assetPackRetentionMs) return;
+  for (const entry of await fs.readdir(packRoot).catch(() => [] as string[])) {
+    if (entry === currentVersion) continue;
+    const packPath = path.join(packRoot, entry);
+    if ((await assetPackAgeMs(packPath)) < assetPackRetentionMs) continue;
+    const stale = path.join(
+      environment.assetsPath,
+      `.pack-stale-${entry}-${process.pid}-${Math.random().toString(36).slice(2, 8)}`,
+    );
+    try {
+      await fs.rename(packPath, stale);
+    } catch {
+      // Already gone, or being swapped by another instance. Leave it to them.
+      continue;
+    }
+    if ((await assetPackAgeMs(stale)) < assetPackRetentionMs) {
+      // A peer republished this version between the age check and the move.
+      // Restore it; if that fails, reclaimDeadStaging sweeps the parked copy.
+      await fs.rename(stale, packPath).catch(() => {});
+      continue;
+    }
+    await fs.rm(stale, { recursive: true, force: true }).catch(() => {});
+  }
+};
+
 export const cacheAssetPack = async (version: string) => {
   const destination = getAssetPackDestination(version);
   // Sweep before the early return: a crash between the two renames leaves a
   // .pack-stale-* directory that would otherwise never be reclaimed while
   // the destination stays complete.
   await reclaimDeadStaging();
-  if (await hasCompleteAssetPack(destination)) return;
-  await pacoteAssetPack(version);
-  cache.set("cached-version", version);
+  if (!(await hasCompleteAssetPack(destination))) {
+    await pacoteAssetPack(version);
+    cache.set("cached-version", version);
+  }
+  // Best effort: a cleanup hiccup must not fail a launch whose pack is fine.
+  await removeSupersededPacks(version).catch(() => {});
 };
 
 export const loadCachedJson = async (version: string) => {
