@@ -1,0 +1,3 @@
+# Menu-bar surface is limits-only
+
+The Raycast menu-bar command is a glance surface: its dropdown shows only the three OpenCode Go limit windows plus Force refresh / Open full view / Open Extension Preferences — no model catalog, no picks. The model catalog and daily picks are full-view-only. This reverses the earlier prototype decision (`.scratch/opencode-usage/issues/07-menu-bar-surface.md` had specified a "catalog-first" dropdown) and was settled during store review: a limits glance belongs in a transient menu-bar dropdown, while the rich catalog search belongs in the full view, which has the space, sorting, and search that menu rows cannot offer.

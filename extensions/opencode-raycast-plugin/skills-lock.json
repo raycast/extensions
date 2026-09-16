@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "raycast-extension": {
+      "source": "johnlindquist/claude",
+      "sourceType": "github",
+      "skillPath": "skills/raycast-extension/SKILL.md",
+      "computedHash": "87366f0165766b6f13cbc5d958b20265b8d84c891879d156287e0de4efe5dce6"
+    }
+  }
+}
