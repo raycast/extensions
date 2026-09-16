@@ -14,7 +14,7 @@ type FormValues = {
 };
 
 function QuickCapture() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.QuickCapture>();
   const { data, isLoading: isLoadingData } = useCachedPromise(loadDashboard);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTeamId, setSelectedTeamId] = useState("");

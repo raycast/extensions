@@ -5,7 +5,7 @@ import { buildDashboard, statesForIssue } from "./dashboard";
 import { IssueListItem } from "./components";
 
 function WorkDashboard() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.WorkDashboard>();
   const { data, error, isLoading, revalidate } = useCachedPromise(loadDashboard, [], {
     keepPreviousData: true,
   });
