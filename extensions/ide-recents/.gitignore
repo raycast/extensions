@@ -36,3 +36,8 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
+
+# Assistant workspace data (local only, not part of the published extension)
+.workbuddy/
+
+images

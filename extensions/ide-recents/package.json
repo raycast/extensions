@@ -5,6 +5,9 @@
     "description": "Search and open recent projects across VS Code, Trae, and Antigravity IDE",
     "icon": "icon.png",
     "author": "huid",
+    "platforms": [
+        "macOS"
+    ],
     "categories": [
         "Developer Tools"
     ],

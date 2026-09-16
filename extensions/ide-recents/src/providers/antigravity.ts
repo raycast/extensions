@@ -19,13 +19,22 @@ export const antigravityProvider: IDEProvider = {
 
   getOpenCommands(projectPath: string) {
     const home = homedir();
+    const cliPaths = [
+      path.join(home, ".antigravity-ide/antigravity-ide/bin/antigravity-ide"),
+      "/Applications/Antigravity IDE.app/Contents/Resources/app/bin/antigravity-ide",
+    ];
+
     return [
-      path.join(home, ".antigravity-ide/antigravity-ide/bin/antigravity-ide") +
-        ` "${projectPath}"`,
-      `antigravity-ide "${projectPath}"`,
-      `"/Applications/Antigravity IDE.app/Contents/Resources/app/bin/antigravity-ide" "${projectPath}"`,
-      `open -b com.google.antigravity-ide "${projectPath}"`,
-      `open -a "Antigravity IDE" "${projectPath}"`,
+      ...cliPaths.map((command) => ({ command, args: [projectPath] })),
+      { command: "antigravity-ide", args: [projectPath] },
+      {
+        command: "/usr/bin/open",
+        args: ["-b", "com.google.antigravity-ide", projectPath],
+      },
+      {
+        command: "/usr/bin/open",
+        args: ["-a", "Antigravity IDE", projectPath],
+      },
     ];
   },
 };

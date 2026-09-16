@@ -13,9 +13,6 @@ import {
   Alert,
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { exec } from "child_process";
-import { homedir } from "os";
-import path from "path";
 
 import type { ProjectItem } from "./providers/types";
 import { allProviders, getProviderById } from "./providers/registry";
@@ -23,7 +20,9 @@ import {
   loadProjectsFromProvider,
   mergeProjects,
   removePathsFromAllDatabases,
+  type RemovalReport,
 } from "./utils/db";
+import { formatOpenCommand, runOpenCommand } from "./utils/exec";
 
 // 隐藏项目的 LocalStorage Key
 const HIDDEN_PATHS_STORAGE_KEY = "hidden_recents_paths";
@@ -42,19 +41,6 @@ const IDE_SHORTCUTS: Record<string, Keyboard.Shortcut> = {
   vscode: { modifiers: ["cmd"], key: "1" },
   trae: { modifiers: ["cmd"], key: "2" },
   antigravity: { modifiers: ["cmd"], key: "3" },
-};
-
-// 扩展 PATH 环境变量以确保在 Raycast GUI 进程中能找到 CLI
-const extendedEnv = {
-  ...process.env,
-  PATH: [
-    "/usr/local/bin",
-    "/opt/homebrew/bin",
-    "/opt/homebrew/sbin",
-    path.join(homedir(), ".antigravity-ide/antigravity-ide/bin"),
-    path.join(homedir(), ".local/bin"),
-    process.env.PATH || "",
-  ].join(":"),
 };
 
 export default function Command() {
@@ -88,8 +74,8 @@ export default function Command() {
       // 过滤掉已加入黑名单的项目
       const filtered = merged.filter((p) => !hiddenSet.has(p.path));
       setProjects(filtered);
-    } catch (error: any) {
-      const message = error?.message || String(error);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       setErrorDetails(message);
       showToast({
         style: Toast.Style.Failure,
@@ -130,11 +116,32 @@ export default function Command() {
     return allProviders.filter((p) => sourceIds.has(p.id));
   }, [projects]);
 
+  /**
+   * 数据库清理失败时据实告知，并且不把项目从列表里隐藏 ——
+   * 否则用户会以为记录已经删掉，而 IDE 里其实还在。
+   */
+  const reportRemovalFailure = (report: RemovalReport) => {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "未能从 IDE 数据库删除",
+      message: report.failures
+        .map((item) => `${item.providerName}: ${item.error}`)
+        .join("；")
+        .slice(0, 240),
+    });
+  };
+
+  const hasBackupFailure = (report: RemovalReport) =>
+    report.results.some((item) => item.backupFailures.length > 0);
+
   // 单项移除（隐藏或物理删除）
   const handleRemoveItem = async (
     item: ProjectItem,
     cleanFromDatabase: boolean,
   ) => {
+    let removedFromDatabase = 0;
+    let backupWarning = "";
+
     if (cleanFromDatabase) {
       const confirmed = await confirmAlert({
         title: `从 IDE 数据库中删除记录？`,
@@ -149,7 +156,16 @@ export default function Command() {
       });
       if (!confirmed) return;
 
-      removePathsFromAllDatabases(allProviders, [item.path]);
+      const report = removePathsFromAllDatabases(allProviders, [item.path]);
+      if (report.failures.length > 0) {
+        reportRemovalFailure(report);
+        return;
+      }
+
+      removedFromDatabase = report.totalRemoved;
+      backupWarning = hasBackupFailure(report)
+        ? "（部分库未生成 .bak 备份）"
+        : "";
     }
 
     // 保存到 LocalStorage 黑名单
@@ -169,7 +185,11 @@ export default function Command() {
 
     showToast({
       style: Toast.Style.Success,
-      title: cleanFromDatabase ? "已从 IDE 数据库及列表移除" : "已从列表中隐藏",
+      title: cleanFromDatabase
+        ? removedFromDatabase > 0
+          ? `已从 IDE 数据库删除 ${removedFromDatabase} 条记录${backupWarning}`
+          : "IDE 数据库中已无该记录，已从列表移除"
+        : "已从列表中隐藏",
       message: item.name,
     });
   };
@@ -186,6 +206,8 @@ export default function Command() {
     }
 
     const missingPaths = missingProjects.map((p) => p.path);
+    let removedFromDatabase = 0;
+    let backupWarning = "";
 
     if (cleanFromDatabase) {
       const confirmed = await confirmAlert({
@@ -201,50 +223,43 @@ export default function Command() {
       });
       if (!confirmed) return;
 
-      const { totalRemoved } = removePathsFromAllDatabases(
-        allProviders,
-        missingPaths,
-      );
-
-      const hiddenRaw = await LocalStorage.getItem<string>(
-        HIDDEN_PATHS_STORAGE_KEY,
-      );
-      const hiddenList: string[] = hiddenRaw ? JSON.parse(hiddenRaw) : [];
-      for (const p of missingPaths) {
-        if (!hiddenList.includes(p)) hiddenList.push(p);
+      const report = removePathsFromAllDatabases(allProviders, missingPaths);
+      if (report.failures.length > 0) {
+        reportRemovalFailure(report);
+        return;
       }
-      await LocalStorage.setItem(
-        HIDDEN_PATHS_STORAGE_KEY,
-        JSON.stringify(hiddenList),
-      );
 
-      setProjects((prev) => prev.filter((p) => !missingPaths.includes(p.path)));
-
-      showToast({
-        style: Toast.Style.Success,
-        title: `成功清理 ${missingProjects.length} 个失效项目`,
-        message: `IDE 数据库同步移除了 ${totalRemoved} 条记录`,
-      });
-    } else {
-      const hiddenRaw = await LocalStorage.getItem<string>(
-        HIDDEN_PATHS_STORAGE_KEY,
-      );
-      const hiddenList: string[] = hiddenRaw ? JSON.parse(hiddenRaw) : [];
-      for (const p of missingPaths) {
-        if (!hiddenList.includes(p)) hiddenList.push(p);
-      }
-      await LocalStorage.setItem(
-        HIDDEN_PATHS_STORAGE_KEY,
-        JSON.stringify(hiddenList),
-      );
-
-      setProjects((prev) => prev.filter((p) => !missingPaths.includes(p.path)));
-
-      showToast({
-        style: Toast.Style.Success,
-        title: `已在列表中隐藏 ${missingProjects.length} 个失效项目`,
-      });
+      removedFromDatabase = report.totalRemoved;
+      backupWarning = hasBackupFailure(report)
+        ? "（部分库未生成 .bak 备份）"
+        : "";
     }
+
+    const hiddenRaw = await LocalStorage.getItem<string>(
+      HIDDEN_PATHS_STORAGE_KEY,
+    );
+    const hiddenList: string[] = hiddenRaw ? JSON.parse(hiddenRaw) : [];
+    for (const p of missingPaths) {
+      if (!hiddenList.includes(p)) hiddenList.push(p);
+    }
+    await LocalStorage.setItem(
+      HIDDEN_PATHS_STORAGE_KEY,
+      JSON.stringify(hiddenList),
+    );
+
+    setProjects((prev) => prev.filter((p) => !missingPaths.includes(p.path)));
+
+    showToast({
+      style: Toast.Style.Success,
+      title: cleanFromDatabase
+        ? removedFromDatabase > 0
+          ? `已从 IDE 数据库删除 ${removedFromDatabase} 条记录${backupWarning}`
+          : `已在列表中移除 ${missingPaths.length} 个失效项目`
+        : `已在列表中隐藏 ${missingPaths.length} 个失效项目`,
+      message: cleanFromDatabase
+        ? "列表中已移除对应项目"
+        : "仍保留在 IDE 的最近项目记录中",
+    });
   };
 
   // 打开项目（带 IDE 选择及状态检查）
@@ -262,22 +277,10 @@ export default function Command() {
       return;
     }
 
-    const commandsToTry = provider.getOpenCommands(item.path);
-
-    const executeCommand = (cmd: string) =>
-      new Promise<{ success: boolean; error?: string }>((resolve) => {
-        exec(cmd, { env: extendedEnv }, (err, stdout, stderr) => {
-          if (err) {
-            resolve({ success: false, error: stderr || err.message });
-          } else {
-            resolve({ success: true });
-          }
-        });
-      });
-
+    // 逐条尝试：命令与路径以独立参数传入，不经过 shell
     let lastError = "";
-    for (const cmd of commandsToTry) {
-      const result = await executeCommand(cmd);
+    for (const command of provider.getOpenCommands(item.path)) {
+      const result = await runOpenCommand(command);
       if (result.success) {
         showToast({
           style: Toast.Style.Success,
@@ -444,6 +447,12 @@ export default function Command() {
           const primaryProvider =
             getProviderById(primaryProviderId) || allProviders[0];
 
+          // 复制到剪贴板的命令按主 IDE 生成，并按 shell 规则转义路径
+          const primaryCommand = primaryProvider.getOpenCommands(item.path)[0];
+          const terminalCommand = primaryCommand
+            ? formatOpenCommand(primaryCommand)
+            : item.path;
+
           return (
             <List.Item
               key={item.id}
@@ -502,7 +511,7 @@ export default function Command() {
                     />
                     <Action.CopyToClipboard
                       title="Copy Terminal Command"
-                      content={`code "${item.path}"`}
+                      content={terminalCommand}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                     />
                   </ActionPanel.Section>

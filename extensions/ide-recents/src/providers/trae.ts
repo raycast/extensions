@@ -2,6 +2,13 @@ import { homedir } from "os";
 import path from "path";
 import type { IDEProvider } from "./types";
 
+/** Trae CLI 的候选绝对路径（按优先级尝试） */
+const TRAE_CLI_PATHS = [
+  "/usr/local/bin/trae",
+  "/opt/homebrew/bin/trae",
+  "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
+];
+
 export const traeProvider: IDEProvider = {
   id: "trae",
   name: "Trae",
@@ -19,12 +26,14 @@ export const traeProvider: IDEProvider = {
 
   getOpenCommands(projectPath: string) {
     return [
-      `/usr/local/bin/trae "${projectPath}"`,
-      `"/Applications/Trae.app/Contents/Resources/app/bin/marscode" "${projectPath}"`,
-      `open -b com.trae.app "${projectPath}"`,
-      `open -a "Trae" "${projectPath}"`,
-      `open -a "/Applications/Trae.app" "${projectPath}"`,
-      `trae "${projectPath}"`,
+      ...TRAE_CLI_PATHS.map((command) => ({ command, args: [projectPath] })),
+      { command: "/usr/bin/open", args: ["-b", "com.trae.app", projectPath] },
+      { command: "/usr/bin/open", args: ["-a", "Trae", projectPath] },
+      {
+        command: "/usr/bin/open",
+        args: ["-a", "/Applications/Trae.app", projectPath],
+      },
+      { command: "trae", args: [projectPath] },
     ];
   },
 };

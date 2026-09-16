@@ -27,6 +27,22 @@ A Raycast extension to search and open recent projects across multiple IDEs — 
   - **Trae**: CLI is typically auto-installed at `/usr/local/bin/trae`
   - **Antigravity IDE**: Falls back to the bundled CLI at the app path if not in `PATH`
 
+## Where the data comes from
+
+Recent projects are read from the SQLite databases (`state.vscdb`) these IDEs use for
+their recently-opened lists. Every existing database is read, including both VS Code
+locations and both key names used across versions:
+
+| IDE | Database |
+| --- | --- |
+| VS Code | `~/.vscode-shared/sharedStorage/state.vscdb` |
+| VS Code | `~/Library/Application Support/Code/User/globalStorage/state.vscdb` |
+| Trae | `~/Library/Application Support/Trae/User/globalStorage/state.vscdb` |
+| Antigravity IDE | `~/Library/Application Support/Antigravity IDE/User/globalStorage/state.vscdb` |
+
+Removing an entry from the IDE database rewrites only the key that actually holds it and
+keeps a `.bak` copy next to the database before writing.
+
 ## Adding New IDE Support
 
 The extension uses a pluggable provider architecture. To add a new IDE:

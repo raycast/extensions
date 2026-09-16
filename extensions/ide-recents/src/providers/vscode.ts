@@ -2,6 +2,13 @@ import { homedir } from "os";
 import path from "path";
 import type { IDEProvider } from "./types";
 
+/** VS Code CLI 的候选绝对路径（按优先级尝试） */
+const VSCODE_CLI_PATHS = [
+  "/usr/local/bin/code",
+  "/opt/homebrew/bin/code",
+  "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
+];
+
 export const vscodeProvider: IDEProvider = {
   id: "vscode",
   name: "VS Code",
@@ -10,9 +17,9 @@ export const vscodeProvider: IDEProvider = {
   getDatabasePaths() {
     const home = homedir();
     return [
-      // VS Code 1.118+ 新版共享存储
+      // VS Code 1.118+ 新版共享存储（近期版本中键名为 history.recentlyOpenedPathsList）
       path.join(home, ".vscode-shared/sharedStorage/state.vscdb"),
-      // macOS 传统全局用户存储
+      // macOS 传统全局用户存储（近期版本中键名为 recently.opened）
       path.join(
         home,
         "Library/Application Support/Code/User/globalStorage/state.vscdb",
@@ -27,12 +34,17 @@ export const vscodeProvider: IDEProvider = {
 
   getOpenCommands(projectPath: string) {
     return [
-      `/usr/local/bin/code "${projectPath}"`,
-      `"/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" "${projectPath}"`,
-      `open -b com.microsoft.VSCode "${projectPath}"`,
-      `code "${projectPath}"`,
-      `code-next "${projectPath}"`,
-      `open -a "Visual Studio Code" "${projectPath}"`,
+      ...VSCODE_CLI_PATHS.map((command) => ({ command, args: [projectPath] })),
+      {
+        command: "/usr/bin/open",
+        args: ["-b", "com.microsoft.VSCode", projectPath],
+      },
+      { command: "code", args: [projectPath] },
+      { command: "code-next", args: [projectPath] },
+      {
+        command: "/usr/bin/open",
+        args: ["-a", "Visual Studio Code", projectPath],
+      },
     ];
   },
 };
