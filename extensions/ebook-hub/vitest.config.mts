@@ -11,12 +11,12 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.mts"],
+    include: ["src/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
-      include: ["src/**/*.{ts,tsx}", "scripts/**/*.mts"],
+      include: ["src/**/*.{ts,tsx}"],
       // Test doubles and helpers are not shipped code.
-      exclude: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.mts", "src/test/**"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/test/**"],
       reporter: ["text", "html", "json-summary"],
       thresholds: {
         statements: 95,

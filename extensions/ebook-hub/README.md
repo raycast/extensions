@@ -16,7 +16,7 @@ moods.
 ## Reader Keys
 
 Raycast shortcuts need a modifier, so Vim motions use `ctrl`
-([ADR-0003](docs/adr/0003-vim-keybindings.md)).
+([ADR-0003](https://github.com/crafts69guy/ebooks/blob/production/docs/adr/0003-vim-keybindings.md)).
 
 | Keys | Action |
 | --- | --- |
@@ -37,14 +37,14 @@ Command Mode accepts `:12` (page), `:c3` (chapter), `:toc`, `:bm`,
 Raycast renders reader text with the active Raycast theme. Ebook Hub uses Hue
 colors for accents and offers **Apply Hue Theme to Raycast**, which imports
 Huế Mưa, Huế Hương, or Huế Cung as a Raycast theme
-([ADR-0001](docs/adr/0001-reading-surface-theming.md)).
+([ADR-0001](https://github.com/crafts69guy/ebooks/blob/production/docs/adr/0001-reading-surface-theming.md)).
 
 ## Privacy and Sharing
 
 Books are stored under Raycast's support folder and are **private by default**
-([ADR-0004](docs/adr/0004-local-first-library-storage.md)). The community
+([ADR-0004](https://github.com/crafts69guy/ebooks/blob/production/docs/adr/0004-local-first-library-storage.md)). The community
 library only accepts public-domain and Creative Commons books
-([ADR-0005](docs/adr/0005-community-library-repository.md)).
+([ADR-0005](https://github.com/crafts69guy/ebooks/blob/production/docs/adr/0005-community-library-repository.md)).
 
 ## Development
 
@@ -60,22 +60,10 @@ npm run lint
 npm run build
 ```
 
-## Releasing
-
-Versions are git tags; the changelog is generated from `feat`, `fix`, and `perf`
-commits ([ADR-0009](docs/adr/0009-release-versioning-and-changelog.md)).
-
-```fish
-npm run release -- --dry-run                   # preview the next entry
-npm run release                                # update CHANGELOG.md, commit, and tag
-npm run release -- --title "Search Improvements"
-npm run publish                                # open the Raycast Store pull request
-```
-
 Views are tested against Raycast API doubles in `src/test/`
-([ADR-0008](docs/adr/0008-testing-strategy-and-toolchain.md)).
+([ADR-0008](https://github.com/crafts69guy/ebooks/blob/production/docs/adr/0008-testing-strategy-and-toolchain.md)).
 Community books come from
 [`crafts69guy/ebook-hub-library`](https://github.com/crafts69guy/ebook-hub-library).
 
-- Domain language: [`CONTEXT.md`](CONTEXT.md)
-- Decisions: [`docs/adr/`](docs/adr/README.md)
+- Domain language: [`CONTEXT.md`](https://github.com/crafts69guy/ebooks/blob/production/CONTEXT.md)
+- Decisions: [`docs/adr/`](https://github.com/crafts69guy/ebooks/blob/production/docs/adr/README.md)
