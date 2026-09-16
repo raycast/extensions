@@ -87,9 +87,27 @@ const isProcessAlive = (pid: number) => {
   }
 };
 
+// Newest mtime of any file in the tree. pacote streams entries into nested
+// directories (icons/...) without touching the staging root's mtime, so the
+// root alone makes a long extraction look abandoned.
+const newestFileMtimeMs = async (directory: string): Promise<number> => {
+  let newest = 0;
+  for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      newest = Math.max(newest, await newestFileMtimeMs(entryPath));
+    } else {
+      const entryStat = await fs.stat(entryPath).catch(() => null);
+      if (entryStat) newest = Math.max(newest, entryStat.mtimeMs);
+    }
+  }
+  return newest;
+};
+
 // Reclaim staging directories abandoned by a crashed or wedged process.
 // A staging is dead when its owner PID is confirmed dead past the soft window,
-// or when its age exceeds the hard ceiling regardless of PID liveness.
+// or when it has made no progress (newest file mtime anywhere in the tree)
+// past the hard ceiling regardless of PID liveness.
 const reclaimDeadStaging = async () => {
   const entries = await fs.readdir(environment.assetsPath).catch(() => [] as string[]);
   for (const entry of entries) {
@@ -101,7 +119,8 @@ const reclaimDeadStaging = async () => {
     const segments = entry.split("-");
     const ownerPid = Number(segments[segments.length - 2]);
     const ownerDead = !Number.isInteger(ownerPid) || ownerPid <= 0 || !isProcessAlive(ownerPid);
-    const ageMs = Date.now() - stat.mtimeMs;
+    const newestMtime = (await newestFileMtimeMs(stagingPath).catch(() => 0)) || stat.mtimeMs;
+    const ageMs = Date.now() - newestMtime;
     if ((ownerDead && ageMs > 60_000) || ageMs > assetPackHardStaleMs) {
       await fs.rm(stagingPath, { recursive: true, force: true });
     }
@@ -156,6 +175,7 @@ export const cacheAssetPack = async (version: string) => {
   await fs.rm(destination, { recursive: true, force: true }).catch(() => {});
   await reclaimDeadStaging();
   await pacoteAssetPack(version);
+  cache.set("cached-version", version);
 };
 
 export const loadCachedJson = async (version: string) => {
