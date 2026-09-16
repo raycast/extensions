@@ -226,7 +226,7 @@ export async function getMyOpenPullRequests() {
   const response = await fetch(
     // List endpoints omit `participants` by default (performance) — `+` adds it
     // to the default field set instead of restricting the response to just this.
-    `https://api.bitbucket.org/2.0/workspaces/${preferences.workspace}/pullrequests/${(await getCurrentUser()).username}?pagelen=20&sort=-created_on&state=OPEN&fields=${encodeURIComponent("+values.participants")}`,
+    `https://api.bitbucket.org/2.0/workspaces/${preferences.workspace}/pullrequests/${(await getCurrentUser()).username}?pagelen=20&sort=-created_on&state=OPEN&fields=${encodeURIComponent("+values.participants,+values.destination.repository.slug")}`,
     {
       method: "GET",
       headers: {
