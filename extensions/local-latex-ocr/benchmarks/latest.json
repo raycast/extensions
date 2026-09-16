@@ -1,0 +1,3097 @@
+{
+  "generatedAt": "2026-09-12T10:48:54.915Z",
+  "loadMs": 1901.77775,
+  "peakRss": 1783709696,
+  "calibration": {
+    "mean": 1,
+    "minimum": 1,
+    "accepted": 0,
+    "correct": 0
+  },
+  "rows": [
+    {
+      "id": "fraction-01",
+      "category": "fraction",
+      "latex": "\\frac{x^{1}}{a_{1}+b_{1}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-01.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\frac{x^{1}}{a_{1}+b_{1}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9898403914313314,
+        "minimumTokenProbability": 0.8589251081596785,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1213.183333,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-02",
+      "category": "fraction",
+      "latex": "\\frac{x^{2}}{a_{2}+b_{2}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-02.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\frac{x^{2}}}{a_{2}+b_{2}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9916443282591186,
+        "minimumTokenProbability": 0.8793770824750906,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1125.560708,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "fraction-03",
+      "category": "fraction",
+      "latex": "\\frac{x^{3}}{a_{3}+b_{3}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-03.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\frac{x^{3}}{a_{3}+b_{3}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9984978909407942,
+        "minimumTokenProbability": 0.9859783707370066,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1092.7230419999996,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-04",
+      "category": "fraction",
+      "latex": "\\frac{x^{4}}{a_{4}+b_{4}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-04.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\frac{x^{4}}{a_{4}+b_{4}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9991937367003084,
+        "minimumTokenProbability": 0.9945553988737874,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1062.5115409999999,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-05",
+      "category": "fraction",
+      "latex": "\\frac{x^{5}}{a_{5}+b_{5}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-05.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\frac{x^{5}}{a_{5}+b_{5}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9946358451381208,
+        "minimumTokenProbability": 0.91986246935393,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1047.0002080000004,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-06",
+      "category": "fraction",
+      "latex": "\\frac{x^{6}}{a_{6}+b_{6}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-06.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\frac{x^{6}}{a_{6}+b_{6}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9969794421693102,
+        "minimumTokenProbability": 0.95467018231395,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1034.4802499999996,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-07",
+      "category": "fraction",
+      "latex": "\\frac{x^{7}}{a_{7}+b_{7}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-07.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\frac{x^{7}}{a_{7}+b_{7}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9958733734181283,
+        "minimumTokenProbability": 0.9362900574324006,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1049.1049170000006,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-08",
+      "category": "fraction",
+      "latex": "\\frac{x^{8}}{a_{8}+b_{8}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-08.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\frac{x^{8}}{a_{8}+b_{8}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9989573407623219,
+        "minimumTokenProbability": 0.9916494394541826,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1112.4858330000006,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-09",
+      "category": "fraction",
+      "latex": "\\frac{x^{9}}{a_{9}+b_{9}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-09.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\frac{x^{9}}{a_{9}+b_{9}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9955690919362565,
+        "minimumTokenProbability": 0.9383913408033445,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1039.215333,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-10",
+      "category": "fraction",
+      "latex": "\\frac{x^{10}}{a_{10}+b_{10}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-10.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\frac{x^{10}}}{a_{10}+b_{10}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9924903589511112,
+        "minimumTokenProbability": 0.8891335698904682,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1020.6880419999998,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "fraction-11",
+      "category": "fraction",
+      "latex": "\\frac{x^{11}}{a_{11}+b_{11}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-11.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\frac{x^{11}}{a_{11}+b_{11}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9824633096592442,
+        "minimumTokenProbability": 0.729146227488625,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1028.1355829999993,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-12",
+      "category": "fraction",
+      "latex": "\\frac{x^{12}}{a_{12}+b_{12}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-12.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\frac{x^{12}}}{a_{12}+b_{12}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9889468275367225,
+        "minimumTokenProbability": 0.8574279372129425,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1018.3376669999998,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "fraction-13",
+      "category": "fraction",
+      "latex": "\\frac{x^{13}}{a_{13}+b_{13}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-13.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\frac{x^{13}}{a_{13}+b_{13}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9982603540812899,
+        "minimumTokenProbability": 0.9902736535971842,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1063.8478329999998,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-14",
+      "category": "fraction",
+      "latex": "\\frac{x^{14}}{a_{14}+b_{14}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-14.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\frac{x^{14}}{a_{14}+b_{14}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9984789875178656,
+        "minimumTokenProbability": 0.9853622956756952,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1089.5872500000023,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "fraction-15",
+      "category": "fraction",
+      "latex": "\\frac{x^{15}}{a_{15}+b_{15}}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/fraction-15.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\frac{x^{15}}{a_{15}+b_{15}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9917231983645381,
+        "minimumTokenProbability": 0.9175777084404143,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1029.2515839999978,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-01",
+      "category": "radical",
+      "latex": "\\sqrt[3]{x^{1}+1}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-01.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\sqrt[3]{x^{1}+1}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.9979780211316974,
+        "minimumTokenProbability": 0.9874802858221704,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 879.5220829999998,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-02",
+      "category": "radical",
+      "latex": "\\sqrt[4]{x^{2}+2}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-02.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\sqrt[4]{x^{2}+2}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.999465949000849,
+        "minimumTokenProbability": 0.9964824600433577,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 892.6944589999985,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-03",
+      "category": "radical",
+      "latex": "\\sqrt[5]{x^{3}+3}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-03.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\sqrt\\left[5\\right]{x^{3}+3}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9720825860032284,
+        "minimumTokenProbability": 0.6824707888688706,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1016.661791999999,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": true,
+      "renderEquivalent": false
+    },
+    {
+      "id": "radical-04",
+      "category": "radical",
+      "latex": "\\sqrt[2]{x^{4}+4}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-04.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\sqrt[2]{x^{4}+4}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.9609133461372356,
+        "minimumTokenProbability": 0.5314426305284022,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 893.882458,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-05",
+      "category": "radical",
+      "latex": "\\sqrt[3]{x^{5}+5}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-05.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\sqrt\\left[3\\right]{x^{5}+5}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9662830543949646,
+        "minimumTokenProbability": 0.5024407251614244,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1007.5559580000008,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": true,
+      "renderEquivalent": false
+    },
+    {
+      "id": "radical-06",
+      "category": "radical",
+      "latex": "\\sqrt[4]{x^{6}+6}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-06.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\sqrt[4]{x^{6}+6}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.9961239053363627,
+        "minimumTokenProbability": 0.9545500892434121,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 929.8535420000007,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-07",
+      "category": "radical",
+      "latex": "\\sqrt[5]{x^{7}+7}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-07.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\sqrt[5]{x^{7}+7}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.987471397301463,
+        "minimumTokenProbability": 0.8528031614819624,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 913.3272920000018,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-08",
+      "category": "radical",
+      "latex": "\\sqrt[2]{x^{8}+8}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-08.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\sqrt[2]{x^{8}+8}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.9983899557735727,
+        "minimumTokenProbability": 0.9816606788466073,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 908.8365410000006,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-09",
+      "category": "radical",
+      "latex": "\\sqrt[3]{x^{9}+9}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-09.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\sqrt\\left[3\\right]{x^{9}+9}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.990026546180979,
+        "minimumTokenProbability": 0.8418058814160099,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 980.9114169999993,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": true,
+      "renderEquivalent": false
+    },
+    {
+      "id": "radical-10",
+      "category": "radical",
+      "latex": "\\sqrt[4]{x^{10}+10}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-10.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\sqrt[4]{x^{10}+10}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.9979567637512057,
+        "minimumTokenProbability": 0.9793051647397183,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 948.6374170000017,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-11",
+      "category": "radical",
+      "latex": "\\sqrt[5]{x^{11}+11}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-11.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\sqrt[5]{x^{11}+11}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.9953798053740908,
+        "minimumTokenProbability": 0.9484682179900981,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 898.7137079999993,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-12",
+      "category": "radical",
+      "latex": "\\sqrt[2]{x^{12}+12}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-12.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\sqrt[2]{x^{12}+12}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.9980888129267798,
+        "minimumTokenProbability": 0.9893796741549519,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 897.2611250000009,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-13",
+      "category": "radical",
+      "latex": "\\sqrt[3]{x^{13}+13}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-13.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\sqrt[3]{x^{13}+13}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.9877550014139359,
+        "minimumTokenProbability": 0.8565719981110813,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 876.9642500000009,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "radical-14",
+      "category": "radical",
+      "latex": "\\sqrt[4]{x^{14}+14}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-14.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\sqrt\\left[4\\right]{x^{14}+14}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9807267270248147,
+        "minimumTokenProbability": 0.6934966290410146,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 934.1889169999995,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": true,
+      "renderEquivalent": false
+    },
+    {
+      "id": "radical-15",
+      "category": "radical",
+      "latex": "\\sqrt[5]{x^{15}+15}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/radical-15.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\sqrt[5]{x^{15}+15}",
+        "tokenCount": 12,
+        "meanTokenProbability": 0.9981719792696944,
+        "minimumTokenProbability": 0.9823149038533153,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 953.8077919999996,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "integral-01",
+      "category": "integral",
+      "latex": "\\int_{0}^{1} x^{2}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-01.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\int_{0}^{1}x^{2}\\,dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9938516683694739,
+        "minimumTokenProbability": 0.9491224825578927,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1024.1012499999997,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "integral-02",
+      "category": "integral",
+      "latex": "\\int_{0}^{2} x^{3}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-02.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\int_{0}^{2}x^{3}\\,dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.974481590001922,
+        "minimumTokenProbability": 0.7903002886442273,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1004.7781669999968,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "integral-03",
+      "category": "integral",
+      "latex": "\\int_{0}^{3} x^{4}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-03.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\int_{0}^{3}x^{4}dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9998759704691312,
+        "minimumTokenProbability": 0.9995541719479425,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1068.0188750000016,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "integral-04",
+      "category": "integral",
+      "latex": "\\int_{0}^{4} x^{5}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-04.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\int_{0}^{4}x^{5}dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9991439338628039,
+        "minimumTokenProbability": 0.9966449972661131,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1035.987583000002,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "integral-05",
+      "category": "integral",
+      "latex": "\\int_{0}^{5} x^{1}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-05.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\int_{0}^{5}x^{1}\\,dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9894380382451361,
+        "minimumTokenProbability": 0.8697734913062873,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1025.9493340000045,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "integral-06",
+      "category": "integral",
+      "latex": "\\int_{0}^{6} x^{2}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-06.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\int_{0}^{6}x^{2}\\,dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9916309649779451,
+        "minimumTokenProbability": 0.899469785048281,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1053.8746249999967,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "integral-07",
+      "category": "integral",
+      "latex": "\\int_{0}^{7} x^{3}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-07.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\int_{0}}^{7}x^{3}\\,dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9648574926249427,
+        "minimumTokenProbability": 0.6576609879107684,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1058.5894999999946,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "integral-08",
+      "category": "integral",
+      "latex": "\\int_{0}^{8} x^{4}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-08.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\int_{0}^{8}x^{4}dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9998572241897185,
+        "minimumTokenProbability": 0.9988269694336585,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1018.0252089999994,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "integral-09",
+      "category": "integral",
+      "latex": "\\int_{0}^{9} x^{5}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-09.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\int_{0}^{9}x^{5}dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9990299598826395,
+        "minimumTokenProbability": 0.9909431496693558,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1026.5865420000046,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "integral-10",
+      "category": "integral",
+      "latex": "\\int_{0}^{10} x^{1}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-10.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\int_{0}^{10}x^{1}\\,dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9880741896894427,
+        "minimumTokenProbability": 0.8851923784542156,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 988.0303749999948,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "integral-11",
+      "category": "integral",
+      "latex": "\\int_{0}^{11} x^{2}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-11.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\int_{0}^{11}x^{2}\\,dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9979774881806251,
+        "minimumTokenProbability": 0.9891889568567882,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 986.0612499999988,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "integral-12",
+      "category": "integral",
+      "latex": "\\int_{0}^{12} x^{3}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-12.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\int_{0}^{12}x^{3}\\,dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9938751795297274,
+        "minimumTokenProbability": 0.9408535124886191,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 989.6050000000032,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "integral-13",
+      "category": "integral",
+      "latex": "\\int_{0}^{13} x^{4}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-13.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\int_{0}^{13}x^{4}dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9990132981263579,
+        "minimumTokenProbability": 0.9940240248154018,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1005.4758330000041,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "integral-14",
+      "category": "integral",
+      "latex": "\\int_{0}^{14} x^{5}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-14.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\int_{0}^{14}x^{5}dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9739910293093078,
+        "minimumTokenProbability": 0.6938491540894571,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1022.6192909999954,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "integral-15",
+      "category": "integral",
+      "latex": "\\int_{0}^{15} x^{1}\\,dx",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/integral-15.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\int_{0}^{15}x^{1}\\,dx",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.992538153448975,
+        "minimumTokenProbability": 0.9349623258554186,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1011.6972500000047,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-01",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{3} k^{2}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-01.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\sum\\limits_{k=1}^{3}k^{2}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9534244813806967,
+        "minimumTokenProbability": 0.4166763739761808,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1120.9280419999996,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-02",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{4} k^{3}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-02.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\sum\\limits_{k=1}^{4}k^{3}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9602128348868008,
+        "minimumTokenProbability": 0.5279835698512272,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1089.297040999998,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-03",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{5} k^{1}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-03.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\sum_{k=1}^{5}k^{1}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9986524208320485,
+        "minimumTokenProbability": 0.9949057287417691,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1079.6881670000002,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-04",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{6} k^{2}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-04.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\sum_{k=1}^{6}k^{2}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9954964445452765,
+        "minimumTokenProbability": 0.9713458472550882,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1092.5459590000028,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-05",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{7} k^{3}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-05.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\sum_{\\boldsymbol{k}=1}^{7}\\boldsymbol{k^{3}}",
+        "tokenCount": 18,
+        "meanTokenProbability": 0.897733953948753,
+        "minimumTokenProbability": 0.45950781394880963,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1109.8708750000005,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "summation-06",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{8} k^{1}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-06.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\sum_{k=1}^{8}k^{1}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9718085979261204,
+        "minimumTokenProbability": 0.7453799122971642,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1035.1441670000058,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-07",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{9} k^{2}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-07.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\sum_{\\boldsymbol{k}=1}^{9}\\boldsymbol{k^{2}}",
+        "tokenCount": 18,
+        "meanTokenProbability": 0.8908888125272563,
+        "minimumTokenProbability": 0.40041586594353007,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1134.3572090000016,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "summation-08",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{10} k^{3}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-08.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\sum_{k=1}^{10}k^{3}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9994209686079236,
+        "minimumTokenProbability": 0.9965148712311049,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1119.199999999997,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-09",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{11} k^{1}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-09.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\sum_{k=1}^{11}k^{1}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9963096259563498,
+        "minimumTokenProbability": 0.9809028891700918,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1048.3470000000016,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-10",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{12} k^{2}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-10.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\sum_{k=1}^{12}k^{2}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9527773185659436,
+        "minimumTokenProbability": 0.4582185488560869,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1028.593332999997,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-11",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{13} k^{3}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-11.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\sum_{\\boldsymbol{k}=1}^{\\boldsymbol{13}}\\boldsymbol{k^{3}}",
+        "tokenCount": 20,
+        "meanTokenProbability": 0.8907804898514504,
+        "minimumTokenProbability": 0.3829161231090839,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1314.898000000001,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "summation-12",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{14} k^{1}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-12.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\sum_{\\boldsymbol{k}=1}^{14}\\boldsymbol{k}^{1}",
+        "tokenCount": 18,
+        "meanTokenProbability": 0.9058780604816579,
+        "minimumTokenProbability": 0.5453144381207694,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1175.1263340000005,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "summation-13",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{15} k^{2}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-13.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\sum_{k=1}^{15}k^{2}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9991900419668122,
+        "minimumTokenProbability": 0.995842496227146,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1087.252459000003,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-14",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{16} k^{3}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-14.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\sum_{k=1}^{16}k^{3}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9914049667964532,
+        "minimumTokenProbability": 0.9428326913944336,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1156.6888749999998,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "summation-15",
+      "category": "summation",
+      "latex": "\\sum_{k=1}^{17} k^{1}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/summation-15.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\sum_{\\boldsymbol{k}=1}^{\\boldsymbol{17}}\\boldsymbol{k^{1}}",
+        "tokenCount": 20,
+        "meanTokenProbability": 0.9129991078159868,
+        "minimumTokenProbability": 0.5122915828644752,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1193.228541999997,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "greek-01",
+      "category": "greek",
+      "latex": "\\alpha_{1}+\\beta_{1}=\\gamma_{1}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-01.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\alpha_{1}+\\beta_{1}=\\gamma_{1}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9983230988216024,
+        "minimumTokenProbability": 0.9874369914331016,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 933.7803750000021,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "greek-02",
+      "category": "greek",
+      "latex": "\\alpha_{2}+\\beta_{2}=\\gamma_{2}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-02.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\alpha_{2}+\\beta_{2}=\\gamma_{2}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9976277360260889,
+        "minimumTokenProbability": 0.9864969190128957,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 890.322917000005,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "greek-03",
+      "category": "greek",
+      "latex": "\\alpha_{3}+\\beta_{3}=\\gamma_{3}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-03.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\boldsymbol{\\alpha_{3}+\\beta_{3}=\\gamma_{3}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.994504387598127,
+        "minimumTokenProbability": 0.9747914005689459,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1031.133249999999,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "greek-04",
+      "category": "greek",
+      "latex": "\\alpha_{4}+\\beta_{4}=\\gamma_{4}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-04.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\boldsymbol{\\alpha_{4}+\\beta_{4}=\\gamma_{4}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9914837683904633,
+        "minimumTokenProbability": 0.8964651239463178,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1054.4329579999903,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "greek-05",
+      "category": "greek",
+      "latex": "\\alpha_{5}+\\beta_{5}=\\gamma_{5}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-05.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\alpha_{5}+\\beta_{5}=\\gamma_{5}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9984484266783673,
+        "minimumTokenProbability": 0.9882405824531374,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 977.8687500000087,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "greek-06",
+      "category": "greek",
+      "latex": "\\alpha_{6}+\\beta_{6}=\\gamma_{6}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-06.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\alpha_{6}+\\beta_{6}=\\gamma_{6}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9964783148588114,
+        "minimumTokenProbability": 0.9834541668558661,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1044.9387500000012,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "greek-07",
+      "category": "greek",
+      "latex": "\\alpha_{7}+\\beta_{7}=\\gamma_{7}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-07.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\alpha_{7}+\\beta_{7}=\\gamma_{7}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9969450394608872,
+        "minimumTokenProbability": 0.9844754052064031,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 987.7312079999974,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "greek-08",
+      "category": "greek",
+      "latex": "\\alpha_{8}+\\beta_{8}=\\gamma_{8}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-08.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\boldsymbol{\\alpha_{8}+\\beta_{8}=\\gamma_{8}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9927493680568996,
+        "minimumTokenProbability": 0.951376772851066,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 983.1134170000005,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "greek-09",
+      "category": "greek",
+      "latex": "\\alpha_{9}+\\beta_{9}=\\gamma_{9}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-09.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\boldsymbol{\\alpha_{9}+\\beta_{9}=\\gamma_{9}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.98763060700203,
+        "minimumTokenProbability": 0.8412540711812049,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 946.9485000000132,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "greek-10",
+      "category": "greek",
+      "latex": "\\alpha_{10}+\\beta_{10}=\\gamma_{10}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-10.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\alpha_{10}+\\beta_{10}=\\gamma_{10}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9883471201601609,
+        "minimumTokenProbability": 0.8696084282295482,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 895.3562910000037,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "greek-11",
+      "category": "greek",
+      "latex": "\\alpha_{11}+\\beta_{11}=\\gamma_{11}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-11.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\alpha_{11}+\\beta_{11}=\\gamma_{11}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9972753951874465,
+        "minimumTokenProbability": 0.9790909225037464,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 970.0216250000085,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "greek-12",
+      "category": "greek",
+      "latex": "\\alpha_{12}+\\beta_{12}=\\gamma_{12}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-12.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\alpha_{12}+\\beta_{12}=\\gamma_{12}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9978166638790071,
+        "minimumTokenProbability": 0.9803728813189453,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 901.6249589999934,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "greek-13",
+      "category": "greek",
+      "latex": "\\alpha_{13}+\\beta_{13}=\\gamma_{13}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-13.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\boldsymbol{\\alpha_{13}+\\beta_{13}=\\gamma_{13}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9935162475289099,
+        "minimumTokenProbability": 0.9484988033922578,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 941.1749169999966,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "greek-14",
+      "category": "greek",
+      "latex": "\\alpha_{14}+\\beta_{14}=\\gamma_{14}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-14.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\boldsymbol{\\alpha_{14}+\\beta_{14}=\\gamma_{14}}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.992892500414752,
+        "minimumTokenProbability": 0.9391055301433454,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 951.2117919999873,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "greek-15",
+      "category": "greek",
+      "latex": "\\alpha_{15}+\\beta_{15}=\\gamma_{15}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/greek-15.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\alpha_{15}+\\beta_{15}=\\gamma_{15}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9976540329682265,
+        "minimumTokenProbability": 0.9871649988771526,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 992.891082999995,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "accent-01",
+      "category": "accent",
+      "latex": "\\hat{x}_{1}+\\bar{y}_{1}=\\vec{z}_{1}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-01.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\hat{x}_{1}+\\bar{y}_{1}=\\vec{z}_{1}",
+        "tokenCount": 20,
+        "meanTokenProbability": 0.9849605903908486,
+        "minimumTokenProbability": 0.7665398105304932,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1214.135792000001,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "accent-02",
+      "category": "accent",
+      "latex": "\\hat{x}_{2}+\\bar{y}_{2}=\\vec{z}_{2}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-02.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\hat{x}_{2}+\\bar{y}_{2}=\\vec{z}_{2}",
+        "tokenCount": 20,
+        "meanTokenProbability": 0.9956360043447317,
+        "minimumTokenProbability": 0.9651790752552365,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1145.7089169999963,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "accent-03",
+      "category": "accent",
+      "latex": "\\hat{x}_{3}+\\bar{y}_{3}=\\vec{z}_{3}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-03.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\boldsymbol{\\bar{x}_{3}+\\bar{y}_{3}=\\bar{z}_{3}}",
+        "tokenCount": 22,
+        "meanTokenProbability": 0.9567220171226072,
+        "minimumTokenProbability": 0.5705252899215467,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1096.6707920000044,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "accent-04",
+      "category": "accent",
+      "latex": "\\hat{x}_{4}+\\bar{y}_{4}=\\vec{z}_{4}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-04.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\widehat{\\bm{x}}_{\\bm{4}}+\\bm{\\bar{y}}_{\\bm{4}}=\\bm{\\vec{z}}_{\\bm{4}}",
+        "tokenCount": 32,
+        "meanTokenProbability": 0.9296120029491362,
+        "minimumTokenProbability": 0.4265445184989801,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1248.1074579999986,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "accent-05",
+      "category": "accent",
+      "latex": "\\hat{x}_{5}+\\bar{y}_{5}=\\vec{z}_{5}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-05.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\hat{x}_{5}+\\bar{y}_{5}=\\vec{z}_{5}",
+        "tokenCount": 20,
+        "meanTokenProbability": 0.9948970239622199,
+        "minimumTokenProbability": 0.9433793321448691,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1110.7996660000063,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "accent-06",
+      "category": "accent",
+      "latex": "\\hat{x}_{6}+\\bar{y}_{6}=\\vec{z}_{6}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-06.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\boxed{\\hat{x}_{6}+\\bar{y}_{6}=\\vec{z}_{6}}",
+        "tokenCount": 22,
+        "meanTokenProbability": 0.9788868032953086,
+        "minimumTokenProbability": 0.6235451549043323,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1003.3458329999994,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "accent-07",
+      "category": "accent",
+      "latex": "\\hat{x}_{7}+\\bar{y}_{7}=\\vec{z}_{7}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-07.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\hat{x}_{7}+\\bar{y}_{7}=\\vec{z}_{7}",
+        "tokenCount": 20,
+        "meanTokenProbability": 0.9927325475510281,
+        "minimumTokenProbability": 0.9237226495455068,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1061.692916999993,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "accent-08",
+      "category": "accent",
+      "latex": "\\hat{x}_{8}+\\bar{y}_{8}=\\vec{z}_{8}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-08.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\widehat{x}_{8}+\\widehat{y}_{8}=\\overrightarrow{z}_{8}",
+        "tokenCount": 22,
+        "meanTokenProbability": 0.9598608053488404,
+        "minimumTokenProbability": 0.6347219824490802,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1075.0884170000063,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "accent-09",
+      "category": "accent",
+      "latex": "\\hat{x}_{9}+\\bar{y}_{9}=\\vec{z}_{9}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-09.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\widehat{\\bm{x}}_{\\bm{9}}+\\bm{\\bar{y}}_{\\bm{9}}=\\bm{\\vec{z}}_{\\bm{9}}",
+        "tokenCount": 32,
+        "meanTokenProbability": 0.9614803613291104,
+        "minimumTokenProbability": 0.6113510270362599,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1271.8636249999981,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "accent-10",
+      "category": "accent",
+      "latex": "\\hat{x}_{10}+\\bar{y}_{10}=\\vec{z}_{10}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-10.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\boxed{\\hat{x}_{10}+\\bar{y}_{10}=\\vec{z}_{10}}",
+        "tokenCount": 22,
+        "meanTokenProbability": 0.9830253781474937,
+        "minimumTokenProbability": 0.7232828083089472,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1214.1085830000084,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "accent-11",
+      "category": "accent",
+      "latex": "\\hat{x}_{11}+\\bar{y}_{11}=\\vec{z}_{11}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-11.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\boxed{\\hat{x}_{11}+\\bar{y}_{11}=\\vec{z}_{11}}",
+        "tokenCount": 22,
+        "meanTokenProbability": 0.989587521703784,
+        "minimumTokenProbability": 0.8623044706595626,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1117.0965419999993,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "accent-12",
+      "category": "accent",
+      "latex": "\\hat{x}_{12}+\\bar{y}_{12}=\\vec{z}_{12}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-12.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\boxed{\\hat{x}_{12}+\\bar{y}_{12}=\\vec{z}_{12}}",
+        "tokenCount": 22,
+        "meanTokenProbability": 0.9843548178345778,
+        "minimumTokenProbability": 0.8028504330398497,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1047.9203750000015,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "accent-13",
+      "category": "accent",
+      "latex": "\\hat{x}_{13}+\\bar{y}_{13}=\\vec{z}_{13}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-13.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\boldsymbol{\\hat{x}_{13}+\\bar{y}_{13}=\\vec{z}_{13}}",
+        "tokenCount": 22,
+        "meanTokenProbability": 0.9513723793221808,
+        "minimumTokenProbability": 0.39158905451088305,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1165.89783300001,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "accent-14",
+      "category": "accent",
+      "latex": "\\hat{x}_{14}+\\bar{y}_{14}=\\vec{z}_{14}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-14.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\bm{\\hat{x}_{14}+\\bar{y}_{14}=\\vec{z}_{14}}",
+        "tokenCount": 22,
+        "meanTokenProbability": 0.9607401672919635,
+        "minimumTokenProbability": 0.4482728692224086,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1108.458832999997,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "accent-15",
+      "category": "accent",
+      "latex": "\\hat{x}_{15}+\\bar{y}_{15}=\\vec{z}_{15}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/accent-15.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\boxed{\\hat{x}_{15}+\\bar{y}_{15}=\\vec{z}_{15}}",
+        "tokenCount": 22,
+        "meanTokenProbability": 0.9925521029201807,
+        "minimumTokenProbability": 0.9328283416743857,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 992.5431669999962,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-01",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-01.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\begin{1}}&2\\\\ 3&4\\end{pmatrix}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.8943183429234136,
+        "minimumTokenProbability": 0.5368799755160911,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1019.3405829999974,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-02",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}2&3\\\\4&5\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-02.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\begin{{{{{{{{{{{{{{{{{}}}}}}}}}}}}}}}\\end{pmatrix}",
+        "tokenCount": 29,
+        "meanTokenProbability": 0.6307449319186428,
+        "minimumTokenProbability": 0.22280885669742237,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1226.596583000006,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result",
+          "Average token confidence is low"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-03",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}3&4\\\\5&6\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-03.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\begin{3}}&\\textbf{4}\\\\ \\textbf{5}&\\textbf{6}\\end{8}",
+        "tokenCount": 25,
+        "meanTokenProbability": 0.8718751841720318,
+        "minimumTokenProbability": 0.28265873976858974,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1167.383707999994,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-04",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}4&5\\\\6&7\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-04.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\begin{\\begin{4}&\\boldsymbol{5}\\\\ \\boldsymbol{6}&\\boldsymbol{7}\\end{pmatrix}",
+        "tokenCount": 28,
+        "meanTokenProbability": 0.8259508169423337,
+        "minimumTokenProbability": 0.35512071942019147,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1219.8102910000016,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-05",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}5&6\\\\7&8\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-05.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\beginbm{\\left{5}}\\begin{5}\\bm{\\mathit{6}\\bm{\\mathit{6}\\bm{6}\\bm{\\mathit{6}\\bm{6}\\bm{\\bm{6}\\bm{6}\\bm{6}\\bm{6}\\bm{6}\\bm{6}\\bm6}\\bm{6}\\bm6}\\bm{6}\\bm6}\\bm\\bm\\bm\\bm6}\\bm6}\\bm\\bm\\bm6}\\bm\\bm\\bm\\bm\\bm6}\\bm\\bm\\bm6}\\bm6}\\bm\\bm6}\\bm\\bm\\bm\\bm\\bm\\bm\\bm\\bm6}\\bm6}\\bm\\bm\\bm6}\\bm\\bm\\bm\\bm\\bm\\bm\\bm}\\bm\\bm\\bm}\\bm\\bm\\bm\\bm\\bm\\bm}\\bm\\bm\\bm}\\bm\\bm\\bm\\bm\\bm\\bm\\bm\\bm}\\bm\\bm\\bm}\\bm}\\bm\\bm\\bm\\bm\\bm\\bm\\bm",
+        "tokenCount": 256,
+        "meanTokenProbability": 0.6809035119566044,
+        "minimumTokenProbability": 0.1391766228104896,
+        "eosReached": false,
+        "syntaxValid": false,
+        "elapsedMs": 5544.743374999991,
+        "backend": "cpu",
+        "reviewReasons": [
+          "The model did not emit an end token",
+          "The result reached the token limit",
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result",
+          "Average token confidence is low"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-06",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}6&7\\\\8&9\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-06.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\begin{{{{{{{{{{{{{{{{{{{{{}}}}}}}}}}}}}}}}}}\\end{\\begin{pmatrix}\\begin{pmatrix}6\\end{pmatrix}\\boldsymboltext{\\boldsymbol!}}}}\\textbf{}\\textbf{}\\textbf{{}\\textbf{{}\\textbf{{}}}}}\\textbf{{}\\textbf{{}\\ref}}\\textbf{{}\\ref}}\\ref}\\ref}\\emptyset}\\emptyset}8}\\end{{}\\end{{}\\emptyset}9}\\end{{}\\end}\\end}\\end{{}\\emptyset}\\emptyset}9\\end}9\\end}9}9\\end{{\\end}\\end}9",
+        "tokenCount": 165,
+        "meanTokenProbability": 0.5070157357265651,
+        "minimumTokenProbability": 0.04834064055429164,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 4052.578125,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result",
+          "Average token confidence is low",
+          "At least one token has very low confidence"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-07",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}7&8\\\\9&10\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-07.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\begin{7}}&8\\\\ 9&10\\end{pmatrix}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.9566275203590155,
+        "minimumTokenProbability": 0.8067245714316182,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1022.244417000009,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-08",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}8&9\\\\10&11\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-08.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\left(\\begin{smallmatrix}8&9\\\\ 10&11\\end{smallmatrix}\\right)",
+        "tokenCount": 22,
+        "meanTokenProbability": 0.9232952097120504,
+        "minimumTokenProbability": 0.6357504705733974,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1087.1023330000025,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-09",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}9&10\\\\11&12\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-09.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\left\\begin{9}{11}\\end{10}\\right)",
+        "tokenCount": 17,
+        "meanTokenProbability": 0.8749366685814998,
+        "minimumTokenProbability": 0.5741204506947594,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1008.1247920000023,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-10",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}10&11\\\\12&13\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-10.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\begin{10}}\\begin{10mid\\end{10mid\\end{10mid\\end{10mid\\begin{10mid\\end{10mid\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\quad\\",
+        "tokenCount": 256,
+        "meanTokenProbability": 0.7966282564332984,
+        "minimumTokenProbability": 0.07115325925524625,
+        "eosReached": false,
+        "syntaxValid": false,
+        "elapsedMs": 5621.753124999988,
+        "backend": "cpu",
+        "reviewReasons": [
+          "The model did not emit an end token",
+          "The result reached the token limit",
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result",
+          "At least one token has very low confidence"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-11",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}11&12\\\\13&14\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-11.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\begin{11}}&12\\\\ 13&14\\end{pmatrix}",
+        "tokenCount": 16,
+        "meanTokenProbability": 0.911302461199268,
+        "minimumTokenProbability": 0.5043951591876251,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 998.0383749999892,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-12",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}12&13\\\\14&15\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-12.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\begin{12}}}\\end{pmatrix}12\\quad13\\quad15\\quad\\begin{pmatrix}\\end{pmatrix}\\end{pmatrix}\\begin{pmatrix}\\end{pmatrix}\\end{pmatrix}\\quad",
+        "tokenCount": 53,
+        "meanTokenProbability": 0.7923303919523628,
+        "minimumTokenProbability": 0.22954493374544407,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1779.599125000008,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-13",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}13&14\\\\15&16\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-13.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\tiny{\\begin{pmatrix}13&14\\\\ 15&16\\end{pmatrix}}",
+        "tokenCount": 20,
+        "meanTokenProbability": 0.9730189177266064,
+        "minimumTokenProbability": 0.5130756214700205,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1201.570458999995,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-14",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}14&15\\\\16&17\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-14.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\begin{14}}&\\textbf{15}\\\\ \\textbf{16}&\\textbf{17}\\end{pmatrix}",
+        "tokenCount": 24,
+        "meanTokenProbability": 0.9336693841394627,
+        "minimumTokenProbability": 0.4808647559126516,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1440.0509170000005,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "matrix-15",
+      "category": "matrix",
+      "latex": "\\begin{pmatrix}15&16\\\\17&18\\end{pmatrix}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/matrix-15.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\begin{{{{{{{{{{{{{{{{{{{{{}}}}}}}}}}}}}}}}}}\\end{array}",
+        "tokenCount": 34,
+        "meanTokenProbability": 0.7334403295054702,
+        "minimumTokenProbability": 0.13820670232201285,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1541.4167080000043,
+        "backend": "cpu",
+        "reviewReasons": [
+          "LaTeX braces or environments are unbalanced",
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "cases-01",
+      "category": "cases",
+      "latex": "f_{1}(x)=\\begin{cases}x^{2},&x\\geq 1\\\\-x,&x<1\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-01.png",
+      "variant": "clean",
+      "result": {
+        "latex": "f_{1}(x)=\\begin{cases}x^{2},&x\\geq1\\\\ -x,&x<1\\end{cases}",
+        "tokenCount": 32,
+        "meanTokenProbability": 0.9964293016824645,
+        "minimumTokenProbability": 0.9465293420870698,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1316.554290999993,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "cases-02",
+      "category": "cases",
+      "latex": "f_{2}(x)=\\begin{cases}x^{2},&x\\geq 2\\\\-x,&x<2\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-02.png",
+      "variant": "dark",
+      "result": {
+        "latex": "f_{2}(x)=\\begin{cases}x^{2},&x\\geq2\\\\ -x,&x<2\\end{cases}",
+        "tokenCount": 32,
+        "meanTokenProbability": 0.9978548300424492,
+        "minimumTokenProbability": 0.958447357935947,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1274.3574579999986,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "cases-03",
+      "category": "cases",
+      "latex": "f_{3}(x)=\\begin{cases}x^{2},&x\\geq 3\\\\-x,&x<3\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-03.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "f_{3}\\left(x\\boldsymbol{x}\\right)=\\begin{cases}\\boldsymbol{x^{2},}&\\boldsymbol{x\\geq3}\\\\ -\\boldsymbol{x},&\\boldsymbol{x<3}\\end{cases}",
+        "tokenCount": 56,
+        "meanTokenProbability": 0.9282333207028969,
+        "minimumTokenProbability": 0.38477489152578886,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1683.924874999997,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "cases-04",
+      "category": "cases",
+      "latex": "f_{4}(x)=\\begin{cases}x^{2},&x\\geq 4\\\\-x,&x<4\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-04.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "f_{4}\\left(x\\boldsymbol{x}\\right)=\\begin{cases}\\boldsymbol{x^{2},}&\\boldsymbol{x}\\geq4\\\\ -\\boldsymbol{x},&\\boldsymbol{x}<4\\end{cases}",
+        "tokenCount": 58,
+        "meanTokenProbability": 0.9415859814698585,
+        "minimumTokenProbability": 0.41502699252496916,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1817.5718749999942,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "cases-05",
+      "category": "cases",
+      "latex": "f_{5}(x)=\\begin{cases}x^{2},&x\\geq 5\\\\-x,&x<5\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-05.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "f_{5}(x)=\\begin{cases}x^{2},&x\\geq5\\\\ -x,&x<5\\end{cases}",
+        "tokenCount": 32,
+        "meanTokenProbability": 0.9969316171592966,
+        "minimumTokenProbability": 0.9375767874267563,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1304.9203329999873,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "cases-06",
+      "category": "cases",
+      "latex": "f_{6}(x)=\\begin{cases}x^{2},&x\\geq 6\\\\-x,&x<6\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-06.png",
+      "variant": "clean",
+      "result": {
+        "latex": "f_{6}(x)=\\begin{cases}x^{2},&x\\geq6\\\\ -x,&x<6\\end{cases}",
+        "tokenCount": 32,
+        "meanTokenProbability": 0.9971479698495707,
+        "minimumTokenProbability": 0.9551560261131627,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1291.1671670000069,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "cases-07",
+      "category": "cases",
+      "latex": "f_{7}(x)=\\begin{cases}x^{2},&x\\geq 7\\\\-x,&x<7\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-07.png",
+      "variant": "dark",
+      "result": {
+        "latex": "f_{7}(x)=\\begin{cases}x^{2},&x\\geq7\\\\ -x,&x<7\\end{cases}",
+        "tokenCount": 32,
+        "meanTokenProbability": 0.9973172241870402,
+        "minimumTokenProbability": 0.9577482175457573,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1268.5516669999924,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "cases-08",
+      "category": "cases",
+      "latex": "f_{8}(x)=\\begin{cases}x^{2},&x\\geq 8\\\\-x,&x<8\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-08.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "f_{8}(x)=\\begin{cases}x^{2},&x\\geq8\\\\ -x,&x<8\\end{cases}",
+        "tokenCount": 33,
+        "meanTokenProbability": 0.9554937571524222,
+        "minimumTokenProbability": 0.5174682479019018,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1263.084750000009,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "cases-09",
+      "category": "cases",
+      "latex": "f_{9}(x)=\\begin{cases}x^{2},&x\\geq 9\\\\-x,&x<9\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-09.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "f_{9}\\left(x\\boldsymbol{x}\\right)=\\begin{cases}\\boldsymbol{x^{2},}&\\boldsymbol{x\\geq9}\\\\ -\\boldsymbol{x},&\\boldsymbol{x<9}\\end{cases}",
+        "tokenCount": 58,
+        "meanTokenProbability": 0.9395655931308092,
+        "minimumTokenProbability": 0.3701459695613066,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1747.2607089999947,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "cases-10",
+      "category": "cases",
+      "latex": "f_{10}(x)=\\begin{cases}x^{2},&x\\geq 10\\\\-x,&x<10\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-10.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "f_{10}(x)=\\begin{cases}x^{2},&x\\geq10\\\\ -x,&x<10\\end{cases}",
+        "tokenCount": 32,
+        "meanTokenProbability": 0.9924521072295248,
+        "minimumTokenProbability": 0.8837799056344595,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1256.867957999988,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "cases-11",
+      "category": "cases",
+      "latex": "f_{11}(x)=\\begin{cases}x^{2},&x\\geq 11\\\\-x,&x<11\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-11.png",
+      "variant": "clean",
+      "result": {
+        "latex": "f_{11}(x)=\\begin{cases}x^{2},&x\\geq11\\\\ -x,&x<11\\end{cases}",
+        "tokenCount": 33,
+        "meanTokenProbability": 0.9771088531265795,
+        "minimumTokenProbability": 0.5769439808005536,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1250.2014999999956,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "cases-12",
+      "category": "cases",
+      "latex": "f_{12}(x)=\\begin{cases}x^{2},&x\\geq 12\\\\-x,&x<12\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-12.png",
+      "variant": "dark",
+      "result": {
+        "latex": "f_{12}(x)=\\begin{cases}x^{2},&x\\geq12\\\\ -x,&x<12\\end{cases}",
+        "tokenCount": 32,
+        "meanTokenProbability": 0.9966381753015849,
+        "minimumTokenProbability": 0.9425381040720855,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1261.2250000000058,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "cases-13",
+      "category": "cases",
+      "latex": "f_{13}(x)=\\begin{cases}x^{2},&x\\geq 13\\\\-x,&x<13\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-13.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "f_{13}\\left(x\\right)=\\begin{cases}x^{2},&x\\geq13\\\\ -x,&x<13\\end{cases}",
+        "tokenCount": 38,
+        "meanTokenProbability": 0.9792087615700854,
+        "minimumTokenProbability": 0.6821633033023478,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1323.1399589999928,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": false
+    },
+    {
+      "id": "cases-14",
+      "category": "cases",
+      "latex": "f_{14}(x)=\\begin{cases}x^{2},&x\\geq 14\\\\-x,&x<14\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-14.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "f_{14}\\left(x\\right)=\\begin{cases}x^{2},&x\\geq14\\\\ -x,&x<14\\end{cases}",
+        "tokenCount": 38,
+        "meanTokenProbability": 0.9735541314781403,
+        "minimumTokenProbability": 0.4071486622844078,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1374.1136249999981,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": false
+    },
+    {
+      "id": "cases-15",
+      "category": "cases",
+      "latex": "f_{15}(x)=\\begin{cases}x^{2},&x\\geq 15\\\\-x,&x<15\\end{cases}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/cases-15.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "f_{15}(x)=\\begin{cases}x^{2},&x\\geq15\\\\ -x,&x<15\\end{cases}",
+        "tokenCount": 32,
+        "meanTokenProbability": 0.9979069830781786,
+        "minimumTokenProbability": 0.9719602735747439,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1263.7689590000082,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "multiline-01",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{2}&=x_{1}+1\\\\y_{2}&=2y_{1}-1\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-01.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\begin{split}\\mathit{x}_{2}&=\\mathit{x}_{1}+1\\\\ \\mathit{y}_{2}&=2\\mathit{y}_{1}-1\\end{split}",
+        "tokenCount": 41,
+        "meanTokenProbability": 0.9464332103218974,
+        "minimumTokenProbability": 0.4248177131528302,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1464.5156669999997,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-02",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{3}&=x_{2}+2\\\\y_{3}&=2y_{2}-2\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-02.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\begin{array}{l}\\mbox{\\it x}_{3}=\\mbox{\\it x}_{2}+2\\\\ \\mbox{\\it y}_{3}=2\\mbox{\\it y}_{2}-2\\end{array}",
+        "tokenCount": 47,
+        "meanTokenProbability": 0.9554345586034174,
+        "minimumTokenProbability": 0.3086030595309743,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1519.4185419999994,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-03",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{4}&=x_{3}+3\\\\y_{4}&=2y_{3}-3\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-03.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\boldsymbol{x_{4}=x_{3}+3}",
+        "tokenCount": 14,
+        "meanTokenProbability": 0.9352522085945271,
+        "minimumTokenProbability": 0.4540378054232002,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 949.0090839999903,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-04",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{5}&=x_{4}+4\\\\y_{5}&=2y_{4}-4\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-04.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\begin{array}{l}\\bm{x_{5}=x_{4}+4}\\\\ \\bm{y_{5}=2y_{4}-4}\\end{array}",
+        "tokenCount": 38,
+        "meanTokenProbability": 0.9818427385052982,
+        "minimumTokenProbability": 0.43844310335432735,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1631.0994160000118,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-05",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{6}&=x_{5}+5\\\\y_{6}&=2y_{5}-5\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-05.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\begin{array}{l}\\mbox{\\boldmath$x_{6}=x_{5}+5$}\\\\ \\mbox{\\boldmath$y_{6}=2y_{5}-5$}\\end{array}",
+        "tokenCount": 42,
+        "meanTokenProbability": 0.9683751299282936,
+        "minimumTokenProbability": 0.482515608896139,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1593.3682499999995,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-06",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{7}&=x_{6}+6\\\\y_{7}&=2y_{6}-6\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-06.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\begin{array}{l}\\mbox{\\boldmath$x_{7}=x_{6}+6$}\\\\ \\mbox{\\boldmath$y_{7}=2y_{6}-6$}\\end{array}",
+        "tokenCount": 42,
+        "meanTokenProbability": 0.9575418909845907,
+        "minimumTokenProbability": 0.39391410502616564,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1502.1257499999774,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-07",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{8}&=x_{7}+7\\\\y_{8}&=2y_{7}-7\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-07.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\begin{split}\\bm{x_{8}}&=\\bm{x_{7}+7}\\\\ \\bm{y_{8}}&=2\\bm{y_{7}-7}\\end{split}",
+        "tokenCount": 41,
+        "meanTokenProbability": 0.9493366581452899,
+        "minimumTokenProbability": 0.37931097314174567,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1527.0576669999864,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-08",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{9}&=x_{8}+8\\\\y_{9}&=2y_{8}-8\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-08.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\begin{array}{l}\\bm{x_{9}=x_{8}+8}\\\\ \\bm{y_{9}=2y_{8}-8}\\end{array}",
+        "tokenCount": 38,
+        "meanTokenProbability": 0.9712083382345537,
+        "minimumTokenProbability": 0.5015031050313574,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1391.0500830000092,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-09",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{10}&=x_{9}+9\\\\y_{10}&=2y_{9}-9\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-09.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\begin{array}{l}\\boldsymbol{x_{10}=x_{9}+9}\\\\ \\boldsymbol{y_{10}=2y_{9}-9}\\end{array}",
+        "tokenCount": 38,
+        "meanTokenProbability": 0.9858037322453692,
+        "minimumTokenProbability": 0.6488614861651668,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1309.4200000000128,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-10",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{11}&=x_{10}+10\\\\y_{11}&=2y_{10}-10\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-10.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\begin{split}x_{11}&=x_{10}+10\\\\ y_{11}&=2y_{10}-10\\end{split}",
+        "tokenCount": 31,
+        "meanTokenProbability": 0.9885099519776018,
+        "minimumTokenProbability": 0.8244504808696446,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1265.1249170000083,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-11",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{12}&=x_{11}+11\\\\y_{12}&=2y_{11}-11\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-11.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\begin{array}{l}\\mathit{x_{12}=x_{11}+11}\\\\ \\mathit{y_{12}=2y_{11}-11}\\end{array}",
+        "tokenCount": 38,
+        "meanTokenProbability": 0.9625113328732386,
+        "minimumTokenProbability": 0.43905951993461745,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1341.6085840000014,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-12",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{13}&=x_{12}+12\\\\y_{13}&=2y_{12}-12\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-12.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\begin{split}x_{13}&=x_{12}+12\\\\ y_{13}&=2y_{12}-12\\end{split}",
+        "tokenCount": 31,
+        "meanTokenProbability": 0.9851769012660775,
+        "minimumTokenProbability": 0.6957270661819591,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1300.4104169999773,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-13",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{14}&=x_{13}+13\\\\y_{14}&=2y_{13}-13\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-13.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\begin{array}{l}\\boldsymbol{x_{14}=x_{13}+13}\\\\ \\boldsymbol{y_{14}=2y_{13}-13}\\end{array}",
+        "tokenCount": 38,
+        "meanTokenProbability": 0.9812205123390244,
+        "minimumTokenProbability": 0.651023749180386,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1431.3303750000196,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-14",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{15}&=x_{14}+14\\\\y_{15}&=2y_{14}-14\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-14.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\begin{array}{l}\\boldsymbol{x_{15}=x_{14}+14}\\\\ \\boldsymbol{y_{15}=2y_{14}-14}\\end{array}",
+        "tokenCount": 38,
+        "meanTokenProbability": 0.9859798664948768,
+        "minimumTokenProbability": 0.5978017487062067,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1331.273416000011,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "multiline-15",
+      "category": "multiline",
+      "latex": "\\begin{aligned}x_{16}&=x_{15}+15\\\\y_{16}&=2y_{15}-15\\end{aligned}",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/multiline-15.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\begin{array}{l}\\mbox{\\boldmath$x_{16}=x_{15}+15$}\\\\ \\mbox{\\boldmath$y_{16}=2y_{15}-15$}\\end{array}",
+        "tokenCount": 42,
+        "meanTokenProbability": 0.969753418958914,
+        "minimumTokenProbability": 0.5573513435257131,
+        "eosReached": true,
+        "syntaxValid": false,
+        "elapsedMs": 1385.315249999985,
+        "backend": "cpu",
+        "reviewReasons": [
+          "KaTeX could not render the result"
+        ]
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "long-01",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{1}e^{-1x}\\right)=e^{-1x}\\left(1x^{0}-1x^{1}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-01.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{1}e^{-1x}\\right)=e^{-1x}\\left(1x^{0}-1x^{1}\\right)",
+        "tokenCount": 40,
+        "meanTokenProbability": 0.9957659890197968,
+        "minimumTokenProbability": 0.8999559326227674,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1327.2268329999933,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-02",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{2}e^{-2x}\\right)=e^{-2x}\\left(2x^{1}-2x^{2}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-02.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{2}e^{-2x}\\right)=e^{-2x}\\left(2x^{1}-2x^{2}\\right)",
+        "tokenCount": 40,
+        "meanTokenProbability": 0.996422750579659,
+        "minimumTokenProbability": 0.9171821064804506,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1317.5505419999827,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-03",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{3}e^{-3x}\\right)=e^{-3x}\\left(3x^{2}-3x^{3}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-03.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{3}e^{-3x}\\right)=e^{-3x}\\left(3x^{2}-3x^{3}\\right)",
+        "tokenCount": 44,
+        "meanTokenProbability": 0.9988809604327368,
+        "minimumTokenProbability": 0.9632391085340685,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1416.9537500000151,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-04",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{4}e^{-4x}\\right)=e^{-4x}\\left(4x^{3}-4x^{4}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-04.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{4}e^{-4x}\\right)=e^{-4x}\\left(4x^{3}-4x^{4}\\right)",
+        "tokenCount": 44,
+        "meanTokenProbability": 0.9946402647547199,
+        "minimumTokenProbability": 0.7935914936958429,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1492.5615410000028,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-05",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{5}e^{-5x}\\right)=e^{-5x}\\left(5x^{4}-5x^{5}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-05.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{5}e^{-5x}\\right)=e^{-5x}\\left(5x^{4}-5x^{5}\\right)",
+        "tokenCount": 40,
+        "meanTokenProbability": 0.9961627261510468,
+        "minimumTokenProbability": 0.9107179734689971,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1369.0210829999996,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-06",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{6}e^{-6x}\\right)=e^{-6x}\\left(6x^{5}-6x^{6}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-06.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{6}e^{-6x}\\right)=e^{-6x}\\left(6x^{5}-6x^{6}\\right)",
+        "tokenCount": 40,
+        "meanTokenProbability": 0.995366276383167,
+        "minimumTokenProbability": 0.8942721666655569,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1344.771000000008,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-07",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{7}e^{-7x}\\right)=e^{-7x}\\left(7x^{6}-7x^{7}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-07.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{7}e^{-7x}\\right)=e^{-7x}\\left(7x^{6}-7x^{7}\\right)",
+        "tokenCount": 40,
+        "meanTokenProbability": 0.9955210326634493,
+        "minimumTokenProbability": 0.8934334506936749,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1407.305624999979,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-08",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{8}e^{-8x}\\right)=e^{-8x}\\left(8x^{7}-8x^{8}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-08.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{8}e^{-8x}\\right)=e^{-8x}\\left(8x^{7}-8x^{8}\\right)",
+        "tokenCount": 44,
+        "meanTokenProbability": 0.9987749139281863,
+        "minimumTokenProbability": 0.9579351883576472,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1430.6460840000072,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-09",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{9}e^{-9x}\\right)=e^{-9x}\\left(9x^{8}-9x^{9}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-09.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{9}e^{-9x}\\right)=e^{-9x}\\left(9x^{8}-9x^{9}\\right)",
+        "tokenCount": 44,
+        "meanTokenProbability": 0.9983705861735414,
+        "minimumTokenProbability": 0.9372398840731729,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1399.4532500000205,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-10",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{10}e^{-10x}\\right)=e^{-10x}\\left(10x^{9}-10x^{10}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-10.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{10}e^{-10x}\\right)=e^{-10x}\\left(10x^{9}-10x^{10}\\right)",
+        "tokenCount": 40,
+        "meanTokenProbability": 0.9958234630079204,
+        "minimumTokenProbability": 0.8918395754200812,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1342.6662919999799,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-11",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{11}e^{-11x}\\right)=e^{-11x}\\left(11x^{10}-11x^{11}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-11.png",
+      "variant": "clean",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{11}e^{-11x}\\right)=e^{-11x}\\left(11x^{10}-11x^{11}\\right)",
+        "tokenCount": 40,
+        "meanTokenProbability": 0.9956290877293281,
+        "minimumTokenProbability": 0.9024486559878326,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1285.2362500000163,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-12",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{12}e^{-12x}\\right)=e^{-12x}\\left(12x^{11}-12x^{12}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-12.png",
+      "variant": "dark",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{12}e^{-12x}\\right)=e^{-12x}\\left(12x^{11}-12x^{12}\\right)",
+        "tokenCount": 40,
+        "meanTokenProbability": 0.9966951779290844,
+        "minimumTokenProbability": 0.9403049664338167,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1297.3022920000076,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-13",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{13}e^{-13x}\\right)=e^{-13x}\\left(13x^{12}-13x^{13}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-13.png",
+      "variant": "low-resolution",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{13}e^{-13x}\\right)=e^{-13x}\\left(13x^{12}-13x^{13}\\right)",
+        "tokenCount": 44,
+        "meanTokenProbability": 0.9965119164915333,
+        "minimumTokenProbability": 0.916357593860551,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1370.6574580000015,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    },
+    {
+      "id": "long-14",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{14}e^{-14x}\\right)=e^{-14x}\\left(14x^{13}-14x^{14}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-14.png",
+      "variant": "blurred",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(\\bm{x^{14}e^{-14x}}\\right)=\\bm{e^{-14x}}\\left(14\\bm{x^{13}}-14\\bm{x^{14}}\\right)",
+        "tokenCount": 51,
+        "meanTokenProbability": 0.9393552939939548,
+        "minimumTokenProbability": 0.45911889727898914,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1573.2378339999996,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": false,
+      "renderEquivalent": false
+    },
+    {
+      "id": "long-15",
+      "category": "long",
+      "latex": "\\frac{d}{dx}\\left(x^{15}e^{-15x}\\right)=e^{-15x}\\left(15x^{14}-15x^{15}\\right)",
+      "imagePath": "/Users/escaperr94/Documents/Codex/2026-09-11/p/work/corpus-v1/long-15.png",
+      "variant": "low-contrast",
+      "result": {
+        "latex": "\\frac{d}{dx}\\left(x^{15}e^{-15x}\\right)=e^{-15x}\\left(15x^{14}-15x^{15}\\right)",
+        "tokenCount": 40,
+        "meanTokenProbability": 0.9966802834895561,
+        "minimumTokenProbability": 0.9333480709581811,
+        "eosReached": true,
+        "syntaxValid": true,
+        "elapsedMs": 1316.0144999999902,
+        "backend": "cpu",
+        "reviewReasons": []
+      },
+      "exact": true,
+      "renderEquivalent": true
+    }
+  ]
+}
