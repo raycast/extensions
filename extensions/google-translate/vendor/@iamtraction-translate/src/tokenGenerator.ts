@@ -61,9 +61,7 @@ async function updateTKK() {
     let now = Math.floor(Date.now() / 3600000);
 
     if (Number(window.TKK.split(".")[0]) !== now) {
-        const response = await fetch("https://translate.google.com", {
-            headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" },
-        });
+        const response = await fetch("https://translate.google.com");
         const body = await response.text();
 
         // code will extract something like tkk:'1232135.131231321312', we need only value

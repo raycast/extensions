@@ -62,12 +62,10 @@ export async function translate(text: string, options?: TranslateOption): Promis
     // Append query string to the request URL.
     let url = `${baseUrl}?${querystring.stringify(data)}`;
 
-    // A browser-like UA so Google's endpoint doesn't reject the request.
-    const userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     let requestUrl = url;
     let method: "GET" | "POST" = "GET";
     let requestBody: string | undefined;
-    const headers: Record<string, string> = { "User-Agent": userAgent };
+    const headers: Record<string, string> = {};
     // If request URL is greater than 2048 characters, use POST method.
     if (url.length > 2048) {
         delete data.q;
