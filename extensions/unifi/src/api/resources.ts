@@ -1,4 +1,5 @@
 export type UniFiService = "network" | "protect" | "site-manager" | "mobility" | "innerspace" | "carrier-fabric";
+export type PaginationStrategy = "site-manager-token" | "mobility-offset" | "carrier-cursor";
 
 export interface ResourceContext {
   deviceId?: string;
@@ -9,6 +10,7 @@ export interface ResourceContext {
 export interface ResourceDefinition {
   key: string;
   label: string;
+  pagination?: PaginationStrategy;
   requiresSite?: boolean;
   service: UniFiService;
   path: (context: ResourceContext) => string;
@@ -175,9 +177,27 @@ export const RESOURCE_DEFINITIONS = [
   { key: "protect-users", label: "Protect Users", service: "protect", path: () => "/v1/users" },
   { key: "protect-identity-users", label: "UniFi Identity Users", service: "protect", path: () => "/v1/ulp-users" },
 
-  { key: "site-manager-hosts", label: "Site Manager Hosts", service: "site-manager", path: () => "/v1/hosts" },
-  { key: "site-manager-sites", label: "Site Manager Sites", service: "site-manager", path: () => "/v1/sites" },
-  { key: "site-manager-devices", label: "Site Manager Devices", service: "site-manager", path: () => "/v1/devices" },
+  {
+    key: "site-manager-hosts",
+    label: "Site Manager Hosts",
+    pagination: "site-manager-token",
+    service: "site-manager",
+    path: () => "/v1/hosts",
+  },
+  {
+    key: "site-manager-sites",
+    label: "Site Manager Sites",
+    pagination: "site-manager-token",
+    service: "site-manager",
+    path: () => "/v1/sites",
+  },
+  {
+    key: "site-manager-devices",
+    label: "Site Manager Devices",
+    pagination: "site-manager-token",
+    service: "site-manager",
+    path: () => "/v1/devices",
+  },
   {
     key: "site-manager-sd-wan",
     label: "SD-WAN Configurations",
@@ -203,10 +223,17 @@ export const RESOURCE_DEFINITIONS = [
     service: "mobility",
     path: workspacePath("/admins"),
   },
-  { key: "mobility-devices", label: "Mobility Devices", service: "mobility", path: workspacePath("/devices") },
+  {
+    key: "mobility-devices",
+    label: "Mobility Devices",
+    pagination: "mobility-offset",
+    service: "mobility",
+    path: workspacePath("/devices"),
+  },
   {
     key: "mobility-device-clients",
     label: "Mobility Device Clients",
+    pagination: "mobility-offset",
     service: "mobility",
     path: (context) =>
       `${workspacePath("/devices")(context)}/${required(context, "deviceId", "A Mobility device ID")}/clients`,
@@ -236,6 +263,7 @@ export const RESOURCE_DEFINITIONS = [
   {
     key: "carrier-subscribers",
     label: "Carrier Subscribers",
+    pagination: "carrier-cursor",
     service: "carrier-fabric",
     path: () => "/v1/carrier/subscribers",
   },

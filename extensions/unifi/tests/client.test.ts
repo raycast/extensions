@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildServiceBaseUrl, normalizeControllerUrl, UniFiClient, UniFiError } from "../src/api/client";
+import {
+  allowsSelfSignedCertificateForUrl,
+  buildServiceBaseUrl,
+  normalizeControllerUrl,
+  UniFiClient,
+  UniFiError,
+} from "../src/api/client";
 
 function jsonResponse(payload: unknown, status = 200, headers?: Record<string, string>) {
   return new Response(JSON.stringify(payload), {
@@ -34,6 +40,36 @@ describe("controller URL policy", () => {
       }),
     ).toBe("https://api.ui.com/v1/connector/consoles/console%2Fid/proxy/network/integration");
     expect(buildServiceBaseUrl("site-manager", { connectionMode: "local" })).toBe("https://api.ui.com");
+  });
+
+  it("allows self-signed certificates only for the configured local console origin", () => {
+    expect(
+      allowsSelfSignedCertificateForUrl("https://192.168.1.1", {
+        connectionMode: "local",
+        controllerUrl: "https://192.168.1.1",
+      }),
+    ).toBe(false);
+    expect(
+      allowsSelfSignedCertificateForUrl("https://192.168.1.1/proxy/network/integration/v1/sites", {
+        allowSelfSignedCertificate: true,
+        connectionMode: "local",
+        controllerUrl: "https://192.168.1.1",
+      }),
+    ).toBe(true);
+    expect(
+      allowsSelfSignedCertificateForUrl("https://api.ui.com/v1/hosts", {
+        allowSelfSignedCertificate: true,
+        connectionMode: "local",
+        controllerUrl: "https://192.168.1.1",
+      }),
+    ).toBe(false);
+    expect(
+      allowsSelfSignedCertificateForUrl("https://192.168.1.1", {
+        allowSelfSignedCertificate: true,
+        connectionMode: "cloud",
+        controllerUrl: "https://192.168.1.1",
+      }),
+    ).toBe(false);
   });
 });
 
@@ -87,6 +123,90 @@ describe("UniFiClient", () => {
     await expect(client.listResource("protect-cameras")).resolves.toEqual([{ id: "camera-1" }]);
     expect(request).toHaveBeenCalledTimes(2);
     expect(wait).toHaveBeenCalledWith(0);
+  });
+
+  it("uses exponential fallback delay when Retry-After is absent", async () => {
+    const wait = vi.fn().mockResolvedValue(undefined);
+    const request = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ message: "temporary" }, 503))
+      .mockResolvedValueOnce(jsonResponse([{ id: "camera-1" }]));
+    const client = new UniFiClient({ ...baseConfig, fetch: request, wait });
+
+    await client.listResource("protect-cameras");
+
+    expect(wait).toHaveBeenCalledWith(250);
+  });
+
+  it("explains certificate verification failures for local consoles", async () => {
+    const certificateError = Object.assign(new Error("self signed certificate"), {
+      code: "DEPTH_ZERO_SELF_SIGNED_CERT",
+    });
+    const request = vi.fn().mockRejectedValue(new TypeError("fetch failed", { cause: certificateError }));
+    const client = new UniFiClient({ ...baseConfig, fetch: request });
+
+    await expect(client.listSites()).rejects.toThrow(
+      "Could not verify the UniFi console certificate. Enable Allow Self-Signed Console Certificate in the extension preferences, configure a trusted certificate, or use Cloud Connector mode.",
+    );
+  });
+
+  it.each([
+    ["innerspace-access-points", "access_points"],
+    ["innerspace-floor-plans", "floor_plans"],
+    ["innerspace-switches", "switches"],
+    ["innerspace-inventory", "devices"],
+  ] as const)("extracts the named %s collection", async (resource, envelope) => {
+    const request = vi.fn().mockResolvedValue(jsonResponse({ [envelope]: [{ id: "item-1" }, { id: "item-2" }] }));
+    const client = new UniFiClient({ ...baseConfig, fetch: request });
+
+    await expect(client.listResource(resource)).resolves.toEqual([{ id: "item-1" }, { id: "item-2" }]);
+  });
+
+  it("follows Site Manager nextToken pagination", async () => {
+    const request = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ data: [{ id: "host-1" }], nextToken: "page-2" }))
+      .mockResolvedValueOnce(jsonResponse({ data: [{ id: "host-2" }] }));
+    const client = new UniFiClient({ ...baseConfig, fetch: request });
+
+    await expect(client.listResource("site-manager-hosts")).resolves.toEqual([
+      { id: "host-1" },
+      { id: "host-2" },
+    ]);
+    expect(request.mock.calls[0][0]).toContain("pageSize=200");
+    expect(request.mock.calls[1][0]).toContain("nextToken=page-2");
+  });
+
+  it("follows Mobility offset pagination", async () => {
+    const request = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ data: [{ id: "device-1" }], total: 2, offset: 0, limit: 1 }))
+      .mockResolvedValueOnce(jsonResponse({ data: [{ id: "device-2" }], total: 2, offset: 1, limit: 1 }));
+    const client = new UniFiClient({ ...baseConfig, fetch: request });
+
+    await expect(client.listResource("mobility-devices", { workspaceId: "workspace-1" })).resolves.toEqual([
+      { id: "device-1" },
+      { id: "device-2" },
+    ]);
+    expect(request.mock.calls[0][0]).toContain("limit=200&offset=0");
+    expect(request.mock.calls[1][0]).toContain("limit=1&offset=1");
+  });
+
+  it("follows Carrier cursor pagination", async () => {
+    const request = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({ data: [{ id: "subscriber-1" }], meta: { hasMore: true, nextCursor: "page-2" } }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ data: [{ id: "subscriber-2" }], meta: { hasMore: false } }));
+    const client = new UniFiClient({ ...baseConfig, fetch: request });
+
+    await expect(client.listResource("carrier-subscribers")).resolves.toEqual([
+      { id: "subscriber-1" },
+      { id: "subscriber-2" },
+    ]);
+    expect(request.mock.calls[0][0]).toContain("limit=500");
+    expect(request.mock.calls[1][0]).toContain("cursor=page-2");
   });
 
   it("reports remote errors with trace IDs without leaking credentials", async () => {
@@ -154,6 +274,19 @@ describe("UniFiClient", () => {
 
     await expect(client.getCameraSnapshot("camera-1")).resolves.toEqual(Buffer.from([1, 2, 3]));
     expect(request.mock.calls[0][0]).toContain("/v1/cameras/camera-1/snapshot?highQuality=true");
+  });
+
+  it("falls back to a standard snapshot when a camera does not support full HD", async () => {
+    const snapshot = Buffer.from([1, 2, 3]);
+    const request = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ message: "Camera does not support full HD snapshot" }, 400))
+      .mockResolvedValueOnce(new Response(snapshot, { status: 200 }));
+    const client = new UniFiClient({ ...baseConfig, fetch: request });
+
+    await expect(client.getCameraSnapshot("camera-1")).resolves.toEqual(snapshot);
+    expect(request.mock.calls[0][0]).toContain("highQuality=true");
+    expect(request.mock.calls[1][0]).toContain("highQuality=false");
   });
 
   it("keeps successful Network collections when one API group is unavailable", async () => {

@@ -1,4 +1,12 @@
-import { getResourceDefinition, type ResourceContext, type ResourceKey, type UniFiService } from "./resources";
+import {
+  getResourceDefinition,
+  type ResourceContext,
+  type ResourceDefinition,
+  type ResourceKey,
+  type UniFiService,
+} from "./resources";
+import https from "node:https";
+import nodeFetch, { type RequestInit as NodeFetchRequestInit } from "node-fetch";
 import type {
   FirewallPolicy,
   JsonObject,
@@ -21,12 +29,21 @@ import { getUniFiPreferences } from "./preferences";
 const CLOUD_API_ORIGIN = "https://api.ui.com";
 const DEFAULT_TIMEOUT_MS = 10_000;
 const PAGE_SIZE = 200;
+const CARRIER_PAGE_SIZE = 500;
 const MAX_PAGES = 100;
+const CERTIFICATE_ERROR_CODES = new Set([
+  "CERT_HAS_EXPIRED",
+  "DEPTH_ZERO_SELF_SIGNED_CERT",
+  "ERR_TLS_CERT_ALTNAME_INVALID",
+  "SELF_SIGNED_CERT_IN_CHAIN",
+  "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+]);
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 type Wait = (milliseconds: number) => Promise<void>;
 
 export interface UniFiClientConfig {
+  allowSelfSignedCertificate?: boolean;
   apiKey: string;
   connectionMode: "local" | "cloud";
   consoleId?: string;
@@ -35,6 +52,28 @@ export interface UniFiClientConfig {
   fetch?: Fetch;
   timeoutMs?: number;
   wait?: Wait;
+}
+
+export function allowsSelfSignedCertificateForUrl(
+  url: string,
+  config: Pick<UniFiClientConfig, "allowSelfSignedCertificate" | "connectionMode" | "controllerUrl">,
+): boolean {
+  if (config.connectionMode !== "local" || config.allowSelfSignedCertificate !== true) return false;
+  try {
+    return new URL(url).origin === normalizeControllerUrl(config.controllerUrl);
+  } catch {
+    return false;
+  }
+}
+
+function createDefaultFetch(config: UniFiClientConfig): Fetch {
+  if (config.connectionMode !== "local" || config.allowSelfSignedCertificate !== true) return fetch;
+  const agent = new https.Agent({ keepAlive: true, rejectUnauthorized: false });
+  return async (url, init) => {
+    if (!allowsSelfSignedCertificateForUrl(url, config)) return fetch(url, init);
+    const response = await nodeFetch(url, { ...init, agent } as NodeFetchRequestInit);
+    return response as unknown as Response;
+  };
 }
 
 interface RequestOptions {
@@ -114,6 +153,13 @@ function asMessage(payload: unknown): { message?: string; traceId?: string } {
   return { message, traceId: typeof record.traceId === "string" ? record.traceId : undefined };
 }
 
+function nestedErrorCode(error: unknown): string | undefined {
+  if (!error || typeof error !== "object") return undefined;
+  const record = error as { cause?: unknown; code?: unknown };
+  if (typeof record.code === "string") return record.code;
+  return nestedErrorCode(record.cause);
+}
+
 function normalizeCollection(payload: unknown): JsonObject[] {
   if (Array.isArray(payload))
     return payload.filter((item): item is JsonObject => Boolean(item && typeof item === "object"));
@@ -124,6 +170,12 @@ function normalizeCollection(payload: unknown): JsonObject[] {
     return record.data.filter((item): item is JsonObject => Boolean(item && typeof item === "object"));
   }
   if (record.data && typeof record.data === "object") return [record.data as JsonObject];
+  const namedCollection = ["access_points", "floor_plans", "switches", "devices"]
+    .map((key) => record[key])
+    .find(Array.isArray);
+  if (namedCollection) {
+    return namedCollection.filter((item): item is JsonObject => Boolean(item && typeof item === "object"));
+  }
   return [record as JsonObject];
 }
 
@@ -146,7 +198,7 @@ export class UniFiClient {
     this.apiKey = config.apiKey?.trim();
     if (!this.apiKey) throw new UniFiError("UniFi API Key is required.");
     this.config = config;
-    this.fetch = config.fetch ?? fetch;
+    this.fetch = config.fetch ?? createDefaultFetch(config);
     this.timeoutMs = config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.wait = config.wait ?? ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)));
   }
@@ -179,8 +231,9 @@ export class UniFiClient {
 
       if (!response.ok) {
         if (retries > 0 && (response.status === 429 || response.status >= 500)) {
-          const retryAfter = Number(response.headers.get("retry-after"));
-          const delay = Number.isFinite(retryAfter) ? retryAfter * 1000 : 250 * 2 ** (2 - retries);
+          const retryAfterHeader = response.headers.get("retry-after")?.trim();
+          const retryAfter = retryAfterHeader ? Number(retryAfterHeader) : Number.NaN;
+          const delay = Number.isFinite(retryAfter) && retryAfter >= 0 ? retryAfter * 1000 : 250 * 2 ** (2 - retries);
           await response.arrayBuffer();
           await this.wait(Math.min(delay, 5_000));
           return this.request<T>(service, path, { ...options, retries: retries - 1 });
@@ -211,6 +264,11 @@ export class UniFiClient {
       if (error instanceof Error && error.name === "AbortError") {
         if (options.signal?.aborted) throw error;
         throw new UniFiError(`UniFi request timed out after ${this.timeoutMs / 1000} seconds.`);
+      }
+      if (this.config.connectionMode === "local" && CERTIFICATE_ERROR_CODES.has(nestedErrorCode(error) ?? "")) {
+        throw new UniFiError(
+          "Could not verify the UniFi console certificate. Enable Allow Self-Signed Console Certificate in the extension preferences, configure a trusted certificate, or use Cloud Connector mode.",
+        );
       }
       throw new UniFiError(error instanceof Error ? error.message : "UniFi request failed.");
     } finally {
@@ -317,8 +375,63 @@ export class UniFiClient {
     if (definition.service === "network") {
       return this.listPage<JsonObject>(path, signal);
     }
-    const payload = await this.request<unknown>(definition.service, path, { signal });
-    return normalizeCollection(payload);
+    return this.listIntegrationResource(definition, path, signal);
+  }
+
+  private async listIntegrationResource(
+    definition: ResourceDefinition,
+    path: string,
+    signal?: AbortSignal,
+  ): Promise<JsonObject[]> {
+    const results: JsonObject[] = [];
+    const seenCursors = new Set<string>();
+    let pagePath =
+      definition.pagination === "site-manager-token"
+        ? appendQuery(path, { pageSize: PAGE_SIZE })
+        : definition.pagination === "mobility-offset"
+          ? appendQuery(path, { limit: PAGE_SIZE, offset: 0 })
+          : definition.pagination === "carrier-cursor"
+            ? appendQuery(path, { limit: CARRIER_PAGE_SIZE })
+            : path;
+
+    for (let pageNumber = 0; pageNumber < MAX_PAGES; pageNumber += 1) {
+      const payload = await this.request<unknown>(definition.service, pagePath, { signal });
+      const items = normalizeCollection(payload);
+      results.push(...items);
+
+      if (!definition.pagination || !payload || typeof payload !== "object" || Array.isArray(payload)) return results;
+      const record = payload as Record<string, unknown>;
+
+      if (definition.pagination === "site-manager-token") {
+        const nextToken = typeof record.nextToken === "string" ? record.nextToken.trim() : "";
+        if (!nextToken) return results;
+        if (seenCursors.has(nextToken)) throw new UniFiError("Site Manager pagination returned a repeated token.");
+        seenCursors.add(nextToken);
+        pagePath = appendQuery(path, { nextToken, pageSize: PAGE_SIZE });
+        continue;
+      }
+
+      if (definition.pagination === "mobility-offset") {
+        const total = typeof record.total === "number" ? record.total : results.length;
+        const offset = typeof record.offset === "number" ? record.offset : results.length - items.length;
+        const limit = typeof record.limit === "number" && record.limit > 0 ? record.limit : PAGE_SIZE;
+        const nextOffset = offset + items.length;
+        if (nextOffset >= total) return results;
+        if (items.length === 0) throw new UniFiError("Mobility pagination did not advance.");
+        pagePath = appendQuery(path, { limit, offset: nextOffset });
+        continue;
+      }
+
+      const meta = record.meta && typeof record.meta === "object" ? (record.meta as Record<string, unknown>) : {};
+      if (meta.hasMore !== true) return results;
+      const nextCursor = typeof meta.nextCursor === "string" ? meta.nextCursor.trim() : "";
+      if (!nextCursor) throw new UniFiError("Carrier pagination did not return a next cursor.");
+      if (seenCursors.has(nextCursor)) throw new UniFiError("Carrier pagination returned a repeated cursor.");
+      seenCursors.add(nextCursor);
+      pagePath = appendQuery(path, { cursor: nextCursor, limit: CARRIER_PAGE_SIZE });
+    }
+
+    throw new UniFiError(`UniFi pagination exceeded ${MAX_PAGES} pages.`);
   }
 
   async getProtectOverview(signal?: AbortSignal): Promise<ProtectOverview> {
@@ -361,11 +474,18 @@ export class UniFiClient {
   }
 
   async getCameraSnapshot(cameraId: string, highQuality = true): Promise<Buffer> {
-    return this.request<Buffer>(
-      "protect",
-      appendQuery(`/v1/cameras/${encodeURIComponent(cameraId)}/snapshot`, { highQuality: String(highQuality) }),
-      { responseType: "buffer" },
-    );
+    try {
+      return await this.request<Buffer>(
+        "protect",
+        appendQuery(`/v1/cameras/${encodeURIComponent(cameraId)}/snapshot`, { highQuality: String(highQuality) }),
+        { responseType: "buffer" },
+      );
+    } catch (error) {
+      if (highQuality && error instanceof UniFiError && /does not support full hd snapshot/i.test(error.message)) {
+        return this.getCameraSnapshot(cameraId, false);
+      }
+      throw error;
+    }
   }
 
   async restartNetworkDevice(siteId: string, deviceId: string): Promise<void> {

@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Color, Icon, launchCommand, LaunchType, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, LaunchType, List } from "@raycast/api";
 import { useCallback } from "react";
 import { getSelectedSite } from "./api/preferences";
 import { MissingSite } from "./components/states";
 import { useAsyncResource } from "./hooks/use-async-resource";
 import { useUniFiClient } from "./hooks/use-unifi";
 import { findUniFiProblems, summarizeUniFiHealth, type UniFiProblem } from "./lib/health";
+import { launchUniFiCommand } from "./lib/launch-command";
 import {
   OVERVIEW_RESOURCE_TARGETS,
   protectProblemContext,
@@ -22,7 +23,9 @@ function OpenCommandAction({ context, name, title }: CommandTarget) {
     <Action
       title={title}
       icon={Icon.Sidebar}
-      onAction={() => launchCommand({ context, name, type: LaunchType.UserInitiated })}
+      onAction={() =>
+        launchUniFiCommand({ context, name, type: LaunchType.UserInitiated }, `Could not open ${title.toLowerCase()}`)
+      }
     />
   );
 }
@@ -48,18 +51,21 @@ function ProblemList({
   unavailable: string[];
   refresh: () => void;
 }) {
-  const openProblem = (problem: UniFiProblem) =>
-    problem.service === "network"
-      ? launchCommand({
-          arguments: { search: problem.entityId },
-          name: "view-devices",
-          type: LaunchType.UserInitiated,
-        })
-      : launchCommand({
-          context: protectProblemContext(problem.resource, problem.entityId),
-          name: "browse-protect",
-          type: LaunchType.UserInitiated,
-        });
+  const openProblem = (problem: UniFiProblem) => {
+    const options =
+      problem.service === "network"
+        ? {
+            arguments: { search: problem.entityId },
+            name: "view-devices",
+            type: LaunchType.UserInitiated,
+          }
+        : {
+            context: protectProblemContext(problem.resource, problem.entityId),
+            name: "browse-protect",
+            type: LaunchType.UserInitiated,
+          };
+    launchUniFiCommand(options, "Could not open the UniFi resource");
+  };
 
   return (
     <List filtering isShowingDetail navigationTitle="UniFi Problems" searchBarPlaceholder="Search problems">

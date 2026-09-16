@@ -1,12 +1,13 @@
-import { Color, Icon, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 import { useCallback } from "react";
 import { getSelectedSite } from "./api/preferences";
 import { useAsyncResource } from "./hooks/use-async-resource";
 import { useUniFiClient } from "./hooks/use-unifi";
 import { summarizeUniFiHealth } from "./lib/health";
+import { launchUniFiCommand } from "./lib/launch-command";
 
-function openCommand(name: string): Promise<void> {
-  return launchCommand({ name, type: LaunchType.UserInitiated });
+function openCommand(name: string): void {
+  launchUniFiCommand({ name, type: LaunchType.UserInitiated }, "Could not open the UniFi command");
 }
 
 export default function UniFiHealthMenu() {

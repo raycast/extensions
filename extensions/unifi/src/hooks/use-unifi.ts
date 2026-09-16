@@ -6,6 +6,12 @@ export function useUniFiClient(): UniFiClient {
   const preferences = getUniFiPreferences();
   return useMemo(
     () => new UniFiClient(preferences),
-    [preferences.apiKey, preferences.connectionMode, preferences.consoleId, preferences.controllerUrl],
+    [
+      preferences.allowSelfSignedCertificate,
+      preferences.apiKey,
+      preferences.connectionMode,
+      preferences.consoleId,
+      preferences.controllerUrl,
+    ],
   );
 }

@@ -22,14 +22,28 @@ describe("first-run preferences", () => {
     expect(command).toMatchObject({ disabledByDefault: true, mode: "menu-bar" });
   });
 
-  it("does not expose an insecure TLS bypass or bundle a fetch polyfill", () => {
-    expect(manifest.preferences.some(({ name }) => name === "verifyTlsCertificates")).toBe(false);
-    expect(manifest.dependencies).not.toHaveProperty("node-fetch");
-    expect(manifest.devDependencies).not.toHaveProperty("@types/node-fetch");
+  it("keeps self-signed certificate support explicit and disabled by default", () => {
+    const preference = manifest.preferences.find(({ name }) => name === "allowSelfSignedCertificate");
+
+    expect(preference).toMatchObject({ default: false, required: false, type: "checkbox" });
+    expect(preference?.description).toContain("Local Console only");
+    expect(preference?.label).toContain("not recommended");
+    expect(manifest.dependencies).toHaveProperty("node-fetch");
   });
 
-  it("does not direct users to bypass certificate verification", () => {
-    expect(help).toContain("always validates the console certificate");
-    expect(help).not.toContain("leave certificate verification disabled");
+  it("warns users before they allow a self-signed console certificate", () => {
+    expect(help).toContain("validates the console certificate by default");
+    expect(help).toContain("Enable it only for a console you trust on a local network");
+    expect(help).toContain("Cloud requests always validate certificates");
+  });
+
+  it("does not expose a removed live-stats polling preference", () => {
+    const command = manifest.commands.find(({ name }) => name === "view-devices");
+
+    expect(command).not.toHaveProperty("preferences");
+  });
+
+  it("builds before tests and lint so clean checkouts have generated Raycast types", () => {
+    expect(manifest.scripts.check).toBe("npm run build && npm test && npm run lint");
   });
 });

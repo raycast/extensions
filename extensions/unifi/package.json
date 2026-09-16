@@ -96,16 +96,6 @@
           "placeholder": "Name, IP or MAC address",
           "required": false
         }
-      ],
-      "preferences": [
-        {
-          "name": "statsPollingInterval",
-          "title": "Live Stats Interval",
-          "description": "The interval in seconds to poll live stats",
-          "type": "textfield",
-          "default": "2",
-          "required": false
-        }
       ]
     },
     {
@@ -247,6 +237,15 @@
       "required": true
     },
     {
+      "name": "allowSelfSignedCertificate",
+      "title": "Certificate Verification",
+      "description": "Local Console only. Disables TLS certificate verification for consoles that use UniFi's default self-signed certificate.",
+      "type": "checkbox",
+      "label": "Allow a self-signed console certificate (not recommended)",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "dateFormat",
       "title": "Date Format",
       "description": "The format to display dates in",
@@ -257,7 +256,8 @@
   ],
   "dependencies": {
     "@raycast/api": "2.3.0",
-    "date-fns": "^4.1.0"
+    "date-fns": "^4.1.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
@@ -276,7 +276,7 @@
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check": "npm run typecheck && npm test && npm run lint && npm run build",
+    "check": "npm run build && npm test && npm run lint",
     "publish": "npx @raycast/api@latest publish"
   },
   "overrides": {

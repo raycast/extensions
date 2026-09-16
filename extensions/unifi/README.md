@@ -37,8 +37,9 @@ Older application versions may expose only part of the documented API. Cloud Con
 3. Choose **Local Console** or **Cloud Connector**.
 4. Enter the API key.
 5. Enter the console IP or URL, such as `https://192.168.1.1`.
-6. For a cloud connection, enter the console ID shown in Site Manager.
-7. Run **Select Site** before using Network commands.
+6. If a local console still uses UniFi's default self-signed certificate, enable **Allow a self-signed console certificate**.
+7. For a cloud connection, enter the console ID shown in Site Manager.
+8. Run **Select Site** before using Network commands.
 
 API keys are sent only in the `X-API-Key` request header. They are never placed in URLs or returned by AI tools.
 
@@ -46,7 +47,9 @@ Raycast opens these preferences before any command can run until both the consol
 
 ### TLS Certificates
 
-Local Console mode requires HTTPS and always validates the console certificate before sending the API key. Use a hostname and certificate trusted by the Raycast runtime. If the console still uses its default self-signed certificate, configure a trusted certificate on the console or use Cloud Connector mode; the extension does not provide an insecure certificate bypass.
+Local Console mode requires HTTPS and validates the console certificate by default. Use a hostname and certificate trusted by the Raycast runtime when possible. For consoles that still use UniFi's default self-signed certificate, enable **Allow a self-signed console certificate** in the extension preferences. This opt-in applies only to direct Local Console requests. Cloud requests always validate certificates.
+
+Allowing a self-signed certificate prevents the extension from confirming that it reached the intended console. Enable it only for a console you trust on a local network.
 
 ## Raycast AI
 
