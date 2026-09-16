@@ -1,0 +1,74 @@
+{
+  "name": "yt-browse",
+  "title": "YT",
+  "description": "Search videos, browse trending and history, and open YouTube in a Safari web app with auto Picture-in-Picture. No API key needed.",
+  "icon": "icon.png",
+  "author": "abhi",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Fun", "Media"],
+  "version": "1.0.19",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Videos",
+      "description": "Search for videos on YouTube",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "e.g. lofi hip hop",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "watching",
+      "title": "Continue Watching",
+      "description": "Open YouTube web app (resumes last watched video)",
+      "mode": "no-view"
+    },
+    {
+      "name": "watching-fullscreen",
+      "title": "Continue Watching in Fullscreen",
+      "description": "Open YouTube web app and enter video fullscreen",
+      "mode": "no-view"
+    },
+    {
+      "name": "trending",
+      "title": "Browse Trending",
+      "description": "Browse trending videos on YouTube",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Browse History",
+      "description": "View your recently watched YouTube videos",
+      "mode": "view"
+    },
+    {
+      "name": "setup",
+      "title": "Setup YouTube",
+      "description": "Install the Safari web app and AutoPiP extension",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^1.0.0",
+    "@tanstack/react-query": "^5.101.4",
+    "youtube-sr": "^4.3.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.2.18",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint"
+  },
+  "overrides": {}
+}
