@@ -76,4 +76,10 @@ export async function getTopProcesses(mode: ProcessListMode, count = PROCESS_PRE
   return getProcessList(mode, count);
 }
 
+/** Number of running processes, from `ps -axo pid=` (one line per process). */
+export async function countProcesses(): Promise<number> {
+  const output = await execf("/bin/ps", ["-axo", "pid="]);
+  return output.split("\n").filter((line) => line.trim().length > 0).length;
+}
+
 export const PROCESS_LIST_POLL_MS = 3_000;
