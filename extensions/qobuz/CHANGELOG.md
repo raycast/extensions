@@ -1,5 +1,10 @@
 # Qobuz Changelog
 
+## [Copy Share Links] - 2026-09-16
+
+- Copy Share Links: a no-view command that puts a ready-to-paste message on the clipboard for the track Qobuz is on — title and artist, then a link per service (Qobuz, Deezer, Apple Music, Spotify, Tidal) and a song.link line that resolves every other platform
+- Convert Track Link: the Qobuz → other services direction gains the same Copy Share Links action, one Open/Search action per service, and per-service match tags in the metadata
+
 ## [Now Playing fallback] - 2026-09-12
 
 - Convert Track Link: convert the track Qobuz is currently on, falling back to a track link on the clipboard; when both are available, an action switches to the other one

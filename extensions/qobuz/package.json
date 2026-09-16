@@ -33,6 +33,13 @@
       ]
     },
     {
+      "name": "copy-share-links",
+      "title": "Copy Share Links",
+      "subtitle": "Qobuz",
+      "description": "Copy a ready-to-paste message with the current track's title, artist, and a link on every streaming service.",
+      "mode": "no-view"
+    },
+    {
       "name": "now-playing",
       "title": "Now Playing",
       "subtitle": "Qobuz",

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import type { Album, Artist, Playlist, Track } from "@kud/qobuz";
 import { appLink, BRAND, deepLink, formatDuration, getClient } from "./client";
-import { spotifySearchUrl, ytMusicSearchUrl } from "./resolve";
+import { spotifySearchUrl, ytMusicSearchUrl } from "./share";
 
 const COVER_SIZE = 220;
 

@@ -5,16 +5,14 @@ import { readNowPlayingTrackId, type Album, type QobuzClient, type Track } from 
 import { useState } from "react";
 import { appLink, BRAND, deepLink, formatDuration, getClient } from "./lib/client";
 import {
-  deezerByIsrc,
   findIsrc,
   isLikelyMatch,
   looksLikeTrackLink,
   resolveLink,
-  spotifySearchUrl,
-  ytMusicSearchUrl,
   type ResolveFailure,
   type ResolvedTrack,
 } from "./lib/resolve";
+import { formatShareMessage, shareLinks, shareQuery, type ShareLink } from "./lib/share";
 
 type Source = "argument" | "now-playing" | "clipboard";
 
@@ -34,8 +32,7 @@ type FromQobuz = Input & {
   mode: "from-qobuz";
   track: Track;
   album: Album | null;
-  query: string;
-  deezerUrl?: string;
+  links: ShareLink[];
 };
 
 type Conversion = { mode: "empty" } | { mode: "error"; reason: ResolveFailure } | ToQobuz | FromQobuz;
@@ -63,9 +60,8 @@ const UNRESOLVED_MESSAGE: Record<ResolveFailure, string> = {
 const convertFromQobuz = async (client: QobuzClient, trackId: number): Promise<Omit<FromQobuz, keyof Input>> => {
   const track = await client.tracks.get(trackId);
   const album = track.album?.id ? ((await client.albums.get(track.album.id).catch(() => undefined)) ?? null) : null;
-  const query = `${track.artist?.name ?? ""} ${track.title}`.trim();
-  const deezerUrl = track.isrc ? await deezerByIsrc(track.isrc) : undefined;
-  return { mode: "from-qobuz", track, album, query, deezerUrl };
+  const links = await shareLinks(track);
+  return { mode: "from-qobuz", track, album, links };
 };
 
 // Forward: a foreign track → the matching Qobuz track.
@@ -191,18 +187,26 @@ const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) 
   if (data.mode === "from-qobuz") {
     return (
       <ActionPanel>
-        <Action.OpenInBrowser
-          title="Search on YouTube Music"
-          icon={Icon.MagnifyingGlass}
-          url={ytMusicSearchUrl(data.query)}
+        <Action.CopyToClipboard
+          title="Copy Share Links"
+          icon={Icon.Link}
+          content={formatShareMessage(data.track, data.links)}
         />
-        <Action.OpenInBrowser
-          title="Search on Spotify"
-          icon={Icon.MagnifyingGlass}
-          url={spotifySearchUrl(data.query)}
-        />
-        {data.deezerUrl && <Action.OpenInBrowser title="Open on Deezer" url={data.deezerUrl} />}
-        <Action.CopyToClipboard title="Copy Artist & Title" content={data.query} />
+        {data.links
+          .filter((link) => link.platform !== "qobuz")
+          .map((link) => (
+            <Action.OpenInBrowser
+              key={link.platform}
+              title={
+                link.confidence === "search"
+                  ? `Search on ${LINK_LABEL[link.platform]}`
+                  : `Open on ${LINK_LABEL[link.platform]}`
+              }
+              icon={link.confidence === "search" ? Icon.MagnifyingGlass : Icon.Globe}
+              url={link.url}
+            />
+          ))}
+        <Action.CopyToClipboard title="Copy Artist & Title" content={shareQuery(data.track)} />
         <ActionPanel.Section title="Qobuz">
           <QobuzTrackActions track={data.track} />
         </ActionPanel.Section>
@@ -227,6 +231,21 @@ function QobuzTrackActions({ track }: { track: Track }) {
     </>
   );
 }
+
+const LINK_LABEL: Record<ShareLink["platform"], string> = {
+  qobuz: "Qobuz",
+  deezer: "Deezer",
+  apple: "Apple Music",
+  spotify: "Spotify",
+  tidal: "Tidal",
+  songlink: "song.link",
+};
+
+const MATCH_TAG: Record<ShareLink["confidence"], { text: string; color: Color }> = {
+  exact: { text: "Exact (ISRC)", color: Color.Green },
+  approximate: { text: "Approximate", color: Color.Orange },
+  search: { text: "Search", color: Color.SecondaryText },
+};
 
 const SOURCE_LABEL: Record<Source, string> = {
   argument: "Typed link",
@@ -258,12 +277,16 @@ function FromQobuzMetadata({ data, track }: { data: FromQobuz; track: Track }) {
       <Detail.Metadata.Separator />
       <TrackFacts track={track} />
       <Detail.Metadata.Separator />
-      <Detail.Metadata.TagList title="Deezer">
-        <Detail.Metadata.TagList.Item
-          text={data.deezerUrl ? "Exact (ISRC)" : "Not found"}
-          color={data.deezerUrl ? Color.Green : Color.SecondaryText}
-        />
-      </Detail.Metadata.TagList>
+      {data.links
+        .filter((link) => link.platform !== "qobuz" && link.platform !== "songlink")
+        .map((link) => (
+          <Detail.Metadata.TagList key={link.platform} title={LINK_LABEL[link.platform]}>
+            <Detail.Metadata.TagList.Item
+              text={MATCH_TAG[link.confidence].text}
+              color={MATCH_TAG[link.confidence].color}
+            />
+          </Detail.Metadata.TagList>
+        ))}
     </Detail.Metadata>
   );
 }

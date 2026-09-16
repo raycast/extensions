@@ -14,9 +14,10 @@ Search Qobuz, see what's playing, and manage your favourites and playlists — o
 
 ### Now Playing
 
-| Command         | Description                                                                                                                          |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Now Playing** | Menu-bar item showing the track currently playing in the Qobuz desktop app, with one-click copy of its link. Refreshes every minute. |
+| Command              | Description                                                                                                                                        |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Now Playing**      | Menu-bar item showing the track currently playing in the Qobuz desktop app, with one-click copy of its link. Refreshes every minute.               |
+| **Copy Share Links** | Copy a ready-to-paste message for the current track: title and artist, then a link per streaming service and a song.link line for everything else. |
 
 ### Playback controls
 
