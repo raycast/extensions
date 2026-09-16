@@ -21,8 +21,8 @@ Official references: [Prepare an Extension for Store](https://developers.raycast
 - [x] `script/build_lame.sh` downloads LAME 3.100 from the official SourceForge project, verifies SHA-256 `ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e`, builds both architectures, and combines them into a universal executable.
 - [x] `THIRD_PARTY_NOTICES.md` and the upstream LGPL-2.0 materials under `licenses/lame/` document provenance and redistribution terms. LAME runs as a separate executable and is not linked into the MIT helper.
 - [x] No executable is downloaded from a developer-controlled server after review. Apple language assets are requested through the public `AssetInventory` API and downloaded/managed by macOS.
-- [x] Binary payload remains modest. The final `.rayext` is 1,192,121 bytes with SHA-256 `ccf7daf7fb578bd2f4bab1fc84f04ce960a73999821635106ab27a44d9456ede`.
-- [x] Final helper SHA-256: `b1c8e48f06ccb9f694126fd35be8f8bee568f65630351208a4d4f79bffd27c2e`. Final nested LAME SHA-256: `bcd6d8b852cbbf411782dd5b230cf981dd795e2cfabb7cebff24fbf3c011755a`.
+- [x] Binary payload remains modest. The final `.rayext` is 1,194,668 bytes with SHA-256 `2e855d46e86945740fb6fbf8714efec7559f3036fcd582fbaca7be5e88b506a8`.
+- [x] Final helper SHA-256: `0e827ba602eff70bc11b1021a66e8885bd6836a02c69f5ba31534094ebe8a67e`. Final nested LAME SHA-256: `bcd6d8b852cbbf411782dd5b230cf981dd795e2cfabb7cebff24fbf3c011755a`.
 - [ ] Raycast team action required: the official Store guidance says traceable bundled binaries currently need a Raycast team member to add/approve the binary. In the submission PR, explicitly request review of `assets/MeetingCaptureHelper.app` and its nested `lame`, link `CONTRIBUTING.md` and `THIRD_PARTY_NOTICES.md`, and provide the final SHA-256 values. Do not replace them after review without repeating that process.
 - [x] `RAYCAST_BINARY_REVIEW.md` contains the reviewer-facing necessity, provenance, reproducible-build, licensing, architecture, privacy, and runtime-download explanation.
 

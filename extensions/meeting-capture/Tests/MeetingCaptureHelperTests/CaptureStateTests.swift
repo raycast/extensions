@@ -2,6 +2,15 @@ import Foundation
 import Testing
 @testable import MeetingCaptureHelper
 
+@Test func onlyPermissionErrorsRequirePermission() {
+    #expect(RecorderError.screenPermission.phase == .permissionRequired)
+    #expect(RecorderError.microphonePermission.phase == .permissionRequired)
+    let failures: [RecorderError] = [.usage, .noDisplay, .noSupportedFileType, .captureFailed("Stream failed"), .processingFailed("Encoding failed")]
+    for error in failures {
+        #expect(error.phase == .failed)
+    }
+}
+
 @Test func safeFilenameHasNoPathSeparators() {
     let url = safeRecordingURL(in: URL(fileURLWithPath: "/tmp"), date: Date(timeIntervalSince1970: 0), fileExtension: "mp3")
     #expect(url.lastPathComponent.hasPrefix("Meeting_"))

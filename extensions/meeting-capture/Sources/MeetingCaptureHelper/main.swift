@@ -4,8 +4,14 @@ import CoreGraphics
 import Foundation
 import ScreenCaptureKit
 
-private enum RecorderError: LocalizedError {
+enum RecorderError: LocalizedError {
     case usage, screenPermission, microphonePermission, noDisplay, noSupportedFileType, captureFailed(String), processingFailed(String)
+    var phase: CaptureState.Phase {
+        switch self {
+        case .screenPermission, .microphonePermission: .permissionRequired
+        default: .failed
+        }
+    }
     var errorDescription: String? {
         switch self {
         case .usage: "Usage: MeetingCaptureHelper record --output-directory DIR --state FILE --control-directory DIR --transcript-language MODE"
@@ -208,7 +214,7 @@ private final class CaptureController {
         do { try await record(try parseArguments()) }
         catch {
             let stateURL = stateURLFromArguments() ?? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("meeting-capture-error.json")
-            let phase: CaptureState.Phase = error is RecorderError ? .permissionRequired : .failed
+            let phase: CaptureState.Phase = (error as? RecorderError)?.phase ?? .failed
             try? writeState(.init(phase: phase, pid: getpid(), message: error.localizedDescription, updatedAt: Date()), to: stateURL)
             fputs("MeetingCaptureHelper: \(error.localizedDescription)\n", stderr); exit(1)
         }
