@@ -13,8 +13,8 @@ Audio and transcripts remain in the user's selected local folder. Recorded audio
 
 ## Final artifacts
 
-- `.rayext`: 1,177,013 bytes; SHA-256 `0d96c4875cfa6cb6803bbe05f8b6b549dc94cc644ef112ad5ca9274d45191197`
-- Helper SHA-256: `a28f970fab74c7b0a79291d8e3b19bf7621a0d94322858be2bc376490a1b0be9`
+- `.rayext`: 1,192,121 bytes; SHA-256 `ccf7daf7fb578bd2f4bab1fc84f04ce960a73999821635106ab27a44d9456ede`
+- Helper SHA-256: `b1c8e48f06ccb9f694126fd35be8f8bee568f65630351208a4d4f79bffd27c2e`
 - Nested LAME SHA-256: `bcd6d8b852cbbf411782dd5b230cf981dd795e2cfabb7cebff24fbf3c011755a`
 - Architectures: arm64 and x86_64 for both executables
 - Bundle identifier: `com.raycast.extensions.meeting-capture.helper`

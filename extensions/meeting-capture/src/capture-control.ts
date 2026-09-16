@@ -8,17 +8,12 @@ import {
 } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { constants } from "node:fs";
-import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { DEFAULT_RECORDING_DIRECTORY } from "./constants.js";
 
 const execFileAsync = promisify(execFile);
-type Preferences = {
-  outputDirectory: string;
-  transcriptLanguage:
-    "vietnamese" | "english" | "vietnamese-english" | "system-default";
-};
 type Phase =
   | "starting"
   | "recording"
@@ -75,6 +70,78 @@ async function waitFor(
   throw new Error("Meeting Capture did not acknowledge the command in time.");
 }
 
+type LaunchLockOwner = { pid: number; createdAt: number };
+
+async function acquireLaunchLock(lockDirectory: string): Promise<boolean> {
+  const ownerFile = path.join(lockDirectory, "owner.json");
+  try {
+    await mkdir(lockDirectory);
+    await writeFile(
+      ownerFile,
+      JSON.stringify({ pid: process.pid, createdAt: Date.now() }),
+      { flag: "wx" },
+    );
+    return true;
+  } catch {
+    let stale = false;
+    try {
+      const owner = JSON.parse(
+        await readFile(ownerFile, "utf8"),
+      ) as LaunchLockOwner;
+      stale =
+        !Number.isFinite(owner.createdAt) ||
+        Date.now() - owner.createdAt > 5 * 60_000 ||
+        !(await alive(owner.pid));
+    } catch {
+      try {
+        const lockStat = await stat(lockDirectory);
+        stale = Date.now() - lockStat.mtimeMs > 30_000;
+      } catch {
+        stale = true;
+      }
+    }
+    if (!stale) return false;
+    await rm(lockDirectory, { recursive: true, force: true });
+    try {
+      await mkdir(lockDirectory);
+      await writeFile(
+        ownerFile,
+        JSON.stringify({ pid: process.pid, createdAt: Date.now() }),
+        { flag: "wx" },
+      );
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
+
+async function stopHelperAfterStartTimeout(stateFile: string): Promise<void> {
+  const pending = await readState(stateFile);
+  if (pending && (await alive(pending.pid))) {
+    try {
+      process.kill(pending.pid, "SIGTERM");
+    } catch {
+      // The helper may have exited between the liveness check and the signal.
+    }
+    for (
+      let attempt = 0;
+      attempt < 20 && (await alive(pending.pid));
+      attempt++
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    if (await alive(pending.pid)) {
+      try {
+        process.kill(pending.pid, "SIGKILL");
+      } catch {
+        // The process may have exited after the final liveness check.
+      }
+    }
+  }
+  await rm(stateFile, { force: true });
+}
+
 export async function runCaptureAction(action: CaptureAction) {
   const preferences = getPreferenceValues<Preferences>();
   await closeMainWindow();
@@ -122,9 +189,7 @@ export async function runCaptureAction(action: CaptureAction) {
         await showHUD(`Meeting Capture is already ${current.phase}.`);
         return;
       }
-      try {
-        await mkdir(launchLock);
-      } catch {
+      if (!(await acquireLaunchLock(launchLock))) {
         await showHUD("Meeting Capture is already starting.");
         return;
       }
@@ -148,9 +213,20 @@ export async function runCaptureAction(action: CaptureAction) {
           "--transcript-language",
           preferences.transcriptLanguage ?? "system-default",
         ]);
-        const started = await waitFor(stateFile, (state) =>
-          ["recording", "permissionRequired", "failed"].includes(state.phase),
-        );
+        let started: State;
+        try {
+          started = await waitFor(
+            stateFile,
+            (state) =>
+              ["recording", "permissionRequired", "failed"].includes(
+                state.phase,
+              ),
+            120_000,
+          );
+        } catch (error) {
+          await stopHelperAfterStartTimeout(stateFile);
+          throw error;
+        }
         if (started.phase !== "recording")
           throw new Error(started.message ?? "Recording did not start.");
         await showHUD("🔴 Meeting Capture started — system audio + microphone");

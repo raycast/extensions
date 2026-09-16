@@ -5,7 +5,7 @@ import Foundation
 import ScreenCaptureKit
 
 private enum RecorderError: LocalizedError {
-    case usage, screenPermission, microphonePermission, noDisplay, noSupportedFileType
+    case usage, screenPermission, microphonePermission, noDisplay, noSupportedFileType, captureFailed(String), processingFailed(String)
     var errorDescription: String? {
         switch self {
         case .usage: "Usage: MeetingCaptureHelper record --output-directory DIR --state FILE --control-directory DIR --transcript-language MODE"
@@ -13,16 +13,30 @@ private enum RecorderError: LocalizedError {
         case .microphonePermission: "Microphone permission is required. Grant it in System Settings, then invoke Start Meeting Capture again."
         case .noDisplay: "No capturable display is available."
         case .noSupportedFileType: "No supported ScreenCaptureKit recording file type is available."
+        case let .captureFailed(message): "Recording stopped unexpectedly: \(message)"
+        case let .processingFailed(message): message
         }
     }
 }
 
 private final class RecordingDelegate: NSObject, SCRecordingOutputDelegate, SCStreamDelegate {
-    private(set) var failure: Error?
+    private let lock = NSLock()
+    private var storedFailureMessage: String?
+
+    var failureMessage: String? {
+        lock.withLock { storedFailureMessage }
+    }
+
+    private func recordFailure(_ error: any Error) {
+        lock.withLock {
+            if storedFailureMessage == nil { storedFailureMessage = error.localizedDescription }
+        }
+    }
+
     func recordingOutputDidStartRecording(_ output: SCRecordingOutput) {}
     func recordingOutputDidFinishRecording(_ output: SCRecordingOutput) {}
-    func recordingOutput(_ output: SCRecordingOutput, didFailWithError error: any Error) { failure = error }
-    func stream(_ stream: SCStream, didStopWithError error: any Error) { failure = error }
+    func recordingOutput(_ output: SCRecordingOutput, didFailWithError error: any Error) { recordFailure(error) }
+    func stream(_ stream: SCStream, didStopWithError error: any Error) { recordFailure(error) }
 }
 
 @MainActor
@@ -63,6 +77,12 @@ private final class CaptureController {
         indicator.show()
         try updateState(.recording, message: "Recording")
         while phase == .recording || phase == .paused {
+            if let failureMessage = delegate?.failureMessage {
+                phase = .failed
+                indicator.hide()
+                try updateState(.failed, message: "Recording stopped unexpectedly: \(failureMessage)")
+                throw RecorderError.captureFailed(failureMessage)
+            }
             if let request = nextControlRequest(in: controlDirectory) {
                 try await handle(request)
             } else {
@@ -118,7 +138,9 @@ private final class CaptureController {
         guard let stream, let url = currentSegmentURL else { return }
         try await stream.stopCapture()
         try await Task.sleep(for: .milliseconds(500))
-        if let failure = delegate?.failure { throw failure }
+        if let failureMessage = delegate?.failureMessage {
+            throw RecorderError.captureFailed(failureMessage)
+        }
         if let started = segmentStartedAt { elapsedSeconds += Date().timeIntervalSince(started) }
         segmentURLs.append(url)
         self.stream = nil
@@ -129,12 +151,23 @@ private final class CaptureController {
 
     private func finalize() async throws {
         let mergedURL = outputDirectory.appendingPathComponent(".\(mp3URL.deletingPathExtension().lastPathComponent).\(UUID().uuidString).merged.m4a")
-        defer {
-            for url in segmentURLs { try? FileManager.default.removeItem(at: url) }
-            try? FileManager.default.removeItem(at: mergedURL)
-        }
         try await mergeAudioSegments(segmentURLs, to: mergedURL)
-        try await encodeMP3(from: mergedURL, to: mp3URL)
+        do {
+            try await encodeMP3(from: mergedURL, to: mp3URL)
+        } catch {
+            let encodingMessage = error.localizedDescription
+            let recoveryURL = safeRecordingURL(in: outputDirectory, fileExtension: "m4a")
+            do {
+                try FileManager.default.moveItem(at: mergedURL, to: recoveryURL)
+                throw RecorderError.processingFailed("MP3 encoding failed. Recoverable audio was saved at \(recoveryURL.path). \(encodingMessage)")
+            } catch let recoveryError as RecorderError {
+                throw recoveryError
+            } catch {
+                throw RecorderError.processingFailed("MP3 encoding failed. Source segments were preserved in \(outputDirectory.path). \(encodingMessage)")
+            }
+        }
+        for url in segmentURLs { try? FileManager.default.removeItem(at: url) }
+        defer { try? FileManager.default.removeItem(at: mergedURL) }
         phase = .transcribing
         try updateState(.transcribing, message: "Transcribing on-device — \(transcriptLanguage.displayName)")
         do {
