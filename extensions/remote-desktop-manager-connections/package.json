@@ -1,0 +1,65 @@
+{
+  "name": "remote-desktop-manager-connections",
+  "title": "Remote Desktop Manager Connections",
+  "description": "Search and open local Remote Desktop Manager connections from Raycast.",
+  "icon": "icon.png",
+  "author": "Bagheri",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "showFolders",
+      "title": "Show Folders",
+      "description": "Show folders as separate navigable items in the connection list",
+      "type": "checkbox",
+      "label": "Show folders",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showRecent",
+      "title": "Show Recent",
+      "description": "Show recently used connections in a separate Recent section",
+      "type": "checkbox",
+      "label": "Show recent connections",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showRecentAtStart",
+      "title": "Show Recent at Start of List",
+      "description": "Place the Recent section at the start of the list instead of after folders and connections",
+      "type": "checkbox",
+      "label": "Show recent at the start",
+      "required": false,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-connections",
+      "title": "Remote Desktop Manager Connections",
+      "description": "Search and open connections from Remote Desktop Manager",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint"
+  }
+}
