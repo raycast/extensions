@@ -2,7 +2,7 @@
 
 Make large and small numbers easier to read.
 
-Number Formatter is a small quality-of-life Raycast extension for seeing numbers in formats that are easier to understand and share. Type or paste a number, choose a locale, and copy the representation you need.
+Number Formatter is a small quality-of-life Raycast extension for seeing numbers in formats that are easier to understand and share. Type or paste a number and copy the representation you need.
 
 ```text
 1200000   → 1.2 million
@@ -14,7 +14,7 @@ Number Formatter is a small quality-of-life Raycast extension for seeing numbers
 
 - See grouped, compact short, compact long, and scientific formats at once.
 - Copy any result with Enter.
-- Switch between the system locale, English, German, French, Italian, and Spanish.
+- Choose the system locale, English, German, French, Italian, or Spanish in command preferences.
 - Adjust decimal detail in Raycast preferences.
 - Paste numbers with commas, periods, spaces, or apostrophe grouping.
 - Keep every calculation local and offline.
@@ -23,7 +23,7 @@ Number Formatter is a small quality-of-life Raycast extension for seeing numbers
 
 1. Open **Format Number** in Raycast.
 2. Type or paste a number in the search bar.
-3. Optionally choose a locale from the dropdown.
+3. Optionally choose a locale from command preferences.
 4. Select a result and press Enter to copy it.
 
 ## Supported Locales

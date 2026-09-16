@@ -43,6 +43,48 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "locale",
+          "title": "Number Locale",
+          "description": "Locale used to interpret and format numbers.",
+          "type": "dropdown",
+          "required": true,
+          "default": "system",
+          "data": [
+            {
+              "title": "System Default",
+              "value": "system"
+            },
+            {
+              "title": "English (United States)",
+              "value": "en-US"
+            },
+            {
+              "title": "English (United Kingdom)",
+              "value": "en-GB"
+            },
+            {
+              "title": "German (Germany)",
+              "value": "de-DE"
+            },
+            {
+              "title": "German (Switzerland)",
+              "value": "de-CH"
+            },
+            {
+              "title": "French (France)",
+              "value": "fr-FR"
+            },
+            {
+              "title": "Italian (Italy)",
+              "value": "it-IT"
+            },
+            {
+              "title": "Spanish (Spain)",
+              "value": "es-ES"
+            }
+          ]
+        },
+        {
           "name": "decimalDetail",
           "title": "Decimal Detail",
           "description": "Maximum decimal detail to show without adding trailing zeros.",

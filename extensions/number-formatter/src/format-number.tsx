@@ -3,17 +3,6 @@ import { useMemo, useState } from "react";
 
 import { formatNumber, parseNumber } from "./number-format";
 
-const locales = [
-  ["system", "System Default"],
-  ["en-US", "English (United States)"],
-  ["en-GB", "English (United Kingdom)"],
-  ["de-DE", "German (Germany)"],
-  ["de-CH", "German (Switzerland)"],
-  ["fr-FR", "French (France)"],
-  ["it-IT", "Italian (Italy)"],
-  ["es-ES", "Spanish (Spain)"],
-] as const;
-
 const errorMessages = {
   empty: {
     title: "Type or paste a number",
@@ -34,27 +23,15 @@ const errorMessages = {
 } as const;
 
 export default function Command() {
-  const { decimalDetail } = getPreferenceValues<Preferences.FormatNumber>();
+  const { decimalDetail, locale: localeChoice } = getPreferenceValues<Preferences.FormatNumber>();
   const [input, setInput] = useState("");
-  const [localeChoice, setLocaleChoice] = useState("system");
   const locale = localeChoice === "system" ? Intl.NumberFormat().resolvedOptions().locale : localeChoice;
   const parsed = useMemo(() => parseNumber(input, locale), [input, locale]);
   const results = parsed.ok ? formatNumber(parsed.value, locale, Number(decimalDetail)) : [];
   const emptyState = parsed.ok ? null : errorMessages[parsed.reason];
 
   return (
-    <List
-      filtering={false}
-      onSearchTextChange={setInput}
-      searchBarPlaceholder="Type or paste a number…"
-      searchBarAccessory={
-        <List.Dropdown defaultValue="system" onChange={setLocaleChoice} storeValue tooltip="Number Locale">
-          {locales.map(([value, title]) => (
-            <List.Dropdown.Item key={value} title={title} value={value} />
-          ))}
-        </List.Dropdown>
-      }
-    >
+    <List filtering={false} onSearchTextChange={setInput} searchBarPlaceholder="Type or paste a number…">
       {emptyState ? (
         <List.EmptyView icon={Icon.Calculator} title={emptyState.title} description={emptyState.description} />
       ) : null}
