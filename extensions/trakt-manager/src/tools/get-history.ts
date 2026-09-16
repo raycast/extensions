@@ -83,7 +83,21 @@ type CandidateSelection = {
    * year that matched nothing. Lets the caller report the mismatch instead of guessing.
    */
   missedYears: number[];
+  /**
+   * Releases that share the requested title exactly but were left unchecked because of
+   * `EXACT_MATCH_CHECK_CAP`. A "not watched" verdict cannot be called exhaustive while any of
+   * these remain, since the user may mean one of them. Kept as candidates rather than years,
+   * because a release with no year on Trakt still has to count as unchecked.
+   */
+  unchecked: Candidate[];
 };
+
+/**
+ * Upper bound on how many same-title releases are probed in one lookup. Every candidate costs
+ * one history request, and they run in parallel, so this only guards against pathological
+ * titles; anything dropped is reported back rather than silently ignored.
+ */
+const EXACT_MATCH_CHECK_CAP = 8;
 
 function uniqueYears(candidates: Candidate[]): number[] {
   const years = candidates.map((candidate) => candidate.year).filter((year): year is number => year !== undefined);
@@ -91,8 +105,11 @@ function uniqueYears(candidates: Candidate[]): number[] {
 }
 
 /**
- * Keep the results worth checking: exact title matches when available,
+ * Keep the results worth checking: every release sharing the exact title when available,
  * otherwise the two best-ranked results.
+ *
+ * All exact matches are equally valid readings of the query, so dropping one would let a
+ * "not watched" answer be wrong about the release the user actually meant.
  */
 function pickCandidates(candidates: Candidate[], query: string, year?: number): CandidateSelection {
   const normalizedQuery = normalizeTitle(query);
@@ -103,15 +120,22 @@ function pickCandidates(candidates: Candidate[], query: string, year?: number): 
     // Falling back to another release here would hand back an "exhaustive" verdict about a
     // different film, so report the mismatch and let the caller disambiguate instead.
     if (sameYear.length === 0) {
-      return { candidates: [], missedYears: uniqueYears(pool) };
+      return { candidates: [], missedYears: uniqueYears(pool), unchecked: [] };
     }
     pool = sameYear;
   }
 
   const exact = pool.filter((candidate) => normalizeTitle(candidate.title) === normalizedQuery);
-  if (exact.length > 0) return { candidates: exact.slice(0, 3), missedYears: [] };
+  if (exact.length > 0) {
+    return {
+      candidates: exact.slice(0, EXACT_MATCH_CHECK_CAP),
+      missedYears: [],
+      unchecked: exact.slice(EXACT_MATCH_CHECK_CAP),
+    };
+  }
 
-  return { candidates: pool.slice(0, 2), missedYears: [] };
+  // No exact match: these are approximations, and the reply names each title it checked.
+  return { candidates: pool.slice(0, 2), missedYears: [], unchecked: [] };
 }
 
 async function resolveCandidates(
@@ -121,6 +145,7 @@ async function resolveCandidates(
 ): Promise<CandidateSelection> {
   const resolved: Candidate[] = [];
   const missed = new Set<number>();
+  const unchecked: Candidate[] = [];
 
   if (type === "movies" || type === "all") {
     const found = await searchMovieCandidates(query);
@@ -131,6 +156,7 @@ async function resolveCandidates(
     );
     resolved.push(...selection.candidates);
     selection.missedYears.forEach((value) => missed.add(value));
+    unchecked.push(...selection.unchecked);
   }
 
   if (type === "shows" || type === "all") {
@@ -142,9 +168,14 @@ async function resolveCandidates(
     );
     resolved.push(...selection.candidates);
     selection.missedYears.forEach((value) => missed.add(value));
+    unchecked.push(...selection.unchecked);
   }
 
-  return { candidates: resolved, missedYears: [...missed].sort((a, b) => a - b) };
+  return {
+    candidates: resolved,
+    missedYears: [...missed].sort((a, b) => a - b),
+    unchecked,
+  };
 }
 
 /**
@@ -237,6 +268,7 @@ export default async function tool(input: Input): Promise<Output> {
   if (query || traktId !== undefined) {
     let candidates: Candidate[] = [];
     let missedYears: number[] = [];
+    let unchecked: Candidate[] = [];
 
     if (traktId !== undefined) {
       if (type === "movies" || type === "all") {
@@ -249,6 +281,7 @@ export default async function tool(input: Input): Promise<Output> {
       const selection = await resolveCandidates(query, year, type);
       candidates = selection.candidates;
       missedYears = selection.missedYears;
+      unchecked = selection.unchecked;
     }
 
     const target = query ? `"${query}"` : `Trakt ID ${traktId}`;
@@ -293,22 +326,45 @@ export default async function tool(input: Input): Promise<Output> {
     const watchedItems = checked.filter((item) => item.watched);
     const wasWatched = watchedItems.length > 0;
 
-    const message = wasWatched
-      ? watchedItems
-          .map(
-            (item) =>
-              `"${item.title}"${item.year ? ` (${item.year})` : ""} was watched: ${item.plays} recorded play(s)${
-                item.lastWatchedAt ? `, most recently on ${item.lastWatchedAt}` : ""
-              }.`,
-          )
-          .join(" ")
-      : `Confirmed: no watch event exists for ${target} (checked the complete history of ${checked
-          .map((item) => `"${item.title}"${item.year ? ` (${item.year})` : ""}`)
-          .join(", ")}). This result is exhaustive, do not assume otherwise.`;
+    const label = (item: WatchCheck) => `"${item.title}"${item.year ? ` (${item.year})` : ""}`;
+    const checkedLabels = checked.map(label).join(", ");
+    const hasUnchecked = unchecked.length > 0;
+    const uncheckedYearList = uniqueYears(unchecked);
+    const uncheckedLabels =
+      uncheckedYearList.length > 0 ? uncheckedYearList.join(", ") : `${unchecked.length} with no year on Trakt`;
+
+    // A positive verdict rests on a real watch event, so leftover releases cannot invalidate it.
+    // A negative one is only exhaustive once every release sharing the title has been probed.
+    const exhaustive = wasWatched || !hasUnchecked;
+
+    let message: string;
+    if (wasWatched) {
+      const confirmed = watchedItems
+        .map(
+          (item) =>
+            `${label(item)} was watched: ${item.plays} recorded play(s)${
+              item.lastWatchedAt ? `, most recently on ${item.lastWatchedAt}` : ""
+            }.`,
+        )
+        .join(" ");
+      message = hasUnchecked
+        ? `${confirmed} Other releases share that title and were not checked (${uncheckedLabels}), ` +
+          `so name the release this answer refers to.`
+        : confirmed;
+    } else if (hasUnchecked) {
+      message =
+        `No watch event exists for ${target} among the releases checked (${checkedLabels}), but other releases ` +
+        `share that exact title and were NOT checked: ${uncheckedLabels}. Ask the user which release ` +
+        `they mean instead of reporting a not-watched verdict.`;
+    } else {
+      message =
+        `Confirmed: no watch event exists for ${target} (checked the complete history of ${checkedLabels}). ` +
+        `This result is exhaustive, do not assume otherwise.`;
+    }
 
     return {
       mode: "lookup",
-      exhaustive: true,
+      exhaustive,
       found: wasWatched,
       wasWatched,
       message,

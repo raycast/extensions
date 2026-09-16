@@ -12,6 +12,12 @@ export type ResolvedMatch = ResolvedMedia & {
    * entry is a fallback rather than the exact item the caller asked for.
    */
   matchedYear: boolean;
+  /**
+   * False when the returned title is not an exact match for the query. A requested year can
+   * only exist under a different title (asking for "Dune" 2026 resolves to "Dune: Part Three"),
+   * so callers must surface this instead of answering as if it were the requested title.
+   */
+  titleMatched: boolean;
 };
 
 /**
@@ -40,18 +46,23 @@ export function pickBestMatch(candidates: ResolvedMedia[], query: string, year?:
   if (candidates.length === 0) return undefined;
 
   const normalizedQuery = normalizeTitle(query);
-  const exact = candidates.filter((candidate) => normalizeTitle(candidate.title) === normalizedQuery);
+  const isExactTitle = (candidate: ResolvedMedia) => normalizeTitle(candidate.title) === normalizedQuery;
+  const exact = candidates.filter(isExactTitle);
   const pool = exact.length > 0 ? exact : candidates;
 
   if (year !== undefined) {
     const sameYear = pool.find((candidate) => candidate.year === year);
-    if (sameYear) return { ...sameYear, matchedYear: true };
+    if (sameYear) return { ...sameYear, matchedYear: true, titleMatched: isExactTitle(sameYear) };
 
+    // The year exists, but only under another title. Returning it is still the best guess,
+    // provided the caller is told the title drifted.
     const sameYearAnywhere = candidates.find((candidate) => candidate.year === year);
-    if (sameYearAnywhere) return { ...sameYearAnywhere, matchedYear: true };
+    if (sameYearAnywhere) {
+      return { ...sameYearAnywhere, matchedYear: true, titleMatched: isExactTitle(sameYearAnywhere) };
+    }
   }
 
-  return { ...pool[0], matchedYear: year === undefined };
+  return { ...pool[0], matchedYear: year === undefined, titleMatched: isExactTitle(pool[0]) };
 }
 
 export async function searchMovieCandidates(query: string, limit = SEARCH_RESULT_CAP): Promise<ResolvedMedia[]> {

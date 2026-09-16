@@ -62,6 +62,10 @@ export default async function tool(input: Input): Promise<Output> {
       warning =
         `No TV show named "${showTitle}" from ${showYear} was found; ` +
         `using "${match.title}"${match.year ? ` (${match.year})` : ""} instead.`;
+    } else if (!match.titleMatched) {
+      warning =
+        `No TV show is titled exactly "${showTitle}"; using "${match.title}"` +
+        `${match.year ? ` (${match.year})` : ""} instead. Confirm this is the right show.`;
     }
 
     showTraktId = match.traktId;

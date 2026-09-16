@@ -84,6 +84,10 @@ export default async function tool(input: Input): Promise<Output> {
       resolutionWarning =
         `No TV show named "${input.title}" from ${input.year} was found; ` +
         `showing "${match.title}"${match.year ? ` (${match.year})` : ""} instead. Confirm this is the right show.`;
+    } else if (!match.titleMatched) {
+      resolutionWarning =
+        `No TV show is titled exactly "${input.title}"; showing "${match.title}"` +
+        `${match.year ? ` (${match.year})` : ""} instead. Confirm this is the right show.`;
     }
   }
 
