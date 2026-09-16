@@ -102,7 +102,11 @@ export function PullRequestsList(props: { repo: Repository; pageNumber: number }
                       title="Open Pull Request in Browser"
                       url={`https://bitbucket.org/${pr.repo.fullName}/pull-requests/${pr.id}`}
                     />
-                    <ShowPullRequestDetailAction pr={pr} onDeclined={() => removePullRequest(pr.id)} />
+                    <ShowPullRequestDetailAction
+                      pr={pr}
+                      onDeclined={() => removePullRequest(pr.id)}
+                      onDone={onReviewStateChange}
+                    />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <ApprovePullRequestAction
