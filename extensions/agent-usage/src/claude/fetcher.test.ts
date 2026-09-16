@@ -62,13 +62,13 @@ const VALID_OAUTH = {
 
 test("listClaudeOAuthAccounts reads an explicit config dir and labels it from the directory name", async () => {
   const { listClaudeOAuthAccounts } = await import("./fetcher.ts");
-  const { parent, configDir } = makeClaudeHome(".claude-lazy", VALID_OAUTH);
+  const { parent, configDir } = makeClaudeHome(".claude-personal", VALID_OAUTH);
 
   try {
     const accounts = listClaudeOAuthAccounts({ configDir });
 
     assert.equal(accounts.length, 1);
-    assert.equal(accounts[0].label, "lazy");
+    assert.equal(accounts[0].label, "personal");
     assert.equal(accounts[0].token, "access-token-1");
     assert.equal(accounts[0].scopeError, null);
     assert.equal(accounts[0].credentials.subscriptionType, "max");
@@ -113,7 +113,7 @@ test("listClaudeOAuthAccounts skips a credentials file that is not parseable", a
 
 test("listClaudeOAuthAccounts keeps an account missing the user:profile scope and reports the error", async () => {
   const { listClaudeOAuthAccounts } = await import("./fetcher.ts");
-  const { parent, configDir } = makeClaudeHome(".claude-flex", {
+  const { parent, configDir } = makeClaudeHome(".claude-work", {
     ...VALID_OAUTH,
     scopes: ["user:inference"],
   });
@@ -122,7 +122,7 @@ test("listClaudeOAuthAccounts keeps an account missing the user:profile scope an
     const accounts = listClaudeOAuthAccounts({ configDir });
 
     assert.equal(accounts.length, 1);
-    assert.equal(accounts[0].label, "flex");
+    assert.equal(accounts[0].label, "work");
     assert.equal(accounts[0].scopeError?.type, "missing_scope");
   } finally {
     fs.rmSync(parent, { recursive: true, force: true });
@@ -133,14 +133,14 @@ test("dedupeClaudeAccounts drops later accounts that repeat an access token", as
   const { dedupeClaudeAccounts } = await import("./fetcher.ts");
 
   const accounts = [
-    { id: "a", label: "lazy", token: "shared", credentials: {}, scopeError: null },
+    { id: "a", label: "personal", token: "shared", credentials: {}, scopeError: null },
     { id: "b", label: "mirror", token: "shared", credentials: {}, scopeError: null },
-    { id: "c", label: "flex", token: "other", credentials: {}, scopeError: null },
+    { id: "c", label: "work", token: "other", credentials: {}, scopeError: null },
   ] as unknown as Parameters<typeof dedupeClaudeAccounts>[0];
 
   assert.deepEqual(
     dedupeClaudeAccounts(accounts).map((account) => account.label),
-    ["lazy", "flex"],
+    ["personal", "work"],
   );
 });
 
@@ -154,15 +154,15 @@ test("claudeKeychainService uses the bare service name for the default Claude ho
 test("claudeKeychainService derives the per-profile suffix from the config dir path", async () => {
   const { claudeKeychainService } = await import("./fetcher.ts");
 
-  // Pinned against services observed on a real macOS install: the suffix is
-  // sha256(<absolute config dir>) truncated to 8 hex characters.
+  // The suffix is sha256(<absolute config dir>) truncated to 8 hex characters —
+  // the shape Claude Code was observed to create on a real macOS install.
   assert.equal(
-    claudeKeychainService("/Users/lazynet/.claude-flex", "/Users/lazynet"),
-    "Claude Code-credentials-24a20f4f",
+    claudeKeychainService("/Users/someone/.claude-work", "/Users/someone"),
+    "Claude Code-credentials-18cc900a",
   );
   assert.equal(
-    claudeKeychainService("/Users/lazynet/.claude-lazy", "/Users/lazynet"),
-    "Claude Code-credentials-49ae4d6b",
+    claudeKeychainService("/Users/someone/.claude-personal", "/Users/someone"),
+    "Claude Code-credentials-c160e579",
   );
 });
 
@@ -304,13 +304,13 @@ test("the stock home falls back to the email local part when the account has no 
 
 test("a named config dir keeps its directory label even when an account identity is available", async () => {
   const { listClaudeOAuthAccounts } = await import("./fetcher.ts");
-  const { parent, configDir } = makeClaudeHome(".claude-flex", VALID_OAUTH);
+  const { parent, configDir } = makeClaudeHome(".claude-work", VALID_OAUTH);
   writeClaudeConfig(configDir, { emailAddress: "work@example.com", displayName: "Someone Else" });
 
   try {
     const [account] = listClaudeOAuthAccounts({ configDir, readKeychain: () => ({ password: null, account: null }) });
 
-    assert.equal(account.label, "flex");
+    assert.equal(account.label, "work");
     assert.equal(account.identity?.email, "work@example.com");
   } finally {
     fs.rmSync(parent, { recursive: true, force: true });
