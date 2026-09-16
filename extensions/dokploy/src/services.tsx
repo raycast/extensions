@@ -13,11 +13,14 @@ import {
 } from "@raycast/api";
 import { useFetch, useForm, FormValidation } from "@raycast/utils";
 import { useToken } from "./instances";
-import { Server, Service, ErrorResult } from "./interfaces";
+import { Server, Service, ErrorResult, DatabaseKind } from "./interfaces";
 import ServiceLogs from "./service-logs";
 import DeploymentHistory from "./deployment-history";
+import { DatabaseActions } from "./database-actions";
 import type { ServiceScope } from "./utils";
 import { getTotalServices } from "./utils";
+
+const DATABASE_KINDS: DatabaseKind[] = ["mariadb", "mongo", "mysql", "postgres", "redis"];
 
 export default function Services({
   environment,
@@ -306,6 +309,9 @@ export default function Services({
                     />
                   )}
                 </ActionPanel.Section>
+                {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
+                  <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />
+                )}
                 <Action
                   icon={Icon.Trash}
                   title="Delete"

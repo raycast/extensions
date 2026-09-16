@@ -106,6 +106,21 @@ export interface User {
 export interface Server {
   id: string;
   name: string;
+  ipAddress?: string | null;
+}
+
+export type DatabaseKind = "mariadb" | "mongo" | "mysql" | "postgres" | "redis";
+
+/** The full `<kind>.one` response for a database - unlike the row in a project tree, this carries credentials. */
+export interface DatabaseDetail {
+  appName: string;
+  databaseUser?: string | null;
+  databasePassword?: string | null;
+  databaseName?: string | null;
+  externalPort?: number | null;
+  serverId?: string | null;
+  /** Mongo only - changes the connection URI. */
+  replicaSets?: boolean | null;
 }
 
 interface Issue {
