@@ -1,0 +1,128 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ebook-hub",
+  "title": "Ebook Hub",
+  "description": "Read, import, and share freely licensed ebooks with Vim-style navigation and Hue themes.",
+  "icon": "extension-icon.png",
+  "author": "crafts69guy",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "library",
+      "title": "My Library",
+      "description": "Browse, read, and manage the books in your local library.",
+      "mode": "view"
+    },
+    {
+      "name": "continue-reading",
+      "title": "Continue Reading",
+      "description": "Open the last book you were reading at your saved position.",
+      "mode": "view"
+    },
+    {
+      "name": "import-book",
+      "title": "Import Book",
+      "description": "Import a Markdown, text, EPUB, or PDF file into your library.",
+      "mode": "view"
+    },
+    {
+      "name": "browse-community",
+      "title": "Browse Community Library",
+      "description": "Discover freely licensed books shared by the community and add them to your library.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "theme",
+      "title": "Reading Theme",
+      "description": "Hue mood used for accents and the Apply Hue Theme action.",
+      "type": "dropdown",
+      "required": false,
+      "default": "mua",
+      "data": [
+        {
+          "title": "Huế Mưa (Dark)",
+          "value": "mua"
+        },
+        {
+          "title": "Huế Hương (Dark)",
+          "value": "huong"
+        },
+        {
+          "title": "Huế Cung (Light)",
+          "value": "cung"
+        }
+      ]
+    },
+    {
+      "name": "wordsPerPage",
+      "title": "Words per Page",
+      "description": "How many words fit on one reader page (100–2000).",
+      "type": "textfield",
+      "required": false,
+      "default": "350"
+    },
+    {
+      "name": "focusMode",
+      "title": "Focus Mode",
+      "label": "Hide progress while reading",
+      "description": "Show only the book title in the reader's navigation title.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "communityIndexUrl",
+      "title": "Community Library Index",
+      "description": "HTTPS URL of the community library index.json.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://cdn.jsdelivr.net/gh/crafts69guy/ebook-hub-library@main/index.json"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1",
+    "fast-xml-parser": "^5.11.1",
+    "jszip": "^3.10.2",
+    "node-html-markdown": "^2.0.0",
+    "unpdf": "^1.8.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "~19.0.4",
+    "@vitest/coverage-v8": "^5.0.1",
+    "eslint": "^10.10.0",
+    "git-cliff": "^2.13.1",
+    "happy-dom": "^20.14.5",
+    "prettier": "^3.9.6",
+    "react-dom": "^19.0.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.scripts.json",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test:coverage": "vitest run --coverage",
+    "release": "node scripts/release.mts",
+    "changelog:preview": "git-cliff --unreleased --bump --strip all"
+  }
+}
