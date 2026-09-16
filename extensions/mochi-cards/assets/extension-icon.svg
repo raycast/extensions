@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Mochi Cards icon</title>
+  <desc id="description">A white Mochi tree with a green trunk on a green background.</desc>
+  <defs>
+    <linearGradient id="background" x1="88" y1="54" x2="424" y2="476" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#93C751" />
+      <stop offset="1" stop-color="#68972F" />
+    </linearGradient>
+    <clipPath id="icon-inset">
+      <rect x="32" y="32" width="448" height="448" rx="80" />
+    </clipPath>
+    <filter id="tree-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="-16" stdDeviation="16" flood-color="#355B1E" flood-opacity="0.28" />
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#background)" />
+  <rect x="2" y="2" width="508" height="508" rx="110" fill="none" stroke="#B5DA7C" stroke-opacity="0.5" stroke-width="4" />
+  <g clip-path="url(#icon-inset)">
+    <g transform="translate(0 40)" filter="url(#tree-shadow)">
+      <path
+        fill="#FFFFFF"
+        d="M256 90C221 90 193 117 192 152C166 137 132 141 109 164C86 187 82 220 96 247C63 252 39 279 39 312C39 331 47 349 61 362C39 377 27 402 29 428C32 461 59 480 99 480H413C453 480 480 461 483 428C485 402 473 377 451 362C465 349 473 331 473 312C473 279 449 252 416 247C430 220 426 187 403 164C380 141 346 137 320 152C319 117 291 90 256 90Z"
+      />
+      <path
+        d="M256 452V235M256 326L311 271M256 417L352 321M256 339L187 270M256 437L141 322"
+        fill="none"
+        stroke="#68972F"
+        stroke-width="34"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </g>
+  </g>
+</svg>
