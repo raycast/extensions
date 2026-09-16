@@ -1,0 +1,77 @@
+{
+  "ownerName": "App Store",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://support.apple.com/guide/app-store/keyboard-shortcuts-fir513b7cb81/mac",
+  "shortcuts": [
+    {
+      "id": "discover",
+      "commandName": "Display Discover Apps",
+      "modifiers": ["command"],
+      "key": "1",
+      "scope": "app"
+    },
+    {
+      "id": "arcade",
+      "commandName": "Display Arcade Apps",
+      "modifiers": ["command"],
+      "key": "2",
+      "scope": "app"
+    },
+    {
+      "id": "create",
+      "commandName": "Display Create Apps",
+      "modifiers": ["command"],
+      "key": "3",
+      "scope": "app"
+    },
+    {
+      "id": "work",
+      "commandName": "Display Work Apps",
+      "modifiers": ["command"],
+      "key": "4",
+      "scope": "app"
+    },
+    {
+      "id": "play",
+      "commandName": "Display Play Apps",
+      "modifiers": ["command"],
+      "key": "5",
+      "scope": "app"
+    },
+    {
+      "id": "develop",
+      "commandName": "Display Develop Apps",
+      "modifiers": ["command"],
+      "key": "6",
+      "scope": "app"
+    },
+    {
+      "id": "categories",
+      "commandName": "Display Categories Apps",
+      "modifiers": ["command"],
+      "key": "7",
+      "scope": "app"
+    },
+    {
+      "id": "updates",
+      "commandName": "Display Updates",
+      "modifiers": ["command"],
+      "key": "8",
+      "scope": "app"
+    },
+    {
+      "id": "search",
+      "commandName": "Search for App",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "refresh",
+      "commandName": "Refresh Current Page",
+      "modifiers": ["command"],
+      "key": "R",
+      "scope": "app"
+    }
+  ]
+}

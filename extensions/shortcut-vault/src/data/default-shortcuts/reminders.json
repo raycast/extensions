@@ -1,0 +1,133 @@
+{
+  "ownerName": "Reminders",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://support.apple.com/guide/reminders/keyboard-shortcuts-remn19b3424c/mac",
+  "shortcuts": [
+    {
+      "id": "new-reminder",
+      "commandName": "New Reminder",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-list",
+      "commandName": "New List",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-section",
+      "commandName": "New Section",
+      "modifiers": ["command", "option"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-section-with-selection",
+      "commandName": "New Section with Selection",
+      "modifiers": ["control", "command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "indent-reminder",
+      "commandName": "Indent Reminder",
+      "modifiers": ["command"],
+      "key": "]",
+      "scope": "app"
+    },
+    {
+      "id": "outdent-reminder",
+      "commandName": "Outdent Reminder",
+      "modifiers": ["command"],
+      "key": "[",
+      "scope": "app"
+    },
+    {
+      "id": "show-subtasks",
+      "commandName": "Show All Subtasks",
+      "modifiers": ["command"],
+      "key": "E",
+      "scope": "app"
+    },
+    {
+      "id": "hide-subtasks",
+      "commandName": "Hide All Subtasks",
+      "modifiers": ["command", "shift"],
+      "key": "E",
+      "scope": "app"
+    },
+    {
+      "id": "flag-reminder",
+      "commandName": "Flag or Unflag Reminder",
+      "modifiers": ["command", "shift"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "print-list",
+      "commandName": "Print Reminder List",
+      "modifiers": ["command"],
+      "key": "P",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-sidebar",
+      "commandName": "Hide or Show Sidebar",
+      "modifiers": ["command", "option"],
+      "key": "S",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-complete",
+      "commandName": "Mark Reminder Completed or Incomplete",
+      "modifiers": ["command", "shift"],
+      "key": "C",
+      "scope": "app"
+    },
+    {
+      "id": "show-completed",
+      "commandName": "Show or Hide Completed Reminders",
+      "modifiers": ["command", "shift"],
+      "key": "H",
+      "scope": "app"
+    },
+    {
+      "id": "due-today",
+      "commandName": "Set Reminder Due Today",
+      "modifiers": ["command"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "due-tomorrow",
+      "commandName": "Set Reminder Due Tomorrow",
+      "modifiers": ["command", "option"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "overdue-due-today",
+      "commandName": "Set All Overdue Reminders Due Today",
+      "modifiers": ["control", "command"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "due-this-weekend",
+      "commandName": "Set Reminder Due This Weekend",
+      "modifiers": ["command"],
+      "key": "K",
+      "scope": "app"
+    },
+    {
+      "id": "due-next-week",
+      "commandName": "Set Reminder Due Next Week",
+      "modifiers": ["command", "option"],
+      "key": "K",
+      "scope": "app"
+    }
+  ]
+}
