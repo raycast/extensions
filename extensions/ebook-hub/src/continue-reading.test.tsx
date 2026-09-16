@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 
 import Command from "./continue-reading";
 import { rememberLastOpened } from "./storage";
-import { launchCommand } from "./test/raycast-api";
+import { launchCommand, toasts } from "./test/raycast-api";
 import { renderCommand, sampleBook, useTempLibrary, view } from "./test/render";
 
 const markdown = () => view().getByTestId("markdown").textContent ?? "";
@@ -22,6 +22,19 @@ describe("Continue Reading", () => {
     fireEvent.click(view().getByRole("button", { name: "Open My Library" }));
 
     expect(launchCommand).toHaveBeenCalledWith({ name: "library", type: "userInitiated" });
+  });
+
+  it("reports a failure to open the library instead of throwing", async () => {
+    await useTempLibrary();
+    launchCommand.mockRejectedValueOnce(new Error("Command is disabled"));
+    renderCommand(<Command />);
+
+    await waitFor(() => expect(markdown()).toContain("Nothing to continue"));
+    fireEvent.click(view().getByRole("button", { name: "Open My Library" }));
+
+    await waitFor(() =>
+      expect(toasts.at(-1)).toMatchObject({ title: "Could not open My Library", message: "Command is disabled" }),
+    );
   });
 
   it("opens the last book at its saved position", async () => {

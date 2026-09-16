@@ -112,6 +112,22 @@ describe("My Library", () => {
     expect(launchCommand).toHaveBeenCalledWith({ name: "browse-community", type: "userInitiated" });
   });
 
+  it("reports a failure to open the Community Library", async () => {
+    await useTempLibrary();
+    launchCommand.mockRejectedValueOnce(new Error("Command is disabled"));
+    renderCommand(<Command />);
+
+    await waitFor(() => expect(view().getByText("Your library is empty")).toBeTruthy());
+    fireEvent.click(within(view().getByTestId("empty-view")).getByRole("button", { name: "Browse Community Library" }));
+
+    await waitFor(() =>
+      expect(toasts.at(-1)).toMatchObject({
+        title: "Could not open the Community Library",
+        message: "Command is disabled",
+      }),
+    );
+  });
+
   it("opens the reader and refreshes progress on return", async () => {
     const { store, walden } = await seed();
     renderCommand(<Command />);

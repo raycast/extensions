@@ -103,7 +103,13 @@ export default function Command() {
     <Action
       title="Browse Community Library"
       icon={Icon.Globe}
-      onAction={() => launchCommand({ name: "browse-community", type: LaunchType.UserInitiated })}
+      onAction={async () => {
+        try {
+          await launchCommand({ name: "browse-community", type: LaunchType.UserInitiated });
+        } catch (error) {
+          await showFailureToast(error, { title: "Could not open the Community Library" });
+        }
+      }}
     />
   );
 

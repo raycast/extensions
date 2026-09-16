@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon, LaunchType, launchCommand } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 
 import { Reader } from "./components/Reader";
@@ -44,7 +44,13 @@ export default function Command() {
           <Action
             title="Open My Library"
             icon={Icon.Book}
-            onAction={() => launchCommand({ name: "library", type: LaunchType.UserInitiated })}
+            onAction={async () => {
+              try {
+                await launchCommand({ name: "library", type: LaunchType.UserInitiated });
+              } catch (error) {
+                await showFailureToast(error, { title: "Could not open My Library" });
+              }
+            }}
           />
         </ActionPanel>
       }
