@@ -1,6 +1,6 @@
 # Jira (Self-Hosted) Changelog
 
-## [Improve issue reliability and authentication setup] - {PR_MERGE_DATE}
+## [Improve issue reliability and authentication setup] - 2026-09-16
 
 - Prevent issue details from crashing when search results omit custom-field schemas.
 - Fix missing Jira issue-type icons and preserve their returned image content types.
