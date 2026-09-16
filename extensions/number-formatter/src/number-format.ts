@@ -19,45 +19,64 @@ function localeSeparators(locale: string) {
 }
 
 function isConventionalGroup(mantissa: string, separator: string) {
-  const unsigned = mantissa.replace(/^[+-]/, "");
-  const groups = unsigned.split(separator);
+  const groups = mantissa.split(separator);
 
   return (
     groups.length > 1 && /^\d{1,3}$/.test(groups[0] ?? "") && groups.slice(1).every((group) => /^\d{3}$/.test(group))
   );
 }
 
+function normalizeGroupedInteger(integer: string): string | null {
+  const separators = [...new Set(integer.match(/[., ']/g) ?? [])];
+  if (separators.length > 1) return null;
+  if (separators.length === 0) return /^\d*$/.test(integer) ? integer : null;
+
+  const separator = separators[0]!;
+  return isConventionalGroup(integer, separator) ? integer.replaceAll(separator, "") : null;
+}
+
 function normalizeMantissa(mantissa: string, locale: string): string | null {
-  const withoutSpaceGroups = mantissa.replace(/[\s\u00a0\u202f'’]/g, "");
-  const dots = [...withoutSpaceGroups.matchAll(/\./g)].map((match) => match.index);
-  const commas = [...withoutSpaceGroups.matchAll(/,/g)].map((match) => match.index);
+  const sign = mantissa.match(/^[+-]/)?.[0] ?? "";
+  const unsigned = sign ? mantissa.slice(1) : mantissa;
+  const normalizedGroups = unsigned.replace(/[\s\u00a0\u202f]/g, " ").replaceAll("’", "'");
+  const dots = [...normalizedGroups.matchAll(/\./g)].map((match) => match.index);
+  const commas = [...normalizedGroups.matchAll(/,/g)].map((match) => match.index);
+  let decimalSeparator: "." | "," | null = null;
 
   if (dots.length > 0 && commas.length > 0) {
-    const decimal = dots.at(-1)! > commas.at(-1)! ? "." : ",";
-    const group = decimal === "." ? "," : ".";
+    decimalSeparator = dots.at(-1)! > commas.at(-1)! ? "." : ",";
+    const decimalCount = decimalSeparator === "." ? dots.length : commas.length;
+    if (decimalCount !== 1) return null;
+  } else {
+    const separator = dots.length > 0 ? "." : commas.length > 0 ? "," : null;
 
-    if (withoutSpaceGroups.split(decimal).length !== 2) return null;
-    return withoutSpaceGroups.replaceAll(group, "").replace(decimal, ".");
+    if (separator) {
+      const count = separator === "." ? dots.length : commas.length;
+      const { decimal, group } = localeSeparators(locale);
+
+      if (separator === decimal) {
+        if (count !== 1) return null;
+        decimalSeparator = separator;
+      } else if (separator === group && (count > 1 || isConventionalGroup(normalizedGroups, separator))) {
+        decimalSeparator = null;
+      } else if (count === 1) {
+        decimalSeparator = separator;
+      } else {
+        return null;
+      }
+    }
   }
 
-  const separator = dots.length > 0 ? "." : commas.length > 0 ? "," : null;
-  if (!separator) return withoutSpaceGroups;
-
-  const count = separator === "." ? dots.length : commas.length;
-  const { decimal, group } = localeSeparators(locale);
-
-  if (separator === decimal) {
-    if (count !== 1) return null;
-    return withoutSpaceGroups.replace(separator, ".");
+  if (!decimalSeparator) {
+    const integer = normalizeGroupedInteger(normalizedGroups);
+    return integer === null ? null : `${sign}${integer}`;
   }
 
-  if (separator === group && (count > 1 || isConventionalGroup(withoutSpaceGroups, separator))) {
-    return withoutSpaceGroups.replaceAll(separator, "");
-  }
+  const [integerPart, fractionPart, extraPart] = normalizedGroups.split(decimalSeparator);
+  if (extraPart !== undefined || !/^\d*$/.test(fractionPart ?? "")) return null;
 
-  if (count === 1) return withoutSpaceGroups.replace(separator, ".");
-
-  return null;
+  const integer = normalizeGroupedInteger(integerPart ?? "");
+  return integer === null ? null : `${sign}${integer}.${fractionPart}`;
 }
 
 function significantDigitCount(canonical: string) {
@@ -85,6 +104,9 @@ export function parseNumber(input: string, locale: string): ParseResult {
 
   const value = Number(canonical);
   if (!Number.isFinite(value)) return { ok: false, reason: "out-of-range" };
+  if (value === 0 && /[1-9]/.test(canonical.split(/[eE]/)[0] ?? "")) {
+    return { ok: false, reason: "out-of-range" };
+  }
 
   return { ok: true, value };
 }

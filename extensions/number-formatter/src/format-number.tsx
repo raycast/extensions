@@ -33,12 +33,8 @@ const errorMessages = {
   },
 } as const;
 
-type Preferences = {
-  decimalDetail: string;
-};
-
 export default function Command() {
-  const { decimalDetail } = getPreferenceValues<Preferences>();
+  const { decimalDetail } = getPreferenceValues<Preferences.FormatNumber>();
   const [input, setInput] = useState("");
   const [localeChoice, setLocaleChoice] = useState("system");
   const locale = localeChoice === "system" ? Intl.NumberFormat().resolvedOptions().locale : localeChoice;
@@ -49,7 +45,6 @@ export default function Command() {
   return (
     <List
       filtering={false}
-      navigationTitle="Number Formatter"
       onSearchTextChange={setInput}
       searchBarPlaceholder="Type or paste a number…"
       searchBarAccessory={

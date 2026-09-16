@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "number-formatter",
   "version": "1.0.0",
   "description": "Quickly understand and copy numbers in familiar, locale-aware formats.",
@@ -7,7 +8,7 @@
   "author": "dydent",
   "license": "MIT",
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -91,7 +92,7 @@
     "@types/node": "^22.20.3",
     "@types/react": "^19.3.0",
     "eslint": "^10.10.0",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.7",
     "typescript": "^6.0.3"
   }
 }

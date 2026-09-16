@@ -37,7 +37,7 @@ Number Formatter is a small quality-of-life Raycast extension for seeing numbers
 
 ## Development
 
-Requires Node.js 22.14 or newer, npm, and Raycast.
+Requires Node.js 24 LTS or a newer LTS release, npm, and Raycast.
 
 ```bash
 npm install

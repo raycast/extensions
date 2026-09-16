@@ -14,5 +14,5 @@
     "target": "ES2023",
     "types": ["node", "react"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "raycast-env.d.ts"]
 }
