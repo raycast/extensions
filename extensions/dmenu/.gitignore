@@ -1,0 +1,26 @@
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# dependencies
+node_modules/
+
+# python cache
+.mypy_cache/
+__pycache__/
+*.pyc
+
+# build output (raycast build artifacts, if any)
+dist/
+build/
+
+# OS/editor cruft
+.DS_Store
+.vscode/
+.idea/
+
+# env/secrets
+.env
+.env.local
