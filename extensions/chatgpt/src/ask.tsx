@@ -7,7 +7,8 @@ import { PreferencesActionSection } from "./actions/preferences";
 import { useAutoSaveConversation } from "./hooks/useAutoSaveConversation";
 import { useChat } from "./hooks/useChat";
 import { useConversations } from "./hooks/useConversations";
-import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
+import { DEFAULT_MODEL } from "./hooks/useModel";
+import { useModelCatalog } from "./hooks/useModelCatalog";
 import { useQuestion } from "./hooks/useQuestion";
 import { useSavedChat } from "./hooks/useSavedChat";
 import { Chat, Conversation, Model } from "./type";
@@ -16,22 +17,17 @@ import { ModelDropdown } from "./views/model/dropdown";
 import { QuestionForm } from "./views/question/form";
 import { EditModelAction } from "./actions/edit-model";
 import { CacheAdapter } from "./utils/cache";
-import { initialModelId, selectedChatModel } from "./utils/model-selection";
+import { availableChatModels, initialModelId, selectedChatModel } from "./utils/model-selection";
+import { isCommandModel } from "./utils/model-catalog";
 
 export default function Ask(props: { conversation?: Conversation; initialQuestion?: string; initialModel?: Model }) {
   const conversations = useConversations();
-  const models = useModel();
+  const snapshot = useModelCatalog();
+  const modelsLoading = snapshot.isLoading;
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
   const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
-
-  useEffect(() => {
-    // only work on `Summarize -> Ask` flow
-    if (props.initialQuestion) {
-      chats.ask(props.initialQuestion, [], props.conversation!.model);
-    }
-  }, []);
 
   const explicitModel = props.initialModel ?? props.conversation?.model;
   const [modelCache] = useState(() => new CacheAdapter("select_model"));
@@ -58,25 +54,34 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
 
   const { push } = useNavigation();
   const openedInitialInput = useRef(false);
-  const currentModel = selectedChatModel(models.data, selectedModelId, explicitModel ?? conversation.model);
+  // Catalog snapshots keep stable references, so the resolved model can drive effects directly.
+  const currentModel = selectedChatModel(snapshot, selectedModelId, explicitModel ?? conversation.model);
+  const askedInitialQuestion = useRef(false);
+  useEffect(() => {
+    // Summarize -> Ask must also wait for the chat model to be resolved.
+    if (modelsLoading || !props.initialQuestion || askedInitialQuestion.current) return;
+    askedInitialQuestion.current = true;
+    chats.ask(props.initialQuestion, [], currentModel);
+  }, [modelsLoading, props.initialQuestion, currentModel]);
   const currentModelId = useRef(currentModel.id);
   currentModelId.current = currentModel.id;
   const changeModel = (id: string) => {
     if (id === currentModelId.current) return;
     currentModelId.current = id;
     setSelectedModelId(id);
-    modelCache.set(id);
+    if (!isCommandModel(id)) modelCache.set(id);
   };
-  const availableModels = models.data[currentModel.id]
-    ? Object.values(models.data)
-    : [...Object.values(models.data), currentModel];
+  const availableModels = availableChatModels(
+    snapshot,
+    explicitModel && isCommandModel(explicitModel.id) ? explicitModel : currentModel,
+  );
   const submitQuestion = (text: string, files: string[], model = currentModel) => {
     void question.update("");
     return chats.ask(text, files, model);
   };
 
   useEffect(() => {
-    if (models.isLoading || question.isLoading || openedInitialInput.current) return;
+    if (modelsLoading || question.isLoading || openedInitialInput.current) return;
     openedInitialInput.current = true;
     if (props.initialQuestion || !isAutoFullInput) return;
     if (isAutoLoadText && question.data.length === 0) return;
@@ -92,7 +97,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
         />,
       );
     }
-  }, [models.isLoading, question.isLoading, question.data, currentModel]);
+  }, [modelsLoading, question.isLoading, question.data, currentModel]);
 
   useEffect(() => {
     if ((props.conversation?.id !== conversation.id || conversations.data.length === 0) && isAutoSaveConversation) {
@@ -109,15 +114,15 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   }, [chats.data]);
 
   useEffect(() => {
-    if (models.isLoading) return;
+    if (modelsLoading) return;
+    // Models -> Ask is an explicit choice. Continuing a conversation is session-local. A remembered
+    // ID that no longer resolves (a removed preset or an old command entry) is repaired in place.
+    const remember = rememberInitialModel.current || (!explicitModel && selectedModelId !== currentModel.id);
+    rememberInitialModel.current = false;
+    if (remember && !isCommandModel(currentModel.id)) modelCache.set(currentModel.id);
     setSelectedModelId(currentModel.id);
-    // Models -> Ask is an explicit choice. Continuing a conversation is session-local.
-    if (rememberInitialModel.current) {
-      modelCache.set(currentModel.id);
-      rememberInitialModel.current = false;
-    }
     setConversation((previous) => ({ ...previous, model: currentModel, updated_at: new Date().toISOString() }));
-  }, [currentModel, models.isLoading]);
+  }, [currentModel, modelsLoading]);
 
   const getActionPanel = (question: string, model: Model) => (
     <ActionPanel>
@@ -134,7 +139,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
     </ActionPanel>
   );
 
-  if (models.isLoading)
+  if (modelsLoading)
     return <List isLoading navigationTitle="Ask" searchText={question.data} onSearchTextChange={question.update} />;
 
   return (
@@ -142,7 +147,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       searchText={question.data}
       isShowingDetail={chats.data.length > 0}
       filtering={false}
-      isLoading={question.isLoading || chats.isLoading || models.isLoading}
+      isLoading={question.isLoading || chats.isLoading || modelsLoading}
       onSearchTextChange={question.update}
       throttle={false}
       navigationTitle={"Ask"}

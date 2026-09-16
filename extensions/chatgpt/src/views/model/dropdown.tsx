@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
 import { ChangeModelProp } from "../../type";
+import { chatModelLabel } from "../../utils/model-selection";
 
 export const ModelDropdown = (props: ChangeModelProp) => {
   const { models, onModelChange, selectedModel } = props;
@@ -13,14 +14,14 @@ export const ModelDropdown = (props: ChangeModelProp) => {
         {separateDefaultModel
           .filter((x) => x.pinned)
           .map((model) => (
-            <List.Dropdown.Item key={model.id} title={model.name} value={model.id} />
+            <List.Dropdown.Item key={model.id} title={chatModelLabel(model)} value={model.id} />
           ))}
       </List.Dropdown.Section>
       <List.Dropdown.Section title="Models">
         {separateDefaultModel
           .filter((x) => !x.pinned)
           .map((model) => (
-            <List.Dropdown.Item key={model.id} title={model.name} value={model.id} />
+            <List.Dropdown.Item key={model.id} title={chatModelLabel(model)} value={model.id} />
           ))}
       </List.Dropdown.Section>
     </List.Dropdown>

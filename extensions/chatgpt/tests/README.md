@@ -1,5 +1,18 @@
 Model and command management checks
 
+Ask and Command model selection:
+
+| Changed behavior | Decision | Conditions / stop boundary | Layer |
+| ---------------- | -------- | -------------------------- | ----- |
+| Model resolution | test | Old command cache resolves to a base/Default; command conversations reuse the catalog snapshot's command projection, or a deleted command's saved settings | Unit |
+| Model choices and labels | test | Ordinary Ask, Full Text Input and Summarize list bases; command conversations additionally offer their own Command-prefixed choice | Raycast runtime integration |
+| Command continuation and editing | update-existing | Preserve messages and drafts, apply edited settings, allow switching to a base and back; a base chosen explicitly inside a command conversation is remembered, switching back to the command is not | Raycast runtime integration |
+| Ask with This Command | test | Command rows offer Ask with This Command instead of Ask with This Model; it starts a labeled command conversation that sends the command settings and leaves the remembered base unchanged | Raycast runtime integration |
+| Cached selections and saved conversations | test | Repaired base choice survives reopening, command deletion and a later restored preset ID; saved command conversations retain settings, messages and labels | Raycast runtime integration |
+| Summary submission | test | Uses the displayed base model exactly once; editing settings does not repeat the initial request | Raycast runtime integration |
+| Ordinary base-model flows | existing-test-enough | Existing selection, edit/back and draft tests retain coverage | Raycast runtime integration |
+| User documentation | no-test | Describes selection and continuation behavior | Inspection |
+
 Cross-command storage and shortcut review fixes:
 
 | Changed behavior | Decision | Conditions / stop boundary | Layer |

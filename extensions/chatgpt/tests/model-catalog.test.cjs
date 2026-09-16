@@ -1,6 +1,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const {
+  catalogModels,
   createModelCatalog,
   migrateCatalog,
   mapCommandToModel,
@@ -34,6 +35,7 @@ const command = {
   contentSource: "clipboard",
   isDisplayInput: true,
 };
+const chatCatalog = (catalog) => ({ catalog, models: catalogModels(catalog) });
 function storage(initial = {}) {
   const values = new Map(Object.entries(initial));
   return {
@@ -384,11 +386,44 @@ test("legacy migration preserves existing presets even when their IDs resemble g
 test("explicit model and saved conversation selection win over the cached model; invalid cache falls back", () => {
   assert.equal(initialModelId(base, "default"), base.id);
   assert.equal(initialModelId(undefined, base.id), base.id);
-  const data = { default: DEFAULT_MODEL, writer: { ...base, prompt: "Latest config" } };
+  const data = chatCatalog({
+    models: { default: DEFAULT_MODEL, writer: { ...base, prompt: "Latest config" } },
+    commands: {},
+  });
   assert.equal(selectedChatModel(data, base.id, base).prompt, "Latest config");
   assert.equal(selectedChatModel(data, "removed").id, "default");
   const historical = { ...base, id: "removed", prompt: "Historical preset" };
   assert.equal(selectedChatModel(data, "removed", historical).prompt, "Historical preset");
+});
+
+test("ordinary Ask resolves old command cache to bases while command conversations retain command settings", () => {
+  const rewrite = { ...command, configurationMode: "inherit", overridePrompt: true, prompt: "Command only" };
+  const catalog = { models: { default: DEFAULT_MODEL, writer: base }, commands: { rewrite } };
+  const conversationModel = mapCommandToModel(rewrite, catalog.models);
+  assert.equal(selectedChatModel(chatCatalog(catalog), initialModelId(undefined, conversationModel.id)), base);
+  const updated = chatCatalog({
+    ...catalog,
+    commands: { rewrite: { ...rewrite, prompt: "Updated command instructions" } },
+  });
+  const resolved = selectedChatModel(updated, conversationModel.id, conversationModel);
+  assert.equal(resolved.prompt, "Updated command instructions");
+  assert.equal(resolved.id, conversationModel.id);
+  assert.equal(resolved, updated.models[conversationModel.id], "command conversations reuse the snapshot projection");
+  assert.equal(selectedChatModel(updated, base.id, conversationModel), base);
+  const independent = chatCatalog({
+    ...catalog,
+    commands: { rewrite: { ...rewrite, configurationMode: "independent", model: "command-only-model" } },
+  });
+  assert.equal(selectedChatModel(independent, conversationModel.id, conversationModel).option, "command-only-model");
+  assert.equal(selectedChatModel(independent, conversationModel.id), DEFAULT_MODEL);
+  const removed = chatCatalog({ ...catalog, commands: {} });
+  assert.equal(selectedChatModel(removed, conversationModel.id, conversationModel), conversationModel);
+  assert.equal(selectedChatModel(removed, conversationModel.id), DEFAULT_MODEL);
+  const orphaned = {
+    catalog: { ...catalog, commands: { rewrite: { ...command, baseModelId: "removed" } } },
+    models: catalog.models,
+  };
+  assert.equal(selectedChatModel(orphaned, conversationModel.id), DEFAULT_MODEL);
 });
 
 test("loading and resetting a previously linked built-in preserves shared bases and restores independent defaults", async () => {
