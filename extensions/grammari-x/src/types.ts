@@ -5,6 +5,12 @@ enum CommandType {
   ContinueText = "Continue Text",
 }
 
+enum AIProvider {
+  Auto = "auto",
+  RaycastAI = "raycast",
+  OpenAI = "openai",
+}
+
 enum ToneType {
   Professional = "Professional",
   Friendly = "Friendly",
@@ -33,4 +39,4 @@ export interface SavedChat extends Chat {
   saved_at?: string;
 }
 
-export { CommandType, ToneType };
+export { AIProvider, CommandType, ToneType };
