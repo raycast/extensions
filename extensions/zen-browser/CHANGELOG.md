@@ -4,6 +4,7 @@
 
 - Add live pinned tabs to Search Bookmarks through an optional Zen companion; preserve ordinary bookmarks.
 - Activate existing tabs through the browser API and a local Native Messaging bridge on macOS.
+- Set up, repair, and remove the bundled local bridge from Search Bookmarks without manual downloads.
 
 ## [Fix Open Workspace Command for Recent Zen Versions] - 2026-06-05
 

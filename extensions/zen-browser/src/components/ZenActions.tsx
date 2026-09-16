@@ -15,6 +15,7 @@ import { runShortcut } from "../actions";
 import { platform } from "os";
 import { runPowerShellScript } from "@raycast/utils";
 
+import { BridgeActions } from "./BridgeActions";
 import { switchPinnedTab } from "../actions/switch-pinned-tab";
 import { PinnedTabEntry } from "../util/pinned-tabs";
 
@@ -86,7 +87,7 @@ function ZenGoToWorkspace(props: { workspace: WorkspaceEntry }) {
   );
 }
 
-function PinnedItemAction({ entry }: { entry: PinnedTabEntry }) {
+function PinnedItemAction({ entry, refresh }: { entry: PinnedTabEntry; refresh: () => void }) {
   return (
     <ActionPanel title={entry.title}>
       <Action
@@ -110,6 +111,9 @@ function PinnedItemAction({ entry }: { entry: PinnedTabEntry }) {
         content={entry.url}
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
       />
+      <ActionPanel.Section title="Zen Connection">
+        <BridgeActions refresh={refresh} />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }

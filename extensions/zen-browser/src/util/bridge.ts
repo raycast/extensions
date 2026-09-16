@@ -5,7 +5,7 @@ import path from "path";
 import { PinnedTabEntry } from "./pinned-tabs";
 
 const directory = path.join(os.homedir(), ".zen-browser-bridge");
-const unavailable = "Open Zen and install the Zen Browser Bridge companion. See the extension README.";
+const unavailable = "Install the Zen add-on, then choose Set Up or Repair Zen Connection.";
 
 export function bridgeRequest<T>(socketPath: string, request: object): Promise<T> {
   return new Promise((resolve, reject) => {
