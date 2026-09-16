@@ -1,6 +1,8 @@
 import { LocalStorage } from "@raycast/api";
+import { randomUUID } from "crypto";
 
 export interface TimerState {
+  id: string; // Identifies this timer instance; see clearTimer()
   taskTitle: string;
   subtaskTitle?: string;
   startedAt: number; // Unix timestamp ms
@@ -22,7 +24,11 @@ const LOG_KEY = "pomodoro-md-logs";
 export async function getTimer(): Promise<TimerState | null> {
   const raw = await LocalStorage.getItem<string>(TIMER_KEY);
   if (!raw) return null;
-  return JSON.parse(raw);
+  const state = JSON.parse(raw) as TimerState;
+  // Timers stored before ids existed: derive a stable one so they can still
+  // be claimed and cleared.
+  if (!state.id) state.id = `legacy-${state.startedAt}`;
+  return state;
 }
 
 export async function startTimer(
@@ -32,6 +38,7 @@ export async function startTimer(
   isBreak = false,
 ): Promise<void> {
   const state: TimerState = {
+    id: randomUUID(),
     taskTitle,
     subtaskTitle,
     startedAt: Date.now(),
@@ -45,8 +52,20 @@ export async function startBreak(durationMinutes: number): Promise<void> {
   await startTimer("Break", durationMinutes, undefined, true);
 }
 
-export async function clearTimer(): Promise<void> {
+/**
+ * Remove the stored timer, but only if it is still the instance identified
+ * by `id`. Returns whether this call removed it.
+ *
+ * This is the claim step for finishing a session: of several commands that
+ * read the same expired timer (the menu bar refresh and a command launched at
+ * the same moment), exactly one gets `true` and goes on to log it. A caller
+ * holding a stale timer never removes a newer one started in the meantime.
+ */
+export async function clearTimer(id: string): Promise<boolean> {
+  const current = await getTimer();
+  if (!current || current.id !== id) return false;
   await LocalStorage.removeItem(TIMER_KEY);
+  return true;
 }
 
 // Keep logs for 30 days so LocalStorage does not grow unbounded.

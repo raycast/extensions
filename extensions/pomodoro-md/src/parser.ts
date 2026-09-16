@@ -28,6 +28,26 @@ export interface ParseOptions {
 
 export const DEFAULT_DAILY_NOTE_FORMAT = "YYYY-MM-DD.md";
 
+// Task line: "- 2p Title" or "- 2p [done] Title". Groups: (1) pomodoros, (2) title.
+const TASK_LINE_RE = /^- (\d+)p\s+(?:\[done\]\s+)?(.+)$/;
+// Subtask line: indented with a tab or 2+ spaces. Group: (1) title.
+const SUBTASK_LINE_RE = /^(?:\t| {2,})- (?:\[done\]\s+)?(.+)$/;
+
+/**
+ * Title of a task line exactly as the parser reports it (links stripped,
+ * trimmed), or null when the line is not a task line.
+ */
+export function taskLineTitle(line: string): string | null {
+  const m = line.match(TASK_LINE_RE);
+  return m ? stripMarkdownLinks(m[2].trim()) : null;
+}
+
+/** Same as taskLineTitle, for subtask lines. */
+export function subtaskLineTitle(line: string): string | null {
+  const m = line.match(SUBTASK_LINE_RE);
+  return m ? stripMarkdownLinks(m[1].trim()) : null;
+}
+
 /**
  * Get today's daily note file path.
  *
@@ -54,6 +74,20 @@ export function getDailyNotePath(
 
 function headingLevel(header: string): number {
   return header.match(/^#+/)?.[0].length ?? 1;
+}
+
+/**
+ * Form used to compare a block name with a break keyword: trimmed, case-
+ * insensitive, inner whitespace collapsed. The whole name must match, so the
+ * default "Break" keyword never catches a "Breakfast" block.
+ */
+function normalizeBlockName(name: string): string {
+  return name.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+export function isBreakBlock(name: string, breakKeywords: string[]): boolean {
+  const normalized = normalizeBlockName(name);
+  return breakKeywords.some((kw) => normalizeBlockName(kw) === normalized);
 }
 
 /**
@@ -135,7 +169,7 @@ function parseBlocks(
       const name = blockMatch[1].trim();
       const timeRange = blockMatch[2] || "";
       const target = blockMatch[3] ? parseInt(blockMatch[3]) : 0;
-      const isBreak = breakKeywords.some((kw) => name.includes(kw));
+      const isBreak = isBreakBlock(name, breakKeywords);
 
       currentBlock = {
         name,
@@ -149,8 +183,7 @@ function parseBlocks(
 
     if (!currentBlock || currentBlock.isBreak) continue;
 
-    // Match task lines: - 2p #482 : ... or - 2p [done] #482 : ...
-    const taskMatch = line.match(/^- (\d+)p\s+(?:\[done\]\s+)?(.+)$/);
+    const taskMatch = line.match(TASK_LINE_RE);
     if (taskMatch) {
       if (currentTask) currentBlock.tasks.push(currentTask);
       const isDone = /^- \d+p\s+\[done\]/.test(line);
@@ -163,9 +196,7 @@ function parseBlocks(
       continue;
     }
 
-    // Match subtask lines (indented with tab or spaces):
-    //   - Review design feedback  or  - [done] Review design feedback
-    const subtaskMatch = line.match(/^(?:\t| {2,})- (?:\[done\]\s+)?(.+)$/);
+    const subtaskMatch = line.match(SUBTASK_LINE_RE);
     if (subtaskMatch && currentTask) {
       const isSubDone = /^(?:\t| {2,})- \[done\]/.test(line);
       currentTask.subtasks.push({

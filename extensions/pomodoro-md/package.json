@@ -131,7 +131,7 @@
     {
       "name": "breakKeywords",
       "title": "Break Keywords",
-      "description": "Comma-separated keywords to identify break blocks",
+      "description": "Comma-separated block names to skip as breaks. A block is skipped when its name (without the time range) equals a keyword, ignoring case",
       "type": "textfield",
       "default": "Break,Lunch",
       "required": false

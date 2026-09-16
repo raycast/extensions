@@ -4,15 +4,14 @@ import {
   getDailyNotePath,
   parseTimetable,
   ParseOptions,
-  stripMarkdownLinks,
+  subtaskLineTitle,
+  taskLineTitle,
 } from "./parser";
 import { getAppPreferences } from "./preferences";
 import { TaskSource, TaskGroup } from "./task-source";
 
-function lineMatchesTitle(line: string, title: string): boolean {
-  const stripped = stripMarkdownLinks(line);
-  return stripped.includes(title.substring(0, 20));
-}
+const DONE_TASK_RE = /^- \d+p\s+\[done\]/;
+const DONE_SUBTASK_RE = /^(?:\t| {2,})- \[done\]/;
 
 export class DailyNoteTaskSource implements TaskSource {
   private filePath: string;
@@ -49,13 +48,11 @@ export class DailyNoteTaskSource implements TaskSource {
     // (e.g. other sections mentioning the same task) are never touched.
     const range = findTimetableRange(lines, this.parseOptions.timetableHeader);
     if (!range) return;
+    // Titles are compared exactly as parsed, so "Agenda" never marks
+    // "Prepare Agenda".
     for (let i = range[0]; i < range[1]; i++) {
       const line = lines[i];
-      if (
-        line.match(/^- \d+p\s+/) &&
-        !line.includes("[done]") &&
-        lineMatchesTitle(line, taskTitle)
-      ) {
+      if (!DONE_TASK_RE.test(line) && taskLineTitle(line) === taskTitle) {
         lines[i] = line.replace(/^(- \d+p\s+)/, "$1[done] ");
         fs.writeFileSync(this.filePath, lines.join("\n"), "utf-8");
         return;
@@ -75,8 +72,9 @@ export class DailyNoteTaskSource implements TaskSource {
     let inTask = false;
     for (let i = range[0]; i < range[1]; i++) {
       const line = lines[i];
-      if (line.match(/^- \d+p\s+/)) {
-        inTask = lineMatchesTitle(line, taskTitle);
+      const title = taskLineTitle(line);
+      if (title !== null) {
+        inTask = title === taskTitle;
         continue;
       }
       if (/^#{1,6} /.test(line)) {
@@ -85,9 +83,8 @@ export class DailyNoteTaskSource implements TaskSource {
       }
       if (
         inTask &&
-        line.match(/^(?:\t| {2,})- /) &&
-        !line.includes("[done]") &&
-        lineMatchesTitle(line, subtaskTitle)
+        !DONE_SUBTASK_RE.test(line) &&
+        subtaskLineTitle(line) === subtaskTitle
       ) {
         lines[i] = line.replace(/^((?:\t| {2,})- )/, "$1[done] ");
         fs.writeFileSync(this.filePath, lines.join("\n"), "utf-8");
