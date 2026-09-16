@@ -132,7 +132,7 @@ export function TrackItemActions({ track }: { track: Track }) {
       <Action.Push title="Show Details" icon={Icon.Info} target={<TrackDetail track={track} />} />
       <Action.Open title="Play in Qobuz" target={appLink.track(track.id)} icon={Icon.Play} />
       <Action.OpenInBrowser title="Open in Browser" url={web} />
-      <Action.CopyToClipboard title="Copy Share Link" content={web} />
+      <Action.CopyToClipboard title="Copy Qobuz Link" content={web} />
     </ActionPanel>
   );
 }
@@ -144,7 +144,7 @@ export function AlbumItemActions({ album }: { album: Album }) {
       <Action.Push title="Show Details" icon={Icon.Info} target={<AlbumDetail album={album} />} />
       <Action.Open title="Open in Qobuz" target={appLink.album(album.id)} icon={Icon.Music} />
       <Action.OpenInBrowser title="Open in Browser" url={web} />
-      <Action.CopyToClipboard title="Copy Share Link" content={web} />
+      <Action.CopyToClipboard title="Copy Qobuz Link" content={web} />
     </ActionPanel>
   );
 }
@@ -156,7 +156,7 @@ export function ArtistItemActions({ artist }: { artist: Artist }) {
       <Action.Push title="Show Details" icon={Icon.Info} target={<ArtistDetail artist={artist} />} />
       <Action.Open title="Open in Qobuz" target={appLink.artist(artist.id)} icon={Icon.Music} />
       <Action.OpenInBrowser title="Open in Browser" url={web} />
-      <Action.CopyToClipboard title="Copy Share Link" content={web} />
+      <Action.CopyToClipboard title="Copy Qobuz Link" content={web} />
     </ActionPanel>
   );
 }

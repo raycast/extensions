@@ -3,7 +3,9 @@
 ## [Copy Share Links] - 2026-09-16
 
 - Copy Share Links: a no-view command that puts a ready-to-paste message on the clipboard for the track Qobuz is on — title and artist, then a link per service (Qobuz, Deezer, Apple Music, Spotify, Tidal) and a song.link line that resolves every other platform
+- Copy Share Links: the clipboard also carries a rich-text version — title and one line of linked platform names — which Slack, Notion and Mail paste in place of the plain lines
 - Convert Track Link: the Qobuz → other services direction gains the same Copy Share Links action, one Open/Search action per service, and per-service match tags in the metadata
+- Rename the list and menu-bar "Copy Share Link" actions to "Copy Qobuz Link", matching the detail views
 
 ## [Now Playing fallback] - 2026-09-12
 
