@@ -1,0 +1,22 @@
+{
+  "$schema": "https://www.raycast.com/schemas/ts-config.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["es2023", "dom"],
+    "types": ["node", "typescript/lib/lib.es5"],
+    "module": "es2022",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2022"
+  },
+  "include": ["src", "raycast-env.d.ts", "package.json"]
+}
