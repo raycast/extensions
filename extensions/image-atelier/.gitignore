@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env*
+.DS_Store
+
+# Draft artwork is not a real Store screenshot.
+media/concepts/
