@@ -6,6 +6,17 @@
  * transitively and cannot be run outside Raycast.
  */
 
+/** The Homebrew major version the extension's confirmation-gated features require. */
+export const HOMEBREW_7 = 7;
+
+const BREW_MAJOR = /^Homebrew (\d+)\./m;
+
+/** Major from `brew --version` stdout; undefined for the ">=4.3.0 (shallow…)" fallback or garbage. */
+export function parseBrewMajor(stdout: string): number | undefined {
+  const m = BREW_MAJOR.exec(stdout);
+  return m ? Number(m[1]) : undefined;
+}
+
 /** Homebrew appends `_N` to an installed FORMULA rebuilt at the same version. */
 const REVISION_SUFFIX = /_\d+$/;
 

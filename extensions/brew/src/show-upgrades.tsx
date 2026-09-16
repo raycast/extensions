@@ -12,8 +12,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Action, ActionPanel, Color, Icon, Keyboard, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import {
+  ensureError,
+  showBrewFailureToast,
   upgradeKey,
   type OutdatedCask,
   type OutdatedFormula,
@@ -39,9 +41,11 @@ import { useBrewOutdated } from "./hooks/useBrewOutdated";
 import { useBrewUpgrade } from "./hooks/useBrewUpgrade";
 import { InstallableFilterDropdown, InstallableFilterType } from "./components/filter";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { OutdatedActionSections, UpgradingActionPanel } from "./components/actionPanels";
+import { OutdatedActionSections, OutdatedUpgradeAction, UpgradingActionPanel } from "./components/actionPanels";
 import { pin, unpin } from "./components/actions";
 import { OutdatedList, statusIcon } from "./components/outdatedList";
+import { UpgradePreview } from "./components/installPreview";
+import { STATUS_COLOR } from "./components/palette";
 
 // Blue, not green: green CheckCircle is the engine's "upgraded" outcome icon,
 // and a selection that shares it makes the post-run list (kept open unless
@@ -49,11 +53,11 @@ import { OutdatedList, statusIcon } from "./components/outdatedList";
 // run" and "done in the last run" must not look identical.
 // Included and excluded are two states of one control, so they share a tint and
 // differ only in glyph — two different greys read as two unrelated things.
-// Blue means "in progress" in the icon vocabulary (see packageIcons.ts), so the
+// Blue means "in progress" in the icon vocabulary (see palette.ts), so the
 // neutral primary tint is what is left for a selection.
-const SELECTION_TINT = Color.PrimaryText;
+const SELECTION_TINT = STATUS_COLOR.attention;
 const INCLUDED_ICON = { source: Icon.CheckCircle, tintColor: SELECTION_TINT };
-const EXCLUDED_ICON = { source: Icon.CircleDisabled, tintColor: SELECTION_TINT };
+const EXCLUDED_ICON = { source: Icon.CircleDisabled, tintColor: STATUS_COLOR.muted };
 // A pinned row is excluded too — the pin accessory is what says why.
 const PINNED_ICON = EXCLUDED_ICON;
 
@@ -96,8 +100,16 @@ function ShowUpgradesContent() {
 
   const reviewPackages = useMemo<SelectablePackage[]>(() => {
     const fetched: SelectablePackage[] = [
-      ...(reviewSource?.formulae ?? []).map((f) => ({ kind: "formula" as const, name: f.name, pinned: f.pinned })),
-      ...(reviewSource?.casks ?? []).map((c) => ({ kind: "cask" as const, name: c.name, pinned: c.pinned })),
+      ...(reviewSource?.formulae ?? []).map((f) => ({
+        kind: "formula" as const,
+        name: f.name,
+        pinned: f.pinned,
+      })),
+      ...(reviewSource?.casks ?? []).map((c) => ({
+        kind: "cask" as const,
+        name: c.name,
+        pinned: c.pinned,
+      })),
     ];
     return applyPinOverrides(fetched, pinOverrides);
   }, [reviewSource, pinOverrides]);
@@ -191,11 +203,25 @@ function ShowUpgradesContent() {
       const pinned = pinOverrides.get(key) ?? item.pinned;
       if (pinned) return { value: PINNED_ICON, tooltip: "Pinned — unpin to include" };
       if (reviewSelection.get(key) !== true) {
-        return { value: EXCLUDED_ICON, tooltip: upgrade.isUpgrading ? "Not in this upgrade" : "Excluded from upgrade" };
+        return {
+          value: EXCLUDED_ICON,
+          tooltip: upgrade.isUpgrading ? "Not in this upgrade" : "Excluded from upgrade",
+        };
       }
       return upgrade.isUpgrading ? statusIcon(undefined) : { value: INCLUDED_ICON, tooltip: "Included in upgrade" };
     },
     [upgrade.states, upgrade.isUpgrading, pinOverrides, reviewSelection],
+  );
+
+  // The list partitions rows into Pinned sections and draws the tack from each
+  // item's own `pinned`, so it needs the same effective state the icons and
+  // actions use — otherwise a just-pinned package sits in the wrong section,
+  // with the wrong accessory, until a refetch lands (or forever, if it fails).
+  // It is also what tells the whole-machine preview which of its rows are
+  // casks: brew's upgrade table does not say.
+  const listSource = applyPinOverridesToResults(
+    upgrade.isUpgrading ? (upgrade.outdated ?? data) : (data ?? upgrade.outdated),
+    pinOverrides,
   );
 
   const actions = useCallback(
@@ -213,6 +239,7 @@ function ShowUpgradesContent() {
       return (
         <ReviewActionPanel
           outdated={item}
+          results={listSource}
           isCask={isCask}
           pinned={(pinOverrides.get(key) ?? item.pinned) === true}
           included={reviewSelection.get(key) === true}
@@ -229,6 +256,7 @@ function ShowUpgradesContent() {
     },
     [
       upgrade,
+      listSource,
       pinOverrides,
       reviewSelection,
       runTitle,
@@ -240,15 +268,6 @@ function ShowUpgradesContent() {
       handlePinChange,
       handleAction,
     ],
-  );
-
-  // The list partitions rows into Pinned sections and draws the tack from each
-  // item's own `pinned`, so it needs the same effective state the icons and
-  // actions use — otherwise a just-pinned package sits in the wrong section,
-  // with the wrong accessory, until a refetch lands (or forever, if it fails).
-  const listSource = applyPinOverridesToResults(
-    upgrade.isUpgrading ? (upgrade.outdated ?? data) : (data ?? upgrade.outdated),
-    pinOverrides,
   );
 
   return (
@@ -281,8 +300,8 @@ function ShowUpgradesContent() {
 async function showInstalled() {
   try {
     await launchCommand({ name: "installed", type: LaunchType.UserInitiated });
-  } catch {
-    await showToast({ style: Toast.Style.Failure, title: "Could Not Open Show Installed" });
+  } catch (err) {
+    await showBrewFailureToast("Could Not Open Show Installed", ensureError(err));
   }
 }
 
@@ -316,11 +335,20 @@ function applyPinOverridesToResults(
 
 function ReviewActionPanel(props: {
   outdated: OutdatedCask | OutdatedFormula;
+  /**
+   * Every outdated package, not just this row's — the whole-machine preview
+   * resolves each of its rows to a formula or a cask by name from these lists,
+   * because brew's upgrade table does not mark which is which.
+   */
+  results: OutdatedResults | undefined;
   isCask: boolean;
   pinned: boolean;
   included: boolean;
-  /** Absent when nothing is selected — the run action then gives way to a
-      guidance action rather than offering an upgrade of zero packages. */
+  /**
+   * Present when at least one package is selected. Absent, the panel still
+   * occupies the run slot with a prompt rather than dropping it — otherwise
+   * Select All becomes the second action, and Raycast binds ⌘↩ to it.
+   */
   runTitle?: string;
   allSelected: boolean;
   onToggle: () => void;
@@ -331,16 +359,40 @@ function ReviewActionPanel(props: {
   onAction: (result: boolean) => void;
 }) {
   // The second action in the panel is where Raycast binds ⌘↩ — the run
-  // action sits there on every row, so it is reachable from anywhere. That
-  // binding is positional, so the slot must never fall through to Select All:
-  // with nothing selected, a muscle-memory ⌘↩ would silently overwrite the
-  // deliberately empty selection, and a second ⌘↩ would launch a full
-  // upgrade. A guidance action holds the slot instead — pressing it surfaces
-  // the Nothing Selected toast via onStart.
+  // action sits there on every row so the review is runnable from anywhere.
+  // With nothing selected there is nothing to run, but the slot still has to
+  // be occupied: dropping it would make Select All the second action, and
+  // ⌘↩ after a deliberate deselect would silently reselect everything.
   const runAction = props.runTitle ? (
     <Action title={props.runTitle} icon={Icon.ArrowUpCircle} onAction={props.onStart} />
   ) : (
     <Action title="Select Packages to Upgrade" icon={Icon.CheckCircle} onAction={props.onStart} />
+  );
+  // On demand only. `brew upgrade --dry-run` resolves a bottle manifest over
+  // the network for every outdated package — tens of seconds on a full list —
+  // so it must never run for the review list itself. Pushing the view is the
+  // request; the pushed view puts its loading row up before the call starts.
+  const previewAction = (
+    <Action.Push
+      title="Preview Upgrades"
+      icon={Icon.Eye}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+      target={<UpgradePreview outdated={props.results} onAction={props.onAction} />}
+    />
+  );
+  // This row's own upgrade, not the machine's. Cheap next to the all-packages
+  // preview above — one package resolves one bottle manifest — but the pushed
+  // view still puts its loading row up before the call starts.
+  // ⌘⌥I, because ⌘⇧I is taken here by Preview Upgrades; the same binding is
+  // used in the installed-package panels so one key always means "preview this
+  // package's upgrade".
+  const previewOneAction = (
+    <Action.Push
+      title={`Preview Upgrade of ${props.outdated.name}`}
+      icon={Icon.Eye}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
+      target={<UpgradePreview target={props.outdated} onAction={props.onAction} />}
+    />
   );
   const toggleAllAction = (
     <Action
@@ -352,45 +404,78 @@ function ReviewActionPanel(props: {
   );
 
   // A pin is a lock: upgrading a pinned formula means unpinning it, which
-  // selects it — one gesture.
+  // selects it — one gesture. It holds the first slot here because a pinned
+  // row has no single-package upgrade to put there, and the run action must
+  // stay in the second (see above).
   if (props.pinned) {
     return (
       <ActionPanel>
         <ActionPanel.Section>
           <Action
-            title={props.isCask ? "Unpin Cask and Include" : "Unpin Formula and Include"}
+            title={props.isCask ? "Unpin Cask" : "Unpin Formula"}
             icon={Icon.TackDisabled}
             shortcut={Keyboard.Shortcut.Common.Pin}
             onAction={() => props.onPinChange(false)}
           />
           {runAction}
-          {toggleAllAction}
+          {previewAction}
         </ActionPanel.Section>
-        {/* Pinned: no single-package upgrade and no upgrade command — brew
-            refuses an explicitly named pinned package outright. */}
+        {/* Pinned: no upgrade command either — brew refuses an explicitly
+            named pinned package outright. */}
         <OutdatedActionSections
           outdated={props.outdated}
           isCask={props.isCask}
           pinned
-          onUpgrade={props.onUpgrade}
           onAction={props.onAction}
           omitPin
-          omitUpgrade
           omitUpgradeCommand
-        />
+        >
+          {/* No per-row toggle: a pinned row cannot be selected. */}
+          {toggleAllAction}
+        </OutdatedActionSections>
       </ActionPanel>
     );
   }
 
+  const toggleAction = (
+    <Action
+      title={props.included ? "Deselect" : "Select"}
+      icon={props.included ? Icon.CircleDisabled : Icon.CheckCircle}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+      onAction={props.onToggle}
+    />
+  );
+  // Select leads a deselected row, the way Unpin leads a pinned
+  // one: ↩ on a package the user deliberately left out should put it back in,
+  // not upgrade it behind their back.
+  const toggleLeads = !props.included;
+
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action
-          title={props.included ? "Exclude from Upgrade" : "Include in Upgrade"}
-          icon={props.included ? Icon.CircleDisabled : Icon.CheckCircle}
-          onAction={props.onToggle}
-        />
+        {props.included ? (
+          <OutdatedUpgradeAction
+            outdated={props.outdated}
+            isCask={props.isCask}
+            pinned={props.pinned}
+            onUpgrade={props.onUpgrade}
+            onAction={props.onAction}
+          />
+        ) : (
+          toggleAction
+        )}
         {runAction}
+        {previewOneAction}
+        {previewAction}
+      </ActionPanel.Section>
+      <OutdatedActionSections
+        outdated={props.outdated}
+        isCask={props.isCask}
+        pinned={props.pinned}
+        onAction={props.onAction}
+        omitPin
+      >
+        {toggleLeads ? null : toggleAction}
         {toggleAllAction}
         {/* Selection-aware pin: pinning locks the package out of the run. */}
         <Action
@@ -399,15 +484,7 @@ function ReviewActionPanel(props: {
           shortcut={Keyboard.Shortcut.Common.Pin}
           onAction={() => props.onPinChange(true)}
         />
-      </ActionPanel.Section>
-      <OutdatedActionSections
-        outdated={props.outdated}
-        isCask={props.isCask}
-        pinned={props.pinned}
-        onUpgrade={props.onUpgrade}
-        onAction={props.onAction}
-        omitPin
-      />
+      </OutdatedActionSections>
     </ActionPanel>
   );
 }
