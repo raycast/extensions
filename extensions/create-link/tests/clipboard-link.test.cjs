@@ -125,6 +125,27 @@ test("head completion handles split tags, title precedence, Open Graph fallback 
   }
 });
 
+test("literal less-than signs and multiline titles preserve early stream cancellation", async () => {
+  for (const [chunks, expected] of [
+    [["<head><title>Price < $10</title></head>"], "Price < $10"],
+    [["<head><title>Price <\n$10</title></head>"], "Price <\n$10"],
+    [["<head><title>Price <", " $10</tit", "le>"], "Price < $10"],
+    [["<head><title>Price < $10</title><title>Other</title></head>"], "Price < $10"],
+  ]) {
+    let stream;
+    const titles = loadTitles({
+      fetch: async (_url, { signal }) => {
+        stream = streamedResponse([...chunks.map((chunk) => Buffer.from(chunk)), Buffer.alloc(2 * 1024 * 1024)], signal);
+        return stream.response;
+      },
+    });
+    assert.equal(await titles.fetchPageTitle("https://example.com"), expected);
+    assert.equal(stream.reads(), chunks.length);
+    assert.equal(stream.cancelled(), true);
+    assert.equal(stream.body.locked, false);
+  }
+});
+
 test("entities are decoded once, including decimal and hex references", async () => {
   for (const [encoded, expected] of [
     ["Caf&#233; &#x2014; &mdash; &amp;lt;", "Caf\u00e9 \u2014 \u2014 &lt;"],

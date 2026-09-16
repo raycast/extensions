@@ -36,7 +36,7 @@ function decodeHtmlEntities(text: string): string {
 function extractTitle(html: string, atEnd = false): string | undefined {
   const headEnd = html.search(/<\/head\s*>/i);
   const head = headEnd >= 0 ? html.slice(0, headEnd) : html;
-  const title = head.match(/<title\b[^>]*>([^<]*)<\/title\s*>/i)?.[1]?.trim();
+  const title = head.match(/<title\b[^>]*>([\s\S]*?)<\/title\s*>/i)?.[1]?.trim();
   if (title) return decodeHtmlEntities(title);
   if (headEnd < 0 && !atEnd) return undefined;
 

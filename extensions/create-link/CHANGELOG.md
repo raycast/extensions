@@ -7,6 +7,7 @@
 - Bound GitHub and HTTP lookups with timeouts and copy the original URL with an error notification if fetching fails.
 - Stop reading after a complete title or head ending; retain a 1 MiB inspection limit and timeout for unresolved titles.
 - Decode numeric references and common named title entities in one pass without double-decoding.
+- Preserve literal less-than signs and multiline text in page titles.
 
 ## [Feature Update] - 2025-06-30
 
