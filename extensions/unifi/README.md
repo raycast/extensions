@@ -46,7 +46,7 @@ Raycast opens these preferences before any command can run until both the consol
 
 ### TLS Certificates
 
-Local UniFi consoles commonly use a self-signed certificate, so certificate verification is disabled by default for local HTTPS connections. Enable **Verify TLS Certificates** when the console uses a certificate trusted by macOS. Plain HTTP is accepted only for localhost and private-network addresses.
+Local Console mode requires HTTPS and always validates the console certificate before sending the API key. Use a hostname and certificate trusted by the Raycast runtime. If the console still uses its default self-signed certificate, configure a trusted certificate on the console or use Cloud Connector mode; the extension does not provide an insecure certificate bypass.
 
 ## Raycast AI
 

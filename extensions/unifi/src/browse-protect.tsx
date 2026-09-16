@@ -19,6 +19,7 @@ import { ResourceError } from "./components/states";
 import { useAsyncResource } from "./hooks/use-async-resource";
 import { useUniFiClient } from "./hooks/use-unifi";
 import { cameraPreviewMarkdown } from "./lib/camera-preview";
+import { focusResourceItems, type ResourceLaunchContext } from "./lib/resource-navigation";
 
 const PROTECT_RESOURCES = RESOURCE_DEFINITIONS.filter((resource) => resource.service === "protect");
 
@@ -151,11 +152,12 @@ function ProtectActions({
   );
 }
 
-type BrowseProtectProps = LaunchProps<{ launchContext?: { resourceKey?: ResourceKey } }>;
+type BrowseProtectProps = LaunchProps<{ launchContext?: ResourceLaunchContext }>;
 
 export default function BrowseProtect(props: BrowseProtectProps) {
   const client = useUniFiClient();
   const [resourceKey, setResourceKey] = useState<ResourceKey>(props.launchContext?.resourceKey ?? "protect-cameras");
+  const [targetEntityId, setTargetEntityId] = useState(props.launchContext?.entityId);
   const load = useCallback(
     (signal: AbortSignal) => client.listResource(resourceKey, {}, signal),
     [client, resourceKey],
@@ -173,6 +175,7 @@ export default function BrowseProtect(props: BrowseProtectProps) {
         : items,
     [items, resourceKey],
   );
+  const visibleItems = useMemo(() => focusResourceItems(sortedItems, targetEntityId), [sortedItems, targetEntityId]);
 
   if (error) return <ResourceError error={error} onRetry={revalidate} />;
 
@@ -186,7 +189,10 @@ export default function BrowseProtect(props: BrowseProtectProps) {
         <List.Dropdown
           tooltip="Protect Resource"
           value={resourceKey}
-          onChange={(value) => setResourceKey(value as ResourceKey)}
+          onChange={(value) => {
+            setResourceKey(value as ResourceKey);
+            setTargetEntityId(undefined);
+          }}
         >
           {PROTECT_RESOURCES.map((resource) => (
             <List.Dropdown.Item
@@ -198,7 +204,7 @@ export default function BrowseProtect(props: BrowseProtectProps) {
         </List.Dropdown>
       }
     >
-      {sortedItems.map((item, index) => (
+      {visibleItems.map((item, index) => (
         <ResourceItem
           key={String(item.id ?? `${resourceKey}-${index}`)}
           item={item}
@@ -206,8 +212,17 @@ export default function BrowseProtect(props: BrowseProtectProps) {
           actions={<ProtectActions item={item} resourceKey={resourceKey} onRefresh={revalidate} />}
         />
       ))}
-      {!isLoading && items.length === 0 ? (
-        <List.EmptyView title={`No ${definition?.label ?? "Protect resources"} found`} />
+      {!isLoading && visibleItems.length === 0 ? (
+        <List.EmptyView
+          title={targetEntityId ? "Protect resource not found" : `No ${definition?.label ?? "Protect resources"} found`}
+          actions={
+            targetEntityId ? (
+              <ActionPanel>
+                <Action title="Show All Resources" icon={Icon.List} onAction={() => setTargetEntityId(undefined)} />
+              </ActionPanel>
+            ) : undefined
+          }
+        />
       ) : null}
     </List>
   );

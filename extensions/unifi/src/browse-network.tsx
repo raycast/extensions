@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, type LaunchProps } from "@raycast/api";
 import { useCallback, useState } from "react";
 import { getSelectedSite } from "./api/preferences";
 import { RESOURCE_DEFINITIONS, type ResourceKey } from "./api/resources";
@@ -6,15 +6,18 @@ import { ResourceItem } from "./components/resource-item";
 import { MissingSite, ResourceError } from "./components/states";
 import { useAsyncResource } from "./hooks/use-async-resource";
 import { useUniFiClient } from "./hooks/use-unifi";
+import type { ResourceLaunchContext } from "./lib/resource-navigation";
 
 const NETWORK_RESOURCES = RESOURCE_DEFINITIONS.filter(
   (resource) =>
     resource.service === "network" && !["network-sites", "network-devices", "network-clients"].includes(resource.key),
 );
 
-export default function BrowseNetwork() {
+type BrowseNetworkProps = LaunchProps<{ launchContext?: ResourceLaunchContext }>;
+
+export default function BrowseNetwork(props: BrowseNetworkProps) {
   const client = useUniFiClient();
-  const [resourceKey, setResourceKey] = useState<ResourceKey>("network-networks");
+  const [resourceKey, setResourceKey] = useState<ResourceKey>(props.launchContext?.resourceKey ?? "network-networks");
   const siteLoad = useCallback(() => getSelectedSite(), []);
   const { data: site, isLoading: siteIsLoading } = useAsyncResource(siteLoad);
   const load = useCallback(

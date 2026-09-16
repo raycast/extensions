@@ -1,5 +1,3 @@
-import https from "node:https";
-import fetch, { type RequestInit, type Response } from "node-fetch";
 import { getResourceDefinition, type ResourceContext, type ResourceKey, type UniFiService } from "./resources";
 import type {
   FirewallPolicy,
@@ -18,7 +16,7 @@ import type {
   WanInterface,
   WifiBroadcast,
 } from "./types";
-import { getUniFiPreferences, type UniFiPreferences } from "./preferences";
+import { getUniFiPreferences } from "./preferences";
 
 const CLOUD_API_ORIGIN = "https://api.ui.com";
 const DEFAULT_TIMEOUT_MS = 10_000;
@@ -28,7 +26,12 @@ const MAX_PAGES = 100;
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 type Wait = (milliseconds: number) => Promise<void>;
 
-export interface UniFiClientConfig extends UniFiPreferences {
+export interface UniFiClientConfig {
+  apiKey: string;
+  connectionMode: "local" | "cloud";
+  consoleId?: string;
+  controllerUrl?: string;
+  dateFormat?: string;
   fetch?: Fetch;
   timeoutMs?: number;
   wait?: Wait;
@@ -53,20 +56,6 @@ export class UniFiError extends Error {
   }
 }
 
-function isPrivateHostname(hostname: string): boolean {
-  const host = hostname.toLowerCase();
-  if (host === "localhost" || host === "::1" || host.endsWith(".local")) return true;
-  const parts = host.split(".").map(Number);
-  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return false;
-  return (
-    parts[0] === 10 ||
-    parts[0] === 127 ||
-    (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
-    (parts[0] === 192 && parts[1] === 168) ||
-    (parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127)
-  );
-}
-
 export function normalizeControllerUrl(value?: string): string {
   const raw = value?.trim();
   if (!raw) throw new UniFiError("Controller URL is required in Local Console mode.");
@@ -75,25 +64,21 @@ export function normalizeControllerUrl(value?: string): string {
   try {
     url = new URL(raw);
   } catch {
-    throw new UniFiError("Controller URL must be a valid http or https URL.");
+    throw new UniFiError("Controller URL must be a valid HTTPS URL.");
   }
 
-  if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw new UniFiError("Controller URL must use http or https.");
+  if (url.protocol !== "https:") {
+    throw new UniFiError("Controller URL must use HTTPS so the API key is encrypted in transit.");
   }
   if (url.username || url.password || url.search || url.hash) {
     throw new UniFiError("Controller URL must not contain credentials, query parameters, or a fragment.");
   }
-  if (url.protocol === "http:" && !isPrivateHostname(url.hostname)) {
-    throw new UniFiError("Plain HTTP is allowed only for localhost or private network addresses.");
-  }
-
   return url.origin;
 }
 
 export function buildServiceBaseUrl(
   service: UniFiService,
-  config: Pick<UniFiPreferences, "connectionMode" | "consoleId" | "controllerUrl">,
+  config: Pick<UniFiClientConfig, "connectionMode" | "consoleId" | "controllerUrl">,
 ): string {
   if (service === "site-manager" || service === "mobility" || service === "carrier-fabric") {
     return CLOUD_API_ORIGIN;
@@ -180,16 +165,8 @@ export class UniFiClient {
     const signal = options.signal
       ? AbortSignal.any([options.signal, timeoutController.signal])
       : timeoutController.signal;
-    const isLocal =
-      this.config.connectionMode === "local" && !["site-manager", "mobility", "carrier-fabric"].includes(service);
-    const agent =
-      isLocal && url.startsWith("https:")
-        ? new https.Agent({ keepAlive: true, rejectUnauthorized: this.config.verifyTlsCertificates === true })
-        : undefined;
-
     try {
       const response = await this.fetch(url, {
-        agent,
         body: options.body === undefined ? undefined : JSON.stringify(options.body),
         headers: {
           Accept: options.responseType === "buffer" ? "image/jpeg" : "application/json",
@@ -300,7 +277,7 @@ export class UniFiClient {
   }
 
   async getNetworkOverview(site: Site, signal?: AbortSignal): Promise<NetworkOverview> {
-    const [devices, clients, networks, wifiBroadcasts, firewallPolicies, wans] = await Promise.all([
+    const settled = await Promise.allSettled([
       this.listDevices(site.id, signal),
       this.listClients(site.id, signal),
       this.listNetworks(site.id, signal),
@@ -308,7 +285,26 @@ export class UniFiClient {
       this.listFirewallPolicies(site.id, signal),
       this.listWans(site.id, signal),
     ]);
-    return { clients, devices, firewallPolicies, networks, site, wans, wifiBroadcasts };
+    const unavailable: NetworkOverview["unavailable"] = [];
+    const collection = <T>(result: PromiseSettledResult<T[]>, resource: string): T[] => {
+      if (result.status === "fulfilled") return result.value;
+      unavailable.push({
+        resource,
+        reason: result.reason instanceof Error ? result.reason.message : "Unavailable",
+      });
+      return [];
+    };
+
+    return {
+      clients: collection(settled[1], "network-clients"),
+      devices: collection(settled[0], "network-devices"),
+      firewallPolicies: collection(settled[4], "network-firewall-policies"),
+      networks: collection(settled[2], "network-networks"),
+      site,
+      unavailable,
+      wans: collection(settled[5], "network-wans"),
+      wifiBroadcasts: collection(settled[3], "network-wifi"),
+    };
   }
 
   async listResource(

@@ -1,4 +1,3 @@
-import { Response } from "node-fetch";
 import { describe, expect, it, vi } from "vitest";
 import { buildServiceBaseUrl, normalizeControllerUrl, UniFiClient, UniFiError } from "../src/api/client";
 
@@ -18,11 +17,11 @@ const baseConfig = {
 describe("controller URL policy", () => {
   it("normalizes a local console to its origin", () => {
     expect(normalizeControllerUrl(" https://192.168.1.1/ ")).toBe("https://192.168.1.1");
-    expect(normalizeControllerUrl("http://unifi.local:8080")).toBe("http://unifi.local:8080");
   });
 
-  it("rejects insecure public destinations and embedded credentials", () => {
-    expect(() => normalizeControllerUrl("http://example.com")).toThrow("Plain HTTP");
+  it("rejects all insecure destinations and embedded credentials", () => {
+    expect(() => normalizeControllerUrl("http://unifi.local:8080")).toThrow("HTTPS");
+    expect(() => normalizeControllerUrl("http://example.com")).toThrow("HTTPS");
     expect(() => normalizeControllerUrl("https://user:password@unifi.local")).toThrow("must not contain credentials");
   });
 
@@ -155,5 +154,23 @@ describe("UniFiClient", () => {
 
     await expect(client.getCameraSnapshot("camera-1")).resolves.toEqual(Buffer.from([1, 2, 3]));
     expect(request.mock.calls[0][0]).toContain("/v1/cameras/camera-1/snapshot?highQuality=true");
+  });
+
+  it("keeps successful Network collections when one API group is unavailable", async () => {
+    const request = vi.fn(async (url: string) => {
+      if (url.includes("/clients?")) return jsonResponse({ message: "not allowed" }, 403);
+      const id = url.match(/\/(devices|networks|broadcasts|policies|wans)\?/)?.[1] ?? "item";
+      return jsonResponse({ count: 1, data: [{ id }], limit: 200, offset: 0, totalCount: 1 });
+    });
+    const client = new UniFiClient({ ...baseConfig, fetch: request });
+
+    const overview = await client.getNetworkOverview({ id: "site-1", internalReference: "default", name: "Home" });
+
+    expect(overview.devices).toEqual([{ id: "devices" }]);
+    expect(overview.networks).toEqual([{ id: "networks" }]);
+    expect(overview.clients).toEqual([]);
+    expect(overview.unavailable).toEqual([
+      { resource: "network-clients", reason: "not allowed" },
+    ]);
   });
 });

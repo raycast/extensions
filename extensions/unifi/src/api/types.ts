@@ -195,6 +195,7 @@ export interface NetworkOverview {
   firewallPolicies: FirewallPolicy[];
   networks: NetworkDefinition[];
   site: Site;
+  unavailable: Array<{ resource: string; reason: string }>;
   wans: WanInterface[];
   wifiBroadcasts: WifiBroadcast[];
 }

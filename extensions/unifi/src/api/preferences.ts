@@ -2,33 +2,72 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import type { Site } from "./types";
 
 export const SELECTED_SITE_KEY = "selected-network-site";
+export const LEGACY_SELECTED_SITE_KEY = "selected-site";
 
-export interface UniFiPreferences {
-  apiKey: string;
-  connectionMode: "local" | "cloud";
-  consoleId?: string;
-  controllerUrl: string;
-  dateFormat?: string;
-  verifyTlsCertificates?: boolean;
+interface StoredSiteSelection {
+  connectionIdentity: string;
+  site: Site;
 }
 
-export function getUniFiPreferences(): UniFiPreferences {
-  return getPreferenceValues<UniFiPreferences>();
+export function getUniFiPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
-export async function getSelectedSite(): Promise<Site | undefined> {
-  const value = await LocalStorage.getItem<string>(SELECTED_SITE_KEY);
-  if (!value) return undefined;
+function connectionIdentity(preferences: Pick<Preferences, "connectionMode" | "consoleId" | "controllerUrl">): string {
+  if (preferences.connectionMode === "cloud") return `cloud:${preferences.consoleId?.trim() ?? ""}`;
   try {
-    const site = JSON.parse(value) as Partial<Site>;
-    return typeof site.id === "string" && typeof site.name === "string" ? (site as Site) : undefined;
+    return `local:${new URL(preferences.controllerUrl.trim()).origin}`;
+  } catch {
+    return `local:${preferences.controllerUrl.trim()}`;
+  }
+}
+
+function parseSite(value: unknown): Site | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const site = value as Partial<Site>;
+  if (typeof site.id !== "string" || typeof site.name !== "string") return undefined;
+  return { id: site.id, internalReference: site.internalReference ?? "", name: site.name };
+}
+
+async function storeSite(site: Site, identity: string): Promise<void> {
+  await LocalStorage.setItem(SELECTED_SITE_KEY, JSON.stringify({ connectionIdentity: identity, site }));
+}
+
+export async function getSelectedSite(preferences = getUniFiPreferences()): Promise<Site | undefined> {
+  const identity = connectionIdentity(preferences);
+  const current = await LocalStorage.getItem<string>(SELECTED_SITE_KEY);
+  if (current) {
+    try {
+      const parsed = JSON.parse(current) as Partial<StoredSiteSelection> & Partial<Site>;
+      if (typeof parsed.connectionIdentity === "string") {
+        return parsed.connectionIdentity === identity ? parseSite(parsed.site) : undefined;
+      }
+
+      const unscopedSite = parseSite(parsed);
+      if (unscopedSite) {
+        await storeSite(unscopedSite, identity);
+        return unscopedSite;
+      }
+    } catch {
+      return undefined;
+    }
+  }
+
+  const legacy = await LocalStorage.getItem<string>(LEGACY_SELECTED_SITE_KEY);
+  if (!legacy) return undefined;
+  try {
+    const site = parseSite(JSON.parse(legacy));
+    if (!site) return undefined;
+    await storeSite(site, identity);
+    await LocalStorage.removeItem(LEGACY_SELECTED_SITE_KEY);
+    return site;
   } catch {
     return undefined;
   }
 }
 
-export async function setSelectedSite(site: Site): Promise<void> {
-  await LocalStorage.setItem(SELECTED_SITE_KEY, JSON.stringify(site));
+export async function setSelectedSite(site: Site, preferences = getUniFiPreferences()): Promise<void> {
+  await storeSite(site, connectionIdentity(preferences));
 }
 
 export async function requireSelectedSite(): Promise<Site> {

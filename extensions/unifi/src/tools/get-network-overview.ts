@@ -40,6 +40,7 @@ export default async function getNetworkOverview(input: Input) {
       vlanId,
     })),
     site,
+    unavailable: overview.unavailable,
     wans: overview.wans,
     wifiBroadcasts: overview.wifiBroadcasts.map(({ enabled, id, name, type }) => ({ enabled, id, name, type })),
   };

@@ -5,21 +5,35 @@ import { MissingSite } from "./components/states";
 import { useAsyncResource } from "./hooks/use-async-resource";
 import { useUniFiClient } from "./hooks/use-unifi";
 import { findUniFiProblems, summarizeUniFiHealth, type UniFiProblem } from "./lib/health";
+import {
+  OVERVIEW_RESOURCE_TARGETS,
+  protectProblemContext,
+  type ResourceCommandTarget,
+} from "./lib/resource-navigation";
 
-function OpenCommandAction({ name, title }: { name: string; title: string }) {
+interface CommandTarget {
+  context?: ResourceCommandTarget["context"];
+  name: string;
+  title: string;
+}
+
+function OpenCommandAction({ context, name, title }: CommandTarget) {
   return (
     <Action
       title={title}
       icon={Icon.Sidebar}
-      onAction={() => launchCommand({ name, type: LaunchType.UserInitiated })}
+      onAction={() => launchCommand({ context, name, type: LaunchType.UserInitiated })}
     />
   );
 }
 
-function actions(command: string, title: string, refresh: () => void) {
+function actions(targets: CommandTarget | CommandTarget[], refresh: () => void) {
+  const commands = Array.isArray(targets) ? targets : [targets];
   return (
     <ActionPanel>
-      <OpenCommandAction name={command} title={title} />
+      {commands.map((target) => (
+        <OpenCommandAction key={`${target.name}-${target.title}`} {...target} />
+      ))}
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} />
     </ActionPanel>
   );
@@ -42,7 +56,7 @@ function ProblemList({
           type: LaunchType.UserInitiated,
         })
       : launchCommand({
-          context: { resourceKey: problem.resource },
+          context: protectProblemContext(problem.resource, problem.entityId),
           name: "browse-protect",
           type: LaunchType.UserInitiated,
         });
@@ -135,6 +149,7 @@ export default function UniFiOverview() {
     ...(data?.protectError
       ? [data.protectError instanceof Error ? data.protectError.message : "Protect unavailable"]
       : []),
+    ...(network?.unavailable.map(({ reason, resource }) => `${resource}: ${reason}`) ?? []),
     ...(protect?.unavailable.map(({ reason, resource }) => `${resource}: ${reason}`) ?? []),
   ];
   const healthTitle =
@@ -214,13 +229,13 @@ export default function UniFiOverview() {
               ? [{ tag: { value: `${health.network.firmwareUpdates} updates`, color: Color.Orange } }]
               : []),
           ]}
-          actions={actions("view-devices", "Search Devices", revalidate)}
+          actions={actions({ name: "view-devices", title: "Search Devices" }, revalidate)}
         />
         <List.Item
           title="Connected Clients"
           icon={{ source: Icon.Person, tintColor: Color.Blue }}
           accessories={[{ tag: { value: `${health.network.clients}` } }]}
-          actions={actions("view-clients", "Search Clients", revalidate)}
+          actions={actions({ name: "view-clients", title: "Search Clients" }, revalidate)}
         />
         <List.Item
           title="Networks and Wi-Fi"
@@ -229,7 +244,7 @@ export default function UniFiOverview() {
             { text: `${health.network.networks} networks` },
             { text: `${health.network.wifi - health.network.wifiDisabled}/${health.network.wifi} Wi-Fi enabled` },
           ]}
-          actions={actions("browse-network", "Browse Network Configuration", revalidate)}
+          actions={actions(OVERVIEW_RESOURCE_TARGETS.networksAndWifi, revalidate)}
         />
         <List.Item
           title="WAN and Firewall"
@@ -238,7 +253,7 @@ export default function UniFiOverview() {
             { text: `${health.network.wans} WAN` },
             { text: `${health.network.firewallPolicies} policies` },
           ]}
-          actions={actions("browse-network", "Browse Network Configuration", revalidate)}
+          actions={actions(OVERVIEW_RESOURCE_TARGETS.wanAndFirewall, revalidate)}
         />
       </List.Section>
 
@@ -257,7 +272,7 @@ export default function UniFiOverview() {
               ? [{ tag: { value: `${health.protect.camerasOffline} disconnected`, color: Color.Red } }]
               : []),
           ]}
-          actions={actions("browse-protect", "Open Protect Cameras and Devices", revalidate)}
+          actions={actions(OVERVIEW_RESOURCE_TARGETS.cameras, revalidate)}
         />
         <List.Item
           title="Sensors"
@@ -271,13 +286,13 @@ export default function UniFiOverview() {
               ? [{ tag: { value: `${health.protect.sensorBatteriesLow} low battery`, color: Color.Red } }]
               : []),
           ]}
-          actions={actions("browse-protect", "Open Protect Cameras and Devices", revalidate)}
+          actions={actions(OVERVIEW_RESOURCE_TARGETS.sensors, revalidate)}
         />
         <List.Item
           title="Alarm Mode"
           icon={Icon.Lock}
           accessories={[{ tag: { value: health.protect.alarmStatus } }]}
-          actions={actions("browse-protect", "Open Protect Cameras and Devices", revalidate)}
+          actions={actions(OVERVIEW_RESOURCE_TARGETS.alarmMode, revalidate)}
         />
       </List.Section>
 

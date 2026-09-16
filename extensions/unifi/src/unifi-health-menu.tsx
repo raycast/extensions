@@ -28,6 +28,7 @@ export default function UniFiHealthMenu() {
   const unavailableCount =
     Number(Boolean(data?.networkError)) +
     Number(Boolean(data?.protectError)) +
+    (data?.network?.unavailable.length ?? 0) +
     (data?.protect?.unavailable.length ?? 0);
   const loading = siteIsLoading || isLoading;
   const hasWarning = health.issueCount > 0 || unavailableCount > 0 || (!site && !loading);

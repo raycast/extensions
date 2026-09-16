@@ -62,7 +62,8 @@
       ],
       "description": "Keep Network and Protect health visible in the macOS menu bar",
       "mode": "menu-bar",
-      "interval": "15m"
+      "interval": "15m",
+      "disabledByDefault": true
     },
     {
       "name": "open-dashboard",
@@ -246,15 +247,6 @@
       "required": true
     },
     {
-      "name": "verifyTlsCertificates",
-      "label": "Verify TLS certificates",
-      "description": "Validate the local console TLS certificate. Leave disabled for the default self-signed certificate.",
-      "type": "checkbox",
-      "required": false,
-      "title": "Verify Local TLS Certificates",
-      "default": false
-    },
-    {
       "name": "dateFormat",
       "title": "Date Format",
       "description": "The format to display dates in",
@@ -265,13 +257,11 @@
   ],
   "dependencies": {
     "@raycast/api": "2.3.0",
-    "date-fns": "^4.1.0",
-    "node-fetch": "3.3.2"
+    "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.2.0",
     "@types/node": "22.19.17",
-    "@types/node-fetch": "3.0.2",
     "@types/react": "19.0.10",
     "eslint": "10.10.0",
     "prettier": "3.9.6",

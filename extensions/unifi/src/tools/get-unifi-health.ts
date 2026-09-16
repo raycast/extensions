@@ -31,6 +31,7 @@ export default async function getUniFiHealth(input: Input) {
       ...(protectResult.status === "rejected"
         ? [{ service: "protect", reason: errorMessage(protectResult.reason, "Protect is unavailable.") }]
         : []),
+      ...(network?.unavailable.map(({ resource, reason }) => ({ service: resource, reason })) ?? []),
       ...(protect?.unavailable.map(({ resource, reason }) => ({ service: resource, reason })) ?? []),
     ],
   };

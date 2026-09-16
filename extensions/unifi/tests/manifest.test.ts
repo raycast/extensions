@@ -12,4 +12,16 @@ describe("first-run preferences", () => {
     expect(apiKey).toMatchObject({ required: true, type: "password" });
     expect(apiKey).not.toHaveProperty("default");
   });
+
+  it("keeps the background menu-bar command opt-in", () => {
+    const command = manifest.commands.find(({ name }) => name === "unifi-health-menu");
+
+    expect(command).toMatchObject({ disabledByDefault: true, mode: "menu-bar" });
+  });
+
+  it("does not expose an insecure TLS bypass or bundle a fetch polyfill", () => {
+    expect(manifest.preferences.some(({ name }) => name === "verifyTlsCertificates")).toBe(false);
+    expect(manifest.dependencies).not.toHaveProperty("node-fetch");
+    expect(manifest.devDependencies).not.toHaveProperty("@types/node-fetch");
+  });
 });
