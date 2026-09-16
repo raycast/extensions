@@ -11,7 +11,7 @@ import { promisify } from "node:util";
 import { useState } from "react";
 
 import { AGENTS, agentInfo } from "./agents.ts";
-import type { ExtraSource, PromptSpec } from "./prompt.ts";
+import type { ExtraSource, PromptSpec, PromptTarget } from "./prompt.ts";
 import {
   COMMAND_PREFIX,
   commandName,
@@ -29,6 +29,7 @@ export default function Command() {
   const [projectId, setProjectId] = useState("");
   const [agent, setAgent] = useState("claude");
   const [createWorktree, setCreateWorktree] = useState(false);
+  const [target, setTarget] = useState<PromptTarget>("new");
   const [askExtra, setAskExtra] = useState(true);
   const [extraSource, setExtraSource] = useState<ExtraSource>("ask-clipboard");
   const [worktreeName, setWorktreeName] = useState("");
@@ -56,6 +57,7 @@ export default function Command() {
     agent,
     createWorktree,
     worktreeName,
+    target: createWorktree ? undefined : target,
     prompt,
   };
 
@@ -133,11 +135,32 @@ export default function Command() {
       <Form.Checkbox
         id="createWorktree"
         label="Create a worktree"
-        info="On: a fresh checkout per run. Off: the agent starts in the project folder."
+        info="On: a fresh checkout per run. Off: the prompt goes to the project folder, either to a new agent or to one already running there."
         storeValue
         value={createWorktree}
         onChange={setCreateWorktree}
       />
+
+      {createWorktree ? null : (
+        <Form.Dropdown
+          id="target"
+          title="Run In"
+          storeValue
+          value={target}
+          onChange={(value) => setTarget(value as PromptTarget)}
+        >
+          <Form.Dropdown.Item
+            value="new"
+            title="A new agent"
+            icon={Icon.PlusCircle}
+          />
+          <Form.Dropdown.Item
+            value="last"
+            title="The agent already running"
+            icon={Icon.Reply}
+          />
+        </Form.Dropdown>
+      )}
 
       {createWorktree ? (
         <Form.TextField

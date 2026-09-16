@@ -106,8 +106,13 @@ Raycast ships none, Orca bundles art for only two agents, and a Quicklink's
 
 What a saved prompt points at. With a worktree it is one call —
 `worktree create --repo id:… --name … --agent … --prompt …` — and Orca does the
-rest. Without one, the agent starts as a fresh pane in the project folder
-(`terminal create`, then `terminal send`), leaving working agents alone.
+rest.
+
+Without one, **Run In** decides where the prompt lands. *A new agent* opens a
+fresh pane in the project folder (`terminal create`, then `terminal send`),
+leaving working agents alone. *The agent already running* sends it to the pane
+of the project's most recently active agent instead — and falls back to a fresh
+pane when that project has none, so the prompt is never dropped.
 
 **Orca is never brought to the front.** The agent starts in the background and
 its pane is waiting whenever you get to it; Raycast just flashes a HUD.

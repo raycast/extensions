@@ -4,6 +4,8 @@ import { test } from "node:test";
 import type { PromptSpec } from "../src/prompt.ts";
 import {
   commandName,
+  lastAgentIn,
+  runPrompt,
   composePrompt,
   extraPlaceholder,
   previewParts,
@@ -173,4 +175,84 @@ test("the preview shows the worktree name Orca will actually create", () => {
   assert.match(previewParts(typed, "none", "x").runs, /"fix-export"/);
   // The two must not drift: the form promises what the CLI is told.
   assert.ok(previewParts(typed, "none", "x").runs.includes(args[args.indexOf("--name") + 1]));
+});
+
+test("the last running agent of a project is the one that answered most recently", () => {
+  const rows = [
+    { handle: "old", worktreePath: "/code/api", agentIdentity: "claude", lastOutputAt: 10 },
+    { handle: "fresh", worktreePath: "/code/api", agentIdentity: "claude", lastOutputAt: 40 },
+    { handle: "shell", worktreePath: "/code/api", lastOutputAt: 99 },
+    { handle: "elsewhere", worktreePath: "/code/web", agentIdentity: "claude", lastOutputAt: 80 },
+  ];
+
+  assert.equal(lastAgentIn(rows, "/code/api"), "fresh");
+  // A plain shell is not an agent, and a project with none has nothing to send to.
+  assert.equal(lastAgentIn([rows[2]], "/code/api"), undefined);
+  assert.equal(lastAgentIn(rows, "/code/docs"), undefined);
+});
+
+test("targeting the last agent sends to its pane instead of opening one", async () => {
+  const calls: string[][] = [];
+  const exec = async (_path: string, args: string[]) => {
+    calls.push(args);
+    if (args[0] === "terminal" && args[1] === "list") {
+      return {
+        stdout: JSON.stringify({
+          ok: true,
+          result: {
+            terminals: [
+              { handle: "busy", worktreePath: "/code/checkout", agentIdentity: "claude", lastOutputAt: 5 },
+            ],
+          },
+        }),
+      };
+    }
+    return { stdout: JSON.stringify({ ok: true, result: {} }) };
+  };
+
+  const handle = await runPrompt(
+    { ...spec, createWorktree: false, worktreePath: "/code/checkout", target: "last", prompt: "go" },
+    "orca",
+    exec,
+  );
+
+  assert.equal(handle, "busy");
+  assert.ok(!calls.some((args) => args[1] === "create"), "must not create a pane");
+  assert.deepEqual(calls.at(-1), ["terminal", "send", "--terminal", "busy", "--text", "go", "--enter", "--json"]);
+});
+
+test("with no agent running, the last-agent target falls back to a fresh pane", async () => {
+  const calls: string[][] = [];
+  const exec = async (_path: string, args: string[]) => {
+    calls.push(args);
+    if (args[0] === "terminal" && args[1] === "list") {
+      return { stdout: JSON.stringify({ ok: true, result: { terminals: [] } }) };
+    }
+    if (args[0] === "terminal" && args[1] === "create") {
+      return { stdout: JSON.stringify({ ok: true, result: { terminal: { handle: "new" } } }) };
+    }
+    return { stdout: JSON.stringify({ ok: true, result: {} }) };
+  };
+
+  const handle = await runPrompt(
+    { ...spec, createWorktree: false, worktreePath: "/code/checkout", target: "last", prompt: "go" },
+    "orca",
+    exec,
+  );
+
+  assert.equal(handle, "new");
+  assert.ok(calls.some((args) => args[1] === "create"));
+});
+
+test("the preview says when the prompt goes to an agent already running", () => {
+  const base = { ...spec, createWorktree: false, worktreePath: "/code/checkout" };
+
+  assert.equal(
+    previewParts({ ...base, target: "last" }, "none", "x").runs,
+    "the agent already running in /code/checkout (claude if none)",
+  );
+  assert.equal(
+    previewParts({ ...base, target: "new" }, "none", "x").runs,
+    "claude in /code/checkout",
+  );
 });

@@ -83,6 +83,31 @@ export function composePrompt(
   return addition ? `${prompt}\n\n${addition}` : prompt;
 }
 
+/**
+ * Where a prompt goes when no worktree is created: a fresh pane, or the pane of
+ * an agent already running in that project.
+ */
+export type PromptTarget = "new" | "last";
+
+/**
+ * The agent in this project that answered most recently — the one a person
+ * means by "the running agent". Plain shells are not agents, and a project with
+ * none returns nothing, which the caller treats as "start a fresh one".
+ */
+export function lastAgentIn(
+  rows: {
+    handle: string;
+    worktreePath: string;
+    agentIdentity?: string;
+    lastOutputAt?: number | null;
+  }[],
+  worktreePath: string,
+): string | undefined {
+  return rows
+    .filter((row) => row.worktreePath === worktreePath && row.agentIdentity)
+    .sort((a, b) => (b.lastOutputAt ?? 0) - (a.lastOutputAt ?? 0))[0]?.handle;
+}
+
 /** Everything a saved prompt needs to start an agent; this is what a Quicklink carries. */
 export type PromptSpec = {
   repoId: string;
@@ -91,6 +116,9 @@ export type PromptSpec = {
   agent: string;
   createWorktree: boolean;
   worktreeName?: string;
+  /** Only meaningful without a worktree. Absent means "new", so saved prompts
+   * from before this existed keep their behaviour. */
+  target?: PromptTarget;
   prompt: string;
 };
 
@@ -227,6 +255,38 @@ export async function runPrompt(
     return created?.agentTerminalHandle ?? created?.startupTerminal?.handle;
   }
 
+  const handle =
+    (await runningPane(spec, orcaPath, exec)) ??
+    (await createPane(spec, orcaPath, exec));
+
+  await call(orcaPath, terminalSendArgs(handle, spec.prompt), exec);
+  return handle;
+}
+
+/**
+ * The pane of an agent already running in this project, when that is what the
+ * prompt asked for. Nothing found means the caller starts a fresh one.
+ */
+async function runningPane(
+  spec: PromptSpec,
+  orcaPath: string,
+  exec: Exec,
+): Promise<string | undefined> {
+  if (spec.target !== "last") return undefined;
+
+  const live = await call<{ terminals: Parameters<typeof lastAgentIn>[0] }>(
+    orcaPath,
+    ["terminal", "list", "--limit", "100", "--json"],
+    exec,
+  );
+  return lastAgentIn(live?.terminals ?? [], spec.worktreePath);
+}
+
+async function createPane(
+  spec: PromptSpec,
+  orcaPath: string,
+  exec: Exec,
+): Promise<string> {
   const terminal = await call<{
     terminal?: { handle?: string };
     handle?: string;
@@ -234,8 +294,6 @@ export async function runPrompt(
   const handle = terminal?.terminal?.handle ?? terminal?.handle;
   if (!handle)
     throw new Error("Orca created no terminal to send the prompt to");
-
-  await call(orcaPath, terminalSendArgs(handle, spec.prompt), exec);
   return handle;
 }
 
@@ -299,7 +357,9 @@ export function previewParts(
     extra: source === "none" ? undefined : EXTRA_LABELS[source],
     runs: spec.createWorktree
       ? `${spec.agent} in a new worktree "${worktreeNameFor(spec)}" off ${spec.worktreePath}`
-      : `${spec.agent} in ${spec.worktreePath}`,
+      : spec.target === "last"
+        ? `the agent already running in ${spec.worktreePath} (${spec.agent} if none)`
+        : `${spec.agent} in ${spec.worktreePath}`,
   };
 }
 
