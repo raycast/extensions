@@ -1,0 +1,155 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "discordpy-documentation",
+  "title": "Discord.py Documentation",
+  "description": "Search the discord.py documentation with intent and coroutine hints, plus a permissions calculator, embed builder and Raycast AI tools.",
+  "icon": "icon.png",
+  "author": "cemyilmazzzz122",
+  "license": "MIT",
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "discord",
+    "discord.py",
+    "discordpy",
+    "python",
+    "bot",
+    "documentation",
+    "docs",
+    "api",
+    "intents",
+    "embed",
+    "permissions"
+  ],
+  "commands": [
+    {
+      "name": "search-documentation",
+      "title": "Search Documentation",
+      "subtitle": "Discord.py",
+      "description": "Search classes, methods, attributes, events, exceptions, guides and FAQ answers in the discord.py documentation",
+      "mode": "view"
+    },
+    {
+      "name": "permissions-calculator",
+      "title": "Permissions Calculator",
+      "subtitle": "Discord.py",
+      "description": "Pick Discord permissions and get the integer, the Python code and a bot invite URL",
+      "mode": "view"
+    },
+    {
+      "name": "embed-builder",
+      "title": "Embed Builder",
+      "subtitle": "Discord.py",
+      "description": "Fill in a form and copy the matching discord.Embed Python code",
+      "mode": "view"
+    },
+    {
+      "name": "discord-colors",
+      "title": "Discord Colours",
+      "subtitle": "Discord.py",
+      "description": "Browse discord.Colour presets with their hex and integer values",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1",
+    "node-html-parser": "^9.0.3",
+    "turndown": "^7.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "@types/turndown": "^5.0.5",
+    "eslint": "^9.39.5",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "docsVersion",
+      "title": "Documentation Version",
+      "description": "Which discord.py documentation branch to index.",
+      "type": "dropdown",
+      "required": false,
+      "default": "stable",
+      "data": [
+        {
+          "title": "Stable (latest release)",
+          "value": "stable"
+        },
+        {
+          "title": "Latest (master branch)",
+          "value": "latest"
+        }
+      ]
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "What pressing Enter on a result does.",
+      "type": "dropdown",
+      "required": false,
+      "default": "detail",
+      "data": [
+        {
+          "title": "Show Details in Raycast",
+          "value": "detail"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "browser"
+        }
+      ]
+    },
+    {
+      "name": "botVariable",
+      "title": "Bot Variable Name",
+      "description": "The variable name used in generated boilerplate.",
+      "type": "dropdown",
+      "required": false,
+      "default": "bot",
+      "data": [
+        {
+          "title": "bot (commands.Bot)",
+          "value": "bot"
+        },
+        {
+          "title": "client (discord.Client)",
+          "value": "client"
+        }
+      ]
+    },
+    {
+      "name": "applicationId",
+      "title": "Application ID",
+      "description": "Your bot's application ID, used to build invite URLs in the permissions calculator.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "123456789012345678"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-docs",
+      "title": "Search Discord.py Documentation",
+      "description": "Searches the indexed discord.py documentation and returns signatures, required gateway intents, whether a call is a coroutine, descriptions and code examples. Use this before answering any discord.py question so the answer matches the real API instead of being guessed."
+    },
+    {
+      "name": "read-entry",
+      "title": "Read Discord.py Documentation Entry",
+      "description": "Returns the full documentation for one fully qualified discord.py name, optionally with the list of a class's own attributes, properties and methods."
+    }
+  ]
+}
