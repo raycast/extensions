@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clipboard-diff",
+  "title": "Clipboard Diff",
+  "description": "Diff the two most recent Raycast clipboard history entries in VS Code.",
+  "icon": "command-icon.png",
+  "author": "emilio_micali",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "diff-clipboard",
+      "title": "Diff Last Two Clipboard Items",
+      "subtitle": "VS Code",
+      "description": "Writes the last two clipboard history entries to temp files and opens them with `code --diff`.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "editorCommand",
+      "title": "Editor CLI",
+      "description": "CLI used to open the diff. Must accept `--diff fileA fileB` (code, code-insiders, cursor, windsurf).",
+      "type": "textfield",
+      "required": false,
+      "default": "code"
+    },
+    {
+      "name": "fileExtension",
+      "title": "Temp File Extension",
+      "description": "Extension for the temp files, so the editor picks the right syntax highlighting.",
+      "type": "textfield",
+      "required": false,
+      "default": "txt"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
