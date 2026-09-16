@@ -1,28 +1,29 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import { createRaycastApiMock } from "./raycastApiMock";
 
-mock.module("@raycast/api", () => ({
-  environment: { isDevelopment: true },
-}));
+mock.module("@raycast/api", () => createRaycastApiMock(true));
 
 const loadLocalConstants = () =>
   import(`../lib/constants?local=${crypto.randomUUID()}`);
 
 describe("raycast local constants", () => {
-  test("uses the canonical portless app URL in development", async () => {
+  test("uses the canonical local app URL in development", async () => {
     const { TEAK_DEV_APP_URL, TEAK_SETTINGS_URL } = await loadLocalConstants();
-    expect(TEAK_DEV_APP_URL).toBe("http://app.teak.localhost:1355");
-    expect(TEAK_SETTINGS_URL).toBe("http://app.teak.localhost:1355/settings");
+    expect(TEAK_DEV_APP_URL).toBe("http://localhost:3000");
+    expect(TEAK_SETTINGS_URL).toBe("http://localhost:3000/settings");
   });
 
-  test("uses the canonical portless API URL in development", async () => {
+  test("uses the canonical Convex API URL in development", async () => {
     const { getApiBaseUrl } = await loadLocalConstants();
-    expect(getApiBaseUrl()).toBe("https://api.teak.localhost:1355/v1");
+    expect(getApiBaseUrl()).toBe(
+      "https://reminiscent-kangaroo-59.convex.site/v1",
+    );
   });
 
-  test("builds local card URLs from the portless app origin", async () => {
+  test("builds local card URLs from the local app origin", async () => {
     const { getTeakCardUrl } = await loadLocalConstants();
     expect(getTeakCardUrl("card_123")).toBe(
-      "http://app.teak.localhost:1355/?card=card_123",
+      "http://localhost:3000/?card=card_123",
     );
   });
 });
@@ -43,9 +44,7 @@ describe("raycast OAuth token base URL", () => {
     restoreEnv("TEAK_DEV_CONVEX_SITE_URL", originalTokenEnv);
     restoreEnv("NEXT_PUBLIC_CONVEX_SITE_URL", originalSiteEnv);
     // Restore the file-level development mock for any following tests.
-    mock.module("@raycast/api", () => ({
-      environment: { isDevelopment: true },
-    }));
+    mock.module("@raycast/api", () => createRaycastApiMock(true));
   });
 
   test("ignores NEXT_PUBLIC_CONVEX_SITE_URL and uses the default deployment", async () => {
@@ -53,7 +52,7 @@ describe("raycast OAuth token base URL", () => {
     // A Vercel-pulled .env.local may point this at a stale deployment; the
     // token URL must not follow it.
     process.env.NEXT_PUBLIC_CONVEX_SITE_URL =
-      "https://uncommon-ladybug-882.convex.site";
+      "https://reminiscent-kangaroo-59.convex.site";
 
     const { getOAuthTokenBaseUrl } = await loadLocalConstants();
     expect(getOAuthTokenBaseUrl()).toBe(
@@ -80,9 +79,7 @@ describe("raycast OAuth token base URL", () => {
   });
 
   test("uses the production app origin outside development", async () => {
-    mock.module("@raycast/api", () => ({
-      environment: { isDevelopment: false },
-    }));
+    mock.module("@raycast/api", () => createRaycastApiMock(false));
 
     const { getOAuthTokenBaseUrl } = await loadLocalConstants();
     expect(getOAuthTokenBaseUrl()).toBe("https://app.teakvault.com");
