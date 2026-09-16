@@ -20,13 +20,23 @@ function runSaveScript(scriptPath: string): Promise<void> {
     // "quiet" suppresses the plugin's own tmux status message; we report via HUD.
     // The save can take a while with @resurrect-capture-pane-contents on and many
     // panes, so allow a generous timeout and buffer.
-    execFile(scriptPath, ["quiet"], { env, timeout: 600000, maxBuffer: 64 * 1024 * 1024 }, (error, _stdout, stderr) => {
-      if (error) {
-        reject(new Error(stderr || error.message));
-        return;
-      }
-      resolve();
-    });
+    // The resurrect script has a `#!/usr/bin/env bash` shebang; env resolves bash
+    // from PATH, and bash lives in /bin, which the extension's restricted PATH
+    // omits — so add the system bin dirs for this subprocess.
+    const scriptEnv = { ...env, PATH: `${env.PATH}:/bin:/usr/sbin:/sbin` };
+
+    execFile(
+      scriptPath,
+      ["quiet"],
+      { env: scriptEnv, timeout: 600000, maxBuffer: 64 * 1024 * 1024 },
+      (error, _stdout, stderr) => {
+        if (error) {
+          reject(new Error(stderr || error.message));
+          return;
+        }
+        resolve();
+      },
+    );
   });
 }
 
