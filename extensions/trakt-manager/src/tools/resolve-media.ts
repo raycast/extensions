@@ -31,9 +31,9 @@ export type ResolvedMatch = ResolvedMedia & {
 export const SEARCH_RESULT_CAP = 50;
 
 /**
- * True when the title-first search filled a whole page, meaning further releases sharing the
- * title exist out of reach. A negative conclusion drawn from a truncated set is a guess, so
- * callers must stop describing it as complete.
+ * True when either search filled a whole page. Further releases then exist out of reach —
+ * including a year that only lives under a related title in the relevance ranking — so a
+ * negative conclusion drawn from this set is a guess.
  */
 type Truncated = { truncated: boolean };
 
@@ -134,7 +134,7 @@ export async function searchMovieResults(
 
   return {
     items: mergeById((item) => item.movie.ids.trakt, exact.body, broad.body),
-    truncated: exact.body.length >= limit,
+    truncated: exact.body.length >= limit || broad.body.length >= limit,
   };
 }
 
@@ -163,7 +163,7 @@ export async function searchShowResults(
 
   return {
     items: mergeById((item) => item.show.ids.trakt, exact.body, broad.body),
-    truncated: exact.body.length >= limit,
+    truncated: exact.body.length >= limit || broad.body.length >= limit,
   };
 }
 
