@@ -122,7 +122,11 @@ function SearchAllPullRequestsList() {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <ShowPullRequestDetailAction pr={pr} onDeclined={() => removePullRequest(key)} />
+                    <ShowPullRequestDetailAction
+                      pr={pr}
+                      onDeclined={() => removePullRequest(key)}
+                      onDone={onReviewStateChange}
+                    />
                     <Action.OpenInBrowser
                       title="Open Pull Request in Browser"
                       url={`https://bitbucket.org/${pr.repo.fullName}/pull-requests/${pr.id}`}

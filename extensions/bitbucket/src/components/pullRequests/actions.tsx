@@ -216,7 +216,11 @@ export function RequestChangesAction(props: {
   );
 }
 
-export function ShowPullRequestDetailAction(props: { pr: PullRequest; onDeclined?: () => void; onDone?: () => void }) {
+export function ShowPullRequestDetailAction(props: {
+  pr: PullRequest;
+  onDeclined?: () => void;
+  onDone?: (reviewState: ReviewState) => void;
+}) {
   return (
     <Action.Push
       title="Show Pull Request Details"

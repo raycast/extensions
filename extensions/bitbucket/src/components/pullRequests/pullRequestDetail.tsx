@@ -14,7 +14,11 @@ interface State {
   error?: Error;
 }
 
-export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => void; onDone?: () => void }) {
+export function PullRequestDetail(props: {
+  pr: PullRequest;
+  onDeclined?: () => void;
+  onDone?: (reviewState: ReviewState) => void;
+}) {
   const { pr } = props;
   const { pop } = useNavigation();
   const [state, setState] = useState<State>({ isLoading: true });
@@ -22,6 +26,14 @@ export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => v
   // value, including `null`, means an action fired and must override stale data.
   const [localReviewState, setLocalReviewState] = useState<ReviewState | undefined>(undefined);
   const [myUuid, setMyUuid] = useState<string | null>(null);
+
+  // Propagates the new state back to the row this detail view was pushed from,
+  // so its reviewer accessory updates immediately instead of staying stale until
+  // the list is reopened.
+  function updateReviewState(next: ReviewState) {
+    setLocalReviewState(next);
+    props.onDone?.(next);
+  }
 
   useEffect(() => {
     getCurrentUserUuid()
@@ -98,7 +110,7 @@ export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => v
             <Action.OpenInBrowser title="Open Pull Request in Browser" url={url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ApprovePullRequestAction pr={pr} reviewState={reviewState} onReviewStateChange={setLocalReviewState} />
+            <ApprovePullRequestAction pr={pr} reviewState={reviewState} onReviewStateChange={updateReviewState} />
             <DeclinePullRequestAction
               pr={pr}
               onDeclined={() => {
@@ -106,7 +118,7 @@ export function PullRequestDetail(props: { pr: PullRequest; onDeclined?: () => v
                 pop();
               }}
             />
-            <RequestChangesAction pr={pr} reviewState={reviewState} onReviewStateChange={setLocalReviewState} />
+            <RequestChangesAction pr={pr} reviewState={reviewState} onReviewStateChange={updateReviewState} />
           </ActionPanel.Section>
         </ActionPanel>
       }
