@@ -1,4 +1,5 @@
-import { callWs } from "./moodle";
+import { browserFileUrl, callWs } from "./moodle";
+import { collectSettled, reportPartialFailures } from "./settle";
 import { BASE_URL } from "./constants";
 import { htmlToMarkdown, htmlToText } from "./html";
 import { Lang, resolveMlang } from "./mlang";
@@ -72,7 +73,7 @@ export function toAnnouncement(raw: RawDiscussion, course: Pick<Course, "id" | "
     url: `${BASE_URL}/mod/forum/discuss.php?d=${raw.discussion}`,
     courseId: course.id,
     courseName: course.name,
-    attachments: (raw.attachments ?? []).map((a) => ({ name: a.filename, url: a.fileurl })),
+    attachments: (raw.attachments ?? []).map((a) => ({ name: a.filename, url: browserFileUrl(a.fileurl) })),
   };
 }
 
@@ -86,14 +87,22 @@ export async function fetchForumDiscussions(forumId: number, perPage: number): P
   return data.discussions;
 }
 
-/** Latest announcements across the given courses, newest first. */
-export async function fetchAnnouncements(courses: Course[], lang: Lang, perForum = 5): Promise<Announcement[]> {
+/**
+ * Latest announcements across the given courses, newest first. Courses whose forum cannot be read are
+ * skipped and reported through `onPartialFailure`; the error is rethrown only when nothing could be loaded.
+ */
+export async function fetchAnnouncements(
+  courses: Course[],
+  lang: Lang,
+  options: { perForum?: number; onPartialFailure?: (errors: unknown[]) => void } = {},
+): Promise<Announcement[]> {
+  const perForum = options.perForum ?? 5;
   const byId = new Map(courses.map((course) => [course.id, course]));
   const forums = await fetchNewsForums(
     courses.map((course) => course.id),
     lang,
   );
-  const results = await Promise.all(
+  const { values, errors } = await collectSettled(
     forums.map(async (forum) => {
       const course = byId.get(forum.courseId);
       if (!course) return [];
@@ -101,5 +110,6 @@ export async function fetchAnnouncements(courses: Course[], lang: Lang, perForum
       return discussions.map((d) => toAnnouncement(d, course));
     }),
   );
-  return results.flat().sort((a, b) => b.created.getTime() - a.created.getTime());
+  reportPartialFailures(errors, values.length, options.onPartialFailure);
+  return values.flat().sort((a, b) => b.created.getTime() - a.created.getTime());
 }

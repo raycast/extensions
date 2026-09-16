@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { AuthEmptyView, isAuthError, showError } from "./components/errors";
+import { AuthEmptyView, isAuthError, showError, showPartialFailure } from "./components/errors";
 import { fetchCoursesInProgress } from "./lib/courses";
 import { Announcement, fetchAnnouncements } from "./lib/forum";
 import { Lang } from "./lib/mlang";
@@ -8,7 +8,7 @@ import { getLanguage } from "./lib/prefs";
 
 async function fetchLatestAnnouncements(lang: Lang): Promise<Announcement[]> {
   const courses = await fetchCoursesInProgress(lang);
-  return fetchAnnouncements(courses, lang);
+  return fetchAnnouncements(courses, lang, { onPartialFailure: (errors) => showPartialFailure(errors, "forums") });
 }
 
 function markdownFor(announcement: Announcement): string {

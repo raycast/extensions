@@ -2,11 +2,12 @@ import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { FileItem } from "./components/course-contents";
-import { AuthEmptyView, isAuthError, showError } from "./components/errors";
+import { AuthEmptyView, isAuthError, showError, showPartialFailure } from "./components/errors";
 import { collectFiles, CourseFile, fetchCourseContents } from "./lib/contents";
 import { Course, fetchCoursesInProgress } from "./lib/courses";
 import { Lang } from "./lib/mlang";
 import { getLanguage } from "./lib/prefs";
+import { collectSettled, reportPartialFailures } from "./lib/settle";
 
 interface MaterialsIndex {
   courses: Course[];
@@ -15,13 +16,14 @@ interface MaterialsIndex {
 
 async function fetchMaterials(lang: Lang): Promise<MaterialsIndex> {
   const courses = await fetchCoursesInProgress(lang);
-  const perCourse = await Promise.all(
+  const { values, errors } = await collectSettled(
     courses.map(async (course) => {
       const sections = await fetchCourseContents(course.id, lang);
       return collectFiles(sections).map((file) => ({ file, course }));
     }),
   );
-  const files = perCourse.flat().sort((a, b) => (b.file.modified?.getTime() ?? 0) - (a.file.modified?.getTime() ?? 0));
+  reportPartialFailures(errors, values.length, (failed) => showPartialFailure(failed));
+  const files = values.flat().sort((a, b) => (b.file.modified?.getTime() ?? 0) - (a.file.modified?.getTime() ?? 0));
   return { courses, files };
 }
 

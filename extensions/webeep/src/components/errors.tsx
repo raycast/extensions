@@ -35,3 +35,13 @@ export function AuthEmptyView({ error }: { error: Error }) {
 export function isAuthError(error: unknown): error is AuthError {
   return error instanceof AuthError;
 }
+
+/** Warns that some courses failed to load while still showing the ones that succeeded. */
+export async function showPartialFailure(errors: unknown[], what = "courses"): Promise<void> {
+  const first = errors[0];
+  await showToast({
+    style: Toast.Style.Failure,
+    title: `${errors.length} ${what} could not be loaded`,
+    message: first instanceof Error ? first.message : undefined,
+  });
+}

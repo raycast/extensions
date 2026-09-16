@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { AuthEmptyView, isAuthError, showError } from "./components/errors";
+import { AuthEmptyView, isAuthError, showError, showPartialFailure } from "./components/errors";
 import { collectLinks, CourseLink, fetchCourseContents } from "./lib/contents";
 import { Course, fetchCoursesInProgress } from "./lib/courses";
 import { Lang } from "./lib/mlang";
 import { getLanguage } from "./lib/prefs";
+import { collectSettled, reportPartialFailures } from "./lib/settle";
 
 interface CourseLinks {
   course: Course;
@@ -13,14 +14,15 @@ interface CourseLinks {
 
 async function fetchRecordingLinks(lang: Lang): Promise<CourseLinks[]> {
   const courses = await fetchCoursesInProgress(lang);
-  const perCourse = await Promise.all(
+  const { values, errors } = await collectSettled(
     courses.map(async (course) => {
       const sections = await fetchCourseContents(course.id, lang);
       const links = collectLinks(sections, course.id).filter((link) => link.kind !== "link");
       return { course, links };
     }),
   );
-  return perCourse.filter((entry) => entry.links.length > 0);
+  reportPartialFailures(errors, values.length, (failed) => showPartialFailure(failed));
+  return values.filter((entry) => entry.links.length > 0);
 }
 
 export default function OpenRecordings() {

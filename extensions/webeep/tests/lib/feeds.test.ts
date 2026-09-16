@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { toAnnouncement } from "../../src/lib/forum";
 import { toNotification } from "../../src/lib/notifications";
 import { mergeEvents, toCalendarEvent } from "../../src/lib/calendar";
+import { collectSettled, reportPartialFailures } from "../../src/lib/settle";
 
 describe("toAnnouncement", () => {
   it("builds a markdown announcement with a discussion URL", () => {
@@ -23,7 +24,9 @@ describe("toAnnouncement", () => {
     expect(announcement.message).toBe("The calendar has **changed**.\nSee you.");
     expect(announcement.preview).toBe("The calendar has changed. See you.");
     expect(announcement.courseName).toBe("COMPILERS");
-    expect(announcement.attachments).toHaveLength(1);
+    expect(announcement.attachments).toEqual([
+      { name: "a.pdf", url: "https://webeep.polimi.it/pluginfile.php/1/a.pdf" },
+    ]);
   });
 });
 
@@ -92,5 +95,26 @@ describe("calendar", () => {
       "en",
     );
     expect(events.map((e) => e.id)).toEqual([2, 3, 1]);
+  });
+});
+
+describe("settle helpers", () => {
+  it("separates fulfilled values from failures", async () => {
+    const { values, errors } = await collectSettled([
+      Promise.resolve(1),
+      Promise.reject(new Error("x")),
+      Promise.resolve(3),
+    ]);
+    expect(values).toEqual([1, 3]);
+    expect(errors).toHaveLength(1);
+  });
+
+  it("rethrows only when nothing succeeded, otherwise reports", () => {
+    const boom = new Error("boom");
+    expect(() => reportPartialFailures([boom], 0)).toThrow(boom);
+    const reported: unknown[][] = [];
+    reportPartialFailures([boom], 2, (errors) => reported.push(errors));
+    expect(reported).toEqual([[boom]]);
+    expect(() => reportPartialFailures([], 0)).not.toThrow();
   });
 });
