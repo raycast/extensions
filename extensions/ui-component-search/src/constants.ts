@@ -6,11 +6,15 @@ export const LIBRARY_URLS = {
     components: "https://ui.shadcn.com/docs/components",
   },
   primeng: {
-    base: "https://primeng.org",
+    base: "https://primeng.dev",
+    // Component list from the showcase sidebar menu data (structured JSON).
+    menu: "https://raw.githubusercontent.com/primefaces/primeng/master/apps/showcase/assets/data/menu.json",
   },
   material: {
     base: "https://material.angular.dev",
-    components: "https://material.angular.dev/components/categories",
+    // Component list from the docs app's documentation-items registry.
+    docItems:
+      "https://raw.githubusercontent.com/angular/components/main/docs/src/app/shared/documentation-items/documentation-items.ts",
   },
   spartan: {
     base: "https://spartan.ng",
@@ -18,8 +22,9 @@ export const LIBRARY_URLS = {
   },
   taiga: {
     base: "https://taiga-ui.dev",
-    sitemap: "https://taiga-ui.dev/sitemap.xml",
     components: "https://taiga-ui.dev/components",
+    // Component list from the demo app route registry (plain TS).
+    routes: "https://raw.githubusercontent.com/taiga-family/taiga-ui/main/projects/demo/src/pages/app/demo-routes.ts",
   },
   mantine: {
     base: "https://mantine.dev",
