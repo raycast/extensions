@@ -1,6 +1,6 @@
 # iOS Resolution Changelog
 
-## [2025–2026 Device Update] - {PR_MERGE_DATE}
+## [2025–2026 Device Update] - 2026-09-16
 
 - Add both iPhone Duo displays, iPhone 18 Pro and Pro Max, and iPhone 17e
 - Add iPad (A16), iPad Air with M3 and M4, and iPad Pro with M5
