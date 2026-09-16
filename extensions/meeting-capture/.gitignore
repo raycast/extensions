@@ -1,0 +1,9 @@
+node_modules/
+.build/
+dist/
+.DS_Store
+work/
+.codex/
+.cleanup-removed/
+*.log
+*.xcuserstate
