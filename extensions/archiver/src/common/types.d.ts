@@ -5,6 +5,7 @@ interface ICompressPreferences {
   deleteAfterCompression: boolean;
   locationSaveCompressed: string;
   defaultCompressionFormat: CompressFormat;
+  revealInFinder: boolean;
   useOriginalNameWhenSingle: boolean;
   useParentFolderNameWhenMultiple: boolean;
 }
