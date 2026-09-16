@@ -1,6 +1,6 @@
 # Unsplash Changelog
 
-## [Fix Liked Images Pagination] - {PR_MERGE_DATE}
+## [Fix Liked Images Pagination] - 2026-09-16
 
 - Fixed the Liked Images command only showing the first page of likes (~10 images) by paging through all of the user's likes
 
