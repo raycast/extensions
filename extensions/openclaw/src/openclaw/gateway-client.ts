@@ -223,7 +223,9 @@ export class RaycastGatewayClient {
       storedScopes: this.options.deviceAuth?.scopes,
     });
     const scopes = resolveGatewayConnectScopes({
-      requestedScopes: this.options.scopes,
+      requestedScopes: selectedAuth.authBootstrapToken
+        ? this.options.scopes
+        : undefined,
       usingStoredDeviceToken: selectedAuth.usingStoredDeviceToken,
       storedScopes: selectedAuth.storedScopes,
       defaultScopes: this.options.scopes,

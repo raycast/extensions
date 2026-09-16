@@ -181,23 +181,45 @@ function usageSubtitle(
   return parts.length ? parts.join(" · ") : "Aggregate totals are unavailable.";
 }
 
-function openSession(
+async function openSession(
   sessionKey: string,
   title: string,
   agentId?: string,
 ): Promise<void> {
-  return launchCommand({
-    name: "chat",
-    type: LaunchType.UserInitiated,
-    context: { sessionKey, title, agentId },
-  });
+  try {
+    await launchCommand({
+      name: "chat",
+      type: LaunchType.UserInitiated,
+      context: { sessionKey, title, agentId },
+    });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could Not Open Chat",
+      message:
+        error instanceof Error
+          ? error.message
+          : "The command failed to launch.",
+    });
+  }
 }
 
-function openStatus(): Promise<void> {
-  return launchCommand({
-    name: "status",
-    type: LaunchType.UserInitiated,
-  });
+async function openStatus(): Promise<void> {
+  try {
+    await launchCommand({
+      name: "status",
+      type: LaunchType.UserInitiated,
+    });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could Not Open Gateway Status",
+      message:
+        error instanceof Error
+          ? error.message
+          : "The command failed to launch.",
+    });
+  }
 }
 
 function SharedActions({
