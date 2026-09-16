@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import { basename } from "node:path";
 import { Diagnostic, readDiagnostics } from "./diagnostic-data";
 import { markdownText } from "./model";
+import { trackingScope } from "./preferences";
+import { scopeLabel } from "./tracking";
 export default function Diagnostics() {
   const [reports, setReports] = useState<Diagnostic[]>([]),
     [warnings, setWarnings] = useState<string[]>([]),
     [loading, setLoading] = useState(true);
   useEffect(() => {
-    void readDiagnostics()
+    void readDiagnostics(trackingScope())
       .then((result) => {
         setReports(result.reports);
         setWarnings(result.warnings);
@@ -22,7 +24,10 @@ export default function Diagnostics() {
       navigationTitle="Recent Diagnostics"
       searchBarPlaceholder="Search recent apps and events"
     >
-      <List.Section title="Last 7 days · diagnostic events, not continuous usage history">
+      <List.Section
+        title="Last 7 days · diagnostic events, not continuous usage history"
+        subtitle={scopeLabel[trackingScope()]}
+      >
         {warnings.length > 0 && (
           <List.Item
             title={`${warnings.length} reports or locations could not be read`}
@@ -43,8 +48,8 @@ export default function Diagnostics() {
         )}
         {!loading && !reports.length && (
           <List.Item
-            title="No supported recent reports found"
-            subtitle="Recorded history continues independently"
+            title="No recent reports match this tracking scope"
+            subtitle="Reports without app identity require All Resources in preferences"
             icon={Icon.Info}
           />
         )}

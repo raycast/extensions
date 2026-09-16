@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { entities } from "./model";
 import { prepare } from "./runtime";
 import { ResourceRow, systemSummary, useLive } from "./ui";
+import { trackingScope } from "./preferences";
+import { scopeLabel } from "./tracking";
 export default function Inspect() {
   const live = useLive();
   const [kind, setKind] = useState("app"),
@@ -63,7 +65,7 @@ export default function Inspect() {
         subtitle={
           live.error
             ? "Refresh failed · values may be stale"
-            : "Refreshes every 5 seconds"
+            : `${scopeLabel[trackingScope()]} · refreshes every 5 seconds`
         }
       >
         <List.Item

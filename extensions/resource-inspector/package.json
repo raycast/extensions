@@ -77,5 +77,29 @@
     "prettier": "^3.6.0",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0"
-  }
+  },
+  "preferences": [
+    {
+      "name": "trackingScope",
+      "title": "Tracking Scope",
+      "description": "Applies to live lists, new recordings, history views, and diagnostics. Overall memory pressure and swap remain visible. Existing history is retained until normal expiry.",
+      "type": "dropdown",
+      "required": false,
+      "default": "third-party",
+      "data": [
+        {
+          "title": "Exclude macOS Services and Built-in Apple Apps",
+          "value": "third-party"
+        },
+        {
+          "title": "Apps and Tools \u2014 Exclude macOS Services",
+          "value": "apps"
+        },
+        {
+          "title": "All Resources",
+          "value": "all"
+        }
+      ]
+    }
+  ]
 }

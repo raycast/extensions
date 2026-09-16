@@ -13,6 +13,8 @@ import { bytes, entities, markdownText } from "./model";
 import { getSnapshot, historyStore, prepare } from "./runtime";
 import { HistoryRow } from "./storage";
 import { ResourceDetail } from "./ui";
+import { trackingScope } from "./preferences";
+import { scopeLabel } from "./tracking";
 function duration(value: number | null) {
   return value == null ? "Unavailable" : `${(value / 60).toFixed(1)} min`;
 }
@@ -76,7 +78,7 @@ export default function History() {
       await prepare();
       const since = Date.now() / 1000 - Number(days) * 86400;
       const [data, covered, paused] = await Promise.all([
-        historyStore.history(since, kind),
+        historyStore.history(since, kind, trackingScope()),
         historyStore.coverage(since),
         historyStore.meta("paused"),
       ]);
@@ -118,7 +120,7 @@ export default function History() {
         </List.Dropdown>
       }
     >
-      <List.Section title={coverage}>
+      <List.Section title={coverage} subtitle={scopeLabel[trackingScope()]}>
         <List.Item
           title={`${kind === "app" ? "Apps" : kind === "process" ? "Processes" : "Containers"} · sorted by ${sort}`}
           icon={Icon.Filter}
@@ -159,8 +161,8 @@ export default function History() {
         )}
         {!loading && !rows.length && !error && (
           <List.Item
-            title="History starts with your first recorded sample"
-            subtitle="Run Record Resource Usage; past events are in Recent Diagnostics"
+            title="No recorded resources match this tracking scope"
+            subtitle="Run Record Resource Usage or change Tracking Scope in extension preferences"
             icon={Icon.Info}
           />
         )}

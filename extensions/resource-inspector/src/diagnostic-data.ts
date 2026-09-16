@@ -1,6 +1,7 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
+import { included, resourceClass, TrackingScope } from "./tracking";
 export interface Diagnostic {
   title: string;
   date: string;
@@ -16,8 +17,15 @@ function dateValue(text: string) {
     .replace(/ ([+-]\d{2})(\d{2})$/, "$1:$2");
   return new Date(normalized).getTime();
 }
-export function parseDiagnostic(text: string, path: string): Diagnostic | null {
+export function parseDiagnostic(
+  text: string,
+  path: string,
+  scope: TrackingScope = "all",
+): Diagnostic | null {
   if (basename(path).startsWith("JetsamEvent")) {
+    // These reports contain short names and PIDs, not trustworthy executable/app
+    // identities. A current PID or a familiar name cannot identify an old event.
+    if (scope !== "all") return null;
     const data = JSON.parse(text.slice(text.indexOf("\n") + 1));
     if (
       !Array.isArray(data.processes) ||
@@ -70,13 +78,24 @@ export function parseDiagnostic(text: string, path: string): Diagnostic | null {
   const fields = new Map<string, string>();
   for (const line of text.split("\n")) {
     const match = line.match(
-      /^(Date\/Time|Command|Event|CPU|Writes|Footprint|Duration|Action taken):\s*(.*)$/,
+      /^(Date\/Time|Command|Path|Identifier|Event|CPU|Writes|Footprint|Duration|Action taken):\s*(.*)$/,
     );
     if (match && !fields.has(match[1])) fields.set(match[1], match[2]);
   }
   const date = fields.get("Date/Time"),
     event = fields.get("Event");
   if (!date || !event || !fields.get("Command")) return null;
+  const executable = fields.get("Path") ?? "";
+  if (
+    !included(
+      resourceClass({
+        executable: executable.startsWith("/") ? executable : "",
+        bundleId: fields.get("Identifier"),
+      }),
+      scope,
+    )
+  )
+    return null;
   return {
     title: fields.get("Command")!,
     date,
@@ -85,13 +104,18 @@ export function parseDiagnostic(text: string, path: string): Diagnostic | null {
     summary: [
       "A diagnostic event, not continuous monitoring or proof of a slowdown.",
       ...[...fields]
-        .filter(([key]) => !["Command", "Date/Time", "Event"].includes(key))
+        .filter(
+          ([key]) =>
+            !["Command", "Date/Time", "Event", "Path", "Identifier"].includes(
+              key,
+            ),
+        )
         .map(([key, value]) => `${key}: ${value}`),
     ].join("\n\n"),
     path,
   };
 }
-export async function readDiagnostics() {
+export async function readDiagnostics(scope: TrackingScope = "all") {
   const reports: Diagnostic[] = [],
     warnings: string[] = [];
   const cutoff = Date.now() - 7 * 86400000;
@@ -118,7 +142,11 @@ export async function readDiagnostics() {
           info.mtimeMs < cutoff
         )
           continue;
-        const report = parseDiagnostic(await readFile(path, "utf8"), path);
+        const report = parseDiagnostic(
+          await readFile(path, "utf8"),
+          path,
+          scope,
+        );
         if (
           report &&
           Number.isFinite(report.timestamp) &&

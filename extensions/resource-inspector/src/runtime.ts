@@ -5,6 +5,8 @@ import { Snapshot } from "./model";
 import { nativeCall } from "./native";
 import { listContainers } from "./containers";
 import { HistoryStore } from "./storage";
+import { trackingScope } from "./preferences";
+import { trackedSnapshot } from "./tracking";
 export const binary = join(environment.assetsPath, "inspector");
 export const databasePath = join(environment.supportPath, "history.sqlite");
 export const historyStore = new HistoryStore(binary, databasePath);
@@ -21,16 +23,19 @@ export async function getSnapshot(): Promise<Snapshot> {
     throw new Error(
       "macOS did not return any process measurements. Run this command from Raycast.",
     );
-  return {
-    ...native.value,
-    containers: containers.status === "fulfilled" ? containers.value : [],
-    containerError:
-      containers.status === "rejected"
-        ? String(
-            containers.reason instanceof Error
-              ? containers.reason.message
-              : containers.reason,
-          )
-        : undefined,
-  };
+  return trackedSnapshot(
+    {
+      ...native.value,
+      containers: containers.status === "fulfilled" ? containers.value : [],
+      containerError:
+        containers.status === "rejected"
+          ? String(
+              containers.reason instanceof Error
+                ? containers.reason.message
+                : containers.reason,
+            )
+          : undefined,
+    },
+    trackingScope(),
+  );
 }

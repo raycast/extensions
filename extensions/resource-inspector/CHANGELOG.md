@@ -14,3 +14,4 @@
 - Recheck container identity at the final local API boundary and observe its state after stopping, without automatic retries.
 - Cancel active Git queries and serialize replacement worktree scans, including in-flight filesystem work.
 - Keep zero-duration history baselines from marking complete CPU and disk totals as partial.
+- Exclude macOS services and built-in Apple apps from tracking by default, with a shared scope setting for live lists, history, and diagnostics.
