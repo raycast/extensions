@@ -17,24 +17,28 @@
     {
       "name": "library",
       "title": "My Library",
+      "subtitle": "Ebook Hub",
       "description": "Browse, read, and manage the books in your local library.",
       "mode": "view"
     },
     {
       "name": "continue-reading",
       "title": "Continue Reading",
+      "subtitle": "Ebook Hub",
       "description": "Open the last book you were reading at your saved position.",
       "mode": "view"
     },
     {
       "name": "import-book",
       "title": "Import Book",
+      "subtitle": "Ebook Hub",
       "description": "Import a Markdown, text, EPUB, or PDF file into your library.",
       "mode": "view"
     },
     {
       "name": "browse-community",
       "title": "Browse Community Library",
+      "subtitle": "Ebook Hub",
       "description": "Discover freely licensed books shared by the community and add them to your library.",
       "mode": "view"
     }
