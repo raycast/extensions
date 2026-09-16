@@ -4,8 +4,13 @@ const INLINE_IMAGE = /!\[[^\]]*\]\([^)]*\)/g;
 const REFERENCE_IMAGE = /!\[[^\]]*\]\[[^\]]*\]/g;
 const HTML_TAG = /<\/?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?\/?>/g;
 const UNSAFE_LINK = /\[([^\]]*)\]\(\s*(?:javascript|data|vbscript|file):(?:[^()]|\([^()]*\))*\)/gi;
+/** `[ref]: javascript:…` defines a target for `[text][ref]` without ever writing `](`. */
+const UNSAFE_DEFINITION = /^\s{0,3}\[[^\]]*\]:\s*(?:javascript|data|vbscript|file):/i;
 
 function sanitizeLine(line: string): string {
+  if (UNSAFE_DEFINITION.test(line)) {
+    return "";
+  }
   return line.replace(INLINE_IMAGE, "").replace(REFERENCE_IMAGE, "").replace(HTML_TAG, "").replace(UNSAFE_LINK, "$1");
 }
 
