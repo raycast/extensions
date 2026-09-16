@@ -21,7 +21,18 @@ async function getUserLikes(): Promise<SearchResult[]> {
     await LocalStorage.setItem("username", user.username);
     username = user.username;
   }
-  return apiRequest<SearchResult[]>(`/users/${username}/likes`, { requireUserAuth: true });
+  // /users/:username/likes is paginated (max 30 per page); a single request
+  // only returns the most recent page, hiding every older liked image.
+  const perPage = 30;
+  const likes: SearchResult[] = [];
+  for (let page = 1; ; page += 1) {
+    const pageLikes = await apiRequest<SearchResult[]>(`/users/${username}/likes?per_page=${perPage}&page=${page}`, {
+      requireUserAuth: true,
+    });
+    likes.push(...pageLikes);
+    if (pageLikes.length < perPage) break;
+  }
+  return likes;
 }
 
 export default useLikes;
