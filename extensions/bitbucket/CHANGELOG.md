@@ -3,6 +3,8 @@
 ## [Update] - {PR_MERGE_DATE}
 
 - Add Approve / Decline / Request Changes actions for pull requests
+- Open pull request details on Enter, open in browser on Cmd+Enter (or Enter again from the detail view)
+- Fix "Search My Open Pull Requests" failing to load pull requests missing `destination.repository.slug`
 
 ## [Update] - 2026-09-16
 

@@ -36,6 +36,11 @@ function SearchAllPullRequestsList() {
 
   const [reviewStates, setReviewStates] = useState<Map<string, ReviewState>>(new Map());
   const [myUuid, setMyUuid] = useState<string | null>(null);
+  // `mutate`'s updater only sees SWR's cache, which is still empty during a cold
+  // load (the list renders from `progress` at that point) — track declined keys
+  // separately so the row disappears immediately regardless of which state it
+  // was rendered from.
+  const [declinedKeys, setDeclinedKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     getCurrentUserUuid()
@@ -43,22 +48,24 @@ function SearchAllPullRequestsList() {
       .catch(() => setMyUuid(null));
   }, []);
 
-  const pullRequests: PullRequest[] | undefined = result?.values.map((pr) => ({
-    id: pr.id,
-    title: pr.title,
-    state: pr.state,
-    repo: {
-      name: pr.destination?.repository?.name ?? "",
-      fullName: pr.destination?.repository?.full_name ?? "",
-      slug: pr.destination?.repository?.slug ?? "",
-    },
-    commentCount: pr.comment_count,
-    author: {
-      url: pr.author?.links?.avatar?.href ?? "",
-      nickname: pr.author?.nickname,
-    },
-    reviewers: pr.reviewers,
-  }));
+  const pullRequests: PullRequest[] | undefined = result?.values
+    .map((pr) => ({
+      id: pr.id,
+      title: pr.title,
+      state: pr.state,
+      repo: {
+        name: pr.destination?.repository?.name ?? "",
+        fullName: pr.destination?.repository?.full_name ?? "",
+        slug: pr.destination?.repository?.slug ?? "",
+      },
+      commentCount: pr.comment_count,
+      author: {
+        url: pr.author?.links?.avatar?.href ?? "",
+        nickname: pr.author?.nickname,
+      },
+      reviewers: pr.reviewers,
+    }))
+    .filter((pr) => !declinedKeys.has(getPullRequestKey(pr)));
 
   useEffect(() => {
     if (!isValidating && data && data.failedRepoCount > 0) {
@@ -83,13 +90,12 @@ function SearchAllPullRequestsList() {
   }, [error]);
 
   function removePullRequest(key: string) {
+    setDeclinedKeys((current) => new Set(current).add(key));
     mutate(
       (current) =>
         current && {
           ...current,
-          values: current.values.filter(
-            (pr) => `${pr.destination?.repository?.slug}#${pr.id}` !== key,
-          ),
+          values: current.values.filter((pr) => `${pr.destination?.repository?.slug}#${pr.id}` !== key),
         },
       { revalidate: false },
     );
@@ -116,11 +122,11 @@ function SearchAllPullRequestsList() {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
+                    <ShowPullRequestDetailAction pr={pr} onDeclined={() => removePullRequest(key)} />
                     <Action.OpenInBrowser
                       title="Open Pull Request in Browser"
                       url={`https://bitbucket.org/${pr.repo.fullName}/pull-requests/${pr.id}`}
                     />
-                    <ShowPullRequestDetailAction pr={pr} onDeclined={() => removePullRequest(key)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <ApprovePullRequestAction
