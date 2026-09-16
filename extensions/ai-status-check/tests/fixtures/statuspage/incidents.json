@@ -1,0 +1,51 @@
+{
+  "incidents": [
+    {
+      "id": "resolved-incident",
+      "name": "Earlier API outage",
+      "status": "resolved",
+      "impact": "major",
+      "created_at": "2026-08-09T12:00:00Z",
+      "updated_at": "2026-08-09T12:30:00Z",
+      "resolved_at": "2026-08-09T12:30:00Z",
+      "incident_updates": [
+        {
+          "id": "resolved-update",
+          "status": "resolved",
+          "body": "This incident has been resolved.",
+          "created_at": "2026-08-09T12:30:00Z"
+        }
+      ]
+    },
+    {
+      "id": "active-incident",
+      "name": "Code requests are slow",
+      "status": "investigating",
+      "impact": "minor",
+      "created_at": "2026-08-11T15:00:00Z",
+      "updated_at": "2026-08-11T15:05:00Z",
+      "shortlink": "https://stspg.io/example",
+      "components": [
+        {
+          "id": "code"
+        }
+      ],
+      "incident_updates": [
+        {
+          "id": "active-update",
+          "status": "investigating",
+          "body": "We are investigating elevated latency.",
+          "created_at": "2026-08-11T15:05:00Z",
+          "affected_components": [
+            {
+              "code": "code",
+              "name": "Code Assistant",
+              "old_status": "operational",
+              "new_status": "degraded_performance"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

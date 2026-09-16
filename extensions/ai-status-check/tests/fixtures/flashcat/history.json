@@ -1,0 +1,25 @@
+{
+  "request_id": "request-history",
+  "data": {
+    "items": [
+      {
+        "change_id": 100,
+        "type": "incident",
+        "title": "Earlier API errors",
+        "status": "resolved",
+        "start_at_seconds": 1786370400,
+        "close_at_seconds": 1786371000,
+        "affected_components": [{ "component_id": "api", "status": "operational" }],
+        "updates": [
+          {
+            "update_id": "update-resolved",
+            "at_seconds": 1786371000,
+            "status": "resolved",
+            "description": "The API has recovered.",
+            "component_changes": [{ "component_id": "api", "status": "degraded" }]
+          }
+        ]
+      }
+    ]
+  }
+}
