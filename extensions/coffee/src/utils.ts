@@ -76,9 +76,6 @@ export async function stopCaffeinate(
   hudMessage?: string,
   options?: { pauseRunningSchedule?: boolean },
 ) {
-  if (hudMessage) {
-    await showHUD(hudMessage);
-  }
   let pausedSchedule: Schedule | undefined;
   if (options?.pauseRunningSchedule) {
     const schedule = await getSchedule();
@@ -103,6 +100,12 @@ export async function stopCaffeinate(
   }
   await setCaffeinationReason(undefined);
   await update(updates, false);
+
+  // showHUD closes the window and Raycast 2 unloads a view command's process
+  // on window close, so the HUD must come last or the work above never runs.
+  if (hudMessage) {
+    await showHUD(hudMessage);
+  }
 }
 
 async function update(updates: Updates, caffeinated: boolean) {
