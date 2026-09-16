@@ -5,14 +5,14 @@
  */
 
 import React from "react";
-import { Color, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { OutdatedCask, OutdatedFormula, OutdatedResults, preferences, type UpgradePackageStatus } from "../utils";
 import type { PackageState } from "../hooks/useBrewUpgrade";
 import { OutdatedActionPanel } from "./actionPanels";
 import { OutdatedErrorView } from "./outdatedErrorView";
 import { InstallableFilterType, placeholder } from "./filter";
-import { UPDATE_AVAILABLE_ICON } from "./packageIcons";
+import { ERROR_ICON, IN_PROGRESS_ICON, STATUS_COLOR, UPDATE_AVAILABLE_ICON, UP_TO_DATE_ICON } from "./palette";
 
 /** Icon for a list item, e.g. an upgrade status indicator. Defaults to `PENDING_ICON`. */
 export type OutdatedIcon = (
@@ -71,14 +71,14 @@ export function statusIcon(state?: PackageState): React.ComponentProps<typeof Li
 
   switch (state.status) {
     case "upgrading":
-      return { value: { source: getProgressIcon(0.5, Color.Blue), tintColor: Color.Blue }, tooltip: "Upgrading…" };
+      return { value: IN_PROGRESS_ICON, tooltip: "Upgrading…" };
     case "upgraded":
-      return { value: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Upgraded" };
+      return { value: UP_TO_DATE_ICON, tooltip: "Upgraded" };
     case "failed":
-      return { value: { source: Icon.XMarkCircle, tintColor: Color.Red }, tooltip: state.message ?? "Upgrade failed" };
+      return { value: ERROR_ICON, tooltip: state.message ?? "Upgrade failed" };
     case "skipped":
       return {
-        value: { source: Icon.MinusCircleFilled, tintColor: Color.SecondaryText },
+        value: { source: Icon.MinusCircleFilled, tintColor: STATUS_COLOR.muted },
         tooltip: state.message ?? "Skipped",
       };
   }
@@ -160,11 +160,7 @@ export function OutdatedList(props: OutdatedListProps) {
 
       {/* Empty state when no outdated packages */}
       {!props.isLoading && !props.error && !hasResults && props.outdated !== undefined && (
-        <List.EmptyView
-          icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-          title="All your packages are up to date"
-          actions={props.emptyActions}
-        />
+        <List.EmptyView icon={UP_TO_DATE_ICON} title="All your packages are up to date" actions={props.emptyActions} />
       )}
 
       {/* Results */}

@@ -262,6 +262,63 @@ Focus: Implement AI-powered features, improve user experience, and add advanced 
 - [x] Homebrew 6.0+ only; removed the deprecated internal-API preference
 - [x] vitest coverage for selection and formula/cask discriminator logic
 
+### Adopt: bring an app installed outside Homebrew under brew's management
+
+`brew install --adopt <cask>` exists today: *"Adopt existing artifacts in the destination that are
+identical to those being installed"* (`cmd/install.rb:152-155`). It registers an app already sitting
+in `/Applications` as that cask's artifact, so brew tracks its updates from then on, rather than
+downloading and replacing it. It conflicts with `--force` (`cmd/install.rb:173`).
+
+The UX to copy is Updatest's "Homebrew Adoption" panel: a suggested cask for the detected app, a
+dropdown of alternates when several could match (`sonos` vs `sonos-s1-controller`), the app's
+current version, description and homepage, one Adopt button, and a manual escape hatch taking a
+cask token plus an optional tap.
+
+**Read this before designing the flow — brew's rule is stricter than "adopt whatever is there."**
+In `cask/artifact/moved.rb`, adoption compares the downloaded artifact against the installed one:
+
+- For a cask **without** `auto_updates`, it reads both `Info.plist` files and requires
+  `CFBundleShortVersionString` **and** the bundle version to match. A mismatch prints
+  `onoe "The bundle version of ... is X but is Y for ..."` and the adoption **fails**.
+- For a cask **with** `auto_updates: true`, that check is skipped entirely — it adopts regardless.
+- If either plist cannot be read, it falls back to `diff --recursive --brief` over the two bundles.
+
+So adoption generally only succeeds when the installed app is *already* at the cask's current
+version. That is the opposite of an upgrade path, and the UI has to say so plainly: adopting does
+not update the app, and for most casks the user must update it first — or the attempt errors out.
+
+- [ ] **Detect adoptable apps.** The cask API payload already carries what is needed: `artifacts`
+      includes `{"app": ["1Password.app"]}`, so scanning `/Applications` for bundle names not owned
+      by any installed cask and matching them against that field is the whole detection step. No new
+      data source, and it reuses the cask index the extension already caches
+  - [ ] Rank candidates when several casks claim the same app name, and show the alternates rather
+        than silently picking one
+  - [ ] Exclude apps already managed by brew (the Caskroom knows), and Setapp/MAS-managed apps,
+        which cannot be adopted meaningfully
+- [ ] **Preflight the version comparison before offering the button.** Read the installed app's
+      `Info.plist` and compare against the cask's version the way brew does, so the extension can say
+      "versions match — adoptable", "update the app first", or "this cask auto-updates, so adoption
+      will succeed regardless" *before* the user runs a command that errors
+- [ ] **Run it**: `brew install --adopt --cask <token>`, with a fully-qualified `<user>/<repo>/<token>`
+      when the cask comes from a tap. Never pass `--force` alongside it — brew rejects the pair, and
+      forcing would overwrite the app rather than adopt it
+- [ ] **Manual entry** for the case where detection finds nothing or guesses wrong: a cask token plus
+      an optional tap, matching Updatest's fallback
+- [ ] **Ship it as its own `Adopt` command** (decided 2026-09-15, Chris) — a `view` command titled
+      "Adopt Apps", which scans for apps installed outside Homebrew and lists the ones a cask could
+      adopt. An action buried in Show Installed cannot be found by someone who does not already know
+      adoption exists, and the list it acts on is `/Applications`, not the installed-package list
+  - [ ] Rows are detected apps, not casks: app name, installed version, the matched cask token as a
+        subtitle, and an accessory saying whether it is adoptable now ("versions match"), blocked
+        ("update the app to <version> first") or unconditional ("cask auto-updates")
+  - [ ] Primary action Adopt, behind the shared `confirmAndRun` confirmation showing the exact
+        `brew install --adopt --cask <token>`; alternates for an ambiguous app in a submenu; Copy
+        Adopt Command and Run Adopt in <terminal> reuse the existing actions from Search
+  - [ ] Empty state when nothing is adoptable, plus the manual-entry escape hatch above as an action
+        on the empty view so the command is never a dead end
+  - [ ] Scanning `/Applications` reads the filesystem on every launch: show the progress indicator
+        before the scan starts, and cache the result briefly so reopening the command is instant
+
 ## 🔒 Dependencies
 
 - [ ] **Migrate `stream-json` 1.9.1 → 3.6.0** (moderate advisory
@@ -361,3 +418,44 @@ treating it as an ordinary install.
 - [ ] Add batch operations
   - [ ] Select multiple packages for install/uninstall — only upgrade selection exists today
   - [x] Bulk upgrade selected packages (selection review in Show Upgrades)
+
+## Homebrew 7 follow-ups (2026-09-14)
+
+- [ ] Build-context requirements stay in the installability check (user decision). Optional
+      mitigation: skip build-context requirements when `versions.bottle === true`, mirroring
+      Homebrew's `formula_installer.rb` around line 770. Cost of leaving it as-is: `anyzig`-style
+      formulae show ⊘ and lose their Install action even though a bottle would pour cleanly
+- [ ] `xcode` requirements are not evaluated by `src/utils/brew/installability.ts`. Deliberate:
+      they are usually build-only and pruned by bottles, so honouring them would mark much of the
+      tap "Can't Install" on a CLT-only Mac
+- [ ] Keg-only formulae with two kegs and an `opt` link pointing at the older one can be misfiled
+      by `src/utils/installed.ts` — which keg is linked is not visible from the JSON
+- [x] The background `brew update` in `src/hooks/useBrewOutdated.ts` does not call
+      `invalidateBrewMajorVersion()`, so a long-lived Show Installed session keeps a stale version
+      gate after Homebrew upgrades itself underneath it
+- [x] `src/utils/chunked-cache.test.ts` returns early on a runner without the live Application
+      Support JSON. Needs a small committed fixture pushed through the stream filter, asserting
+      `requirements`, `disabled`, `languages` and `artifacts` survive it
+- [x] Three inline "Copy Logs" toast actions (`src/utils/toast.ts`,
+      `src/components/formulaInfo.tsx`, `src/components/actions.tsx`) could share one builder —
+      done, plus a fourth at `src/hooks/useBrewInstalled.ts`; all four now call `copyLogsAction()`
+- [ ] The `--language=` cask install variant was deliberately not built — the Languages metadata
+      row only reports what a cask offers
+- [ ] CHANGELOG: the Homebrew 7 bullets currently sit under the in-flight "Show Upgrade Actions"
+      heading alongside PR #31099's bullets. Rename or split the section before either ships
+
+## Carried over from the retired HANDOFF.md / PLAN-homebrew6.md (2026-09-14)
+
+- [ ] Gatekeeper-disabled casks: installs fail with a Gatekeeper-specific brew error and there is
+      no matcher in `src/utils/errors.ts`, so it surfaces as a generic failure. Write the matcher
+      against a captured real failure, not a guessed string
+- [ ] Intel `x86_64` is Tier 3 (no new bottles): `brewPrefix` in `src/utils/brew/paths.ts` still
+      falls back to `/usr/local`, which is right, but the extension cannot tell a source build from
+      a bottle, so what an Intel user sees during install is unverified
+- [ ] `brew update-if-needed` (4.4.27+) could replace the unconditional `brew update` in
+      `src/utils/brew/fetch.ts`; independent change, real win
+- [ ] `src/utils/cache.ts` path filter keeps a nested subtree whenever any key inside it is in
+      `valid_keys` (removing `requirements` from the list leaves the data in place because of its
+      nested `name`); the whitelist is looser than it reads. Tighten to top-level paths or document
+- [ ] Deliberately not adopted (PLAN-homebrew6): `brew list --versions --json` (hard `jq`
+      dependency), `--variations`, `outdated --json=v1`

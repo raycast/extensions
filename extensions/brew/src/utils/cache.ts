@@ -14,13 +14,19 @@ import { Readable } from "stream";
 import { ReadableStream } from "stream/web";
 import { chain } from "stream-chain";
 import { parser } from "stream-json";
-import { filter } from "stream-json/filters/Filter";
-import { streamArray } from "stream-json/streamers/StreamArray";
+// Kebab-case with the extension: stream-json 3.x exposes everything through an
+// `exports` map and the old PascalCase subpaths (`filters/Filter`) resolve to
+// nothing. `@types/stream-json` is deliberately NOT installed — it still
+// describes 1.x, so it type-checks the dead specifiers clean while they fail at
+// runtime. 3.x ships its own types.
+import { filter } from "stream-json/filters/filter.js";
+import { streamArray } from "stream-json/streamers/stream-array.js";
 import { pipeline as streamPipeline } from "stream/promises";
 import { DownloadProgressCallback, ChunkedCacheConfig, ChunkedCacheMeta, CacheIndex, IndexEntry } from "./types";
 import { cacheLogger, fetchLogger } from "./logger";
 import { analyticsCacheFiles } from "./brew/analyticsParse";
 import { NetworkError, ParseError, ensureError } from "./errors";
+import { copyLogsAction } from "./toast";
 
 /// Cache Paths
 
@@ -119,7 +125,12 @@ export async function clearCache(): Promise<void> {
   } catch (err) {
     const error = ensureError(err);
     cacheLogger.error("Failed to clear cache", { error: error.message });
-    await showToast(Toast.Style.Failure, "Failed to clear cache", error.message);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to clear cache",
+      message: error.message,
+      primaryAction: copyLogsAction(`Failed to clear cache\n\n${error.message}`, { hideToast: true }),
+    });
   }
 }
 
@@ -165,6 +176,12 @@ const valid_keys = [
   "keg_only",
   "linked_keg",
   "pinned",
+  // Platform constraints, so the list can tell that brew would refuse to
+  // install a package here. `\bdisabled\b` does not match `disable_reason`.
+  "requirements",
+  "disabled",
+  "languages",
+  "artifacts",
 ];
 
 /**
@@ -339,7 +356,7 @@ export async function downloadRemoteToCache(
 const CHUNK_SIZE = 500;
 
 /** Current schema version for chunked cache */
-export const CHUNKED_CACHE_VERSION = 1;
+export const CHUNKED_CACHE_VERSION = 2;
 
 /**
  * Get configuration for chunked cache paths.
