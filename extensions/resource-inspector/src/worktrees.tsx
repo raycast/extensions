@@ -27,6 +27,8 @@ import {
   WorktreeScan,
 } from "./worktree-data";
 
+import { LatestTask } from "./cancellation";
+
 const rootsKey = "worktree-additional-roots";
 const branchName = (tree: Worktree) =>
   tree.branch?.replace(/^refs\/heads\//, "") ??
@@ -310,52 +312,56 @@ export default function Worktrees() {
     [progress, setProgress] = useState("Discovering repositories…"),
     [limit, setLimit] = useState(200),
     [search, setSearch] = useState("");
-  const controller = useRef<AbortController | undefined>(undefined);
+  const scanner = useRef(new LatestTask());
   const runScan = useCallback(async () => {
-    controller.current?.abort();
-    const current = new AbortController();
-    controller.current = current;
     setLoading(true);
     setError(undefined);
     setProgress("Discovering repositories…");
     try {
-      const extra = ((await LocalStorage.getItem<string>(rootsKey)) ?? "")
-        .split("\n")
-        .map((p) => p.trim())
-        .filter(Boolean)
-        .map((p) =>
-          p === "~"
-            ? homedir()
-            : p.startsWith("~/")
-              ? `${homedir()}/${p.slice(2)}`
-              : p,
-        );
-      const result = await scanWorktrees(
-        [...extra, ...defaultWorktreeRoots()],
-        {
-          signal: current.signal,
-          onProgress: (dirs, repos) => {
-            if (!current.signal.aborted)
-              setProgress(
-                `${dirs.toLocaleString()} folders · ${repos} repositories`,
-              );
-          },
-        },
-      );
-      if (!current.signal.aborted) {
-        setScan(result);
-        setLimit(200);
-      }
-    } catch (e) {
-      if (!current.signal.aborted)
-        setError(String(e instanceof Error ? e.message : e));
-    } finally {
-      if (!current.signal.aborted) setLoading(false);
+      await scanner.current.run(async (signal) => {
+        try {
+          const extra = ((await LocalStorage.getItem<string>(rootsKey)) ?? "")
+            .split("\n")
+            .map((p) => p.trim())
+            .filter(Boolean)
+            .map((p) =>
+              p === "~"
+                ? homedir()
+                : p.startsWith("~/")
+                  ? `${homedir()}/${p.slice(2)}`
+                  : p,
+            );
+          const result = await scanWorktrees(
+            [...extra, ...defaultWorktreeRoots()],
+            {
+              signal,
+              onProgress: (dirs, repos) => {
+                if (!signal.aborted)
+                  setProgress(
+                    `${dirs.toLocaleString()} folders · ${repos} repositories`,
+                  );
+              },
+            },
+          );
+          if (!signal.aborted) {
+            setScan(result);
+            setLimit(200);
+          }
+        } catch (e) {
+          if (!signal.aborted)
+            setError(String(e instanceof Error ? e.message : e));
+        } finally {
+          if (!signal.aborted) setLoading(false);
+        }
+      });
+    } catch (error) {
+      // Queued scans that were replaced or unmounted never start.
+      if (!(error instanceof Error && error.name === "AbortError")) throw error;
     }
   }, []);
   useEffect(() => {
     void runScan();
-    return () => controller.current?.abort();
+    return () => scanner.current.cancel();
   }, [runScan]);
   const terms = search.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
   const rows = (scan?.trees ?? [])

@@ -135,26 +135,60 @@ func systemMetrics() -> [String: Any] {
 func snapshot() -> [String: Any] {
     ["timestamp": Date().timeIntervalSince1970, "awake": awakeTime(), "boot": bootID(), "system": systemMetrics(), "processes": processRows()]
 }
+func processToken(_ pid: pid_t) throws -> audit_token_t {
+    var task: mach_port_name_t = 0
+    guard task_name_for_pid(mach_task_self_, pid, &task) == KERN_SUCCESS else {
+        throw Failure("Cannot bind this process identity; no signal was sent")
+    }
+    defer { mach_port_deallocate(mach_task_self_, task) }
+    var token = audit_token_t()
+    var count = mach_msg_type_number_t(MemoryLayout<audit_token_t>.size / MemoryLayout<integer_t>.size)
+    let result = withUnsafeMutablePointer(to: &token) { pointer in
+        pointer.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+            task_info(task, task_flavor_t(TASK_AUDIT_TOKEN), $0, &count)
+        }
+    }
+    guard result == KERN_SUCCESS else { throw Failure("Cannot bind this process identity; no signal was sent") }
+    return token
+}
+func signalProcess(_ token: inout audit_token_t, force: Bool) throws -> [String: Any] {
+    // The kernel checks the token's PID generation while holding the process reference.
+    // Unlike kill(pid), an exited target cannot redirect this signal to a reused PID.
+    let result = proc_signal_with_audittoken(&token, force ? SIGKILL : SIGTERM)
+    if result == ESRCH { return ["status": "exited"] }
+    guard result == 0 else { throw Failure(String(cString: strerror(result))) }
+    return ["status": "requested"]
+}
 func act(_ request: [String: Any]) throws -> [String: Any] {
     guard let pid = request["pid"] as? Int, pid > 1,
           let start = request["start"] as? String, let boot = request["boot"] as? String, boot != "unknown", boot == bootID(),
           let path = request["executable"] as? String, !path.isEmpty,
           let action = request["action"] as? String,
           ["quit-app", "force-app", "stop-process", "force-process"].contains(action) else { throw Failure("Invalid or outdated process identity; refresh the list") }
+    // Capture the application instance before validating. Retain this object through
+    // the action; never look up a potentially replacement application afterwards.
+    let app = action.hasSuffix("app") ? NSRunningApplication(processIdentifier: pid_t(pid)) : nil
     guard let current = processRows().first(where: { $0["pid"] as? Int == pid }) else { return ["status": "exited"] }
     guard current["start"] as? String == start, current["executable"] as? String == path else { throw Failure("This process has changed. Refresh before acting.") }
     if let reason = current["blockedReason"] as? String { throw Failure(reason) }
     if action.hasSuffix("app") {
         if let reason = current["appBlockedReason"] as? String { throw Failure(reason) }
-        guard current["appPid"] as? Int == pid, let app = NSRunningApplication(processIdentifier: pid_t(pid)) else { throw Failure("This application is no longer available") }
+        guard current["appPid"] as? Int == pid, let app else { throw Failure("This application is no longer available") }
         let accepted = action == "quit-app" ? app.terminate() : app.forceTerminate()
         return ["status": accepted ? "requested" : "rejected"]
     }
-    guard kill(pid_t(pid), action == "stop-process" ? SIGTERM : SIGKILL) == 0 else {
-        if errno == ESRCH { return ["status": "exited"] }
-        throw Failure(String(cString: strerror(errno)))
+    var token = try processToken(pid_t(pid))
+    // Verify that the captured token still belongs to the selected start/path.
+    // Failure to obtain or validate a token never falls back to PID-only signaling.
+    var bsd = proc_bsdinfo()
+    guard proc_pidinfo(Int32(pid), PROC_PIDTBSDINFO, 0, &bsd, Int32(MemoryLayout.size(ofValue: bsd))) == MemoryLayout.size(ofValue: bsd),
+          "\(bsd.pbi_start_tvsec):\(bsd.pbi_start_tvusec)" == start, bsd.pbi_uid == getuid() else {
+        throw Failure("This process has changed. Refresh before acting.")
     }
-    return ["status": "requested"]
+    var executable = [CChar](repeating: 0, count: 4096)
+    guard proc_pidpath_audittoken(&token, &executable, UInt32(executable.count)) > 0,
+          String(cString: executable) == path else { throw Failure("This process has changed. Refresh before acting.") }
+    return try signalProcess(&token, force: action == "force-process")
 }
 
 // SQLite transactions live in one short-lived helper process; no native Node addon or daemon.
@@ -222,6 +256,7 @@ func database(_ request: [String: Any]) throws -> [Any] {
     return results
 }
 
+#if !INSPECTOR_TESTING
 umask(0o077)
 do {
     switch CommandLine.arguments.dropFirst().first ?? "" {
@@ -234,3 +269,4 @@ do {
     try? emit(["error": String(describing: error)])
     exit(1)
 }
+#endif

@@ -224,6 +224,52 @@ test("SQLite recording, compaction, seven-day pruning, pause, clear and rollback
   }
 });
 
+test("zero-duration baselines retain memory without making complete history partial", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "inspector-baseline-history-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const store = new HistoryStore(binary, join(dir, "history.sqlite"));
+  const start = 100 * 3600;
+  await store.record(snap(start));
+  let row = (await store.history(start, "app"))[0];
+  assert.equal(row.observed, 0);
+  assert.equal(row.peak, 1024);
+  assert.equal(row.cpu, null);
+  assert.equal(row.partialMetrics, 0);
+  await store.record(
+    snap(start + 60, [proc({ cpuNs: 31e9, writeBytes: 1200 })]),
+  );
+  // Simulate a baseline written by the earlier version. Ignore its flag in both
+  // raw history and compaction, while retaining real partial measured intervals.
+  await store.run([{ sql: "UPDATE samples SET partial=1 WHERE observed=0" }]);
+  row = (await store.history(start, "app"))[0];
+  assert.equal(row.cpu, 30);
+  assert.equal(row.partialMetrics, 0);
+  await store.record(snap(start + 90000));
+  assert.equal((await store.history(start, "app"))[0].partialMetrics, 0);
+  const [hours] = await store.run([
+    { sql: "SELECT partial FROM hours WHERE kind='app'" },
+  ]);
+  assert.equal(hours[0].partial, 0);
+  // An old baseline-only hour must not taint a later complete hourly upsert.
+  await store.run([
+    {
+      sql: "UPDATE hours SET observed=0,cpu=NULL,reads=NULL,writes=NULL,partial=1",
+    },
+  ]);
+  assert.equal((await store.history(start, "app"))[0].partialMetrics, 0);
+  const { recordingStatements } = await import("../src/storage");
+  await store.run(
+    recordingStatements(
+      snap(start + 120, [proc({ cpuNs: 61e9 })]),
+      snap(start + 60, [proc({ cpuNs: 31e9 })]),
+    ),
+  );
+  await store.run(recordingStatements(snap(start + 90100)));
+  row = (await store.history(start, "app"))[0];
+  assert.equal(row.cpu, 30);
+  assert.equal(row.partialMetrics, 0);
+});
+
 test("partial totals survive storage, mixed hourly compaction, and subsequent aggregation", async (t) => {
   const dir = await mkdtemp(join(tmpdir(), "inspector-partial-history-"));
   t.after(() => rm(dir, { recursive: true, force: true }));

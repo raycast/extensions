@@ -13,6 +13,8 @@ import {
   sep,
 } from "node:path";
 
+import { cancellableIO } from "./cancellation";
+
 const execute = promisify(execFile);
 export interface WorktreeRecord {
   path: string;
@@ -54,7 +56,13 @@ export interface WorktreeReview {
   blockedReason?: string;
   statusError?: string;
 }
-export async function gitAt(cwd: string, args: string[], timeout = 15000) {
+export async function gitAt(
+  cwd: string,
+  args: string[],
+  timeout = 15000,
+  signal?: AbortSignal,
+) {
+  signal?.throwIfAborted();
   const env = {
     ...process.env,
     GIT_TERMINAL_PROMPT: "0",
@@ -68,7 +76,7 @@ export async function gitAt(cwd: string, args: string[], timeout = 15000) {
     )
       delete (env as NodeJS.ProcessEnv)[key];
   }
-  const { stdout } = await execute(
+  const pending = execute(
     "/usr/bin/git",
     [
       "--no-optional-locks",
@@ -84,9 +92,19 @@ export async function gitAt(cwd: string, args: string[], timeout = 15000) {
       cwd,
       ...args,
     ],
-    { env, timeout, maxBuffer: 16 * 1024 * 1024 },
+    { env, timeout, maxBuffer: 16 * 1024 * 1024, signal },
   );
-  return stdout;
+  // Abort rejects execFile before its child necessarily exits. Do not release the
+  // serialized scan until Git has closed its process and stdio handles.
+  const closed = new Promise<void>((resolve) =>
+    pending.child.once("close", () => resolve()),
+  );
+  try {
+    return (await pending).stdout;
+  } finally {
+    await closed;
+    signal?.throwIfAborted();
+  }
 }
 function oneLine(text: string) {
   return text.replace(/\n$/, "");
@@ -155,44 +173,48 @@ export function defaultWorktreeRoots(home = homedir()) {
     join(home, ".opencode"),
   ];
 }
-async function canonical(path: string) {
-  return realpath(path).catch(() => resolve(path));
+async function canonical(path: string, signal?: AbortSignal) {
+  return cancellableIO(signal, () => realpath(path).catch(() => resolve(path)));
 }
 // Resolve parent aliases such as /var, but never hide a replaced symlink at the checkout itself.
-async function checkoutPath(path: string) {
-  return join(await canonical(dirname(path)), basename(path));
+async function checkoutPath(path: string, signal?: AbortSignal) {
+  return join(await canonical(dirname(path), signal), basename(path));
 }
-async function smallText(path: string): Promise<string> {
-  const info = await lstat(path);
+async function smallText(path: string, signal?: AbortSignal): Promise<string> {
+  const info = await cancellableIO(signal, () => lstat(path));
   if (!info.isFile() || info.isSymbolicLink() || info.size > 16384)
     throw new Error("Unexpected Git metadata file");
-  return readFile(path, "utf8");
-}
-async function commonDirectory(path: string) {
-  return realpath(
-    oneLine(
-      await gitAt(path, [
-        "rev-parse",
-        "--path-format=absolute",
-        "--git-common-dir",
-      ]),
-    ),
+  return cancellableIO(signal, () =>
+    readFile(path, { encoding: "utf8", signal }),
   );
 }
-async function administrativePaths(commonDir: string) {
+async function commonDirectory(path: string, signal?: AbortSignal) {
+  const common = oneLine(
+    await gitAt(
+      path,
+      ["rev-parse", "--path-format=absolute", "--git-common-dir"],
+      15000,
+      signal,
+    ),
+  );
+  return cancellableIO(signal, () => realpath(common));
+}
+async function administrativePaths(commonDir: string, signal?: AbortSignal) {
   const result = new Map<string, string>();
   const root = join(commonDir, "worktrees");
-  for (const entry of await readdir(root, { withFileTypes: true }).catch(
-    () => [],
+  for (const entry of await cancellableIO(signal, () =>
+    readdir(root, { withFileTypes: true }).catch(() => []),
   )) {
+    signal?.throwIfAborted();
     if (!entry.isDirectory() || entry.isSymbolicLink()) continue;
     const admin = join(root, entry.name);
     try {
-      const pointer = oneLine(await smallText(join(admin, "gitdir")));
+      const pointer = oneLine(await smallText(join(admin, "gitdir"), signal));
       const marker = resolve(admin, pointer);
       if (basename(marker) !== ".git") continue;
-      result.set(await checkoutPath(dirname(marker)), admin);
+      result.set(await checkoutPath(dirname(marker), signal), admin);
     } catch {
+      signal?.throwIfAborted();
       /* Unreadable metadata cannot authorize deletion. */
     }
   }
@@ -200,21 +222,31 @@ async function administrativePaths(commonDir: string) {
 }
 export async function listRepositoryWorktrees(
   commonDir: string,
+  signal?: AbortSignal,
 ): Promise<Worktree[]> {
-  commonDir = await realpath(commonDir);
+  commonDir = await cancellableIO(signal, () => realpath(commonDir));
   const records = parseWorktreeList(
-    await gitAt(commonDir, ["worktree", "list", "--porcelain", "-z"]),
+    await gitAt(
+      commonDir,
+      ["worktree", "list", "--porcelain", "-z"],
+      15000,
+      signal,
+    ),
   );
-  const admins = await administrativePaths(commonDir);
+  const admins = await administrativePaths(commonDir, signal);
   const mainPath = records[0]?.path ?? dirname(commonDir);
   const repository = basename(mainPath).replace(/\.git$/, "");
   const result: Worktree[] = [];
   for (let index = 0; index < records.length; index++) {
     const record = records[index],
-      path = await checkoutPath(record.path),
+      path = await checkoutPath(record.path, signal),
       adminDir = admins.get(path);
-    const info = await lstat(path).catch(() => null),
-      adminInfo = adminDir ? await lstat(adminDir).catch(() => null) : null;
+    const info = await cancellableIO(signal, () =>
+        lstat(path).catch(() => null),
+      ),
+      adminInfo = adminDir
+        ? await cancellableIO(signal, () => lstat(adminDir).catch(() => null))
+        : null;
     const creation =
       adminInfo?.birthtimeMs && adminInfo.birthtimeMs > 0
         ? adminInfo.birthtimeMs
@@ -295,31 +327,35 @@ export async function scanWorktrees(
     started = Date.now();
   let scannedDirectories = 0,
     partial = false;
-  const home = await canonical(homedir());
+  const signal = options.signal;
+  signal?.throwIfAborted();
+  const home = await canonical(homedir(), signal);
   const optionalRoots = new Set(defaultWorktreeRoots());
   for (const root of roots) {
     try {
-      queue.push(await realpath(root));
+      queue.push(await cancellableIO(signal, () => realpath(root)));
     } catch {
+      signal?.throwIfAborted();
       if (!optionalRoots.has(root))
         warnings.push(`Scan folder is missing or unavailable: ${root}`);
     }
   }
   async function addRepository(path: string) {
     try {
-      const common = await commonDirectory(path);
+      const common = await commonDirectory(path, signal);
       if (repos.has(common)) return;
       repos.add(common);
-      for (const tree of await listRepositoryWorktrees(common))
+      for (const tree of await listRepositoryWorktrees(common, signal))
         trees.set(tree.key, tree);
     } catch (error) {
+      signal?.throwIfAborted();
       warnings.push(
         `Could not inspect repository ${path}: ${error instanceof Error ? error.message.split("\n").slice(-2).join(" ") : String(error)}`,
       );
     }
   }
   for (let index = 0; index < queue.length; index++) {
-    if (options.signal?.aborted) throw new Error("Scan cancelled");
+    signal?.throwIfAborted();
     if (
       scannedDirectories >= (options.maxDirectories ?? 30000) ||
       Date.now() - started > (options.maxMilliseconds ?? 45000)
@@ -333,8 +369,11 @@ export async function scanWorktrees(
     scannedDirectories++;
     let entries;
     try {
-      entries = await readdir(dir, { withFileTypes: true });
+      entries = await cancellableIO(signal, () =>
+        readdir(dir, { withFileTypes: true }),
+      );
     } catch {
+      signal?.throwIfAborted();
       warnings.push(`Cannot read ${dir}`);
       continue;
     }
@@ -352,6 +391,7 @@ export async function scanWorktrees(
         continue;
     }
     for (const entry of entries) {
+      signal?.throwIfAborted();
       if (
         !entry.isDirectory() ||
         entry.isSymbolicLink() ||
@@ -368,6 +408,7 @@ export async function scanWorktrees(
     if (scannedDirectories % 100 === 0)
       options.onProgress?.(scannedDirectories, repos.size);
   }
+  signal?.throwIfAborted();
   return {
     trees: [...trees.values()],
     roots,

@@ -297,7 +297,7 @@ export function ResourceDetail({
       ? `PID: ${selected.target.pid} · Owner UID: ${selected.target.uid}\n\nExecutable: ${markdownText(selected.target.executable)}\n\n`
       : "") +
     (selected.container
-      ? `Container ID: ${selected.container.id}\n\nContainer memory overlaps OrbStack's host allocation. Stopping it may free much less host RAM than OrbStack's total.\n\n`
+      ? `Container ID: ${selected.container.id}\n\nIf this container is restarting, wait for it to settle before stopping. A concurrent restart can race the stop request.\n\nContainer memory overlaps OrbStack's host allocation. Stopping it may free much less host RAM than OrbStack's total.\n\n`
       : "") +
     (latest.blockedReason || selected.blockedReason
       ? `**Read-only:** ${markdownText(latest.blockedReason ?? selected.blockedReason!)}\n\n`

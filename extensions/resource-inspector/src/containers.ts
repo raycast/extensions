@@ -4,6 +4,9 @@ import { access, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { ContainerRow, parseBytes } from "./model";
+import { localContainerClient, stopWithClient } from "./container-control";
+export { validateContainer } from "./container-control";
+
 const execute = promisify(execFile);
 const socket = join(homedir(), ".orbstack/run/docker.sock");
 const format =
@@ -91,41 +94,18 @@ export async function listContainers(): Promise<ContainerRow[]> {
     };
   });
 }
-export function validateContainer(
-  expected: ContainerRow,
-  current: ContainerRow,
-) {
-  if (current.id !== expected.id || current.startedAt !== expected.startedAt)
-    throw new Error(
-      "This container has restarted or changed. Refresh before acting.",
-    );
-}
 export async function stopContainer(
   expected: ContainerRow,
   force: boolean,
 ): Promise<string> {
-  if (!/^[a-f0-9]{64}$/.test(expected.id))
-    throw new Error("Invalid container identity");
-  const [current] = lines<ContainerRow>(
-    await docker(["inspect", "--format", format, expected.id]),
-  );
-  validateContainer(expected, current);
-  if (current.status !== "running") return "exited";
-  if (!force && /^(SIG)?KILL$|^9$/i.test(current.stopSignal))
+  if (!(await stat(socket).catch(() => null))?.isSocket())
     throw new Error(
-      "This container is configured to kill immediately. Use the separate Force Stop action if intended.",
+      "OrbStack is not running or its local socket is unavailable",
     );
+  const client = localContainerClient(socket);
   try {
-    await docker(
-      force
-        ? ["kill", "--signal", "KILL", expected.id]
-        : ["stop", "--timeout=-1", expected.id],
-      10000,
-    );
-    return "exited";
-  } catch (error) {
-    // The client timeout never escalates the daemon's graceful stop to SIGKILL.
-    if (!force && (error as { killed?: boolean }).killed) return "requested";
-    throw error;
+    return await stopWithClient(expected, force, client.send);
+  } finally {
+    client.close();
   }
 }

@@ -10,3 +10,7 @@
 - Protect combined app rows with multiple running instances from ambiguous quit actions.
 - Verify that both the worktree registration and checkout folder are gone before reporting removal success.
 - Preserve partial CPU and disk measurement labels through history storage, hourly summaries, and migration of existing records.
+- Bind process signals to macOS process generations and retain the validated application instance.
+- Recheck container identity at the final local API boundary and observe its state after stopping, without automatic retries.
+- Cancel active Git queries and serialize replacement worktree scans, including in-flight filesystem work.
+- Keep zero-duration history baselines from marking complete CPU and disk totals as partial.
