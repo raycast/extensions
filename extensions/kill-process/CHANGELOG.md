@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-16
 
 - App grouping now works on Windows, where it groups a process with the helpers it spawned (fixes #26386)
 - Killing a grouped app on Windows now terminates every process in the group rather than only the main process and its children
