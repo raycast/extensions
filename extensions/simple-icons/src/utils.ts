@@ -111,7 +111,7 @@ const newestFileMtimeMs = async (directory: string): Promise<number> => {
 const reclaimDeadStaging = async () => {
   const entries = await fs.readdir(environment.assetsPath).catch(() => [] as string[]);
   for (const entry of entries) {
-    if (!entry.startsWith(".pack-staging")) continue;
+    if (!entry.startsWith(".pack-staging") && !entry.startsWith(".pack-stale")) continue;
     const stagingPath = path.join(environment.assetsPath, entry);
     const stat = await fs.stat(stagingPath).catch(() => null);
     if (!stat) continue;
@@ -153,15 +153,29 @@ const pacoteAssetPack = async (version: string) => {
         return;
       }
       // Destination exists but is incomplete (crashed process, old code).
-      // Remove it and retry the rename. This is the only place shared state
-      // is removed: the marker check above already proved no complete pack
-      // exists at this instant, and the rename is the single coordination
-      // point. Rename onto a non-empty directory is ENOTEMPTY on macOS/Linux,
+      // Move it aside with a rename (atomic), then rename staging into the
+      // now-free path (atomic). Neither instance can delete a directory it
+      // didn't itself move, so this closes the read-then-remove gap.
+      // Rename onto a non-empty directory is ENOTEMPTY on macOS/Linux,
       // EEXIST on some filesystems, and EPERM/EACCES on Windows.
       const code = (error as NodeJS.ErrnoException).code;
       if (code === "ENOTEMPTY" || code === "EEXIST" || code === "EPERM" || code === "EACCES") {
-        await fs.rm(destination, { recursive: true, force: true });
-        await fs.rename(staging, destination);
+        const stale = path.join(
+          environment.assetsPath,
+          `.pack-stale-${path.basename(destination)}-${process.pid}-${Math.random().toString(36).slice(2, 8)}`,
+        );
+        await fs.rename(destination, stale);
+        try {
+          await fs.rename(staging, destination);
+        } catch (renameError) {
+          if (await hasCompleteAssetPack(destination)) {
+            // Someone else published a complete pack; use it.
+            await fs.rm(staging, { recursive: true, force: true });
+          } else {
+            throw renameError;
+          }
+        }
+        await fs.rm(stale, { recursive: true, force: true });
         return;
       }
       throw error;
@@ -172,15 +186,31 @@ const pacoteAssetPack = async (version: string) => {
   }
 };
 
+// Remove sibling version directories after a successful install. Each pack
+// is ~16 MB; without this, every released version accumulates forever.
+// Safe to call once the new pack is complete and cached: new launches use
+// the new version, and any process still reading an old version is in a
+// short window before it exits.
+const removeOldPacks = async (currentVersion: string) => {
+  const packRoot = path.join(environment.assetsPath, "pack");
+  const versions = await fs.readdir(packRoot).catch(() => [] as string[]);
+  for (const v of versions) {
+    if (v !== currentVersion) {
+      await fs.rm(path.join(packRoot, v), { recursive: true, force: true }).catch(() => {});
+    }
+  }
+};
+
 export const cacheAssetPack = async (version: string) => {
   const destination = getAssetPackDestination(version);
   if (await hasCompleteAssetPack(destination)) return;
-  // An incomplete destination is removed inside the rename's error path,
-  // not here: removing after a marker check leaves a gap where another
+  // An incomplete destination is moved aside inside the rename's error path,
+  // not removed here: removing after a marker check leaves a gap where another
   // instance's rename can publish a complete pack that this then deletes.
   await reclaimDeadStaging();
   await pacoteAssetPack(version);
   cache.set("cached-version", version);
+  await removeOldPacks(version);
 };
 
 export const loadCachedJson = async (version: string) => {
