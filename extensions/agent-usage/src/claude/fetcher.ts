@@ -464,9 +464,11 @@ function resolveConfigDirIdentity(configDir: string): string {
  * short-circuited at the first hit, so a personal and a work login can be shown
  * side by side.
  *
- * The Keychain is only a fallback for the default lookup and stays
- * single-account: Claude Code writes per-profile services under undocumented
- * hashed suffixes, so only the canonical service name is read.
+ * Each config dir is read from its own Keychain service first and from its
+ * `.credentials.json` only as a fallback — Claude Code writes to the Keychain, so
+ * the file next to it can be days stale. `claudeKeychainService` resolves that
+ * service: the canonical name for `~/.claude`, a `sha256(<config dir>)` suffix for
+ * every other profile.
  */
 export function listClaudeOAuthAccounts(
   options: {
