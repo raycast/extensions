@@ -12,3 +12,4 @@
 - Preserve backups and running agents after restoration failures; serialize lifecycle commands.
 - Apply changed SSH preferences and preserve settings when the network-service selection changes.
 - Allow Stop after network-service deletion and safely detach renamed services still using the router PAC.
+- Match complete PAC URLs and retain private session URL history through Repair and failed cleanup, preserving unrelated local proxy settings.

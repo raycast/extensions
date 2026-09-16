@@ -737,3 +737,220 @@ test("Repair after a rename cannot save a router PAC that Stop leaves enabled", 
   assert.equal(h.services.get("Renamed Ethernet")!.enabled, false);
   assert.equal(h.jobs.size, 0);
 });
+
+function managedFile(h: { stateDir: string }) {
+  return path.join(h.stateDir, "managed-pac-urls.json");
+}
+
+const unrelatedLocalURLs = [
+  `http://127.0.0.1:${config.pacPort}/proxy.pac?v=another-tool`,
+  `http://127.0.0.1:${config.pacPort}/proxy.pac`,
+  `${pacURL(config)}&tool=other`,
+  `${pacURL(config)}#other-tool`,
+];
+for (const url of unrelatedLocalURLs) {
+  test(`Stop leaves an unselected PAC untouched: ${url}`, async (t) => {
+    const h = await harness(t);
+    await h.proxy.startProxy();
+    const other = { url, enabled: true };
+    h.services.set("Other Network", { ...other });
+    h.calls.length = 0;
+    await h.proxy.stopProxy();
+    assert.deepEqual(h.services.get("Other Network"), other);
+    assert.equal(
+      h.calls.some((call) => call[1].startsWith("-set") && call[2] === "Other Network"),
+      false,
+    );
+  });
+  test(`Stop restores a backed-up unrelated PAC exactly: ${url}`, async (t) => {
+    const h = await harness(t);
+    const original = { url, enabled: true };
+    h.services.set("Wi-Fi", { ...original });
+    await h.proxy.startProxy();
+    await h.proxy.stopProxy();
+    assert.deepEqual(h.services.get("Wi-Fi"), original);
+  });
+}
+
+test("URL history is private, deduplicated and recorded before network mutations", async (t) => {
+  const h = await harness(t);
+  const execute = h.dependencies.execute!;
+  let mutations = 0;
+  const proxy = createProxyController(config, {
+    ...h.dependencies,
+    execute: async (file, args, timeout) => {
+      if (args[0].startsWith("-set")) {
+        const history = JSON.parse(await fs.readFile(managedFile(h), "utf8"));
+        assert.deepEqual(history, { schemaVersion: 1, urls: [pacURL(config)] });
+        mutations++;
+      }
+      return execute(file, args, timeout);
+    },
+  });
+  await proxy.startProxy();
+  await proxy.startProxy();
+  assert.ok(mutations > 0);
+  assert.equal((await fs.stat(managedFile(h))).mode & 0o777, 0o600);
+  assert.deepEqual(JSON.parse(await fs.readFile(managedFile(h), "utf8")).urls, [pacURL(config)]);
+  await proxy.stopProxy();
+  await assert.rejects(fs.access(managedFile(h)));
+});
+
+for (const change of [
+  { pacPort: 18081 },
+  { socksPort: 1081 },
+  { routedHosts: [{ host: "changed.example", wildcard: false }] },
+]) {
+  test(`Repair retains prior URL ownership after ${JSON.stringify(change)}`, async (t) => {
+    const h = await harness(t);
+    await h.proxy.startProxy();
+    h.services.set("Renamed Ethernet", h.services.get("Ethernet")!);
+    h.services.delete("Ethernet");
+    const updated = { ...config, ...change, networkServices: ["Wi-Fi", "Renamed Ethernet"] };
+    h.setContent(buildPac(updated));
+    const proxy = createProxyController(updated, h.dependencies);
+    await proxy.startProxy();
+    assert.deepEqual(JSON.parse(await fs.readFile(managedFile(h), "utf8")).urls, [pacURL(config), pacURL(updated)]);
+    // Repair captured the renamed service's old router URL in the original backup.
+    const backup = JSON.parse(await fs.readFile(h.backup, "utf8"));
+    assert.equal(backup.find((entry: { service: string }) => entry.service === "Renamed Ethernet").url, pacURL(config));
+    await proxy.stopProxy();
+    assert.equal(h.services.get("Renamed Ethernet")!.enabled, false);
+    await assert.rejects(fs.access(managedFile(h)));
+    assert.equal(h.jobs.size, 0);
+  });
+}
+
+test("successful Stop retires history before repeated Stop and a new routing session", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  await h.proxy.stopProxy();
+  await h.proxy.stopProxy();
+  await assert.rejects(fs.access(managedFile(h)));
+  const other = { url: pacURL(config), enabled: true };
+  h.services.set("Other Network", { ...other });
+  const updated = { ...config, socksPort: 1081 };
+  h.setContent(buildPac(updated));
+  const proxy = createProxyController(updated, h.dependencies);
+  // The stale PAC instance file still has the old port, but is not ownership evidence.
+  await proxy.startProxy();
+  assert.deepEqual(JSON.parse(await fs.readFile(managedFile(h), "utf8")).urls, [pacURL(updated)]);
+  await proxy.stopProxy();
+  assert.deepEqual(h.services.get("Other Network"), other);
+});
+
+for (const stage of ["restoration", "agent cleanup"]) {
+  test(`${stage} failure retains history and backup until Stop retry succeeds`, async (t) => {
+    const h = await harness(t);
+    await h.proxy.startProxy();
+    h.setFailure((args) =>
+      stage === "restoration"
+        ? args[0] === "-setautoproxyurl" && args[2] === "https://old.example/proxy.pac"
+        : args[0] === "disable" && args.at(-1)!.endsWith(".pac"),
+    );
+    await assert.rejects(h.proxy.stopProxy());
+    await fs.access(h.backup);
+    assert.deepEqual(JSON.parse(await fs.readFile(managedFile(h), "utf8")).urls, [pacURL(config)]);
+    h.setFailure(() => false);
+    await h.proxy.stopProxy();
+    await assert.rejects(fs.access(managedFile(h)));
+    await assert.rejects(fs.access(h.backup));
+  });
+}
+
+for (const cleanupFails of [false, true]) {
+  test(`startup rollback ${cleanupFails ? "retains" : "removes"} history when cleanup ${cleanupFails ? "fails" : "succeeds"}`, async (t) => {
+    const h = await harness(t);
+    h.setFailure(
+      (args) =>
+        (args[0] === "bootstrap" && args.at(-1)!.endsWith(".pac.plist")) ||
+        (cleanupFails && args[0] === "disable" && args.at(-1)!.endsWith(".pac")),
+    );
+    await assert.rejects(h.proxy.startProxy(), /Could not start/);
+    if (cleanupFails) {
+      await fs.access(managedFile(h));
+      await fs.access(h.backup);
+      h.setFailure(() => false);
+      await h.proxy.stopProxy();
+    }
+    await assert.rejects(fs.access(managedFile(h)));
+    await assert.rejects(fs.access(h.backup));
+  });
+}
+
+test("legacy recovery matches only the exact current URL, ignoring the instance port", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  await fs.rm(managedFile(h));
+  h.services.set("Legacy Renamed", h.services.get("Ethernet")!);
+  h.services.delete("Ethernet");
+  const other = { url: `${pacURL(config)}&other=1`, enabled: true };
+  h.services.set("Other Network", { ...other });
+  await h.proxy.stopProxy();
+  assert.equal(h.services.get("Legacy Renamed")!.enabled, false);
+  assert.deepEqual(h.services.get("Other Network"), other);
+});
+
+test("legacy recovery leaves an unidentifiable old URL untouched after preferences change", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  await fs.rm(managedFile(h));
+  const unidentifiable = { url: pacURL(config), enabled: true };
+  h.services.set("Untracked Service", { ...unidentifiable });
+  await createProxyController({ ...config, pacPort: 18081 }, h.dependencies).stopProxy();
+  assert.deepEqual(h.services.get("Untracked Service"), unidentifiable);
+});
+
+for (const history of [
+  "{",
+  "null",
+  "{}",
+  '{"schemaVersion":2,"urls":[]}',
+  '{"schemaVersion":1,"urls":[]}',
+  '{"schemaVersion":1,"urls":["http://127.0.0.1:18080/proxy.pac?tool=other"]}',
+]) {
+  test(`malformed URL history fails closed: ${history}`, async (t) => {
+    const h = await harness(t);
+    await h.proxy.startProxy();
+    await fs.writeFile(managedFile(h), history);
+    h.calls.length = 0;
+    await assert.rejects(h.proxy.startProxy(), /managed PAC URLs/);
+    await assert.rejects(h.proxy.stopProxy(), /managed PAC URLs/);
+    assert.equal(await fs.readFile(managedFile(h), "utf8"), history);
+    assert.equal(h.jobs.size, 2);
+    await fs.access(h.backup);
+    assert.equal(
+      h.calls.some((call) => call[1].startsWith("-set") || ["bootstrap", "disable", "bootout"].includes(call[1])),
+      false,
+    );
+  });
+}
+
+test("failed atomic URL-history write prevents network changes and preserves previous history", async (t) => {
+  const h = await harness(t);
+  await h.proxy.startProxy();
+  const before = await fs.readFile(managedFile(h), "utf8");
+  const failingFs = new Proxy(fs, {
+    get(target, key) {
+      if (key === "rename")
+        return async (from: string, to: string) => {
+          if (to === managedFile(h)) throw new Error("history disk failure");
+          return fs.rename(from, to);
+        };
+      return Reflect.get(target, key);
+    },
+  });
+  h.calls.length = 0;
+  const proxy = createProxyController({ ...config, pacPort: 18081 }, { ...h.dependencies, fs: failingFs });
+  await assert.rejects(proxy.startProxy(), /history disk failure/);
+  assert.equal(await fs.readFile(managedFile(h), "utf8"), before);
+  assert.equal(
+    h.calls.some((call) => call[1].startsWith("-set") || ["bootstrap", "disable", "bootout"].includes(call[1])),
+    false,
+  );
+  assert.equal(
+    (await fs.readdir(h.stateDir)).some((file) => file.endsWith(".tmp")),
+    false,
+  );
+  assert.equal(h.jobs.size, 2);
+});

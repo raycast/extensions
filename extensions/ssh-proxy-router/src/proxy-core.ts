@@ -259,6 +259,7 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
   const PAC_SERVER_FILE = path.join(STATE_DIR, "pac-server.py");
   const PAC_LOG_FILE = path.join(STATE_DIR, "pac-server.log");
   const SSH_LOG_FILE = path.join(STATE_DIR, "ssh-tunnel.log");
+  const MANAGED_PAC_URLS_FILE = path.join(STATE_DIR, "managed-pac-urls.json");
   const PAC_INSTANCE_FILE = path.join(STATE_DIR, "pac-instance.json");
   const SSH_ACTIVE_FILE = path.join(STATE_DIR, "ssh-active.json");
   const PROXY_BACKUP_FILE = path.join(STATE_DIR, "automatic-proxy-backup.json");
@@ -482,31 +483,58 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
     await atomicPrivateWrite(PROXY_BACKUP_FILE, `${JSON.stringify(settings, null, 2)}\n`, fs);
   }
 
-  async function restoreProxySettings(config: RoutingConfig, retain = false): Promise<string[]> {
+  async function managedPacURLs(config: RoutingConfig): Promise<Set<string>> {
+    try {
+      const value: unknown = JSON.parse(await fs.readFile(MANAGED_PAC_URLS_FILE, "utf8"));
+      if (
+        !value ||
+        typeof value !== "object" ||
+        !("schemaVersion" in value) ||
+        value.schemaVersion !== 1 ||
+        !("urls" in value) ||
+        !Array.isArray(value.urls) ||
+        !value.urls.length ||
+        !value.urls.every((url: unknown) => {
+          if (typeof url !== "string") return false;
+          const match = url.match(/^http:\/\/127\.0\.0\.1:(\d+)\/proxy\.pac\?v=[a-f0-9]{12}$/);
+          return (
+            match !== null &&
+            Number(match[1]) >= 1024 &&
+            Number(match[1]) <= 65535 &&
+            String(Number(match[1])) === match[1]
+          );
+        })
+      )
+        throw new Error("Invalid managed PAC URL record.");
+      return new Set(value.urls as string[]);
+    } catch (error) {
+      // Legacy state has no URL history. Only the exact current URL is identifiable.
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return new Set([pacURL(config)]);
+      throw new Error(`Could not read managed PAC URLs: ${errorMessage(error)}`);
+    }
+  }
+
+  async function recordManagedPacURL(config: RoutingConfig): Promise<void> {
+    const urls = await managedPacURLs(config);
+    urls.add(pacURL(config));
+    await atomicPrivateWrite(
+      MANAGED_PAC_URLS_FILE,
+      `${JSON.stringify({ schemaVersion: 1, urls: [...urls] }, null, 2)}\n`,
+      fs,
+    );
+  }
+
+  async function clearRecoveryState(): Promise<void> {
+    await fs.rm(PROXY_BACKUP_FILE, { force: true });
+    await fs.rm(MANAGED_PAC_URLS_FILE, { force: true });
+  }
+
+  async function restoreProxySettings(config: RoutingConfig): Promise<string[]> {
     const settings = (await readBackup()) ?? [];
+    const urls = await managedPacURLs(config);
     const existing = new Set((await networkServiceInventory()).map((service) => service.name));
     const recovered: string[] = [];
-    const ports = new Set([config.pacPort]);
-    try {
-      const instance: unknown = JSON.parse(await fs.readFile(PAC_INSTANCE_FILE, "utf8"));
-      if (instance && typeof instance === "object" && "port" in instance && typeof instance.port === "number")
-        ports.add(instance.port);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-    }
-    function isRouterURL(value: string | null): boolean {
-      try {
-        const url = new URL(value ?? "");
-        return (
-          url.protocol === "http:" &&
-          url.hostname === "127.0.0.1" &&
-          ports.has(Number(url.port)) &&
-          url.pathname === "/proxy.pac"
-        );
-      } catch {
-        return false;
-      }
-    }
+    const isRouterURL = (value: string | null): boolean => value !== null && urls.has(value);
     // A renamed service keeps its proxy settings but has no matching backup name.
     // Only detach untracked services still pointing to our endpoint; never guess
     // which missing service's original settings belong to the new name.
@@ -536,7 +564,6 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
       throw new Error(
         `Could not restore proxy settings: ${errors.join("; ")}. Agents and backup retained; retry Stop.`,
       );
-    if (!retain) await fs.rm(PROXY_BACKUP_FILE, { force: true });
     return recovered;
   }
 
@@ -753,16 +780,21 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
 
   async function startProxy(): Promise<string> {
     if (!("sshUser" in config)) throw new Error("Starting the router requires SSH configuration.");
+    await managedPacURLs(config);
     const alreadyRunning = await getProxyStatus();
-    if (alreadyRunning.running)
+    if (alreadyRunning.running) {
+      await recordManagedPacURL(config);
       return `Already running with ${config.routedHosts.length} routed host rule${config.routedHosts.length === 1 ? "" : "s"}.`;
+    }
 
     const services = [...new Set(await listNetworkServices(config))];
     // Validate and persist the complete backup before any agent or network changes.
     await saveProxySettings(services);
+    // Persist ownership before any network setting changes, including Repair restoration.
+    await recordManagedPacURL(config);
     // Keep the first-start backup, and detach all services before replacing listeners.
     // This also restores services removed from the selection during Repair.
-    await restoreProxySettings(config, true);
+    await restoreProxySettings(config);
     try {
       await startTunnel(config);
       await startPacServer(config);
@@ -779,6 +811,13 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
       for (const cleanup of [stopPacServer, stopTunnel]) {
         try {
           await cleanup();
+        } catch (cleanupError) {
+          cleanupErrors.push(errorMessage(cleanupError));
+        }
+      }
+      if (!cleanupErrors.length) {
+        try {
+          await clearRecoveryState();
         } catch (cleanupError) {
           cleanupErrors.push(errorMessage(cleanupError));
         }
@@ -805,6 +844,7 @@ export function createProxyController(config: Config | RoutingConfig, overrides:
       errors.push(errorMessage(error));
     }
     if (errors.length) throw new Error(`Could not fully stop SSH Proxy Router: ${errors.join("; ")}`);
+    await clearRecoveryState();
     return recovered.length
       ? `Stopped — saved proxy settings restored. Disabled router PAC on untracked services: ${recovered.join(", ")}. Recheck any prior proxy settings for renamed services.`
       : "Stopped — previous macOS proxy settings restored.";

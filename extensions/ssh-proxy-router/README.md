@@ -99,7 +99,13 @@ When started, the extension:
 4. Saves the current automatic-proxy settings for each selected macOS network service.
 5. Enables the localhost PAC URL.
 
-Stopping the extension restores the saved proxy settings before unloading and disabling either LaunchAgent. If restoration fails for any service, the backup and agents are retained; correct the reported issue and retry **Stop and Restore Proxy Settings** in the menu. This recovery action is available while routing is degraded. Stop checks the current macOS service inventory and skips deleted services, while still restoring disabled services. If a renamed or otherwise untracked service still uses this router’s PAC endpoint, Stop disables that PAC setting and reports the service so you can recheck any previous proxy configuration; it does not guess the service’s former name. Their stable plist files remain installed so macOS does not treat every later start as newly installed background software. Raycast itself does not need to stay open for the tunnel to remain active.
+Stopping the extension restores the saved proxy settings before unloading and disabling either LaunchAgent. If restoration fails for any service, the backup and agents are retained; correct the reported issue and retry **Stop and Restore Proxy Settings** in the menu. This recovery action is available while routing is degraded. Stop checks the current macOS service inventory and skips deleted services, while still restoring disabled services. If a renamed or otherwise untracked service still uses an exact PAC URL recorded for this routing session, Stop disables that PAC setting and reports the service so you can recheck any previous proxy configuration; it does not guess the service’s former name. Matching includes the complete query string: another PAC URL on the same port and path is left untouched. The agents’ stable plist files remain installed so macOS does not treat every later start as newly installed background software. Raycast itself does not need to stay open for the tunnel to remain active.
+
+### PAC ownership and recovery
+
+The private `managed-pac-urls.json` file records the full URLs used during a routing session. Repair retains previous URLs when settings change. The URL history and proxy backup are removed only after settings are restored and both agents shut down successfully; failures retain them for retry.
+
+Older installations have no URL history. In that case, recovery recognizes only the exact URL generated from the current preferences. If preferences were changed and an older URL can no longer be identified, that setting is left untouched. Check the affected service’s Automatic Proxy Configuration in macOS settings and restore its prior configuration manually; an old listener port alone is not ownership evidence.
 
 ### Background activity and battery use
 
