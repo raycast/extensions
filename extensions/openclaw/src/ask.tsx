@@ -99,7 +99,7 @@ function AskForm({ initialQuestion }: { initialQuestion?: string }) {
 }
 
 export default function Command(
-  props: LaunchProps<{ arguments: { question?: string } }>,
+  props: LaunchProps<{ arguments: Arguments.Ask }>,
 ) {
   const initialQuestion = props.arguments?.question?.trim();
 
