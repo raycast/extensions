@@ -84,6 +84,10 @@ if (toolBlocks.length === 0) {
 
 /** @type {ToolEntry[]} */
 const tools = [];
+/** @type {string[]} */
+const errors = [];
+/** @type {Map<string, string>} route path → tool name */
+const toolNameByRoute = new Map();
 
 for (const block of toolBlocks) {
   const name = extractString(block, "name");
@@ -98,7 +102,30 @@ for (const block of toolBlocks) {
     continue;
   }
 
-  const routePath = routes[routeRef] ?? routeRef;
+  // A quoted route is a literal path; anything else must be an AppRoutes
+  // constant. Never guess a path from an unresolved identifier, or the index
+  // would ship a broken deep link such as `devtpro://jsonFormatter`.
+  const routeIsLiteral = /route\s*:\s*['"`]/.test(block);
+  let routePath;
+  if (routeIsLiteral) {
+    routePath = routeRef;
+  } else if (Object.hasOwn(routes, routeRef)) {
+    routePath = routes[routeRef];
+  } else {
+    errors.push(`"${name}": route "${routeRef}" is not defined in app_routes.dart`);
+    continue;
+  }
+  if (!routePath.startsWith("/")) {
+    errors.push(`"${name}": route "${routePath}" must start with "/"`);
+    continue;
+  }
+  const existing = toolNameByRoute.get(routePath);
+  if (existing) {
+    errors.push(`"${name}": route "${routePath}" is already used by "${existing}"`);
+    continue;
+  }
+  toolNameByRoute.set(routePath, name);
+
   const keywords = extractList(block, "keywords");
   const deepLink = buildDeepLink(routePath);
   const iconName = mapIcon(dartIcon, name, category);
@@ -113,6 +140,12 @@ for (const block of toolBlocks) {
     iconName,
     keywords,
   });
+}
+
+if (errors.length > 0) {
+  console.error(`✖ Found ${errors.length} invalid tool route(s). tools.json was not written.`);
+  for (const error of errors) console.error(`  - ${error}`);
+  process.exit(1);
 }
 
 if (tools.length === 0) {

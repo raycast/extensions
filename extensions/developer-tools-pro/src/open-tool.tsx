@@ -110,6 +110,30 @@ function groupByCategory(toolList: ToolEntry[], pinnedIds: string[]) {
   return { sortedCategories, groups, pinned };
 }
 
+let pinQueue: Promise<unknown> = Promise.resolve();
+
+/**
+ * Run pin storage reads and writes one at a time, in the order they were
+ * requested, so the initial load and overlapping toggles can't overwrite each
+ * other.
+ */
+function enqueuePinTask<T>(task: () => Promise<T>): Promise<T> {
+  const run = pinQueue.then(task, task);
+  pinQueue = run.catch(() => undefined);
+  return run;
+}
+
+async function readPins(): Promise<string[]> {
+  const val = await LocalStorage.getItem<string>(PINNED_TOOLS_KEY);
+  if (!val) return [];
+  try {
+    const parsed: unknown = JSON.parse(val);
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
 async function readClipboardText(): Promise<string> {
   try {
     return (await Clipboard.readText()) ?? "";
@@ -125,24 +149,22 @@ export default function Command() {
   const { push } = useNavigation();
 
   useEffect(() => {
-    LocalStorage.getItem<string>(PINNED_TOOLS_KEY)
-      .then((val) => {
-        if (!val) return;
-        try {
-          const parsed: unknown = JSON.parse(val);
-          if (Array.isArray(parsed)) setPinnedIds(parsed.filter((id): id is string => typeof id === "string"));
-        } catch {
-          setPinnedIds([]);
-        }
-      })
+    enqueuePinTask(readPins)
+      .then(setPinnedIds)
       .finally(() => setIsLoading(false));
   }, []);
 
   const togglePin = async (route: string) => {
-    const isPinned = pinnedIds.includes(route);
-    const newPins = isPinned ? pinnedIds.filter((id) => id !== route) : [...pinnedIds, route];
+    let isPinned = false;
+    const newPins = await enqueuePinTask(async () => {
+      // Read fresh storage so overlapping toggles build on each other's writes.
+      const pins = await readPins();
+      isPinned = pins.includes(route);
+      const next = isPinned ? pins.filter((id) => id !== route) : [...pins, route];
+      await LocalStorage.setItem(PINNED_TOOLS_KEY, JSON.stringify(next));
+      return next;
+    });
     setPinnedIds(newPins);
-    await LocalStorage.setItem(PINNED_TOOLS_KEY, JSON.stringify(newPins));
     await showToast({
       title: isPinned ? "Unpinned Tool" : "Pinned Tool",
       style: Toast.Style.Success,
