@@ -1,5 +1,10 @@
 # Toggl Track Changelog
 
+## [Quickstop Timer] - 2026-09-16
+
+- Added a "Quickstop Timer" command that stops the running time entry with no UI, so it can be bound to a global hotkey
+- In Low Data Mode the command confirms the running entry against the API before stopping, so it never acts on a stale cached timer
+
 ## [Back-date a New Timer] - 2026-09-13
 
 - Added a "Start Time" option to the new time entry form to start a timer as of 5, 10 or 15 minutes ago, or a custom number of minutes, for when you remember to start tracking after you began working
