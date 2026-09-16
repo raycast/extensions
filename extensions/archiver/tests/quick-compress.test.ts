@@ -18,7 +18,7 @@ mock.module("@raycast/api", () => ({
   Toast: { Style: { Animated: "animated" } },
 }));
 mock.module("@raycast/utils", () => ({ showFailureToast: mock(() => undefined) }));
-mock.module("./common/utils", () => ({ compress, ensureBinary }));
+mock.module("../src/common/utils", () => ({ compress, ensureBinary }));
 
 afterEach(() => {
   mock.clearAllMocks();
@@ -26,7 +26,7 @@ afterEach(() => {
 });
 
 test("reveals the compressed archive when the preference is enabled", async () => {
-  const { default: Command } = await import("./quick-compress");
+  const { default: Command } = await import("../src/quick-compress");
 
   await Command();
 
@@ -35,7 +35,7 @@ test("reveals the compressed archive when the preference is enabled", async () =
 
 test("does not reveal the compressed archive when the preference is disabled", async () => {
   getPreferenceValues.mockReturnValue({ defaultCompressionFormat: "ZIP", revealInFinder: false });
-  const { default: Command } = await import("./quick-compress");
+  const { default: Command } = await import("../src/quick-compress");
 
   await Command();
 
