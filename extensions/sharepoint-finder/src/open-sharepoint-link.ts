@@ -75,14 +75,18 @@ export default async function Command(): Promise<void> {
     }
 
     for (const candidate of candidates) {
+      let itemStats;
       try {
-        const itemStats = await stat(candidate.localPath);
-        if (itemStats.isDirectory()) await open(candidate.localPath);
-        else await showInFinder(candidate.localPath);
-        return;
-      } catch {
-        // The item does not exist in this candidate library, so try the next one.
+        itemStats = await stat(candidate.localPath);
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException).code;
+        if (code === "ENOENT" || code === "ENOTDIR") continue;
+        throw error;
       }
+
+      if (itemStats.isDirectory()) await open(candidate.localPath);
+      else await showInFinder(candidate.localPath);
+      return;
     }
 
     throw new Error(

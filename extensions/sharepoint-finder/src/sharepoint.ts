@@ -48,7 +48,14 @@ export function extractServerRelativePath(browserUrl: string): string {
   const directPath = normalizeServerPath(
     url.pathname.replace(/^\/:\w:\/(?:r|s)\//i, "/"),
   );
-  if (!directPath.toLocaleLowerCase().includes("/shared documents/")) {
+  const directSegments = directPath.split("/").filter(Boolean);
+  const siteContainerIndex = directSegments.findIndex((segment) =>
+    ["sites", "teams"].includes(segment.toLocaleLowerCase()),
+  );
+  if (
+    siteContainerIndex === -1 ||
+    directSegments.length < siteContainerIndex + 3
+  ) {
     throw new Error(
       "Wait for the shared folder to finish opening, then try again",
     );
@@ -91,6 +98,7 @@ function rankByRemoteName(names: string[], remoteName: string): string[] {
       else if (localKey.startsWith(remoteKey)) score = 700 + remoteKey.length;
       return { name, score };
     })
+    .filter(({ score }) => score > 0)
     .sort(
       (left, right) =>
         right.score - left.score || left.name.localeCompare(right.name),

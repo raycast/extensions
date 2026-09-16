@@ -51,6 +51,18 @@ test("extracts a folder from a direct SharePoint URL", () => {
   assert.equal(extractServerRelativePath(url), folderPath);
 });
 
+test("extracts a custom library from a direct SharePoint URL", () => {
+  const url =
+    "https://contoso.sharepoint.com/:f:/r/sites/design/Brand%20Assets/Campaigns?csf=1";
+  assert.deepEqual(parseSharePointLocation(url), {
+    tenantName: "contoso",
+    siteSlug: "design",
+    libraryName: "Brand Assets",
+    relativeSegments: ["Campaigns"],
+    serverRelativePath: "/sites/design/Brand Assets/Campaigns",
+  });
+});
+
 test("detects Creative from the synced libraries", () => {
   const location = parseSharePointLocation(exactUrl);
   assert.equal(
@@ -82,6 +94,25 @@ test("matches the SharePoint tenant to the correct OneDrive root", () => {
   assert.equal(
     rankSharedLibraryRoots(roots, "four12global")[0],
     "OneDrive-SharedLibraries-Four12Global",
+  );
+});
+
+test("rejects unrelated OneDrive roots", () => {
+  const roots = [
+    "OneDrive-SharedLibraries-Contoso",
+    "OneDrive-SharedLibraries-Four12Global",
+  ];
+  assert.deepEqual(rankSharedLibraryRoots(roots, "fabrikam"), []);
+});
+
+test("rejects unrelated synced site libraries", () => {
+  const location = parseSharePointLocation(exactUrl);
+  assert.deepEqual(
+    rankLocalLibraries(
+      ["Accounts - Documents", "Operations - Documents"],
+      location,
+    ),
+    [],
   );
 });
 
