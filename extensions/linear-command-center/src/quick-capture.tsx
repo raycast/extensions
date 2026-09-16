@@ -1,19 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-  Icon,
-  open,
-  popToRoot,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, open, popToRoot, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { createIssue, linearOAuth, loadDashboard } from "./api";
 import { buildDashboard, DashboardModel } from "./dashboard";
-import { Preferences } from "./types";
 
 type FormValues = {
   teamId: string;
@@ -37,8 +26,7 @@ function QuickCapture() {
     buildError = error instanceof Error ? error : new Error(String(error));
   }
 
-  const selectedTeam =
-    model?.teams.find((team) => team.id === selectedTeamId) || model?.team || model?.teams[0];
+  const selectedTeam = model?.teams.find((team) => team.id === selectedTeamId) || model?.team || model?.teams[0];
 
   async function submit(values: FormValues) {
     if (!model || !values.title.trim()) return;
@@ -55,7 +43,7 @@ function QuickCapture() {
       });
       await showToast({ style: Toast.Style.Success, title: `Created ${issue.identifier}` });
       await popToRoot();
-      await open(issue.url);
+      if (!preferences.demoMode) await open(issue.url);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -91,12 +79,7 @@ function QuickCapture() {
         title="Context"
         placeholder="Outcome, constraints, evidence, or acceptance criteria"
       />
-      <Form.Dropdown
-        key={`state-${selectedTeam?.id}`}
-        id="stateId"
-        title="Status"
-        defaultValue={defaultState}
-      >
+      <Form.Dropdown key={`state-${selectedTeam?.id}`} id="stateId" title="Status" defaultValue={defaultState}>
         {availableStates
           .filter((state) => ["unstarted", "started"].includes(state.type))
           .map((state) => (

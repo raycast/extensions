@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildDashboard, statesForIssue } from "./dashboard";
-import { DashboardResponse, Issue, Preferences, Team, WorkflowState } from "./types";
+import { DashboardResponse, Issue, Team, WorkflowState } from "./types";
 
 const alphaStates: WorkflowState[] = [
   { id: "alpha-todo", name: "Queue", type: "unstarted", color: "#999999" },
@@ -77,6 +77,7 @@ const preferences: Preferences = {
   reviewStateNames: "Peer Check",
   staleAfterHours: "24",
   menuItemLimit: "6",
+  demoMode: false,
 };
 
 describe("buildDashboard", () => {
@@ -86,6 +87,16 @@ describe("buildDashboard", () => {
     expect(model.issues.map((item) => item.identifier)).toHaveLength(3);
     expect(model.agentWork.map((item) => item.identifier)).toEqual(["ALP-1"]);
     expect(model.reviews.map((item) => item.identifier)).toEqual(["ALP-2"]);
+    expect(model.todo.map((item) => item.identifier)).toEqual(["ALP-3"]);
+  });
+
+  it("lists an unstarted issue that needs attention once, under needs you", () => {
+    const data = fixture();
+    const overdueTodo = issue("5", teams[0], alphaStates[0], { dueDate: "2000-01-01" });
+    data.viewer.assignedIssues.nodes.push(overdueTodo);
+    const model = buildDashboard(data, preferences);
+
+    expect(model.needsYou.map((item) => item.identifier)).toEqual(["ALP-5"]);
     expect(model.todo.map((item) => item.identifier)).toEqual(["ALP-3"]);
   });
 

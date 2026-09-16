@@ -30,6 +30,13 @@ export type RelatedIssue = {
   state: Pick<WorkflowState, "name" | "type">;
 };
 
+export type IssueRelation = {
+  id: string;
+  type: string;
+  issue: RelatedIssue;
+  relatedIssue: RelatedIssue;
+};
+
 export type Issue = {
   id: string;
   identifier: string;
@@ -46,12 +53,8 @@ export type Issue = {
   delegate?: { id: string; name: string; displayName: string } | null;
   labels: { nodes: Array<{ id: string; name: string; color: string }> };
   inverseRelations: {
-    nodes: Array<{
-      id: string;
-      type: string;
-      issue: RelatedIssue;
-      relatedIssue: RelatedIssue;
-    }>;
+    nodes: IssueRelation[];
+    pageInfo?: PageInfo;
   };
 };
 
@@ -76,16 +79,6 @@ export type DashboardResponse = {
   };
   agentSessions: { nodes: AgentSession[] };
   teams: { nodes: Team[] };
-};
-
-export type Preferences = {
-  teamKey?: string;
-  agentProjectId?: string;
-  agentProjectKeywords?: string;
-  reviewStateNames?: string;
-  staleAfterHours: string;
-  menuItemLimit: string;
-  demoMode?: boolean;
 };
 
 export type IssueWithContext = Issue & {

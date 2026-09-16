@@ -3,7 +3,6 @@ import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { linearOAuth, loadDashboard } from "./api";
 import { buildDashboard, statesForIssue } from "./dashboard";
 import { IssueListItem } from "./components";
-import { Preferences } from "./types";
 
 function WorkDashboard() {
   const preferences = getPreferenceValues<Preferences>();

@@ -27,11 +27,7 @@ type IssueListItemProps = IssueActionProps & {
   itemId: string;
 };
 
-async function changeState(
-  issue: IssueWithContext,
-  state: WorkflowState,
-  onChanged: () => void | Promise<void>,
-) {
+async function changeState(issue: IssueWithContext, state: WorkflowState, onChanged: () => void | Promise<void>) {
   const toast = await showToast({ style: Toast.Style.Animated, title: `Moving ${issue.identifier}…` });
   try {
     await updateIssueState(issue.id, state.id);
@@ -120,16 +116,9 @@ export function IssueListItem({ issue, states, onChanged, itemId }: IssueListIte
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Linear" url={issue.url} />
-          {sessionUrl ? (
-            <Action.OpenInBrowser title="Open Agent Session" url={sessionUrl} icon={Icon.Bolt} />
-          ) : null}
+          {sessionUrl ? <Action.OpenInBrowser title="Open Agent Session" url={sessionUrl} icon={Icon.Bolt} /> : null}
           {externalLinks.map((link) => (
-            <Action.OpenInBrowser
-              key={link.url}
-              title={`Open ${link.label}`}
-              url={link.url}
-              icon={Icon.Code}
-            />
+            <Action.OpenInBrowser key={link.url} title={`Open ${link.label}`} url={link.url} icon={Icon.Code} />
           ))}
           <ActionPanel.Submenu title="Change Status" icon={Icon.ArrowRight}>
             {states
@@ -196,11 +185,7 @@ function CommentForm({ issue, onChanged }: Pick<IssueActionProps, "issue" | "onC
       }
     >
       <Form.Description title={issue.identifier} text={issue.title} />
-      <Form.TextArea
-        id="body"
-        title="Note"
-        placeholder="What changed, what is blocked, or what needs review?"
-      />
+      <Form.TextArea id="body" title="Note" placeholder="What changed, what is blocked, or what needs review?" />
     </Form>
   );
 }

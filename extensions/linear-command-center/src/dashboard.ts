@@ -1,11 +1,4 @@
-import {
-  AgentSession,
-  DashboardResponse,
-  Issue,
-  IssueWithContext,
-  Preferences,
-  WorkflowState,
-} from "./types";
+import { AgentSession, DashboardResponse, Issue, IssueWithContext, WorkflowState } from "./types";
 
 const CLOSED_TYPES = new Set(["completed", "canceled", "duplicate"]);
 const ACTIVE_AGENT_STATUSES = new Set(["pending", "active", "awaitingInput", "error", "stale"]);
@@ -28,9 +21,7 @@ export function buildDashboard(data: DashboardResponse, preferences: Preferences
     ? data.teams.nodes.find((candidate) => candidate.key.toUpperCase() === requestedTeamKey)
     : data.teams.nodes[0];
   if (!team) {
-    throw new Error(
-      requestedTeamKey ? `No Linear team found for ${requestedTeamKey}` : "No Linear teams found",
-    );
+    throw new Error(requestedTeamKey ? `No Linear team found for ${requestedTeamKey}` : "No Linear teams found");
   }
 
   const delegatedIds = new Set(data.viewer.delegatedIssues.nodes.map((issue) => issue.id));
@@ -54,8 +45,7 @@ export function buildDashboard(data: DashboardResponse, preferences: Preferences
       const agentSession = sessionsByIssue.get(issue.id);
       const isAgentProject = Boolean(
         (preferences.agentProjectId && issue.project?.id === preferences.agentProjectId) ||
-        (issue.project &&
-          agentProjectKeywords.some((keyword) => issue.project!.name.toLowerCase().includes(keyword))),
+        (issue.project && agentProjectKeywords.some((keyword) => issue.project!.name.toLowerCase().includes(keyword))),
       );
       const hasAgentLabel = issue.labels.nodes.some((label) => label.name.toLowerCase() === "agent");
       const isDelegated = Boolean(
@@ -65,8 +55,7 @@ export function buildDashboard(data: DashboardResponse, preferences: Preferences
         (relation) => relation.type === "blocks" && !CLOSED_TYPES.has(relation.issue.state.type),
       );
       const isOverdue = Boolean(issue.dueDate && new Date(`${issue.dueDate}T00:00:00`) < today);
-      const isStale =
-        issue.state.type === "started" && Date.now() - new Date(issue.updatedAt).getTime() > staleAfterMs;
+      const isStale = issue.state.type === "started" && Date.now() - new Date(issue.updatedAt).getTime() > staleAfterMs;
       const isReview = isReviewState(issue.state, reviewStateNames);
 
       const attentionReasons: string[] = [];
@@ -104,15 +93,14 @@ export function buildDashboard(data: DashboardResponse, preferences: Preferences
         issue.isDelegated &&
         !issue.needsAttention &&
         !issue.isReview &&
-        (issue.agentSession
-          ? ACTIVE_AGENT_STATUSES.has(issue.agentSession.status)
-          : issue.state.type === "started"),
+        (issue.agentSession ? ACTIVE_AGENT_STATUSES.has(issue.agentSession.status) : issue.state.type === "started"),
     ),
     active: issues.filter(
-      (issue) =>
-        issue.state.type === "started" && !issue.needsAttention && !issue.isReview && !issue.isDelegated,
+      (issue) => issue.state.type === "started" && !issue.needsAttention && !issue.isReview && !issue.isDelegated,
     ),
-    todo: issues.filter((issue) => issue.state.type === "unstarted"),
+    // Anything that needs attention is already in needsYou; listing it here
+    // too would show the same issue twice.
+    todo: issues.filter((issue) => issue.state.type === "unstarted" && !issue.needsAttention),
   };
 }
 
@@ -160,8 +148,7 @@ export function sessionLabel(session?: AgentSession): string | undefined {
 export function issueSubtitle(issue: IssueWithContext): string {
   if (issue.attentionReasons.length) return issue.attentionReasons.join(" · ");
   return (
-    sessionLabel(issue.agentSession) ||
-    (issue.isDelegated ? `Agent-tracked · ${issue.state.name}` : issue.state.name)
+    sessionLabel(issue.agentSession) || (issue.isDelegated ? `Agent-tracked · ${issue.state.name}` : issue.state.name)
   );
 }
 
