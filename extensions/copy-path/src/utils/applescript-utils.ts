@@ -263,3 +263,65 @@ export const copySafariWebAppPath = async (app: string) => {
     return "";
   }
 };
+
+// Arc "Little Arc" popup window.
+// Arc's own scripting dictionary does not expose Little Arc windows, so
+// "URL of active tab of front window" silently returns the main window's tab.
+// Little Arc is an AXSystemDialog window; read the AXURL of its web area via
+// the accessibility C API (System Events cannot coerce Chromium's AXURL).
+export const scriptArcLittleArcUrl = `
+ObjC.import("Cocoa");
+ObjC.import("ApplicationServices");
+ObjC.bindFunction("AXUIElementCreateApplication", ["id", ["int"]]);
+ObjC.bindFunction("AXUIElementCopyAttributeValue", ["int", ["id", "id", "id*"]]);
+function attr(el, name) {
+  if (!el) return null;
+  const ref = Ref();
+  const err = $.AXUIElementCopyAttributeValue(el, $(name), ref);
+  return err === 0 ? ref[0] : null;
+}
+function str(v) {
+  if (!v) return null;
+  try {
+    return ObjC.unwrap(v.isKindOfClass($.NSURL) ? v.absoluteString : v);
+  } catch (e) {
+    return null;
+  }
+}
+function findWebArea(el, depth) {
+  if (!el || depth > 8) return null;
+  if (str(attr(el, "AXRole")) === "AXWebArea") return el;
+  const kids = attr(el, "AXChildren");
+  if (!kids) return null;
+  const n = kids.count;
+  for (let i = 0; i < n; i++) {
+    const r = findWebArea(kids.objectAtIndex(i), depth + 1);
+    if (r) return r;
+  }
+  return null;
+}
+const apps = $.NSRunningApplication.runningApplicationsWithBundleIdentifier("company.thebrowser.Browser");
+if (apps.count === 0) {
+  "";
+} else {
+  const app = $.AXUIElementCreateApplication(apps.objectAtIndex(0).processIdentifier);
+  const win = attr(app, "AXFocusedWindow") || attr(app, "AXMainWindow");
+  if (str(attr(win, "AXSubrole")) !== "AXSystemDialog") {
+    "";
+  } else {
+    str(attr(findWebArea(win, 0), "AXURL")) || "";
+  }
+}
+`;
+
+export const getArcLittleArcUrl = async () => {
+  try {
+    const url = await runAppleScript(scriptArcLittleArcUrl, {
+      language: "JavaScript",
+      timeout: APPLESCRIPT_TIMEOUT_MS,
+    });
+    return url.trim().startsWith("http") ? url.trim() : "";
+  } catch (e) {
+    return "";
+  }
+};
