@@ -9,6 +9,10 @@ export const linearOAuth = OAuthService.linear({
   scope: "read write",
 });
 
+// Linear caps a query at 10,000 complexity points: 1 per object, 0.1 per
+// property, and a connection multiplies its children by `first` (50 when
+// omitted). Page sizes below keep each query near 5,000 by that arithmetic;
+// anything past a page is fetched by cursor.
 const DASHBOARD_QUERY = `
   query LinearCommandCenterDashboard(
     $first: Int!
@@ -33,8 +37,8 @@ const DASHBOARD_QUERY = `
           team { id key name }
           project { id name }
           delegate { id name displayName }
-          labels { nodes { id name color } }
-          inverseRelations(first: 50) {
+          labels(first: 20) { nodes { id name color } }
+          inverseRelations(first: 10) {
             nodes {
               id
               type
@@ -96,7 +100,7 @@ const TEAMS_QUERY = `
         id
         key
         name
-        states(first: 100) { nodes { id name type color } }
+        states(first: 50) { nodes { id name type color } }
       }
       pageInfo { hasNextPage endCursor }
     }
@@ -109,7 +113,7 @@ const PROJECTS_QUERY = `
       nodes {
         id
         name
-        teams(first: 50) { nodes { id } }
+        teams(first: 10) { nodes { id } }
       }
       pageInfo { hasNextPage endCursor }
     }
@@ -227,7 +231,7 @@ export async function loadDashboard(): Promise<DashboardResponse> {
 
   for (let page = 0; page < MAX_PAGES; page += 1) {
     const data = await linearRequest<DashboardPageResponse>(DASHBOARD_QUERY, {
-      first: 100,
+      first: 50,
       issuesAfter,
       delegatedAfter,
       sessionsAfter,
