@@ -54,6 +54,12 @@
       "title": "Search Session Output",
       "description": "Search commands and printed output across the scrollback of all tmux sessions",
       "mode": "view"
+    },
+    {
+      "name": "save_sessions",
+      "title": "Save Tmux Sessions",
+      "description": "Force tmux-resurrect to save all sessions now (requires the tmux-resurrect plugin; pairs with tmux-continuum)",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -93,8 +99,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.23",
-    "@raycast/utils": "^1.18.1"
+    "@raycast/api": "^1.104.23"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.11",
