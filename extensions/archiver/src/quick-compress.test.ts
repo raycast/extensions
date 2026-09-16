@@ -1,4 +1,5 @@
 import { afterEach, expect, mock, test } from "bun:test";
+import { readFile } from "node:fs/promises";
 
 const getPreferenceValues = mock(() => ({ defaultCompressionFormat: "ZIP", revealInFinder: true }));
 const getSelectedFinderItems = mock(async () => [{ path: "/tmp/example.txt" }]);
@@ -39,4 +40,15 @@ test("does not reveal the compressed archive when the preference is disabled", a
   await Command();
 
   expect(showInFinder).not.toHaveBeenCalled();
+});
+
+test("declares the Finder reveal preference only for Quick Compress", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  const quickCompress = manifest.commands.find((command: { name: string }) => command.name === "quick-compress");
+  const compress = manifest.commands.find((command: { name: string }) => command.name === "compress");
+
+  expect(quickCompress.preferences.some((preference: { name: string }) => preference.name === "revealInFinder")).toBe(
+    true,
+  );
+  expect(compress.preferences.some((preference: { name: string }) => preference.name === "revealInFinder")).toBe(false);
 });
