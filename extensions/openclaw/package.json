@@ -215,7 +215,6 @@
     "@openclaw/gateway-client": "2026.9.4",
     "@openclaw/gateway-protocol": "2026.9.4",
     "@raycast/api": "^2.4.1",
-    "@raycast/utils": "^2.3.1",
     "json5": "2.2.3",
     "ws": "8.21.3"
   },
