@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sf-symbol-intent-finder",
+  "title": "SF Symbol Intent Finder",
+  "description": "Search SF Symbols by intent, not just by name. Instant keyword matches plus AI-powered semantic suggestions.",
+  "icon": "command-icon.png",
+  "author": "fvates",
+  "categories": ["Design Tools", "Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Find SF Symbols",
+      "subtitle": "SF Symbol Intent Finder",
+      "description": "Search SF Symbols by name or by intent using AI",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "geminiApiKey",
+      "type": "password",
+      "title": "Gemini API Key",
+      "description": "Your Google AI Studio API key. Enables AI intent search. Get one free at https://aistudio.google.com/apikey",
+      "required": false
+    },
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "The default action (Enter) for a selected symbol",
+      "required": false,
+      "data": [
+        { "title": "Copy Symbol", "value": "copySymbol" },
+        { "title": "Paste Symbol", "value": "pasteSymbol" },
+        { "title": "Copy Name", "value": "copyName" },
+        { "title": "Paste Name", "value": "pasteName" }
+      ],
+      "default": "copySymbol"
+    },
+    {
+      "name": "model",
+      "type": "textfield",
+      "title": "AI Model",
+      "description": "Gemini model id used for intent search. Leave as default unless you know what you are doing.",
+      "required": false,
+      "default": "gemini-3.1-flash-lite"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.1"
+  },
+  "overrides": {
+    "@types/react": "19.0.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

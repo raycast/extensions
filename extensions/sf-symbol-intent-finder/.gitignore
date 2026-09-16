@@ -1,0 +1,9 @@
+node_modules
+dist
+.gemini-key
+.DS_Store
+*.log
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+raycast-env.d.ts
