@@ -42,13 +42,14 @@ test("does not reveal the compressed archive when the preference is disabled", a
   expect(showInFinder).not.toHaveBeenCalled();
 });
 
-test("declares the Finder reveal preference only for Quick Compress", async () => {
+test("declares the Finder reveal preference in Archiver settings", async () => {
   const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   const quickCompress = manifest.commands.find((command: { name: string }) => command.name === "quick-compress");
   const compress = manifest.commands.find((command: { name: string }) => command.name === "compress");
 
+  expect(manifest.preferences.some((preference: { name: string }) => preference.name === "revealInFinder")).toBe(true);
   expect(quickCompress.preferences.some((preference: { name: string }) => preference.name === "revealInFinder")).toBe(
-    true,
+    false,
   );
   expect(compress.preferences.some((preference: { name: string }) => preference.name === "revealInFinder")).toBe(false);
 });

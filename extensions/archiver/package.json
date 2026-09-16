@@ -37,6 +37,15 @@
       "default": false
     },
     {
+      "name": "revealInFinder",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "description": "Reveal the compressed file in Finder after quick compression completes",
+      "label": "Reveal Compressed File in Finder",
+      "default": true
+    },
+    {
       "name": "locationSaveCompressed",
       "type": "directory",
       "required": false,
@@ -157,15 +166,6 @@
               "value": "GZIP"
             }
           ]
-        },
-        {
-          "name": "revealInFinder",
-          "type": "checkbox",
-          "required": false,
-          "title": "",
-          "description": "Reveal the compressed file in Finder after quick compression completes",
-          "label": "Reveal Compressed File in Finder",
-          "default": true
         }
       ]
     },
