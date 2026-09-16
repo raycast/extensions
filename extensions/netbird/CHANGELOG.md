@@ -1,5 +1,9 @@
 # NetBird Changelog
 
+## [Toggle Connection] - {PR_MERGE_DATE}
+
+- Added `Toggle Connection` command which connects to NetBird when disconnected and disconnects when connected.
+
 ## [Custom Admin URL] - 2026-04-03
 
 - Added option to overwrite Admin Panel URL in preferences.
