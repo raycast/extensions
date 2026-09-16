@@ -1,6 +1,6 @@
 # GoodLinks Changelog
 
-## [Fix Opening Links With Query Strings] - {PR_MERGE_DATE}
+## [Fix Opening Links With Query Strings] - 2026-09-16
 
 - Encode the link URL passed to GoodLinks, so opening a link whose URL contains `&`, `#` or `+` no longer truncates or alters it
 
