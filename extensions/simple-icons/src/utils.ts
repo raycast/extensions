@@ -153,9 +153,13 @@ const pacoteAssetPack = async (version: string) => {
         return;
       }
       // Destination exists but is incomplete (crashed process, old code).
-      // Remove it and retry — no process writes to the pack directory
-      // directly, so this is safe.
-      if ((error as NodeJS.ErrnoException).code === "ENOTEMPTY") {
+      // Remove it and retry the rename. This is the only place shared state
+      // is removed: the marker check above already proved no complete pack
+      // exists at this instant, and the rename is the single coordination
+      // point. Rename onto a non-empty directory is ENOTEMPTY on macOS/Linux,
+      // EEXIST on some filesystems, and EPERM/EACCES on Windows.
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code === "ENOTEMPTY" || code === "EEXIST" || code === "EPERM" || code === "EACCES") {
         await fs.rm(destination, { recursive: true, force: true });
         await fs.rename(staging, destination);
         return;
@@ -171,8 +175,9 @@ const pacoteAssetPack = async (version: string) => {
 export const cacheAssetPack = async (version: string) => {
   const destination = getAssetPackDestination(version);
   if (await hasCompleteAssetPack(destination)) return;
-  // Remove an incomplete pack (safe — processes only write via staging+rename)
-  await fs.rm(destination, { recursive: true, force: true }).catch(() => {});
+  // An incomplete destination is removed inside the rename's error path,
+  // not here: removing after a marker check leaves a gap where another
+  // instance's rename can publish a complete pack that this then deletes.
   await reclaimDeadStaging();
   await pacoteAssetPack(version);
   cache.set("cached-version", version);
