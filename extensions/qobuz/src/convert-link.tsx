@@ -12,7 +12,7 @@ import {
   type ResolveFailure,
   type ResolvedTrack,
 } from "./lib/resolve";
-import { formatShareMessage, shareLinks, shareQuery, type ShareLink } from "./lib/share";
+import { shareClipboard, shareLinks, shareQuery, type ShareLink } from "./lib/share";
 
 type Source = "argument" | "now-playing" | "clipboard";
 
@@ -190,7 +190,7 @@ const renderActions = (data: Conversion | undefined, onSwitch: (source: Source) 
         <Action.CopyToClipboard
           title="Copy Share Links"
           icon={Icon.Link}
-          content={formatShareMessage(data.track, data.links)}
+          content={shareClipboard(data.track, data.links)}
         />
         {data.links
           .filter((link) => link.platform !== "qobuz")

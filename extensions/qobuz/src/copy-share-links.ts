@@ -2,7 +2,7 @@ import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import type { QobuzClient, Track } from "@kud/qobuz";
 import { getClient } from "./lib/client";
-import { countServices, formatShareMessage, shareLinks, shareTitle } from "./lib/share";
+import { countServices, shareClipboard, shareLinks, shareTitle } from "./lib/share";
 
 // The Qobuz app rewrites its player-state file on every queue change, so a
 // read can land mid-write and parse as "nothing playing". One retry covers it.
@@ -25,7 +25,7 @@ export default async function Command() {
     }
 
     const links = await shareLinks(track);
-    await Clipboard.copy(formatShareMessage(track, links));
+    await Clipboard.copy(shareClipboard(track, links));
     await showHUD(`Copied ${countServices(links)} links for ${shareTitle(track)}`);
   } catch (error) {
     await showFailureToast(error, { title: "Couldn't copy share links" });

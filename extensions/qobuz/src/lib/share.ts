@@ -1,3 +1,4 @@
+import type { Clipboard } from "@raycast/api";
 import type { Track } from "@kud/qobuz";
 import { deepLink } from "./client";
 import { isLikelyMatch } from "./resolve";
@@ -98,5 +99,23 @@ const lineLabel = ({ platform, confidence }: ShareLink): string =>
 
 export const formatShareMessage = (track: Track, links: ShareLink[]): string =>
   [`🎵 ${shareTitle(track)}`, "", ...links.map((link) => `${lineLabel(link)}: ${link.url}`)].join("\n");
+
+const escapeHtml = (text: string): string =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+// Rich-text destinations (Slack, Notion, Mail) take this; hiding the URLs
+// behind the names is what lets it collapse to one line.
+const htmlLink = ({ platform, url, confidence }: ShareLink): string => {
+  const anchor = `<a href="${escapeHtml(url)}">${PLATFORM_LABEL[platform]}</a>`;
+  return confidence === "search" ? `${anchor} (search)` : anchor;
+};
+
+export const formatShareHtml = (track: Track, links: ShareLink[]): string =>
+  `🎵 <b>${escapeHtml(shareTitle(track))}</b><br>\n${links.map(htmlLink).join(" · ")}`;
+
+export const shareClipboard = (track: Track, links: ShareLink[]): Clipboard.Content => ({
+  text: formatShareMessage(track, links),
+  html: formatShareHtml(track, links),
+});
 
 export const countServices = (links: ShareLink[]): number => links.filter((l) => l.platform !== "songlink").length;
