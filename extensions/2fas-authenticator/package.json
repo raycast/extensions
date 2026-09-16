@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "2fas-authenticator",
   "title": "2FAS Authenticator",
-  "description": "Search and copy TOTP codes from 2FAS exports with a Keychain-encrypted local vault",
+  "description": "Search and copy TOTP codes from 2FAS exports with an encrypted local vault",
   "icon": "extension-icon.png",
   "author": "Lock",
+  "contributors": [
+    "MushuDG"
+  ],
   "categories": [
     "Security"
   ],
@@ -40,7 +43,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.87.0"
+    "@raycast/api": "^2.4.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -59,6 +62,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
