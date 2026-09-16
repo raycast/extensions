@@ -45,3 +45,32 @@ test("authentication, role, capacity and throttling failures are actionable", as
     await assert.rejects(request("secret", "/me"), expected);
   }
 });
+
+test("search cancellation keeps the request deadline", async (t) => {
+  const deadline = new AbortController();
+  t.mock.method(AbortSignal, "timeout", (milliseconds) => {
+    assert.equal(milliseconds, 20000);
+    return deadline.signal;
+  });
+  const caller = new AbortController();
+  globalThis.fetch = async (_, { signal }) => {
+    deadline.abort(new DOMException("Timed out", "TimeoutError"));
+    assert.equal(signal.aborted, true);
+    signal.throwIfAborted();
+  };
+  await assert.rejects(request("secret", "/bookmarks", { signal: caller.signal }), { name: "TimeoutError" });
+});
+test("caller cancellation still aborts the request", async () => {
+  const caller = new AbortController();
+  globalThis.fetch = async (_, { signal }) => {
+    caller.abort();
+    signal.throwIfAborted();
+  };
+  await assert.rejects(request("secret", "/bookmarks", { signal: caller.signal }), { name: "AbortError" });
+});
+test("non-JSON server failures retain the HTTP status", async () => {
+  for (const body of ["", "Bad Gateway"]) {
+    globalThis.fetch = async () => new Response(body, { status: 502 });
+    await assert.rejects(request("secret", "/me"), /Linqlo request failed \(502\)/);
+  }
+});

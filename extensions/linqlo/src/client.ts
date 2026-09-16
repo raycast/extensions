@@ -36,7 +36,9 @@ export async function request<T>(
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    signal: options.signal ?? AbortSignal.timeout(20000),
+    signal: options.signal
+      ? AbortSignal.any([options.signal, AbortSignal.timeout(20000)])
+      : AbortSignal.timeout(20000),
     redirect: "error",
     ...(options.body === undefined
       ? {}
@@ -54,12 +56,13 @@ export async function request<T>(
     throw new Error(
       `Too many requests. Try again in ${response.headers.get("retry-after") || "60"} seconds.`,
     );
-  const body = await response.json();
-  if (!response.ok)
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
     throw new Error(
       typeof body?.error === "string"
         ? body.error
         : `Linqlo request failed (${response.status}).`,
     );
-  return body as T;
+  }
+  return (await response.json()) as T;
 }
