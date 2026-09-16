@@ -19,7 +19,7 @@ The Control Center is a fast operational view, not a replacement for OpenClaw's 
 ## Requirements
 
 - OpenClaw `2026.9.4` or a protocol-compatible Gateway
-- A reachable local `ws://` Gateway or trusted remote `wss://` endpoint
+- A reachable local loopback `ws://` Gateway or remote `wss://` endpoint
 - A Gateway token or password when bootstrap authentication is required
 - `cloudflared` on the Raycast Mac for Cloudflare Access browser sign-in
 
@@ -33,11 +33,11 @@ Raycast asks how it should reach OpenClaw on first launch.
 | --- | --- | --- |
 | OpenClaw Configuration | Read from `~/.openclaw/openclaw.json` | Uses the local or remote mode in the file |
 | Local Gateway | `ws://127.0.0.1:18789` | Gateway runs on the same Mac |
-| Local Network | `ws://<host>:18789` or private `wss://` URL | Use only on a trusted LAN |
+| Local Network | Private `wss://` URL | Use TLS even on a trusted LAN |
 | Tailscale | OpenClaw-managed `wss://<machine>.<tailnet>.ts.net` URL | Requires Tailscale access on both machines |
 | Cloudflare Tunnel and Access | Tunnel `wss://` hostname | Supports browser sign-in or a service token |
 
-Remote modes validate the configured URL before connecting. Local Network mode rejects loopback addresses. Tailscale and Cloudflare require `wss://`. If the URL field is empty, a matching `gateway.remote.url` from OpenClaw's configuration can be used.
+Remote modes validate the configured URL before connecting and require `wss://`. Plain `ws://` is accepted only for a loopback Gateway on the same Mac. If the URL field is empty, a matching `gateway.remote.url` from OpenClaw's configuration can be used.
 
 ## Pair the Raycast device
 

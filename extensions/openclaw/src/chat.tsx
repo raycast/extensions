@@ -350,6 +350,7 @@ export default function Command(props: LaunchProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const openedLaunchContext = useRef(false);
+  const conversationWrites = useRef<Promise<void>>(Promise.resolve());
   const { push } = useNavigation();
   const launchContext = props.launchContext as ChatLaunchContext | undefined;
 
@@ -403,7 +404,20 @@ export default function Command(props: LaunchProps) {
   }, [conversations, isLoading, launchContext, push, updateConversation]);
 
   useEffect(() => {
-    if (!isLoading) void saveConversations(conversations);
+    if (isLoading) return;
+
+    const write = conversationWrites.current
+      .catch(() => undefined)
+      .then(() => saveConversations(conversations));
+    conversationWrites.current = write;
+    void write.catch((error: unknown) => {
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Save Conversations",
+        message:
+          error instanceof Error ? error.message : "Local storage failed.",
+      });
+    });
   }, [conversations, isLoading]);
 
   function createNewConversation() {
@@ -423,9 +437,9 @@ export default function Command(props: LaunchProps) {
   }
 
   async function removeConversation(id: string) {
-    const next = conversations.filter((conversation) => conversation.id !== id);
-    setConversations(next);
-    await saveConversations(next);
+    setConversations((current) =>
+      current.filter((conversation) => conversation.id !== id),
+    );
     await showToast({
       style: Toast.Style.Success,
       title: "Removed from Raycast",

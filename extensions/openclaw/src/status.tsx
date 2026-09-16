@@ -165,6 +165,26 @@ export default function Command() {
       markdown={status ? markdownForStatus(status) : "Connecting…"}
       actions={
         <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={refresh}
+          />
+          {gatewayUrl ? (
+            <Action.CopyToClipboard
+              title="Copy Gateway URL"
+              content={gatewayUrl}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+          ) : null}
+          {webUrl ? (
+            <Action.OpenInBrowser
+              title="Open OpenClaw Control UI"
+              url={webUrl}
+              shortcut={Keyboard.Shortcut.Common.Open}
+            />
+          ) : null}
           {status?.state === "error" && status.pairingCommand ? (
             <Action.CopyToClipboard
               title="Copy Device Approval Command"
@@ -197,26 +217,6 @@ export default function Command() {
               title="Open Connection Settings"
               icon={Icon.Gear}
               onAction={openExtensionPreferences}
-            />
-          ) : null}
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={refresh}
-          />
-          {gatewayUrl ? (
-            <Action.CopyToClipboard
-              title="Copy Gateway URL"
-              content={gatewayUrl}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
-          ) : null}
-          {webUrl ? (
-            <Action.OpenInBrowser
-              title="Open OpenClaw Control UI"
-              url={webUrl}
-              shortcut={Keyboard.Shortcut.Common.Open}
             />
           ) : null}
         </ActionPanel>

@@ -204,7 +204,7 @@ export class OpenClawGateway {
       edgeAuthHeaders,
       token: preferences.token || undefined,
       password: preferences.password || undefined,
-      deviceToken: deviceToken?.token,
+      deviceAuth: deviceToken ?? undefined,
       deviceIdentity: identity,
       instanceId,
       clientName: "gateway-client",

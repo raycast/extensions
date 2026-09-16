@@ -6,10 +6,9 @@ import JSON5 from "json5";
 
 const LOOPBACK_GATEWAY_URL = "ws://127.0.0.1:18789";
 
-export type ConnectionMode =
-  "config" | "local" | "network" | "tailscale" | "cloudflare";
+export type ConnectionMode = Preferences["connectionMode"];
 
-export type CloudflareAuthMode = "browser" | "service-token";
+export type CloudflareAuthMode = Preferences["cloudflareAuthMode"];
 
 type Credentials = {
   token?: string;
@@ -24,18 +23,7 @@ type FileGatewayConfig = {
   remoteMode?: boolean;
 };
 
-type ExtensionPreferences = {
-  connectionMode?: ConnectionMode;
-  endpoint?: string;
-  token?: string;
-  password?: string;
-  agentId?: string;
-  cloudflareAuthMode?: CloudflareAuthMode;
-  cloudflareAccessClientId?: string;
-  cloudflareAccessClientSecret?: string;
-};
-
-export type ResolvedPreferences = ExtensionPreferences & {
+export type ResolvedPreferences = Preferences & {
   connectionMode: ConnectionMode;
   endpoint: string;
   gatewayUrl: string;
@@ -154,10 +142,7 @@ function remoteGatewayUrl(
   }
 
   const gatewayUrl = toGatewayUrl(endpoint);
-  if (
-    (mode === "tailscale" || mode === "cloudflare") &&
-    new URL(gatewayUrl).protocol !== "wss:"
-  ) {
+  if (new URL(gatewayUrl).protocol !== "wss:") {
     throw new Error(
       `${CONNECTION_MODE_LABELS[mode]} requires a secure wss:// Gateway URL.`,
     );
@@ -192,6 +177,14 @@ function resolveConnection(
           "gateway.mode is remote, but gateway.remote.url is missing from OpenClaw configuration.",
         );
       }
+      if (
+        !isLoopbackGateway(file.remoteGatewayUrl) &&
+        new URL(file.remoteGatewayUrl).protocol !== "wss:"
+      ) {
+        throw new Error(
+          "gateway.remote.url requires a secure wss:// URL when it is not loopback.",
+        );
+      }
       return {
         gatewayUrl: file.remoteGatewayUrl,
         credentials: file.remote,
@@ -208,9 +201,8 @@ function resolveConnection(
   return { gatewayUrl, credentials };
 }
 
-export function getPreferences<T extends object = Record<string, never>>(): T &
-  ResolvedPreferences {
-  const preferences = getPreferenceValues<T & ExtensionPreferences>();
+export function getPreferences(): ResolvedPreferences {
+  const preferences = getPreferenceValues<Preferences>();
   const connectionMode = preferences.connectionMode;
   if (!connectionMode || !(connectionMode in CONNECTION_MODE_LABELS)) {
     throw new Error("Choose how Raycast should connect to OpenClaw.");

@@ -151,7 +151,7 @@
     {
       "name": "endpoint",
       "title": "Gateway URL",
-      "description": "Required for Local Network, Tailscale, and Cloudflare. Use ws:// on a trusted LAN and wss:// for Tailscale or Cloudflare.",
+      "description": "Required for Local Network, Tailscale, and Cloudflare. Every remote connection must use wss://.",
       "type": "textfield",
       "placeholder": "wss://gateway.example.com",
       "required": false

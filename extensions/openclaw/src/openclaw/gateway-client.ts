@@ -24,7 +24,7 @@ type GatewayClientOptions = {
   edgeAuthHeaders?: Readonly<Record<string, string>>;
   token?: string;
   password?: string;
-  deviceToken?: string;
+  deviceAuth?: DeviceAuthTokenRecord;
   deviceIdentity: DeviceIdentity;
   instanceId: string;
   clientName: "gateway-client";
@@ -219,7 +219,8 @@ export class RaycastGatewayClient {
     const selectedAuth = selectGatewayConnectAuth({
       token: this.options.token,
       password: this.options.password,
-      storedToken: this.options.deviceToken,
+      storedToken: this.options.deviceAuth?.token,
+      storedScopes: this.options.deviceAuth?.scopes,
     });
     const scopes = resolveGatewayConnectScopes({
       requestedScopes: this.options.scopes,
