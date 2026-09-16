@@ -1,6 +1,6 @@
 # Caschys Blog Changelog
 
-## [Archive Search and Reliability] - {PR_MERGE_DATE}
+## [Archive Search and Reliability] - 2026-09-16
 
 - Fixed multi-page loading for small page sizes and when WordPress caps RSS responses.
 - Search now queries the public WordPress feed instead of only the recent local cache.
