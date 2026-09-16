@@ -1,6 +1,6 @@
 # Changelog
 
-## [Reliable search and favorites] - {PR_MERGE_DATE}
+## [Reliable search and favorites] - 2026-09-16
 
 - Search, favorites, and AI tools now use Teak's current card listing API
 - Fixed search and favorites against the latest Teak backend
