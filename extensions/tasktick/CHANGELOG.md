@@ -1,6 +1,6 @@
 # TaskTick Changelog
 
-## [Updated Icon] - {PR_MERGE_DATE}
+## [Updated Icon] - 2026-09-16
 
 - New extension and command icons, matching the redrawn app icon in TaskTick 1.22.0
 
