@@ -5,12 +5,14 @@ import { extractDomainName } from "../utils";
 import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
 import CopyTitleAction from "./CopyTitleAction";
 import CopyUrlAction from "./CopyUrlAction";
+import OpenInOrionAction from "./OpenInOrionAction";
 
 const Actions = (props: { entry: HistoryItem; searchText?: string }) => {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.OpenInBrowser url={props.entry.url} />
+        <OpenInOrionAction url={props.entry.url} />
+        <Action.OpenInBrowser title="Open in Default Browser" url={props.entry.url} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <CopyUrlAction url={props.entry.url} />

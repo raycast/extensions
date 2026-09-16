@@ -189,6 +189,32 @@ export function buildSearchUrl(query: string, engine: SearchEngine = getSearchEn
   return SEARCH_ENGINES[engine].search + encodeURIComponent(query);
 }
 
+// Accept the same kinds of address users commonly enter in a browser's address
+// bar: a hostname (with an optional protocol, port, or path), localhost, or an
+// IPv4 address. A space means this is a search query, not an address.
+export function isWebAddress(value: string): boolean {
+  const candidate = value.trim();
+  if (!candidate || /\s/.test(candidate)) return false;
+
+  const url = parseUrl(/^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`);
+  if (!url) return false;
+
+  const hostname = url.hostname;
+  if (hostname === "localhost") return true;
+  if (/^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
+    return hostname.split(".").every((part) => Number(part) <= 255);
+  }
+
+  // This deliberately mirrors Arc's "hostname with a TLD" behavior while
+  // allowing modern TLD lengths and hyphenated labels.
+  return /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(hostname);
+}
+
+export function normalizeWebAddress(value: string): string {
+  const candidate = value.trim();
+  return /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`;
+}
+
 // Returns null for engines (e.g. Kagi) that have no public autocomplete endpoint.
 export function buildSuggestUrl(query: string, engine: SearchEngine = getSearchEngine()): string | null {
   const base = SEARCH_ENGINES[engine].suggest;
