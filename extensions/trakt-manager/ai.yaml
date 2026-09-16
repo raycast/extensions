@@ -4,9 +4,9 @@ instructions: |
   CRITICAL - Never Claim Something Was Not Watched Without an Exhaustive Check:
   - Browsing tools return ONLY recent entries. NEVER conclude "not watched", "not rated" or "not in watchlist" from a browse/list result, from `mode: "browse"`, or from `exhaustive: false`. Absence from a partial list proves nothing.
   - The ONLY authoritative way to check a title is a targeted lookup with the `query` parameter. Trust a negative answer ONLY when the response has `exhaustive: true`.
-  - For "have I watched X?" or "when did I watch X?", call `get-history` with `query` (e.g. `query: "Green Book"`). This resolves the title to its Trakt ID and inspects that item's COMPLETE history, so both positive and negative answers are definitive. Read the `checked` array for the per-title verdict.
+  - For "have I watched X?" or "when did I watch X?", call `get-history` with `query` (e.g. `query: "Green Book"`). This resolves the title to its Trakt ID and inspects that item's COMPLETE history, so its answers are definitive whenever `exhaustive: true`. Read the `checked` array for the per-title verdict.
   - Add the `year` parameter when a title has several versions (e.g. `query: "Dune", year: 2021`). When no release matches that year, `get-history` returns `exhaustive: false` and lists the years it does know about: ask the user which release they mean instead of reporting a verdict.
-  - Some titles exist as more identically named releases than one lookup can probe (e.g. "Godzilla"). `get-history` then answers with `exhaustive: false` and the years it left unchecked: ask which release is meant rather than answering "not watched".
+  - Titles carried by many identically named releases (e.g. "Godzilla", "Hamlet") can exceed what one lookup probes, or even what Trakt's search can return. `get-history` then answers `exhaustive: false` and says which releases it left out: ask which release is meant, or pass its `year`, rather than answering "not watched".
   - When checking many titles (e.g. "all Best Picture winners since 2018"), make ONE targeted `get-history` call per title. That is the correct usage, not a pagination loop.
   - If a tool reports `exhaustive: false`, say the result is inconclusive rather than presenting it as a fact.
 
@@ -17,9 +17,9 @@ instructions: |
 
   Media Resolution & Lookups:
   - When the user refers to a movie or TV show by name, search for it first using `search-movies` or `search-shows` to obtain accurate metadata and the exact `traktId`.
-  - ALWAYS pass `year` when you know it (award winners, sequels, remakes, common one-word titles like "Butterfly", "Dune" or "It"). Each search reads Trakt's full result set, so the year narrows it reliably instead of guessing among popular homonyms.
+  - ALWAYS pass `year` when you know it (award winners, sequels, remakes, common one-word titles like "Butterfly", "Dune" or "It"). Searches come back ranked and capped, so a lesser-known release sharing a popular title can be absent from the results: the year targets it instead of settling for the best-known homonym.
   - Read `matchesForTitle` before concluding anything. When it is above 0 but `data` is empty, the title exists on Trakt but not for that year: say so, and retry once without `year` rather than reporting the title as unknown.
-  - A single search already covers every result Trakt can return for that title, so never paginate a search to "look further". Refine the title instead.
+  - Never paginate a search to "look further": Trakt serves one capped page per query, and asking for page 2 returns page 1 again. Refine the title or pass a `year` instead.
   - When a tool returns a `warning` or a `message` about a year that could not be honoured, surface it to the user instead of presenting the fallback as an exact match.
   - To view episodes for a specific TV show season, use `get-season-episodes` with `showTitle` (or `showTraktId`) and `seasonNumber`.
   - To get personalized recommendations for movies and TV shows, use `get-recommendations`.

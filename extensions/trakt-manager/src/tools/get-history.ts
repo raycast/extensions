@@ -12,8 +12,9 @@ type Input = {
   /**
    * Title to look up in your complete watch history (e.g. "Green Book", "Breaking Bad").
    * Use this to answer "have I watched X?" or "when did I watch X?".
-   * The lookup is EXHAUSTIVE: it resolves the title to a Trakt ID and queries the full
-   * history for that exact item, so a negative answer is authoritative.
+   * It resolves the title to a Trakt ID and queries the full history for that exact item, so a
+   * negative answer is authoritative whenever the response reports `exhaustive: true`. Titles
+   * with many identically named releases can come back `exhaustive: false` instead.
    */
   query?: string;
   /**
@@ -90,7 +91,18 @@ type CandidateSelection = {
    * because a release with no year on Trakt still has to count as unchecked.
    */
   unchecked: Candidate[];
+  /**
+   * True when Trakt's search could not enumerate every release sharing the title, so the
+   * candidate set is incomplete before any filtering of ours. A "not watched" verdict then
+   * rests on releases we never saw, which rules out calling it final.
+   */
+  truncated: boolean;
 };
+
+/**
+ * What a single search yields, before the search's own completeness is known.
+ */
+type CandidatePick = Omit<CandidateSelection, "truncated">;
 
 /**
  * Upper bound on how many same-title releases are probed in one lookup. Every candidate costs
@@ -111,7 +123,7 @@ function uniqueYears(candidates: Candidate[]): number[] {
  * All exact matches are equally valid readings of the query, so dropping one would let a
  * "not watched" answer be wrong about the release the user actually meant.
  */
-function pickCandidates(candidates: Candidate[], query: string, year?: number): CandidateSelection {
+function pickCandidates(candidates: Candidate[], query: string, year?: number): CandidatePick {
   const normalizedQuery = normalizeTitle(query);
   let pool = candidates;
 
@@ -146,35 +158,39 @@ async function resolveCandidates(
   const resolved: Candidate[] = [];
   const missed = new Set<number>();
   const unchecked: Candidate[] = [];
+  let truncated = false;
 
   if (type === "movies" || type === "all") {
     const found = await searchMovieCandidates(query);
     const selection = pickCandidates(
-      found.map((item) => ({ type: "movie" as const, ...item })),
+      found.candidates.map((item) => ({ type: "movie" as const, ...item })),
       query,
       year,
     );
     resolved.push(...selection.candidates);
     selection.missedYears.forEach((value) => missed.add(value));
     unchecked.push(...selection.unchecked);
+    truncated = truncated || found.truncated;
   }
 
   if (type === "shows" || type === "all") {
     const found = await searchShowCandidates(query);
     const selection = pickCandidates(
-      found.map((item) => ({ type: "show" as const, ...item })),
+      found.candidates.map((item) => ({ type: "show" as const, ...item })),
       query,
       year,
     );
     resolved.push(...selection.candidates);
     selection.missedYears.forEach((value) => missed.add(value));
     unchecked.push(...selection.unchecked);
+    truncated = truncated || found.truncated;
   }
 
   return {
     candidates: resolved,
     missedYears: [...missed].sort((a, b) => a - b),
     unchecked,
+    truncated,
   };
 }
 
@@ -269,6 +285,7 @@ export default async function tool(input: Input): Promise<Output> {
     let candidates: Candidate[] = [];
     let missedYears: number[] = [];
     let unchecked: Candidate[] = [];
+    let truncated = false;
 
     if (traktId !== undefined) {
       if (type === "movies" || type === "all") {
@@ -282,6 +299,7 @@ export default async function tool(input: Input): Promise<Output> {
       candidates = selection.candidates;
       missedYears = selection.missedYears;
       unchecked = selection.unchecked;
+      truncated = selection.truncated;
     }
 
     const target = query ? `"${query}"` : `Trakt ID ${traktId}`;
@@ -292,7 +310,11 @@ export default async function tool(input: Input): Promise<Output> {
         exhaustive: false,
         found: false,
         message:
-          `${target} has no ${year} release on Trakt. Known year(s) for that title: ${missedYears.join(", ")}. ` +
+          `${
+            truncated
+              ? `No ${year} release of ${target} is reachable: that title has more releases than Trakt's search can return, so this is not proof that none exists.`
+              : `${target} has no ${year} release on Trakt.`
+          } Known year(s) for that title: ${missedYears.join(", ")}. ` +
           `Ask the user which release they mean, or call again without a year. Do not report a watched or ` +
           `not-watched verdict, because none of the releases above was checked.`,
         checked: [],
@@ -333,9 +355,10 @@ export default async function tool(input: Input): Promise<Output> {
     const uncheckedLabels =
       uncheckedYearList.length > 0 ? uncheckedYearList.join(", ") : `${unchecked.length} with no year on Trakt`;
 
-    // A positive verdict rests on a real watch event, so leftover releases cannot invalidate it.
-    // A negative one is only exhaustive once every release sharing the title has been probed.
-    const exhaustive = wasWatched || !hasUnchecked;
+    // A positive verdict rests on a real watch event, so releases left out cannot invalidate it.
+    // A negative one is only exhaustive once every release sharing the title has been probed,
+    // which also requires the search to have enumerated them all in the first place.
+    const exhaustive = wasWatched || (!hasUnchecked && !truncated);
 
     let message: string;
     if (wasWatched) {
@@ -347,15 +370,21 @@ export default async function tool(input: Input): Promise<Output> {
             }.`,
         )
         .join(" ");
-      message = hasUnchecked
-        ? `${confirmed} Other releases share that title and were not checked (${uncheckedLabels}), ` +
-          `so name the release this answer refers to.`
-        : confirmed;
+      message =
+        hasUnchecked || truncated
+          ? `${confirmed} Other releases share that title and were not checked` +
+            `${hasUnchecked ? ` (${uncheckedLabels})` : ""}, so name the release this answer refers to.`
+          : confirmed;
     } else if (hasUnchecked) {
       message =
         `No watch event exists for ${target} among the releases checked (${checkedLabels}), but other releases ` +
         `share that exact title and were NOT checked: ${uncheckedLabels}. Ask the user which release ` +
         `they mean instead of reporting a not-watched verdict.`;
+    } else if (truncated) {
+      message =
+        `No watch event exists for ${target} among the releases checked (${checkedLabels}), but that title has ` +
+        `more releases than Trakt's search can return, so some were never seen. This is NOT a definitive ` +
+        `not-watched answer: ask the user which release they mean, or pass its \`year\`.`;
     } else {
       message =
         `Confirmed: no watch event exists for ${target} (checked the complete history of ${checkedLabels}). ` +

@@ -35,6 +35,20 @@ const TraktMovieContract = c.router({
     query: TraktSearchSchema,
     summary: "Search for movies",
   },
+  /**
+   * Title-first search. Ranked by title equality instead of relevance, so releases that
+   * share a title but little popularity surface here while the relevance-ranked search
+   * above drops them. Trakt documents both as complementary: neither is a superset.
+   */
+  searchMoviesExact: {
+    method: "GET",
+    path: "/search/movie/exact",
+    responses: {
+      200: TraktMovieList,
+    },
+    query: TraktSearchSchema,
+    summary: "Search for movies by exact title",
+  },
   getWatchlistMovies: {
     method: "GET",
     path: "/sync/watchlist/movies/added",
@@ -143,6 +157,15 @@ const TraktShowContract = c.router({
     },
     query: TraktSearchSchema,
     summary: "Search for shows",
+  },
+  searchShowsExact: {
+    method: "GET",
+    path: "/search/show/exact",
+    responses: {
+      200: TraktShowList,
+    },
+    query: TraktSearchSchema,
+    summary: "Search for shows by exact title",
   },
   searchEpisodes: {
     method: "GET",

@@ -9,7 +9,7 @@
 
 ### Fixed
 
-- Searching by year no longer misses titles. Trakt returns search results ranked by popularity and caps them at 50, but reports a single page regardless of the requested page size, so asking for 10 results made the remaining ones unreachable. A recent or lesser-known title could therefore be reported as missing. Searches now read the full result set before filtering by year.
+- Searching by year no longer misses titles. Trakt ranks search results by relevance and serves them as a single capped page, so a lesser-known release sharing a popular title stayed out of reach and could be reported as missing. Searches now combine Trakt's exact-title and relevance results, which surfaces releases such as Dune (1989) that ranking alone hides.
 - Resolving a title now prefers an exact title match over the most popular one, so "Butterfly" no longer resolves to "Sniper Butterfly".
 - When a requested year matches nothing, tools now say the title exists for other years instead of reporting it as unknown, and flag when a fallback was used rather than presenting it as an exact match.
 
