@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Use the built-in fetch client] - {PR_MERGE_DATE}
+
+- Switched translation, token, and text-to-speech requests to the platform's global `fetch`; `undici` and `https-proxy-agent` are now loaded lazily and only when an HTTP proxy is set
+
 ## [Fix translations failing with JSON parse error] - 2026-08-24
 
 - Switched the Google Translate API client identifier from `gtx` to `dict-chrome-ex` to avoid Google's 429 HTML block page for non-browser clients

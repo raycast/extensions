@@ -3,7 +3,6 @@
  * MIT License
  */
 import querystring from "querystring";
-import { request, ProxyAgent } from "undici";
 import { TranslateOption, TranslateResponse } from "./types";
 import { isSupported, getISOCode } from "./languages";
 import { tokenGenerator } from "./tokenGenerator";
@@ -63,32 +62,37 @@ export async function translate(text: string, options?: TranslateOption): Promis
     // Append query string to the request URL.
     let url = `${baseUrl}?${querystring.stringify(data)}`;
 
-    let requestOptions: any;
+    // A browser-like UA so Google's endpoint doesn't reject the request.
+    const userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     let requestUrl = url;
+    let method = "GET";
+    let requestBody: string | undefined;
+    const headers: Record<string, string> = { "User-Agent": userAgent };
     // If request URL is greater than 2048 characters, use POST method.
     if (url.length > 2048) {
         delete data.q;
         requestUrl = `${baseUrl}?${querystring.stringify(data)}`;
-        requestOptions = {
-            method: "POST",
-            body: new URLSearchParams({ q: text }).toString(),
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            },
-        };
-        if (options.proxy) {
-            requestOptions.dispatcher = new ProxyAgent(options.proxy);
-        }
-    }
-    else {
-        if (options.proxy) {
-            requestOptions = { dispatcher: new ProxyAgent(options.proxy) };
-        }
+        method = "POST";
+        requestBody = new URLSearchParams({ q: text }).toString();
+        headers["Content-Type"] = "application/x-www-form-urlencoded;charset=UTF-8";
     }
 
-    // Request translation from Google Translate.
-    let response = await request(requestUrl, requestOptions);
-    let body: any = await response.body.json();
+    // Use the platform's built-in fetch. undici is loaded lazily and only when a
+    // proxy is configured, so the common path never pulls it in.
+    let body: any;
+    if (options.proxy) {
+        const { fetch: undiciFetch, ProxyAgent } = await import("undici");
+        const response = await undiciFetch(requestUrl, {
+            method,
+            body: requestBody,
+            headers,
+            dispatcher: new ProxyAgent(options.proxy),
+        });
+        body = await response.json();
+    } else {
+        const response = await fetch(requestUrl, { method, body: requestBody, headers });
+        body = await response.json();
+    }
 
     let result: TranslateResponse = {
         text: "",
