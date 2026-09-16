@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
 import { Fragment, useState } from "react";
 import { createSecret, formatDuration, parseDuration } from "./shared";
 
@@ -133,20 +133,26 @@ export default function Command() {
               <Action
                 title="Add Entry"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 onAction={() => setRows((prev) => [...prev, { key: "", value: "" }])}
               />
               <Action
                 title="Add Section"
                 icon={Icon.PlusSquare}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "n" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+                }}
                 onAction={() => setSections((prev) => [...prev, { name: "", rows: [{ key: "", value: "" }] }])}
               />
               {rows.length > 1 && (
                 <Action
                   title="Remove Last Entry"
                   icon={Icon.Minus}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd"], key: "backspace" },
+                    Windows: { modifiers: ["ctrl"], key: "backspace" },
+                  }}
                   onAction={() => setRows((prev) => prev.slice(0, -1))}
                 />
               )}
@@ -155,7 +161,10 @@ export default function Command() {
                   <Action
                     title="Add Entry to Last Section"
                     icon={Icon.Plus}
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "n" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "opt"], key: "n" },
+                      Windows: { modifiers: ["ctrl", "alt"], key: "n" },
+                    }}
                     onAction={() =>
                       setSections((prev) =>
                         prev.map((s, i) =>
@@ -167,7 +176,10 @@ export default function Command() {
                   <Action
                     title="Remove Last Section"
                     icon={Icon.Trash}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "backspace" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "backspace" },
+                    }}
                     onAction={() => setSections((prev) => prev.slice(0, -1))}
                   />
                 </>
@@ -188,7 +200,7 @@ export default function Command() {
 
       {mode === "multivalue" && (
         <>
-          <Form.Description text="Entries (use the Actions menu — ⌘K — to add or remove entries and sections)" />
+          <Form.Description text="Entries (use the Actions menu — ⌘K on macOS, Ctrl+K on Windows — to add or remove entries and sections)" />
           {rows.map((row, i) => (
             <Form.TextField
               key={`row-${i}-key`}

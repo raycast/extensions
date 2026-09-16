@@ -47,8 +47,14 @@ A guided form to create a secret with dropdowns for expiration and a checkbox fo
 Pick an **Input Mode**:
 
 - **Free Form** — a single text secret (password, API key, note…)
-- **Multiple Values** — structured key/value entries, optionally grouped into named sections. Manage entries from the Actions menu (`⌘K`):
-  - `⌘N` add an entry · `⌘⌫` remove the last entry
-  - `⌘⇧N` add a section · `⌘⌥N` add an entry to the last section · `⌘⇧⌫` remove the last section
+- **Multiple Values** — structured key/value entries, optionally grouped into named sections. Manage entries from the Actions menu (`⌘K` on macOS, `Ctrl+K` on Windows):
+
+  | Action                       | macOS | Windows                |
+  | ---------------------------- | ----- | ---------------------- |
+  | Add an entry                 | `⌘N`  | `Ctrl+N`               |
+  | Remove the last entry        | `⌘⌫`  | `Ctrl+Backspace`       |
+  | Add a section                | `⌘⇧N` | `Ctrl+Shift+N`         |
+  | Add an entry to last section | `⌘⌥N` | `Ctrl+Alt+N`           |
+  | Remove the last section      | `⌘⇧⌫` | `Ctrl+Shift+Backspace` |
 
 Either way the secret is encrypted on your device before upload; the recipient decrypts it in their browser.

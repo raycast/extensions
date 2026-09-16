@@ -8,7 +8,9 @@ const MAX_DURATION_SECONDS = 7 * 86400; // 7 days
 
 function getWhisperUrl(): string {
   const { serverUrl } = getPreferenceValues<Preferences>();
-  return serverUrl?.trim() || DEFAULT_WHISPER_URL;
+  // Strip trailing slashes so a preference like "https://host/" does not
+  // produce "//v1/ephemeral" (a 404 that would look like an outdated server).
+  return serverUrl?.trim().replace(/\/+$/, "") || DEFAULT_WHISPER_URL;
 }
 
 export function parseDuration(input: string): number | null {
@@ -108,6 +110,15 @@ export async function createSecret(
     throw new Error(`Whisper server error (${response.status}). ${detail || "Please try again later."}`);
   }
 
-  const { id } = (await response.json()) as { id: string };
-  return `${base}/get_secret?shared_secret_id=${id}#k=${keyB64}`;
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Unexpected response from Whisper server: expected JSON with a secret id.");
+  }
+  const id = (data as { id?: unknown } | null)?.id;
+  if (typeof id !== "string" || id.length === 0) {
+    throw new Error("Unexpected response from Whisper server: missing secret id.");
+  }
+  return `${base}/get_secret?shared_secret_id=${encodeURIComponent(id)}#k=${keyB64}`;
 }
