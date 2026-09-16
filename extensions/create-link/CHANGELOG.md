@@ -5,7 +5,8 @@
 - Add Copy Clipboard URL for Slack with rich HTML and plain-text URL clipboard representations.
 - Fetch page titles from HTML or authenticated GitHub CLI lookups for pull requests, issues, and discussions.
 - Bound GitHub and HTTP lookups with timeouts and copy the original URL with an error notification if fetching fails.
-- Limit streamed HTML responses to 1 MiB and abort oversized responses before buffering the complete body.
+- Stop reading after a complete title or head ending; retain a 1 MiB inspection limit and timeout for unresolved titles.
+- Decode numeric references and common named title entities in one pass without double-decoding.
 
 ## [Feature Update] - 2025-06-30
 

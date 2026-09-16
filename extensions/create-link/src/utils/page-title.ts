@@ -14,13 +14,46 @@ export function isWebUrl(text: string): boolean {
 }
 
 function decodeHtmlEntities(text: string): string {
-  return text
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ");
+  const named: Record<string, string> = {
+    amp: "&",
+    lt: "<",
+    gt: ">",
+    quot: '"',
+    apos: "'",
+    nbsp: " ",
+    mdash: "\u2014",
+    ndash: "\u2013",
+  };
+  return text.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, (entity, name: string) => {
+    if (!name.startsWith("#")) return Object.hasOwn(named, name) ? named[name] : entity;
+    const hex = name[1].toLowerCase() === "x";
+    const point = Number.parseInt(name.slice(hex ? 2 : 1), hex ? 16 : 10);
+    if (point === 0 || point > 0x10ffff || (point >= 0xd800 && point <= 0xdfff)) return "\ufffd";
+    return String.fromCodePoint(point);
+  });
+}
+
+function extractTitle(html: string, atEnd = false): string | undefined {
+  const headEnd = html.search(/<\/head\s*>/i);
+  const head = headEnd >= 0 ? html.slice(0, headEnd) : html;
+  const title = head.match(/<title\b[^>]*>([^<]*)<\/title\s*>/i)?.[1]?.trim();
+  if (title) return decodeHtmlEntities(title);
+  if (headEnd < 0 && !atEnd) return undefined;
+
+  const metaTags = head.match(/<meta\b(?:[^"'<>]|"[^"]*"|'[^']*')*>/gi) ?? [];
+  for (const tag of metaTags) {
+    const attributes = new Map(
+      [...tag.matchAll(/([^\s=<>]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)].map((match) => [
+        match[1].toLowerCase(),
+        match[2] ?? match[3],
+      ]),
+    );
+    if (attributes.get("property")?.toLowerCase() === "og:title") {
+      const content = attributes.get("content")?.trim();
+      if (content) return decodeHtmlEntities(content);
+    }
+  }
+  return "";
 }
 
 async function fetchHtmlTitle(url: string): Promise<string> {
@@ -46,22 +79,26 @@ async function fetchHtmlTitle(url: string): Promise<string> {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
+          const remaining = MAX_HTML_BYTES - bytesRead;
+          html += decoder.decode(value.subarray(0, remaining), { stream: true });
+          const title = extractTitle(html);
+          if (title !== undefined) {
+            clearTimeout(timeout);
+            await reader.cancel();
+            return title || url;
+          }
           bytesRead += value.byteLength;
           if (bytesRead > MAX_HTML_BYTES) {
             controller.abort();
             throw new Error("Page response exceeds the 1 MiB limit");
           }
-          html += decoder.decode(value, { stream: true });
         }
         html += decoder.decode();
       } finally {
         reader.releaseLock();
       }
     }
-    const title = html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1];
-    const ogTitle = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']*)["']/i)?.[1];
-    const rawTitle = title?.trim() || ogTitle?.trim();
-    return rawTitle ? decodeHtmlEntities(rawTitle) : url;
+    return extractTitle(html, true) || url;
   } finally {
     controller.abort();
     clearTimeout(timeout);

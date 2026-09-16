@@ -30,20 +30,153 @@ const response = (html) => new Response(html);
 
 function streamedResponse(chunks, signal, headers = {}) {
   let reads = 0;
+  let cancelled = false;
+  let onAbort;
   const body = new ReadableStream(
     {
       start(controller) {
-        signal.addEventListener("abort", () => controller.error(new Error("Aborted")));
+        onAbort = () => controller.error(new Error("Aborted"));
+        signal.addEventListener("abort", onAbort, { once: true });
       },
       pull(controller) {
         if (reads < chunks.length) controller.enqueue(chunks[reads++]);
-        else controller.close();
+        else {
+          signal.removeEventListener("abort", onAbort);
+          controller.close();
+        }
+      },
+      cancel() {
+        cancelled = true;
+        signal.removeEventListener("abort", onAbort);
       },
     },
     { highWaterMark: 0 },
   );
-  return { response: new Response(body, { headers }), body, reads: () => reads };
+  return { response: new Response(body, { headers }), body, reads: () => reads, cancelled: () => cancelled };
 }
+
+test("a complete title cancels before a large or stalled tail is read", async () => {
+  let stream;
+  let timerCleared = false;
+  const titles = loadTitles({
+    globals: {
+      clearTimeout: (timer) => {
+        clearTimeout(timer);
+        timerCleared = true;
+      },
+    },
+    fetch: async (_url, { signal }) => {
+      stream = streamedResponse([Buffer.from("<head><title>Early title</title>"), Buffer.alloc(2 * 1024 * 1024)], signal);
+      return stream.response;
+    },
+  });
+  assert.equal(await titles.fetchPageTitle("https://example.com"), "Early title");
+  assert.equal(stream.reads(), 1);
+  assert.equal(stream.cancelled(), true);
+  assert.equal(stream.body.locked, false);
+  assert.equal(timerCleared, true);
+});
+
+test("a complete title succeeds even if the server never closes the body", async () => {
+  let cancelled = false;
+  const body = new ReadableStream(
+    {
+      start(controller) {
+        controller.enqueue(Buffer.from("<title>Ready</title>"));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    },
+    { highWaterMark: 0 },
+  );
+  assert.equal(await loadTitles({ fetch: async () => new Response(body) }).fetchPageTitle("https://example.com"), "Ready");
+  assert.equal(cancelled, true);
+});
+
+test("inspect only the allowed prefix of an oversized chunk for a title", async () => {
+  for (const [html, expected] of [
+    [Buffer.concat([Buffer.from("<title>Early</title>"), Buffer.alloc(2 * 1024 * 1024)]), "Early"],
+    [Buffer.concat([Buffer.alloc(1024 * 1024), Buffer.from("<title>Too late</title>")]), undefined],
+  ]) {
+    const titles = loadTitles({ fetch: async (_url, { signal }) => streamedResponse([html], signal).response });
+    if (expected) assert.equal(await titles.fetchPageTitle("https://example.com"), expected);
+    else await assert.rejects(titles.fetchPageTitle("https://example.com"), /1 MiB limit/);
+  }
+});
+
+test("head completion handles split tags, title precedence, Open Graph fallback and no title", async () => {
+  for (const [chunks, expected] of [
+    [['<head><meta content="Other" property="og:title"><ti', "tle>Preferred</tit", "le>"], "Preferred"],
+    [['<head><meta content="Fallback" property="og:title"></he', "ad>"], "Fallback"],
+    [["<head><title> </title></he", "ad>"], "https://example.com"],
+    [["<head></head><title>Body title must not win</title>"], "https://example.com"],
+  ]) {
+    let stream;
+    const titles = loadTitles({
+      fetch: async (_url, { signal }) => {
+        stream = streamedResponse([...chunks.map((chunk) => Buffer.from(chunk)), Buffer.alloc(2 * 1024 * 1024)], signal);
+        return stream.response;
+      },
+    });
+    assert.equal(await titles.fetchPageTitle("https://example.com"), expected);
+    assert.equal(stream.reads(), chunks.length);
+    assert.equal(stream.cancelled(), true);
+  }
+});
+
+test("entities are decoded once, including decimal and hex references", async () => {
+  for (const [encoded, expected] of [
+    ["Caf&#233; &#x2014; &mdash; &amp;lt;", "Caf\u00e9 \u2014 \u2014 &lt;"],
+    ["&#x1F600; &unknown; &constructor; &amp;#233;", "\ud83d\ude00 &unknown; &constructor; &#233;"],
+    ["&#0; &#xD800; &#1114112;", "\ufffd \ufffd \ufffd"],
+  ]) {
+    const titles = loadTitles({ fetch: async () => response(`<title>${encoded}</title>`) });
+    assert.equal(await titles.fetchPageTitle("https://example.com"), expected);
+  }
+});
+
+test("a title ending exactly at the byte limit succeeds, but a later title is never inspected", async () => {
+  const title = Buffer.from("<title>At limit</title>");
+  const prefix = Buffer.alloc(1024 * 1024 - title.length, 32);
+  const titles = loadTitles({
+    fetch: async (_url, { signal }) =>
+      streamedResponse([Buffer.concat([prefix, title, Buffer.from("extra bytes")])], signal).response,
+  });
+  assert.equal(await titles.fetchPageTitle("https://example.com"), "At limit");
+  assert.equal(
+    await loadTitles({ fetch: async () => new Response(Buffer.alloc(1024 * 1024, 32)) }).fetchPageTitle(
+      "https://example.com",
+    ),
+    "https://example.com",
+  );
+});
+
+test("Open Graph metadata is accepted at EOF without a head ending", async () => {
+  const titles = loadTitles({
+    fetch: async () => response('<meta property="og:title" content="A &quot;quote&quot; and &#233;">'),
+  });
+  assert.equal(await titles.fetchPageTitle("https://example.com"), 'A "quote" and \u00e9');
+});
+
+test("cancellation failures are surfaced and still release the reader lock", async () => {
+  const body = new ReadableStream(
+    {
+      start(controller) {
+        controller.enqueue(Buffer.from("<title>Ready</title>"));
+      },
+      cancel() {
+        throw new Error("Cancellation failed");
+      },
+    },
+    { highWaterMark: 0 },
+  );
+  await assert.rejects(
+    loadTitles({ fetch: async () => new Response(body) }).fetchPageTitle("https://example.com"),
+    /Cancellation failed/,
+  );
+  assert.equal(body.locked, false);
+});
 
 test("HTML accepts exactly 1 MiB and preserves UTF-8 across chunk boundaries", async () => {
   const title = "<title>Café</title>";
