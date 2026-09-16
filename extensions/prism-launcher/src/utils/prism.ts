@@ -1,10 +1,11 @@
 import { ConfigIniParser } from "config-ini-parser";
 import * as fs from "fs-extra";
 import * as async from "modern-async";
+import * as os from "os";
 import * as path from "path";
 import nbt from "prismarine-nbt";
 import { pathToFileURL } from "url";
-import type { Instance, Server } from "../types";
+import type { Instance, Screenshot, Server } from "../types";
 import { getPreferences } from "./preferences";
 import { getShortcutTargetPath } from "./powershell";
 
@@ -123,7 +124,11 @@ async function readInstanceVersion(
 /**
  * Load all PrismLauncher instances
  */
-export async function loadInstances(favoriteIds: string[], onlyWithServers: boolean = false): Promise<Instance[]> {
+export async function loadInstances(
+  favoriteIds: string[],
+  onlyWithServers: boolean = false,
+  onlyWithScreenshots: boolean = false,
+): Promise<Instance[]> {
   const instancesPath = await getInstancesPath();
   if (!instancesPath) return [];
 
@@ -155,6 +160,12 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
       hasServers = (await fs.pathExists(serversPath)) || (await fs.pathExists(legacyServersPath));
     }
 
+    // Check if instance has any screenshots
+    let hasScreenshots = false;
+    if (onlyWithScreenshots) {
+      hasScreenshots = await instanceHasScreenshots(instanceId);
+    }
+
     return {
       name: instanceCfg.get("General", "name", instanceId),
       id: instanceId,
@@ -162,14 +173,19 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
       favorite: favoriteIds.includes(instanceId),
       ...version,
       ...(onlyWithServers ? { hasServers } : {}),
+      ...(onlyWithScreenshots ? { hasScreenshots } : {}),
     };
   });
 
-  // Filter instances with servers if requested
+  // Filter instances with servers/screenshots if requested
   let filteredInstances = instancesList;
   if (onlyWithServers) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    filteredInstances = instancesList.filter((instance: any) => instance.hasServers);
+    filteredInstances = filteredInstances.filter((instance: any) => instance.hasServers);
+  }
+  if (onlyWithScreenshots) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    filteredInstances = filteredInstances.filter((instance: any) => instance.hasScreenshots);
   }
 
   // Sort instances with favorites at the top, then alphabetically
@@ -207,6 +223,73 @@ export async function getMinecraftFolderPath(instanceId: string): Promise<string
   }
 
   return null;
+}
+
+const SCREENSHOT_EXTENSIONS = [".png", ".jpg", ".jpeg"];
+
+/**
+ * Get the screenshots folder path for an instance, if it exists
+ */
+export async function getScreenshotsFolderPath(instanceId: string): Promise<string | null> {
+  const minecraftPath = await getMinecraftFolderPath(instanceId);
+  if (!minecraftPath) return null;
+
+  const screenshotsPath = path.join(minecraftPath, "screenshots");
+  return (await fs.pathExists(screenshotsPath)) ? screenshotsPath : null;
+}
+
+/**
+ * Check whether an instance has at least one screenshot
+ */
+async function instanceHasScreenshots(instanceId: string): Promise<boolean> {
+  const screenshotsPath = await getScreenshotsFolderPath(instanceId);
+  if (!screenshotsPath) return false;
+
+  const files = await fs.readdir(screenshotsPath);
+  return files.some((file) => SCREENSHOT_EXTENSIONS.includes(path.extname(file).toLowerCase()));
+}
+
+/**
+ * Load screenshots from a single instance, newest first
+ */
+export async function loadScreenshotsFromInstance(instance: Instance): Promise<Screenshot[]> {
+  const screenshotsPath = await getScreenshotsFolderPath(instance.id);
+  if (!screenshotsPath) return [];
+
+  const files = await fs.readdir(screenshotsPath);
+  const imageFiles = files.filter((file) => SCREENSHOT_EXTENSIONS.includes(path.extname(file).toLowerCase()));
+
+  const screenshots = await async.asyncMap(imageFiles, async (file: string): Promise<Screenshot> => {
+    const filePath = path.join(screenshotsPath, file);
+    const stats = await fs.stat(filePath);
+
+    return {
+      path: filePath,
+      name: path.basename(file, path.extname(file)),
+      instanceId: instance.id,
+      instanceName: instance.name,
+      modifiedAt: stats.mtimeMs,
+    };
+  });
+
+  return screenshots.sort((a, b) => b.modifiedAt - a.modifiedAt);
+}
+
+/**
+ * Copy a screenshot into the user's Downloads folder, avoiding overwrites
+ */
+export async function saveScreenshotToDownloads(screenshot: Screenshot): Promise<string> {
+  const downloadsPath = path.join(os.homedir(), "Downloads");
+  await fs.ensureDir(downloadsPath);
+
+  const extension = path.extname(screenshot.path);
+  let destination = path.join(downloadsPath, `${screenshot.name}${extension}`);
+  for (let suffix = 1; await fs.pathExists(destination); suffix++) {
+    destination = path.join(downloadsPath, `${screenshot.name} (${suffix})${extension}`);
+  }
+
+  await fs.copy(screenshot.path, destination);
+  return destination;
 }
 
 /**
