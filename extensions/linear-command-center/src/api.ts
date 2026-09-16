@@ -141,7 +141,10 @@ type RelationPage = { issue: { inverseRelations: { nodes: IssueRelation[]; pageI
 // Hard stop on any paginated loop, so a broken cursor can never spin forever.
 const MAX_PAGES = 20;
 
-const isDemo = () => Boolean(getPreferenceValues<Preferences>().demoMode);
+const isDemo = () => {
+  const preferences: Preferences = getPreferenceValues();
+  return Boolean(preferences.demoMode);
+};
 
 type GraphQLResponse<T> = {
   data?: T;

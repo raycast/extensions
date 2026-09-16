@@ -19,7 +19,7 @@ const MENU_BAR_GLYPH = "menu-bar-icon.png";
 const MENU_BAR_ICON = { source: MENU_BAR_GLYPH, tintColor: Color.PrimaryText };
 
 function LinearPulse() {
-  const preferences = getPreferenceValues<Preferences.LinearPulse>();
+  const preferences: Preferences.LinearPulse = getPreferenceValues();
   const { data, isLoading, error, revalidate } = useCachedPromise(loadDashboard, [], {
     keepPreviousData: true,
   });
