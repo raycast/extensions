@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dont-sleep-bro",
+  "title": "Don't Sleep Bro",
+  "description": "Keep your Mac awake with the lid closed — even on battery.",
+  "icon": "icon.png",
+  "author": "benyamynbrkyc",
+  "categories": [
+    "System"
+  ],
+  "keywords": [
+    "caffeinate",
+    "sleep",
+    "awake",
+    "battery",
+    "lid",
+    "clamshell",
+    "pmset",
+    "lock"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start",
+      "title": "Start Keep Awake",
+      "subtitle": "Don't Sleep Bro",
+      "description": "Prevent sleep and lock with the lid closed, including on battery",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Keep Awake",
+      "subtitle": "Don't Sleep Bro",
+      "description": "Restore normal sleep settings",
+      "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "Check Status",
+      "subtitle": "Don't Sleep Bro",
+      "description": "Show whether keep-awake is active and current power settings",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.91.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^10.7.0",
+    "prettier": "^3.8.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
