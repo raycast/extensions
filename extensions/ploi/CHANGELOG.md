@@ -1,6 +1,6 @@
 # Ploi Changelog
 
-## [SSH Terminal Preference] - {PR_MERGE_DATE}
+## [SSH Terminal Preference] - 2026-09-16
 
 - Added an "SSH Terminal" preference to open SSH connections in Terminal, Ghostty or iTerm2
 - Fixed the server "Open SSH (ploi)" action ignoring the "Ploi SSH User" preference
