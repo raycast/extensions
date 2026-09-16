@@ -1,6 +1,6 @@
 # Ploi Changelog
 
-## [Fix Pagination and Sites Loading] - {PR_MERGE_DATE}
+## [Fix Pagination and Sites Loading] - 2026-09-16
 
 - Fixed Servers pagination replacing the loaded servers with an empty list
 - Opening a server now waits for its sites to load, so the list no longer jumps under the cursor
