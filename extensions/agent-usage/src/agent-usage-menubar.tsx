@@ -24,7 +24,7 @@ import {
   useAihubmixUsage,
   useAmpUsage,
   useAntigravityUsage,
-  useClaudeUsage,
+  useClaudeAccounts,
   useClinePassAccounts,
   useCodexAccounts,
   useCopilotAccounts,
@@ -125,7 +125,7 @@ export default function MenuBarCommand() {
 
   const aihubmixState = useAihubmixUsage(isAihubmixVisible);
   const ampState = useAmpUsage(isAmpVisible);
-  const claudeState = useClaudeUsage(isClaudeVisible);
+  const claudeState = useClaudeAccounts(isClaudeVisible);
   const clinePassState = useClinePassAccounts(isClinePassVisible);
   const codexState = useCodexAccounts(isCodexVisible);
   const copilotState = useCopilotAccounts(isCopilotVisible);
@@ -168,16 +168,6 @@ export default function MenuBarCommand() {
         ),
         revalidate: ampState.revalidate,
         lastFetchedAt: ampState.lastFetchedAt,
-      },
-      {
-        id: "claude",
-        name: "Claude",
-        icon: getThemeIcon("claude-icon.svg"),
-        visible: isClaudeVisible,
-        isLoading: claudeState.isLoading,
-        accessory: getClaudeAccessory(claudeState.usage, claudeState.error, claudeState.isLoading),
-        revalidate: claudeState.revalidate,
-        lastFetchedAt: claudeState.lastFetchedAt,
       },
       {
         id: "cursor",
@@ -289,7 +279,6 @@ export default function MenuBarCommand() {
     [
       isAihubmixVisible,
       isAmpVisible,
-      isClaudeVisible,
       isCursorVisible,
       isDeepSeekVisible,
       isDroidVisible,
@@ -307,11 +296,6 @@ export default function MenuBarCommand() {
       ampState.revalidate,
       ampState.lastFetchedAt,
       ampState.credentialStatus,
-      claudeState.isLoading,
-      claudeState.usage,
-      claudeState.error,
-      claudeState.revalidate,
-      claudeState.lastFetchedAt,
       cursorState.isLoading,
       cursorState.usage,
       cursorState.error,
@@ -391,6 +375,33 @@ export default function MenuBarCommand() {
       lastFetchedAt: account.lastFetchedAt,
     }));
   }, [isClinePassVisible, clinePassState]);
+
+  const claudeAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isClaudeVisible) return [];
+    if (claudeState.isLoading) {
+      return [
+        {
+          id: "claude" as AgentId,
+          name: "Claude",
+          icon: getThemeIcon("claude-icon.svg"),
+          visible: true,
+          isLoading: true,
+          accessory: getClaudeAccessory(null, null, true),
+          revalidate: claudeState.revalidate,
+        },
+      ];
+    }
+    return claudeState.accounts.map((account) => ({
+      id: `claude-${account.accountId}` as AgentId,
+      name: account.label !== "Default" ? `Claude • ${account.label}` : "Claude",
+      icon: getThemeIcon("claude-icon.svg"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getClaudeAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isClaudeVisible, claudeState]);
 
   const codexAgents = useMemo<MenuBarAgent[]>(() => {
     if (!isCodexVisible) return [];
@@ -539,6 +550,7 @@ export default function MenuBarCommand() {
       sortByAgentOrder(
         [
           ...singleAgents,
+          ...claudeAgents,
           ...clinePassAgents,
           ...codexAgents,
           ...copilotAgents,
@@ -548,7 +560,17 @@ export default function MenuBarCommand() {
         ].filter((a) => a.visible),
         agentOrder,
       ),
-    [singleAgents, clinePassAgents, codexAgents, copilotAgents, kimiAgents, syntheticAgents, zaiAgents, agentOrder],
+    [
+      singleAgents,
+      claudeAgents,
+      clinePassAgents,
+      codexAgents,
+      copilotAgents,
+      kimiAgents,
+      syntheticAgents,
+      zaiAgents,
+      agentOrder,
+    ],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 
