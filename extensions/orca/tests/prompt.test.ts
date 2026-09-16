@@ -49,6 +49,12 @@ test("an empty worktree name falls back to the prompt", () => {
   assert.equal(args[args.indexOf("--name") + 1], "pochini-eksport-otchetov");
 });
 
+test("a typed worktree name is slugified too — it becomes a branch and a directory", () => {
+  const args = worktreeCreateArgs({ ...spec, worktreeName: "Fix export" });
+
+  assert.equal(args[args.indexOf("--name") + 1], "fix-export");
+});
+
 test("without a worktree the agent starts in the project folder", () => {
   assert.deepEqual(terminalCreateArgs({ ...spec, createWorktree: false }), [
     "terminal",

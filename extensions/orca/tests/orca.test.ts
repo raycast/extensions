@@ -164,3 +164,20 @@ test("a waiting row is labelled project-first, like the root search subtitle", (
   assert.equal(sessionLabel(row, true), "api: /review work_items/450");
   assert.equal(sessionLabel(row, false), "/review work_items/450");
 });
+
+test("projects with the same folder name stay separate sections", () => {
+  const rows = [
+    { handle: "a", worktreePath: "/code/team-a/app", worktreeId: "r1::/code/team-a/app",
+      title: "one", connected: true, lastOutputAt: 2, state: "done" },
+    { handle: "b", worktreePath: "/code/team-b/app", worktreeId: "r2::/code/team-b/app",
+      title: "two", connected: true, lastOutputAt: 1, state: "done" },
+  ];
+
+  const sections = buildSections(rows);
+
+  assert.equal(sections.length, 2);
+  assert.deepEqual(
+    sections.map((section) => section.key),
+    ["team-a/app", "team-b/app"],
+  );
+});

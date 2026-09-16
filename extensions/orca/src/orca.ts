@@ -108,9 +108,19 @@ export type Section =
   | { kind: "waiting"; key: string; items: AgentRow[] }
   | { kind: "project"; key: string; items: AgentRow[] };
 
+/** The last path segment — what Orca shows as the project. */
+function folderName(path: string): string {
+  return path.split("/").filter(Boolean).pop() ?? path;
+}
+
+/** Enough of the path to tell two projects of the same name apart. */
+function qualifiedName(path: string): string {
+  return path.split("/").filter(Boolean).slice(-2).join("/");
+}
+
 /** Orca groups panes by worktree; the last path segment is what the app shows as the project. */
 export function projectName(row: { worktreePath: string }): string {
-  return row.worktreePath.split("/").filter(Boolean).pop() ?? row.worktreePath;
+  return folderName(row.worktreePath);
 }
 
 export function buildSections(rows: AgentRow[]): Section[] {
@@ -129,17 +139,29 @@ export function buildSections(rows: AgentRow[]): Section[] {
     });
   }
 
-  const byProject = new Map<string, AgentRow[]>();
+  // Keyed by path, not by name: /team-a/app and /team-b/app are two projects
+  // that happen to share a folder name.
+  const byPath = new Map<string, AgentRow[]>();
   for (const row of rest) {
-    const key = projectName(row);
-    byProject.set(key, [...(byProject.get(key) ?? []), row]);
+    byPath.set(row.worktreePath, [
+      ...(byPath.get(row.worktreePath) ?? []),
+      row,
+    ]);
   }
 
+  const names = [...byPath.keys()].map(folderName);
+  const ambiguous = new Set(
+    names.filter((name, index) => names.indexOf(name) !== index),
+  );
+
   const recency = (row: AgentRow) => row.lastOutputAt ?? 0;
-  const projects: Section[] = [...byProject.entries()]
-    .map(([key, items]) => ({
+  const projects: Section[] = [...byPath.entries()]
+    .map(([path, items]) => ({
       kind: "project" as const,
-      key,
+      // Only the colliding ones pay for the longer label.
+      key: ambiguous.has(folderName(path))
+        ? qualifiedName(path)
+        : folderName(path),
       items: [...items].sort((a, b) => recency(b) - recency(a)),
     }))
     .sort((a, b) => recency(b.items[0]) - recency(a.items[0]));

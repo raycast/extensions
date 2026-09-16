@@ -96,7 +96,9 @@ export type PromptSpec = {
 
 /** Orca creates the checkout, launches the agent and delivers the prompt in one call. */
 export function worktreeCreateArgs(spec: PromptSpec): string[] {
-  const name = spec.worktreeName?.trim() || slugify(spec.prompt) || "prompt";
+  // A typed name becomes a branch and a directory just as a derived one does,
+  // so it gets the same safe latin form.
+  const name = slugify(spec.worktreeName?.trim() || spec.prompt) || "prompt";
   return [
     "worktree",
     "create",
