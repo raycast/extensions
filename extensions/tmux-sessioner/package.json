@@ -58,7 +58,7 @@
     {
       "name": "save_sessions",
       "title": "Save Tmux Sessions",
-      "description": "Force tmux-resurrect to save all sessions now, for use with the resurrect/continuum plugins",
+      "description": "Force tmux-resurrect to save all sessions now (requires the tmux-resurrect plugin; pairs with tmux-continuum)",
       "mode": "no-view"
     }
   ],
