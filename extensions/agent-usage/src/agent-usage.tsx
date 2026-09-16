@@ -191,8 +191,8 @@ interface AccountedAgentView {
   provider?: "clinepass" | "kimi" | "zai" | "codex" | "copilot" | "synthetic";
   /** Whether this provider is supported (always true for accounted views) */
   isSupported: boolean;
-  /** The API token for this account (for copying) */
-  token: string;
+  /** The API token for this account (for copying); absent for providers with no manual key flow */
+  token?: string;
   /** Whether this account's token matches the one configured in OpenCode */
   isOpenCodeActive?: boolean;
   lastFetchedAt?: number;
@@ -480,7 +480,10 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
     accountId: state.accountId,
     provider,
     isSupported: true,
-    token: state.token,
+    // Only a provider with a manual key flow has a copyable key. Claude's token is a
+    // short-lived OAuth access token, so offering it as an "API Key" hands out a secret
+    // that expires and fails wherever an Anthropic key is expected.
+    token: provider ? state.token : undefined,
     isOpenCodeActive: state.isOpenCodeActive,
   }));
 }
