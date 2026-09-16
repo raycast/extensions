@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [New Command] - 2026-09-16
+
+- Add `Reopen Last Session` command to relaunch Safari and reopen all windows from the last session — for when you accidentally hit ⌘Q. Requires Accessibility access for Raycast, as the session is restored through Safari's History menu.
+
 ## [New Command] - 2026-09-09
 
 - Add a `New Window` command that opens a new window of the selected Safari browser.

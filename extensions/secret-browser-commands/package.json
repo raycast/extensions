@@ -44,7 +44,7 @@
       "required": false,
       "title": "Hide Crash Commands",
       "label": "Hide commands that crash or hang the browser",
-      "description": "Hide the Command URLs for Debug \u2014 chrome://crash, chrome://hang, chrome://gpucrash and the rest. They deliberately crash, hang, or terminate the browser and will lose unsaved work. Internal debugging pages, which are harmless, are not affected by this.",
+      "description": "Hide the Command URLs for Debug — chrome://crash, chrome://hang, chrome://gpucrash and the rest. They deliberately crash, hang, or terminate the browser and will lose unsaved work. Internal debugging pages, which are harmless, are not affected by this.",
       "default": true
     },
     {
@@ -68,7 +68,7 @@
   ],
   "dependencies": {
     "@chrismessina/raycast-kit": "^0.2.0",
-    "@raycast/api": "^2.4.1",
+    "@raycast/api": "^2.2.1",
     "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {

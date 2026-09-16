@@ -1318,7 +1318,7 @@
 /extensions/jira                                                    @thomaslombart @FezVrasta @teziovsky @gavinroderick @gavinroderick @michael-par @literallyjustroy @mheidinger @luarmr @horumyy @rsperezn @Silv-1 @EyLuismi @pernielsentikaer @BehnH @JokeyChen @Murreey @erayack @0xdhrv @dytsou
 /extensions/jira-search                                             @svenwiegand
 /extensions/jira-search-self-hosted                                 @emanguy @svenwiegand @koseduhemak @LunaticMuch @marinsokol @limonkufu @thezaff
-/extensions/jira-self-hosted                                        @Ernest0-Production
+/extensions/jira-self-hosted                                        @Ernest0-Production @Astatine-213-Tian
 /extensions/jira-time-tracking                                      @niallpaterson @0w0miki @haydencbarnes
 /extensions/jira2git                                                @ipiranhaa
 /extensions/jisho                                                   @dmacdermott @mmtftr
@@ -1924,6 +1924,7 @@
 /extensions/open-link-in-specific-browser                           @koinzhang @ViGeng @ridemountainpig
 /extensions/open-path                                               @koinzhang
 /extensions/open-props                                              @tmwrnr
+/extensions/open-slide                                              @ridemountainpig
 /extensions/open-targets-raycast                                    @ireneisdoomed
 /extensions/open-with-app                                           @fturcheti @omarshahine @pernielsentikaer @Sheraff @errepuntopenco
 /extensions/openai-gpt                                              @simicvm @DorukAkinci @EvilMouth
@@ -2098,7 +2099,7 @@
 /extensions/plex                                                    @mSarheed @owain-williams @xmok @timoransky
 /extensions/plexamp                                                 @kendaniels @saschabratton
 /extensions/plexus                                                  @RensHoogendam @diegosreis
-/extensions/ploi                                                    @ploi-deploy @xmok
+/extensions/ploi                                                    @ploi-deploy @xmok @Tarpsvo
 /extensions/pm2                                                     @LitoMore @pernielsentikaer
 /extensions/pocket                                                  @vimtor @hrishabhn @xmok @pernielsentikaer
 /extensions/pocketbase                                              @xmok
@@ -2433,7 +2434,7 @@
 /extensions/saasflow                                                @apeiniger
 /extensions/sabnzbd                                                 @jesse-c @xmok
 /extensions/sadaqah-box                                             @emircanerkul
-/extensions/safari                                                  @loris @thomaspaulmann @SKaplanOfficial @iwex @xilopaint @ChangeHow @ridemountainpig @1weiho @xmok @niksite @ojowwalker77 @gumadeiras @jsonMartin
+/extensions/safari                                                  @loris @thomaspaulmann @SKaplanOfficial @iwex @xilopaint @ChangeHow @ridemountainpig @1weiho @xmok @niksite @ojowwalker77 @gumadeiras @adrena11n @jsonMartin
 /extensions/safe-secret                                             @melonamin
 /extensions/sage-hr                                                 @cyxn
 /extensions/salesforce-search                                       @svenwiegand

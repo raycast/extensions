@@ -380,7 +380,7 @@ export function resolveMessageAuthor(
  * shown these at all -- the server substitutes messageMediaUnsupported -- so any
  * code that only reads `msg.message` silently loses every rich message.
  */
-function renderMessageContent(msg: Api.Message): { text: string; markdown?: string } {
+export function renderMessageContent(msg: Api.Message): { text: string; markdown?: string } {
   if (msg.message) {
     return { text: msg.message };
   }
@@ -398,7 +398,7 @@ function renderMessageContent(msg: Api.Message): { text: string; markdown?: stri
 }
 
 /** True when a message carries anything worth rendering. */
-function hasRenderableContent(msg: Api.Message): boolean {
+export function hasRenderableContent(msg: Api.Message): boolean {
   return Boolean(msg.message || msg.media || msg.richMessage);
 }
 
@@ -425,7 +425,7 @@ async function describeUser(
   return { name, photo };
 }
 
-function parseMessageMedia(msg: Api.Message): MessageMedia | undefined {
+export function parseMessageMedia(msg: Api.Message): MessageMedia | undefined {
   if (!msg.media) return undefined;
 
   const mediaClassName = msg.media.className;

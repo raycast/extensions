@@ -1,25 +1,39 @@
 import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import useSWR, { SWRConfig } from "swr";
 
-import { getAllOpenPullRequests, getCurrentUserUuid } from "./../../queries";
+import { getAllOpenPullRequests, getCurrentUserUuid, OpenPullRequestsResult } from "./../../queries";
 import {
   ApprovePullRequestAction,
   DeclinePullRequestAction,
   RequestChangesAction,
   ShowPullRequestDetailAction,
 } from "./actions";
+import { cacheConfig } from "../../helpers/cache";
+import { preferences } from "../../helpers/preferences";
 import { PullRequest } from "./interface";
 import { getPullRequestKey } from "./../../helpers/pullRequestKey";
 import { ReviewState, setReviewState } from "./../../helpers/reviewState";
 import { buildReviewAccessories, findMyReviewState } from "./../../helpers/reviewers";
 
-interface State {
-  pullRequests?: PullRequest[];
-  error?: Error;
-}
+const PULL_REQUESTS_CACHE_KEY = `all-open-pull-requests:${preferences.workspace}:${preferences.email}`;
 
 export function SearchAllPullRequests() {
-  const [state, setState] = useState<State>({});
+  return (
+    <SWRConfig value={cacheConfig}>
+      <SearchAllPullRequestsList />
+    </SWRConfig>
+  );
+}
+
+function SearchAllPullRequestsList() {
+  const [progress, setProgress] = useState<OpenPullRequestsResult>();
+  const { data, error, isLoading, isValidating, mutate } = useSWR(PULL_REQUESTS_CACHE_KEY, async () => {
+    setProgress(undefined);
+    return getAllOpenPullRequests(setProgress);
+  });
+  const result = data ?? progress;
+
   const [reviewStates, setReviewStates] = useState<Map<string, ReviewState>>(new Map());
   const [myUuid, setMyUuid] = useState<string | null>(null);
 
@@ -29,66 +43,62 @@ export function SearchAllPullRequests() {
       .catch(() => setMyUuid(null));
   }, []);
 
+  const pullRequests: PullRequest[] | undefined = result?.values.map((pr) => ({
+    id: pr.id,
+    title: pr.title,
+    state: pr.state,
+    repo: {
+      name: pr.destination?.repository?.name ?? "",
+      fullName: pr.destination?.repository?.full_name ?? "",
+      slug: pr.destination?.repository?.slug ?? "",
+    },
+    commentCount: pr.comment_count,
+    author: {
+      url: pr.author?.links?.avatar?.href ?? "",
+      nickname: pr.author?.nickname,
+    },
+    reviewers: pr.reviewers,
+  }));
+
   useEffect(() => {
-    async function fetchPRs() {
-      try {
-        const { values: pullRequests, failedRepoCount } = await getAllOpenPullRequests();
-
-        const prs =
-          pullRequests.map((pr) => ({
-            id: pr.id,
-            title: pr.title,
-            state: pr.state,
-            repo: {
-              name: pr.destination?.repository?.name,
-              fullName: pr.destination?.repository?.full_name,
-              slug: pr.destination?.repository?.slug,
-            },
-            commentCount: pr.comment_count,
-            author: {
-              url: pr.author?.links?.avatar?.href,
-              nickname: pr.author?.nickname,
-            },
-            reviewers: pr.reviewers,
-          })) ?? [];
-        setState({ pullRequests: prs });
-
-        if (failedRepoCount > 0) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Some repositories failed to load",
-            message: `Could not fetch pull requests from ${failedRepoCount} ${
-              failedRepoCount === 1 ? "repository" : "repositories"
-            }. Results may be incomplete.`,
-          });
-        }
-      } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
-      }
+    if (!isValidating && data && data.failedRepoCount > 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Some repositories failed to load",
+        message: `Could not fetch pull requests from ${data.failedRepoCount} ${
+          data.failedRepoCount === 1 ? "repository" : "repositories"
+        }. Results may be incomplete.`,
+      });
     }
+  }, [isValidating, data]);
 
-    fetchPRs();
-  }, []);
-
-  if (state.error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed loading pull requests",
-      message: state.error.message,
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed loading pull requests",
+        message: error instanceof Error ? error.message : "Something went wrong",
+      });
+    }
+  }, [error]);
 
   function removePullRequest(key: string) {
-    setState((current) => ({
-      ...current,
-      pullRequests: current.pullRequests?.filter((pr) => getPullRequestKey(pr) !== key),
-    }));
+    mutate(
+      (current) =>
+        current && {
+          ...current,
+          values: current.values.filter(
+            (pr) => `${pr.destination?.repository?.slug}#${pr.id}` !== key,
+          ),
+        },
+      { revalidate: false },
+    );
   }
 
   return (
-    <List isLoading={!state.pullRequests && !state.error} searchBarPlaceholder="Search by name...">
-      <List.Section title="Open Pull Requests" subtitle={state.pullRequests?.length + ""}>
-        {state.pullRequests?.map((pr) => {
+    <List isLoading={isLoading || isValidating} searchBarPlaceholder="Search by name...">
+      <List.Section title="Open Pull Requests" subtitle={pullRequests?.length + ""}>
+        {pullRequests?.map((pr) => {
           const key = getPullRequestKey(pr);
           const reviewState = reviewStates.has(key)
             ? (reviewStates.get(key) ?? null)

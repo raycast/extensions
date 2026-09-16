@@ -240,7 +240,7 @@ function LocalItem(
 
   return (
     <ListOrGridItem
-      id={props.pinned ? path : undefined}
+      id={path}
       title={name}
       subtitle={displaySubtitle}
       icon={{ fileIcon: path }}
@@ -342,7 +342,7 @@ function RemoteItem(
 
   return (
     <ListOrGridItem
-      id={props.pinned ? props.uri : undefined}
+      id={props.uri}
       title={remoteDisplay.title}
       subtitle={remoteDisplay.subtitle}
       icon={remoteIconPath ? { fileIcon: remoteIconPath } : Icon.Folder}

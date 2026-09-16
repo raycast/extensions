@@ -1,5 +1,9 @@
 # Bonjour Changelog
 
+## [Improvements] - 2026-09-16
+
+- improved reliability
+
 ## [Updates] - 2026-08-22
 
 - updates for Raycast 2.0
