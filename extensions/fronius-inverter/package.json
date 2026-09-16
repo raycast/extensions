@@ -110,5 +110,8 @@
     "prettier": "3.9.6",
     "typescript": "6.0.3",
     "vitest": "5.0.0"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

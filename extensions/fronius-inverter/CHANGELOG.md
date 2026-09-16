@@ -1,6 +1,6 @@
 # Changelog
 
-## [Expanded Monitoring and Reliability] - {PR_MERGE_DATE}
+## [Expanded Monitoring and Reliability] - 2026-09-16
 
 - Added connection state to the menu bar so an unreachable inverter is no longer shown as healthy.
 - Added a connection-test command and a read-only status tool for Raycast AI.
