@@ -1,6 +1,6 @@
 # Brand Icons Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-09-16
 
 - Fix `ENOENT` errors when copying icons from an incompletely downloaded asset pack (e.g. interrupted download on Windows); the pack is now re-downloaded automatically
 
