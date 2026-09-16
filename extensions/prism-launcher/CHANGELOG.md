@@ -1,5 +1,10 @@
 # Prism Launcher Changelog
 
+## [New Addition] - {PR_MERGE_DATE}
+
+- Instances now show their Minecraft version and mod loader (Forge, NeoForge, Fabric, Quilt, ...) in the list
+- Instances can be searched by version or loader
+
 ## [Bugfix] - 2026-08-06
 
 Fixed broken icon on Windows
