@@ -16,3 +16,4 @@ compiled_raycast_rust
 node_modules
 dist
 .DS_Store
+.serena
