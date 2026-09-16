@@ -58,6 +58,7 @@ export default function QuickSaveCommand() {
     refresh: refreshAuth,
   } = useTeakAuth();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: prefill clipboard only once on mount; re-running would clobber user input
   useEffect(() => {
     let isMounted = true;
 
@@ -65,7 +66,7 @@ export default function QuickSaveCommand() {
       try {
         const clipboardText = await Clipboard.readText();
         if (isMounted && !content.trim() && clipboardText?.trim()) {
-          setContent(clipboardText.trim());
+          setContent(clipboardText);
         }
       } catch {
         // Ignore clipboard prefill failures and keep the form usable.
@@ -80,8 +81,7 @@ export default function QuickSaveCommand() {
   }, []);
 
   const handleSubmit = async (values: FormValues) => {
-    const trimmed = values.content.trim();
-    if (!trimmed) {
+    if (!values.content.trim()) {
       await showToast({
         message: "Enter text or a URL before saving.",
         style: Toast.Style.Failure,
@@ -98,7 +98,7 @@ export default function QuickSaveCommand() {
 
     try {
       const result = await quickSaveCard({
-        content: trimmed,
+        content: values.content,
         source: "raycast_quick_save",
       });
       addSuccessActions(toast, result);
