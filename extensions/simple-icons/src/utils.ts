@@ -56,24 +56,171 @@ export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
   return "?context=" + encodeURIComponent(JSON.stringify(launchContext));
 };
 
-export const pacoteAssetPack = async (version: string) => {
+const assetPackCompleteMarker = ".raycast-complete";
+// Hard ceiling on staging age: past this the staging is reclaimed even when
+// the owner PID answers (PID reuse, or the owner is wedged). Extraction uses
+// per-process staging and a rename that loses the race discards its own pack,
+// so takeover stays safe.
+const assetPackHardStaleMs = 5 * 60_000;
+
+const getAssetPackDestination = (version: string) => path.join(environment.assetsPath, "pack", version);
+
+const hasCompleteAssetPack = async (destination: string) => {
+  try {
+    await fs.access(path.join(destination, assetPackCompleteMarker), fs.constants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// Whether a process is still running. Used as the abandonment signal for
+// leftover staging: unlike directory mtimes, it stays valid even when writes
+// land deep inside extracted subdirectories. EPERM means the process exists
+// under another user, which is treated as alive.
+const isProcessAlive = (pid: number) => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === "EPERM";
+  }
+};
+
+// Newest mtime of any file in the tree. pacote streams entries into nested
+// directories (icons/...) without touching the staging root's mtime, so the
+// root alone makes a long extraction look abandoned.
+const newestFileMtimeMs = async (directory: string): Promise<number> => {
+  let newest = 0;
+  for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      newest = Math.max(newest, await newestFileMtimeMs(entryPath));
+    } else {
+      const entryStat = await fs.stat(entryPath).catch(() => null);
+      if (entryStat) newest = Math.max(newest, entryStat.mtimeMs);
+    }
+  }
+  return newest;
+};
+
+// Reclaim staging directories and stale packs parked aside by a crashed or
+// wedged process. A directory is dead when its owner PID is confirmed dead
+// past the soft window, or when it has made no progress (newest file mtime
+// anywhere in the tree) past the hard ceiling regardless of PID liveness.
+const reclaimDeadStaging = async () => {
+  const entries = await fs.readdir(environment.assetsPath).catch(() => [] as string[]);
+  for (const entry of entries) {
+    if (!entry.startsWith(".pack-staging") && !entry.startsWith(".pack-stale")) continue;
+    const stagingPath = path.join(environment.assetsPath, entry);
+    const stat = await fs.stat(stagingPath).catch(() => null);
+    if (!stat) continue;
+    // Name format: .pack-staging-<version>-<pid>-<random>
+    const segments = entry.split("-");
+    const ownerPid = Number(segments[segments.length - 2]);
+    const ownerDead = !Number.isInteger(ownerPid) || ownerPid <= 0 || !isProcessAlive(ownerPid);
+    const newestMtime = (await newestFileMtimeMs(stagingPath).catch(() => 0)) || stat.mtimeMs;
+    const ageMs = Date.now() - newestMtime;
+    if ((ownerDead && ageMs > 60_000) || ageMs > assetPackHardStaleMs) {
+      await fs.rm(stagingPath, { recursive: true, force: true });
+    }
+  }
+};
+
+const pacoteAssetPack = async (version: string) => {
   await showToast({
     style: Toast.Style.Animated,
     title: "Downloading asset pack",
   });
-  await pacote.extract(releaseVersion, path.join(environment.assetsPath, "pack", version));
+  // Extract into an instance-owned staging directory and swap it in only once
+  // the marker is written, so other instances never observe half-extracted
+  // files. The atomic rename is the coordination point: the loser discards its
+  // own staging and uses the winner's pack.
+  const destination = getAssetPackDestination(version);
+  const staging = path.join(
+    environment.assetsPath,
+    `.pack-staging-${version}-${process.pid}-${Math.random().toString(36).slice(2, 8)}`,
+  );
+  try {
+    await pacote.extract(releaseVersion, staging);
+    await fs.writeFile(path.join(staging, assetPackCompleteMarker), version, "utf8");
+    await fs.mkdir(path.dirname(destination), { recursive: true });
+    try {
+      await fs.rename(staging, destination);
+    } catch (error) {
+      if (await hasCompleteAssetPack(destination)) {
+        await fs.rm(staging, { recursive: true, force: true });
+        return;
+      }
+      // Destination exists but is incomplete (crashed process, old code).
+      // Move it aside with a rename (atomic), then rename staging into the
+      // now-free path (atomic). Neither instance can delete a directory it
+      // didn't itself move, so this closes the read-then-remove gap.
+      // Rename onto a non-empty directory is ENOTEMPTY on macOS/Linux,
+      // EEXIST on some filesystems, and EPERM/EACCES on Windows.
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code === "ENOTEMPTY" || code === "EEXIST" || code === "EPERM" || code === "EACCES") {
+        const stale = path.join(
+          environment.assetsPath,
+          `.pack-stale-${path.basename(destination)}-${process.pid}-${Math.random().toString(36).slice(2, 8)}`,
+        );
+        let movedAside = true;
+        try {
+          await fs.rename(destination, stale);
+        } catch (moveError) {
+          if ((moveError as NodeJS.ErrnoException).code !== "ENOENT") throw moveError;
+          // Another instance in this same branch already moved it aside.
+          movedAside = false;
+        }
+        if (movedAside && (await hasCompleteAssetPack(stale))) {
+          // The directory we moved aside was completed in the gap by another
+          // instance. Restore it and stand down — a marker-bearing directory
+          // is never deleted.
+          try {
+            await fs.rename(stale, destination);
+          } catch {
+            // The restore failed. Only delete the stale pack if the destination
+            // is now complete (someone else published in this gap too). If the
+            // destination is not complete, leave the stale pack — it's a
+            // complete pack with nowhere to go, and reclaimDeadStaging will
+            // sweep it if it stays abandoned.
+            if (await hasCompleteAssetPack(destination)) {
+              await fs.rm(stale, { recursive: true, force: true }).catch(() => {});
+            }
+          }
+          await fs.rm(staging, { recursive: true, force: true });
+          return;
+        }
+        try {
+          await fs.rename(staging, destination);
+        } catch (renameError) {
+          if (await hasCompleteAssetPack(destination)) {
+            // Someone else published a complete pack; use it.
+            await fs.rm(staging, { recursive: true, force: true });
+          } else {
+            throw renameError;
+          }
+        }
+        if (movedAside) await fs.rm(stale, { recursive: true, force: true });
+        return;
+      }
+      throw error;
+    }
+  } catch (error) {
+    await fs.rm(staging, { recursive: true, force: true });
+    throw error;
+  }
 };
 
 export const cacheAssetPack = async (version: string) => {
-  const destination = path.join(environment.assetsPath, "pack", version);
-  try {
-    await fs.access(destination, fs.constants.R_OK | fs.constants.W_OK);
-  } catch {
-    cache.set("cached-version", "");
-    await cleanAssetPack();
-    await pacoteAssetPack(version);
-    cache.set("cached-version", version);
-  }
+  const destination = getAssetPackDestination(version);
+  // Sweep before the early return: a crash between the two renames leaves a
+  // .pack-stale-* directory that would otherwise never be reclaimed while
+  // the destination stays complete.
+  await reclaimDeadStaging();
+  if (await hasCompleteAssetPack(destination)) return;
+  await pacoteAssetPack(version);
+  cache.set("cached-version", version);
 };
 
 export const loadCachedJson = async (version: string) => {
@@ -174,15 +321,6 @@ export const copySvg = async ({ version, icon, pathOnly }: { version: string; ic
   if (pathOnly) svg = svg.replace(/^.+ d="([^"]+)".+$/, "$1");
   toast.style = Toast.Style.Success;
   copyOrPaste(svg);
-};
-
-export const cleanAssetPack = async () => {
-  const directories = await fs.readdir(environment.assetsPath);
-  await Promise.all(
-    directories
-      .filter((d) => d.startsWith("pack"))
-      .map((d) => fs.rm(path.join(environment.assetsPath, d), { recursive: true, force: true })),
-  );
 };
 
 export const makeCopyToDownload = async ({
