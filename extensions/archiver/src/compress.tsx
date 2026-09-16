@@ -65,7 +65,9 @@ export default function Command() {
                 try {
                   showToast({ title: "Compressing...", style: Toast.Style.Animated });
                   const path = await compress(files, value.format, value.password);
-                  await showInFinder(path);
+                  if (preferences.revealInFinder) {
+                    await showInFinder(path);
+                  }
                   showHUD("🎉 Compress successfully");
                   popToRoot();
                 } catch (error) {
