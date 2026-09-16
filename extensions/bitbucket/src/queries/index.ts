@@ -199,6 +199,17 @@ async function listOpenPullRequestsForRepo(repo: {
       page,
       sort: "-created_on",
       state: "OPEN",
+      fields: [
+        "values.id",
+        "values.title",
+        "values.comment_count",
+        "values.created_on",
+        "values.author.nickname",
+        "values.author.links.avatar.href",
+        "values.destination.repository.name",
+        "values.destination.repository.full_name",
+        "next",
+      ].join(","),
     });
 
     for (const pr of data.values ?? []) {
@@ -262,28 +273,46 @@ async function mapWithConcurrency<T, R>(
   return results;
 }
 
+export type OpenPullRequestsResult = { values: OpenPullRequest[]; failedRepoCount: number };
+
+const PROGRESS_EMIT_INTERVAL_MS = 200;
+
 // Bitbucket has no workspace-wide PR endpoint; iterate repos then fetch open PRs per repo.
-export async function getAllOpenPullRequests() {
+// Repos are sorted -updated_on, so onProgress lets callers render the most-active repos'
+// PRs as soon as they land instead of waiting for every repo to finish.
+export async function getAllOpenPullRequests(
+  onProgress?: (partial: OpenPullRequestsResult) => void,
+): Promise<OpenPullRequestsResult> {
   const repos = (await listAllRepositories()).filter(
     (repo): repo is Schema.Repository & { slug: string } => typeof repo.slug === "string",
   );
 
-  const perRepo = await mapWithConcurrency(repos, 10, async (repo) => {
+  const collected: OpenPullRequest[] = [];
+  let failedRepoCount = 0;
+  let lastEmit = 0;
+
+  const snapshot = (): OpenPullRequestsResult => {
+    const values = [...collected].sort((a, b) => {
+      const aTime = a.created_on ? Date.parse(a.created_on) : 0;
+      const bTime = b.created_on ? Date.parse(b.created_on) : 0;
+      return bTime - aTime;
+    });
+    return { values, failedRepoCount };
+  };
+
+  await mapWithConcurrency(repos, 10, async (repo) => {
     try {
-      return { ok: true as const, values: await listOpenPullRequestsForRepo(repo) };
+      collected.push(...(await listOpenPullRequestsForRepo(repo)));
     } catch {
-      return { ok: false as const, values: [] as OpenPullRequest[] };
+      failedRepoCount += 1;
+    }
+
+    const now = Date.now();
+    if (onProgress && now - lastEmit >= PROGRESS_EMIT_INTERVAL_MS) {
+      lastEmit = now;
+      onProgress(snapshot());
     }
   });
 
-  const failedRepoCount = perRepo.filter((result) => !result.ok).length;
-  const all = perRepo.flatMap((result) => result.values);
-
-  all.sort((a, b) => {
-    const aTime = a.created_on ? Date.parse(a.created_on) : 0;
-    const bTime = b.created_on ? Date.parse(b.created_on) : 0;
-    return bTime - aTime;
-  });
-
-  return { values: all, failedRepoCount };
+  return snapshot();
 }

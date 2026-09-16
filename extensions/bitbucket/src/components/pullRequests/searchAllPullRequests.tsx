@@ -1,67 +1,70 @@
 import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import useSWR, { SWRConfig } from "swr";
 
-import { getAllOpenPullRequests } from "./../../queries";
+import { getAllOpenPullRequests, OpenPullRequestsResult } from "./../../queries";
+import { cacheConfig } from "../../helpers/cache";
+import { preferences } from "../../helpers/preferences";
 import { PullRequest } from "./interface";
 
-interface State {
-  pullRequests?: PullRequest[];
-  error?: Error;
-}
+const PULL_REQUESTS_CACHE_KEY = `all-open-pull-requests:${preferences.workspace}:${preferences.email}`;
 
 export function SearchAllPullRequests() {
-  const [state, setState] = useState<State>({});
+  return (
+    <SWRConfig value={cacheConfig}>
+      <SearchAllPullRequestsList />
+    </SWRConfig>
+  );
+}
+
+function SearchAllPullRequestsList() {
+  const [progress, setProgress] = useState<OpenPullRequestsResult>();
+  const { data, error, isLoading, isValidating } = useSWR(PULL_REQUESTS_CACHE_KEY, async () => {
+    setProgress(undefined);
+    return getAllOpenPullRequests(setProgress);
+  });
+  const result = data ?? progress;
+
+  const pullRequests: PullRequest[] | undefined = result?.values.map((pr) => ({
+    id: pr.id,
+    title: pr.title,
+    repo: {
+      name: pr.destination?.repository?.name ?? "",
+      fullName: pr.destination?.repository?.full_name ?? "",
+    },
+    commentCount: pr.comment_count,
+    author: {
+      url: pr.author?.links?.avatar?.href ?? "",
+      nickname: pr.author?.nickname,
+    },
+  }));
 
   useEffect(() => {
-    async function fetchPRs() {
-      try {
-        const { values: pullRequests, failedRepoCount } = await getAllOpenPullRequests();
-
-        const prs =
-          pullRequests.map((pr) => ({
-            id: pr.id,
-            title: pr.title,
-            repo: {
-              name: pr.destination?.repository?.name,
-              fullName: pr.destination?.repository?.full_name,
-            },
-            commentCount: pr.comment_count,
-            author: {
-              url: pr.author?.links?.avatar?.href,
-              nickname: pr.author?.nickname,
-            },
-          })) ?? [];
-        setState({ pullRequests: prs });
-
-        if (failedRepoCount > 0) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Some repositories failed to load",
-            message: `Could not fetch pull requests from ${failedRepoCount} ${
-              failedRepoCount === 1 ? "repository" : "repositories"
-            }. Results may be incomplete.`,
-          });
-        }
-      } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
-      }
+    if (!isValidating && data && data.failedRepoCount > 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Some repositories failed to load",
+        message: `Could not fetch pull requests from ${data.failedRepoCount} ${
+          data.failedRepoCount === 1 ? "repository" : "repositories"
+        }. Results may be incomplete.`,
+      });
     }
+  }, [isValidating, data]);
 
-    fetchPRs();
-  }, []);
-
-  if (state.error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed loading pull requests",
-      message: state.error.message,
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed loading pull requests",
+        message: error instanceof Error ? error.message : "Something went wrong",
+      });
+    }
+  }, [error]);
 
   return (
-    <List isLoading={!state.pullRequests && !state.error} searchBarPlaceholder="Search by name...">
-      <List.Section title="Open Pull Requests" subtitle={state.pullRequests?.length + ""}>
-        {state.pullRequests?.map((pr) => (
+    <List isLoading={isLoading || isValidating} searchBarPlaceholder="Search by name...">
+      <List.Section title="Open Pull Requests" subtitle={pullRequests?.length + ""}>
+        {pullRequests?.map((pr) => (
           <List.Item
             key={`${pr.repo.fullName}-${pr.id}`}
             title={pr.title}
