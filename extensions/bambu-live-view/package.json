@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bambu-live-view",
+  "title": "Bambu Live View",
+  "description": "Tiny always-on-top live camera view of your Bambu Lab 3D printer, streamed over your local network with mpv.",
+  "icon": "icon.png",
+  "author": "girr_paan",
+  "license": "MIT",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "setup-printer",
+      "title": "Printer Setup",
+      "subtitle": "Bambu Live View",
+      "description": "Step-by-step guide to enable LAN liveview, install mpv, save your printer's IP and access code, and test the connection.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-live-view",
+      "title": "Toggle Live View",
+      "subtitle": "Bambu Live View",
+      "description": "Open or close a small always-on-top window with your printer's live camera.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "size",
+      "title": "Window Size",
+      "description": "Size of the live view window.",
+      "type": "dropdown",
+      "required": false,
+      "default": "medium",
+      "data": [
+        {
+          "title": "Small (320×180)",
+          "value": "small"
+        },
+        {
+          "title": "Medium (480×270)",
+          "value": "medium"
+        },
+        {
+          "title": "Large (640×360)",
+          "value": "large"
+        }
+      ]
+    },
+    {
+      "name": "corner",
+      "title": "Window Position",
+      "description": "Screen corner the live view window opens in.",
+      "type": "dropdown",
+      "required": false,
+      "default": "top-right",
+      "data": [
+        {
+          "title": "Top Right",
+          "value": "top-right"
+        },
+        {
+          "title": "Top Left",
+          "value": "top-left"
+        },
+        {
+          "title": "Bottom Right",
+          "value": "bottom-right"
+        },
+        {
+          "title": "Bottom Left",
+          "value": "bottom-left"
+        }
+      ]
+    },
+    {
+      "name": "windowTitle",
+      "title": "Window Title",
+      "description": "Title of the mpv window (shown in Mission Control and the window switcher).",
+      "type": "textfield",
+      "required": false,
+      "default": "Bambu Live View"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
