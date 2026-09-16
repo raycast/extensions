@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "teak-raycast",
   "version": "1.0.70",
   "private": true,
