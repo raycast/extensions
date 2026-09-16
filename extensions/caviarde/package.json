@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "caviarde",
+  "title": "Caviarde",
+  "description": "Mask PII in your clipboard before you paste it anywhere",
+  "icon": "icon.png",
+  "author": "gldywn",
+  "categories": ["Developer Tools", "Security"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mask-and-paste",
+      "title": "Mask and Paste",
+      "subtitle": "Caviarde",
+      "description": "Replace personal data in the clipboard with placeholders, then paste the result",
+      "mode": "no-view"
+    },
+    {
+      "name": "setup-detector",
+      "title": "Set up Detector",
+      "subtitle": "Caviarde",
+      "description": "Start the local detector Caviarde uses for its semantic layer",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "detectorUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Detector URL",
+      "description": "Base URL of the local PasteGuard detector. Leave the default unless you moved it.",
+      "default": "http://127.0.0.1:5002"
+    },
+    {
+      "name": "detectorTimeoutMs",
+      "type": "textfield",
+      "required": false,
+      "title": "Detector Timeout (ms)",
+      "description": "Give up on the semantic layer after this long and mask with the deterministic layer alone.",
+      "default": "3500"
+    },
+    {
+      "name": "authToken",
+      "type": "password",
+      "required": false,
+      "title": "Auth Token",
+      "description": "Sent as a bearer token when set. A local detector needs none.",
+      "default": ""
+    },
+    {
+      "name": "phoneRegions",
+      "type": "textfield",
+      "required": false,
+      "title": "Phone Regions",
+      "description": "Comma-separated ISO country codes. Without these, only numbers in +33 form are detected.",
+      "default": "FR"
+    },
+    {
+      "name": "maskPersons",
+      "type": "checkbox",
+      "required": false,
+      "title": "Semantic Detection",
+      "label": "Mask person names",
+      "description": "Needs the local detector. Mentions written with an at sign are masked either way.",
+      "default": true
+    },
+    {
+      "name": "maskLocations",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Mask locations and addresses",
+      "description": "Needs the local detector. Street addresses are reported as locations.",
+      "default": true
+    },
+    {
+      "name": "maskOrganizations",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Mask company and organisation names",
+      "description": "Needs the local detector running the patch in detector-patch/.",
+      "default": true
+    }
+  ],
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": "24.18.1"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.18",
+    "eslint": "10.8.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
