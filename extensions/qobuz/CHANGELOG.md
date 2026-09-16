@@ -1,6 +1,6 @@
 # Qobuz Changelog
 
-## [Copy Share Links] - 2026-09-16
+## [Copy Share Links] - {PR_MERGE_DATE}
 
 - Copy Share Links: a no-view command that puts a ready-to-paste message on the clipboard for the track Qobuz is on — title and artist, then a link per service (Qobuz, Deezer, Apple Music, Spotify, Tidal) and a song.link line that resolves every other platform
 - Copy Share Links: the clipboard also carries a rich-text version — title and one line of linked platform names — which Slack, Notion and Mail paste in place of the plain lines
