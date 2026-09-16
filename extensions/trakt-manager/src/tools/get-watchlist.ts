@@ -1,6 +1,6 @@
 import { withPagination } from "../lib/schema";
 import { CompactMovie, CompactShow, toCompactMovie, toCompactShow } from "./compact-media";
-import { identifyTraktIdKinds, normalizeTitle } from "./resolve-media";
+import { identifyTraktIdKinds, isMatchableTitle, normalizeTitle } from "./resolve-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -117,6 +117,18 @@ export default async function tool(input: Input): Promise<Output> {
 
   // Fast path: search for a specific item in the watchlist
   if (query || traktId) {
+    if (query && traktId === undefined && !isMatchableTitle(query)) {
+      return {
+        found: false,
+        inWatchlist: false,
+        exhaustive: false,
+        message:
+          `The title ${JSON.stringify(query)} cannot be compared: after normalization it has no letters or digits. ` +
+          `This is NOT a confirmed absence from the watchlist.`,
+        hasMore: false,
+      };
+    }
+
     let scanMovies = type === "movies" || type === "all";
     let scanShows = type === "shows" || type === "all";
 

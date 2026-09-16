@@ -2,7 +2,7 @@ import { TraktMovieListItem, TraktShowListItem } from "../lib/schema";
 import { executeToolCall, executeToolCallAllowingNotFound, toolTraktClient } from "./tool-client";
 import { normalizeTitle } from "./title-text";
 
-export { describeYearFilter, normalizeTitle } from "./title-text";
+export { describeYearFilter, isMatchableTitle, normalizeTitle } from "./title-text";
 
 export type ResolvedMedia = {
   traktId: number;
@@ -88,7 +88,8 @@ export function pickBestMatch(candidates: ResolvedMedia[], query: string, year?:
   if (candidates.length === 0) return undefined;
 
   const normalizedQuery = normalizeTitle(query);
-  const isExactTitle = (candidate: ResolvedMedia) => normalizeTitle(candidate.title) === normalizedQuery;
+  const comparable = normalizedQuery.length > 0;
+  const isExactTitle = (candidate: ResolvedMedia) => comparable && normalizeTitle(candidate.title) === normalizedQuery;
   const exact = candidates.filter(isExactTitle);
   const pool = exact.length > 0 ? exact : candidates;
 

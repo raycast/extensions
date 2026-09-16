@@ -2,9 +2,14 @@ export function normalizeTitle(value: string): string {
   return value
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\p{M}+/gu, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim();
+}
+
+/** False when the string has no letters or digits left — it cannot decide a title match. */
+export function isMatchableTitle(value: string): boolean {
+  return normalizeTitle(value).length > 0;
 }
 
 /**

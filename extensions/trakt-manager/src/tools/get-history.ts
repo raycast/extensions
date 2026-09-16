@@ -1,7 +1,7 @@
 import { TraktMovieHistoryList, TraktShowHistoryList, withPagination } from "../lib/schema";
 import { CompactHistoryItem, toCompactMovieHistory, toCompactShowHistory } from "./compact-media";
 import { pickCandidates, uniqueYears, type CandidatePick, type HistoryCandidate } from "./history-candidates";
-import { searchMovieCandidates, searchShowCandidates } from "./resolve-media";
+import { isMatchableTitle, searchMovieCandidates, searchShowCandidates } from "./resolve-media";
 import { executeToolCall, executeToolCallAllowingNotFound, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -280,6 +280,20 @@ export default async function tool(input: Input): Promise<Output> {
 
   // Lookup mode: exhaustive per-item history check
   if (query || traktId !== undefined) {
+    if (query && traktId === undefined && !isMatchableTitle(query)) {
+      return {
+        mode: "lookup",
+        exhaustive: false,
+        found: false,
+        message:
+          `The title ${JSON.stringify(query)} cannot be compared: after normalization it has no letters or digits. ` +
+          `This is NOT a definitive not-watched answer.`,
+        checked: [],
+        history: [],
+        hasMore: false,
+      };
+    }
+
     let candidates: Candidate[] = [];
     let missedYears: number[] = [];
     let unchecked: Candidate[] = [];

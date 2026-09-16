@@ -1,4 +1,4 @@
-import { normalizeTitle } from "./title-text";
+import { isMatchableTitle, normalizeTitle } from "./title-text";
 
 export type HistoryCandidate = {
   type: "movie" | "show";
@@ -36,7 +36,6 @@ export function uniqueYears(candidates: HistoryCandidate[]): number[] {
  */
 export function pickCandidates(candidates: HistoryCandidate[], query: string, year?: number): CandidatePick {
   const normalizedQuery = normalizeTitle(query);
-  const isExactTitle = (candidate: HistoryCandidate) => normalizeTitle(candidate.title) === normalizedQuery;
   const empty = (overrides: Partial<CandidatePick>): CandidatePick => ({
     candidates: [],
     missedYears: [],
@@ -45,6 +44,14 @@ export function pickCandidates(candidates: HistoryCandidate[], query: string, ye
     yearHeldBy: [],
     ...overrides,
   });
+
+  // A query that strips to nothing is not comparable: treating "" === "" as exact would
+  // mark every punctuation-only title as a hit, and a negative as confirmed absence.
+  if (!isMatchableTitle(query)) {
+    return empty({ approximated: true });
+  }
+
+  const isExactTitle = (candidate: HistoryCandidate) => normalizeTitle(candidate.title) === normalizedQuery;
 
   if (year !== undefined) {
     const sameYear = candidates.filter((candidate) => candidate.year === year);
