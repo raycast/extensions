@@ -1,0 +1,121 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import {
+  extractServerRelativePath,
+  parseSharePointLocation,
+  rankLocalLibraries,
+  rankSharedLibraryRoots,
+  toLocalPath,
+} from "../src/sharepoint.ts";
+
+const sharedLibrariesPath =
+  "/Users/andrewslabbert/Library/CloudStorage/OneDrive-SharedLibraries-Four12Global";
+const folderPath =
+  "/sites/creative.branding/Shared Documents/Events/Conferences/Conference in South Africa/2026";
+const exactUrl =
+  "https://four12global.sharepoint.com/sites/creative.branding/Shared%20Documents/Forms/AllItems.aspx?id=/sites/creative.branding/Shared%20Documents/Events/Conferences/Conference%20in%20South%20Africa/2026&p=true&ga=1";
+const localLibraries = [
+  "Conference RSA 2024 - Documents",
+  "Copy - Documents",
+  "Creative - Documents",
+  "Event Management - Documents",
+  "Partnering Programmes - Documents",
+  "Photo Gallery - Documents",
+  "Platforms - Documents",
+  "Resources - Documents",
+  "Resources External - Documents",
+];
+
+test("extracts the folder from SharePoint's id query parameter", () => {
+  const url = `https://four12global.sharepoint.com/sites/creative.branding/Shared%20Documents/Forms/AllItems.aspx?id=${encodeURIComponent(folderPath)}`;
+  assert.equal(extractServerRelativePath(url), folderPath);
+});
+
+test("parses the exact Four12 folder URL", () => {
+  assert.deepEqual(parseSharePointLocation(exactUrl), {
+    tenantName: "four12global",
+    siteSlug: "creative.branding",
+    libraryName: "Shared Documents",
+    relativeSegments: [
+      "Events",
+      "Conferences",
+      "Conference in South Africa",
+      "2026",
+    ],
+    serverRelativePath: folderPath,
+  });
+});
+
+test("extracts a folder from a direct SharePoint URL", () => {
+  const url = `https://four12global.sharepoint.com/:f:/r${folderPath.replaceAll(" ", "%20")}?csf=1`;
+  assert.equal(extractServerRelativePath(url), folderPath);
+});
+
+test("detects Creative from the synced libraries", () => {
+  const location = parseSharePointLocation(exactUrl);
+  assert.equal(
+    rankLocalLibraries(localLibraries, location)[0],
+    "Creative - Documents",
+  );
+});
+
+test("prefers Resources External over Resources", () => {
+  const location = {
+    tenantName: "example",
+    siteSlug: "resources.external",
+    libraryName: "Shared Documents",
+    relativeSegments: [],
+    serverRelativePath: "/sites/resources.external/Shared Documents",
+  };
+  assert.equal(
+    rankLocalLibraries(localLibraries, location)[0],
+    "Resources External - Documents",
+  );
+});
+
+test("matches the SharePoint tenant to the correct OneDrive root", () => {
+  const roots = [
+    "OneDrive-SharedLibraries-Contoso",
+    "OneDrive-SharedLibraries-Four12Global",
+    "OneDrive-Personal",
+  ];
+  assert.equal(
+    rankSharedLibraryRoots(roots, "four12global")[0],
+    "OneDrive-SharedLibraries-Four12Global",
+  );
+});
+
+test("supports SharePoint team paths", () => {
+  const url =
+    "https://contoso.sharepoint.com/teams/Design/Shared%20Documents/Forms/AllItems.aspx?id=/teams/Design/Shared%20Documents/Projects";
+  assert.deepEqual(parseSharePointLocation(url), {
+    tenantName: "contoso",
+    siteSlug: "Design",
+    libraryName: "Shared Documents",
+    relativeSegments: ["Projects"],
+    serverRelativePath: "/teams/Design/Shared Documents/Projects",
+  });
+});
+
+test("maps beneath the selected synced library", () => {
+  assert.equal(
+    toLocalPath(sharedLibrariesPath, "Creative - Documents", [
+      "Events",
+      "Conferences",
+      "Conference in South Africa",
+      "2026",
+    ]),
+    `${sharedLibrariesPath}/Creative - Documents/Events/Conferences/Conference in South Africa/2026`,
+  );
+});
+
+test("rejects a path outside the detected library", () => {
+  assert.throws(
+    () =>
+      toLocalPath(sharedLibrariesPath, "Creative - Documents", [
+        "..",
+        "Private",
+      ]),
+    /outside the detected library/,
+  );
+});
