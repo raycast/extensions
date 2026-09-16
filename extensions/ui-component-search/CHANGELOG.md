@@ -1,6 +1,6 @@
 # UI Component Search Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-09-16
 
 - Fix PrimeNG component fetching: read the list from the showcase sidebar menu data on GitHub, since primeng.dev is client-rendered
 - Fix Angular Material component fetching: read the list from the docs `documentation-items` registry on GitHub, since material.angular.dev exposes no component links in its HTML
