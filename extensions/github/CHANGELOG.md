@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Restore My Repositories Filter] - {PR_MERGE_DATE}
+
+- Search Repositories, Issues, Pull Requests, and Discussions: Restore the **My Repositories** filter, which combines your personal repositories with those of your organizations.
+
 ## [Fix Star Action Icon] - 2026-09-09
 
 - Search Repositories: Fix the broken Star action icon
