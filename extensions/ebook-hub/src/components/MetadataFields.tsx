@@ -40,14 +40,18 @@ export function MetadataFields({ itemProps, detectFromFile = false }: MetadataFi
         ))}
       </Form.Dropdown>
       <Form.TextField title="Categories" placeholder="fiction, history" {...itemProps.categories} />
-      <Form.Dropdown title="Visibility" info="Private books never leave this Mac." {...itemProps.visibility}>
+      <Form.Dropdown
+        title="Visibility"
+        info="Books stay on this Mac. Shared marks books that came from the Community Library."
+        {...itemProps.visibility}
+      >
         <Form.Dropdown.Item value="private" title="Private" />
         <Form.Dropdown.Item value="shared" title="Shared" />
       </Form.Dropdown>
       <Form.TextField
         title="License"
         placeholder="public-domain, CC-BY-4.0, …"
-        info="Required for shared books."
+        info="Required for books shared with the Community Library."
         {...itemProps.license}
       />
     </>
