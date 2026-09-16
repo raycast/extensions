@@ -77,6 +77,45 @@ const hasCompleteAssetPack = async (destination: string) => {
   }
 };
 
+// Icon index of a pack directory. Layout varies across simple-icons releases:
+// data/ (current), _data/ (legacy), distribution/icons.json (oldest).
+const readAssetPackIcons = async (packPath: string) => {
+  const candidates = [
+    path.join(packPath, "data", "simple-icons.json"),
+    path.join(packPath, "_data", "simple-icons.json"),
+    path.join(packPath, "distribution", "icons.json"),
+  ];
+  const files = await Promise.all(candidates.map((p) => fs.readFile(p, "utf8").catch(() => "")));
+  const json = JSON.parse(files.find(Boolean) || "[]");
+  return (json.icons ? json.icons : json) as IconData[];
+};
+
+// pacote runs node-tar in non-strict mode: an entry that fails to write
+// (EPERM from a locked file on Windows, ENOSPC, ...) is logged as a warning
+// and skipped, and extract() still resolves. So "extract returned" does not
+// mean every icon is on disk. Check the pack against its own index before
+// vouching for it with the completion marker; a failure discards the staging
+// and the next launch downloads again.
+const assertAssetPackComplete = async (packPath: string, version: string) => {
+  const icons = await readAssetPackIcons(packPath);
+  if (icons.length === 0) throw new Error("Downloaded asset pack contains no icons");
+  const present = new Set(await fs.readdir(path.join(packPath, "icons")).catch(() => [] as string[]));
+  // Pass the version explicitly: cached-version is not set until the pack is
+  // installed, and the slug pattern depends on the pack's major version.
+  const missing = icons.filter((icon) => !present.has(`${getIconSlug(icon, version)}.svg`));
+  if (missing.length > 0) {
+    throw new Error(
+      `Downloaded asset pack is incomplete: ${missing.length} of ${icons.length} icons missing (e.g. ${getIconSlug(missing[0], version)}.svg)`,
+    );
+  }
+};
+
+// Best-effort removal of a directory this process owns (its own staging, a
+// pack it moved aside, or a superseded version). A failure here — EPERM/EBUSY
+// on a locked file on Windows — must never fail a launch: the directory is
+// left in place and reclaimDeadStaging sweeps it on a later launch.
+const discardDirectory = (directory: string) => fs.rm(directory, { recursive: true, force: true }).catch(() => {});
+
 // Whether a process is still running. Used as the abandonment signal for
 // leftover staging: unlike directory mtimes, it stays valid even when writes
 // land deep inside extracted subdirectories. EPERM means the process exists
@@ -125,7 +164,8 @@ const reclaimDeadStaging = async () => {
     const newestMtime = (await newestFileMtimeMs(stagingPath).catch(() => 0)) || stat.mtimeMs;
     const ageMs = Date.now() - newestMtime;
     if ((ownerDead && ageMs > 60_000) || ageMs > assetPackHardStaleMs) {
-      await fs.rm(stagingPath, { recursive: true, force: true });
+      // Tolerated so one locked entry doesn't stop the rest of the sweep.
+      await discardDirectory(stagingPath);
     }
   }
 };
@@ -146,13 +186,14 @@ const pacoteAssetPack = async (version: string) => {
   );
   try {
     await pacote.extract(releaseVersion, staging);
+    await assertAssetPackComplete(staging, version);
     await fs.writeFile(path.join(staging, assetPackCompleteMarker), version, "utf8");
     await fs.mkdir(path.dirname(destination), { recursive: true });
     try {
       await fs.rename(staging, destination);
     } catch (error) {
       if (await hasCompleteAssetPack(destination)) {
-        await fs.rm(staging, { recursive: true, force: true });
+        await discardDirectory(staging);
         return;
       }
       // Destination exists but is incomplete (crashed process, old code).
@@ -189,9 +230,9 @@ const pacoteAssetPack = async (version: string) => {
             // than report success and let cacheAssetPack persist a version
             // that has no pack. The stale pack is left for reclaimDeadStaging.
             if (!(await hasCompleteAssetPack(destination))) throw restoreError;
-            await fs.rm(stale, { recursive: true, force: true }).catch(() => {});
+            await discardDirectory(stale);
           }
-          await fs.rm(staging, { recursive: true, force: true });
+          await discardDirectory(staging);
           return;
         }
         try {
@@ -199,18 +240,19 @@ const pacoteAssetPack = async (version: string) => {
         } catch (renameError) {
           if (await hasCompleteAssetPack(destination)) {
             // Someone else published a complete pack; use it.
-            await fs.rm(staging, { recursive: true, force: true });
+            await discardDirectory(staging);
           } else {
             throw renameError;
           }
         }
-        if (movedAside) await fs.rm(stale, { recursive: true, force: true });
+        if (movedAside) await discardDirectory(stale);
         return;
       }
       throw error;
     }
   } catch (error) {
-    await fs.rm(staging, { recursive: true, force: true });
+    // Don't let a failed staging removal mask the original error.
+    await discardDirectory(staging);
     throw error;
   }
 };
@@ -235,10 +277,13 @@ const assetPackAgeMs = async (packPath: string) => {
 // renames into the freed path instead of into the tree being deleted, and a
 // pack that turns out to have been republished in the gap is put back.
 const removeSupersededPacks = async (currentVersion: string) => {
-  const packRoot = path.dirname(getAssetPackDestination(currentVersion));
-  if ((await assetPackAgeMs(getAssetPackDestination(currentVersion))) < assetPackRetentionMs) return;
+  const currentPack = getAssetPackDestination(currentVersion);
+  const packRoot = path.dirname(currentPack);
+  if ((await assetPackAgeMs(currentPack)) < assetPackRetentionMs) return;
   for (const entry of await fs.readdir(packRoot).catch(() => [] as string[])) {
-    if (entry === currentVersion) continue;
+    // Compare directory names, not the version string: a scoped package name
+    // (`@scope/pkg@1.0.0`) nests one level deeper than its version string.
+    if (entry === path.basename(currentPack)) continue;
     const packPath = path.join(packRoot, entry);
     if ((await assetPackAgeMs(packPath)) < assetPackRetentionMs) continue;
     const stale = path.join(
@@ -257,7 +302,7 @@ const removeSupersededPacks = async (currentVersion: string) => {
       await fs.rename(stale, packPath).catch(() => {});
       continue;
     }
-    await fs.rm(stale, { recursive: true, force: true }).catch(() => {});
+    await discardDirectory(stale);
   }
 };
 
@@ -265,26 +310,21 @@ export const cacheAssetPack = async (version: string) => {
   const destination = getAssetPackDestination(version);
   // Sweep before the early return: a crash between the two renames leaves a
   // .pack-stale-* directory that would otherwise never be reclaimed while
-  // the destination stays complete.
-  await reclaimDeadStaging();
-  if (!(await hasCompleteAssetPack(destination))) {
-    await pacoteAssetPack(version);
-    cache.set("cached-version", version);
-  }
+  // the destination stays complete. Non-fatal: a sweep failure must neither
+  // block the re-download of an incomplete pack nor fail a launch whose pack
+  // is fine.
+  await reclaimDeadStaging().catch(() => {});
+  if (!(await hasCompleteAssetPack(destination))) await pacoteAssetPack(version);
+  // Persist on both paths: the pack may already have been installed by another
+  // instance, and a launch that skips the download still needs the version to
+  // start offline next time.
+  cache.set("cached-version", version);
   // Best effort: a cleanup hiccup must not fail a launch whose pack is fine.
   await removeSupersededPacks(version).catch(() => {});
 };
 
 export const loadCachedJson = async (version: string) => {
-  const legacyJsonPath = path.join(environment.assetsPath, "pack", version, "_data", "simple-icons.json");
-  const newJsonPath = path.join(environment.assetsPath, "pack", version, "data", "simple-icons.json");
-  const extremeJsonPath = path.join(environment.assetsPath, "pack", version, "distribution", "icons.json");
-  const [newJsonFile, legacyJsonFile, extremeJsonFile] = await Promise.all(
-    [newJsonPath, legacyJsonPath, extremeJsonPath].map((p) => fs.readFile(p, "utf8").catch(() => "")),
-  );
-  const jsonFile = newJsonFile || legacyJsonFile || extremeJsonFile || "[]";
-  const json = JSON.parse(jsonFile);
-  const icons = (json.icons ? json.icons : json) as IconData[];
+  const icons = await readAssetPackIcons(getAssetPackDestination(version));
   return icons.map((icon, i) => ({ ...icon, code: fontUnicodeStart + i }));
 };
 
