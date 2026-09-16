@@ -42,6 +42,7 @@ interface ServiceEnvDetail {
   buildArgs?: string | null;
   buildSecrets?: string | null;
   createEnvFile?: boolean;
+  buildType?: string | null;
 }
 
 /**
@@ -77,10 +78,16 @@ export default function ServiceEnv({
         const detail = (await response.json()) as ServiceEnvDetail;
         return {
           env: detail.env ?? null,
+          // Kept even when hidden below: `application.saveEnvironment` always writes these three
+          // together (see the form's `submit`), so the save has to round-trip whatever they really
+          // are, not the empty value a gate-to-null here would quietly overwrite them with.
           buildArgs: isApplication ? (detail.buildArgs ?? null) : null,
           buildSecrets: isApplication ? (detail.buildSecrets ?? null) : null,
           createEnvFile: isApplication ? (detail.createEnvFile ?? false) : false,
-          supportsBuildFields: isApplication,
+          // Dokploy only applies these for a dockerfile build - nixpacks, railpack, heroku, paketo
+          // and static ignore them, so this is what decides whether the UI offers them, not whether
+          // the save carries them.
+          supportsBuildFields: isApplication && detail.buildType === "dockerfile",
         };
       },
     },
