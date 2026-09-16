@@ -1,0 +1,30 @@
+{
+  "id": "vim",
+  "name": {
+    "en": "Vim (mine)"
+  },
+  "match": {
+    "bundleIDs": [],
+    "processNames": [
+      "vim"
+    ]
+  },
+  "mode": "replace",
+  "priority": 50,
+  "groups": [
+    {
+      "title": {
+        "en": "Mine"
+      },
+      "items": [
+        {
+          "title": {
+            "en": "Write and quit"
+          },
+          "keys": ":wq",
+          "raw": true
+        }
+      ]
+    }
+  ]
+}
