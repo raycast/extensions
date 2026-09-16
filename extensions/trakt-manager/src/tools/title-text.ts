@@ -1,10 +1,15 @@
 export function normalizeTitle(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{M}+/gu, "")
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
+  return (
+    value
+      .toLowerCase()
+      .normalize("NFD")
+      // Only Combining Diacritical Marks (Latin / Greek / Cyrillic accents).
+      // Stripping every `\p{M}` would drop Devanagari matras and other vowel signs,
+      // so distinct titles would compare equal.
+      .replace(/[\u0300-\u036f]+/g, "")
+      .replace(/[^\p{L}\p{N}]+/gu, " ")
+      .trim()
+  );
 }
 
 /** False when the string has no letters or digits left — it cannot decide a title match. */

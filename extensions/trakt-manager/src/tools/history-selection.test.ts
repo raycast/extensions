@@ -20,6 +20,19 @@ test("normalizeTitle keeps non-Latin letters and digits", () => {
   assert.equal(isMatchableTitle("Война и мир"), true);
 });
 
+test("normalizeTitle keeps Devanagari vowel signs so distinct titles stay distinct", () => {
+  assert.notEqual(normalizeTitle("माल"), normalizeTitle("मल"));
+  assert.notEqual(normalizeTitle("माता"), normalizeTitle("मत"));
+  assert.equal(isMatchableTitle("माल"), true);
+
+  const picked = pickCandidates([movie("माल", 2019, 1), movie("मल", 2020, 2)], "माल");
+  assert.deepEqual(
+    picked.candidates.map((item) => item.traktId),
+    [1],
+  );
+  assert.equal(picked.approximated, false);
+});
+
 test("a query that normalizes to nothing is not comparable", () => {
   assert.equal(normalizeTitle("🎉"), "");
   assert.equal(normalizeTitle("???"), "");
