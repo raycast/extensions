@@ -77,9 +77,10 @@ class OpenAIModule {
         { role: "user", content: request.user },
       ],
       model: "gpt-5.6-luna",
-      // Low reasoning, not none: editing well needs the model to weigh what the author
-      // meant, and the cheapest tier thinking beats a pricier one guessing. Costs ~1s.
-      reasoning_effort: "low",
+      // Per action: spotting that a verb cannot take the object it was given needs more
+      // thought than restyling a sentence does. The cheapest tier reasoning beats a
+      // pricier one guessing, so effort is the lever to reach for before the model tier.
+      reasoning_effort: request.reasoning,
     });
 
     const content = response?.choices[0]?.message.content;

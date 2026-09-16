@@ -5,6 +5,8 @@ export type AIRequest = {
   system: string;
   user: string;
   creativity: AI.Creativity;
+  /** OpenAI only. Judging what an author meant needs more thought than restyling does. */
+  reasoning: "none" | "low" | "medium" | "high";
 };
 
 const SHARED_RULES = [
@@ -24,17 +26,26 @@ function wrap(instruction: string, inputText: string): string {
 export function fixGrammarPrompt(inputText: string): AIRequest {
   const system = `You are a precise copy editor. You return an edited version of the text you are given, and nothing else.
 
+Your goal: a careful native speaker of the text's language reads your version and finds nothing wrong or odd in it, while recognising it as the same thing the author was trying to say.
+
 How to edit:
-- Read the whole text before changing anything, and use that context to work out what the author meant. Resolve ambiguous or garbled wording the way the surrounding text implies.
-- Fix grammar, spelling, punctuation, capitalisation, agreement, tense, articles, prepositions and word order.
-- Fix word choice too, when a word is wrong, misspelled, or reads unnaturally to a native speaker in this context. Replacing a word is expected where it genuinely does not work. It is not licence to swap correct words for fancier synonyms.
-- Make the smallest set of changes that leaves the text correct and natural. Keep the author's voice, register, vocabulary and sentence structure wherever they already work. Do not restyle, expand, condense, merge, split or reorder anything that is already fine.
+- Read the whole text first and work out what the author meant. Edit towards that meaning.
+- Fix grammar, spelling, punctuation, capitalisation, agreement, tense, case, articles, prepositions and word order.
+- Check that the words actually go together: verbs with their objects, prepositions with the cases they govern, and fixed expressions. Where a combination is impossible or simply not what people say, repair the combination itself. Change the verb, the preposition, the case or the phrasing. Do not merely tidy the endings around a pairing that does not work. If a text pairs a verb meaning to ride with a word meaning on foot, the verb is what is wrong, not its ending.
+- When one change forces another, make that one too. A different verb often needs a different preposition or case, and the word order may have to follow.
+- Minimal editing is how you arrive at a correct result, never a reason to stop short of one. Among versions that are fully correct and natural, choose the one closest to the original. Never choose a smaller edit that leaves the text wrong, unidiomatic or nonsensical.
+- Keep the author's voice, register and vocabulary wherever they already work. Do not restyle, expand, condense or reorder anything that is already correct and natural.
 - If a passage is already correct, return it untouched. If the entire text is already correct, return it exactly as you received it.
 - ${SHARED_RULES}
 
 ${OUTPUT_RULE}`;
 
-  return { system, user: wrap("Edit the text between the <text> tags.", inputText), creativity: "none" };
+  return {
+    system,
+    user: wrap("Edit the text between the <text> tags.", inputText),
+    creativity: "none",
+    reasoning: "medium",
+  };
 }
 
 export function paraphrasePrompt(inputText: string): AIRequest {
@@ -49,7 +60,12 @@ How to rephrase:
 
 ${OUTPUT_RULE}`;
 
-  return { system, user: wrap("Rephrase the text between the <text> tags.", inputText), creativity: "low" };
+  return {
+    system,
+    user: wrap("Rephrase the text between the <text> tags.", inputText),
+    creativity: "low",
+    reasoning: "low",
+  };
 }
 
 export function changeTonePrompt(inputText: string, toneType: ToneType): AIRequest {
@@ -68,6 +84,7 @@ ${OUTPUT_RULE}`;
     system,
     user: wrap(`Rewrite the text between the <text> tags so that it reads as ${toneType.toLowerCase()}.`, inputText),
     creativity: "low",
+    reasoning: "low",
   };
 }
 
@@ -87,5 +104,6 @@ ${OUTPUT_RULE}`;
     system,
     user: wrap("Continue the text between the <text> tags. Return only your continuation.", inputText),
     creativity: "medium",
+    reasoning: "low",
   };
 }
