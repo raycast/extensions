@@ -467,7 +467,12 @@ function applyInstalledStatus(results: InstallableResults, installed?: Installed
       formula.pinned = info.pinned;
       // The search index strips `revision`, so without this a revision-bumped
       // formula renders its available version as the one already installed.
-      formula.revision = info.revision;
+      // Only when the two records describe the SAME stable version: a cached
+      // index older than the local tap would otherwise stamp the installed
+      // revision onto a different version and invent a release that never shipped.
+      if (formula.versions?.stable === info.versions?.stable) {
+        formula.revision = info.revision;
+      }
     } else {
       formula.installed = [];
       formula.outdated = false;

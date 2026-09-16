@@ -228,14 +228,21 @@ function VulnActions(props: {
       <ActionPanel.Section>
         {outdated && (
           <Action
-            title={`Upgrade ${finding.formula}`}
+            title={outdated.pinned ? `Unpin and Upgrade ${finding.formula}` : `Upgrade ${finding.formula}`}
             icon={Icon.ArrowUpCircle}
             shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
             onAction={async () => {
               const installed = outdated.installed_versions.join(", ");
-              const ok = await confirmAndRun([`brew upgrade ${finding.formula}`], {
-                title: `Upgrade ${finding.formula}?`,
-                message: `Upgrade available (${installed} \u2192 ${outdated.current_version}) \u2014 may not resolve the advisory.`,
+              // Homebrew REFUSES an explicitly named pinned formula
+              // (`cmd/upgrade.rb:471-476`), so upgrading one has to drop the pin
+              // first. Both commands are shown in the confirmation, so the pin
+              // is never removed behind the user's back.
+              const commands = outdated.pinned
+                ? [`brew unpin ${finding.formula}`, `brew upgrade ${finding.formula}`]
+                : [`brew upgrade ${finding.formula}`];
+              const ok = await confirmAndRun(commands, {
+                title: outdated.pinned ? `Unpin and upgrade ${finding.formula}?` : `Upgrade ${finding.formula}?`,
+                message: `${outdated.pinned ? `${finding.formula} is pinned. ` : ""}Upgrade available (${installed} \u2192 ${outdated.current_version}) \u2014 may not resolve the advisory.`,
               });
               if (ok) props.onRefresh();
             }}

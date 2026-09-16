@@ -18,10 +18,17 @@
 import type { Cask, Formula, FormulaRequirement } from "../types";
 import { compareVersions } from "./version";
 
+export type BrewArch = "arm64" | "x86_64";
+
 export interface BrewHost {
   /** `sw_vers -productVersion`, e.g. "26.6.2". Undefined when it could not be read. */
   macos: string | undefined;
-  arch: "arm64" | "x86_64";
+  /**
+   * Undefined when the brew install's architecture could not be determined —
+   * a `customBrewPath` under a non-standard prefix. The arch gate is skipped
+   * rather than guessed.
+   */
+  arch: BrewArch | undefined;
 }
 
 export type Installability = { installable: true } | { installable: false; reason: string };
@@ -33,7 +40,7 @@ function blocked(reason: string): Installability {
 }
 
 /** `cask/dsl/depends_on.rb:26-29`. An unknown type is ignored, not failed. */
-const ARCH_BY_CASK_TYPE: Record<string, BrewHost["arch"] | undefined> = { arm: "arm64", intel: "x86_64" };
+const ARCH_BY_CASK_TYPE: Record<string, BrewArch | undefined> = { arm: "arm64", intel: "x86_64" };
 
 /**
  * Homebrew compares macOS majors for ≥ 11 (`macos_version.rb` `strip_patch`),
@@ -79,8 +86,8 @@ function caskInstallability(cask: Cask, host: BrewHost): Installability {
 
   const arches = (Array.isArray(dependsOn?.arch) ? dependsOn.arch : [])
     .map(({ type }) => ARCH_BY_CASK_TYPE[type])
-    .filter((arch): arch is BrewHost["arch"] => arch !== undefined);
-  if (arches.length > 0 && !arches.includes(host.arch)) {
+    .filter((arch): arch is BrewArch => arch !== undefined);
+  if (host.arch && arches.length > 0 && !arches.includes(host.arch)) {
     return blocked(`Requires ${arches.join(" or ")}`);
   }
 
@@ -119,7 +126,7 @@ function formulaInstallability(formula: Formula, host: BrewHost): Installability
   }
 
   const arch = requirements.find((r) => r.name === "arch" && r.version);
-  if (arch?.version && arch.version !== host.arch) {
+  if (host.arch && arch?.version && arch.version !== host.arch) {
     return blocked(`Requires ${arch.version}`);
   }
 

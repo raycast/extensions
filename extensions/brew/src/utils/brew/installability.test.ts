@@ -113,6 +113,15 @@ describe("installabilityOf — casks", () => {
     expect(installabilityOf(intelOnly, { macos: "26.6.2", arch: "x86_64" }).installable).toBe(true);
   });
 
+  it("skips the arch gate when the brew install's arch is unknown", () => {
+    // A `customBrewPath` under a non-standard prefix: the prefix no longer says
+    // which architecture brew runs as, and a false \u2298 hides a package the
+    // user could have had.
+    const unknownArch = { macos: "26.6.2", arch: undefined };
+    const intelOnly = cask({ depends_on: { arch: [{ type: "intel", bits: 64 }] } });
+    expect(installabilityOf(intelOnly, unknownArch).installable).toBe(true);
+  });
+
   it("blocks a Linux-only cask", () => {
     // Real: koreader — the value is a Ruby inspect string; presence is the signal.
     const linux = cask({ token: "koreader", depends_on: { linux: "#<LinuxRequirement:0x000000012b1d3220>" } });

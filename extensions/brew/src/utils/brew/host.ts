@@ -16,8 +16,13 @@ export const brewHost: BrewHost = (() => {
   } catch {
     // sw_vers unavailable; the macOS gate simply does not apply.
   }
-  // Homebrew's arch is the brew process's own MACHTYPE (`utils/os.sh`): a
-  // /usr/local brew on Apple Silicon runs under Rosetta and is x86_64.
-  const arch: BrewHost["arch"] = process.arch === "arm64" && brewPrefix !== "/usr/local" ? "arm64" : "x86_64";
+  // Homebrew's arch is the brew process's own MACHTYPE (`utils/os.sh`), and the
+  // prefix is the only cheap tell we have: /usr/local is the Intel install (it
+  // runs under Rosetta on Apple Silicon), /opt/homebrew the Apple Silicon one.
+  // `customBrewPath` can point at a brew under ANY prefix, and an Intel one
+  // there would read as arm64 — so leave it unknown rather than guess, per this
+  // module's never-mark-on-a-guess bias. Unknown arch skips the arch gate.
+  const arch: BrewHost["arch"] =
+    brewPrefix === "/opt/homebrew" ? "arm64" : brewPrefix === "/usr/local" ? "x86_64" : undefined;
   return { macos, arch };
 })();

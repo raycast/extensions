@@ -62,14 +62,11 @@
       ]
     },
     {
-      "name": "show-upgrades",
+      "name": "outdated",
       "title": "Show Upgrades",
       "subtitle": "Brew",
       "description": "Review available upgrades, choose which to apply, and run it",
-      "mode": "view",
-      "keywords": [
-        "outdated"
-      ]
+      "mode": "view"
     },
     {
       "name": "show-vulnerabilities",
