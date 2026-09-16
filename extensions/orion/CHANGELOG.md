@@ -1,5 +1,10 @@
 # Orion Changelog
 
+## [Command Bar] - {PR_MERGE_DATE}
+
+- Add a configurable limit for live search suggestions; setting it to zero hides suggestions and prevents suggestion requests.
+- Add fuzzy and pinyin matching as a labeled fallback for open tabs when there is no exact local tab match. Fallback matches are not eligible for Top Hit.
+
 ## [Command Bar] - 2026-06-22
 
 - Add a "Command Bar" command — an Arc-style unified palette that searches open tabs, bookmarks, reading list, history, and the web from one place. Shows a top hit, a "Search the Web" action, live search-engine autocomplete, and per-source sections. Includes a profile switcher (search bar accessory) and a Search Engine preference (DuckDuckGo, Google, Brave, or Kagi). Results open in Orion rather than the system default browser.
