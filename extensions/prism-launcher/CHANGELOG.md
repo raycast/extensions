@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [New Addition] - {PR_MERGE_DATE}
+## [New Addition] - 2026-09-16
 
 - Instances now show their Minecraft version and mod loader (Forge, NeoForge, Fabric, Quilt, ...) in the list
 - Instances can be searched by version or loader
