@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codexrunway-reset-tracker",
+  "title": "CodexRunway Reset Tracker",
+  "description": "Track CodexRunway usage reset schedule and completion status right from the menu bar",
+  "icon": "icon.png",
+  "author": "evilmouth",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "menubar",
+      "title": "Reset Status (Menu Bar)",
+      "subtitle": "CodexRunway",
+      "description": "Shows the latest reset status in the menu bar, auto-refreshing every 10 minutes",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "iconOnly",
+          "title": "Menu Bar Display",
+          "label": "Show icon only",
+          "description": "Keep the status in the tooltip and expanded menu.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "notifyResets",
+          "title": "Completion Notifications",
+          "label": "Notify when a new reset is confirmed",
+          "description": "Uses macOS notifications. The first background check establishes a baseline; subsequent checks notify only new completions matching your plan. Requires background refresh.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "latest",
+      "title": "View Latest Reset",
+      "subtitle": "CodexRunway",
+      "description": "Shows full details of the latest reset record",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Browse Reset History",
+      "subtitle": "CodexRunway",
+      "description": "Browse paginated reset records, filterable by kind",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.2.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "test": "TZ=UTC node tests/api.cjs && TZ=UTC node tests/requests.cjs && TZ=UTC node tests/notifications.cjs",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "plan",
+      "title": "Subscription Plan",
+      "description": "Show resets explicitly covering this plan, including records marked for all plans. Unspecified scope is only shown with All Plans.",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "data": [
+        {
+          "title": "All Plans",
+          "value": "all"
+        },
+        {
+          "title": "Free",
+          "value": "free"
+        },
+        {
+          "title": "Plus",
+          "value": "plus"
+        },
+        {
+          "title": "Pro",
+          "value": "pro"
+        },
+        {
+          "title": "Team",
+          "value": "team"
+        },
+        {
+          "title": "Business",
+          "value": "business"
+        },
+        {
+          "title": "Enterprise",
+          "value": "enterprise"
+        }
+      ]
+    }
+  ]
+}
