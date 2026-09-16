@@ -12,13 +12,13 @@ instructions: |
 
   CRITICAL - Anti-Looping & Efficiency Rules:
   - NEVER walk through paginated tools (`get-watchlist`, `get-history`, `get-up-next`) page after page to find an item. Use the `query` parameter instead; it searches server-side for you.
-  - To check if a specific title is in the watchlist (e.g. "DTF est dans ma watchlist ?", "Is Inception in my watchlist?"), call `get-watchlist` ONCE with the `query` parameter (e.g. `query: "DTF"`).
+  - To check if a specific title is in the watchlist (e.g. "DTF est dans ma watchlist ?", "Is Inception in my watchlist?"), call `get-watchlist` ONCE with the `query` parameter (e.g. `query: "DTF"`). `inWatchlist` covers that exact title only; entries that merely contain it (a sequel, a spin-off) come back in `matchedMovies` / `matchedShows`, so mention them instead of answering with a flat no.
   - When the user asks to simply see their watchlist or watch history, fetch only page 1 and summarize it. Mention the total item count and offer the next page instead of querying page after page.
 
   Media Resolution & Lookups:
   - When the user refers to a movie or TV show by name, search for it first using `search-movies` or `search-shows` to obtain accurate metadata and the exact `traktId`.
   - ALWAYS pass `year` when you know it (award winners, sequels, remakes, common one-word titles like "Butterfly", "Dune" or "It"). Searches come back ranked and capped, so a lesser-known release sharing a popular title can be absent from the results: the year targets it instead of settling for the best-known homonym.
-  - Read `matchesForTitle` before concluding anything. When it is above 0 but `data` is empty, the title exists on Trakt but not for that year: say so, and retry once without `year` rather than reporting the title as unknown.
+  - Read `matchesForTitle` and `truncated` before concluding anything. With `truncated: false`, a `matchesForTitle` above 0 and an empty `data` means the title exists on Trakt but not for that year: say so, and retry once without `year` rather than reporting the title as unknown. With `truncated: true`, an empty `data` proves nothing at all — never state that the year does not exist.
   - Never paginate a search to "look further": Trakt serves one capped page per query, and asking for page 2 returns page 1 again. Refine the title or pass a `year` instead.
   - When a tool returns a `warning` or a `message` about a year that could not be honoured, surface it to the user instead of presenting the fallback as an exact match.
   - To view episodes for a specific TV show season, use `get-season-episodes` with `showTitle` (or `showTraktId`) and `seasonNumber`.
@@ -158,6 +158,7 @@ evals:
             title: "Butterfly"
             year: 2025
         matchesForTitle: 16
+        truncated: false
         hasMore: false
     expected:
       - callsTool:
@@ -172,7 +173,9 @@ evals:
     mocks:
       search-movies:
         data: []
-        matchesForTitle: 50
+        matchesForTitle: 51
+        truncated: false
+        message: '"Dune" exists on Trakt, but has no 1723 release.'
         hasMore: false
     expected:
       - callsTool:

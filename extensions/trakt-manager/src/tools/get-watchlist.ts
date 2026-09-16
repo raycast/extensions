@@ -1,5 +1,6 @@
 import { withPagination } from "../lib/schema";
 import { CompactMovie, CompactShow, toCompactMovie, toCompactShow } from "./compact-media";
+import { normalizeTitle } from "./resolve-media";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
@@ -31,6 +32,9 @@ type Input = {
 type Output = {
   /**
    * Set when searching for a specific item (via query or traktId).
+   * True only for an entry whose title matches the query outright, or for the requested
+   * `traktId`. Entries that merely contain the query (a sequel, a spin-off) are reported in
+   * `matchedMovies` / `matchedShows` without making this true.
    */
   found?: boolean;
   inWatchlist?: boolean;
@@ -110,15 +114,25 @@ export default async function tool(input: Input): Promise<Output> {
 
   // Fast path: search for a specific item in the watchlist
   if (query || traktId) {
-    const normalizedQuery = query?.trim().toLowerCase();
+    const normalizedQuery = query ? normalizeTitle(query) : undefined;
 
-    const matchesFilter = (title: string, id: number) => {
-      if (traktId !== undefined && id === traktId) return true;
-      if (normalizedQuery) {
-        return title.toLowerCase().includes(normalizedQuery);
-      }
-      return false;
+    /**
+     * Accents cannot be allowed to decide the verdict: comparing raw text makes "Amelie" miss
+     * "Amélie" while the reply below still claims every entry was searched. Containment is kept
+     * so near misses can be surfaced, but only an outright title match counts as being in the
+     * watchlist, otherwise "Dune: Part Two" would answer for "Dune".
+     */
+    const classify = (title: string, id: number): "exact" | "partial" | "none" => {
+      if (traktId !== undefined && id === traktId) return "exact";
+      if (!normalizedQuery) return "none";
+
+      const normalizedTitle = normalizeTitle(title);
+      if (normalizedTitle === normalizedQuery) return "exact";
+
+      return normalizedTitle.includes(normalizedQuery) ? "partial" : "none";
     };
+
+    const matchesFilter = (title: string, id: number) => classify(title, id) !== "none";
 
     let matchedMovies: CompactMovie[] = [];
     let matchedShows: CompactShow[] = [];
@@ -166,13 +180,25 @@ export default async function tool(input: Input): Promise<Output> {
       exhaustive = exhaustive && result.exhaustive;
     }
 
-    const totalMatches = matchedMovies.length + matchedShows.length;
-    const isFound = totalMatches > 0;
+    const matched = [...matchedMovies, ...matchedShows];
+    const exactCount = matched.filter((item) => classify(item.title, item.traktId) === "exact").length;
+    const relatedCount = matched.length - exactCount;
+    const isFound = exactCount > 0;
     const target = query ?? `Trakt ID ${traktId}`;
+    const plural = (count: number) => (count === 1 ? "y" : "ies");
 
     let message: string;
     if (isFound) {
-      message = `Found ${totalMatches} matching item(s) in your watchlist.`;
+      message =
+        relatedCount > 0
+          ? `Found ${exactCount} item(s) titled "${target}" in your watchlist, plus ${relatedCount} related ` +
+            `entr${plural(relatedCount)} whose title contains it.`
+          : `Found ${exactCount} matching item(s) in your watchlist.`;
+    } else if (relatedCount > 0) {
+      message =
+        `"${target}" itself is not in your watchlist, but ${relatedCount} related entr${plural(relatedCount)} ` +
+        `share part of that title: ${matched.map((item) => `"${item.title}"`).join(", ")}. Ask the user whether ` +
+        `they meant one of those rather than answering with a flat no.`;
     } else if (exhaustive) {
       message = `Confirmed: "${target}" is not in your watchlist (searched every entry).`;
     } else {

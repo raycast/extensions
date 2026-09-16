@@ -1,3 +1,4 @@
+import { TraktMovieListItem, TraktShowListItem } from "../lib/schema";
 import { executeToolCall, toolTraktClient } from "./tool-client";
 
 export type ResolvedMedia = {
@@ -29,25 +30,33 @@ export type ResolvedMatch = ResolvedMedia & {
  */
 export const SEARCH_RESULT_CAP = 50;
 
-export type TitleSearch = {
+/**
+ * True when the title-first search filled a whole page, meaning further releases sharing the
+ * title exist out of reach. A negative conclusion drawn from a truncated set is a guess, so
+ * callers must stop describing it as complete.
+ */
+type Truncated = { truncated: boolean };
+
+export type TitleSearch = Truncated & {
   /**
    * Every release reachable for the query, the exact-title ones first.
    */
   candidates: ResolvedMedia[];
-  /**
-   * True when the title-first search filled a whole page, meaning further releases sharing
-   * the title exist out of reach. A negative conclusion drawn from a truncated set is a
-   * guess, so callers must stop describing it as complete.
-   */
-  truncated: boolean;
 };
 
-function mergeById(...groups: ResolvedMedia[][]): ResolvedMedia[] {
-  const byId = new Map<number, ResolvedMedia>();
+/**
+ * The same reachable releases as `TitleSearch`, kept as Trakt returned them for callers that
+ * need more than an identifier, a title and a year.
+ */
+export type TitleSearchResults<T> = Truncated & { items: T[] };
+
+function mergeById<T>(idOf: (item: T) => number, ...groups: T[][]): T[] {
+  const byId = new Map<number, T>();
 
   for (const group of groups) {
-    for (const candidate of group) {
-      if (!byId.has(candidate.traktId)) byId.set(candidate.traktId, candidate);
+    for (const item of group) {
+      const id = idOf(item);
+      if (!byId.has(id)) byId.set(id, item);
     }
   }
 
@@ -100,7 +109,10 @@ export function pickBestMatch(candidates: ResolvedMedia[], query: string, year?:
  * release that relevance ranking finds. Trakt's guidance is therefore to query both and
  * de-duplicate by Trakt ID, which is what its own site search does.
  */
-export async function searchMovieCandidates(query: string, limit = SEARCH_RESULT_CAP): Promise<TitleSearch> {
+export async function searchMovieResults(
+  query: string,
+  limit = SEARCH_RESULT_CAP,
+): Promise<TitleSearchResults<TraktMovieListItem>> {
   const [exact, broad] = await Promise.all([
     executeToolCall(
       (signal) =>
@@ -120,19 +132,16 @@ export async function searchMovieCandidates(query: string, limit = SEARCH_RESULT
     ),
   ]);
 
-  const toMedia = (item: (typeof exact.body)[number]) => ({
-    traktId: item.movie.ids.trakt,
-    title: item.movie.title,
-    year: item.movie.year,
-  });
-
   return {
-    candidates: mergeById(exact.body.map(toMedia), broad.body.map(toMedia)),
+    items: mergeById((item) => item.movie.ids.trakt, exact.body, broad.body),
     truncated: exact.body.length >= limit,
   };
 }
 
-export async function searchShowCandidates(query: string, limit = SEARCH_RESULT_CAP): Promise<TitleSearch> {
+export async function searchShowResults(
+  query: string,
+  limit = SEARCH_RESULT_CAP,
+): Promise<TitleSearchResults<TraktShowListItem>> {
   const [exact, broad] = await Promise.all([
     executeToolCall(
       (signal) =>
@@ -152,15 +161,35 @@ export async function searchShowCandidates(query: string, limit = SEARCH_RESULT_
     ),
   ]);
 
-  const toMedia = (item: (typeof exact.body)[number]) => ({
-    traktId: item.show.ids.trakt,
-    title: item.show.title,
-    year: item.show.year,
-  });
+  return {
+    items: mergeById((item) => item.show.ids.trakt, exact.body, broad.body),
+    truncated: exact.body.length >= limit,
+  };
+}
+
+export async function searchMovieCandidates(query: string, limit = SEARCH_RESULT_CAP): Promise<TitleSearch> {
+  const { items, truncated } = await searchMovieResults(query, limit);
 
   return {
-    candidates: mergeById(exact.body.map(toMedia), broad.body.map(toMedia)),
-    truncated: exact.body.length >= limit,
+    candidates: items.map((item) => ({
+      traktId: item.movie.ids.trakt,
+      title: item.movie.title,
+      year: item.movie.year,
+    })),
+    truncated,
+  };
+}
+
+export async function searchShowCandidates(query: string, limit = SEARCH_RESULT_CAP): Promise<TitleSearch> {
+  const { items, truncated } = await searchShowResults(query, limit);
+
+  return {
+    candidates: items.map((item) => ({
+      traktId: item.show.ids.trakt,
+      title: item.show.title,
+      year: item.show.year,
+    })),
+    truncated,
   };
 }
 
@@ -177,4 +206,31 @@ export async function resolveShow(title: string, year?: number): Promise<Resolve
 export async function resolveMovie(title: string, year?: number): Promise<ResolvedMatch | undefined> {
   const { candidates } = await searchMovieCandidates(title);
   return pickBestMatch(candidates, title, year);
+}
+
+/**
+ * Explain an empty year-filtered search.
+ *
+ * "This title has no release that year" and "that release is out of Trakt's reach" look
+ * identical once the filter has run, yet only the first is a fact. Saying which one applies
+ * keeps the caller from reporting a reachable release as non-existent.
+ */
+export function describeYearFilter(
+  title: string,
+  year: number | undefined,
+  kept: number,
+  total: number,
+  truncated: boolean,
+): string | undefined {
+  if (year === undefined || kept > 0) return undefined;
+
+  if (truncated) {
+    return (
+      `No ${year} release of "${title}" came back, but Trakt returned as many releases for that title as it ` +
+      `can list, so others stay out of reach and this is NOT proof that none exists. Ask the user which ` +
+      `release they mean, or search without a year, instead of reporting the year as unknown.`
+    );
+  }
+
+  return total > 0 ? `"${title}" exists on Trakt, but has no ${year} release.` : undefined;
 }
