@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "abuseipdb",
+  "title": "AbuseIPDB",
+  "description": "Check any IP address against the AbuseIPDB reputation database without leaving Raycast.",
+  "icon": "extension-icon.png",
+  "author": "gabrielbelli",
+  "categories": [
+    "Security",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-ip",
+      "title": "Check IP",
+      "subtitle": "AbuseIPDB",
+      "description": "Look up the abuse reputation of an IPv4 or IPv6 address.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ip",
+          "placeholder": "1.2.3.4",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "check-clipboard-ip",
+      "title": "Check IP from Clipboard",
+      "subtitle": "AbuseIPDB",
+      "description": "Look up the first IP address found in the clipboard.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your AbuseIPDB API key (Account -> API -> Create Key).",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "maxAgeInDays",
+      "title": "Report Window",
+      "description": "Only consider reports made within this many days.",
+      "type": "dropdown",
+      "required": false,
+      "default": "90",
+      "data": [
+        {
+          "title": "1 day",
+          "value": "1"
+        },
+        {
+          "title": "7 days",
+          "value": "7"
+        },
+        {
+          "title": "30 days",
+          "value": "30"
+        },
+        {
+          "title": "90 days",
+          "value": "90"
+        },
+        {
+          "title": "180 days",
+          "value": "180"
+        },
+        {
+          "title": "365 days",
+          "value": "365"
+        }
+      ]
+    },
+    {
+      "name": "verbose",
+      "title": "Report Details",
+      "label": "Include individual reports",
+      "description": "Fetch the most recent report comments and categories.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.5",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
