@@ -115,6 +115,16 @@ export default withAccessToken(provider)(async function ReplaceSelectionWithAgen
     }
 
     const plainAnswer = stripMarkdown(answer);
+    if (!plainAnswer.trim()) {
+      // Clipboard.paste("") would clear the selection instead of pasting anything.
+      await Clipboard.copy(answer);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Answer had no plain text to paste — copied the raw answer instead",
+        message: "Paste it manually with ⌘V",
+      });
+      return;
+    }
     const [currentSelection, currentApp] = await Promise.all([
       getSelectedText().catch(() => undefined),
       getFrontmostApplication().catch(() => undefined),

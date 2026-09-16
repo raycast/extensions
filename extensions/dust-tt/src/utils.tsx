@@ -214,10 +214,11 @@ function renderTokenPlain(token: Token): string {
       return `${renderInlinePlain(token)}\n\n`;
     case "list": {
       const list = token as Tokens.List;
-      return list.items.map((item) => `${renderInlinePlain(item)}\n`).join("") + "\n";
+      return list.items.map((item) => `${renderTokenPlain(item)}\n`).join("") + "\n";
     }
     case "list_item":
-      return renderInlinePlain(token);
+      // "\n", not "": an item's text and a nested block (e.g. a sub-list) are siblings with no boundary otherwise.
+      return (token as Tokens.ListItem).tokens.map(renderTokenPlain).join("\n");
     case "table": {
       const table = token as Tokens.Table;
       const rows = [table.header, ...table.rows];
@@ -229,15 +230,25 @@ function renderTokenPlain(token: Token): string {
     case "space":
     case "def":
       return "";
-    case "html":
-      return convertHtmlToText(renderInlinePlain(token), { selectors: [{ selector: "img", format: "skip" }] });
+    case "html": {
+      const rendered = convertHtmlToText(renderInlinePlain(token), {
+        selectors: [{ selector: "img", format: "skip" }],
+      });
+      // Block html (e.g. <div>) needs a boundary; inline html (e.g. <sup> around a citation) must stay glued to its text.
+      return (token as Tokens.HTML).block ? `${rendered}\n\n` : rendered;
+    }
     default:
       return "raw" in token ? String(token.raw) : "";
   }
 }
 
+// Slack's lone ">>>" line ("quote everything below") makes marked recurse on the extra ">"s and drop the quoted lines.
+function normalizeSlackBlockquotes(text: string): string {
+  return text.replace(/^>>>[ \t]*$/gm, ">");
+}
+
 export function stripMarkdown(text: string): string {
-  return renderTokensPlain(marked.lexer(text))
+  return renderTokensPlain(marked.lexer(normalizeSlackBlockquotes(text)))
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
