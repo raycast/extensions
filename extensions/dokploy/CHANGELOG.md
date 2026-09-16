@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Database Connection Actions] - {PR_MERGE_DATE}
+## [Database Connection Actions] - 2026-09-16
 
 - Add `Copy Internal Connection String`, `Copy External Connection String` and `Copy Password` actions to database services (PostgreSQL, MySQL, MariaDB, MongoDB, Redis), matching the URIs Dokploy's own dashboard shows.
 
