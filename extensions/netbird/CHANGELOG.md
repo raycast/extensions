@@ -1,6 +1,6 @@
 # NetBird Changelog
 
-## [Toggle Connection] - {PR_MERGE_DATE}
+## [Toggle Connection] - 2026-09-16
 
 - Added `Toggle Connection` command which connects to NetBird when disconnected and disconnects when connected.
 
