@@ -4,9 +4,10 @@
  * casks.
  *
  * The Upgrade action is offered only where the formula is ALSO outdated, and
- * says so carefully: brew reports the upstream commit that fixed an advisory,
- * not the Homebrew release that carries it, so a newer bottle is an
- * opportunity, never a guaranteed fix.
+ * the view never claims it resolves anything: brew reports the upstream commit
+ * that fixed an advisory, not the Homebrew release that carries it, so a newer
+ * bottle is an opportunity, never a guaranteed fix. What it CAN say is printed
+ * verbatim — "Fixed upstream in: …" beside each advisory.
  */
 
 import React, { useMemo } from "react";
@@ -15,6 +16,7 @@ import { useCachedState } from "@raycast/utils";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { HomebrewGate } from "./components/requiresHomebrew";
 import { RefreshAction, ToggleSidebarAction } from "./components/actionPanels";
+import * as Actions from "./components/actions";
 import { DetailMetadata, ListMetadata, MetadataRow } from "./components/packageMetadata";
 import { useBrewOutdated } from "./hooks/useBrewOutdated";
 import { useBrewVulns } from "./hooks/useBrewVulns";
@@ -27,7 +29,6 @@ import {
   vulnerableIcon,
 } from "./components/palette";
 import {
-  confirmAndRun,
   formatCount,
   getErrorMessage,
   escapeMarkdown,
@@ -226,28 +227,15 @@ function VulnActions(props: {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {outdated && (
-          <Action
-            title={outdated.pinned ? `Unpin and Upgrade ${finding.formula}` : `Upgrade ${finding.formula}`}
-            icon={Icon.ArrowUpCircle}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-            onAction={async () => {
-              const installed = outdated.installed_versions.join(", ");
-              // Homebrew REFUSES an explicitly named pinned formula
-              // (`cmd/upgrade.rb:471-476`), so upgrading one has to drop the pin
-              // first. Both commands are shown in the confirmation, so the pin
-              // is never removed behind the user's back.
-              const commands = outdated.pinned
-                ? [`brew unpin ${finding.formula}`, `brew upgrade ${finding.formula}`]
-                : [`brew upgrade ${finding.formula}`];
-              const ok = await confirmAndRun(commands, {
-                title: outdated.pinned ? `Unpin and upgrade ${finding.formula}?` : `Upgrade ${finding.formula}?`,
-                message: `${outdated.pinned ? `${finding.formula} is pinned. ` : ""}Upgrade available (${installed} \u2192 ${outdated.current_version}) \u2014 may not resolve the advisory.`,
-              });
-              if (ok) props.onRefresh();
-            }}
-          />
-        )}
+        {/* The canonical single-package upgrade: it re-reads brew's own pin
+            directory rather than trusting this snapshot, shows download
+            progress, and reports brew's "did not upgrade" reasons. On a pinned
+            formula it names the unpin in its own title and does both, because
+            brew refuses an explicitly named pin (`cmd/upgrade.rb:471-476`).
+            Refreshing on failure as well as success matters here: the unpin
+            has landed by then, so the row would otherwise keep claiming a pin
+            that is gone. */}
+        {outdated && <Actions.FormulaUpgradeAction formula={outdated} onAction={() => props.onRefresh()} />}
         {props.showDetails}
         {worst && (
           <Action.OpenInBrowser title="Open in OSV" url={osvUrl(worst.id)} shortcut={Keyboard.Shortcut.Common.Open} />
