@@ -15,6 +15,7 @@ export interface ProcessRow {
   appPid?: number;
   appBlockedReason?: string;
   blockedReason: string | null;
+  foreground?: boolean | null;
 }
 export interface ContainerRow {
   id: string;

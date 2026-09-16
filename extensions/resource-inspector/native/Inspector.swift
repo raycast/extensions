@@ -63,6 +63,7 @@ func processRows() -> [[String: Any]] {
         rows.append(row)
     }
     let byPID = Dictionary(uniqueKeysWithValues: rows.map { ($0["pid"] as! Int, $0) })
+    let foregroundPID = NSWorkspace.shared.frontmostApplication.map { Int($0.processIdentifier) }
     let running = NSWorkspace.shared.runningApplications
     var instances = [String: [NSRunningApplication]]()
     for app in running {
@@ -108,9 +109,13 @@ func processRows() -> [[String: Any]] {
                 break
             }
         }
+        if let foregroundPID {
+            row["foreground"] = ancestry.contains { $0["pid"] as? Int == foregroundPID } || row["appPid"] as? Int == foregroundPID
+        } else { row["foreground"] = NSNull() }
         var reason: String? = nil
         if row["uid"] as! Int != Int(getuid()) { reason = "Owned by another user or macOS" }
         if pid <= 1 || executable.hasPrefix("/System/Library/") || executable.hasPrefix("/usr/libexec/") || executable.hasPrefix("/usr/sbin/") || executable.hasPrefix("/sbin/") { reason = "macOS infrastructure" }
+        if executable == Bundle.main.executableURL?.path || executable.contains("/Resource Inspector Notifications.app/") || executable.hasSuffix("/assets/inspector") { reason = "Inspector helpers are protected" }
         if executable.isEmpty { reason = "Process identity could not be verified" }
         if ownAncestors.contains(pid) || ancestry.contains(where: { ($0["executable"] as! String).contains("/Raycast.app/") }) { reason = "Raycast and inspector processes are protected" }
         row["blockedReason"] = reason as Any? ?? NSNull()
@@ -257,16 +262,19 @@ func database(_ request: [String: Any]) throws -> [Any] {
 }
 
 #if !INSPECTOR_TESTING
+func runInspector() {
 umask(0o077)
 do {
     switch CommandLine.arguments.dropFirst().first ?? "" {
     case "snapshot": try emit(snapshot())
     case "action": try emit(act(input()))
     case "database": try emit(database(input()))
+    case "inactivity": try emit(inactivity(input()))
     default: throw Failure("Expected snapshot, action, or database")
     }
 } catch {
     try? emit(["error": String(describing: error)])
     exit(1)
+}
 }
 #endif

@@ -9,6 +9,7 @@ These captures use demonstration data; no personal usage history or private proj
 ![Live app memory and CPU](media/resource-inspector-1.png)
 ![Seven-day usage history](media/resource-inspector-2.png)
 ![Git worktrees across providers](media/resource-inspector-3.png)
+![Opt-in inactivity notifications](media/resource-inspector-inactivity.jpg)
 
 ## Use it
 
@@ -56,6 +57,22 @@ Before deletion, the extension rereads the registry, folder identity, branch/com
 
 **Missing Folders** shows stale registrations separately. Removing one registration keeps its branch and does not free space for a folder that is already absent. It does not prune other entries. Never remove a registration for an external drive merely because the drive is temporarily disconnected; Git-locked entries remain protected.
 
+## Opt-in inactivity notifications
+
+Open **Inspect Resources**, open an app or standalone process, and choose **Watch for Inactivity**. This saves a rule for that program's future instances too. Open **Inactive Resources** to enable alerts and allow **Resource Inspector Notifications** in macOS. The feature starts **disabled**, with no programs selected. **Resource Inspector Settings → Manage Inactivity Alerts** opens the same controls.
+
+The default is **three observed hours**, adjustable to two. Every comparable sample must stay below **1% of one CPU core** and **64 KiB/s combined disk reads/writes**, with the target and its owning app not foreground at either sample. App rules require complete measurements for an unchanged group of helpers. Activity, changed group membership, unavailable counters, sleep, restarts, pauses, and gaps longer than two minutes reset progress. Time recorded before adding a watch is never credited.
+
+A notification identifies one target, its PID, memory usage, and observed quiet time. **Force Quit immediately terminates that named target when clicked, without another confirmation. Unsaved work may be lost.** Ignoring or dismissing the notification does nothing. Clicking the body opens a review in Raycast. There is no timer-driven termination, recursive process-tree cleanup, or bulk action.
+
+A program that **appears inactive** may still be useful. Network activity and use between samples are not fully observed. Choose programs deliberately; watching a generic executable such as Node includes all eligible instances at that exact path. Application rules match their installed path, bundle identity, and executable. Moving an app or upgrading a tool to a different executable path requires adding a new watch. Containers and worktrees are not monitored by this feature.
+
+Notification actions recheck the original process identity, fresh measurements, watch rule, recording status, and protections. A restarted, active, stale, or protected target is rejected; an old button never selects a replacement instance. Each button is consumed at most once. Results distinguish observed exit from an unconfirmed request or failure, and remain local for seven days. Surviving children remain visible for separate selection.
+
+Notifications are delivered once per inactivity episode, at most one every five minutes across all candidates. macOS may suppress banners through Focus or notification settings; candidates remain visible in **Inactive Resources**. The small notification app is bundled from source, copied into the private extension support folder, and runs only to post or handle notifications. There is no login item or persistent service. Alert permission belongs to **Resource Inspector Notifications**, separately from Raycast's screen capture permission.
+
+Pausing recording, disabling alerts, changing the threshold, removing a watch, or clearing history invalidates affected notifications. Clear History retains watched program selections, clears inactivity observations/results, and pauses recording. Resume starts a new observation period. System services, built-in Apple apps, other users' processes, Raycast, and inspector helpers are always ineligible, including when the resource list shows all resources.
+
 ## Background recording
 
 Run **Record Resource Usage** once to activate Raycast's Background Refresh. Raycast samples approximately once per minute while it is running; macOS can delay background runs. Inspect Resources starts an initial sample but does not itself enable Raycast's scheduling switch.
@@ -79,7 +96,7 @@ History starts when recording starts. Sleeping, paused, unavailable, and unsampl
 
 ## Privacy and local files
 
-There is no upload, analytics, remote account, API key, administrator helper, or separate background service. The native helper runs briefly for each request. The recorder stores process names, executable paths, app IDs, usage counters, and local container names/IDs. It does not collect process arguments, document contents, browser URLs, environment variables, or container secrets.
+There is no upload, analytics, remote account, API key, administrator helper, or separate background service. The native helper runs briefly for each request. The recorder stores process names, executable paths, app IDs, usage counters, and local container names/IDs. Inactivity monitoring also stores selected program identities, sampled foreground ownership, quiet-duration state, opaque notification IDs, and action results. It does not collect process arguments, document contents, browser URLs, environment variables, or container secrets.
 
 Data is kept in Raycast's extension support folder, shown in Resource Inspector Settings. SQLite transactions protect interrupted writes. Diagnostic reports are read on demand and not copied into the history database.
 

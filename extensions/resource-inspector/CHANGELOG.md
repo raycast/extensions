@@ -1,5 +1,12 @@
 # Resource Inspector Changelog
 
+## [Inactivity Notifications] - {PR_MERGE_DATE}
+
+- Add opt-in watches for chosen applications and standalone programs, with a three-hour inactivity threshold adjustable to two hours.
+- Deliver macOS notifications with an explicit Force Quit button. Only clicking that button authorizes immediate termination of its one named target, with an unsaved-work warning.
+- Validate identity and current activity at the notification action boundary; invalidate buttons after pauses, changed rules, restarts, or resumed activity.
+- Add Inactive Resources, foreground ownership measurements, local transactional state, a bundled on-demand notification app, and disposable-fixture regression tests.
+
 ## [Initial Release] - {PR_MERGE_DATE}
 
 - Inspect physical memory, CPU, disk activity, memory pressure, compression, and swap.

@@ -25,6 +25,12 @@
       "mode": "view"
     },
     {
+      "name": "inactive",
+      "title": "Inactive Resources",
+      "description": "Opt in to inactivity notifications for chosen programs; Force Quit only when you click",
+      "mode": "view"
+    },
+    {
       "name": "inspect",
       "title": "Inspect Resources",
       "description": "Inspect apps, processes, and containers before choosing one to close",

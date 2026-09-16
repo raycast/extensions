@@ -15,6 +15,7 @@ import {
 import { useEffect, useState } from "react";
 import { historyStore, prepare } from "./runtime";
 import { trackingScope } from "./preferences";
+import { inactivity, notifications } from "./inactivity";
 import { scopeLabel } from "./tracking";
 
 export default function Settings() {
@@ -54,9 +55,11 @@ export default function Settings() {
           params: [String(!paused)],
         },
         { sql: "DELETE FROM meta WHERE key='previous'" },
+        { sql: "UPDATE inactivity_control SET revision=revision+1 WHERE id=1" },
       ]);
       if (paused)
         await launchCommand({ name: "record", type: LaunchType.Background });
+      await notifications("reconcile");
       await refresh();
     } catch (e) {
       await showToast({
@@ -81,6 +84,8 @@ export default function Settings() {
       return;
     try {
       await historyStore.clear();
+      await inactivity("clear-results");
+      await notifications("reconcile");
       await refresh();
       await showToast({
         style: Toast.Style.Success,
@@ -97,7 +102,7 @@ export default function Settings() {
   return (
     <Detail
       isLoading={loading}
-      markdown={`# Resource Inspector\n\n**Collection: ${paused ? "Paused" : "Enabled"}**\n\n**Tracking: ${scopeLabel[trackingScope()]}**\n\nChange Tracking Scope below to include Apple apps, or include all resources. The same scope applies to live lists, new recordings, history, and diagnostics. Overall memory pressure and swap still describe the whole Mac.\n\nExisting history is retained until normal expiry. Older entries without a reliable identity and mixed memory reports are visible only under All Resources; process names alone cannot identify macOS components.\n\nLatest recorded sample: ${last}\n\n${error ? `History error: ${error}\n\n` : ""}Collection uses Raycast’s background refresh, approximately once per minute while Raycast is running. Raycast’s scheduling switch is independent of the collection switch here. If samples stop updating, run Record Resource Usage and check its Background Refresh setting in Raycast.\n\nLive views refresh every five seconds even when recording is paused. Samples are local: detailed data for approximately 24 hours, hourly summaries up to seven days. Nothing is uploaded. Sleep, recording gaps, and unavailable measurements are not filled in.\n\nOnly one manually selected target can be closed. Force Quit always requires a separate action.\n\nLocal data folder: ${environment.supportPath}`}
+      markdown={`# Resource Inspector\n\n**Collection: ${paused ? "Paused" : "Enabled"}**\n\n**Tracking: ${scopeLabel[trackingScope()]}**\n\nChange Tracking Scope below to include Apple apps, or include all resources. The same scope applies to live lists, new recordings, history, and diagnostics. Overall memory pressure and swap still describe the whole Mac.\n\nExisting history is retained until normal expiry. Older entries without a reliable identity and mixed memory reports are visible only under All Resources; process names alone cannot identify macOS components.\n\nLatest recorded sample: ${last}\n\n${error ? `History error: ${error}\n\n` : ""}Collection uses Raycast’s background refresh, approximately once per minute while Raycast is running. Raycast’s scheduling switch is independent of the collection switch here. If samples stop updating, run Record Resource Usage and check its Background Refresh setting in Raycast.\n\nLive views refresh every five seconds even when recording is paused. Samples are local: detailed data for approximately 24 hours, hourly summaries up to seven days. Nothing is uploaded. Sleep, recording gaps, and unavailable measurements are not filled in.\n\nOnly one selected target can be closed. Optional inactivity notifications have an explicit Force Quit button; clicking it immediately terminates the named target without another confirmation. Manage Inactivity Alerts to select programs and enable notifications.\n\nLocal data folder: ${environment.supportPath}`}
       actions={
         <ActionPanel>
           <Action
@@ -110,6 +115,16 @@ export default function Settings() {
             icon={Icon.Clock}
             onAction={() =>
               launchCommand({ name: "record", type: LaunchType.UserInitiated })
+            }
+          />
+          <Action
+            title="Manage Inactivity Alerts"
+            icon={Icon.Bell}
+            onAction={() =>
+              launchCommand({
+                name: "inactive",
+                type: LaunchType.UserInitiated,
+              })
             }
           />
           <Action

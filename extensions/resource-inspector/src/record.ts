@@ -7,6 +7,7 @@ import {
 import { open, stat, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import { getSnapshot, historyStore, prepare } from "./runtime";
+import { inactivity, notifications } from "./inactivity";
 export default async function record() {
   await prepare();
   const lock = join(environment.supportPath, "record.lock");
@@ -24,7 +25,10 @@ export default async function record() {
         await showHUD("Recording is paused");
       return;
     }
-    await historyStore.record(await getSnapshot());
+    const snapshot = await getSnapshot();
+    await historyStore.record(snapshot);
+    const idle = await inactivity("observe", { snapshot });
+    if (idle.state.enabled && !idle.paused) await notifications("deliver");
     await updateCommandMetadata({
       subtitle: `Last recorded ${new Date().toLocaleTimeString()} · stored locally`,
     });

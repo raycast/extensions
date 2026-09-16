@@ -28,6 +28,10 @@ export interface HistoryRow {
 }
 const schema: Statement[] = [
   {
+    sql: "CREATE TABLE IF NOT EXISTS inactivity_control(id INTEGER PRIMARY KEY CHECK(id=1),revision INTEGER NOT NULL)",
+  },
+  { sql: "INSERT OR IGNORE INTO inactivity_control VALUES(1,0)" },
+  {
     sql: "CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
   },
   {
@@ -183,6 +187,7 @@ export class HistoryStore {
   async clear() {
     // Clear also pauses, so an in-flight background read cannot immediately refill history.
     await this.run([
+      { sql: "UPDATE inactivity_control SET revision=revision+1 WHERE id=1" },
       { sql: "DELETE FROM samples" },
       { sql: "DELETE FROM hours" },
       { sql: "DELETE FROM coverage" },

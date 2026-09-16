@@ -3,12 +3,13 @@ export async function nativeCall<T>(
   binary: string,
   command: string,
   request?: unknown,
+  timeout = 15000,
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     const child = execFile(
       binary,
       [command],
-      { timeout: 15000, maxBuffer: 32 * 1024 * 1024 },
+      { timeout, maxBuffer: 32 * 1024 * 1024 },
       (error, stdout, stderr) => {
         try {
           const parsed = JSON.parse(stdout);

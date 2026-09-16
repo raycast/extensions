@@ -7,6 +7,8 @@ import {
   Detail,
   Icon,
   List,
+  launchCommand,
+  LaunchType,
   showToast,
   Toast,
   useNavigation,
@@ -23,6 +25,7 @@ import {
 } from "./model";
 import { binary, getSnapshot } from "./runtime";
 import { nativeCall } from "./native";
+import { canWatch, watch } from "./inactivity";
 import { stopContainer } from "./containers";
 
 export function useLive() {
@@ -325,6 +328,31 @@ export function ResourceDetail({
             icon={Icon.ArrowClockwise}
             onAction={live.refresh}
           />
+          {canAct && canWatch(latest) && (
+            <Action
+              title="Watch for Inactivity"
+              icon={Icon.Bell}
+              onAction={async () => {
+                try {
+                  await watch(latest, snap);
+                  await showToast({
+                    title: "Program added to watch list",
+                    message: "Enable alerts in Inactive Resources when ready",
+                  });
+                  await launchCommand({
+                    name: "inactive",
+                    type: LaunchType.UserInitiated,
+                  });
+                } catch (e) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Could not watch program",
+                    message: String(e),
+                  });
+                }
+              }}
+            />
+          )}
           {canAct && (
             <ActionPanel.Section title="Only This Target">
               <Action
