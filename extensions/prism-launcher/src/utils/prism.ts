@@ -7,7 +7,7 @@ import nbt from "prismarine-nbt";
 import { pathToFileURL } from "url";
 import type { Instance, Screenshot, Server } from "../types";
 import { getPreferences } from "./preferences";
-import { getShortcutTargetPath } from "./powershell";
+import { getDownloadsFolderPath, getShortcutTargetPath } from "./powershell";
 
 /**
  * Convert a local filesystem path to a `file://` URL that Raycast's `Image.source`
@@ -279,7 +279,7 @@ export async function loadScreenshotsFromInstance(instance: Instance): Promise<S
  * Copy a screenshot into the user's Downloads folder, avoiding overwrites
  */
 export async function saveScreenshotToDownloads(screenshot: Screenshot): Promise<string> {
-  const downloadsPath = path.join(os.homedir(), "Downloads");
+  const downloadsPath = (isWin && (await getDownloadsFolderPath())) || path.join(os.homedir(), "Downloads");
   await fs.ensureDir(downloadsPath);
 
   const extension = path.extname(screenshot.path);
