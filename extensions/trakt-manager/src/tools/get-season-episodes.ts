@@ -1,6 +1,7 @@
+import { TraktEpisodeList } from "../lib/schema";
 import { CompactEpisode, toCompactEpisode } from "./compact-media";
-import { resolveShow } from "./resolve-media";
-import { executeToolCall, toolTraktClient } from "./tool-client";
+import { identifyTraktIdKinds, resolveShow } from "./resolve-media";
+import { executeToolCallAllowingNotFound, toolTraktClient } from "./tool-client";
 
 type Input = {
   /**
@@ -72,7 +73,7 @@ export default async function tool(input: Input): Promise<Output> {
     showTitle = match.title;
   }
 
-  const episodesRes = await executeToolCall(
+  const episodesRes = await executeToolCallAllowingNotFound(
     (signal) =>
       toolTraktClient.shows.getEpisodes({
         params: {
@@ -87,7 +88,19 @@ export default async function tool(input: Input): Promise<Output> {
     `Failed to fetch episodes for season ${seasonNumber}`,
   );
 
-  const episodes = episodesRes.body.map(toCompactEpisode);
+  if (!episodesRes) {
+    if (showTraktId) {
+      const kinds = await identifyTraktIdKinds(showTraktId);
+      if (kinds.includes("movie") && !kinds.includes("show")) {
+        throw new Error(
+          `Trakt ID ${showTraktId} is a movie, not a TV show. Look the show up with \`search-shows\` first.`,
+        );
+      }
+    }
+    throw new Error(`TV show ${showTraktId} could not be found on Trakt.`);
+  }
+
+  const episodes = (episodesRes.body as TraktEpisodeList).map(toCompactEpisode);
 
   return {
     showTitle,

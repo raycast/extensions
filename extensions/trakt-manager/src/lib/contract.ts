@@ -127,6 +127,7 @@ const TraktMovieContract = c.router({
     path: "/sync/history/movies/:id",
     responses: {
       200: TraktMovieHistoryList,
+      404: z.unknown(),
     },
     pathParams: z.object({
       id: z.coerce.number(),
@@ -265,6 +266,7 @@ const TraktShowContract = c.router({
     path: "/sync/history/shows/:id",
     responses: {
       200: TraktShowHistoryList,
+      404: z.unknown(),
     },
     pathParams: z.object({
       id: z.coerce.number(),
@@ -299,6 +301,7 @@ const TraktShowContract = c.router({
     path: "/shows/:showid/seasons/:seasonNumber/episodes",
     responses: {
       200: TraktEpisodeList,
+      404: z.unknown(),
     },
     pathParams: z.object({
       showid: z.coerce.number(),
@@ -347,6 +350,7 @@ const TraktShowContract = c.router({
     path: "/shows/:showid/progress/watched",
     responses: {
       200: TraktShowDetailedProgressSchema,
+      404: z.unknown(),
     },
     pathParams: z.object({
       showid: z.coerce.number(),

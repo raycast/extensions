@@ -289,6 +289,7 @@ export default async function tool(input: Input): Promise<Output> {
       page,
       totalMovies: paginated.pagination["x-pagination-item-count"],
       hasMore: paginated.pagination["x-pagination-page"] < paginated.pagination["x-pagination-page-count"],
+      exhaustive: false,
     };
   }
 
@@ -313,6 +314,7 @@ export default async function tool(input: Input): Promise<Output> {
       page,
       totalShows: paginated.pagination["x-pagination-item-count"],
       hasMore: paginated.pagination["x-pagination-page"] < paginated.pagination["x-pagination-page-count"],
+      exhaustive: false,
     };
   }
 
@@ -363,5 +365,6 @@ export default async function tool(input: Input): Promise<Output> {
     totalMovies: paginatedMovies.pagination["x-pagination-item-count"],
     totalShows: paginatedShows.pagination["x-pagination-item-count"],
     hasMore: moviesHasMore || showsHasMore,
+    exhaustive: false,
   };
 }

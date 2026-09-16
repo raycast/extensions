@@ -18,6 +18,11 @@ type Output = {
   page: number;
   totalItems?: number;
   hasMore: boolean;
+  /**
+   * Always false: this is a browse page, not a lookup. Absence from it does not mean
+   * a show has no next episode.
+   */
+  exhaustive: false;
 };
 
 /**
@@ -51,5 +56,6 @@ export default async function tool(input: Input): Promise<Output> {
     page,
     totalItems: paginated.pagination["x-pagination-item-count"],
     hasMore: paginated.pagination["x-pagination-page"] < paginated.pagination["x-pagination-page-count"],
+    exhaustive: false,
   };
 }

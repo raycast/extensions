@@ -35,7 +35,7 @@ type Output = {
 /**
  * Search for TV shows in the Trakt database by title and optional year.
  * Returns a compact list of TV shows with their traktId, title, year, network, and genres.
- * Always run this tool before any write action on a TV show, to obtain its traktId.
+ * Use this to obtain a show \`traktId\` before a targeted lookup.
  */
 export default async function tool(input: Input): Promise<Output> {
   const { title, year } = input;

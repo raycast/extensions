@@ -35,7 +35,7 @@ type Output = {
 /**
  * Search for movies in the Trakt database by title and optional year.
  * Returns a compact list of movies with their traktId, title, year, rating, and genres.
- * Always run this tool before any write action on a movie, to obtain its traktId.
+ * Use this to obtain a movie \`traktId\` before a targeted lookup.
  */
 export default async function tool(input: Input): Promise<Output> {
   const { title, year } = input;

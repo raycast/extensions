@@ -1,5 +1,6 @@
-import { resolveShow } from "./resolve-media";
-import { executeToolCall, toolTraktClient } from "./tool-client";
+import { TraktShowDetailedProgress } from "../lib/schema";
+import { identifyTraktIdKinds, resolveShow } from "./resolve-media";
+import { executeToolCallAllowingNotFound, toolTraktClient } from "./tool-client";
 
 type Input = {
   /**
@@ -91,7 +92,7 @@ export default async function tool(input: Input): Promise<Output> {
     }
   }
 
-  const progressResponse = await executeToolCall(
+  const progressResponse = await executeToolCallAllowingNotFound(
     (signal) =>
       toolTraktClient.shows.getShowProgress({
         params: {
@@ -105,7 +106,25 @@ export default async function tool(input: Input): Promise<Output> {
     `Failed to fetch progress for show ID ${resolvedId}`,
   );
 
-  const p = progressResponse.body;
+  if (!progressResponse) {
+    if (input.traktId !== undefined) {
+      const kinds = await identifyTraktIdKinds(input.traktId);
+      if (kinds.includes("movie") && !kinds.includes("show")) {
+        return {
+          found: false,
+          message:
+            `Trakt ID ${input.traktId} is a movie, not a TV show. Use \`get-history\` with \`type: "movies"\`, ` +
+            `or look the show up with \`search-shows\`.`,
+        };
+      }
+    }
+    return {
+      found: false,
+      message: `No TV show exists with Trakt ID ${resolvedId}.`,
+    };
+  }
+
+  const p = progressResponse.body as TraktShowDetailedProgress;
   const aired = p.aired ?? 0;
   const completed = p.completed ?? 0;
   const completionPercentage = aired > 0 ? Math.round((completed / aired) * 100) : 0;
