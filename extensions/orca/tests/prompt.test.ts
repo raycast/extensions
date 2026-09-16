@@ -165,3 +165,12 @@ test("saved commands are grouped under an Orca prefix that cannot be doubled", (
   assert.equal(commandName("Orca / Fix the export"), "Orca / Fix the export");
   assert.equal(commandName("  "), "Orca / ");
 });
+
+test("the preview shows the worktree name Orca will actually create", () => {
+  const typed = { ...spec, createWorktree: true, worktreeName: "Fix export" };
+  const args = worktreeCreateArgs(typed);
+
+  assert.match(previewParts(typed, "none", "x").runs, /"fix-export"/);
+  // The two must not drift: the form promises what the CLI is told.
+  assert.ok(previewParts(typed, "none", "x").runs.includes(args[args.indexOf("--name") + 1]));
+});

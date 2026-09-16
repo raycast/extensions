@@ -94,18 +94,25 @@ export type PromptSpec = {
   prompt: string;
 };
 
+/**
+ * The name Orca will use for the checkout. A typed name becomes a branch and a
+ * directory just as a derived one does, so both take the same safe latin form —
+ * and the preview and the CLI call share this, or the form would promise a name
+ * different from the one created.
+ */
+export function worktreeNameFor(spec: PromptSpec): string {
+  return slugify(spec.worktreeName?.trim() || spec.prompt) || "prompt";
+}
+
 /** Orca creates the checkout, launches the agent and delivers the prompt in one call. */
 export function worktreeCreateArgs(spec: PromptSpec): string[] {
-  // A typed name becomes a branch and a directory just as a derived one does,
-  // so it gets the same safe latin form.
-  const name = slugify(spec.worktreeName?.trim() || spec.prompt) || "prompt";
   return [
     "worktree",
     "create",
     "--repo",
     `id:${spec.repoId}`,
     "--name",
-    name,
+    worktreeNameFor(spec),
     "--agent",
     spec.agent,
     "--prompt",
@@ -287,14 +294,11 @@ export function previewParts(
   source: ExtraSource,
   name: string,
 ): { command: string; extra?: string; runs: string } {
-  const worktree =
-    spec.worktreeName?.trim() || slugify(spec.prompt) || "prompt";
-
   return {
     command: commandName(name),
     extra: source === "none" ? undefined : EXTRA_LABELS[source],
     runs: spec.createWorktree
-      ? `${spec.agent} in a new worktree "${worktree}" off ${spec.worktreePath}`
+      ? `${spec.agent} in a new worktree "${worktreeNameFor(spec)}" off ${spec.worktreePath}`
       : `${spec.agent} in ${spec.worktreePath}`,
   };
 }
