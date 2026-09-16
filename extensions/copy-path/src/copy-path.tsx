@@ -1,5 +1,5 @@
 import { closeMainWindow, getFrontmostApplication } from "@raycast/api";
-import { finderBundleId, qSpaceBundleId } from "./utils/constants";
+import { finderBundleId, qSpaceBundleId, spotifyBundleId } from "./utils/constants";
 import {
   copyFinderPath,
   copyBrowserTabUrl,
@@ -8,6 +8,7 @@ import {
   copyUnSupportedAppContent,
   copyWindowPath,
   copyQSpacePath,
+  copySpotifyUrl,
 } from "./utils/common-utils";
 
 export default async () => {
@@ -19,6 +20,8 @@ export default async () => {
     await copyFinderPath();
   } else if (frontmostApp.bundleId === qSpaceBundleId) {
     await copyQSpacePath();
+  } else if (frontmostApp.bundleId === spotifyBundleId) {
+    await copySpotifyUrl();
   } else {
     const windowPath = await copyWindowPath(frontmostApp);
     if (!isEmpty(windowPath)) {
