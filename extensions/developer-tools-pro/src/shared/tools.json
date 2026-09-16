@@ -1,0 +1,1224 @@
+[
+  {
+    "name": "JSON to CSV",
+    "category": "Converters",
+    "route": "/converters/json_to_csv",
+    "deepLink": "devtpro://converters/json_to_csv",
+    "description": "Convert JSON data to CSV format",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "csv", "convert", "transform", "spreadsheet"]
+  },
+  {
+    "name": "JSON to TOON",
+    "category": "Converters",
+    "route": "/converters/json_to_toon",
+    "deepLink": "devtpro://converters/json_to_toon",
+    "description": "Convert JSON structures into TOON format",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "toon", "convert", "transform"]
+  },
+  {
+    "name": "JSON to TSV",
+    "category": "Converters",
+    "route": "/converters/json_to_tsv",
+    "deepLink": "devtpro://converters/json_to_tsv",
+    "description": "Convert JSON data to TSV format",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "tsv", "convert", "tab"]
+  },
+  {
+    "name": "JSON to XML",
+    "category": "Converters",
+    "route": "/converters/json_to_xml",
+    "deepLink": "devtpro://converters/json_to_xml",
+    "description": "Convert JSON data to XML format",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "xml", "convert", "transform"]
+  },
+  {
+    "name": "JSON to YAML",
+    "category": "Converters",
+    "route": "/converters/json_to_yaml",
+    "deepLink": "devtpro://converters/json_to_yaml",
+    "description": "Convert JSON data to YAML format",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "yaml", "convert", "transform"]
+  },
+  {
+    "name": "JSON to TOML",
+    "category": "Converters",
+    "route": "/converters/json_to_toml",
+    "deepLink": "devtpro://converters/json_to_toml",
+    "description": "Convert JSON data to TOML format",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "toml", "convert", "transform", "config"]
+  },
+  {
+    "name": "JSON to JSON Schema",
+    "category": "Converters",
+    "route": "/converters/json_to_schema",
+    "deepLink": "devtpro://converters/json_to_schema",
+    "description": "Generate JSON Schema from JSON data",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "schema", "generate", "validate", "type", "definition"]
+  },
+  {
+    "name": "JSON to Java",
+    "category": "Code Converters",
+    "route": "/converters/json_to_java",
+    "deepLink": "devtpro://converters/json_to_java",
+    "description": "Generate Java classes from JSON",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "java", "code", "class", "generate", "model", "pojo"]
+  },
+  {
+    "name": "JSON to C#",
+    "category": "Code Converters",
+    "route": "/converters/json_to_csharp",
+    "deepLink": "devtpro://converters/json_to_csharp",
+    "description": "Generate C# classes from JSON",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "csharp", "c#", "code", "class", "generate", "model", "dotnet"]
+  },
+  {
+    "name": "JSON to TypeScript",
+    "category": "Code Converters",
+    "route": "/converters/json_to_typescript",
+    "deepLink": "devtpro://converters/json_to_typescript",
+    "description": "Generate TypeScript interfaces from JSON",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "typescript", "ts", "code", "interface", "generate", "type"]
+  },
+  {
+    "name": "JSON to Python",
+    "category": "Code Converters",
+    "route": "/converters/json_to_python",
+    "deepLink": "devtpro://converters/json_to_python",
+    "description": "Generate Python dataclasses from JSON",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "python", "py", "code", "class", "dataclass", "generate", "model"]
+  },
+  {
+    "name": "JSON to Dart",
+    "category": "Code Converters",
+    "route": "/converters/json_to_dart",
+    "deepLink": "devtpro://converters/json_to_dart",
+    "description": "Generate Dart classes from JSON",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "dart", "flutter", "code", "class", "generate", "model", "freezed"]
+  },
+  {
+    "name": "JSON to Kotlin",
+    "category": "Code Converters",
+    "route": "/converters/json_to_kotlin",
+    "deepLink": "devtpro://converters/json_to_kotlin",
+    "description": "Generate Kotlin data classes from JSON",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "kotlin", "kt", "code", "data class", "generate", "model", "android"]
+  },
+  {
+    "name": "JSON to Swift",
+    "category": "Code Converters",
+    "route": "/converters/json_to_swift",
+    "deepLink": "devtpro://converters/json_to_swift",
+    "description": "Generate Swift structs from JSON",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "swift", "code", "struct", "generate", "model", "ios", "apple"]
+  },
+  {
+    "name": "JSON to Go",
+    "category": "Code Converters",
+    "route": "/converters/json_to_go",
+    "deepLink": "devtpro://converters/json_to_go",
+    "description": "Generate Go structs from JSON",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "go", "golang", "code", "struct", "generate", "model"]
+  },
+  {
+    "name": "cURL to Java",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_java",
+    "deepLink": "devtpro://code_converters/curl_to_java",
+    "description": "Convert cURL commands to Java HTTP client code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "java", "http", "request", "convert", "code", "generate"]
+  },
+  {
+    "name": "cURL to C#",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_csharp",
+    "deepLink": "devtpro://code_converters/curl_to_csharp",
+    "description": "Convert cURL commands to C# HttpClient code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "csharp", "c#", "http", "request", "convert", "code", "generate", "dotnet"]
+  },
+  {
+    "name": "cURL to Python",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_python",
+    "deepLink": "devtpro://code_converters/curl_to_python",
+    "description": "Convert cURL commands to Python requests code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "python", "http", "request", "convert", "code", "generate", "requests"]
+  },
+  {
+    "name": "cURL to JavaScript",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_javascript",
+    "deepLink": "devtpro://code_converters/curl_to_javascript",
+    "description": "Convert cURL commands to JavaScript fetch code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "javascript", "js", "http", "request", "convert", "code", "generate", "fetch"]
+  },
+  {
+    "name": "cURL to TypeScript",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_typescript",
+    "deepLink": "devtpro://code_converters/curl_to_typescript",
+    "description": "Convert cURL commands to TypeScript fetch code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "typescript", "ts", "http", "request", "convert", "code", "generate", "fetch"]
+  },
+  {
+    "name": "cURL to Go",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_go",
+    "deepLink": "devtpro://code_converters/curl_to_go",
+    "description": "Convert cURL commands to Go http code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "go", "golang", "http", "request", "convert", "code", "generate"]
+  },
+  {
+    "name": "cURL to PHP",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_php",
+    "deepLink": "devtpro://code_converters/curl_to_php",
+    "description": "Convert cURL commands to PHP cURL code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "php", "http", "request", "convert", "code", "generate"]
+  },
+  {
+    "name": "cURL to Ruby",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_ruby",
+    "deepLink": "devtpro://code_converters/curl_to_ruby",
+    "description": "Convert cURL commands to Ruby Net::HTTP code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "ruby", "http", "request", "convert", "code", "generate", "net/http"]
+  },
+  {
+    "name": "cURL to Swift",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_swift",
+    "deepLink": "devtpro://code_converters/curl_to_swift",
+    "description": "Convert cURL commands to Swift URLSession code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "swift", "http", "request", "convert", "code", "generate", "ios", "apple"]
+  },
+  {
+    "name": "cURL to Kotlin",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_kotlin",
+    "deepLink": "devtpro://code_converters/curl_to_kotlin",
+    "description": "Convert cURL commands to Kotlin OkHttp code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "kotlin", "http", "request", "convert", "code", "generate", "android", "okhttp"]
+  },
+  {
+    "name": "cURL to Rust",
+    "category": "Code Converters",
+    "route": "/code_converters/curl_to_rust",
+    "deepLink": "devtpro://code_converters/curl_to_rust",
+    "description": "Convert cURL commands to Rust reqwest code",
+    "supportsInput": true,
+    "iconName": "Terminal",
+    "keywords": ["curl", "rust", "http", "request", "convert", "code", "generate", "reqwest"]
+  },
+  {
+    "name": "XML to CSV",
+    "category": "Converters",
+    "route": "/converters/xml_to_csv",
+    "deepLink": "devtpro://converters/xml_to_csv",
+    "description": "Convert XML data to CSV format",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "csv", "convert"]
+  },
+  {
+    "name": "XML to JSON",
+    "category": "Converters",
+    "route": "/converters/xml_to_json",
+    "deepLink": "devtpro://converters/xml_to_json",
+    "description": "Convert XML data to JSON format",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "json", "convert", "transform"]
+  },
+  {
+    "name": "XML to TOON",
+    "category": "Converters",
+    "route": "/converters/xml_to_toon",
+    "deepLink": "devtpro://converters/xml_to_toon",
+    "description": "Convert XML structures into TOON format",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "toon", "convert", "transform"]
+  },
+  {
+    "name": "XML to TSV",
+    "category": "Converters",
+    "route": "/converters/xml_to_tsv",
+    "deepLink": "devtpro://converters/xml_to_tsv",
+    "description": "Convert XML data to TSV format",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "tsv", "convert"]
+  },
+  {
+    "name": "XML to XSD",
+    "category": "Converters",
+    "route": "/converters/xml_to_xsd",
+    "deepLink": "devtpro://converters/xml_to_xsd",
+    "description": "Generate XSD schema from XML data",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "xsd", "schema", "convert", "generate"]
+  },
+  {
+    "name": "XML to YAML",
+    "category": "Converters",
+    "route": "/converters/xml_to_yaml",
+    "deepLink": "devtpro://converters/xml_to_yaml",
+    "description": "Convert XML data to YAML format",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "yaml", "convert"]
+  },
+  {
+    "name": "XML to TOML",
+    "category": "Converters",
+    "route": "/converters/xml_to_toml",
+    "deepLink": "devtpro://converters/xml_to_toml",
+    "description": "Convert XML data to TOML format",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "toml", "convert", "transform", "config"]
+  },
+  {
+    "name": "YAML to CSV",
+    "category": "Converters",
+    "route": "/converters/yaml_to_csv",
+    "deepLink": "devtpro://converters/yaml_to_csv",
+    "description": "Convert YAML data to CSV format",
+    "supportsInput": true,
+    "iconName": "Document",
+    "keywords": ["yaml", "csv", "convert"]
+  },
+  {
+    "name": "YAML to JSON",
+    "category": "Converters",
+    "route": "/converters/yaml_to_json",
+    "deepLink": "devtpro://converters/yaml_to_json",
+    "description": "Convert YAML data to JSON format",
+    "supportsInput": true,
+    "iconName": "Document",
+    "keywords": ["yaml", "json", "convert", "transform"]
+  },
+  {
+    "name": "YAML to TOON",
+    "category": "Converters",
+    "route": "/converters/yaml_to_toon",
+    "deepLink": "devtpro://converters/yaml_to_toon",
+    "description": "Convert YAML data to TOON format",
+    "supportsInput": true,
+    "iconName": "Document",
+    "keywords": ["yaml", "toon", "convert", "transform"]
+  },
+  {
+    "name": "YAML to TSV",
+    "category": "Converters",
+    "route": "/converters/yaml_to_tsv",
+    "deepLink": "devtpro://converters/yaml_to_tsv",
+    "description": "Convert YAML data to TSV format",
+    "supportsInput": true,
+    "iconName": "Document",
+    "keywords": ["yaml", "tsv", "convert"]
+  },
+  {
+    "name": "YAML to XML",
+    "category": "Converters",
+    "route": "/converters/yaml_to_xml",
+    "deepLink": "devtpro://converters/yaml_to_xml",
+    "description": "Convert YAML data to XML format",
+    "supportsInput": true,
+    "iconName": "Document",
+    "keywords": ["yaml", "xml", "convert"]
+  },
+  {
+    "name": "YAML to TOML",
+    "category": "Converters",
+    "route": "/converters/yaml_to_toml",
+    "deepLink": "devtpro://converters/yaml_to_toml",
+    "description": "Convert YAML data to TOML format",
+    "supportsInput": true,
+    "iconName": "Document",
+    "keywords": ["yaml", "toml", "convert", "transform", "config"]
+  },
+  {
+    "name": "TOON to CSV",
+    "category": "Converters",
+    "route": "/converters/toon_to_csv",
+    "deepLink": "devtpro://converters/toon_to_csv",
+    "description": "Transform TOON content into CSV tables",
+    "supportsInput": true,
+    "iconName": "ComputerChip",
+    "keywords": ["toon", "csv", "convert", "transform", "table"]
+  },
+  {
+    "name": "TOON to JSON",
+    "category": "Converters",
+    "route": "/converters/toon_to_json",
+    "deepLink": "devtpro://converters/toon_to_json",
+    "description": "Transform TOON content into JSON objects",
+    "supportsInput": true,
+    "iconName": "ComputerChip",
+    "keywords": ["toon", "json", "convert", "transform"]
+  },
+  {
+    "name": "TOON to TSV",
+    "category": "Converters",
+    "route": "/converters/toon_to_tsv",
+    "deepLink": "devtpro://converters/toon_to_tsv",
+    "description": "Transform TOON content into TSV tables",
+    "supportsInput": true,
+    "iconName": "ComputerChip",
+    "keywords": ["toon", "tsv", "convert", "transform", "tab"]
+  },
+  {
+    "name": "TOON to XML",
+    "category": "Converters",
+    "route": "/converters/toon_to_xml",
+    "deepLink": "devtpro://converters/toon_to_xml",
+    "description": "Transform TOON content into XML documents",
+    "supportsInput": true,
+    "iconName": "ComputerChip",
+    "keywords": ["toon", "xml", "convert", "transform"]
+  },
+  {
+    "name": "TOON to YAML",
+    "category": "Converters",
+    "route": "/converters/toon_to_yaml",
+    "deepLink": "devtpro://converters/toon_to_yaml",
+    "description": "Transform TOON content into YAML format",
+    "supportsInput": true,
+    "iconName": "ComputerChip",
+    "keywords": ["toon", "yaml", "convert", "transform"]
+  },
+  {
+    "name": "TOON to TOML",
+    "category": "Converters",
+    "route": "/converters/toon_to_toml",
+    "deepLink": "devtpro://converters/toon_to_toml",
+    "description": "Transform TOON content into TOML configuration",
+    "supportsInput": true,
+    "iconName": "ComputerChip",
+    "keywords": ["toon", "toml", "convert", "transform", "config"]
+  },
+  {
+    "name": "CSV to HTML Table",
+    "category": "Converters",
+    "route": "/converters/csv_to_html",
+    "deepLink": "devtpro://converters/csv_to_html",
+    "description": "Convert CSV to HTML table",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["csv", "html", "convert", "table"]
+  },
+  {
+    "name": "CSV to JSON",
+    "category": "Converters",
+    "route": "/converters/csv_to_json",
+    "deepLink": "devtpro://converters/csv_to_json",
+    "description": "Convert CSV data to JSON format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["csv", "json", "convert", "transform", "spreadsheet"]
+  },
+  {
+    "name": "CSV to TOON",
+    "category": "Converters",
+    "route": "/converters/csv_to_toon",
+    "deepLink": "devtpro://converters/csv_to_toon",
+    "description": "Convert CSV tables to TOON format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["csv", "toon", "convert", "transform", "table"]
+  },
+  {
+    "name": "CSV to TSV",
+    "category": "Converters",
+    "route": "/converters/csv_to_tsv",
+    "deepLink": "devtpro://converters/csv_to_tsv",
+    "description": "Convert CSV data to TSV format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["csv", "tsv", "convert", "tab"]
+  },
+  {
+    "name": "CSV to XML",
+    "category": "Converters",
+    "route": "/converters/csv_to_xml",
+    "deepLink": "devtpro://converters/csv_to_xml",
+    "description": "Convert CSV data to XML format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["csv", "xml", "convert"]
+  },
+  {
+    "name": "CSV to YAML",
+    "category": "Converters",
+    "route": "/converters/csv_to_yaml",
+    "deepLink": "devtpro://converters/csv_to_yaml",
+    "description": "Convert CSV data to YAML format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["csv", "yaml", "convert"]
+  },
+  {
+    "name": "CSV to TOML",
+    "category": "Converters",
+    "route": "/converters/csv_to_toml",
+    "deepLink": "devtpro://converters/csv_to_toml",
+    "description": "Convert CSV data to TOML format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["csv", "toml", "convert", "transform", "config"]
+  },
+  {
+    "name": "TSV to CSV",
+    "category": "Converters",
+    "route": "/converters/tsv_to_csv",
+    "deepLink": "devtpro://converters/tsv_to_csv",
+    "description": "Convert TSV data to CSV format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["tsv", "csv", "convert", "tab"]
+  },
+  {
+    "name": "TSV to HTML Table",
+    "category": "Converters",
+    "route": "/converters/tsv_to_html",
+    "deepLink": "devtpro://converters/tsv_to_html",
+    "description": "Convert TSV to HTML table",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["tsv", "html", "convert", "table"]
+  },
+  {
+    "name": "TSV to JSON",
+    "category": "Converters",
+    "route": "/converters/tsv_to_json",
+    "deepLink": "devtpro://converters/tsv_to_json",
+    "description": "Convert TSV data to JSON format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["tsv", "json", "convert", "tab"]
+  },
+  {
+    "name": "TSV to TOON",
+    "category": "Converters",
+    "route": "/converters/tsv_to_toon",
+    "deepLink": "devtpro://converters/tsv_to_toon",
+    "description": "Convert TSV tables to TOON format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["tsv", "toon", "convert", "transform", "tab"]
+  },
+  {
+    "name": "TSV to XML",
+    "category": "Converters",
+    "route": "/converters/tsv_to_xml",
+    "deepLink": "devtpro://converters/tsv_to_xml",
+    "description": "Convert TSV data to XML format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["tsv", "xml", "convert"]
+  },
+  {
+    "name": "TSV to YAML",
+    "category": "Converters",
+    "route": "/converters/tsv_to_yaml",
+    "deepLink": "devtpro://converters/tsv_to_yaml",
+    "description": "Convert TSV data to YAML format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["tsv", "yaml", "convert"]
+  },
+  {
+    "name": "TSV to TOML",
+    "category": "Converters",
+    "route": "/converters/tsv_to_toml",
+    "deepLink": "devtpro://converters/tsv_to_toml",
+    "description": "Convert TSV data to TOML format",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["tsv", "toml", "convert", "transform", "config"]
+  },
+  {
+    "name": "TOML to JSON",
+    "category": "Converters",
+    "route": "/converters/toml_to_json",
+    "deepLink": "devtpro://converters/toml_to_json",
+    "description": "Convert TOML configuration to JSON format",
+    "supportsInput": true,
+    "iconName": "Cog",
+    "keywords": ["toml", "json", "convert", "transform", "config"]
+  },
+  {
+    "name": "TOML to YAML",
+    "category": "Converters",
+    "route": "/converters/toml_to_yaml",
+    "deepLink": "devtpro://converters/toml_to_yaml",
+    "description": "Convert TOML configuration to YAML format",
+    "supportsInput": true,
+    "iconName": "Cog",
+    "keywords": ["toml", "yaml", "convert", "transform", "config"]
+  },
+  {
+    "name": "TOML to XML",
+    "category": "Converters",
+    "route": "/converters/toml_to_xml",
+    "deepLink": "devtpro://converters/toml_to_xml",
+    "description": "Convert TOML configuration to XML format",
+    "supportsInput": true,
+    "iconName": "Cog",
+    "keywords": ["toml", "xml", "convert", "transform", "config"]
+  },
+  {
+    "name": "TOML to CSV",
+    "category": "Converters",
+    "route": "/converters/toml_to_csv",
+    "deepLink": "devtpro://converters/toml_to_csv",
+    "description": "Convert TOML data to CSV format",
+    "supportsInput": true,
+    "iconName": "Cog",
+    "keywords": ["toml", "csv", "convert", "transform", "config"]
+  },
+  {
+    "name": "TOML to TSV",
+    "category": "Converters",
+    "route": "/converters/toml_to_tsv",
+    "deepLink": "devtpro://converters/toml_to_tsv",
+    "description": "Convert TOML data to TSV format",
+    "supportsInput": true,
+    "iconName": "Cog",
+    "keywords": ["toml", "tsv", "convert", "transform", "config"]
+  },
+  {
+    "name": "TOML to TOON",
+    "category": "Converters",
+    "route": "/converters/toml_to_toon",
+    "deepLink": "devtpro://converters/toml_to_toon",
+    "description": "Convert TOML configuration to TOON format",
+    "supportsInput": true,
+    "iconName": "Cog",
+    "keywords": ["toml", "toon", "convert", "transform", "config"]
+  },
+  {
+    "name": "JSON Formatter",
+    "category": "Formatters",
+    "route": "/formatters/json",
+    "deepLink": "devtpro://formatters/json",
+    "description": "Format and validate JSON",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "format", "beautify", "pretty", "lint"]
+  },
+  {
+    "name": "XML Formatter",
+    "category": "Formatters",
+    "route": "/formatters/xml",
+    "deepLink": "devtpro://formatters/xml",
+    "description": "Format and validate XML",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "format", "beautify", "pretty", "lint"]
+  },
+  {
+    "name": "TOML Formatter",
+    "category": "Formatters",
+    "route": "/formatters/toml",
+    "deepLink": "devtpro://formatters/toml",
+    "description": "Format and validate TOML configuration files",
+    "supportsInput": true,
+    "iconName": "Cog",
+    "keywords": ["toml", "format", "beautify", "pretty", "lint", "config"]
+  },
+  {
+    "name": "TOON Formatter",
+    "category": "Formatters",
+    "route": "/formatters/toon",
+    "deepLink": "devtpro://formatters/toon",
+    "description": "Format and validate TOON data",
+    "supportsInput": true,
+    "iconName": "ComputerChip",
+    "keywords": ["toon", "format", "beautify", "pretty", "lint"]
+  },
+  {
+    "name": "SQL Formatter",
+    "category": "Formatters",
+    "route": "/formatters/sql",
+    "deepLink": "devtpro://formatters/sql",
+    "description": "Format, beautify, and validate SQL queries",
+    "supportsInput": true,
+    "iconName": "HardDrive",
+    "keywords": ["sql", "format", "beautify", "pretty", "query", "database", "validate"]
+  },
+  {
+    "name": "HTML Entity Encoder",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/html_entity/encode",
+    "deepLink": "devtpro://encoders_decoders/html_entity/encode",
+    "description": "Encode text to HTML entities",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["html", "entity", "encode", "escape", "special", "characters"]
+  },
+  {
+    "name": "HTML Entity Decoder",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/html_entity/decode",
+    "deepLink": "devtpro://encoders_decoders/html_entity/decode",
+    "description": "Decode HTML entities to text",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["html", "entity", "decode", "unescape", "special", "characters"]
+  },
+  {
+    "name": "Hex/ASCII Converter",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/hex_ascii",
+    "deepLink": "devtpro://encoders_decoders/hex_ascii",
+    "description": "Convert between text and hex string",
+    "supportsInput": true,
+    "iconName": "Hashtag",
+    "keywords": ["hex", "ascii", "convert", "utf8", "latin1", "bytes"]
+  },
+  {
+    "name": "Number Format Converter",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/number_format",
+    "deepLink": "devtpro://encoders_decoders/number_format",
+    "description": "Convert numbers between bases, bit widths, floats, and codepoints",
+    "supportsInput": false,
+    "iconName": "Calculator",
+    "keywords": ["number", "binary", "hex", "octal", "decimal", "twos complement", "ieee 754", "unicode", "ascii"]
+  },
+  {
+    "name": "URL Encoder",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/url/encode",
+    "deepLink": "devtpro://encoders_decoders/url/encode",
+    "description": "Encode text for URLs",
+    "supportsInput": true,
+    "iconName": "Link",
+    "keywords": ["url", "encode", "percent", "escape"]
+  },
+  {
+    "name": "URL Decoder",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/url/decode",
+    "deepLink": "devtpro://encoders_decoders/url/decode",
+    "description": "Decode URL encoded text",
+    "supportsInput": true,
+    "iconName": "Link",
+    "keywords": ["url", "decode", "percent", "unescape"]
+  },
+  {
+    "name": "URL Parser",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/url/parser",
+    "deepLink": "devtpro://encoders_decoders/url/parser",
+    "description": "Parse URLs, edit query parameters, and rebuild encoded URLs",
+    "supportsInput": true,
+    "iconName": "Globe",
+    "keywords": ["url", "uri", "parser", "query", "parameters", "decode", "encode", "fragment", "path"]
+  },
+  {
+    "name": "Base64 Encoder",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/base64/encode",
+    "deepLink": "devtpro://encoders_decoders/base64/encode",
+    "description": "Encode text to Base64",
+    "supportsInput": true,
+    "iconName": "Lock",
+    "keywords": ["base64", "encode", "binary", "text"]
+  },
+  {
+    "name": "Base64 File Encoder",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/base64/file/encode",
+    "deepLink": "devtpro://encoders_decoders/base64/file/encode",
+    "description": "Encode a file to Base64",
+    "supportsInput": false,
+    "iconName": "Upload",
+    "keywords": ["base64", "file", "encode", "binary"]
+  },
+  {
+    "name": "Base64 File Decoder",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/base64/file/decode",
+    "deepLink": "devtpro://encoders_decoders/base64/file/decode",
+    "description": "Decode Base64 to a downloadable file",
+    "supportsInput": false,
+    "iconName": "Download",
+    "keywords": ["base64", "file", "decode", "binary"]
+  },
+  {
+    "name": "Base64 Decoder",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/base64/decode",
+    "deepLink": "devtpro://encoders_decoders/base64/decode",
+    "description": "Decode Base64 to text",
+    "supportsInput": true,
+    "iconName": "Lock",
+    "keywords": ["base64", "decode", "binary", "text"]
+  },
+  {
+    "name": "JWT Decoder",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/jwt",
+    "deepLink": "devtpro://encoders_decoders/jwt",
+    "description": "Decode and inspect JWT tokens",
+    "supportsInput": true,
+    "iconName": "Key",
+    "keywords": ["jwt", "token", "decode", "auth", "security"]
+  },
+  {
+    "name": "Backslash Escape",
+    "category": "Encoders/Decoders",
+    "route": "/encoders_decoders/backslash_escape",
+    "deepLink": "devtpro://encoders_decoders/backslash_escape",
+    "description": "Escape and unescape strings with various encoding modes",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["escape", "unescape", "backslash", "string", "json", "regex", "url", "html"]
+  },
+  {
+    "name": "Timestamp Converter",
+    "category": "DateTime Utilities",
+    "route": "/utilities/timestamp",
+    "deepLink": "devtpro://utilities/timestamp",
+    "description": "Convert between timestamps and dates",
+    "supportsInput": true,
+    "iconName": "Clock",
+    "keywords": ["time", "date", "timestamp", "epoch", "unix", "convert"]
+  },
+  {
+    "name": "Age Calculator",
+    "category": "DateTime Utilities",
+    "route": "/datetime/age_calculator",
+    "deepLink": "devtpro://datetime/age_calculator",
+    "description": "Calculate age and duration between dates",
+    "supportsInput": false,
+    "iconName": "Calendar",
+    "keywords": ["age", "birthday", "birth", "date", "calculate", "years", "days"]
+  },
+  {
+    "name": "Date Calculator",
+    "category": "DateTime Utilities",
+    "route": "/datetime/date_calculator",
+    "deepLink": "devtpro://datetime/date_calculator",
+    "description": "Add, subtract durations and find the difference between dates",
+    "supportsInput": false,
+    "iconName": "Calendar",
+    "keywords": ["date", "add", "subtract", "duration", "calculate", "difference"]
+  },
+  {
+    "name": "World Clock",
+    "category": "DateTime Utilities",
+    "route": "/datetime/world_clock",
+    "deepLink": "devtpro://datetime/world_clock",
+    "description": "Compare timezones, plan event windows, and open calendar links",
+    "supportsInput": false,
+    "iconName": "Globe",
+    "keywords": [
+      "world",
+      "clock",
+      "timezone",
+      "time",
+      "city",
+      "utc",
+      "global",
+      "meeting",
+      "planner",
+      "calendar",
+      "scheduler"
+    ]
+  },
+  {
+    "name": "Cronjob Parser",
+    "category": "Utilities",
+    "route": "/utilities/cron_parser",
+    "deepLink": "devtpro://utilities/cron_parser",
+    "description": "Parse cron expressions and see next run times",
+    "supportsInput": true,
+    "iconName": "Clock",
+    "keywords": ["cron", "job", "schedule", "parser", "expression", "time"]
+  },
+  {
+    "name": "Token Counter",
+    "category": "Utilities",
+    "route": "/utilities/token_counter",
+    "deepLink": "devtpro://utilities/token_counter",
+    "description": "Count prompt tokens, context usage, and model cost",
+    "supportsInput": true,
+    "iconName": "Snippets",
+    "keywords": ["token", "counter", "llm", "openai", "claude", "gemini", "cost", "context", "prompt"]
+  },
+  {
+    "name": "Unit Converter",
+    "category": "Utilities",
+    "route": "/utilities/unit_converter",
+    "deepLink": "devtpro://utilities/unit_converter",
+    "description": "Convert developer units across storage, time, bandwidth, frequency, and CSS",
+    "supportsInput": false,
+    "iconName": "Ruler",
+    "keywords": ["unit", "convert", "storage", "bytes", "bandwidth", "time", "frequency", "css", "rem"]
+  },
+  {
+    "name": "HTTP Request Parser",
+    "category": "Utilities",
+    "route": "/utilities/http_request_parser",
+    "deepLink": "devtpro://utilities/http_request_parser",
+    "description": "Parse raw HTTP requests into URL, headers, body, and cURL",
+    "supportsInput": true,
+    "iconName": "Globe",
+    "keywords": ["http", "request", "parser", "headers", "query", "curl", "postman", "devtools"]
+  },
+  {
+    "name": "Text Case Converter",
+    "category": "Utilities",
+    "route": "/utilities/text_case",
+    "deepLink": "devtpro://utilities/text_case",
+    "description": "Convert text between different naming conventions",
+    "supportsInput": true,
+    "iconName": "Text",
+    "keywords": ["text", "case", "upper", "lower", "camel", "snake", "kebab"]
+  },
+  {
+    "name": "Diff Viewer",
+    "category": "Utilities",
+    "route": "/utilities/diff_viewer",
+    "deepLink": "devtpro://utilities/diff_viewer",
+    "description": "Compare two blocks of text side-by-side",
+    "supportsInput": false,
+    "iconName": "TextCursor",
+    "keywords": ["diff", "compare", "text", "difference"]
+  },
+  {
+    "name": "Lorem Ipsum Generator",
+    "category": "Utilities",
+    "route": "/utilities/lorem_ipsum",
+    "deepLink": "devtpro://utilities/lorem_ipsum",
+    "description": "Generate placeholder text for your designs",
+    "supportsInput": false,
+    "iconName": "Document",
+    "keywords": ["lorem", "ipsum", "generator", "text", "placeholder"]
+  },
+  {
+    "name": "UUID / ULID Generator",
+    "category": "Utilities",
+    "route": "/utilities/uuid_generator",
+    "deepLink": "devtpro://utilities/uuid_generator",
+    "description": "Generate unique identifiers (UUID v4, ULID)",
+    "supportsInput": false,
+    "iconName": "Fingerprint",
+    "keywords": ["uuid", "ulid", "generator", "id", "unique"]
+  },
+  {
+    "name": "Regex Tester",
+    "category": "Utilities",
+    "route": "/utilities/regex_tester",
+    "deepLink": "devtpro://utilities/regex_tester",
+    "description": "Test and debug regular expressions with match highlighting",
+    "supportsInput": false,
+    "iconName": "MagnifyingGlass",
+    "keywords": ["regex", "regular", "expression", "pattern", "match", "test"]
+  },
+  {
+    "name": "Color Converter",
+    "category": "Utilities",
+    "route": "/utilities/color_converter",
+    "deepLink": "devtpro://utilities/color_converter",
+    "description": "Convert colors between HEX, RGB, HSL, CMYK, and HSV formats",
+    "supportsInput": false,
+    "iconName": "Swatch",
+    "keywords": ["color", "convert", "hex", "rgb", "hsl", "cmyk", "picker", "palette"]
+  },
+  {
+    "name": "QR Code Generator",
+    "category": "QR Code",
+    "route": "/qr_code/generator",
+    "deepLink": "devtpro://qr_code/generator",
+    "description": "Generate QR codes from text or URLs",
+    "supportsInput": false,
+    "iconName": "BarCode",
+    "keywords": ["qr", "code", "generate", "create", "barcode"]
+  },
+  {
+    "name": "QR Code Reader",
+    "category": "QR Code",
+    "route": "/qr_code/reader",
+    "deepLink": "devtpro://qr_code/reader",
+    "description": "Scan and read QR codes",
+    "supportsInput": false,
+    "iconName": "BarCode",
+    "keywords": ["qr", "code", "read", "scan", "camera"]
+  },
+  {
+    "name": "Hash Generator",
+    "category": "Cryptography",
+    "route": "/cryptography/hash_generator",
+    "deepLink": "devtpro://cryptography/hash_generator",
+    "description": "Generate cryptographic hashes",
+    "supportsInput": true,
+    "iconName": "Fingerprint",
+    "keywords": ["hash", "md5", "sha", "crypto", "digest"]
+  },
+  {
+    "name": "Encryption",
+    "category": "Cryptography",
+    "route": "/cryptography/encryption",
+    "deepLink": "devtpro://cryptography/encryption",
+    "description": "Encrypt and decrypt text",
+    "supportsInput": true,
+    "iconName": "Lock",
+    "keywords": ["encrypt", "decrypt", "aes", "security", "cipher"]
+  },
+  {
+    "name": "Password / Secret Key Generator",
+    "category": "Cryptography",
+    "route": "/cryptography/secret_key_generator",
+    "deepLink": "devtpro://cryptography/secret_key_generator",
+    "description": "Generate cryptographically strong passwords and secret tokens",
+    "supportsInput": false,
+    "iconName": "Key",
+    "keywords": ["password", "secret", "key", "token", "api", "webhook", "random", "entropy", "base64", "hex"]
+  },
+  {
+    "name": "JSON Viewer",
+    "category": "Viewers",
+    "route": "/viewers/json_viewer",
+    "deepLink": "devtpro://viewers/json_viewer",
+    "description": "Visualize JSON data",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "view", "inspect", "tree"]
+  },
+  {
+    "name": "XML Viewer",
+    "category": "Viewers",
+    "route": "/viewers/xml_viewer",
+    "deepLink": "devtpro://viewers/xml_viewer",
+    "description": "Visualize XML data",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "view", "inspect", "tree"]
+  },
+  {
+    "name": "CSV Viewer",
+    "category": "Viewers",
+    "route": "/viewers/csv_viewer",
+    "deepLink": "devtpro://viewers/csv_viewer",
+    "description": "Visualize CSV data",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["csv", "view", "inspect", "table"]
+  },
+  {
+    "name": "TSV Viewer",
+    "category": "Viewers",
+    "route": "/viewers/tsv_viewer",
+    "deepLink": "devtpro://viewers/tsv_viewer",
+    "description": "Visualize TSV data",
+    "supportsInput": true,
+    "iconName": "List",
+    "keywords": ["tsv", "view", "inspect", "table", "tab"]
+  },
+  {
+    "name": "YAML Viewer",
+    "category": "Viewers",
+    "route": "/viewers/yaml_viewer",
+    "deepLink": "devtpro://viewers/yaml_viewer",
+    "description": "Visualize YAML data",
+    "supportsInput": true,
+    "iconName": "Document",
+    "keywords": ["yaml", "view", "inspect", "tree"]
+  },
+  {
+    "name": "TOML Viewer",
+    "category": "Viewers",
+    "route": "/viewers/toml_viewer",
+    "deepLink": "devtpro://viewers/toml_viewer",
+    "description": "Visualize TOML configuration data",
+    "supportsInput": true,
+    "iconName": "Cog",
+    "keywords": ["toml", "view", "inspect", "tree", "config"]
+  },
+  {
+    "name": "TOON Viewer",
+    "category": "Viewers",
+    "route": "/viewers/toon_viewer",
+    "deepLink": "devtpro://viewers/toon_viewer",
+    "description": "Visualize TOON data",
+    "supportsInput": true,
+    "iconName": "ComputerChip",
+    "keywords": ["toon", "view", "inspect", "tree"]
+  },
+  {
+    "name": "HTML Preview",
+    "category": "Previewers",
+    "route": "/previewers/html",
+    "deepLink": "devtpro://previewers/html",
+    "description": "Real-time HTML preview with WebView rendering",
+    "supportsInput": true,
+    "iconName": "Eye",
+    "keywords": ["html", "preview", "render", "web"]
+  },
+  {
+    "name": "Markdown Preview",
+    "category": "Previewers",
+    "route": "/previewers/md",
+    "deepLink": "devtpro://previewers/md",
+    "description": "Live Markdown rendering with Github-flavored styling",
+    "supportsInput": true,
+    "iconName": "Text",
+    "keywords": ["markdown", "preview", "render", "md"]
+  },
+  {
+    "name": "JSON Minifier",
+    "category": "Minifiers",
+    "route": "/minifiers/json",
+    "deepLink": "devtpro://minifiers/json",
+    "description": "Compact JSON data to save space",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "minify", "compress", "compact"]
+  },
+  {
+    "name": "XML Minifier",
+    "category": "Minifiers",
+    "route": "/minifiers/xml",
+    "deepLink": "devtpro://minifiers/xml",
+    "description": "Remove whitespace from XML documents",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "minify", "compress", "compact"]
+  },
+  {
+    "name": "TOML Minifier",
+    "category": "Minifiers",
+    "route": "/minifiers/toml",
+    "deepLink": "devtpro://minifiers/toml",
+    "description": "Minify TOML configuration files",
+    "supportsInput": true,
+    "iconName": "Cog",
+    "keywords": ["toml", "minify", "compress", "compact", "config"]
+  },
+  {
+    "name": "JSON Validator",
+    "category": "Validators",
+    "route": "/validators/json",
+    "deepLink": "devtpro://validators/json",
+    "description": "Validate JSON syntax and structure",
+    "supportsInput": true,
+    "iconName": "CodeBlock",
+    "keywords": ["json", "validate", "verify", "check", "lint"]
+  },
+  {
+    "name": "XML Validator",
+    "category": "Validators",
+    "route": "/validators/xml",
+    "deepLink": "devtpro://validators/xml",
+    "description": "Validate XML syntax and structure",
+    "supportsInput": true,
+    "iconName": "Code",
+    "keywords": ["xml", "validate", "verify", "check", "lint"]
+  },
+  {
+    "name": "YAML Validator",
+    "category": "Validators",
+    "route": "/validators/yaml",
+    "deepLink": "devtpro://validators/yaml",
+    "description": "Validate YAML syntax and structure",
+    "supportsInput": true,
+    "iconName": "Document",
+    "keywords": ["yaml", "validate", "verify", "check", "lint"]
+  },
+  {
+    "name": "TOON Validator",
+    "category": "Validators",
+    "route": "/validators/toon",
+    "deepLink": "devtpro://validators/toon",
+    "description": "Validate TOON syntax and structure",
+    "supportsInput": true,
+    "iconName": "ComputerChip",
+    "keywords": ["toon", "validate", "verify", "check", "lint"]
+  },
+  {
+    "name": "TOML Validator",
+    "category": "Validators",
+    "route": "/validators/toml",
+    "deepLink": "devtpro://validators/toml",
+    "description": "Validate TOML syntax and structure",
+    "supportsInput": true,
+    "iconName": "Cog",
+    "keywords": ["toml", "validate", "verify", "check", "lint", "config"]
+  },
+  {
+    "name": "Settings",
+    "category": "Settings",
+    "route": "/settings",
+    "deepLink": "devtpro://settings",
+    "description": "Configure editor settings and preferences",
+    "supportsInput": false,
+    "iconName": "Gear",
+    "keywords": ["settings", "preferences", "config", "options", "editor"]
+  },
+  {
+    "name": "Keyboard Shortcuts",
+    "category": "Settings",
+    "route": "/settings/keyboard_shortcuts",
+    "deepLink": "devtpro://settings/keyboard_shortcuts",
+    "description": "View and search keyboard shortcuts",
+    "supportsInput": false,
+    "iconName": "Keyboard",
+    "keywords": ["keyboard", "shortcuts", "keybindings", "hotkeys", "keys"]
+  }
+]
