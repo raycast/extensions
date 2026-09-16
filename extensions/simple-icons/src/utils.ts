@@ -179,7 +179,14 @@ const pacoteAssetPack = async (version: string) => {
           try {
             await fs.rename(stale, destination);
           } catch {
-            await fs.rm(stale, { recursive: true, force: true }).catch(() => {});
+            // The restore failed. Only delete the stale pack if the destination
+            // is now complete (someone else published in this gap too). If the
+            // destination is not complete, leave the stale pack — it's a
+            // complete pack with nowhere to go, and reclaimDeadStaging will
+            // sweep it if it stays abandoned.
+            if (await hasCompleteAssetPack(destination)) {
+              await fs.rm(stale, { recursive: true, force: true }).catch(() => {});
+            }
           }
           await fs.rm(staging, { recursive: true, force: true });
           return;
