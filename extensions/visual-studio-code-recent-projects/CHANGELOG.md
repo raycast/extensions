@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Fix: Crash with remote SSH entries] - {PR_MERGE_DATE}
+## [Fix: Crash with remote SSH entries] - 2026-09-16
 
 - Fixed "Maximum update depth exceeded" crash when the recent projects list contains remote SSH entries. Items now use their full URI as a stable identifier, preventing Raycast from re-creating items during navigation. Fixes [#31120](https://github.com/raycast/extensions/issues/31120).
 
