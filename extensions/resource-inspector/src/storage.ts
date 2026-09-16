@@ -3,6 +3,7 @@ import { nativeCall } from "./native";
 export interface Statement {
   sql: string;
   params?: unknown[];
+  ifMissingColumn?: [string, string];
 }
 export interface HistoryRow {
   key: string;
@@ -15,6 +16,7 @@ export interface HistoryRow {
   writes: number | null;
   observed: number;
   count: number;
+  partialMetrics: number;
 }
 const schema: Statement[] = [
   {
@@ -28,6 +30,15 @@ const schema: Statement[] = [
   },
   {
     sql: "CREATE TABLE IF NOT EXISTS coverage (time REAL PRIMARY KEY, observed REAL NOT NULL, pressure INTEGER, compressed REAL, swap REAL)",
+  },
+  // Existing records have unknown completeness. Migrate conservatively without deleting history.
+  {
+    sql: "ALTER TABLE samples ADD COLUMN partial INTEGER NOT NULL DEFAULT 1",
+    ifMissingColumn: ["samples", "partial"],
+  },
+  {
+    sql: "ALTER TABLE hours ADD COLUMN partial INTEGER NOT NULL DEFAULT 1",
+    ifMissingColumn: ["hours", "partial"],
   },
 ];
 export class HistoryStore {
@@ -121,10 +132,10 @@ export class HistoryStore {
     const result = await this.run([
       {
         sql: `WITH data AS (
-      SELECT key,kind,name,memory AS peak,weight,integral,cpu,reads,writes,observed,1 AS count FROM samples WHERE time>=? AND kind=?
-      UNION ALL SELECT key,kind,name,peak,weight,integral,cpu,reads,writes,observed,count FROM hours WHERE time>=? AND kind=?)
+      SELECT key,kind,name,memory AS peak,weight,integral,cpu,reads,writes,observed,1 AS count,partial FROM samples WHERE time>=? AND kind=?
+      UNION ALL SELECT key,kind,name,peak,weight,integral,cpu,reads,writes,observed,count,partial FROM hours WHERE time>=? AND kind=?)
       SELECT key,kind,MAX(name) AS name,COALESCE(SUM(integral)/NULLIF(SUM(weight),0),MAX(peak)) AS average,MAX(peak) AS peak,
-      SUM(cpu) AS cpu,SUM(reads) AS reads,SUM(writes) AS writes,SUM(observed) AS observed,SUM(count) AS count FROM data GROUP BY key,kind`,
+      SUM(cpu) AS cpu,SUM(reads) AS reads,SUM(writes) AS writes,SUM(observed) AS observed,SUM(count) AS count,MAX(partial) AS partialMetrics FROM data GROUP BY key,kind`,
         params: [since, kind, since, kind],
       },
     ]);
@@ -164,7 +175,7 @@ export function recordingStatements(
   const statements: Statement[] = rows.map((row) => {
     const weight = row.memory == null ? 0 : row.observed;
     return {
-      sql: "INSERT OR IGNORE INTO samples VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+      sql: "INSERT OR IGNORE INTO samples VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
       params: [
         time,
         row.key,
@@ -177,6 +188,12 @@ export function recordingStatements(
         row.readDelta,
         row.writeDelta,
         row.observed,
+        row.partialMetrics ||
+        row.cpuSeconds == null ||
+        row.readDelta == null ||
+        row.writeDelta == null
+          ? 1
+          : 0,
       ],
     };
   });
@@ -195,10 +212,10 @@ export function recordingStatements(
   // Compact complete hours only, avoiding a moving partial-hour boundary.
   const cutoff = Math.floor((time - 86400) / 3600) * 3600;
   statements.push({
-    sql: `INSERT INTO hours SELECT CAST(time/3600 AS INTEGER)*3600,key,kind,MAX(name),MAX(memory),SUM(weight),SUM(integral),SUM(cpu),SUM(reads),SUM(writes),SUM(observed),COUNT(*)
+    sql: `INSERT INTO hours SELECT CAST(time/3600 AS INTEGER)*3600,key,kind,MAX(name),MAX(memory),SUM(weight),SUM(integral),SUM(cpu),SUM(reads),SUM(writes),SUM(observed),COUNT(*),MAX(partial)
     FROM samples WHERE time<? GROUP BY CAST(time/3600 AS INTEGER),key,kind
     ON CONFLICT(time,key) DO UPDATE SET name=excluded.name,peak=COALESCE(MAX(hours.peak,excluded.peak),hours.peak,excluded.peak),
-    weight=hours.weight+excluded.weight,integral=hours.integral+excluded.integral,cpu=${add("cpu")},reads=${add("reads")},writes=${add("writes")},observed=hours.observed+excluded.observed,count=hours.count+excluded.count`,
+    weight=hours.weight+excluded.weight,integral=hours.integral+excluded.integral,cpu=${add("cpu")},reads=${add("reads")},writes=${add("writes")},observed=hours.observed+excluded.observed,count=hours.count+excluded.count,partial=MAX(hours.partial,excluded.partial)`,
     params: [cutoff],
   });
   statements.push(

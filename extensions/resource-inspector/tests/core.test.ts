@@ -13,6 +13,7 @@ import {
 import { HistoryStore } from "../src/storage";
 import { parseDiagnostic } from "../src/diagnostic-data";
 import { validateContainer } from "../src/containers";
+import { nativeCall } from "../src/native";
 const binary = resolve("assets/inspector");
 function proc(overrides: Partial<ProcessRow> = {}): ProcessRow {
   return {
@@ -75,6 +76,36 @@ test("PID reuse, reboot, sleep and long gaps never produce fictional usage", () 
   assert.equal(interval({ ...snap(1060), boot: "other" }, old), 0);
   assert.equal(interval({ ...snap(1060), awake: 1002 }, old), 0);
   assert.equal(interval(snap(2000), old), 0);
+});
+test("multiple app instances never select an arbitrary quit target, while processes remain selectable", () => {
+  for (const processes of [
+    [proc(), proc({ pid: 50, appPid: 50, start: "200:0" })],
+    [
+      proc({
+        appPid: undefined,
+        appBlockedReason: "Multiple running instances (2)",
+      }),
+      proc({
+        pid: 50,
+        appPid: undefined,
+        appBlockedReason: "Multiple running instances (2)",
+      }),
+    ],
+  ]) {
+    const rows = entities(snap(1060, processes), snap());
+    const app = rows.find((e) => e.kind === "app")!;
+    assert.equal(app.memory, 2048);
+    assert.equal(app.target, undefined);
+    assert.match(app.blockedReason!, /Multiple running instances/);
+    assert.ok(
+      rows
+        .filter((e) => e.kind === "process")
+        .every((e) => e.target && !e.blockedReason),
+    );
+  }
+  const single = entities(snap()).find((e) => e.kind === "app")!;
+  assert.equal(single.target?.pid, 40);
+  assert.equal(single.blockedReason, undefined);
 });
 test("a new or unreadable helper does not hide measured CPU for the whole app", () => {
   const old = snap(1000);
@@ -191,4 +222,87 @@ test("SQLite recording, compaction, seven-day pruning, pause, clear and rollback
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test("partial totals survive storage, mixed hourly compaction, and subsequent aggregation", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "inspector-partial-history-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const store = new HistoryStore(binary, join(dir, "history.sqlite"));
+  const start = 100 * 3600;
+  await store.record(snap(start));
+  await store.record(
+    snap(start + 60, [proc({ cpuNs: 31e9, writeBytes: 1200 })]),
+  );
+  assert.equal((await store.history(start + 60, "app"))[0].partialMetrics, 0);
+  await store.record(
+    snap(start + 120, [
+      proc({ cpuNs: 61e9, writeBytes: 2200 }),
+      proc({ pid: 43, cpuNs: null, readBytes: null, writeBytes: null }),
+    ]),
+  );
+  const before = (await store.history(start + 60, "app"))[0];
+  assert.equal(before.cpu, 60);
+  assert.equal(before.writes, 2000);
+  assert.equal(before.partialMetrics, 1);
+  await store.record(snap(start + 90000));
+  const after = (await store.history(start, "app"))[0];
+  assert.equal(after.cpu, 60);
+  assert.equal(after.writes, 2000);
+  assert.equal(after.partialMetrics, 1);
+  const [hour] = await store.run([
+    { sql: "SELECT partial FROM hours WHERE kind='app'" },
+  ]);
+  assert.equal(hour[0].partial, 1);
+  // A late sample can update an existing hourly bucket; it must not clear the warning.
+  const { recordingStatements } = await import("../src/storage");
+  await store.run(
+    recordingStatements(
+      snap(start + 180, [proc({ cpuNs: 91e9 })]),
+      snap(start + 120, [proc({ cpuNs: 61e9 })]),
+    ),
+  );
+  await store.run(recordingStatements(snap(start + 90100)));
+  assert.equal((await store.history(start, "app"))[0].partialMetrics, 1);
+});
+
+test("legacy history migrates atomically and keeps old totals with unknown completeness", async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), "inspector-history-migration-"));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const path = join(dir, "history.sqlite");
+  await nativeCall(binary, "database", {
+    path,
+    statements: [
+      {
+        sql: "CREATE TABLE samples (time REAL,key TEXT,kind TEXT,name TEXT,memory REAL,weight REAL,integral REAL,cpu REAL,reads REAL,writes REAL,observed REAL,PRIMARY KEY(time,key))",
+      },
+      {
+        sql: "CREATE TABLE hours (time REAL,key TEXT,kind TEXT,name TEXT,peak REAL,weight REAL,integral REAL,cpu REAL,reads REAL,writes REAL,observed REAL,count INTEGER,PRIMARY KEY(time,key))",
+      },
+      {
+        sql: "INSERT INTO samples VALUES (1000,'app:legacy','app','Legacy',2048,60,122880,30,100,200,60)",
+      },
+      {
+        sql: "INSERT INTO hours VALUES (0,'app:legacy','app','Legacy',1024,60,61440,15,50,100,60,1)",
+      },
+    ],
+  });
+  const stores = [
+    new HistoryStore(binary, path),
+    new HistoryStore(binary, path),
+  ];
+  const histories = await Promise.all(
+    stores.map((store) => store.history(0, "app")),
+  );
+  for (const [row] of histories) {
+    assert.equal(row.cpu, 45);
+    assert.equal(row.writes, 300);
+    assert.equal(row.count, 2);
+    assert.equal(row.partialMetrics, 1);
+  }
+  const [columns] = await stores[0].run([
+    {
+      sql: "SELECT name FROM pragma_table_info('samples') WHERE name='partial'",
+    },
+  ]);
+  assert.equal(columns.length, 1);
 });

@@ -547,12 +547,27 @@ export async function removeWorktree(
     ],
     120000,
   );
-  const remains = (await listRepositoryWorktrees(fresh.tree.commonDir)).some(
-    (t) => t.key === fresh.tree.key,
+  await verifyWorktreeRemoval(fresh.tree);
+  return { recoveryRef };
+}
+export async function verifyWorktreeRemoval(tree: Worktree) {
+  const remains = (await listRepositoryWorktrees(tree.commonDir)).some(
+    (t) => t.key === tree.key,
   );
   if (remains)
     throw new Error(
       "Git still lists this worktree; rescan before trying again",
     );
-  return { recoveryRef };
+  const folder = await lstat(tree.path).catch(
+    (error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return null;
+      throw new Error(
+        `Cannot verify whether the worktree folder was removed: ${error.message}`,
+      );
+    },
+  );
+  if (folder)
+    throw new Error(
+      `Git no longer registers this worktree, but its folder still exists: ${tree.path}. No further files were removed. Inspect the remaining folder manually.`,
+    );
 }

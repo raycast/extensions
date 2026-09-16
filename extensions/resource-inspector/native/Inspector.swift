@@ -64,15 +64,26 @@ func processRows() -> [[String: Any]] {
     }
     let byPID = Dictionary(uniqueKeysWithValues: rows.map { ($0["pid"] as! Int, $0) })
     let running = NSWorkspace.shared.runningApplications
-    var apps = [String: [String: Any]]()
+    var instances = [String: [NSRunningApplication]]()
     for app in running {
         guard let url = app.bundleURL else { continue }
-        let path = url.path
-        if apps[path] != nil && app.activationPolicy != .regular { continue }
+        instances[url.path, default: []].append(app)
+    }
+    var apps = [String: [String: Any]]()
+    for (path, candidates) in instances {
+        let regular = candidates.filter { $0.activationPolicy == .regular }
+        let owners = regular.isEmpty ? candidates : regular
+        guard let app = owners.first else { continue }
         let bundle = app.bundleIdentifier ?? ""
-        apps[path] = ["appPath": path, "bundleId": bundle,
-            "appName": bundle == "com.openai.codex" ? "Codex" : (app.localizedName ?? url.deletingPathExtension().lastPathComponent),
-            "appPid": Int(app.processIdentifier)]
+        var info: [String: Any] = ["appPath": path, "bundleId": bundle,
+            "appName": bundle == "com.openai.codex" ? "Codex" : (app.localizedName ?? URL(fileURLWithPath: path).deletingPathExtension().lastPathComponent)]
+        if owners.count == 1 {
+            info["appPid"] = Int(app.processIdentifier)
+        } else {
+            // Usage stays aggregated by application; never choose an arbitrary instance to quit.
+            info["appBlockedReason"] = "Multiple running instances (\(owners.count)); inspect and select an individual process instead"
+        }
+        apps[path] = info
     }
     func chain(_ first: Int) -> [[String: Any]] {
         var result = [[String: Any]](), seen = Set<Int>(), pid = first
@@ -134,6 +145,7 @@ func act(_ request: [String: Any]) throws -> [String: Any] {
     guard current["start"] as? String == start, current["executable"] as? String == path else { throw Failure("This process has changed. Refresh before acting.") }
     if let reason = current["blockedReason"] as? String { throw Failure(reason) }
     if action.hasSuffix("app") {
+        if let reason = current["appBlockedReason"] as? String { throw Failure(reason) }
         guard current["appPid"] as? Int == pid, let app = NSRunningApplication(processIdentifier: pid_t(pid)) else { throw Failure("This application is no longer available") }
         let accepted = action == "quit-app" ? app.terminate() : app.forceTerminate()
         return ["status": accepted ? "requested" : "rejected"]
@@ -153,12 +165,28 @@ func database(_ request: [String: Any]) throws -> [Any] {
     defer { sqlite3_close(db) }
     sqlite3_busy_timeout(db, 5000)
     func error() -> Failure { Failure(String(cString: sqlite3_errmsg(db))) }
+    func hasColumn(_ table: String, _ column: String) throws -> Bool {
+        var query: OpaquePointer?
+        guard sqlite3_prepare_v2(db, "SELECT 1 FROM pragma_table_info(?) WHERE name=?", -1, &query, nil) == SQLITE_OK else { throw error() }
+        defer { sqlite3_finalize(query) }
+        let transient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+        guard sqlite3_bind_text(query, 1, table, -1, transient) == SQLITE_OK,
+              sqlite3_bind_text(query, 2, column, -1, transient) == SQLITE_OK else { throw error() }
+        let step = sqlite3_step(query)
+        guard step == SQLITE_ROW || step == SQLITE_DONE else { throw error() }
+        return step == SQLITE_ROW
+    }
     guard sqlite3_exec(db, "PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; BEGIN IMMEDIATE", nil, nil, nil) == SQLITE_OK else { throw error() }
     var committed = false
     defer { if !committed { sqlite3_exec(db, "ROLLBACK", nil, nil, nil) } }
     var results = [Any]()
     for statement in statements {
         guard let sql = statement["sql"] as? String else { throw Failure("Missing SQL") }
+        // Check and migrate while holding the same write transaction as the request.
+        if let column = statement["ifMissingColumn"] as? [String] {
+            guard column.count == 2 else { throw Failure("Invalid column migration") }
+            if try hasColumn(column[0], column[1]) { results.append([[String: Any]]()); continue }
+        }
         var stmt: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { throw error() }
         defer { sqlite3_finalize(stmt) }

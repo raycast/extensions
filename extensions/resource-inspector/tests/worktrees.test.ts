@@ -2,6 +2,7 @@ import test, { TestContext } from "node:test";
 import assert from "node:assert/strict";
 import {
   mkdtemp,
+  lstat,
   mkdir,
   readFile,
   realpath,
@@ -21,6 +22,7 @@ import {
   removeWorktree,
   reviewWorktree,
   scanWorktrees,
+  verifyWorktreeRemoval,
 } from "../src/worktree-data";
 
 async function fixture(t: TestContext) {
@@ -198,6 +200,48 @@ test("dirty removal requires explicit discard and stale review cannot delete new
   assert.equal(
     (await gitAt(f.repo, ["rev-parse", tree.branch!])).trim(),
     tree.head,
+  );
+});
+
+test("ordinary removal deletes an ignored-only checkout and verifies the folder is absent", async (t) => {
+  const f = await fixture(t),
+    tree = await f.add("ignored-only"),
+    sibling = await f.add("ignored-sibling");
+  await mkdir(join(tree.path, "ignored"));
+  await writeFile(
+    join(tree.path, "ignored/build.txt"),
+    "disposable ignored build output",
+  );
+  const review = await reviewWorktree(tree);
+  assert.equal(review.tracked, 0);
+  assert.equal(review.untracked, 0);
+  assert.equal(review.ignored, 1);
+  await removeWorktree(review, false);
+  await assert.rejects(lstat(tree.path), { code: "ENOENT" });
+  assert.ok(
+    (await listRepositoryWorktrees(f.common)).some(
+      (row) => row.key === sibling.key,
+    ),
+  );
+  assert.equal(
+    (await gitAt(f.repo, ["rev-parse", tree.branch!])).trim(),
+    tree.head,
+  );
+});
+
+test("an unregistered checkout folder is reported as remaining and never deleted automatically", async (t) => {
+  const f = await fixture(t),
+    tree = await f.add("leftover");
+  await gitAt(f.repo, ["worktree", "remove", tree.path]);
+  await mkdir(tree.path);
+  await writeFile(join(tree.path, "remaining.txt"), "leave this file alone");
+  await assert.rejects(
+    verifyWorktreeRemoval(tree),
+    /no longer registers.*folder still exists/,
+  );
+  assert.equal(
+    await readFile(join(tree.path, "remaining.txt"), "utf8"),
+    "leave this file alone",
   );
 });
 

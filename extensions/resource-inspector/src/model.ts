@@ -13,6 +13,7 @@ export interface ProcessRow {
   appName?: string;
   bundleId?: string;
   appPid?: number;
+  appBlockedReason?: string;
   blockedReason: string | null;
 }
 export interface ContainerRow {
@@ -130,7 +131,17 @@ export function entities(current: Snapshot, previous?: Snapshot): Entity[] {
   }
   const apps: Entity[] = [...groups].map(([key, parts]) => {
     const processes = parts.flatMap((p) => p.processes);
-    const target = processes.find((p) => p.pid === p.appPid);
+    const owners = new Set(
+      processes.map((p) => p.appPid).filter((pid) => pid != null),
+    );
+    const appBlockedReason =
+      processes.find((p) => p.appBlockedReason)?.appBlockedReason ??
+      (owners.size > 1
+        ? "Multiple running instances; inspect and select an individual process instead"
+        : undefined);
+    const target = appBlockedReason
+      ? undefined
+      : processes.find((p) => p.pid === p.appPid);
     const representative = target ?? processes[0];
     return {
       key,
@@ -150,9 +161,11 @@ export function entities(current: Snapshot, previous?: Snapshot): Entity[] {
       observed: Math.max(0, ...parts.map((p) => p.observed)),
       processes,
       target,
-      blockedReason: target
-        ? (target.blockedReason ?? undefined)
-        : "Main app has exited; inspect the remaining processes individually",
+      blockedReason:
+        appBlockedReason ??
+        (target
+          ? (target.blockedReason ?? undefined)
+          : "Main app has exited; inspect the remaining processes individually"),
     };
   });
   const previousContainers = new Map(

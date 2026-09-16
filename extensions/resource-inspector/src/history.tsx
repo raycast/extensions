@@ -16,6 +16,13 @@ import { ResourceDetail } from "./ui";
 function duration(value: number | null) {
   return value == null ? "Unavailable" : `${(value / 60).toFixed(1)} min`;
 }
+function observedValue(
+  row: HistoryRow,
+  value: number | null,
+  formatted: string,
+) {
+  return `${row.partialMetrics && value != null ? "≥ " : ""}${formatted}`;
+}
 function HistoryDetail({ row }: { row: HistoryRow }) {
   const { push } = useNavigation();
   async function findCurrent() {
@@ -40,7 +47,7 @@ function HistoryDetail({ row }: { row: HistoryRow }) {
   }
   return (
     <Detail
-      markdown={`# ${markdownText(row.name)}\n\nRecorded ${row.kind} history, from ${row.count} samples.\n\n| Measurement | Observed |\n|---|---|\n| Average memory | ${bytes(row.average)} |\n| Peak memory | ${bytes(row.peak)} |\n| CPU time | ${duration(row.cpu)} |\n| Disk read | ${bytes(row.reads)} |\n| Disk written | ${bytes(row.writes)} |\n| Covered time | ${duration(row.observed)} |\n\nAverages cover measured intervals only. Short-lived processes between samples can be missed. Missing and sleeping periods are not filled in. Older data is summarized by hour.\n\n${row.kind === "container" ? "Container CPU time is an estimate from sampled CPU percentages. Container memory is separate from, and overlaps, OrbStack’s host memory." : "App totals include their associated processes; do not add app totals and process totals together."}\n\nHistorical entries cannot directly stop a process. Inspect the current target first.`}
+      markdown={`# ${markdownText(row.name)}\n\nRecorded ${row.kind} history, from ${row.count} samples.\n\n| Measurement | Observed |\n|---|---|\n| Average memory | ${bytes(row.average)} |\n| Peak memory | ${bytes(row.peak)} |\n| CPU time | ${observedValue(row, row.cpu, duration(row.cpu))} |\n| Disk read | ${observedValue(row, row.reads, bytes(row.reads))} |\n| Disk written | ${observedValue(row, row.writes, bytes(row.writes))} |\n| Covered time | ${duration(row.observed)} |\n\n${row.partialMetrics ? "**Partial CPU and disk totals (≥):** some counters were unavailable, or older records did not track completeness. Available values are lower bounds, not complete totals.\n\n" : ""}Averages cover measured intervals only. Short-lived processes between samples can be missed. Missing and sleeping periods are not filled in. Older data is summarized by hour.\n\n${row.kind === "container" ? "Container CPU time is an estimate from sampled CPU percentages. Container memory is separate from, and overlaps, OrbStack’s host memory." : "App totals include their associated processes; do not add app totals and process totals together."}\n\nHistorical entries cannot directly stop a process. Inspect the current target first.`}
       actions={
         <ActionPanel>
           <Action
@@ -173,7 +180,9 @@ export default function History() {
               icon={kind === "container" ? Icon.Box : Icon.BarChart}
               accessories={[
                 { text: `Peak ${bytes(row.peak)}` },
-                { text: `CPU ${duration(row.cpu)}` },
+                {
+                  text: `CPU ${observedValue(row, row.cpu, duration(row.cpu))}`,
+                },
               ]}
               actions={
                 <ActionPanel>

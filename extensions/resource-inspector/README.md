@@ -20,6 +20,8 @@ These captures use demonstration data; no personal usage history or private proj
 
 An app's process view lets you inspect individual helpers. Quitting an app does not recursively kill its process tree. Surviving processes remain individually selectable. macOS infrastructure, other users' processes, Raycast, and the inspector itself are read-only.
 
+If multiple instances of the same application are running, their combined app row is read-only. Inspect its processes and deliberately select an individual PID instead. The native helper also rejects an app quit request if another instance appeared after you selected it.
+
 **Usage History** compares the last 24 hours, three days, or seven days. The first row changes resource type and ranking. Historical entries open current measurements before offering a close action.
 
 **Recent Diagnostics** reads available macOS reports from the last seven days. These are dated events, not a complete history and not proof that an app caused a slowdown.
@@ -42,6 +44,8 @@ The default discovery covers visible projects beneath your home folder and known
 
 Deletion uses Git's single-worktree removal operation. It permanently removes that checkout, not its branch. There is no bulk delete, automatic prune, branch deletion, or unlocking. Main checkouts, bare repositories, locked worktrees, unverified identities, and a checkout containing another registered worktree in the same repository are protected. Git can refuse special layouts such as submodules; the extension displays the error and never retries with stronger deletion automatically.
 
+Success requires both the Git registration and the checkout folder to be absent. If files remain after Git unregisters a worktree, the extension reports the remaining folder and does not delete anything further automatically. Ignored-only checkouts still use ordinary Git removal after the confirmation explicitly identifies the ignored files.
+
 Before deletion, the extension rereads the registry, folder identity, branch/commit, and list of changed paths. A changed review is rejected. This is not an activity lock or a backup of file contents, so stop ongoing work in the selected folder first. Uncommitted and ignored files cannot be recovered by this extension. When deleting a detached worktree, its current commit is preserved under `refs/resource-inspector/deleted-worktrees/…`; list these with `git for-each-ref refs/resource-inspector/deleted-worktrees/`, then use `git branch recovered-work <ref>` if needed. Previous detached commits that are not ancestors of the current commit are not separately backed up.
 
 **Missing Folders** shows stale registrations separately. Removing one registration keeps its branch and does not free space for a folder that is already absent. It does not prune other entries. Never remove a registration for an external drive merely because the drive is temporarily disconnected; Git-locked entries remain protected.
@@ -59,6 +63,7 @@ History starts when recording starts. Sleeping, paused, unavailable, and unsampl
 - Memory is the native physical footprint, which accounts for compressed memory differently from plain resident memory. Values can differ from `ps` and from other tools' grouping.
 - CPU uses **100% per logical core**, so a busy app can exceed 100%. Live CPU and disk activity need two comparable samples. An app's CPU/disk totals include available process counters; **≥** marks partial totals. Processes that exit between samples may be missed.
 - History CPU and disk values are observed totals, not guaranteed complete totals. Container CPU history is estimated from sampled percentages.
+- History preserves partial-measurement warnings through hourly summaries. CPU and disk values marked **≥** are lower bounds because some counters were unavailable. Older stored records did not track completeness and are conservatively marked partial during an atomic migration; existing history is retained.
 - App totals already include their associated processes. Container memory is inside OrbStack's host allocation; never add container usage to the OrbStack total.
 - A process's start time and boot session are checked again immediately before stopping it. Containers are checked using full ID and start time. If the target changes, select it again.
 - A graceful container stop uses `--timeout=-1`. After ten seconds, the client can return “shutdown requested” while the Docker daemon continues waiting; it does not automatically force-stop the container. A container configured to use SIGKILL as its stop signal requires the separate force action.
@@ -107,6 +112,7 @@ For the optional destructive integration test, `tests/safety.integration.ts` cre
 - A disposable macOS app displayed its simulated save prompt. Cancel left it running. A separate native Force Quit then closed only that fixture.
 - Raycast displayed live resource usage and recorded history; Background Refresh was activated.
 - Worktree tests use only disposable repositories. They cover provider-independent discovery, unusual path names, main/locked protection, clean and explicit dirty removal, stale confirmations, retained branches, detached-commit recovery, single missing-registration removal, replaced directories/symlinks, nested worktrees, bare repositories, and relative registrations.
+- Regression tests also cover ignored-only worktree removal and leftover-folder reporting, partial history through compaction, and concurrent migration of older history. `node --import tsx tests/app-instances.integration.ts` creates two disposable regular app instances and verifies that normal and forced app actions reject an ambiguous or newly ambiguous target; a single remaining instance can quit normally.
 - The automated suite passed on the development Mac. The installed Raycast command was checked for search, branch/date details, ignored-path warnings, and the separate removal action; destructive validation used only disposable fixtures.
 - One native snapshot took about 0.09 seconds, approximately 0.04 seconds of CPU time, and a 6.4 MB peak physical footprint (13.8 MB maximum resident size). This is a single native-helper measurement, not a claim about total Raycast or Docker CLI overhead.
 

@@ -136,7 +136,13 @@ function stillSame(selected: Entity, snapshot: Snapshot) {
         c.id === selected.container!.id &&
         c.startedAt === selected.container!.startedAt,
     );
-  if (!selected.target) return false;
+  if (!selected.target)
+    return (
+      selected.kind === "app" &&
+      snapshot.processes.some(
+        (p) => p.appPath && `app:${p.appPath}` === selected.key,
+      )
+    );
   return (
     snapshot.boot !== "unknown" &&
     snapshot.processes.some(
@@ -193,6 +199,7 @@ export function ResourceDetail({
   const canAct =
     same &&
     !selected.blockedReason &&
+    !latest.blockedReason &&
     !unavailable &&
     !!live.snapshot &&
     !pending;
@@ -292,8 +299,8 @@ export function ResourceDetail({
     (selected.container
       ? `Container ID: ${selected.container.id}\n\nContainer memory overlaps OrbStack's host allocation. Stopping it may free much less host RAM than OrbStack's total.\n\n`
       : "") +
-    (selected.blockedReason
-      ? `**Read-only:** ${markdownText(selected.blockedReason)}\n\n`
+    (latest.blockedReason || selected.blockedReason
+      ? `**Read-only:** ${markdownText(latest.blockedReason ?? selected.blockedReason!)}\n\n`
       : "") +
     (selected.kind === "app"
       ? "Quitting requests that this application close normally. Surviving background processes remain available for individual inspection.\n\n"
