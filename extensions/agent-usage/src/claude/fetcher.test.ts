@@ -175,7 +175,7 @@ test("listClaudeOAuthAccounts prefers the Keychain credential over a stale crede
       configDir,
       readKeychain: () => ({
         password: JSON.stringify({ claudeAiOauth: { ...VALID_OAUTH, accessToken: "fresh-keychain-token" } }),
-        account: "lazynet",
+        account: "someone",
       }),
     });
 
@@ -213,11 +213,11 @@ test("a Keychain-sourced account records the service it came from so a refresh w
   try {
     const accounts = listClaudeOAuthAccounts({
       configDir,
-      readKeychain: () => ({ password: JSON.stringify({ claudeAiOauth: VALID_OAUTH }), account: "lazynet" }),
+      readKeychain: () => ({ password: JSON.stringify({ claudeAiOauth: VALID_OAUTH }), account: "someone" }),
     });
 
     assert.equal(accounts[0].credentials.keychainService, claudeKeychainService(configDir));
-    assert.equal(accounts[0].credentials.keychainAccount, "lazynet");
+    assert.equal(accounts[0].credentials.keychainAccount, "someone");
   } finally {
     fs.rmSync(parent, { recursive: true, force: true });
   }
