@@ -8,6 +8,7 @@
 
 - App grouping now works on Windows, where it groups processes by executable path (fixes #26386)
 - Killing a grouped app on Windows now terminates every process in the group rather than only the main process and its children
+- Grouped rows on Windows keep the app's icon instead of falling back to a generic one
 
 ## [Improvements] - 2026-06-25
 

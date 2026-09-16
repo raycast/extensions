@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
-import { getProcessListCommandSpec, isMac, parseWindowsProcesses } from "../src/utils/platform";
+import { getKillGroupCommand, getProcessListCommandSpec, isMac, parseWindowsProcesses } from "../src/utils/platform";
 
 test("uses direct ps invocation for macOS process listing", () => {
   if (!isMac) {
@@ -32,4 +32,10 @@ test("keeps extended length windows paths pointing at the same file", () => {
 
 test("keeps the parent process id from the windows process list", () => {
   assert.equal(parseWindowsProcesses(windowsProcess("C:\\App.exe"))[0]?.pid, 4);
+});
+
+test("names every process in a windows group kill", () => {
+  assert.equal(getKillGroupCommand([120, 121, 122]), "taskkill /T /PID 120 /PID 121 /PID 122");
+  assert.equal(getKillGroupCommand([120, 121, 122], true), "taskkill /F /T /PID 120 /PID 121 /PID 122");
+  assert.equal(getKillGroupCommand([120]), "taskkill /T /PID 120");
 });

@@ -386,7 +386,7 @@ export function getFileIcon(process: Process): Image.ImageLike {
   }
 
   if (isWindows) {
-    if (process.type === "app") {
+    if (process.type === "app" || process.type === "aggregatedApp") {
       return { fileIcon: process.path };
     }
     return "🖥️";
