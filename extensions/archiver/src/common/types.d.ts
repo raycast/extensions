@@ -14,6 +14,7 @@ interface IExtractPreferences {
   defaultExtractSelected: boolean;
   deleteAfterExtraction: boolean;
   locationSaveExtracted: string;
+  revealExtracted: boolean;
 }
 
 interface IFileInfo {

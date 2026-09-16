@@ -107,7 +107,9 @@ export default function Command() {
                   }
                   showToast({ title: "Extracting...", style: Toast.Style.Animated });
                   const path = await extract(file.path, file.format, value.password);
-                  await showInFinder(path);
+                  if (preferences.revealExtracted) {
+                    await showInFinder(path);
+                  }
                   showHUD("🎉 Extract successfully");
                   popToRoot();
                 } catch {

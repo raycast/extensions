@@ -132,6 +132,14 @@ async function getExtractSaveLocation(zipPath: string, format: ExtractFormat): P
     zipName = zipName.substring(0, zipName.lastIndexOf("."));
   }
   saveLoc += zipName.substring(0, zipName.lastIndexOf("."));
+  if (fs.existsSync(saveLoc) && !fs.statSync(saveLoc).isDirectory()) {
+    const originalSaveLoc = saveLoc;
+    let suffix = 2;
+    do {
+      saveLoc = `${originalSaveLoc} ${suffix}`;
+      suffix += 1;
+    } while (fs.existsSync(saveLoc));
+  }
   await folderExists(saveLoc);
   return saveLoc;
 }

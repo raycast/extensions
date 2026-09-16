@@ -47,6 +47,15 @@
       "default": true
     },
     {
+      "name": "revealExtracted",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "description": "Reveal extracted files in Finder after extraction completes",
+      "label": "Reveal Extracted Files in Finder",
+      "default": true
+    },
+    {
       "name": "locationSaveCompressed",
       "type": "directory",
       "required": false,
