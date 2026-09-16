@@ -16,7 +16,12 @@ export type Spring = {
   initialVelocity: number;
 };
 export type Easing = Curve | Spring;
-export type Parsed = { easing: Easing; format: string; notes: string[] };
+export type Parsed = {
+  easing: Easing;
+  format: string;
+  notes: string[];
+  inputLosses?: string[];
+};
 export type Output = {
   id: string;
   title: string;

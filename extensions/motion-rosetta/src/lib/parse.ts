@@ -376,6 +376,12 @@ export function parse(input: string, depth = 0): Parsed {
         "Specify a spring type or at least one spring parameter.",
       );
     const notes: string[] = [];
+    const inputLosses: string[] = [];
+    if (f.velocity !== undefined && f.initialVelocity !== undefined) {
+      const reason = `Both velocity and initialVelocity were supplied: velocity (${f.velocity}) takes precedence; initialVelocity (${f.initialVelocity}) was discarded.`;
+      inputLosses.push(reason);
+      notes.push(reason);
+    }
     const num = (key: string, fallback: number) =>
       f[key] === undefined ? fallback : (f[key] as number);
     let easing: Spring;
@@ -404,6 +410,8 @@ export function parse(input: string, depth = 0): Parsed {
       );
     } else {
       const bounce = range(num("bounce", 0.3), 0, 1, "Bounce");
+      if (inputLosses.length)
+        inputLosses.push("Motion time-based springs ignore initial velocity.");
       if (f.visualDuration !== undefined) {
         // Motion visualDuration = Apple duration / 1.2. Do not equate the two.
         easing = fromDuration(
@@ -445,6 +453,7 @@ export function parse(input: string, depth = 0): Parsed {
           ? "Figma prototype spring"
           : "Motion spring",
       notes,
+      ...(inputLosses.length ? { inputLosses } : {}),
     };
   }
   const css = text.match(/^cubic-bezier\((.*)\)$/is);
