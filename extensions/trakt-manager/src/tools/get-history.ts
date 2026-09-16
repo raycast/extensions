@@ -102,12 +102,17 @@ type CandidateSelection = {
    * this — all four films titled "Dune" come back from `/exact`.
    */
   exactTruncated: boolean;
+  /**
+   * True when at least one search returned a release, even if none survived the year filter.
+   * Distinguishes "this title exists for other years" from "Trakt has never heard of it".
+   */
+  titleExists: boolean;
 };
 
 /**
  * What a single search yields, before the search's own completeness is known.
  */
-type CandidatePick = Omit<CandidateSelection, "truncated" | "exactTruncated">;
+type CandidatePick = Omit<CandidateSelection, "truncated" | "exactTruncated" | "titleExists">;
 
 /**
  * Upper bound on how many same-title releases are probed in one lookup. Every candidate costs
@@ -165,9 +170,11 @@ async function resolveCandidates(
   const unchecked: Candidate[] = [];
   let truncated = false;
   let exactTruncated = false;
+  let titleExists = false;
 
   if (type === "movies" || type === "all") {
     const found = await searchMovieCandidates(query);
+    titleExists = titleExists || found.candidates.length > 0;
     const selection = pickCandidates(
       found.candidates.map((item) => ({ type: "movie" as const, ...item })),
       query,
@@ -182,6 +189,7 @@ async function resolveCandidates(
 
   if (type === "shows" || type === "all") {
     const found = await searchShowCandidates(query);
+    titleExists = titleExists || found.candidates.length > 0;
     const selection = pickCandidates(
       found.candidates.map((item) => ({ type: "show" as const, ...item })),
       query,
@@ -200,6 +208,7 @@ async function resolveCandidates(
     unchecked,
     truncated,
     exactTruncated,
+    titleExists,
   };
 }
 
@@ -296,6 +305,7 @@ export default async function tool(input: Input): Promise<Output> {
     let unchecked: Candidate[] = [];
     let truncated = false;
     let exactTruncated = false;
+    let titleExists = false;
 
     if (traktId !== undefined) {
       if (type === "movies" || type === "all") {
@@ -311,11 +321,13 @@ export default async function tool(input: Input): Promise<Output> {
       unchecked = selection.unchecked;
       truncated = selection.truncated;
       exactTruncated = selection.exactTruncated;
+      titleExists = selection.titleExists;
     }
 
     const target = query ? `"${query}"` : `Trakt ID ${traktId}`;
 
-    if (candidates.length === 0 && year !== undefined && missedYears.length > 0) {
+    if (candidates.length === 0 && year !== undefined && titleExists) {
+      const knownYears = missedYears.length > 0 ? ` Known year(s) for that title: ${missedYears.join(", ")}.` : "";
       return {
         mode: "lookup",
         exhaustive: false,
@@ -325,7 +337,7 @@ export default async function tool(input: Input): Promise<Output> {
             truncated
               ? `No ${year} release of ${target} is reachable: that title has more releases than Trakt's search can return, so this is not proof that none exists.`
               : `${target} has no ${year} release on Trakt.`
-          } Known year(s) for that title: ${missedYears.join(", ")}. ` +
+          }${knownYears} ` +
           `Ask the user which release they mean, or call again without a year. Do not report a watched or ` +
           `not-watched verdict, because none of the releases above was checked.`,
         checked: [],
@@ -382,7 +394,7 @@ export default async function tool(input: Input): Promise<Output> {
         )
         .join(" ");
       message =
-        hasUnchecked || exactTruncated
+        hasUnchecked || (exactTruncated && year === undefined)
           ? `${confirmed} Other releases share that title and were not checked` +
             `${hasUnchecked ? ` (${uncheckedLabels})` : ""}, so name the release this answer refers to.`
           : confirmed;
@@ -394,8 +406,11 @@ export default async function tool(input: Input): Promise<Output> {
     } else if (exactTruncated) {
       message =
         `No watch event exists for ${target} among the releases checked (${checkedLabels}), but that title has ` +
-        `more releases than Trakt's search can return, so some were never seen. This is NOT a definitive ` +
-        `not-watched answer: ask the user which release they mean, or pass its \`year\`.`;
+        `more identically named releases than Trakt's exact search can return, so some were never seen. ` +
+        `This is NOT a definitive not-watched answer. ` +
+        (year !== undefined
+          ? `The year is already set: resolve the release with \`search-movies\` / \`search-shows\` and call again with its \`traktId\`.`
+          : `Ask the user which release they mean, or pass its \`year\`.`);
     } else {
       message =
         `Confirmed: no watch event exists for ${target} (checked the complete history of ${checkedLabels}). ` +
