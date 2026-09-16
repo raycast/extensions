@@ -1,5 +1,18 @@
 # Trakt Manager Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+
+- **AI tools for browsing your account** — Raycast AI can now read your Trakt account directly, reusing the existing OAuth session. Ask it in plain language to search a title, check whether you have already watched something, or see what to watch next.
+- Nine read-only tools: search movies and shows, watchlist, watch history, up next, show progress, season episodes, personalised recommendations, and account statistics. None of them modify your account.
+
+### Fixed
+
+- Searching by year no longer misses titles. Trakt ranks search results by relevance and serves them as a single capped page, so a lesser-known release sharing a popular title stayed out of reach and could be reported as missing. Searches now combine Trakt's exact-title and relevance results, which surfaces releases such as Dune (1989) that ranking alone hides.
+- Resolving a title now prefers an exact title match over the most popular one, so "Butterfly" no longer resolves to "Sniper Butterfly".
+- When a requested year matches nothing, tools now say the title exists for other years instead of reporting it as unknown, and flag when a fallback was used rather than presenting it as an exact match.
+
 ## [Fix] - 2026-09-14
 
 - Fixed sign-in failing with `invalid_grant` ("invalid code") when a command issued several requests at once. Each request triggered its own authorization, so the same single-use code was exchanged more than once; concurrent callers now share one in-flight authorization

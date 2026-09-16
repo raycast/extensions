@@ -1,0 +1,292 @@
+import { withPagination } from "../lib/schema";
+import { CompactMovie, CompactShow, toCompactMovie, toCompactShow } from "./compact-media";
+import { executeToolCall, toolTraktClient } from "./tool-client";
+
+type Input = {
+  /**
+   * Filter the watchlist by media type: "movies", "shows", or "all".
+   * Defaults to "all".
+   */
+  type?: "movies" | "shows" | "all";
+  /**
+   * Search for a specific title or keyword directly within your watchlist.
+   * ALWAYS use this when checking if a movie or TV show is in the watchlist (e.g. "is DTF in my watchlist?").
+   * Do NOT paginate manually when looking for a title; use this parameter instead.
+   */
+  query?: string;
+  /**
+   * Optional Trakt ID to check if a specific item is in the watchlist.
+   */
+  traktId?: number;
+  /**
+   * The page number for paginated results (when listing items). Defaults to 1.
+   */
+  page?: number;
+  /**
+   * Number of items to return per page (default: 30, max: 100).
+   */
+  limit?: number;
+};
+
+type Output = {
+  /**
+   * Set when searching for a specific item (via query or traktId).
+   */
+  found?: boolean;
+  inWatchlist?: boolean;
+  /**
+   * True when every watchlist entry was inspected, making a negative answer definitive.
+   */
+  exhaustive?: boolean;
+  message?: string;
+  matchedMovies?: CompactMovie[];
+  matchedShows?: CompactShow[];
+  /**
+   * List of movies (when listing watchlist).
+   */
+  movies?: CompactMovie[];
+  /**
+   * List of TV shows (when listing watchlist).
+   */
+  shows?: CompactShow[];
+  /**
+   * Current page returned.
+   */
+  page?: number;
+  /**
+   * Total number of items in watchlist for movies/shows if available.
+   */
+  totalMovies?: number;
+  totalShows?: number;
+  hasMore: boolean;
+};
+
+async function fetchAllPagesForQuery<
+  T extends { movie?: { title: string; ids: { trakt: number } }; show?: { title: string; ids: { trakt: number } } },
+>(
+  fetcher: (
+    page: number,
+    limit: number,
+    signal: AbortSignal,
+  ) => Promise<{ status: number; body: T[]; headers: Headers }>,
+  matcher: (item: T) => boolean,
+  maxPages = 20,
+  pageSize = 100,
+): Promise<{ matches: T[]; totalCount: number; scanned: number; exhaustive: boolean }> {
+  const matches: T[] = [];
+  let totalCount = 0;
+  let scanned = 0;
+  let exhaustive = false;
+
+  for (let p = 1; p <= maxPages; p++) {
+    const res = await executeToolCall((signal) => fetcher(p, pageSize, signal), "Failed to search watchlist");
+    const paginated = withPagination(res);
+    totalCount = paginated.pagination["x-pagination-item-count"] || totalCount;
+    scanned += paginated.data.length;
+
+    for (const item of paginated.data) {
+      if (matcher(item)) {
+        matches.push(item);
+      }
+    }
+
+    if (paginated.data.length < pageSize || p >= paginated.pagination["x-pagination-page-count"]) {
+      exhaustive = true;
+      break;
+    }
+  }
+
+  return { matches, totalCount, scanned, exhaustive };
+}
+
+/**
+ * Get items from your authenticated Trakt watchlist or search for a specific title inside it.
+ * - To check if an item is in your watchlist, supply `query` or `traktId` to get an instant answer without paginating.
+ * - To view your watchlist, supply `type` and an optional `limit` (default: 30).
+ */
+export default async function tool(input: Input): Promise<Output> {
+  const { type = "all", query, traktId, page = 1, limit = 30 } = input;
+  const safeLimit = Math.min(Math.max(limit, 1), 100);
+
+  // Fast path: search for a specific item in the watchlist
+  if (query || traktId) {
+    const normalizedQuery = query?.trim().toLowerCase();
+
+    const matchesFilter = (title: string, id: number) => {
+      if (traktId !== undefined && id === traktId) return true;
+      if (normalizedQuery) {
+        return title.toLowerCase().includes(normalizedQuery);
+      }
+      return false;
+    };
+
+    let matchedMovies: CompactMovie[] = [];
+    let matchedShows: CompactShow[] = [];
+    let totalMovies = 0;
+    let totalShows = 0;
+    let exhaustive = true;
+
+    if (type === "movies" || type === "all") {
+      const result = await fetchAllPagesForQuery(
+        (p, l, signal) =>
+          toolTraktClient.movies.getWatchlistMovies({
+            query: {
+              page: p,
+              limit: l,
+              extended: "full",
+              sort_by: "added",
+              sort_how: "desc",
+            },
+            fetchOptions: { signal },
+          }),
+        (item) => matchesFilter(item.movie.title, item.movie.ids.trakt),
+      );
+      matchedMovies = result.matches.map(toCompactMovie);
+      totalMovies = result.totalCount;
+      exhaustive = exhaustive && result.exhaustive;
+    }
+
+    if (type === "shows" || type === "all") {
+      const result = await fetchAllPagesForQuery(
+        (p, l, signal) =>
+          toolTraktClient.shows.getWatchlistShows({
+            query: {
+              page: p,
+              limit: l,
+              extended: "full",
+              sort_by: "added",
+              sort_how: "desc",
+            },
+            fetchOptions: { signal },
+          }),
+        (item) => matchesFilter(item.show.title, item.show.ids.trakt),
+      );
+      matchedShows = result.matches.map(toCompactShow);
+      totalShows = result.totalCount;
+      exhaustive = exhaustive && result.exhaustive;
+    }
+
+    const totalMatches = matchedMovies.length + matchedShows.length;
+    const isFound = totalMatches > 0;
+    const target = query ?? `Trakt ID ${traktId}`;
+
+    let message: string;
+    if (isFound) {
+      message = `Found ${totalMatches} matching item(s) in your watchlist.`;
+    } else if (exhaustive) {
+      message = `Confirmed: "${target}" is not in your watchlist (searched every entry).`;
+    } else {
+      message = `"${target}" was not found, but the watchlist is too large to scan entirely. This result is NOT definitive.`;
+    }
+
+    return {
+      found: isFound,
+      inWatchlist: isFound,
+      exhaustive,
+      message,
+      matchedMovies: matchedMovies.length > 0 ? matchedMovies : undefined,
+      matchedShows: matchedShows.length > 0 ? matchedShows : undefined,
+      totalMovies,
+      totalShows,
+      hasMore: false,
+    };
+  }
+
+  // Standard path: list items with larger default limit and sorted descending (newest first)
+  if (type === "movies") {
+    const response = await executeToolCall(
+      (signal) =>
+        toolTraktClient.movies.getWatchlistMovies({
+          query: {
+            page,
+            limit: safeLimit,
+            extended: "full",
+            sort_by: "added",
+            sort_how: "desc",
+          },
+          fetchOptions: { signal },
+        }),
+      "Failed to fetch watchlist movies",
+    );
+    const paginated = withPagination(response);
+    return {
+      movies: paginated.data.map(toCompactMovie),
+      page,
+      totalMovies: paginated.pagination["x-pagination-item-count"],
+      hasMore: paginated.pagination["x-pagination-page"] < paginated.pagination["x-pagination-page-count"],
+    };
+  }
+
+  if (type === "shows") {
+    const response = await executeToolCall(
+      (signal) =>
+        toolTraktClient.shows.getWatchlistShows({
+          query: {
+            page,
+            limit: safeLimit,
+            extended: "full",
+            sort_by: "added",
+            sort_how: "desc",
+          },
+          fetchOptions: { signal },
+        }),
+      "Failed to fetch watchlist shows",
+    );
+    const paginated = withPagination(response);
+    return {
+      shows: paginated.data.map(toCompactShow),
+      page,
+      totalShows: paginated.pagination["x-pagination-item-count"],
+      hasMore: paginated.pagination["x-pagination-page"] < paginated.pagination["x-pagination-page-count"],
+    };
+  }
+
+  // "all" - fetch movies and shows in parallel with safeLimit
+  const [moviesResponse, showsResponse] = await Promise.all([
+    executeToolCall(
+      (signal) =>
+        toolTraktClient.movies.getWatchlistMovies({
+          query: {
+            page,
+            limit: safeLimit,
+            extended: "full",
+            sort_by: "added",
+            sort_how: "desc",
+          },
+          fetchOptions: { signal },
+        }),
+      "Failed to fetch watchlist movies",
+    ),
+    executeToolCall(
+      (signal) =>
+        toolTraktClient.shows.getWatchlistShows({
+          query: {
+            page,
+            limit: safeLimit,
+            extended: "full",
+            sort_by: "added",
+            sort_how: "desc",
+          },
+          fetchOptions: { signal },
+        }),
+      "Failed to fetch watchlist shows",
+    ),
+  ]);
+
+  const paginatedMovies = withPagination(moviesResponse);
+  const paginatedShows = withPagination(showsResponse);
+
+  const moviesHasMore =
+    paginatedMovies.pagination["x-pagination-page"] < paginatedMovies.pagination["x-pagination-page-count"];
+  const showsHasMore =
+    paginatedShows.pagination["x-pagination-page"] < paginatedShows.pagination["x-pagination-page-count"];
+
+  return {
+    movies: paginatedMovies.data.map(toCompactMovie),
+    shows: paginatedShows.data.map(toCompactShow),
+    page,
+    totalMovies: paginatedMovies.pagination["x-pagination-item-count"],
+    totalShows: paginatedShows.pagination["x-pagination-item-count"],
+    hasMore: moviesHasMore || showsHasMore,
+  };
+}

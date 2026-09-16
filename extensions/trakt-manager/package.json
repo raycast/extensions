@@ -71,6 +71,53 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-movies",
+      "title": "Search Movies",
+      "description": "Search for movies on Trakt by title and optional year to get details and traktId"
+    },
+    {
+      "name": "search-shows",
+      "title": "Search TV Shows",
+      "description": "Search for TV shows on Trakt by title and optional year to get details and traktId"
+    },
+    {
+      "name": "get-watchlist",
+      "title": "Get Watchlist",
+      "description": "Retrieve items from your Trakt watchlist or search if a specific title is in your watchlist using query"
+    },
+    {
+      "name": "get-up-next",
+      "title": "Get Up Next Episodes",
+      "description": "Get the next unwatched episodes for TV series you are currently watching on Trakt"
+    },
+    {
+      "name": "get-show-progress",
+      "title": "Get Show Progress",
+      "description": "Get watching progress, completed episode counts, and season details for a TV show on Trakt"
+    },
+    {
+      "name": "get-history",
+      "title": "Get Watch History",
+      "description": "Definitively check whether and when a movie or show was watched, or browse recent Trakt watch history"
+    },
+    {
+      "name": "get-recommendations",
+      "title": "Get Recommendations",
+      "description": "Get personalized movie and TV show recommendations based on your Trakt habits"
+    },
+    {
+      "name": "get-season-episodes",
+      "title": "Get Season Episodes",
+      "description": "Get all episodes for a specific TV show season with titles, air dates, and overviews"
+    },
+    {
+      "name": "get-user-stats",
+      "title": "Get User Stats",
+      "description": "Get your lifetime Trakt viewing statistics including watch times, movies, shows, and ratings counts"
+    }
+  ],
   "contributors": [
     "vishalbalaji3",
     "Berenger",
