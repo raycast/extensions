@@ -3,6 +3,7 @@ import { toAnnouncement } from "../../src/lib/forum";
 import { toNotification } from "../../src/lib/notifications";
 import { mergeEvents, toCalendarEvent } from "../../src/lib/calendar";
 import { collectSettled, reportPartialFailures } from "../../src/lib/settle";
+import { AuthError } from "../../src/lib/auth";
 
 describe("toAnnouncement", () => {
   it("builds a markdown announcement with a discussion URL", () => {
@@ -116,5 +117,12 @@ describe("settle helpers", () => {
     reportPartialFailures([boom], 2, (errors) => reported.push(errors));
     expect(reported).toEqual([[boom]]);
     expect(() => reportPartialFailures([], 0)).not.toThrow();
+  });
+
+  it("always rethrows an AuthError, even next to successes", () => {
+    const auth = new AuthError("login");
+    const reported: unknown[][] = [];
+    expect(() => reportPartialFailures([new Error("x"), auth], 5, (errors) => reported.push(errors))).toThrow(auth);
+    expect(reported).toEqual([]);
   });
 });
