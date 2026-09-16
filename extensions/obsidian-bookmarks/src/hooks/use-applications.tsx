@@ -5,7 +5,7 @@ import useLoadable, { createLoadableContext, Loadable } from "./use-loader";
 const ApplicationsContext = createLoadableContext<Application[]>();
 
 type ApplicationsProviderProps = { children: ReactNode };
-export function ApplicationsProvider({ children }: ApplicationsProviderProps): JSX.Element {
+export function ApplicationsProvider({ children }: ApplicationsProviderProps): React.JSX.Element {
   const applications = useLoadable(() => getApplications());
 
   return <ApplicationsContext.Provider value={applications}>{children}</ApplicationsContext.Provider>;
