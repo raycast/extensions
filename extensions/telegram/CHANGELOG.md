@@ -1,6 +1,6 @@
 # Telegram Changelog
 
-## [Add Unit Tests] - {PR_MERGE_DATE}
+## [Add Unit Tests] - 2026-09-16
 
 - Add a `vitest` suite covering message content parsing, sender attribution, media type detection, detail-pane markdown, and chat and date grouping, runnable with `npm test`
 
