@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Support Little Arc] - {PR_MERGE_DATE}
+
+- Fix Arc: copy the URL of a focused Little Arc popup window instead of the main window's active tab (#12677)
+
 ## [Update extension icon] - 2026-08-08
 
 - Updated the extension icon with a clear `~/` path mark designed to remain legible at Raycast's UI sizes.
