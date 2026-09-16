@@ -25,7 +25,56 @@ function escapeRe(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** Reads the string literal starting at `i`, honouring escapes. */
+const SIMPLE_ESCAPES: Record<string, string> = {
+  n: "\n",
+  t: "\t",
+  r: "\r",
+  b: "\b",
+  f: "\f",
+  v: "\v",
+  0: "\0",
+};
+
+/**
+ * Decodes the escape sequence whose backslash sits at `i`, returning the
+ * decoded text and the index just past the sequence.
+ */
+function readEscapeAt(src: string, i: number): { value: string; end: number } {
+  const ch = src[i + 1];
+  if (ch === undefined) return { value: "", end: i + 1 };
+
+  if (ch in SIMPLE_ESCAPES && !(ch === "0" && /[0-9]/.test(src[i + 2] ?? ""))) {
+    return { value: SIMPLE_ESCAPES[ch], end: i + 2 };
+  }
+
+  if (ch === "x") {
+    const hex = src.slice(i + 2, i + 4);
+    if (/^[0-9a-fA-F]{2}$/.test(hex)) return { value: String.fromCharCode(parseInt(hex, 16)), end: i + 4 };
+  }
+
+  if (ch === "u") {
+    if (src[i + 2] === "{") {
+      const close = src.indexOf("}", i + 3);
+      const hex = close === -1 ? "" : src.slice(i + 3, close);
+      if (/^[0-9a-fA-F]{1,6}$/.test(hex)) {
+        const point = parseInt(hex, 16);
+        if (point <= 0x10ffff) return { value: String.fromCodePoint(point), end: close + 1 };
+      }
+    } else {
+      const hex = src.slice(i + 2, i + 6);
+      if (/^[0-9a-fA-F]{4}$/.test(hex)) return { value: String.fromCharCode(parseInt(hex, 16)), end: i + 6 };
+    }
+  }
+
+  // Line continuation: a backslash before a newline joins the lines.
+  if (ch === "\r" && src[i + 2] === "\n") return { value: "", end: i + 3 };
+  if (ch === "\n" || ch === "\r" || ch === "\u2028" || ch === "\u2029") return { value: "", end: i + 2 };
+
+  // Anything else (`\\`, `\"`, `\'`, `` \` ``, `\/`, …) is the character itself.
+  return { value: ch, end: i + 2 };
+}
+
+/** Reads the string literal starting at `i`, decoding escapes. */
 function readStringAt(src: string, i: number): { value: string; end: number } | null {
   const quote = src[i];
   if (!QUOTES.has(quote)) return null;
@@ -33,8 +82,9 @@ function readStringAt(src: string, i: number): { value: string; end: number } | 
   for (let j = i + 1; j < src.length; j++) {
     const ch = src[j];
     if (ch === "\\") {
-      value += src[j + 1] ?? "";
-      j++;
+      const esc = readEscapeAt(src, j);
+      value += esc.value;
+      j = esc.end - 1;
       continue;
     }
     if (ch === quote) return { value, end: j + 1 };
@@ -547,7 +597,10 @@ function elementSpans(code: string, open: number, close: number): Array<[number,
     }
     if (CLOSERS.has(ch)) {
       depth--;
-      if (depth === 0) spans.push([start, i]);
+      // `[]` and a trailing comma (`[a,]`) leave nothing after the last
+      // separator; JS gives those arrays no extra element either. Holes
+      // between commas (`[a,,b]`) are kept so indexes stay aligned.
+      if (depth === 0 && code.slice(start, i).trim() !== "") spans.push([start, i]);
       continue;
     }
     if (ch === "," && depth === 1) {
