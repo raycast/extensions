@@ -104,10 +104,10 @@ const newestFileMtimeMs = async (directory: string): Promise<number> => {
   return newest;
 };
 
-// Reclaim staging directories abandoned by a crashed or wedged process.
-// A staging is dead when its owner PID is confirmed dead past the soft window,
-// or when it has made no progress (newest file mtime anywhere in the tree)
-// past the hard ceiling regardless of PID liveness.
+// Reclaim staging directories and stale packs parked aside by a crashed or
+// wedged process. A directory is dead when its owner PID is confirmed dead
+// past the soft window, or when it has made no progress (newest file mtime
+// anywhere in the tree) past the hard ceiling regardless of PID liveness.
 const reclaimDeadStaging = async () => {
   const entries = await fs.readdir(environment.assetsPath).catch(() => [] as string[]);
   for (const entry of entries) {
@@ -164,7 +164,14 @@ const pacoteAssetPack = async (version: string) => {
           environment.assetsPath,
           `.pack-stale-${path.basename(destination)}-${process.pid}-${Math.random().toString(36).slice(2, 8)}`,
         );
-        await fs.rename(destination, stale);
+        let movedAside = true;
+        try {
+          await fs.rename(destination, stale);
+        } catch (moveError) {
+          if ((moveError as NodeJS.ErrnoException).code !== "ENOENT") throw moveError;
+          // Another instance in this same branch already moved it aside.
+          movedAside = false;
+        }
         try {
           await fs.rename(staging, destination);
         } catch (renameError) {
@@ -175,7 +182,7 @@ const pacoteAssetPack = async (version: string) => {
             throw renameError;
           }
         }
-        await fs.rm(stale, { recursive: true, force: true });
+        if (movedAside) await fs.rm(stale, { recursive: true, force: true });
         return;
       }
       throw error;
@@ -183,21 +190,6 @@ const pacoteAssetPack = async (version: string) => {
   } catch (error) {
     await fs.rm(staging, { recursive: true, force: true });
     throw error;
-  }
-};
-
-// Remove sibling version directories after a successful install. Each pack
-// is ~16 MB; without this, every released version accumulates forever.
-// Safe to call once the new pack is complete and cached: new launches use
-// the new version, and any process still reading an old version is in a
-// short window before it exits.
-const removeOldPacks = async (currentVersion: string) => {
-  const packRoot = path.join(environment.assetsPath, "pack");
-  const versions = await fs.readdir(packRoot).catch(() => [] as string[]);
-  for (const v of versions) {
-    if (v !== currentVersion) {
-      await fs.rm(path.join(packRoot, v), { recursive: true, force: true }).catch(() => {});
-    }
   }
 };
 
@@ -210,7 +202,6 @@ export const cacheAssetPack = async (version: string) => {
   await reclaimDeadStaging();
   await pacoteAssetPack(version);
   cache.set("cached-version", version);
-  await removeOldPacks(version);
 };
 
 export const loadCachedJson = async (version: string) => {
