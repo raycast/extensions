@@ -16,7 +16,12 @@ This is a extension for raycast to manage tmux sessions.
 - Delete sessions 🗑
 - Kill multiple sessions at once 🧹
 - Search commands and output across all sessions' scrollback 🔍
+- Save all sessions on demand for tmux-resurrect / continuum 💾
 - Rename sessions 📝
+
+## Saving sessions on demand
+
+If you use the [tmux-resurrect](https://github.com/tmux-plugins/tmux-resurrect) and [tmux-continuum](https://github.com/tmux-plugins/tmux-continuum) plugins, the `Save Tmux Sessions` command forces a resurrect save immediately — handy when you want to be sure everything is persisted before shutting down, without waiting for continuum's next interval. It runs the same save as `prefix + Ctrl-s`, so it never conflicts with continuum's automatic saves. Requires tmux-resurrect to be configured.
 
 ## Searching session output
 

@@ -54,6 +54,12 @@
       "title": "Search Session Output",
       "description": "Search commands and printed output across the scrollback of all tmux sessions",
       "mode": "view"
+    },
+    {
+      "name": "save_sessions",
+      "title": "Save Tmux Sessions",
+      "description": "Force tmux-resurrect to save all sessions now, for use with the resurrect/continuum plugins",
+      "mode": "no-view"
     }
   ],
   "preferences": [
