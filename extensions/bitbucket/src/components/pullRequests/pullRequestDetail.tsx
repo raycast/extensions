@@ -108,6 +108,7 @@ export function PullRequestDetail(props: {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open Pull Request in Browser" url={url} />
+            <Action.CopyToClipboard title="Copy Pull Request URL" content={url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <ApprovePullRequestAction pr={pr} reviewState={reviewState} onReviewStateChange={updateReviewState} />

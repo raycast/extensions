@@ -63,7 +63,7 @@ function SearchAllPullRequestsList() {
         url: pr.author?.links?.avatar?.href ?? "",
         nickname: pr.author?.nickname,
       },
-      reviewers: pr.reviewers,
+      reviewers: pr.reviewers ?? [],
     }))
     .filter((pr) => !declinedKeys.has(getPullRequestKey(pr)));
 
