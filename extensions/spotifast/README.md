@@ -2,6 +2,8 @@
 
 Control [Spotifast](https://spotifast.rocks/), the native Spotify client, from Raycast.
 
+![Spotifast commands in Raycast](media/commands.png)
+
 ## Commands
 
 - **Menu Bar Player**: the playing track in the menu bar, with play/pause, next, previous, Like, shuffle, repeat, volume and device controls.
