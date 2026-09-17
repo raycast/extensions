@@ -1,7 +1,7 @@
-import { ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
-import type { Meeting, ActionItem } from "../types/Types";
-import { MeetingCopyActions, MeetingOpenActions } from "./MeetingActions";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import type { ActionItem, Meeting } from "../types/Types";
 import { ActionItemDetail } from "../view-action-item-detail";
+import { MeetingCopyActions, MeetingOpenActions } from "./MeetingActions";
 
 export function ActionItemActions({
   item,
@@ -44,7 +44,7 @@ export function ActionItemActions({
           title="Copy All Action Items"
           content={allItemsCopyContent}
           icon={Icon.CopyClipboard}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
         />
       </ActionPanel.Section>
 

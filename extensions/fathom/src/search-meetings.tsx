@@ -1,16 +1,18 @@
-import { List, ActionPanel, Action, Icon, Detail, showToast, Toast, openExtensionPreferences } from "@raycast/api";
+import { showError } from "@chrismessina/raycast-kit";
+import { logger } from "@chrismessina/raycast-logger";
+import { useCallback, useMemo, useState } from "react";
+import { Action, ActionPanel, Detail, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useMemo, useCallback } from "react";
-import type { Meeting, Team } from "./types/Types";
-import { getMeetingSummary, getMeetingTranscript, listTeams } from "./fathom/api";
 import { MeetingDetailActions } from "./actions/MeetingActions";
-import { useCachedMeetings } from "./hooks/useCachedMeetings";
-import { getUserFriendlyError, classifyError, ErrorType } from "./utils/errorHandling";
-import { hasApiKey, isApiKeyKnownInvalid } from "./fathom/auth";
-
-import { MeetingListItem } from "./components/MeetingListItem";
 import { RefreshCacheAction } from "./actions/RefreshCacheAction";
+import { MeetingListItem } from "./components/MeetingListItem";
+import { getMeetingSummary, getMeetingTranscript, listTeams } from "./fathom/api";
+import { hasApiKey, isApiKeyKnownInvalid } from "./fathom/auth";
+import { useCachedMeetings } from "./hooks/useCachedMeetings";
+import type { Meeting, Team } from "./types/Types";
 import { getDateRanges } from "./utils/dates";
+import { classifyError, ErrorType, getUserFriendlyError } from "./utils/errorHandling";
+import { loadTranscript } from "./utils/transcriptStore";
 
 function getErrorDisplay(error: Error): { icon: Icon; title: string; description: string; isAuth: boolean } {
   const errorType = classifyError(error);
@@ -198,6 +200,37 @@ function Command() {
       previousMonth.sort(sortByDate);
       older.sort(sortByDate);
 
+      // Full accounting of the grouping step.
+      //
+      // This is the narrowest point at which a large cache can become a short
+      // list: every meeting must land in exactly one bucket, and the buckets
+      // must sum to the input. A shortfall here means either a date failed to
+      // parse or the ranges have a gap.
+      const grouped = thisWeek.length + lastWeek.length + previousMonth.length + older.length;
+      // Verbose-only. Kept because it is the line that finally localized the
+      // vanishing-meetings bug: if `input` and `grouped` ever disagree, the
+      // grouping step is dropping records.
+      logger.log("[search-meetings] Grouped meetings", {
+        input: allMeetings.length,
+        thisWeek: thisWeek.length,
+        lastWeek: lastWeek.length,
+        previousMonth: previousMonth.length,
+        older: older.length,
+        grouped,
+        lost: allMeetings.length - grouped,
+      });
+
+      // Duplicate React keys collapse a list silently — N items render as one.
+      const ids = allMeetings.map((m) => m.id);
+      const uniqueIds = new Set(ids);
+      if (uniqueIds.size !== ids.length) {
+        logger.error("[search-meetings] DUPLICATE meeting ids — React will collapse these rows", {
+          total: ids.length,
+          unique: uniqueIds.size,
+          sample: ids.slice(0, 8),
+        });
+      }
+
       return {
         thisWeekMeetings: thisWeek,
         lastWeekMeetings: lastWeek,
@@ -322,11 +355,7 @@ export function MeetingSummaryDetail({ meeting, recordingId }: { meeting: Meetin
   } = useCachedPromise(async (id: string) => getMeetingSummary(id), [recordingId], {
     onError: (err) => {
       const { message } = getUserFriendlyError(err);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Load Summary",
-        message,
-      });
+      void showError(err, { title: "Failed to Load Summary", message, copyContext: `Recording: ${recordingId}` });
     },
   });
 
@@ -387,16 +416,23 @@ export function MeetingTranscriptDetail({ meeting, recordingId }: { meeting: Mee
     data: transcript,
     isLoading,
     error,
-  } = useCachedPromise(async (id: string) => getMeetingTranscript(id), [recordingId], {
-    onError: (err) => {
-      const { message } = getUserFriendlyError(err);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Load Transcript",
-        message,
-      });
+  } = useCachedPromise(
+    async (id: string) => {
+      // Prefer the on-disk copy: transcripts moved out of LocalStorage because
+      // it silently dropped writes past ~500 kB. A local hit avoids a network
+      // round-trip entirely.
+      const stored = loadTranscript(id);
+      if (stored) return { text: stored };
+      return getMeetingTranscript(id);
     },
-  });
+    [recordingId],
+    {
+      onError: (err) => {
+        const { message } = getUserFriendlyError(err);
+        void showError(err, { title: "Failed to Load Transcript", message, copyContext: `Recording: ${recordingId}` });
+      },
+    },
+  );
 
   const markdown = error
     ? `# Error\n\n${error instanceof Error ? error.message : String(error)}`

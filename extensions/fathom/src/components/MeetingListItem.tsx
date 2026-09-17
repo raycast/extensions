@@ -1,8 +1,8 @@
-import { List, Icon } from "@raycast/api";
-import type { Meeting } from "../types/Types";
-import { formatDate, formatDuration } from "../utils/dates";
+import { Icon, List } from "@raycast/api";
 import { MeetingActions } from "../actions/MeetingActions";
 import { useTeamColor } from "../hooks/useTeamColor";
+import type { Meeting } from "../types/Types";
+import { formatDate, formatDuration } from "../utils/dates";
 
 export function MeetingListItem({ meeting, onRefresh }: { meeting: Meeting; onRefresh?: () => Promise<void> }) {
   const createdDate = meeting.createdAt ? formatDate(meeting.createdAt) : "";

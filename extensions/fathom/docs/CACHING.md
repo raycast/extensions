@@ -75,12 +75,52 @@ src/
 {
   meeting: Meeting,           // Full meeting object
   summary?: string,           // Markdown-formatted summary
-  transcript?: string,        // Full transcript text
+  transcript?: string,        // Full transcript text — ~92% of the value's size
   actionItems?: ActionItem[], // Action items array
   cachedAt: number,          // Timestamp when cached
   hash: string               // Content hash for validation
 }
 ```
+
+### Write path — writes MUST be sequential
+
+`cacheMeetingsBatch` writes meetings one at a time, awaiting each.
+
+**Concurrent `LocalStorage.setItem` calls clobber each other.** This was the cause of the
+long-standing "only 3 meetings appear" bug. Measured:
+
+| payload size | parallel writes   | persisted |
+| ------------ | ----------------- | --------- |
+| 185,280 B    | 50                | 5         |
+| 8,673 B      | 50                | 3         |
+| 8,673 B      | 50 **sequential** | **50**    |
+
+Shrinking payloads 21× made it worse, so this is not a size limit. Raycast's LocalStorage behaves
+like a single document that each `setItem` reads, mutates and writes back — N parallel writers
+share one snapshot, last write wins, everything else is lost. **Every call still resolves
+successfully.** Nothing throws.
+
+The same hazard applies to `removeItem`, so `pruneExpiredFromIndex` and `pruneCache` are
+sequential too. **Do not "optimize" any of these back into `Promise.all`.**
+
+Writes are then verified by reading back, and a mismatch logs `SILENT WRITE LOSS` with counts.
+A successful write is not evidence the data is there.
+
+### Read path — silent drops are logged
+
+`getAllCachedMeetings()` can discard an entry in two ways, both previously silent:
+
+- **Expired TTL** — expected, and pruned from the index.
+- **Malformed JSON** — was a bare `catch {}`. Now logs the offending key.
+
+It also emits an accounting line whenever stored keys ≠ returned meetings:
+
+```text
+[cache] getAllCachedMeetings accounting { storedKeys: 50, returned: 3, expired: 0, malformed: 47 }
+```
+
+If the list is short, that line names the cause. Its absence for months is why a large shortfall
+went undiagnosed.
 
 ## Usage
 
@@ -164,6 +204,7 @@ To manually clear all cached data (for development/debugging):
 
 ```typescript
 import { clearAllCache } from "./utils/cache";
+
 await clearAllCache();
 ```
 
@@ -200,11 +241,38 @@ These fields are populated when meetings are fetched with the new query paramete
 
 ## Performance Considerations
 
-### Storage
+### Storage — measured, not estimated
 
-- Each meeting with summary and transcript can be 10-100KB
-- 50 meetings = ~500KB - 5MB total
-- Raycast LocalStorage has no documented size limits, but is encrypted and performant
+Measured against the live API on 2026-08-01 (`include_summary` + `include_transcript`):
+
+| Request                              | Items | Payload    |
+| ------------------------------------ | ----- | ---------- |
+| No `include_*`                       | 10    | **13 kB**  |
+| `include_summary` only               | 10    | **86 kB**  |
+| `include_transcript` only            | 10    | **916 kB** |
+| All three (what the extension sends) | 10    | **990 kB** |
+
+So a cached meeting averages **~99 kB, of which the transcript is ~92%**. At the 500-meeting
+cache cap that projects to roughly **50 MB in LocalStorage**.
+
+Two consequences worth understanding before changing anything here:
+
+1. **`getAllCachedMeetings()` deserializes every transcript on every launch.** It calls
+   `LocalStorage.allItems()` and JSON-parses each value — tens of megabytes — purely to render a
+   list showing title, date and duration. The transcript is not read again until a detail view
+   opens.
+2. **Large values make batch writes fragile.** See the `Promise.allSettled` note under
+   _Write path_ below; this was a real, user-visible failure, not a theoretical one.
+
+`include_*` params change payload size but **not** page size — the API returns 10 items per page
+either way, with `next_cursor` for more. Requesting transcripts does not reduce how many meetings
+you get back.
+
+### Storage limits
+
+Raycast documents no LocalStorage size limit. That is not the same as there being none, and the
+extension currently stores far more per key than most extensions do. Treat a failed write as
+expected rather than exceptional — which is why writes are now individually settled and logged.
 
 ### Search Performance
 
@@ -230,6 +298,46 @@ Toast messages now clearly indicate the operation:
 - `"50 meetings ready — cached locally"` - Complete
 - `"50 older meetings cached locally"` - Incremental load complete
 
+## Proposed: move transcripts out of LocalStorage
+
+**Status: proposed, not implemented.** Recorded here because the measurements above make the case
+concrete.
+
+Transcripts are ~92% of every cached value and are read only when a detail view opens or an
+export runs — yet they are deserialized on every launch to render a list of titles and dates.
+
+### The shape
+
+| Where                                                   | What                                | Read when                              |
+| ------------------------------------------------------- | ----------------------------------- | -------------------------------------- |
+| `environment.supportPath/transcripts/<recordingId>.txt` | Full transcript                     | A detail view opens, or an export runs |
+| LocalStorage                                            | Meeting metadata + summary          | Every launch (small)                   |
+| LocalStorage                                            | Normalized search index per meeting | Every keystroke while searching        |
+
+### Why `.txt` and not `.md`
+
+These are transcripts, not documents. `formatTranscriptToMarkdown` produces
+`**Speaker** [00:05:32]` markup for _display_; persisting that as `.md` invites something
+downstream to treat it as a document to render. Plain text is what the data is, and what search
+consumes.
+
+### The constraint that shapes the design
+
+`searchMeetings` runs full-text over titles, summaries **and transcripts**, synchronously, on
+every keystroke. Naively moving transcripts to files forces a choice between reading 500 files
+per keystroke (unusable) and dropping transcript search (a documented feature).
+
+Hence the third row: a **normalized search index** — lowercased, deduplicated word set per
+meeting — stays in LocalStorage. It is a fraction of the full text, keeps search synchronous, and
+keeps each stored value small enough that one oversized entry can't jeopardize a batch.
+
+### Before implementing
+
+This is a **cache-format migration**. Existing users have transcripts inside LocalStorage values;
+new code must either tolerate both shapes or migrate transparently on read. Getting that wrong
+discards cached data users already have. Worth its own pass, with the migration path tested
+against a populated cache — not bolted onto an unrelated change.
+
 ## Future Enhancements
 
 ### Potential Improvements
@@ -243,7 +351,9 @@ Toast messages now clearly indicate the operation:
 ### Known Limitations
 
 1. Cache is per-extension instance (not synced across devices)
-2. Large transcripts increase payload size on initial load
+2. Large transcripts dominate cache size (~92% of each stored value) and are deserialized on
+   every launch even though the list view never displays them — see the transcript-storage
+   proposal above
 3. No fuzzy matching or relevance scoring in search
 4. Action item status updates require manual cache refresh or 6-hour TTL expiration
 5. Search is limited to cached meetings (use ⌘-L to expand corpus)

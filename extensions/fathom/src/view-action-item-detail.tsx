@@ -1,7 +1,7 @@
-import { Detail, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
-import type { Meeting, ActionItem } from "./types/Types";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { MeetingCopyActions, MeetingOpenActions } from "./actions/MeetingActions";
 import { useTeamColor } from "./hooks/useTeamColor";
+import type { ActionItem, Meeting } from "./types/Types";
 
 export function ActionItemDetail({ item, meeting }: { item: ActionItem; meeting: Meeting }) {
   const assigneeText = item.assignee.name || item.assignee.email || "Unassigned";

@@ -1,5 +1,12 @@
 # Cache Implementation Summary
 
+> **Status note (2026-08-01).** This document described the cache as designed. A reported bug —
+> the list showing 3 meetings when the account has 50+ — showed the implementation did not
+> behave as described. **Root cause: concurrent `LocalStorage.setItem` calls silently discard
+> each other's writes.** Now fixed and confirmed (50 fetched → 50 displayed). See
+> **Corrections** at the end for the full investigation, including two wrong diagnoses worth
+> knowing about. Sections above it describe intent; trust Corrections where they disagree.
+
 ## What Was Implemented
 
 ### 1. **Aggressive Meeting Caching** ✅
@@ -222,9 +229,11 @@ The HTTP mapper now extracts embedded data:
 
 ### Storage
 
-- ~10-100KB per meeting (with summary + transcript)
-- 50 meetings ≈ 500KB - 5MB total
-- All encrypted by Raycast
+Measured 2026-08-01 (see Corrections): **~99 kB per meeting**, of which the transcript is ~92%.
+50 meetings ≈ 5 MB; at the 500-meeting cache cap, ~50 MB. All encrypted by Raycast.
+
+Note that `getAllCachedMeetings()` deserializes every one of those values on each launch to render
+a list of titles and dates.
 
 ### Search Speed
 
@@ -272,6 +281,7 @@ console.log(`Has more meetings: ${cacheManager.hasMore()}`);
 
 ```typescript
 import { clearAllCache } from "./utils/cache";
+
 await clearAllCache();
 ```
 
@@ -336,3 +346,103 @@ The implementation successfully adds:
 - ✅ Instant loading when reopening within 5 minutes
 
 The search experience is now significantly more powerful - users can search through actual meeting content rather than just titles, with fast initial loads and incremental expansion of the searchable corpus!
+
+---
+
+## Corrections (2026-08-01)
+
+Written after investigating a report that Search Meetings displayed **3 meetings for an account
+with 50+**. Everything here is measured; where it contradicts the sections above, this section is
+correct.
+
+### The API was not at fault
+
+Probed directly against the live endpoint:
+
+| Request                 | Items             | Payload | `next_cursor` | Rows missing required fields |
+| ----------------------- | ----------------- | ------- | ------------- | ---------------------------- |
+| No `include_*`          | 10                | 13 kB   | yes           | 0                            |
+| Extension's exact query | 10                | 990 kB  | yes           | 0                            |
+| Following the cursor    | 10/page × 5 pages | —       | still more    | 0                            |
+
+The `include_*` parameters change payload size but **not** page size. Every row carried
+`recording_id` and `recording_start_time`, so `mapMeetingFromHTTP` was not dropping records
+either. Both hypotheses refuted; the loss was in the extension.
+
+### Fixed: a partial batch write could lose an entire page
+
+`cacheMeetingsBatch` used `Promise.all` over `LocalStorage.setItem`. One rejected write rejects
+the whole batch — the remaining meetings are never written, the index is never updated, and the
+caller sees one generic error. With ~99 kB values (transcripts are ~92% of each), a single
+oversized entry could take down all 10 meetings in a page.
+
+Now uses `Promise.allSettled`: writes settle independently, only IDs that actually landed are
+indexed, and failures are logged by meeting ID with observed payload sizes.
+
+### Fixed: silent drops on read
+
+`getAllCachedMeetings()` discarded malformed entries via a bare `catch {}` — no log, no counter.
+It now names the offending key and emits an accounting line whenever stored keys ≠ returned
+meetings:
+
+```text
+[cache] getAllCachedMeetings accounting { storedKeys: 50, returned: 3, expired: 0, malformed: 47 }
+```
+
+**This is the important change.** The shortfall persisted for months precisely because every
+discard path was silent. If the list is short again, that line names the cause.
+
+### Ruled out
+
+- **Page cap** — `MAX_PAGES = 5` (~50 meetings), not 3.
+- **Pruning** — `CACHE_SIZE = 500`, far above the observed count.
+- **TTL expiry** — meetings have a 30-day TTL; these were days old.
+
+### RESOLVED — the actual root cause (confirmed 2026-08-01)
+
+**Concurrent `LocalStorage.setItem` calls clobber each other.** Not a size ceiling — that was a
+wrong diagnosis, and the write-verification added to test it is what disproved it:
+
+| payload size | parallel writes   | persisted |
+| ------------ | ----------------- | --------- |
+| 185,280 B    | 50                | 5         |
+| 8,673 B      | 50                | 3         |
+| 8,673 B      | 10                | 2         |
+| 8,673 B      | 50 **sequential** | **50**    |
+
+Shrinking payloads 21× made things _worse_, which killed the size hypothesis outright. Survivor
+count tracks CONCURRENCY. Raycast's LocalStorage behaves like a single document that each
+`setItem` reads, mutates, and writes back — so N parallel writers all start from the same
+snapshot, the last one wins, and every other entry is discarded. Every call still resolves
+successfully, which is why nothing ever threw and why this survived months of investigation.
+
+**Fix:** `cacheMeetingsBatch` writes sequentially. `pruneExpiredFromIndex` and `pruneCache` had
+the identical hazard and were serialized too. Zero parallel LocalStorage mutations remain.
+
+Confirmed by log:
+
+```text
+Wrote 50 meetings { largestPayloadBytes: 8673 }
+Cache updated, now have 50 meetings { wroteThisBatch: 50, totalAfterMerge: 50, uniqueIds: 50 }
+Grouped meetings { input: 50, ..., grouped: 50, lost: 0 }
+```
+
+No `SILENT WRITE LOSS` line. 50 fetched, 50 cached, 50 displayed.
+
+### The lesson worth keeping
+
+Three fixes were applied before the real one, and each looked plausible at the time:
+
+1. `Promise.all` → `Promise.allSettled` — a real robustness win, but not the bug
+2. Silent-drop logging on read — how the loss was finally localized
+3. Transcripts moved out of LocalStorage — a real 20× size win, but not the bug
+
+What actually found it was **verifying the write by reading it back**. A successful `setItem` is
+not evidence the data is there. That check stays in the code permanently: it is cheap, and it
+converts an invisible data-loss bug into a named log line.
+
+### Related
+
+See `docs/CACHING.md` for the measured storage breakdown and a proposal to move transcripts out
+of LocalStorage into `environment.supportPath`, which would shrink the hot path by roughly an
+order of magnitude.

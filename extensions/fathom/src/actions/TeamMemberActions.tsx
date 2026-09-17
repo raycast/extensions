@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Icon, Keyboard, showToast, Toast, environment } from "@raycast/api";
+import fs from "fs";
+import path from "path";
+import { Action, ActionPanel, environment, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import type { TeamMember } from "../types/Types";
+import { showContextualError } from "../utils/errorHandling";
 import { exportAsVCard, exportTeamMembers } from "../utils/export";
 import MemberMeetingsView from "../views/MemberMeetingsView";
-import { showContextualError } from "../utils/errorHandling";
-import path from "path";
-import fs from "fs";
 
 export function TeamMemberActions(props: {
   member: TeamMember;
@@ -76,7 +76,7 @@ export function TeamMemberActions(props: {
             title="View Member's Meetings"
             icon={Icon.MagnifyingGlass}
             target={<MemberMeetingsView email={email} name={member.name} />}
-            shortcut={{ modifiers: ["cmd"], key: "m" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "m" }, Windows: { modifiers: ["ctrl"], key: "m" } }}
           />
           <Action.OpenInBrowser url={`mailto:${email}`} title="Send Email" icon={Icon.Envelope} />
         </>
@@ -95,14 +95,14 @@ export function TeamMemberActions(props: {
             title="Copy Email Address"
             content={email}
             icon={Icon.Clipboard}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         )}
         <Action.CopyToClipboard
           title="Copy All Details"
           content={JSON.stringify(member, null, 2)}
           icon={Icon.Document}
-          shortcut={{ modifiers: ["cmd"], key: "." }}
+          shortcut={Keyboard.Shortcut.Common.Pin}
         />
       </ActionPanel.Section>
 
@@ -112,7 +112,10 @@ export function TeamMemberActions(props: {
           title="Export Member as Vcard"
           onAction={exportMemberAsVCard}
           icon={Icon.AddPerson}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "e" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+          }}
         />
         <Action title="Export Member as JSON" onAction={exportMemberDetails} icon={Icon.Download} />
         {allMembers && allMembers.length > 0 && (
@@ -128,7 +131,10 @@ export function TeamMemberActions(props: {
                 });
               }}
               icon={Icon.PersonLines}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "opt"], key: "v" },
+                Windows: { modifiers: ["ctrl", "opt"], key: "v" },
+              }}
             />
             <Action
               title={`Export All ${teamName ? `${teamName} ` : ""}Members as CSV`}
@@ -140,7 +146,7 @@ export function TeamMemberActions(props: {
                 });
               }}
               icon={Icon.Document}
-              shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
             />
           </>
         )}
