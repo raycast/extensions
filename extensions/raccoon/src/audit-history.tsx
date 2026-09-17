@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { emptyState } from "./empty-state";
 import { HISTORY_DIR, readHistory, type PastAudit } from "./audit-runs";
 import { join } from "node:path";
 
@@ -34,8 +35,16 @@ function tint(run: PastAudit): Color {
 }
 
 export default function Command() {
-	const { data, isLoading, revalidate } = usePromise(readHistory);
+	const { data, isLoading, revalidate, error } = usePromise(readHistory);
 	const runs = data ?? [];
+	const empty = emptyState(
+		error,
+		{
+			title: "No audit has been run on this Mac yet",
+			description: "Run Security Audit once and it will be kept here.",
+		},
+		"The audit history",
+	);
 
 	const refresh = (
 		<Action
@@ -54,8 +63,8 @@ export default function Command() {
 		>
 			<List.EmptyView
 				icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
-				title="No audit has been run on this Mac yet"
-				description="Run Security Audit once and it will be kept here."
+				title={empty.title}
+				description={empty.description}
 				actions={<ActionPanel>{refresh}</ActionPanel>}
 			/>
 			{runs.map((run) => (

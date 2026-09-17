@@ -64,7 +64,16 @@ export async function runResolution(r: Resolution): Promise<void> {
 	});
 	if (!confirmed) return;
 
-	await runInTerminal(r.command);
+	// osascript drives Terminal.app, and the first time a Mac is asked to do
+	// that macOS puts up its Automation prompt - which can be denied. Without
+	// this the rejection is unhandled inside an Action handler: no success
+	// toast, no failure, the screen simply does not react to Enter.
+	try {
+		await runInTerminal(r.command);
+	} catch (error) {
+		await showFailureToast(error, { title: "Could not hand the command to Terminal" });
+		return;
+	}
 	await showToast({
 		style: Toast.Style.Success,
 		title: r.title,

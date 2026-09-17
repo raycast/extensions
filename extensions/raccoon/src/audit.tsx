@@ -267,7 +267,12 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 		});
 		if (!confirmed) return;
 
-		await runInTerminal(fixCommand(rcc, [check.name]));
+		try {
+			await runInTerminal(fixCommand(rcc, [check.name]));
+		} catch (error) {
+			await showFailureToast(error, { title: "Could not hand the fix to Terminal" });
+			return;
+		}
 		await showToast({
 			style: Toast.Style.Success,
 			title: `Fixing ${check.name}`,
@@ -303,7 +308,12 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 		});
 		if (!confirmed) return;
 
-		await runInTerminal(fixCommand(rcc, names));
+		try {
+			await runInTerminal(fixCommand(rcc, names));
+		} catch (error) {
+			await showFailureToast(error, { title: "Could not hand the fix to Terminal" });
+			return;
+		}
 		await showToast({
 			style: Toast.Style.Success,
 			title: `Fixing ${names.length} checks`,

@@ -62,3 +62,24 @@ test("both ways of changing the admin session ask first", () => {
 		assert.ok(bodyOf(admin, entry).includes("confirmAlert("), `${entry} changes sudo without asking`);
 	}
 });
+
+test("a command handed to Terminal says so when Terminal refuses", () => {
+	// osascript is asked to drive Terminal.app, and the first time a Mac does
+	// that it puts up macOS's Automation prompt - which can be denied. An
+	// unhandled rejection in an Action handler shows the reader nothing at all:
+	// no success toast, no failure, the screen simply does not react.
+	//
+	// Coarse, like the rest of this file: it asks only that the call sits near
+	// something that catches.
+	for (const [file, text] of source) {
+		if (file === "terminal.ts") continue;
+		let from = 0;
+		for (;;) {
+			const at = text.indexOf("runInTerminal(", from);
+			if (at === -1) break;
+			const around = text.slice(Math.max(0, at - 400), at + 400);
+			assert.ok(around.includes("catch"), `${file} hands a command to Terminal and ignores the refusal`);
+			from = at + 1;
+		}
+	}
+});

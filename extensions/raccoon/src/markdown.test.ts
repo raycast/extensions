@@ -1,7 +1,7 @@
 // Zero-dependency check: node --test src/markdown.test.ts
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { pendingFixCount, SUDO_HINT, toMarkdown, withSudoHint } from "./markdown.ts";
+import { pendingFixCount, quietOutcome, SUDO_HINT, toMarkdown, withSudoHint } from "./markdown.ts";
 
 test("section headers become h2", () => {
 	assert.equal(toMarkdown("-- Battery Status").trim(), "## Battery Status");
@@ -49,4 +49,15 @@ test("the Touch ID hint is appended only when sudo was unavailable", () => {
 	assert.equal(withSudoHint("all good"), "all good");
 	assert.ok(withSudoHint("⚠ sudo unavailable — sudo checks skipped").endsWith(SUDO_HINT));
 	assert.ok(withSudoHint("✗ Deep scan requires sudo — skipped").endsWith(SUDO_HINT));
+});
+
+test("a run somebody stopped did not finish quietly", () => {
+	// "finished without printing anything" for a run the reader killed reads as
+	// a command that had nothing to say, not one that never got the chance.
+	assert.equal(
+		quietOutcome(["audit", "--fix"], { code: 0, signal: "SIGTERM" }),
+		"`rcc audit --fix` was stopped before it printed anything.",
+	);
+	assert.equal(quietOutcome(["disk"], { code: 0, signal: null }), "`rcc disk` finished without printing anything.");
+	assert.equal(quietOutcome(["disk"], undefined), "`rcc disk` finished without printing anything.");
 });

@@ -148,3 +148,17 @@ export const SUDO_HINT = [
 export function withSudoHint(markdown: string): string {
 	return SUDO_UNAVAILABLE.test(markdown) ? `${markdown}\n${SUDO_HINT}` : markdown;
 }
+
+/**
+ * What the screen says when a run printed nothing at all.
+ *
+ * A run the reader stopped and a run that had nothing to say look identical
+ * from the output alone - both are empty - and calling the first one
+ * "finished" tells them the command ran to completion when they killed it.
+ */
+export function quietOutcome(args: string[], exit: { code: number | null; signal: string | null } | undefined): string {
+	const command = `\`rcc ${args.join(" ")}\``;
+	return exit?.signal
+		? `${command} was stopped before it printed anything.`
+		: `${command} finished without printing anything.`;
+}

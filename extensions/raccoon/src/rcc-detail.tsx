@@ -11,7 +11,15 @@ import {
 import { useState } from "react";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
 import type { RccCommand } from "./commands";
-import { pendingFixCount, progressBar, progressOf, toMarkdown, withoutProgress, withSudoHint } from "./markdown";
+import {
+	quietOutcome,
+	pendingFixCount,
+	progressBar,
+	progressOf,
+	toMarkdown,
+	withoutProgress,
+	withSudoHint,
+} from "./markdown";
 import { isFailure } from "./exit";
 import { RccNotFoundError } from "./rcc";
 import { useRccStream } from "./use-rcc-stream";
@@ -48,7 +56,7 @@ export function RccDetail({ command }: { command: RccCommand }) {
 	} else if (isLoading) {
 		markdown = `Running \`rcc ${args.join(" ")}\``;
 	} else {
-		markdown = `\`rcc ${args.join(" ")}\` finished without printing anything.`;
+		markdown = quietOutcome(args, exit);
 	}
 
 	// rcc audit says what it found through its exit status, so a non-zero code is

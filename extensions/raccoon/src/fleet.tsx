@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, confirmAlert } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { emptyState } from "./empty-state";
 import { useState } from "react";
 import { FLEET_CONF, readGroups, readHosts, type Host } from "./fleet-hosts";
 import { RccDetail } from "./rcc-detail";
@@ -44,10 +45,18 @@ function scanCommand(args: string[], what: string): RccCommand {
 
 export default function Command() {
 	const [scan, setScan] = useState<RccCommand | undefined>();
-	const { data, isLoading, revalidate } = usePromise(async () => ({
+	const { data, isLoading, revalidate, error } = usePromise(async () => ({
 		hosts: await readHosts(),
 		groups: await readGroups(),
 	}));
+	const empty = emptyState(
+		error,
+		{
+			title: "No machines configured",
+			description: `Add one with \`rcc fleet add <host>\`. Raccoon keeps them in ${FLEET_CONF}.`,
+		},
+		"The fleet configuration",
+	);
 
 	// Once the reader has said yes, this becomes the streaming view for the run
 	// they asked for. Nothing reaches it before that.
@@ -95,8 +104,8 @@ export default function Command() {
 		>
 			<List.EmptyView
 				icon={{ source: Icon.Monitor, tintColor: Color.SecondaryText }}
-				title="No machines configured"
-				description={`Add one with \`rcc fleet add <host>\`. Raccoon keeps them in ${FLEET_CONF}.`}
+				title={empty.title}
+				description={empty.description}
 				actions={<ActionPanel>{refresh}</ActionPanel>}
 			/>
 
