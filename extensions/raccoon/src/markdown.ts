@@ -162,3 +162,19 @@ export function quietOutcome(args: string[], exit: { code: number | null; signal
 		? `${command} was stopped before it printed anything.`
 		: `${command} finished without printing anything.`;
 }
+
+/**
+ * What the screen says about a run that was given up on for silence.
+ *
+ * Not "failed": nothing said it failed. The run was still open and had stopped
+ * saying anything, and what it had already done to the machine is still done -
+ * the same thing progress-list.tsx tells a reader who pressed Stop.
+ */
+export function idleNotice(args: string[], idleMs: number): string {
+	const minutes = Math.round(idleMs / 60_000);
+	return [
+		`\`rcc ${args.join(" ")}\` printed nothing for ${minutes} minutes, so Raccoon stopped waiting for it.`,
+		"",
+		"Whatever it had already changed stays changed.",
+	].join("\n");
+}

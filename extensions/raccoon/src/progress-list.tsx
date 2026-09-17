@@ -2,8 +2,9 @@ import { Action, ActionPanel, Color, Icon, Keyboard, List, openExtensionPreferen
 import type { ReactNode } from "react";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
 import { RccNotFoundError } from "./rcc";
+import { IDLE_TIMEOUT_MS } from "./idle-timer";
 import { useRccStream } from "./use-rcc-stream";
-import { withoutProgress } from "./markdown";
+import { idleNotice, withoutProgress } from "./markdown";
 import { managersFrom, stillWorking, type Manager, type ManagerState } from "./upgrade-progress";
 
 /**
@@ -93,7 +94,7 @@ export function ProgressList({
 	/** Actions this particular command adds, e.g. running it for real. */
 	extraActions?: ReactNode;
 }) {
-	const { output, stderrOutput, exit, isLoading, error, reload, stop } = useRccStream(args);
+	const { output, stderrOutput, exit, isLoading, error, gaveUp, reload, stop } = useRccStream(args);
 
 	if (error instanceof RccNotFoundError) return <MissingRcc />;
 
@@ -162,11 +163,16 @@ export function ProgressList({
 					// A stopped run is reported as stopped, never as a clean
 					// finish: it was cut off partway, and what it had already
 					// done to the machine is still done.
-					title={exit.signal !== null ? "Stopped partway" : "Finished with errors"}
+					title={gaveUp ? "Given up on" : exit.signal !== null ? "Stopped partway" : "Finished with errors"}
 					subtitle={
-						exit.signal !== null
-							? `${command} was stopped with ${exit.signal}. Whatever it had already changed stays changed.`
-							: `${command} exited with status ${exit.code}`
+						// A run nobody stopped, that simply went quiet, is a
+						// third thing: saying "stopped" for it would credit the
+						// reader with a keystroke they never pressed.
+						gaveUp
+							? idleNotice(args, IDLE_TIMEOUT_MS).split("\n")[0]
+							: exit.signal !== null
+								? `${command} was stopped with ${exit.signal}. Whatever it had already changed stays changed.`
+								: `${command} exited with status ${exit.code}`
 					}
 					detail={
 						<List.Item.Detail

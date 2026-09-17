@@ -63,19 +63,30 @@ export async function isInstalled(): Promise<boolean> {
 }
 
 /**
+ * How a command is run. Injectable for one reason: what matters here is not
+ * that a process started but WHICH one, with which arguments, in which order -
+ * `visudo -c` before anything is asked of root, and the drop-in installed 0440
+ * root:wheel rather than with whatever bits the staged file happened to have.
+ * A test can hold that to account without ever running sudo.
+ */
+export type Run = (file: string, args: string[]) => Promise<unknown>;
+
+const execute: Run = (file, args) => execFileAsync(file, args);
+
+/**
  * Write the drop-in, but only after `visudo -c` accepts it. A malformed file in
  * /etc/sudoers.d breaks sudo for the whole machine, so it is validated as the
  * unprivileged user first and only the final install step runs as root.
  */
-export async function install(session: SudoSession): Promise<void> {
+export async function install(session: SudoSession, run: Run = execute): Promise<void> {
 	const dir = await mkdtemp(join(tmpdir(), "raccoon-sudoers-"));
 	const staged = join(dir, "raccoon");
 	try {
 		await writeFile(staged, buildDropIn(currentUsername(), session), {
 			mode: 0o440,
 		});
-		await execFileAsync("/usr/sbin/visudo", ["-c", "-f", staged]);
-		await execFileAsync("/usr/bin/sudo", [
+		await run("/usr/sbin/visudo", ["-c", "-f", staged]);
+		await run("/usr/bin/sudo", [
 			"/usr/bin/install",
 			"-m",
 			"0440",
@@ -91,6 +102,6 @@ export async function install(session: SudoSession): Promise<void> {
 	}
 }
 
-export async function uninstall(): Promise<void> {
-	await execFileAsync("/usr/bin/sudo", ["/bin/rm", "-f", SUDOERS_PATH]);
+export async function uninstall(run: Run = execute): Promise<void> {
+	await run("/usr/bin/sudo", ["/bin/rm", "-f", SUDOERS_PATH]);
 }

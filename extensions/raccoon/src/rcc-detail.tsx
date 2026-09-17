@@ -11,7 +11,9 @@ import {
 import { useState } from "react";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
 import type { RccCommand } from "./commands";
+import { IDLE_TIMEOUT_MS } from "./idle-timer";
 import {
+	idleNotice,
 	quietOutcome,
 	pendingFixCount,
 	progressBar,
@@ -36,7 +38,7 @@ function failureNotice(args: string[], code: number, stderrOutput: string): stri
 
 export function RccDetail({ command }: { command: RccCommand }) {
 	const [args, setArgs] = useState(command.args);
-	const { output, stdoutOutput, stderrOutput, exit, isLoading, error, reload, stop } = useRccStream(args);
+	const { output, stdoutOutput, stderrOutput, exit, isLoading, error, gaveUp, reload, stop } = useRccStream(args);
 
 	if (error instanceof RccNotFoundError) return <MissingRcc />;
 
@@ -58,6 +60,11 @@ export function RccDetail({ command }: { command: RccCommand }) {
 	} else {
 		markdown = quietOutcome(args, exit);
 	}
+
+	// Nobody stopped this one: it went quiet and Raccoon stopped waiting. The
+	// notice goes after whatever did arrive, so a run that printed half a
+	// report keeps the half it printed.
+	if (gaveUp) markdown = [markdown, "", idleNotice(args, IDLE_TIMEOUT_MS)].join("\n");
 
 	// rcc audit says what it found through its exit status, so a non-zero code is
 	// not news by itself. Anything isFailure() does call a failure is reported

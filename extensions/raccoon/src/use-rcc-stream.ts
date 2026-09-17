@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RccExit } from "./exit";
+import { idleTimer, IDLE_TIMEOUT_MS } from "./idle-timer.ts";
 import { streamRcc } from "./rcc";
 
 /**
@@ -23,6 +24,7 @@ export function useRccStream(args: string[]) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<Error | undefined>();
 	const [runCount, setRunCount] = useState(0);
+	const [gaveUp, setGaveUp] = useState(false);
 	const controllerRef = useRef<AbortController>(undefined);
 
 	// The joined form is the dependency - a new array every render must not
@@ -41,6 +43,18 @@ export function useRccStream(args: string[]) {
 		setExit(undefined);
 		setError(undefined);
 		setIsLoading(true);
+		setGaveUp(false);
+
+		// Born inside this effect, like the controller, and for the same
+		// reason: a superseded run keeps draining its pipe, and a timer shared
+		// across runs would let those late chunks keep the NEXT run's wait
+		// alive - hiding exactly the hang this is here to catch.
+		const idle = idleTimer(IDLE_TIMEOUT_MS, () => {
+			if (controllerRef.current !== controller) return;
+			setGaveUp(true);
+			// The same abort the Stop action uses: one way out of a run, not two.
+			controller.abort();
+		});
 
 		streamRcc(
 			argv.current,
@@ -50,6 +64,7 @@ export function useRccStream(args: string[]) {
 				// and those late chunks used to land on the state the next run
 				// had just cleared: the same block appeared twice in one log.
 				if (controllerRef.current !== controller) return;
+				idle.poke();
 				const append = (previous: string) => previous + chunk.text;
 				setOutput(append);
 				if (chunk.source === "stderr") setStderrOutput(append);
@@ -69,10 +84,14 @@ export function useRccStream(args: string[]) {
 				if (controllerRef.current === controller) setError(caught);
 			})
 			.finally(() => {
+				idle.stop();
 				if (controllerRef.current === controller) setIsLoading(false);
 			});
 
-		return () => controller.abort();
+		return () => {
+			idle.stop();
+			controller.abort();
+		};
 	}, [key, runCount]);
 
 	const reload = useCallback(() => setRunCount((n) => n + 1), []);
@@ -85,6 +104,8 @@ export function useRccStream(args: string[]) {
 		exit,
 		isLoading,
 		error,
+		/** Whether this run was given up on for silence rather than stopped by hand. */
+		gaveUp,
 		reload,
 		stop,
 	};

@@ -1,7 +1,7 @@
 // Zero-dependency check: node --test src/markdown.test.ts
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { pendingFixCount, quietOutcome, SUDO_HINT, toMarkdown, withSudoHint } from "./markdown.ts";
+import { idleNotice, pendingFixCount, quietOutcome, SUDO_HINT, toMarkdown, withSudoHint } from "./markdown.ts";
 
 test("section headers become h2", () => {
 	assert.equal(toMarkdown("-- Battery Status").trim(), "## Battery Status");
@@ -60,4 +60,11 @@ test("a run somebody stopped did not finish quietly", () => {
 	);
 	assert.equal(quietOutcome(["disk"], { code: 0, signal: null }), "`rcc disk` finished without printing anything.");
 	assert.equal(quietOutcome(["disk"], undefined), "`rcc disk` finished without printing anything.");
+});
+
+test("a run given up on for silence says so, and says what it leaves behind", () => {
+	const notice = idleNotice(["upgrade"], 15 * 60 * 1000);
+	assert.match(notice, /15 minutes/);
+	assert.match(notice, /`rcc upgrade`/);
+	assert.match(notice, /stays changed/);
 });
