@@ -1,6 +1,6 @@
 # Hue Changelog
 
-## [Update API Endpoint] - {PR_MERGE_DATE}
+## [Update API Endpoint] - 2026-09-17
 
 - Update the hue color image API endpoint to `hue-palette.yencheng.dev`.
 
