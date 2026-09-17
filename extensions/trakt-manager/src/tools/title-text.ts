@@ -83,7 +83,7 @@ export function partitionByLookup<T>(
   query: string | undefined,
   traktId?: number,
   year?: number,
-): { exact: T[]; related: T[]; yearHeldBy: T[] } {
+): { exact: T[]; related: T[]; yearHeldBy: T[]; yearUnknown: T[] } {
   const lookup = resolveLookupQuery(query, year);
   const classify = (item: T, q: string | undefined) =>
     classifyTitleMatch(titlesOf(item), q, { requested: traktId, item: idOf(item) });
@@ -98,19 +98,18 @@ export function partitionByLookup<T>(
   const related = items.filter((item) => classify(item, comparable) === "partial");
 
   if (appliedYear === undefined) {
-    return { exact: titleExact, related, yearHeldBy: [] };
+    return { exact: titleExact, related, yearHeldBy: [], yearUnknown: [] };
   }
 
   return {
-    exact: titleExact.filter((item) => {
-      const itemYear = yearOf(item);
-      return itemYear === undefined || itemYear === appliedYear;
-    }),
+    exact: titleExact.filter((item) => yearOf(item) === appliedYear),
     related,
     yearHeldBy: titleExact.filter((item) => {
       const itemYear = yearOf(item);
       return itemYear !== undefined && itemYear !== appliedYear;
     }),
+    // A missing year is not the requested year and is not a different year either.
+    yearUnknown: titleExact.filter((item) => yearOf(item) === undefined),
   };
 }
 

@@ -106,15 +106,16 @@ test("a rating year miss is not treated as an exact match for another release", 
   assert.equal(picked.yearHeldBy[0]?.year, 2021);
 });
 
-test("a rating with no year is not treated as a year miss", () => {
+test("a rating with no year is not a confirmed year match or a year miss", () => {
   const picked = pickRatingMatches(
     [{ type: "episode", title: "Good News About Hell", rating: 9, ratedAt: "2024-01-01T00:00:00.000Z", traktId: 99 }],
     "Good News About Hell",
     undefined,
     2022,
   );
-  assert.equal(picked.exact[0]?.traktId, 99);
+  assert.equal(picked.exact.length, 0);
   assert.equal(picked.yearHeldBy.length, 0);
+  assert.equal(picked.yearUnknown[0]?.traktId, 99);
 });
 
 test("season and episode ratings inherit the parent show year", () => {

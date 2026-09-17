@@ -5,6 +5,7 @@ export type RatingMatchPick = {
   exact: CompactRatingItem[];
   related: CompactRatingItem[];
   yearHeldBy: CompactRatingItem[];
+  yearUnknown: CompactRatingItem[];
   scoreMismatched: CompactRatingItem[];
 };
 
@@ -23,6 +24,7 @@ export function pickRatingMatches(
     exact: yearExact,
     related,
     yearHeldBy,
+    yearUnknown,
   } = partitionByLookup(
     items,
     (item) => [item.title, item.episode?.title],
@@ -34,13 +36,14 @@ export function pickRatingMatches(
   );
 
   if (rating === undefined) {
-    return { exact: yearExact, related, yearHeldBy, scoreMismatched: [] };
+    return { exact: yearExact, related, yearHeldBy, yearUnknown, scoreMismatched: [] };
   }
 
   return {
     exact: yearExact.filter((item) => item.rating === rating),
     related,
     yearHeldBy,
+    yearUnknown,
     scoreMismatched: yearExact.filter((item) => item.rating !== rating),
   };
 }

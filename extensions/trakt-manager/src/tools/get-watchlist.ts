@@ -259,12 +259,13 @@ export default async function tool(input: Input): Promise<Output> {
     );
     const yearExact = [...moviesPick.exact, ...showsPick.exact];
     const yearHeldBy = [...moviesPick.yearHeldBy, ...showsPick.yearHeldBy];
+    const yearUnknown = [...moviesPick.yearUnknown, ...showsPick.yearUnknown];
     const related = [...moviesPick.related, ...showsPick.related];
     const isFound = yearExact.length > 0;
     const target = query ?? `Trakt ID ${traktId}`;
     const yearLabel = lookup.year !== undefined ? ` (${lookup.year})` : "";
     const plural = (count: number) => (count === 1 ? "y" : "ies");
-    const definitive = exhaustive && (isFound || yearHeldBy.length === 0);
+    const definitive = exhaustive && (isFound || (yearHeldBy.length === 0 && yearUnknown.length === 0));
 
     let message: string;
     if (isFound) {
@@ -278,6 +279,11 @@ export default async function tool(input: Input): Promise<Output> {
       message =
         `"${target}" is on your watchlist, but not for ${lookup.year}: ${known}. ` +
         `Ask which release they mean instead of reporting a confirmed absence.`;
+    } else if (yearUnknown.length > 0) {
+      message =
+        `"${target}" is on your watchlist, but Trakt did not give a year for ` +
+        `${yearUnknown.map((item) => `"${item.title}"`).join(", ")}, so this is NOT proof it is the ${lookup.year} ` +
+        `release and NOT a confirmed absence.`;
     } else if (related.length > 0) {
       message =
         `"${target}" itself is not in your watchlist, but ${related.length} related entr${plural(related.length)} ` +

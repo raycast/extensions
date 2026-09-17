@@ -177,7 +177,7 @@ export default async function tool(input: Input): Promise<Output> {
       }
     }
 
-    const { exact, related, yearHeldBy, scoreMismatched } = pickRatingMatches(
+    const { exact, related, yearHeldBy, yearUnknown, scoreMismatched } = pickRatingMatches(
       scanned,
       query,
       traktId,
@@ -191,7 +191,7 @@ export default async function tool(input: Input): Promise<Output> {
     const userRating = exact.length === 1 ? exact[0].rating : undefined;
     const plural = (count: number) => (count === 1 ? "y" : "ies");
     const scope = describeRatingScope(type);
-    const shown = [...exact, ...scoreMismatched, ...yearHeldBy, ...related].slice(0, safeLimit);
+    const shown = [...exact, ...scoreMismatched, ...yearHeldBy, ...yearUnknown, ...related].slice(0, safeLimit);
 
     let message: string;
     if (exact.length > 0) {
@@ -210,6 +210,11 @@ export default async function tool(input: Input): Promise<Output> {
       message =
         `${target} is rated, but not for ${lookup.year}: ${known}. ` +
         `Ask which release they mean instead of reporting a never-rated verdict.`;
+    } else if (yearUnknown.length > 0) {
+      message =
+        `${target} is rated, but Trakt did not give a year for ` +
+        `${yearUnknown.map((item) => `"${item.title}" ${item.rating}/10`).join(", ")}, so this is NOT proof it is ` +
+        `the ${lookup.year} release and NOT a never-rated verdict.`;
     } else if (related.length > 0) {
       message =
         `${target} itself is not rated, but ${related.length} related entr${plural(related.length)} ` +
@@ -227,7 +232,7 @@ export default async function tool(input: Input): Promise<Output> {
       userRating,
       // A year miss is a fact about that year, not a never-rated. Leaving exhaustive
       // true here would make the assistant trust a negative the way it does on history.
-      exhaustive: exhaustive && (rated || yearHeldBy.length === 0),
+      exhaustive: exhaustive && (rated || (yearHeldBy.length === 0 && yearUnknown.length === 0)),
       message,
       ratings: shown,
       hasMore: false,
