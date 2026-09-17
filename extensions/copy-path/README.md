@@ -16,6 +16,6 @@ Copy the URL of the current tab of the browser or web app.
 
 - Support Safari, Chrome, Arc, Edge, Brave, Vivaldi, Opera, Orion, SigmaOS and Yandex Browser.
 - Support Safari Web App and Firefox browser by using an alternative method, which is not as stable as other browsers.
-- Support Arc's Little Arc popup window. Arc's scripting dictionary only exposes the main window, so the URL is read from the popup's web area through the macOS Accessibility API (Raycast's existing Accessibility permission is enough).
+- Support Arc's Little Arc windows and Peek previews. Arc's scripting dictionary only knows full tabs, so the URL of the focused web area is read through the macOS Accessibility API (Raycast's existing Accessibility permission is enough).
 
 🌟🌟To make it easier and faster to use, it is recommended to set shortcut keys for the extension

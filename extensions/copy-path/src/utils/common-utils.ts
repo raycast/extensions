@@ -6,7 +6,7 @@ import {
   getFocusWindowPath,
   getFocusWindowTitle,
   getQSpacePathUrls,
-  getArcLittleArcUrl,
+  getArcFocusedPageUrl,
   getVSCodeActiveFilePath,
   getWebkitBrowserPath,
 } from "./applescript-utils";
@@ -137,9 +137,10 @@ export const copyWindowPath = async (app: Application) => {
 };
 
 const tryCopyBrowserUrl = async (app: Application) => {
-  // Arc: a focused Little Arc popup is not reachable through Arc's scripting
-  // dictionary, so check it first; otherwise the main window's tab is copied.
-  let url = app.bundleId === arcBundleId ? await getArcLittleArcUrl() : "";
+  // Arc: Little Arc windows and Peek previews are not reachable through Arc's
+  // scripting dictionary, so read the focused web area first; otherwise the
+  // underlying tab of the main window would be copied.
+  let url = app.bundleId === arcBundleId ? await getArcFocusedPageUrl() : "";
   // get extra browser web page url
   if (isEmpty(url)) {
     url = await getChromiumBrowserPath(app.name);

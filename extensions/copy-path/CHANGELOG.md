@@ -1,8 +1,8 @@
 # Copy Path Changelog
 
-## [Support Little Arc] - {PR_MERGE_DATE}
+## [Support Little Arc and Peek] - {PR_MERGE_DATE}
 
-- Fix Arc: copy the URL of a focused Little Arc popup window instead of the main window's active tab (#12677)
+- Fix Arc: copy the URL of a focused Little Arc window or Peek preview instead of the underlying tab of the main window (#12677)
 
 ## [Update extension icon] - 2026-08-08
 
