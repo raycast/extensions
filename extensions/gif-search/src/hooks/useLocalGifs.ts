@@ -55,8 +55,10 @@ export default function useLocalGifs(service?: ServiceName, itemSize?: ItemSize)
       else return [];
 
       const all = await getAll(type);
+      // Empty providers make no lookup and must not count as successful recovery.
+      const populatedProviders = all.filter(([, ids]) => ids.length > 0);
       // Populate all gifs using the API
-      const promises = all.map(async ([service, ids]): Promise<ResolvedGifs | ProviderFailure> => {
+      const promises = populatedProviders.map(async ([service, ids]): Promise<ResolvedGifs | ProviderFailure> => {
         const api = await getAPIByServiceName(service);
         if (api === null) return [service, [] as IGif[]] as const;
         try {
@@ -71,7 +73,7 @@ export default function useLocalGifs(service?: ServiceName, itemSize?: ItemSize)
       const results = await Promise.all(promises);
       const failures = results.filter(isFailure);
 
-      // Every provider failing looks identical to having saved nothing, and the empty result
+      // Every populated provider failing looks identical to having saved nothing, and the empty result
       // would be cached over the last good one. Rejecting instead keeps the cached GIFs on
       // screen and gives the hook's own toast a Retry action.
       if (failures.length && failures.length === results.length) {
