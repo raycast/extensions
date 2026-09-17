@@ -69,7 +69,7 @@ In both modes your handlers and the remembered rules are always applied first. T
 
 ### How the glue works
 
-Finicky 4 handlers cannot change a URL, and its `rewrite` rules run before every handler. So `finickizer()` appends one rewrite rule that turns a web URL into the Raycast deep link only if none of your handlers and none of the remembered rules would route it, and puts one handler first that sends `raycast:` URLs to Raycast. The check mirrors Finicky's matching for arrays, functions such as `finicky.matchHostnames`, and regexes. Plain wildcard strings like `"example.com/*"` are not mirrored, so prefer `finicky.matchHostnames` or a regex in your own handlers.
+Finicky 4 handlers cannot change a URL, and its `rewrite` rules run before every handler. So `finickizer()` appends one rewrite rule that turns a web URL into the Raycast deep link only if none of your handlers and none of the remembered rules would route it, and puts one handler first that sends `raycast:` URLs to Raycast. The check mirrors Finicky's own matching exactly: arrays, regexes, wildcard strings like `"example.com/*"` through a port of Finicky's `matchWildcard`, and functions, which receive the very arguments Finicky passes, so matchers written for Finicky 3 behave the same as well.
 
 ## Rules
 

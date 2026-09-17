@@ -156,10 +156,14 @@ export function setRuleBrowser(target: RuleEntry, browser: string): void {
   editRules(target, (lines) => lines.map((existing, index) => (index === target.index ? line : existing)));
 }
 
-/** Swaps the rule with its neighbour; `delta` is -1 for up, 1 for down. Does nothing at either end. */
+/**
+ * Swaps the rule with the neighbour the list shows; `delta` is -1 for up, 1 for down. Blank lines are
+ * not listed, so they are skipped rather than swapped with. Does nothing at either end.
+ */
 export function moveRule(target: RuleEntry, delta: -1 | 1): void {
   editRules(target, (lines) => {
-    const to = target.index + delta;
+    let to = target.index + delta;
+    while (to >= 0 && to < lines.length && lines[to].trim() === "") to += delta;
     if (to < 0 || to >= lines.length) return lines;
     const next = [...lines];
     [next[target.index], next[to]] = [next[to], next[target.index]];

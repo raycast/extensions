@@ -24,10 +24,14 @@ export default function Browsers() {
 
   const add = (app: Application) => setStored([...selection, toStored(app)]);
   const remove = (app: Application) => setStored(selection.filter((entry) => !isSameApp(entry, app)));
+  // Swaps with the neighbour the user can see. Records of apps that are no longer installed stay in
+  // storage, hidden, and must not soak up a Move Up or Move Down.
   const move = (app: Application, delta: number) => {
-    const from = selection.findIndex((entry) => isSameApp(entry, app));
-    const to = from + delta;
-    if (from === -1 || to < 0 || to >= selection.length) return;
+    const positions = chosen.map((browser) => selection.findIndex((entry) => isSameApp(entry, browser.app)));
+    const at = chosen.findIndex((browser) => browser.app.path === app.path);
+    const from = positions[at];
+    const to = positions[at + delta];
+    if (from === undefined || to === undefined || from === -1 || to === -1) return;
     const next = [...selection];
     [next[from], next[to]] = [next[to], next[from]];
     setStored(next);
