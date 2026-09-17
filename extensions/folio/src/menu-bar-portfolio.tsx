@@ -50,7 +50,7 @@ export default function MenuBarPortfolio() {
       {error && accounts.length === 0 ? (
         <MenuBarExtra.Section title={classifyError(error) === "sign-in" ? "Signed out" : "Folio"}>
           <MenuBarExtra.Item
-            title={classifyError(error) === "sign-in" ? "Sign in with SnapTrade…" : "Open Preferences…"}
+            title={classifyError(error) === "sign-in" ? "Sign In with SnapTrade…" : "Open Preferences…"}
             onAction={() => (classifyError(error) === "sign-in" ? launch("sign-in") : openExtensionPreferences())}
           />
         </MenuBarExtra.Section>

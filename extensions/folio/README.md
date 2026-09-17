@@ -8,7 +8,7 @@ Folio never places trades or moves money. SnapTrade OAuth apps are read-only by 
 
 | Command | What it shows |
 | --- | --- |
-| Sign in with SnapTrade | Start or end a read-only SnapTrade session |
+| Sign In with SnapTrade | Start or end a read-only SnapTrade session |
 | Show Portfolio | Net worth per currency, accounts by institution, holdings per account |
 | Show Positions | Every position across accounts, searchable, with weight and open P&L. Takes an optional ticker (`Show Positions AAPL`) |
 | Show Activities | All · Trades · Dividends · Deposits for the last 365 days |
@@ -20,7 +20,7 @@ Everywhere: **⌘⇧P** hides balances (privacy mode), **⌘R** refreshes past t
 
 ## Using Folio
 
-1. Run **Sign in with SnapTrade**. Your browser opens SnapTrade's consent page; approve read access.
+1. Run **Sign In with SnapTrade**. Your browser opens SnapTrade's consent page; approve read access.
 2. Run **Connect Brokerage** if you haven't linked a brokerage to SnapTrade yet. The Connection Portal opens in your browser and only asks for read-only access.
 3. Run **Show Portfolio**.
 

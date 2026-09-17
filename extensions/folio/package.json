@@ -24,13 +24,14 @@
   "commands": [
     {
       "name": "sign-in",
-      "title": "Sign in with SnapTrade",
+      "title": "Sign In with SnapTrade",
       "description": "Sign in to SnapTrade with OAuth (read-only) or sign out.",
       "mode": "view",
       "keywords": [
         "login",
         "logout",
-        "oauth"
+        "oauth",
+        "snaptrade"
       ]
     },
     {

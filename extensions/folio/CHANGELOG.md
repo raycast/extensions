@@ -2,7 +2,7 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Sign in with SnapTrade (OAuth, PKCE, read-only) with token refresh and revoke through the Folio auth worker
+- Sign In with SnapTrade (OAuth, PKCE, read-only) with token refresh and revoke through the Folio auth worker
 - Show Portfolio: net worth per currency, accounts grouped by institution, holdings per account
 - Show Positions: every position across accounts in one searchable list with weights and open P&L; optional ticker argument jumps straight to a holding
 - Show Activities: All / Trades / Dividends / Deposits across accounts
