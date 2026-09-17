@@ -174,6 +174,19 @@ function configuredRemoteGatewayUrl(
   }
 }
 
+function matchingRemoteCredentials(
+  file: FileGatewayConfig,
+  gatewayUrl: string,
+): Credentials {
+  if (!file.remote.token && !file.remote.password) return {};
+
+  try {
+    return configuredRemoteGatewayUrl(file) === gatewayUrl ? file.remote : {};
+  } catch {
+    return {};
+  }
+}
+
 function resolveConnection(
   mode: ConnectionMode,
   endpoint: string,
@@ -212,13 +225,19 @@ function resolveConnection(
     return { gatewayUrl: LOOPBACK_GATEWAY_URL, credentials: file.local };
   }
 
+  if (endpoint) {
+    const gatewayUrl = remoteGatewayUrl(mode, endpoint);
+    return {
+      gatewayUrl,
+      credentials: matchingRemoteCredentials(file, gatewayUrl),
+    };
+  }
+
   const configuredGatewayUrl = configuredRemoteGatewayUrl(file);
-  const gatewayUrl = remoteGatewayUrl(
-    mode,
-    endpoint || configuredGatewayUrl || "",
-  );
-  const credentials = configuredGatewayUrl === gatewayUrl ? file.remote : {};
-  return { gatewayUrl, credentials };
+  return {
+    gatewayUrl: remoteGatewayUrl(mode, configuredGatewayUrl || ""),
+    credentials: file.remote,
+  };
 }
 
 export function getPreferences(): ResolvedPreferences {
