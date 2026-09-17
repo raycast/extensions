@@ -16,14 +16,12 @@ import {
   checkPwdOnExtract,
   ensureBinary,
   extract,
-  getFileSize,
   isNeedPwdOnExtract,
   isSupportExtractFormat,
   processingAlert,
 } from "./common/utils";
 import path from "node:path";
 import { IExtractPreferences, IFileInfo } from "./common/types";
-import { PRE_PWD_CHECK_THRESHOLD } from "./common/const";
 import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
@@ -74,11 +72,9 @@ export default function Command() {
         format,
       };
       updateFileState(file);
-      if (getFileSize(file.path) <= PRE_PWD_CHECK_THRESHOLD) {
-        const need = await isNeedPwdOnExtract(file.path, file.format);
-        updateNeedPwdState(need);
-        updatePwdCheckedState(true);
-      }
+      const need = await isNeedPwdOnExtract(file.path, file.format);
+      updateNeedPwdState(need);
+      updatePwdCheckedState(true);
       updatePwdErrorState(undefined);
       // eslint-disable-next-line no-empty
     } catch {
@@ -182,13 +178,9 @@ export default function Command() {
               format,
             };
             updateFileState(file);
-            updateNeedPwdState(false);
-            updatePwdCheckedState(false);
-            if (getFileSize(file.path) <= PRE_PWD_CHECK_THRESHOLD) {
-              const need = await isNeedPwdOnExtract(file.path, file.format);
-              updateNeedPwdState(need);
-              updatePwdCheckedState(true);
-            }
+            const need = await isNeedPwdOnExtract(file.path, file.format);
+            updateNeedPwdState(need);
+            updatePwdCheckedState(true);
           } catch {
             showToast({ title: "Sorry! Something went wrong...", style: Toast.Style.Failure });
           } finally {

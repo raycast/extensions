@@ -89,6 +89,7 @@ export default function Command() {
       <Form.Dropdown
         id="format"
         title="Format"
+        autoFocus
         defaultValue={preferences.defaultCompressionFormat}
         storeValue={preferences.defaultCompressionFormat === CompressFormat.PREVIOUS}
         onChange={(format) => {
@@ -112,7 +113,6 @@ export default function Command() {
         title="Files"
         info="Files to be compressed"
         value={files}
-        autoFocus
         canChooseDirectories
         onChange={(values) => {
           if (isLoading) {
