@@ -1,46 +1,30 @@
-import { Clipboard, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
-import { createSecret, formatDuration, parseDuration } from "./shared";
+import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { copyConcealed, createSecret, formatDuration, getDefaults, parseDuration } from "./shared";
 
-const DEFAULT_DURATION_SECONDS = 3600; // 1 hour
-
-function parseCommand(text: string): { secret: string; durationSeconds: number; selfDestruct: boolean } {
-  const tokens = text.trim().split(/\s+/);
-  let selfDestruct = true;
-  let durationSeconds = DEFAULT_DURATION_SECONDS;
-  let end = tokens.length;
-
-  if (end > 1 && tokens[end - 1].toLowerCase() === "false") {
-    selfDestruct = false;
-    end--;
-  }
-
-  if (end > 1) {
-    const parsed = parseDuration(tokens[end - 1]);
-    if (parsed) {
-      durationSeconds = parsed;
-      end--;
-    }
-  }
-
-  const secret = tokens.slice(0, end).join(" ");
-  return { secret, durationSeconds, selfDestruct };
+interface Arguments {
+  secret: string;
+  duration?: string;
+  selfDestruct?: string;
 }
 
-export default async function main(props: LaunchProps<{ arguments: { text: string } }>) {
-  const input = props.arguments.text.trim();
+export default async function main(props: LaunchProps<{ arguments: Arguments }>) {
+  const secret = props.arguments.secret;
 
-  if (!input) {
+  if (!secret.trim()) {
     await showToast({ style: Toast.Style.Failure, title: "Secret cannot be empty" });
     return;
   }
 
-  const { secret, durationSeconds, selfDestruct } = parseCommand(input);
+  const defaults = getDefaults();
+  const durationSeconds =
+    (props.arguments.duration && parseDuration(props.arguments.duration)) || defaults.durationSeconds;
+  const selfDestruct = props.arguments.selfDestruct ? props.arguments.selfDestruct === "true" : defaults.selfDestruct;
 
   try {
-    await showToast({ style: Toast.Style.Animated, title: "Creating secret..." });
+    await showToast({ style: Toast.Style.Animated, title: "Encrypting secret..." });
     const expirationTimestamp = Math.floor(Date.now() / 1000) + durationSeconds;
     const shareUrl = await createSecret(secret, expirationTimestamp, selfDestruct);
-    await Clipboard.copy(shareUrl);
+    await copyConcealed(shareUrl);
 
     const durationDisplay = formatDuration(durationSeconds);
     const destructNote = selfDestruct ? "Self-destructs after first view." : "Can be viewed multiple times.";
