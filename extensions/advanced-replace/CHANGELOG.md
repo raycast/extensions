@@ -1,5 +1,12 @@
 # Regex Replace Changelog
 
+## [Quick Slots] - 2026-06-17
+
+- Added 6 "Quick Slot" commands that run a saved entry directly, so each can be bound to a Raycast hotkey/alias
+- Assign an entry to a slot from "Extract and Replace Text" via the "Assign to Quick Slot" action (⌘⇧S)
+- Per-slot preference to Paste (default) or Copy the result
+- Slot assignments are cleared automatically when their entry is deleted
+
 ## [Regex Transformations and Additional Entry Actions] - 2025-09-08
 
 - Added possibility to use regex transformations (upper/lowercase, escapes)

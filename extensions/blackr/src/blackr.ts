@@ -12,14 +12,36 @@ const MAX_DURATION_SECONDS = 600;
 export default async function command() {
   const preferences = getPreferenceValues<Preferences.Blackr>();
   const durationSeconds = normalizeDuration(preferences.durationSeconds);
-  const overlayPath = join(environment.assetsPath, "blackr-overlay");
 
   try {
     await closeMainWindow({ clearRootSearch: true });
-    await execFileAsync(overlayPath, [String(durationSeconds)], {
-      timeout: (durationSeconds + 5) * 1000,
-      windowsHide: true,
-    });
+
+    if (process.platform === "darwin") {
+      const { blackrOverlay } = await import("swift:../swift/blackr-overlay");
+      await blackrOverlay(durationSeconds);
+      return;
+    }
+
+    if (process.platform === "win32") {
+      await execFileAsync(
+        "powershell.exe",
+        [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          join(environment.assetsPath, "blackr-overlay.ps1"),
+          String(durationSeconds),
+        ],
+        {
+          timeout: (durationSeconds + 5) * 1000,
+          windowsHide: true,
+        },
+      );
+      return;
+    }
+
+    throw new Error(`Blackr is not supported on ${process.platform}`);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,

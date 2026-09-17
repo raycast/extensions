@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  useNavigation,
+  open,
+  showInFinder,
+  Clipboard,
+} from "@raycast/api";
 import { useState } from "react";
 import { tryClone } from "../lib/try-cli";
 import { basename } from "path";
@@ -14,8 +24,15 @@ export function CloneForm({ onSuccess }: CloneFormProps) {
   const { pop } = useNavigation();
 
   const handleSubmit = async () => {
+    // Re-entrancy guard: ignore a second submit while a clone is in flight, so
+    // mashing Enter during the pause can't kick off a duplicate clone. This
+    // backs up the disabled submit action below.
+    if (isCloning) {
+      return;
+    }
+
     if (!url.trim()) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "URL required",
         message: "Please enter a git repository URL",
@@ -25,31 +42,44 @@ export function CloneForm({ onSuccess }: CloneFormProps) {
 
     setIsCloning(true);
 
-    try {
-      showToast({
-        style: Toast.Style.Animated,
-        title: "Cloning...",
-        message: url,
-      });
+    // Show the progress toast *before* awaiting the clone, and keep the handle so
+    // we can mutate it in place when the clone resolves.
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Cloning…",
+      message: url,
+    });
 
-      const targetPath = tryClone(url, customName || undefined);
+    try {
+      const targetPath = await tryClone(url, customName || undefined);
       const dirName = basename(targetPath);
 
-      showToast({
-        style: Toast.Style.Success,
-        title: "Cloned successfully",
-        message: dirName,
-      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Cloned";
+      toast.message = dirName;
+      toast.primaryAction = {
+        title: "Open",
+        onAction: () => open(targetPath),
+      };
+      toast.secondaryAction = {
+        title: "Show in Finder",
+        onAction: () => showInFinder(targetPath),
+      };
 
       onSuccess();
       pop();
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Clone failed",
-        message: String(error),
-      });
-    } finally {
+      const message = error instanceof Error ? error.message : String(error);
+
+      toast.style = Toast.Style.Failure;
+      toast.title = "Clone failed";
+      toast.message = message;
+      toast.primaryAction = {
+        title: "Copy Error",
+        onAction: () => Clipboard.copy(message),
+      };
+
+      // Stay on the form with the URL preserved so the user can fix and retry.
       setIsCloning(false);
     }
   };
@@ -60,7 +90,8 @@ export function CloneForm({ onSuccess }: CloneFormProps) {
       isLoading={isCloning}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Clone" onSubmit={handleSubmit} />
+          {/* Hide the submit action while cloning so a second press has nothing to fire. */}
+          {!isCloning && <Action.SubmitForm title="Clone" onSubmit={handleSubmit} />}
         </ActionPanel>
       }
     >

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "duckduckgo-email",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "DuckDuckGo Email",
   "description": "A simple extension that generate DuckDuckGo email alias",
   "icon": "duckduckgo-icon.png",
@@ -19,7 +19,7 @@
       "mode": "no-view"
     }
   ],
-  "preferences":[
+  "preferences": [
     {
       "name": "token",
       "description": "Your DuckDuckGo token",
@@ -46,5 +46,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

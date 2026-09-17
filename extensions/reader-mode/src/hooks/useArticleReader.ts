@@ -18,7 +18,7 @@
  * @see src/utils/article-loader.ts for the fetch/parse/paywall logic
  */
 import { useState, useEffect, useCallback, useRef } from "react";
-import { environment, AI, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { environment, AI, Clipboard, Keyboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useAI } from "@raycast/utils";
 import { ArticleState } from "../types/article";
 import { BrowserTab } from "../types/browser";
@@ -48,6 +48,8 @@ export interface UseArticleReaderOptions {
 export interface ArticleReaderState {
   article: ArticleState | null;
   isLoading: boolean;
+  /** What the loader is currently doing, shown while `isLoading`. */
+  loadingStatus: string | null;
   error: string | null;
   blockedUrl: string | null;
   hasBrowserExtension: boolean;
@@ -85,6 +87,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
   // Article state
   const [article, setArticle] = useState<ArticleState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Blocked page state
@@ -99,8 +102,10 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
   // Empty content page state
   const [emptyContentUrl, setEmptyContentUrl] = useState<string | null>(null);
 
-  // Browser extension state
-  const [hasBrowserExtensionAvailable, setHasBrowserExtensionAvailable] = useState(false);
+  // Browser extension availability is answered locally by `environment.canAccess` —
+  // no IPC, no async, so it needs neither state nor an effect.
+  const hasBrowserExtensionAvailable = isBrowserExtensionAvailable();
+
   const [reimportInactiveTab, setReimportInactiveTab] = useState<{
     url: string;
     tab: { id: number; title?: string };
@@ -156,6 +161,14 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
           style: Toast.Style.Failure,
           title: "Failed to generate summary",
           message: userMessage,
+          primaryAction: {
+            title: "Copy Error",
+            shortcut: Keyboard.Shortcut.Common.Copy,
+            onAction: async () => {
+              // Copy the raw error, not the friendlier rewrite above — this is for bug reports.
+              await Clipboard.copy(err.message);
+            },
+          },
         });
       }
     },
@@ -280,6 +293,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
         setError(result.error);
       }
       setIsLoading(false);
+      setLoadingStatus(null);
     },
     [preferences.rewriteArticleTitles, canAccessAI],
   );
@@ -308,6 +322,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
         skipPreCheck: preferences.skipPreCheck,
         enablePaywallHopper: preferences.enablePaywallHopper,
         showArticleImage: preferences.showArticleImage,
+        onProgress: setLoadingStatus,
       });
       handleLoadResult(result);
     }
@@ -333,11 +348,6 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       urlLog.log("summary:skipped-bypassed-check", { url: article.url });
     }
   }, [article, shouldShowSummary, summaryInitialized, handleSummarize, preferences.defaultSummaryStyle]);
-
-  // Check browser extension availability on mount
-  useEffect(() => {
-    isBrowserExtensionAvailable().then(setHasBrowserExtensionAvailable);
-  }, []);
 
   // Handler to fetch content via browser extension after user opens the page
   const handleFetchFromBrowser = useCallback(async () => {
@@ -426,6 +436,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       skipPreCheck: true,
       enablePaywallHopper: preferences.enablePaywallHopper,
       showArticleImage: preferences.showArticleImage,
+      onProgress: setLoadingStatus,
     });
     handleLoadResult(result);
   }, [notReadableUrl, handleLoadResult, preferences.enablePaywallHopper, preferences.showArticleImage]);
@@ -442,6 +453,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
 
     const result = await loadArticleViaPaywallHopper(notReadableUrl, {
       showArticleImage: preferences.showArticleImage,
+      onProgress: setLoadingStatus,
     });
 
     if (result.status === "success") {
@@ -450,6 +462,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
       setError(result.error);
       setNotReadableUrl(notReadableUrl);
       setIsLoading(false);
+      setLoadingStatus(null);
     }
   }, [notReadableUrl, handleLoadResult, preferences.showArticleImage]);
 
@@ -472,6 +485,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
         skipPreCheck: preferences.skipPreCheck,
         enablePaywallHopper: preferences.enablePaywallHopper,
         showArticleImage: preferences.showArticleImage,
+        onProgress: setLoadingStatus,
       });
       handleLoadResult(result);
     },
@@ -494,6 +508,7 @@ export function useArticleReader(options: UseArticleReaderOptions): ArticleReade
     // State
     article: hasMinimalContent ? null : article,
     isLoading,
+    loadingStatus,
     error,
     blockedUrl,
     hasBrowserExtension,

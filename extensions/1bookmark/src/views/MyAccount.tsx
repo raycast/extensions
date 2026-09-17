@@ -7,6 +7,7 @@ import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
 import { useMe } from "../hooks/use-me.hook";
 import { CACHED_KEY_SESSION_TOKEN } from "../utils/constants.util";
 import { cache } from "../utils/cache.util";
+import { resolveSpaceIconUrl } from "../utils/space-icon.util";
 
 const Body = () => {
   const { data, isLoading, refetch } = useMe();
@@ -74,7 +75,7 @@ const Body = () => {
             key={space.id}
             title={space.name}
             subtitle={space.description || undefined}
-            icon={space.image ?? (space.type === "TEAM" ? Icon.TwoPeople : Icon.Person)}
+            icon={resolveSpaceIconUrl(space.image) ?? (space.type === "TEAM" ? Icon.TwoPeople : Icon.Person)}
           />
         ))}
       </List.Section>

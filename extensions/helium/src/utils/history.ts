@@ -1,8 +1,6 @@
-import { homedir } from "os";
-import { join } from "path";
-import { existsSync } from "fs";
 import { useSQL } from "@raycast/utils";
 import { useMemo } from "react";
+import { findHistoryDatabasePath } from "./helium-profile";
 
 export interface HistoryEntry {
   id: string;
@@ -18,20 +16,10 @@ interface HistorySqlRow {
   lastVisitedAt: string;
 }
 
-const HISTORY_FILENAME = "History";
-const HELIUM_BASE_PATH = join(homedir(), "Library", "Application Support", "net.imput.helium");
-
-/**
- * Get the path to Helium's history database
- */
-function getHistoryDatabasePath(): string {
-  return join(HELIUM_BASE_PATH, "Default", HISTORY_FILENAME);
-}
-
 /**
  * Get a query to retrieve the most recent history entries (for testing/debugging)
  */
-function getRecentHistoryQuery(limit = 10): string {
+export function getRecentHistoryQuery(limit = 10): string {
   return `
     SELECT
       id,
@@ -49,7 +37,7 @@ function getRecentHistoryQuery(limit = 10): string {
  * Each space-separated term is treated as an AND condition
  * Searches are case-insensitive via SQLite LIKE
  */
-function getHistoryQuery(searchText: string, limit = 25): string {
+export function getHistoryQuery(searchText: string, limit = 25): string {
   const terms = searchText
     .trim()
     .split(/\s+/) // Split on any whitespace
@@ -83,8 +71,9 @@ function getHistoryQuery(searchText: string, limit = 25): string {
  * Hook to search browsing history
  */
 export function useHistorySearch(searchText: string, limit = 25) {
-  const historyDbPath = getHistoryDatabasePath();
-  const dbExists = existsSync(historyDbPath);
+  const historyDbPath = useMemo(() => findHistoryDatabasePath(), []);
+  const dbExists = !!historyDbPath;
+  const sqlDatabasePath = historyDbPath ?? __filename;
 
   const query = useMemo(() => {
     if (!dbExists) {
@@ -99,7 +88,12 @@ export function useHistorySearch(searchText: string, limit = 25) {
     return getHistoryQuery(searchText, limit);
   }, [searchText, limit, dbExists]);
 
-  const { data, isLoading, permissionView } = useSQL<HistorySqlRow>(dbExists ? historyDbPath : "", query);
+  const { data, isLoading, permissionView, revalidate } = useSQL<HistorySqlRow>(sqlDatabasePath, query, {
+    execute: dbExists && query.trim().length > 0,
+    onError(error) {
+      console.error("[Helium] History search unavailable:", error);
+    },
+  });
 
   const restructuredData = useMemo(() => {
     if (!data) {
@@ -116,7 +110,9 @@ export function useHistorySearch(searchText: string, limit = 25) {
 
   return {
     data: restructuredData,
-    isLoading,
+    isLoading: dbExists ? isLoading : false,
+    isAvailable: dbExists,
     permissionView,
+    revalidate,
   };
 }

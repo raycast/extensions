@@ -3,9 +3,17 @@ import * as fs from "fs-extra";
 import * as async from "modern-async";
 import * as path from "path";
 import nbt from "prismarine-nbt";
+import { pathToFileURL } from "url";
 import type { Instance, Server } from "../types";
 import { getPreferences } from "./preferences";
 import { getShortcutTargetPath } from "./powershell";
+
+/**
+ * Convert a local filesystem path to a `file://` URL that Raycast's `Image.source`
+ */
+function toFileUrl(p: string | undefined): string | undefined {
+  return p ? pathToFileURL(p).href : undefined;
+}
 
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";
@@ -62,6 +70,57 @@ export async function saveFavoriteInstanceIds(
 }
 
 /**
+ * Prism component UIDs that identify a mod loader, mapped to their display name
+ */
+const LOADER_UIDS: Record<string, string> = {
+  "net.minecraftforge": "Forge",
+  "net.neoforged": "NeoForge",
+  "net.fabricmc.fabric-loader": "Fabric",
+  "net.legacyfabric.fabric-loader": "Legacy Fabric",
+  "org.quiltmc.quilt-loader": "Quilt",
+  "com.mumfrey.liteloader": "LiteLoader",
+};
+
+type PackComponent = {
+  uid?: string;
+  version?: string;
+  cachedVersion?: string;
+};
+
+/**
+ * Read the Minecraft version and mod loader of an instance from its mmc-pack.json,
+ * falling back to the legacy `IntendedVersion` key in instance.cfg
+ */
+async function readInstanceVersion(
+  instanceFolder: string,
+  instanceCfg: ConfigIniParser,
+): Promise<Pick<Instance, "minecraftVersion" | "loader" | "loaderVersion">> {
+  let intendedVersion: string | undefined;
+  try {
+    intendedVersion = instanceCfg.get("General", "IntendedVersion", "") || undefined;
+  } catch {
+    // Section missing on some legacy configs
+  }
+
+  try {
+    const pack = await fs.readJson(path.join(instanceFolder, "mmc-pack.json"));
+    const components: PackComponent[] = Array.isArray(pack?.components) ? pack.components : [];
+
+    const minecraft = components.find((component) => component.uid === "net.minecraft");
+    const loader = components.find((component) => component.uid && LOADER_UIDS[component.uid]);
+
+    return {
+      minecraftVersion: minecraft?.version ?? minecraft?.cachedVersion ?? intendedVersion,
+      loader: loader?.uid ? LOADER_UIDS[loader.uid] : "Vanilla",
+      loaderVersion: loader?.version ?? loader?.cachedVersion,
+    };
+  } catch {
+    // No (or unreadable) mmc-pack.json - legacy instance or partial download
+    return { minecraftVersion: intendedVersion };
+  }
+}
+
+/**
  * Load all PrismLauncher instances
  */
 export async function loadInstances(favoriteIds: string[], onlyWithServers: boolean = false): Promise<Instance[]> {
@@ -86,6 +145,8 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
     );
     const iconPath = await async.asyncFind(paths, async (p: string) => await fs.pathExists(p));
 
+    const version = await readInstanceVersion(instanceFolder, instanceCfg);
+
     // Check if instance has servers.dat
     let hasServers = false;
     if (onlyWithServers) {
@@ -97,8 +158,9 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
     return {
       name: instanceCfg.get("General", "name", instanceId),
       id: instanceId,
-      icon: iconPath,
+      icon: toFileUrl(iconPath),
       favorite: favoriteIds.includes(instanceId),
+      ...version,
       ...(onlyWithServers ? { hasServers } : {}),
     };
   });

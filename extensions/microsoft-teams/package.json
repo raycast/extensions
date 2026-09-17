@@ -2,9 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-teams",
   "title": "Microsoft Teams",
-  "description": "Easily manage your Microsoft Teams presence and status message with this Raycast extension. Search chats and open them in with a keystroke in the Teams app.",
+  "description": "Manage your Microsoft Teams presence and status message. Search for people and chats, open conversations, and start calls.",
   "icon": "teams.png",
   "author": "sven",
+  "contributors": [
+    "mSarheed",
+    "ray.dhruv"
+  ],
   "categories": [
     "Applications",
     "Communication"
@@ -17,6 +21,14 @@
       "subtitle": "Microsoft Teams",
       "icon": "chat.png",
       "description": "Find a chat by title.",
+      "mode": "view"
+    },
+    {
+      "name": "findUser",
+      "title": "Find User",
+      "subtitle": "Microsoft Teams",
+      "icon": "teams.png",
+      "description": "Find a user and open a chat.",
       "mode": "view"
     },
     {
@@ -34,6 +46,68 @@
       "icon": "status.png",
       "description": "Set your Microsoft Teams status message (and optionally your presence).",
       "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-users",
+      "title": "Search Users",
+      "description": "Searches Microsoft Teams users by name or email address."
+    },
+    {
+      "name": "search-chats",
+      "title": "Search Chats",
+      "description": "Searches Microsoft Teams chats by title, participant, or bot name."
+    },
+    {
+      "name": "get-presence",
+      "title": "Get User Presence",
+      "description": "Gets another user's Microsoft Teams presence using their Microsoft Graph user ID."
+    },
+    {
+      "name": "get-current-presence",
+      "title": "Get Current Presence",
+      "description": "Gets the signed-in user's current Microsoft Teams presence."
+    },
+    {
+      "name": "set-presence",
+      "title": "Set Presence",
+      "description": "Sets or clears the current user's Microsoft Teams presence."
+    },
+    {
+      "name": "set-status",
+      "title": "Set Status Message",
+      "description": "Sets the current user's Microsoft Teams status message."
+    },
+    {
+      "name": "clear-status",
+      "title": "Clear Status Message",
+      "description": "Clears the current user's Microsoft Teams status message."
+    },
+    {
+      "name": "get-current-user",
+      "title": "Get Current User",
+      "description": "Gets the signed-in Microsoft Teams user's profile."
+    },
+    {
+      "name": "list-recent-chats",
+      "title": "List Recent Chats",
+      "description": "Lists the signed-in user's most recently active Microsoft Teams chats."
+    },
+    {
+      "name": "get-chat-messages",
+      "title": "Get Chat Messages",
+      "description": "Gets recent messages from a Microsoft Teams chat."
+    },
+    {
+      "name": "create-chat-link",
+      "title": "Create Chat Link",
+      "description": "Creates a Microsoft Teams deep link for a new chat, optionally with draft text."
+    },
+    {
+      "name": "create-call-link",
+      "title": "Create Call Link",
+      "description": "Creates a Microsoft Teams deep link for an audio or video call."
     }
   ],
   "preferences": [
@@ -71,20 +145,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.0",
-    "@raycast/utils": "^1.15.0",
-    "@types/luxon": "^3.3.0",
-    "luxon": "^3.3.0",
-    "node-fetch": "^3.3.1"
+    "@raycast/api": "^2.0.6",
+    "@raycast/utils": "^2.3.0",
+    "luxon": "^3.7.2",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/luxon": "^3.7.5",
+    "@types/node": "^26.4.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.0.0",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -92,5 +166,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

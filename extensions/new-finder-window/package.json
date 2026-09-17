@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "new-finder-window",
+  "title": "New Finder Window",
+  "description": "Open a new Finder window on the current macOS Space without switching Spaces.",
+  "icon": "icon.png",
+  "author": "tickmao",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-finder-window",
+      "title": "Open New Finder Window",
+      "description": "Open a new Finder window on the current macOS Space",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "directory",
+      "title": "Default Directory",
+      "description": "Choose which directory to open. You can also type a path directly.",
+      "type": "directory",
+      "required": true,
+      "default": "~/Downloads"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "version": "1.0.0"
+  }
+}

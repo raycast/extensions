@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ten-four",
+  "title": "Ten Four",
+  "description": "A shelf of clean, copyable snippets pushed from your terminal or Claude Code. \"10-4, copy that\": copy them out of Raycast with pristine formatting, no mangled line breaks.",
+  "icon": "icon.png",
+  "author": "jaymcc",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "ten-four",
+      "title": "Ten Four Shelf",
+      "subtitle": "Copy that",
+      "description": "Browse and copy snippets pushed to your shelf",
+      "mode": "view"
+    },
+    {
+      "name": "install-cli",
+      "title": "Install Ten Four CLI",
+      "description": "Install the `tenfour` command-line tool so your terminal and Claude Code can push snippets",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "shelfUrl",
+      "title": "Shelf URL",
+      "description": "Optional. Leave blank to keep the shelf in a local file (~/.ten-four.json) on this Mac. Set it to an HTTPS Ten Four shelf service endpoint (for example via tailscale serve). HTTP is only supported for loopback testing.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://your-host.ts.net/shelf"
+    },
+    {
+      "name": "shelfToken",
+      "title": "Shelf Token",
+      "description": "Required when Shelf URL is set. Must match TENFOUR_TOKEN on the shelf service.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

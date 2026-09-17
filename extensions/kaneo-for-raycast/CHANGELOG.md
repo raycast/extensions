@@ -1,5 +1,11 @@
 # Kaneo Changelog
 
+## [My Tasks] - 2026-07-09
+
+- Added "My Tasks" command to list tickets assigned to you across all projects, grouped by status
+- Only open tasks are shown (completed/final columns are hidden)
+- Open a task's details, open it in Kaneo Web, copy its title, or change its status directly from the list
+
 ## [Add Subtasks Support] - 2026-03-27
 
 - Added support for sub tasks in task details

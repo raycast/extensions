@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionPanel,
   Action,
@@ -13,15 +13,20 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { runAppleScript, useCachedState } from "@raycast/utils";
+import { useQuery } from "@tanstack/react-query";
 import { trpc } from "./utils/trpc.util";
+import { resolveSpaceIconUrl } from "./utils/space-icon.util";
 import { CachedQueryClientProvider } from "./components/CachedQueryClientProvider";
 import MyAccount from "./views/MyAccount";
 import { LoginFormInView } from "./components/LoginFormInView";
 import { NewTagForm } from "./views/NewTagForm";
 import { useLoggedOutStatus } from "./hooks/use-logged-out-status.hook";
+import { useUserCacheReset } from "./hooks/use-user-cache-reset.hook";
+import { useMe } from "./hooks/use-me.hook";
 import { useMyTags } from "./hooks/use-tags.hook";
 import { CACHED_KEY_RECENT_SELECTED_TAGS, CACHED_KEY_RECENT_SELECTED_SPACE } from "./utils/constants.util";
 import { useEnabledSpaces } from "./hooks/use-enabled-spaces.hook";
+import { fetchPageTitle } from "./utils/page-title.util";
 
 interface ScriptsPerBrowser {
   getURL: () => Promise<string>;
@@ -147,9 +152,22 @@ interface SelectedTag {
 function Body(props: { onlyPop?: boolean }) {
   const { onlyPop = false } = props;
   const { pop } = useNavigation();
-  const [title, setTitle] = useState<string>("");
+  // Two title sources: the auto-detected "Page title" (browser prefill or URL fetch result) vs
+  // the user-entered "Custom title". A dropdown selects which one to use.
+  const [userTitle, setUserTitle] = useState<string>("");
+  const [browserTitle, setBrowserTitle] = useState<string>("");
+  // Defaults to "Page title" so the title is filled automatically from the URL/browser prefill.
+  // If the fetch fails and there is no browser prefill, a useEffect switches to "Custom title" automatically.
+  const [titleSource, setTitleSource] = useState<"auto" | "manual">("auto");
   const [url, setUrl] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  // Trigger that fires the fetchPageTitle request on URL blur. Since this value is the
+  // queryKey itself, even if the URL changes twice in quick succession react-query only
+  // surfaces the result for the latest key, which naturally prevents stale-result races (issue #300).
+  const [titleFetchUrl, setTitleFetchUrl] = useState<string>("");
+  // Holds the latest value for checking whether the user has typed a title manually.
+  const userTitleRef = useRef(userTitle);
+  userTitleRef.current = userTitle;
   const [selectedSpace, setSelectedSpace] = useCachedState(CACHED_KEY_RECENT_SELECTED_SPACE, "");
   const [selectedTags, setSelectedTags] = useCachedState<SelectedTag[]>(CACHED_KEY_RECENT_SELECTED_TAGS, []);
 
@@ -160,13 +178,16 @@ function Body(props: { onlyPop?: boolean }) {
 
   useEffect(() => {
     getCurrentBrowserPageInfo().then((info) => {
-      setTitle(info ? info.title : "");
-      setUrl(info ? info.url : "");
+      if (!info) return;
+      setBrowserTitle(info.title);
+      setUrl(info.url);
     });
   }, []);
 
   const tags = useMyTags();
   const { enabledSpaces } = useEnabledSpaces();
+  // Exclude READ-only spaces from bookmark creation targets
+  const writableSpaces = useMemo(() => enabledSpaces?.filter((s) => s.myRole !== "READ"), [enabledSpaces]);
 
   const spaceTags = useMemo(() => {
     if (!tags.data) return undefined;
@@ -176,10 +197,87 @@ function Body(props: { onlyPop?: boolean }) {
 
   const bookmarkCreate = trpc.bookmark.create.useMutation();
 
+  const titleQuery = useQuery({
+    queryKey: ["pageTitle", titleFetchUrl],
+    queryFn: () => fetchPageTitle(titleFetchUrl),
+    enabled: !!titleFetchUrl,
+    staleTime: Infinity,
+    retry: false,
+  });
+  const fetchedTitle = titleQuery.data ?? null;
+  const isFetchingTitle = titleQuery.isFetching;
+  // Auto-detected page title: the freshly fetched one from the URL takes priority, otherwise the browser prefill.
+  const autoTitle = fetchedTitle ?? browserTitle;
+
+  // Once an auto title is available and the user hasn't typed anything, switch to "Page title" automatically.
+  useEffect(() => {
+    if (!autoTitle) return;
+    if (userTitleRef.current.trim().length > 0) return;
+    setTitleSource("auto");
+  }, [autoTitle]);
+
+  // If the fetch has finished with no result (null) or an error, and there is no browser prefill,
+  // switch to "Custom title" mode automatically so the user can start typing right away.
+  useEffect(() => {
+    if (!titleFetchUrl) return;
+    if (titleQuery.isFetching) return;
+    if ((titleQuery.isError || titleQuery.data === null) && !autoTitle) {
+      setTitleSource("manual");
+    }
+  }, [titleFetchUrl, titleQuery.isFetching, titleQuery.isError, titleQuery.data, autoTitle]);
+
+  // Fetch the page title automatically 500ms after the user stops typing the URL (debounce).
+  // Previously this fetched on blur, but it was changed so it also works when the user only
+  // enters a URL without moving to another field.
+  useEffect(() => {
+    const trimmed = url.trim();
+    if (!trimmed) {
+      // If the URL is cleared, the cached page title is meaningless too → reset to the initial state.
+      if (titleFetchUrl) setTitleFetchUrl("");
+      return;
+    }
+    if (trimmed === titleFetchUrl) return;
+    try {
+      new URL(trimmed);
+    } catch {
+      return;
+    }
+    const handle = setTimeout(() => {
+      setTitleFetchUrl(trimmed);
+    }, 500);
+    return () => clearTimeout(handle);
+  }, [url, titleFetchUrl]);
+
+  const handleUserTitleChange = (value: string) => {
+    setUserTitle(value);
+    // Switch to "Custom title" automatically as soon as the user starts typing.
+    setTitleSource("manual");
+  };
+
+  const effectiveTitle = titleSource === "auto" ? autoTitle : userTitle;
+
+  // Text to show in the "Page title" field.
+  const autoTitleDisplay = isFetchingTitle
+    ? "Loading title from URL…"
+    : autoTitle || (titleFetchUrl ? "(Couldn't get page title. Please enter manually.)" : "(Enter a URL first)");
+
   const handleSubmit = () => {
+    // The Form's error prop only shows a message and doesn't block submit itself, so guard manually.
+    if (!effectiveTitle.trim()) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Title required",
+        message:
+          titleSource === "manual"
+            ? "Please enter a title."
+            : "Page title not available. Switch to Custom title or enter a URL.",
+      });
+      return;
+    }
+    if (!url.trim() || !selectedSpace) return;
     bookmarkCreate.mutate(
       {
-        name: title,
+        name: effectiveTitle,
         description: description,
         url: url,
         spaceId: selectedSpace,
@@ -204,12 +302,14 @@ function Body(props: { onlyPop?: boolean }) {
   };
 
   const { loggedOutStatus } = useLoggedOutStatus();
+  const me = useMe();
+  useUserCacheReset(me.data?.email);
 
   if (loggedOutStatus) {
     return <LoginFormInView />;
   }
 
-  if (!enabledSpaces) {
+  if (!writableSpaces) {
     return <Form isLoading={true} />;
   }
 
@@ -231,8 +331,26 @@ function Body(props: { onlyPop?: boolean }) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" value={title} onChange={setTitle} />
       <Form.TextField id="url" title="URL" value={url} onChange={setUrl} />
+      <Form.Dropdown
+        id="titleSource"
+        title="Use as title"
+        value={titleSource}
+        onChange={(v) => setTitleSource(v as "auto" | "manual")}
+      >
+        <Form.Dropdown.Item value="auto" title="Page title" />
+        <Form.Dropdown.Item value="manual" title="Custom title" />
+      </Form.Dropdown>
+      <Form.Description title="Page title" text={autoTitleDisplay} />
+      {titleSource === "manual" && (
+        <Form.TextField
+          id="userTitle"
+          title="Custom title"
+          value={userTitle}
+          onChange={handleUserTitleChange}
+          error={userTitle.trim() === "" ? "Please enter a title." : undefined}
+        />
+      )}
       {isSlackHuddleUrl && (
         <Form.Checkbox
           id="answer"
@@ -249,13 +367,18 @@ function Body(props: { onlyPop?: boolean }) {
         id="space"
         title="Space"
         defaultValue={selectedSpace}
-        isLoading={!enabledSpaces}
+        isLoading={!writableSpaces}
         onChange={(value) => {
           setSelectedSpace(value);
         }}
       >
-        {enabledSpaces.map((s) => (
-          <Form.Dropdown.Item key={s.id} value={s.id} title={s.name} icon={s.image || Icon.TwoPeople} />
+        {writableSpaces.map((s) => (
+          <Form.Dropdown.Item
+            key={s.id}
+            value={s.id}
+            title={s.name}
+            icon={resolveSpaceIconUrl(s.image) || Icon.TwoPeople}
+          />
         ))}
       </Form.Dropdown>
 

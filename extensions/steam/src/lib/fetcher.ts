@@ -1,29 +1,8 @@
 import useSWR, { useSWRConfig } from "swr";
 import { fakeGameData, fakeGameDataSimpleMany, fakeGames, isFakeData } from "./fake";
-import { GameData, GameDataResponse, GameDataSimple, GameDataSimpleResponse, GameSimple } from "../types";
+import { GameData, GameDataSimple, GameDataSimpleResponse, GameSimple } from "../types";
 import { getPreferenceValues, LocalStorage, openCommandPreferences, showToast, Toast } from "@raycast/api";
-
-async function fetchGames(url: string) {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
-  }
-  const games = (await response.json()) as GameSimple[];
-  return games?.filter((game) => game?.appid) ?? [];
-}
-
-async function fetchGameData({ appid, url }: { appid: number; url: string }) {
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw Object.assign(new Error(`${response.status} ${response.statusText}`), { status: response.status });
-  }
-  const gameData = (await response.json()) as GameDataResponse;
-  if (!gameData?.[appid]?.success) {
-    throw Object.assign(new Error("Game not found"), { status: 404 });
-  }
-  return gameData?.[appid]?.data;
-}
+import { fetchSteamGameData, fetchSteamGames, getSteamGameDetailsUrl, getSteamGameSearchUrl } from "./games";
 
 async function fetcherWithAuth(url: string) {
   const { token, steamid } = getPreferenceValues();
@@ -54,8 +33,8 @@ async function fetcherWithAuth(url: string) {
 
 export const useGamesSearch = ({ term = "", cacheKey = 0, execute = true }) => {
   const { data, error, isValidating } = useSWR<GameSimple[]>(
-    execute ? `https://steam-search.vercel.app/api/games?cacheKey=${cacheKey}&search=${term}` : null,
-    isFakeData ? () => fakeGames(30) : fetchGames,
+    execute ? getSteamGameSearchUrl(term, cacheKey) : null,
+    isFakeData ? () => fakeGames(30) : fetchSteamGames,
   );
   return {
     data,
@@ -69,11 +48,11 @@ export const useGameData = <T>({ appid = 0, execute = true }) => {
   const { cache } = useSWRConfig();
   const key = {
     appid,
-    url: `https://store.steampowered.com/api/appdetails?appids=${appid}`,
+    url: getSteamGameDetailsUrl(appid),
   };
   const { data, error, isValidating } = useSWR<GameData | undefined>(
     execute && appid ? key : null,
-    isFakeData ? () => fakeGameData(30) : fetchGameData,
+    isFakeData ? () => fakeGameData(30) : fetchSteamGameData,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

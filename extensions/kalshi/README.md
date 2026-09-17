@@ -1,49 +1,42 @@
 # Kalshi
 
-A Raycast extension for searching, browsing, and managing prediction markets on [Kalshi](https://kalshi.com). Quickly access trending markets, search for specific events, and keep track of your favorite markets without leaving Raycast.
+Search, filter, and track prediction markets on [Kalshi](https://kalshi.com) from Raycast.
 
 ## Features
 
-### 🔍 Search & Browse Markets
-- **Default View**: Browse top markets sorted by 24-hour trading volume
-- **Search**: Real-time search across all available Kalshi markets with fuzzy matching
-- **Market Details**: View individual markets within each series, sorted by price percentage
+### Search and Browse Markets
 
-### ⭐ Favorites System
-- **Favorite Series**: Save entire market series to quickly access later
-- **Favorite Markets**: Pin specific markets within a series
-- **Persistent Storage**: Favorites are saved locally and persist across sessions
-- **Smart Display**: Favorited items appear at the top of their respective lists
+- Browse active markets sorted by 24-hour volume.
+- Search Kalshi events and markets with fuzzy matching.
+- Use market and event logos when Kalshi provides them, with clean fallback icons for the rest.
+- Keep the main list focused with volume as the only numeric right-side indicator.
 
-### 📊 Market Information
-- **Volume Display**: See 24-hour trading volume formatted as `$X.XM` or `$X.XK`
-- **Price Percentages**: View "yes" price as a percentage for each market
-- **Market Counts**: See how many markets are available in each series
-- **Full Titles**: Long titles are displayed with tooltips—no truncation
+### Favorites and Filters
 
-### 🎯 Quick Actions
-- **View Markets**: Navigate into a series to see all individual markets
-- **Open in Browser**: Jump directly to the market page on Kalshi
-- **Copy to Clipboard**: Copy market tickers or URLs with keyboard shortcuts
-- **Toggle Favorites**: Add or remove favorites with `Cmd+F`
+- Favorite events, individual markets, filters, and topics.
+- See favorite markets pinned at the top of the list.
+- Filter by Active, Inactive, Resolved, Favorites, and common categories such as Sports, Politics, Crypto, Finance, Entertainment, and Climate.
+- Open the Stats filter to view a category heatmap by volume.
+
+### Market Details
+
+- Choose a required detail mode on first launch:
+  - **Simple** keeps detail pages fast and chart-free.
+  - **Advanced with Chart** adds market charting to detail pages when chart data is available.
+- Switch modes later with the **Change Detail View** action from the command action panel.
+- View market rules, prices, volume, status, close time, expiration, and tickers from the detail view.
 
 ## Usage
 
-### Browsing Markets
+1. Open Raycast and run **Search Markets**.
+2. Choose **Simple** or **Advanced with Chart** when prompted.
+3. Search for a market or use the filter dropdown to narrow results.
+4. Press `Enter` to view markets inside an event.
+5. Use `Cmd+K` to open actions for favorites, browser links, refresh, and detail view settings.
 
-1. Open Raycast and type "Search Markets" (or set a custom alias)
-2. The default view shows **Top Markets by 24h Volume**
-3. Use the search bar to find specific markets or events
-4. Press `Enter` on any series to view individual markets within it
+## Keyboard Shortcuts
 
-### Managing Favorites
-
-- **Add to Favorites**: Select a series or market, then press `Cmd+F` or use the action panel
-- **Remove from Favorites**: Press `Cmd+F` again or use the "Remove/Unfavorite" action
-- **View Favorites**: Favorited items appear in a dedicated "Favorites" section at the top
-
-### Keyboard Shortcuts
-
-- `Cmd+F`: Toggle favorite status
-- `Cmd+.`: Copy market ticker (when viewing a series)
-- `Enter`: View markets within a series (when on a series item)
+- `Cmd+F`: Favorite or unfavorite the selected event.
+- `Cmd+Shift+F`: Favorite or unfavorite the selected filter.
+- `Cmd+Shift+,`: Open command preferences to change the detail view mode.
+- `Cmd+R`: Refresh markets.

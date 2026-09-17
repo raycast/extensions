@@ -1,5 +1,11 @@
 # Warp Changelog
 
+## [Scoped Directory Search] - 2026-06-21
+
+- "Open Directory" search is now scoped to a configurable list of root folders instead of searching your whole system.
+- Added "Add Search Folder" and "Manage Search Folders" actions to add folders with a native picker (multi-select) and remove them; folders persist automatically.
+- When no folders are configured, search defaults to your Home folder.
+
 ## [Tab Config Support] - 2026-05-28
 
 - Added Tab Config support to the config launcher, with legacy Launch Configurations as a fallback.

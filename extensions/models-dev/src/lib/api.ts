@@ -1,34 +1,20 @@
-import { Cache } from "@raycast/api";
-import { RawApiResponse, RawModel, Model, Provider, ModelsData, InputModality, OutputModality } from "./types";
+import { Models, type Model as ApiModel, type ProviderMap } from "@opencode-ai/models";
+import { Model, Provider, ModelsData } from "./types";
 
-export const API_URL = "https://models.dev/api.json";
 export const LOGO_BASE_URL = "https://models.dev/logos";
 
-// Lightweight timestamp-only cache — stores a single small string, not the full dataset
-const timestampCache = new Cache();
-const TIMESTAMP_KEY = "models-data-timestamp";
-
-export function getCacheTimestamp(): number | null {
-  const ts = timestampCache.get(TIMESTAMP_KEY);
-  return ts ? Number(ts) : null;
-}
+const modelsClient = Models.make();
 
 export async function fetchModelsData(): Promise<ModelsData> {
-  const response = await fetch(API_URL);
-  if (!response.ok) {
-    throw new Error(`Models.dev request failed (${response.status})`);
-  }
-  const raw = (await response.json()) as RawApiResponse;
-  const transformed = transformApiResponse(raw);
-  timestampCache.set(TIMESTAMP_KEY, String(Date.now()));
-  return transformed;
+  const raw = await modelsClient.providers();
+  return transformApiResponse(raw);
 }
 
 export function getProviderLogoUrl(providerId: string): string {
   return `${LOGO_BASE_URL}/${providerId}.svg`;
 }
 
-export function transformApiResponse(data: RawApiResponse): ModelsData {
+export function transformApiResponse(data: ProviderMap): ModelsData {
   const providers: Provider[] = [];
   const models: Model[] = [];
 
@@ -62,7 +48,7 @@ export function transformApiResponse(data: RawApiResponse): ModelsData {
 }
 
 function transformModel(
-  raw: RawModel,
+  raw: ApiModel,
   modelId: string,
   providerId: string,
   providerName: string,
@@ -71,6 +57,7 @@ function transformModel(
   return {
     id: modelId,
     name: raw.name,
+    description: raw.description,
     family: raw.family,
     providerId,
     providerName,
@@ -87,15 +74,11 @@ function transformModel(
     // Metadata
     knowledge: raw.knowledge,
     release_date: raw.release_date,
-    last_updated: raw.last_updated,
     open_weights: raw.open_weights ?? false,
     status: raw.status,
 
     // Modalities
-    modalities: {
-      input: (raw.modalities?.input ?? ["text"]) as InputModality[],
-      output: (raw.modalities?.output ?? ["text"]) as OutputModality[],
-    },
+    modalities: raw.modalities ?? { input: ["text"], output: ["text"] },
 
     // Pricing
     cost: raw.cost,

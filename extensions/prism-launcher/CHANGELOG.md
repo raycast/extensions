@@ -1,5 +1,14 @@
 # Prism Launcher Changelog
 
+## [New Addition] - 2026-09-16
+
+- Instances now show their Minecraft version and mod loader (Forge, NeoForge, Fabric, Quilt, ...) in the list
+- Instances can be searched by version or loader
+
+## [Bugfix] - 2026-08-06
+
+Fixed broken icon on Windows
+
 ## [New Addition] - 2026-04-01
 
 - Added support for showing live server status in the servers list

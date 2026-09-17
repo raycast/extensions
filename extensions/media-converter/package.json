@@ -49,6 +49,27 @@
       "subtitle": "Media Converter",
       "description": "Create, edit and delete conversion presets",
       "mode": "view"
+    },
+    {
+      "name": "inspect",
+      "title": "Inspect Media",
+      "subtitle": "Media Converter",
+      "description": "Inspect codecs, streams, dimensions, bitrate and metadata",
+      "mode": "view"
+    },
+    {
+      "name": "queue",
+      "title": "Conversion Queue",
+      "subtitle": "Media Converter",
+      "description": "Run, monitor, cancel and retry queued conversions",
+      "mode": "view"
+    },
+    {
+      "name": "edit",
+      "title": "Edit Media",
+      "subtitle": "Media Converter",
+      "description": "Resize, crop, change speed, extract audio, normalize loudness, or edit subtitles",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -160,6 +181,23 @@
         ]
       },
       {
+        "input": "@media-converter compress @finder video.mp4 to approximately 10 MB",
+        "mocks": {
+          "convert-media": {}
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "convert-media",
+              "arguments": {
+                "outputFileType": ".mp4",
+                "targetSizeMb": 10
+              }
+            }
+          }
+        ]
+      },
+      {
         "input": "@media-converter merge @finder clip1.mp4 and @finder clip2.mp4 into merged.mp4",
         "mocks": {
           "merge-media": {}
@@ -212,7 +250,7 @@
   "dependencies": {
     "@raycast/api": "^1.100.2",
     "@raycast/utils": "^2.0.1",
-    "axios": "^1.10.0"
+    "axios": "^1.18.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

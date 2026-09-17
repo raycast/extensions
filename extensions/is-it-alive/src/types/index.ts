@@ -2,7 +2,19 @@ export type SiteProvider =
   | "statuspage"
   | "railway"
   | "incidentio"
-  | "betterstack";
+  | "betterstack"
+  | "instatus"
+  | "checkly"
+  | "rss"
+  | "aws"
+  | "heroku"
+  | "salesforce"
+  | "uptimecom"
+  | "googlecloud"
+  | "aistudio"
+  | "outagedeck"
+  | "onlineornot"
+  | "firehydrant";
 
 export type StatusIndicator = "none" | "minor" | "major" | "critical";
 
@@ -18,13 +30,20 @@ export interface MonitoredSite {
   name: string;
   url: string;
   provider: SiteProvider;
+  monitoredRegions?: string[];
   createdAt: string;
+}
+
+export interface FetchSnapshotInput {
+  url: string;
+  monitoredRegions?: string[];
 }
 
 export interface ComponentStatus {
   id: string;
   name: string;
   status: ComponentStatusValue | string;
+  regions?: string[];
   uptimePercent?: number;
   historyDays?: DayStatus[];
 }
@@ -37,6 +56,7 @@ export interface StatusIncident {
   updatedAt: string;
   body?: string;
   affectedComponentIds?: string[];
+  regions?: string[];
 }
 
 export interface DayStatus {
@@ -55,9 +75,14 @@ export interface StatusSnapshot {
   uptimePercent?: number;
   fetchedAt: string;
   error?: string;
+  regionFilter?: {
+    monitored: string[];
+    hiddenIncidents: number;
+    hiddenComponents: number;
+  };
 }
 
 export interface StatusAdapter {
-  fetchSnapshot(siteUrl: string): Promise<StatusSnapshot>;
+  fetchSnapshot(input: FetchSnapshotInput): Promise<StatusSnapshot>;
   detect?(siteUrl: string): Promise<boolean>;
 }

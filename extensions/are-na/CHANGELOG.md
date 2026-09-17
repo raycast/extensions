@@ -1,5 +1,15 @@
 # Are.na Changelog
 
+## [Expand Commands and AI Tools] - 2026-09-12
+
+- Added a dark-theme command icon so the Are.na mark stays visible on dark Raycast chrome.
+- Added multiline text previews to block grids, with light and dark appearances.
+- Added Create Block to save URLs or text to multiple channels and Open Are.na Link to view channels and blocks directly in Raycast.
+- Expanded AI tools with block creation and editing, channel editing, connections, user browsing, and sampled channel digests.
+- Added content type filters to AI search, channel descriptions during creation, and Are.na URL support for lookups and destinations.
+- My Channels now loads beyond the first 100 results; AI lists expose pagination and long block details identify truncated text.
+- Fixed text block edits and prevented nested channels from showing block deletion actions, while keeping Remove from This Channel available for nested connections.
+
 ## [Updates] - 2026-04-23
 
 - Migrated API integration to Are.na `v3` with unified pagination and error handling.

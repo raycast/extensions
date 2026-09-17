@@ -13,7 +13,11 @@
 - **Custom output folder** — save converted files anywhere (per-run or as a preference)
 - **Before/After size comparison** in the success toast (e.g. "saved 42 MB (58%)")
 - **Live progress %** and ETA for video and GIF conversions
-- **Conversion history** — browse, re-run, open, or copy the FFmpeg command for any past conversion
+- **Target file size** for video — enter an approximate MB limit and the extension calculates a two-pass bitrate
+- **Persistent conversion queue** — add multiple conversions, reorder, cancel, retry, and recover jobs interrupted by Raycast closing
+- **Media Inspector** — view container, duration, codecs, dimensions, frame rate, bitrate, audio details, and metadata
+- **Editing tools** — resize/crop, change playback speed, extract audio, normalize loudness, burn subtitles, or remove subtitle streams
+- **Media history** — browse conversions and merges; re-run conversions, open outputs, or copy FFmpeg commands
 - **Presets** — built-in presets (Web WebP, Email MP4, Podcast MP3, Twitter GIF, …) plus save-your-own
 - **Merge / concatenate** multiple video or audio files with automatic fast stream-copy or re-encode fallback
 - Simple customization of the quality of the output file; precise control by enabling it in extension preferences
@@ -37,8 +41,11 @@
 2. Select files to convert (⌘ + click for multiple) OR select files in Finder before opening the extension
 3. (Optional) Pick a **Preset**, adjust **Trim**, toggle **Strip metadata**, or change the **Save to** folder
 4. Choose your desired output format and quality settings (defaults are fine)
-5. Press &#8984;↵ to start conversion
-6. After conversion, a toast shows the size savings (e.g. "saved 42 MB (58%)"). Press &#8984;O to open the new file.
+5. For supported video outputs, optionally enter a **Target Size** in MB
+6. Press &#8984;↵ to start conversion, or use **Add to Conversion Queue** (⌘⇧↵)
+7. After conversion, a toast shows the size savings (e.g. "saved 42 MB (58%)"). Press &#8984;O to open the new file.
+
+Long-running conversions can be cancelled from the progress toast or with ⌘..
 
 #### Converting video to GIF
 
@@ -51,10 +58,32 @@ Select any video file, pick `.gif` as the output format, then choose frame rate 
 3. Pick an output format and filename
 4. Turn on "Always re-encode" if your inputs have different codecs/resolutions; otherwise the extension tries fast stream-copy first.
 
+### Inspect Media
+
+Open **Inspect Media** with files selected in Finder, or choose files in the command. The inspector shows file size, container, duration, bitrate, video and audio stream details, subtitle streams, and embedded metadata.
+
+### Conversion Queue
+
+Use **Add to Conversion Queue** from Convert Media, then keep the **Conversion Queue** command open while jobs run. Jobs are stored between launches and run one at a time. You can reorder pending jobs, cancel the active job, retry failed/cancelled/interrupted jobs, open completed outputs, and clear finished entries.
+
+Raycast extensions cannot run as permanent background daemons. If Raycast or the extension process stops, the active job is marked interrupted the next time the queue opens and can be retried; pending jobs remain queued.
+
+### Edit Media
+
+Open **Edit Media**, choose one file, and select an operation:
+
+- Resize and/or crop an image or video
+- Change audio or video playback speed from 0.25× to 4×
+- Extract an audio stream as MP3, M4A, WAV, or FLAC
+- Normalize loudness to a chosen LUFS target
+- Burn an external subtitle file into video
+- Remove embedded subtitle streams
+
 ### View Conversion History
 
 - Open "View Conversion History" to see your recent conversions grouped by day.
 - For each entry: Open the file, show in Finder, re-run with the exact same settings (great after re-saving a source file), copy the FFmpeg command, or remove from history.
+- Conversion, merge, and edit results are recorded in history.
 
 ### Manage Presets
 

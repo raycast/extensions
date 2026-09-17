@@ -1,5 +1,8 @@
 # WhatsApp Changelog
 
+## [Fix] - 2026-06-25
+- Prevent phone parsing from crashing when the default country preference is missing.
+
 ## [Enhancements] - 2026-05-16
 - Type a phone number in Open Chat to open it without saving (also offers to save the contact)
 - Added a `Default Country` preference so local phone numbers (e.g. `0530572910`) are accepted alongside international format

@@ -23,10 +23,12 @@ export interface Suggestion {
   id: string;
   query: string;
   url: string;
-  type: "search" | "url";
+  type: "search" | "url" | "bang";
+  providerName?: string;
 }
 
-// Bookmark entry from Helium via AppleScript
+// Bookmark entry read from the Helium profile's Bookmarks file.
+// `folder` is the "Parent/Child" folder path, unset for top-level bookmarks.
 export interface Bookmark {
   id: string;
   url: string;

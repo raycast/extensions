@@ -4,14 +4,15 @@ import {
   closeMainWindow,
   Icon,
   List,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getLanguagesForModel, LanguageOption } from "./lib/languages";
-import { MODEL_REGISTRY } from "./lib/models";
+import { getModelCapabilities } from "./lib/catalog";
 import { readSettings, writeSettings } from "./lib/settings";
+import { selectLanguageInHandy } from "./lib/handy";
+import { applyLiveOrRestart } from "./lib/apply-selection";
 
 export default function SelectLanguage() {
   const [languages, setLanguages] = useState<LanguageOption[]>([]);
@@ -22,19 +23,19 @@ export default function SelectLanguage() {
     try {
       const settings = readSettings();
       const modelId = settings.selected_model;
-      const model = MODEL_REGISTRY.find((m) => m.id === modelId);
+      const caps = getModelCapabilities(modelId);
 
-      // Model found and explicitly does not support language selection
-      if (model && !model.supportsLanguageSelection) {
+      // Model found in the catalog and explicitly does not support language selection
+      if (caps && !caps.supportsLanguageSelection) {
         void showToast({
           style: Toast.Style.Failure,
-          title: `${model.name} does not support language selection`,
+          title: `${caps.name} does not support language selection`,
         });
         void closeMainWindow(); // closeMainWindow returns Promise<void>; void to avoid floating promise in sync callback
         return; // leave isLoading=true so no empty view renders before close
       }
 
-      setLanguages(getLanguagesForModel(model?.supportedLanguages));
+      setLanguages(getLanguagesForModel(caps?.supportedLanguages));
       setCurrentCode(settings.selected_language ?? "auto");
       setIsLoading(false);
     } catch (err) {
@@ -53,13 +54,23 @@ export default function SelectLanguage() {
 
   async function handleSelect(lang: LanguageOption) {
     try {
-      writeSettings({ selected_language: lang.code });
-      setCurrentCode(lang.code);
+      const currentDisplay =
+        currentCode === "auto"
+          ? "Auto (detect)"
+          : `${lang.native} · ${lang.label}`;
       const display =
         lang.code === "auto"
           ? "Auto (detect)"
           : `${lang.native} · ${lang.label}`;
-      await showHUD(`Language set to ${display}`);
+      await applyLiveOrRestart({
+        isCurrent: lang.code === currentCode,
+        alreadyActiveMessage: `${currentDisplay} is already set`,
+        persist: () => writeSettings({ selected_language: lang.code }),
+        markCurrent: () => setCurrentCode(lang.code),
+        liveSwitch: () => selectLanguageInHandy(lang.label),
+        successMessage: `Language set to ${display}`,
+        failureTitle: "Couldn't switch language in Handy",
+      });
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,

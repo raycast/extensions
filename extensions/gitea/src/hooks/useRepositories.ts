@@ -3,13 +3,15 @@ import { CacheKey, DEFAULT_PAGE_SIZE } from "../constants";
 import { RepositorySort, mapRepositorySortToGitea } from "../domain/repository-sort";
 import { usePaginatedResource } from "./usePaginatedResource";
 
-export function useRepositories(sort?: RepositorySort) {
+export function useRepositories(sort?: RepositorySort, query?: string) {
+  const normalizedQuery = query?.trim() || undefined;
+
   return usePaginatedResource({
     cacheKey: CacheKey.Repositories,
     errorTitle: "Couldn't retrieve repositories",
     pageSize: DEFAULT_PAGE_SIZE,
-    params: { sort },
-    fetchPage: ({ sort: repositorySort, page, limit }) => {
+    params: { sort, query: normalizedQuery },
+    fetchPage: ({ sort: repositorySort, query: searchQuery, page, limit }) => {
       const { sort: giteaSort, order: giteaOrder } = mapRepositorySortToGitea(
         repositorySort ?? RepositorySort.MostStars,
       );
@@ -17,6 +19,7 @@ export function useRepositories(sort?: RepositorySort) {
       return getRepositories({
         limit,
         page,
+        q: searchQuery,
         sort: giteaSort,
         order: giteaOrder,
       });

@@ -5,6 +5,9 @@
   "description": "Fuzzy-search files by full path to reach the right item instantly.",
   "icon": "extension-icon.png",
   "author": "erykksc",
+  "contributors": [
+    "gilitos92"
+  ],
   "categories": [
     "Productivity",
     "System"
@@ -74,7 +77,7 @@
     "proper-lockfile": "^4.1.2",
     "sanitize-filename": "^1.6.3",
     "sha256-file": "^1.0.0",
-    "tar": "^7.5.13"
+    "tar": "^7.5.22"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -97,5 +100,10 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "tar": "^7.5.22",
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

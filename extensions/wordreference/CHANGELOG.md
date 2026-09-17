@@ -1,38 +1,31 @@
-# Changelog
+# WordReference Dictionary Translation Changelog
 
-All notable changes to "Raycast WordReference Extension" will be documented in this file.
+## [Windows support and storage migration] - 2026-06-16
 
-## [1.1.2] - 2026-06-11
+- Add Windows support
+- Migrate preferences and recent searches from legacy LocalStorage
 
-### Added
+## [Faster startup and better ranking] - 2026-06-11
 
-- Ranking based on word match
+- Rank translation results based on word match
+- Lazy-load translation parsing to speed up command startup
+- Reduce duplicate storage reads on launch
 
-### Improved
+## [Better error handling] - 2026-06-02
 
-- Faster command startup by lazy-loading translation parsing and reducing duplicate storage reads
+- Prevent crashes when WordReference rejects translation detail requests
+- Show a clear translation error page with probable causes and recovery suggestions
+- Classify common WordReference HTTP errors such as bot protection, rate limits, missing pages, and server issues
 
-## [1.1.1] - 2026-06-02
+## [Selected text and command arguments] - 2023-09-19
 
-### Fixed
+- Add preference to automatically use the selected text in the search bar
+- Add command arguments "Word" and "Language" for a faster search
 
-- Prevent crashes when WordReference rejects translation detail requests.
-- Show a clear translation error page with probable causes and recovery suggestions.
-- Classify common WordReference HTTP errors such as bot protection, rate limits, missing pages, and server issues.
+## [Initial release] - 2023-08-11
 
-## [1.1.0] - 2023-09-19
-
-### Added
-
-- Option : Automatically use the selected text in the search bar.
-- Command arguments "Word" and "Language" for a faster search.
-
-## [1.0.0] - 2023-08-11
-
-### Added
-
-- Initial release of Raycast WordReference Extension.
-- Quick and easy translation feature.
-- Multilanguage translation [French - Spanish - Portuguese - Italian - German - Dutch - Swedish - Icelandic (They have no enemies) - Russian - Polish - Romamian - Czech - Greek - Turkish - Chinese - Japanese - Korean - Arabic]
-- Recent searches features 
-- Preferences : Select translation language
+- Initial version
+- Quick and easy translation feature
+- Multilanguage translation support for French, Spanish, Portuguese, Italian, German, Dutch, Swedish, Icelandic, Russian, Polish, Romanian, Czech, Greek, Turkish, Chinese, Japanese, Korean, and Arabic
+- Recent searches
+- Preferences to select translation language

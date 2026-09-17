@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "monocle",
   "title": "Monocle",
-  "description": "Extension to control Monocle 3.0 for macOS\n\nNoise-cancelling for your  screen now with cursor shake",
+  "description": "Extension to control Monocle for macOS\n\nNoise-cancelling for your screen with cursor shake",
   "icon": "extension-icon.png",
   "author": "emlez",
+  "contributors": [
+    "heyiamdk"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -22,7 +25,7 @@
     },
     {
       "name": "on",
-      "title": "Turn Overlay on",
+      "title": "Turn Overlay On",
       "subtitle": "Enable the overlay",
       "description": "Turn the Monocle overlay on",
       "mode": "no-view",
@@ -30,7 +33,7 @@
     },
     {
       "name": "off",
-      "title": "Turn Overlay off",
+      "title": "Turn Overlay Off",
       "subtitle": "Disable the overlay",
       "description": "Turn the Monocle overlay off",
       "mode": "no-view",
@@ -39,14 +42,14 @@
     {
       "name": "toggle-mode",
       "title": "Toggle Focus Mode",
-      "subtitle": "Switch between Ambient and Deep mode",
+      "subtitle": "Switch between Ambient and Deep",
       "description": "Toggle the focus mode between Ambient and Deep",
       "mode": "no-view"
     },
     {
       "name": "ambient",
       "title": "Ambient Mode",
-      "subtitle": "Set focus mode to gradient",
+      "subtitle": "Gradient overlay",
       "description": "Set focus mode to Ambient (gradient overlay)",
       "mode": "no-view",
       "disabledByDefault": true
@@ -54,7 +57,7 @@
     {
       "name": "deep",
       "title": "Deep Focus Mode",
-      "subtitle": "Set focus mode to fullscreen",
+      "subtitle": "Fullscreen overlay",
       "description": "Set focus mode to Deep (fullscreen overlay)",
       "mode": "no-view",
       "disabledByDefault": true
@@ -70,7 +73,7 @@
       "name": "ignore",
       "title": "Exclude Current App",
       "subtitle": "Add app to ignore list",
-      "description": "Exclude the currently focused app from Monocle overlay",
+      "description": "Exclude the currently focused app from the Monocle overlay",
       "mode": "no-view",
       "disabledByDefault": true
     },
@@ -78,7 +81,229 @@
       "name": "unignore",
       "title": "Include Current App",
       "subtitle": "Remove app from ignore list",
-      "description": "Include the currently focused app in Monocle overlay",
+      "description": "Include the currently focused app in the Monocle overlay",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "set-blur",
+      "title": "Set Blur",
+      "subtitle": "Blur intensity",
+      "description": "Set the Monocle blur intensity (0–100)",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "0–100",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "set-grain",
+      "title": "Set Grain",
+      "subtitle": "Grain intensity",
+      "description": "Set the Monocle grain intensity (0–100)",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "0–100",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "toggle-monochrome",
+      "title": "Toggle Monochrome",
+      "subtitle": "Turn monochrome on or off",
+      "description": "Toggle the Monocle monochrome effect on or off",
+      "mode": "no-view"
+    },
+    {
+      "name": "monochrome-on",
+      "title": "Turn Monochrome On",
+      "subtitle": "Enable monochrome",
+      "description": "Turn the Monocle monochrome effect on",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "monochrome-off",
+      "title": "Turn Monochrome Off",
+      "subtitle": "Disable monochrome",
+      "description": "Turn the Monocle monochrome effect off",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "set-monochrome",
+      "title": "Set Monochrome",
+      "subtitle": "Monochrome intensity",
+      "description": "Set the Monocle monochrome intensity (0–100)",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "0–100",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "set-tint-preset",
+      "title": "Set Tint Preset",
+      "subtitle": "Pick a tint color",
+      "description": "Set the Monocle tint to a preset color",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "preset",
+          "placeholder": "Preset",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "System",
+              "value": "system"
+            },
+            {
+              "title": "Blue",
+              "value": "blue"
+            },
+            {
+              "title": "Purple",
+              "value": "purple"
+            },
+            {
+              "title": "Pink",
+              "value": "pink"
+            },
+            {
+              "title": "Red",
+              "value": "red"
+            },
+            {
+              "title": "Orange",
+              "value": "orange"
+            },
+            {
+              "title": "Yellow",
+              "value": "yellow"
+            },
+            {
+              "title": "Green",
+              "value": "green"
+            },
+            {
+              "title": "Graphite",
+              "value": "graphite"
+            },
+            {
+              "title": "Black",
+              "value": "black"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "set-tint-opacity",
+      "title": "Set Tint Opacity",
+      "subtitle": "Tint opacity",
+      "description": "Set the Monocle tint opacity (0–100)",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "0–100",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "set-tint-hex",
+      "title": "Set Tint Color (Hex)",
+      "subtitle": "Custom tint color",
+      "description": "Set the Monocle tint to a custom RRGGBB hex color",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "hex",
+          "placeholder": "RRGGBB",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "display-per-screen",
+      "title": "Per-Screen Display Mode",
+      "subtitle": "Render per screen",
+      "description": "Render the Monocle overlay on each screen independently",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "display-global",
+      "title": "Global Display Mode",
+      "subtitle": "Render globally",
+      "description": "Render the Monocle overlay anchored to one screen",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-app-wide-focus",
+      "title": "Toggle App-Wide Focus",
+      "subtitle": "Show all windows from active app",
+      "description": "Toggle showing all windows from the focused app",
+      "mode": "no-view"
+    },
+    {
+      "name": "app-wide-focus-on",
+      "title": "Turn App-Wide Focus On",
+      "subtitle": "Enable showing all windows",
+      "description": "Turn app-wide focus on (show all windows from the focused app)",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "app-wide-focus-off",
+      "title": "Turn App-Wide Focus Off",
+      "subtitle": "Disable showing all windows",
+      "description": "Turn app-wide focus off",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Open the settings window",
+      "description": "Open the Monocle settings window",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "check-updates",
+      "title": "Check for Updates",
+      "subtitle": "Run Monocle's update check",
+      "description": "Check for Monocle updates",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "quit-monocle",
+      "title": "Quit Monocle",
+      "subtitle": "Quit the app",
+      "description": "Quit the Monocle app",
       "mode": "no-view",
       "disabledByDefault": true
     }

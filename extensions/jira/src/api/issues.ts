@@ -5,7 +5,7 @@ import FormData from "form-data";
 import { markdownToAdf } from "marklassian";
 
 import { IssueFormValues } from "../components/CreateIssueForm";
-import { CustomFieldSchema, getCustomFieldValue } from "../helpers/issues";
+import { CustomFieldSchema, getCustomFieldValue } from "../helpers/customFields";
 
 import { Project } from "./projects";
 import { autocomplete, getAuthenticatedUri, request } from "./request";
@@ -100,12 +100,14 @@ export async function createIssue(values: IssueFormValues, { customFields }: Cre
   });
 }
 
-export enum StatusCategoryKey {
-  indeterminate = "indeterminate",
-  new = "new",
-  done = "done",
-  unknown = "unknown",
-}
+export const StatusCategoryKey = {
+  indeterminate: "indeterminate",
+  new: "new",
+  done: "done",
+  unknown: "unknown",
+} as const;
+
+export type StatusCategoryKey = (typeof StatusCategoryKey)[keyof typeof StatusCategoryKey];
 
 type IssueStatus = {
   id: string;

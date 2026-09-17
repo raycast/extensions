@@ -1,6 +1,6 @@
 import { environment } from "@raycast/api";
 import fs from "node:fs";
-import { PluginConfig } from "svgo";
+import type { PluginConfig } from "svgo";
 
 export type SVGOPlugin = { id: PluginConfig; name: string; enabledByDefault: boolean; description: string };
 
@@ -258,7 +258,7 @@ export const defaultConfig: SVGOPlugin[] = [
     description: "",
   },
   {
-    id: "removeScriptElement",
+    id: "removeScripts",
     name: "Remove script elements",
     enabledByDefault: false,
     description: "",
@@ -278,7 +278,10 @@ function getAllConfig(): SVGOPlugin[] {
     const savedConfig = fs.readFileSync(configPath, "utf8");
     return JSON.parse(savedConfig) as SVGOPlugin[];
   } catch (err) {
-    console.error("Failed to parse json", err);
+    // No saved config yet (first run) is expected — fall back to defaults silently.
+    if ((err as NodeJS.ErrnoException)?.code !== "ENOENT") {
+      console.error("Failed to parse SVGO config", err);
+    }
     return defaultConfig;
   }
 }

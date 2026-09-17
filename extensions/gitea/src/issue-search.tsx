@@ -20,9 +20,9 @@ type IssueSearchOptions = {
   query?: string;
 };
 
-export default function Command() {
+export default function Command(props: { initialSearchText?: string }) {
   const [state, setState] = useCachedState<IssueSearchState>("issues-search-state", IssueSearchState.Open);
-  const [searchText, setSearchText] = useState<string>("");
+  const [searchText, setSearchText] = useState<string>(props.initialSearchText ?? "");
 
   const options = useMemo<IssueSearchOptions>(() => {
     const { query, owner, repo } = parseSearchQuery(searchText);
@@ -35,6 +35,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search issues"
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       pagination={pagination}
       throttle

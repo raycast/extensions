@@ -17,7 +17,8 @@
     "ridemountainpig",
     "xmok",
     "jadenmajid",
-    "ADCAdams"
+    "ADCAdams",
+    "TurboCoder13"
   ],
   "commands": [
     {
@@ -90,12 +91,12 @@
     }
   ],
   "dependencies": {
+    "@raycast/api": "^1.104.20",
     "@raycast/utils": "^2.2.2",
     "os-utils": "0.0.14",
     "plist": "^3.1.0",
     "systeminformation": "^5.22.7",
-    "usehooks-ts": "^3.1.0",
-    "@raycast/api": "^1.104.3"
+    "usehooks-ts": "^3.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -103,18 +104,22 @@
     "@types/os-utils": "0.0.4",
     "@types/plist": "^3.0.5",
     "@types/react": "19.0.10",
+    "@vitest/coverage-v8": "^3.2.6",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "vitest run",
+    "validate": "npm run lint && npm run test && npm run build",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "prebuild": "clang -Wall -O2 -fobjc-arc -arch arm64 -arch x86_64 tools/temp-reader.m -framework IOKit -framework Foundation -o assets/temperature-reader"
+    "prebuild": "clang -Wall -O2 -fobjc-arc -arch arm64 -arch x86_64 tools/temp-reader.m -framework IOKit -framework Foundation -o assets/temperature-reader && clang -Wall -O2 -fobjc-arc -arch arm64 -arch x86_64 tools/smc-fan-reader.m -framework IOKit -framework Foundation -o assets/smc-fan-reader"
   },
   "preferences": [
     {
@@ -136,6 +141,10 @@
         {
           "title": "Memory",
           "value": "memory"
+        },
+        {
+          "title": "Disk",
+          "value": "disk"
         },
         {
           "title": "Power",

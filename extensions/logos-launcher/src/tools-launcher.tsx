@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { LOGOS_TOOL_GROUPS, type LogosTool } from "./data/logos-tools";
 import { extractErrorMessage } from "./utils/errors";
 import { LOGOS_BUNDLE_ID } from "./logos/constants";
+import { floatActiveLogosPanel } from "./utils/floating-window";
 
 export default function Command() {
   return (
@@ -33,6 +34,7 @@ function ToolListItem({ tool }: { tool: LogosTool }) {
 
 function ToolActions({ tool }: { tool: LogosTool }) {
   const uris = useMemo(() => buildToolUris(tool), [tool]);
+  const floatingUris = useMemo(() => uris.filter((uri) => !isHttpUri(uri)), [uris]);
   const primaryCommand = getPrimaryCommand(tool);
   const primaryUri = uris[0];
 
@@ -47,11 +49,20 @@ function ToolActions({ tool }: { tool: LogosTool }) {
       />
       <Action.CopyToClipboard title="Copy Command Text" content={primaryCommand} />
       {primaryUri ? <Action.CopyToClipboard title="Copy Launch URI" content={primaryUri} /> : null}
+      {floatingUris.length > 0 ? (
+        <Action
+          title="Open in Floating Window"
+          icon={Icon.AppWindow}
+          onAction={async () => {
+            await launchTool(tool, floatingUris, { floating: true });
+          }}
+        />
+      ) : null}
     </ActionPanel>
   );
 }
 
-async function launchTool(tool: LogosTool, uris?: string[]) {
+async function launchTool(tool: LogosTool, uris?: string[], options: { floating?: boolean } = {}) {
   const candidates = uris?.length ? uris : buildToolUris(tool);
   if (candidates.length === 0) {
     await showToast({
@@ -65,9 +76,20 @@ async function launchTool(tool: LogosTool, uris?: string[]) {
   let lastError: unknown;
   for (const uri of candidates) {
     try {
-      const isHttp = uri.startsWith("http://") || uri.startsWith("https://");
-      await open(uri, isHttp ? undefined : LOGOS_BUNDLE_ID);
-      await showHUD(`Opening ${tool.name}`);
+      await open(uri, isHttpUri(uri) ? undefined : LOGOS_BUNDLE_ID);
+      if (options.floating) {
+        try {
+          await floatActiveLogosPanel(tool.name);
+        } catch (error) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Opened tool, but could not float panel",
+            message: `${extractErrorMessage(error)} Check automation or accessibility permissions and try again.`,
+          });
+          return;
+        }
+      }
+      await showHUD(options.floating ? `Opening ${tool.name} in a floating window` : `Opening ${tool.name}`);
       return;
     } catch (error) {
       lastError = error;
@@ -82,9 +104,15 @@ async function launchTool(tool: LogosTool, uris?: string[]) {
   });
 }
 
+function isHttpUri(uri: string) {
+  return uri.startsWith("http://") || uri.startsWith("https://");
+}
+
 function buildToolUris(tool: LogosTool) {
-  const uris: string[] = [];
+  const nativeUris: string[] = [];
+  const httpUris: string[] = [];
   const seen = new Set<string>();
+
   const add = (uri?: string) => {
     if (!uri) {
       return;
@@ -93,7 +121,11 @@ function buildToolUris(tool: LogosTool) {
       return;
     }
     seen.add(uri);
-    uris.push(uri);
+    if (isHttpUri(uri)) {
+      httpUris.push(uri);
+    } else {
+      nativeUris.push(uri);
+    }
   };
 
   tool.uriHints?.forEach(add);
@@ -104,10 +136,6 @@ function buildToolUris(tool: LogosTool) {
       continue;
     }
     const encodedKind = encodeURIComponent(trimmed);
-    add(`https://ref.ly/logos4/${encodedKind}`);
-    add(`https://ref.ly/logos4/Tools?kind=${encodedKind}`);
-    add(`https://ref.ly/logos4/Tool?kind=${encodedKind}`);
-    add(`https://ref.ly/logos4/Tools?kind=${encodedKind}&name=${encodedKind}`);
     add(`logos4:${trimmed}`);
     add(`logos4:${trimmed};Name=${trimmed}`);
     add(`logos4:Tools;Kind=${trimmed}`);
@@ -115,6 +143,10 @@ function buildToolUris(tool: LogosTool) {
     add(`logos4:Tool;Kind=${trimmed}`);
     add(`logos4:Tools;Name=${trimmed}`);
     add(`logos4:Tools;Tool=${trimmed}`);
+    add(`https://ref.ly/logos4/${encodedKind}`);
+    add(`https://ref.ly/logos4/Tools?kind=${encodedKind}`);
+    add(`https://ref.ly/logos4/Tool?kind=${encodedKind}`);
+    add(`https://ref.ly/logos4/Tools?kind=${encodedKind}&name=${encodedKind}`);
   }
 
   const interactiveSlugCandidates = new Set<string>();
@@ -132,10 +164,10 @@ function buildToolUris(tool: LogosTool) {
   }
   for (const slug of interactiveSlugCandidates) {
     const encodedSlug = encodeURIComponent(slug);
-    add(`https://ref.ly/logosres/interactive:${encodedSlug}`);
-    add(`https://ref.ly/logosres/interactive:${encodedSlug}?pos=index.html`);
     add(`logosres:interactive:${slug}`);
     add(`logosres:interactive:${slug}?pos=index.html`);
+    add(`https://ref.ly/logosres/interactive:${encodedSlug}`);
+    add(`https://ref.ly/logosres/interactive:${encodedSlug}?pos=index.html`);
   }
 
   for (const interactiveId of tool.interactiveIds ?? []) {
@@ -144,24 +176,24 @@ function buildToolUris(tool: LogosTool) {
       continue;
     }
     const encodedInteractive = encodeURIComponent(trimmed);
-    add(`https://ref.ly/logos4/Interactive?name=${encodedInteractive}`);
     add(`logos4:Interactive;Name=${trimmed}`);
     add(`logos4:Interactive;name=${trimmed}`);
     add(`logos4:Interactive;Id=${trimmed}`);
+    add(`https://ref.ly/logos4/Interactive?name=${encodedInteractive}`);
   }
 
   for (const command of buildCommandCandidates(tool)) {
     const encodedCommand = encodeURIComponent(command);
-    add(`https://ref.ly/logos4/Command?q=${encodedCommand}`);
-    add(`https://ref.ly/logos4/Command?text=${encodedCommand}`);
     add(`logos4:Command?text=${encodedCommand}`);
     add(`logos4:Command;Command=${command}`);
     add(`logos4:Command;Name=Open;Text=${encodedCommand}`);
     add(`logos4-command://command/open?text=${encodedCommand}`);
     add(`logos4-command://command?text=${encodedCommand}`);
+    add(`https://ref.ly/logos4/Command?q=${encodedCommand}`);
+    add(`https://ref.ly/logos4/Command?text=${encodedCommand}`);
   }
 
-  return uris;
+  return [...nativeUris, ...httpUris];
 }
 
 function getPrimaryCommand(tool: LogosTool) {

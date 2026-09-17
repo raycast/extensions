@@ -1,47 +1,43 @@
-import { showHUD, Clipboard, getPreferenceValues } from "@raycast/api";
+import { showHUD, Clipboard } from "@raycast/api";
 import { writeFile } from "fs/promises";
-import { exec } from "child_process";
+import { tmpdir } from "os";
+import { join } from "path";
+import { randomUUID } from "crypto";
 import { showFailureToast } from "@raycast/utils";
-
-interface Preferences {
-  editor: "code" | "cursor"; // VS Code or Cursor
-}
+import { getEditorPreference, openDiffInEditor } from "./editor";
 
 export default async function main() {
   // Get the user's preference for the editor
-  const { editor } = getPreferenceValues<Preferences>();
+  const editor = getEditorPreference();
 
   // Grab the clipboard content at offset 0 and 1
   const clipboard0 = await Clipboard.readText({ offset: 0 });
   const clipboard1 = await Clipboard.readText({ offset: 1 });
 
-  // If the clipboard contents are identical, show a message and exit
-  if (clipboard0 === clipboard1) {
-    showHUD("Clipboard content is identical. No action taken.");
+  // Need at least two clipboard entries to compare
+  if (clipboard0 === undefined || clipboard1 === undefined) {
+    await showHUD("Need at least two clipboard entries to compare.");
     return;
   }
 
-  // Store both files separately in a temp file (files in /tmp will be deleted after reboot)
-  const content0FilePath = "/tmp/clipboard0.txt";
-  const content1FilePath = "/tmp/clipboard1.txt";
-  await writeFile(content0FilePath, clipboard0 ?? "");
-  await writeFile(content1FilePath, clipboard1 ?? "");
+  // If the clipboard contents are identical, show a message and exit
+  if (clipboard0 === clipboard1) {
+    await showHUD("Clipboard content is identical. No action taken.");
+    return;
+  }
 
-  // The command assumes that either VS Code or Cursor is installed and available in the PATH as `code` or `cursor` respectively.
-  const command = `${editor} --diff "${content1FilePath}" "${content0FilePath}"`;
+  // Store both entries in unique temp files (files in the temp dir are cleaned up by the OS) so
+  // concurrent runs cannot clobber each other and the paths are not predictable in shared /tmp.
+  const runId = randomUUID();
+  const content0FilePath = join(tmpdir(), `diff-view-${runId}-0.txt`);
+  const content1FilePath = join(tmpdir(), `diff-view-${runId}-1.txt`);
+  await writeFile(content0FilePath, clipboard0);
+  await writeFile(content1FilePath, clipboard1);
 
-  exec(command, (error: Error | null, stdout: string, stderr: string) => {
-    if (error) {
-      console.error(`Error executing command: ${error.message}`);
-      showFailureToast(error, { title: "Failed to open diff view in Editor" });
-      return;
-    }
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      showFailureToast({ title: "An error occurred while opening the diff view." });
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-    showHUD("Diff view opened in Editor.");
-  });
+  try {
+    await openDiffInEditor(editor, content1FilePath, content0FilePath);
+    await showHUD("Diff view opened in Editor.");
+  } catch (error) {
+    await showFailureToast(error, { title: "Failed to open diff view in Editor" });
+  }
 }

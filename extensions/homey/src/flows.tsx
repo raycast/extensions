@@ -1,34 +1,59 @@
 import { List, Action, ActionPanel, Icon, Color } from "@raycast/api";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { showToast, Toast } from "@raycast/api";
-import { Homey } from "./lib/Homey";
+import { type FlowGroup, type HomeyFlow, Homey, HomeyAuthenticationError } from "./lib/Homey";
 
 export default function Command() {
-  const [flows, setFlows] = useState<any[]>([]);
-  const [homey, setHomey] = useState<Homey>(new Homey());
+  const [flows, setFlows] = useState<FlowGroup[]>([]);
+  const [homey] = useState<Homey>(new Homey());
   const [loading, setLoading] = useState<boolean>(true);
+  const authorizingRef = useRef<boolean>(false);
   useEffect(() => {
     const fetchData = async () => {
-      await homey.auth();
-      await homey.selectFirstHomey();
-      const flows = await homey.getFlowsWithFolders();
-      setFlows(flows);
-      setLoading(false);
+      if (authorizingRef.current) {
+        return;
+      }
+      try {
+        authorizingRef.current = true;
+        await homey.auth();
+        await homey.selectFirstHomey();
+        const flows = await homey.getFlowsWithFolders();
+        setLoading(false);
+        setFlows(flows);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+        if (!(error instanceof HomeyAuthenticationError)) {
+          await showToast({
+            title: "Failed to load flows",
+            style: Toast.Style.Failure,
+          });
+        }
+      } finally {
+        authorizingRef.current = false;
+      }
     };
+    const timer = setInterval(() => {
+      if (homey.getHomey()) {
+        fetchData();
+      }
+    }, 30000);
     fetchData();
+    return () => {
+      clearInterval(timer);
+    };
   }, [homey]);
-
   return (
     <List isLoading={loading}>
       {flows
-        .sort((a, b) => Math.sign(b.order - a.order))
+        .sort((a: FlowGroup, b: FlowGroup) => Math.sign(b.order - a.order))
         .map((folder) => (
           <List.Section key={folder.name} title={folder.name}>
             {folder.flows &&
               folder.flows
-                .sort((a: any, b: any) => Math.sign(b.order - a.order))
-                .map((flow: any) => (
+                .sort((a: HomeyFlow, b: HomeyFlow) => Math.sign(b.order - a.order))
+                .map((flow: HomeyFlow) => (
                   <List.Item
                     key={flow.id}
                     icon={{
@@ -44,8 +69,7 @@ export default function Command() {
                               title="Start Flow"
                               icon={Icon.PlayFilled}
                               onAction={async () => {
-                                //  //@ts-ignore
-                                homey.triggerFlow(flow.id, flow?.advanced);
+                                await homey.triggerFlow(flow.id, flow?.advanced);
 
                                 await showToast({
                                   title: "Flow triggered",
@@ -59,7 +83,7 @@ export default function Command() {
                             title="Goto Flow Editor"
                             url={
                               "https://my.homey.app/homeys/" +
-                              homey.getHomey().id +
+                              homey.getHomey()?.id +
                               "/flows/" +
                               (flow?.advanced ? "advanced/" : "") +
                               flow.id

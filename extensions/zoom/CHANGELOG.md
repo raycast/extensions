@@ -1,5 +1,14 @@
 # Zoom Changelog
 
+## [Personal Meeting ID Support] - 2026-08-10
+
+- Added a `Personal Meeting ID` preference to the Start Meeting command so you can always start your own personal meeting room with a consistent meeting ID.
+
+## [Improvements] - 2026-06-29
+
+- Retry meeting list requests when Zoom rate limits the API
+- Improve reliability when loading upcoming meetings concurrently
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

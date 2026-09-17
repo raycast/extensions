@@ -1,5 +1,7 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
-import { CommandExitError, runCommand } from "./utilities/runCommand";
+import Process from "./models/Process";
+import { KillSignal, kill } from "./utilities/killProcess";
+import { CommandExitError } from "./utilities/runCommand";
 
 function isInteger(str: string): boolean {
   return /^\d+$/.test(str);
@@ -26,11 +28,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     let pids: string[];
 
     try {
-      const { stdout } = await runCommand("/usr/sbin/lsof", ["-n", `-iTCP:${port}`, "-sTCP:LISTEN", "-t"], {
-        timeout: 5_000,
-        killProcessGroup: true,
-      });
-      pids = stdout.split(/\s+/).filter(Boolean);
+      pids = await Process.getListeningPids(port);
     } catch (error) {
       if (!isLsofNoMatch(error)) throw error;
       pids = [];
@@ -38,7 +36,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
     if (pids.length === 0) throw new Error(`No process is listening on port ${port}.`);
 
-    await runCommand("/bin/kill", pids, { timeout: 2_000 });
+    await kill(pids.map(Number), KillSignal.TERM);
     showToast({
       style: Toast.Style.Success,
       title: "Success",

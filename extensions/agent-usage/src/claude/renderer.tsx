@@ -1,21 +1,29 @@
 import { List } from "@raycast/api";
-import type { Accessory } from "../agents/types";
+import React from "react";
+
+import { formatPercentDisplay, toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,
   generateAsciiBar,
   generatePieIcon,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   renderErrorOrNoData,
-} from "../agents/ui";
-import type { ClaudeError, ClaudeUsage } from "./types";
+} from "../agents/ui.tsx";
+import type { ClaudeError, ClaudeUsage } from "./types.ts";
 
-function formatWindow(name: string, percent: number, resetsIn: string | null): string {
-  let text = `\n\n${name}: ${generateAsciiBar(percent)} ${percent}% remaining`;
+function formatWindow(name: string, percent: number, resetsIn: string | null, mode: PercentageDisplayMode): string {
+  let text = `\n\n${name}: ${generateAsciiBar(toDisplayPercent(percent, mode))} ${formatPercentDisplay(percent, mode)}`;
   if (resetsIn) {
     text += `\nResets In: ${resetsIn}`;
   }
   return text;
+}
+
+function formatModelLabel(key: string): string {
+  return `Weekly ${key.charAt(0).toUpperCase()}${key.slice(1)}`;
 }
 
 export function formatClaudeUsageText(usage: ClaudeUsage | null, error: ClaudeError | null): string {
@@ -23,15 +31,16 @@ export function formatClaudeUsageText(usage: ClaudeUsage | null, error: ClaudeEr
   if (fallback !== null) return fallback;
   const u = usage as ClaudeUsage;
 
+  const mode = getPercentageDisplayMode();
   let text = `Claude Usage\nPlan: ${u.plan}`;
-  text += formatWindow("5h Limit", u.fiveHour.percentageRemaining, u.fiveHour.resetsIn);
+  text += formatWindow("5h Limit", u.fiveHour.percentageRemaining, u.fiveHour.resetsIn, mode);
 
   if (u.sevenDay) {
-    text += formatWindow("Weekly Limit", u.sevenDay.percentageRemaining, u.sevenDay.resetsIn);
+    text += formatWindow("Weekly Limit", u.sevenDay.percentageRemaining, u.sevenDay.resetsIn, mode);
   }
 
-  if (u.sevenDayModel) {
-    text += formatWindow("Weekly Sonnet", u.sevenDayModel.percentageRemaining, u.sevenDayModel.resetsIn);
+  for (const [model, window] of Object.entries(u.modelWindows || {})) {
+    text += formatWindow(formatModelLabel(model), window.percentageRemaining, window.resetsIn, mode);
   }
 
   if (u.extraUsage) {
@@ -45,6 +54,7 @@ export function renderClaudeDetail(usage: ClaudeUsage | null, error: ClaudeError
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as ClaudeUsage;
+  const mode = getPercentageDisplayMode();
 
   return (
     <List.Item.Detail.Metadata>
@@ -53,7 +63,7 @@ export function renderClaudeDetail(usage: ClaudeUsage | null, error: ClaudeError
 
       <List.Item.Detail.Metadata.Label
         title="5h Limit"
-        text={`${generateAsciiBar(u.fiveHour.percentageRemaining)} ${u.fiveHour.percentageRemaining}% remaining`}
+        text={`${generateAsciiBar(toDisplayPercent(u.fiveHour.percentageRemaining, mode))} ${formatPercentDisplay(u.fiveHour.percentageRemaining, mode)}`}
       />
       {u.fiveHour.resetsIn && <List.Item.Detail.Metadata.Label title="Resets In" text={u.fiveHour.resetsIn} />}
 
@@ -62,24 +72,22 @@ export function renderClaudeDetail(usage: ClaudeUsage | null, error: ClaudeError
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Weekly Limit"
-            text={`${generateAsciiBar(u.sevenDay.percentageRemaining)} ${u.sevenDay.percentageRemaining}% remaining`}
+            text={`${generateAsciiBar(toDisplayPercent(u.sevenDay.percentageRemaining, mode))} ${formatPercentDisplay(u.sevenDay.percentageRemaining, mode)}`}
           />
           {u.sevenDay.resetsIn && <List.Item.Detail.Metadata.Label title="Resets In" text={u.sevenDay.resetsIn} />}
         </>
       )}
 
-      {u.sevenDayModel && (
-        <>
+      {Object.entries(u.modelWindows || {}).map(([model, window]) => (
+        <React.Fragment key={model}>
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
-            title="Weekly Sonnet"
-            text={`${generateAsciiBar(u.sevenDayModel.percentageRemaining)} ${u.sevenDayModel.percentageRemaining}% remaining`}
+            title={formatModelLabel(model)}
+            text={`${generateAsciiBar(toDisplayPercent(window.percentageRemaining, mode))} ${formatPercentDisplay(window.percentageRemaining, mode)}`}
           />
-          {u.sevenDayModel.resetsIn && (
-            <List.Item.Detail.Metadata.Label title="Resets In" text={u.sevenDayModel.resetsIn} />
-          )}
-        </>
-      )}
+          {window.resetsIn && <List.Item.Detail.Metadata.Label title="Resets In" text={window.resetsIn} />}
+        </React.Fragment>
+      ))}
 
       {u.extraUsage && (
         <>
@@ -123,11 +131,23 @@ export function getClaudeAccessory(
     return getNoDataAccessory();
   }
 
+  const mode = getPercentageDisplayMode();
+  const tooltipParts = [`5h Limit: ${toDisplayPercent(usage.fiveHour.percentageRemaining, mode)}%`];
+  if (usage.sevenDay) {
+    tooltipParts.push(`Weekly Limit: ${toDisplayPercent(usage.sevenDay.percentageRemaining, mode)}%`);
+  }
+  for (const [model, window] of Object.entries(usage.modelWindows || {})) {
+    tooltipParts.push(`${formatModelLabel(model)}: ${toDisplayPercent(window.percentageRemaining, mode)}%`);
+  }
+  if (usage.extraUsage) {
+    tooltipParts.push(
+      `Extra: ${usage.extraUsage.currency} ${usage.extraUsage.used.toFixed(2)} / ${usage.extraUsage.limit.toFixed(2)}`,
+    );
+  }
+
   return {
     icon: generatePieIcon(usage.fiveHour.percentageRemaining),
-    text: `${usage.fiveHour.percentageRemaining}%`,
-    tooltip: usage.sevenDay
-      ? `5h: ${usage.fiveHour.percentageRemaining}% | Weekly: ${usage.sevenDay.percentageRemaining}%`
-      : `5h: ${usage.fiveHour.percentageRemaining}%`,
+    text: `${toDisplayPercent(usage.fiveHour.percentageRemaining, mode)}%`,
+    tooltip: tooltipParts.join("\n"),
   };
 }

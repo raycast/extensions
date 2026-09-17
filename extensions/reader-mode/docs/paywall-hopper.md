@@ -43,7 +43,7 @@ const GOOGLEBOT_USER_AGENT =
   "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
 ```
 
-Many paywalled sites serve full content to Googlebot for SEO indexing. This is our **first-line bypass** before hitting archive services.
+Many paywalled sites serve full content to Googlebot for SEO indexing.
 
 #### SMRY.ai Architecture
 
@@ -133,11 +133,14 @@ abstract class BaseExtractor {
 4. Extractor.isPaywalled() returns true
 5. Try Googlebot User-Agent fetch
    └─ Success? → Parse & display with "Retrieved via Googlebot" note
-6. Try archive.is
+6. Try Bingbot User-Agent fetch
+7. Try social media referrer
+8. Try WallHopper re-fetch
+9. Try archive.is
    └─ Success? → Parse & display with archive link annotation
-7. Try Wayback Machine
-   └─ Success? → Parse & display with archive link annotation
-8. All failed → Show paywall message with options
+10. Try Wayback Machine
+    └─ Success? → Parse & display with archive link annotation
+11. All failed → Show paywall message with options
 ```
 
 ### Flow 2: Subscriber (Has Browser Tab Open)
@@ -214,98 +217,26 @@ Some sites like **NYTimes** return HTTP 200 OK but serve truncated/preview conte
 
 #### How It Works
 
-1. After successful fetch and parse, check if the site is in `isKnownPaywalledSite()` list
-2. Scan the parsed `textContent` for paywall keyword patterns
-3. If detected, trigger Paywall Hopper bypass methods
-4. Compare bypassed content length to original (require **20% improvement** to use)
-5. Fall back to original content if bypass doesn't improve
+Detection is **evidence-based and runs on every site** — there is no domain allowlist. (It used to gate on a hardcoded list of ~13 domains, which meant a paywall on any other site went undetected and its subscription chrome was shown as the article. That's fixed.)
+
+1. After a successful fetch and parse, `detectPaywall()` weighs several signals against the parsed text, the raw HTML, and the page's `og:description`.
+2. Each signal is **conclusive** (worth 3) or **circumstantial** (worth 1). A page is judged paywalled at a score of **3**, so:
+   - one conclusive signal — barrier markup in the DOM, or gating language like "subscribe to continue" / "for subscribers only" — decides it alone;
+   - circumstantial signals (a truncated ending, a short body, a body shorter than the description, a stray subscription keyword) **never reach 3 on their own**. This is the invariant that keeps false positives down: no page is condemned without direct evidence of a barrier.
+3. If paywalled, the bypass waterfall runs, and the bypassed content is only used if it's meaningfully longer (**>20%**) than the original.
 
 #### Implementation
 
-The detection happens in `src/utils/paywall-detector.ts`:
+The detector lives in `src/utils/paywall-detector.ts` (`detectPaywall`). Signal weights are `CONCLUSIVE` (3) / `CIRCUMSTANTIAL` (1) and the bar is `PAYWALL_SCORE_THRESHOLD` (3). The building-block pattern lists (`PAYWALL_KEYWORDS`, `PAYWALL_SELECTORS`, `TRUNCATION_PATTERNS`) live in `src/extractors/_paywall.ts`; the barrier selectors and phrases are in `paywall-detector.ts` itself.
 
-```typescript
-import { PAYWALL_KEYWORDS, isKnownPaywalledSite } from "../extractors/_paywall";
+#### Improving detection for a new site
 
-export function detectPaywallInText(textContent: string, url: string): PaywallTextDetectionResult {
-  // Only check known paywalled sites to avoid false positives
-  if (!isKnownPaywalledSite(url)) {
-    return { isPaywalled: false, url };
-  }
+You usually **don't** need to touch anything site-specific — the generic barrier markup and gating phrases cover most sites. If a real paywalled page slips through:
 
-  // Check for paywall keywords in the content
-  for (const pattern of PAYWALL_KEYWORDS) {
-    if (pattern.test(textContent)) {
-      return { isPaywalled: true, matchedPattern: pattern.source, url };
-    }
-  }
+1. Find the signal that's missing. Most often it's a DOM barrier: add its class/attribute pattern to `BARRIER_SELECTORS`, or its wording to `BARRIER_PHRASES`, in `paywall-detector.ts`.
+2. **Add a test.** Drop the captured HTML into the fixture corpus (or write a synthetic case) and assert `detectPaywall(...).isPaywalled === true`, and confirm the innocent-page tests stay green. A new signal that tips the balance can create false positives, which fire this slow waterfall on good articles — the tests are what catch that. See `tests/reader.test.ts`.
 
-  return { isPaywalled: false, url };
-}
-```
-
-#### Adding a New Site with Soft Paywall
-
-To add detection for a new site that uses this pattern:
-
-**Step 1:** Add the domain to `isKnownPaywalledSite()` in `src/extractors/_paywall.ts`:
-
-```typescript
-const knownPaywalledDomains = [
-  "wsj.com",
-  "nytimes.com",
-  "washingtonpost.com",
-  // Add your new site here:
-  "example.com",
-];
-```
-
-**Step 2:** Add site-specific text patterns to `PAYWALL_KEYWORDS` in `src/extractors/_paywall.ts`:
-
-```typescript
-export const PAYWALL_KEYWORDS: RegExp[] = [
-  // Generic patterns (work across many sites)
-  /subscribe now/i,
-  /already a (?:subscriber|member)\?/i,
-  /you(?:'ve| have) (?:reached|used) your (?:free )?(?:article|story) limit/i,
-
-  // NYTimes-specific patterns
-  /you have a preview view of this article/i,
-  /thank you for your patience while we verify access/i,
-
-  // Add your new site's patterns here:
-  /your site's specific paywall message/i,
-];
-```
-
-**Step 3:** (Optional) Add DOM selectors if the site also has paywall overlay elements:
-
-```typescript
-export const SITE_PAYWALL_SELECTORS: Record<string, string[]> = {
-  "example.com": ['[class*="paywall"]', ".subscription-required"],
-};
-```
-
-#### Example: NYTimes Soft Paywall
-
-NYTimes serves preview content with these markers:
-
-```text
-You have a preview view of this article while we are checking your access.
-...
-Thank you for your patience while we verify access.
-Already a subscriber? Log in.
-Want all of The Times? Subscribe.
-```
-
-The patterns added to detect this:
-
-```typescript
-/you have a preview view of this article/i,
-/thank you for your patience while we verify access/i,
-/please exit and log into your Times account/i,
-/want all of The Times\? Subscribe/i,
-```
+Do **not** reach for a per-domain list — that's the design this replaced.
 
 ---
 
@@ -369,7 +300,7 @@ async function fetchFromWayback(url: string): Promise<ArchiveFetchResult> {
 ```typescript
 // Timeouts (archive services can be slow)
 export const FETCH_TIMEOUT_MS = 30000; // Normal fetch (existing)
-export const GOOGLEBOT_TIMEOUT_MS = 15000; // Googlebot fetch
+export const CRAWLER_TIMEOUT_MS = 15000; // Crawler-UA fetch (Googlebot, Bingbot)
 export const ARCHIVE_IS_TIMEOUT_MS = 45000; // archive.is can be slow
 export const WAYBACK_TIMEOUT_MS = 30000; // Wayback Machine
 
@@ -452,7 +383,7 @@ export interface ArticleState {
 
   /** Source of archived content, if retrieved via Paywall Hopper */
   archiveSource?: {
-    service: "googlebot" | "archive.is" | "wayback" | "browser";
+    service: "googlebot" | "bingbot" | "social-referrer" | "wallhopper" | "archive.is" | "wayback" | "browser";
     url?: string; // URL to the archived copy
     timestamp?: string; // When the archive was captured
     retrievedAt: string; // When we fetched it

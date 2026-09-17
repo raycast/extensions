@@ -26,6 +26,9 @@ function removeQueryParams(url: string, allowParams: string[]): string {
   // if params is not empty, match params to remove
   if (allowParams.length > 0) {
     const newQuery = query.filter((param) => allowParams.includes(param.split("=")[0]));
+    if (newQuery.length === 0) {
+      return urlParts[0];
+    }
     return `${urlParts[0]}?${newQuery.join("&")}`;
   }
   // if params is empty, remove all query params

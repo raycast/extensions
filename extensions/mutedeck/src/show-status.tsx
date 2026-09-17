@@ -1,126 +1,213 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Alert, Grid, Icon, Keyboard, confirmAlert, open } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
 import {
+  MuteDeckOffline,
+  MuteDeckStatus,
+  StateValue,
+  Toggleable,
+  bringToFront,
+  controlLabel,
   getPreferences,
   getStatus,
-  isInMeeting,
-  isMuted,
-  isMuteDeckRunning,
-  isPresenting,
-  isRecording,
-  isVideoOn,
-  type MuteDeckStatus,
-} from "./utils/api";
+  leaveMeeting,
+  muteLabel,
+  onOffLabel,
+} from "./mutedeck";
+import { confirmWhilePresenting, toggleAndWait } from "./run-toggle";
+import { tileIcon } from "./tiles";
 
-interface State {
-  status: MuteDeckStatus | null;
-  isLoading: boolean;
-  error: Error | null;
-}
+const REFRESH_MS = 1000;
 
-export default function Command(): JSX.Element {
-  const [state, setState] = useState<State>({
-    status: null,
-    isLoading: true,
-    error: null,
+export default function MeetingDeck() {
+  const {
+    data: status,
+    error,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(getStatus, [], {
+    keepPreviousData: true,
   });
 
   useEffect(() => {
-    void fetchStatus();
+    const timer = setInterval(revalidate, REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [revalidate]);
 
-    // Set up polling interval
-    const { statusRefreshInterval } = getPreferences();
-    const interval = setInterval(fetchStatus, parseInt(statusRefreshInterval, 10) * 1000);
+  const offline = error instanceof MuteDeckOffline && !status;
+  const inCall = status?.call === "active";
+  const title = !status
+    ? "MuteDeck"
+    : inCall
+      ? `MuteDeck — In ${controlLabel(status.control)} call`
+      : "MuteDeck — No active call";
 
-    // Cleanup on unmount
-    return () => clearInterval(interval);
-  }, []);
-
-  async function fetchStatus(): Promise<void> {
+  async function run(action: () => Promise<void>, failure: string) {
     try {
-      const status = await getStatus();
-      setState((prev) => ({ ...prev, status, isLoading: false }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        error: new Error(error instanceof Error ? error.message : "Failed to fetch status"),
-        isLoading: false,
-      }));
+      await action();
+      revalidate();
+    } catch (e) {
+      showFailureToast(e, { title: failure });
     }
   }
 
-  if (state.error) {
-    void showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to Get Status",
-      message: state.error.message,
-    });
+  async function guardedToggle(what: Toggleable, failure: string) {
+    if (!status) {
+      return;
+    }
+    if (!(await confirmWhilePresenting(what, status))) {
+      return;
+    }
+    // Wait for MuteDeck to report the flipped state before refreshing, so the
+    // tile doesn't briefly show the pre-toggle state (the status API lags a
+    // moment behind an action).
+    await run(async () => {
+      await toggleAndWait(what, status[what]);
+    }, failure);
+  }
 
+  async function confirmLeave() {
+    const confirmed =
+      !getPreferences().confirmLeave ||
+      (await confirmAlert({
+        title: "Leave Meeting?",
+        message: "MuteDeck will leave the current meeting.",
+        icon: Icon.Logout,
+        primaryAction: { title: "Leave", style: Alert.ActionStyle.Destructive },
+      }));
+    if (confirmed) {
+      await run(leaveMeeting, "Couldn't leave the meeting");
+    }
+  }
+
+  if (offline) {
     return (
-      <List>
-        <List.EmptyView icon={Icon.ExclamationMark} title="Failed to Get Status" description={state.error.message} />
-      </List>
+      <Grid navigationTitle="MuteDeck">
+        <Grid.EmptyView
+          icon={Icon.Plug}
+          title="MuteDeck isn't running"
+          description="Start MuteDeck to control your meetings from Raycast."
+          actions={
+            <ActionPanel>
+              {/* eslint-disable-next-line @raycast/prefer-title-case -- MuteDeck is a brand name */}
+              <Action title="Open MuteDeck" icon={Icon.AppWindow} onAction={() => open("/Applications/MuteDeck.app")} />
+              {/* eslint-disable-next-line @raycast/prefer-title-case -- MuteDeck is a brand name */}
+              <Action.OpenInBrowser title="Get MuteDeck" url="https://mutedeck.com/downloads" />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      </Grid>
     );
   }
 
-  const status = state.status;
-  if (!status) {
-    return <List isLoading />;
-  }
-
-  const isRunning = isMuteDeckRunning(status);
-  const inMeeting = isInMeeting(status);
-  const muted = isMuted(status);
-  const videoEnabled = isVideoOn(status);
-  const presenting = isPresenting(status);
-  const recording = isRecording(status);
-
   return (
-    <List isLoading={state.isLoading}>
-      <List.Item
-        icon={isRunning ? Icon.CheckCircle : Icon.XMarkCircle}
-        title="MuteDeck Status"
-        accessories={[{ text: isRunning ? "Running" : "Not Running" }]}
-        actions={
-          <ActionPanel>
-            <Action title="Refresh Status" onAction={fetchStatus} />
-          </ActionPanel>
-        }
-      />
+    <Grid columns={4} inset={Grid.Inset.Small} isLoading={isLoading} navigationTitle={title}>
+      <Grid.Section title={inCall && status ? `In a ${controlLabel(status.control)} call` : "Controls"}>
+        <ControlTile
+          status={status}
+          kind="mute"
+          title="Microphone"
+          label={muteLabel}
+          onToggle={() => guardedToggle("mute", "Couldn't toggle the microphone")}
+          revalidate={revalidate}
+        />
+        <ControlTile
+          status={status}
+          kind="video"
+          title="Camera"
+          label={(v) => (v === "active" ? "Cam on" : v === "inactive" ? "Cam off" : onOffLabel(v))}
+          onToggle={() => guardedToggle("video", "Couldn't toggle the camera")}
+          revalidate={revalidate}
+        />
+        <ControlTile
+          status={status}
+          kind="share"
+          title="Screen Share"
+          label={(v) => (v === "active" ? "Sharing" : v === "inactive" ? "Not sharing" : onOffLabel(v))}
+          onToggle={() => guardedToggle("share", "Couldn't toggle screen sharing")}
+          revalidate={revalidate}
+        />
+        <ControlTile
+          status={status}
+          kind="record"
+          title="Recording"
+          label={(v) => (v === "active" ? "Recording" : v === "inactive" ? "Not recording" : onOffLabel(v))}
+          onToggle={() => guardedToggle("record", "Couldn't toggle recording")}
+          revalidate={revalidate}
+        />
+      </Grid.Section>
+      <Grid.Section title="Meeting">
+        <Grid.Item
+          content={tileIcon("leave", inCall ? "active" : "disabled")}
+          title="Leave Meeting"
+          subtitle={inCall ? "In call" : "No call"}
+          actions={
+            <ActionPanel>
+              {inCall && (
+                <Action
+                  title="Leave Meeting"
+                  icon={Icon.Logout}
+                  style={Action.Style.Destructive}
+                  onAction={confirmLeave}
+                />
+              )}
+              <RefreshAction revalidate={revalidate} />
+            </ActionPanel>
+          }
+        />
+        <Grid.Item
+          content={tileIcon("front", "active")}
+          title="Bring to Front"
+          subtitle={status ? controlLabel(status.control) : undefined}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Bring Call to Front"
+                icon={Icon.AppWindow}
+                onAction={() => run(bringToFront, "Couldn't reach MuteDeck")}
+              />
+              <RefreshAction revalidate={revalidate} />
+            </ActionPanel>
+          }
+        />
+      </Grid.Section>
+    </Grid>
+  );
+}
 
-      <List.Item
-        icon={inMeeting ? Icon.Circle : Icon.XMarkCircle}
-        title="Meeting Status"
-        accessories={[{ text: inMeeting ? "In Meeting" : "Not in Meeting" }]}
-      />
+function ControlTile(props: {
+  status: MuteDeckStatus | undefined;
+  kind: Toggleable;
+  title: string;
+  label: (v: StateValue) => string;
+  onToggle: () => Promise<void>;
+  revalidate: () => void;
+}) {
+  const state = props.status?.[props.kind] ?? "";
+  const disabled = state === "disabled" || state === "";
+  return (
+    <Grid.Item
+      content={tileIcon(props.kind, state)}
+      title={props.title}
+      subtitle={props.label(state)}
+      actions={
+        <ActionPanel>
+          {!disabled && <Action title={`Toggle ${props.title}`} icon={Icon.Switch} onAction={props.onToggle} />}
+          <RefreshAction revalidate={props.revalidate} />
+        </ActionPanel>
+      }
+    />
+  );
+}
 
-      {inMeeting && (
-        <>
-          <List.Item
-            icon={muted ? Icon.SpeakerOff : Icon.Speaker}
-            title="Microphone"
-            accessories={[{ text: muted ? "Muted" : "Unmuted" }]}
-          />
-
-          <List.Item
-            icon={videoEnabled ? Icon.Video : Icon.VideoDisabled}
-            title="Camera"
-            accessories={[{ text: videoEnabled ? "On" : "Off" }]}
-          />
-
-          <List.Item
-            icon={presenting ? Icon.Desktop : Icon.Window}
-            title="Screen Sharing"
-            accessories={[{ text: presenting ? "Presenting" : "Not Presenting" }]}
-          />
-
-          <List.Item
-            icon={recording ? Icon.Dot : Icon.Circle}
-            title="Recording"
-            accessories={[{ text: recording ? "Recording" : "Not Recording" }]}
-          />
-        </>
-      )}
-    </List>
+function RefreshAction(props: { revalidate: () => void }) {
+  return (
+    <Action
+      title="Refresh Status"
+      icon={Icon.ArrowClockwise}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
+      onAction={props.revalidate}
+    />
   );
 }

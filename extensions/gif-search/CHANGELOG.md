@@ -1,5 +1,22 @@
 # GIF Search Changelog
 
+## [Improve provider error handling] - 2026-07-02
+
+- Improve error handling for provider fetch/search failures reported in #24313, #24571, #25591, and #27216
+- Show clearer failure messages when GIPHY, GIPHY Clips, Klipy, or Finer Gifs Club requests fail
+- Fix pagination for providers that do not return a cursor, preventing unnecessary follow-up requests
+
+## [Klipy API proxy & copy shortcut fix] - 2026-07-01
+
+- Klipy now routes requests through Raycast's API proxy, removing the need for a personal API key
+- Removed the Klipy API Key preference field
+- Fixed GIF favorites loading for Klipy (individual GIF lookup now works)
+- Use `Keyboard.Shortcut.Common.Copy` for the "Copy Page Link" action shortcut
+
+## [Remove Tenor support] - 2026-06-30
+
+- Removed Tenor from the GIF provider dropdown, preferences, API integration, URL detection, and extension metadata
+
 ## [Direct Favorites & Recents commands] - 2026-06-05
 
 - Added a "Browse Favorite GIFs" command that opens straight into your favorites

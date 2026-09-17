@@ -1,142 +1,97 @@
-import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getCIRefreshInterval, getGitLabGQL } from "../common";
-import { gql } from "@apollo/client";
-import { capitalizeFirstLetter, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
-import { JobList } from "./jobs";
-import { PipelineItemActions } from "./pipeline_actions";
-import useInterval from "use-interval";
+import { Action, ActionPanel, List, Icon, Color } from "@raycast/api";
+import { useMemo } from "react";
+import { copyShortcut, formatDate, formatDateTime } from "../utils";
+import { getCIJobStatusIcon, getMRPipelineStatusTooltip, JobList } from "./jobs";
+import {
+  CancelPipelineAction,
+  isCancelablePipeline,
+  PipelineItemActions,
+  RetryPipelineAction,
+  RunPipelineAction,
+  TriggerPipelineAction,
+} from "./pipeline_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
-import { GitLabIcons } from "../icons";
 import { Pipeline } from "../gitlabapi";
+import { usePaginatedProjectPipelines } from "./pipelines_data";
+export { normalizePipelineForList } from "./pipelines_gql";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-const GET_PIPELINES = gql`
-  query GetProjectPipeplines($fullPath: ID!) {
-    project(fullPath: $fullPath) {
-      pipelines {
-        nodes {
-          id
-          iid
-          project {
-            id
-          }
-          status
-          active
-          path
-          ref
-          startedAt
-          duration
-          createdAt
-          updatedAt
-          finishedAt
-        }
-      }
-    }
-  }
-`;
-
-function getIcon(status: string): Image {
-  switch (status.toLowerCase()) {
-    case "success": {
-      return { source: GitLabIcons.status_success, tintColor: Color.Green };
-    }
-    case "created": {
-      return { source: GitLabIcons.status_created, tintColor: Color.Yellow };
-    }
-    case "pending": {
-      return { source: GitLabIcons.status_pending, tintColor: Color.Yellow };
-    }
-    case "running": {
-      return { source: GitLabIcons.status_running, tintColor: Color.Blue };
-    }
-    case "failed": {
-      return { source: GitLabIcons.status_failed, tintColor: Color.Red };
-    }
-    case "canceled": {
-      return { source: GitLabIcons.status_canceled, tintColor: Color.PrimaryText };
-    }
-    default:
-      return { source: GitLabIcons.status_notfound, tintColor: Color.Magenta };
-  }
-}
-
-function getStatusText(status: string) {
-  if (status == "success") {
-    return "passed";
-  } else {
-    return status;
-  }
-}
-
-function getDateStatus(pipeline: any): {
-  icon: Image.ImageLike | undefined;
-  tooltip: string | undefined;
-  date: Date | undefined;
-} {
-  if (pipeline.finishedAt) {
-    const d = new Date(pipeline.finishedAt);
-    const durationText = pipeline.duration ? `\nDuration: ${pipeline.duration} seconds` : "";
-    return { icon: Icon.Calendar, tooltip: `Finished at ${d.toLocaleString()}${durationText}`, date: d };
-  }
-  if (pipeline.startedAt) {
-    const d = new Date(pipeline.startedAt);
-    return { icon: Icon.WristWatch, tooltip: `Started at ${d.toLocaleString()}`, date: d };
-  }
-  if (pipeline.createdAt) {
-    const d = new Date(pipeline.createdAt);
-    return { icon: Icon.Stop, tooltip: `Created at ${d.toLocaleString()}`, date: d };
-  }
-  return { icon: undefined, tooltip: undefined, date: undefined };
-}
+export const pipelineSearchBarPlaceholder = "Search pipelines by commit, ref, or author...";
 
 export function PipelineListItem(props: {
   pipeline: Pipeline;
   projectFullPath: string;
   onRefreshPipelines: () => void;
   navigationTitle?: string;
+  mrIID?: number;
 }) {
-  const pipeline = props.pipeline;
-  const icon = getIcon(pipeline.status);
-  const dateStatus = getDateStatus(pipeline);
+  const finishedAt = props.pipeline.finished_at || (props.pipeline as { finishedAt?: string }).finishedAt;
+  const startedAt = props.pipeline.started_at || (props.pipeline as { startedAt?: string }).startedAt;
+  const createdAt = props.pipeline.created_at || (props.pipeline as { createdAt?: string }).createdAt;
+  const iso = finishedAt ?? startedAt ?? createdAt;
+  const keywords = useMemo(
+    () =>
+      [
+        props.pipeline.commit_title,
+        props.pipeline.ref,
+        props.pipeline.user?.name,
+        props.pipeline.user?.username,
+      ].filter((keyword): keyword is string => !!keyword),
+    [props.pipeline.commit_title, props.pipeline.ref, props.pipeline.user?.name, props.pipeline.user?.username],
+  );
+  const accessories = useMemo((): List.Item.Accessory[] => {
+    if (!iso) {
+      return [];
+    }
+    return [
+      {
+        text: formatDate(new Date(iso)),
+        tooltip: finishedAt
+          ? `Finished ${formatDateTime(new Date(iso))}`
+          : startedAt
+            ? `Started ${formatDateTime(new Date(iso))}`
+            : `Created ${formatDateTime(new Date(iso))}`,
+      },
+    ];
+  }, [finishedAt, iso, startedAt]);
+
   return (
     <List.Item
-      id={`${pipeline.id}`}
-      title={pipeline.id.toString()}
+      id={`${props.pipeline.id}`}
+      title={props.pipeline.id.toString()}
+      keywords={keywords}
       icon={{
-        value: icon,
-        tooltip: pipeline?.status
-          ? `Status: ${capitalizeFirstLetter(getStatusText(pipeline.status.toLowerCase()))}`
-          : "",
+        value: getCIJobStatusIcon(props.pipeline.status, false),
+        tooltip: props.pipeline.status ? getMRPipelineStatusTooltip(props.pipeline.status) : "",
       }}
-      subtitle={pipeline.ref || ""}
-      accessories={[
-        {
-          tooltip: dateStatus.tooltip,
-          icon: dateStatus.icon,
-          date: dateStatus.date,
-        },
-      ]}
+      subtitle={props.pipeline.commit_title || props.pipeline.ref}
+      accessories={accessories}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
+          <ActionPanel.Section title={`#${props.pipeline.iid}`}>
             <Action.Push
               title="Show Jobs"
               target={
                 <JobList
                   projectFullPath={props.projectFullPath}
-                  pipelineID={pipeline.id}
-                  pipelineIID={pipeline.iid}
+                  pipelineIID={props.pipeline.iid}
                   navigationTitle={props.navigationTitle}
                 />
               }
               icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
             />
-            <GitLabOpenInBrowserAction url={pipeline.webUrl} />
+            <GitLabOpenInBrowserAction url={props.pipeline.webUrl} />
+            <Action.CopyToClipboard title="Copy URL" content={props.pipeline.webUrl} shortcut={copyShortcut} />
+            <RetryPipelineAction pipeline={props.pipeline} onRetryFinished={props.onRefreshPipelines} />
+            {isCancelablePipeline(props.pipeline) && (
+              <CancelPipelineAction pipeline={props.pipeline} onRefreshPipelines={props.onRefreshPipelines} />
+            )}
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <PipelineItemActions pipeline={props.pipeline} />
+          <ActionPanel.Section title={props.mrIID !== undefined ? `MR !${props.mrIID}` : undefined}>
+            <PipelineItemActions
+              pipeline={props.pipeline}
+              onRefreshPipelines={props.onRefreshPipelines}
+              mrIID={props.mrIID}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -145,101 +100,50 @@ export function PipelineListItem(props: {
 }
 
 export function PipelineList(props: { projectFullPath: string; navigationTitle?: string }) {
-  const { pipelines, error, isLoading, refresh } = useSearch("", props.projectFullPath);
-  useInterval(() => {
-    refresh();
-  }, getCIRefreshInterval());
-  if (error) {
-    showErrorToast(error, "Cannot search Pipelines");
-  }
+  const { pipelines, isLoading, performRefetch, pagination } = usePaginatedProjectPipelines({
+    cacheKey: `project_pipelines_${props.projectFullPath}`,
+    projectFullPath: props.projectFullPath,
+  });
+
   return (
-    <List isLoading={isLoading} navigationTitle={props.navigationTitle || "Pipelines"}>
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      navigationTitle={props.navigationTitle || "Pipelines"}
+      searchBarPlaceholder={pipelineSearchBarPlaceholder}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            {pipelines[0] && (
+              <>
+                <RunPipelineAction
+                  projectId={pipelines[0].projectId}
+                  ref={pipelines[0].ref}
+                  onFinished={performRefetch}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                />
+                <TriggerPipelineAction
+                  projectId={pipelines[0].projectId}
+                  defaultRef={pipelines[0].ref}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                />
+              </>
+            )}
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    >
       <List.Section title="Pipelines">
-        {pipelines?.map((pipeline) => (
+        {pipelines.map((pipeline) => (
           <PipelineListItem
             key={pipeline.id}
             pipeline={pipeline}
             projectFullPath={props.projectFullPath}
-            onRefreshPipelines={refresh}
+            onRefreshPipelines={performRefetch}
             navigationTitle={props.navigationTitle}
           />
         ))}
       </List.Section>
     </List>
   );
-}
-
-export function useSearch(
-  query: string | undefined,
-  projectFullPath: string,
-): {
-  pipelines: any[];
-  error?: string;
-  isLoading: boolean;
-  refresh: () => void;
-} {
-  const [pipelines, setPipelines] = useState<any[]>([]);
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [timestamp, setTimestamp] = useState<Date>(now());
-
-  const refresh = () => {
-    setTimestamp(now());
-  };
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const data = await getGitLabGQL().client.query({
-          query: GET_PIPELINES,
-          variables: { fullPath: projectFullPath },
-          fetchPolicy: "network-only",
-        });
-        const glData: Record<string, any>[] = data.data.project.pipelines.nodes.map((p: any) => ({
-          id: getIdFromGqlId(p.id),
-          iid: `${p.iid}`,
-          projectId: getIdFromGqlId(p.project.id),
-          status: p.status,
-          active: p.active,
-          webUrl: `${getGitLabGQL().url}${p.path}`,
-          createdAt: p.createdAt,
-          updatedAt: p.updatedAt,
-          startedAt: p.startedAt,
-          duration: p.duration,
-          finishedAt: p.finishedAt,
-          ref: p.ref,
-        }));
-        if (!didUnmount) {
-          setPipelines(glData);
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query, projectFullPath, timestamp]);
-
-  return { pipelines, error, isLoading, refresh };
 }

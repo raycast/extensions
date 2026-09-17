@@ -35,9 +35,6 @@ export const FILE_CONSTANTS = {
   /** Default zshrc filename */
   ZSHRC_FILENAME: ".zshrc",
 
-  /** Maximum content length after reading (in characters) */
-  MAX_CONTENT_LENGTH: 10000,
-
   /** Maximum line length to prevent DoS attacks (in characters) */
   MAX_LINE_LENGTH: 1000,
 } as const;
@@ -76,16 +73,14 @@ export const PARSING_CONSTANTS = {
     EXPORT: /^(?:\s*)(?:export|typeset\s+-x)\s+([A-Za-z_][A-Za-z0-9_]*)=(.*?)(?:\s*)$/,
     EVAL: /^(?:\s*)eval\s+(.+?)(?:\s*)$/,
     SETOPT: /^(?:\s*)setopt\s+(.+?)(?:\s*)$/,
-    PLUGIN: /^(?:\s*)plugins\s*=\s*\(([^)]+)\)(?:\s*)$/,
     FUNCTION: /^(?:\s*)([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*\)\s*\{(?:\s*)$/,
-    SOURCE: /^(?:\s*)source\s+(.+?)(?:\s*)$/,
+    // Capture only the operand (quoted string or unquoted token) — an
+    // inline `# comment` after it is not part of the path
+    SOURCE: /^(?:\s*)source\s+("(?:[^"\\]|\\.)*"|'[^']*'|[^\s#]+)/,
     AUTOLOAD: /^(?:\s*)autoload\s+(?:-Uz\s+)?([A-Za-z_][A-Za-z0-9_]*)(?:\s*)$/,
-    FPATH: /^(?:\s*)fpath\s*=\s*\(([^)]+)\)(?:\s*)$/,
-    PATH: /^(?:\s*)PATH\s*=\s*(.+?)(?:\s*)$/,
     THEME: /^(?:\s*)ZSH_THEME\s*=\s*(?:'|")(.*?)(?:'|")(?:\s*)$/,
     COMPLETION: /^(?:\s*)compinit(?:\s*)$/,
     HISTORY: /^(?:\s*)HIST[A-Z_]*\s*=\s*(.+?)(?:\s*)$/,
-    KEYBINDING: /^(?:\s*)bindkey\s+(.+?)(?:\s*)$/,
   },
 
   /** Section detection priorities (higher number = higher priority) */

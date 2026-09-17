@@ -1,4 +1,5 @@
 import { runAppleScript } from "@raycast/utils";
+import { parseHeliumTabs, type HeliumTabRef } from "./applescript-parser";
 
 /**
  * This function escapes tab url
@@ -12,12 +13,6 @@ function escapeForAppleScript(value: string): string {
  * AppleScript `id` (per the app's scripting dictionary) to its current URL and
  * title. The traversal order matches AppleScript's `windows` × `tabs` order.
  */
-export interface HeliumTabRef {
-  heliumId: string;
-  url: string;
-  title: string;
-}
-
 /**
  * Enumerate every open tab in Helium and return its AppleScript `id` along
  * with its URL and title. Helium's scripting dictionary exposes
@@ -26,29 +21,28 @@ export interface HeliumTabRef {
  * subsequent switch/close operations instead of matching by URL (which breaks
  * on duplicates).
  *
- * Output is one record per line in the form
- * `heliumId<TAB>url<TAB>title`. We build the separator outside the
- * `tell application "Helium"` block because inside that block the identifier
- * `tab` resolves to Helium's tab class rather than the ASCII tab constant,
- * which silently breaks the script.
+ * Output is separated with ASCII record/field separators so tabs with odd
+ * titles cannot break parsing. Reads are batched per property list to avoid
+ * one AppleEvent per tab property at 20-50+ tabs.
  */
 export async function listHeliumTabs(): Promise<HeliumTabRef[]> {
   const script = `
-    set sep to character id 9
+    set fieldSep to character id 31
+    set recordSep to character id 30
     tell application "Helium"
       if not running then return ""
       set output to {}
       repeat with w in windows
-        repeat with t in tabs of w
-          try
-            set tId to id of t as text
-            set tUrl to URL of t as text
-            set tTitle to title of t as text
-            set end of output to tId & sep & tUrl & sep & tTitle
-          end try
-        end repeat
+        try
+          set tabIds to id of tabs of w
+          set tabUrls to URL of tabs of w
+          set tabTitles to title of tabs of w
+          repeat with i from 1 to count of tabIds
+            set end of output to (item i of tabIds as text) & fieldSep & (item i of tabUrls as text) & fieldSep & (item i of tabTitles as text)
+          end repeat
+        end try
       end repeat
-      set AppleScript's text item delimiters to linefeed
+      set AppleScript's text item delimiters to recordSep
       set s to output as text
       set AppleScript's text item delimiters to ""
       return s
@@ -56,12 +50,7 @@ export async function listHeliumTabs(): Promise<HeliumTabRef[]> {
   `;
 
   const raw = await runAppleScript(script, { timeout: 5000 });
-  if (!raw || raw.trim() === "") return [];
-  return raw
-    .split("\n")
-    .map((line) => line.split("\t"))
-    .filter((parts) => parts.length >= 2)
-    .map(([heliumId, url, title = ""]) => ({ heliumId, url, title }));
+  return parseHeliumTabs(raw);
 }
 
 /**
@@ -256,6 +245,37 @@ export async function closeHeliumTab(tabUrl: string): Promise<boolean> {
 }
 
 /**
+ * Open a new tab on Helium's default new tab page.
+ *
+ * Deliberately creates the tab without a URL: Chromium refuses
+ * AppleScript-driven navigation to `chrome://` addresses, so setting the tab's
+ * URL to `chrome://new-tab-page/` lands on an `ERR_INVALID_URL` error page
+ * instead of the new tab page. A tab made with no properties opens whatever
+ * Helium is configured to show.
+ */
+export async function createNewTab(): Promise<void> {
+  const script = `
+    tell application "Helium"
+      if not running then
+        activate
+        delay 1
+      end if
+
+      if (count of windows) is 0 then
+        make new window
+      else
+        tell window 1 to make new tab
+      end if
+
+      activate
+    end tell
+    return true
+  `;
+
+  await runAppleScript(script);
+}
+
+/**
  * Create a new window in Helium browser
  */
 export async function createNewWindow(): Promise<void> {
@@ -319,143 +339,24 @@ export async function openUrlInHelium(url: string): Promise<void> {
 
       if not winExists then
         make new window
+        activate
+        try
+          set URL of active tab of window 1 to "${escapedUrl}"
+        on error
+          tell window 1
+            set newTab to make new tab with properties {URL:"${escapedUrl}"}
+          end tell
+        end try
       else
         activate
-      end if
 
-      tell window 1
-        set newTab to make new tab with properties {URL:"${escapedUrl}"}
-      end tell
+        tell window 1
+          set newTab to make new tab with properties {URL:"${escapedUrl}"}
+        end tell
+      end if
     end tell
     return true
   `;
 
   await runAppleScript(script);
-}
-
-/**
- * Get all bookmarks from Helium using AppleScript
- * @returns Array of bookmark data as strings in format "name|url|id|folder"
- */
-export async function getHeliumBookmarks(): Promise<string[]> {
-  const script = `
-    tell application "Helium"
-      set allBookmarks to {}
-
-      -- Get bookmarks from bookmarks bar
-      try
-        tell bookmarks bar
-          -- Direct bookmarks (no folder)
-          repeat with bm in bookmark items
-            try
-              set bmName to name of bm
-              set bmURL to URL of bm
-              set bmId to id of bm
-              set end of allBookmarks to (bmName & "|" & bmURL & "|" & bmId & "|")
-            end try
-          end repeat
-
-          -- Bookmarks in folders
-          try
-            repeat with folder in bookmark folders
-              set folderName to name of folder
-              tell folder
-                repeat with bm in bookmark items
-                  try
-                    set bmName to name of bm
-                    set bmURL to URL of bm
-                    set bmId to id of bm
-                    set end of allBookmarks to (bmName & "|" & bmURL & "|" & bmId & "|" & folderName)
-                  end try
-                end repeat
-
-                -- One more level deep for nested folders
-                try
-                  repeat with subFolder in bookmark folders
-                    set subFolderName to name of subFolder
-                    tell subFolder
-                      repeat with bm in bookmark items
-                        try
-                          set bmName to name of bm
-                          set bmURL to URL of bm
-                          set bmId to id of bm
-                          set end of allBookmarks to (bmName & "|" & bmURL & "|" & bmId & "|" & folderName & " > " & subFolderName)
-                        end try
-                      end repeat
-                    end tell
-                  end repeat
-                end try
-              end tell
-            end repeat
-          end try
-        end tell
-      end try
-
-      -- Get bookmarks from other bookmarks
-      try
-        tell other bookmarks
-          -- Direct bookmarks (no folder)
-          repeat with bm in bookmark items
-            try
-              set bmName to name of bm
-              set bmURL to URL of bm
-              set bmId to id of bm
-              set end of allBookmarks to (bmName & "|" & bmURL & "|" & bmId & "|")
-            end try
-          end repeat
-
-          -- Bookmarks in folders
-          try
-            repeat with folder in bookmark folders
-              set folderName to name of folder
-              tell folder
-                repeat with bm in bookmark items
-                  try
-                    set bmName to name of bm
-                    set bmURL to URL of bm
-                    set bmId to id of bm
-                    set end of allBookmarks to (bmName & "|" & bmURL & "|" & bmId & "|" & folderName)
-                  end try
-                end repeat
-
-                -- One more level deep for nested folders
-                try
-                  repeat with subFolder in bookmark folders
-                    set subFolderName to name of subFolder
-                    tell subFolder
-                      repeat with bm in bookmark items
-                        try
-                          set bmName to name of bm
-                          set bmURL to URL of bm
-                          set bmId to id of bm
-                          set end of allBookmarks to (bmName & "|" & bmURL & "|" & bmId & "|" & folderName & " > " & subFolderName)
-                        end try
-                      end repeat
-                    end tell
-                  end repeat
-                end try
-              end tell
-            end repeat
-          end try
-        end tell
-      end try
-
-      -- Convert list to newline-delimited string to avoid issues with commas in bookmark data
-      set AppleScript's text item delimiters to linefeed
-      set bookmarkString to allBookmarks as text
-      set AppleScript's text item delimiters to ""
-      return bookmarkString
-    end tell
-  `;
-
-  const result = await runAppleScript(script);
-
-  // Parse the result - now newline-delimited instead of comma-separated
-  if (!result || result.trim() === "") {
-    return [];
-  }
-
-  // Split by newline - much more robust than comma-space
-  const bookmarkStrings = result.split("\n").filter((s) => s.trim() !== "");
-  return bookmarkStrings;
 }

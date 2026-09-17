@@ -1,15 +1,17 @@
-import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import type { Repository } from "../../types/api";
 import RepositoryCloneActions from "./repository-clone-actions";
+import CreateIssue from "../../issue-create";
+import SearchIssues from "../../issue-search";
 
 export default function RepositoryActions(props: {
   item: Repository;
   showDetails: boolean;
   setShowDetails: (show: boolean) => void;
-  createIssueAction?: ActionPanel.Section.Children;
   children?: ActionPanel.Section.Children;
 }) {
-  const cloneUrl = props.item.ssh_url || props.item.clone_url;
+  const { cloneProtocol = "https" } = getPreferenceValues<ExtensionPreferences>();
+  const cloneUrl = getPreferredCloneUrl(props.item, cloneProtocol);
 
   return (
     <ActionPanel>
@@ -32,7 +34,8 @@ export default function RepositoryActions(props: {
           onAction={() => props.setShowDetails(!props.showDetails)}
         />
 
-        {props.createIssueAction}
+        {getCreateIssueAction(props.item)}
+        {getSearchIssuesAction(props.item)}
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Copy">
@@ -73,4 +76,33 @@ export default function RepositoryActions(props: {
       {props.children && <ActionPanel.Section>{props.children}</ActionPanel.Section>}
     </ActionPanel>
   );
+}
+
+function getCreateIssueAction(item: Repository) {
+  return item.full_name && !item.archived && item.has_issues !== false ? (
+    <Action.Push
+      title="Create Issue"
+      icon={Icon.Plus}
+      shortcut={Keyboard.Shortcut.Common.New}
+      target={<CreateIssue initialRepo={item} />}
+    />
+  ) : null;
+}
+
+function getSearchIssuesAction(item: Repository) {
+  return item.full_name && item.has_issues !== false ? (
+    <Action.Push
+      title="Search Issues"
+      icon={Icon.MagnifyingGlass}
+      target={<SearchIssues initialSearchText={`repo:${item.full_name}`} />}
+    />
+  ) : null;
+}
+
+function getPreferredCloneUrl(item: Repository, cloneProtocol: ExtensionPreferences["cloneProtocol"]) {
+  if (cloneProtocol === "https") {
+    return item.clone_url || item.ssh_url;
+  }
+
+  return item.ssh_url || item.clone_url;
 }

@@ -1,0 +1,1177 @@
+[
+  {
+    "name": "access-denied",
+    "category": "Alerts",
+    "tags": ["access", "denied", "restricted", "alert"]
+  },
+  {
+    "name": "activity",
+    "category": "Analytics",
+    "tags": ["activity", "history", "log", "timeline"]
+  },
+  {
+    "name": "add",
+    "category": "Actions",
+    "tags": ["create", "new", "plus", "add"]
+  },
+  {
+    "name": "add-circle",
+    "category": "Actions",
+    "tags": ["create", "new", "add", "circle"]
+  },
+  {
+    "name": "add-comment",
+    "category": "Communication",
+    "tags": ["add", "comment", "reply", "new"]
+  },
+  {
+    "name": "add-document",
+    "category": "Actions",
+    "tags": ["create", "file", "document", "new"]
+  },
+  {
+    "name": "add-user",
+    "category": "Users",
+    "tags": ["avatar", "member", "person", "profile"]
+  },
+  {
+    "name": "api",
+    "category": "Code",
+    "tags": ["api", "integration", "endpoint", "interface"]
+  },
+  {
+    "name": "archive",
+    "category": "Actions",
+    "tags": ["archive", "storage", "box"]
+  },
+  {
+    "name": "arrow-down",
+    "category": "Arrows",
+    "tags": ["arrow", "down", "direction", "chevron"]
+  },
+  {
+    "name": "arrow-left",
+    "category": "Arrows",
+    "tags": ["arrow", "left", "direction", "chevron"]
+  },
+  {
+    "name": "arrow-right",
+    "category": "Arrows",
+    "tags": ["arrow", "right", "direction", "chevron"]
+  },
+  {
+    "name": "arrow-top-right",
+    "category": "Arrows",
+    "tags": ["arrow", "top-right", "direction", "external"]
+  },
+  {
+    "name": "arrow-up",
+    "category": "Arrows",
+    "tags": ["arrow", "up", "direction", "chevron"]
+  },
+  {
+    "name": "asterisk",
+    "category": "Text",
+    "tags": ["asterisk", "star", "wildcard", "text"]
+  },
+  {
+    "name": "bar-chart",
+    "category": "Analytics",
+    "tags": ["bar-chart", "chart", "graph", "stats"]
+  },
+  {
+    "name": "basket",
+    "category": "Commerce",
+    "tags": ["basket", "shopping", "cart", "commerce"]
+  },
+  {
+    "name": "bell",
+    "category": "Alerts",
+    "tags": ["bell", "notification", "alert", "reminder"]
+  },
+  {
+    "name": "bill",
+    "category": "Commerce",
+    "tags": ["bill", "invoice", "payment", "receipt"]
+  },
+  {
+    "name": "binary-document",
+    "category": "Code",
+    "tags": ["binary", "code", "document", "file"]
+  },
+  {
+    "name": "block-content",
+    "category": "Content",
+    "tags": ["block", "content", "rich-text", "editor"]
+  },
+  {
+    "name": "block-element",
+    "category": "Content",
+    "tags": ["block", "element", "layout", "rich-text"]
+  },
+  {
+    "name": "blockquote",
+    "category": "Text",
+    "tags": ["blockquote", "quote", "text", "rich-text"]
+  },
+  {
+    "name": "bold",
+    "category": "Text",
+    "tags": ["bold", "formatting", "text", "rich-text"]
+  },
+  {
+    "name": "bolt",
+    "category": "Objects",
+    "tags": ["bolt", "lightning", "power", "fast"]
+  },
+  {
+    "name": "book",
+    "category": "Content",
+    "tags": ["book", "documentation", "guide", "manual"]
+  },
+  {
+    "name": "bookmark",
+    "category": "Objects",
+    "tags": ["bookmark", "save", "favorite"]
+  },
+  {
+    "name": "bookmark-filled",
+    "category": "Objects",
+    "tags": ["bookmark", "save", "favorite", "filled"]
+  },
+  {
+    "name": "bottle",
+    "category": "Objects",
+    "tags": ["bottle", "experiment", "lab", "science"]
+  },
+  {
+    "name": "bug",
+    "category": "Code",
+    "tags": ["bug", "debug", "error", "issue"]
+  },
+  {
+    "name": "bulb-filled",
+    "category": "Objects",
+    "tags": ["bulb", "idea", "filled", "light"]
+  },
+  {
+    "name": "bulb-outline",
+    "category": "Objects",
+    "tags": ["bulb", "idea", "light", "outline"]
+  },
+  {
+    "name": "calendar",
+    "category": "Objects",
+    "tags": ["calendar", "date", "event", "schedule"]
+  },
+  {
+    "name": "case",
+    "category": "Objects",
+    "tags": ["case", "briefcase", "business", "work"]
+  },
+  {
+    "name": "chart-upward",
+    "category": "Analytics",
+    "tags": ["chart", "upward", "growth", "stats"]
+  },
+  {
+    "name": "checkmark",
+    "category": "Actions",
+    "tags": ["checkmark", "confirm", "done", "tick"]
+  },
+  {
+    "name": "checkmark-circle",
+    "category": "Actions",
+    "tags": ["checkmark", "circle", "confirm", "done"]
+  },
+  {
+    "name": "chevron-down",
+    "category": "Arrows",
+    "tags": ["chevron", "down", "direction", "arrow"]
+  },
+  {
+    "name": "chevron-left",
+    "category": "Arrows",
+    "tags": ["chevron", "left", "direction", "arrow"]
+  },
+  {
+    "name": "chevron-right",
+    "category": "Arrows",
+    "tags": ["chevron", "right", "direction", "arrow"]
+  },
+  {
+    "name": "chevron-up",
+    "category": "Arrows",
+    "tags": ["chevron", "up", "direction", "arrow"]
+  },
+  {
+    "name": "circle",
+    "category": "Shapes",
+    "tags": ["circle", "shape", "outline"]
+  },
+  {
+    "name": "clipboard",
+    "category": "Actions",
+    "tags": ["clipboard", "copy", "paste", "board"]
+  },
+  {
+    "name": "clipboard-image",
+    "category": "Media",
+    "tags": ["clipboard", "image", "copy", "media"]
+  },
+  {
+    "name": "clock",
+    "category": "Objects",
+    "tags": ["clock", "time", "history", "schedule"]
+  },
+  {
+    "name": "close",
+    "category": "Actions",
+    "tags": ["close", "dismiss", "cancel", "x"]
+  },
+  {
+    "name": "close-circle",
+    "category": "Actions",
+    "tags": ["close", "circle", "dismiss", "cancel"]
+  },
+  {
+    "name": "code",
+    "category": "Code",
+    "tags": ["code", "developer", "programming", "script"]
+  },
+  {
+    "name": "code-block",
+    "category": "Code",
+    "tags": ["code", "block", "snippet", "developer"]
+  },
+  {
+    "name": "cog",
+    "category": "Objects",
+    "tags": ["cog", "settings", "configuration", "gear"]
+  },
+  {
+    "name": "collapse",
+    "category": "Actions",
+    "tags": ["collapse", "minimize", "reduce", "contract"]
+  },
+  {
+    "name": "color-wheel",
+    "category": "Design",
+    "tags": ["color", "wheel", "palette", "design"]
+  },
+  {
+    "name": "comment",
+    "category": "Communication",
+    "tags": ["comment", "message", "reply", "discussion"]
+  },
+  {
+    "name": "component",
+    "category": "Design",
+    "tags": ["component", "module", "block", "element"]
+  },
+  {
+    "name": "compose",
+    "category": "Editing",
+    "tags": ["compose", "write", "edit", "create"]
+  },
+  {
+    "name": "compose-sparkles",
+    "category": "Editing",
+    "tags": ["compose", "write", "ai", "sparkle"]
+  },
+  {
+    "name": "confetti",
+    "category": "Emoji",
+    "tags": ["confetti", "celebration", "party", "fun"]
+  },
+  {
+    "name": "controls",
+    "category": "Media",
+    "tags": ["controls", "playback", "media", "player"]
+  },
+  {
+    "name": "copy",
+    "category": "Actions",
+    "tags": ["copy", "duplicate", "clone"]
+  },
+  {
+    "name": "credit-card",
+    "category": "Commerce",
+    "tags": ["credit-card", "payment", "billing", "card"]
+  },
+  {
+    "name": "crop",
+    "category": "Design",
+    "tags": ["crop", "resize", "trim", "image"]
+  },
+  {
+    "name": "cube",
+    "category": "Objects",
+    "tags": ["cube", "box", "3d", "shape"]
+  },
+  {
+    "name": "dashboard",
+    "category": "Analytics",
+    "tags": ["dashboard", "overview", "metrics", "analytics"]
+  },
+  {
+    "name": "database",
+    "category": "Code",
+    "tags": ["database", "data", "storage", "server"]
+  },
+  {
+    "name": "desktop",
+    "category": "Devices",
+    "tags": ["desktop", "computer", "monitor"]
+  },
+  {
+    "name": "diamond",
+    "category": "Shapes",
+    "tags": ["diamond", "shape", "gem", "premium"]
+  },
+  {
+    "name": "document",
+    "category": "Content",
+    "tags": ["document", "file", "page", "paper"]
+  },
+  {
+    "name": "document-pdf",
+    "category": "Content",
+    "tags": ["document", "pdf", "file", "export"]
+  },
+  {
+    "name": "document-remove",
+    "category": "Content",
+    "tags": ["document", "remove", "delete", "file"]
+  },
+  {
+    "name": "document-sheet",
+    "category": "Content",
+    "tags": ["document", "sheet", "spreadsheet", "file"]
+  },
+  {
+    "name": "document-text",
+    "category": "Content",
+    "tags": ["document", "text", "file", "content"]
+  },
+  {
+    "name": "document-video",
+    "category": "Content",
+    "tags": ["document", "video", "file", "media"]
+  },
+  {
+    "name": "document-word",
+    "category": "Content",
+    "tags": ["document", "word", "file", "text"]
+  },
+  {
+    "name": "document-zip",
+    "category": "Content",
+    "tags": ["document", "zip", "archive", "file"]
+  },
+  {
+    "name": "documents",
+    "category": "Content",
+    "tags": ["collection", "documents", "file", "multiple"]
+  },
+  {
+    "name": "dot",
+    "category": "Status",
+    "tags": ["dot", "status", "indicator", "online"]
+  },
+  {
+    "name": "double-chevron-down",
+    "category": "Arrows",
+    "tags": ["chevron", "down", "direction", "skip"]
+  },
+  {
+    "name": "double-chevron-left",
+    "category": "Arrows",
+    "tags": ["chevron", "left", "direction", "skip"]
+  },
+  {
+    "name": "double-chevron-right",
+    "category": "Arrows",
+    "tags": ["chevron", "right", "direction", "skip"]
+  },
+  {
+    "name": "double-chevron-up",
+    "category": "Arrows",
+    "tags": ["chevron", "up", "direction", "skip"]
+  },
+  {
+    "name": "download",
+    "category": "Actions",
+    "tags": ["download", "save", "arrow"]
+  },
+  {
+    "name": "drag-handle",
+    "category": "Editing",
+    "tags": ["drag", "handle", "move", "reorder"]
+  },
+  {
+    "name": "drop",
+    "category": "Design",
+    "tags": ["drop", "droplet", "water", "liquid"]
+  },
+  {
+    "name": "earth-americas",
+    "category": "Objects",
+    "tags": ["earth", "americas", "globe", "world"]
+  },
+  {
+    "name": "earth-globe",
+    "category": "Objects",
+    "tags": ["earth", "globe", "world", "internet"]
+  },
+  {
+    "name": "edit",
+    "category": "Actions",
+    "tags": ["edit", "pencil", "write", "modify"]
+  },
+  {
+    "name": "ellipsis-horizontal",
+    "category": "Navigation",
+    "tags": ["ellipsis", "more", "menu", "horizontal"]
+  },
+  {
+    "name": "ellipsis-vertical",
+    "category": "Navigation",
+    "tags": ["ellipsis", "more", "menu", "vertical"]
+  },
+  {
+    "name": "empty",
+    "category": "Status",
+    "tags": ["empty", "void", "none", "blank"]
+  },
+  {
+    "name": "enter",
+    "category": "Actions",
+    "tags": ["enter", "return", "submit", "confirm"]
+  },
+  {
+    "name": "enter-right",
+    "category": "Arrows",
+    "tags": ["enter", "right", "direction", "arrow"]
+  },
+  {
+    "name": "envelope",
+    "category": "Communication",
+    "tags": ["envelope", "email", "mail", "message"]
+  },
+  {
+    "name": "equal",
+    "category": "Text",
+    "tags": ["equal", "equals", "math", "operator"]
+  },
+  {
+    "name": "error-filled",
+    "category": "Alerts",
+    "tags": ["error", "alert", "problem", "filled"]
+  },
+  {
+    "name": "error-outline",
+    "category": "Alerts",
+    "tags": ["error", "alert", "problem", "outline"]
+  },
+  {
+    "name": "error-screen",
+    "category": "Alerts",
+    "tags": ["error", "screen", "crash", "alert"]
+  },
+  {
+    "name": "expand",
+    "category": "Actions",
+    "tags": ["expand", "open", "fullscreen", "grow"]
+  },
+  {
+    "name": "eye-closed",
+    "category": "Actions",
+    "tags": ["eye", "hide", "hidden", "invisible"]
+  },
+  {
+    "name": "eye-open",
+    "category": "Actions",
+    "tags": ["eye", "view", "show", "visibility"]
+  },
+  {
+    "name": "face-happy",
+    "category": "Emoji",
+    "tags": ["face", "happy", "smile", "emoji"]
+  },
+  {
+    "name": "face-indifferent",
+    "category": "Emoji",
+    "tags": ["face", "indifferent", "neutral", "emoji"]
+  },
+  {
+    "name": "face-sad",
+    "category": "Emoji",
+    "tags": ["face", "sad", "frown", "emoji"]
+  },
+  {
+    "name": "feedback",
+    "category": "Communication",
+    "tags": ["feedback", "review", "comment", "rating"]
+  },
+  {
+    "name": "filter",
+    "category": "Actions",
+    "tags": ["filter", "sort", "narrow", "funnel"]
+  },
+  {
+    "name": "folder",
+    "category": "Content",
+    "tags": ["folder", "directory", "file", "browse"]
+  },
+  {
+    "name": "generate",
+    "category": "Actions",
+    "tags": ["generate", "create", "produce", "build"]
+  },
+  {
+    "name": "github",
+    "category": "Social",
+    "tags": ["github", "git", "code", "repository"]
+  },
+  {
+    "name": "groq",
+    "category": "Code",
+    "tags": ["groq", "query", "database", "sanity"]
+  },
+  {
+    "name": "hash",
+    "category": "Code",
+    "tags": ["hash", "number", "tag", "metadata"]
+  },
+  {
+    "name": "heart",
+    "category": "Objects",
+    "tags": ["heart", "favorite", "like", "love"]
+  },
+  {
+    "name": "heart-filled",
+    "category": "Objects",
+    "tags": ["heart", "favorite", "like", "filled"]
+  },
+  {
+    "name": "help-circle",
+    "category": "Alerts",
+    "tags": ["help", "question", "support", "info"]
+  },
+  {
+    "name": "highlight",
+    "category": "Editing",
+    "tags": ["highlight", "mark", "text", "annotate"]
+  },
+  {
+    "name": "home",
+    "category": "Navigation",
+    "tags": ["home", "house", "dashboard", "start"]
+  },
+  {
+    "name": "ice-cream",
+    "category": "Emoji",
+    "tags": ["ice-cream", "dessert", "food", "emoji"]
+  },
+  {
+    "name": "image",
+    "category": "Media",
+    "tags": ["image", "photo", "picture", "media"]
+  },
+  {
+    "name": "image-remove",
+    "category": "Media",
+    "tags": ["image", "remove", "delete", "media"]
+  },
+  {
+    "name": "images",
+    "category": "Media",
+    "tags": ["images", "gallery", "photos", "media"]
+  },
+  {
+    "name": "inbox",
+    "category": "Communication",
+    "tags": ["inbox", "receive", "mail", "messages"]
+  },
+  {
+    "name": "info-filled",
+    "category": "Alerts",
+    "tags": ["info", "information", "alert", "filled"]
+  },
+  {
+    "name": "info-outline",
+    "category": "Alerts",
+    "tags": ["info", "information", "alert", "outline"]
+  },
+  {
+    "name": "inline",
+    "category": "Text",
+    "tags": ["inline", "text", "format", "rich-text"]
+  },
+  {
+    "name": "inline-element",
+    "category": "Text",
+    "tags": ["inline", "element", "text", "formatting"]
+  },
+  {
+    "name": "insert-above",
+    "category": "Editing",
+    "tags": ["insert", "above", "add", "before"]
+  },
+  {
+    "name": "insert-below",
+    "category": "Editing",
+    "tags": ["insert", "below", "add", "after"]
+  },
+  {
+    "name": "italic",
+    "category": "Text",
+    "tags": ["italic", "formatting", "text", "rich-text"]
+  },
+  {
+    "name": "joystick",
+    "category": "Devices",
+    "tags": ["joystick", "game", "controller", "gaming"]
+  },
+  {
+    "name": "json",
+    "category": "Code",
+    "tags": ["json", "code", "data", "file"]
+  },
+  {
+    "name": "launch",
+    "category": "Actions",
+    "tags": ["launch", "start", "rocket", "deploy"]
+  },
+  {
+    "name": "leave",
+    "category": "Actions",
+    "tags": ["leave", "exit", "sign-out", "out"]
+  },
+  {
+    "name": "lemon",
+    "category": "Emoji",
+    "tags": ["lemon", "fruit", "emoji", "food"]
+  },
+  {
+    "name": "link",
+    "category": "Content",
+    "tags": ["link", "url", "reference", "connect"]
+  },
+  {
+    "name": "link-removed",
+    "category": "Content",
+    "tags": ["link", "removed", "broken", "unlink"]
+  },
+  {
+    "name": "linkedin",
+    "category": "Social",
+    "tags": ["linkedin", "social", "network", "professional"]
+  },
+  {
+    "name": "list",
+    "category": "Text",
+    "tags": ["list", "items", "bullet", "unordered"]
+  },
+  {
+    "name": "lock",
+    "category": "Security",
+    "tags": ["lock", "secure", "locked", "privacy"]
+  },
+  {
+    "name": "logo-js",
+    "category": "Code",
+    "tags": ["javascript", "js", "logo", "language"]
+  },
+  {
+    "name": "logo-ts",
+    "category": "Code",
+    "tags": ["typescript", "ts", "logo", "language"]
+  },
+  {
+    "name": "marker",
+    "category": "Editing",
+    "tags": ["marker", "highlight", "pen", "draw"]
+  },
+  {
+    "name": "marker-removed",
+    "category": "Editing",
+    "tags": ["marker", "removed", "delete", "clear"]
+  },
+  {
+    "name": "master-detail",
+    "category": "Content",
+    "tags": ["master-detail", "split", "layout", "panel"]
+  },
+  {
+    "name": "menu",
+    "category": "Navigation",
+    "tags": ["menu", "list", "navigation", "hamburger"]
+  },
+  {
+    "name": "microphone",
+    "category": "Media",
+    "tags": ["microphone", "audio", "record", "voice"]
+  },
+  {
+    "name": "microphone-slash",
+    "category": "Media",
+    "tags": ["microphone", "muted", "audio", "slash"]
+  },
+  {
+    "name": "mobile-device",
+    "category": "Devices",
+    "tags": ["mobile", "phone", "device"]
+  },
+  {
+    "name": "moon",
+    "category": "Objects",
+    "tags": ["moon", "dark", "night", "theme"]
+  },
+  {
+    "name": "number",
+    "category": "Text",
+    "tags": ["number", "list", "ordered", "numeric"]
+  },
+  {
+    "name": "ok-hand",
+    "category": "Emoji",
+    "tags": ["ok-hand", "gesture", "emoji", "hand"]
+  },
+  {
+    "name": "olist",
+    "category": "Text",
+    "tags": ["ordered-list", "numbered", "list", "ol"]
+  },
+  {
+    "name": "overage",
+    "category": "Status",
+    "tags": ["overage", "limit", "excess", "over"]
+  },
+  {
+    "name": "package",
+    "category": "Content",
+    "tags": ["package", "module", "bundle", "dependency"]
+  },
+  {
+    "name": "panel-left",
+    "category": "Layout",
+    "tags": ["panel", "left", "sidebar", "layout"]
+  },
+  {
+    "name": "panel-right",
+    "category": "Layout",
+    "tags": ["panel", "right", "sidebar", "layout"]
+  },
+  {
+    "name": "pause",
+    "category": "Media",
+    "tags": ["pause", "playback", "media", "control"]
+  },
+  {
+    "name": "pin",
+    "category": "Actions",
+    "tags": ["pin", "sticky", "attach", "save"]
+  },
+  {
+    "name": "pin-filled",
+    "category": "Actions",
+    "tags": ["pin", "sticky", "attach", "filled"]
+  },
+  {
+    "name": "pin-removed",
+    "category": "Actions",
+    "tags": ["pin", "removed", "unpin", "detach"]
+  },
+  {
+    "name": "play",
+    "category": "Media",
+    "tags": ["play", "playback", "media", "video"]
+  },
+  {
+    "name": "plug",
+    "category": "Code",
+    "tags": ["plug", "plugin", "extension", "connect"]
+  },
+  {
+    "name": "presentation",
+    "category": "Content",
+    "tags": ["presentation", "slides", "deck", "slideshow"]
+  },
+  {
+    "name": "progress-50",
+    "category": "Status",
+    "tags": ["progress", "half", "loading", "50"]
+  },
+  {
+    "name": "progress-75",
+    "category": "Status",
+    "tags": ["progress", "almost", "loading", "75"]
+  },
+  {
+    "name": "projects",
+    "category": "Content",
+    "tags": ["projects", "folder", "collection", "workspace"]
+  },
+  {
+    "name": "publish",
+    "category": "Actions",
+    "tags": ["publish", "deploy", "release", "go-live"]
+  },
+  {
+    "name": "read-only",
+    "category": "Security",
+    "tags": ["read-only", "locked", "view", "protect"]
+  },
+  {
+    "name": "redo",
+    "category": "Actions",
+    "tags": ["redo", "forward", "repeat", "restore"]
+  },
+  {
+    "name": "refresh",
+    "category": "Actions",
+    "tags": ["refresh", "reload", "sync", "update"]
+  },
+  {
+    "name": "remove",
+    "category": "Actions",
+    "tags": ["remove", "delete", "subtract", "minus"]
+  },
+  {
+    "name": "remove-circle",
+    "category": "Actions",
+    "tags": ["remove", "circle", "delete", "subtract"]
+  },
+  {
+    "name": "reset",
+    "category": "Actions",
+    "tags": ["reset", "clear", "default", "restore"]
+  },
+  {
+    "name": "restore",
+    "category": "Actions",
+    "tags": ["restore", "recover", "revert", "undo"]
+  },
+  {
+    "name": "retrieve",
+    "category": "Actions",
+    "tags": ["retrieve", "get", "fetch", "import"]
+  },
+  {
+    "name": "retry",
+    "category": "Actions",
+    "tags": ["retry", "reload", "refresh", "again"]
+  },
+  {
+    "name": "revert",
+    "category": "Actions",
+    "tags": ["revert", "undo", "rollback", "restore"]
+  },
+  {
+    "name": "robot",
+    "category": "Objects",
+    "tags": ["robot", "bot", "automation", "ai"]
+  },
+  {
+    "name": "rocket",
+    "category": "Objects",
+    "tags": ["rocket", "launch", "space", "ship"]
+  },
+  {
+    "name": "schema",
+    "category": "Code",
+    "tags": ["schema", "structure", "model", "blueprint"]
+  },
+  {
+    "name": "search",
+    "category": "Actions",
+    "tags": ["search", "find", "lookup", "magnifier"]
+  },
+  {
+    "name": "select",
+    "category": "Actions",
+    "tags": ["select", "choose", "pick", "cursor"]
+  },
+  {
+    "name": "share",
+    "category": "Actions",
+    "tags": ["share", "export", "send", "social"]
+  },
+  {
+    "name": "sort",
+    "category": "Actions",
+    "tags": ["sort", "order", "arrange", "organize"]
+  },
+  {
+    "name": "sparkle",
+    "category": "Objects",
+    "tags": ["sparkle", "magic", "star", "ai"]
+  },
+  {
+    "name": "sparkles",
+    "category": "Objects",
+    "tags": ["sparkles", "magic", "sparkle", "ai"]
+  },
+  {
+    "name": "spinner",
+    "category": "Status",
+    "tags": ["spinner", "loading", "wait", "progress"]
+  },
+  {
+    "name": "split-horizontal",
+    "category": "Layout",
+    "tags": ["split", "horizontal", "divide", "layout"]
+  },
+  {
+    "name": "split-vertical",
+    "category": "Layout",
+    "tags": ["split", "vertical", "divide", "layout"]
+  },
+  {
+    "name": "square",
+    "category": "Shapes",
+    "tags": ["square", "shape", "rectangle"]
+  },
+  {
+    "name": "stack",
+    "category": "Layout",
+    "tags": ["stack", "layers", "arrange", "order"]
+  },
+  {
+    "name": "stack-compact",
+    "category": "Layout",
+    "tags": ["stack", "compact", "layers", "dense"]
+  },
+  {
+    "name": "star",
+    "category": "Objects",
+    "tags": ["star", "favorite", "rating"]
+  },
+  {
+    "name": "star-filled",
+    "category": "Objects",
+    "tags": ["star", "favorite", "rating", "filled"]
+  },
+  {
+    "name": "stop",
+    "category": "Media",
+    "tags": ["stop", "playback", "media", "control"]
+  },
+  {
+    "name": "strikethrough",
+    "category": "Text",
+    "tags": ["strikethrough", "formatting", "text", "rich-text"]
+  },
+  {
+    "name": "string",
+    "category": "Code",
+    "tags": ["string", "text", "code", "data"]
+  },
+  {
+    "name": "sun",
+    "category": "Objects",
+    "tags": ["sun", "light", "bright", "theme"]
+  },
+  {
+    "name": "sync",
+    "category": "Actions",
+    "tags": ["sync", "refresh", "reload", "arrows"]
+  },
+  {
+    "name": "tablet-device",
+    "category": "Devices",
+    "tags": ["tablet", "device", "mobile", "screen"]
+  },
+  {
+    "name": "tag",
+    "category": "Content",
+    "tags": ["tag", "label", "category", "keyword"]
+  },
+  {
+    "name": "tags",
+    "category": "Content",
+    "tags": ["tags", "labels", "categories", "multiple"]
+  },
+  {
+    "name": "target",
+    "category": "Actions",
+    "tags": ["target", "aim", "goal", "focus"]
+  },
+  {
+    "name": "task",
+    "category": "Status",
+    "tags": ["task", "todo", "checklist", "pending"]
+  },
+  {
+    "name": "terminal",
+    "category": "Code",
+    "tags": ["terminal", "console", "cli", "shell"]
+  },
+  {
+    "name": "text",
+    "category": "Text",
+    "tags": ["text", "type", "font", "typography"]
+  },
+  {
+    "name": "th-large",
+    "category": "Layout",
+    "tags": ["grid", "large", "layout", "tiles"]
+  },
+  {
+    "name": "th-list",
+    "category": "Layout",
+    "tags": ["list", "table", "layout", "rows"]
+  },
+  {
+    "name": "thumbs-down",
+    "category": "Social",
+    "tags": ["thumbs-down", "dislike", "downvote", "feedback"]
+  },
+  {
+    "name": "thumbs-up",
+    "category": "Social",
+    "tags": ["thumbs-up", "like", "approve", "feedback"]
+  },
+  {
+    "name": "tiers",
+    "category": "Layout",
+    "tags": ["tiers", "levels", "hierarchy", "layers"]
+  },
+  {
+    "name": "timeline",
+    "category": "Status",
+    "tags": ["timeline", "history", "sequence", "activity"]
+  },
+  {
+    "name": "toggle-arrow-right",
+    "category": "Navigation",
+    "tags": ["toggle", "arrow", "collapse", "expand"]
+  },
+  {
+    "name": "token",
+    "category": "Code",
+    "tags": ["token", "key", "auth", "security"]
+  },
+  {
+    "name": "transfer",
+    "category": "Actions",
+    "tags": ["transfer", "move", "exchange", "swap"]
+  },
+  {
+    "name": "translate",
+    "category": "Text",
+    "tags": ["translate", "language", "locale", "i18n"]
+  },
+  {
+    "name": "trash",
+    "category": "Actions",
+    "tags": ["trash", "delete", "remove", "bin"]
+  },
+  {
+    "name": "trend-upward",
+    "category": "Analytics",
+    "tags": ["trend", "upward", "growth", "increase"]
+  },
+  {
+    "name": "triangle-outline",
+    "category": "Shapes",
+    "tags": ["triangle", "shape", "outline"]
+  },
+  {
+    "name": "trolley",
+    "category": "Commerce",
+    "tags": ["trolley", "cart", "shopping", "commerce"]
+  },
+  {
+    "name": "truncate",
+    "category": "Text",
+    "tags": ["truncate", "shorten", "text", "overflow"]
+  },
+  {
+    "name": "twitter",
+    "category": "Social",
+    "tags": ["twitter", "social", "network", "tweet"]
+  },
+  {
+    "name": "ulist",
+    "category": "Text",
+    "tags": ["unordered-list", "bullet", "list", "ul"]
+  },
+  {
+    "name": "unarchive",
+    "category": "Actions",
+    "tags": ["unarchive", "restore", "extract", "unpack"]
+  },
+  {
+    "name": "underline",
+    "category": "Text",
+    "tags": ["underline", "formatting", "text", "rich-text"]
+  },
+  {
+    "name": "undo",
+    "category": "Actions",
+    "tags": ["undo", "revert", "back", "rollback"]
+  },
+  {
+    "name": "unknown",
+    "category": "Alerts",
+    "tags": ["unknown", "question", "help", "unsure"]
+  },
+  {
+    "name": "unlink",
+    "category": "Actions",
+    "tags": ["unlink", "detach", "disconnect", "remove"]
+  },
+  {
+    "name": "unlock",
+    "category": "Security",
+    "tags": ["unlock", "unlocked", "open", "security"]
+  },
+  {
+    "name": "unpublish",
+    "category": "Actions",
+    "tags": ["unpublish", "revert", "draft", "hide"]
+  },
+  {
+    "name": "upload",
+    "category": "Actions",
+    "tags": ["upload", "import", "up", "arrow"]
+  },
+  {
+    "name": "user",
+    "category": "Users",
+    "tags": ["member", "person", "profile", "avatar"]
+  },
+  {
+    "name": "users",
+    "category": "Users",
+    "tags": ["group", "member", "person", "profile"]
+  },
+  {
+    "name": "versions",
+    "category": "Content",
+    "tags": ["versions", "history", "revisions", "changes"]
+  },
+  {
+    "name": "video",
+    "category": "Media",
+    "tags": ["video", "film", "movie", "media"]
+  },
+  {
+    "name": "warning-filled",
+    "category": "Alerts",
+    "tags": ["warning", "alert", "caution", "filled"]
+  },
+  {
+    "name": "warning-outline",
+    "category": "Alerts",
+    "tags": ["warning", "alert", "caution", "outline"]
+  },
+  {
+    "name": "wrench",
+    "category": "Objects",
+    "tags": ["wrench", "tool", "settings", "fix"]
+  }
+]

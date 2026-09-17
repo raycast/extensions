@@ -20,8 +20,8 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
         const titleOrNotesChanged = values.title !== reminder.title || values.notes !== reminder.notes;
         const listChanged = values.listId !== (reminder.list?.id || "");
 
-        titleOrNotesChanged &&
-          (await mutate(setTitleAndNotes({ reminderId: reminder.id, title: values.title, notes: values.notes }), {
+        if (titleOrNotesChanged) {
+          await mutate(setTitleAndNotes({ reminderId: reminder.id, title: values.title, notes: values.notes }), {
             optimisticUpdate(data) {
               if (!data) return;
 
@@ -35,9 +35,10 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
                 }),
               };
             },
-          }));
-        listChanged &&
-          (await mutate(moveToList({ reminderId: reminder.id, listId: values.listId }), {
+          });
+        }
+        if (listChanged) {
+          await mutate(moveToList({ reminderId: reminder.id, listId: values.listId }), {
             optimisticUpdate(data) {
               if (!data) return;
 
@@ -54,7 +55,8 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
                 }),
               };
             },
-          }));
+          });
+        }
 
         pop();
       } catch (error) {

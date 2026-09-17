@@ -1,5 +1,9 @@
 # Dev Cache Cleaner Changelog
 
+## [Raycast 2 Compatibility] - 2026-08-27
+
+- Updated to `@raycast/api` 2.x
+
 ## [Initial Version] - 2026-05-12
 
 - Scan Caches: full scan across 6 categories with detail panel, risk indicators, and selective cleanup

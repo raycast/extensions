@@ -1,5 +1,29 @@
 # Quarantine Manager
 
+## [Faster scans and correct download dates] - 2026-07-28
+
+### Fixed
+
+- Scanning an app installed from a DMG or zip no longer runs out of memory. Such apps carry the quarantine flag on **every** file inside them (Final Cut Pro: over 38,000), which the scan previously read one file at a time. It now reads them in a single pass — about 2.5 seconds instead of well over a minute.
+- Large scans list the first 500 quarantined items and report the full count, with **Remove Quarantine Recursively** (`⌘⇧R`) to clear everything — including the items too numerous to list individually.
+- Download dates were shown 31 years in the future (2057 instead of 2026); the quarantine timestamp was being read as Mac absolute time rather than Unix epoch seconds.
+- Source apps that escape spaces in the quarantine record now read correctly — "Free Download Manager" instead of "Free\x20Download\x20Manager".
+- A scan cut short by a size or time limit now says so, instead of reporting the item as clean.
+
+## [Multi-target selection] - 2026-06-16
+
+### Fixed
+
+- Removing quarantine from several apps no longer triggers a separate admin prompt per app. You can now select **multiple** files/apps/folders at once (in the picker or via the Finder selection); they're scanned into one list and cleared in a single pass with at most one admin prompt.
+
+### Added
+
+- The picker remembers your **last selection** and defaults to it, so re-checking the same folder is one keystroke (`⌘R` to re-scan).
+
+### Changed
+
+- The per-row Select/Deselect toggle moved from `⌘S` to `⌘↵`, matching Raycast's uninstall command.
+
 ## [Single command with batch select] - 2026-06-10
 
 ### Changed

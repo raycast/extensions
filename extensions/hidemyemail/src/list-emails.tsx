@@ -64,7 +64,7 @@ export default function Command() {
   );
   const { sortByCreationDate, popAfterCopy } = getPreferenceValues<Preferences.ListEmails>();
   const effectRan = useRef(false);
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const { pop } = useNavigation();
 
   const {
@@ -313,7 +313,7 @@ export default function Command() {
                     />
                   }
                   icon={Icon.PlusCircle}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                 />
               )}
             </ActionPanel>
@@ -445,7 +445,7 @@ export default function Command() {
                             />
                           }
                           icon={Icon.PlusCircle}
-                          shortcut={{ modifiers: ["cmd"], key: "n" }}
+                          shortcut={Keyboard.Shortcut.Common.New}
                         />
                       </ActionPanel.Section>
                     )}

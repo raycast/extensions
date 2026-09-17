@@ -2,6 +2,7 @@ import crypto from "crypto";
 
 import { sync_token, syncRequest } from "../api";
 import { mapPriority } from "../helpers/priorities";
+import { parseOptionalStringList } from "../helpers/parseStringList";
 import { withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
@@ -80,8 +81,8 @@ type Input = {
     date?: string; // Available but string format is recommended
   };
   /**
-   * The deadline of the task in the format YYYY-MM-DD (RFC 3339). Omit unless the user explicitly asks for a
-   * Todoist deadline.
+   * Optional paid Todoist deadline in the format YYYY-MM-DD (RFC 3339). Omit this field entirely unless the user
+   * explicitly asks for a deadline. Use `due` for ordinary due dates.
    */
   deadline?: { date: string };
   /**
@@ -118,9 +119,9 @@ type Input = {
    */
   collapsed?: boolean;
   /**
-   * Array of label names that may represent either personal or shared labels
+   * JSON array of label names (e.g. ["work", "urgent"]) or comma-separated label names
    */
-  labels?: string[];
+  labels?: string;
   /**
    * The ID of user who assigns the task. Only relevant for shared projects.
    * Must be 0 or a valid user ID from project collaborators
@@ -141,6 +142,10 @@ type Input = {
   auto_parse_labels?: boolean;
 };
 
+type TaskArgs = Omit<Input, "labels"> & {
+  labels?: string[];
+};
+
 function isValidDeadline(deadline: Input["deadline"]): deadline is NonNullable<Input["deadline"]> {
   return typeof deadline?.date === "string" && deadline.date.trim().length > 0;
 }
@@ -149,6 +154,7 @@ function isValidDuration(duration: Input["duration"]): duration is NonNullable<I
   return (
     duration != null &&
     (duration.unit === "minute" || duration.unit === "day") &&
+    Number.isFinite(duration.amount) &&
     Number.isInteger(duration.amount) &&
     duration.amount > 0
   );
@@ -156,16 +162,21 @@ function isValidDuration(duration: Input["duration"]): duration is NonNullable<I
 
 export default withTodoistApi(async function (input: Input) {
   const temp_id = crypto.randomUUID();
-  const taskArgs: Input = { ...input, priority: mapPriority(input.priority) };
+  const { labels, ...taskInput } = input;
+  const args: TaskArgs = {
+    ...taskInput,
+    priority: mapPriority(taskInput.priority),
+    ...(labels ? { labels: parseOptionalStringList(labels) } : {}),
+  };
 
   if (isValidDeadline(input.deadline)) {
-    taskArgs.deadline = { date: input.deadline.date.trim() };
+    args.deadline = { date: input.deadline.date.trim() };
   } else {
-    delete taskArgs.deadline;
+    delete args.deadline;
   }
 
   if (!isValidDuration(input.duration)) {
-    delete taskArgs.duration;
+    delete args.duration;
   }
 
   return syncRequest({
@@ -176,7 +187,7 @@ export default withTodoistApi(async function (input: Input) {
         type: "item_add",
         temp_id,
         uuid: crypto.randomUUID(),
-        args: taskArgs,
+        args,
       },
     ],
   });

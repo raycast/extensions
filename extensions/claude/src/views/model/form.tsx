@@ -4,28 +4,7 @@ import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { Model, ModelHook, CSVPrompt } from "../../type";
 import { parse } from "csv-parse/sync";
-
-// Helper to determine max tokens for a model
-function getMaxTokensForModel(modelId: string): number {
-  // Check if it's a Claude 4+ model
-  const isClaude4Plus =
-    modelId.includes("-4-") ||
-    modelId.startsWith("claude-haiku-4") ||
-    modelId.startsWith("claude-sonnet-4") ||
-    modelId.startsWith("claude-opus-4");
-
-  if (isClaude4Plus) {
-    // Opus 4+ models have 32K output limit
-    if (modelId.includes("opus")) {
-      return 32000;
-    }
-    // Haiku 4+ and Sonnet 4+ models have 64K output limit
-    return 64000;
-  }
-
-  // Legacy Claude 3 models have 4096 token output limit
-  return 4096;
-}
+import { getMaxTokensForModel } from "../../utils/models";
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
@@ -107,7 +86,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           return "Minimal value is 0";
         }
 
-        const maxAllowed = getMaxTokensForModel(selectedModel);
+        const maxAllowed = getMaxTokensForModel(selectedModel, use.models.availableModels);
 
         if (numValue > maxAllowed) {
           return `Maximum value is ${maxAllowed}`;
@@ -122,7 +101,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           ? use.models.availableModels.find((m) => m.id === defaultModelOption)?.display_name || ""
           : ""),
       temperature: model?.temperature.toString() ?? "1",
-      max_tokens: model?.max_tokens ?? getMaxTokensForModel(defaultModelOption).toString(),
+      max_tokens: model?.max_tokens ?? getMaxTokensForModel(defaultModelOption, use.models.availableModels).toString(),
       option: defaultModelOption,
       prompt: model?.prompt ?? "You are a useful assistant",
       pinned: model?.pinned ?? false,
@@ -166,7 +145,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       }
 
       // Auto-populate max_tokens with the maximum allowed value for the selected model
-      const maxTokens = getMaxTokensForModel(newValue);
+      const maxTokens = getMaxTokensForModel(newValue, use.models.availableModels);
       setValue("max_tokens", maxTokens.toString());
     },
     [setValue, getDisplayName, isNameAModelDisplayName, itemProps.name]
@@ -235,7 +214,10 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       <Form.TextField
         title="Max token output"
         placeholder="Set the maximum number of tokens to generate"
-        info={`Maximum allowed: ${getMaxTokensForModel(selectedModel).toLocaleString()} tokens`}
+        info={`Maximum allowed: ${getMaxTokensForModel(
+          selectedModel,
+          use.models.availableModels
+        ).toLocaleString()} tokens`}
         {...itemProps.max_tokens}
       />
       {model?.id !== "default" && <Form.Checkbox title="Pinned" label="Pin model" {...itemProps.pinned} />}

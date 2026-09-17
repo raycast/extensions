@@ -6,6 +6,8 @@ import { useGetAllTags } from "../hooks/useGetAllTags";
 import { TAG_PICKER_NOOP_VALUE, useTagPicker } from "../hooks/useTagPicker";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
+import { markToastFailed } from "../utils/toast";
+import { ensureReachable } from "../utils/submitGuard";
 
 const log = logger.child("[BookmarkEdit]");
 
@@ -65,6 +67,15 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
     async onSubmit(values) {
       log.info("Submitting bookmark update", { bookmarkId: bookmark.id });
       const toast = await showToast({ title: t("bookmark.updating"), style: Toast.Style.Animated });
+
+      // Same pre-flight as the create forms: don't write into a dead server and
+      // lose the user's edits. Reuses the toast already on screen rather than
+      // opening a second one that would replace it.
+      // The note is handed over as the recoverable input. This form is nested in
+      // navigation, where Raycast's own drafts do not work, so the clipboard is
+      // the ONLY thing standing between a failed write and retyping the note.
+      if ((await ensureReachable(values.note.trim() || values.title.trim(), toast)) !== "ok") return;
+
       try {
         await fetchUpdateBookmark(bookmark.id, {
           title: values.title.trim(),
@@ -80,9 +91,7 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
         await onRefresh?.();
         pop();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = t("bookmark.updateFailed");
-        toast.message = String(error);
+        markToastFailed(toast, t("bookmark.updateFailed"), error);
       }
     },
   });

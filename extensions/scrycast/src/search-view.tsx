@@ -13,6 +13,9 @@ import {
   scryfallMultiUrl,
   FEEDBACK_URL,
   SAVED_CARDS_KEY,
+  SCRYFALL_API_BASE,
+  SCRYFALL_HEADERS,
+  parseScryfallResponse,
 } from "./shared";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -82,16 +85,30 @@ export default function Command({
   }
 
   const { isLoading, data } = useFetch<ScryfallSearchResponse>(
-    `https://api.scryfall.com/cards/search?q=${encodeURIComponent(debouncedSearchText)}&unique=cards`,
+    `${SCRYFALL_API_BASE}/cards/search?q=${encodeURIComponent(debouncedSearchText)}&unique=cards`,
     {
+      headers: SCRYFALL_HEADERS,
+      parseResponse: parseScryfallResponse,
       execute: debouncedSearchText.trim().length > 0,
       keepPreviousData: true,
       onError: (err) => {
         const isNotFound = err.message.includes("404") || err.message.includes("No cards found");
-        if (!isNotFound) {
+        const isBadSyntax =
+          err.message.includes("400") ||
+          err.message.includes("invalid") ||
+          err.message.includes("ignored") ||
+          err.message.includes("Bad Request");
+        const isRateLimited = err.message.includes("429") || err.message.toLowerCase().includes("too many");
+        if (isRateLimited) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Rate limited by Scryfall",
+            message: "Wait a moment and try again.",
+          });
+        } else if (!isNotFound && !isBadSyntax) {
           console.error("[Scrycast] Search error:", err.message, "\nStack:", err.stack);
           showToast({ style: Toast.Style.Failure, title: "Search failed", message: err.message });
-        } else {
+        } else if (isNotFound) {
           console.log(`[Scrycast] No results for query: "${debouncedSearchText}"`);
         }
       },

@@ -35,7 +35,7 @@ function Command() {
   const debouncedSearch = useDebouncedValue(searchText, 200);
   const searchEngine = getSearchEngine();
 
-  const { isLoading: isLoadingTabs, data: tabs, revalidate: revalidateTabs } = useTabs();
+  const { isLoading: isLoadingTabs, data: tabs, revalidate: revalidateTabs, mutate: mutateTabs } = useTabs();
   const { data: history, permissionView } = useSearchHistory(debouncedSearch);
   const { data: bookmarks } = useBookmarks(debouncedSearch);
   const { data: googleSuggestions } = useGoogleSuggestions(debouncedSearch, searchEngine.id === "google");
@@ -104,6 +104,7 @@ function Command() {
                 tab={tab}
                 searchText={searchText}
                 onTabAction={revalidateTabs}
+                mutateTabs={mutateTabs}
               />
             ))}
         </List.Section>
@@ -119,6 +120,7 @@ function Command() {
                 tab={tab}
                 searchText={searchText}
                 onTabAction={revalidateTabs}
+                mutateTabs={mutateTabs}
               />
             ))}
         </List.Section>

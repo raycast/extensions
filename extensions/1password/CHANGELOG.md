@@ -1,5 +1,25 @@
 # 1Password Changelog
 
+## [Fix Repeated Re-Authentication] - 2026-08-14
+
+- Fixed the "Authentication Required" screen appearing on macOS even though the 1Password desktop-app integration works. The `op account get` fallback added in the previous release only ran on Windows, so macOS still trusted `op whoami`, which reports "account is not signed in" without an `op signin` session.
+- Because the same check gates **Auto Renew Authorization**, that command starts renewing on macOS for people who sign in through the desktop app. Its guard always failed for them before, so it never renewed anything.
+- Failures while loading accounts or items now show the error with **Retry** and **Copy Error Details** instead of the "No items found" empty state.
+- Authentication errors from the 1Password CLI keep their full output, including the steps the CLI suggests, instead of only the first line.
+- Documented the desktop app integration, the available commands and preferences, and how to enable Auto Renew Authorization in the README.
+
+## [Windows Desktop-App Integration Fixes] - 2026-08-13
+
+- Fixed constant "cannot connect to 1Password app" failures on Windows. The 1Password app briefly has no CLI pipe listener right after a previous `op` process disconnects; back-to-back `op` invocations are now serialized and connection failures are retried instead of surfacing immediately.
+- Fixed the "Authentication Required" screen appearing on Windows even though the 1Password desktop-app integration works. `op whoami` reports "account is not signed in" without an `op signin` session, so the sign-in check and account resolution now fall back to `op account get`, which uses the app's delegated sessions.
+- Item actions (copy/paste credentials, share, open in browser, password generation) now run through the same guarded execution path instead of spawning `op` directly, so they benefit from the same connection-failure handling.
+
+## [Bug Fix] - 2026-06-15
+
+- Reduce memory usage when loading large item lists by avoiding the full item payload until it is needed. Opt in via **Reduce item list memory usage** in extension preferences.
+- When enabled, the item list uses the summary payload, so username/email subtitles and username/email search are unavailable until full item details are fetched by an action.
+- When enabled, the list renders the first 200 matching items to avoid Raycast worker memory limits on very large vaults.
+
 ## [Enhancements] - 2026-04-16
 
 - Improved search: queries now match across all item fields (title, username/email, URLs, vault name). For example, searching "m@ goo" now finds a Google login with email "m@example.com".

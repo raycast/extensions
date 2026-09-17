@@ -1,5 +1,13 @@
 # Tempo Changelog
 
+## [Prefill Remaining Estimate] - 2026-08-05
+
+- Prefill the editable remaining estimate from the selected Jira issue
+
+## [Add Remaining Estimate Validation] - 2026-06-22
+
+- Add validation for remaining estimate field based on global configuration
+
 ## [Add Autofocus to Worklog Duration] - 2026-06-05
 
 - Autofocus the Time Spent field when opening the Add Worklog form

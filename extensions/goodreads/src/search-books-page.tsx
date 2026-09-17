@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchBooksByTitle, getDetailsPageUrl } from "./goodreads-api";
 import type { Book } from "./types";
@@ -90,13 +90,9 @@ function BookItem(props: BookItemProps) {
           </>
 
           <ActionPanel.Section>
+            <Action.CopyToClipboard shortcut={Keyboard.Shortcut.Common.Pin} title={STRINGS.copyTitle} content={title} />
             <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-              title={STRINGS.copyTitle}
-              content={title}
-            />
-            <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={Keyboard.Shortcut.Common.CopyPath}
               title={STRINGS.copyUrl}
               content={detailsPageUrl}
             />

@@ -59,7 +59,7 @@ export function getHistoryQuery(searchText?: string, limit = 200) {
     ? searchText
         .split(" ")
         .filter((word) => word.length > 0)
-        .map((term) => `(url LIKE "%${term}%" OR title LIKE "%${term}%")`)
+        .map((term) => `(url LIKE '%${term}%' ESCAPE '\\' OR title LIKE '%${term}%' ESCAPE '\\')`)
         .join(" AND ")
     : undefined;
 
@@ -87,7 +87,7 @@ export function useHistorySearch(
   searchText: string,
   limit?: number,
 ): { data: HistoryEntry[] | undefined; isLoading: boolean; permissionView: JSX.Element | undefined } {
-  const escapedSearchText = searchText.replace(/"/g, '""');
+  const escapedSearchText = searchText.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/[%_]/g, "\\$&");
 
   let permissionView: JSX.Element | undefined;
   let isLoading = false;
@@ -137,10 +137,11 @@ export function useHistorySearch(
 
 export async function getHistory(searchText?: string, limit = 200): Promise<HistoryEntry[]> {
   const data: HistoryEntry[] = [];
+  const escapedSearchText = searchText?.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/[%_]/g, "\\$&");
 
   for (const profile of profileHistoryDatabasePaths) {
     try {
-      const query = getHistoryQuery(searchText, limit);
+      const query = getHistoryQuery(escapedSearchText, limit);
       const rows = await executeSQL<HistorySqlRow>(profile.historyDatabasePath, query);
 
       const restructured = rows.map((row: HistorySqlRow) => ({

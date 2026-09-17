@@ -31,6 +31,11 @@ export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(removeLike);
 
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
+
     switch (result) {
       case "ytmusic-removed":
         await showHUD("👍🏻 Removed Like (YT Music)");
@@ -49,6 +54,6 @@ export default async () => {
     }
     await closeMainWindow();
   } catch (error) {
-    // do nothing if error is thrown because it will be handled by the toast
+    await showHUD(`❌ Command failed: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 };

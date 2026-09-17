@@ -1,6 +1,7 @@
 import { Clipboard, showHUD } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
+import { getEmbedCode } from "./helpers/getEmbedCode";
 
 export default async function Command() {
   await setSpotifyClient();
@@ -15,9 +16,11 @@ export default async function Command() {
   const external_urls = currentlyPlayingData.item.external_urls;
   const spotifyUrl = external_urls?.spotify;
 
-  const embedUrl = spotifyUrl?.replace("open.spotify.com/", "open.spotify.com/embed/");
+  const embedCode = getEmbedCode(spotifyUrl);
 
-  const embedCode = `<iframe style="border-radius:12px" src="${embedUrl}?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+  if (!embedCode) {
+    return await showHUD("Nothing is currently playing");
+  }
 
   await Clipboard.copy(embedCode);
   return showHUD("Copied embed code to clipboard");

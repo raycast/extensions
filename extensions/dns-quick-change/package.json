@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dns-quick-change",
+  "description": "It's always DNS, take control: switch DNS with presets, create your own, or revert to DHCP-provided DNS.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "dns-quick-change",
+      "title": "DNS Quick Change",
+      "description": "It's always DNS, take control: switch DNS with presets, create your own, or revert to DHCP-provided DNS.",
+      "subtitle": "DNS"
+    }
+  ],
+  "screenshots": [
+    { "path": "metadata/extension-screenshot-1.png" },
+    { "path": "metadata/extension-screenshot-2.png" },
+    { "path": "metadata/extension-screenshot-3.png" },
+    { "path": "metadata/extension-screenshot-4.png" }
+  ],
+  "preferences": [
+    {
+      "name": "networkService",
+      "type": "textfield",
+      "title": "Network Service",
+      "description": "Leave blank to auto-detect (Wi-Fi, Ethernet, etc.). Set manually if auto-detect fails.",
+      "placeholder": "Auto-detect",
+      "default": "",
+      "required": false
+    }
+  ],
+  "title": "DNS Quick Change",
+  "author": "natew",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ]
+}

@@ -69,7 +69,11 @@ export function AnswerView(props: props): React.JSX.Element {
         props.thinking ? props.thinking : Model.thinking,
         props.keep_alive ? props.keep_alive : Model.keep_alive,
       ).catch(async (e) => {
-        await showToast({ style: Toast.Style.Failure, title: "Error", message: e });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: e,
+        });
         setLoading(false);
       });
     }
@@ -136,6 +140,7 @@ export function AnswerView(props: props): React.JSX.Element {
             shortcut={Shortcut.New}
           />
         )}
+        <Action.Paste content={answer} />
       </ActionPanel>
     );
   }

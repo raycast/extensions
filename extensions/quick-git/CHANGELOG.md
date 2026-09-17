@@ -1,5 +1,9 @@
 # Quick Git Changelog
 
+## [Bug fixes] - 2026-06-15
+
+Fixes a bug to do with certain forms not submitting correctly
+
 ## [Submodule Selection] - 2026-04-18
 
 Added functionality to view and select submodules in a repo

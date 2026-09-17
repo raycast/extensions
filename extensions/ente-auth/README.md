@@ -13,7 +13,7 @@ The workflow uses Ente CLI to export your secrets from Ente Auth and then stashe
 - Imports: Ability to dynamically import secrets
 - TOTP Code Display: Fetches and displays TOTP secrets exported from Ente Auth.
 - Sorted Data: Most used TOTP codes will be displayed at the top. Use ⌘ + [Number] to select.
-- Dynamic Icons: Displays service-specific favicons when URL placed in notes section.
+- Service Icons: Automatically fetches a brand icon for each account from the Ente custom-icon registry, with a Simple Icons fallback. If neither has a match, it falls back to a favicon (when a URL is set in the notes) and then a default icon. Use the **Refresh Icons** action (⌘R) to re-download.
 - Metadata Display: Shows detailed metadata for each TOTP.
 - Progress Indicator: Visual progress indicator for the remaining time of the current TOTP code.
 - Tag Support: Displays tags associated with each TOTP secret.
@@ -81,7 +81,7 @@ ente version
    - Search for a specific account.
    - You can change the preferred action when `Enter` is pressed (e.g. Paste or Copy).
    - The search supports loose search queries, matching words in the account name in any order.
-      - For example "Docker Hub" will match with the queries "Docker Hub", "Hub", "Do Hu".
+     - For example "Docker Hub" will match with the queries "Docker Hub", "Hub", "Do Hu".
 
 ---
 
@@ -119,10 +119,10 @@ Note: In the extension preferences, **Ente CLI Export Location** refers to the `
 
 ## Defaults
 
-| Preference | Value | Notes |
-| --- | --- | --- |
-| Ente CLI Path | `/usr/local/bin/ente` | If you are using Homebrew (MacOS) set this to `/opt/homebrew/bin/ente` |
-| Ente CLI Export Location | `~/Documents/ente` | |
+| Preference               | Value                 | Notes                                                                                                                                                                   |
+| ------------------------ | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ente CLI Path            | `/usr/local/bin/ente` | Homebrew (macOS): set this to `/opt/homebrew/bin/ente`. Pointing at the containing folder (e.g. `/opt/homebrew/bin`) also works — the binary is resolved automatically. |
+| Ente CLI Export Location | `~/Documents/ente`    |                                                                                                                                                                         |
 
 ## Disclaimer
 

@@ -116,7 +116,11 @@ function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.TextArea title="Prompt" placeholder="Describe a coding task to work on" {...itemProps.prompt} />
+      <Form.TextArea
+        title="Prompt"
+        placeholder={"Give Copilot a background task to work on.\nIf you want Copilot to open a PR, just ask."}
+        {...itemProps.prompt}
+      />
       <RepositoryDropdown
         organizations={data?.organizations.nodes.map((org) => org.login)}
         itemProps={itemProps.repository}

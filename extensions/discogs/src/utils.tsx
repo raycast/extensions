@@ -66,12 +66,7 @@ export function ReleaseDetail({ release }: { release: DiscogsResult }) {
     };
   }, [release.resource_url]);
 
-  const releaseDateSource = detail?.released_formatted ?? detail?.released;
-
-  const releaseDate =
-    releaseDateSource && !Number.isNaN(Date.parse(releaseDateSource))
-      ? new Date(releaseDateSource).toISOString().slice(0, 10)
-      : releaseDateSource;
+  const releaseDate = detail?.released;
   const year = detail?.year ?? release.year;
 
   const country = detail?.country ?? release.country;
@@ -82,11 +77,7 @@ export function ReleaseDetail({ release }: { release: DiscogsResult }) {
   const formats = release.format?.join(", ");
   const primaryLabelEntry = detail?.labels?.[0];
   const primaryLabelName = primaryLabelEntry?.name?.trim();
-  const primaryLabelCatno = primaryLabelEntry?.catno?.trim();
-  const labels =
-    primaryLabelName && primaryLabelCatno
-      ? `${primaryLabelName} (${primaryLabelCatno})`
-      : (primaryLabelName ?? release.label?.[0]);
+  const labels = primaryLabelName ?? release.label?.[0];
   const artistValues =
     detail?.artists
       ?.map((artist) => artist.name?.trim())
@@ -99,7 +90,8 @@ export function ReleaseDetail({ release }: { release: DiscogsResult }) {
     detail?.identifiers
       ?.filter((identifier) => identifier.type?.toLowerCase() === "barcode")
       .map((identifier) => identifier.value?.trim())
-      .filter((value): value is string => Boolean(value)) ?? [];
+      .filter((value): value is string => Boolean(value))
+      .map((value) => value.replace(/\s+/g, "")) ?? [];
   const barcodes =
     barcodeValues.length > 0
       ? Array.from(new Set(barcodeValues)).join(", ")
@@ -127,14 +119,14 @@ export function ReleaseDetail({ release }: { release: DiscogsResult }) {
   const rows = [
     { label: "Title", value: title },
     { label: "Artists", value: artists },
-    { label: "Year", value: year ? String(year) : undefined },
-    { label: "Release Date", value: releaseDate },
-    { label: "Country", value: country },
-    { label: "Catalog Number", value: catno },
-    { label: "Formats", value: formats },
-    { label: "Labels", value: labels },
     { label: "Genres", value: genres },
     { label: "Styles", value: styles },
+    { label: "Year", value: year ? String(year) : undefined },
+    { label: "Formats", value: formats },
+    { label: "Labels", value: labels },
+    { label: "Catalog Number", value: catno },
+    { label: "Country", value: country },
+    { label: "Release Date", value: releaseDate },
     { label: "Barcodes", value: barcodes },
     { label: "Resource URL", value: resourceUrl, url: resourceUrl },
     { label: "Discogs URL", value: discogsUrl, url: discogsUrl },

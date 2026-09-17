@@ -1,16 +1,13 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
-import { useCache } from "../cache";
-import { gitlab } from "../common";
+import { useCachedPromise } from "@raycast/utils";
 import { Project, User, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { capitalizeFirstLetter, daysInSeconds, shortify, showErrorToast } from "../utils";
+import { capitalizeFirstLetter, shortify } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
-import { CacheActionPanelSection } from "./cache_actions";
+import { fetchEventsWithProjects } from "./events_data";
 import { IssueDetailFetch } from "./issues";
 import { MRDetailFetch } from "./mr";
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface PushData {
   commit_count: number;
@@ -41,37 +38,24 @@ export interface Event {
   push_data?: PushData;
   note?: Note;
   author?: User;
+  project?: Project;
 }
 
 export function EventListItem(props: { event: Event }) {
-  const ev = props.event;
-  const { data: project, error } = useCache<Project | undefined>(
-    `event_project_${ev.project_id}`,
-    async (): Promise<Project | undefined> => {
-      const pro = await gitlab.getProject(ev.project_id);
-      return pro;
-    },
-    {
-      deps: [ev.project_id],
-      secondsToRefetch: 15 * 60,
-      secondsToInvalid: daysInSeconds(7),
-    },
-  );
   let title = "";
   let subtitle: string | undefined = undefined;
   let icon: Image.ImageLike | undefined;
-  const action_name = ev.action_name;
   let actionElement: React.ReactNode | undefined;
-  switch (action_name) {
+  switch (props.event.action_name) {
     case "updated":
       {
-        const an = capitalizeFirstLetter(ev.action_name);
-        title = an;
-        if (ev.target_type) {
-          const tt = ev.target_type.toLowerCase();
-          if (tt) {
-            if (tt === "wikipage::meta") {
-              title = `${an} wiki page ${ev.target_title}`;
+        const actionLabel = capitalizeFirstLetter(props.event.action_name);
+        title = actionLabel;
+        if (props.event.target_type) {
+          const targetType = props.event.target_type.toLowerCase();
+          if (targetType) {
+            if (targetType === "wikipage::meta") {
+              title = `${actionLabel} wiki page ${props.event.target_title}`;
               icon = { source: GitLabIcons.wiki, tintColor: Color.Green };
             }
           }
@@ -82,11 +66,10 @@ export function EventListItem(props: { event: Event }) {
     case "pushed to":
     case "deleted":
       {
-        const an = capitalizeFirstLetter(ev.action_name);
-        const pd = ev.push_data;
-        if (pd) {
+        const actionLabel = capitalizeFirstLetter(props.event.action_name);
+        if (props.event.push_data) {
           let iconColor: Color.ColorLike | undefined;
-          switch (ev.action_name) {
+          switch (props.event.action_name) {
             case "pushed new":
               {
                 iconColor = Color.Purple;
@@ -104,24 +87,23 @@ export function EventListItem(props: { event: Event }) {
               break;
           }
           let iconSource: Image.Source | undefined;
-          if (pd.ref_type === "branch") {
-            const ref = pd.ref;
-            title = `${an} branch ${ref}`;
+          if (props.event.push_data.ref_type === "branch") {
+            title = `${actionLabel} branch ${props.event.push_data.ref}`;
             iconSource = GitLabIcons.branches;
-            if (project && !error && ev.action_name !== "deleted") {
+            if (props.event.project && props.event.action_name !== "deleted") {
               actionElement = (
                 <DefaultActions
                   webAction={
                     <GitLabOpenInBrowserAction
-                      url={`${project.web_url}/-/tree/${ref}`}
+                      url={`${props.event.project.web_url}/-/tree/${props.event.push_data.ref}`}
                       title="Open Branch in Browser"
                     />
                   }
                 />
               );
             }
-          } else if (pd.ref_type === "tag") {
-            title = `${an} tag ${pd.ref}`;
+          } else if (props.event.push_data.ref_type === "tag") {
+            title = `${actionLabel} tag ${props.event.push_data.ref}`;
             iconSource = GitLabIcons.tag;
           }
           icon = iconSource && { source: iconSource, tintColor: iconColor };
@@ -131,16 +113,18 @@ export function EventListItem(props: { event: Event }) {
     case "created":
     case "joined":
       {
-        const an = capitalizeFirstLetter(ev.action_name);
-        title = `${an} project`;
+        const actionLabel = capitalizeFirstLetter(props.event.action_name);
+        title = `${actionLabel} project`;
         icon = { source: Icon.Circle, tintColor: Color.Green };
-        if (project && !error) {
-          title += ` ${project.fullPath}`;
+        if (props.event.project) {
+          title += ` ${props.event.project.fullPath}`;
         }
-        if (project && !error && ev.action_name !== "deleted") {
+        if (props.event.project) {
           actionElement = (
             <DefaultActions
-              webAction={<GitLabOpenInBrowserAction url={`${project.web_url}`} title="Open Project in Browser" />}
+              webAction={
+                <GitLabOpenInBrowserAction url={`${props.event.project.web_url}`} title="Open Project in Browser" />
+              }
             />
           );
         }
@@ -151,22 +135,22 @@ export function EventListItem(props: { event: Event }) {
     case "opened":
     case "closed":
       {
-        const an = capitalizeFirstLetter(ev.action_name);
-        if (ev.target_type) {
-          const tt = ev.target_type.toLowerCase();
-          if (tt === "issue") {
-            title = `${an} issue #${ev.target_iid}`;
-            switch (ev.action_name) {
+        const actionLabel = capitalizeFirstLetter(props.event.action_name);
+        if (props.event.target_type) {
+          const targetType = props.event.target_type.toLowerCase();
+          if (targetType === "issue") {
+            title = `${actionLabel} issue #${props.event.target_iid}`;
+            switch (props.event.action_name) {
               case "closed":
                 {
                   icon = { source: GitLabIcons.issue, tintColor: Color.Red };
-                  subtitle = shortify(ev.target_title, 50);
+                  subtitle = shortify(props.event.target_title, 50);
                 }
                 break;
               case "opened":
                 {
                   icon = { source: GitLabIcons.issue, tintColor: Color.Green };
-                  subtitle = shortify(ev.target_title, 50);
+                  subtitle = shortify(props.event.target_title, 50);
                 }
                 break;
               case "commented on":
@@ -175,74 +159,74 @@ export function EventListItem(props: { event: Event }) {
                 }
                 break;
             }
-            if (project && !error) {
+            if (props.event.project) {
               actionElement = (
                 <DefaultActions
                   action={
                     <Action.Push
                       title="Open Issue"
                       icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
-                      target={<IssueDetailFetch project={project} issueId={ev.target_iid} />}
+                      target={<IssueDetailFetch project={props.event.project} issueId={props.event.target_iid} />}
                     />
                   }
                   webAction={
                     <GitLabOpenInBrowserAction
-                      url={`${project.web_url}/-/issues/${ev.target_iid}`}
+                      url={`${props.event.project.web_url}/-/issues/${props.event.target_iid}`}
                       title="Open Issue in Browser"
                     />
                   }
                 />
               );
             }
-          } else if (tt == "mergerequest") {
-            switch (ev.action_name) {
+          } else if (targetType == "mergerequest") {
+            switch (props.event.action_name) {
               case "closed":
                 {
                   icon = { source: GitLabIcons.merged, tintColor: Color.Purple };
-                  subtitle = shortify(ev.target_title, 50);
+                  subtitle = shortify(props.event.target_title, 50);
                 }
                 break;
               case "opened":
                 {
                   icon = { source: GitLabIcons.mropen, tintColor: Color.Green };
-                  subtitle = shortify(ev.target_title, 50);
+                  subtitle = shortify(props.event.target_title, 50);
                 }
                 break;
               case "accepted":
                 {
                   icon = { source: GitLabIcons.mraccepted, tintColor: Color.Green };
-                  subtitle = shortify(ev.target_title, 50);
+                  subtitle = shortify(props.event.target_title, 50);
                 }
                 break;
               case "commented on":
                 {
                   icon = { source: GitLabIcons.comment, tintColor: Color.Green };
-                  subtitle = shortify(ev.target_title, 50);
+                  subtitle = shortify(props.event.target_title, 50);
                 }
                 break;
             }
-            title = `${an} merge request !${ev.target_iid}`;
-            if (project && !error) {
+            title = `${actionLabel} merge request !${props.event.target_iid}`;
+            if (props.event.project) {
               actionElement = (
                 <DefaultActions
                   action={
                     <Action.Push
                       title="Open Merge Request"
                       icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
-                      target={<MRDetailFetch project={project} mrId={ev.target_iid} />}
+                      target={<MRDetailFetch project={props.event.project} mrId={props.event.target_iid} />}
                     />
                   }
                   webAction={
                     <GitLabOpenInBrowserAction
-                      url={`${project.web_url}/-/merge_requests/${ev.target_iid}`}
+                      url={`${props.event.project.web_url}/-/merge_requests/${props.event.target_iid}`}
                       title="Open Merge Request in Browser"
                     />
                   }
                 />
               );
             }
-          } else if (tt === "milestone") {
-            switch (ev.action_name) {
+          } else if (targetType === "milestone") {
+            switch (props.event.action_name) {
               case "opened":
                 {
                   icon = { source: GitLabIcons.milestone, tintColor: Color.Green };
@@ -254,21 +238,21 @@ export function EventListItem(props: { event: Event }) {
                 }
                 break;
             }
-            title = `${an} milestone ${ev.target_title}`;
-            if (project && !error) {
+            title = `${actionLabel} milestone ${props.event.target_title}`;
+            if (props.event.project) {
               actionElement = (
                 <DefaultActions
                   webAction={
                     <GitLabOpenInBrowserAction
-                      url={`${project.web_url}/-/milestones/${ev.target_iid}`}
+                      url={`${props.event.project.web_url}/-/milestones/${props.event.target_iid}`}
                       title="Open Milestone in Browser"
                     />
                   }
                 />
               );
             }
-          } else if (tt === "discussionnote") {
-            switch (ev.action_name) {
+          } else if (targetType === "discussionnote") {
+            switch (props.event.action_name) {
               case "opened":
                 {
                   icon = { source: GitLabIcons.comment, tintColor: Color.Green };
@@ -285,27 +269,36 @@ export function EventListItem(props: { event: Event }) {
                 }
                 break;
             }
-            title = `${an} discussion note`;
-            if (!error && project && ev.target_iid && ev.note && ev.note.noteable_id && ev.note.noteable_type) {
+            title = `${actionLabel} discussion note`;
+            if (
+              props.event.project &&
+              props.event.target_iid &&
+              props.event.note &&
+              props.event.note.noteable_id &&
+              props.event.note.noteable_type
+            ) {
               let slug = "";
-              const nt = ev.note.noteable_type.toLowerCase();
-              if (nt === "mergerequest" && ev.note && ev.note.noteable_iid) {
-                slug = `/-/merge_requests/${ev.note.noteable_iid}#note_${ev.target_iid}`;
-              } else if (nt === "issue" && ev.note && ev.note.noteable_iid) {
-                slug = `/-/issues/${ev.note.noteable_iid}#note_${ev.target_iid}`;
+              const noteableType = props.event.note.noteable_type.toLowerCase();
+              if (noteableType === "mergerequest" && props.event.note.noteable_iid) {
+                slug = `/-/merge_requests/${props.event.note.noteable_iid}#note_${props.event.target_iid}`;
+              } else if (noteableType === "issue" && props.event.note.noteable_iid) {
+                slug = `/-/issues/${props.event.note.noteable_iid}#note_${props.event.target_iid}`;
               }
               if (slug) {
                 actionElement = (
                   <DefaultActions
                     webAction={
-                      <GitLabOpenInBrowserAction url={`${project.web_url}${slug}`} title="Open Comment in Browser" />
+                      <GitLabOpenInBrowserAction
+                        url={`${props.event.project.web_url}${slug}`}
+                        title="Open Comment in Browser"
+                      />
                     }
                   />
                 );
               }
             }
-          } else if (tt === "note" || tt == "diffnote") {
-            switch (ev.action_name) {
+          } else if (targetType === "note" || targetType == "diffnote") {
+            switch (props.event.action_name) {
               case "opened":
                 {
                   icon = { source: GitLabIcons.comment, tintColor: Color.Green };
@@ -318,64 +311,69 @@ export function EventListItem(props: { event: Event }) {
                 break;
               case "commented on":
                 {
-                  const body = ev.note?.body;
-                  if (body !== undefined && body.length > 0) {
-                    subtitle = shortify(body, 50);
+                  if (props.event.note?.body !== undefined && props.event.note.body.length > 0) {
+                    subtitle = shortify(props.event.note.body, 50);
                   }
                   icon = { source: GitLabIcons.comment, tintColor: Color.Yellow };
                 }
                 break;
             }
-            title = `${an} note`;
-            if (!error && project && ev.target_iid && ev.note && ev.note.noteable_id && ev.note.noteable_type) {
+            title = `${actionLabel} note`;
+            if (
+              props.event.project &&
+              props.event.target_iid &&
+              props.event.note &&
+              props.event.note.noteable_id &&
+              props.event.note.noteable_type
+            ) {
               let slug = "";
-              const nt = ev.note.noteable_type.toLowerCase();
-              if (nt === "mergerequest" && ev.note && ev.note.noteable_iid) {
-                slug = `/-/merge_requests/${ev.note.noteable_iid}#note_${ev.target_iid}`;
-              } else if (nt === "issue" && ev.note && ev.note.noteable_iid) {
-                slug = `/-/issues/${ev.note.noteable_iid}#note_${ev.target_iid}`;
+              const noteableType = props.event.note.noteable_type.toLowerCase();
+              if (noteableType === "mergerequest" && props.event.note.noteable_iid) {
+                slug = `/-/merge_requests/${props.event.note.noteable_iid}#note_${props.event.target_iid}`;
+              } else if (noteableType === "issue" && props.event.note.noteable_iid) {
+                slug = `/-/issues/${props.event.note.noteable_iid}#note_${props.event.target_iid}`;
               }
               if (slug) {
                 actionElement = (
                   <DefaultActions
                     webAction={
-                      <GitLabOpenInBrowserAction url={`${project.web_url}${slug}`} title="Open Comment in Browser" />
+                      <GitLabOpenInBrowserAction
+                        url={`${props.event.project.web_url}${slug}`}
+                        title="Open Comment in Browser"
+                      />
                     }
                   />
                 );
               }
             }
           } else {
-            console.log(ev);
+            console.log(props.event);
           }
         } else {
-          console.log(ev);
+          console.log(props.event);
         }
       }
       break;
     case "approved":
       {
-        if (ev.target_type) {
-          const tt = ev.target_type.toLowerCase();
-          if (tt === "mergerequest") {
-            const target_title = ev.target_title;
-            const mrIId = ev.target_iid;
-            title = `Approved Merge Request !${mrIId} "${target_title}"`;
+        if (props.event.target_type) {
+          const targetType = props.event.target_type.toLowerCase();
+          if (targetType === "mergerequest") {
+            title = `Approved Merge Request !${props.event.target_iid} "${props.event.target_title}"`;
             icon = { source: "approved.png", tintColor: Color.Green };
-            if (project) {
-              const slug = `/-/merge_requests/${mrIId}`;
+            if (props.event.project) {
               actionElement = (
                 <DefaultActions
                   action={
                     <Action.Push
                       title="Open Merge Request"
                       icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
-                      target={<MRDetailFetch project={project} mrId={mrIId} />}
+                      target={<MRDetailFetch project={props.event.project} mrId={props.event.target_iid} />}
                     />
                   }
                   webAction={
                     <GitLabOpenInBrowserAction
-                      url={`${project.web_url}${slug}`}
+                      url={`${props.event.project.web_url}/-/merge_requests/${props.event.target_iid}`}
                       title="Open Merge Request in Browser"
                     />
                   }
@@ -389,35 +387,31 @@ export function EventListItem(props: { event: Event }) {
     default:
       {
         console.log("unknown action_name");
-        console.log(ev);
+        console.log(props.event);
       }
       break;
   }
   if (!title && !icon && !actionElement) {
-    title = `Unknown event: ${action_name}`;
+    title = `Unknown event: ${props.event.action_name}`;
     icon = { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
-    actionElement = <Action.CopyToClipboard content={JSON.stringify(ev, null, 2)} title="Copy Event Details" />;
+    actionElement = (
+      <Action.CopyToClipboard content={JSON.stringify(props.event, null, 2)} title="Copy Event Details" />
+    );
   }
-  const accessoryTitle = project && !error ? project.name_with_namespace : undefined;
 
   return (
     <List.Item
-      title={{ value: title || "", tooltip: ev.target_title }}
+      title={{ value: title || "", tooltip: props.event.target_title }}
       subtitle={subtitle}
       icon={icon}
       accessories={[
-        { text: accessoryTitle },
+        { text: props.event.project?.name_with_namespace },
         {
-          icon: ev.author ? { source: ev.author.avatar_url, mask: Image.Mask.Circle } : undefined,
-          tooltip: ev.author ? ev.author.name : undefined,
+          icon: props.event.author ? { source: props.event.author.avatar_url, mask: Image.Mask.Circle } : undefined,
+          tooltip: props.event.author ? props.event.author.name : undefined,
         },
       ]}
-      actions={
-        <ActionPanel>
-          {actionElement && actionElement}
-          {actionElement && <CacheActionPanelSection />}
-        </ActionPanel>
-      }
+      actions={<ActionPanel>{actionElement && actionElement}</ActionPanel>}
     />
   );
 }
@@ -443,37 +437,17 @@ function EventListEmptyView() {
 export function EventList() {
   const [scope, setScope] = useState<string>(ScopeType.MyActivities);
   const [searchText, setSearchText] = useState<string>();
-  const params: Record<string, any> = {};
-  if (scope === ScopeType.MyProjects) {
-    params.scope = "all";
-  }
-  const { data, error, isLoading } = useCache<Event[]>(
-    `events_${scope}`,
-    async (): Promise<any[]> => {
-      const result: Event[] = await gitlab.fetch("events", params).then((events) => {
-        return events.map((ev: any) => ev as Event);
-      });
-      return result;
+  const { data, isLoading } = useCachedPromise(
+    async (scopeType: string): Promise<Event[]> => {
+      const params: Record<string, string> = {};
+      if (scopeType === ScopeType.MyProjects) {
+        params.scope = "all";
+      }
+      return fetchEventsWithProjects(params);
     },
-    {
-      deps: [searchText, scope],
-      secondsToRefetch: 60,
-      onFilter: async (epics) => {
-        return searchData<Event>(epics, {
-          search: searchText || "",
-          keys: ["action_name", "target_title"],
-          limit: 50,
-        });
-      },
-    },
+    [scope],
+    { initialData: [] },
   );
-  if (error) {
-    showErrorToast(error, "Cannot search Events");
-  }
-
-  if (!data) {
-    return <List isLoading={true} />;
-  }
   return (
     <List
       onSearchTextChange={setSearchText}
@@ -481,8 +455,12 @@ export function EventList() {
       throttle={true}
       searchBarAccessory={<EventListDropdown onChange={setScope} />}
     >
-      {data?.map((ev) => (
-        <EventListItem key={ev.id} event={ev} />
+      {searchData<Event>(data, {
+        search: searchText || "",
+        keys: ["action_name", "target_title"],
+        limit: 50,
+      }).map((event: Event) => (
+        <EventListItem key={event.id} event={event} />
       ))}
       <EventListEmptyView />
     </List>

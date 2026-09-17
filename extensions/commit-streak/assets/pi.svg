@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <g stroke="black" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Top bar -->
+    <line x1="2" y1="5" x2="14" y2="5"/>
+    <!-- Left leg with curve at bottom -->
+    <path d="M5,5 L5,12 Q5,14 3,14"/>
+    <!-- Right leg straight -->
+    <line x1="11" y1="5" x2="11" y2="13"/>
+  </g>
+</svg>

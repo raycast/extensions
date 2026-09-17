@@ -24,13 +24,13 @@ We support Raycast extension as our top priority client and are developing a web
 
 ## Sign-Up and Sign-In
 
-Currently, 1bookmark supports email login and there is no separate SignUp process.
+Currently, 1Bookmark supports email login and there is no separate SignUp process.
 
-When you first enter the Raycast 1bookmark extension, you can log in by entering your email
+When you first enter the Raycast 1Bookmark extension, you will see the login view below. Press Enter (or click **"Open login in browser"**) to sign in on the 1Bookmark website.
 
 ![login-1](./media/login-1.png)
 
-and then entering the 6-digit code sent to your email.
+After signing in on the website, click the **"Login in Raycast"** button to return to Raycast as a signed-in user.
 
 ![login-2](./media/login-2.png)
 
@@ -52,9 +52,10 @@ You can use special characters in your search query to filter results:
 
 - `!space` - Filter by space name. Example: `!raycast api` searches for "api" in the "raycast" space
 - `@user` - Filter by bookmark creator name. Example: `@john documentation` searches for "documentation" created by "john"
-- `#tag#` - Filter by tag. Example: `#dev# tools` searches for "tools" with the "dev" tag
+- `#tag` - Filter by tag. Example: `#dev tools` searches for "tools" with the "dev" tag
+- `##text` - Escape: search for the literal `#text` (e.g. `##general` to find a Slack channel name)
 
 This allows you to first narrow down your bookmarks by space, creator, or tag, and then find specific items within that filtered set. The filtering and searching are handled by separate systems, making the process more efficient and the results more accurate.
 
 You can combine multiple filters:
-- `!raycast #api# @john documentation` searches for "documentation" in the "raycast" space with the "api" tag created by "john"
+- `!raycast #api @john documentation` searches for "documentation" in the "raycast" space with the "api" tag created by "john"

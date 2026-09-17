@@ -17,7 +17,9 @@
     "image hosting"
   ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "validate-credentials",
@@ -39,10 +41,22 @@
           "placeholder": "Output format",
           "required": false,
           "data": [
-            { "title": "Use my preference", "value": "preference" },
-            { "title": "Markdown", "value": "markdown" },
-            { "title": "HTML", "value": "html" },
-            { "title": "Raw URL", "value": "raw" }
+            {
+              "title": "Use my preference",
+              "value": "preference"
+            },
+            {
+              "title": "Markdown",
+              "value": "markdown"
+            },
+            {
+              "title": "HTML",
+              "value": "html"
+            },
+            {
+              "title": "Raw URL",
+              "value": "raw"
+            }
           ]
         },
         {
@@ -51,9 +65,18 @@
           "placeholder": "Signed mode",
           "required": false,
           "data": [
-            { "title": "Use my preference", "value": "preference" },
-            { "title": "Signed", "value": "signed" },
-            { "title": "Public", "value": "public" }
+            {
+              "title": "Use my preference",
+              "value": "preference"
+            },
+            {
+              "title": "Signed",
+              "value": "signed"
+            },
+            {
+              "title": "Public",
+              "value": "public"
+            }
           ]
         }
       ]
@@ -234,9 +257,18 @@
       "required": false,
       "default": "markdown",
       "data": [
-        { "title": "Markdown (![name](url))", "value": "markdown" },
-        { "title": "HTML (<img src=\"url\" alt=\"name\" />)", "value": "html" },
-        { "title": "Raw URL", "value": "raw" }
+        {
+          "title": "Markdown (![name](url))",
+          "value": "markdown"
+        },
+        {
+          "title": "HTML (<img src=\"url\" alt=\"name\" />)",
+          "value": "html"
+        },
+        {
+          "title": "Raw URL",
+          "value": "raw"
+        }
       ]
     },
     {
@@ -327,9 +359,18 @@
       "required": false,
       "default": "webp",
       "data": [
-        { "title": "WebP (recommended)", "value": "webp" },
-        { "title": "JPEG", "value": "jpeg" },
-        { "title": "PNG", "value": "png" }
+        {
+          "title": "WebP (recommended)",
+          "value": "webp"
+        },
+        {
+          "title": "JPEG",
+          "value": "jpeg"
+        },
+        {
+          "title": "PNG",
+          "value": "png"
+        }
       ]
     }
   ],
@@ -353,5 +394,9 @@
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "echo \"Use 'npm run publish' to publish to the Raycast Store.\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

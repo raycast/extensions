@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, useNavigation } from "@raycast/api";
 import { showFailureToast, useExec, useForm } from "@raycast/utils";
-import { useSelectedRepo } from "../../hooks/useRepo.js";
+import { useSelectedRepoStorage } from "../../hooks/useRepo.js";
 import { validateBranchName } from "../../utils/validators.js";
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function CreateBranch({ checkBranches }: Props) {
-  const repo = useSelectedRepo();
+  const repo = useSelectedRepoStorage();
   const { pop } = useNavigation();
   const [branchName, setBranchName] = useState("");
   const { revalidate, isLoading } = useExec("git", ["switch", "-c", branchName], {

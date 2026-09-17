@@ -6,6 +6,7 @@ import {
   List,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { apiPut, getBaseUrl, TypeWhisperError } from "./api";
@@ -82,7 +83,7 @@ export default function Command() {
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={() => revalidate()}
                 />
               </ActionPanel>

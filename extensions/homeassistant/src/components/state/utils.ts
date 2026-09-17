@@ -220,7 +220,7 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
   }
 }
 
-export function getStateValue(state: State): string | undefined {
+export function getStateValue(state: State, statesById?: ReadonlyMap<string, State>): string | undefined {
   if (state.entity_id.startsWith("light") && state.state === "on") {
     const brightnessPercentage = getLightCurrentBrightnessPercentage(state);
     if (brightnessPercentage !== undefined) {
@@ -263,6 +263,13 @@ export function getStateValue(state: State): string | undefined {
       return "✔";
     }
     return state.state;
+  } else if (state.entity_id.startsWith("person")) {
+    const inZones = state.attributes.in_zones;
+    if (Array.isArray(inZones) && inZones.length > 0 && inZones.every((zone) => typeof zone === "string")) {
+      return inZones
+        .map((zone) => statesById?.get(zone)?.attributes.friendly_name || zone.replace(/^zone\./, ""))
+        .join(", ");
+    }
   }
   return state.state;
 }

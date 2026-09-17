@@ -16,20 +16,46 @@
     "System"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "angleMode",
+      "title": "Angle Mode",
+      "description": "Choose how trigonometric functions interpret inputs and return inverse-function results.",
+      "type": "dropdown",
+      "required": false,
+      "default": "radians",
+      "data": [
+        {
+          "title": "Radians",
+          "value": "radians"
+        },
+        {
+          "title": "Degrees",
+          "value": "degrees"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "math-functions",
       "title": "Math Functions",
       "description": "Evaluate mathematical expressions with intelligent auto-completion and instant results",
       "mode": "view"
+    },
+    {
+      "name": "toggle-degree-radian-mode",
+      "title": "Toggle Degree/Radian Mode",
+      "description": "Switch trigonometric calculations between degrees and radians",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.9",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/jest": "^30.0.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",

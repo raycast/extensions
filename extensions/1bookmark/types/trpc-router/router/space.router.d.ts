@@ -27,11 +27,21 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
     };
     transformer: true;
 }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
+    delete: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+        };
+        output: {
+            spaceId: string;
+        };
+        meta: object;
+    }>;
     create: import("@trpc/server").TRPCMutationProcedure<{
         input: {
             name: string;
             image: string;
             description?: string | undefined;
+            slackTeamId?: string | undefined;
         };
         output: void;
         meta: object;
@@ -52,10 +62,10 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 status: import(".prisma/client").$Enums.TeamMemberStatus;
                 spaceId: string;
                 createdAt: Date;
-                email: string;
-                tags: string[];
-                updatedAt: Date;
                 image: string | null;
+                email: string;
+                updatedAt: Date;
+                tags: string[];
                 nickname: string | null;
                 authEmail: string | null;
                 role: import(".prisma/client").$Enums.TeamRole;
@@ -68,9 +78,9 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 authCheckIntervalSec: number;
             }[];
             _count: {
-                tags: number;
                 bookmarks: number;
                 users: number;
+                tags: number;
                 memberAuthPolicies: number;
             };
         } & {
@@ -80,9 +90,54 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             id: string;
             createdAt: Date;
             name: string;
-            updatedAt: Date;
             image: string | null;
+            slackTeamId: string | null;
+            updatedAt: Date;
         }) | null;
+        meta: object;
+    }>;
+    invitationInfo: import("@trpc/server").TRPCQueryProcedure<{
+        input: {
+            spaceId: string;
+        };
+        output: {
+            id: string;
+            name: string;
+            image: string | null;
+            memberCount: number;
+            alreadyMember: boolean;
+            pending: boolean;
+            banned: boolean;
+        };
+        meta: object;
+    }>;
+    joinByInvitation: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+        };
+        output: {
+            spaceId: string;
+            status: "ACTIVATED";
+        } | {
+            spaceId: string;
+            status: "PENDING";
+        };
+        meta: object;
+    }>;
+    approveJoinRequest: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+            targetEmail: string;
+        };
+        output: void;
+        meta: object;
+    }>;
+    rejectJoinRequest: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+            targetEmail: string;
+        };
+        output: void;
         meta: object;
     }>;
     update: import("@trpc/server").TRPCMutationProcedure<{
@@ -91,6 +146,7 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             description?: string | undefined;
             name?: string | undefined;
             image?: string | undefined;
+            slackTeamId?: string | undefined;
             myNickname?: string | undefined;
             myImage?: string | undefined;
         };
@@ -103,6 +159,32 @@ export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             targetEmail: string;
         };
         output: void;
+        meta: object;
+    }>;
+    updateMemberRole: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            spaceId: string;
+            role: "ADMIN" | "MEMBER" | "READ";
+            targetEmail: string;
+        };
+        output: void;
+        meta: object;
+    }>;
+    topUsedBookmarks: import("@trpc/server").TRPCQueryProcedure<{
+        input: {
+            spaceId: string;
+            limit?: number | undefined;
+            range?: "7d" | "30d" | "1y" | undefined;
+        };
+        output: {
+            useCount: number;
+            bookmark: {
+                id: string;
+                name: string;
+                url: string;
+                faviconUrl: string | null;
+            };
+        }[];
         meta: object;
     }>;
 }>>;

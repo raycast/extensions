@@ -1,63 +1,4 @@
-// Raw API response types (as returned from models.dev)
-export interface RawApiResponse {
-  [providerId: string]: RawProvider;
-}
-
-export interface RawProvider {
-  id: string;
-  name: string;
-  npm: string;
-  env: string[];
-  doc: string;
-  api?: string;
-  models: Record<string, RawModel>;
-}
-
-export interface RawModel {
-  id: string;
-  name: string;
-  family?: string;
-  attachment: boolean;
-  reasoning: boolean;
-  tool_call: boolean;
-  structured_output?: boolean;
-  temperature?: boolean;
-  knowledge?: string;
-  release_date?: string;
-  last_updated?: string;
-  open_weights?: boolean;
-  status?: "alpha" | "beta" | "deprecated";
-  interleaved?: { field: string };
-  modalities: {
-    input: Modality[];
-    output: Modality[];
-  };
-  cost?: ModelCost;
-  limit?: ModelLimit;
-}
-
-// Modality types
-export type InputModality = "text" | "image" | "audio" | "video" | "pdf";
-export type OutputModality = "text" | "audio";
-export type Modality = InputModality | OutputModality;
-
-// Pricing structure
-export interface ModelCost {
-  input: number;
-  output: number;
-  cache_read?: number;
-  cache_write?: number;
-  reasoning?: number;
-  input_audio?: number;
-  output_audio?: number;
-}
-
-// Token limits
-export interface ModelLimit {
-  context: number;
-  input?: number;
-  output?: number;
-}
+import type { Limit, Modalities, ModelCost, ModelFamily } from "@opencode-ai/models";
 
 // Transformed/flattened types for use in the extension
 
@@ -72,7 +13,8 @@ export interface Provider {
 export interface Model {
   id: string;
   name: string;
-  family?: string;
+  description: string;
+  family?: ModelFamily;
   providerId: string;
   providerName: string;
   providerLogo: string;
@@ -88,21 +30,17 @@ export interface Model {
   // Metadata
   knowledge?: string;
   release_date?: string;
-  last_updated?: string;
   open_weights: boolean;
   status?: "alpha" | "beta" | "deprecated";
 
   // Modalities
-  modalities: {
-    input: InputModality[];
-    output: OutputModality[];
-  };
+  modalities: Modalities;
 
   // Pricing (per million tokens, USD)
   cost?: ModelCost;
 
   // Limits
-  limit?: ModelLimit;
+  limit?: Limit;
 }
 
 // Transformed data structure
@@ -120,4 +58,6 @@ export type Capability =
   | "video"
   | "pdf"
   | "structured_output"
-  | "open_weights";
+  | "open_weights"
+  | "attachment"
+  | "temperature";

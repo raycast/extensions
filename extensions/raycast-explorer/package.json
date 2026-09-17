@@ -183,6 +183,73 @@
       ]
     }
   ],
+  "tools": [
+    {
+      "name": "search-library",
+      "title": "Search Raycast Explorer",
+      "description": "Search the public Raycast Explorer catalog for prompts, presets, Quicklinks, snippets, and themes. This tool is read-only and does not access the user's personal Raycast data."
+    }
+  ],
+  "ai": {
+    "instructions": "Use Search Raycast Explorer when the user wants a public prompt, preset, Quicklink template, snippet, or theme recommendation. It searches public ray.so catalog data only; never suggest that it can inspect, edit, delete, deduplicate, or replace the user's personal Quicklinks, Snippets, or Themes. Present relevant results with their importUrl as a Markdown link, and state when no suitable catalog result is found.",
+    "evals": [
+      {
+        "input": "@raycast-explorer Find me a dark purple theme",
+        "mocks": {
+          "search-library": {
+            "query": "dark purple",
+            "contentType": "themes",
+            "count": 1,
+            "results": [
+              {
+                "type": "themes",
+                "id": "example/purple-night",
+                "title": "Purple Night",
+                "summary": "dark theme by Example",
+                "importUrl": "raycast://theme?name=Purple%20Night"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-library"
+          },
+          {
+            "includes": "Purple Night"
+          }
+        ]
+      },
+      {
+        "input": "@raycast-explorer Recommend a prompt template for release notes",
+        "mocks": {
+          "search-library": {
+            "query": "release notes",
+            "contentType": "prompts",
+            "count": 1,
+            "results": [
+              {
+                "type": "prompts",
+                "id": "release-notes",
+                "title": "Write Release Notes",
+                "category": "Writing",
+                "summary": "Create concise release notes from changes.",
+                "importUrl": "raycast://prompts/import?prompts=example"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-library"
+          },
+          {
+            "includes": "Write Release Notes"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@raycast/api": "^1.104.12",
     "@raycast/utils": "^2.2.3",

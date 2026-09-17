@@ -1,6 +1,6 @@
 import { Toast, showToast } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import translationKeyMap from "../data/translationKeyMap.json";
+import { useMigratedCachedState } from "./migrateCachedState";
 
 export interface Preferences {
   translationKey: string;
@@ -11,15 +11,11 @@ const defaultPreferences: Preferences = {
 };
 
 export default function usePreferences() {
-  const [preferences, setPreferences] = useCachedState<Preferences>("preferences", defaultPreferences);
+  const [preferences, setPreferences] = useMigratedCachedState<Preferences>("preferences", defaultPreferences);
 
   const _setPreferences = async (newPreferences: Preferences) => {
     setPreferences(newPreferences);
-    showToast({
-      title: "Saving preferences...",
-      style: Toast.Style.Animated,
-    });
-    showToast({
+    await showToast({
       title: "Preferences saved",
       style: Toast.Style.Success,
     });

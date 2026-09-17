@@ -4,6 +4,7 @@ import {
   Color,
   Detail,
   Icon,
+  Keyboard,
   List,
   getPreferenceValues,
   useNavigation,
@@ -48,6 +49,14 @@ const METRIC_ASC: Record<MetricKey, boolean> = {
   price_1m_output_tokens: true,
   price_1m_blended_3_to_1: true,
 };
+
+const shortcut = (key: Keyboard.KeyEquivalent, macOS: Keyboard.KeyModifier, Windows: Keyboard.KeyModifier) => ({
+  macOS: { modifiers: [macOS], key },
+  Windows: { modifiers: [Windows], key },
+});
+
+const primaryShortcut = (key: Keyboard.KeyEquivalent) => shortcut(key, "cmd", "ctrl");
+const alternateShortcut = (key: Keyboard.KeyEquivalent) => shortcut(key, "opt", "alt");
 
 function timeAgo(iso: string | null | undefined) {
   if (!iso) return "N/A";
@@ -119,7 +128,7 @@ export default function View() {
             </List.Dropdown>
           )}
           {mode === "leaderboards" && (
-            <List.Dropdown tooltip="Metric" onChange={(v) => setMetric(v as MetricKey)}>
+            <List.Dropdown tooltip="Metric" value={metric} onChange={(v) => setMetric(v as MetricKey)}>
               {METRICS.map((m) => (
                 <List.Dropdown.Item key={m.key} value={m.key} title={m.label} />
               ))}
@@ -191,6 +200,7 @@ function SearchSection({
     data: rows = [],
     isLoading,
     revalidate,
+    error,
   } = useCachedPromise(
     async (query: string, creator: string) => {
       const client = sb();
@@ -286,7 +296,7 @@ function SearchSection({
                 <Action
                   title="Reset Filters"
                   icon={Icon.XMarkCircle}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  shortcut={primaryShortcut("backspace")}
                   onAction={async () => {
                     await setCreatorFilter("");
                     await setSearchText("");
@@ -299,8 +309,19 @@ function SearchSection({
           />
         </List.Section>
       )}
-      {!isLoading && rows.length === 0 ? (
-        <List.EmptyView title="No models found" description="Try another search term" />
+      {!isLoading && error ? (
+        <List.Item
+          icon={Icon.ExclamationMark}
+          title="Could Not Load Models"
+          subtitle={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
+            </ActionPanel>
+          }
+        />
+      ) : !isLoading && rows.length === 0 ? (
+        <List.EmptyView title="No Models Found" description="Try another search term" />
       ) : null}
       {pinnedRows.length > 0 && (
         <List.Section title="Pinned">
@@ -322,7 +343,7 @@ function SearchSection({
                     <Action
                       title="Unpin Model"
                       icon={Icon.PinDisabled}
-                      shortcut={{ modifiers: ["opt"], key: "enter" }}
+                      shortcut={alternateShortcut("enter")}
                       onAction={async () => {
                         await removePin(m.id);
                         await showToast({ style: Toast.Style.Success, title: "Unpinned Model" });
@@ -333,10 +354,10 @@ function SearchSection({
                     <Action
                       title="Switch to Leaderboards"
                       icon={Icon.List}
-                      shortcut={{ modifiers: ["cmd"], key: "l" }}
+                      shortcut={primaryShortcut("l")}
                       onAction={() => setMode("leaderboards")}
                     />
-                    <ActionPanel.Submenu title="Filter by Creator" shortcut={{ modifiers: ["cmd"], key: "p" }}>
+                    <ActionPanel.Submenu title="Filter by Creator" shortcut={primaryShortcut("p")}>
                       <Action title="All Creators" onAction={() => setCreatorFilter("")} />
                       {[...new Set(rows.map((r) => r.creator_name).filter(Boolean) as string[])].map((name) => (
                         <Action key={name} title={name} onAction={() => setCreatorFilter(name)} />
@@ -345,7 +366,7 @@ function SearchSection({
                     <Action
                       title="Reset Filters"
                       icon={Icon.XMarkCircle}
-                      shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                      shortcut={primaryShortcut("backspace")}
                       onAction={async () => {
                         await setCreatorFilter("");
                         await setSearchText("");
@@ -382,14 +403,10 @@ function SearchSection({
                   <Action
                     title="Switch to Leaderboards"
                     icon={Icon.List}
-                    shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    shortcut={primaryShortcut("l")}
                     onAction={() => setMode("leaderboards")}
                   />
-                  <ActionPanel.Submenu
-                    title="Filter by Creator"
-                    icon={Icon.Person}
-                    shortcut={{ modifiers: ["cmd"], key: "p" }}
-                  >
+                  <ActionPanel.Submenu title="Filter by Creator" icon={Icon.Person} shortcut={primaryShortcut("p")}>
                     <Action title="All Creators" icon={Icon.Person} onAction={() => setCreatorFilter("")} />
                     {[...new Set(rows.map((r) => r.creator_name).filter(Boolean) as string[])].map((name) => (
                       <Action key={name} title={name} icon={Icon.Person} onAction={() => setCreatorFilter(name)} />
@@ -398,7 +415,7 @@ function SearchSection({
                   <Action
                     title="Reset Filters"
                     icon={Icon.XMarkCircle}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                    shortcut={primaryShortcut("backspace")}
                     onAction={async () => {
                       await setCreatorFilter("");
                       await setSearchText("");
@@ -410,7 +427,7 @@ function SearchSection({
                     <Action
                       title="Unpin Model"
                       icon={Icon.PinDisabled}
-                      shortcut={{ modifiers: ["opt"], key: "enter" }}
+                      shortcut={alternateShortcut("enter")}
                       onAction={async () => {
                         await removePin(m.id);
                         await showToast({ style: Toast.Style.Success, title: "Unpinned Model" });
@@ -420,7 +437,7 @@ function SearchSection({
                     <Action
                       title="Pin Model"
                       icon={Icon.Pin}
-                      shortcut={{ modifiers: ["opt"], key: "enter" }}
+                      shortcut={alternateShortcut("enter")}
                       onAction={async () => {
                         await addPin(m.id);
                         await showToast({ style: Toast.Style.Success, title: "Pinned Model" });
@@ -474,6 +491,7 @@ function LeaderboardSection({
     data: rows = [],
     isLoading,
     revalidate,
+    error,
   } = useCachedPromise(
     async (m: MetricKey) => {
       const client = sb();
@@ -537,7 +555,7 @@ function LeaderboardSection({
             <Action
               title={isPinned ? "Unpin Model" : "Pin Model"}
               icon={isPinned ? Icon.PinDisabled : Icon.Pin}
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
+              shortcut={alternateShortcut("enter")}
               onAction={async () => {
                 if (isPinned) {
                   await removePin(r.id);
@@ -551,14 +569,10 @@ function LeaderboardSection({
             <Action
               title="Switch to Search"
               icon={Icon.MagnifyingGlass}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              shortcut={primaryShortcut("l")}
               onAction={() => setMode("search")}
             />
-            <ActionPanel.Submenu
-              title="Change Leaderboard…"
-              icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
-            >
+            <ActionPanel.Submenu title="Change Leaderboard…" icon={Icon.List} shortcut={primaryShortcut("p")}>
               <ActionPanel.Section title="Pick Leaderboard Metric">
                 {METRICS.map((opt) => (
                   <Action
@@ -679,6 +693,18 @@ function LeaderboardSection({
           ))}
         </List.Section>
       )}
+      {!isLoading && error ? (
+        <List.Item
+          icon={Icon.ExclamationMark}
+          title="Could Not Load Leaderboard"
+          subtitle={error.message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {pinnedRowsFiltered.length > 0 && (
         <List.Section title="Pinned">{pinnedRowsFiltered.map((r) => renderItem(r as unknown as Model))}</List.Section>
       )}
@@ -883,6 +909,7 @@ function ModelDetail({ model, pinnedIds, addPin, removePin }: ModelDetailProps) 
           <Action
             title={isPinned ? "Unpin Model" : "Pin Model"}
             icon={isPinned ? Icon.PinDisabled : Icon.Pin}
+            shortcut={alternateShortcut("enter")}
             onAction={() => void togglePin()}
           />
           <ActionPanel.Submenu title="Copy Info" icon={Icon.Clipboard}>

@@ -1,4 +1,4 @@
-import { request } from "./request";
+import { request, requestAll } from "./request";
 import { Task } from "./tasks";
 
 export type Tag = {
@@ -7,11 +7,9 @@ export type Tag = {
 };
 
 export async function getTagsForWorkspace(workspaceGid: string) {
-  const { data } = await request<{ data: Tag[] }>(`/workspaces/${workspaceGid}/tags`, {
+  return requestAll<Tag>(`/workspaces/${workspaceGid}/tags`, {
     params: { opt_fields: "gid,name" },
   });
-
-  return data.data;
 }
 
 export async function addTag(taskId: string, tagId: string) {

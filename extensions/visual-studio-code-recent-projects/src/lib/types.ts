@@ -40,6 +40,7 @@ export enum VSCodeBuild {
   TraeCN = "Trae CN",
   VSCodium = "VSCodium",
   VSCodiumInsiders = "VSCodium - Insiders",
+  Devin = "Devin",
   Windsurf = "Windsurf",
   Lingma = "Lingma",
 }

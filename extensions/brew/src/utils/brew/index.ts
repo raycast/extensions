@@ -22,7 +22,7 @@ export type {
 } from "../types";
 
 // Paths
-export { brewPrefix, brewPath, brewExecutable } from "./paths";
+export { brewPrefix, brewPath, brewCachePrefix, brewExecutable } from "./paths";
 
 // Commands
 export { execBrew, execBrewEnv } from "./commands";
@@ -34,14 +34,37 @@ export type { BrewPhase, BrewProgress, ProgressCallback } from "./progress";
 // Fetching
 export {
   brewFetchInstalled,
-  brewFetchInstalledFast,
+  brewFetchInstallableResults,
+  brewMapInstalled,
+  asInstallableResults,
   brewFetchOutdated,
   brewUpdate,
   brewFetchFormulaInfo,
   brewFetchCaskInfo,
   hasSearchCache,
   invalidateChunkedCacheMemory,
+  onIndexRefreshed,
 } from "./fetch";
+
+// Analytics
+export {
+  packageAnalyticsURL,
+  analyticsRows,
+  totalForPeriod,
+  packageStatus,
+  fetchPopularityRanks,
+  invalidatePopularityRanks,
+  analyticsCacheFiles,
+  POPULARITY_PERIOD,
+} from "./analytics";
+export type {
+  AnalyticsPeriod,
+  AnalyticsRow,
+  AnalyticsCounts,
+  PackageAnalytics,
+  PackageDetailResponse,
+  PopularityRanks,
+} from "./analytics";
 
 // Search
 export { brewSearch } from "./search";
@@ -56,14 +79,37 @@ export {
   brewUpgradeSingleWithProgress,
   brewUpgradeAll,
   brewCleanup,
-  brewPinFormula,
-  brewUnpinFormula,
+  brewPin,
+  brewUnpin,
   brewDoctor,
 } from "./actions";
 
 // Upgrade with progress
-export { brewUpgradeWithProgress } from "./upgrade";
-export type { UpgradeStep, UpgradeStepStatus, UpgradeProgressCallback, UpgradeResult } from "./upgrade";
+export { brewUpgradeOutdated, upgradeKey } from "./upgrade";
+export type {
+  UpgradePackage,
+  UpgradePackageStatus,
+  UpgradeEvent,
+  UpgradeEventCallback,
+  UpgradeSummary,
+} from "./upgrade";
+
+// Services
+export {
+  ALL_SERVICES,
+  SERVICE_ACTION_COPY,
+  applyServiceAction,
+  brewFetchServices,
+  brewStartService,
+  brewStopService,
+  brewRestartService,
+  brewServiceIsRunning,
+  runServiceCommand,
+} from "./services";
+export type { Service, ServiceStatus, ServiceAction } from "./services";
+
+// Version comparison
+export { isOutdatedVersion } from "./version";
 
 // Helpers
 export {
@@ -71,11 +117,19 @@ export {
   brewIsInstalled,
   brewInstallPath,
   brewFormatVersion,
+  brewInstalledVersion,
+  brewIsOutdated,
+  brewInstalledDate,
   brewIdentifier,
   brewCaskOption,
+  normalizeOutdatedResults,
+  brewPinnedIdentifiers,
+  pinLookupKey,
+  isPinnedPackage,
   isCask,
   brewCompare,
   brewInstallCommand,
+  brewAdoptCommand,
   brewUninstallCommand,
   brewUpgradeCommand,
 } from "./helpers";

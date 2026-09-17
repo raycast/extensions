@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import path from "path";
 import { promisify } from "util";
 
@@ -11,8 +11,13 @@ import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import {
   ACCEPTABLE_CLONE_PROTOCOLS,
   AcceptableCloneProtocol,
+  AcceptableCloneTool,
+  ACCEPTABLE_CLONE_TOOLS,
+  buildCloneCommandArgs,
+  buildGhCloneCommandArgs,
   CLONE_PROTOCOLS_TO_LABELS,
-  buildCloneCommand,
+  CLONE_TOOLS_TO_LABELS,
+  getGhAvailability,
 } from "../helpers/repository";
 
 type CloneRepositoryFormProps = {
@@ -21,7 +26,7 @@ type CloneRepositoryFormProps = {
 
 export default function CloneRepositoryForm({ repository }: CloneRepositoryFormProps) {
   const { octokit } = getGitHubClient();
-  const { application, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
+  const { application, baseClonePath, repositoryCloneProtocol } = getPreferenceValues<Preferences.SearchRepositories>();
 
   const { data: branches, isLoading } = useCachedPromise(
     async (repo) => {
@@ -35,13 +40,16 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
     [repository],
   );
 
-  const { itemProps, handleSubmit, setValue } = useForm<{
+  const { itemProps, handleSubmit, setValue, values } = useForm<{
     clonePath: string[];
     branch: string;
     cloneProtocol: AcceptableCloneProtocol;
+    cloneTool: AcceptableCloneTool;
   }>({
     initialValues: {
+      clonePath: baseClonePath ? [baseClonePath] : [],
       cloneProtocol: repositoryCloneProtocol,
+      cloneTool: "git",
     },
     async onSubmit(values) {
       const repoName = repository.name;
@@ -54,15 +62,51 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
       });
 
       const branchOption = values.branch ? ["-b", values.branch] : [];
-      const cloneCommand = buildCloneCommand(repository.nameWithOwner, values.cloneProtocol, {
-        gitFlags: branchOption,
-        targetDir: targetDir,
-      });
-
       const execAsync = promisify(exec);
+      const execFileAsync = promisify(execFile);
+
+      let ghExecutable = "gh";
+
+      if (values.cloneTool === "gh") {
+        const ghAvailability = await getGhAvailability();
+
+        if (!ghAvailability.available) {
+          if (ghAvailability.reason === "not-installed") {
+            await showFailureToast(undefined, {
+              title: "GitHub CLI is not installed",
+              message: "Install it with `brew install gh` or visit https://cli.github.com, then try again.",
+            });
+          } else {
+            await showFailureToast(undefined, {
+              title: "GitHub CLI is not authenticated",
+              message: "Run `gh auth login` in your terminal to authenticate, then try again.",
+            });
+          }
+          return;
+        }
+
+        ghExecutable = ghAvailability.executable;
+      }
 
       try {
-        await execAsync(cloneCommand);
+        if (values.cloneTool === "gh") {
+          await execFileAsync(
+            ghExecutable,
+            buildGhCloneCommandArgs(repository.nameWithOwner, {
+              gitFlags: branchOption,
+              targetDir: targetDir,
+            }),
+          );
+        } else {
+          await execFileAsync(
+            "git",
+            buildCloneCommandArgs(repository.nameWithOwner, values.cloneProtocol, {
+              gitFlags: branchOption,
+              targetDir: targetDir,
+            }),
+          );
+        }
+
         await showToast({
           style: Toast.Style.Success,
           title: "Repository cloned successfully",
@@ -117,6 +161,20 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
         </ActionPanel>
       }
     >
+      {/* @ts-expect-error value always satisfies AcceptableCloneTool but TypeScript doesn't know that */}
+      <Form.Dropdown {...itemProps.cloneTool} title="Clone Tool">
+        {ACCEPTABLE_CLONE_TOOLS.map((tool) => (
+          <Form.Dropdown.Item key={tool} value={tool} title={CLONE_TOOLS_TO_LABELS[tool]} />
+        ))}
+      </Form.Dropdown>
+      <Form.Description
+        title="Clone Location"
+        text={
+          baseClonePath
+            ? `Starts at your Default Clone Path (${baseClonePath}). Choose another directory to override it for this clone.`
+            : "Choose the directory where the repository should be cloned. Set a Default Clone Path in extension preferences to reuse a directory."
+        }
+      />
       <Form.FilePicker
         {...itemProps.clonePath}
         title="Clone Path"
@@ -128,12 +186,21 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
       <Form.Dropdown {...itemProps.branch} title="Branch Name">
         {branches?.map((b) => <Form.Dropdown.Item key={b} value={b} title={b} />)}
       </Form.Dropdown>
-      {/* @ts-expect-error value always satisfies AcceptableCloneProtocol but TypeScript doesn't know that */}
-      <Form.Dropdown {...itemProps.cloneProtocol} title="Repository Clone Protocol" storeValue>
-        {ACCEPTABLE_CLONE_PROTOCOLS.map((protocol) => (
-          <Form.Dropdown.Item key={protocol} value={protocol} title={CLONE_PROTOCOLS_TO_LABELS[protocol]} />
-        ))}
-      </Form.Dropdown>
+      {values.cloneTool === "gh" ? (
+        <Form.Description
+          title="Authentication"
+          text="Cloning uses your existing GitHub CLI (gh) authentication and git protocol configuration. Run `gh auth login` in your terminal if you are not authenticated."
+        />
+      ) : (
+        <>
+          {/* @ts-expect-error value always satisfies AcceptableCloneProtocol but TypeScript doesn't know that */}
+          <Form.Dropdown {...itemProps.cloneProtocol} title="Repository Clone Protocol" storeValue>
+            {ACCEPTABLE_CLONE_PROTOCOLS.map((protocol) => (
+              <Form.Dropdown.Item key={protocol} value={protocol} title={CLONE_PROTOCOLS_TO_LABELS[protocol]} />
+            ))}
+          </Form.Dropdown>
+        </>
+      )}
     </Form>
   );
 }

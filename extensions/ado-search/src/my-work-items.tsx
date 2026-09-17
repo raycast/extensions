@@ -17,6 +17,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
+  parseList,
   getMyWorkItems,
   getWorkItemStates,
   getWorkItemTypes,
@@ -130,24 +131,32 @@ interface AppSettings {
   project: string;
   states: string[];
   types: string[];
+  /** Comma-separated states to float to the top of the list, in order. */
+  stateOrder: string;
   defaultRepo: string;
   defaultBaseBranch: string;
+  /** When true, only show items assigned to me. Default true. */
+  assignedToMe: boolean;
 }
 
 const EMPTY_SETTINGS: AppSettings = {
   project: "",
   states: [],
   types: [],
+  stateOrder: "",
   defaultRepo: "",
   defaultBaseBranch: "",
+  assignedToMe: true,
 };
 
 const STORAGE_KEYS = {
   project: "app.project",
   states: "app.states",
   types: "app.types",
+  stateOrder: "app.stateOrder",
   defaultRepo: "app.defaultRepo",
   defaultBaseBranch: "app.defaultBaseBranch",
+  assignedToMe: "app.assignedToMe",
   onboarded: "app.onboarded",
 };
 
@@ -155,12 +164,14 @@ async function readAppSettings(): Promise<{
   settings: AppSettings;
   onboarded: boolean;
 }> {
-  const [p, s, t, r, b, o] = await Promise.all([
+  const [p, s, t, so, r, b, am, o] = await Promise.all([
     LocalStorage.getItem<string>(STORAGE_KEYS.project),
     LocalStorage.getItem<string>(STORAGE_KEYS.states),
     LocalStorage.getItem<string>(STORAGE_KEYS.types),
+    LocalStorage.getItem<string>(STORAGE_KEYS.stateOrder),
     LocalStorage.getItem<string>(STORAGE_KEYS.defaultRepo),
     LocalStorage.getItem<string>(STORAGE_KEYS.defaultBaseBranch),
+    LocalStorage.getItem<string>(STORAGE_KEYS.assignedToMe),
     LocalStorage.getItem<string>(STORAGE_KEYS.onboarded),
   ]);
   const tryParse = <T,>(v: string | undefined, fallback: T): T => {
@@ -176,8 +187,10 @@ async function readAppSettings(): Promise<{
       project: tryParse<string>(p, ""),
       states: tryParse<string[]>(s, []),
       types: tryParse<string[]>(t, []),
+      stateOrder: tryParse<string>(so, ""),
       defaultRepo: tryParse<string>(r, ""),
       defaultBaseBranch: tryParse<string>(b, ""),
+      assignedToMe: tryParse<boolean>(am, true),
     },
     onboarded: tryParse<boolean>(o, false),
   };
@@ -188,8 +201,10 @@ async function writeAppSettings(settings: AppSettings): Promise<void> {
     LocalStorage.setItem(STORAGE_KEYS.project, JSON.stringify(settings.project)),
     LocalStorage.setItem(STORAGE_KEYS.states, JSON.stringify(settings.states)),
     LocalStorage.setItem(STORAGE_KEYS.types, JSON.stringify(settings.types)),
+    LocalStorage.setItem(STORAGE_KEYS.stateOrder, JSON.stringify(settings.stateOrder)),
     LocalStorage.setItem(STORAGE_KEYS.defaultRepo, JSON.stringify(settings.defaultRepo)),
     LocalStorage.setItem(STORAGE_KEYS.defaultBaseBranch, JSON.stringify(settings.defaultBaseBranch)),
+    LocalStorage.setItem(STORAGE_KEYS.assignedToMe, JSON.stringify(settings.assignedToMe)),
     LocalStorage.setItem(STORAGE_KEYS.onboarded, JSON.stringify(true)),
   ]);
 }
@@ -240,15 +255,18 @@ export default function Command() {
   const appProject = settings.project;
   const appStates = settings.states;
   const appTypes = settings.types;
+  const appStateOrder = settings.stateOrder;
+  const appAssignedToMe = settings.assignedToMe;
 
   const { data, isLoading, revalidate, mutate } = useCachedPromise(
-    async (projectArg: string, statesArg: string, typesArg: string) =>
+    async (projectArg: string, statesArg: string, typesArg: string, assignedToMeArg: boolean) =>
       getMyWorkItems({
         project: projectArg || undefined,
         states: statesArg ? statesArg.split("|") : undefined,
         types: typesArg ? typesArg.split("|") : undefined,
+        assignedToMe: assignedToMeArg,
       }),
-    [appProject, appStates.join("|"), appTypes.join("|")],
+    [appProject, appStates.join("|"), appTypes.join("|"), appAssignedToMe],
     {
       initialData: [],
       keepPreviousData: true,
@@ -281,7 +299,14 @@ export default function Command() {
     list.push(item);
     groups.set(item.state, list);
   }
-  const stateOrder = (appStates ?? []).map(normalizeState);
+  // Section order: user's "Preferred state order" first (in that order), then
+  // any remaining selected states (TagPicker order), then everything else
+  // alphabetically (handled by stateOrderIndex returning the array length).
+  const preferredOrder = parseList(appStateOrder).map(normalizeState);
+  const stateOrder = [
+    ...preferredOrder,
+    ...(appStates ?? []).map(normalizeState).filter((s) => !preferredOrder.includes(s)),
+  ];
   const groupKeys = Array.from(groups.keys()).sort((a, b) => {
     const ai = stateOrderIndex(a, stateOrder);
     const bi = stateOrderIndex(b, stateOrder);
@@ -372,6 +397,19 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 target={<CreateWorkItemForm knownProjects={projects} onCreated={() => revalidate()} />}
               />
+              <Action.Push
+                title="Settings"
+                icon={Icon.Gear}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "," }}
+                target={
+                  <SetupView
+                    onSaved={(next) => {
+                      handleSettingsSaved(next);
+                      revalidate();
+                    }}
+                  />
+                }
+              />
             </ActionPanel>
           }
         />
@@ -392,6 +430,7 @@ export default function Command() {
               <WorkItemRow
                 key={item.id}
                 item={item}
+                showAssignee={!appAssignedToMe}
                 onChange={() => revalidate()}
                 onItemUpdated={onItemUpdated}
                 showDetail={showDetail}
@@ -430,6 +469,7 @@ function WorkItemRow({
   onSelectAllVisible,
   onClearSelection,
   onSettingsSaved,
+  showAssignee,
 }: {
   item: WorkItem;
   onChange: () => void;
@@ -444,6 +484,7 @@ function WorkItemRow({
   onSelectAllVisible: () => void;
   onClearSelection: () => void;
   onSettingsSaved: (s: AppSettings) => void;
+  showAssignee: boolean;
 }) {
   const typeAcc = getTypeAccessory(item.workItemType);
   const selectedCount = selectedItems.length;
@@ -464,6 +505,9 @@ function WorkItemRow({
             ]
           : []),
         ...(item.priority ? [{ text: `P${item.priority}` }] : []),
+        ...(showAssignee && item.assignedTo
+          ? [{ icon: Icon.Person, text: item.assignedTo, tooltip: `Assigned to ${item.assignedTo}` }]
+          : []),
         {
           tag: { value: item.state, color: getStateColor(item.state) },
         },
@@ -606,7 +650,7 @@ function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: (update
   });
 
   const richHtmls = [current.description, current.acceptanceCriteria, current.reproSteps, ...(comments ?? [])];
-  const richKey = `${current.id}|${crypto.createHash("sha1").update(richHtmls.filter(Boolean).join(" ")).digest("hex")}`;
+  const richKey = `${current.id}|${crypto.createHash("sha1").update(richHtmls.filter(Boolean).join("\u0000")).digest("hex")}`;
   const media = useProcessedHtmlList(richHtmls, richKey);
 
   const {
@@ -803,7 +847,7 @@ function WorkItemView({ item, onUpdated }: { item: WorkItem; onUpdated?: (update
                     />
                   )}
                   <Action.ShowInFinder
-                    title="Show in Finder"
+                    title={process.platform === "win32" ? "Show in Explorer" : "Show in Finder"}
                     path={img.localPath}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                   />
@@ -954,9 +998,11 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
 
   const [project, setProject] = useState("");
   const [states, setStates] = useState<string[]>([]);
+  const [stateOrder, setStateOrder] = useState("");
   const [types, setTypes] = useState<string[]>([]);
   const [defaultRepo, setDefaultRepo] = useState("");
   const [defaultBaseBranch, setDefaultBaseBranch] = useState("");
+  const [assignedToMe, setAssignedToMe] = useState(true);
   const [formInitialized, setFormInitialized] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -966,9 +1012,11 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
       if (cancelled) return;
       setProject(settings.project);
       setStates(settings.states);
+      setStateOrder(settings.stateOrder);
       setTypes(settings.types);
       setDefaultRepo(settings.defaultRepo);
       setDefaultBaseBranch(settings.defaultBaseBranch);
+      setAssignedToMe(settings.assignedToMe);
       setFormInitialized(true);
     });
     return () => {
@@ -1013,13 +1061,26 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
   const branchList = branches ?? [];
 
   const handleSubmit = async () => {
+    // Mirror the query-layer guard in buildWorkItemsWiql: browsing everyone's
+    // items needs a bounding filter, otherwise the next query would throw and
+    // leave the list empty/stale despite a "saved" toast.
+    if (!assignedToMe && !project.trim() && states.length === 0 && types.length === 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Add a bounding filter",
+        message: "To show items not assigned to you, pick a project, state, or type first.",
+      });
+      return;
+    }
     setSubmitting(true);
     const next: AppSettings = {
       project: project.trim(),
       states,
       types,
+      stateOrder: stateOrder.trim(),
       defaultRepo: defaultRepo.trim(),
       defaultBaseBranch: defaultBaseBranch.trim(),
+      assignedToMe,
     };
     try {
       await writeAppSettings(next);
@@ -1048,24 +1109,30 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
   const repoInList = !defaultRepo || repoList.some((r) => r.name === defaultRepo);
   const baseBranchInList = !defaultBaseBranch || branchList.includes(defaultBaseBranch);
 
+  // Ignore onChange before the saved values have loaded (prevents the initial
+  // mount from clobbering them). We no longer bail while option lists are still
+  // loading — that silently dropped the user's selections, so saving persisted
+  // the defaults. Dropdowns stay safe because they render the current value as a
+  // fallback item; the TagPickers have no fallback, so they additionally ignore
+  // the empty onChange emitted while their options are still loading.
   const handleProjectChange = (next: string) => {
-    if (!formInitialized || loadingProjects) return;
+    if (!formInitialized) return;
     setProject(next);
   };
   const handleStatesChange = (next: string[]) => {
-    if (!formInitialized || loadingStates || stateOptions.length === 0) return;
+    if (!formInitialized || stateOptions.length === 0) return;
     setStates(next);
   };
   const handleTypesChange = (next: string[]) => {
-    if (!formInitialized || loadingTypes || typeOptions.length === 0) return;
+    if (!formInitialized || typeOptions.length === 0) return;
     setTypes(next);
   };
   const handleRepoChange = (next: string) => {
-    if (!formInitialized || loadingRepos) return;
+    if (!formInitialized) return;
     setDefaultRepo(next);
   };
   const handleBaseBranchChange = (next: string) => {
-    if (!formInitialized || loadingBranches) return;
+    if (!formInitialized) return;
     setDefaultBaseBranch(next);
   };
 
@@ -1106,13 +1173,21 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
           <Form.Dropdown.Item key={p} value={p} title={p} />
         ))}
       </Form.Dropdown>
+      <Form.Checkbox
+        id="assignedToMe"
+        title="Assignment"
+        label="Only show items assigned to me"
+        info="When on, the list is scoped to items assigned to you. Turn off to see everyone's items — a project, state, or type filter is required to keep the result set bounded."
+        value={assignedToMe}
+        onChange={setAssignedToMe}
+      />
       <Form.TagPicker
         id="states"
         title="States to Show"
         info={
           projectIsEmpty
             ? "Pick a project first to see its states."
-            : "Select which work item states appear in the list. Empty = all except Closed, Done, Removed. Selection order also determines the order of grouped sections in the list."
+            : "Select which work item states appear in the list. Empty = all except Closed, Done, Removed. Use “Preferred State Order” below to control the order of the grouped sections."
         }
         value={safeStates}
         onChange={handleStatesChange}
@@ -1121,6 +1196,14 @@ function SetupView({ firstRun = false, onSaved }: { firstRun?: boolean; onSaved?
           <Form.TagPicker.Item key={s} value={s} title={s} />
         ))}
       </Form.TagPicker>
+      <Form.TextField
+        id="stateOrder"
+        title="Preferred State Order"
+        placeholder="Doing, In Progress, Code Review"
+        info="Comma-separated states to pin to the top of the list, in this order (e.g. 'Doing, In Progress'). Matching is case-insensitive. States not listed here follow afterwards. Leave empty for the default order."
+        value={stateOrder}
+        onChange={setStateOrder}
+      />
       <Form.TagPicker
         id="types"
         title="Types to Show"

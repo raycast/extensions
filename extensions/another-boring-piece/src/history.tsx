@@ -13,12 +13,8 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  buildWallpaperMarkdown,
-  downloadWallpaper,
-  getThumbnailUrl,
-  setDesktopWallpaper,
-} from "./utils";
+import { DownloadWallpaperAction, SetWallpaperAction } from "./actions";
+import { buildWallpaperMarkdown, getThumbnailUrl } from "./utils";
 import {
   clearWallpaperHistory,
   deleteWallpaperHistoryEntry,
@@ -90,49 +86,9 @@ function HistoryActions(props: {
 
   return (
     <ActionPanel>
-      <Action
-        title="Set Desktop Wallpaper"
-        icon={Icon.Desktop}
-        onAction={async () => {
-          const toast = await showToast({
-            style: Toast.Style.Animated,
-            title: "Setting wallpaper...",
-          });
-          try {
-            await setDesktopWallpaper(entry.wallpaper);
-            toast.style = Toast.Style.Success;
-            toast.title = "Wallpaper set successfully";
-          } catch (error) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Failed to set wallpaper";
-            toast.message =
-              error instanceof Error ? error.message : String(error);
-          }
-        }}
-      />
+      <SetWallpaperAction wallpaper={entry.wallpaper} />
       <ActionPanel.Section>
-        <Action
-          title="Download Wallpaper"
-          icon={Icon.Download}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
-          onAction={async () => {
-            const toast = await showToast({
-              style: Toast.Style.Animated,
-              title: "Downloading...",
-            });
-            try {
-              const downloadPath = await downloadWallpaper(entry.wallpaper);
-              toast.style = Toast.Style.Success;
-              toast.title = "Wallpaper downloaded";
-              toast.message = `Saved to ${downloadPath}`;
-            } catch (error) {
-              toast.style = Toast.Style.Failure;
-              toast.title = "Download failed";
-              toast.message =
-                error instanceof Error ? error.message : String(error);
-            }
-          }}
-        />
+        <DownloadWallpaperAction wallpaper={entry.wallpaper} />
         <Action.OpenInBrowser
           title="Open Artwork Page"
           url={getArtworkUrl(entry)}

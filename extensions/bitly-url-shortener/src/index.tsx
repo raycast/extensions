@@ -1,18 +1,34 @@
-import { Clipboard, getPreferenceValues, showToast, Toast, getSelectedText } from "@raycast/api";
+import {
+  Clipboard,
+  getPreferenceValues,
+  showToast,
+  Toast,
+  getSelectedText,
+  openCommandPreferences,
+} from "@raycast/api";
 import { Bitlink, ErrorResult } from "./types";
 import { API_HEADERS, API_URL } from "./config";
+import { assertBitlyOk, BitlyAuthError } from "./utils";
 
 export default async function () {
   const toast = await showToast(Toast.Style.Animated, "Shortening");
   try {
     const { pasteAfterShortening } = getPreferenceValues<Preferences>();
 
-    // If no text is selected, fall back to the clipboard
+    // If no text is selected, fall back to the clipboard.
+    // On some platforms (e.g. Windows) getSelectedText() resolves with an empty
+    // string instead of rejecting when there is no selection, so we can't rely
+    // on the try/catch alone to trigger the clipboard fallback.
     let urlToShorten;
     try {
       urlToShorten = await getSelectedText();
     } catch {
-      urlToShorten = await Clipboard.readText();
+      urlToShorten = undefined;
+    }
+    urlToShorten = urlToShorten?.trim();
+
+    if (!urlToShorten) {
+      urlToShorten = (await Clipboard.readText())?.trim();
     }
 
     if (!urlToShorten) throw new Error("No text selected and clipboard is empty");
@@ -28,10 +44,7 @@ export default async function () {
     });
 
     const result = await response.json();
-    if (!response.ok) {
-      const { message, errors } = result as ErrorResult;
-      throw new Error(`Bitly API Error - ${errors ? JSON.stringify(errors) : message}, URL - ${urlToShorten}`);
-    }
+    assertBitlyOk(response, result as ErrorResult, `URL - ${urlToShorten}`);
     const { link } = result as Bitlink;
 
     await Clipboard.copy(link);
@@ -45,7 +58,13 @@ export default async function () {
     }
   } catch (error) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Error";
-    toast.message = `${error}`;
+    toast.title = error instanceof BitlyAuthError ? "Invalid Access Token" : "Error";
+    toast.message = `${error instanceof Error ? error.message : error}`;
+    if (error instanceof BitlyAuthError) {
+      toast.primaryAction = {
+        title: "Open Command Preferences",
+        onAction: () => openCommandPreferences(),
+      };
+    }
   }
 }

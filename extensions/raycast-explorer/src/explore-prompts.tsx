@@ -1,10 +1,28 @@
-import { ActionPanel, Action, List, Icon, Color, environment, LaunchProps, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, LaunchProps, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { getPromptUpvotes, removeUpvote, upvote } from "./api";
+import {
+  AddSelectedToRaycastAction,
+  buildSharingLink,
+  CatalogSelectionActions,
+  CategoryDropdownItems,
+  CopyShareUrlAction,
+  filterCatalogGroups,
+  getSelectedItemIds,
+  ToggleSelectionAction,
+  useCatalogSelection,
+} from "./catalog";
 import { Prompt, PromptCategory } from "./data/prompts";
-import { CONTRIBUTE_URL, getIcon, raycastProtocol, wrapInCodeBlock } from "./helpers";
+import {
+  getCreativityIcon,
+  getIcon,
+  platformShortcut,
+  prepareModel,
+  raycastProtocol,
+  wrapInCodeBlock,
+} from "./helpers";
 
 type Props = LaunchProps<{ launchContext: string[] }>;
 
@@ -12,8 +30,9 @@ export default function ExplorePrompts(props: Props) {
   const { data: rawCategories, isLoading } = useFetch<PromptCategory[]>(`https://ray.so/api/prompts`);
   const { data: promptUpvotes, isLoading: isLoadingpromptUpvotes, mutate } = useCachedPromise(() => getPromptUpvotes());
 
-  const [selectedIds, setSelectedIds] = useState<string[]>(props.launchContext ?? []);
-  const [selectedCategory, setSelectedCategory] = useState(props.launchContext ? "selected" : "");
+  const { selectedIds, setSelectedIds, selectedCategory, setSelectedCategory, toggleSelection } = useCatalogSelection(
+    props.launchContext,
+  );
 
   const categories = useMemo(() => {
     const dataNormalizedById =
@@ -37,14 +56,6 @@ export default function ExplorePrompts(props: Props) {
       }) ?? []
     );
   }, [promptUpvotes, rawCategories]);
-
-  function toggleSelect(id: string) {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
-  }
 
   async function upvotePrompt(prompt: Prompt) {
     try {
@@ -82,7 +93,13 @@ export default function ExplorePrompts(props: Props) {
         const { title, prompt, creativity, icon, model } = selectedPrompt;
 
         return `prompts=${encodeURIComponent(
-          JSON.stringify({ title, prompt, creativity, icon, model: prepareModel(model) }),
+          JSON.stringify({
+            title,
+            prompt,
+            creativity,
+            icon,
+            model: prepareModel(model, "openai_gpt35_turbo"),
+          }),
         )}`;
       })
       .join("&");
@@ -90,30 +107,22 @@ export default function ExplorePrompts(props: Props) {
     return `${raycastProtocol}prompts/import?${queryString}`;
   }, [selectedIds, categories]);
 
-  const sharingLink = useMemo(() => {
-    const prompts = categories
-      .flatMap((category) => category.prompts)
-      .filter((prompt) => selectedIds.includes(prompt.id));
-
-    const { extensionName, commandName, raycastVersion } = environment;
-    const protocol = raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
-    const baseLink = `${protocol}extensions/thomaslombart/${extensionName}/${commandName}`;
-
-    return `${baseLink}?launchContext=${encodeURIComponent(JSON.stringify(prompts.map((prompt) => prompt.id)))}`;
-  }, [selectedIds, categories]);
+  const sharingLink = buildSharingLink(
+    getSelectedItemIds(
+      categories.map((category) => category.prompts),
+      selectedIds,
+    ),
+  );
 
   const filteredCategories = useMemo(() => {
-    if (selectedCategory === "") {
-      return categories;
-    }
-
-    if (selectedCategory === "selected") {
-      return categories.map((category) => {
-        return {
-          ...category,
-          prompts: category.prompts.filter((prompt) => selectedIds.includes(prompt.id)),
-        };
-      });
+    if (selectedCategory !== "popular" && selectedCategory !== "new") {
+      return filterCatalogGroups(
+        categories,
+        selectedCategory,
+        selectedIds,
+        (category) => category.prompts,
+        (category, prompts) => ({ ...category, prompts }),
+      );
     }
 
     if (selectedCategory === "popular") {
@@ -156,7 +165,7 @@ export default function ExplorePrompts(props: Props) {
       ];
     }
 
-    return categories.filter((category) => category.slug === selectedCategory);
+    return categories;
   }, [selectedCategory, categories, selectedIds]);
 
   const selectPromptsTitle = useMemo(() => {
@@ -177,8 +186,6 @@ export default function ExplorePrompts(props: Props) {
   }, [selectedCategory, categories]);
 
   const filteredPromptIds = filteredCategories.flatMap((category) => category.prompts).map((prompt) => prompt.id);
-  const selectedFilteredPromptsCount = selectedIds.filter((id) => filteredPromptIds.includes(id)).length;
-  const showSelectAllPromptsAction = selectedFilteredPromptsCount !== filteredPromptIds.length;
   const hasSelectedPrompts = selectedIds.length > 0;
 
   return (
@@ -196,17 +203,7 @@ export default function ExplorePrompts(props: Props) {
           <List.Dropdown.Item icon={Icon.Calendar} title="New Prompts" value="new" />
 
           <List.Dropdown.Section title="Categories">
-            {categories.map((category) => {
-              const icon = getIcon(category.icon || "");
-              return (
-                <List.Dropdown.Item
-                  key={category.slug}
-                  title={category.name}
-                  icon={Icon[icon] ?? Icon.List}
-                  value={category.slug}
-                />
-              );
-            })}
+            <CategoryDropdownItems categories={categories} />
           </List.Dropdown.Section>
         </List.Dropdown>
       }
@@ -232,81 +229,49 @@ export default function ExplorePrompts(props: Props) {
                 detail={<List.Item.Detail markdown={getPromptMarkdown(prompt)} />}
                 actions={
                   <ActionPanel>
-                    {isSelected ? (
-                      <Action title="Unselect Prompt" icon={Icon.Circle} onAction={() => toggleSelect(prompt.id)} />
-                    ) : (
-                      <Action title="Select Prompt" icon={Icon.CheckCircle} onAction={() => toggleSelect(prompt.id)} />
-                    )}
-                    {hasSelectedPrompts ? (
-                      <Action.Open title="Add to Raycast" icon={Icon.RaycastLogoNeg} target={addToRaycastUrl} />
-                    ) : null}
+                    <ToggleSelectionAction
+                      isSelected={isSelected}
+                      itemType="Prompt"
+                      onToggle={() => toggleSelection(prompt.id)}
+                    />
+                    {hasSelectedPrompts ? <AddSelectedToRaycastAction target={addToRaycastUrl} /> : null}
 
-                    {hasSelectedPrompts ? (
-                      <Action.CopyToClipboard
-                        title="Copy URL to Share"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                        icon={Icon.Link}
-                        content={sharingLink}
-                      />
-                    ) : null}
+                    {hasSelectedPrompts ? <CopyShareUrlAction content={sharingLink} /> : null}
                     <ActionPanel.Section>
                       {prompt.upvoted ? (
                         <Action
                           title="Remove Upvote"
-                          shortcut={{ modifiers: ["ctrl", "shift"], key: "u" }}
+                          shortcut={platformShortcut(["cmd", "shift"], "u")}
                           icon={Icon.Minus}
                           onAction={() => removePromptUpvote(prompt)}
                         />
                       ) : (
                         <Action
                           title="Upvote Prompt"
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                          shortcut={platformShortcut(["cmd", "shift"], "u")}
                           icon={Icon.ArrowUp}
                           onAction={() => upvotePrompt(prompt)}
                         />
                       )}
-                      {showSelectAllPromptsAction ? (
-                        <Action
-                          title={`Select ${selectPromptsTitle}`}
-                          icon={Icon.CheckCircle}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                          onAction={() =>
-                            setSelectedIds((ids) => [
-                              ...ids.filter((id) => !filteredPromptIds.includes(id)),
-                              ...filteredPromptIds,
-                            ])
-                          }
-                        />
-                      ) : null}
-                      {hasSelectedPrompts ? (
-                        <Action
-                          title={`Unselect ${selectPromptsTitle}`}
-                          icon={Icon.Circle}
-                          shortcut={{ modifiers: ["opt", "shift"], key: "a" }}
-                          onAction={() => {
-                            setSelectedIds(selectedIds.filter((id) => !filteredPromptIds.includes(id)));
-                          }}
-                        />
-                      ) : null}
-                      <Action.OpenInBrowser
-                        title="Contribute"
-                        icon={Icon.PlusSquare}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        url={CONTRIBUTE_URL}
+                      <CatalogSelectionActions
+                        selectedIds={selectedIds}
+                        setSelectedIds={setSelectedIds}
+                        filteredIds={filteredPromptIds}
+                        selectTitle={selectPromptsTitle}
                       />
                     </ActionPanel.Section>
 
                     <ActionPanel.Section>
                       <Action.CopyToClipboard
                         title="Copy Prompt"
-                        shortcut={{ modifiers: ["cmd"], key: "." }}
+                        shortcut={platformShortcut(["cmd"], ".")}
                         content={prompt.prompt}
                       />
 
                       {prompt.example ? (
                         <Action.CopyToClipboard
                           title="Copy Example Selection"
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                          shortcut={platformShortcut(["cmd", "shift"], ".")}
                           content={prompt.example.selection}
                         />
                       ) : null}
@@ -356,33 +321,4 @@ function getPromptMarkdown(prompt: Prompt) {
   return `## ${prompt.title}\n\n${formattedPrompt}${example ? `\n\n${example}` : ""}${
     author ? `\n\n---\n_${author}_` : ""
   }`;
-}
-
-function getCreativityIcon(creativity: Prompt["creativity"]) {
-  if (!creativity || creativity === "none") {
-    return Icon.CircleDisabled;
-  }
-
-  if (creativity === "low") {
-    return Icon.StackedBars1;
-  }
-
-  if (creativity === "medium") {
-    return Icon.StackedBars2;
-  }
-
-  if (creativity === "high") {
-    return Icon.StackedBars3;
-  }
-
-  if (creativity === "maximum") {
-    return Icon.StackedBars4;
-  }
-}
-
-function prepareModel(model?: string) {
-  if (model && /^".*"$/.test(model)) {
-    return model.slice(1, model.length - 1);
-  }
-  return model || "openai_gpt35_turbo";
 }

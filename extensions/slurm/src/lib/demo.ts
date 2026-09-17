@@ -26,6 +26,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import type { Host } from "./ssh-config";
+import type { MetricSample } from "./metrics";
 
 const FORCE_DEMO = false; // flip to true for an unconditional override
 const MARKER_FILE = path.join(os.homedir(), ".raycast-slurm-demo");
@@ -236,32 +237,6 @@ const PHOENIX_JOBS: MockJob[] = [
     tres: "cpu=32,mem=200G,node=1,gres/gpu=1,gres/gpu:h100=1",
   },
   {
-    jobId: "145798",
-    partition: "gpu-long",
-    name: "nerf_train",
-    state: "RUNNING",
-    elapsed: "22:18:42",
-    timeLimit: "3-00:00:00",
-    nodes: "1",
-    cpus: "24",
-    reasonOrNodeList: "gpu02",
-    user: "e.tanaka",
-    tres: "cpu=24,mem=160G,node=1,gres/gpu=2,gres/gpu:h100=2",
-  },
-  {
-    jobId: "145805",
-    partition: "gpu",
-    name: "robotics_rl",
-    state: "RUNNING",
-    elapsed: "5:14:08",
-    timeLimit: "1-00:00:00",
-    nodes: "1",
-    cpus: "16",
-    reasonOrNodeList: "gpu10",
-    user: "farah.ali",
-    tres: "cpu=16,mem=96G,node=1,gres/gpu=2,gres/gpu:a100=2",
-  },
-  {
     jobId: "145817",
     partition: "gpu",
     name: "protein_fold",
@@ -275,32 +250,6 @@ const PHOENIX_JOBS: MockJob[] = [
     tres: "cpu=32,mem=240G,node=1,gres/gpu=4,gres/gpu:h100=4",
   },
   {
-    jobId: "145828",
-    partition: "gpu",
-    name: "gan_train",
-    state: "RUNNING",
-    elapsed: "3:21:48",
-    timeLimit: "12:00:00",
-    nodes: "1",
-    cpus: "16",
-    reasonOrNodeList: "gpu15",
-    user: "h.kowalski",
-    tres: "cpu=16,mem=128G,node=1,gres/gpu=2,gres/gpu:a100=2",
-  },
-  {
-    jobId: "145833",
-    partition: "gpu",
-    name: "clip_finetune",
-    state: "RUNNING",
-    elapsed: "1:54:22",
-    timeLimit: "8:00:00",
-    nodes: "1",
-    cpus: "16",
-    reasonOrNodeList: "gpu15",
-    user: "j.martinez",
-    tres: "cpu=16,mem=128G,node=1,gres/gpu=2,gres/gpu:a100=2",
-  },
-  {
     jobId: "145840",
     partition: "gpu",
     name: "stable_video",
@@ -312,19 +261,6 @@ const PHOENIX_JOBS: MockJob[] = [
     reasonOrNodeList: "(Resources)",
     user: "k.nakamura",
     tres: "cpu=16,mem=128G,node=1,gres/gpu=4,gres/gpu:h100=4",
-  },
-  {
-    jobId: "145843",
-    partition: "debug",
-    name: "test_pipeline",
-    state: "PENDING",
-    elapsed: "0:00",
-    timeLimit: "0:30:00",
-    nodes: "1",
-    cpus: "4",
-    reasonOrNodeList: "(QOSMaxJobsPerUser)",
-    user: "m.olsen",
-    tres: "cpu=4,mem=16G,node=1,gres/gpu=1,gres/gpu:a100=1",
   },
 ];
 
@@ -680,32 +616,6 @@ const NIMBUS_JOBS: MockJob[] = [
     tres: "cpu=16,mem=96G,node=1,gres/gpu=2,gres/gpu:l40s=2",
   },
   {
-    jobId: "92322",
-    partition: "cpu",
-    name: "monte_carlo",
-    state: "RUNNING",
-    elapsed: "1:08:33",
-    timeLimit: "4:00:00",
-    nodes: "1",
-    cpus: "32",
-    reasonOrNodeList: "cpu04",
-    user: "e.tanaka",
-    tres: "cpu=32,mem=96G,node=1",
-  },
-  {
-    jobId: "92328",
-    partition: "cpu",
-    name: "nlp_pipeline",
-    state: "RUNNING",
-    elapsed: "0:48:14",
-    timeLimit: "6:00:00",
-    nodes: "1",
-    cpus: "16",
-    reasonOrNodeList: "cpu08",
-    user: "farah.ali",
-    tres: "cpu=16,mem=64G,node=1",
-  },
-  {
     jobId: "92335",
     partition: "gpu",
     name: "cv_baseline",
@@ -730,19 +640,6 @@ const NIMBUS_JOBS: MockJob[] = [
     reasonOrNodeList: "cpu13",
     user: "h.kowalski",
     tres: "cpu=8,mem=32G,node=1",
-  },
-  {
-    jobId: "92344",
-    partition: "cpu",
-    name: "bayes_mcmc",
-    state: "RUNNING",
-    elapsed: "5:31:22",
-    timeLimit: "12:00:00",
-    nodes: "1",
-    cpus: "24",
-    reasonOrNodeList: "cpu05",
-    user: "j.martinez",
-    tres: "cpu=24,mem=96G,node=1",
   },
   {
     jobId: "92355",
@@ -1175,26 +1072,130 @@ function nodesForHost(host: string): MockNode[] {
   return [];
 }
 
+// Local "YYYY-MM-DDTHH:MM:SS" — the format real scontrol emits and parseSlurmDateTime expects.
+function slurmIso(ms: number): string {
+  const d = new Date(ms);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+
+function durationSeconds(v: string): number {
+  // Demo durations are well-formed ("0:45:23", "3-08:14:22"); fall back to 0.
+  const dash = v.split("-");
+  let days = 0;
+  let rest = v;
+  if (dash.length === 2) {
+    days = Number(dash[0]);
+    rest = dash[1];
+  }
+  const parts = rest.split(":").map(Number);
+  const [h, m, s] = parts.length === 3 ? parts : [0, parts[0] ?? 0, parts[1] ?? 0];
+  return days * 86_400 + h * 3600 + m * 60 + s;
+}
+
 function jobDetail(host: string, jobId: string): string {
   const j = jobsForHost(host).find((x) => x.jobId === jobId);
   if (!j) return `JobId=${jobId} JobState=NOT_FOUND Reason=Job_not_found`;
+  // Derive timestamps from the job's elapsed / limit so the detail view's
+  // elapsed / remaining / progress stay internally consistent (and tick live).
+  const now = Date.now();
+  const pending = j.state === "PENDING";
+  const running = j.state === "RUNNING";
+  const startMs = now - durationSeconds(j.elapsed) * 1000;
+  // Running jobs report a projected EndTime (start + limit); finished/completing
+  // jobs report the actual end (≈ now in the demo).
+  const endMs = running ? startMs + durationSeconds(j.timeLimit) * 1000 : now;
+  // Real Slurm leaves a pending job's StartTime "Unknown" until the scheduler
+  // estimates it; give the demo a near-future estimate so the Schedule view has
+  // something to show.
+  const startTime = pending ? slurmIso(now + 40 * 60_000) : slurmIso(startMs);
+  const endTime = pending ? "Unknown" : slurmIso(endMs);
+  const submitMs = pending ? now - 5 * 60_000 : startMs - 3 * 60_000;
   return [
     `JobId=${j.jobId} JobName=${j.name}`,
     `   UserId=${j.user}(1000) GroupId=${j.user}(1000) MCS_label=N/A`,
     `   Priority=4294901758 Nice=0 Account=research QOS=normal`,
-    `   JobState=${j.state} Reason=${j.state === "PENDING" ? j.reasonOrNodeList.replace(/[()]/g, "") : "None"} Dependency=(null)`,
+    `   JobState=${j.state} Reason=${pending ? j.reasonOrNodeList.replace(/[()]/g, "") : "None"} Dependency=(null)`,
     `   Requeue=1 Restarts=0 BatchFlag=1 Reboot=0 ExitCode=0:0`,
     `   RunTime=${j.elapsed} TimeLimit=${j.timeLimit} TimeMin=N/A`,
-    `   SubmitTime=2026-05-22T08:14:02 EligibleTime=2026-05-22T08:14:02`,
-    `   StartTime=${j.state === "PENDING" ? "Unknown" : "2026-05-22T08:14:05"}`,
+    `   SubmitTime=${slurmIso(submitMs)} EligibleTime=${slurmIso(submitMs)}`,
+    `   StartTime=${startTime} EndTime=${endTime}`,
     `   Partition=${j.partition} AllocNode:Sid=login01:48291`,
-    `   NodeList=${j.state === "PENDING" ? "(null)" : j.reasonOrNodeList}`,
+    `   NodeList=${pending ? "(null)" : j.reasonOrNodeList}`,
     `   NumNodes=${j.nodes} NumCPUs=${j.cpus} NumTasks=${j.nodes} CPUs/Task=1`,
-    `   TRES=${j.tres}`,
+    // Real scontrol exposes ReqTRES (always) and AllocTRES (empty until the job
+    // is allocated), not a plain "TRES" field.
+    `   ReqTRES=${j.tres}`,
+    `   AllocTRES=${pending ? "" : j.tres}`,
     `   Command=/home/${j.user}/scripts/${j.name}.sh`,
     `   WorkDir=/home/${j.user}/projects/${j.name}`,
     `   StdErr=/home/${j.user}/logs/${j.name}-${j.jobId}.err`,
     `   StdOut=/home/${j.user}/logs/${j.name}-${j.jobId}.out`,
+  ].join("\n");
+}
+
+// ---------- live utilization (fixed values) ----------
+
+// nvidia-smi-style model names + VRAM for the GPU types used in the fixtures.
+const GPU_SPECS: Record<string, { name: string; totalMiB: number }> = {
+  h100: { name: "NVIDIA H100 80GB HBM3", totalMiB: 81559 },
+  a100: { name: "NVIDIA A100-SXM4-80GB", totalMiB: 81920 },
+  l40s: { name: "NVIDIA L40S", totalMiB: 46068 },
+};
+
+// Fixed per-index utilization figures so the demo Utilization pane shows a
+// believable mixed picture without streaming anything.
+const GPU_UTIL = [94, 88, 97, 91, 86, 96, 90, 93];
+const GPU_MEM_PCT = [78, 71, 84, 69, 75, 81, 66, 73];
+
+// One synthetic metrics tick for an owned demo job, derived from its TRES (GPU
+// count + model). The caller stamps `t`; values are constant per job/GPU index.
+export function mockMetricSample(host: string, jobId: string): MetricSample | null {
+  const j = jobsForHost(host).find((x) => x.jobId === jobId && x.user === DEMO_USER);
+  if (!j || j.state !== "RUNNING") return null;
+  const count = Number(/gres\/gpu=(\d+)/.exec(j.tres)?.[1] ?? 0);
+  const model = /gres\/gpu:([^=,]+)=/.exec(j.tres)?.[1] ?? "";
+  const spec = GPU_SPECS[model] ?? { name: model.toUpperCase() || "GPU", totalMiB: 81920 };
+  const gpus = Array.from({ length: count }, (_, i) => ({
+    index: i,
+    name: spec.name,
+    util: GPU_UTIL[i % GPU_UTIL.length],
+    memPct: GPU_MEM_PCT[i % GPU_MEM_PCT.length],
+    memTotalMiB: spec.totalMiB,
+  }));
+  // CPU-only jobs run hotter on CPU; GPU jobs are mostly dataloader-bound.
+  return { t: Date.now(), gpus, cpu: count > 0 ? 62 : 87, ram: 54 };
+}
+
+// ---------- log tails ----------
+
+function mockLogTail(host: string, filePath: string): string {
+  const m = /-(\d+)\.(out|err)$/.exec(filePath);
+  if (!m) return "";
+  const j = jobsForHost(host).find((x) => x.jobId === m[1] && x.user === DEMO_USER);
+  if (!j) return "";
+  if (m[2] === "err") {
+    return [
+      `[${j.jobId}] WARNING: torch.distributed run with OMP_NUM_THREADS=1 — set it explicitly for best performance.`,
+      "FutureWarning: `torch.cuda.amp.autocast(...)` is deprecated, use `torch.amp.autocast('cuda', ...)` instead.",
+      "UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`.",
+      "",
+    ].join("\n");
+  }
+  return [
+    `=== ${j.name} (job ${j.jobId}) on ${host} ===`,
+    `Loading dataset shards from /scratch/${j.user}/${j.name}/data ... done (1024 shards)`,
+    "Initializing model ... done",
+    "Starting training from checkpoint step 42000",
+    "step 42010 | loss 2.4137 | lr 3.0e-4 | 1.42 it/s",
+    "step 42020 | loss 2.4051 | lr 3.0e-4 | 1.45 it/s",
+    "step 42030 | loss 2.3988 | lr 3.0e-4 | 1.44 it/s",
+    "step 42040 | loss 2.3902 | lr 3.0e-4 | 1.45 it/s",
+    "[eval] step 42040 | val_loss 2.4310 | val_ppl 11.37",
+    "saved checkpoint to checkpoints/step_42040.pt",
+    "step 42050 | loss 2.3877 | lr 3.0e-4 | 1.43 it/s",
+    "step 42060 | loss 2.3815 | lr 3.0e-4 | 1.44 it/s",
+    "",
   ].join("\n");
 }
 
@@ -1230,6 +1231,13 @@ export async function mockRunSsh(host: string, cmd: string): Promise<string> {
       .trim()
       .replace(/^'(.*)'$/, "$1");
     return jobDetail(host, jobId) + "\n";
+  }
+
+  // Log tails for the Output / Error panes: readLogTail's
+  // `tail -c <n> -- <path> | tr ... | tail -n <n>` pipeline.
+  if (cmd.startsWith("tail -c ")) {
+    const m = /--\s+'?([^\s'|]+)'?/.exec(cmd);
+    return mockLogTail(host, m ? m[1] : "");
   }
 
   if (cmd.startsWith("scancel ")) return "";

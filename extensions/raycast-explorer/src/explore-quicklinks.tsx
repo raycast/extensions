@@ -1,46 +1,50 @@
-import { ActionPanel, Action, List, Icon, Color, environment, LaunchProps } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, LaunchProps } from "@raycast/api";
 import { getAvatarIcon, useFetch } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
+import {
+  AddSelectedToRaycastAction,
+  CatalogDropdown,
+  CatalogSelectionActions,
+  filterCatalogGroups,
+  ToggleSelectionAction,
+  useCatalogSelection,
+} from "./catalog";
 import { QuicklinkCategory } from "./data/quicklinks";
-import { CONTRIBUTE_URL, getIcon } from "./helpers";
+import { platformShortcut } from "./helpers";
 
 type Props = LaunchProps<{ launchContext: string[] }>;
 
 export default function ExploreSnippets(props: Props) {
   const { data: rawCategories, isLoading } = useFetch<QuicklinkCategory[]>(`https://ray.so/api/quicklinks`);
-  const [selectedIds, setSelectedIds] = useState<string[]>(props.launchContext ?? []);
-  const [selectedCategory, setSelectedCategory] = useState(props.launchContext ? "selected" : "");
+  const { selectedIds, setSelectedIds, selectedCategory, setSelectedCategory, toggleSelection } = useCatalogSelection(
+    props.launchContext,
+  );
 
   const categories = useMemo(() => {
-    const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+    const protocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
+    // External quicklink data from ray.so always uses the public "raycast://" prefix.
+    // Rewrite it to the current build's scheme (supports internal/alpha/dev builds).
+    const publicRaycastPrefix = "raycast://";
     return rawCategories?.map((category) => {
       return {
         ...category,
         quicklinks: category.quicklinks.map((quicklink) => {
           return {
             ...quicklink,
-            link: quicklink.link.replace("raycast://", protocol),
+            link: quicklink.link.replace(publicRaycastPrefix, protocol),
           };
         }),
       };
     });
   }, [rawCategories]);
 
-  function toggleSelect(id: string) {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
-    } else {
-      setSelectedIds([...selectedIds, id]);
-    }
-  }
-
   const addToRaycastUrl = useMemo(() => {
     const quicklinks = categories
       ?.flatMap((category) => category.quicklinks)
       .filter((quicklink) => selectedIds.includes(quicklink.id));
 
-    const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+    const protocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
 
     const queryString = quicklinks
       ?.map((quicklink) => {
@@ -54,20 +58,14 @@ export default function ExploreSnippets(props: Props) {
   }, [selectedIds, categories]);
 
   const filteredCategories = useMemo(() => {
-    if (selectedCategory === "") {
-      return categories;
-    }
-
-    if (selectedCategory === "selected") {
-      return categories?.map((category) => {
-        return {
-          ...category,
-          quicklinks: category.quicklinks.filter((quicklink) => selectedIds.includes(quicklink.id)),
-        };
-      });
-    }
-
-    return categories?.filter((category) => category.slug === selectedCategory);
+    if (!categories) return categories;
+    return filterCatalogGroups(
+      categories,
+      selectedCategory,
+      selectedIds,
+      (category) => category.quicklinks,
+      (category, quicklinks) => ({ ...category, quicklinks }),
+    );
   }, [selectedCategory, categories, selectedIds]);
 
   const selectQuicklinksTitle = useMemo(() => {
@@ -81,8 +79,6 @@ export default function ExploreSnippets(props: Props) {
 
   const filteredQuicklinkIds =
     filteredCategories?.flatMap((category) => category.quicklinks).map((quicklink) => quicklink.id) ?? [];
-  const selectedFilteredQuicklinksCount = selectedIds.filter((id) => filteredQuicklinkIds.includes(id)).length;
-  const showSelectAllQuicklinksAction = selectedFilteredQuicklinksCount !== filteredQuicklinkIds.length;
   const hasSelectedQuicklinks = selectedIds.length > 0;
 
   return (
@@ -91,31 +87,13 @@ export default function ExploreSnippets(props: Props) {
       isLoading={isLoading}
       searchBarPlaceholder="Filter by name, category, or link"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Category"
+        <CatalogDropdown
+          categories={categories}
+          selectedCategory={selectedCategory}
           onChange={setSelectedCategory}
-          value={selectedCategory}
           isLoading={isLoading}
-        >
-          <List.Dropdown.Item icon={Icon.BulletPoints} title="All Categories" value="" />
-          {hasSelectedQuicklinks ? (
-            <List.Dropdown.Item icon={Icon.CheckCircle} title="Selected Quicklinks" value="selected" />
-          ) : null}
-
-          <List.Dropdown.Section title="Categories">
-            {categories?.map((category) => {
-              const icon = getIcon(category.icon || "");
-              return (
-                <List.Dropdown.Item
-                  icon={Icon[icon] ?? Icon.List}
-                  key={category.slug}
-                  title={category.name}
-                  value={category.slug}
-                />
-              );
-            })}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+          selectedItemsTitle={hasSelectedQuicklinks ? "Selected Quicklinks" : undefined}
+        />
       }
     >
       {filteredCategories?.map((category) => (
@@ -170,60 +148,27 @@ export default function ExploreSnippets(props: Props) {
                 }
                 actions={
                   <ActionPanel>
-                    {isSelected ? (
-                      <Action
-                        title="Unselect Quicklink"
-                        icon={Icon.Circle}
-                        onAction={() => toggleSelect(quicklink.id)}
-                      />
-                    ) : (
-                      <Action
-                        title="Select Quicklink"
-                        icon={Icon.CheckCircle}
-                        onAction={() => toggleSelect(quicklink.id)}
-                      />
-                    )}
+                    <ToggleSelectionAction
+                      isSelected={isSelected}
+                      itemType="Quicklink"
+                      onToggle={() => toggleSelection(quicklink.id)}
+                    />
 
-                    {hasSelectedQuicklinks ? (
-                      <Action.Open title="Add to Raycast" icon={Icon.RaycastLogoNeg} target={addToRaycastUrl} />
-                    ) : null}
+                    {hasSelectedQuicklinks ? <AddSelectedToRaycastAction target={addToRaycastUrl} /> : null}
 
                     <ActionPanel.Section>
-                      {showSelectAllQuicklinksAction ? (
-                        <Action
-                          title={`Select ${selectQuicklinksTitle}`}
-                          icon={Icon.CheckCircle}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                          onAction={() =>
-                            setSelectedIds((ids) => [
-                              ...ids.filter((id) => !filteredQuicklinkIds.includes(id)),
-                              ...filteredQuicklinkIds,
-                            ])
-                          }
-                        />
-                      ) : null}
-                      {hasSelectedQuicklinks ? (
-                        <Action
-                          title={`Unselect ${selectQuicklinksTitle}`}
-                          icon={Icon.Circle}
-                          shortcut={{ modifiers: ["opt", "shift"], key: "a" }}
-                          onAction={() => {
-                            setSelectedIds(selectedIds.filter((id) => !filteredQuicklinkIds.includes(id)));
-                          }}
-                        />
-                      ) : null}
-                      <Action.OpenInBrowser
-                        title="Contribute"
-                        icon={Icon.PlusSquare}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        url={CONTRIBUTE_URL}
+                      <CatalogSelectionActions
+                        selectedIds={selectedIds}
+                        setSelectedIds={setSelectedIds}
+                        filteredIds={filteredQuicklinkIds}
+                        selectTitle={selectQuicklinksTitle}
                       />
                     </ActionPanel.Section>
 
                     <ActionPanel.Section>
                       <Action.CopyToClipboard
                         title="Copy Quicklink Link"
-                        shortcut={{ modifiers: ["cmd"], key: "." }}
+                        shortcut={platformShortcut(["cmd"], ".")}
                         content={quicklink.link}
                       />
                     </ActionPanel.Section>

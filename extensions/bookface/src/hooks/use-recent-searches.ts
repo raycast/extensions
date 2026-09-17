@@ -27,6 +27,11 @@ function isRecentSearch(value: unknown): value is RecentSearch {
 export function useRecentSearches(
   storageKey: string,
   limit = 25,
+  // When true, adding a query drops any existing recent that is a strict prefix
+  // of it — right for search-as-you-type (where "S","Stri","Stripe" are stages
+  // of one search), wrong for Ask (where entries are deliberate submissions and
+  // "safe" must survive a later "safe financing"). Opt-in; defaults off.
+  collapsePrefixes = false,
 ): UseRecentSearchesResult {
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +74,18 @@ export function useRecentSearches(
       const trimmed = query.trim();
       if (!trimmed) return;
       try {
-        const filtered = recentSearches.filter((s) => s.query !== trimmed);
+        const lower = trimmed.toLowerCase();
+        const filtered = recentSearches.filter((s) => {
+          const sl = s.query.toLowerCase();
+          // Always drop an exact duplicate (re-added at the front).
+          if (sl === lower) return false;
+          // Optionally collapse typed-toward prefixes: a search-as-you-type
+          // session produces "S","St","Stri",… so when a longer query lands,
+          // remove the shorter prefixes it superseded. Off for Ask, where each
+          // recent is a deliberate question that must not be eaten by a longer one.
+          if (collapsePrefixes && lower.startsWith(sl)) return false;
+          return true;
+        });
         const next = [
           { query: trimmed, timestamp: Date.now() },
           ...filtered,
@@ -82,7 +98,7 @@ export function useRecentSearches(
         await showFailureToast(err, { title: "Failed to save recent" });
       }
     },
-    [recentSearches, limit, persist],
+    [recentSearches, limit, persist, collapsePrefixes],
   );
 
   const removeRecentSearch = useCallback(

@@ -1,5 +1,25 @@
 # Messages Changelog
 
+## [AI Message History and Activity] - 2026-08-31
+
+- Add stable cursor pagination, date and unread filters, attachment metadata, and plain-text fallback to AI message search
+- Add an AI tool for overall and per-chat sent/received activity
+- Use stable chat IDs for existing-conversation sends and report AppleScript send failures accurately
+- Add unread filters and message-activity date ranges to AI chat search
+- Search a cached full Contacts catalog when an AI request names someone without a recent conversation
+
+## [Faster chat and recipient search] - 2026-07-10
+
+- Show cached Send Message recipients immediately, grouped under `Recents` and `Contacts`
+- Keep Open Chat focused on existing conversations
+
+## [Bug Fixes & Improvements] - 2026-07-01
+
+- Fix contacts showing only a phone number instead of their name
+- Show contacts identified by an email address in chats and message filters
+- Load contacts faster and stop re-fetching them while searching
+- Show cached contact names instantly when reopening commands
+
 ## [Bug Fixes & Improvements] - 2026-06-10
 
 - Add `before` pagination cursor to load older messages in AI chat

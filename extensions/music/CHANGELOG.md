@@ -1,5 +1,18 @@
 # Apple Music Changelog
 
+## [Search Apple Music Command] - 2026-08-22
+
+- Added a new "Search Apple Music" command that searches the Apple Music catalog for songs and albums — with album tracklists, Open in Music, and Add to Library (checking first whether the item is already in your library).
+- Added Apple Music account sign-in (via Raycast's OAuth proxy) powering the catalog features.
+
+## [Background Refresh Fix] - 2026-08-21
+
+- Reduced background current-track refreshes to once per minute.
+
+## [Fix Library Album Search] - 2026-06-15
+
+- Fixed `Play Library Album` so searching by artist name shows matching albums from the library.
+
 ## [Just Play Command] - 2026-04-04
 
 - Added a new "Just Play" no-view command that takes a text query and immediately plays the best matching track from your library, with HUD feedback.

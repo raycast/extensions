@@ -1,10 +1,24 @@
 # Gram Changelog
 
+## [Fix Local Project Launch in Raycast v2] - 2026-08-16
+
+- Open projects before closing Raycast so CLI launches complete reliably. From [PR #30174](https://github.com/raycast/extensions/pull/30174)
+- Update Raycast SDK, utilities, and development dependencies.
+
+## [Fix Nix aware `$PATH` lookup] - 2026-07-22
+
+- Restore `$PATH` lookup for Nix-managed language tools by supplying `$USER` to the clean login shell. From [PR #29611](https://github.com/raycast/extensions/pull/29611)
+- Update Raycast SDK and devDependencies
+
+## [Fix Remote Project Launch] - 2026-07-01
+
+- Fix an issue where remote projects fail to launch from the "Search Recent Projects" menu. From [PR #29088](https://github.com/raycast/extensions/pull/29088)
+
 ## [Fix Non-POSIX Shell Support] - 2026-06-05
 
 - Fix projects silently failing to open when the user's default shell is non-POSIX (nushell, elvish, xonsh, pwsh, ...) by falling back to `/bin/zsh` for the `env -i ... -lc` invocation. Previously only fish was handled this way.
 - Surface CLI launch failures via a toast in the single-folder open action so future regressions don't fail silently.
-- from [PR #28027](https://github.com/raycast/extensions/pull/28027)
+- From [PR #28027](https://github.com/raycast/extensions/pull/28027)
 
 ## [New Commands & Fixes] - 2026-06-04
 
@@ -19,6 +33,5 @@
 
 ### Fixed
 - Resolved a bug where opening a project via the recent projects menu required navigating to Raycast's main menu and back again for the "Open" badge and associated actions to appear in the UI.
-
 
 ## [Initial Version] - 2026-05-11

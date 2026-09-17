@@ -144,7 +144,9 @@ export class HomeAssistant {
     if (hostname.endsWith(".local")) {
       const mdnsHost = await queryMdns(hostname);
       if (mdnsHost) {
-        return url.replace(hostname, mdnsHost);
+        // IPv6 literals need brackets to be valid in a URL
+        const host = mdnsHost.includes(":") ? `[${mdnsHost}]` : mdnsHost;
+        return url.replace(hostname, host);
       } else {
         throw Error(`Could not resolve mDNS address ${url}`);
       }

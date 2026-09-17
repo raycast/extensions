@@ -1,5 +1,10 @@
 # LLM Stats Changelog
 
+## [Fix crash when sorting the model list by throughput] - 2026-07-06
+
+### Fixed
+- Sorting the model list by throughput no longer crashes with "TypeError: match is not a function" when the API returns the throughput value as a number
+
 ## [0.1.1] - 2026-01-19
 
 ### Changed

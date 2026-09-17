@@ -5,6 +5,9 @@
   "description": "Track value of your Stocks, ETFs, Properties, Cash, Debt and Crypto with automatic price updates over time to see your net worth",
   "icon": "extension-icon.png",
   "author": "filipawaits",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "platforms": [
     "macOS"
   ],

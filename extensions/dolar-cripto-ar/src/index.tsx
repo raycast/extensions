@@ -1,10 +1,10 @@
 import { environment, LaunchType, MenuBarExtra } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import MenuItems from "./components/MenuItems";
 import { CRYPTO_RATES as crypto, DOLLAR_RATES as dollar } from "./constants/currency-types";
-import { DollarResponse, CryptoPriceResponse, StablePriceResponse } from "./types/types";
+import { DollarResponse, CryptoPriceResponse, StablePriceResponse, CoinGeckoPriceResponse } from "./types/types";
 
 type AllCurrencyData = {
   dollar: DollarResponse;
@@ -27,22 +27,34 @@ export default function Command() {
     setIsLoading(true);
 
     try {
-      const dollarResponse: AxiosResponse<DollarResponse> = await axios.get("https://criptoya.com/api/dolar");
-      const btcResponse: AxiosResponse<CryptoPriceResponse> = await axios.get(
-        "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD",
-      );
-      const ethResponse: AxiosResponse<CryptoPriceResponse> = await axios.get(
-        "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD",
-      );
-      const usdtResponse: AxiosResponse<StablePriceResponse> = await axios.get(
-        "https://criptoya.com/api/binancep2p/usdt/ars/0.1",
-      );
+      const [dollarResult, cryptoResult, usdtResult] = await Promise.allSettled([
+        axios.get<DollarResponse>("https://criptoya.com/api/dolar"),
+        axios.get<CoinGeckoPriceResponse>(
+          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd",
+        ),
+        axios.get<StablePriceResponse>("https://criptoya.com/api/binancep2p/usdt/ars/0.1"),
+      ]);
+
+      const dollarData = dollarResult.status === "fulfilled" ? dollarResult.value.data : currencyData?.dollar;
+      const cryptoData = cryptoResult.status === "fulfilled" ? cryptoResult.value.data : undefined;
+      const usdtData = usdtResult.status === "fulfilled" ? usdtResult.value.data : currencyData?.usdt;
+
+      const btc: CryptoPriceResponse =
+        cryptoData?.bitcoin?.usd !== undefined ? { USD: cryptoData.bitcoin.usd } : (currencyData?.btc ?? {});
+      const eth: CryptoPriceResponse =
+        cryptoData?.ethereum?.usd !== undefined ? { USD: cryptoData.ethereum.usd } : (currencyData?.eth ?? {});
+
+      // Only blank out if we have no usable data at all
+      if (!dollarData && !usdtData && btc.USD === undefined && eth.USD === undefined) {
+        setCurrencyData(null);
+        return;
+      }
 
       const newCurrencyData: AllCurrencyData = {
-        dollar: dollarResponse.data,
-        btc: btcResponse.data,
-        eth: ethResponse.data,
-        usdt: usdtResponse.data,
+        dollar: dollarData ?? {},
+        btc,
+        eth,
+        usdt: usdtData ?? ({} as StablePriceResponse),
       };
 
       setCurrencyData(newCurrencyData);

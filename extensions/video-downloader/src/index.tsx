@@ -64,6 +64,9 @@ export default function DownloadVideo() {
       const options = ["-o", path.join(downloadPath, `${video?.title || "video"} (%(id)s).%(ext)s`)];
       const [downloadFormat, recodeFormat] = values.format.split("#");
 
+      // `medium` ("Audio"/"Video") is derived at component scope from the selected
+      // format and reused here for the progress toasts below.
+
       // The metadata preview is always for the single video, so default to
       // --no-playlist; only pull the whole list when the user opted in via the
       // "Download entire playlist" checkbox (shown only for playlist URLs).
@@ -81,7 +84,7 @@ export default function DownloadVideo() {
       }
 
       const toast = await showToast({
-        title: "Downloading Video",
+        title: `Downloading ${medium}`,
         style: Toast.Style.Animated,
         message: "0%",
       });
@@ -108,7 +111,7 @@ export default function DownloadVideo() {
           const currentProgress = Number(toast.message?.replace("%", ""));
 
           if (progress < currentProgress) {
-            toast.title = "Formatting Video";
+            toast.title = `Formatting ${medium}`;
           }
           toast.message = `${Math.floor(progress)}%`;
         }
@@ -170,7 +173,7 @@ export default function DownloadVideo() {
           return;
         }
 
-        toast.title = "Video Downloaded";
+        toast.title = `${medium} Downloaded`;
         toast.style = Toast.Style.Success;
         toast.message = video?.title;
 
@@ -330,6 +333,19 @@ export default function DownloadVideo() {
 
   const formats = useMemo(() => getFormats(video), [video]);
 
+  // "Audio" when the selected format is audio-only (MP3 via --extract-audio, or a
+  // raw audio stream like M4A/Opus — every "Audio Only" entry has vcodec "none"),
+  // else "Video". Drives both the submit button label and the progress toasts, so
+  // the whole flow agrees on what's being downloaded. MP3_FORMAT_ID is a hardcoded
+  // value with no backing Format in the list, so it's checked explicitly.
+  const medium = useMemo(() => {
+    const selectedFormat = Object.values(formats)
+      .flat()
+      .find((format) => getFormatValue(format) === values.format);
+    const isAudio = values.format === MP3_FORMAT_ID || selectedFormat?.vcodec === "none";
+    return isAudio ? "Audio" : "Video";
+  }, [formats, values.format]);
+
   // Classify the load error once so the placeholder, the Title row, and the
   // Try Again action all agree on whether a retry would help.
   const friendlyError = videoError ? describeYtdlpError(videoError) : null;
@@ -353,7 +369,7 @@ export default function DownloadVideo() {
           <ActionPanel.Section>
             <Action.SubmitForm
               icon={Icon.Download}
-              title="Download Video"
+              title={`Download ${medium}`}
               onSubmit={(values) => {
                 setWarning("");
                 handleSubmit({ ...values, copyToClipboard: false } as DownloadOptions);

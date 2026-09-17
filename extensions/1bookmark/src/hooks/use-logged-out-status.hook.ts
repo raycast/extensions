@@ -1,25 +1,38 @@
 import { useEffect, useRef } from "react";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCachedState } from "@raycast/utils";
-import { RouterOutputs, trpc } from "@/utils/trpc.util";
+import { RouterOutputs } from "@/utils/trpc.util";
+import { CachedMyBookmarks } from "../types";
 import { cache } from "../utils/cache.util";
 import {
   CACHED_KEY_SESSION_TOKEN,
   CACHED_KEY_ME,
   CACHED_KEY_MY_BOOKMARKS,
   CACHED_KEY_MY_TAGS,
+  CACHED_KEY_SPACE_VERIFYING_AUTH_EMAIL,
+  CACHED_KEY_SPACE_AUTH_CODE_SENT,
 } from "../utils/constants.util";
 
 export const useLoggedOutStatus = () => {
   const [sessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
+  // Local mirror of server data. Must not be exposed to another user, so clear it immediately on logout.
   const [, setMe] = useCachedState<RouterOutputs["user"]["me"] | null>(CACHED_KEY_ME, null);
-  const [, setBookmarks] = useCachedState<RouterOutputs["bookmark"]["listAll"] | null>(CACHED_KEY_MY_BOOKMARKS, null);
+  const [, setBookmarks] = useCachedState<CachedMyBookmarks | null>(CACHED_KEY_MY_BOOKMARKS, null);
   const [, setTags] = useCachedState<RouterOutputs["tag"]["list"] | null>(CACHED_KEY_MY_TAGS, null);
+  // Transient state of the short-lived auth flow — clear immediately on logout.
+  const [, setSpaceVerifyingAuthEmail] = useCachedState<string | undefined>(
+    CACHED_KEY_SPACE_VERIFYING_AUTH_EMAIL,
+    undefined,
+  );
+  const [, setSpaceAuthCodeSent] = useCachedState<boolean>(CACHED_KEY_SPACE_AUTH_CODE_SENT, false);
+  // Local-only user preferences — left untouched on logout so they survive re-login with the same ID;
+  // they are reset only when a different user logs in (use-user-cache-reset.hook).
   const [after1Sec, setAfter1Sec] = useState(sessionToken ? true : false);
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const cleared = useRef(false);
 
-  const trpcUtils = trpc.useUtils();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // If this is not here, LoginView will briefly appear.
@@ -37,13 +50,21 @@ export const useLoggedOutStatus = () => {
       cleared.current = false;
     } else if (loggedOutStatus && !cleared.current) {
       console.log("❌ clear cache");
+      // Immediately clear only security-sensitive caches (those that must not be exposed to another user).
       setMe(null);
       setBookmarks(null);
       setTags(null);
-      // cache.clear();
+      setSpaceVerifyingAuthEmail(undefined);
+      setSpaceAuthCodeSent(false);
+      // disabledSpaceIds / rankingEntries / recentSelectedSpace / recentSelectedTags are
+      // intentionally not cleared here so they survive re-login with the same ID.
+      // CACHED_KEY_LAST_LOGGED_IN_EMAIL is kept for comparison on the next login.
 
-      trpcUtils.user.me.reset(undefined, { cancelRefetch: true });
-      trpcUtils.bookmark.listAll.reset(undefined, { cancelRefetch: true });
+      // The React Query in-memory cache is a singleton that lives for the whole process, so resetting
+      // only some queries would let the previous user's data in the remaining queries (tag.list,
+      // space.get, spaceAuth.*, etc.) be reused on re-login. Reset the entire server-data cache instead.
+      // At this point the session token is empty, so queries are disabled/unmounted and no refetch occurs.
+      queryClient.resetQueries();
       cleared.current = true;
 
       // force re-render to resolve the issue that

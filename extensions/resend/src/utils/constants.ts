@@ -21,5 +21,6 @@ export const DOMAIN_STATUS_COLORS: Record<DomainStatus, Color> = {
   pending: Color.Yellow,
   not_started: Color.Orange,
   failed: Color.Red,
-  temporary_failure: Color.Orange,
+  partially_failed: Color.Orange,
+  partially_verified: Color.Orange,
 };

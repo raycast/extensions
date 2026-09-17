@@ -18,6 +18,7 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
   const {
     article,
     isLoading,
+    loadingStatus,
     error,
     blockedUrl,
     hasBrowserExtension,
@@ -47,7 +48,9 @@ export function ArticleReaderView(props: ArticleReaderViewProps) {
   } = props;
 
   if (isLoading) {
-    return <Detail isLoading={true} markdown="" />;
+    // Never an empty pane: loading can run long (a paywall bypass tries several
+    // sources in turn), and a blank screen with no words on it reads as a hang.
+    return <Detail isLoading={true} markdown={loadingStatus ? `# ${loadingStatus}` : "# Loading…"} />;
   }
 
   if (showUrlForm) {

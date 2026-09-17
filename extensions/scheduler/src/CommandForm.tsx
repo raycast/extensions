@@ -5,7 +5,7 @@ import { ScheduledCommand, RaycastCommand, FormValues, ScheduleType } from "./ty
 import { toLocalYMD } from "./utils/dateTime";
 import { useCommandPermissions } from "./hooks/useCommandPermissions";
 import { useBackgroundRefreshStatus } from "./hooks/useBackgroundRefreshStatus";
-import CronExpressionParser from "cron-parser";
+import { CronExpressionParser } from "cron-parser";
 import {
   getScheduleDescription,
   parseRaycastDeeplink,

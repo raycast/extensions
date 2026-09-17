@@ -5,6 +5,9 @@
   "description": "View Servers, Resources, Teams and more",
   "icon": "coolify.png",
   "author": "xmok",
+  "contributors": [
+    "alextlopez11"
+  ],
   "categories": [
     "Applications",
     "Developer Tools"
@@ -47,6 +50,29 @@
       "mode": "view"
     },
     {
+      "name": "menu-bar-deployments",
+      "title": "Menu Bar Deployments",
+      "description": "View recent Coolify deployments in the menu bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "maxDeployments",
+          "title": "Max Deployments",
+          "description": "The maximum number of deployments to show",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "10"
+        }
+      ]
+    },
+    {
+      "name": "search-deployments",
+      "title": "Search Deployments",
+      "description": "Search recent Coolify deployments",
+      "mode": "view"
+    },
+    {
       "name": "teams",
       "title": "View Teams",
       "description": "View Teams and Members",
@@ -66,8 +92,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.5",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^2.1.0",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -78,7 +104,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

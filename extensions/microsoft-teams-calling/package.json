@@ -42,33 +42,6 @@
       "mode": "no-view"
     }
   ],
-  "preferences": [
-    {
-      "name": "apiVersion",
-      "title": "Teams Version",
-      "description": "Classic Teams or New Teams",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Classic Teams",
-          "value": "classic"
-        },
-        {
-          "title": "New Teams",
-          "value": "new"
-        }
-      ],
-      "default": "new",
-      "required": true
-    },
-    {
-      "name": "apiToken",
-      "title": "API Token (Classic Teams)",
-      "description": "Get this from your Teams client in Settings → Privacy → Manage API (Only required for Classic Teams)",
-      "type": "textfield",
-      "required": false
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.48.9",
     "@raycast/utils": "^1.5.2",

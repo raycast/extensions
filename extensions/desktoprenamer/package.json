@@ -23,7 +23,7 @@
       "title": "Current Desktop",
       "description": "Show the currently active desktop with live status.",
       "mode": "no-view",
-      "interval": "10s"
+      "interval": "1m"
     },
     {
       "name": "rename-current-space",
@@ -82,9 +82,9 @@
       "mode": "view"
     },
     {
-      "name": "batch-move-windows",
-      "title": "Batch Move Windows",
-      "description": "Queue multiple window moves and execute them efficiently",
+      "name": "manage-windows",
+      "title": "Manage Windows",
+      "description": "Queue multiple window operations and execute them efficiently",
       "mode": "view"
     }
   ],

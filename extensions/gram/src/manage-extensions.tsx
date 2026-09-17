@@ -1,4 +1,15 @@
-import { List, getPreferenceValues, ActionPanel, Action, Icon, showToast, Toast, Cache, trash } from "@raycast/api";
+import {
+  List,
+  getPreferenceValues,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  Cache,
+  trash,
+  Keyboard,
+} from "@raycast/api";
 import path from "path";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { usePromise } from "@raycast/utils";
@@ -711,7 +722,7 @@ function ExtensionActions({
           <Action.ShowInFinder
             title="View in Finder"
             path={path.join(getGramExtensionsDir(gramBuild), "installed", ext.id)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
           <Action
             title="Uninstall Extension"

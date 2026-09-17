@@ -264,3 +264,64 @@ export function getWeekMonthOccurrences(
 
   return dates;
 }
+
+const SOLAR_TERM_EMOJIS: Record<string, string> = {
+  "xuân phân": "🌸",
+  "thanh minh": "🌿",
+  "cốc vũ": "🌧️",
+  "lập hạ": "☀️",
+  "tiểu mãn": "🌾",
+  "mang chủng": "🌱",
+  "hạ chí": "🏖️",
+  "tiểu thử": "🌡️",
+  "đại thử": "🔥",
+  "lập thu": "🍂",
+  "xử thử": "🌬️",
+  "bạch lộ": "💧",
+  "thu phân": "🍁",
+  "hàn lộ": "🌫️",
+  "sương giáng": "❄️",
+  "lập đông": "🍃",
+  "tiểu tuyết": "🌨️",
+  "đại tuyết": "❄️",
+  "đông chí": "☃️",
+  "tiểu hàn": "🥶",
+  "đại hàn": "🌬️",
+  "lập xuân": "🌱",
+  "vũ thủy": "🌂",
+  "kinh trập": "🐛",
+};
+
+export function getSolarTerm(
+  date: Date,
+): { name: string; emoji: string; day: number } | null {
+  const s = new SolarDate(date);
+  const l = s.toLunarDate();
+  if (!l) return null;
+  const termName = l.getSolarTerm();
+  if (!termName) return null;
+
+  // Step backward to find the start of this term
+  const temp = new Date(date);
+  temp.setHours(12, 0, 0, 0); // avoid timezone/DST issues
+
+  let days = 0;
+  while (days < 31) {
+    const sTemp = new SolarDate(temp);
+    const lTemp = sTemp.toLunarDate();
+    if (!lTemp || lTemp.getSolarTerm() !== termName) {
+      break;
+    }
+    days++;
+    temp.setDate(temp.getDate() - 1);
+  }
+
+  const formattedName = termName
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+
+  const emoji = SOLAR_TERM_EMOJIS[termName.toLowerCase()] || "📅";
+
+  return { name: formattedName, emoji, day: days };
+}

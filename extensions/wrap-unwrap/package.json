@@ -126,7 +126,7 @@
         {
           "name": "hyphenation",
           "title": "Hyphenation",
-          "description": "When joining lines, remove a trailing hyphen if it appears to be a soft line-break hyphen (e.g., `inter-` + `esting` becomes `interesting`).",
+          "description": "When joining lines, remove a trailing soft hyphen (U+00AD), the invisible character used to mark an optional line break. A regular hyphen is always kept, so compounds like `well-known` stay intact.",
           "type": "checkbox",
           "required": false,
           "default": true,

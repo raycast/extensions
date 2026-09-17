@@ -31,7 +31,7 @@
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5",
-    "vitest": "^3.0.6"
+    "vitest": "^3.2.6"
   },
   "scripts": {
     "build": "ray build",

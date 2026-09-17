@@ -1,5 +1,9 @@
 # Weather Changelog
 
+## [Feels Like in Menu Bar] - 2026-09-08
+
+- Add menu bar preference to show the feels-like temperature instead of the actual temperature
+
 ## [Fix wttr.in API compatibility] - 2026-03-17
 
 - Handle new `data` wrapper in wttr.in JSON response.

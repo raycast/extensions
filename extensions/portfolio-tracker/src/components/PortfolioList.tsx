@@ -41,7 +41,13 @@ import {
   isPropertyAssetType,
   isDebtAssetType,
 } from "../utils/types";
-import { formatCurrency, formatCurrencyCompact, formatRelativeTime, getDisplayName } from "../utils/formatting";
+import {
+  formatCurrency,
+  formatCurrencyCompact,
+  formatPercent,
+  formatRelativeTime,
+  getDisplayName,
+} from "../utils/formatting";
 import { isDebtAccountType } from "../utils/types";
 import {
   ACCOUNT_TYPE_LABELS,
@@ -397,6 +403,20 @@ export function PortfolioList({
                         color: portfolioTotals.liabilities < 0 ? COLOR_NEGATIVE : COLOR_NEUTRAL,
                       },
                     },
+                    ...(valuation.pnl
+                      ? [
+                          {
+                            tag: {
+                              value: `P&L: ${formatCurrency(valuation.pnl.pnl, valuation.baseCurrency, { showSign: true })}`,
+                              color: valuation.pnl.pnl >= 0 ? COLOR_POSITIVE : COLOR_NEGATIVE,
+                            },
+                            tooltip:
+                              valuation.pnl.costBasis > 0
+                                ? `Unrealized P&L across positions with a buy price recorded (${formatPercent((valuation.pnl.pnl / valuation.pnl.costBasis) * 100)} of ${formatCurrency(valuation.pnl.costBasis, valuation.baseCurrency)} invested)`
+                                : undefined,
+                          },
+                        ]
+                      : []),
                     {
                       tag: {
                         value: `Net: ${formatCurrency(portfolioTotals.net, valuation.baseCurrency)}`,
@@ -419,6 +439,21 @@ export function PortfolioList({
                         color={portfolioTotals.liabilities < 0 ? COLOR_NEGATIVE : COLOR_NEUTRAL}
                       />
                     </List.Item.Detail.Metadata.TagList>
+                    {valuation.pnl && (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label
+                          title="Total Invested"
+                          text={formatCurrency(valuation.pnl.costBasis, valuation.baseCurrency)}
+                        />
+                        <List.Item.Detail.Metadata.TagList title="Unrealized P&L">
+                          <List.Item.Detail.Metadata.TagList.Item
+                            text={`${formatCurrency(valuation.pnl.pnl, valuation.baseCurrency, { showSign: true })}${valuation.pnl.costBasis > 0 ? ` (${formatPercent((valuation.pnl.pnl / valuation.pnl.costBasis) * 100)})` : ""}`}
+                            color={valuation.pnl.pnl >= 0 ? COLOR_POSITIVE : COLOR_NEGATIVE}
+                          />
+                        </List.Item.Detail.Metadata.TagList>
+                      </>
+                    )}
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.TagList title="Net Worth">
                       <List.Item.Detail.Metadata.TagList.Item

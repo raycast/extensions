@@ -11,6 +11,7 @@ import { basename } from "path";
  */
 export function PatchCreateAction(context: RepositoryContext & { file?: FileStatus }) {
   return (
+    // eslint-disable-next-line @raycast/prefer-common-shortcut -- keep ⌘⇧S for Save as Patch; Common.Duplicate is ⌘D
     <ActionPanel.Submenu title="Save as Patch" icon={`patch.svg`} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
       <Action.Push title="All Changes" target={<PatchCreateForm scope="all" {...context} />} />
       {context.file && (

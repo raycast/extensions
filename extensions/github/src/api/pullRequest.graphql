@@ -67,12 +67,16 @@ fragment PullRequestFields on PullRequest {
   }
 }
 
-query searchPullRequests($query: String!, $numberOfItems: Int!) {
-  search(query: $query, type: ISSUE, first: $numberOfItems) {
+query searchPullRequests($query: String!, $numberOfItems: Int!, $after: String) {
+  search(query: $query, type: ISSUE, first: $numberOfItems, after: $after) {
     edges {
       node {
         ...PullRequestFields
       }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
     }
   }
 }
@@ -159,6 +163,15 @@ fragment PullRequestDetailsFields on PullRequest {
       }
     }
   }
+  commits(last: 1) {
+    nodes {
+      commit {
+        statusCheckRollup {
+          state
+        }
+      }
+    }
+  }
   assignees(first: 50) {
     totalCount
     nodes {
@@ -230,7 +243,7 @@ query repositoryProjectsForPullRequests($owner: String!, $name: String!, $pullRe
 }
 
 fragment PullRequestCommitFields on PullRequest {
-  commits(last: 100) {
+  commits(last: $numberOfItems, before: $before) {
     totalCount
     nodes {
       commit {
@@ -250,10 +263,14 @@ fragment PullRequestCommitFields on PullRequest {
         treeUrl
       }
     }
+    pageInfo {
+      hasPreviousPage
+      startCursor
+    }
   }
 }
 
-query pullRequestCommits($nodeId: ID!) {
+query pullRequestCommits($nodeId: ID!, $numberOfItems: Int!, $before: String) {
   node(id: $nodeId) {
     ...PullRequestCommitFields
   }
@@ -275,6 +292,14 @@ mutation closePullRequest($nodeId: ID!) {
 
 mutation reopenPullRequest($nodeId: ID!) {
   reopenPullRequest(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
+    }
+  }
+}
+
+mutation markPullRequestReadyForReview($nodeId: ID!) {
+  markPullRequestReadyForReview(input: { pullRequestId: $nodeId }) {
     pullRequest {
       id
     }

@@ -11,6 +11,7 @@ import {
   LaunchType,
   openCommandPreferences,
   openExtensionPreferences,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { addWeeks, endOfWeek, format, startOfToday, startOfTomorrow, startOfWeek } from "date-fns";
@@ -22,7 +23,15 @@ import {
   setDueDate as setReminderDueDate,
 } from "swift:../swift/AppleReminders";
 
-import { getAttachedUrls, getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
+import {
+  formatReminderTime,
+  getAttachedUrls,
+  getPriorityIcon,
+  isOverdue,
+  isToday,
+  isTomorrow,
+  truncate,
+} from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 import { sortByDate } from "./hooks/useViewReminders";
 
@@ -95,7 +104,7 @@ export default function Command() {
         title: priority ? "Set priority" : "Removed priority",
         message: priority ? `Changed to ${priority}` : "",
       });
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: `Unable to set priority`,
@@ -111,7 +120,7 @@ export default function Command() {
         style: Toast.Style.Success,
         title: date ? "Set due date" : "Removed due date",
       });
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: `Unable to set due date`,
@@ -128,7 +137,7 @@ export default function Command() {
         title: "Deleted Reminder",
         message: reminder.title,
       });
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Unable to delete reminder",
@@ -181,7 +190,9 @@ export default function Command() {
   const displayReminderTitle = titleType === "firstReminder" && remindersCount > 0;
   if (displayReminderTitle) {
     const firstReminder = sections[0].items[0];
-    title = truncate(addPriorityToTitle(firstReminder.title, firstReminder.priority), 30);
+    const formattedTime = formatReminderTime(firstReminder);
+    const timePrefix = formattedTime ? `${formattedTime}  ` : "";
+    title = truncate(`${timePrefix}${addPriorityToTitle(firstReminder.title, firstReminder.priority)}`, 30);
   }
 
   return (
@@ -200,7 +211,7 @@ export default function Command() {
                 title: "Marked reminder as complete",
                 message: reminder.title,
               });
-            } catch (error) {
+            } catch {
               await showToast({
                 style: Toast.Style.Failure,
                 title: "Unable to mark reminder as complete",
@@ -215,17 +226,20 @@ export default function Command() {
           {section.items.map((reminder) => {
             const attachedUrls = getAttachedUrls(reminder);
 
+            const formattedTime = formatReminderTime(reminder);
+            const timePrefix = formattedTime ? `${formattedTime}  ` : "";
+
             return (
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
                 title={truncate(
-                  addPriorityToTitle(
+                  `${timePrefix}${addPriorityToTitle(
                     displayListTitleForMenuBarReminders
                       ? addListTitle(reminder.title, reminder.list?.title)
                       : reminder.title,
                     reminder.priority,
-                  ),
+                  )}`,
                 )}
               >
                 <MenuBarExtra.Item
@@ -271,7 +285,7 @@ export default function Command() {
                         title: reminder.isCompleted ? "Marked reminder as incomplete" : "Completed Reminder",
                         message: reminder.title,
                       });
-                    } catch (error) {
+                    } catch {
                       await showToast({
                         style: Toast.Style.Failure,
                         title: `Unable to mark reminder as ${reminder.isCompleted ? "incomplete" : "complete"}`,
@@ -362,7 +376,7 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Create Reminder"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
           onAction={() => launchCommand({ name: "create-reminder", type: LaunchType.UserInitiated })}
         />
 
@@ -384,7 +398,6 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Configure Command"
           icon={Icon.Gear}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={openCommandPreferences}
           alternate={
             <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />

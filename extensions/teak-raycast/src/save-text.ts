@@ -1,36 +1,21 @@
+import { type LaunchProps, showToast, Toast } from "@raycast/api";
 import {
-  type LaunchProps,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { extractFirstHttpUrl, saveCardWithFeedback } from "./lib/capture";
-import { getPreferences } from "./lib/preferences";
+  ensureCredentialsForNoViewCommand,
+  saveCardWithFeedback,
+} from "./lib/capture";
 
 export default async function SaveTextCommand(
   props: LaunchProps<{ arguments: Arguments.SaveText }>,
 ) {
-  const { apiKey } = getPreferences();
-  if (!apiKey?.trim()) {
-    await showToast({
-      message: "Set your Teak API key in extension preferences to continue.",
-      primaryAction: {
-        onAction: () => {
-          void openExtensionPreferences();
-        },
-        title: "Open Preferences",
-      },
-      style: Toast.Style.Failure,
-      title: "Missing API key",
-    });
+  if (!(await ensureCredentialsForNoViewCommand())) {
     return;
   }
 
-  const fallbackText = props.fallbackText?.trim();
-  const argumentContent = props.arguments?.content?.trim();
-  const content = argumentContent || fallbackText || "";
+  const fallbackText = props.fallbackText;
+  const argumentContent = props.arguments?.content;
+  const content = argumentContent ?? fallbackText ?? "";
 
-  if (!content) {
+  if (!content.trim()) {
     await showToast({
       message: "Type or dictate text to save, then retry.",
       style: Toast.Style.Failure,
@@ -39,13 +24,11 @@ export default async function SaveTextCommand(
     return;
   }
 
-  const url = extractFirstHttpUrl(content);
-
   await saveCardWithFeedback(
     {
+      cardType: "text",
       content,
       source: fallbackText ? "raycast_fallback" : "raycast_save_text",
-      url: url ?? undefined,
     },
     {
       loadingTitle: "Saving to Teak...",

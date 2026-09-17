@@ -11,6 +11,9 @@ A Raycast extension that allows you to manage custom AI provider settings throug
 - View a list of all configured providers
 - View detailed information about each provider (models, API keys, additional parameters)
 - Edit existing or add new providers and models
+- Synchronize models from any OpenAI-compatible provider's `/models` endpoint
+
+Use the **Sync Models** action on a provider to replace its configured model list with the provider's live OpenAI-compatible catalog. The request uses the provider's configured API key when present. Existing models remain unchanged if fetching or validating the catalog fails.
 
 The extension automatically works with the Raycast AI configuration file located at:
 ```

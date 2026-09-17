@@ -1,4 +1,4 @@
 export declare const loginRequest: (params: {
     email: string;
-    preparedToken?: string;
+    baseUrl?: string;
 }) => Promise<void>;

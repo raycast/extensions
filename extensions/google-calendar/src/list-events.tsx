@@ -1,4 +1,4 @@
-import { Color, Icon, LaunchProps, List } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, LaunchProps, List } from "@raycast/api";
 import { useEvents, withGoogleAPIs } from "./lib/google";
 import { calendar_v3 } from "@googleapis/calendar";
 import { formatRecurrence } from "./lib/utils";
@@ -7,8 +7,16 @@ import { useState, useMemo } from "react";
 import EventActions from "./components/EventActions";
 import CalendarSelector from "./components/CalendarSelector";
 
-function getAccessories(event: calendar_v3.Schema$Event) {
+function getAccessories(event: calendar_v3.Schema$Event, showLocation: boolean) {
   const accessories = new Array<List.Item.Accessory>();
+
+  if (showLocation && event.location) {
+    accessories.push({
+      text: event.location,
+      icon: Icon.Pin,
+      tooltip: `Location: ${event.location}`,
+    });
+  }
 
   if (event.recurrence || event.recurringEventId) {
     const accessory: List.Item.Accessory = {
@@ -103,14 +111,18 @@ export function getEventSection(date: Date, now = new Date()) {
     return "Next Week";
   } else if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) {
     return `Rest of ${date.toLocaleString("default", { month: "long" })}`;
-  } else {
+  } else if (date.getFullYear() === now.getFullYear()) {
     // Group by month name
     return date.toLocaleString("default", { month: "long" });
+  } else {
+    // Group by month and year
+    return date.toLocaleString("default", { month: "long", year: "numeric" });
   }
 }
 
 function Command(props: LaunchProps) {
   const { calendarId } = (props.launchContext ?? {}) as { calendarId?: string };
+  const { showLocation } = getPreferenceValues<Preferences.ListEvents>();
   const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(calendarId ?? null);
   const { data, isLoading, pagination, revalidate } = useEvents(selectedCalendarId);
   const { data: calendars, isLoading: calendarsIsLoading, revalidate: revalidateCalendars } = useCalendars();
@@ -128,7 +140,7 @@ function Command(props: LaunchProps) {
   const sections =
     data?.reduce(
       (acc, event) => {
-        const date = new Date(event.start?.dateTime ?? event.start?.date ?? "");
+        const date = new Date(event.start?.dateTime ?? (event.start?.date ? `${event.start.date}T00:00:00` : ""));
         const now = new Date();
         const section = getEventSection(date, now);
 
@@ -141,6 +153,13 @@ function Command(props: LaunchProps) {
       {} as Record<string, calendar_v3.Schema$Event[]>,
     ) ?? {};
 
+  const getSectionTime = (section: string) => {
+    const firstEvent = sections[section]?.[0];
+    const dateStr =
+      firstEvent?.start?.dateTime ?? (firstEvent?.start?.date ? `${firstEvent.start.date}T00:00:00` : undefined);
+    return dateStr ? new Date(dateStr).getTime() : 0;
+  };
+
   // Sort sections by date
   const sectionOrder = Object.keys(sections).sort((a, b) => {
     if (a === "Today") return -1;
@@ -150,21 +169,12 @@ function Command(props: LaunchProps) {
     if (a === "Next Week") return -1;
     if (b === "Next Week") return 1;
 
-    // Compare month/year sections
-    const dateA = new Date(a);
-    const dateB = new Date(b);
-    const timeA = dateA.getTime();
-    const timeB = dateB.getTime();
-
-    if (Number.isNaN(timeA) && Number.isNaN(timeB)) return a.localeCompare(b);
-    if (Number.isNaN(timeA)) return -1;
-    if (Number.isNaN(timeB)) return 1;
-    return timeA - timeB;
+    return getSectionTime(a) - getSectionTime(b);
   });
 
   const formatEventTime = (event: calendar_v3.Schema$Event, section: string) => {
-    const startDate = new Date(event.start?.dateTime ?? event.start?.date ?? "");
-    const endDate = new Date(event.end?.dateTime ?? event.end?.date ?? "");
+    const startDate = new Date(event.start?.dateTime ?? (event.start?.date ? `${event.start.date}T00:00:00` : ""));
+    const endDate = new Date(event.end?.dateTime ?? (event.end?.date ? `${event.end.date}T00:00:00` : ""));
 
     // For Today or Tomorrow, show only time
     if (section === "Today" || section === "Tomorrow") {
@@ -205,7 +215,7 @@ function Command(props: LaunchProps) {
                 icon={getIcon(event)}
                 title={event.summary ?? "Untitled Event"}
                 subtitle={formatEventTime(event, section)}
-                accessories={getAccessories(event)}
+                accessories={getAccessories(event, showLocation)}
                 actions={
                   <EventActions
                     event={event}

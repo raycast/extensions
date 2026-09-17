@@ -1,14 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": [
-    "src/**/*",
-    "raycast-env.d.ts",
-    "eslint.config.mjs"
-  ],
+  "include": ["src/**/*", "raycast-env.d.ts", "eslint.config.mjs"],
   "compilerOptions": {
-    "lib": [
-      "ES2023"
-    ],
+    "lib": ["ES2023", "DOM"],
     "module": "commonjs",
     "target": "ES2022",
     "strict": true,
@@ -17,12 +11,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    }
+    "resolveJsonModule": true
   }
 }

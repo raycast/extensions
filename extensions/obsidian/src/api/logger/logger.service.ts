@@ -34,7 +34,7 @@ export class Logger {
     if (typeof message === "object" && message !== null) {
       try {
         return JSON.stringify(message, null, 2);
-      } catch (e) {
+      } catch {
         return String(message);
       }
     }

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Form, Icon, List, useNavigation, Keyboard } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchCreateTag, fetchDeleteTag, fetchUpdateTag } from "./apis";
@@ -7,19 +7,27 @@ import { useConfig } from "./hooks/useConfig";
 import { useGetAllTags } from "./hooks/useGetAllTags";
 import { useGetTagsBookmarks } from "./hooks/useGetTagsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
+import { connectionGuard } from "./components/ConnectionErrorView";
 import { Tag } from "./types";
 import { runWithToast } from "./utils/toast";
 
 const log = logger.child("[Tags]");
 
 function TagBookmarksView({ tagId, tagName }: { tagId: string; tagName: string }) {
-  const { bookmarks, isLoading, revalidate, pagination } = useGetTagsBookmarks(tagId);
+  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetTagsBookmarks(tagId);
   const { t } = useTranslation();
+
+  // Without this the suppressed default toast leaves NOTHING on screen but
+  // "no bookmarks found" — which reads as an empty tag, not a dead server.
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
 
   return (
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidate}
       pagination={pagination}
       searchBarPlaceholder={t("tags.bookmarks.searchInTag", { name: tagName })}
@@ -40,7 +48,7 @@ function CreateTagForm({ onCreated }: { onCreated: () => void }) {
   const { handleSubmit, itemProps } = useForm<TagFormValues>({
     initialValues: { name: "" },
     validation: {
-      name: (value) => (!value?.trim() ? t("tags.tagName") + " is required" : undefined),
+      name: (value) => (!value?.trim() ? t("common.fieldRequired", { field: t("tags.tagName") }) : undefined),
     },
     async onSubmit(values) {
       log.info("Creating tag", { name: values.name });
@@ -84,7 +92,7 @@ function RenameTagForm({ tag, onRenamed }: { tag: Tag; onRenamed: () => void }) 
   const { handleSubmit, itemProps } = useForm<TagFormValues>({
     initialValues: { name: tag.name },
     validation: {
-      name: (value) => (!value?.trim() ? t("tags.tagName") + " is required" : undefined),
+      name: (value) => (!value?.trim() ? t("common.fieldRequired", { field: t("tags.tagName") }) : undefined),
     },
     async onSubmit(values) {
       log.info("Renaming tag", { tagId: tag.id, name: values.name });
@@ -123,7 +131,7 @@ function RenameTagForm({ tag, onRenamed }: { tag: Tag; onRenamed: () => void }) 
 
 export default function Tags() {
   const { push } = useNavigation();
-  const { isLoading, tags, revalidate } = useGetAllTags();
+  const { isLoading, tags, error, hasLiveData, revalidate } = useGetAllTags();
   const { config } = useConfig();
   const { apiUrl } = config;
   const { t } = useTranslation();
@@ -161,6 +169,9 @@ export default function Tags() {
 
   const sortedTags = [...tags].sort((a, b) => b.numBookmarks - a.numBookmarks);
 
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
+
   return (
     <List
       isLoading={isLoading}
@@ -171,7 +182,7 @@ export default function Tags() {
             title={t("tags.actions.createTag")}
             onAction={handleCreateTag}
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            shortcut={Keyboard.Shortcut.Common.New}
           />
         </ActionPanel>
       }
@@ -187,7 +198,7 @@ export default function Tags() {
                 title={t("tags.actions.createTag")}
                 onAction={handleCreateTag}
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
               />
             </ActionPanel>
           }
@@ -205,19 +216,19 @@ export default function Tags() {
                   onAction={() => push(<TagBookmarksView tagId={tag.id} tagName={tag.name} />)}
                   title={t("tags.actions.viewBookmarks")}
                   icon={Icon.Eye}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
+                  shortcut={Keyboard.Shortcut.Common.Open}
                 />
                 <Action
                   title={t("tags.actions.renameTag")}
                   onAction={() => push(<RenameTagForm tag={tag} onRenamed={revalidate} />)}
                   icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                 />
                 <Action
                   title={t("tags.actions.createTag")}
                   onAction={handleCreateTag}
                   icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={Keyboard.Shortcut.Common.New}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -226,7 +237,7 @@ export default function Tags() {
                 <Action.CopyToClipboard
                   title={t("tags.actions.copyTagId")}
                   content={tag.id}
-                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -235,7 +246,7 @@ export default function Tags() {
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => handleDeleteTag(tag.id)}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                 />
               </ActionPanel.Section>
             </ActionPanel>

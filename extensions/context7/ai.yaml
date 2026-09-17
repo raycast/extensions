@@ -1,0 +1,149 @@
+instructions: |
+  Context7 serves up-to-date documentation for libraries, frameworks, SDKs, and
+  documentation sites.
+
+  Library IDs are paths like `/vercel/next.js`, `/websites/tailwindcss`, or
+  `/llmstxt/developers_raycast_llms_txt`. They are NOT guessable — never invent one.
+  If you do not already have an ID, call search-libraries first and pick from what it
+  returns, preferring a higher trustScore and snippet count when several match.
+
+  Prefer search-my-libraries when the question plausibly concerns something the user
+  already keeps: it reads their local copy, so it is instant, works offline, and spends
+  no API quota. Fall back to search-libraries plus get-documentation when it returns
+  nothing useful, or when the library clearly is not one of theirs.
+
+  Pass the user's actual question to get-documentation rather than keywords — Context7
+  ranks snippets semantically against the query, so a full question retrieves better
+  than a bag of terms.
+
+  Answer from the snippets you retrieve and cite the `source` URL when you use one. If
+  the snippets do not cover the question, say so rather than filling the gap from
+  memory — the whole point of these tools is documentation that is newer than your
+  training data.
+
+  A tool that fails returns an `error` field instead of results. Report what it says and
+  STOP — do not fall back to answering from your own knowledge. The user asked this
+  extension precisely because they want documentation newer than your training data, so
+  a plausible-sounding answer from memory is worse than no answer: it looks sourced when
+  it is not. Say the lookup failed, say why, and suggest the fix. A `status` of 429 means
+  the request limit was reached and an API key in the extension preferences would raise
+  it. The same applies when a lookup succeeds but returns nothing relevant.
+
+# Every eval's `input` doubles as a suggested prompt shown to the user, unless
+# `usedAsExample: false`. So these are written as questions a developer would actually
+# type — the ones that exist only to pin down routing are hidden.
+evals:
+  # ── Shown as suggestions ──────────────────────────────────────────────────────────
+  # The core case: current documentation for a library, whether or not it is saved.
+  - input: "@context7 how do I set up middleware in Next.js?"
+    mocks:
+      search-my-libraries:
+        savedLibraries: 0
+        librariesWithoutCache: 0
+        returned: 0
+        omittedForLength: 0
+        snippets: []
+        note: "The user has no saved libraries. Use search-libraries and get-documentation instead."
+      search-libraries:
+        count: 1
+        returned: 1
+        omittedForLength: 0
+        libraries:
+          - id: "/vercel/next.js"
+            name: "Next.js"
+            description: "The React Framework for the Web"
+            trustScore: 10
+            snippets: 4200
+      get-documentation:
+        libraryId: "/vercel/next.js"
+        returned: 1
+        omittedForLength: 0
+        snippets:
+          - title: "Middleware"
+            library: "/vercel/next.js"
+            source: "https://github.com/vercel/next.js/blob/canary/docs/middleware.mdx"
+            content: "export function middleware(request) { return NextResponse.next() }"
+    expected:
+      # The whole chain, not just the last call — asserting only get-documentation would
+      # pass for a model that skipped both lookups and invented the library ID.
+      - callsTool: "search-my-libraries"
+      - callsTool: "search-libraries"
+      - callsTool:
+          name: "get-documentation"
+          arguments:
+            libraryId: "/vercel/next.js"
+
+  # Teaches that the extension knows what YOU keep, not just the public index.
+  - input: "@context7 find the useEffect cleanup example in my saved docs"
+    mocks:
+      search-my-libraries:
+        savedLibraries: 2
+        librariesWithoutCache: 0
+        returned: 1
+        omittedForLength: 0
+        snippets:
+          - title: "Cleanup function"
+            library: "React"
+            content: "useEffect(() => { const id = setInterval(tick, 1000); return () => clearInterval(id); })"
+    expected:
+      - callsTool: "search-my-libraries"
+
+  # Teaches that documentation can be kept for offline use.
+  - input: "@context7 save the Next.js docs so I can search them offline"
+    mocks:
+      search-libraries:
+        count: 1
+        returned: 1
+        omittedForLength: 0
+        libraries:
+          - id: "/vercel/next.js"
+            name: "Next.js"
+            trustScore: 10
+            snippets: 4200
+      add-library:
+        libraryId: "/vercel/next.js"
+        name: "Next.js"
+        cachedSnippets: 120
+    expected:
+      - callsTool: "add-library"
+
+  # ── Tests only, not shown as suggestions ──────────────────────────────────────────
+  # Plumbing: nobody wants a library ID for its own sake, but the resolution step is
+  # worth pinning down because every other tool depends on it.
+  - input: "@context7 what is the Context7 library ID for Next.js?"
+    usedAsExample: false
+    mocks:
+      search-libraries:
+        count: 1
+        returned: 1
+        omittedForLength: 0
+        libraries:
+          - id: "/vercel/next.js"
+            name: "Next.js"
+            description: "The React Framework for the Web"
+            trustScore: 10
+            snippets: 4200
+    expected:
+      - callsTool: "search-libraries"
+
+  # A failing tool must be reported, not retried or papered over from memory.
+  - input: "@context7 how do I configure routing in SvelteKit?"
+    usedAsExample: false
+    mocks:
+      search-my-libraries:
+        savedLibraries: 0
+        returned: 0
+        snippets: []
+      search-libraries:
+        error: "Anonymous request limit reached. Add a Context7 API key in the extension preferences to raise it."
+        status: 429
+        hint: "The Context7 request limit was reached. Adding an API key in the extension preferences raises it."
+    expected:
+      - callsTool: "search-libraries"
+      - includes: "limit"
+      # The real assertion. `includes: "limit"` alone passed while the model reported the
+      # failure and then answered from memory anyway — a green result for the exact
+      # behaviour the instructions forbid. SvelteKit routing answered from training data
+      # almost always names the routes directory, so its absence is the usable signal.
+      - not:
+          includes: "src/routes"

@@ -1,5 +1,29 @@
 # Media Converter Changelog
 
+## [1.7.0] - 2026-07-23
+
+### Added
+
+- **Inspect Media** command for container, duration, bitrate, stream, codec, dimension, frame-rate, audio, subtitle, and metadata details.
+- Approximate **Target Size** video conversion using a duration-aware two-pass bitrate calculation.
+- Persistent **Conversion Queue** with sequential processing, reordering, cancellation, retry, completed-output actions, and recovery for interrupted jobs.
+- **Edit Media** command with resize/crop, 0.25×–4× speed changes, audio extraction, LUFS normalization, subtitle burning, and subtitle-stream removal.
+- Target-size support in the `convert-media` AI tool.
+- Edit operations are recorded in conversion history.
+
+### Changed
+
+- Conversion, merge, and editing processes use argument-based child processes instead of shell command execution.
+- Long-running forms keep their cancel action visible while processing.
+- Stored history, presets, and queue data are validated before use.
+- AVI output now uses FFmpeg's built-in MPEG-4 encoder so it works with the bundled FFmpeg binary.
+- Updated runtime and development dependencies to resolve all known production security advisories.
+
+### Tests
+
+- Expanded unit coverage for process execution, storage validation, target-size planning, media inspection, queue persistence, and edit command construction.
+- Expanded the real-FFmpeg smoke suite to cover inspection, target-size conversion, and all editing operations.
+
 ## [1.6.1] - 2026-04-28
 
 ### Fixed

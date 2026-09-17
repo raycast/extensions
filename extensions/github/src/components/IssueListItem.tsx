@@ -1,10 +1,9 @@
 import { Action, Color, Icon, List } from "@raycast/api";
-import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
 import { IssueFieldsFragment, UserFieldsFragment } from "../generated/graphql";
+import { RevalidateList } from "../helpers";
 import { getIssueAuthor, getIssueStatus } from "../helpers/issue";
-import { useMyIssues } from "../hooks/useMyIssues";
 
 import IssueActions from "./IssueActions";
 import IssueDetail from "./IssueDetail";
@@ -13,7 +12,7 @@ import { SortActionProps } from "./SortAction";
 type IssueListItemProps = {
   issue: IssueFieldsFragment;
   viewer?: UserFieldsFragment;
-  mutateList: MutatePromise<IssueFieldsFragment[] | undefined> | ReturnType<typeof useMyIssues>["mutate"];
+  mutateList: RevalidateList;
 };
 
 export default function IssueListItem({

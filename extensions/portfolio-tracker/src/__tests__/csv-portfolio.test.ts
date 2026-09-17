@@ -225,7 +225,8 @@ describe("mapHeaders", () => {
     expect(mapping.get("Asset Name")).toBe(2);
     expect(mapping.get("Symbol")).toBe(3);
     expect(mapping.get("Units")).toBe(4);
-    expect(mapping.get("Currency")).toBe(7);
+    expect(mapping.get("Average Cost")).toBe(6);
+    expect(mapping.get("Currency")).toBe(8);
   });
 
   it("is case-insensitive", () => {
@@ -1574,8 +1575,8 @@ describe("CSV edge cases", () => {
     expect(result.rows[0].symbol).toBe("FUND.L");
   });
 
-  it("CSV_HEADERS has exactly 11 entries", () => {
-    expect(CSV_HEADERS).toHaveLength(11);
+  it("CSV_HEADERS has exactly 12 entries", () => {
+    expect(CSV_HEADERS).toHaveLength(12);
   });
 });
 
@@ -1878,5 +1879,124 @@ describe("parseAdditionalParameters", () => {
     expect(result.debtData!.totalTermMonths).toBe(24);
     expect(result.debtData!.paidOff).toBe(false);
     expect(result.debtData!.archived).toBe(false);
+  });
+});
+
+// ──────────────────────────────────────────
+// Average Cost (P&L) column
+// ──────────────────────────────────────────
+
+describe("Average Cost column", () => {
+  it("exports avgCostPrice in the Average Cost column", () => {
+    const pos = makePosition({ avgCostPrice: 65.2 });
+    const csv = exportPortfolioToCsv([makeExportData({ position: pos })]);
+    const dataLine = csv.split("\n")[1];
+    const fields = dataLine.split(",");
+
+    // Column order: Account, Account Type, Asset Name, Symbol, Units, Price, Average Cost, ...
+    expect(fields[6]).toBe("65.200000");
+  });
+
+  it("preserves 6 decimal places on export (matches the max precision accepted by validatePrice)", () => {
+    const pos = makePosition({ avgCostPrice: 3456.789012 });
+    const csv = exportPortfolioToCsv([makeExportData({ position: pos })]);
+    const dataLine = csv.split("\n")[1];
+    const fields = dataLine.split(",");
+
+    expect(fields[6]).toBe("3456.789012");
+  });
+
+  it("exports an empty Average Cost column when no cost is recorded", () => {
+    const csv = exportPortfolioToCsv([makeExportData()]);
+    const dataLine = csv.split("\n")[1];
+    const fields = dataLine.split(",");
+
+    expect(fields[6]).toBe("");
+  });
+
+  it("parses the Average Cost column into row.averageCost", () => {
+    const header =
+      "Account,Account Type,Asset Name,Symbol,Units,Price,Average Cost,Total Value,Currency,Asset Type,Last Updated,Additional Parameters";
+    const csv = [header, "Vanguard ISA,ISA,Vanguard S&P 500,VUSA.L,50,72.45,65.20,3622.50,GBP,ETF,2024-03-15,"].join(
+      "\n",
+    );
+
+    const result = parsePortfolioCsv(csv);
+    expect(result.errors).toHaveLength(0);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].averageCost).toBeCloseTo(65.2);
+  });
+
+  it("leaves averageCost undefined when the column is missing (old CSVs)", () => {
+    const csv = buildSimpleCsv(["Vanguard ISA,ISA,Vanguard S&P 500,VUSA.L,50,72.45,3622.50,GBP,ETF,2024-03-15,"]);
+
+    const result = parsePortfolioCsv(csv);
+    expect(result.errors).toHaveLength(0);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].averageCost).toBeUndefined();
+  });
+
+  it("rejects a non-numeric Average Cost value", () => {
+    const header =
+      "Account,Account Type,Asset Name,Symbol,Units,Price,Average Cost,Total Value,Currency,Asset Type,Last Updated,Additional Parameters";
+    const csv = [header, "Vanguard ISA,ISA,Vanguard S&P 500,VUSA.L,50,72.45,abc,3622.50,GBP,ETF,2024-03-15,"].join(
+      "\n",
+    );
+
+    const result = parsePortfolioCsv(csv);
+    expect(result.errors.some((e) => e.column === "Average Cost")).toBe(true);
+  });
+
+  it("builds positions with avgCostPrice for market-traded assets", () => {
+    const rows: CsvRow[] = [
+      {
+        accountName: "ISA",
+        accountType: "ISA",
+        assetName: "Vanguard S&P 500",
+        symbol: "VUSA.L",
+        units: 50,
+        price: 72.45,
+        averageCost: 65.2,
+        totalValue: 3622.5,
+        currency: "GBP",
+        assetType: "ETF",
+        lastUpdated: "2024-03-15",
+      },
+    ];
+
+    const result = buildPortfolioFromCsvRows(rows);
+    expect(result.portfolio.accounts[0].positions[0].avgCostPrice).toBeCloseTo(65.2);
+  });
+
+  it("ignores averageCost for CASH positions", () => {
+    const rows: CsvRow[] = [
+      {
+        accountName: "Savings",
+        accountType: "SAVINGS ACCOUNT",
+        assetName: "Cash (GBP)",
+        symbol: "CASH:GBP",
+        units: 500,
+        price: 1,
+        averageCost: 1,
+        totalValue: 500,
+        currency: "GBP",
+        assetType: "CASH",
+        lastUpdated: "2024-03-15",
+      },
+    ];
+
+    const result = buildPortfolioFromCsvRows(rows);
+    expect(result.portfolio.accounts[0].positions[0].avgCostPrice).toBeUndefined();
+  });
+
+  it("round-trips avgCostPrice through export → parse → build", () => {
+    const pos = makePosition({ avgCostPrice: 65.2 });
+    const csv = exportPortfolioToCsv([makeExportData({ position: pos })]);
+
+    const parsed = parsePortfolioCsv(csv);
+    expect(parsed.errors).toHaveLength(0);
+
+    const rebuilt = buildPortfolioFromCsvRows(parsed.rows);
+    expect(rebuilt.portfolio.accounts[0].positions[0].avgCostPrice).toBeCloseTo(65.2);
   });
 });

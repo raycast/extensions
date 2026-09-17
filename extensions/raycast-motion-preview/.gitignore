@@ -1,3 +1,18 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# misc
+.DS_Store
+
 # dependencies
 /node_modules
 
@@ -10,6 +25,9 @@ compiled_raycast_swift
 # misc
 .DS_Store
 assets/test_files/
+.agents/
+design/
+skills-lock.json
 
 # Swift
 .build
@@ -19,3 +37,4 @@ DerivedData/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+/test_files

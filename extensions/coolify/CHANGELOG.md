@@ -1,10 +1,21 @@
 # Coolify Changelog
 
+## [Deployment History] - 2026-08-29
+
+- Added Search Deployments to search recent deployment history across applications.
+- Added Menu Bar Deployments to view recent deployments from the menu bar.
+
+## [Resources Enhancements] - 2026-07-17
+
+- In `Resources`:
+    1. view status tooltip
+    2. handle when status is "exited" instead of "exited:..."
+
 ## [Delete Project + Better Error Message] - 2025-11-11
 
 - Better Error Messages are shown
 - In `Projects`:
-    - Delete Project
+    1. Delete Project
 
 ## [Add Windows Support] - 2025-11-03
 

@@ -9,9 +9,9 @@ type ResultType = "copy" | "paste";
 
 export const performReplacement = (entry: Entry, resultType: ResultType) => {
   if (entry.type === "directReplace") {
-    performDirectReplacement(entry, resultType);
+    return performDirectReplacement(entry, resultType);
   } else {
-    performCutPasteReplacement(entry, resultType);
+    return performCutPasteReplacement(entry, resultType);
   }
 };
 

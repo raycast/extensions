@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, Image, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Image, showToast, Toast, useNavigation, Keyboard } from "@raycast/api";
 import { RepositoryContext, NavigationContext } from "../../open-repository";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GitLocalConfig, GitLocalConfigUpdates } from "../../types";
@@ -338,17 +338,13 @@ export function GitConfigView(context: RepositoryContext & NavigationContext) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.SubmitForm title="Save Config" icon={Icon.SaveDocument} onSubmit={handleSubmit} />
-            <ActionPanel.Submenu
-              title="Open Git Config"
-              icon={Icon.Document}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
-            >
+            <ActionPanel.Submenu title="Open Git Config" icon={Icon.Document} shortcut={Keyboard.Shortcut.Common.Open}>
               <Action.Open title="Local Config" icon={Icon.House} target={context.gitManager.localConfigPath} />
               <Action.Open title="Global Config" icon={Icon.Globe} target={context.gitManager.globalConfigPath} />
             </ActionPanel.Submenu>
           </ActionPanel.Section>
 
-          <ActionPanel.Submenu title="Add Preference" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }}>
+          <ActionPanel.Submenu title="Add Preference" icon={Icon.Plus} shortcut={Keyboard.Shortcut.Common.New}>
             {missingFieldsSections.map(([group, fields]) => (
               <ActionPanel.Section key={group}>
                 {fields

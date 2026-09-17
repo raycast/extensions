@@ -37,3 +37,23 @@ export interface StatuspageIncident {
   }>;
   components?: Array<{ id: string }>;
 }
+
+/**
+ * Embedded in Statuspage HTML as `window.uptimeData`. Outage keys are seconds
+ * spent in that status: `m` major, `p` partial, `d` degraded.
+ */
+export interface StatuspageUptimeDay {
+  date: string;
+  outages?: Partial<Record<"m" | "p" | "d", number>>;
+  related_events?: Array<{ name: string; code: string }>;
+}
+
+export interface StatuspageComponentUptime {
+  component: { code: string; name: string; startDate?: string };
+  days: StatuspageUptimeDay[];
+}
+
+export type StatuspageUptimeData = Record<
+  string,
+  StatuspageComponentUptime | undefined
+>;

@@ -1,5 +1,9 @@
 # FileZilla Changelog
 
+## [Bug Fixes] - 2026-07-14
+
+- Fix issue with connecting to servers that have spaces in their names
+
 ## [FileZilla Pro Support] - 2026-05-25
 
 - Add support for FileZilla Pro (Mac App Store version) alongside standard FileZilla

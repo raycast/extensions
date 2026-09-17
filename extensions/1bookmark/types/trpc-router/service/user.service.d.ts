@@ -4,6 +4,7 @@ export declare class UserService {
         associatedSpaces: {
             myTags: string[];
             myRole: import(".prisma/client").$Enums.TeamRole;
+            myStatus: import(".prisma/client").$Enums.TeamMemberStatus;
             myImage: string | null;
             myNickname: string | null;
             myAuthEmail: string | null;
@@ -24,31 +25,32 @@ export declare class UserService {
             id: string;
             createdAt: Date;
             name: string;
-            updatedAt: Date;
             image: string | null;
+            slackTeamId: string | null;
+            updatedAt: Date;
         }[];
         createdAt: Date;
         name: string;
+        image: string | null;
         email: string;
         updatedAt: Date;
-        image: string | null;
     }>;
     listBySpaceId(spaceId: string): Promise<({
         user: {
             createdAt: Date;
             name: string;
+            image: string | null;
             email: string;
             updatedAt: Date;
-            image: string | null;
         };
     } & {
         status: import(".prisma/client").$Enums.TeamMemberStatus;
         spaceId: string;
         createdAt: Date;
-        email: string;
-        tags: string[];
-        updatedAt: Date;
         image: string | null;
+        email: string;
+        updatedAt: Date;
+        tags: string[];
         nickname: string | null;
         authEmail: string | null;
         role: import(".prisma/client").$Enums.TeamRole;
@@ -57,6 +59,7 @@ export declare class UserService {
         space: Exclude<Awaited<ReturnType<typeof db.space.findUnique>>, null>;
         actorEmail: string;
         emails: string[];
+        role: 'ADMIN' | 'MEMBER' | 'READ';
     }): Promise<void>;
     subscribeTag(p: {
         email: string;
@@ -68,6 +71,13 @@ export declare class UserService {
         spaceId: string;
         tagName: string;
     }): Promise<void>;
+    listSoleOwnerTeamSpaces(email: string): Promise<{
+        id: string;
+        name: string;
+    }[]>;
+    deleteAccount(email: string): Promise<{
+        placeholderEmail: string;
+    }>;
     update(p: {
         email: string;
         name?: string;

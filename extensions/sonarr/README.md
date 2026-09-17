@@ -2,6 +2,11 @@
 
 View your Sonarr instance, upcoming shows and much more
 
+### Requirements
+- Raycast for macOS or Windows
+- Sonarr v3.0+ running and reachable from the machine Raycast runs on
+- Sonarr API key (Settings > General > Security)
+
 ### Instance Setup
 - Website: https://sonarr.tv/
 - Sonarr docs: https://wiki.servarr.com/sonarr
@@ -19,6 +24,18 @@ View your Sonarr instance, upcoming shows and much more
 - `Port` should be only the numeric port (`8989`) and is ignored if already included in `Host`.
 - `Connection Type` should match your Sonarr server (`HTTP` or `HTTPS`).
 - If Sonarr is served from a subpath, set `URL Base` (example: `sonarr` for `http://host:8989/sonarr`).
+- `Instance Name` is only a label: it names the instance in the search bar and in the switch action.
+
+### Two Sonarr Instances
+The extension can talk to a second Sonarr server and switch between the two from any command.
+
+1. Enable `Second Instance` in the extension preferences.
+2. Fill in `Second Instance Host`, `Second Instance Port`, `Second Instance Connection Type` and `Second Instance API Key` — the same four values as the first instance, with the same rules (`Second Instance URL Base` for a subpath, and a full URL in `Host` also works).
+3. Optionally name it with `Second Instance Name`.
+
+`Active Instance` decides which one commands start on, and changing it takes effect right away even if you had switched manually before. From any command, the `Instance` section of the action panel switches to the other one (`⌘⇧I` on macOS, `Ctrl+Shift+I` on Windows). The choice is remembered: it applies to every command and survives closing Raycast, until you switch back.
+
+`Instance Status` lists every configured instance, tests each connection, and reports a second instance that is enabled but still missing its host or API key.
 
 ### Extension Usage
 https://user-images.githubusercontent.com/43297314/179749726-0919e1d8-686f-4e45-8440-85fecdc35414.mp4

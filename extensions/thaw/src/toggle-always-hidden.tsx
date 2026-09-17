@@ -1,5 +1,5 @@
-import { openThawUrl } from "@utils";
+import { runThawAction } from "@utils";
 
 export default async function ToggleAlwaysHidden() {
-  await openThawUrl("toggle-always-hidden", "Toggled Always Hidden Section");
+  await runThawAction("toggle-always-hidden");
 }

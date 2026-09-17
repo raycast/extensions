@@ -2,7 +2,8 @@
 // Credentialed: official GraphQL. No-key: Atom feed. No production HTML scraping.
 import { LocalStorage } from "@raycast/api";
 import { Product } from "../types";
-import { graphql, getCredentials, hasCredentials, ApiError } from "./client";
+import { graphql, ApiError } from "./client";
+import { isSignedIn } from "./oauth";
 import { FEATURED_POSTS_QUERY, POST_DETAIL_QUERY, FeaturedPostsResponse, PostDetailResponse } from "./queries";
 import { postNodeToProduct, postDetailToProduct } from "./product";
 import { getFeedProducts } from "./feed";
@@ -44,9 +45,9 @@ function pacificMidnightIso(): string {
 // consumes ~3300 of the API's 6250 complexity-points-per-15min budget, so two reopens within 15 min
 // could 429. These caches let repeated command opens reuse a recent result. This is RESPONSE caching,
 // separate from the token cache in client.ts.
-const FRONTPAGE_API_CACHE_KEY = "frontpage_api_cache_v1";
+const FRONTPAGE_API_CACHE_KEY = "frontpage_api_cache_v2";
 const FRONTPAGE_FEED_CACHE_KEY = "frontpage_feed_cache_v1";
-const PRODUCT_DETAIL_CACHE_PREFIX = "product_detail_api_cache_v1:";
+const PRODUCT_DETAIL_CACHE_PREFIX = "product_detail_api_cache_v2:";
 const FRONTPAGE_CACHE_TTL_MS = 60_000; // 60s
 const PRODUCT_DETAIL_CACHE_TTL_MS = 300_000; // 5 min
 
@@ -75,7 +76,10 @@ async function writeCache<T>(key: string, value: T): Promise<void> {
 }
 
 // Why a feed fallback happened, so the UI can surface the right message/action.
-export type FeedReason = "no-credentials" | "incomplete-credentials" | "invalid-credentials" | "api-error";
+//  - "signed-out":   user hasn't signed in — show a "Sign in to Product Hunt" action.
+//  - "auth-rejected": token was rejected and cleared — show a "Sign in Again" action.
+//  - "api-error":     signed in, but the API failed (rate limit, network).
+export type FeedReason = "signed-out" | "auth-rejected" | "api-error";
 
 export async function getFrontpageProducts(options?: { forceRefresh?: boolean }): Promise<{
   products: Product[];
@@ -86,25 +90,9 @@ export async function getFrontpageProducts(options?: { forceRefresh?: boolean })
   // forceRefresh (e.g. a "Refresh" action) bypasses the response cache so the user gets fresh data;
   // results are still written back to the cache afterward.
   const forceRefresh = options?.forceRefresh ?? false;
-  let credsComplete = false;
-  // The reason the no-key path will report if we fall through to it: plain "no-credentials" when both
-  // fields are blank, "incomplete-credentials" when exactly one is filled (a misconfiguration the user
-  // should fix, but never a reason to deny them the public feed that needs no credentials at all).
-  let noKeyReason: FeedReason = "no-credentials";
-  try {
-    credsComplete = hasCredentials(getCredentials());
-  } catch (error) {
-    // Exactly one of key/secret present: don't hard-fail. Fall back to the feed like the no-key case,
-    // but flag it so the UI can warn "Missing credentials. Showing basic feed."
-    if (error instanceof ApiError && error.category === "missingCredentials") {
-      noKeyReason = "incomplete-credentials";
-    } else {
-      // Any other (currently unreachable) credential-read failure: log, then degrade to feed.
-      log.warn("unexpected error reading credentials; falling back to feed", error);
-    }
-  }
+  const signedIn = await isSignedIn();
 
-  if (credsComplete) {
+  if (signedIn) {
     const cached = forceRefresh
       ? null
       : await readCache<Product[]>(FRONTPAGE_API_CACHE_KEY, FRONTPAGE_CACHE_TTL_MS, Array.isArray);
@@ -115,23 +103,20 @@ export async function getFrontpageProducts(options?: { forceRefresh?: boolean })
     try {
       const postedAfter = pacificMidnightIso();
       log.debug("fetching frontpage via official API", { postedAfter });
-      const data = await graphql<FeaturedPostsResponse>(
-        FEATURED_POSTS_QUERY,
-        {
-          first: 30,
-          postedAfter,
-        },
-        { forceRefresh },
-      );
+      const data = await graphql<FeaturedPostsResponse>(FEATURED_POSTS_QUERY, {
+        first: 30,
+        postedAfter,
+      });
       const products = data.posts.edges.map((e) => postNodeToProduct(e.node));
       log.debug("frontpage API returned", { count: products.length });
       if (products.length > 0) await writeCache(FRONTPAGE_API_CACHE_KEY, products);
       return { products };
     } catch (error) {
       log.warn("frontpage API failed, falling back to feed", error);
-      // Distinguish bad credentials (actionable: fix them in prefs) from a transient API error.
+      // A rejected token (authRejected) is now cleared by client.ts, so re-signing in is the
+      // fix; a transient failure is just api-error. Both still fall back to the feed here.
       const reason: FeedReason =
-        error instanceof ApiError && error.category === "invalidCredentials" ? "invalid-credentials" : "api-error";
+        error instanceof ApiError && error.category === "authRejected" ? "auth-rejected" : "api-error";
       // List view may fall back to feed (spec); detail view may not.
       const cachedFeed = forceRefresh
         ? null
@@ -154,20 +139,20 @@ export async function getFrontpageProducts(options?: { forceRefresh?: boolean })
     }
   }
 
-  // No (or incomplete) credentials: feed-only mode. noKeyReason distinguishes the two.
+  // Signed out: feed-only mode. The UI offers a "Sign in to Product Hunt" action.
   const cachedFeed = forceRefresh
     ? null
     : await readCache<Product[]>(FRONTPAGE_FEED_CACHE_KEY, FRONTPAGE_CACHE_TTL_MS, Array.isArray);
   if (cachedFeed) {
-    log.debug("frontpage served from feed cache", { count: cachedFeed.length, reason: noKeyReason });
-    return { products: cachedFeed, usingFeed: true, feedReason: noKeyReason };
+    log.debug("frontpage served from feed cache", { count: cachedFeed.length, reason: "signed-out" });
+    return { products: cachedFeed, usingFeed: true, feedReason: "signed-out" };
   }
   try {
-    log.debug("no/incomplete credentials; fetching frontpage via Atom feed", { reason: noKeyReason });
+    log.debug("signed out; fetching frontpage via Atom feed");
     const products = await getFeedProducts();
     log.debug("frontpage feed returned", { count: products.length });
     if (products.length > 0) await writeCache(FRONTPAGE_FEED_CACHE_KEY, products);
-    return { products, usingFeed: true, feedReason: noKeyReason };
+    return { products, usingFeed: true, feedReason: "signed-out" };
   } catch (error) {
     return { products: [], error: error instanceof Error ? error.message : "Failed to load products." };
   }
@@ -184,14 +169,8 @@ export async function getFrontpageProducts(options?: { forceRefresh?: boolean })
 //     THROW, so the detail view shows a visible error with retry / open-in-browser actions rather
 //     than a broken-looking page presented as if it were complete.
 export async function enhanceProductWithMetadata(product: Product): Promise<Product> {
-  let credsComplete = false;
-  try {
-    credsComplete = hasCredentials(getCredentials());
-  } catch {
-    credsComplete = false;
-  }
-  if (!credsComplete) {
-    log.debug("detail enrichment skipped (no credentials)");
+  if (!(await isSignedIn())) {
+    log.debug("detail enrichment skipped (signed out)");
     return product;
   }
 

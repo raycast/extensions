@@ -1,4 +1,4 @@
-import { type Card, type ScryfallSearchResponse } from "./shared";
+import { type Card, type ScryfallSearchResponse, scryfallFetch, SCRYFALL_API_BASE } from "./shared";
 
 // ─── Module-level Cover Fetcher ───────────────────────────────────────────────
 //
@@ -21,8 +21,8 @@ let paused = false;
 
 // Returns the card, or throws with a retryAfterMs property if rate limited
 async function fetchMostExpensiveCard(code: string): Promise<Card | undefined> {
-  const res = await fetch(
-    `https://api.scryfall.com/cards/search?q=e:${encodeURIComponent(code)}&order=usd&dir=desc&unique=prints`
+  const res = await scryfallFetch(
+    `${SCRYFALL_API_BASE}/cards/search?q=e:${encodeURIComponent(code)}&order=usd&dir=desc&unique=prints`
   );
   if (res.status === 429) {
     const retryAfter = parseInt(res.headers.get("Retry-After") ?? "1", 10);

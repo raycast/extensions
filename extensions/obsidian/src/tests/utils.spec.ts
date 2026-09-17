@@ -121,31 +121,41 @@ describe("utils", () => {
     });
 
     describe("createdDateFor", () => {
-      it("should return birthtime of file", () => {
+      it("should return cached creation time without reading the file", () => {
+        const stats = fs.statSync(testFile);
         const note: Note = {
           title: "Test",
           path: testFile,
           lastModified: new Date(),
           bookmarked: false,
+          createdAt: stats.birthtime,
         };
+        const stat = vi.spyOn(fs, "statSync");
 
         const birthtime = createdDateFor(note);
-        expect(birthtime).toBeInstanceOf(Date);
+        expect(birthtime).toEqual(stats.birthtime);
+        expect(stat).not.toHaveBeenCalled();
+        stat.mockRestore();
       });
     });
 
     describe("fileSizeFor", () => {
-      it("should return file size in kilobytes", () => {
+      it("should return cached file size without reading the file", () => {
+        const stats = fs.statSync(testFile);
         const note: Note = {
           title: "Test",
           path: testFile,
           lastModified: new Date(),
           bookmarked: false,
+          fileSize: stats.size,
         };
+        const stat = vi.spyOn(fs, "statSync");
 
         const size = fileSizeFor(note);
         expect(size).toBeGreaterThan(0);
         expect(typeof size).toBe("number");
+        expect(stat).not.toHaveBeenCalled();
+        stat.mockRestore();
       });
     });
   });

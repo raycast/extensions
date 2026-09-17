@@ -129,7 +129,10 @@ export async function ToolOllamaWebSearchFn(parameters: Record<string, unknown>)
   try {
     const bodyParsed: ToolOllamaWebSearchBody = JSON.parse(JSON.stringify(parameters));
     const data = await toolOllamaWebSearchFn(bodyParsed);
-    return { tool_name: ToolOllamaWebSearchName, content: JSON.stringify(data) };
+    return {
+      tool_name: ToolOllamaWebSearchName,
+      content: JSON.stringify(data),
+    };
   } catch (error) {
     console.error(error);
     return { tool_name: ToolOllamaWebSearchName, content: String(error) };

@@ -1,5 +1,45 @@
 # Linear Changelog
 
+## [Favorites Crash Fix] - 2026-09-14
+
+- Fix the Favorites command crashing when a favorite is a workspace-level label (no team); both workspace and team labels now open through the favorite's Linear-provided URL.
+
+## [AI Comment Reliability] - 2026-09-02
+
+- Prevent AI comment tools from retrying successful writes and creating duplicate comments.
+
+## [Expanded AI Tools] - 2026-08-26
+
+- Expand the Linear AI extension with native tools for issues, projects, initiatives, documents, comments, teams, users, cycles, labels, milestones, releases, status updates, attachments, agent skills, and documentation search.
+- Add cursor pagination to collection tools, full-text issue search, structured issue filtering, and issue deletion with confirmation.
+
+## [Issue Attachments] - 2026-08-20
+
+- Fix attachments added through Create Issue failing to upload.
+
+## [Copy as Prompt] - 2026-08-19
+
+- Add a "Copy as Prompt" action to issue copy actions, matching Linear's native action of the same name. Copies the issue as a structured prompt for coding agents, including its description, team, labels, project, and parent or sub-issues.
+
+## [My Issues Sub Views] - 2026-07-30
+
+- Add a dropdown to the "My Issues" command to switch between the Assigned, Created, and Subscribed sub views, matching the Linear app. Assigned stays the default.
+
+## [Add Copy Shortcuts] - 2026-07-18
+
+- Add `Cmd/Ctrl + Shift + U` shortcut to the "Copy Issue URL" action.
+- Add `Cmd/Ctrl + Shift + T` shortcut to the "Copy Title as Link" action.
+
+## [AI Comment Attachments] - 2026-07-14
+
+- Add local file attachments to the AI tools for creating and updating comments. Images are embedded in the comment, while other files are added as links.
+
+## [Templates, Copy Title as Link, and Auth Fix] - 2026-06-17
+
+- Add template support to the Create Issue command. Let users pick a Linear issue template to auto-populate the title, description, labels, project, status, priority, assignee, estimate, due date, and cycle. See https://github.com/raycast/extensions/issues/27138
+- Add a "Copy title as link" action to issue copy actions. Copy the issue title as a Markdown/HTML link for pasting into Slack and other apps, matching Linear’s native shortcut. See https://github.com/raycast/extensions/issues/28588
+- Fix initial OAuth connection failures that show Raycast’s generic "Something went wrong" error instead of a recoverable sign-in screen. See https://github.com/raycast/extensions/issues/28214
+
 ## [Set Priority shortcut] - 2026-06-10
 
 - Move the `Set Priority` shortcut off `⌘ .` so it no longer collides with `Copy Issue ID`. `Set Priority` is now `⌘ ⌥ P` on macOS and `Ctrl Alt P` on Windows.

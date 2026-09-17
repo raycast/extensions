@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dondori",
+  "title": "Dondori",
+  "description": "Control Dondori: today's tasks, quick add, timers, and window shortcuts.",
+  "icon": "icon.png",
+  "author": "ruslan-korneev",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "todo",
+    "tasks",
+    "timer",
+    "productivity"
+  ],
+  "commands": [
+    {
+      "name": "today",
+      "title": "Today's Tasks",
+      "description": "List today's tasks: toggle done, start/stop timer, open in app.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add",
+      "title": "Quick Add",
+      "description": "Add a task via the quick-add parser (dates, #tags, priority, recurrence).",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Buy milk tomorrow 15:00 #home",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "open-todos",
+      "title": "Open Todos",
+      "description": "Open the Dondori panel.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-notes",
+      "title": "Open Notes",
+      "description": "Open the Dondori window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-calendar",
+      "title": "Open Calendar",
+      "description": "Open the calendar grid.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-pool",
+      "title": "Open Task Pool",
+      "description": "Open the backlog task pool.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-focus",
+      "title": "Toggle Focus Mode",
+      "description": "Toggle Dondori focus mode.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.7.0",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}

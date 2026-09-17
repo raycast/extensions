@@ -1,5 +1,9 @@
 # Python Changelog
 
+## [Fix Search Query Escaping] - 2026-08-05
+
+- Escape user input before interpolating it into the search query and URL.
+
 ## [Maintenance] - 2026-01-15
 
 - Add support for Windows platform.

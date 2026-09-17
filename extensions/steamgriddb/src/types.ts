@@ -1,4 +1,4 @@
-import { Grid } from "@raycast/api";
+import { Grid, Icon } from "@raycast/api";
 import { SGDBImage as DBImage } from "steamgriddb";
 import { ComponentProps } from "react";
 
@@ -9,11 +9,14 @@ export type SGDBImage = DBImage & {
   height: number;
 };
 
-export enum ImageType {
-  Grids = "Grids",
-  Heroes = "Heroes",
-  Logos = "Logos",
-  Icons = "Icons",
-}
+export const imageTypes = [
+  { value: "Grids", title: "Grids", icon: Icon.AppWindowGrid2x2 },
+  { value: "Heroes", title: "Heroes", icon: Icon.Image },
+  { value: "Logos", title: "Logos", icon: Icon.Heading },
+  { value: "Icons", title: "Icons", icon: Icon.StarCircle },
+] as const;
+
+export type ImageType = (typeof imageTypes)[number];
+export type ImageTypeValue = ImageType["value"];
 
 export type AspectRatio = ComponentProps<typeof Grid>["aspectRatio"];

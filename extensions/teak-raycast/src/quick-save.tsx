@@ -11,34 +11,37 @@ import {
 import { useEffect, useState } from "react";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
 import { SetApiKeyAction } from "./components/SetApiKeyAction";
+import { SignOutAction } from "./components/SignOutAction";
 import {
   getRecoveryHint,
   getUserFacingErrorMessage,
   quickSaveCard,
 } from "./lib/api";
-import { getPreferences } from "./lib/preferences";
+import { useTeakAuth } from "./lib/useTeakAuth";
 
-type FormValues = {
+interface FormValues {
   content: string;
-};
+}
 
 const addSuccessActions = (
   toast: Toast,
   result: Awaited<ReturnType<typeof quickSaveCard>>,
 ) => {
-  if (result.appUrl) {
+  const appUrl = result.appUrl;
+  if (appUrl) {
     toast.primaryAction = {
       onAction: () => {
-        void open(result.appUrl!);
+        void open(appUrl);
       },
       title: "Open Card",
     };
   }
 
-  if (result.card?.url) {
+  const sourceUrl = result.card?.url;
+  if (sourceUrl) {
     toast.secondaryAction = {
       onAction: () => {
-        void open(result.card!.url!);
+        void open(sourceUrl);
       },
       title: "Open Source URL",
     };
@@ -49,9 +52,13 @@ export default function QuickSaveCommand() {
   const [content, setContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  const { apiKey } = getPreferences();
-  const hasApiKey = Boolean(apiKey?.trim());
+  const {
+    isAuthenticated,
+    isLoading: isCheckingAuth,
+    refresh: refreshAuth,
+  } = useTeakAuth();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: prefill clipboard only once on mount; re-running would clobber user input
   useEffect(() => {
     let isMounted = true;
 
@@ -59,7 +66,7 @@ export default function QuickSaveCommand() {
       try {
         const clipboardText = await Clipboard.readText();
         if (isMounted && !content.trim() && clipboardText?.trim()) {
-          setContent(clipboardText.trim());
+          setContent(clipboardText);
         }
       } catch {
         // Ignore clipboard prefill failures and keep the form usable.
@@ -74,8 +81,7 @@ export default function QuickSaveCommand() {
   }, []);
 
   const handleSubmit = async (values: FormValues) => {
-    const trimmed = values.content.trim();
-    if (!trimmed) {
+    if (!values.content.trim()) {
       await showToast({
         message: "Enter text or a URL before saving.",
         style: Toast.Style.Failure,
@@ -92,7 +98,7 @@ export default function QuickSaveCommand() {
 
     try {
       const result = await quickSaveCard({
-        content: trimmed,
+        content: values.content,
         source: "raycast_quick_save",
       });
       addSuccessActions(toast, result);
@@ -112,8 +118,12 @@ export default function QuickSaveCommand() {
     }
   };
 
-  if (!hasApiKey) {
-    return <MissingApiKeyDetail />;
+  if (isCheckingAuth) {
+    return <Form isLoading navigationTitle="Quick Save to Teak" />;
+  }
+
+  if (!isAuthenticated) {
+    return <MissingApiKeyDetail onSignedIn={refreshAuth} />;
   }
 
   return (
@@ -126,6 +136,7 @@ export default function QuickSaveCommand() {
             title={isSaving ? "Saving..." : "Save to Teak"}
           />
           <SetApiKeyAction />
+          <SignOutAction onSignedOut={refreshAuth} />
         </ActionPanel>
       }
       navigationTitle="Quick Save to Teak"

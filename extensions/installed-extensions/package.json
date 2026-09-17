@@ -11,7 +11,8 @@
     "litomore",
     "ridemountainpig",
     "xmok",
-    "Undolog"
+    "Undolog",
+    "tofrankie"
   ],
   "platforms": [
     "macOS",
@@ -85,16 +86,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.3"
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^22.13.10",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",

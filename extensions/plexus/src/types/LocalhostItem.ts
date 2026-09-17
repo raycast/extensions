@@ -5,6 +5,7 @@ export type LocalhostItem = {
   port: string;
   pid: string;
   url: string;
+  title?: string;
   favicon?: string;
   source: "host" | "wsl";
   distro?: string;

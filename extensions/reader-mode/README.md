@@ -38,7 +38,7 @@ The clipboard and current tab commands are disabled by default to reduce command
 Reader Mode uses a multi-layered approach to extract clean article content:
 
 1. **Site-Specific Extractors** (`src/extractors/`) - Custom extraction logic for complex sites
-2. **Site Configuration** (`src/utils/site-config.ts`) - Selector-based configuration for simpler sites
+2. **Site Configuration** (`src/config/site-config.ts`) - Selector-based configuration for simpler sites
 3. **Mozilla Readability** - Fallback for all other sites
 
 #### Extractors vs Site Config
@@ -51,7 +51,7 @@ Reader Mode uses a multi-layered approach to extract clean article content:
 
 ### Adding Support for New Sites
 
-**For simple sites** (just need different selectors), add to `src/utils/site-config.ts`:
+**For simple sites** (just need different selectors), add to `src/config/site-config.ts`:
 
 ```typescript
 [
@@ -86,6 +86,16 @@ export class MySiteExtractor extends BaseExtractor {
   }
 }
 ```
+
+## Testing
+
+Reader extracts content from live web pages, whose markup — and whose paywalls — change constantly. To keep that brittle logic honest, the repo ships an automated test suite:
+
+```bash
+npm test
+```
+
+It covers content extraction, HTML cleaning, and paywall detection, including the specific regressions these features have hit before. The committed fixtures in `tests/fixtures/` are synthetic pages that reproduce real paywall _structure_ without copying any publisher's content, so the suite runs on a fresh clone with no extra setup. If you change extraction, cleaning, or paywall detection, please add a case — see [CONTRIBUTING.md](./CONTRIBUTING.md#testing).
 
 ## Summary Configuration
 
@@ -124,15 +134,15 @@ Each prompt config includes:
 
 ### Summary Styles
 
-| Style                       | Description                                           |
-| --------------------------- | ----------------------------------------------------- |
-| **Overview**                | One-liner summary + 3 key bullet points               |
-| **At a Glance**             | Summary + Key Takeaways in a concise format           |
-| **Comprehensive**           | Fact-filled bullet points from the author's POV       |
-| **Opposing Sides**          | Two contrasting viewpoints from the article           |
-| **The 5 Ws**                | Who, What, Where, When, Why breakdown                 |
-| **Explain Like I'm 5**      | Simplified explanation using simple language          |
-| **People, Places & Things** | Key entities extracted with context                   |
+| Style                       | Description                                     |
+| --------------------------- | ----------------------------------------------- |
+| **Overview**                | One-liner summary + 3 key bullet points         |
+| **At a Glance**             | Summary + Key Takeaways in a concise format     |
+| **Comprehensive**           | Fact-filled bullet points from the author's POV |
+| **Opposing Sides**          | Two contrasting viewpoints from the article     |
+| **The 5 Ws**                | Who, What, Where, When, Why breakdown           |
+| **Explain Like I'm 5**      | Simplified explanation using simple language    |
+| **People, Places & Things** | Key entities extracted with context             |
 
 ### Summary Output Language
 
@@ -212,6 +222,12 @@ Square brackets `[text]` that appear in article content (such as editorial inser
 Image alt text and title attributes are automatically stripped to ensure proper rendering in Raycast. Images are displayed as `![](url)` without descriptive text. This prevents rendering issues where long alt text or title attributes (especially those containing quotes) can break the markdown image syntax.
 
 Additionally, relative image URLs (e.g., `/image.jpg`) are automatically converted to absolute URLs using the page's base URL to ensure images load properly.
+
+### Paywall Detection: Externally-Hidden Barriers
+
+Paywall detection runs on the fetched page HTML only — it has no network access while scoring, so it cannot read a page's **external** stylesheets. It accounts for barrier markup hidden by the `hidden`/`aria-hidden` attributes, inline styles, inert containers (`<template>`, etc.), and the page's own inline `<style>` rules. It **cannot** tell that a barrier element (e.g. `class="article-gate"`) is hidden by a rule in a _linked_ stylesheet.
+
+So a readable article that also ships an inactive, externally-hidden paywall template can occasionally be misclassified as paywalled and sent through the Paywall Hopper bypass. The impact is bounded: retrieved content only _replaces_ the original when it is at least 20% longer (see `article-loader.ts`), and an already-complete article is unlikely to gain that much from an archive — so the practical cost is a redundant bypass attempt, not swapped-out content. Fixing it properly requires evaluating linked CSS, which is out of scope for the detector's static, no-network design. This is a deliberate, accepted trade-off; see [`docs/known-issues.md`](./docs/known-issues.md) for the full rationale.
 
 ## References
 

@@ -1,5 +1,13 @@
 # Bitbucket Changelog
 
+## [Update] - 2026-09-16
+
+- Speed up "Search All Open Pull Requests" cold start: cross-session cache, slimmer API payload, progressive results as repos finish loading
+
+## [Update] - 2026-08-22
+
+- Added Search All Open Pull Requests command to browse open PRs across the workspace
+
 ## [Update] - 2025-11-17
 
 - Update shortcuts to be consistent across MacOS and Windows

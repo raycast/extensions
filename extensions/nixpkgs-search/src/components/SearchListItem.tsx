@@ -52,6 +52,9 @@ export function SearchListItem({ searchResult, channel }: SearchListItemProps) {
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Name" text={searchResult.name} />
               <List.Item.Detail.Metadata.Label title="Version" text={searchResult.version} />
+              {searchResult.system && (
+                <List.Item.Detail.Metadata.Label title="Evaluation System" text={searchResult.system} />
+              )}
               {searchResult.homepage.map((url, idx) =>
                 url ? (
                   <List.Item.Detail.Metadata.Link key={url} title="Homepage" target={url} text={new URL(url).host} />

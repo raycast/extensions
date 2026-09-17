@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getHistory, removeAllItemsFromHistory, removeItemFromHistory } from "@/utils/history-storage";
 import type { HistoryItem } from "@/utils/history-storage";
 
@@ -14,7 +14,7 @@ export const HistoryListItem = ({ item, setHistory, setSearchTerm }: HistoryList
     <List.Item
       title={item.term}
       key={id}
-      icon={item.type === "search" ? Icon.MagnifyingGlass : Icon.Box}
+      icon={{ source: item.type === "search" ? Icon.MagnifyingGlass : Icon.Box, tintColor: Color.SecondaryText }}
       actions={
         <ActionPanel>
           <Action title="Search Package" onAction={() => setSearchTerm(item.term)} icon={Icon.MagnifyingGlass} />

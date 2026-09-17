@@ -1,0 +1,13 @@
+# Raycast
+.raycast-swift-build
+.swiftpm
+*.icloud
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Misc
+.DS_Store

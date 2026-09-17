@@ -83,6 +83,31 @@
       "subtitle": "OVHcloud",
       "description": "Manage Domains, DNS Records, Nameservers",
       "mode": "view"
+    },
+    {
+      "name": "communication",
+      "title": "Communication",
+      "subtitle": "OVHcloud",
+      "description": "Messages and Contacts",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "view",
+          "placeholder": "View",
+          "required": true,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "My Messages",
+              "value": "my-messages"
+            },
+            {
+              "title": "Contacts",
+              "value": "contacts"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -104,5 +129,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

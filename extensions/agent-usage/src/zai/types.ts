@@ -16,7 +16,9 @@ export interface ZaiLimitEntry {
 
 export interface ZaiUsage {
   tokenLimit: ZaiLimitEntry | null;
+  weeklyTokenLimit: ZaiLimitEntry | null;
   timeLimit: ZaiLimitEntry | null;
+  weeklyTimeLimit: ZaiLimitEntry | null;
   planName: string | null;
 }
 

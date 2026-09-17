@@ -3,10 +3,14 @@ import { CachedQueryClientProvider } from "../components/CachedQueryClientProvid
 import { SpaceTagItemActionPanel } from "../components/SpaceTagItemActionPanel";
 import { NewTagForm } from "./NewTagForm";
 import { useTags } from "../hooks/use-tags.hook";
+import { useMe } from "../hooks/use-me.hook";
+import { resolveSpaceIconUrl } from "../utils/space-icon.util";
 
 export const Body = (props: { spaceId: string }) => {
   const { spaceId } = props;
   const { data, refetch, isLoading, isFetching } = useTags(spaceId);
+  const me = useMe();
+  const myTags = me.data?.associatedSpaces.find((s) => s.id === spaceId)?.myTags;
 
   if (isLoading || !data) {
     return <List isLoading />;
@@ -41,9 +45,11 @@ export const Body = (props: { spaceId: string }) => {
         <List.Item
           key={tag.name}
           title={tag.name}
-          // TODO: Subscribed check icon
           icon={Icon.Tag}
-          accessories={[{ text: tag.space.name, icon: tag.space.image }]}
+          accessories={[
+            ...(myTags?.includes(tag.name) ? [{ icon: Icon.Check, tooltip: "Subscribed" }] : []),
+            { text: tag.space.name, icon: resolveSpaceIconUrl(tag.space.image) },
+          ]}
           actions={<SpaceTagItemActionPanel spaceId={spaceId} tagName={tag.name} refetch={refetch} />}
         />
       ))}

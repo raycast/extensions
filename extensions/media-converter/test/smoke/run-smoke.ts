@@ -13,6 +13,9 @@ import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import { convertMedia } from "../../src/utils/converter";
 import { mergeMedia } from "../../src/utils/merge";
+import { inspectMedia } from "../../src/utils/mediaProbe";
+import { resolveTargetSizeQuality } from "../../src/utils/targetSize";
+import { editMedia } from "../../src/utils/editMedia";
 import type { QualitySettings } from "../../src/types/media";
 
 // `QualitySettings` is derived from `VIDEO_QUALITY_OBJECT as const`, so it
@@ -47,7 +50,12 @@ function fail(name: string, info: string) {
 }
 
 async function findFFmpegBinary(): Promise<string> {
-  const candidates = ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg"];
+  const candidates = [
+    process.env.FFMPEG_BIN,
+    "/opt/homebrew/bin/ffmpeg",
+    "/usr/local/bin/ffmpeg",
+    "/usr/bin/ffmpeg",
+  ].filter((candidate): candidate is string => Boolean(candidate));
   for (const c of candidates) if (fs.existsSync(c)) return c;
   try {
     const { stdout } = await execP("which ffmpeg");
@@ -128,6 +136,18 @@ async function main() {
   await genImageFixture(ffmpeg, img1);
   pass("fixtures generated", `${fs.readdirSync(TMP).length} files`);
 
+  // ---- Media inspection ----
+  await check("inspect video streams and dimensions", async () => {
+    const inspection = await inspectMedia(vid1);
+    const video = inspection.streams.find((stream) => stream.type === "video");
+    const audio = inspection.streams.find((stream) => stream.type === "audio");
+    if (!video || video.width !== 160 || video.height !== 120) {
+      throw new Error(`unexpected video inspection: ${JSON.stringify(video)}`);
+    }
+    if (!audio || !inspection.durationSec) throw new Error("audio stream or duration missing from inspection");
+    pass("inspect video streams and dimensions", `${video.codec}, ${video.width}×${video.height}`);
+  });
+
   // ---- Video: mp4 -> webm ----
   await check("convert mp4 -> webm", async () => {
     const out = await convertMedia(vid1, ".webm", q({ ".webm": { encodingMode: "crf", crf: 50, quality: "good" } }), {
@@ -169,6 +189,43 @@ async function main() {
     pass("convert mp4 with stripMetadata");
   });
 
+  // ---- Target-size planning + two-pass conversion ----
+  await check("convert mp4 near target size", async () => {
+    const targetSizeMb = 0.1;
+    const { quality, plan } = await resolveTargetSizeQuality(
+      vid1,
+      ".mp4",
+      q({ ".mp4": { encodingMode: "crf", crf: 60, preset: "ultrafast" } }),
+      targetSizeMb,
+    );
+    const out = await convertMedia(vid1, ".mp4", quality, { outputDir: TMP });
+    const actual = sizeOf(out);
+    if (!fs.existsSync(out) || actual === 0) throw new Error("target-size output missing");
+    if (actual > targetSizeMb * 1024 * 1024 * 2) {
+      throw new Error(`output ${actual} bytes is unexpectedly far above target`);
+    }
+    pass("convert mp4 near target size", `${plan.videoBitrateKbps} kbps, ${actual} bytes`);
+  });
+
+  for (const [format, baseQuality] of [
+    [".mkv", { ".mkv": { encodingMode: "crf", crf: 60, preset: "ultrafast" } }],
+    [".webm", { ".webm": { encodingMode: "crf", crf: 60, quality: "good" } }],
+    [".avi", { ".avi": { encodingMode: "vbr", bitrate: "1000", maxBitrate: "" } }],
+    [".mpg", { ".mpg": { encodingMode: "vbr", bitrate: "1000", maxBitrate: "" } }],
+  ] as const) {
+    await check(`convert ${format} near target size`, async () => {
+      const targetSizeMb = 0.1;
+      const { quality } = await resolveTargetSizeQuality(vid1, format, q(baseQuality), targetSizeMb);
+      const out = await convertMedia(vid1, format, quality, { outputDir: TMP });
+      const actual = sizeOf(out);
+      if (!fs.existsSync(out) || actual === 0) throw new Error("target-size output missing");
+      if (actual > targetSizeMb * 1024 * 1024 * 2) {
+        throw new Error(`output ${actual} bytes is unexpectedly far above target`);
+      }
+      pass(`convert ${format} near target size`, `${actual} bytes`);
+    });
+  }
+
   // ---- Audio: wav -> mp3 ----
   await check("convert wav -> mp3", async () => {
     const out = await convertMedia(aud1, ".mp3", q({ ".mp3": { bitrate: "128", vbr: false } }), { outputDir: TMP });
@@ -181,6 +238,72 @@ async function main() {
     const out = await convertMedia(img1, ".jpg", q({ ".jpg": 80 }), { outputDir: TMP });
     if (!fs.existsSync(out) || sizeOf(out) < 200) throw new Error(`output missing or too small: ${out}`);
     pass("convert png -> jpg", `${sizeOf(out)} bytes`);
+  });
+
+  // ---- Adversarial path handling: these characters must remain literal ----
+  await check("convert path with shell metacharacters and Unicode safely", async () => {
+    const marker = path.join(process.cwd(), "MEDIA_CONVERTER_INJECTION_MARKER");
+    if (fs.existsSync(marker)) fs.unlinkSync(marker);
+    const unusualInput = path.join(TMP, `image $(touch MEDIA_CONVERTER_INJECTION_MARKER); 'mídia'.png`);
+    fs.copyFileSync(img1, unusualInput);
+    try {
+      const out = await convertMedia(unusualInput, ".webp", q({ ".webp": 80 }), { outputDir: TMP });
+      if (!fs.existsSync(out) || sizeOf(out) < 100) throw new Error(`output missing or too small: ${out}`);
+      if (fs.existsSync(marker)) throw new Error("filename content was interpreted by a shell");
+      pass("convert adversarial path safely");
+    } finally {
+      if (fs.existsSync(marker)) fs.unlinkSync(marker);
+    }
+  });
+
+  // ---- Editing operations ----
+  await check("resize video", async () => {
+    const out = await editMedia(vid1, { operation: "resize-crop", width: 80 }, { outputDir: TMP });
+    const inspection = await inspectMedia(out);
+    const video = inspection.streams.find((stream) => stream.type === "video");
+    if (video?.width !== 80 || video.height !== 60) {
+      throw new Error(`unexpected resized dimensions: ${video?.width}x${video?.height}`);
+    }
+    pass("resize video", `${video.width}×${video.height}`);
+  });
+
+  await check("extract audio from video", async () => {
+    const out = await editMedia(vid1, { operation: "extract-audio", audioFormat: ".mp3" }, { outputDir: TMP });
+    const inspection = await inspectMedia(out);
+    if (!inspection.streams.some((stream) => stream.type === "audio")) throw new Error("audio stream missing");
+    if (inspection.streams.some((stream) => stream.type === "video")) throw new Error("unexpected video stream");
+    pass("extract audio from video", `${sizeOf(out)} bytes`);
+  });
+
+  await check("change video speed", async () => {
+    const out = await editMedia(vid1, { operation: "speed", speed: 2 }, { outputDir: TMP });
+    const duration = await probeDuration(ffmpeg, out);
+    if (duration === null || duration > 1.3) throw new Error(`unexpected sped-up duration: ${duration}`);
+    pass("change video speed", `duration=${duration.toFixed(2)}s`);
+  });
+
+  await check("normalize audio loudness", async () => {
+    const out = await editMedia(aud1, { operation: "normalize", integratedLufs: -16 }, { outputDir: TMP });
+    if (!fs.existsSync(out) || sizeOf(out) < 500) throw new Error("normalized audio output missing");
+    pass("normalize audio loudness", `${sizeOf(out)} bytes`);
+  });
+
+  await check("burn subtitles into video", async () => {
+    const subtitle = path.join(TMP, "captions.srt");
+    fs.writeFileSync(subtitle, "1\n00:00:00,000 --> 00:00:01,500\nMedia Converter\n");
+    const out = await editMedia(
+      vid1,
+      { operation: "subtitles", mode: "burn", subtitlePath: subtitle },
+      { outputDir: TMP },
+    );
+    if (!fs.existsSync(out) || sizeOf(out) < 500) throw new Error("subtitled video output missing");
+    pass("burn subtitles into video", `${sizeOf(out)} bytes`);
+  });
+
+  await check("remove subtitle streams", async () => {
+    const out = await editMedia(vid1, { operation: "subtitles", mode: "remove" }, { outputDir: TMP });
+    if (!fs.existsSync(out) || sizeOf(out) < 500) throw new Error("subtitle-free video output missing");
+    pass("remove subtitle streams", `${sizeOf(out)} bytes`);
   });
 
   // ---- Merge: 2 compatible mp4s (should stream-copy) ----
@@ -204,6 +327,18 @@ async function main() {
     const dur = await probeDuration(ffmpeg, result.outputPath);
     if (dur === null || dur < 3.5) throw new Error(`merged (re-encode) duration looks wrong: ${dur}`);
     pass("merge 2 mp4s with forceReencode", `dur=${dur.toFixed(2)}s`);
+  });
+
+  await check("merge 2 mp4s into avi with forceReencode", async () => {
+    const result = await mergeMedia([vid1, vid2], ".avi", {
+      outputDir: TMP,
+      outputFileName: "merged-avi",
+      forceReencode: true,
+    });
+    if (result.strategy !== "reencode") throw new Error(`expected reencode, got ${result.strategy}`);
+    const dur = await probeDuration(ffmpeg, result.outputPath);
+    if (dur === null || dur < 3.5) throw new Error(`merged AVI duration looks wrong: ${dur}`);
+    pass("merge 2 mp4s into avi with forceReencode", `dur=${dur.toFixed(2)}s`);
   });
 
   // ---- Merge: 2 audio files ----

@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useRef } from "react";
 import {
-  AUDIT_PROVIDER_LABELS,
   buildInstallCommand,
   buildSkillUrl,
+  formatAuditProviderLabel,
   formatInstalls,
   formatRelativeDate,
   normalizeAllowedTools,
@@ -184,14 +184,14 @@ ${installCommand}
         audit.url ? (
           <Detail.Metadata.Link
             key={audit.provider}
-            title={`${AUDIT_PROVIDER_LABELS[audit.provider]} Audit`}
+            title={`${formatAuditProviderLabel(audit)} Audit`}
             text={formatAuditStatus(audit.status)}
             target={audit.url}
           />
         ) : (
           <Detail.Metadata.Label
             key={audit.provider}
-            title={`${AUDIT_PROVIDER_LABELS[audit.provider]} Audit`}
+            title={`${formatAuditProviderLabel(audit)} Audit`}
             text={formatAuditStatus(audit.status)}
           />
         ),

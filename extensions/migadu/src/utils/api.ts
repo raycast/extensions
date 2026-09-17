@@ -15,8 +15,9 @@ import {
   RewriteCreate,
   RewriteEdit,
   APIMethod,
+  Domain,
+  DomainCreate,
 } from "./types";
-import fetch from "node-fetch";
 import { showFailureToast } from "@raycast/utils";
 
 const USERNAME = getPreferenceValues<Preferences>().username;
@@ -71,6 +72,14 @@ const callApi = async <T>(
     return { error } as ErrorResponse;
   }
 };
+
+// Domains
+export async function getDomains(verbosity: ApiToastVerbosity = "verbose") {
+  return await callApi<{ domains: Domain[] }>(`domains`, "GET", undefined, verbosity);
+}
+export async function createDomain(newDomain: DomainCreate) {
+  return await callApi<Domain>(`domains`, "POST", newDomain);
+}
 
 // Mailboxes
 export async function getMailboxes(domain: string, verbosity: ApiToastVerbosity = "verbose") {

@@ -13,8 +13,11 @@ export type { ExtractorResult };
 const EXTRACTOR_REGISTRY: Array<{
   pattern: RegExp;
   name: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ExtractorClass: new (doc: ExtractorDocument, url: string, schemaOrgData?: any) => BaseExtractor;
+  ExtractorClass: new (
+    doc: ExtractorDocument,
+    url: string,
+    schemaOrgData?: Record<string, unknown> | null,
+  ) => BaseExtractor;
 }> = [
   {
     pattern: /^news\.ycombinator\.com$/i,

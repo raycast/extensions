@@ -35,6 +35,11 @@ export interface User {
 export interface UserFeatures {
   scheduler: number;
   extraScopes: boolean;
+  // Reclaim 2.0 ("Assistant"). When enabled, tasks live in the /reclaim-tasks
+  // (GTD) pool rather than the 1.0 /tasks endpoints.
+  assistant: {
+    enabled: boolean;
+  };
   assistSettings: {
     travel?: boolean;
     otherTravelDuration?: number;

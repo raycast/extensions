@@ -6,12 +6,11 @@ import generateSignMarkdown from "./utils/generateSignMarkdown";
 import HoroscopeActions from "./components/HoroscopeActions";
 
 export default function DailyHoroscope(props: LaunchProps<{ arguments: Arguments.DailyHoroscope }>) {
-  const day = props.arguments.day;
   const sign = props.arguments.sign || DEFAULT_SIGN;
 
-  const params = new URLSearchParams({ sign, day });
+  const params = new URLSearchParams({ sign });
   const { data, isLoading } = useFetch<DailyHoroscope>(API_URL + `daily?${params}`);
 
-  const markdown = generateSignMarkdown(sign) + (!data ? "" : `## ${data.data.date} \n\n ${data.data.horoscope_data}`);
+  const markdown = generateSignMarkdown(sign) + (!data ? "" : `## ${data.data.date} \n\n ${data.data.horoscope}`);
   return <Detail isLoading={isLoading} markdown={markdown} actions={<HoroscopeActions data={data} />} />;
 }

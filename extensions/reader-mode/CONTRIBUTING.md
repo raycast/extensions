@@ -25,26 +25,29 @@ Thank you for your interest in contributing to Reader! This guide will help you 
 ### Setup
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/chrismessina/raycast-reader.git
 cd raycast-reader
 ```
 
-2. Install dependencies:
+1. Install dependencies:
+
 ```bash
 npm install
 ```
 
-3. Start development mode:
+1. Start development mode:
+
 ```bash
 npm run dev
 ```
 
-4. The extension will automatically reload in Raycast when you make changes.
+1. The extension will automatically reload in Raycast when you make changes.
 
 ### Project Structure
 
-```
+```text
 raycast-reader/
 ├── src/
 │   ├── actions/          # Action panel components
@@ -66,7 +69,7 @@ raycast-reader/
 
 Reader follows a pipeline architecture:
 
-```
+```text
 URL Input → Fetch → Extract → Convert → Summarize → Display
 ```
 
@@ -92,6 +95,7 @@ Reader uses a **three-tier extraction system** that handles different site compl
 Extractors are for sites with non-standard structures that need custom DOM traversal and content transformation.
 
 **Current extractors:**
+
 - `hackernews.ts` — Transforms comment threads
 - `github.ts` — Extracts README content
 - `reddit.ts` — Converts posts and comments
@@ -142,11 +146,11 @@ export function getExtractorForUrl(url: string, document: Document) {
     // ... other extractors
   ];
 
-  return extractors.find(e => e.canExtract()) || null;
+  return extractors.find((e) => e.canExtract()) || null;
 }
 ```
 
-### 2. Site Configuration (`src/utils/site-config.ts`)
+### 2. Site Configuration (`src/config/site-config.ts`)
 
 **Use when:** Site just needs CSS selector adjustments (works WITH Readability).
 
@@ -155,18 +159,14 @@ Site configs pre-clean HTML before Readability runs. This is simpler and less er
 **Adding site config:**
 
 ```typescript
-// In src/utils/site-config.ts
+// In src/config/site-config.ts
 export const SITE_CONFIGS: [RegExp, SiteConfig][] = [
   [
     /^(.*\.)?example\.com$/i,
     {
       name: "Example",
       articleSelector: ".article-body",
-      removeSelectors: [
-        ".sidebar",
-        ".newsletter-signup",
-        ".social-share",
-      ],
+      removeSelectors: [".sidebar", ".newsletter-signup", ".social-share"],
     },
   ],
   // ... other configs
@@ -174,6 +174,7 @@ export const SITE_CONFIGS: [RegExp, SiteConfig][] = [
 ```
 
 **Available options:**
+
 - `name` — Human-readable site name
 - `articleSelector` — Override content container selector
 - `removeSelectors` — Array of selectors to remove before extraction
@@ -185,7 +186,7 @@ Automatically handles standard article pages without any configuration.
 
 ### Decision Tree: Extractor vs Site Config
 
-```
+```text
 Does the site need custom DOM traversal or content restructuring?
 ├─ YES → Create an extractor
 └─ NO → Use site config
@@ -260,7 +261,7 @@ export type SummaryStyle =
   | ...;
 ```
 
-2. **Configure AI settings** in `src/config/ai.ts`:
+1. **Configure AI settings** in `src/config/ai.ts`:
 
 ```typescript
 export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig> = {
@@ -272,7 +273,7 @@ export const AI_SUMMARY_CONFIG: Record<SummaryStyle, AIStyleConfig> = {
 };
 ```
 
-3. **Add prompt template** in `src/config/prompts.ts`:
+1. **Add prompt template** in `src/config/prompts.ts`:
 
 ```typescript
 export const SUMMARY_PROMPTS: Record<SummaryStyle, PromptConfig> = {
@@ -289,7 +290,7 @@ Format your response EXACTLY like this:
 };
 ```
 
-4. **Add preference option** in `package.json`:
+1. **Add preference option** in `package.json`:
 
 ```json
 {
@@ -301,7 +302,7 @@ Format your response EXACTLY like this:
 }
 ```
 
-5. **Add action** in `src/actions/ArticleActions.tsx`:
+1. **Add action** in `src/actions/ArticleActions.tsx`:
 
 ```typescript
 <Action
@@ -328,7 +329,7 @@ Your modified instructions...`,
 Clear cached summaries to test changes:
 
 ```typescript
-localStorage.removeItem('summary:URL:style:default');
+localStorage.removeItem("summary:URL:style:default");
 ```
 
 ## Development Workflow
@@ -347,7 +348,12 @@ npm run lint
 
 # Fix linting issues
 npm run fix-lint
+
+# Run the automated test suite
+npm test
 ```
+
+> **Heads up on `npm run fix-lint`:** its `prefer-common-shortcut` autofixer rewrites keyboard shortcuts and does **not** check for conflicts within an `ActionPanel`. After running it, `git diff` any action files it touched — see [Keyboard Shortcuts](#keyboard-shortcuts) under Code Style.
 
 ### Debugging
 
@@ -365,7 +371,7 @@ log stream --predicate 'subsystem == "com.raycast.macos"' --level debug
 # Or use Console.app and filter for "Reader"
 ```
 
-3. **Common log events:**
+1. **Common log events:**
 
    - `url:resolve:*` — URL resolution
    - `fetch:*` — HTTP requests
@@ -385,8 +391,8 @@ log stream --predicate 'subsystem == "com.raycast.macos"' --level debug
 ```typescript
 // In extension code or browser console
 Object.keys(localStorage)
-  .filter(key => key.startsWith('summary:'))
-  .forEach(key => localStorage.removeItem(key));
+  .filter((key) => key.startsWith("summary:"))
+  .forEach((key) => localStorage.removeItem(key));
 ```
 
 **Test extraction without summaries:**
@@ -396,7 +402,22 @@ Object.keys(localStorage)
 
 ## Testing
 
+### Automated Tests
+
+Run the suite with `npm test`. It exercises the extraction, cleaning, and paywall-detection logic, and covers the regressions those features have hit before — cleaning silently removing nothing, the `forceParse` fallback querying a consumed DOM, paywall detection missing sites or crying wolf on innocent ones. **Run it before every PR, and add to it when you change this logic.** These features shipped broken for months precisely because nothing asserted their behavior.
+
+The suite runs on `node` with esbuild (no test-framework dependency); it bundles with `@raycast/api` stubbed so the extension's own imports resolve as they do in a real build. It does not affect the extension — `ray build` never bundles `tests/`.
+
+**Fixtures come in two tiers:**
+
+- **Committed, synthetic** (`tests/fixtures/`) — hand-written pages that reproduce the _structure_ of a paywall (the barrier markup and gating language detection keys on) without copying any publisher's real content. These are the baseline: they ship, and they run on any fresh clone. This is the corpus you extend.
+- **Private, real** (`.github/.private/tests/`, gitignored) — actual captured pages from real sites, kept out of the repo for size and copyright. When present they add higher-fidelity checks (and the large-page memory test); when absent — the normal case — those tests skip and the suite still passes on the synthetic corpus.
+
+**When you change paywall detection or content cleaning, add an assertion to the committed corpus.** A new paywall pattern should come with a synthetic fixture (or inline case) that fails without your change; a change to `NEGATIVE_SELECTORS` should keep the "does not remove article content" test green. If you have a real page that a synthetic fixture can't faithfully capture, drop it in `.github/.private/tests/` and add it to the private fixture list — but make sure the committed corpus still covers the behavior, so contributors without your captures are protected too.
+
 ### Manual Testing
+
+Automated tests cover the parsing logic, but the UI and host integration still need a real run in Raycast:
 
 1. **Test different scenarios:**
    - Direct URLs
@@ -405,6 +426,7 @@ Object.keys(localStorage)
    - Blocked pages (403)
    - Paywalled content
    - Non-readable pages
+   - **On Windows** (if available): the Browser Extension API is unavailable there, so verify the browser-dependent commands degrade gracefully rather than hang.
 
 2. **Test summary styles:**
    - Generate each style on the same article
@@ -460,6 +482,15 @@ Before submitting an extractor:
 - Extract reusable logic into `src/utils/`
 - Group related functions together
 - Add JSDoc comments for public APIs
+
+### Keyboard Shortcuts
+
+This extension ships on **both macOS and Windows** (`platforms` in `package.json`), which makes shortcuts platform-sensitive:
+
+- **Prefer `Keyboard.Shortcut.Common.*`** — those constants are already platform-aware.
+- **A custom shortcut must be platform-explicit:** `{ macOS: { modifiers: [...], key }, Windows: { modifiers: [...], key } }` (capital `Windows`). A bare `{ modifiers: ["cmd"], key }` is a macOS binding that means nothing on Windows.
+- **No two actions in one `ActionPanel` may share a shortcut.** A spelled-out combo is not automatically distinct — `{ modifiers: ["cmd","shift"], key: "c" }` **is** `Common.Copy`, and `{ modifiers: ["cmd"], key: "s" }` **is** `Common.Save`. Assigning one next to an action already using that `Common` constant is a silent collision.
+- **`npm run fix-lint` will not catch that collision** — worse, its `prefer-common-shortcut` autofixer can create the appearance of one by rewriting your longhand into the constant, and it auto-resolves platform-ambiguous shortcuts without asking. After running `fix-lint`, `git diff` your action files and re-check each panel by hand.
 
 ### Logging
 

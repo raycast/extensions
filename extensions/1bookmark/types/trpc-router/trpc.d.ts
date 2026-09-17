@@ -1,3 +1,12 @@
+/**
+ * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
+ * 1. You want to modify request context (see Part 1).
+ * 2. You want to create a new middleware or type of procedure (see Part 3).
+ *
+ * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
+ * need to use are documented accordingly near the end.
+ */
+import { TRPCError } from "@trpc/server";
 import superjson from "superjson";
 type CreateContextOptions = {
     headers: Headers;
@@ -56,7 +65,7 @@ export declare const t: import("@trpc/server").TRPCRootObject<{
 }, object, {
     transformer: typeof superjson;
     errorFormatter({ shape, error }: {
-        error: import("@trpc/server").TRPCError;
+        error: TRPCError;
         type: import("@trpc/server").ProcedureType | "unknown";
         path: string | undefined;
         input: unknown;

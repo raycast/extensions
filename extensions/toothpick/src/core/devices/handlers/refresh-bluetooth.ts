@@ -4,7 +4,7 @@ import { showAnimatedMessage, showErrorMessage, showSuccessMessage } from "src/u
 export default async function refreshBluetooth() {
   let devicesService: ReturnType<typeof getDevicesService>;
   try {
-    devicesService = getDevicesService("blueutil");
+    devicesService = getDevicesService(process.platform === "win32" ? undefined : "blueutil");
   } catch {
     await showErrorMessage(
       "Refresh All requires blueutil. Install it with Homebrew or set Blueutil Directory in preferences.",

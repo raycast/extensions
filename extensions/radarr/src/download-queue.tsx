@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { List, ActionPanel, Action, Icon, Color, confirmAlert, Alert } from "@raycast/api";
 
+import { OpenPreferencesAction } from "@/lib/components/OpenPreferencesAction";
 import { useInstanceManager } from "@/lib/hooks/useInstanceManager";
 import { useQueue, removeQueueItem } from "@/lib/hooks/useRadarrAPI";
 import { formatMovieTitle, formatFileSize, formatOverview } from "@/lib/utils/formatting";
@@ -183,7 +184,7 @@ ${formatOverview(item.movie?.overview || "")}`}
                     onAction={() => switchToInstance(instance)}
                   />
                 ))}
-                <Action.Open title="Open Preferences" target="raycast://extensions/preferences" icon={Icon.Gear} />
+                <OpenPreferencesAction />
               </ActionPanel.Section>
             )}
           </ActionPanel>
@@ -205,7 +206,7 @@ ${formatOverview(item.movie?.overview || "")}`}
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.Open title="Open Preferences" target="raycast://extensions/preferences" icon={Icon.Gear} />
+              <OpenPreferencesAction />
             </ActionPanel>
           }
         />

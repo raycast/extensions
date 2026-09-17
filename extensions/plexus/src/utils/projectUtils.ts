@@ -99,10 +99,3 @@ export function getProjectPath(cmdResult: string): string {
   const dir = dirname(scriptPath);
   return dir === "." ? "" : dir;
 }
-
-export function createDisplayName(projectName: string, framework: string): string {
-  if (!framework || framework === projectName) return projectName;
-  if (projectName.toLowerCase().includes(framework.toLowerCase())) return projectName;
-
-  return `${projectName} (${framework})`;
-}

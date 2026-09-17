@@ -1,4 +1,15 @@
-import { ActionPanel, Action, List, open, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  open,
+  Icon,
+  Keyboard,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Application,
+} from "@raycast/api";
 import { useCachedState, showFailureToast } from "@raycast/utils";
 import { SearchUsingSpotlightAction } from "@components/search-using-spotlight-action";
 import { useZoxide } from "@hooks/use-zoxide";
@@ -46,19 +57,18 @@ export const SearchResult = ({
   const showTerminal = terminal.bundleId !== openIn.bundleId;
   const showEditor = editor.bundleId !== openIn.bundleId && editor.bundleId !== terminal.bundleId;
 
-  // Opening a result counts as a visit, so boost its score in zoxide first.
-  // Pass a bundle id, not an app name — `open(path, "Finder")` by name lands on AirDrop.
-  const openIn_ = async (bundleId: string | undefined, failureTitle: string) => {
+  // Bump the score first (while mounted), then open with the full Application
+  // object — a bundle-id string drops the folder target on recent Raycast versions.
+  const openIn_ = async (app: Application, failureTitle: string) => {
     try {
       await addQuery();
-      if (bundleId) await open(searchResult.originalPath, bundleId);
-      else await open(searchResult.originalPath);
+      await open(searchResult.originalPath, app);
     } catch (error) {
       showFailureToast(error, { title: failureTitle });
     }
   };
 
-  const openResult = () => openIn_(openIn.bundleId, "Failed to open folder");
+  const openResult = () => openIn_(openIn, "Failed to open folder");
 
   const boostResult = async () => {
     try {
@@ -104,7 +114,7 @@ export const SearchResult = ({
                 title={`Open in ${terminal.name}`}
                 icon={Icon.Terminal}
                 shortcut={{ modifiers: ["cmd"], key: "return" }}
-                onAction={() => openIn_(terminal.bundleId, "Failed to open in terminal")}
+                onAction={() => openIn_(terminal, "Failed to open in terminal")}
               />
             )}
             {showEditor && (
@@ -112,11 +122,11 @@ export const SearchResult = ({
                 title={`Open in ${editor.name}`}
                 icon={Icon.Code}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-                onAction={() => openIn_(editor.bundleId, "Failed to open in editor")}
+                onAction={() => openIn_(editor, "Failed to open in editor")}
               />
             )}
             <Action.ShowInFinder path={searchResult.originalPath} shortcut={{ modifiers: ["cmd"], key: "f" }} />
-            <Action.OpenWith path={searchResult.originalPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.OpenWith path={searchResult.originalPath} shortcut={Keyboard.Shortcut.Common.Open} />
             <SearchUsingSpotlightAction searchText={searchText || ""} />
           </ActionPanel.Section>
           <ActionPanel.Section>

@@ -1,4 +1,4 @@
-import { ActionPanel, Color, List } from "@raycast/api";
+import { Color, List } from "@raycast/api";
 import type { Repository } from "../../types/api";
 import RepositoryDetails from "./repository-details";
 import RepositoryActions from "./repository-actions";
@@ -10,7 +10,6 @@ export default function RepositoryItem(props: {
   sort: RepositorySort | undefined;
   showDetails: boolean;
   setShowDetails: (show: boolean) => void;
-  createIssueAction?: ActionPanel.Section.Children;
 }) {
   const item = props.item;
   const showDetails = props.showDetails;
@@ -23,14 +22,7 @@ export default function RepositoryItem(props: {
       title={item.full_name || "[No Name]"}
       subtitle={item.description || ""}
       detail={<RepositoryDetails repo={item} />}
-      actions={
-        <RepositoryActions
-          item={item}
-          showDetails={showDetails}
-          setShowDetails={setShowDetails}
-          createIssueAction={props.createIssueAction}
-        />
-      }
+      actions={<RepositoryActions item={item} showDetails={showDetails} setShowDetails={setShowDetails} />}
       accessories={showDetails ? [] : getRepositoryAccessories(item, sort)}
     />
   );

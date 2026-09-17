@@ -1,0 +1,3 @@
+{"id":41,"type":"user_joined","time":"2026-06-20T10:00:00.000Z","category":"events","data":{"user":{"id":7,"full_name":"Riley Chen","email":"riley@example.com"}}}
+{"id":42,"type":"transcription_finished","time":"2026-06-20T10:05:01.000Z","category":"transcript","data":{"user_id":7,"start":"2026-06-20T10:05:00.000Z","end":"2026-06-20T10:05:01.000Z","text":"Check C++: launch OR retry --flag?"}}
+{"id":43,"type":"shared_content_changed","time":"2026-06-20T10:05:02.000Z","category":"content","data":{"user_id":7,"app":{"name":"Editor","id":"app.editor"},"title":{"value":"migration.ts"},"url":{"value":"https://example.com/migration"}}}

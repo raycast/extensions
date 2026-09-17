@@ -1,9 +1,9 @@
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
-import { type Transaction, type Category, type Tag, useLunchMoney } from "./api";
+import { type Transaction, type Category, type Tag, useLunchMoney, usePrimaryCurrency } from "./api";
 import { TransactionListItem, getDateRangeForFilter, DateRangeDropdown } from "./components";
-import { formatCurrency, buildLunchMoneyUrl, formatTransactionsAsText } from "./format";
+import { formatCurrency, buildLunchMoneyUrl, formatTransactionsAsText, getTransactionBaseValue } from "./format";
 
 function filterTransactions(
   transactions: Transaction[],
@@ -46,15 +46,18 @@ export default function Command() {
 
       while (hasMore) {
         const { data, error } = await client.GET("/transactions", {
-          params: { query: { start_date: startDate, end_date: endDate, offset } },
+          params: { query: { start_date: startDate, end_date: endDate, offset, include_pending: true } },
         });
         if (error) {
           console.error("Transactions fetch error:", error);
           throw new Error(JSON.stringify(error));
         }
-        allTransactions.push(...(data?.transactions || []));
-        hasMore = data?.has_more ?? false;
-        offset += data?.transactions?.length ?? 0;
+        const batch = data?.transactions || [];
+        allTransactions.push(...batch);
+        // Stop on an empty page even if the API still reports has_more, so offset always
+        // advances and the loop can't spin forever.
+        hasMore = (data?.has_more ?? false) && batch.length > 0;
+        offset += batch.length;
       }
 
       return allTransactions;
@@ -86,6 +89,7 @@ export default function Command() {
 
   const categories = categoriesData ?? [];
   const tags = tagsData ?? [];
+  const primaryCurrency = usePrimaryCurrency();
 
   // Filter transactions based on search text
   const filteredTransactions = useMemo(
@@ -101,35 +105,22 @@ export default function Command() {
     [filteredTransactions, categories],
   );
 
-  // Calculate total for filtered transactions
-  const totalAmount = useMemo(() => {
-    return filteredTransactions.reduce((sum, t) => {
-      const category = categories.find((c) => c.id === t.category_id);
-      const isIncome = category?.is_income ?? false;
-      const amount = Math.abs(parseFloat(t.amount));
-      return sum + (isIncome ? amount : -amount);
-    }, 0);
-  }, [filteredTransactions, categories]);
+  // Net total in the user's primary currency. getTransactionBaseValue is positive for debits
+  // (money out), so we negate: a positive total means net income, negative means net spent.
+  const totalAmount = useMemo(
+    () => filteredTransactions.reduce((sum, t) => sum - getTransactionBaseValue(t), 0),
+    [filteredTransactions],
+  );
 
-  // Calculate total for pending transactions
-  const pendingTotal = useMemo(() => {
-    return pendingTransactions.reduce((sum, t) => {
-      const category = categories.find((c) => c.id === t.category_id);
-      const isIncome = category?.is_income ?? false;
-      const amount = Math.abs(parseFloat(t.amount));
-      return sum + (isIncome ? amount : -amount);
-    }, 0);
-  }, [pendingTransactions, categories]);
+  const pendingTotal = useMemo(
+    () => pendingTransactions.reduce((sum, t) => sum - getTransactionBaseValue(t), 0),
+    [pendingTransactions],
+  );
 
-  // Calculate total for non-pending transactions
-  const nonPendingTotal = useMemo(() => {
-    return nonPendingTransactions.reduce((sum, t) => {
-      const category = categories.find((c) => c.id === t.category_id);
-      const isIncome = category?.is_income ?? false;
-      const amount = Math.abs(parseFloat(t.amount));
-      return sum + (isIncome ? amount : -amount);
-    }, 0);
-  }, [nonPendingTransactions, categories]);
+  const nonPendingTotal = useMemo(
+    () => nonPendingTransactions.reduce((sum, t) => sum - getTransactionBaseValue(t), 0),
+    [nonPendingTransactions],
+  );
 
   return (
     <List
@@ -141,15 +132,15 @@ export default function Command() {
     >
       <List.Section
         title="Summary"
-        subtitle={`${filteredTransactions.length} transaction${filteredTransactions.length === 1 ? "" : "s"} • Total: ${formatCurrency(Math.abs(totalAmount))}${totalAmount > 0 ? " income" : " spent"}`}
+        subtitle={`${filteredTransactions.length} transaction${filteredTransactions.length === 1 ? "" : "s"} • Total: ${formatCurrency(Math.abs(totalAmount), primaryCurrency)}${totalAmount > 0 ? " income" : " spent"}`}
       />
       {pendingTransactions.length > 0 && (
         <List.Section
           title="Pending"
-          subtitle={`${pendingTransactions.length} transaction${pendingTransactions.length === 1 ? "" : "s"} • ${formatCurrency(Math.abs(pendingTotal))}${pendingTotal > 0 ? " income" : " spent"}`}
+          subtitle={`${pendingTransactions.length} transaction${pendingTransactions.length === 1 ? "" : "s"} • ${formatCurrency(Math.abs(pendingTotal), primaryCurrency)}${pendingTotal > 0 ? " income" : " spent"}`}
         >
           {pendingTransactions.map((transaction: Transaction) => {
-            const lunchMoneyUrl = buildLunchMoneyUrl({ transaction, start, end });
+            const lunchMoneyUrl = buildLunchMoneyUrl(transaction);
 
             return (
               <TransactionListItem
@@ -167,10 +158,10 @@ export default function Command() {
       )}
       <List.Section
         title="Transactions"
-        subtitle={`${nonPendingTransactions.length} transaction${nonPendingTransactions.length === 1 ? "" : "s"} • ${formatCurrency(Math.abs(nonPendingTotal))}${nonPendingTotal > 0 ? " income" : " spent"}`}
+        subtitle={`${nonPendingTransactions.length} transaction${nonPendingTransactions.length === 1 ? "" : "s"} • ${formatCurrency(Math.abs(nonPendingTotal), primaryCurrency)}${nonPendingTotal > 0 ? " income" : " spent"}`}
       >
         {nonPendingTransactions.map((transaction: Transaction) => {
-          const lunchMoneyUrl = buildLunchMoneyUrl({ transaction, start, end });
+          const lunchMoneyUrl = buildLunchMoneyUrl(transaction);
 
           return (
             <TransactionListItem

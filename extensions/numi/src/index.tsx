@@ -1,220 +1,284 @@
-import { List, ActionPanel, Action, showToast, Toast, Icon, getPreferenceValues, LaunchProps } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  confirmAlert,
+  getPreferenceValues,
+  showToast,
+  type LaunchProps,
+} from "@raycast/api";
+import { showFailureToast, useCachedPromise, useLocalStorage } from "@raycast/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { checkNumiInstallation, isNumiCliInstalled } from "./services/checkinstall";
-import { query, queryWithNumiCli } from "./services/requests";
+import { isConnectionRefused, isNumiApiAvailable, runQuery } from "./services/requests";
+import {
+  HISTORY_STORAGE_KEY,
+  type HistoryEntry,
+  type HistoryUpdater,
+  appendEntry,
+  clearLegacyHistory,
+  createHistoryWriter,
+  parseMaxHistory,
+  readLegacyHistory,
+} from "./services/history";
 
-interface State {
-  isLoading: boolean;
-  query?: string;
-  results?: string[];
-}
+const BACKEND_POLL_INTERVAL_MS = 5000;
+const SEARCH_DEBOUNCE_MS = 400;
 
-interface HistoryEntry {
-  query: string;
-  results: string[];
-}
+/**
+ * History waits considerably longer than the query does. Numi answers partial
+ * input, so recording on the same cadence as the search would save a query
+ * word by word as it is typed.
+ */
+const HISTORY_SETTLE_MS = 1200;
 
-interface NumiArguments {
-  queryArgument: string;
-}
-
-export interface Preferences {
-  max_history_elemets: string;
-  use_numi_cli: boolean;
-  numi_cli_binary_path: string;
-}
-
-export default function Command(props: LaunchProps<{ arguments: NumiArguments }>) {
-  const { queryArgument } = props.arguments;
-  const { max_history_elemets, use_numi_cli, numi_cli_binary_path } = getPreferenceValues<Preferences>();
-  const [apiStatus, setApiStatus] = useState<boolean | undefined>(undefined);
-  const [state, setState] = useState<State>({ isLoading: true });
-  const [toast, setToast] = useState<Toast | undefined>(undefined);
-  const [history, setHistory] = useCachedState<HistoryEntry[]>("history", []);
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | string | number | undefined>(undefined);
-  const INTERVAL_TIME = 5000;
-
-  const handleUpdateHistory = (q: string | undefined, results: string[]) => {
-    setTimeoutId((prev) => {
-      clearTimeout(prev);
-
-      return setTimeout(() => {
-        if (q && results[0].trim() !== q.trim() && results[0]) {
-          setHistory((prev) => {
-            const itemFoundIndex = prev.findIndex((entry) => entry.query === q);
-            console.log("Busqueda", q, itemFoundIndex, itemFoundIndex > -1 && ![null, undefined, ""].includes(q));
-            if (itemFoundIndex && itemFoundIndex > -1 && ![null, undefined, ""].includes(q)) {
-              prev[itemFoundIndex] = {
-                query: q,
-                results,
-              };
-            } else {
-              prev.push({ query: q, results });
-            }
-
-            const newHistory = [...prev.slice(-+max_history_elemets || -10)];
-            return newHistory;
-          });
-        }
-      }, 1000);
-    });
-  };
-
-  const queryOnNumi = (q: string | undefined) => {
-    if (!use_numi_cli) {
-      query(q)
-        .then((results) => {
-          if (toast) {
-            toast.hide();
-          }
-          setState((oldState) => ({ ...oldState, results, isLoading: false }));
-
-          handleUpdateHistory(q, results);
-        })
-        .catch((err) => {
-          if (err.message.includes("ECONNREFUSED")) {
-            setApiStatus(false);
-            setState((oldState) => ({ ...oldState, isLoading: false }));
-          }
-
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Something went wrong",
-            message: "Please make sure Numi is running",
-          })
-            .then((toast) => setToast)
-            .catch((err) => console.error("Error Creating Toast"));
-        });
-    } else {
-      queryWithNumiCli(q)
-        .then((results) => {
-          if (toast) {
-            toast.hide();
-          }
-          setState((oldState) => ({ ...oldState, results, isLoading: false }));
-
-          if (results.length > 0) {
-            handleUpdateHistory(q, results);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Something went wrong",
-            message: "make sure Numi CLI is installed and binary path is correct",
-          })
-            .then((toast) => setToast)
-            .catch((err) => console.error("Error Creating Toast"));
-        });
-    }
-  };
-
-  const checkApiStatus = () => {
-    if (!use_numi_cli) {
-      query("1")
-        .then(() => setApiStatus(true))
-        .catch((err) => {
-          if (err.message.includes("ECONNREFUSED")) {
-            setApiStatus(false);
-          }
-        });
-    } else {
-      isNumiCliInstalled()
-        .then(() => setApiStatus(true))
-        .catch(() => setApiStatus(false));
-    }
-  };
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
-    if (!apiStatus) {
-      checkApiStatus();
-    }
-    const interval = setInterval(() => {
-      if (!apiStatus) {
-        checkApiStatus();
-      }
-    }, INTERVAL_TIME);
+    const timeout = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timeout);
+  }, [value, delay]);
 
-    if (queryArgument) {
-      queryOnNumi(queryArgument);
-    }
-    return clearInterval(interval);
+  return debouncedValue;
+}
+
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  const { max_history_elemets, use_numi_cli } = getPreferenceValues<Preferences>();
+  const maxHistory = parseMaxHistory(max_history_elemets);
+
+  // The search bar is controlled so that launch arguments, fallback-command text
+  // and "use this query" from history all flow through one source of truth.
+  const [searchText, setSearchText] = useState(props.arguments.queryArgument ?? "");
+  const debouncedQuery = useDebouncedValue(searchText, SEARCH_DEBOUNCE_MS);
+  const settledQuery = useDebouncedValue(searchText, HISTORY_SETTLE_MS);
+  const [isBackendAvailable, setIsBackendAvailable] = useState<boolean | undefined>(undefined);
+
+  const {
+    value: history,
+    setValue: setHistory,
+    isLoading: isHistoryLoading,
+  } = useLocalStorage<HistoryEntry[]>(HISTORY_STORAGE_KEY, []);
+
+  // Every history change goes through one serialized writer, so overlapping
+  // mutations compose instead of overwriting each other. See createHistoryWriter.
+  const writer = useRef(createHistoryWriter()).current;
+
+  useEffect(() => {
+    // Skipped while loading so the writer is never seeded with an empty array
+    // while a stored history is still on its way in.
+    if (!isHistoryLoading) writer.sync(history ?? []);
+  }, [history, isHistoryLoading, writer]);
+
+  const mutateHistory = useCallback(
+    (updater: HistoryUpdater) => writer.mutate(updater, setHistory),
+    [writer, setHistory],
+  );
+
+  const handleQueryError = useCallback(
+    async (error: Error) => {
+      if (isConnectionRefused(error)) {
+        setIsBackendAvailable(false);
+        return;
+      }
+
+      await showFailureToast(error, {
+        title: use_numi_cli ? "Could not run numi-cli" : "Could not reach Numi",
+      });
+    },
+    [use_numi_cli],
+  );
+
+  const { data: results, isLoading: isQuerying } = useCachedPromise(
+    (expression: string, useNumiCli: boolean) => runQuery(expression, useNumiCli),
+    [debouncedQuery, use_numi_cli],
+    { initialData: [] as string[], keepPreviousData: true, onError: handleQueryError },
+  );
+
+  useEffect(() => {
+    void checkNumiInstallation();
   }, []);
 
   useEffect(() => {
-    if (!state.isLoading) {
-      return;
-    }
-    const q = state.query?.trim() ?? "";
-    queryOnNumi(q);
-  }, [state]);
+    let cancelled = false;
 
-  checkNumiInstallation();
+    const check = async () => {
+      const available = use_numi_cli ? await isNumiCliInstalled() : await isNumiApiAvailable();
+      if (!cancelled) setIsBackendAvailable(available);
+    };
+
+    void check();
+    const interval = setInterval(() => void check(), BACKEND_POLL_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [use_numi_cli]);
+
+  // One-time move of history off the evictable Cache and into LocalStorage.
+  // Queued like every other mutation: this is the one moment real user data is
+  // at stake, so it must not race a query being recorded on the same launch.
+  const hasMigrated = useRef(false);
+  useEffect(() => {
+    if (isHistoryLoading || hasMigrated.current) return;
+    hasMigrated.current = true;
+
+    const legacy = readLegacyHistory();
+    if (legacy.length === 0) return;
+
+    void mutateHistory((current) => (current.length > 0 ? current : legacy.slice(-maxHistory))).then(
+      clearLegacyHistory,
+    );
+  }, [isHistoryLoading, mutateHistory, maxHistory]);
+
+  const recordQuery = useCallback(
+    (entryQuery: string, entryResults: string[], supersedes: string | null) =>
+      mutateHistory((current) =>
+        appendEntry(
+          current,
+          { query: entryQuery, results: entryResults, timestamp: Date.now() },
+          { max: maxHistory, supersedes },
+        ),
+      ),
+    [mutateHistory, maxHistory],
+  );
+
+  const lastRecorded = useRef("");
+  const lastRecordedQuery = useRef<string | null>(null);
+  useEffect(() => {
+    if (isQuerying || isHistoryLoading) return;
+
+    const expression = debouncedQuery.trim();
+    // Nothing is saved until typing has fully stopped: while a query is still
+    // being typed the settled value lags behind and the two differ.
+    if (settledQuery.trim() !== expression) return;
+
+    const result = results?.[0]?.trim();
+    // Echoing the input back (e.g. plain text) is not a calculation worth saving.
+    if (!expression || !result || result === expression) return;
+
+    const signature = `${expression} => ${result}`;
+    if (lastRecorded.current === signature) return;
+    lastRecorded.current = signature;
+
+    const supersedes = lastRecordedQuery.current;
+    lastRecordedQuery.current = expression;
+    void recordQuery(expression, results ?? [], supersedes);
+  }, [debouncedQuery, settledQuery, results, isQuerying, isHistoryLoading, recordQuery]);
+
+  const deleteEntry = useCallback(
+    (entryQuery: string) => mutateHistory((current) => current.filter((entry) => entry.query !== entryQuery)),
+    [mutateHistory],
+  );
+
+  const clearHistory = useCallback(async () => {
+    const confirmed = await confirmAlert({
+      title: "Clear Query History",
+      message: "This removes every saved query. It cannot be undone.",
+      primaryAction: { title: "Clear History", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+
+    // Queued rather than removing the key outright, so a query still being
+    // recorded cannot land afterwards and resurrect the list.
+    await mutateHistory(() => []);
+    clearLegacyHistory();
+    lastRecorded.current = "";
+    lastRecordedQuery.current = null;
+    await showToast({ style: Toast.Style.Success, title: "History cleared" });
+  }, [mutateHistory]);
+
+  const currentResults = (results ?? []).filter((result) => result.trim().length > 0);
+  const historyEntries = [...(history ?? [])].reverse();
 
   return (
     <List
       searchBarPlaceholder="Enter text to query"
-      onSearchTextChange={(searchValue) => {
-        setState((oldState) => ({ ...oldState, query: searchValue, isLoading: true }));
-      }}
-      isLoading={state.isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      isLoading={isQuerying || isHistoryLoading}
     >
       <List.EmptyView
         icon="empty-view.png"
         title={
-          apiStatus === false
+          isBackendAvailable === false
             ? use_numi_cli
               ? "Numi CLI is not installed"
-              : "Numi is not running"
+              : "Numi's API is not responding"
             : "Waiting for query..."
         }
         description={
-          apiStatus === false
+          isBackendAvailable === false
             ? use_numi_cli
-              ? "Install numi-cli first"
-              : "Start Numi and enable Alfred integration"
+              ? "Run: brew install nikolaeu/numi/numi-cli"
+              : "Recent Numi versions dropped this API. Install numi-cli and turn on “Use numi-cli” in preferences."
             : "E.g.: 1+5..."
         }
       />
+
       <List.Section title="Current">
-        {state.results &&
-          state.results.map((result, index) => {
-            if (result) {
-              return (
-                <List.Item
-                  key={index}
-                  title={result}
-                  icon={Icon.Text}
-                  actions={
-                    <ActionPanel>
-                      <Action.CopyToClipboard content={result} />
-                      <Action.Paste content={result} />
-                    </ActionPanel>
-                  }
-                />
-              );
+        {currentResults.map((result) => (
+          <List.Item
+            key={result}
+            title={result}
+            icon={Icon.Text}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard content={result} />
+                <Action.Paste content={result} />
+              </ActionPanel>
             }
-          })}
+          />
+        ))}
       </List.Section>
+
       <List.Section title="History">
-        {history &&
-          history.reverse().map((entry, index) => {
-            return (
-              <List.Item
-                key={index}
-                title={entry.query}
-                accessories={[{ text: entry.results[0] }]}
-                actions={
-                  <ActionPanel>
-                    <Action.CopyToClipboard content={entry.results[0]} />
-                    <Action.Paste content={entry.results[0]} />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
+        {historyEntries.map((entry) => (
+          <List.Item
+            key={entry.query}
+            title={entry.query}
+            icon={Icon.Clock}
+            accessories={[
+              { text: entry.results[0] },
+              { date: new Date(entry.timestamp), tooltip: new Date(entry.timestamp).toLocaleString() },
+            ]}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action
+                    title="Use This Query"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() => setSearchText(entry.query)}
+                  />
+                  <Action.CopyToClipboard content={entry.results[0]} />
+                  <Action.Paste content={entry.results[0]} />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    title="Delete Entry"
+                    icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    onAction={() => deleteEntry(entry.query)}
+                  />
+                  <Action
+                    title="Clear History"
+                    icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                    onAction={clearHistory}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
     </List>
   );

@@ -1,7 +1,39 @@
-import { Action, ActionPanel, List, Toast, open, showToast } from "@raycast/api";
+import { DIRECT_THAW_ACTIONS, SETTINGS_THAW_ACTIONS, type ThawAction } from "@data";
+import { Action, ActionPanel, Color, List, Toast, open, showToast } from "@raycast/api";
+import { THAW_INSTALL_URL, buildThawUrl, isThawInstalled, openThawUrl } from "@utils";
 import { useEffect, useState } from "react";
-import { THAW_ACTIONS } from "@data";
-import { THAW_INSTALL_URL, isThawInstalled, openThawUrl } from "@utils";
+
+function ActionItem({ action }: Readonly<{ action: ThawAction }>) {
+  const url = buildThawUrl(action.action, action.query);
+
+  return (
+    <List.Item
+      title={action.title}
+      subtitle={action.subtitle}
+      icon={action.icon}
+      accessories={
+        action.requiresSettingsURI ? [{ tag: { value: "Settings URI", color: Color.SecondaryText } }] : undefined
+      }
+      actions={
+        <ActionPanel>
+          <Action
+            title="Run Action"
+            icon={action.icon}
+            onAction={async () => {
+              await openThawUrl(action.action, action.successMessage, action.query);
+            }}
+          />
+          <Action.CopyToClipboard title="Copy Thaw URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CreateQuicklink
+            title="Create Quicklink"
+            quicklink={{ name: `Thaw: ${action.title}`, link: url }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
 
 export default function Command() {
   const [installed, setInstalled] = useState<boolean | null>(null);
@@ -28,18 +60,18 @@ export default function Command() {
       {installed === false ? (
         <List.EmptyView title="Thaw Not Installed" description={`Get Thaw from ${THAW_INSTALL_URL}`} />
       ) : (
-        THAW_ACTIONS.map((action) => (
-          <List.Item
-            key={action.id}
-            title={action.title}
-            subtitle={action.subtitle}
-            actions={
-              <ActionPanel>
-                <Action title="Run Action" onAction={() => openThawUrl(action.id, `${action.title} toggled`)} />
-              </ActionPanel>
-            }
-          />
-        ))
+        <>
+          <List.Section title="Actions">
+            {DIRECT_THAW_ACTIONS.map((action) => (
+              <ActionItem key={action.id} action={action} />
+            ))}
+          </List.Section>
+          <List.Section title="Settings URI" subtitle="Enable in Thaw → Automation, then Authorize Raycast">
+            {SETTINGS_THAW_ACTIONS.map((action) => (
+              <ActionItem key={action.id} action={action} />
+            ))}
+          </List.Section>
+        </>
       )}
     </List>
   );

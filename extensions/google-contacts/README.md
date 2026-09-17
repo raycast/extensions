@@ -89,6 +89,12 @@ Raycast uses a custom URI redirect (`com.raycast://oauth`) which Google only all
 **Why do I need my own Client ID?**
 Google requires each OAuth app to go through a verification process for published credentials. By using your own Client ID, you avoid this restriction and maintain full control over your API access.
 
+**I'm getting `Error 403: access_denied` when I try to sign in**
+Make sure you added your own Google account as a test user in step 2 (OAuth consent screen → Audience → Test users). Apps in Testing mode only let listed test users authenticate — everyone else, including the account that created the project, is blocked until added.
+
+**Should I publish the OAuth app instead of leaving it in Testing?**
+No — Contacts is a restricted scope, so publishing means going through Google's verification process (privacy policy, domain ownership, sometimes a security assessment). Testing mode with your account added as a test user skips all of that, which is exactly why this setup uses it: you're one person authenticating to your own data, not running a public app that needs Google's sign-off.
+
 **Is my data safe?**
 All authentication is handled locally by Raycast's built-in OAuth PKCE flow. Your tokens are stored securely in your system keychain. The extension never transmits data anywhere other than directly to Google's APIs.
 

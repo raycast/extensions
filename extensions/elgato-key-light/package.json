@@ -11,6 +11,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "configure-target-lights",
+      "title": "Configure Target Lights",
+      "subtitle": "Elgato Key Light",
+      "description": "Choose whether commands control all lights or only selected discovered lights",
+      "mode": "view"
+    },
+    {
       "name": "discoverLights",
       "title": "Discover Lights",
       "subtitle": "Elgato Key Light",
@@ -21,35 +28,35 @@
       "name": "toggle",
       "title": "Toggle Lights",
       "subtitle": "Elgato Key Light",
-      "description": "Toggles all connected Key Lights on or off",
+      "description": "Toggles the targeted Key Lights on or off",
       "mode": "no-view"
     },
     {
       "name": "increaseBrightness",
       "title": "Increase Brightness",
       "subtitle": "Elgato Key Light",
-      "description": "Increase brightness of Key Light by 5%",
+      "description": "Increase brightness of the targeted Key Lights by 5%",
       "mode": "no-view"
     },
     {
       "name": "decreaseBrightness",
       "title": "Decrease Brightness",
       "subtitle": "Elgato Key Light",
-      "description": "Decrease brightness of Key Light by 5%",
+      "description": "Decrease brightness of the targeted Key Lights by 5%",
       "mode": "no-view"
     },
     {
       "name": "increaseTemperature",
       "title": "Warmer Color Temperature",
       "subtitle": "Elgato Key Light",
-      "description": "Make light color warmer (lower Kelvin)",
+      "description": "Make the targeted lights warmer (lower Kelvin)",
       "mode": "no-view"
     },
     {
       "name": "decreaseTemperature",
       "title": "Cooler Color Temperature",
       "subtitle": "Elgato Key Light",
-      "description": "Make light color cooler (higher Kelvin)",
+      "description": "Make the targeted lights cooler (higher Kelvin)",
       "mode": "no-view"
     },
     {
@@ -83,12 +90,12 @@
     },
     {
       "name": "turn-on",
-      "title": "Turn On",
+      "title": "Turn on",
       "description": "Turn on your Elgato Key Lights"
     },
     {
       "name": "turn-off",
-      "title": "Turn Off",
+      "title": "Turn off",
       "description": "Turn off your Elgato Key Lights"
     },
     {
@@ -98,24 +105,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.95.0",
-    "@raycast/utils": "1.19.1",
-    "axios": "^1.6.2",
-    "bonjour-service": "^1.1.1"
+    "@raycast/api": "1.104.21",
+    "@raycast/utils": "2.2.7",
+    "axios": "^1.18.1",
+    "bonjour-service": "^1.4.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.0",
-    "@types/node": "^20.10.5",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "@typescript-eslint/parser": "^6.15.0",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.1.1",
-    "typescript": "^5.3.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.62.1",
+    "@typescript-eslint/parser": "^8.62.1",
+    "eslint": "^10.6.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "lint": "ray lint"
-  }
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

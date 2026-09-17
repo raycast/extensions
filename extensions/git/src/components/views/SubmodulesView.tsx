@@ -24,7 +24,7 @@ export default function SubmodulesView(context: RepositoryContext & NavigationCo
   return (
     <List
       isLoading={context.submodules.isLoading}
-      navigationTitle={context.gitManager.repoName}
+      navigationTitle={context.gitManager.worktreeOrigin?.displayName ?? context.gitManager.repoName}
       searchBarPlaceholder="Search submodules..."
       searchBarAccessory={WorkspaceNavigationDropdown(context)}
       actions={
@@ -143,7 +143,7 @@ function SubmoduleListItem(
               ]}
             />
             <RepositoryAttachedLinksAction remotes={remotes.data} />
-            <RepositoryQuickLinkAction repositoryPath={context.submodule.fullPath} />
+            <RepositoryQuickLinkAction currentWorktreePath={context.submodule.fullPath} />
             <SubmoduleDeleteAction {...context} />
           </ActionPanel.Section>
 
@@ -152,7 +152,10 @@ function SubmoduleListItem(
             <SubmodulesUpdateAllAction {...context} />
           </ActionPanel.Section>
 
-          <RepositoryDirectoryActions repositoryPath={context.submodule.fullPath} />
+          <RepositoryDirectoryActions
+            currentWorktreePath={context.submodule.fullPath}
+            repositoryRootPath={context.submodule.fullPath}
+          />
 
           <ActionPanel.Section>
             <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => context.submodules.revalidate()} />

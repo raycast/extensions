@@ -32,7 +32,7 @@
     "eslint": "^9.31.0",
     "prettier": "^3.6.2",
     "typescript": "~5.8.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   },
   "icon": "extension-icon.png",
   "license": "MIT",
@@ -67,5 +67,11 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "title": "Clip - URL Shortener"
+  "title": "Clip - URL Shortener",
+  "overrides": {
+    "brace-expansion@1": "1.1.18",
+    "brace-expansion@2": "2.1.4",
+    "brace-expansion@5": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

@@ -6,8 +6,8 @@ import { useSkillAudits } from "../hooks/useSkillAudits";
 import {
   type InstalledSkill,
   type Skill,
-  AUDIT_PROVIDER_LABELS,
   buildSkillUrl,
+  formatAuditProviderLabel,
   isGithubBackedInstalledSkill,
   parseFrontmatter,
 } from "../shared";
@@ -135,14 +135,14 @@ function InlineDetail({ skill, isSelected, skillDetailPageUrl, audits }: InlineD
           audit.url ? (
             <List.Item.Detail.Metadata.Link
               key={`agent-audits-${audit.provider}`}
-              title={`${AUDIT_PROVIDER_LABELS[audit.provider]} Audit`}
+              title={`${formatAuditProviderLabel(audit)} Audit`}
               text={formatAuditStatus(audit.status)}
               target={audit.url}
             />
           ) : (
             <List.Item.Detail.Metadata.Label
               key={`agent-audits-${audit.provider}`}
-              title={`${AUDIT_PROVIDER_LABELS[audit.provider]} Audit`}
+              title={`${formatAuditProviderLabel(audit)} Audit`}
               text={formatAuditStatus(audit.status)}
             />
           ),

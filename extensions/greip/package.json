@@ -92,7 +92,7 @@
   "dependencies": {
     "@raycast/api": "^1.43.2",
     "@raycast/utils": "^1.4.11",
-    "axios": "^1.8.4"
+    "axios": "^1.18.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
@@ -110,5 +110,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "fast-uri": "3.1.5"
   }
 }

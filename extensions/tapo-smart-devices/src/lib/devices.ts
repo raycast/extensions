@@ -5,7 +5,7 @@ import { cloudLogin, loginDeviceByIp, TapoDevice } from "tp-link-tapo-connect";
 import { AvailableDevice, DeviceStatusEnum, DeviceTypeEnum, Device } from "./types";
 import { isWindows, normaliseMacAddress } from "./utils";
 
-const tapoDeviceTypeToDeviceType = (tapoDeviceType: string): DeviceTypeEnum => {
+const tapoDeviceTypeToDeviceType = (tapoDeviceType: string): DeviceTypeEnum | null => {
   switch (tapoDeviceType) {
     case "SMART.TAPOPLUG":
       return DeviceTypeEnum.Plug;
@@ -14,21 +14,31 @@ const tapoDeviceTypeToDeviceType = (tapoDeviceType: string): DeviceTypeEnum => {
     case "HOMEWIFISYSTEM":
       return DeviceTypeEnum.HomeWifiSystem;
     default:
-      throw `Device type ${tapoDeviceType} not supported`;
+      // The Tapo API can return device types we don't recognise. Return null
+      // so the device can be filtered out rather than crashing the extension.
+      return null;
   }
 };
 
-const tapoDeviceToDevice = (tapoDevice: TapoDevice): Device => ({
-  ...tapoDevice,
-  type: tapoDeviceTypeToDeviceType(tapoDevice.deviceType),
-  macAddress: tapoDevice.deviceMac,
-  name: `Tapo ${tapoDevice.deviceName}`,
-  alias: tapoDevice.alias,
-  availabilityStatus: DeviceStatusEnum.Loading,
-  isTurnedOn: null,
-  ip: undefined,
-  deviceKey: null,
-});
+const tapoDeviceToDevice = (tapoDevice: TapoDevice): Device | null => {
+  const type = tapoDeviceTypeToDeviceType(tapoDevice.deviceType);
+
+  if (type === null) {
+    return null;
+  }
+
+  return {
+    ...tapoDevice,
+    type,
+    macAddress: tapoDevice.deviceMac,
+    name: `Tapo ${tapoDevice.deviceName}`,
+    alias: tapoDevice.alias,
+    availabilityStatus: DeviceStatusEnum.Loading,
+    isTurnedOn: null,
+    ip: undefined,
+    deviceKey: null,
+  };
+};
 
 const isSupportedDevice = (device: Device): boolean =>
   device.type === DeviceTypeEnum.Plug || device.type === DeviceTypeEnum.Bulb;
@@ -39,7 +49,10 @@ export const getDevices = async (): Promise<Device[]> => {
   const cloudAPI = await cloudLogin(email, password);
   const tapoDevices = await cloudAPI.listDevices();
 
-  return tapoDevices.map(tapoDeviceToDevice).filter(isSupportedDevice);
+  return tapoDevices
+    .map(tapoDeviceToDevice)
+    .filter((device): device is Device => device !== null)
+    .filter(isSupportedDevice);
 };
 
 export const turnDeviceOn = async (device: AvailableDevice): Promise<void> => {

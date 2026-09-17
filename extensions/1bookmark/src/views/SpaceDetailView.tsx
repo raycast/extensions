@@ -8,6 +8,8 @@ import { SpaceTagsView } from "./SpaceTagsView";
 import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
 import { SpaceMemberAuthPoliciesView } from "./SpaceMemberAuthPoliciesView";
 import { SpaceAuthForm } from "./SpaceAuthForm";
+import { resolveSpaceIconUrl } from "../utils/space-icon.util";
+import { API_URL } from "../utils/constants.util";
 
 const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: string; refetch: () => void }) => {
   const { spaceId, keyToEdit, value, refetch } = props;
@@ -32,7 +34,8 @@ function Body(props: { spaceId: string }) {
   }
 
   const spaceInMe = me.data?.associatedSpaces.find((s) => s.id === spaceId);
-  const image = data.image ? data.image : data.type === "TEAM" ? Icon.TwoPeople : Icon.Person;
+  const image = resolveSpaceIconUrl(data.image) || (data.type === "TEAM" ? Icon.TwoPeople : Icon.Person);
+  const spaceWebUrl = new URL(`/spaces/${spaceId}`, API_URL).toString();
 
   const refetch = () => {
     refetchSpace();
@@ -68,6 +71,17 @@ function Body(props: { spaceId: string }) {
         actions={
           <ActionPanel>
             <EditAction spaceId={spaceId} keyToEdit="description" value={data.description || ""} refetch={refetch} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="Slack Team ID"
+        subtitle={data.slackTeamId || ""}
+        accessories={data.slackTeamId ? [] : [{ tag: { value: "Not set", color: Color.SecondaryText } }]}
+        icon={Icon.Hashtag}
+        actions={
+          <ActionPanel>
+            <EditAction spaceId={spaceId} keyToEdit="slackTeamId" value={data.slackTeamId || ""} refetch={refetch} />
           </ActionPanel>
         }
       />
@@ -205,13 +219,20 @@ function Body(props: { spaceId: string }) {
         />
       </List.Section>
 
-      {/*
-      TODO: delete space feature under construction
-      <List.Item
-        title={`Delete [${data.name}]`}
-        accessories={[{ text: spaceInMe?.myRole === 'OWNER' ? `All users in this space will be unable to access space's bookmarks.` : 'Only owner can delete space', icon: Icon.Warning }]}
-        icon={Icon.Trash}
-      /> */}
+      {spaceInMe?.myRole === "OWNER" && (
+        <List.Section title="Manage on the Web">
+          <List.Item
+            title="Manage Space on the Web"
+            subtitle="To change settings or delete this space, continue on the web."
+            icon={Icon.Globe}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser title="Manage Space on the Web" url={spaceWebUrl} icon={Icon.Globe} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
     </List>
   );
 }

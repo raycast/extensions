@@ -21,6 +21,12 @@ export interface Product {
   galleryImages?: string[];
   weeklyRank?: number;
   dailyRank?: number;
+  monthlyRank?: number;
+  yearlyRank?: number;
+  isVoted?: boolean;
+  reviewsCount?: number;
+  reviewsRating?: number;
+  makerReplies?: number;
   productHubUrl?: string;
   previousLaunches?: number;
   // True when this product came from the token-free Atom feed (limited data: no real votes,
@@ -34,6 +40,7 @@ export interface Topic {
   name: string;
   slug: string;
   description?: string;
+  followersCount?: number;
 }
 
 export interface User {

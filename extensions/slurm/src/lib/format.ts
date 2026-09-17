@@ -17,6 +17,18 @@ export function stateColor(state: string): Color {
   return STATE_COLORS[state] ?? Color.SecondaryText;
 }
 
+// Parse a Slurm ISO datetime ("2025-06-10T14:23:45") into a Date. Returns null
+// for empty / sentinel values ("Unknown", "N/A", "None") or anything unparseable.
+export function parseSlurmDateTime(s: string): Date | null {
+  const v = (s ?? "").trim();
+  if (!v || v === "Unknown" || v === "N/A" || v === "None") return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/.exec(v);
+  if (!m) return null;
+  const [, y, mo, d, hh, mm, ss] = m;
+  const date = new Date(Number(y), Number(mo) - 1, Number(d), Number(hh), Number(mm), Number(ss));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function formatSlurmDateTime(s: string): string {
   const v = (s ?? "").trim();
   if (!v || v === "Unknown" || v === "N/A" || v === "None") return "—";
@@ -38,7 +50,25 @@ export function formatSlurmDateTime(s: string): string {
   return `${absolute} (${relativeFromNow(date)})`;
 }
 
-function relativeFromNow(date: Date): string {
+// Compact datetime for metadata label values: "Tue 14:25" when it falls on
+// today, otherwise "Tue Jun 13, 14:25". Returns "—" for empty/sentinel values.
+export function formatShortDateTime(s: string): string {
+  const date = parseSlurmDateTime(s);
+  return date ? formatShortDateTimeFor(date) : "—";
+}
+
+function formatShortDateTimeFor(date: Date): string {
+  const now = new Date();
+  const sameDay =
+    date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
+  const time = date.toLocaleString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+  const weekday = date.toLocaleString("en-US", { weekday: "short" });
+  if (sameDay) return `${weekday} ${time}`;
+  const day = date.toLocaleString("en-US", { day: "numeric", month: "short" });
+  return `${weekday} ${day}, ${time}`;
+}
+
+export function relativeFromNow(date: Date): string {
   const diffSec = Math.round((date.getTime() - Date.now()) / 1000);
   const future = diffSec >= 0;
   const abs = Math.abs(diffSec);
@@ -72,11 +102,17 @@ export function formatSlurmDuration(s: string): string {
   if (v.toUpperCase() === "UNLIMITED") return "unlimited";
   const total = parseSlurmDurationSeconds(v);
   if (total == null) return v;
-  if (total <= 0) return "0s";
+  return formatDurationSeconds(total);
+}
+
+// Human-readable duration from a raw second count, e.g. 8045 → "2h 14m".
+// Seconds are only shown for sub-hour durations, matching formatSlurmDuration.
+export function formatDurationSeconds(total: number): string {
+  if (!Number.isFinite(total) || total <= 0) return "0s";
   const days = Math.floor(total / 86_400);
   const hours = Math.floor((total % 86_400) / 3600);
   const minutes = Math.floor((total % 3600) / 60);
-  const seconds = total % 60;
+  const seconds = Math.floor(total % 60);
   const parts: string[] = [];
   if (days) parts.push(`${days}d`);
   if (hours) parts.push(`${hours}h`);
@@ -85,7 +121,7 @@ export function formatSlurmDuration(s: string): string {
   return parts.join(" ") || "0s";
 }
 
-function parseSlurmDurationSeconds(v: string): number | null {
+export function parseSlurmDurationSeconds(v: string): number | null {
   const dashSplit = v.split("-");
   let days = 0;
   let rest = v;
@@ -114,6 +150,67 @@ function parseSlurmDurationSeconds(v: string): number | null {
   return days * 86_400 + h * 3600 + m * 60 + s;
 }
 
+// Unicode meter for metadata label values, e.g. "████░░░░░░░░". `fraction` is
+// clamped to [0,1]; `width` is the segment count.
+export function progressBar(fraction: number, width = 12): string {
+  const f = Math.max(0, Math.min(1, Number.isFinite(fraction) ? fraction : 0));
+  const filled = Math.round(f * width);
+  return "█".repeat(filled) + "░".repeat(width - filled);
+}
+
+export type JobTimeInfo = {
+  elapsedSec: number | null;
+  limitSec: number | null; // null = UNLIMITED / unknown
+  remainingSec: number | null; // running + limited only
+  progress: number | null; // 0..1, limited + elapsed known
+  submitted: string; // formatted short datetime + relative
+  started: string;
+  ends: string; // actual EndTime, or projected (StartTime + TimeLimit) for running jobs
+};
+
+// Derive the time facts the detail view renders from scontrol fields. Pure
+// (takes `nowMs`) so the 1 Hz re-render keeps elapsed/remaining ticking. `state`
+// gates running-only figures (remaining, projected end).
+export function buildJobTime(fields: Record<string, string>, nowMs: number): JobTimeInfo {
+  const running = (fields.JobState ?? "").toUpperCase().startsWith("RUNNING");
+  const start = parseSlurmDateTime(fields.StartTime ?? "");
+  const end = parseSlurmDateTime(fields.EndTime ?? "");
+  const limitSec =
+    (fields.TimeLimit ?? "").trim().toUpperCase() === "UNLIMITED"
+      ? null
+      : parseSlurmDurationSeconds(fields.TimeLimit ?? "");
+
+  let elapsedSec: number | null = null;
+  if (start) {
+    if (running) elapsedSec = Math.max(0, Math.round((nowMs - start.getTime()) / 1000));
+    else if (end) elapsedSec = Math.max(0, Math.round((end.getTime() - start.getTime()) / 1000));
+  }
+
+  const remainingSec = running && limitSec != null && elapsedSec != null ? Math.max(0, limitSec - elapsedSec) : null;
+  const progress =
+    limitSec != null && limitSec > 0 && elapsedSec != null ? Math.max(0, Math.min(1, elapsedSec / limitSec)) : null;
+
+  // For a running job scontrol's EndTime is the projected end; fall back to
+  // StartTime + TimeLimit if it's missing.
+  const endsDate = end ?? (running && start && limitSec != null ? new Date(start.getTime() + limitSec * 1000) : null);
+
+  return {
+    elapsedSec,
+    limitSec,
+    remainingSec,
+    progress,
+    submitted: withRelative(fields.SubmitTime ?? ""),
+    started: withRelative(fields.StartTime ?? ""),
+    ends: endsDate ? `${formatShortDateTimeFor(endsDate)} · ${relativeFromNow(endsDate)}` : "—",
+  };
+}
+
+function withRelative(s: string): string {
+  const date = parseSlurmDateTime(s);
+  if (!date) return "—";
+  return `${formatShortDateTimeFor(date)} · ${relativeFromNow(date)}`;
+}
+
 export function formatBytesMB(mb: number): string {
   if (!Number.isFinite(mb) || mb <= 0) return "0 MB";
   if (mb >= 1024 * 1024) return `${(mb / (1024 * 1024)).toFixed(1)} TB`;
@@ -124,6 +221,30 @@ export function formatBytesMB(mb: number): string {
 export function formatPercent(num: number, den: number): string {
   if (!den) return "—";
   return `${Math.round((num / den) * 100)}%`;
+}
+
+// Raycast lays out a List.Item as: icon + title + subtitle on the left, and
+// accessories on the right. The subtitle (we use it for the job name) is the
+// element Raycast lets overflow — the title and accessories keep their space,
+// so a long job name shoves accessories (e.g. the GPU tag) off the right edge.
+// Raycast exposes no row width or resize hook, so we can't measure pixels; we
+// instead give the name whatever character budget the row has left after the
+// title + accessories (which are right-bounded) take their share. Names that
+// fit keep their full text; only names that would actually overflow get an
+// ellipsis — so the name grows and shrinks with the rest of the row. ROW_CHAR_-
+// BUDGET approximates the default Raycast window's content width: raise it if
+// names look over-truncated, lower it if accessories still get clipped.
+//
+// ACCESSORY_PADDING reserves slack around every right-bounded chip so the name
+// (and only the name) absorbs any shortfall — in particular the variable-width
+// "elapsed / timeLimit" chip must never be the element that gets ellipsized.
+const ROW_CHAR_BUDGET = 112;
+const ACCESSORY_PADDING = 6; // per-element gap/slack Raycast adds around each chip
+
+export function fitSubtitleToRow(name: string, rowTexts: string[]): string {
+  const used = rowTexts.reduce((n, t) => n + t.length + ACCESSORY_PADDING, 0);
+  const max = Math.max(6, ROW_CHAR_BUDGET - used);
+  return name.length > max ? `${name.slice(0, max - 1)}…` : name;
 }
 
 export function shortReason(reason: string | undefined): string {
@@ -186,7 +307,31 @@ export function gpuLabelFromTres(tres: string): string | null {
   return null;
 }
 
-function prettifyGpuModel(raw: string): string {
+// Count + raw gres type token for a job's allocated GPUs, e.g.
+// "cpu=64,gres/gpu:rtx_pro_6000=4" → { count: 4, type: "rtx_pro_6000" }.
+// `type` is the lowercase Slurm token (feed it to prettifyGpuModel for display
+// and gpuVramGb for VRAM); it is null for the generic "gres/gpu=N" form.
+export function gpuInfoFromTres(tres: string): { count: number; type: string | null } | null {
+  if (!tres || tres === "N/A" || tres === "(null)") return null;
+  const typedM = /gres\/gpu:([^=,]+)=(\d+)/.exec(tres);
+  if (typedM) {
+    const count = Number(typedM[2]);
+    return count ? { count, type: typedM[1] } : null;
+  }
+  const genericM = /gres\/gpu=(\d+)/.exec(tres);
+  if (genericM) {
+    const count = Number(genericM[1]);
+    return count ? { count, type: null } : null;
+  }
+  const gresM = /(?:^|,)gpu(?::([^:,(]+))?:(\d+)/.exec(tres);
+  if (gresM) {
+    const count = Number(gresM[2]);
+    return count ? { count, type: gresM[1] ?? null } : null;
+  }
+  return null;
+}
+
+export function prettifyGpuModel(raw: string): string {
   // Slurm gres types are lowercase with underscores (e.g. "rtx_pro_6000",
   // "a100", "h200"). Replace underscores with spaces and uppercase the first
   // character of each token for readability.

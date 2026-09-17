@@ -27,6 +27,12 @@ This is a raycast extension with commands for the note taking and knowledge mana
 This command allows for quick access to all of your notes. By default you can search notes by title. Enabling content search in the commands preferences allows you to search for notes by their content and title. If there doesn't exist a note with the title you searched for you can create a new note with that title right from the command.
 Use the tag filter in the top right corner to filter notes based on their tags (both YAML frontmatter and inline tags).
 
+### Exact Content Match Navigation
+
+When content search is enabled, each exact occurrence is shown as a separate result with its line, column, and nearby context. The **Open Match in Obsidian** action opens the note and selects the matching text. Existing primary-action preferences continue to control which action runs when pressing `Enter`.
+
+Exact navigation requires Obsidian 1.12.7 or later. In Obsidian, open **Settings > General > Advanced** and enable **Command line interface**. Search and match previews continue to work without the CLI; it is only required when opening an exact occurrence.
+
 Enabling `Show Detail` and `Show Metadata` in the extensions preferences will show a sidebar view with the following information:
 
 - Note content
@@ -47,7 +53,8 @@ It features several actions which you can trigger with these keyboard shortcuts 
 **Open Note Actions:**
 Depending on the primary action set in preferences, the keyboard shortcuts can be different.
 
-- `enter` will open the note in "Quick Look"
+- `enter` on a content occurrence will open and select the exact match when `Open in Obsidian` is configured as the primary action
+- `enter` on a regular note result will open the note in "Quick Look" by default
 - `cmd + enter` will open the note in Obsidian
 - `Open in new Pane` will open the note in a new pane in Obsidian (only for vaults with advanced-uri plugin)
 

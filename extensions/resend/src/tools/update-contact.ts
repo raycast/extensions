@@ -1,38 +1,33 @@
 import { Tool } from "@raycast/api";
-import { resend } from "../lib/resend";
+import { getResend, withResend } from "../lib/oauth";
 
 type Input = {
   /**
-   * The ID of the audience that contains the contact.
-   * This is required to identify which audience the contact belongs to.
-   * You can get this ID by using the list-audiences tool first.
+   * Legacy audience ID used to scope the contact. Usually unnecessary.
    */
-  audienceId: string;
+  audienceId?: string;
 
   /**
    * The ID of the contact to update.
    * This is required to identify which contact to update.
    * You can get this ID by using the list-contacts tool first.
    */
-  contactId: string;
+  contactId?: string;
 
   /**
-   * The first name of the contact.
-   * This is optional. If provided, it will update the contact's first name.
+   * The contact's current email address, used as an identifier when contactId is unavailable.
+   */
+  contactEmail?: string;
+
+  /**
+   * The first name of the contact. Use an empty string to clear it.
    */
   firstName?: string;
 
   /**
-   * The last name of the contact.
-   * This is optional. If provided, it will update the contact's last name.
+   * The last name of the contact. Use an empty string to clear it.
    */
   lastName?: string;
-
-  /**
-   * The email of the contact.
-   * This is optional. If provided, it will update the contact's email.
-   */
-  email?: string;
 
   /**
    * Unsubscribed status of the contact.
@@ -42,12 +37,20 @@ type Input = {
 };
 
 const tool = async (input: Input) => {
+  if (!input.contactId && !input.contactEmail) {
+    throw new Error("Provide contactId or contactEmail to identify the contact");
+  }
+  if (input.firstName === undefined && input.lastName === undefined && input.unsubscribed === undefined) {
+    throw new Error("Provide at least one contact field to update");
+  }
+
+  const resend = getResend();
   const { data, error } = await resend.contacts.update({
-    audienceId: input.audienceId,
+    ...(input.audienceId ? { audienceId: input.audienceId } : {}),
     ...(input.firstName !== undefined && { firstName: input.firstName }),
     ...(input.lastName !== undefined && { lastName: input.lastName }),
-    ...(input.email !== undefined ? { email: input.email } : { id: input.contactId }),
     ...(input.unsubscribed !== undefined && { unsubscribed: input.unsubscribed }),
+    ...(input.contactId ? { id: input.contactId } : { email: input.contactEmail as string }),
   });
 
   if (error) {
@@ -60,14 +63,14 @@ const tool = async (input: Input) => {
 export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   // Create an array of info items for the confirmation dialog
   const infoItems = [
-    { name: "Audience ID", value: input.audienceId },
-    { name: "Contact ID", value: input.contactId },
+    ...(input.audienceId ? [{ name: "Audience ID", value: input.audienceId }] : []),
+    ...(input.contactId ? [{ name: "Contact ID", value: input.contactId }] : []),
+    ...(input.contactEmail ? [{ name: "Contact Email", value: input.contactEmail }] : []),
   ];
 
   // Add optional fields to the info items if they are provided
   if (input.firstName !== undefined) infoItems.push({ name: "First Name", value: input.firstName });
   if (input.lastName !== undefined) infoItems.push({ name: "Last Name", value: input.lastName });
-  if (input.email !== undefined) infoItems.push({ name: "Email", value: input.email });
   if (input.unsubscribed !== undefined) infoItems.push({ name: "Unsubscribed", value: input.unsubscribed.toString() });
 
   return {
@@ -77,4 +80,4 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   };
 };
 
-export default tool;
+export default withResend(tool);

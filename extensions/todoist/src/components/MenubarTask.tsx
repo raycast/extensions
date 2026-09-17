@@ -7,10 +7,8 @@ import {
   open,
   launchCommand,
   LaunchType,
-  showToast,
-  Toast,
+  showHUD,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
@@ -19,6 +17,7 @@ import { getCollaboratorIcon, getProjectCollaborators } from "../helpers/collabo
 import { getRemainingLabels } from "../helpers/labels";
 import { truncateMiddle } from "../helpers/menu-bar";
 import { priorities, getPriorityIcon } from "../helpers/priorities";
+import { rescheduleDuePayload } from "../helpers/repeat";
 import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 import { useIsTodoistInstalled } from "../hooks/useIsTodoistInstalled";
@@ -28,6 +27,10 @@ type MenuBarTaskProps = {
   data?: SyncData;
   setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
 };
+
+function getFailureMessage(title: string, error: unknown) {
+  return error instanceof Error && error.message ? `${title}: ${error.message}` : title;
+}
 
 const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
   const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
@@ -50,57 +53,60 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
         unfocusTask();
       }
 
-      await showToast({ style: Toast.Style.Success, title: "Completed task" });
+      await showHUD("Completed task");
     } catch (error) {
-      await showFailureToast(error, { title: "Unable to complete task" });
+      await showHUD(getFailureMessage("Unable to complete task", error));
     }
     if (useConfetti) {
       try {
-        await open("raycast://extensions/raycast/raycast/confetti");
-      } catch (error) {
-        await showFailureToast(error, { title: "Unable to show celebration" });
+        await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast/confetti`);
+      } catch {
+        await showHUD("Unable to show celebration");
       }
     }
   }
 
   async function changeDate(task: Task, timeString: string, type: "due" | "deadline") {
     try {
+      const currentTask = data?.items.find((item) => item.id === task.id) ?? task;
+      const datePayload =
+        type === "due" ? rescheduleDuePayload(currentTask, { string: timeString }) : { string: timeString };
       const updateData = {
         id: task.id,
-        [type]: { string: timeString },
+        [type]: datePayload,
       };
 
       await updateTask(updateData, { data, setData });
-      await showToast({ style: Toast.Style.Success, title: `Updated task ${type}` });
+      await showHUD(`Updated task ${type}`);
     } catch (error) {
-      await showFailureToast(error, { title: `Unable to update task ${type}` });
+      await showHUD(getFailureMessage(`Unable to update task ${type}`, error));
     }
   }
 
   async function changePriority(task: Task, priority: number) {
     try {
       await updateTask({ id: task.id, priority }, { data, setData });
-      await showToast({ style: Toast.Style.Success, title: "Updated task priority" });
+      await showHUD("Updated task priority");
     } catch (error) {
-      await showFailureToast(error, { title: "Unable to update task priority" });
+      await showHUD(getFailureMessage("Unable to update task priority", error));
     }
   }
 
   async function changeAssignee(task: Task, collaboratorId: string) {
     try {
       await updateTask({ id: task.id, responsible_uid: collaboratorId }, { data, setData });
-      await showToast({ style: Toast.Style.Success, title: "Updated task assignee" });
+      await showHUD("Updated task assignee");
     } catch (error) {
-      await showFailureToast(error, { title: "Unable to update task assignee" });
+      await showHUD(getFailureMessage("Unable to update task assignee", error));
     }
   }
 
   async function addLabel(task: Task, label: string) {
     try {
       await updateTask({ id: task.id, labels: [...task.labels, label] }, { data, setData });
-      await showToast({ style: Toast.Style.Success, title: "Added task label" });
+      await showHUD("Added task label");
     } catch (error) {
-      await showFailureToast(error, { title: "Unable to add task label" });
+      await showHUD(getFailureMessage("Unable to add task label", error));
     }
   }
 
@@ -114,9 +120,9 @@ const MenuBarTask = ({ task, data, setData }: MenuBarTaskProps) => {
     ) {
       try {
         await apiDeleteTAsk(task.id, { data, setData });
-        await showToast({ style: Toast.Style.Success, title: "Deleted task" });
+        await showHUD("Deleted task");
       } catch (error) {
-        await showFailureToast(error, { title: "Unable to delete task" });
+        await showHUD(getFailureMessage("Unable to delete task", error));
       }
     }
   }

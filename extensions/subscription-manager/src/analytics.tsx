@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Detail, Icon, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
+import { copyReportToClipboard, exportReportToFile } from "./export";
 import { useSubscriptions } from "./storage";
 import { Subscription } from "./types";
 import {
@@ -183,6 +184,20 @@ ${topRows}
             <Action title="By Category" icon={Icon.Tag} onAction={() => setGroupBy("category")} />
             <Action title="By Billing Cycle" icon={Icon.ArrowClockwise} onAction={() => setGroupBy("cycle")} />
             <Action title="By List" icon={Icon.List} onAction={() => setGroupBy("list")} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ActionPanel.Submenu
+              title="Export Report"
+              icon={Icon.Download}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+            >
+              <Action title="Copy as Markdown" icon={Icon.Clipboard} onAction={() => copyReportToClipboard(markdown)} />
+              <Action
+                title="Save as Markdown"
+                icon={Icon.Document}
+                onAction={() => exportReportToFile(markdown, "subscription-report")}
+              />
+            </ActionPanel.Submenu>
           </ActionPanel.Section>
         </ActionPanel>
       }

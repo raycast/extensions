@@ -1,14 +1,14 @@
-import { List, Icon, Color, Action } from "@raycast/api";
+import { Action, Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { DiggerResult, FontAsset } from "../types";
-import { getFontDisplayName } from "../utils/fontUtils";
 import { Actions } from "../actions";
 import { ResourcesViewActions } from "../actions/ResourceViewActions";
-import { truncateText } from "../utils/formatters";
+import { DiggerResult, FontAsset } from "../types";
 import { getDeniedAccessMessage } from "../utils/botDetection";
-import { ResourcesListView } from "./ResourcesListView";
-import { ImagesGridView, getUniqueImageCount } from "./ImagesGridView";
+import { getFontDisplayName } from "../utils/fontUtils";
+import { truncateText } from "../utils/formatters";
 import { resolveUrl } from "../utils/urlUtils";
+import { getUniqueImageCount, ImagesGridView } from "./ImagesGridView";
+import { ResourcesListView } from "./ResourcesListView";
 
 interface ResourcesAssetsProps {
   data: DiggerResult | null;
@@ -142,23 +142,11 @@ function ResourcesAssetsDetail({
 }: ResourcesAssetsDetailProps) {
   const { resources, botProtection } = data;
   const deniedMessage = getDeniedAccessMessage(botProtection?.provider);
-  const hasThemeColor = !!resources?.themeColor;
 
   return (
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          {hasThemeColor && (
-            <>
-              <List.Item.Detail.Metadata.TagList title="Theme Color">
-                <List.Item.Detail.Metadata.TagList.Item
-                  text={resources!.themeColor!}
-                  color={resources!.themeColor! as Color.ColorLike}
-                />
-              </List.Item.Detail.Metadata.TagList>
-              <List.Item.Detail.Metadata.Separator />
-            </>
-          )}
           <List.Item.Detail.Metadata.Label
             title={`Images${hasImages ? ` (${uniqueImageCount} unique)` : ""}`}
             icon={
@@ -196,7 +184,7 @@ function ResourcesAssetsDetail({
                     );
                   })}
                   {uniqueForDisplay.length > 5 && (
-                    <List.Item.Detail.Metadata.Label title="" text={`...and ${uniqueForDisplay.length - 5} more`} />
+                    <List.Item.Detail.Metadata.Label title={`…and ${uniqueForDisplay.length - 5} more`} />
                   )}
                 </>
               );
@@ -231,7 +219,7 @@ function ResourcesAssetsDetail({
               );
             })}
           {hasFonts && resources!.fonts!.length > 5 && (
-            <List.Item.Detail.Metadata.Label title="" text={`...and ${resources!.fonts!.length - 5} more`} />
+            <List.Item.Detail.Metadata.Label title={`…and ${resources!.fonts!.length - 5} more`} />
           )}
           {!hasFonts && (
             <List.Item.Detail.Metadata.Label title="" text={isChallengePage ? deniedMessage : "No fonts found"} />
@@ -265,7 +253,7 @@ function ResourcesAssetsDetail({
               );
             })}
           {hasStylesheets && resources!.stylesheets!.length > 5 && (
-            <List.Item.Detail.Metadata.Label title="" text={`...and ${resources!.stylesheets!.length - 5} more`} />
+            <List.Item.Detail.Metadata.Label title={`…and ${resources!.stylesheets!.length - 5} more`} />
           )}
           {!hasStylesheets && (
             <List.Item.Detail.Metadata.Label title="" text={isChallengePage ? deniedMessage : "No stylesheets found"} />
@@ -304,7 +292,7 @@ function ResourcesAssetsDetail({
                     );
                   })}
                   {externalScripts.length > 5 && (
-                    <List.Item.Detail.Metadata.Label title="" text={`...and ${externalScripts.length - 5} more`} />
+                    <List.Item.Detail.Metadata.Label title={`…and ${externalScripts.length - 5} more`} />
                   )}
                   {inlineCount > 0 && (
                     <List.Item.Detail.Metadata.Label

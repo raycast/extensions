@@ -1,13 +1,14 @@
 import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
-import { PaginationOptions } from "@raycast/utils/dist/types";
+import { type PaginationOptions } from "./lib/pagination";
 import { setMaxListeners } from "node:events";
 import { setTimeout } from "node:timers/promises";
 import { useCallback, useRef, useState } from "react";
 import { GenericDetail } from "./components/generic-detail";
 import { GenericGrid } from "./components/generic-grid";
+import { useActionRunner } from "./lib/action-runner";
 import { initTraktClient } from "./lib/client";
-import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "./lib/constants";
+import { APP_MAX_LISTENERS, IMDB_APP_URL, IMDB_SHORTCUT, TRAKT_APP_URL } from "./lib/constants";
 import { createEpisodeMarkdown, createEpisodeMetadata } from "./lib/detail-helpers";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
 import { TraktShowListItem, withPagination } from "./lib/schema";
@@ -101,27 +102,7 @@ export default function Command() {
     });
   }, []);
 
-  const handleAction = useCallback(
-    async (show: TraktShowListItem, action: (show: TraktShowListItem) => Promise<void>, message: string) => {
-      setActionLoading(true);
-      try {
-        await action(show);
-        revalidate();
-        showToast({
-          title: message,
-          style: Toast.Style.Success,
-        });
-      } catch (error) {
-        showToast({
-          title: (error as Error).message,
-          style: Toast.Style.Failure,
-        });
-      } finally {
-        setActionLoading(false);
-      }
-    },
-    [],
-  );
+  const handleAction = useActionRunner<TraktShowListItem>({ setActionLoading, onSuccess: revalidate });
 
   const upNextMarkdown = useCallback((show: TraktShowListItem) => {
     return createEpisodeMarkdown(show.progress.next_episode, show.show);
@@ -163,7 +144,7 @@ export default function Command() {
                     <ActionPanel>
                       <ActionPanel.Section>
                         <Action
-                          title="Check-in"
+                          title="Check-In"
                           icon={Icon.Checkmark}
                           shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
                           onAction={() => handleAction(show, checkInEpisode, "Episode checked-in")}
@@ -185,7 +166,7 @@ export default function Command() {
                         <Action.OpenInBrowser
                           icon={getFavicon(IMDB_APP_URL)}
                           title="Open Show in Imdb"
-                          shortcut={{ modifiers: ["cmd"], key: "i" }}
+                          shortcut={IMDB_SHORTCUT}
                           url={getIMDbUrl(show.show.ids.imdb)}
                         />
                       </ActionPanel.Section>
@@ -195,7 +176,7 @@ export default function Command() {
               }
             />
             <Action
-              title="Check-in"
+              title="Check-In"
               icon={Icon.Checkmark}
               onAction={() => handleAction(item, checkInEpisode, "Episode checked-in")}
             />
@@ -216,7 +197,7 @@ export default function Command() {
             <Action.OpenInBrowser
               icon={getFavicon(IMDB_APP_URL)}
               title="Open in Imdb"
-              shortcut={{ modifiers: ["cmd"], key: "i" }}
+              shortcut={IMDB_SHORTCUT}
               url={getIMDbUrl(item.show.ids.imdb)}
             />
           </ActionPanel.Section>

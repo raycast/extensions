@@ -91,9 +91,16 @@ export async function convertAnswerToChat(
   await AddSettingsCommandChat(chat);
   if (openCommand) {
     try {
-      await launchCommand({ name: "ollama-chat", type: LaunchType.UserInitiated });
+      await launchCommand({
+        name: "ollama-chat",
+        type: LaunchType.UserInitiated,
+      });
     } catch (e) {
-      await showToast({ style: Toast.Style.Failure, title: "Error", message: String(e) });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: String(e),
+      });
     }
   }
 }
@@ -137,7 +144,10 @@ async function Inference(
         // showToast when thinking process started
         if (!thinkingStarted) {
           thinkingStarted = true;
-          await showToast({ style: Toast.Style.Animated, title: "🤔 Thinking..." });
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "🤔 Thinking...",
+          });
         }
         setThinking((prevState) => prevState + data);
       });
@@ -147,7 +157,10 @@ async function Inference(
         // showToast when  process started
         if (!responseStarted) {
           responseStarted = true;
-          await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "✍️ Typing...",
+          });
         }
         setAnswer((prevState) => prevState + data);
       });

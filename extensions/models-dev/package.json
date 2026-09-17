@@ -1,27 +1,17 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "models-dev",
-  "title": "Models Dev",
+  "title": "Models.dev",
   "description": "Explore AI model specifications, pricing, and capabilities from models.dev",
   "icon": "extension-icon.png",
   "author": "carlesandres",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Developer Tools",
     "Data"
-  ],
-  "preferences": [
-    {
-      "name": "enableBackgroundSync",
-      "title": "Background Sync",
-      "description": "Allow periodic background refresh of models data",
-      "type": "checkbox",
-      "label": "Enable background sync",
-      "default": false,
-      "required": false
-    }
   ],
   "license": "MIT",
   "keywords": [
@@ -35,14 +25,13 @@
     "openai",
     "anthropic",
     "pricing",
-    "comparison",
     "artificial intelligence"
   ],
   "commands": [
     {
       "name": "search-models",
-      "title": "Search AI Models",
-      "subtitle": "Models Dev",
+      "title": "Search Models",
+      "subtitle": "Models.dev",
       "description": "Search across all AI models by name, provider, or capability",
       "mode": "view",
       "keywords": [
@@ -55,9 +44,9 @@
       ]
     },
     {
-      "name": "browse-providers",
-      "title": "Search AI Providers",
-      "subtitle": "Models Dev",
+      "name": "search-providers",
+      "title": "Search Providers",
+      "subtitle": "Models.dev",
       "description": "Explore AI providers and their model offerings",
       "mode": "view",
       "keywords": [
@@ -67,101 +56,33 @@
         "provider",
         "vendor"
       ]
-    },
+    }
+  ],
+  "tools": [
     {
-      "name": "find-by-capability",
-      "title": "AI Models by Capability",
-      "subtitle": "Models Dev",
-      "description": "Filter models by multiple capabilities",
-      "mode": "view",
-      "keywords": [
-        "reasoning",
-        "vision",
-        "audio",
-        "tools",
-        "filter"
-      ]
-    },
-    {
-      "name": "pricing-explorer",
-      "title": "AI Models by Price",
-      "subtitle": "Models Dev",
-      "description": "Compare model pricing across providers",
-      "mode": "view",
-      "keywords": [
-        "cost",
-        "pricing",
-        "cheap",
-        "expensive",
-        "budget"
-      ]
-    },
-    {
-      "name": "compare-models",
-      "title": "Compare AI Models",
-      "subtitle": "Models Dev",
-      "description": "Select models to compare side-by-side",
-      "mode": "view",
-      "keywords": [
-        "compare",
-        "diff",
-        "versus",
-        "side-by-side"
-      ]
-    },
-    {
-      "name": "new-models",
-      "title": "New AI Models",
-      "subtitle": "Models Dev",
-      "description": "Browse AI models released recently",
-      "mode": "view",
-      "keywords": [
-        "recent",
-        "new",
-        "latest"
-      ],
-      "preferences": [
-        {
-          "name": "lookbackPeriod",
-          "title": "Lookback period (Days)",
-          "description": "Number of days to consider as recent",
-          "type": "textfield",
-          "default": "7",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "background-sync",
-      "title": "Background Sync",
-      "subtitle": "Models Dev",
-      "description": "Refresh model data in the background",
-      "mode": "no-view",
-      "interval": "1h",
-      "disabledByDefault": true
+      "name": "query-models",
+      "title": "Query Models",
+      "description": "Search and filter models.dev by model, provider, capabilities, pricing, and context window"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.3"
+    "@opencode-ai/models": "^0.0.2",
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.1.0",
-    "@types/react": "19.2.10",
-    "@types/react-dom": "^19.0.0",
-    "eslint": "^9.39.2",
-    "prettier": "^3.8.1",
-    "react-dom": "^19.0.0",
-    "tsx": "^4.0.0",
-    "typescript": "^5.9.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "validate": "NODE_OPTIONS='--expose-gc' tsx --tsconfig tsconfig.validate.json scripts/validate-memory.tsx",
-    "validate:e2e": "tsx scripts/validate-e2e-compare-models.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },

@@ -10,6 +10,8 @@ import path from "path";
 import os from "os";
 import { getGitInfo } from "./project-discovery";
 import { getMostRecentGitWorkspace } from "./vscode-storage";
+import { isMacOS } from "./platform";
+import { listProjectDirs, resolveProjectPath } from "./session-parser";
 
 const execFilePromise = promisify(execFile);
 
@@ -59,25 +61,30 @@ async function detectVSCodeProject(): Promise<{
 }> {
   // Try to get window title from each known editor via AppleScript
   // Only use whitelisted editors for security
-  for (const editorProcess of KNOWN_EDITORS) {
-    try {
-      const script = `tell application "System Events" to tell process "${editorProcess}" to get name of front window`;
-      const { stdout } = await execFilePromise("osascript", ["-e", script], {
-        timeout: 2000,
-      });
+  if (isMacOS()) {
+    for (const editorProcess of KNOWN_EDITORS) {
+      try {
+        const script = `tell application "System Events" to tell process "${editorProcess}" to get name of front window`;
+        const { stdout } = await execFilePromise("osascript", ["-e", script], {
+          timeout: 2000,
+        });
 
-      const windowTitle = stdout.trim();
-      if (windowTitle) {
-        const result = parseVSCodeWindowTitle(windowTitle);
-        if (result.projectPath) {
-          const fullPath = await findProjectPath(result.projectPath);
-          if (fullPath) {
-            return { projectPath: fullPath, currentFile: result.currentFile };
+        const windowTitle = stdout.trim();
+        if (windowTitle) {
+          const result = parseVSCodeWindowTitle(windowTitle);
+          if (result.projectPath) {
+            const fullPath = await findProjectPath(result.projectPath);
+            if (fullPath) {
+              return {
+                projectPath: fullPath,
+                currentFile: result.currentFile,
+              };
+            }
           }
         }
+      } catch {
+        // Editor not running or no window, try next
       }
-    } catch {
-      // Editor not running or no window, try next
     }
   }
 
@@ -158,26 +165,17 @@ async function findProjectPath(
   }
 
   // Try Claude's known projects
-  const claudeProjectsDir = path.join(os.homedir(), ".claude", "projects");
   try {
-    const dirs = await fs.promises.readdir(claudeProjectsDir);
+    const dirs = await listProjectDirs();
     for (const dir of dirs) {
-      // Decode the path and check if it ends with the project name
-      const decodedPath = "/" + dir.slice(1).replace(/-/g, "/");
-
-      // Security: Validate that decoded path is absolute and doesn't contain traversal
-      const normalizedPath = path.normalize(decodedPath);
-      if (!path.isAbsolute(normalizedPath) || normalizedPath.includes("..")) {
-        continue; // Skip suspicious paths
-      }
-
+      const resolvedPath = await resolveProjectPath(dir);
       if (
-        decodedPath.endsWith(`/${projectName}`) ||
-        path.basename(decodedPath) === projectName
+        path.basename(resolvedPath) === projectName &&
+        path.isAbsolute(resolvedPath)
       ) {
         try {
-          await fs.promises.access(normalizedPath);
-          return normalizedPath;
+          await fs.promises.access(resolvedPath);
+          return resolvedPath;
         } catch {
           // Path doesn't exist on disk anymore
         }

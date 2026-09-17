@@ -86,7 +86,7 @@ export default function Command(props: LaunchProps) {
                   title="Create Quicklink"
                   quicklink={{
                     name: `Convert to ${format}`,
-                    link: `raycast://extensions/HelloImSteven/sips/convert?context=${encodeURIComponent(JSON.stringify({ convertTo: format }))}`,
+                    link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/HelloImSteven/sips/convert?context=${encodeURIComponent(JSON.stringify({ convertTo: format }))}`,
                   }}
                 />
                 <SettingsActionPanelSection />

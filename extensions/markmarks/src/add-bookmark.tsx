@@ -45,7 +45,7 @@ export default function AddBookmark() {
           showToast({
             style: Toast.Style.Failure,
             title: "No supported browser detected",
-            message: "Focus Safari, Chrome, Arc, Dia, or Zen before running the command.",
+            message: "Focus Safari, Chrome, Arc, Aside, Dia, or Zen before running the command.",
           });
         }
       } catch (error) {

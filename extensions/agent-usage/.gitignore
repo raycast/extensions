@@ -4,6 +4,7 @@
 /node_modules
 
 # Raycast specific files
+/dist
 raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
@@ -18,3 +19,4 @@ compiled_raycast_rust
 CLAUDE.md
 
 docs
+.research-repo

@@ -74,11 +74,12 @@ When viewing an email with attachments:
 | Reply All            | ⇧⌘R      |
 | Forward              | ⌘F       |
 | Mark Read/Unread     | ⇧⌘U      |
+| Star/Unstar          | ⇧⌘S      |
 | Archive              | ⌘E       |
 | Delete               | ⌘⌫       |
 | Download Attachments | ⌘D       |
 | Compose New Email    | ⌘N       |
-| Copy Subject         | ⌘C       |
+| Copy Subject         | ⇧⌘J      |
 | Copy Sender          | ⇧⌘C      |
 | Copy as Markdown     | ⇧⌘M      |
 | Load More Emails     | ⌘L       |

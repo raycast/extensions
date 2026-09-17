@@ -5,6 +5,9 @@
   "description": "An extension to access tududi features from Raycast",
   "icon": "extension-icon.png",
   "author": "david_leibovych",
+  "contributors": [
+    "jcat"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -18,15 +21,17 @@
       "name": "apiUrl",
       "type": "textfield",
       "required": true,
-      "title": "API Base URL",
-      "description": "The base URL for the Tududi API"
+      "title": "Tududi URL",
+      "placeholder": "https://tududi.example.com",
+      "description": "Your Tududi instance URL (without /api). Example: https://tududi.example.com"
     },
     {
       "name": "token",
       "type": "password",
       "required": true,
       "title": "API Token",
-      "description": "Your Tududi API token"
+      "placeholder": "tt_xxxxxxxx",
+      "description": "Personal API token from Tududi Settings → API Tokens (starts with tt_)"
     }
   ],
   "commands": [
@@ -61,22 +66,22 @@
     {
       "name": "today-tasks",
       "title": "Today Tasks",
-      "subtitle": "Tasks that are planned for today",
-      "description": "Focus on Tududi tasks scheduled for completion today",
+      "subtitle": "Tasks in today's plan",
+      "description": "Focus on Tududi tasks in today's plan (planned, in progress, waiting)",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^2.0.5",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "eslint": "^10.9.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -85,5 +90,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

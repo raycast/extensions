@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mailto-link-generator",
+  "title": "Mailto Link Generator",
+  "description": "Build mailto: links with every field — to, cc, bcc, subject and body — then copy them or open a draft.",
+  "icon": "command-icon.png",
+  "author": "stefan.imbesi",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-mailto",
+      "title": "Generate Mailto Link",
+      "description": "Compose a mailto: link from a form, then copy it (raw or as an HTML anchor) or open a draft.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberLastValues",
+          "type": "checkbox",
+          "required": false,
+          "title": "Form",
+          "label": "Remember last-used values between launches",
+          "description": "Off by default — the form opens empty. When on, it restores whatever you last entered.",
+          "default": false
+        },
+        {
+          "name": "defaultCc",
+          "type": "textfield",
+          "required": false,
+          "title": "Default Cc",
+          "description": "Pre-filled into the Cc field of a fresh form. Leave empty for none. Separate multiple addresses with commas.",
+          "placeholder": "team@example.com"
+        },
+        {
+          "name": "defaultBcc",
+          "type": "textfield",
+          "required": false,
+          "title": "Default Bcc",
+          "description": "Pre-filled into the Bcc field of a fresh form. Leave empty for none.",
+          "placeholder": "archive@example.com"
+        },
+        {
+          "name": "signature",
+          "type": "textfield",
+          "required": false,
+          "title": "Signature",
+          "description": "Appended to the body of a fresh form after a \"-- \" delimiter. Leave empty for none. Single-line; use \\n for line breaks.",
+          "placeholder": "Stefan Imbesi · August"
+        },
+        {
+          "name": "outlookHost",
+          "type": "dropdown",
+          "required": false,
+          "title": "Outlook Account",
+          "description": "Which Outlook web app the \"Open in Outlook\" action should target.",
+          "default": "outlook.office.com",
+          "data": [
+            {
+              "title": "Work or School (outlook.office.com)",
+              "value": "outlook.office.com"
+            },
+            {
+              "title": "Personal (outlook.live.com)",
+              "value": "outlook.live.com"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -3,9 +3,20 @@ import { useRecentWorkspaces } from "./hooks/use-recent-workspaces";
 import { usePinnedEntries } from "./hooks/use-pinned-entries";
 import { Entry, getEntry, getEntryPrimaryPath, isEntryMultiFolder } from "./lib/entry";
 import { exists } from "./lib/filesystem";
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  Keyboard,
+} from "@raycast/api";
 import { closeGramWindow, GramBuild, openWithGramCli } from "./lib/gram";
 import { showOpenStatus } from "./lib/preferences";
+import { openProject } from "./lib/open-project";
 import { isMultiFolder, Workspace } from "./lib/workspaces";
 import { EntryItem } from "./components/entry-item";
 
@@ -92,7 +103,7 @@ export function Command() {
                           title="Move up"
                           icon={Icon.ArrowUp}
                           onAction={() => moveUp(entry)}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                          shortcut={Keyboard.Shortcut.Common.MoveUp}
                         />
                       ) : null}
                       {entry.order < pinned.length - 1 ? (
@@ -100,7 +111,7 @@ export function Command() {
                           title="Move Down"
                           icon={Icon.ArrowDown}
                           onAction={() => moveDown(entry)}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                          shortcut={Keyboard.Shortcut.Common.MoveDown}
                         />
                       ) : null}
                     </>
@@ -205,6 +216,8 @@ function OpenInGramAction({ entry, revalidate }: { entry: Entry; revalidate: () 
   const { app, cliPath } = useGramContext();
   const gramIcon = { fileIcon: app.path };
 
+  const actionTitle = entry.isOpen ? "Focus Window" : "Open in Gram";
+
   // Helper to trigger staggered revalidations while Raycast is in the background.
   // This gives Gram enough time to launch and update its SQLite DB.
   const triggerRevalidation = () => {
@@ -213,12 +226,25 @@ function OpenInGramAction({ entry, revalidate }: { entry: Entry; revalidate: () 
     setTimeout(revalidate, 3000);
   };
 
+  // Remote (SSH) entries: paths are relative and not usable with the CLI directly;
+  // fall back to the URI scheme (ssh://user@host/path) which Zed handles natively.
+  if (entry.type === "remote" && !entry.wsl) {
+    return (
+      <Action.Open
+        title={actionTitle}
+        target={entry.uri}
+        application={app}
+        icon={gramIcon}
+        onOpen={triggerRevalidation}
+      />
+    );
+  }
+
   // Multi-folder workspace - use CLI
   if (isEntryMultiFolder(entry) && cliPath) {
     const openMultiFolder = async () => {
       try {
-        await closeMainWindow();
-        await openWithGramCli(cliPath, entry.paths);
+        await openProject(() => openWithGramCli(cliPath, entry.paths), closeMainWindow);
         triggerRevalidation();
       } catch (error) {
         await showToast({
@@ -228,15 +254,14 @@ function OpenInGramAction({ entry, revalidate }: { entry: Entry; revalidate: () 
         });
       }
     };
-    return <Action title="Open in Gram" onAction={openMultiFolder} icon={gramIcon} />;
+    return <Action title={actionTitle} onAction={openMultiFolder} icon={gramIcon} />;
   }
 
-  // If CLI available, use it for consistency (handles revalidation)
+  // If the CLI is available, use it for consistency (handles revalidation)
   if (cliPath) {
     const openSingleFolder = async () => {
       try {
-        await closeMainWindow();
-        await openWithGramCli(cliPath, [entry.paths[0]]);
+        await openProject(() => openWithGramCli(cliPath, [entry.paths[0]]), closeMainWindow);
         triggerRevalidation();
       } catch (error) {
         await showToast({
@@ -246,13 +271,13 @@ function OpenInGramAction({ entry, revalidate }: { entry: Entry; revalidate: () 
         });
       }
     };
-    return <Action title="Open in Gram" icon={gramIcon} onAction={openSingleFolder} />;
+    return <Action title={actionTitle} icon={gramIcon} onAction={openSingleFolder} />;
   }
 
-  // Fallback: open via URI scheme (no revalidation)
+  // Fallback: open via URI scheme
   return (
     <Action.Open
-      title="Open in Gram"
+      title={actionTitle}
       target={entry.uri}
       application={app}
       icon={gramIcon}

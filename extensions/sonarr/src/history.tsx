@@ -1,13 +1,16 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, Keyboard } from "@raycast/api";
 import { useMemo, useState } from "react";
+import { InstanceActions } from "@/lib/components/InstanceActions";
+import { useInstance } from "@/lib/hooks/useInstance";
 import { useHistory } from "@/lib/hooks/useSonarrAPI";
 import type { HistoryRecord } from "@/lib/types/history";
+import type { InstanceState } from "@/lib/types/instance";
 import {
   formatAirDate,
   formatEpisodeNumber,
   formatQualityProfile,
+  getSearchPlaceholder,
   getSeriesPoster,
-  getSonarrUrl,
 } from "@/lib/utils/formatting";
 
 function getEventColor(eventType: string): Color {
@@ -43,7 +46,8 @@ function formatEventLabel(eventType: string): string {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [eventTypeFilter, setEventTypeFilter] = useState("all");
-  const { data, isLoading, mutate } = useHistory(1, 100);
+  const instanceState = useInstance();
+  const { data, isLoading, mutate } = useHistory(instanceState.instance, 1, 100);
 
   const records = data?.records || [];
 
@@ -72,12 +76,21 @@ export default function Command() {
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [records, eventTypeFilter, searchText]);
 
+  // Also reachable with an empty list: without it, switching back out of an
+  // instance that returned nothing would mean quitting the command.
+  const instancePanel = (
+    <ActionPanel>
+      <InstanceActions state={instanceState} />
+    </ActionPanel>
+  );
+
   return (
     <List
-      isLoading={isLoading}
+      actions={instancePanel}
+      isLoading={isLoading || instanceState.isLoading}
       isShowingDetail
       filtering={false}
-      searchBarPlaceholder="Search history by series, episode, or release title..."
+      searchBarPlaceholder={getSearchPlaceholder(instanceState, "Search history by series, episode, or release title")}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Event Type" value={eventTypeFilter} onChange={setEventTypeFilter}>
@@ -93,20 +106,29 @@ export default function Command() {
           title="No History Events"
           description={searchText ? "No events matched your search" : "No recent activity found"}
           icon={Icon.Clock}
+          actions={instancePanel}
         />
       )}
 
       <List.Section title="Recent History" subtitle={`${filteredRecords.length} events`}>
         {filteredRecords.map((record) => (
-          <HistoryListItem key={record.id} record={record} onRefresh={mutate} />
+          <HistoryListItem key={record.id} record={record} onRefresh={mutate} instanceState={instanceState} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function HistoryListItem({ record, onRefresh }: { record: HistoryRecord; onRefresh: () => void }) {
-  const sonarrUrl = getSonarrUrl();
+function HistoryListItem({
+  record,
+  onRefresh,
+  instanceState,
+}: {
+  record: HistoryRecord;
+  onRefresh: () => void;
+  instanceState: InstanceState;
+}) {
+  const sonarrUrl = instanceState.instance?.url ?? "";
   const poster = record.series?.images ? getSeriesPoster(record.series.images) : undefined;
 
   const seriesTitle = record.series?.title || "Unknown Series";
@@ -210,9 +232,11 @@ function HistoryListItem({ record, onRefresh }: { record: HistoryRecord; onRefre
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
+
+          <InstanceActions state={instanceState} />
         </ActionPanel>
       }
     />

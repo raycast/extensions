@@ -36,14 +36,32 @@
     },
     {
       "name": "replace",
-      "title": "Replace File(s) Characters",
+      "title": "Replace in File Names",
       "description": "Replace characters in file(s) names.",
       "mode": "view"
     },
     {
       "name": "advanced-rename",
       "title": "Advanced Batch Rename",
-      "description": "Rename files using a powerful rule-based engine.",
+      "description": "Rename files and folders using a powerful rule-based engine.",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Rename History",
+      "description": "View and undo recent rename operations.",
+      "mode": "view"
+    },
+    {
+      "name": "rename-folders",
+      "title": "Rename Folder(s)",
+      "description": "Rename the folders selected in Finder in a batch.",
+      "mode": "view"
+    },
+    {
+      "name": "replace-folders",
+      "title": "Replace in Folder Names",
+      "description": "Replace characters in the names of the selected folders.",
       "mode": "view"
     }
   ],
@@ -55,12 +73,12 @@
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^8.51.0",
     "jsdom": "^28.0.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   },
   "scripts": {
     "build": "ray build -e dist",

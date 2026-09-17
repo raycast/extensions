@@ -12,21 +12,17 @@ type NotificationListProps = {
 
 export default function NotificationList({ items, mutate }: NotificationListProps) {
   return items.map((item) => {
+    const trailingNumber = getTrailingNumberFromUrl(item.subject?.html_url ?? "");
     return (
       <List.Item
-        key={item.id || item.updated_at || "notification"}
+        key={item.id || item.url || item.subject?.url || item.updated_at || item.subject?.title || "notification"}
         icon={getNotificationIcon(item)}
         title={item.subject?.title || "[No Title]"}
         subtitle={item.repository?.full_name || "[No Repository]"}
         accessories={[
           ...(item.pinned ? [{ icon: Icon.Tack } as const] : []),
           { text: { value: item.subject?.type ?? "", color: Color.PrimaryText } },
-          {
-            text: {
-              value: "#" + (getTrailingNumberFromUrl(item.subject?.html_url ?? "") ?? ""),
-              color: Color.SecondaryText,
-            },
-          },
+          ...(trailingNumber ? [{ text: { value: `#${trailingNumber}`, color: Color.SecondaryText } }] : []),
         ]}
         actions={<NotificationActions item={item} mutate={mutate} />}
       />

@@ -1,13 +1,13 @@
 export interface Repository {
-  contributor_logins: string | null;
-  description: string | null;
-  forks: number;
-  language: string | null;
-  repo_id: number;
+  contributor_logins: string;
+  description: string;
+  forks: string;
+  primary_language: string;
+  repo_id: string;
   repo_name: string;
-  stars: number;
-  pushes: number | null;
-  pull_requests: number | null;
+  stars: string;
+  pushes: string;
+  pull_requests: string;
 }
 
 export const languages = {
@@ -17,7 +17,7 @@ export const languages = {
   Python: "Python",
   PHP: "PHP",
   "C++": "C++",
-  "C#": "C%23",
+  "C#": "C#",
   TypeScript: "TypeScript",
   Shell: "Shell",
   C: "C",

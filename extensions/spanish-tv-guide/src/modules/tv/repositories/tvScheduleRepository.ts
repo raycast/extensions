@@ -1,5 +1,3 @@
-import fetch from "isomorphic-fetch";
-
 import { ProgramDto, ProgramDetailsDto, TvScheduleDto } from "../domain/tvScheduleDto";
 import { dateReviver } from "../../../utils/dateUtils";
 

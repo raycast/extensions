@@ -1,26 +1,12 @@
+import { Clipboard, showToast, Toast } from "@raycast/api";
 import {
-  Clipboard,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { extractFirstHttpUrl, saveCardWithFeedback } from "./lib/capture";
-import { getPreferences } from "./lib/preferences";
+  ensureCredentialsForNoViewCommand,
+  extractFirstHttpUrl,
+  saveCardWithFeedback,
+} from "./lib/capture";
 
 export default async function SaveClipboardCommand() {
-  const { apiKey } = getPreferences();
-  if (!apiKey?.trim()) {
-    await showToast({
-      message: "Set your Teak API key in extension preferences to continue.",
-      primaryAction: {
-        onAction: () => {
-          void openExtensionPreferences();
-        },
-        title: "Open Preferences",
-      },
-      style: Toast.Style.Failure,
-      title: "Missing API key",
-    });
+  if (!(await ensureCredentialsForNoViewCommand())) {
     return;
   }
 

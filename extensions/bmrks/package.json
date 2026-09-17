@@ -59,14 +59,16 @@
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
-    "@supabase/supabase-js": "^2.90.1",
-    "color-string": "^2.1.4"
+    "@supabase/supabase-js": "^2.110.1",
+    "color-string": "^2.1.4",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/color-string": "^1.5.5",
     "@types/node": "^25.0.8",
     "@types/react": "^19.2.8",
+    "@types/ws": "^8.18.1",
     "eslint": "^9.39.2",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3"
@@ -81,5 +83,8 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9"
+  }
 }

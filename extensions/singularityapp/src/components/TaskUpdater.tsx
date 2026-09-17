@@ -17,9 +17,21 @@ type TaskUpdaterProps = {
   task: Task;
   projects?: Project[];
   onTaskUpdated?: () => void;
+  requireTitleChange?: boolean;
+  guidance?: string;
+  submitTitle?: string;
+  successTitle?: string;
 };
 
-export default function TaskUpdater({ task, projects: initialProjects, onTaskUpdated }: TaskUpdaterProps) {
+export default function TaskUpdater({
+  task,
+  projects: initialProjects,
+  onTaskUpdated,
+  requireTitleChange = false,
+  guidance,
+  submitTitle = "Save Changes",
+  successTitle = "Task Updated",
+}: TaskUpdaterProps) {
   const { pop } = useNavigation();
   const [title, setTitle] = useState(task.title || "");
   const [note, setNote] = useState("");
@@ -59,8 +71,19 @@ export default function TaskUpdater({ task, projects: initialProjects, onTaskUpd
   }, []);
 
   async function handleSubmit() {
-    if (!title.trim()) {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
       await showToast({ style: Toast.Style.Failure, title: "Title Required", message: "Please enter a task title" });
+      return;
+    }
+
+    if (requireTitleChange && trimmedTitle === task.title.trim()) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Update Required",
+        message: "Change the task title before continuing.",
+      });
       return;
     }
 
@@ -75,7 +98,7 @@ export default function TaskUpdater({ task, projects: initialProjects, onTaskUpd
         deadline: string | null;
         projectId: string | null;
       } = {
-        title: title.trim(),
+        title: trimmedTitle,
         note: note.trim() || undefined,
         priority: parseInt(priority) as 0 | 1 | 2,
         start: startDate ? getAPIDateString(startDate) : null,
@@ -84,7 +107,7 @@ export default function TaskUpdater({ task, projects: initialProjects, onTaskUpd
       };
 
       await updateTask(task.id, params);
-      await showToast({ style: Toast.Style.Success, title: "Task Updated" });
+      await showToast({ style: Toast.Style.Success, title: successTitle });
       onTaskUpdated?.();
       pop();
     } catch {
@@ -97,10 +120,12 @@ export default function TaskUpdater({ task, projects: initialProjects, onTaskUpd
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Changes" icon={Icon.Check} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={submitTitle} icon={Icon.Check} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
+      {guidance ? <Form.Description text={guidance} /> : null}
+
       <Form.TextField id="title" title="Title" value={title} onChange={setTitle} autoFocus />
 
       <Form.TextArea id="note" title="Note" value={note} onChange={setNote} />

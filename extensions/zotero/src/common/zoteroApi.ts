@@ -1,18 +1,32 @@
-import { stat, readFile, writeFile, copyFile } from "fs/promises";
-import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
+import { stat, readFile, writeFile, copyFile, rename } from "fs/promises";
+import { getPreferenceValues, environment, showToast, Toast, LocalStorage } from "@raycast/api";
+import type { LibraryRef } from "./library";
+import { USER_LIBRARY_NAME } from "./library";
+import type { CollectionRef } from "./collections";
+import { collectionId } from "./collections";
 import * as utils from "./utils";
-import { existsSync, readFileSync } from "fs";
-import Fuse from "fuse.js";
+import { resolveHome } from "./paths";
+export { resolveHome };
+import { existsSync, readFileSync, rmSync } from "fs";
+import { execFileSync } from "child_process";
+import { rankResults } from "./search";
 import initSqlJs, { Database as SqlJsDatabase } from "sql.js";
 import path = require("path");
 
 export interface Preferences {
   zotero_path: string;
   use_bibtex?: boolean;
+  bibtex_search?: boolean;
   bibtex_path?: string;
   csl_style?: string;
   cache_period?: string;
   quote_pdf_path?: boolean;
+}
+
+// citekey is populated (and thus searchable) when the user either exports
+// BibTeX or explicitly opts into bibtex-key search.
+function bibtexEnabled(p: Preferences): boolean {
+  return !!(p.use_bibtex || p.bibtex_search);
 }
 
 export interface RefData {
@@ -21,12 +35,25 @@ export interface RefData {
   modified?: Date;
   key?: string;
   library?: number;
+  // "user" for the personal library, "group" for a group library. Absent in
+  // caches built before group-library support (treated as personal).
+  libraryType?: "user" | "group";
+  // Online group id (groups.groupID), used to build zotero:// URIs for group
+  // items. Only present for group-library items.
+  groupID?: number;
+  // Human-readable library name ("My Library" or the group's name).
+  libraryName?: string;
   type?: string;
   citekey?: string;
   tags?: string[];
   notes?: string[];
   attachment?: Attachment;
+  // Human-readable collection names (for display).
   collection?: string[];
+  // Library-qualified collection ids (`collectionId(library, key)`), used for
+  // filtering. Distinct collections that share a name or a bare key across
+  // libraries stay independent.
+  collectionKeys?: string[];
   [key: string]: any;
 }
 
@@ -137,13 +164,26 @@ ORDER BY "index" ASC
 `;
 
 const ALL_COLLECTIONS_SQL = `
-SELECT DISTINCT collections.collectionName AS name
+SELECT  collections.collectionName AS name,
+        collections.key AS key,
+        collections.libraryID AS library
     FROM collections
+`;
+
+const LIBRARIES_SQL = `
+SELECT  libraries.libraryID AS id,
+        libraries.type AS type,
+        groups.groupID AS groupID,
+        groups.name AS name
+    FROM libraries
+    LEFT JOIN groups
+        ON libraries.libraryID = groups.libraryID
 `;
 
 const COLLECTIONS_SQL = `
 SELECT  collections.collectionName AS name,
-        collections.key AS key
+        collections.key AS key,
+        collections.libraryID AS library
     FROM collections
     LEFT JOIN collectionItems
         ON collections.collectionID = collectionItems.collectionID
@@ -157,14 +197,12 @@ WHERE itemNotes.parentItemID = :id
 `;
 
 const cachePath = utils.cachePath("zotero.json");
-const CACHE_VERSION = 3;
+const CACHE_VERSION = 7;
 
-export function resolveHome(filepath: string): string {
-  if (filepath[0] === "~") {
-    return path.join(process.env.HOME, filepath.slice(1));
-  }
-  return filepath;
-}
+// LocalStorage key holding the JSON array of group libraryIDs the user opted
+// into searching. The personal library is always searched; group libraries are
+// opt-in (default none) so a paper shared to a group no longer double-lists.
+const INCLUDED_GROUPS_KEY = "included_group_libraries";
 
 function stripNoteHtml(note?: string): string {
   if (!note) {
@@ -179,16 +217,119 @@ function stripNoteHtml(note?: string): string {
     .trim();
 }
 
-async function openDb() {
+// Only the tables the queries above touch. A full Zotero database is dominated
+// by the full-text search index (fulltextItemWords and its indexes can be
+// hundreds of MB), which we never query. sql.js has to hold the entire file in
+// the WASM heap, so loading the whole database blows the Raycast worker memory
+// limit on large libraries ("Worker terminated due to reaching memory limit:
+// JS heap out of memory"). Copying just these tables into a slim database keeps
+// the in-memory footprint to a few MB. See issue #29250.
+const SLIM_TABLES = [
+  "itemTypes",
+  "items",
+  "deletedItems",
+  "tags",
+  "itemTags",
+  "itemData",
+  "fields",
+  "itemDataValues",
+  "itemAttachments",
+  "creators",
+  "itemCreators",
+  "creatorTypes",
+  "collections",
+  "collectionItems",
+  "itemNotes",
+  "libraries",
+  "groups",
+];
+
+// CREATE TABLE ... AS SELECT copies rows but not indexes, so re-create the
+// indexes the per-item queries in getData() filter/join on. Without them sql.js
+// falls back to full table scans on every one of the thousands of per-item
+// lookups, which is both extremely slow and (in sql.js) very memory-hungry —
+// worse than the original problem.
+const SLIM_INDEXES = [
+  "CREATE INDEX ix_items_id ON items(itemID)",
+  "CREATE INDEX ix_deletedItems_id ON deletedItems(itemID)",
+  "CREATE INDEX ix_itemTags_item ON itemTags(itemID)",
+  "CREATE INDEX ix_tags_id ON tags(tagID)",
+  "CREATE INDEX ix_itemData_item ON itemData(itemID)",
+  "CREATE INDEX ix_fields_id ON fields(fieldID)",
+  "CREATE INDEX ix_itemDataValues_id ON itemDataValues(valueID)",
+  "CREATE INDEX ix_itemAttachments_parent ON itemAttachments(parentItemID)",
+  "CREATE INDEX ix_itemCreators_item ON itemCreators(itemID)",
+  "CREATE INDEX ix_creators_id ON creators(creatorID)",
+  "CREATE INDEX ix_creatorTypes_id ON creatorTypes(creatorTypeID)",
+  "CREATE INDEX ix_collectionItems_item ON collectionItems(itemID)",
+  "CREATE INDEX ix_collections_id ON collections(collectionID)",
+  "CREATE INDEX ix_itemNotes_parent ON itemNotes(parentItemID)",
+];
+
+// Build a slim database at `slimPath` containing only SLIM_TABLES (plus the
+// indexes above) copied from `sourcePath`, using the macOS system sqlite3
+// binary. Returns the slim database bytes, or null if the slimming failed (e.g.
+// sqlite3 missing) so the caller can fall back. Both paths are extension-owned
+// (never user-controlled), so the single-quote escaping below is only
+// defence-in-depth.
+function buildSlimDb(sourcePath: string, slimPath: string): Buffer | null {
+  try {
+    const script = [
+      `ATTACH '${sourcePath.replace(/'/g, "''")}' AS src;`,
+      ...SLIM_TABLES.map((t) => `CREATE TABLE "${t}" AS SELECT * FROM src."${t}";`),
+      ...SLIM_INDEXES.map((s) => `${s};`),
+    ].join("\n");
+    execFileSync("/usr/bin/sqlite3", [slimPath, script], { timeout: 30000 });
+    return readFileSync(slimPath);
+  } catch {
+    return null;
+  }
+}
+
+// Monotonic counter so overlapping openDb() calls (e.g. getData and
+// getCollections during startup) never share a temp path.
+let dbSeq = 0;
+
+// Serialise openDb() so concurrent callers (getCollections + per-keystroke
+// searches) never each hold a full database copy in memory at the same time.
+// Each ~471 MB library copied + loaded in parallel is what pushes the Raycast
+// worker over its memory limit; running them one at a time caps the footprint.
+let openChain: Promise<unknown> = Promise.resolve();
+function openDb(): Promise<SqlJsDatabase> {
+  const run = openChain.then(openDbImpl, openDbImpl);
+  openChain = run.catch(() => undefined);
+  return run;
+}
+
+async function openDbImpl(): Promise<SqlJsDatabase> {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
-  const new_fPath = f_path + ".raycast";
-  await copyFile(f_path, new_fPath);
 
-  const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
-  const SQL = await initSqlJs({ wasmBinary });
-  const db = readFileSync(new_fPath);
-  return new SQL.Database(db);
+  // Work on private, per-call copies inside the extension's support directory.
+  // The paths are ours (not user-controlled) and unique per invocation, so
+  // concurrent opens can't clobber each other's files, and nothing is left on
+  // disk once we return.
+  const base = path.join(utils.supportPath, `zotero-${process.pid}-${dbSeq++}`);
+  const copyPath = base + ".sqlite";
+  const slimPath = base + ".slim";
+  const tempFiles = [copyPath, copyPath + "-wal", copyPath + "-shm", slimPath];
+
+  try {
+    // Copy the main database file to an unlocked location.
+    await copyFile(f_path, copyPath);
+
+    const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
+    const SQL = await initSqlJs({ wasmBinary });
+
+    // Prefer the slim copy; fall back to the full database if slimming failed.
+    const slim = buildSlimDb(copyPath, slimPath);
+    return new SQL.Database(slim ?? readFileSync(copyPath));
+  } finally {
+    // The temp files are only needed while we read them into memory above.
+    for (const p of tempFiles) {
+      rmSync(p, { force: true });
+    }
+  }
 }
 
 async function getBibtexKey(key: string, library: string): Promise<string> {
@@ -241,55 +382,93 @@ async function openBibtexDb(): Promise<[SqlJsDatabase, boolean] | null> {
   return [new SQL.Database(db), isBBTUpdated];
 }
 
-async function getLatestModifyDate(): Promise<Date> {
-  const db = await openDb();
-  const st = db.prepare(INVALID_TYPES_SQL);
-  const invalid_ids = [];
+// Read every library (personal + groups) from an open database into a map keyed
+// by local libraryID.
+function readLibraries(db: SqlJsDatabase): Map<number, LibraryRef> {
+  const map = new Map<number, LibraryRef>();
+  const st = db.prepare(LIBRARIES_SQL);
   while (st.step()) {
     const row = st.getAsObject();
-    invalid_ids.push(row.tid);
+    const id = row.id as number;
+    const isGroup = row.type === "group";
+    map.set(id, {
+      id,
+      type: isGroup ? "group" : "user",
+      name: isGroup ? (row.name as string) ?? `Group ${row.groupID ?? id}` : USER_LIBRARY_NAME,
+      groupID: isGroup ? (row.groupID as number) : undefined,
+    });
   }
   st.free();
-  const iids = "( " + invalid_ids.join(", ") + " )";
-
-  const statement = db.prepare(ITEMS_SQL.replace("?", iids));
-
-  const results = [];
-  while (statement.step()) {
-    results.push(statement.getAsObject());
-  }
-
-  statement.free();
-  db.close();
-
-  if (results.length < 1) {
-    return new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-  }
-
-  let latest = new Date(results[0].modified);
-  for (const row of results) {
-    const d = new Date(row.modified);
-    if (d > latest) {
-      latest = d;
-    }
-  }
-
-  return latest;
+  return map;
 }
 
-export const getCollections = async (): Promise<string[]> => {
+// All libraries (personal + groups) in the database. Used by the UI to offer the
+// group libraries the user can opt into searching.
+export const getLibraries = async (): Promise<LibraryRef[]> => {
+  const db = await openDb();
+  const libs = [...readLibraries(db).values()];
+  db.close();
+  return libs;
+};
+
+export const getGroupLibraries = async (): Promise<LibraryRef[]> => {
+  return (await getLibraries()).filter((l) => l.type === "group");
+};
+
+// The set of group libraryIDs the user opted into searching (personal library is
+// always included; groups default to none).
+export const getIncludedGroupLibraries = async (): Promise<number[]> => {
+  const raw = await LocalStorage.getItem<string>(INCLUDED_GROUPS_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(Number).filter((n) => !Number.isNaN(n)) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const setIncludedGroupLibraries = async (ids: number[]): Promise<void> => {
+  await LocalStorage.setItem(INCLUDED_GROUPS_KEY, JSON.stringify(ids));
+};
+
+export const getCollections = async (): Promise<CollectionRef[]> => {
   const db = await openDb();
   const st = db.prepare(ALL_COLLECTIONS_SQL);
-  const cols = [];
+  const cols: CollectionRef[] = [];
   while (st.step()) {
-    cols.push(st.getAsObject().name);
+    const r = st.getAsObject();
+    cols.push({ key: r.key as string, name: r.name as string, library: r.library as number });
   }
+  st.free();
+  db.close();
   return cols;
 };
 
-async function getData(): Promise<RefData[]> {
+// Dedupe concurrent getData() calls. With a cold cache, fast typing fires
+// several searchResources() → getData() in parallel; without this each one
+// builds its own multi-thousand-row array (and opens its own database),
+// multiplying peak memory. Concurrent callers now share a single build.
+let getDataInflight: Promise<RefData[]> | null = null;
+// Shared across searchResources() invocations so a burst of concurrent searches
+// rebuilds (and writes) the cache exactly once. Declared at module scope because
+// updateCache() is defined inside searchResources().
+let updateCacheInflight: Promise<RefData[]> | null = null;
+
+function getData(): Promise<RefData[]> {
+  if (getDataInflight) {
+    return getDataInflight;
+  }
+  getDataInflight = getDataImpl().finally(() => {
+    getDataInflight = null;
+  });
+  return getDataInflight;
+}
+
+async function getDataImpl(): Promise<RefData[]> {
   const db = await openDb();
   const preferences: Preferences = getPreferenceValues();
+  const libraries = readLibraries(db);
 
   const st = db.prepare(INVALID_TYPES_SQL);
   const invalid_ids = [];
@@ -376,19 +555,34 @@ async function getData(): Promise<RefData[]> {
     const st6 = db.prepare(COLLECTIONS_SQL);
     st6.bind({ ":id": row.id });
 
-    const clt = [];
+    const cltNames = [];
+    const cltKeys = [];
     while (st6.step()) {
-      clt.push(st6.getAsObject().name);
+      const o = st6.getAsObject();
+      cltNames.push(o.name);
+      // Qualify by libraryID so collections sharing a key across libraries stay
+      // distinct (see collectionId).
+      cltKeys.push(collectionId(o.library as number, o.key as string));
     }
 
     st6.free();
 
-    if (clt.length > 0) {
-      row.collection = clt;
+    if (cltNames.length > 0) {
+      row.collection = cltNames;
+      row.collectionKeys = cltKeys;
     }
 
-    if (preferences.use_bibtex) {
+    if (bibtexEnabled(preferences)) {
       row.citekey = row.citationKey || (await getBibtexKey(row.key, row.library));
+    }
+
+    const lib = libraries.get(row.library as number);
+    if (lib) {
+      row.libraryType = lib.type;
+      row.libraryName = lib.name;
+      if (lib.groupID != null) {
+        row.groupID = lib.groupID;
+      }
     }
 
     rows.push(row);
@@ -400,41 +594,47 @@ async function getData(): Promise<RefData[]> {
   return rows;
 }
 
-const parseQuery = (q: string) => {
-  const queryItems = q.split(" ");
-  const qs = queryItems.filter((c) => !c.startsWith("."));
-  const ts = queryItems.filter((c) => c.startsWith("."));
+// Cap how many results are rendered at once. Raycast renders every List item
+// with a full detail markdown and ~15-20 actions; rendering the whole library
+// (empty query) or a broad-query result of hundreds/thousands grows the
+// command worker's native render memory until it is killed ("Worker terminated
+// due to reaching memory limit: JS heap out of memory") on large libraries.
+// 100 is far more than a user scans and keeps the render footprint bounded.
+export const MAX_RENDER_RESULTS = 100;
 
-  let qss = "";
-  if (qs.length > 0) {
-    qss = qs.join(" ");
-  }
-
-  let tss = [];
-  if (ts.length > 0) {
-    tss = ts.map((x) => x.substring(1));
-  }
-
-  return { qss, tss };
-};
-
-export const searchResources = async (q: string): Promise<RefData[]> => {
+export const searchResources = async (q: string, collection?: string): Promise<RefData[]> => {
   const preferences: Preferences = getPreferenceValues();
 
   async function updateCache(): Promise<RefData[]> {
-    const data = await getData();
-    const fData = {
-      version: CACHE_VERSION,
-      zotero_path: preferences.zotero_path,
-      use_bibtex: preferences.use_bibtex,
-      data: data,
-    };
-    try {
-      await writeFile(cachePath, JSON.stringify(fData));
-    } catch (err) {
-      console.error("Failed to write installed cache:", err);
+    // Dedupe concurrent rebuilds: a burst of cold-cache searches must not each
+    // stringify the whole dataset and write the cache file in parallel —
+    // interleaved writes to the same path can leave a truncated/0-byte cache,
+    // which then fails to parse and triggers an endless rebuild loop.
+    if (updateCacheInflight) {
+      return updateCacheInflight;
     }
-    return data;
+    updateCacheInflight = (async () => {
+      const data = await getData();
+      const fData = {
+        version: CACHE_VERSION,
+        zotero_path: preferences.zotero_path,
+        use_bibtex: preferences.use_bibtex,
+        bibtex_search: preferences.bibtex_search,
+        data: data,
+      };
+      try {
+        // Write to a temp file and rename so the cache is updated atomically.
+        const tmp = `${cachePath}.tmp`;
+        await writeFile(tmp, JSON.stringify(fData));
+        await rename(tmp, cachePath);
+      } catch (err) {
+        console.error("Failed to write installed cache:", err);
+      }
+      return data;
+    })().finally(() => {
+      updateCacheInflight = null;
+    });
+    return updateCacheInflight;
   }
 
   async function mtime(path: string): Promise<Date> {
@@ -447,14 +647,20 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     const diffTime = Math.abs(now.getTime() - cacheTime.getTime());
 
     if (diffTime < 60000 * Number(preferences.cache_period)) {
-      const latest = await getLatestModifyDate();
-      if (latest < cacheTime) {
+      // The cache is valid as long as the Zotero database has not been written
+      // since the cache was built. Comparing the source file's mtime is far
+      // cheaper than opening the database (a copy + slim rebuild) on every
+      // keystroke, and Zotero rewrites the file on any change so it never serves
+      // stale data.
+      const sourceTime = await mtime(resolveHome(preferences.zotero_path));
+      if (sourceTime < cacheTime) {
         const cacheBuffer = await readFile(cachePath);
         const fData = JSON.parse(cacheBuffer.toString());
         if (
           fData.version === CACHE_VERSION &&
           fData.zotero_path === preferences.zotero_path &&
-          fData.use_bibtex === preferences.use_bibtex
+          fData.use_bibtex === preferences.use_bibtex &&
+          fData.bibtex_search === preferences.bibtex_search
         ) {
           return fData.data;
         } else {
@@ -492,70 +698,27 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
     return ret;
   }
 
-  ret.sort(function (a, b) {
-    return +new Date(b.added) - +new Date(a.added);
+  // Collection scoping happens here (before the render cap) so choosing a
+  // collection narrows the whole library, not just the first MAX_RENDER_RESULTS
+  // rows a broad query already surfaced.
+  const collections = collection && collection !== "All" ? [collection] : undefined;
+
+  // Library scoping: always search the personal library; add only the group
+  // libraries the user opted into. This is what keeps a paper shared to a group
+  // from double-listing by default.
+  const includedGroups = new Set(await getIncludedGroupLibraries());
+  const allowedLibraries = new Set<number>();
+  for (const it of ret) {
+    if (it.library == null) continue;
+    if (it.libraryType !== "group" || includedGroups.has(it.library)) {
+      allowedLibraries.add(it.library);
+    }
+  }
+
+  return rankResults(ret, q, {
+    bibtexSearch: !!preferences.bibtex_search,
+    collections,
+    libraries: [...allowedLibraries],
+    limit: MAX_RENDER_RESULTS,
   });
-
-  const { qss, tss } = parseQuery(q);
-
-  if (!qss.trim() && tss.length < 1) {
-    return ret;
-  }
-
-  const options = {
-    isCaseSensitive: false,
-    includeScore: false,
-    shouldSort: true,
-    includeMatches: false,
-    findAllMatches: true,
-    minMatchCharLength: 3,
-    threshold: 0.1,
-    ignoreLocation: true,
-    keys: [
-      {
-        name: "title",
-        weight: 10,
-      },
-      {
-        name: "abstractNote",
-        weight: 5,
-      },
-      {
-        name: "notes",
-        weight: 6,
-      },
-      {
-        name: "tags",
-        weight: 15,
-      },
-      {
-        name: "date",
-        weight: 3,
-      },
-      {
-        name: "creators",
-        weight: 4,
-      },
-      {
-        name: "DOI",
-        weight: 10,
-      },
-    ],
-  };
-
-  const query: Fuse.Expression = {
-    $and: qss
-      .split(" ")
-      .map((k) => k.trim())
-      .filter(Boolean)
-      .map((z) => ({
-        $or: options.keys.map((x) => Object.fromEntries(new Map([[x.name, z.replace(/\+/gi, " ")]]))),
-      })),
-  };
-
-  if (tss.length > 0) {
-    query["$and"].push({ $and: tss.map((x) => ({ tags: x.replace(/\+/gi, " ") })) });
-  }
-
-  return new Fuse(ret, options).search(query).map((x) => x.item);
 };

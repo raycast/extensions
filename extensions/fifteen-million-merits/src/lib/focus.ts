@@ -9,7 +9,7 @@ export function startFocusMode(): void {
   const { focusGoal, focusCategories } = getPreferenceValues<Preferences>();
   const encodedGoal = encodeURIComponent(focusGoal);
   const encodedCategories = encodeURIComponent(focusCategories);
-  const focusUrl = `raycast://focus/start?goal=${encodedGoal}&categories=${encodedCategories}`;
+  const focusUrl = `${process.env.RAYCAST_SCHEME ?? "raycast"}://focus/start?goal=${encodedGoal}&categories=${encodedCategories}`;
   open(focusUrl);
 }
 
@@ -17,7 +17,7 @@ export function startFocusMode(): void {
  * Completes the focus mode.
  */
 export function completeFocusMode(): void {
-  const focusUrl = `raycast://focus/complete`;
+  const focusUrl = `${process.env.RAYCAST_SCHEME ?? "raycast"}://focus/complete`;
   open(focusUrl);
 }
 

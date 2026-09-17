@@ -1,48 +1,35 @@
 import { List } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { NoteListItem } from "./components/NoteListItem";
-import type { Note } from "./types";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { NoteSections } from "./components/NoteSections";
 import { remoApi } from "./utils/api";
 import { handleError } from "./utils/errors";
 
 export default function SearchNotes() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [notes, setNotes] = useState<Note[]>([]);
   const [searchText, setSearchText] = useState("");
   const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const isSearching = searchText.trim() !== "";
 
-  const fetchNotes = useCallback(async (text: string) => {
-    setIsLoading(true);
-    try {
-      let result: Note[] = [];
+  const { isLoading, data, revalidate, mutate } = useCachedPromise(
+    async (text: string) => {
+      return text.trim() === "" ? await remoApi.recentNotes(20) : await remoApi.searchNotes(text);
+    },
+    [searchText],
+    {
+      keepPreviousData: true,
+      onError: (error) => handleError(error, "Failed to fetch notes"),
+    },
+  );
 
-      if (text.trim() === "") {
-        result = await remoApi.recentNotes(20);
-      } else {
-        result = await remoApi.searchNotes(text);
-      }
+  const { data: folders } = useCachedPromise(() => remoApi.listFolders(), []);
 
-      const sortedResult = result.sort((a: Note, b: Note) => {
-        if (a.isPinned === b.isPinned) return 0;
-        return a.isPinned ? -1 : 1;
-      });
-      setNotes(sortedResult);
-    } catch (error) {
-      handleError(error, "Failed to fetch notes");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchNotes(searchText);
-  }, [searchText, fetchNotes]);
+  const notes = data ?? [];
 
   return (
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search notes (text or semantic)..."
+      searchBarPlaceholder="Search notes by title or content..."
       throttle={true}
       isShowingDetail={isShowingDetail}
     >
@@ -52,15 +39,17 @@ export default function SearchNotes() {
           searchText ? "Try a different search term or check your spelling." : "You haven't added any notes yet."
         }
       />
-      {notes.map((note) => (
-        <NoteListItem
-          key={note._id}
-          note={note}
-          onRefresh={() => fetchNotes(searchText)}
-          isShowingDetail={isShowingDetail}
-          onToggleDetail={() => setIsShowingDetail((prev) => !prev)}
-        />
-      ))}
+      <NoteSections
+        notes={notes}
+        onRefresh={revalidate}
+        mutate={mutate}
+        folders={folders}
+        isShowingDetail={isShowingDetail}
+        onToggleDetail={() => setIsShowingDetail((prev) => !prev)}
+        othersTitle="Recent"
+        othersSubtitle={isSearching ? undefined : "20 most recent · type to search all notes"}
+        groupPinned={!isSearching}
+      />
     </List>
   );
 }

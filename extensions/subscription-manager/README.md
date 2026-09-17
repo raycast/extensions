@@ -11,6 +11,7 @@
 - **Subscription Detail** — View full details, edit, pause/resume, or delete. Navigate between subscriptions with `←` / `→`.
 - **Add Subscription** — Quickly add a new subscription with preset services (Netflix, Spotify, Claude, etc.), auto-filled icons and categories.
 - **Analytics** — Monthly spend breakdown by category, billing cycle, or list. Top expenses, month-over-month comparison, and yearly forecast.
+- **Export** — Back up your subscriptions as JSON or CSV, or export the analytics report as Markdown. Save to Downloads or copy to the clipboard (`⌘⇧E`).
 - **Menubar** — Monthly total and upcoming bills at a glance. Shows due today, next 7 days, or full month view.
 - **Notifications** — Get reminded before a subscription bills. Set up to two reminders with custom timing. Fires within 5 minutes of the set time (e.g. 9:00 may notify at 9:05). _(macOS only — uses AppleScript, not available on Windows)_
 

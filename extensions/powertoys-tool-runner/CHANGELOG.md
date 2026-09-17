@@ -1,5 +1,9 @@
 # PowerToys Tool Runner Changelog
 
+## [Added Light Switch Command] - 2026-09-09
+
+- Added Light Switch command to toggle between light and dark themes using PowerToys
+
 ## [Added Auto-Start PowerToys functionality] - 2026-05-20
 
 - Added functionality to automatically start PowerToys when a tool is triggered

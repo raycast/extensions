@@ -1,5 +1,9 @@
 # Kagi Search Changelog
 
+## [1.2.6] - 2026-08-23
+
+* Fix "Unauthorized" error on search by migrating from the retired `v0` Search API (`Authorization: Bot`) to the `v1` Search API (`POST /api/v1/search` with `Authorization: Bearer`), matching the official [kagi-openapi-typescript](https://github.com/kagisearch/kagi-openapi-typescript) client
+
 ## [1.2.5] - 2026-04-30
 * Fix crash when corrupted null value in history storage
 

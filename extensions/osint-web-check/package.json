@@ -5,43 +5,191 @@
   "description": "Raycast extension to perform OSINT web check against a url",
   "icon": "extension_icon.png",
   "author": "gksander",
+  "contributors": [
+    "jergensturdley"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "osint-web-check",
       "title": "OSINT Web Check",
-      "description": "Performs a check against a given URL",
+      "description": "Deep-dive URL checks plus external OSINT platform lookups (VirusTotal, Shodan, etc.)",
       "mode": "view",
       "arguments": [
         {
           "name": "url",
-          "placeholder": "site.com",
+          "placeholder": "URL, domain, IP, or hash",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     }
   ],
-  "categories": ["Developer Tools", "Security"],
+  "preferences": [
+    {
+      "name": "enable_virustotal",
+      "title": "Enable VirusTotal",
+      "description": "Show VirusTotal in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_alienvault",
+      "title": "Enable AlienVault OTX",
+      "description": "Show AlienVault OTX in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_pulsedive",
+      "title": "Enable Pulsedive",
+      "description": "Show Pulsedive in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_opentip",
+      "title": "Enable Kaspersky OpenTIP",
+      "description": "Show Kaspersky OpenTIP in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_abuseipdb",
+      "title": "Enable AbuseIPDB",
+      "description": "Show AbuseIPDB in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_shodan",
+      "title": "Enable Shodan",
+      "description": "Show Shodan in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_ipinfo",
+      "title": "Enable ipinfo.io",
+      "description": "Show ipinfo.io in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_greynoise",
+      "title": "Enable GreyNoise",
+      "description": "Show GreyNoise in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_urlscan",
+      "title": "Enable URLScan.io",
+      "description": "Show URLScan.io in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_webcheck",
+      "title": "Enable WebCheck",
+      "description": "Show WebCheck in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_whois",
+      "title": "Enable WHOIS",
+      "description": "Show WHOIS in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_malwarebazaar",
+      "title": "Enable MalwareBazaar",
+      "description": "Show MalwareBazaar in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_censys",
+      "title": "Enable Censys",
+      "description": "Show Censys in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_crtsh",
+      "title": "Enable crt.sh",
+      "description": "Show crt.sh in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "copy_on_open",
+      "title": "Copy IOC on Open",
+      "description": "Automatically copy the IOC to the clipboard when opening a search result",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Enabled"
+    }
+  ],
+  "categories": [
+    "Developer Tools",
+    "Security"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
-    "got": "^14.0.0",
-    "swr": "^2.2.4"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6",
+    "got": "^15.0.6",
+    "swr": "^2.4.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/got": "^9.6.12",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/node": "^26.0.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

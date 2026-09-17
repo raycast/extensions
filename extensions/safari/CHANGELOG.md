@@ -1,5 +1,28 @@
 # Safari Changelog
 
+## [New Command] - 2026-09-16
+
+- Add `Reopen Last Session` command to relaunch Safari and reopen all windows from the last session — for when you accidentally hit ⌘Q. Requires Accessibility access for Raycast, as the session is restored through Safari's History menu.
+
+## [New Command] - 2026-09-09
+
+- Add a `New Window` command that opens a new window of the selected Safari browser.
+
+## [Fix] - 2026-08-12
+
+- Handle large Safari bookmark libraries without parser limit errors.
+
+## [Fix] - 2026-08-12
+
+- Restore fast, complete local tab loading while preserving tabs with empty titles or URLs.
+- Avoid querying iCloud tabs when they are disabled.
+- Handle `blob:` tab favicons without invalid URL errors.
+
+## [New Command] - 2026-07-24
+
+- Add `Search Tabs, Bookmarks and History` command to search open tabs, bookmarks and history in one place.
+- Replace `pinyin` with the much lighter `pinyin-pro` to fix commands crashing against the extension memory limit (bundle size reduced from ~28 MB to ~6 MB per command).
+
 ## [Bugfix] - 2026-05-22
 
 - Clarify the Full Disk Access requirement when Safari history cannot be opened.

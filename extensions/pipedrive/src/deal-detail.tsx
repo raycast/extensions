@@ -88,6 +88,11 @@ export default function DealDetail({ id }: { id: string }) {
               target={<AddDeal key={`edit-deal-${id}`} dealIdToEdit={id} onSaved={revalidate} />}
               icon="✏️"
             />
+            <Action.CopyToClipboard
+              title="Copy Deal Email"
+              content={`${preferences.domain.replace(/^https?:\/\//, "").split(".")[0]}+deal${id}@pipedrivemail.com`}
+              shortcut={{ modifiers: ["ctrl"], key: "d" }}
+            />
             <Action.OpenInBrowser
               title="Open in Browser"
               url={itemUrl}

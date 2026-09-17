@@ -1,13 +1,14 @@
-import { Action, ActionPanel, Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
-import { getFavicon, useCachedPromise } from "@raycast/utils";
+import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { setMaxListeners } from "node:events";
 import { useCallback, useRef, useState } from "react";
+import { useActionRunner } from "../lib/action-runner";
 import { initTraktClient } from "../lib/client";
-import { APP_MAX_LISTENERS, IMDB_APP_URL, TRAKT_APP_URL } from "../lib/constants";
+import { APP_MAX_LISTENERS } from "../lib/constants";
 import { createEpisodeMarkdown, createEpisodeMetadata } from "../lib/detail-helpers";
-import { getIMDbUrl, getScreenshotUrl, getTraktUrl } from "../lib/helper";
+import { getScreenshotUrl } from "../lib/helper";
 import { TraktEpisodeListItem, TraktShowBaseItem } from "../lib/schema";
-import { GenericDetail } from "./generic-detail";
+import { EpisodeActionPanel, episodeTraktUrl } from "./episode-actions";
 import { GenericGrid } from "./generic-grid";
 
 export const EpisodeGrid = ({
@@ -87,30 +88,7 @@ export const EpisodeGrid = ({
     });
   }, []);
 
-  const handleAction = useCallback(
-    async (
-      episode: TraktEpisodeListItem,
-      action: (episode: TraktEpisodeListItem) => Promise<void>,
-      message: string,
-    ) => {
-      setActionLoading(true);
-      try {
-        await action(episode);
-        showToast({
-          title: message,
-          style: Toast.Style.Success,
-        });
-      } catch (e) {
-        showToast({
-          title: (e as Error).message,
-          style: Toast.Style.Failure,
-        });
-      } finally {
-        setActionLoading(false);
-      }
-    },
-    [],
-  );
+  const handleAction = useActionRunner<TraktEpisodeListItem>({ setActionLoading });
 
   const episodeMarkdown = useCallback(
     (episode: TraktEpisodeListItem) =>
@@ -137,68 +115,28 @@ export const EpisodeGrid = ({
       poster={(item) => getScreenshotUrl(item.images, "episode.png")}
       keyFn={(item, index) => `${item.ids.trakt}-${index}`}
       actions={(item) => (
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action.Push
-              icon={Icon.Eye}
-              title="View Details"
-              target={
-                <GenericDetail
-                  item={item}
-                  isLoading={false}
-                  markdown={episodeMarkdown}
-                  metadata={episodeMetadata}
-                  navigationTitle={(episode) => `${episode.title} • S${episode.season}E${episode.number}`}
-                  actions={(episode) => (
-                    <ActionPanel>
-                      <ActionPanel.Section>
-                        <Action
-                          title="Check-in"
-                          icon={Icon.Checkmark}
-                          onAction={() => handleAction(episode, checkInEpisode, "Episode checked-in")}
-                        />
-                        <Action
-                          title="Add to History"
-                          icon={Icon.Clock}
-                          shortcut={Keyboard.Shortcut.Common.Duplicate}
-                          onAction={() => handleAction(episode, addEpisodeToHistory, "Episode added to history")}
-                        />
-                      </ActionPanel.Section>
-                      <ActionPanel.Section>
-                        <Action.OpenInBrowser
-                          icon={getFavicon(TRAKT_APP_URL)}
-                          title="Open in Trakt"
-                          shortcut={Keyboard.Shortcut.Common.Open}
-                          url={getTraktUrl("episode", slug, episode.season, episode.number)}
-                        />
-                        <Action.OpenInBrowser
-                          icon={getFavicon(IMDB_APP_URL)}
-                          title="Open in Imdb"
-                          shortcut={{ modifiers: ["cmd"], key: "i" }}
-                          url={getIMDbUrl(episode.ids.imdb)}
-                        />
-                      </ActionPanel.Section>
-                    </ActionPanel>
-                  )}
-                />
-              }
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action
-              title="Check-in"
-              icon={Icon.Checkmark}
-              shortcut={Keyboard.Shortcut.Common.Edit}
-              onAction={() => handleAction(item, checkInEpisode, "Episode checked-in")}
-            />
-            <Action
-              title="Add to History"
-              icon={Icon.Clock}
-              shortcut={Keyboard.Shortcut.Common.Duplicate}
-              onAction={() => handleAction(item, addEpisodeToHistory, "Episode added to history")}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
+        <EpisodeActionPanel
+          item={item}
+          markdown={episodeMarkdown}
+          metadata={episodeMetadata}
+          navigationTitle={(episode) => `${episode.title} • S${episode.season}E${episode.number}`}
+          traktUrl={(episode) => episodeTraktUrl(slug, episode.season, episode.number)}
+          imdbId={(episode) => episode.ids.imdb}
+          actions={[
+            {
+              title: "Check-In",
+              icon: Icon.Checkmark,
+              shortcut: Keyboard.Shortcut.Common.Edit,
+              onAction: (episode) => handleAction(episode, checkInEpisode, "Episode checked-in"),
+            },
+            {
+              title: "Add to History",
+              icon: Icon.Clock,
+              shortcut: Keyboard.Shortcut.Common.Duplicate,
+              onAction: (episode) => handleAction(episode, addEpisodeToHistory, "Episode added to history"),
+            },
+          ]}
+        />
       )}
     />
   );

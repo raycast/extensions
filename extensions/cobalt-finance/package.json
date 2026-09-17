@@ -9,7 +9,7 @@
   "license": "MIT",
   "author": "sriket_komali",
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build": "ray build --skip-types",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "gen:api": "openapi-typescript ../server/openapi.json -o src/api-types.ts",
@@ -182,18 +182,11 @@
       "default": "https://api.cobaltpf.com"
     },
     {
-      "name": "brandfetchClientId",
-      "type": "textfield",
+      "name": "apiKey",
+      "type": "password",
       "required": false,
-      "title": "Brandfetch Client ID",
-      "description": "Optional. Provide your own Brandfetch client ID to render merchant logos via the Brandfetch CDN. Leave blank to fall back to generic icons."
-    },
-    {
-      "name": "logoDevToken",
-      "type": "textfield",
-      "required": false,
-      "title": "Logo.dev Publishable Token",
-      "description": "Used for recurring/subscription brand logos via logo.dev (matches web)"
+      "title": "API Key",
+      "description": "Optional. Paste a Cobalt API key (prefix ck_live_) from Settings → API keys to skip OAuth sign-in."
     }
   ],
   "title": "Cobalt Finance",

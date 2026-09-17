@@ -1,7 +1,8 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
-import type { GeminiError } from "./types";
-import { resolveGeminiCommand } from "./binary";
+
+import { resolveGeminiCommand } from "./binary.ts";
+import type { GeminiError } from "./types.ts";
 
 const execFileAsync = promisify(execFile);
 

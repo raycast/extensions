@@ -2,15 +2,21 @@ import { getChartMarkdownAsync } from "@components/charts/chart";
 import { State } from "@lib/haapi";
 import { formatToHumanDateTime, stringToDate } from "@lib/utils";
 import { Action, ActionPanel, List } from "@raycast/api";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
 function ListDetail(props: { state: State; k: string }) {
-  const { isLoading, data } = useCachedPromise(getChartMarkdownAsync, [props.state], {
-    onError: (error) => {
-      showFailureToast(error, { title: "Failed to load chart." });
+  const { isLoading, data } = useCachedPromise(
+    async (state: State) => {
+      try {
+        return await getChartMarkdownAsync(state);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return `# ${message}`;
+      }
     },
-  });
+    [props.state],
+  );
 
   return <List.Item.Detail isLoading={isLoading} markdown={data} />;
 }

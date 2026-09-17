@@ -28,6 +28,26 @@ export function getAmountValue(amount: string | number, isIncome?: boolean): num
 }
 
 /**
+ * Signed transaction amount in the user's primary currency.
+ *
+ * Uses LunchMoney's `to_base` (amount converted to the primary currency) so totals over
+ * mixed-currency transactions add up correctly; falls back to the raw `amount` when
+ * `to_base` is absent. Sign follows LunchMoney's convention: positive = debit (money out /
+ * expense), negative = credit (money in / income or refund). The transaction's own sign is
+ * authoritative — a refund sitting in an expense category is still a credit.
+ */
+export function getTransactionBaseValue(transaction: { amount: string; to_base?: number | null }): number {
+  const value = transaction.to_base ?? parseFloat(transaction.amount);
+  if (!isMockMode) {
+    return value;
+  }
+  // In mock mode, randomize the magnitude (as getAmountValue does for screenshots) while
+  // preserving the debit/credit sign, so totals never show real figures.
+  const mockAmount = getMockAmount();
+  return value < 0 ? -mockAmount : mockAmount;
+}
+
+/**
  * Formats a currency amount using Intl.NumberFormat
  * Respects mock mode for screenshots
  */
@@ -65,37 +85,19 @@ export function formatSignedCurrency(
 }
 
 /**
- * Builds a LunchMoney URL for a transaction with date range filters
+ * Builds a direct deep-link to a single transaction in the LunchMoney web app.
+ * Format matches the web app's "Copy Link" action: /transactions?transaction_id=<id>
  */
-export function buildLunchMoneyUrl({
-  transaction,
-  start,
-  end,
-}: {
-  transaction: { date: string; category_id?: number | null };
-  start: string;
-  end: string;
-}): string {
-  const transactionDate = new Date(transaction.date);
-  const year = transactionDate.getFullYear().toString();
-  const month = (transactionDate.getMonth() + 1).toString().padStart(2, "0");
-
-  const url = new URL(`https://my.lunchmoney.app/transactions/${year}/${month}`);
-  if (transaction.category_id) {
-    url.searchParams.set("category", transaction.category_id.toString());
-  }
-  url.searchParams.set("end_date", end);
-  url.searchParams.set("match", "all");
-  url.searchParams.set("start_date", start);
-  url.searchParams.set("time", "custom");
-  return url.toString();
+export function buildLunchMoneyUrl(transaction: { id: number }): string {
+  return `https://my.lunchmoney.app/transactions?transaction_id=${transaction.id}`;
 }
 
 export function formatTransactionsAsText(transactions: Transaction[], categories: Category[]): string {
   const data = transactions.map((t) => {
     const category = categories.find((c) => c.id === t.category_id);
-    const isIncome = category?.is_income ?? false;
-    const formattedAmount = formatSignedCurrency(t.amount, t.currency, { isIncome, isExpense: !isIncome });
+    // Sign comes from the transaction amount (positive = expense, negative = credit),
+    // not the category — a refund/credit sitting in an expense category is still a credit.
+    const formattedAmount = formatSignedCurrency(t.amount, t.currency);
 
     return {
       Date: t.date,

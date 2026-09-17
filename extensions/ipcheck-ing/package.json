@@ -2,13 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ipcheck-ing",
   "title": "IPCheck",
-  "description": "Show All Your IPs, from Local Network and Multiple Sources",
+  "description": "Show your local and external IPs from multiple sources, look up the location and network behind any IP address, and keep your current IP in the menu bar",
   "icon": "ipchecking.png",
   "author": "jason5ng32",
   "categories": [
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "preferences": [
     {
       "type": "checkbox",
@@ -55,16 +59,8 @@
     {
       "type": "checkbox",
       "name": "getIPFromIPCheck64",
-      "description": "Fetch IP from IPCheck.ing DualStack",
+      "description": "Fetch IP from IPCheck.ing DualStack — shows which protocol your network prefers",
       "label": "IPCheck.ing DualStack",
-      "default": true,
-      "required": false
-    },
-    {
-      "type": "checkbox",
-      "name": "getIPFromIPIP",
-      "description": "Fetch IP from IPIP.net",
-      "label": "IPIP.net",
       "default": true,
       "required": false
     }
@@ -75,21 +71,161 @@
       "title": "Show My IPs",
       "subtitle": "IPCheck",
       "description": "Show All My IPs",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "ip",
+        "my ip",
+        "public ip",
+        "external ip",
+        "local ip",
+        "ipv4",
+        "ipv6",
+        "what is my ip"
+      ]
+    },
+    {
+      "name": "query-ip",
+      "title": "Query IP",
+      "subtitle": "IPCheck",
+      "description": "Look up the location, ISP and network behind any IP address",
+      "mode": "view",
+      "keywords": [
+        "query ip",
+        "search ip",
+        "lookup ip",
+        "ip lookup",
+        "ip info",
+        "geoip",
+        "ip location",
+        "ipv4",
+        "ipv6"
+      ],
+      "arguments": [
+        {
+          "name": "ip",
+          "placeholder": "IP address",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menubar",
+      "title": "IP in Menu Bar",
+      "subtitle": "IPCheck",
+      "description": "Keep your current external IP in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "name": "preferredSource",
+          "title": "IP Source",
+          "description": "Which service to ask for the external IP shown in the menu bar",
+          "default": "getIPFromIPCheck4",
+          "required": false,
+          "data": [
+            {
+              "title": "IPCheck.ing IPv4",
+              "value": "getIPFromIPCheck4"
+            },
+            {
+              "title": "IPCheck.ing IPv6",
+              "value": "getIPFromIPCheck6"
+            },
+            {
+              "title": "IPCheck.ing DualStack",
+              "value": "getIPFromIPCheck64"
+            },
+            {
+              "title": "Cloudflare IPv4",
+              "value": "getIPFromCloudflare_V4"
+            },
+            {
+              "title": "Cloudflare IPv6",
+              "value": "getIPFromCloudflare_V6"
+            }
+          ]
+        },
+        {
+          "type": "dropdown",
+          "name": "labelStyle",
+          "title": "Menu Bar Label",
+          "description": "How much to show next to the menu bar icon",
+          "default": "flagAndIp",
+          "required": false,
+          "data": [
+            {
+              "title": "Flag and IP",
+              "value": "flagAndIp"
+            },
+            {
+              "title": "Flag Only",
+              "value": "flag"
+            },
+            {
+              "title": "IP Only",
+              "value": "ip"
+            },
+            {
+              "title": "Icon Only",
+              "value": "hidden"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "name": "compactIPv6",
+          "title": "IPv6 Display",
+          "description": "When the label shows an IPv6 address, display only its first two segments to save menu bar space",
+          "label": "Shorten IPv6 addresses in the menu bar",
+          "default": false,
+          "required": false
+        },
+        {
+          "type": "dropdown",
+          "name": "refreshEvery",
+          "title": "Refresh Every",
+          "description": "How often to check for a new external IP in the background",
+          "default": "10",
+          "required": false,
+          "data": [
+            {
+              "title": "5 minutes",
+              "value": "5"
+            },
+            {
+              "title": "10 minutes",
+              "value": "10"
+            },
+            {
+              "title": "20 minutes",
+              "value": "20"
+            },
+            {
+              "title": "30 minutes",
+              "value": "30"
+            },
+            {
+              "title": "60 minutes",
+              "value": "60"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.87.5",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/node-fetch": "^2.6.12",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",

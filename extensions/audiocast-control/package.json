@@ -1,0 +1,162 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "audiocast-control",
+  "title": "AudioCast Control",
+  "description": "Control your AudioCast device using Raycast",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "icon": "icon.png",
+  "author": "RomiC",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "preferences": [
+    {
+      "name": "minimalVolume",
+      "title": "Minimal volume",
+      "description": "Specify the minimal volume level which can be set w/ a single \"Set Minimal Volume\" command. Between 0 and 100.",
+      "type": "textfield",
+      "required": false,
+      "default": "50"
+    },
+    {
+      "name": "normalVolume",
+      "title": "Normal volume",
+      "description": "Specify the normal volume level which can be set w/ a single \"Set Normal Volume\" command. Between 0 and 100.",
+      "type": "textfield",
+      "required": false,
+      "default": "60"
+    },
+    {
+      "name": "highVolume",
+      "title": "High volume",
+      "description": "Specify the high volume level which can be set w/ a single \"Set High Volume\" command. Between 0 and 100.",
+      "type": "textfield",
+      "required": false,
+      "default": "75"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Overview",
+      "subtitle": "AudioCast",
+      "icon": "icon.png",
+      "description": "Open AudioCast device information",
+      "mode": "view"
+    },
+    {
+      "name": "radio",
+      "title": "Radio",
+      "subtitle": "AudioCast",
+      "description": "Play online radio station on AudioCast device",
+      "mode": "view"
+    },
+    {
+      "name": "togglePlayPause",
+      "title": "Toggle Play/Pause",
+      "subtitle": "AudioCast",
+      "description": "Toggle play/pause on AudioCast device",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Playback",
+      "subtitle": "AudioCast",
+      "description": "Stop playback on AudioCast device",
+      "mode": "no-view"
+    },
+    {
+      "name": "setVolume",
+      "title": "Set Volume Level",
+      "subtitle": "AudioCast",
+      "description": "Set certain volume on AudioCast device",
+      "arguments": [
+        {
+          "name": "volume",
+          "type": "text",
+          "placeholder": "55",
+          "required": true
+        }
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "volumeUp",
+      "title": "Volume up",
+      "subtitle": "AudioCast",
+      "description": "Increase volume on AudioCast device",
+      "mode": "no-view"
+    },
+    {
+      "name": "volumeDown",
+      "title": "Volume Down",
+      "subtitle": "AudioCast",
+      "description": "Decrease volume on AudioCast device",
+      "mode": "no-view"
+    },
+    {
+      "name": "setMinimalVolume",
+      "title": "Set Minimal Volume",
+      "subtitle": "AudioCast",
+      "description": "Set volume on AudioCast device to minimal level specified in preferences",
+      "mode": "no-view"
+    },
+    {
+      "name": "setNormalVolume",
+      "title": "Set Normal Volume",
+      "subtitle": "AudioCast",
+      "description": "Set volume on AudioCast device to normal level specified in preferences",
+      "mode": "no-view"
+    },
+    {
+      "name": "setHighVolume",
+      "title": "Set High Volume",
+      "subtitle": "AudioCast",
+      "description": "Set volume on AudioCast device to high level specified in preferences",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleMute",
+      "title": "Toggle Mute/Unmute",
+      "subtitle": "AudioCast",
+      "description": "Decrease volume on AudioCast device to 0 or restore previous volume",
+      "mode": "no-view"
+    },
+    {
+      "name": "reboot",
+      "title": "Reboot",
+      "subtitle": "AudioCast",
+      "description": "Restart the device",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.24",
+    "@raycast/utils": "2.2.7",
+    "bonjour-service": "1.4.4",
+    "icy": "2.1.0",
+    "lodash.unescape": "4.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/bonjour": "3.5.13",
+    "@types/lodash.unescape": "4.0.9",
+    "@types/node": "22.20.1",
+    "@types/react": "19.0.10",
+    "eslint": "10.8.0",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

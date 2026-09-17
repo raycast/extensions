@@ -35,6 +35,7 @@ export declare const userRouter: import("@trpc/server").TRPCBuiltRouter<{
             associatedSpaces: {
                 myTags: string[];
                 myRole: import(".prisma/client").$Enums.TeamRole;
+                myStatus: import(".prisma/client").$Enums.TeamMemberStatus;
                 myImage: string | null;
                 myNickname: string | null;
                 myAuthEmail: string | null;
@@ -55,14 +56,15 @@ export declare const userRouter: import("@trpc/server").TRPCBuiltRouter<{
                 id: string;
                 createdAt: Date;
                 name: string;
-                updatedAt: Date;
                 image: string | null;
+                slackTeamId: string | null;
+                updatedAt: Date;
             }[];
             createdAt: Date;
             name: string;
+            image: string | null;
             email: string;
             updatedAt: Date;
-            image: string | null;
         };
         meta: object;
     }>;
@@ -72,18 +74,18 @@ export declare const userRouter: import("@trpc/server").TRPCBuiltRouter<{
             user: {
                 createdAt: Date;
                 name: string;
+                image: string | null;
                 email: string;
                 updatedAt: Date;
-                image: string | null;
             };
         } & {
             status: import(".prisma/client").$Enums.TeamMemberStatus;
             spaceId: string;
             createdAt: Date;
-            email: string;
-            tags: string[];
-            updatedAt: Date;
             image: string | null;
+            email: string;
+            updatedAt: Date;
+            tags: string[];
             nickname: string | null;
             authEmail: string | null;
             role: import(".prisma/client").$Enums.TeamRole;
@@ -94,6 +96,7 @@ export declare const userRouter: import("@trpc/server").TRPCBuiltRouter<{
         input: {
             spaceId: string;
             emails: string[];
+            role?: "ADMIN" | "MEMBER" | "READ" | undefined;
         };
         output: void;
         meta: object;
@@ -119,6 +122,49 @@ export declare const userRouter: import("@trpc/server").TRPCBuiltRouter<{
             name: string;
         };
         output: void;
+        meta: object;
+    }>;
+    listSessions: import("@trpc/server").TRPCQueryProcedure<{
+        input: void;
+        output: {
+            sessions: {
+                jti: string;
+                createdAt: Date;
+                expires: Date;
+                deviceName: string | null;
+                lastActive: Date;
+            }[];
+            currentJti: string;
+        };
+        meta: object;
+    }>;
+    revokeSession: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            jti: string;
+        };
+        output: void;
+        meta: object;
+    }>;
+    listBlockingOwnerships: import("@trpc/server").TRPCQueryProcedure<{
+        input: void;
+        output: {
+            id: string;
+            name: string;
+        }[];
+        meta: object;
+    }>;
+    deleteAccount: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            confirmEmail: string;
+        };
+        output: void;
+        meta: object;
+    }>;
+    revokeOtherSessions: import("@trpc/server").TRPCMutationProcedure<{
+        input: void;
+        output: {
+            count: number;
+        };
         meta: object;
     }>;
 }>>;

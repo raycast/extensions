@@ -6,8 +6,8 @@ import { getIcon } from "./icons";
 
 export function getDocumentIcon(doc: Pick<DocumentResult, "icon" | "color">) {
   return getIcon({
-    icon: doc.icon,
-    color: doc.color,
+    icon: doc.icon ?? undefined,
+    color: doc.color ?? undefined,
     fallbackIcon: { source: Icon.Document, tintColor: doc.color ?? Color.PrimaryText },
   });
 }

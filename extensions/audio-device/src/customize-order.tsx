@@ -10,7 +10,7 @@ The old priority-ordering system (where you ranked multiple devices as fallbacks
 
 1. Open **Set Output Device** or **Set Input Device**
 2. Press **Cmd+Shift+D** on the device you want to select as default
-3. That device will be automatically restored within 10 seconds if macOS switches away
+3. That device will be automatically restored on the next background refresh (roughly every minute) if macOS switches away
 `;
 
 export default function Command() {

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "resend",
   "title": "Resend",
-  "description": "Manage API Keys and Domains, and Send Emails using Resend",
+  "description": "Manage email, contacts, domains, and developer resources with Resend",
   "icon": "resend-extension_icon.png",
   "access": "public",
   "owner": "resend",
@@ -10,7 +10,8 @@
   "contributors": [
     "alexs",
     "peduarte",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "0xdhrv"
   ],
   "categories": [
     "Communication",
@@ -28,7 +29,7 @@
       "type": "password",
       "placeholder": "re_123456789",
       "description": "API Key From Resend Dashboard",
-      "required": true
+      "required": false
     },
     {
       "name": "sender_name",
@@ -66,14 +67,21 @@
       "name": "emails",
       "title": "Emails",
       "subtitle": "Resend",
-      "description": "View Logged Emails and Send A New Email",
+      "description": "View sent emails, share delivery previews, and send new email",
+      "mode": "view"
+    },
+    {
+      "name": "received-emails",
+      "title": "Received Emails",
+      "subtitle": "Resend",
+      "description": "Read inbound email and download its attachments",
       "mode": "view"
     },
     {
       "name": "contacts",
       "title": "Contacts",
       "subtitle": "Resend",
-      "description": "View, create, update and delete contacts from your audiences.",
+      "description": "View, create, update, and delete contacts, or organize them in segments",
       "mode": "view"
     }
   ],
@@ -96,27 +104,37 @@
     {
       "name": "list-audiences",
       "title": "List Audiences",
-      "description": "List all audiences"
+      "description": "List segments using the legacy audience tool name"
     },
     {
       "name": "create-contact",
       "title": "Create Contact",
-      "description": "Create a contact in an audience"
+      "description": "Create a contact, optionally adding it to a segment"
     },
     {
       "name": "list-contacts",
       "title": "List Contacts",
-      "description": "List all contacts in an audience"
+      "description": "List contacts, optionally filtered by segment"
     },
     {
       "name": "update-contact",
       "title": "Update Contact",
-      "description": "Update an existing contact in an audience"
+      "description": "Update an existing contact's name or subscription status"
     },
     {
       "name": "remove-contact",
       "title": "Remove Contact",
-      "description": "Delete a contact from an audience"
+      "description": "Delete a contact from the Resend account"
+    },
+    {
+      "name": "add-contact-to-segment",
+      "title": "Add Contact to Segment",
+      "description": "Add an existing contact to an audience segment"
+    },
+    {
+      "name": "remove-contact-from-segment",
+      "title": "Remove Contact from Segment",
+      "description": "Remove a contact from an audience segment without deleting it"
     },
     {
       "name": "list-api-keys",
@@ -126,7 +144,107 @@
     {
       "name": "list-emails",
       "title": "List Emails",
-      "description": "List all Emails in your Resend account"
+      "description": "List sent emails in your Resend account"
+    },
+    {
+      "name": "reschedule-email",
+      "title": "Reschedule Email",
+      "description": "Change when a scheduled email will be sent"
+    },
+    {
+      "name": "share-email",
+      "title": "Share Email",
+      "description": "Create a temporary public link for a sent or received email"
+    },
+    {
+      "name": "get-email-metrics",
+      "title": "Get Email Metrics",
+      "description": "Get delivery and engagement metrics for sent emails"
+    },
+    {
+      "name": "list-received-emails",
+      "title": "List Received Emails",
+      "description": "List inbound emails received by Resend"
+    },
+    {
+      "name": "retrieve-received-email",
+      "title": "Retrieve Received Email",
+      "description": "Read an inbound email, including its content and attachment metadata"
+    },
+    {
+      "name": "list-received-email-attachments",
+      "title": "List Received Email Attachments",
+      "description": "List downloadable attachments for an inbound email"
+    },
+    {
+      "name": "retrieve-received-email-attachment",
+      "title": "Retrieve Received Email Attachment",
+      "description": "Get a temporary download URL for an inbound email attachment"
+    },
+    {
+      "name": "list-domains",
+      "title": "List Domains",
+      "description": "List sender domains and their verification status"
+    },
+    {
+      "name": "retrieve-domain",
+      "title": "Retrieve Domain",
+      "description": "Get a sender domain and its DNS records"
+    },
+    {
+      "name": "verify-domain",
+      "title": "Verify Domain",
+      "description": "Ask Resend to verify a sender domain's DNS records"
+    },
+    {
+      "name": "list-templates",
+      "title": "List Templates",
+      "description": "List reusable email templates"
+    },
+    {
+      "name": "retrieve-template",
+      "title": "Retrieve Template",
+      "description": "Get a template's content, variables, and publishing status"
+    },
+    {
+      "name": "list-broadcasts",
+      "title": "List Broadcasts",
+      "description": "List broadcast campaigns and their status"
+    },
+    {
+      "name": "retrieve-broadcast",
+      "title": "Retrieve Broadcast",
+      "description": "Get a broadcast campaign's content and delivery details"
+    },
+    {
+      "name": "list-segments",
+      "title": "List Segments",
+      "description": "List audience segments for contact and broadcast workflows"
+    },
+    {
+      "name": "retrieve-segment",
+      "title": "Retrieve Segment",
+      "description": "Get details about an audience segment"
+    },
+    {
+      "name": "list-topics",
+      "title": "List Topics",
+      "description": "List email subscription topics"
+    },
+    {
+      "name": "list-webhooks",
+      "title": "List Webhooks",
+      "description": "List webhook endpoints, event subscriptions, and status"
+    },
+    {
+      "name": "list-logs",
+      "title": "List Logs",
+      "description": "List recent Resend API requests and response statuses"
+    },
+    {
+      "name": "retrieve-log",
+      "title": "Retrieve Log",
+      "description": "Inspect a Resend API request and its response body"
     },
     {
       "name": "create-api-key",
@@ -139,75 +257,10 @@
       "description": "Delete an API key from your Resend account"
     }
   ],
-  "ai": {
-    "evals": [
-      {
-        "input": "@resend Remind laura@acme.app to check us in at the hotel"
-      },
-      {
-        "input": "@resend Add bruno@acme.app to my General audience",
-        "mocks": {
-          "create-contact": {
-            "data": {
-              "id": "bca7c383-3ada-49eb-8b8b-7d598017203e",
-              "object": "contact"
-            },
-            "error": null
-          },
-          "list-audiences": {
-            "data": {
-              "data": [
-                {
-                  "created_at": "2024-11-27 15:11:12.377216+00",
-                  "id": "44479043-4b94-49a0-aa57-dc73532a0a5a",
-                  "name": "Monthly Newsletter"
-                },
-                {
-                  "created_at": "2024-11-27 14:49:27.73494+00",
-                  "id": "f662d68f-c2fd-4945-9577-ff2b31247a50",
-                  "name": "Test List"
-                },
-                {
-                  "created_at": "2023-11-07 15:51:03.473326+00",
-                  "id": "65d0862b-6213-4c59-8421-1e04e7683bfa",
-                  "name": "General"
-                }
-              ],
-              "object": "list"
-            },
-            "error": null
-          }
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "arguments": {},
-              "name": "list-audiences"
-            }
-          },
-          {
-            "callsTool": {
-              "arguments": {
-                "audienceId": "65d0862b-6213-4c59-8421-1e04e7683bfa",
-                "audienceName": "General",
-                "email": "bruno@acme.app",
-                "firstName": "Bruno",
-                "lastName": "Unknown"
-              },
-              "name": "create-contact"
-            }
-          }
-        ]
-      },
-      {
-        "input": "@resend Email Bruno with the selected file in @finder"
-      }
-    ]
-  },
   "dependencies": {
-    "@raycast/api": "^1.103.4",
-    "@raycast/utils": "^2.2.1",
-    "resend": "^6.2.2"
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7",
+    "resend": "^6.25.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -218,6 +271,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

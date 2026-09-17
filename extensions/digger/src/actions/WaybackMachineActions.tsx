@@ -1,5 +1,5 @@
-import { Action, Icon, open, LaunchType } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
+import { Action, Icon, LaunchType, open } from "@raycast/api";
 
 interface WaybackMachineActionsProps {
   url: string;
@@ -20,7 +20,7 @@ export function WaybackMachineActions({ url, archiveUrl }: WaybackMachineActions
       });
     } catch {
       // Extension not installed, open store page
-      await open("raycast://extensions/pernielsentikaer/wayback-machine");
+      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/pernielsentikaer/wayback-machine`);
     }
   };
 
@@ -37,7 +37,7 @@ export function WaybackMachineActions({ url, archiveUrl }: WaybackMachineActions
       });
     } catch {
       // Extension not installed, open store page
-      await open("raycast://extensions/pernielsentikaer/wayback-machine");
+      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/pernielsentikaer/wayback-machine`);
     }
   };
 
@@ -47,20 +47,29 @@ export function WaybackMachineActions({ url, archiveUrl }: WaybackMachineActions
         title="Open in Wayback Machine"
         icon={Icon.Clock}
         onAction={handleOpenInWayback}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "b" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "b" },
+        }}
       />
       <Action
         title="Save to Wayback Machine"
         icon={Icon.SaveDocument}
         onAction={handleSaveToWayback}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "y" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "y" },
+        }}
       />
       {archiveUrl && (
         <Action.OpenInBrowser
           title="Browse Archive History"
           url={archiveUrl}
           icon={Icon.List}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "h" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "h" },
+          }}
         />
       )}
     </>

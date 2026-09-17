@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "threadlens",
+  "title": "Threadlens",
+  "description": "Search local coding-agent sessions across Codex, Claude Code, Cursor, and more.",
+  "icon": "icon.png",
+  "author": "moinulmoin",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "threadlens",
+    "codex",
+    "claude",
+    "cursor",
+    "agent",
+    "sessions"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "threadlens",
+      "title": "Search Agent Sessions",
+      "description": "Search local coding-agent sessions with Threadlens.",
+      "icon": "icon.png",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "threadlensCommand",
+      "title": "Threadlens Command",
+      "description": "Optional path to the threadlens CLI if it isn't on your PATH.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "threadlens",
+      "default": ""
+    },
+    {
+      "name": "threadlensArgs",
+      "title": "Threadlens Args",
+      "description": "Optional args before the Threadlens subcommand.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "--config /path/to/config.toml",
+      "default": ""
+    },
+    {
+      "name": "threadlensCwd",
+      "title": "Working Directory",
+      "description": "Optional cwd for running Threadlens.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/Projects",
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.85.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.4",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

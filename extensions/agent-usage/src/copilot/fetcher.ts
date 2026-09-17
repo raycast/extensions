@@ -1,11 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "./auth";
-import type { CopilotError, CopilotUsage } from "./types";
+import type { CopilotError, CopilotUsage } from "./types.ts";
 
 const COPILOT_USAGE_API = "https://api.github.com/copilot_internal/user";
-
-type Preferences = Preferences.AgentUsage;
 
 interface CopilotQuotaSnapshot {
   percent_remaining?: number | string;
@@ -80,22 +75,27 @@ function deriveFromMonthlyAndLimited(monthly?: number | string, limited?: number
   return clampPercent((limitedNum / monthlyNum) * 100);
 }
 
-function parseCopilotResponse(data: unknown): { usage: CopilotUsage | null; error: CopilotError | null } {
+export function parseCopilotResponse(data: unknown): { usage: CopilotUsage | null; error: CopilotError | null } {
   if (!data || typeof data !== "object") {
     return { usage: null, error: { type: "parse_error", message: "Invalid Copilot API response format" } };
   }
 
   const response = data as CopilotResponse;
 
-  const premiumRemaining =
-    getPercentRemaining(response.quota_snapshots?.premium_interactions) ??
+  const aiCreditsSnapshot = response.quota_snapshots?.premium_interactions;
+  const aiCreditsRemainingPercent =
+    getPercentRemaining(aiCreditsSnapshot) ??
     deriveFromMonthlyAndLimited(response.monthly_quotas?.completions, response.limited_user_quotas?.completions);
+  const aiCreditsEntitlement =
+    toNumber(aiCreditsSnapshot?.entitlement) ?? toNumber(response.monthly_quotas?.completions);
+  const aiCreditsRemaining =
+    toNumber(aiCreditsSnapshot?.remaining) ?? toNumber(response.limited_user_quotas?.completions);
 
   const chatRemaining =
     getPercentRemaining(response.quota_snapshots?.chat) ??
     deriveFromMonthlyAndLimited(response.monthly_quotas?.chat, response.limited_user_quotas?.chat);
 
-  if (premiumRemaining === null && chatRemaining === null) {
+  if (aiCreditsRemainingPercent === null && chatRemaining === null) {
     return {
       usage: null,
       error: {
@@ -108,7 +108,9 @@ function parseCopilotResponse(data: unknown): { usage: CopilotUsage | null; erro
   return {
     usage: {
       plan: formatPlan(response.copilot_plan),
-      premiumRemaining,
+      aiCreditsRemainingPercent,
+      aiCreditsRemaining,
+      aiCreditsEntitlement,
       chatRemaining,
       quotaResetDate: response.quota_reset_date || null,
     },
@@ -116,7 +118,9 @@ function parseCopilotResponse(data: unknown): { usage: CopilotUsage | null; erro
   };
 }
 
-async function fetchCopilotUsage(token: string): Promise<{ usage: CopilotUsage | null; error: CopilotError | null }> {
+export async function fetchCopilotUsage(
+  token: string,
+): Promise<{ usage: CopilotUsage | null; error: CopilotError | null }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -174,98 +178,4 @@ async function fetchCopilotUsage(token: string): Promise<{ usage: CopilotUsage |
   } finally {
     clearTimeout(timeoutId);
   }
-}
-
-export function useCopilotUsage(enabled = true) {
-  const [usage, setUsage] = useState<CopilotUsage | null>(null);
-  const [error, setError] = useState<CopilotError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-  const requestIdRef = useRef(0);
-
-  const fetchData = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-
-    setIsLoading(true);
-    setError(null);
-
-    const preferences = getPreferenceValues<Preferences>();
-    const preferenceToken = preferences.copilotAuthToken?.trim() || "";
-    const {
-      primaryToken,
-      localToken,
-      preferenceToken: cleanedPreferenceToken,
-    } = await resolveCopilotAuthTokens({
-      preferenceToken,
-    });
-
-    if (!primaryToken) {
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
-
-      setUsage(null);
-      setError({
-        type: "not_configured",
-        message: "Copilot is not configured. Set GH_TOKEN/GITHUB_TOKEN or add a token in extension settings (Cmd+,).",
-      });
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
-    }
-
-    let result = await fetchCopilotUsage(primaryToken);
-    if (requestId !== requestIdRef.current) {
-      return;
-    }
-
-    if (
-      cleanedPreferenceToken &&
-      shouldFallbackToPreferenceToken({
-        localToken,
-        preferenceToken: cleanedPreferenceToken,
-        errorType: result.error?.type,
-      })
-    ) {
-      result = await fetchCopilotUsage(cleanedPreferenceToken);
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
-    }
-
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setUsage(null);
-      setError(null);
-      setIsLoading(false);
-      setHasInitialFetch(false);
-      return;
-    }
-
-    if (!hasInitialFetch) {
-      void fetchData();
-    }
-  }, [enabled, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
-
-    await fetchData();
-  }, [enabled, fetchData]);
-
-  return {
-    isLoading: enabled ? isLoading : false,
-    usage: enabled ? usage : null,
-    error: enabled ? error : null,
-    revalidate,
-  };
 }

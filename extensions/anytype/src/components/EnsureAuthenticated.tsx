@@ -14,7 +14,7 @@ import {
 import { showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { checkApiTokenValidity, createApiKey, createChallenge } from "../api";
-import { apiAppName, downloadUrl, localStorageKeys } from "../utils";
+import { apiAppName, downloadUrl, getApiKey, localStorageKeys } from "../utils";
 import { migrateAuthKey } from "../utils/migrateAuthKey";
 
 type EnsureAuthenticatedProps = {
@@ -67,7 +67,7 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
     const retrieveAndValidateToken = async () => {
       await migrateAuthKey();
 
-      const token = getPreferenceValues().apiKey || (await LocalStorage.getItem(localStorageKeys.apiKey));
+      const token = await getApiKey();
       if (token) {
         const isValid = await checkApiTokenValidity();
         setHasToken(true);

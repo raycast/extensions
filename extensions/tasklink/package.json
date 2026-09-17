@@ -25,6 +25,12 @@
       "title": "Convert Issue Ids into Clickable Markdown Links",
       "description": "Converts issue tracker IDs into Markdown links",
       "mode": "no-view"
+    },
+    {
+      "name": "open_selected_issues",
+      "title": "Open Selected Issues",
+      "description": "Opens the selected issues in your default browser",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -55,16 +61,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.4"
+    "@raycast/api": "^1.104.19"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.1.0",
-    "@types/react": "19.2.10",
-    "eslint": "^9.39.2",
-    "prettier": "^3.8.1",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "@types/node": "26.0.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -50,8 +50,10 @@ export const BookmarkItemActionPanel = (props: {
   refetch: () => void;
   rankingEntries: RankingEntries;
   setRankingEntries: (rankingEntries: RankingEntries | ((prev: RankingEntries) => RankingEntries)) => void;
+  isShowingDetail?: boolean;
+  setIsShowingDetail?: (next: boolean | ((prev: boolean) => boolean)) => void;
 }) => {
-  const { bookmark, refetch, setRankingEntries, rankingEntries } = props;
+  const { bookmark, refetch, setRankingEntries, rankingEntries, isShowingDetail, setIsShowingDetail } = props;
   const { url } = bookmark;
 
   const { enabledSpaceIds } = useEnabledSpaces();
@@ -161,20 +163,21 @@ export const BookmarkItemActionPanel = (props: {
         }}
       />
 
-      {/* TODO: Add this feature later */}
-      {/* <Action.Push
-        title="Copy URL to Other Space"
-        icon={Icon.Link}
-        shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
-        target={<CopyBookmarkToOtherSpace bookmark={bookmark} />}
-      /> */}
-
       <Action.Push
         title="Edit Bookmark"
         icon={Icon.Pencil}
         shortcut={Keyboard.Shortcut.Common.Edit}
         target={<EditBookmark bookmark={bookmark} refetch={refetch} />}
       />
+
+      {setIsShowingDetail && (
+        <Action
+          title={isShowingDetail ? "Hide Details" : "Show Details"}
+          icon={isShowingDetail ? Icon.EyeDisabled : Icon.AppWindowSidebarRight}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          onAction={() => setIsShowingDetail((prev) => !prev)}
+        />
+      )}
 
       {rankingEntries[bookmark.id] && rankingEntries[bookmark.id].length > 0 && (
         <Action

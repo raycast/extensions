@@ -5,6 +5,9 @@
   "description": "Browse Plex music libraries and control Plexamp playback from Raycast.",
   "icon": "plexamp-icon.png",
   "author": "kendaniels",
+  "contributors": [
+    "sasch"
+  ],
   "categories": [
     "Media"
   ],

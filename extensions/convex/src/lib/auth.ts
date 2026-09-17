@@ -56,7 +56,7 @@ async function discoverAuthEndpoints(): Promise<AuthEndpoints> {
       `Failed to discover auth configuration: ${response.status}`,
     );
   }
-  return response.json();
+  return (await response.json()) as AuthEndpoints;
 }
 
 /**
@@ -82,7 +82,7 @@ export async function startDeviceAuthorization(): Promise<DeviceAuthResponse> {
     );
   }
 
-  return response.json();
+  return (await response.json()) as DeviceAuthResponse;
 }
 
 /**
@@ -115,10 +115,12 @@ export async function pollForDeviceToken(
     });
 
     if (response.ok) {
-      return response.json();
+      return (await response.json()) as TokenResponse;
     }
 
-    const errorBody = await response.json().catch(() => ({}));
+    const errorBody = (await response.json().catch(() => ({}))) as {
+      error?: string;
+    };
     const error = errorBody.error;
 
     if (error === "authorization_pending" || error === "slow_down") {
@@ -161,7 +163,12 @@ export async function exchangeForDashboardToken(
     );
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as {
+    accessToken: string;
+    tokenType?: string;
+    expiresAt?: number;
+    refreshToken?: string;
+  };
   return {
     accessToken: data.accessToken,
     tokenType: data.tokenType ?? "Bearer",
@@ -292,47 +299,37 @@ export interface SelectedContext {
   projectSlug: string | null;
   deploymentName: string | null;
   deploymentType: string | null;
+  /** Actual deployment URL from the API — newer deployments use region-scoped
+   * domains, so the URL cannot be derived from the name alone */
+  deploymentUrl: string | null;
 }
 
 export async function saveSelectedContext(
   context: SelectedContext,
 ): Promise<void> {
-  if (context.teamId) {
-    await LocalStorage.setItem(
+  // Null fields must be removed, not skipped: switching teams/projects clears
+  // the downstream selection, and a leftover value would point other commands
+  // at the previous team's deployment.
+  const setOrRemove = (key: string, value: string | null) =>
+    value === null
+      ? LocalStorage.removeItem(key)
+      : LocalStorage.setItem(key, value);
+
+  await Promise.all([
+    setOrRemove(
       STORAGE_KEYS.SELECTED_TEAM_ID,
-      context.teamId.toString(),
-    );
-  }
-  if (context.teamSlug) {
-    await LocalStorage.setItem(
-      STORAGE_KEYS.SELECTED_TEAM_SLUG,
-      context.teamSlug,
-    );
-  }
-  if (context.projectId) {
-    await LocalStorage.setItem(
+      context.teamId?.toString() ?? null,
+    ),
+    setOrRemove(STORAGE_KEYS.SELECTED_TEAM_SLUG, context.teamSlug),
+    setOrRemove(
       STORAGE_KEYS.SELECTED_PROJECT_ID,
-      context.projectId.toString(),
-    );
-  }
-  if (context.projectSlug) {
-    await LocalStorage.setItem(
-      STORAGE_KEYS.SELECTED_PROJECT_SLUG,
-      context.projectSlug,
-    );
-  }
-  if (context.deploymentName) {
-    await LocalStorage.setItem(
-      STORAGE_KEYS.SELECTED_DEPLOYMENT_NAME,
-      context.deploymentName,
-    );
-  }
-  if (context.deploymentType) {
-    await LocalStorage.setItem(
-      STORAGE_KEYS.SELECTED_DEPLOYMENT_TYPE,
-      context.deploymentType,
-    );
-  }
+      context.projectId?.toString() ?? null,
+    ),
+    setOrRemove(STORAGE_KEYS.SELECTED_PROJECT_SLUG, context.projectSlug),
+    setOrRemove(STORAGE_KEYS.SELECTED_DEPLOYMENT_NAME, context.deploymentName),
+    setOrRemove(STORAGE_KEYS.SELECTED_DEPLOYMENT_TYPE, context.deploymentType),
+    setOrRemove(STORAGE_KEYS.SELECTED_DEPLOYMENT_URL, context.deploymentUrl),
+  ]);
 }
 
 export async function loadSelectedContext(): Promise<SelectedContext> {
@@ -354,6 +351,9 @@ export async function loadSelectedContext(): Promise<SelectedContext> {
   const deploymentType = await LocalStorage.getItem<string>(
     STORAGE_KEYS.SELECTED_DEPLOYMENT_TYPE,
   );
+  const deploymentUrl = await LocalStorage.getItem<string>(
+    STORAGE_KEYS.SELECTED_DEPLOYMENT_URL,
+  );
 
   return {
     teamId: teamIdStr ? parseInt(teamIdStr, 10) : null,
@@ -362,5 +362,6 @@ export async function loadSelectedContext(): Promise<SelectedContext> {
     projectSlug: projectSlug ?? null,
     deploymentName: deploymentName ?? null,
     deploymentType: deploymentType ?? null,
+    deploymentUrl: deploymentUrl ?? null,
   };
 }

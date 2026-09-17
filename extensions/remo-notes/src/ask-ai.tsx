@@ -50,7 +50,7 @@ export default function Command() {
         placeholder="What did I decide about the project roadmap?"
         enableMarkdown
       />
-      <Form.Description text="🔒 Locked notes are excluded from AI search and source list." />
+      <Form.Description text="Locked notes are excluded from AI search and source list." />
     </Form>
   );
 }

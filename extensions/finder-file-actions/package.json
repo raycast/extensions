@@ -85,8 +85,8 @@
       "icon": "create-text-file.png",
       "arguments": [
         {
-          "name": "extension",
-          "placeholder": "txt",
+          "name": "filename",
+          "placeholder": "untitled.txt",
           "type": "text",
           "required": false
         }
@@ -112,8 +112,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.11",
-    "@raycast/utils": "^2.2.3",
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7",
     "binary-split": "^1.0.5",
     "fs-extra": "^11.3.4",
     "run-applescript": "^7.1.0",

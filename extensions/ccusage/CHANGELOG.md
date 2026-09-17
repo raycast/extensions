@@ -1,4 +1,68 @@
-# Claude Code Usage (ccusage) Changelog
+# Claude Usage (ccusage) Changelog
+
+## [Fix npx failure with missing npm prefix and surface CLI errors] - 2026-09-07
+
+### Fixed
+
+- Only set `npm_config_prefix` to `~/.npm-global` when that directory exists — pointing npm at a missing prefix made npx fail with ENOENT on nvm/Homebrew installs, breaking every command
+- Report the actual failure reason (spawn error, exit code, signal, or timeout, with stderr) when the ccusage CLI fails, instead of a misleading "No output received"
+
+## [Fable support and per-model limits] - 2026-08-29
+
+### Added
+
+- **Frontier model tier:** Model Statistics now groups Fable into a Frontier tier above Premium, so its higher per-token pricing stays separate from Opus. Tiers also render in a fixed order rather than in whatever order the models arrive.
+- **Per-model limits everywhere:** The Usage Limits detail view and the `get-usage-limits` AI tool now show per-model windows alongside the 5-hour and 7-day totals. Previously these appeared only in the menu bar.
+
+### Changed
+
+- Per-model limits are read from the usage endpoint's self-describing `limits` array, so a window for any model shows up under its own name and period without an extension update. The older `seven_day_sonnet` and `seven_day_opus` fields still supply any window the array does not carry.
+- The menu bar and Usage Limits view render every limit window through one path instead of hardcoding a block per window, so the 5-hour, 7-day, and per-model rows stay consistent with each other.
+
+## [Rename to Claude Usage] - 2026-07-29
+
+### Changed
+
+- Renamed the extension from "Claude Code Usage" to "Claude Usage" — the Usage Limits and menu bar tracking reflect your overall Claude plan, not just Claude Code
+- Documented the Pie Chart menu bar icon style in the README
+
+## [Add menu bar section visibility toggles] - 2026-07-29
+
+### Added
+
+- **Section visibility toggles:** Individually show or hide each menu bar dropdown section — Rate Limits, Today's Usage, This Week, Monthly Usage, Total Usage, Current Block, and Working Time. All default to visible, so existing menus are unchanged.
+
+## [Add pie chart icon, pies progress style, and time remaining display] - 2026-07-28
+
+### Added
+
+- **Menu Bar Icon Style:** 'Pie Chart' — SVG pie icon showing 5-hour utilization, filling clockwise with Claude's orange
+- **Progress Bar Style:** 'Pies' — per-row pie SVG icons on rate limit rows instead of Icon.Gauge
+- **Time Remaining Display:** Show Time Remaining toggle appends 5-hour session countdown to the menu bar title text
+- **Time Remaining Format:** Customizable template string with placeholders: `{h}h{m}m`, `{M}m`, `{h.f}h`, etc.
+
+## [More progress bar styles] - 2026-07-12
+
+### Added
+
+- Six new progress bar styles — "Dots" (`●○`), "Segmented" (`▮▯`), "Squares" (`■□`), "Diamonds" (`◆◇`), "Stars" (`★☆`), and "Braille" (`⣿⣀`) — shape-based tracks that render consistently whether a menu row is idle or selected, unlike the Solid style's shade track; the default is unchanged
+
+## [Keep rate-limit bars visible during backoff] - 2026-07-12
+
+### Fixed
+
+- Rate limit progress bars no longer disappear when the menu bar restarts during a rate-limit backoff window. Restored cached limits now mark the feature available immediately, instead of waiting for a fetch that the backoff guard skips
+
+## [Reconcile menu bar usage readouts] - 2026-07-10
+
+### Fixed
+
+- Rate-limit percentages now agree across surfaces. The menu bar title, the progress bars, and the command's Usage Limits accessory all follow one "Usage Display Mode" preference, which defaults to Consumed so they match Claude's own settings out of the box
+- The last-fetched time now persists across relaunches, so a fresh menu bar process reports the real age of its data in "Last Updated" and the stale-data warning instead of a blank timestamp
+
+### Changed
+
+- The former menu bar "Progress Bar Mode" preference is now an extension-level "Usage Display Mode" preference and defaults to Consumed. If you previously set it to Remaining, reselect it in the extension preferences
 
 ## [Honor server rate-limit backoff] - 2026-06-10
 

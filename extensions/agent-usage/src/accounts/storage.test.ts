@@ -1,8 +1,8 @@
 // src/accounts/storage.test.ts
 import { register } from "node:module";
+import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -15,15 +15,16 @@ const mockStorage = new Map<string, string>();
 
 // Register module hook BEFORE importing anything else
 // Use absolute path to the loader
-const loaderPath = join(__dirname, "storage-mock-loader.mjs");
+const loaderPath = join(__dirname, "storage-mock-loader.js");
 register(pathToFileURL(loaderPath), {
   parentURL: import.meta.url,
 });
 
+import assert from "node:assert/strict";
 // Now import test framework
 import test from "node:test";
-import assert from "node:assert/strict";
-import type { AccountEntry } from "./types";
+
+import type { AccountEntry } from "./types.ts";
 
 // Replace the import before loading the module
 const originalConsoleError = console.error;
@@ -43,7 +44,7 @@ test.afterEach(() => {
 
 async function loadStorageModule() {
   // Dynamically import after setting up mocks
-  const module = await import("./storage");
+  const module = await import("./storage.ts");
   return module;
 }
 
@@ -75,6 +76,7 @@ test("loadAccounts filters malformed entries", async () => {
     { id: "missing-token", label: "No Token" },
     { id: "empty-token", label: "Empty Token", token: "" },
     { id: "whitespace-token", label: "Whitespace Token", token: "   " },
+    { id: "invalid-account-id", label: "Invalid Account ID", token: "token456", accountId: 123 },
     null,
     "not an object",
     { label: "No ID", token: "token789" },
@@ -124,6 +126,28 @@ test("addAccount trims whitespace from label and token", async () => {
   assert.equal(accounts[0].token, "test-token");
 });
 
+test("addAccount trims and stores account ID when provided", async () => {
+  const { addAccount, loadAccounts } = await loadStorageModule();
+
+  const entry = await addAccount("codex", "Codex Account", "codex-token", "  acct_123  ");
+
+  assert.equal(entry.accountId, "acct_123");
+
+  const accounts = await loadAccounts("codex");
+  assert.equal(accounts[0].accountId, "acct_123");
+});
+
+test("addAccount omits blank account ID", async () => {
+  const { addAccount, loadAccounts } = await loadStorageModule();
+
+  const entry = await addAccount("codex", "Codex Account", "codex-token", "   ");
+
+  assert.equal(entry.accountId, undefined);
+
+  const accounts = await loadAccounts("codex");
+  assert.equal(accounts[0].accountId, undefined);
+});
+
 test("addAccount uses separate storage per provider", async () => {
   const { addAccount, loadAccounts } = await loadStorageModule();
 
@@ -137,6 +161,20 @@ test("addAccount uses separate storage per provider", async () => {
   assert.equal(kimiAccounts[0].label, "Kimi Account");
   assert.equal(zaiAccounts.length, 1);
   assert.equal(zaiAccounts[0].label, "Zai Account");
+});
+
+test("Copilot accounts use separate storage", async () => {
+  const { addAccount, loadAccounts } = await loadStorageModule();
+
+  await addAccount("copilot", "Work", "copilot-token");
+  await addAccount("kimi", "Personal", "kimi-token");
+
+  const copilotAccounts = await loadAccounts("copilot");
+  const kimiAccounts = await loadAccounts("kimi");
+  assert.equal(copilotAccounts.length, 1);
+  assert.equal(copilotAccounts[0].label, "Work");
+  assert.equal(copilotAccounts[0].token, "copilot-token");
+  assert.equal(kimiAccounts[0].token, "kimi-token");
 });
 
 test("updateAccount returns true and modifies existing account", async () => {
@@ -173,6 +211,16 @@ test("updateAccount updates token only", async () => {
   const accounts = await loadAccounts("kimi");
   assert.equal(accounts[0].label, "Test");
   assert.equal(accounts[0].token, "new-token");
+});
+
+test("updateAccount updates account ID", async () => {
+  const { addAccount, updateAccount, loadAccounts } = await loadStorageModule();
+
+  const entry = await addAccount("codex", "Test", "token123");
+  await updateAccount("codex", entry.id, { accountId: "acct_456" });
+
+  const accounts = await loadAccounts("codex");
+  assert.equal(accounts[0].accountId, "acct_456");
 });
 
 test("deleteAccount returns true and removes existing account", async () => {

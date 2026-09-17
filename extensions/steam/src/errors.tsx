@@ -10,7 +10,7 @@ export const NoApiKey = () => {
       navigationTitle="Missing or incorrect credentials"
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.TagList title="Api Key">
+          <Detail.Metadata.TagList title="Web API Key">
             {token ? (
               <Detail.Metadata.TagList.Item text="OK" color={Color.Green} />
             ) : (
@@ -19,6 +19,35 @@ export const NoApiKey = () => {
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="Steam ID">
             {steamid ? (
+              <Detail.Metadata.TagList.Item text="OK" color={Color.Green} />
+            ) : (
+              <Detail.Metadata.TagList.Item text="Not set" color={Color.Red} />
+            )}
+          </Detail.Metadata.TagList>
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
+        </ActionPanel>
+      }
+    />
+  );
+};
+
+export const NoWebApiKey = () => {
+  const { token } = getPreferenceValues<Preferences>();
+  const markdown =
+    "To search Steam users and load profile information, set your Web API Key in the preferences.\n\nGrab an API key from Steam here:\n\n[https://steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey)\n\n\nPress `Enter` to continue";
+
+  return (
+    <Detail
+      markdown={markdown}
+      navigationTitle="Missing Web API Key"
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Web API Key">
+            {token ? (
               <Detail.Metadata.TagList.Item text="OK" color={Color.Green} />
             ) : (
               <Detail.Metadata.TagList.Item text="Not set" color={Color.Red} />

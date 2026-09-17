@@ -12,10 +12,10 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { useCallback, useState, type ReactElement } from "react";
+import { useCallback, useState, type ReactElement, type ReactNode } from "react";
 
 import { formatDuration, getTrackAccessoryValues } from "./format";
-import { getImageUrl, playItem, playNextItem, queueItem } from "./plex";
+import { getImageUrl, playAlbumFromTrack, playItem, playNextItem, queueItem } from "./plex";
 import type { MusicAlbum, MusicTrack, PlayableItem } from "./types";
 
 export function artworkSource(
@@ -131,19 +131,19 @@ export function PlaybackActionItems(props: {
   onQueue: (item: PlayableItem) => Promise<void>;
   browseTarget?: ReactElement;
   browseTitle?: string;
-  browseIcon?: Icon;
   nowPlayingShortcut?: Keyboard.Shortcut;
+  leadingActions?: ReactNode;
+  children?: ReactNode;
 }) {
   const { push } = useNavigation();
 
   return (
     <>
+      {/* The first two actions in a panel are the Enter / Cmd+Enter defaults, so leading actions take those
+          over; children land after Play Next. */}
+      {props.leadingActions}
       {props.browseTarget && props.browseTitle ? (
-        <Action
-          title={props.browseTitle}
-          icon={props.browseIcon ?? Icon.ArrowRight}
-          onAction={() => push(props.browseTarget)}
-        />
+        <Action title={props.browseTitle} icon={Icon.ArrowRight} onAction={() => push(props.browseTarget)} />
       ) : null}
       <Action title="Play in Plexamp" icon={Icon.Play} onAction={() => props.onPlay(props.item)} />
       <Action title="Add to Queue" icon={Icon.Plus} onAction={() => props.onQueue(props.item)} />
@@ -153,6 +153,7 @@ export function PlaybackActionItems(props: {
         onAction={() => props.onPlayNext(props.item)}
         shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
       />
+      {props.children}
       <NowPlayingAction shortcut={props.nowPlayingShortcut} />
       <PreferencesAction />
     </>
@@ -187,5 +188,7 @@ export function usePlaybackActions() {
     play: (item: PlayableItem) => runAction(() => playItem(item), "Playback started in Plexamp"),
     playNext: (item: PlayableItem) => runAction(() => playNextItem(item), "Item added to play next"),
     queue: (item: PlayableItem) => runAction(() => queueItem(item), "Item added to the Plexamp queue"),
+    playFromTrack: (album: MusicAlbum, track: MusicTrack) =>
+      runAction(() => playAlbumFromTrack(album, track), "Playback started in Plexamp"),
   };
 }

@@ -78,5 +78,9 @@
     "@raycast/utils": "^1.18.1",
     "cross-fetch": "^4.1.0",
     "node-fetch": "^3.3.2"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

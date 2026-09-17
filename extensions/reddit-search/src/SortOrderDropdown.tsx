@@ -1,32 +1,36 @@
-import { useState } from "react";
 import { List } from "@raycast/api";
 import redditSort from "./RedditSort";
 import Sort from "./Sort";
 
-export default function SortOrderDropdown({
-  defaultSort,
-  onSortChange,
-}: {
-  defaultSort: Sort;
-  onSortChange: (sort: Sort) => void;
-}) {
-  const [selectedSort, setSelectedSort] = useState(defaultSort);
-
+/**
+ * Sort order selector.
+ *
+ * Value is **controlled by the parent's persisted sort**, so the label always
+ * reflects the sort actually in effect (a stale local copy once let the label
+ * claim "Top" while showing relevance-ordered results). Selecting a sort always
+ * commits — the parent decides whether to re-fetch now (a live query) or just arm
+ * it for the next search (rate limited, or nothing searched yet).
+ */
+export default function SortOrderDropdown({ sort, onSortChange }: { sort: Sort; onSortChange: (sort: Sort) => void }) {
   return (
     <List.Dropdown
       tooltip="Select Sort Order"
-      value={selectedSort.sortValue}
+      value={sort.sortValue}
       onChange={(newValue) => {
         const newSort = redditSort.getSortFromValue(newValue);
-        setSelectedSort(newSort);
-        onSortChange(newSort);
+        if (newSort && newSort.sortValue !== sort.sortValue) {
+          onSortChange(newSort);
+        }
       }}
     >
-      <List.Dropdown.Item title={`Sorting by ${redditSort.relevance.name}`} value={redditSort.relevance.sortValue} />
-      <List.Dropdown.Item title={`Sorting by ${redditSort.hot.name}`} value={redditSort.hot.sortValue} />
-      <List.Dropdown.Item title={`Sorting by ${redditSort.top.name}`} value={redditSort.top.sortValue} />
-      <List.Dropdown.Item title={`Sorting by ${redditSort.latest.name}`} value={redditSort.latest.sortValue} />
-      <List.Dropdown.Item title={`Sorting by ${redditSort.comments.name}`} value={redditSort.comments.sortValue} />
+      {redditSort.allSortOrders.map((sortOrder) => (
+        <List.Dropdown.Item
+          key={sortOrder.sortValue}
+          title={sortOrder.name}
+          icon={sortOrder.icon}
+          value={sortOrder.sortValue}
+        />
+      ))}
     </List.Dropdown>
   );
 }

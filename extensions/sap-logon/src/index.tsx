@@ -14,8 +14,17 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { AddSystemForm } from "./add-system";
+import { LANGUAGES } from "./components";
 import { SAPSystem } from "./types";
-import { cleanupSAPCFiles, createAndOpenSAPCFile, deleteSAPSystem, getSAPSystems } from "./utils";
+import {
+  cleanupSAPCFiles,
+  createAndOpenSAPCFile,
+  deleteSAPSystem,
+  getSAPSystems,
+  groupSystemsByCustomer,
+  SYSTEM_TYPE_COLORS,
+  SYSTEM_TYPE_LABELS,
+} from "./utils";
 import EditSystemForm from "./edit-system";
 
 export default function Command() {
@@ -29,21 +38,25 @@ export default function Command() {
     cleanupSAPCFiles();
   }, []);
 
-  // Sort systems alphabetically and filter by search text
+  // Filter by search text (matches customer, system ID, type, and more)
   const filteredSystems = useMemo(() => {
-    const sorted = [...systems].sort((a, b) => a.systemId.localeCompare(b.systemId));
-    if (!searchText) return sorted;
+    if (!searchText) return systems;
     const search = searchText.toLowerCase();
-    return sorted.filter(
+    return systems.filter(
       (s) =>
+        s.customerName.toLowerCase().includes(search) ||
         s.systemId.toLowerCase().includes(search) ||
+        s.systemType.toLowerCase() === search ||
+        SYSTEM_TYPE_LABELS[s.systemType].toLowerCase().includes(search) ||
         s.client.includes(search) ||
         s.applicationServer.toLowerCase().includes(search) ||
         s.username.toLowerCase().includes(search),
     );
   }, [systems, searchText]);
 
-  async function handleConnect(system: SAPSystem) {
+  const groups = useMemo(() => groupSystemsByCustomer(filteredSystems), [filteredSystems]);
+
+  async function handleConnect(system: SAPSystem, language?: string) {
     try {
       await showToast({
         style: Toast.Style.Animated,
@@ -51,7 +64,7 @@ export default function Command() {
         message: `Opening ${system.systemId}`,
       });
 
-      const filePath = await createAndOpenSAPCFile(system);
+      const filePath = await createAndOpenSAPCFile(system, language);
       await open(filePath);
 
       await showToast({
@@ -116,58 +129,82 @@ export default function Command() {
           }
         />
       ) : (
-        filteredSystems.map((system) => (
-          <List.Item
-            key={system.id}
-            icon={{ source: Icon.Globe, tintColor: Color.Blue }}
-            title={system.systemId}
-            subtitle={`Client ${system.client}`}
-            accessories={[
-              { text: system.applicationServer },
-              { text: system.username, icon: Icon.Person },
-              { tag: { value: system.language.toUpperCase(), color: Color.Green } },
-            ]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section title="Connection">
-                  <Action title="Connect to SAP" icon={Icon.Link} onAction={() => handleConnect(system)} />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Manage">
-                  <Action
-                    title="Edit System"
-                    icon={Icon.Pencil}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    onAction={() => handleEdit(system)}
-                  />
-                  <Action
-                    title="Add New System"
-                    icon={Icon.Plus}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    onAction={handleAddSystem}
-                  />
-                  <Action
-                    title="Delete System"
-                    icon={Icon.Trash}
-                    style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                    onAction={() => handleDelete(system)}
-                  />
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Info">
-                  <Action.CopyToClipboard
-                    title="Copy System ID"
-                    content={system.systemId}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Application Server"
-                    content={system.applicationServer}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                  />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
+        groups.map(({ customerName, systems: customerSystems }) => (
+          <List.Section key={customerName} title={customerName} subtitle={`${customerSystems.length} system(s)`}>
+            {customerSystems.map((system) => (
+              <List.Item
+                key={system.id}
+                icon={{ source: Icon.Globe, tintColor: SYSTEM_TYPE_COLORS[system.systemType] }}
+                title={system.systemId}
+                subtitle={`Client ${system.client}`}
+                accessories={[
+                  {
+                    tag: {
+                      value: `${system.systemType} – ${SYSTEM_TYPE_LABELS[system.systemType]}`,
+                      color: SYSTEM_TYPE_COLORS[system.systemType],
+                    },
+                  },
+                  { text: system.applicationServer },
+                  { text: system.username, icon: Icon.Person },
+                  system.language
+                    ? { tag: { value: system.language.toUpperCase(), color: Color.SecondaryText } }
+                    : { tag: { value: "Ask", color: Color.Orange }, icon: Icon.QuestionMark },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section title="Connection">
+                      {system.language ? (
+                        <Action title="Connect to SAP" icon={Icon.Link} onAction={() => handleConnect(system)} />
+                      ) : (
+                        <ActionPanel.Submenu title="Connect to SAP" icon={Icon.Link}>
+                          {LANGUAGES.map((lang) => (
+                            <Action
+                              key={lang.value}
+                              title={lang.title}
+                              onAction={() => handleConnect(system, lang.value)}
+                            />
+                          ))}
+                        </ActionPanel.Submenu>
+                      )}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Manage">
+                      <Action
+                        title="Edit System"
+                        icon={Icon.Pencil}
+                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        onAction={() => handleEdit(system)}
+                      />
+                      <Action
+                        title="Add New System"
+                        icon={Icon.Plus}
+                        shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        onAction={handleAddSystem}
+                      />
+                      <Action
+                        title="Delete System"
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                        onAction={() => handleDelete(system)}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section title="Info">
+                      <Action.CopyToClipboard
+                        title="Copy System ID"
+                        content={system.systemId}
+                        shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Application Server"
+                        content={system.applicationServer}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
         ))
       )}
     </List>

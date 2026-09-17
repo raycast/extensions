@@ -7,4 +7,5 @@ export interface Signature {
   imagePath?: string;
   drawingData?: string;
   createdAt: string;
+  updatedAt?: string;
 }

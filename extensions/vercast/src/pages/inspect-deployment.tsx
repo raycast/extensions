@@ -7,11 +7,14 @@ import { useFetch } from "@raycast/utils";
 import { FetchHeaders, getDeploymentURL, getFetchDeploymentBuildsURL } from "../vercel";
 import {
   getDeploymentId,
+  getCommitDeploymentBranch,
+  getCommitMessage,
   isDeploymentCancellable,
   runCancelDeployment,
   CANCEL_DEPLOYMENT_ACTION,
   CANCEL_DEPLOYMENT_SHORTCUT,
 } from "../deployment";
+import { getDeploymentOwnerSlug } from "../utils/deployment-owner";
 
 type Props = {
   deployment: Deployment;
@@ -48,18 +51,6 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
 
   const mostRecentBuild = data?.builds?.[0];
 
-  const getCommitMessage = (deployment: Deployment) => {
-    // TODO: determine others
-    if (deployment.meta.githubCommitMessage) {
-      return deployment.meta.githubCommitMessage;
-    }
-    return "No commit message";
-  };
-
-  const getCommitDeploymentBranch = (deployment: Deployment) => {
-    // TODO: support other providers beside GitHub
-    return deployment.meta.githubCommitRef ?? null;
-  };
   const branchName = getCommitDeploymentBranch(deployment);
 
   const getStateText = () => {
@@ -73,7 +64,7 @@ const InspectDeployment = ({ deployment, selectedTeam, username }: Props) => {
     // @ts-expect-error Property 'inspectorURL' does not exist on type 'Deployment'.
     if (deployment.inspectorURL) return deployment.inspectorURL;
 
-    const teamSlug = selectedTeam?.slug || username;
+    const teamSlug = getDeploymentOwnerSlug({ deployment, team: selectedTeam, username });
 
     if (!teamSlug) {
       showToast({

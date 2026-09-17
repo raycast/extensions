@@ -5,6 +5,58 @@ export const translations = {
     // Global
     loading: "Loading",
     pleaseWait: "Please wait...",
+
+    // Connection / offline recovery
+    connection: {
+      start: "Start Karakeep",
+      starting: "Starting Karakeep…",
+      offlineTitle: "Offline",
+      offlineFormHint: "Karakeep isn't running. Press ↵ to start it.",
+      offlineFormHintRemote: "Karakeep isn't responding. Check that it's running.",
+
+      // Recovery screen states
+      checking: "Checking Karakeep…",
+      checkingDescription: "Looking for a local container to start…",
+      startingDescription: "This takes a few seconds.",
+      notRunning: "Karakeep isn't running",
+      notRunningDescription: "Press ↵ to start it.",
+      unreachable: "Can't reach Karakeep",
+      // A rejected API key. Distinct from every "can't reach" state above: the
+      // server answered, it just refused us.
+      unauthorized: "Invalid API key",
+      unauthorizedDescription:
+        "Karakeep rejected the API key. Press ↵ to fix it in Extension Settings, then run this command again.",
+      unauthorizedFormHint: "Karakeep rejected your API key. Fix it in Extension Settings, then reopen this command.",
+      unauthorizedToast: "Karakeep rejected the API key. Update it in Extension Settings.",
+      // {{apiUrl}} is interpolated by translate(); a function value would only
+      // receive searchText/count, not an arbitrary parameter.
+      unreachableDescription: "Nothing is responding at {{apiUrl}}. Check that Karakeep is running.",
+
+      // Recovery actions
+      tryAgain: "Try Again",
+      openDocker: "Open Docker",
+      openSettings: "Open Extension Settings",
+      copyError: "Copy Error",
+      copyAgain: "Copy Again",
+
+      // Recovery toasts
+      waiting: "Waiting for Karakeep…",
+      back: "Karakeep is back",
+      startedNoResponse: "Started, but Karakeep didn't respond",
+      startFailed: "Couldn't start Karakeep",
+
+      // Non-connection fetch failures, by scope
+      loadFailed: {
+        bookmarks: "Couldn't load bookmarks",
+        lists: "Couldn't load lists",
+        tags: "Couldn't load tags",
+        highlights: "Couldn't load highlights",
+        backups: "Couldn't load backups",
+        stats: "Couldn't load stats",
+        search: "Couldn't load search results",
+      },
+    },
+
     refreshingBookmarks: "Refreshing bookmarks...",
     bookmarksRefreshed: "Bookmarks refreshed",
     refreshingLists: "Refreshing list...",
@@ -14,11 +66,14 @@ export const translations = {
 
     // Common Actions & Messages
     common: {
+      /** Interpolated so the whole sentence is translatable — concatenating an
+       * English " is required" onto a translated field name produced
+       * "名称 is required". */
+      fieldRequired: "{{field}} is required",
       delete: "Delete",
       deleting: "Deleting...",
       deleteSuccess: "Deleted successfully",
       deleteFailed: "Delete failed",
-      deleteCancel: "Delete cancelled",
       viewInBrowser: "View in Browser",
       copyId: "Copy ID",
       open: "Open",
@@ -43,12 +98,17 @@ export const translations = {
       create: "Create Bookmark",
       creating: "Creating bookmark...",
       createSuccess: "Bookmark created successfully",
-      createFailed: "Creation failed",
+      createFailed: "Couldn't create bookmark",
+      // Saving is up to four separate writes. Once the bookmark itself exists,
+      // a later failure must not claim nothing was saved.
+      savedListFailed: "Bookmark saved, but couldn't add to list",
+      savedTagsFailed: "Bookmark saved, but couldn't add tags",
+      savedTitleFailed: "Bookmark saved, but couldn't edit title",
 
       // Types and Fields
       type: "Type",
       typeText: "Plain Text",
-      typeLink: "URL Link",
+      typeLink: "URL",
       content: "Content",
       contentRequired: "Content is required",
       contentTooLong: "Content cannot exceed 2500 characters",
@@ -66,6 +126,13 @@ export const translations = {
       originalTitle: "Original Title",
       customTitle: "Custom Title",
       titlePlaceholder: "Enter title",
+      createTitle: "Title",
+      createTitlePlaceholder: "Set custom title or leave blank to use generated title",
+      titleTooLong: "Title cannot exceed 1000 characters",
+      // Filling this field creates a user title that permanently shadows the one
+      // Karakeep crawls, so it stays opt-in rather than being pre-filled.
+      usePageTitle: "Use Page Title",
+      usePageTitleFailed: "Couldn't read the page title",
       list: "List",
       defaultListPlaceholder: "Default",
       defaultListFilter: "Show All Bookmarks",
@@ -85,10 +152,14 @@ export const translations = {
       actions: {
         openInBrowser: "Open in Browser",
         previewInDashboard: "Preview in Dashboard",
-        openLink: "Open Link",
-        copyLink: "Copy Link",
+        openLink: "Open URL",
+        copyLink: "Copy URL",
         copyContent: "Copy Content",
         aiSummary: "AI Summary",
+        addToList: "Add to List",
+        addingToList: "Adding to {{name}}...",
+        addedToList: "Added to {{name}}",
+        addToListFailed: "Could not add to list",
         favorite: "Favorite",
         unfavorite: "Unfavorite",
         archive: "Archive",
@@ -147,6 +218,96 @@ export const translations = {
     },
 
     // List Related
+    changelog: {
+      title: "Karakeep Release Notes",
+      loading: "Fetching the release notes from GitHub...",
+      empty: "This release has no notes.",
+      error: "Couldn't fetch the release notes: {{message}}",
+      version: "Version",
+      released: "Released",
+      onGitHub: "GitHub",
+      viewOnline: "Open release",
+      actions: {
+        openRelease: "Open Release on GitHub",
+        allReleases: "View All Releases",
+        copy: "Copy Release Notes",
+      },
+    },
+    update: {
+      title: "Update Karakeep",
+      checking: "Looking for a local Karakeep container...",
+      ready:
+        "Pulls the latest images and recreates the containers. Existing bookmarks and settings are stored in volumes and are not affected.",
+      progress: "Progress",
+      unverified:
+        "Karakeep isn't running, so there's no way to confirm this container is yours rather than another project that happens to use the same port. Check the name above — you'll be asked to confirm.",
+      confirm: {
+        title: "Update this project?",
+        message:
+          "Karakeep isn't running, so this couldn't be verified as your instance. Updating pulls new images and recreates every container in `{{project}}` ({{image}}).",
+        proceed: "Update Anyway",
+      },
+      field: {
+        container: "Container",
+        project: "Compose Project",
+        image: "Image",
+        server: "Server",
+      },
+      actions: {
+        update: "Update Karakeep",
+        recheck: "Check Again",
+        viewChangelog: "View Changelog",
+        copyCommand: "Copy Docker Command",
+      },
+      unavailable: {
+        hint: "This command only manages a Karakeep running in Docker on this machine.",
+        notLocal:
+          "Your server is at {{host}}, which isn't on this machine — updating it has to happen wherever it runs.",
+        noDocker: "The Docker CLI wasn't found in any of the standard install locations.",
+        daemonDown: "Docker is installed but the daemon isn't responding. Start Docker Desktop and try again.",
+        noContainer: "No Docker container publishes port {{port}}, so there's nothing here to update.",
+        notCompose:
+          "The container `{{name}}` wasn't created by Docker Compose, so there's no compose file to pull against.",
+        ambiguous:
+          "More than one Docker project publishes port {{port}} ({{projects}}), so there's no safe way to tell which one is Karakeep. Updating the wrong one would recreate an unrelated app.",
+        notKarakeep:
+          "Couldn't confirm Karakeep at `{{apiUrl}}`. It may still be starting, your API key may be wrong, or another app may be using this port — updating would recreate whatever is actually there.",
+        servedByOther:
+          "`{{name}}` is stopped, but something is already answering on port {{port}} — so whatever serves your Karakeep URL isn't this container. Updating it would recreate something unrelated.",
+      },
+      toast: {
+        updating: "Pulling latest images...",
+        waiting: "Images pulled — waiting for Karakeep to start...",
+        updated: "Karakeep updated",
+        alreadyCurrent: "Already on the latest images",
+        finished: "Update finished",
+        startedButUnreachable: "Updated, but Karakeep isn't answering yet",
+        failed: "Update failed",
+      },
+      failure: {
+        network: "Docker couldn't reach the image registry",
+        auth: "Docker isn't authorized to pull these images",
+        disk: "Not enough disk space to pull the images",
+        conflict: "A port Karakeep needs is already in use",
+        unknown: "Update failed",
+        stillRunning: "Your instance is still running",
+        notRunning: "Your instance isn't responding",
+        stillRunningDetail:
+          "Karakeep is still answering at `{{apiUrl}}`, so you have a working instance. A multi-service update can stop partway, so some services may have been recreated and others not — retrying once the problem clears will bring them all to the same version.",
+        notRunningDetail:
+          "Karakeep isn't answering at `{{apiUrl}}`. Check `docker compose ps` and `docker compose logs` for the project.",
+      },
+      result: {
+        updated: "**Updated.** New images were pulled and the containers recreated.",
+        alreadyCurrent: "**Already current.** No newer images were available.",
+        unknownChange:
+          "**Update finished.** Couldn't read the image IDs before and after, so whether anything actually changed is unknown.",
+        reachable: "Karakeep is answering at `{{apiUrl}}`.",
+        unreachable:
+          "Karakeep still isn't answering at `{{apiUrl}}`. It may need longer, or `docker compose logs` may explain why.",
+        failed: "**Update failed.**",
+      },
+    },
     list: {
       favorites: "Favorites",
       openFavorites: "Open Favorites",
@@ -164,7 +325,8 @@ export const translations = {
       listName: "Name",
       listNamePlaceholder: "Enter list name",
       listIcon: "Icon",
-      listIconPlaceholder: "Enter an emoji. Type ':' to open emoji picker.",
+      listIconPlaceholder: "Any emoji, e.g. 🔖",
+      listIconInvalid: "Must be a single emoji",
       listDescription: "Description",
       listDescriptionPlaceholder: "Optional description",
       listParent: "Parent List",
@@ -189,7 +351,7 @@ export const translations = {
         isArchived: "is:archived — Archived",
         isRead: "is:read — Read",
         isUnread: "is:unread — Unread",
-        typeLink: "type:link — Links",
+        typeLink: "type:link — URLs",
         typeText: "type:text — Notes",
         typeImage: "type:image — Images",
         typeVideo: "type:video — Videos",
@@ -367,12 +529,14 @@ export const translations = {
         clearCache: "Clear Cache",
         delete: "Delete",
         viewImage: "View Image",
-        openLink: "Open Link",
-        copyLink: "Copy Link",
-        installChromeExtension: "Get Chrome Extension",
-        installFirefoxAddon: "Get Firefox Add-on",
-        installSafariExtension: "Get Safari Extension",
-        getBrowserExtension: "Get Browser Extension",
+        openLink: "Open URL",
+        copyLink: "Copy URL",
+        addToBrowser: "Add Karakeep to Browser",
+        browsers: {
+          chrome: "Chrome",
+          firefox: "Firefox",
+          safari: "Safari",
+        },
       },
       toast: {
         delete: {
@@ -399,6 +563,7 @@ export const translations = {
         title: "No bookmarks found",
         description: "No bookmarks in this search",
       },
+      searchResponseInvalid: "The server returned an unexpected search response.",
       onlineSearch: {
         title: (searchText: string) => `Online search: ${searchText}`,
         action: (searchText: string) => `Online search: ${searchText}`,
@@ -423,7 +588,7 @@ export const translations = {
       lists: "Lists",
       highlights: "Highlights",
       byType: "By Type",
-      links: "Links",
+      links: "URLs",
       notes: "Notes",
       assets: "Assets",
       bookmarksSaved: "Bookmarks Saved",
@@ -504,6 +669,53 @@ export const translations = {
     // 全局
     loading: "加载中...",
     pleaseWait: "请稍等...",
+
+    // 连接 / 离线恢复
+    connection: {
+      start: "启动 Karakeep",
+      starting: "正在启动 Karakeep…",
+      offlineTitle: "离线",
+      offlineFormHint: "Karakeep 未运行。按 ↵ 启动。",
+      offlineFormHintRemote: "Karakeep 无响应。请检查它是否正在运行。",
+
+      // 恢复界面状态
+      checking: "正在检查 Karakeep…",
+      checkingDescription: "正在查找可启动的本地容器…",
+      startingDescription: "这需要几秒钟。",
+      notRunning: "Karakeep 未运行",
+      notRunningDescription: "按 ↵ 启动。",
+      unreachable: "无法连接到 Karakeep",
+      unauthorized: "API 密钥无效",
+      unauthorizedDescription: "Karakeep 拒绝了该 API 密钥。按 ↵ 在扩展设置中修复，然后重新运行此命令。",
+      unauthorizedFormHint: "Karakeep 拒绝了你的 API 密钥。请在扩展设置中修复，然后重新打开此命令。",
+      unauthorizedToast: "Karakeep 拒绝了该 API 密钥。请在扩展设置中更新。",
+      unreachableDescription: "{{apiUrl}} 无响应。请检查 Karakeep 是否正在运行。",
+
+      // 恢复操作
+      tryAgain: "重试",
+      openDocker: "打开 Docker",
+      openSettings: "打开扩展设置",
+      copyError: "复制错误信息",
+      copyAgain: "再次复制",
+
+      // 恢复提示
+      waiting: "正在等待 Karakeep…",
+      back: "Karakeep 已恢复",
+      startedNoResponse: "已启动，但 Karakeep 无响应",
+      startFailed: "无法启动 Karakeep",
+
+      // 非连接类请求失败
+      loadFailed: {
+        bookmarks: "无法加载书签",
+        lists: "无法加载列表",
+        tags: "无法加载标签",
+        highlights: "无法加载高亮",
+        backups: "无法加载备份",
+        stats: "无法加载统计",
+        search: "无法加载搜索结果",
+      },
+    },
+
     refreshingBookmarks: "正在刷新书签...",
     bookmarksRefreshed: "书签已刷新",
     refreshingLists: "正在刷新列表...",
@@ -513,11 +725,11 @@ export const translations = {
 
     // 通用操作和消息
     common: {
+      fieldRequired: "{{field}}不能为空",
       delete: "删除",
       deleting: "删除中...",
       deleteSuccess: "删除成功",
       deleteFailed: "删除失败",
-      deleteCancel: "已取消删除",
       viewInBrowser: "在浏览器中查看",
       copyId: "复制 ID",
       open: "打开",
@@ -542,12 +754,15 @@ export const translations = {
       create: "创建书签",
       creating: "创建中...",
       createSuccess: "创建成功",
-      createFailed: "创建失败",
+      createFailed: "无法创建书签",
+      savedListFailed: "书签已保存，但无法添加到列表",
+      savedTagsFailed: "书签已保存，但无法添加标签",
+      savedTitleFailed: "书签已保存，但无法修改标题",
 
       // 类型和字段
       type: "类型",
       typeText: "纯文本",
-      typeLink: "URL 链接",
+      typeLink: "URL",
       content: "内容",
       contentRequired: "请输入内容",
       contentTooLong: "内容不能超过2500字符",
@@ -565,6 +780,11 @@ export const translations = {
       originalTitle: "原标题",
       customTitle: "自定义标题",
       titlePlaceholder: "输入标题",
+      createTitle: "标题",
+      createTitlePlaceholder: "设置自定义标题，或留空以使用生成的标题",
+      usePageTitle: "使用页面标题",
+      usePageTitleFailed: "无法读取页面标题",
+      titleTooLong: "标题长度不得超过1000个字符",
 
       list: "列表",
       defaultListPlaceholder: "默认",
@@ -586,10 +806,14 @@ export const translations = {
       actions: {
         openInBrowser: "在浏览器中打开",
         previewInDashboard: "在控制台中预览",
-        openLink: "打开链接",
-        copyLink: "复制链接",
+        openLink: "打开 URL",
+        copyLink: "复制 URL",
         copyContent: "复制内容",
         aiSummary: "AI 摘要",
+        addToList: "添加到列表",
+        addingToList: "正在添加到 {{name}}...",
+        addedToList: "已添加到 {{name}}",
+        addToListFailed: "无法添加到列表",
         favorite: "收藏",
         unfavorite: "取消收藏",
         archive: "归档",
@@ -648,6 +872,91 @@ export const translations = {
     },
 
     // 列表相关
+    changelog: {
+      title: "Karakeep 版本说明",
+      loading: "正在从 GitHub 获取版本说明...",
+      empty: "此版本没有说明。",
+      error: "无法获取版本说明：{{message}}",
+      version: "版本",
+      released: "发布时间",
+      onGitHub: "GitHub",
+      viewOnline: "打开版本页面",
+      actions: {
+        openRelease: "在 GitHub 上打开版本",
+        allReleases: "查看所有版本",
+        copy: "复制版本说明",
+      },
+    },
+    update: {
+      title: "更新 Karakeep",
+      checking: "正在查找本地 Karakeep 容器...",
+      ready: "拉取最新镜像并重新创建容器。现有书签和设置存储在数据卷中，不会受到影响。",
+      progress: "进度",
+      unverified:
+        "Karakeep 未在运行，因此无法确认此容器属于您，而不是恰好使用相同端口的其他项目。请核对上方名称——系统会要求您确认。",
+      confirm: {
+        title: "要更新此项目吗？",
+        message:
+          "Karakeep 未在运行，因此无法验证这是否为您的实例。更新将拉取新镜像并重建 `{{project}}` 中的所有容器（{{image}}）。",
+        proceed: "仍然更新",
+      },
+      field: {
+        container: "容器",
+        project: "Compose 项目",
+        image: "镜像",
+        server: "服务器",
+      },
+      actions: {
+        update: "更新 Karakeep",
+        recheck: "重新检查",
+        viewChangelog: "查看更新日志",
+        copyCommand: "复制 Docker 命令",
+      },
+      unavailable: {
+        hint: "此命令仅管理运行在本机 Docker 中的 Karakeep。",
+        notLocal: "您的服务器位于 {{host}}，不在本机上——需要在其运行的位置进行更新。",
+        noDocker: "在任何标准安装位置均未找到 Docker CLI。",
+        daemonDown: "已安装 Docker，但守护进程无响应。请启动 Docker Desktop 后重试。",
+        noContainer: "没有 Docker 容器发布端口 {{port}}，因此没有可更新的内容。",
+        notCompose: "容器 `{{name}}` 并非由 Docker Compose 创建，因此没有可用的 compose 文件。",
+        ambiguous:
+          "有多个 Docker 项目发布了端口 {{port}}（{{projects}}），无法安全判断哪个是 Karakeep。更新错误的项目会重建无关的应用。",
+        notKarakeep:
+          "无法确认 `{{apiUrl}}` 上运行的是 Karakeep。它可能仍在启动，API 密钥可能有误，或有其他应用占用此端口——更新会重建实际运行的内容。",
+        servedByOther:
+          "`{{name}}` 已停止，但端口 {{port}} 上已有响应——因此为您的 Karakeep URL 提供服务的并非此容器。更新它会重建无关的内容。",
+      },
+      toast: {
+        updating: "正在拉取最新镜像...",
+        waiting: "镜像已拉取——正在等待 Karakeep 启动...",
+        updated: "Karakeep 已更新",
+        alreadyCurrent: "已是最新镜像",
+        finished: "更新完成",
+        startedButUnreachable: "已更新，但 Karakeep 尚未响应",
+        failed: "更新失败",
+      },
+      failure: {
+        network: "Docker 无法连接到镜像仓库",
+        auth: "Docker 无权拉取这些镜像",
+        disk: "磁盘空间不足，无法拉取镜像",
+        conflict: "Karakeep 所需的端口已被占用",
+        unknown: "更新失败",
+        stillRunning: "您的实例仍在运行",
+        notRunning: "您的实例无响应",
+        stillRunningDetail:
+          "Karakeep 仍在 `{{apiUrl}}` 响应，因此您有一个可用的实例。多服务更新可能中途停止，部分服务可能已重建而其他未重建——问题解决后重试可使它们版本一致。",
+        notRunningDetail:
+          "Karakeep 未在 `{{apiUrl}}` 响应。请检查该项目的 `docker compose ps` 和 `docker compose logs`。",
+      },
+      result: {
+        updated: "**已更新。** 已拉取新镜像并重新创建容器。",
+        alreadyCurrent: "**已是最新。** 没有可用的新镜像。",
+        unknownChange: "**更新完成。** 无法读取更新前后的镜像 ID，因此无法确定是否有实际变更。",
+        reachable: "Karakeep 正在 `{{apiUrl}}` 响应。",
+        unreachable: "Karakeep 仍未在 `{{apiUrl}}` 响应。可能需要更长时间，或可通过 `docker compose logs` 查看原因。",
+        failed: "**更新失败。**",
+      },
+    },
     list: {
       favorites: "收藏夹",
       openFavorites: "打开收藏夹",
@@ -665,7 +974,8 @@ export const translations = {
       listName: "名称",
       listNamePlaceholder: "输入列表名称",
       listIcon: "图标",
-      listIconPlaceholder: "请输入表情符号。输入“:”即可打开表情符号选择器。",
+      listIconPlaceholder: "任意表情符号，例如 🔖",
+      listIconInvalid: "必须是单个表情符号",
       listDescription: "描述",
       listDescriptionPlaceholder: "可选描述",
       listParent: "父列表",
@@ -690,7 +1000,7 @@ export const translations = {
         isArchived: "is:archived — 已归档",
         isRead: "is:read — 已读",
         isUnread: "is:unread — 未读",
-        typeLink: "type:link — 链接",
+        typeLink: "type:link — URL",
         typeText: "type:text — 笔记",
         typeImage: "type:image — 图片",
         typeVideo: "type:video — 视频",
@@ -868,12 +1178,14 @@ export const translations = {
         clearCache: "清除缓存",
         delete: "删除",
         viewImage: "查看图片",
-        openLink: "打开链接",
-        copyLink: "复制链接",
-        installChromeExtension: "得到 Chrome 扩展",
-        installFirefoxAddon: "得到 Firefox 插件",
-        installSafariExtension: "得到 Safari 扩展",
-        getBrowserExtension: "获取浏览器扩展",
+        openLink: "打开 URL",
+        copyLink: "复制 URL",
+        addToBrowser: "添加到浏览器",
+        browsers: {
+          chrome: "Chrome",
+          firefox: "Firefox",
+          safari: "Safari",
+        },
       },
       toast: {
         delete: {
@@ -900,6 +1212,7 @@ export const translations = {
         title: "未找到书签",
         description: "请尝试其他关键词",
       },
+      searchResponseInvalid: "服务器返回了意外的搜索响应。",
       onlineSearch: {
         title: (searchText: string) => `在线搜索：${searchText}`,
         action: (searchText: string) => `在线搜索：${searchText}`,
@@ -924,7 +1237,7 @@ export const translations = {
       lists: "列表",
       highlights: "高亮",
       byType: "按类型",
-      links: "链接",
+      links: "URL",
       notes: "笔记",
       assets: "资源",
       bookmarksSaved: "已保存书签",
@@ -989,9 +1302,9 @@ export const translations = {
     },
 
     quickBookmark: {
-      gettingBrowserUrl: "正在获取浏览器链接...",
+      gettingBrowserUrl: "正在获取浏览器 URL...",
       failedToGetBrowserUrl: {
-        title: "获取浏览器链接失败",
+        title: "获取浏览器 URL 失败",
         message: "请确认浏览器已打开且有活动标签页",
       },
       creatingBookmark: "正在创建书签...",

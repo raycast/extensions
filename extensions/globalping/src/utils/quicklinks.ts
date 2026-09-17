@@ -16,7 +16,7 @@ function createExtensionDeeplink(command: string, args: QuicklinkArguments) {
   }
 
   const query = searchParams.toString();
-  const base = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/${command}`;
+  const base = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/${command}`;
 
   return query ? `${base}?${query}` : base;
 }

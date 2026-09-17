@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codex-sessions",
+  "title": "Codex Sessions",
+  "description": "Live Working / Done · Unread status for local Codex sessions — fuzzy-find them from Codex's on-disk state, resume in Desktop or the terminal, and jump between projects",
+  "icon": "extension-icon.png",
+  "author": "jomatsu",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-sessions",
+      "title": "Search Codex Sessions",
+      "mode": "view",
+      "description": "Search all local Codex threads and open them in Codex Desktop or the terminal"
+    },
+    {
+      "name": "open-project",
+      "title": "Open Codex Project",
+      "mode": "view",
+      "description": "Open a project folder in Codex Desktop, ranked by how often you use it"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "codexCliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Codex CLI Path",
+      "description": "Absolute path to the codex binary. Leave empty to auto-detect.",
+      "placeholder": "~/.local/bin/codex"
+    },
+    {
+      "name": "terminalApp",
+      "type": "dropdown",
+      "required": false,
+      "default": "Terminal",
+      "title": "Terminal for Resume",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        }
+      ],
+      "description": "Terminal application used by Resume in Terminal"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

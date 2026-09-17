@@ -1,5 +1,17 @@
 # No More Caffeine Changelog
 
+## [Add Time to Entries] - 2026-07-03
+
+### ✨ Features
+
+- **Backdated Logging** - Choose the exact date and time when logging caffeine; defaults to now so existing behaviour is unchanged
+- **Edit Existing Entries** - Edit the drink type, time, amount description, and caffeine amount of any entry directly from Today's Caffeine (`⌘ E`)
+
+### 🔧 Technical
+
+- `calculateCaffeineMetrics` now accepts optional `newDrinkTimestamp` and `now` parameters so backdated drinks decay correctly in predictions
+- Added `updateIntake` helper to local storage utilities
+
 ## [Fix Default Caffeine Amount] - 2026-06-09
 
 ### 🐛 Bug Fixes

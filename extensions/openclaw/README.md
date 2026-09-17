@@ -1,6 +1,6 @@
 # OpenClaw for Raycast
 
-Chat with your local [OpenClaw](https://github.com/openclaw/openclaw) AI assistant directly from Raycast.
+Chat with your [OpenClaw](https://github.com/openclaw/openclaw) AI assistant from Raycast — on the same Mac as the gateway, or on a node that only talks to a remote gateway.
 
 ## Features
 
@@ -11,8 +11,9 @@ Chat with your local [OpenClaw](https://github.com/openclaw/openclaw) AI assista
 
 ## Requirements
 
-- [OpenClaw](https://github.com/openclaw/openclaw) installed and running locally
-- OpenClaw Gateway with HTTP API enabled
+- [OpenClaw](https://github.com/openclaw/openclaw) installed
+- A reachable OpenClaw **gateway** with the HTTP Chat Completions API enabled
+- This Mac can be the gateway host **or** a node. Do not start a second gateway on node-only Macs.
 
 ## Setup
 
@@ -38,11 +39,16 @@ The gateway will hot-reload the config automatically.
 
 ### 2. Find Your API Token
 
-Your token is in `~/.openclaw/openclaw.json` under `gateway.auth.token`:
+On the **gateway host**, the token is `gateway.auth.token`. On a **node** (`gateway.mode=remote`), use `gateway.remote.token` — it is the same bearer, stored under `remote`.
 
 ```bash
-cat ~/.openclaw/openclaw.json | grep -A 2 '"auth"' | grep token
+# gateway host
+python3 -c 'import json; from pathlib import Path; g=json.loads(Path.home().joinpath(".openclaw/openclaw.json").read_text())["gateway"]; print("auth", bool((g.get("auth") or {}).get("token")))'
+# node
+python3 -c 'import json; from pathlib import Path; g=json.loads(Path.home().joinpath(".openclaw/openclaw.json").read_text())["gateway"]; print("remote", bool((g.get("remote") or {}).get("token")), (g.get("remote") or {}).get("url"))'
 ```
+
+If the token preference is left empty, the extension reads those fields from `~/.openclaw/openclaw.json`. If API Endpoint is still the localhost default and the file has `gateway.remote.url` (`wss://…`), it uses the corresponding `https://` URL.
 
 ### 3. Choose Your Connection Method
 
@@ -52,8 +58,8 @@ When you first run a command, Raycast will prompt for your API Endpoint and Toke
 
 **Use when:** Raycast and OpenClaw are on the same computer.
 
-| Setting | Value |
-|---------|-------|
+| Setting      | Value                    |
+| ------------ | ------------------------ |
 | API Endpoint | `http://127.0.0.1:18789` |
 
 This is the default - no configuration changes needed on OpenClaw.
@@ -64,13 +70,14 @@ This is the default - no configuration changes needed on OpenClaw.
 
 **Use when:** OpenClaw runs on another computer on your home/office network.
 
-| Setting | Value |
-|---------|-------|
+| Setting      | Value                                |
+| ------------ | ------------------------------------ |
 | API Endpoint | `http://<openclaw-machine-ip>:18789` |
 
 **Setup required on the OpenClaw machine:**
 
 1. Find the machine's local IP:
+
    ```bash
    ipconfig getifaddr en0   # WiFi
    # or
@@ -78,6 +85,7 @@ This is the default - no configuration changes needed on OpenClaw.
    ```
 
 2. Edit `~/.openclaw/openclaw.json` and change the gateway bind setting:
+
    ```json
    {
      "gateway": {
@@ -91,6 +99,7 @@ This is the default - no configuration changes needed on OpenClaw.
 4. Use the local IP as your endpoint, e.g., `http://192.168.1.50:18789`
 
 > **⚠️ Security Warning:** Binding to `0.0.0.0` exposes the gateway to your entire local network. Risks include:
+>
 > - Anyone on the same WiFi can attempt connections
 > - Public WiFi = public exposure
 > - If port forwarding is enabled on your router, it could be internet-accessible
@@ -103,8 +112,8 @@ This is the default - no configuration changes needed on OpenClaw.
 
 **Use when:** You want secure access from anywhere - home, office, mobile, etc.
 
-| Setting | Value |
-|---------|-------|
+| Setting      | Value                                     |
+| ------------ | ----------------------------------------- |
 | API Endpoint | `https://<machine-name>.<tailnet>.ts.net` |
 
 **Setup required on the OpenClaw machine:**
@@ -112,19 +121,23 @@ This is the default - no configuration changes needed on OpenClaw.
 1. Install [Tailscale](https://tailscale.com) on both machines and sign in to the same account.
 
 2. On the OpenClaw machine, set up Tailscale serve:
+
    ```bash
    tailscale serve --bg 18789
    ```
 
 3. Get your serve URL:
+
    ```bash
    tailscale serve status
    ```
+
    Output: `https://machine-name.tailca3a37.ts.net`
 
 4. Use that URL as your API Endpoint.
 
 **Benefits:**
+
 - Encrypted connection (HTTPS)
 - Works from anywhere (coffee shop, mobile hotspot, etc.)
 - Only accessible to devices on your Tailscale network
@@ -134,32 +147,39 @@ This is the default - no configuration changes needed on OpenClaw.
 
 #### Connection Method Comparison
 
-| Method | Security | Works Remotely | Setup Complexity | Recommended |
-|--------|----------|----------------|------------------|-------------|
-| Local | High (localhost only) | No | None | ✅ Yes |
-| Local Network | ⚠️ Low (LAN exposure) | No | Low | Only on trusted networks |
-| Tailscale | High (encrypted, private) | Yes | Medium | ✅ Yes - best for remote |
+| Method        | Security                  | Works Remotely | Setup Complexity | Recommended              |
+| ------------- | ------------------------- | -------------- | ---------------- | ------------------------ |
+| Local         | High (localhost only)     | No             | None             | ✅ Yes                   |
+| Local Network | ⚠️ Low (LAN exposure)     | No             | Low              | Only on trusted networks |
+| Tailscale     | High (encrypted, private) | Yes            | Medium           | ✅ Yes - best for remote |
 
 ## Commands
 
 ### Ask OpenClaw
+
 Quick Q&A - type a question, get an answer. Supports passing a question as an argument for automation.
 
 ### Chat with OpenClaw
+
 Full conversation interface with:
+
 - Persistent chat history
 - Multiple conversations
 - Streaming responses
 - Newest messages shown first
 
 ### Ask About Clipboard
+
 Reads your clipboard and lets you ask questions about it. Great for:
+
 - Explaining code snippets
 - Summarizing copied text
 - Translating content
 
 ### Process Selected Text
+
 Select text in any app, then run this command to:
+
 - Explain
 - Summarize
 - Fix Grammar
@@ -176,16 +196,22 @@ Select text in any app, then run this command to:
 ## Troubleshooting
 
 ### "API error: 405 - Method Not Allowed"
+
 The HTTP API endpoint isn't enabled. Add the config shown in Setup step 1.
 
 ### "Failed to connect"
-Make sure OpenClaw gateway is running:
+
+If this Mac is a **node**, `http://127.0.0.1:18789` will fail — nothing should be listening there. Set API Endpoint to the Tailscale HTTPS URL of the gateway (`https://<machine>.<tailnet>.ts.net`). Do not run `openclaw gateway start` on the node.
+
+If OpenClaw is supposed to be local on this Mac:
+
 ```bash
 openclaw gateway status
 ```
 
 ### Token errors
-Verify your token matches `gateway.auth.token` in your OpenClaw config.
+
+On the gateway host use `gateway.auth.token`. On a node use `gateway.remote.token`.
 
 ## Acknowledgments
 

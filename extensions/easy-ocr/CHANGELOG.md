@@ -1,5 +1,9 @@
 # Tesseract OCR Changelog
 
+## [Bug Fixes] - 2026-06-23
+
+- Kept the first OCR result when autodetected languages are not installed in Tesseract
+
 ## [Enhancements] - 2025-04-15
 
 - Added automatic language detection option with either Raycast AI, Franc, LanguageDetect or Tinyld

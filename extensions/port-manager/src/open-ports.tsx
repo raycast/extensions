@@ -10,16 +10,42 @@ import Toasts from "./feedback/Toasts";
 import { useNamedPorts } from "./hooks/useNamedPorts";
 import useProcesses from "./hooks/useProcesses";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
+import { platformShortcut } from "./utilities/platform";
 
 export default function Command() {
   const { primaryPortAction } = getPreferenceValues();
-  const { processes, revalidateProcesses, isLoadingProcesses } = useProcesses();
+  const { processes, revalidateProcesses, isLoadingProcesses, processesError } = useProcesses();
   const { getNamedPort } = useNamedPorts();
 
   const [isShowingDetail, setIsShowingDetail] = useCachedState("showDetail", false);
 
+  const hasProcesses = (processes?.length ?? 0) > 0;
+
   return (
     <List isShowingDetail={isShowingDetail} isLoading={isLoadingProcesses} searchBarPlaceholder="Search Open Ports">
+      {processesError ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Failed to List Ports"
+          description={processesError instanceof Error ? processesError.message : "Unknown error"}
+          actions={
+            <ActionPanel>
+              <Action title="Reload" icon={Icon.ArrowClockwise} onAction={revalidateProcesses} />
+            </ActionPanel>
+          }
+        />
+      ) : !isLoadingProcesses && !hasProcesses ? (
+        <List.EmptyView
+          icon={Icon.Plug}
+          title="No Open Ports"
+          description="No processes are listening on TCP ports."
+          actions={
+            <ActionPanel>
+              <Action title="Reload" icon={Icon.ArrowClockwise} onAction={revalidateProcesses} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {processes?.map((p) => {
         const actions = [
           {
@@ -79,7 +105,10 @@ export default function Command() {
                 key="showDetails"
                 title="Show Details"
                 icon={Icon.QuestionMark}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                shortcut={platformShortcut(
+                  { modifiers: ["cmd", "shift"], key: "d" },
+                  { modifiers: ["ctrl", "shift"], key: "d" },
+                )}
                 onAction={() => setIsShowingDetail((prev) => !prev)}
               />
             ),
@@ -113,7 +142,7 @@ export default function Command() {
           <List.Item
             key={p.pid}
             title={p.name ?? "Untitled Process"}
-            subtitle={isShowingDetail ? "" : p.user ?? ""}
+            subtitle={isShowingDetail ? "" : (p.user ?? "")}
             keywords={p.portInfo
               ?.map((i) => `${i.port}`)
               .concat(p.portInfo?.map((i) => `${i.host}`))
@@ -123,10 +152,17 @@ export default function Command() {
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Name" text={p.name} />
-                    <List.Item.Detail.Metadata.Label title="User" text={`${p.user} (${p.uid})`} />
+                    {p.user !== undefined && (
+                      <List.Item.Detail.Metadata.Label
+                        title="User"
+                        text={p.uid !== undefined ? `${p.user} (${p.uid})` : p.user}
+                      />
+                    )}
                     <List.Item.Detail.Metadata.Label title="PID" text={`${p.pid}`} />
                     {p.path !== undefined && <List.Item.Detail.Metadata.Label title="Path" text={p.path} />}
-                    <List.Item.Detail.Metadata.Label title="Parent PID" text={`${p.parentPid}`} />
+                    {p.parentPid !== undefined && (
+                      <List.Item.Detail.Metadata.Label title="Parent PID" text={`${p.parentPid}`} />
+                    )}
                     {p.parentPath !== undefined && (
                       <List.Item.Detail.Metadata.Label title="Parent Path" text={p.parentPath} />
                     )}

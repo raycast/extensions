@@ -1,55 +1,57 @@
 import { Tool } from "@raycast/api";
-import { resend } from "../lib/resend";
+import { getResend, withResend } from "../lib/oauth";
+import { unwrapResponse } from "./utils";
 
 type Input = {
-  /**
-   * The audience ID to add the contact to.
-   */
-  audienceId: string;
-  /**
-   * The first name of the contact.
-   */
-  firstName: string;
-  /**
-   * The last name of the contact.
-   */
-  lastName: string;
-  /**
-   * The email of the contact.
-   */
+  /** Segment ID to add the contact to. Get it from list-segments. */
+  segmentId?: string;
+  /** Segment name, shown only in the confirmation dialog. */
+  segmentName?: string;
+  /** Legacy audience ID. Prefer segmentId for new calls. */
+  audienceId?: string;
+  /** Legacy audience name, shown only in the confirmation dialog. */
+  audienceName?: string;
+  /** The contact's first name. */
+  firstName?: string;
+  /** The contact's last name. */
+  lastName?: string;
+  /** The contact's email address. */
   email: string;
-  /**
-   * The name of the audience.
-   * This is used for confirmation purposes only.
-   * You can get this from the list-audiences tool first.
-   */
-  audienceName: string;
+  /** Whether the contact should start unsubscribed. */
+  unsubscribed?: boolean;
 };
 
-/**
- * In order to create a contact, an audience ID is required.
- * If the user does not specify which audience to add the contact to,
- * you must ask the user to provide one.
- */
 const tool = async (input: Input) => {
-  return await resend.contacts.create({
-    audienceId: input.audienceId,
-    firstName: input.firstName,
-    lastName: input.lastName,
-    email: input.email,
-  });
+  const response = input.segmentId
+    ? await getResend().contacts.create({
+        email: input.email,
+        segments: [{ id: input.segmentId }],
+        ...(input.firstName ? { firstName: input.firstName } : {}),
+        ...(input.lastName ? { lastName: input.lastName } : {}),
+        ...(input.unsubscribed !== undefined ? { unsubscribed: input.unsubscribed } : {}),
+      })
+    : await getResend().contacts.create({
+        ...(input.audienceId ? { audienceId: input.audienceId } : {}),
+        ...(input.firstName ? { firstName: input.firstName } : {}),
+        ...(input.lastName ? { lastName: input.lastName } : {}),
+        ...(input.unsubscribed !== undefined ? { unsubscribed: input.unsubscribed } : {}),
+        email: input.email,
+      });
+
+  return unwrapResponse(response, "create contact");
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   const infoItems = [];
 
-  infoItems.push({ name: "Audience", value: input.audienceName });
-
-  infoItems.push(
-    { name: "First Name", value: input.firstName },
-    { name: "Last Name", value: input.lastName },
-    { name: "Email", value: input.email },
-  );
+  if (input.segmentName) infoItems.push({ name: "Segment", value: input.segmentName });
+  else if (input.audienceName) infoItems.push({ name: "Audience", value: input.audienceName });
+  if (input.firstName) infoItems.push({ name: "First Name", value: input.firstName });
+  if (input.lastName) infoItems.push({ name: "Last Name", value: input.lastName });
+  infoItems.push({ name: "Email", value: input.email });
+  if (input.unsubscribed !== undefined) {
+    infoItems.push({ name: "Unsubscribed", value: input.unsubscribed ? "Yes" : "No" });
+  }
 
   return {
     message: `New contact:`,
@@ -57,4 +59,4 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   };
 };
 
-export default tool;
+export default withResend(tool);

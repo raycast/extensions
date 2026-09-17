@@ -5,7 +5,7 @@
  * TypeScript building blocks for your backend.
  */
 
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List, Keyboard } from "@raycast/api";
 import { useState } from "react";
 
 interface Component {
@@ -396,19 +396,19 @@ export default function ComponentsCommand() {
                     <Action.CopyToClipboard
                       title="Copy Package Name"
                       content={component.package}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action.OpenInBrowser
                       title="View on npm"
                       url={`https://www.npmjs.com/package/${component.package}`}
-                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      shortcut={Keyboard.Shortcut.Common.Open}
                     />
                     <Action.OpenInBrowser
                       title="Browse All Components"
                       url="https://www.convex.dev/components"
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                      shortcut={Keyboard.Shortcut.Common.OpenWith}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

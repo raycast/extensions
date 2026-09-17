@@ -1,19 +1,9 @@
 import { existsSync, readdirSync } from "fs";
 import { join } from "path";
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { useMemo } from "react";
+import { ActionPanel, Action, getPreferenceValues, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-
-function parsePortlessListOutput(stdout: string): string[] {
-  const urls: string[] = [];
-  const lines = stdout.split("\n");
-  for (const line of lines) {
-    const match = line.match(/https?:\/\/[^\s]+/);
-    if (match) {
-      urls.push(match[0]);
-    }
-  }
-  return urls;
-}
+import { describePortlessError, parsePortlessListOutput } from "./portless";
 
 // Extend PATH so portless is found when installed via nvm, homebrew, or ~/.local/bin.
 // Raycast runs with a minimal PATH that often excludes nvm and homebrew.
@@ -48,12 +38,37 @@ function getExtendedPath(): string {
 }
 
 export default function Command() {
-  const { data, isLoading } = useExec("portless", ["list"], {
+  const preferences = getPreferenceValues<Preferences.List>();
+  // The preference is a file picker, so a configured value is always an
+  // absolute path to an existing file. Empty falls back to a PATH lookup.
+  const executable = preferences.portlessExecutable?.trim() || "portless";
+  const { data, isLoading, error, revalidate } = useExec(executable, ["list"], {
     env: { PATH: getExtendedPath() },
-    parseOutput: ({ stdout, error }) => (error ? [] : parsePortlessListOutput(stdout)),
   });
 
-  const urls = data ?? [];
+  const urls = useMemo(() => parsePortlessListOutput(data ?? ""), [data]);
+
+  // Raycast gives the first and second action in a panel the Enter and
+  // Cmd+Enter shortcuts, so ordering the panel is all the swap requires.
+  const openFirst = preferences.primaryAction === "open";
+
+  if (error) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Unable to Run Portless"
+          description={describePortlessError(error, executable)}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" onAction={revalidate} />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   return (
     <List searchBarPlaceholder="Search active routes..." isLoading={isLoading}>
@@ -70,11 +85,20 @@ export default function Command() {
             icon={Icon.Globe}
             title={url}
             subtitle="Portless route"
-            accessories={[{ icon: Icon.Link, text: "Copy URL" }]}
+            accessories={[
+              openFirst ? { icon: Icon.Globe, text: "Open in Browser" } : { icon: Icon.Link, text: "Copy URL" },
+            ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={url} title="Copy URL" />
-                <Action.OpenInBrowser url={url} />
+                {openFirst
+                  ? [
+                      <Action.OpenInBrowser key="open" url={url} />,
+                      <Action.CopyToClipboard key="copy" content={url} title="Copy URL" />,
+                    ]
+                  : [
+                      <Action.CopyToClipboard key="copy" content={url} title="Copy URL" />,
+                      <Action.OpenInBrowser key="open" url={url} />,
+                    ]}
               </ActionPanel>
             }
           />

@@ -33,8 +33,9 @@ export async function showExtendedHUD(message: string, minDurationMs = MIN_HUD_D
 export async function baseInstantTranslate(onTranslated: (translatedText: string) => Promise<void>) {
   try {
     const preferences = getPreferenceValues<ExtensionPreferences>();
-    const targetLanguage = preferences.lang2; // Use secondary language as target
-    const sourceLanguage = preferences.lang1;
+    const sourceLanguage = preferences.langFrom;
+    const targetLanguage = preferences.lang1;
+    const secondaryTarget = preferences.lang2;
     const proxy = preferences.proxy;
 
     // Get the selected text from any active application
@@ -52,7 +53,7 @@ export async function baseInstantTranslate(onTranslated: (translatedText: string
 
     const result = await simpleTranslate(selectedText, {
       langFrom: sourceLanguage as LanguageCode,
-      langTo: [targetLanguage as LanguageCode],
+      langTo: [targetLanguage as LanguageCode, secondaryTarget as LanguageCode],
       proxy: proxy,
     });
 

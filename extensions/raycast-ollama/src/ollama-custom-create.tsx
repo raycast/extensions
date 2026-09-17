@@ -21,11 +21,7 @@ interface FormData {
 export default function Command(): React.JSX.Element {
   const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, []);
   const { itemProps } = useForm<FormData>({
-    onSubmit() {
-      () => {
-        return;
-      };
-    },
+    onSubmit() {},
     initialValues: {
       creativity: String(Creativity.Medium),
       thinking: String(ThinkingEffort.None),
@@ -63,7 +59,7 @@ The following tags are supported:
     <ActionPanel>
       <Action.CreateQuicklink
         quicklink={{
-          link: `raycast://extensions/massimiliano_pasquini/raycast-ollama/ollama-custom-command?arguments=${encodeURIComponent(
+          link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/massimiliano_pasquini/raycast-ollama/ollama-custom-command?arguments=${encodeURIComponent(
             JSON.stringify({
               prompt: itemProps.prompt.value,
               model: `${itemProps.server.value}:${itemProps.model.value}`,

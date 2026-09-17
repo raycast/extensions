@@ -109,6 +109,14 @@
       "mode": "no-view",
       "subtitle": "PowerToys",
       "icon": "Awake.png"
+    },
+    {
+      "name": "light-switch",
+      "title": "Light Switch",
+      "description": "Toggle light and dark themes using PowerToys Light Switch",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Light Switch.png"
     }
   ],
   "preferences": [
@@ -144,7 +152,8 @@
   },
   "author": "LostViking09",
   "contributors": [
-    "Logan-8f"
+    "Logan-8f",
+    "mitsimi"
   ],
   "platforms": [
     "Windows"

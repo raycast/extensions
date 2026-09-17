@@ -6,6 +6,7 @@ import { findReadingPlanDatabase } from "./logos/installations";
 import { getSqlInstance } from "./utils/sql";
 import { LOGOS_BUNDLE_ID } from "./logos/constants";
 import { encodeForRefLy } from "./utils/encodeForRefLy";
+import { hyphenateGuid } from "./utils/guid";
 
 type Preferences = {
   documentsDbPath?: string;
@@ -171,11 +172,4 @@ function buildReadingPlanUris(plan: Plan) {
 function extractPlanGuid(documentId: string) {
   const parts = documentId.split(":");
   return parts[parts.length - 1];
-}
-
-function hyphenateGuid(hex: string) {
-  if (hex.length !== 32) {
-    return hex;
-  }
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }

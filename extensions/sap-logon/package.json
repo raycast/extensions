@@ -26,16 +26,8 @@
     {
       "name": "connect",
       "title": "Connect to SAP System",
-      "description": "Quick connect to a specific SAP system",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "systemId",
-          "placeholder": "System ID",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "description": "Search by customer and connect to a SAP system",
+      "mode": "view"
     },
     {
       "name": "menu-bar",

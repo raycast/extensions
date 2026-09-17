@@ -7,12 +7,12 @@ import { prettifyDate } from "./utils";
 const tagColors = ["#ee3835", "#a735ee", "#3588ee"];
 
 export default function Command() {
-  const apiKey = getPreferenceValues()?.api_key;
+  const apiKey = getPreferenceValues<Preferences>().api_key;
 
   const [query, setQuery] = useState("");
 
   const { isLoading, data, revalidate } = useFetch<NYTSearchResult>(
-    `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${query}&api-key=${apiKey}`
+    `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${query}&api-key=${apiKey}`,
   );
 
   return (
@@ -24,10 +24,11 @@ export default function Command() {
         </ActionPanel>
       }
       isShowingDetail
-      enableFiltering={false}
+      filtering={false}
       onSearchTextChange={setQuery}
       navigationTitle="Search Articles"
       searchBarPlaceholder="Search through all NYT articles"
+      throttle
     >
       {data?.response.docs
         .filter((p) => p.headline.main && p.web_url)
@@ -42,13 +43,7 @@ export default function Command() {
                   markdown={generateMarkdownFromPost(post)}
                   metadata={
                     <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title="Author"
-                        text={
-                          post.byline.original ||
-                          `By ${post.byline.person[0]?.firstname ?? ""} ${post.byline.person[0]?.lastname ?? ""}`
-                        }
-                      />
+                      <List.Item.Detail.Metadata.Label title="Author" text={post.byline.original ?? ""} />
                       <List.Item.Detail.Metadata.Label title="Published" text={prettifyDate(post.pub_date)} />
                       <List.Item.Detail.Metadata.Label title="Section" text={post.section_name} />
                       {post.keywords.length > 0 ? (
@@ -73,8 +68,8 @@ export default function Command() {
 }
 
 const getIcon = (post: DocsItem) => {
-  if (post.multimedia?.length) {
-    return { source: `https://static01.nyt.com/${post.multimedia[0].url}`, mask: Image.Mask.Circle };
+  if (post.multimedia?.thumbnail) {
+    return { source: post.multimedia.thumbnail.url, mask: Image.Mask.Circle };
   }
 
   return Icon.Circle;

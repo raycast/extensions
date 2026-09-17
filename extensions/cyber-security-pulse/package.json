@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cyber-security-pulse",
+  "title": "Cyber Security Pulse",
+  "description": "Latest important cyber security news, ranked by severity.",
+  "icon": "command-icon.png",
+  "author": "goran_breivik",
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "latest-news",
+      "title": "Cyber Security Pulse",
+      "subtitle": "Security news at a glance",
+      "description": "Lists the latest important cyber security news, ranked by severity.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "feeds",
+          "type": "textfield",
+          "required": false,
+          "title": "Feed Sources",
+          "description": "RSS sources to read. Comma-separated; each is Name|url or a bare url. Edit to add/remove. Empty restores the default set.",
+          "default": "BleepingComputer|https://www.bleepingcomputer.com/feed/, The Hacker News|https://feeds.feedburner.com/TheHackersNews, Krebs on Security|https://krebsonsecurity.com/feed/, CISA Alerts|https://www.cisa.gov/cybersecurity-advisories/all.xml, Schneier on Security|https://www.schneier.com/feed/atom/, SANS ISC|https://isc.sans.edu/rssfeed_full.xml"
+        },
+        {
+          "name": "watchlist",
+          "type": "textfield",
+          "required": false,
+          "title": "Priority Watchlist",
+          "description": "Tech to pin in a ⭐ Watched section. Comma-separated; use | for aliases and pkg: for PURLs. e.g. Linux|kernel, Microsoft|windows, pkg:npm/express, OpenSSL",
+          "default": ""
+        },
+        {
+          "name": "extraCritical",
+          "type": "textfield",
+          "required": false,
+          "title": "Extra Critical Keywords",
+          "description": "Comma-separated keywords that also mark an item 🔴 Critical (matched in title or body). Added to the built-in signals.",
+          "default": ""
+        },
+        {
+          "name": "extraHigh",
+          "type": "textfield",
+          "required": false,
+          "title": "Extra High Keywords",
+          "description": "Comma-separated keywords that also mark an item 🟠 High. Added to the built-in signals.",
+          "default": ""
+        },
+        {
+          "name": "extraMedium",
+          "type": "textfield",
+          "required": false,
+          "title": "Extra Medium Keywords",
+          "description": "Comma-separated keywords that also mark an item 🟡 Medium. Added to the built-in signals.",
+          "default": ""
+        },
+        {
+          "name": "denylist",
+          "type": "textfield",
+          "required": false,
+          "title": "Denylist",
+          "description": "Comma-separated keywords to hide. Any item matching one (in title or summary) is removed from the list. e.g. Android, crypto",
+          "default": ""
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.0",
+    "@types/react": "19.0.10",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

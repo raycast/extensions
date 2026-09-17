@@ -1,5 +1,14 @@
 # Granola Changelog
 
+## [2.2.0 - OAuth Authentication] - 2026-09-07
+
+- Add OAuth sign-in with secure token storage and automatic refresh on macOS and Windows.
+- Fix 404 errors when listing notes by using Granola's current POST request format.
+- Fix folder membership IDs and missing enhanced summaries in exports; prevent empty note nodes from producing literal `undefined` text.
+- Add copyable error diagnostics that exclude credentials and meeting content.
+- Recover server-rejected access tokens automatically and retry reads once, without replaying writes or generation requests.
+- Update Raycast dependencies and the lockfile to resolve dependency advisories.
+
 ## [Sortable date prefixes for exports] - 2026-05-29
 
 - Prefix exported note and transcript filenames with ISO-8601 creation date
@@ -213,4 +222,4 @@ and many many more fixes and improvements, etc!
 - Added Granola extension
 - Added `New Note` command, which starts a new note and recording immediately in Granola
 - Added `Search Notes` command, which allows you to view your notes in a list, view their details, copy their links, or copy their contents as HTML or Markdown
-- Added `AI Notes` AI command, which allows you to use Raycast AI on top of Granola and other AI extensions 
+- Added `AI Notes` AI command, which allows you to use Raycast AI on top of Granola and other AI extensions

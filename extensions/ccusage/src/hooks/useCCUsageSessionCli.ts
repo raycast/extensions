@@ -4,7 +4,7 @@ import { useExec } from "@raycast/utils";
 import { SessionUsageCommandResponse, SessionUsageCommandResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
-import { describeParseFailure } from "../utils/parse-diagnostics";
+import { describeExecFailure, describeParseFailure } from "../utils/parse-diagnostics";
 import { getCcusageVersionSync } from "../utils/ccusage-version";
 import { preferences } from "../preferences";
 
@@ -25,7 +25,12 @@ export const useCCUsageSessionCli = () => {
   const result = useExec(command, args, {
     ...getExecOptions(),
     initialData,
-    parseOutput: ({ stdout }) => {
+    parseOutput: ({ stdout, stderr, error, exitCode, signal, timedOut }) => {
+      const failure = describeExecFailure("ccusage session command", { error, exitCode, signal, timedOut, stderr });
+      if (failure) {
+        throw new Error(failure);
+      }
+
       if (!stdout) {
         return { sessions: [] };
       }

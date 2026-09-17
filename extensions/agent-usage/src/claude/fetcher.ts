@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { execSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { execSync } from "node:child_process";
-import type { ClaudeUsage, ClaudeError } from "./types";
 
-const CLAUDE_CREDENTIALS_PATH = path.join(os.homedir(), ".claude", ".credentials.json");
+import type { ClaudeUsage, ClaudeError } from "./types.ts";
+
+const CLAUDE_CONFIG_DIR_ENV = "CLAUDE_CONFIG_DIR";
+const DEFAULT_CLAUDE_CONFIG_DIR = path.join(os.homedir(), ".claude");
+const CLAUDE_CREDENTIALS_FILE = ".credentials.json";
 const CLAUDE_USAGE_API = "https://api.anthropic.com/api/oauth/usage";
 const KEYCHAIN_SERVICE = "Claude Code-credentials";
 const REQUEST_TIMEOUT = 10000;
@@ -23,6 +25,7 @@ interface ClaudeCredentials {
   rateLimitTier?: string;
   subscriptionType?: string;
   source: CredentialSource;
+  credentialsPath?: string;
   keychainAccount?: string;
   raw: {
     claudeAiOauth?: {
@@ -50,12 +53,27 @@ interface OAuthExtraUsage {
   currency?: string;
 }
 
+interface OAuthLimitScope {
+  model?: { id?: string | null; display_name?: string | null };
+  surface?: string | null;
+}
+
+interface OAuthLimit {
+  kind?: string;
+  group?: string;
+  percent?: number;
+  severity?: string;
+  resets_at?: string;
+  scope?: OAuthLimitScope | null;
+  is_active?: boolean;
+}
+
 interface OAuthUsageResponse {
   five_hour?: OAuthWindow;
   seven_day?: OAuthWindow;
-  seven_day_sonnet?: OAuthWindow;
-  seven_day_opus?: OAuthWindow;
   extra_usage?: OAuthExtraUsage;
+  limits?: OAuthLimit[];
+  [key: string]: OAuthWindow | OAuthExtraUsage | OAuthLimit[] | undefined;
 }
 
 interface OAuthRefreshResponse {
@@ -80,6 +98,13 @@ function pickString(...values: unknown[]): string | undefined {
     }
   }
   return undefined;
+}
+
+export function resolveClaudeCredentialsPaths(env: NodeJS.ProcessEnv = process.env): string[] {
+  const configuredDir = env[CLAUDE_CONFIG_DIR_ENV]?.trim();
+  const configDirs = configuredDir ? [configuredDir, DEFAULT_CLAUDE_CONFIG_DIR] : [DEFAULT_CLAUDE_CONFIG_DIR];
+
+  return [...new Set(configDirs.map((configDir) => path.resolve(configDir, CLAUDE_CREDENTIALS_FILE)))];
 }
 
 function inferPlan(rateLimitTier?: string, subscriptionType?: string): string {
@@ -205,6 +230,7 @@ function writeKeychainPassword(service: string, account: string, value: string):
 function extractCredentials(
   parsed: CredentialsParsed,
   source: CredentialSource,
+  credentialsPath?: string,
   keychainAccount?: string,
 ): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
   const oauth = parsed.claudeAiOauth;
@@ -244,6 +270,7 @@ function extractCredentials(
       rateLimitTier,
       subscriptionType,
       source,
+      credentialsPath,
       keychainAccount,
       raw: parsed,
     },
@@ -251,14 +278,16 @@ function extractCredentials(
   };
 }
 
-function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
-  // Strategy 1: Try credentials file first
-  if (fs.existsSync(CLAUDE_CREDENTIALS_PATH)) {
+export function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
+  // Strategy 1: Try configured/default credential paths first
+  for (const credentialsPath of resolveClaudeCredentialsPaths()) {
+    if (!fs.existsSync(credentialsPath)) continue;
+
     try {
-      const text = fs.readFileSync(CLAUDE_CREDENTIALS_PATH, "utf-8");
+      const text = fs.readFileSync(credentialsPath, "utf-8");
       const parsed = tryParseCredentialJSON(text);
       if (parsed?.claudeAiOauth?.accessToken) {
-        return extractCredentials(parsed, "file");
+        return extractCredentials(parsed, "file", credentialsPath);
       }
     } catch {
       // Fall through to keychain
@@ -271,7 +300,7 @@ function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error
     if (keychainValue) {
       const parsed = tryParseCredentialJSON(keychainValue);
       if (parsed?.claudeAiOauth?.accessToken) {
-        return extractCredentials(parsed, "keychain", readKeychainAccount(KEYCHAIN_SERVICE) ?? undefined);
+        return extractCredentials(parsed, "keychain", undefined, readKeychainAccount(KEYCHAIN_SERVICE) ?? undefined);
       }
     }
   }
@@ -309,7 +338,8 @@ function persistRefreshedCredentials(credentials: ClaudeCredentials, refreshed: 
     writeKeychainPassword(KEYCHAIN_SERVICE, credentials.keychainAccount, JSON.stringify(next));
   } else {
     try {
-      fs.writeFileSync(CLAUDE_CREDENTIALS_PATH, `${JSON.stringify(next, null, 2)}\n`, "utf-8");
+      const credentialsPath = credentials.credentialsPath ?? resolveClaudeCredentialsPaths()[0];
+      fs.writeFileSync(credentialsPath, `${JSON.stringify(next, null, 2)}\n`, "utf-8");
     } catch {
       // Best effort; continue with refreshed token in memory
     }
@@ -347,7 +377,7 @@ async function refreshClaudeAccessToken(credentials: ClaudeCredentials): Promise
   return data;
 }
 
-async function fetchClaudeUsage(
+export async function fetchClaudeUsage(
   credentials: ClaudeCredentials,
 ): Promise<{ usage: ClaudeUsage | null; error: ClaudeError | null }> {
   try {
@@ -449,9 +479,46 @@ async function fetchClaudeUsage(
     }
 
     const sevenDay = data.seven_day;
-    const sevenDayModel = data.seven_day_sonnet ?? data.seven_day_opus;
 
-    const extra = data.extra_usage;
+    // Dynamically collect any seven_day_<model> windows (e.g. sonnet, opus, ...)
+    const modelWindows: Record<string, import("./types.ts").ClaudeRateWindow> = {};
+    const KNOWN_NON_MODEL_KEYS = new Set([
+      "five_hour",
+      "seven_day",
+      "extra_usage",
+      "limits",
+      "spend",
+      "member_dashboard_available",
+    ]);
+    for (const [key, value] of Object.entries(data)) {
+      if (KNOWN_NON_MODEL_KEYS.has(key)) continue;
+      if (!key.startsWith("seven_day_")) continue;
+      const window = value as OAuthWindow | undefined;
+      if (window && typeof window.utilization === "number") {
+        const modelName = key.slice("seven_day_".length);
+        modelWindows[modelName] = {
+          percentageRemaining: clampPercent(100 - window.utilization),
+          resetsIn: formatResetsIn(window.resets_at),
+        };
+      }
+    }
+
+    // Also parse the structured `limits` array for model-scoped weekly limits
+    // (e.g. Fable). These take precedence over any seven_day_* flat key.
+    if (Array.isArray(data.limits)) {
+      for (const limit of data.limits) {
+        if (limit.kind !== "weekly_scoped" || limit.is_active === false) continue;
+        const modelName = limit.scope?.model?.display_name ?? limit.scope?.model?.id;
+        if (!modelName || typeof limit.percent !== "number") continue;
+        const key = modelName.toLowerCase();
+        modelWindows[key] = {
+          percentageRemaining: clampPercent(100 - limit.percent),
+          resetsIn: formatResetsIn(limit.resets_at),
+        };
+      }
+    }
+
+    const extra = data.extra_usage as OAuthExtraUsage | undefined;
     const extraUsage =
       extra?.is_enabled && typeof extra.monthly_limit === "number" && typeof extra.used_credits === "number"
         ? {
@@ -474,13 +541,7 @@ async function fetchClaudeUsage(
               resetsIn: formatResetsIn(sevenDay.resets_at),
             }
           : null,
-      sevenDayModel:
-        sevenDayModel && typeof sevenDayModel.utilization === "number"
-          ? {
-              percentageRemaining: clampPercent(100 - sevenDayModel.utilization),
-              resetsIn: formatResetsIn(sevenDayModel.resets_at),
-            }
-          : null,
+      modelWindows,
       extraUsage,
     };
 
@@ -504,70 +565,4 @@ async function fetchClaudeUsage(
       },
     };
   }
-}
-
-export function useClaudeUsage(enabled = true) {
-  const [usage, setUsage] = useState<ClaudeUsage | null>(null);
-  const [error, setError] = useState<ClaudeError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-  const requestIdRef = useRef(0);
-
-  const fetchData = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-
-    setIsLoading(true);
-    setError(null);
-
-    const { credentials, error: credentialsError } = readClaudeCredentials();
-    if (!credentials) {
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
-      setUsage(null);
-      setError(credentialsError);
-      setIsLoading(false);
-      setHasInitialFetch(true);
-      return;
-    }
-
-    const result = await fetchClaudeUsage(credentials);
-    if (requestId !== requestIdRef.current) {
-      return;
-    }
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
-
-  useEffect(() => {
-    if (!enabled) {
-      requestIdRef.current += 1;
-      setUsage(null);
-      setError(null);
-      setIsLoading(false);
-      setHasInitialFetch(false);
-      return;
-    }
-
-    if (!hasInitialFetch) {
-      void fetchData();
-    }
-  }, [enabled, hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    if (!enabled) {
-      return;
-    }
-
-    await fetchData();
-  }, [enabled, fetchData]);
-
-  return {
-    isLoading: enabled ? isLoading : false,
-    usage: enabled ? usage : null,
-    error: enabled ? error : null,
-    revalidate,
-  };
 }

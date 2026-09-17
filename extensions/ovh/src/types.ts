@@ -77,3 +77,29 @@ export type DomainServiceInfo = {
   status: "autorenewInProgress" | "expired" | "inCreation" | "ok" | "pendingDebt" | "unPaid";
   contactTech: string;
 };
+
+export type Notification = {
+  categories: string[];
+  contacts: Array<{
+    id: string;
+    sentAt: string;
+    status: "BOUNCED" | "DELIVERED" | "DROPPED" | "QUEUED" | "SENT";
+    to: string;
+    type: "EMAIL";
+  }>;
+
+  createdAt: string;
+  id: string;
+  priority: "HIGH" | "LOW" | "MEDIUM";
+  title: string;
+};
+
+export type ContactMean = {
+  createdAt: string;
+  default: boolean;
+  description: string;
+  email: string;
+  id: string;
+  status: "DISABLED" | "ERROR" | "TO_VALIDATE" | "VALID";
+  type: "EMAIL";
+};

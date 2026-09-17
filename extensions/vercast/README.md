@@ -6,7 +6,9 @@ Not affiliated with Vercel.
 
 ## Setup:
 
-- You need to add your Vercel token in the extension settings. You can get it from https://vercel.com/account/tokens.
+- Create a Vercel access token from your personal account settings, then add it to the extension settings. You can create one at https://vercel.com/account/tokens.
+- If you want to use the extension with a Vercel team, make sure the token is scoped to that team. Team API calls require the selected team ID, and Vercel rejects requests when the token does not have access to that team scope.
+- For more details, see Vercel's guide on [using API access tokens](https://vercel.com/kb/guide/how-do-i-use-a-vercel-api-access-token).
 
 ## Current features:
 

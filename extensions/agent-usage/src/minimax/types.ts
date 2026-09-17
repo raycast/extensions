@@ -10,6 +10,10 @@ export interface MiniMaxModelRemain {
   weekly_start_time: number;
   weekly_end_time: number;
   weekly_remains_time: number;
+  current_interval_status?: number;
+  current_interval_remaining_percent?: number;
+  current_weekly_status?: number;
+  current_weekly_remaining_percent?: number;
 }
 
 export interface MiniMaxUsage {

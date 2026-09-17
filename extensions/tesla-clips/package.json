@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tesla-clips",
+  "title": "Tesla Clips",
+  "description": "Manage Tesla dashcam and Sentry clips — merge split recordings or remove merged outputs.",
+  "version": "1.0.0",
+  "icon": "icon.png",
+  "author": "TurboCoder13",
+  "keywords": [
+    "tesla",
+    "clips",
+    "dashcam",
+    "sentry",
+    "video",
+    "merge",
+    "cleanup",
+    "manage",
+    "ffmpeg",
+    "camera"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tesla-clips",
+      "title": "Tesla Clips",
+      "description": "Scan Tesla clip folders, merge split recordings, or remove merged outputs.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultSourcePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Source Folder",
+      "description": "Used when no Finder folders are selected.",
+      "placeholder": "/Users/you/Downloads/TeslaClips"
+    },
+    {
+      "name": "outputRootPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Output Root Folder",
+      "description": "Optional. If empty, merged files are written to each event folder under merged/.",
+      "placeholder": "/Users/you/Movies/TeslaMerged"
+    },
+    {
+      "name": "ffmpegPath",
+      "type": "textfield",
+      "required": false,
+      "default": "ffmpeg",
+      "title": "ffmpeg Binary",
+      "description": "Path to ffmpeg executable used for concatenation. If unresolved, common macOS locations are auto-detected."
+    },
+    {
+      "name": "overwriteExisting",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Overwrite Existing Merged Files",
+      "title": "Overwrite Existing Merged Files",
+      "description": "If enabled, existing merged output files are replaced. Source split clips are not deleted."
+    },
+    {
+      "name": "deleteSourceSegmentsAfterMerge",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Delete Original Split Clips After Merge",
+      "title": "Delete Original Split Clips After Merge",
+      "description": "Delete source split clips only when a merged output is created successfully."
+    },
+    {
+      "name": "openOutputWhenDone",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Open Output Folder After Merge",
+      "title": "Open Output Folder After Merge",
+      "description": "Open the first output folder in Finder after completion."
+    },
+    {
+      "name": "enableDebugLogging",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Debug Logging",
+      "title": "Enable Debug Logging",
+      "description": "Emit verbose logs in Raycast command logs."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@vitest/coverage-v8": "^3.0.9",
+    "eslint": "^9.22.0",
+    "jsdom": "^27.4.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  },
+  "engines": {
+    "node": ">=18.17.0 <23"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run lint && npm run typecheck && npm run test:coverage"
+  },
+  "bugs": {
+    "url": "https://github.com/raycast/extensions/issues"
+  },
+  "homepage": "https://github.com/raycast/extensions/tree/main/extensions/tesla-clips",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raycast/extensions.git",
+    "directory": "extensions/tesla-clips"
+  }
+}

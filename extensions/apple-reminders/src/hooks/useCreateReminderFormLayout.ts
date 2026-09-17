@@ -45,7 +45,7 @@ export const createReminderFieldDefinitions: CreateReminderFieldDefinition[] = [
   {
     id: "dueDate",
     title: "Date",
-    description: "Set a due date or date and time.",
+    description: "Set a due date with natural language (1h, in 10 minutes, tomorrow 3:45pm) or the calendar.",
     icon: Icon.Calendar,
   },
   {

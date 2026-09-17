@@ -32,16 +32,49 @@
 
 ## Supported status pages
 
-The extension auto-detects the provider when you add a URL. Detection order: **Railway → incident.io → Better Stack → Statuspage**.
+The extension auto-detects the provider when you add a URL. Detection order: **Railway → OutageDeck → AWS → Salesforce Trust → Google Cloud → AI Studio → incident.io → Better Stack → Instatus → Statuspage → OnlineOrNot → FireHydrant → Checkly → Uptime.com → RSS**.
 
 | Provider          | Examples                                                       | Detection                             |
 | ----------------- | -------------------------------------------------------------- | ------------------------------------- |
 | **Railway**       | [status.railway.com](https://status.railway.com)               | Hostname match                        |
-| **incident.io**   | [status.openai.com](https://status.openai.com)                 | `/proxy/{host}/component_impacts` API |
+| **OutageDeck**    | [outagedeck.com/providers/github](https://outagedeck.com/providers/github) | Provider URL; normalized public API |
+| **AWS**           | [health.aws.amazon.com](https://health.aws.amazon.com/health/status) | Hostname match                 |
+| **Salesforce Trust** | [status.salesforce.com/products/Heroku](https://status.salesforce.com/products/Heroku), [status.heroku.com](https://status.heroku.com) | Hostname match |
+| **Google Cloud**  | [status.cloud.google.com](https://status.cloud.google.com), `status.cloud.google.com/products/vertex-gemini-api` | Hostname match |
+| **AI Studio**     | [aistudio.google.com/status](https://aistudio.google.com/status) | Hostname match |
+| **incident.io**   | [status.openai.com](https://status.openai.com), [linearstatus.com](https://linearstatus.com) | `/proxy/{host}/component_impacts` JSON API |
 | **Better Stack**  | [status.yachtway.com](https://status.yachtway.com)             | `/index.json` JSON:API                |
+| **Instatus**      | [instat.us](https://instat.us)                                 | `/summary.json`                       |
 | **Statuspage.io** | [status.claude.com](https://status.claude.com), GitHub, Vercel | `/api/v2/summary.json`                |
+| **OnlineOrNot**   | [status.openrouter.ai](https://status.openrouter.ai), `*.onlineornot.com` | Public `/v1/status_pages/{subdomain or hostname}/summary` API |
+| **FireHydrant**   | [status.redis.io](https://status.redis.io)                     | `/data/payload.json`                  |
+| **Checkly**       | [status.mistral.ai](https://status.mistral.ai)                 | `__NUXT_DATA__` payload in page HTML  |
+| **Uptime.com**    | [status.uptime.com](https://status.uptime.com), [uptime.com/statuspage/hackerrank](https://uptime.com/statuspage/hackerrank) | React props payload in page HTML |
+| **RSS fallback**  | [status.x.ai](https://status.x.ai)                             | `/feed.xml` (and common feed paths)   |
 
-incident.io is checked before Statuspage because some Statuspage hosts expose proxy-style URLs that look similar but lack incident.io-only endpoints like `component_impacts`.
+incident.io is checked before Statuspage because some Statuspage hosts expose similar proxy URLs without incident.io endpoints such as `component_impacts`. For redirected pages such as `status.linear.app`, the adapter follows the redirect to `linearstatus.com` and reads the proxy JSON API there.
+
+Instatus must also be checked before Statuspage: Instatus pages serve a Statuspage-compatible `/api/v2/summary.json` shim, so the Statuspage detector matches them even though the payload lacks Statuspage-only fields.
+
+OnlineOrNot is checked after Statuspage. Hosted pages use `{subdomain}.onlineornot.com`. For custom domains such as [status.openrouter.ai](https://status.openrouter.ai), the adapter passes the hostname to the public summary API at `/v1/status_pages/status.openrouter.ai/summary`.
+
+FireHydrant status pages expose current status at `/data/payload.json` on the page origin. The adapter runs before Checkly, which must download and parse the full HTML page.
+
+Checkly has no public JSON API for status pages, so its adapter parses the Nuxt (`__NUXT_DATA__`) payload embedded in the page HTML. It is checked late because its detection requires downloading the full page.
+
+Uptime.com status pages embed their full state as React props in the page HTML; the adapter parses that payload and also calls the page's `/history` JSON endpoint for 90-day uptime and past incidents. Like Checkly, it is checked late because detection requires downloading the page. Both hosted (`uptime.com/statuspage/{slug}`) and custom-domain pages work.
+
+The RSS fallback is checked last and covers pages whose APIs and HTML are blocked (e.g. status.x.ai sits behind a Cloudflare challenge but keeps `/feed.xml` reachable). It is incident-only: components are derived from incident titles, day history marks incident days, and no uptime percentage is available.
+
+The AWS adapter reads the Health Dashboard's public `currentevents` endpoint (UTF-16 JSON) plus the 12-month `historyevents.json` S3 export. Components cover service–region pairs that have reported events; services with no events in the window don't appear.
+
+The OutageDeck adapter accepts any `outagedeck.com/providers/{slug}` URL and reads the keyless public API. It provides a consistent vendor-published status, service breakdown, and active-incident shape for cloud and SaaS providers, based on their official status feeds.
+
+The Salesforce Trust adapter uses the public `api.status.salesforce.com/v1` API and covers any product page on [status.salesforce.com](https://status.salesforce.com) (Heroku, Tableau, Mulesoft, Slack, …). Add `https://status.salesforce.com/products/{Product}` to monitor one product; the bare domain maps to the core Salesforce Services product. `status.heroku.com` is deprecated in favor of Salesforce Trust, so it maps to the Heroku product automatically.
+
+The Google Cloud adapter reads the Service Health dashboard's public `incidents.json` and `products.json` feeds. The dashboard has no per-product URLs, so the adapter supports a path convention: add `https://status.cloud.google.com/products/{product-name}` (e.g. `vertex-gemini-api` for the Gemini API on Vertex, or `vertex-ai` to match all Vertex AI products). The bare domain shows only products with recent incidents, since listing all ~200 as operational adds no signal.
+
+The AI Studio adapter covers [aistudio.google.com/status](https://aistudio.google.com/status) (Gemini API, Gemini Live API, and Google AI Studio for developers using API keys rather than Vertex). The page has no REST API; the adapter calls the same protobuf-JSON RPC the page itself uses, extracting the page's public referrer-restricted API key from the HTML at runtime.
 
 ## Features
 
@@ -75,9 +108,20 @@ src/
   adapters/
     index.ts             # provider detection + registry
     statuspage.ts        # Statuspage.io v2 API
+    aws.ts               # AWS Health Dashboard public events
     betterstack.ts       # Better Stack /index.json API
+    checkly.ts           # Checkly __NUXT_DATA__ HTML payload
     incident-io.ts       # incident.io proxy API
+    instatus.ts          # Instatus public /summary.json API
     railway.ts           # Railway status API
+    outagedeck.ts        # OutageDeck normalized public API
+    onlineornot.ts       # OnlineOrNot public summary API (e.g. OpenRouter)
+    firehydrant.ts       # FireHydrant /data/payload.json (e.g. Redis)
+    rss.ts               # generic RSS feed fallback (e.g. status.x.ai)
+    aistudio.ts          # Google AI Studio / Gemini API incidents RPC
+    googlecloud.ts       # Google Cloud Service Health incidents/products JSON
+    salesforce.ts        # Salesforce Trust API (also covers status.heroku.com)
+    uptimecom.ts         # Uptime.com React props payload + /history JSON
   components/
     site-form.tsx        # add / edit form
     site-detail.tsx      # preview with uptime charts

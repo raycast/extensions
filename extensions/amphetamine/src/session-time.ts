@@ -3,13 +3,6 @@ export interface ParsedTime {
   durationMinutes: number;
 }
 
-export function getDefaultTarget(): Date {
-  const defaultTarget = new Date();
-  defaultTarget.setHours(defaultTarget.getHours() + 1, 0, 0, 0);
-
-  return defaultTarget;
-}
-
 export function formatDateTime(date: Date): string {
   return date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 }

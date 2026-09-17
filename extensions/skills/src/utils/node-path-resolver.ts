@@ -1,5 +1,5 @@
 import { access, readdir } from "node:fs/promises";
-import { cpus } from "node:os";
+import { cpus, userInfo } from "node:os";
 import { join } from "node:path";
 import semver from "semver";
 
@@ -124,7 +124,14 @@ export const resolveVersionManagerPaths = async (): Promise<string[]> => {
   if (!home) return [];
 
   const nvmVersionsDir = join(home, ".nvm", "versions", "node");
-  const staticPathCandidates = [join(home, ".n", "bin"), join(home, ".volta", "bin")];
+  const xdgDataHome = process.env.XDG_DATA_HOME || join(home, ".local", "share");
+  const staticPathCandidates = [
+    join(home, ".n", "bin"),
+    join(home, ".volta", "bin"),
+    // mise and asdf expose every runtime they manage through a shims directory
+    join(xdgDataHome, "mise", "shims"),
+    join(home, ".asdf", "shims"),
+  ];
   const [nvmPaths, fnmPaths, staticPaths] = await Promise.all([
     scanVersionedNodePaths(nvmVersionsDir, (version) => join(nvmVersionsDir, version, "bin")),
     (async () => {
@@ -141,17 +148,56 @@ export const resolveVersionManagerPaths = async (): Promise<string[]> => {
   return [...sortedVersionedPaths, ...staticPaths];
 };
 
+const resolveUsername = (): string | null => {
+  if (process.env.USER) return process.env.USER;
+
+  try {
+    return userInfo().username || null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Runtimes installed outside a version manager or Homebrew. Raycast starts with
+ * the GUI PATH rather than the login shell's, so these locations are invisible
+ * unless they are added explicitly.
+ */
+const resolveToolchainPaths = async (): Promise<string[]> => {
+  const home = process.env.HOME;
+  const candidates: string[] = [];
+
+  if (home) {
+    // Where Bun's official installer puts `bun`/`bunx`
+    candidates.push(join(home, ".bun", "bin"));
+    // Single-user Nix profile
+    candidates.push(join(home, ".nix-profile", "bin"));
+  }
+
+  const username = resolveUsername();
+  if (username) {
+    // Per-user profile of a multi-user Nix / nix-darwin install
+    candidates.push(join("/etc", "profiles", "per-user", username, "bin"));
+  }
+
+  // nix-darwin system profile and the default Nix profile
+  candidates.push("/run/current-system/sw/bin", "/nix/var/nix/profiles/default/bin");
+
+  return resolveExistingPaths(candidates);
+};
+
 const buildEnhancedNodePaths = async (): Promise<string> => {
   const homebrewPrefix = isAppleSilicon() ? "/opt/homebrew" : "/usr/local";
 
   const homebrewPaths = [join(homebrewPrefix, "bin"), join(homebrewPrefix, "lib", "node_modules", ".bin")];
 
-  const [homebrewVersionedNodePaths, versionManagerPaths] = await Promise.all([
+  const [homebrewVersionedNodePaths, versionManagerPaths, toolchainPaths] = await Promise.all([
     resolveHomebrewVersionedNodePaths(homebrewPrefix),
     resolveVersionManagerPaths(),
+    resolveToolchainPaths(),
   ]);
 
-  const systemPaths = ["/usr/bin", "/bin"];
+  const systemPaths = ["/usr/local/bin", "/usr/bin", "/bin"];
 
   if (process.env.HOME) {
     systemPaths.push(`${process.env.HOME}/.npm/bin`, `${process.env.HOME}/.yarn/bin`);
@@ -159,6 +205,7 @@ const buildEnhancedNodePaths = async (): Promise<string> => {
 
   const allPaths = [
     ...versionManagerPaths,
+    ...toolchainPaths,
     ...homebrewVersionedNodePaths,
     ...homebrewPaths,
     ...systemPaths,

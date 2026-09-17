@@ -1,0 +1,438 @@
+import { LocalStorage, OAuth } from "@raycast/api";
+import type {
+  OAuthClientProvider,
+  OAuthDiscoveryState,
+} from "@modelcontextprotocol/sdk/client/auth.js";
+import type {
+  OAuthClientInformationMixed,
+  OAuthClientMetadata,
+  OAuthTokens,
+} from "@modelcontextprotocol/sdk/shared/auth.js";
+import { MOBBIN_ICON } from "./assets";
+import { appendDebugLog } from "./debug-log";
+
+const CLIENT_INFORMATION_KEY = "mobbin.oauth.clientInformation";
+const CODE_VERIFIER_KEY = "mobbin.oauth.codeVerifier";
+const DISCOVERY_STATE_KEY = "mobbin.oauth.discoveryState";
+const CLIENT_SCHEMA_VERSION_KEY = "mobbin.oauth.clientSchemaVersion";
+// Bump when the registered client metadata (redirect URIs, scopes, auth method) changes so a
+// client cached under older metadata is discarded and re-registered automatically — no manual reset.
+const CLIENT_SCHEMA_VERSION = "2";
+// Supabase's OAuth server only accepts redirect URIs that have a scheme AND a host. Raycast's
+// custom-scheme app callbacks (com.raycast:/oauth, com.raycast-x:/oauth) are host-less and rejected
+// with "must have scheme and host", so we standardize on the https web callback.
+const DEFAULT_REDIRECT_URL =
+  "https://raycast.com/redirect?packageName=Extension";
+const SUPPORTED_REDIRECT_URLS = [DEFAULT_REDIRECT_URL];
+
+function parseJson(value: string | undefined): unknown {
+  if (!value) return undefined;
+  try {
+    return JSON.parse(value) as unknown;
+  } catch {
+    return undefined;
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isHttpsUrl(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function validClientInformation(
+  value: unknown,
+): OAuthClientInformationMixed | undefined {
+  if (!isRecord(value) || typeof value.client_id !== "string") return undefined;
+  if (
+    value.redirect_uris !== undefined &&
+    (!Array.isArray(value.redirect_uris) ||
+      !value.redirect_uris.every(isHttpsUrl))
+  )
+    return undefined;
+  return value as OAuthClientInformationMixed;
+}
+
+function validDiscoveryState(value: unknown): OAuthDiscoveryState | undefined {
+  if (!isRecord(value) || !isHttpsUrl(value.authorizationServerUrl))
+    return undefined;
+  if (
+    value.resourceMetadataUrl !== undefined &&
+    !isHttpsUrl(value.resourceMetadataUrl)
+  )
+    return undefined;
+  if (
+    value.authorizationServerMetadata !== undefined &&
+    !isRecord(value.authorizationServerMetadata)
+  )
+    return undefined;
+  if (value.resourceMetadata !== undefined && !isRecord(value.resourceMetadata))
+    return undefined;
+  return value as unknown as OAuthDiscoveryState;
+}
+
+export function createRaycastOAuthClient(): OAuth.PKCEClient {
+  return new OAuth.PKCEClient({
+    redirectMethod: OAuth.RedirectMethod.Web,
+    providerName: "Mobbin",
+    providerId: "mobbin-mcp",
+    providerIcon: MOBBIN_ICON,
+    description:
+      "Connect your Mobbin account to search screens, flows, and sections through Mobbin MCP.",
+  });
+}
+
+export class RaycastMcpOAuthProvider implements OAuthClientProvider {
+  private authorizationCode: string | undefined;
+  private currentRedirectUrl = DEFAULT_REDIRECT_URL;
+
+  constructor(private readonly oauthClient = createRaycastOAuthClient()) {}
+
+  get redirectUrl(): string {
+    return this.currentRedirectUrl;
+  }
+
+  get clientMetadata(): OAuthClientMetadata {
+    return {
+      redirect_uris: SUPPORTED_REDIRECT_URLS,
+      token_endpoint_auth_method: "none",
+      grant_types: ["authorization_code", "refresh_token"],
+      response_types: ["code"],
+      client_name: "Mobbin Raycast",
+      scope: "openid",
+    };
+  }
+
+  async clientInformation(): Promise<OAuthClientInformationMixed | undefined> {
+    const storedSchemaVersion = await LocalStorage.getItem<string>(
+      CLIENT_SCHEMA_VERSION_KEY,
+    );
+    if (storedSchemaVersion !== CLIENT_SCHEMA_VERSION) {
+      await appendDebugLog("oauth.client-information.schema-migration", {
+        storedSchemaVersion,
+        expectedSchemaVersion: CLIENT_SCHEMA_VERSION,
+      });
+      await LocalStorage.removeItem(CLIENT_INFORMATION_KEY);
+      await LocalStorage.setItem(
+        CLIENT_SCHEMA_VERSION_KEY,
+        CLIENT_SCHEMA_VERSION,
+      );
+      return undefined;
+    }
+
+    const storedClientInformation = parseJson(
+      await LocalStorage.getItem<string>(CLIENT_INFORMATION_KEY),
+    );
+    const clientInformation = validClientInformation(storedClientInformation);
+    if (!clientInformation) {
+      if (storedClientInformation !== undefined)
+        await LocalStorage.removeItem(CLIENT_INFORMATION_KEY);
+      await appendDebugLog("oauth.client-information.missing");
+      return undefined;
+    }
+
+    // The redirect URI sent at /authorize is regenerated by Raycast from redirectMethod, so a cached
+    // client whose registered redirect URIs don't include that exact value can never match — discard it.
+    if (
+      "redirect_uris" in clientInformation &&
+      !clientInformation.redirect_uris?.includes(this.redirectUrl)
+    ) {
+      await appendDebugLog(
+        "oauth.client-information.discarded-stale-redirect",
+        {
+          cachedRedirectUris: clientInformation.redirect_uris,
+          requiredRedirectUri: this.redirectUrl,
+        },
+      );
+      await LocalStorage.removeItem(CLIENT_INFORMATION_KEY);
+      return undefined;
+    }
+
+    await appendDebugLog("oauth.client-information.found", {
+      hasClientId: "client_id" in clientInformation,
+      redirectUris:
+        "redirect_uris" in clientInformation
+          ? clientInformation.redirect_uris
+          : undefined,
+    });
+    return clientInformation;
+  }
+
+  async saveClientInformation(
+    clientInformation: OAuthClientInformationMixed,
+  ): Promise<void> {
+    if (!validClientInformation(clientInformation))
+      throw new Error("Mobbin returned invalid OAuth client information.");
+    await appendDebugLog("oauth.client-information.save", {
+      hasClientId: "client_id" in clientInformation,
+      redirectUris:
+        "redirect_uris" in clientInformation
+          ? clientInformation.redirect_uris
+          : undefined,
+      tokenEndpointAuthMethod:
+        "token_endpoint_auth_method" in clientInformation
+          ? clientInformation.token_endpoint_auth_method
+          : undefined,
+    });
+    await LocalStorage.setItem(
+      CLIENT_INFORMATION_KEY,
+      JSON.stringify(clientInformation),
+    );
+  }
+
+  async tokens(): Promise<OAuthTokens | undefined> {
+    const tokens = await this.oauthClient.getTokens();
+    if (!tokens?.accessToken) {
+      await appendDebugLog("oauth.tokens.missing");
+      return undefined;
+    }
+
+    const remainingSeconds =
+      tokens.expiresIn !== undefined
+        ? Math.round(
+            (tokens.updatedAt.getTime() +
+              tokens.expiresIn * 1000 -
+              Date.now()) /
+              1000,
+          )
+        : undefined;
+    await appendDebugLog("oauth.tokens.found", {
+      hasRefreshToken: Boolean(tokens.refreshToken),
+      hasExpiresIn: tokens.expiresIn !== undefined,
+      expiresIn: tokens.expiresIn,
+      remainingSeconds,
+      isExpired: tokens.isExpired(),
+      scope: tokens.scope,
+    });
+
+    return {
+      access_token: tokens.accessToken,
+      token_type: "Bearer",
+      ...(tokens.refreshToken === undefined
+        ? {}
+        : { refresh_token: tokens.refreshToken }),
+      ...(tokens.expiresIn === undefined
+        ? {}
+        : { expires_in: tokens.expiresIn }),
+      ...(tokens.idToken === undefined ? {} : { id_token: tokens.idToken }),
+      ...(tokens.scope === undefined ? {} : { scope: tokens.scope }),
+    };
+  }
+
+  async saveTokens(tokens: OAuthTokens): Promise<void> {
+    await appendDebugLog("oauth.tokens.save", {
+      hasAccessToken: Boolean(tokens.access_token),
+      hasRefreshToken: Boolean(tokens.refresh_token),
+      hasExpiresIn: tokens.expires_in !== undefined,
+      expiresIn: tokens.expires_in,
+      scope: tokens.scope,
+    });
+    await this.oauthClient.setTokens({
+      access_token: tokens.access_token,
+      ...(tokens.refresh_token === undefined
+        ? {}
+        : { refresh_token: tokens.refresh_token }),
+      ...(tokens.id_token === undefined ? {} : { id_token: tokens.id_token }),
+      ...(tokens.expires_in === undefined
+        ? {}
+        : { expires_in: tokens.expires_in }),
+      ...(tokens.scope === undefined ? {} : { scope: tokens.scope }),
+    });
+  }
+
+  async redirectToAuthorization(authorizationUrl: URL): Promise<void> {
+    await appendDebugLog("oauth.redirect.start", {
+      endpoint: `${authorizationUrl.origin}${authorizationUrl.pathname}`,
+      incomingRedirectUri: authorizationUrl.searchParams.get("redirect_uri"),
+      scope: authorizationUrl.searchParams.get("scope"),
+      hasResource: authorizationUrl.searchParams.has("resource"),
+      clientIdPrefix: authorizationUrl.searchParams
+        .get("client_id")
+        ?.slice(0, 8),
+    });
+    const authorizationRequest =
+      await this.createRaycastAuthorizationRequest(authorizationUrl);
+    await appendDebugLog("oauth.redirect.request-created", {
+      redirectUri: authorizationRequest.redirectURI,
+      hasState: Boolean(authorizationRequest.state),
+      hasCodeChallenge: Boolean(authorizationRequest.codeChallenge),
+      url: authorizationRequest.toURL(),
+    });
+    this.currentRedirectUrl = authorizationRequest.redirectURI;
+    await this.saveCodeVerifier(authorizationRequest.codeVerifier);
+    await appendDebugLog("oauth.redirect.authorize.start");
+    const result = await this.oauthClient.authorize(authorizationRequest);
+    await appendDebugLog("oauth.redirect.authorize.resolved", {
+      hasAuthorizationCode: Boolean(result.authorizationCode),
+    });
+    this.authorizationCode = result.authorizationCode;
+  }
+
+  private async createRaycastAuthorizationRequest(
+    authorizationUrl: URL,
+  ): Promise<OAuth.AuthorizationRequest> {
+    const clientId = authorizationUrl.searchParams.get("client_id");
+    if (!clientId)
+      throw new Error("Mobbin OAuth authorization URL is missing a client ID.");
+
+    const endpoint = new URL(authorizationUrl);
+    endpoint.search = "";
+
+    const extraParameters =
+      this.createExtraAuthorizationParameters(authorizationUrl);
+    await appendDebugLog("oauth.redirect.request-options", {
+      endpoint: endpoint.toString(),
+      scope:
+        authorizationUrl.searchParams.get("scope") ??
+        this.clientMetadata.scope ??
+        "",
+      extraParameterKeys: extraParameters ? Object.keys(extraParameters) : [],
+      resource: extraParameters?.resource,
+    });
+
+    return this.oauthClient.authorizationRequest({
+      endpoint: endpoint.toString(),
+      clientId,
+      scope:
+        authorizationUrl.searchParams.get("scope") ??
+        this.clientMetadata.scope ??
+        "",
+      ...(extraParameters ? { extraParameters } : {}),
+    });
+  }
+
+  private createExtraAuthorizationParameters(
+    authorizationUrl: URL,
+  ): Record<string, string> | undefined {
+    const extraParameters: Record<string, string> = {};
+
+    for (const [key, value] of authorizationUrl.searchParams) {
+      if (
+        [
+          "response_type",
+          "client_id",
+          "redirect_uri",
+          "scope",
+          "state",
+          "code_challenge",
+          "code_challenge_method",
+        ].includes(key)
+      ) {
+        continue;
+      }
+      extraParameters[key] = value;
+    }
+
+    return Object.keys(extraParameters).length > 0
+      ? extraParameters
+      : undefined;
+  }
+
+  async saveCodeVerifier(codeVerifier: string): Promise<void> {
+    if (codeVerifier.length < 43 || codeVerifier.length > 128)
+      throw new Error("Mobbin returned an invalid OAuth code verifier.");
+    await appendDebugLog("oauth.code-verifier.save", {
+      length: codeVerifier.length,
+    });
+    await LocalStorage.setItem(CODE_VERIFIER_KEY, codeVerifier);
+  }
+
+  async codeVerifier(): Promise<string> {
+    const verifier = await LocalStorage.getItem<string>(CODE_VERIFIER_KEY);
+    await appendDebugLog("oauth.code-verifier.read", {
+      found: Boolean(verifier),
+      length: verifier?.length,
+    });
+    if (
+      typeof verifier !== "string" ||
+      verifier.length < 43 ||
+      verifier.length > 128
+    )
+      throw new Error(
+        "Missing or invalid OAuth code verifier. Start Mobbin authorization again.",
+      );
+    return verifier;
+  }
+
+  async saveDiscoveryState(state: OAuthDiscoveryState): Promise<void> {
+    await appendDebugLog("oauth.discovery-state.save", {
+      authorizationServerUrl: state.authorizationServerUrl,
+      resourceMetadataUrl: state.resourceMetadataUrl,
+      resource: state.resourceMetadata?.resource,
+    });
+    await LocalStorage.setItem(DISCOVERY_STATE_KEY, JSON.stringify(state));
+  }
+
+  async discoveryState(): Promise<OAuthDiscoveryState | undefined> {
+    const state = validDiscoveryState(
+      parseJson(await LocalStorage.getItem<string>(DISCOVERY_STATE_KEY)),
+    );
+    await appendDebugLog("oauth.discovery-state.read", {
+      found: Boolean(state),
+      authorizationServerUrl: state?.authorizationServerUrl,
+      resourceMetadataUrl: state?.resourceMetadataUrl,
+    });
+    return state;
+  }
+
+  async invalidateCredentials(
+    scope: "all" | "client" | "tokens" | "verifier" | "discovery",
+  ): Promise<void> {
+    await appendDebugLog("oauth.credentials.invalidate", { scope });
+    const tasks: Promise<void>[] = [];
+
+    if (scope === "all" || scope === "client")
+      tasks.push(LocalStorage.removeItem(CLIENT_INFORMATION_KEY));
+    if (scope === "all" || scope === "tokens")
+      tasks.push(this.oauthClient.removeTokens());
+    if (scope === "all" || scope === "verifier")
+      tasks.push(LocalStorage.removeItem(CODE_VERIFIER_KEY));
+    if (scope === "all" || scope === "discovery")
+      tasks.push(LocalStorage.removeItem(DISCOVERY_STATE_KEY));
+
+    await Promise.all(tasks);
+  }
+
+  takeAuthorizationCode(): string | undefined {
+    const code = this.authorizationCode;
+    this.authorizationCode = undefined;
+    return code;
+  }
+}
+
+export async function clearMobbinOAuthState(): Promise<void> {
+  const provider = new RaycastMcpOAuthProvider();
+  await provider.invalidateCredentials("all");
+}
+
+export async function getMobbinOAuthStatus(): Promise<{
+  hasTokens: boolean;
+  hasClientInformation: boolean;
+  isExpired?: boolean;
+}> {
+  const oauthClient = createRaycastOAuthClient();
+  const tokens = await oauthClient.getTokens();
+  const storedSchemaVersion = await LocalStorage.getItem<string>(
+    CLIENT_SCHEMA_VERSION_KEY,
+  );
+  const clientInformation = await LocalStorage.getItem<string>(
+    CLIENT_INFORMATION_KEY,
+  );
+
+  return {
+    hasTokens: Boolean(tokens?.accessToken),
+    // A client cached under an older schema version is discarded on the next clientInformation() call,
+    // so don't report it as present here.
+    hasClientInformation:
+      storedSchemaVersion === CLIENT_SCHEMA_VERSION &&
+      Boolean(validClientInformation(parseJson(clientInformation))),
+    ...(tokens ? { isExpired: tokens.isExpired() } : {}),
+  };
+}

@@ -103,10 +103,7 @@ async function processClient(
   console.log(`Processing client: ${JSON.stringify(client, null, 2)}`);
 
   try {
-    const clientInstance = new Client(
-      { name: "raycast-ai-client", version: "1.0.0" },
-      { capabilities: { prompts: {}, resources: {}, tools: {} } },
-    );
+    const clientInstance = new Client({ name: "raycast-ai-client", version: "1.0.0" }, { capabilities: {} });
 
     let transport: StdioClientTransport;
 

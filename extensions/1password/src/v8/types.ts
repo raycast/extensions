@@ -32,7 +32,7 @@ export type Field = {
   value: string;
 };
 export type Item = {
-  additional_information: string;
+  additional_information?: string;
   category: CategoryName;
   created_at: string;
   favorite?: boolean;

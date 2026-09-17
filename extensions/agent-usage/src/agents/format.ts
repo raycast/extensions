@@ -1,3 +1,5 @@
+import type { Accessory } from "./types.ts";
+
 /**
  * Shared time formatting utilities for agent usage providers.
  */
@@ -49,14 +51,28 @@ export function formatResetTime(value: string | null): string {
 }
 
 /**
- * Returns the percentage of a quota that remains.
+ * Returns the percentage of a quota that remains, or null when the quota is
+ * unknown (a non-positive or non-finite limit). Callers that draw a bar or pie
+ * should prefer this over {@link getRemainingPercent}: an unknown quota must not
+ * be drawn as 0% remaining, which the "Used" display mode would render as a
+ * full — i.e. fully consumed — bar.
+ * @param remaining - Units remaining (not yet consumed)
+ * @param total     - Total quota size
+ * @returns A number 0–100 clamped to [0, 100], or null if unknown.
+ */
+export function getRemainingPercentOrNull(remaining: number, total: number): number | null {
+  if (!Number.isFinite(remaining) || !Number.isFinite(total) || total <= 0) return null;
+  return Math.min(100, Math.max(0, (remaining / total) * 100));
+}
+
+/**
+ * Returns the percentage of a quota that remains, treating an unknown quota as 0.
  * @param remaining - Units remaining (not yet consumed)
  * @param total     - Total quota size
  * @returns A number 0–100 representing the remaining percentage, clamped to [0, 100].
  */
 export function getRemainingPercent(remaining: number, total: number): number {
-  if (total <= 0) return 0;
-  return Math.min(100, Math.max(0, (remaining / total) * 100));
+  return getRemainingPercentOrNull(remaining, total) ?? 0;
 }
 
 /**
@@ -79,4 +95,32 @@ export function formatDuration(seconds: number): string {
   const days = Math.floor(seconds / 86400);
   const hours = Math.floor((seconds % 86400) / 3600);
   return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
+}
+
+/**
+ * Formats a fetch timestamp as a local clock time, e.g. "9:30 PM".
+ *
+ * A clock time is a fact about when the last fetch ran — it never needs to
+ * tick or be re-derived, unlike a relative "ago" which goes stale the moment
+ * it's rendered and (on a menu-bar command that can't tick) freezes at a
+ * misleading value. Returns "" when there is no timestamp.
+ */
+export function formatClock(timestamp: number | undefined): string {
+  if (!timestamp) return "";
+  return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+/** The most recent of the given fetch timestamps, or undefined when none exist. */
+export function latestTimestamp(timestamps: (number | undefined)[]): number | undefined {
+  const known = timestamps.filter((value): value is number => typeof value === "number" && value > 0);
+  return known.length > 0 ? Math.max(...known) : undefined;
+}
+
+export function withCredentialStatus(accessory: Accessory, status?: "unverified"): Accessory {
+  if (!status) return accessory;
+  return {
+    ...accessory,
+    text: `${accessory.text} · Account unverified`,
+    tooltip: `${accessory.tooltip}. Cached result; the current account could not be verified. Use Refresh to check usage.`,
+  };
 }

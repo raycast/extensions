@@ -10,11 +10,21 @@ import {
   Icon,
   popToRoot,
 } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { createDeeplink, DeeplinkType, runAppleScript } from "@raycast/utils";
 import { execSync } from "child_process";
 
 const APPLESCRIPT_TIMEOUT_MS = 5000;
 const RESTART_APPLESCRIPT_TIMEOUT_MS = 15000;
+const QUIT_POLL_INTERVAL_MS = 200;
+
+type RunningApp = {
+  name: string;
+  path?: string;
+};
+
+function escapeAppleScriptString(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
 
 function applicationNameFromPath(path: string): string {
   /* Example:
@@ -26,7 +36,7 @@ function applicationNameFromPath(path: string): string {
   if (!appName) {
     throw new Error("appName not found");
   }
-  return appName.replace(".app", "");
+  return appName.replace(/\.app$/, "");
 }
 
 async function getRunningAppsPaths(): Promise<string[]> {
@@ -48,65 +58,97 @@ async function getRunningAppsPaths(): Promise<string[]> {
   };
 
   try {
+    // Discover running apps via NSWorkspace (a local Cocoa API that needs no Automation
+    // permission). Unlike System Events' `background only is false`, this includes menu-bar /
+    // accessory apps (LSUIElement). We then filter to apps a user would want to quit:
+    //   - drop prohibited (background-only daemons / XPC / bare binaries)
+    //   - drop nested helper bundles (e.g. "Google Chrome Helper.app")
+    //   - regular apps: always keep (Dock apps, including /System/Applications/*)
+    //   - accessory apps: keep only those under /Applications or ~/Applications, so third-party
+    //     menu-bar utilities show up while Apple's UI agents (Dock, Spotlight, …) stay hidden
     const result = await runAppleScript(
-      `
-      set appPaths to {}
-      tell application "System Events"
-        repeat with aProcess in (every process whose background only is false)
-          try
-            set processPath to POSIX path of (file of aProcess)
-            set end of appPaths to processPath
-          end try
-        end repeat
-      end tell
-
-      return appPaths
-    `,
-      { timeout: APPLESCRIPT_TIMEOUT_MS },
+      `ObjC.import('AppKit');
+      const home = ObjC.unwrap($.NSHomeDirectory());
+      const apps = $.NSWorkspace.sharedWorkspace.runningApplications;
+      const count = apps.count;
+      const out = [];
+      for (let i = 0; i < count; i++) {
+        const a = apps.objectAtIndex(i);
+        const policy = Number(a.activationPolicy); // 0 regular, 1 accessory, 2 prohibited
+        if (policy === 2) continue;
+        const url = a.bundleURL;
+        if (!url || url.isNil()) continue;
+        const path = ObjC.unwrap(url.path);
+        if (!path.endsWith('.app')) continue;
+        if (path.indexOf('.app/') !== -1) continue; // nested helper bundle
+        if (policy === 1 && !(path.startsWith('/Applications/') || path.startsWith(home + '/Applications/'))) continue;
+        out.push(path);
+      }
+      JSON.stringify(out);`,
+      { language: "JavaScript", timeout: APPLESCRIPT_TIMEOUT_MS },
     );
 
-    return result.split(", ").map((appPath: string) => appPath.trim());
+    const paths = JSON.parse(result) as string[];
+    if (paths.length > 0) {
+      return paths;
+    }
+    // Empty result is unexpected; fall back to ps before giving up.
+    return getRunningAppsPathsWithPs();
   } catch (error: unknown) {
-    const message = typeof error === "string" ? error : (error as Error)?.message ?? "";
-    const isTimedOut =
-      typeof error === "object" &&
-      error !== null &&
-      "timedOut" in error &&
-      (error as { timedOut: unknown }).timedOut === true;
-    if (message.includes("Not authorized to send Apple events") || isTimedOut) {
-      try {
-        const fallbackPaths = getRunningAppsPathsWithPs();
-        if (fallbackPaths.length > 0) {
-          return fallbackPaths;
-        }
-      } catch {
-        // ignore and fall-through to rethrow below
+    try {
+      const fallbackPaths = getRunningAppsPathsWithPs();
+      if (fallbackPaths.length > 0) {
+        return fallbackPaths;
       }
-      // If we reach here, fallback failed as well; rethrow
-      throw error;
+    } catch {
+      // ignore and fall-through to rethrow below
     }
     throw error;
   }
 }
 
-function quitApp(app: string) {
+function isAppRunning(appPath: string): Promise<boolean> {
   return runAppleScript(
-    `try
-  tell application "${app}" to quit
-  on error error_message number error_number
-      if error_number is equal to -128 then
-      -- the user cancelled the action. no need to error
-      else
-          display dialog error_message
-      end if
-end try`,
-    { timeout: APPLESCRIPT_TIMEOUT_MS },
-  );
+    `ObjC.import('AppKit');
+    const targetPath = ${JSON.stringify(appPath)};
+    const apps = $.NSWorkspace.sharedWorkspace.runningApplications;
+    let running = false;
+    for (let i = 0; i < apps.count; i++) {
+      const url = apps.objectAtIndex(i).bundleURL;
+      if (url && !url.isNil() && ObjC.unwrap(url.path) === targetPath) {
+        running = true;
+        break;
+      }
+    }
+    JSON.stringify(running);`,
+    { language: "JavaScript", timeout: APPLESCRIPT_TIMEOUT_MS },
+  ).then((result) => JSON.parse(result) as boolean);
 }
 
-function restartApp(app: string) {
+async function waitForAppToQuit(appPath: string): Promise<void> {
+  const deadline = Date.now() + APPLESCRIPT_TIMEOUT_MS;
+
+  while (await isAppRunning(appPath)) {
+    if (Date.now() >= deadline) {
+      throw new Error("Application did not quit before the timeout");
+    }
+    await new Promise((resolve) => setTimeout(resolve, QUIT_POLL_INTERVAL_MS));
+  }
+}
+
+async function quitApp(app: RunningApp) {
+  const target = escapeAppleScriptString(app.path ?? app.name);
+  await runAppleScript(`tell application "${target}" to quit`, { timeout: APPLESCRIPT_TIMEOUT_MS });
+
+  if (app.path) {
+    await waitForAppToQuit(app.path);
+  }
+}
+
+function restartApp(app: RunningApp) {
+  const target = escapeAppleScriptString(app.path ?? app.name);
   return runAppleScript(
-    `tell application "${app}"
+    `tell application "${target}"
                             repeat while its running
                               quit
                               delay 0.5
@@ -117,48 +159,50 @@ function restartApp(app: string) {
   );
 }
 
-async function quitAppWithToast(app: string): Promise<boolean> {
+async function quitAppWithToast(app: RunningApp): Promise<boolean> {
   try {
     await quitApp(app);
     showToast({
       style: Toast.Style.Success,
-      title: `Quit ${app}`,
+      title: `Quit ${app.name}`,
     });
     return true;
   } catch {
     showToast({
       style: Toast.Style.Failure,
-      title: `Unable to quit ${app}`,
+      title: `Unable to quit ${app.name}`,
     });
     return false;
   }
 }
 
-async function restartAppWithToast(app: string): Promise<boolean> {
+async function restartAppWithToast(app: RunningApp): Promise<boolean> {
   try {
     await restartApp(app);
     showToast({
       style: Toast.Style.Success,
-      title: `Restarted ${app}`,
+      title: `Restarted ${app.name}`,
     });
     return true;
   } catch {
     showToast({
       style: Toast.Style.Failure,
-      title: `Unable to restart ${app}`,
+      title: `Unable to restart ${app.name}`,
     });
     return false;
   }
 }
 
-function getQuickLinkForApp(appName: string, action: string): string {
-  const context = JSON.stringify({ appName, action });
-  const encodedContext = encodeURIComponent(context);
-  return `raycast://extensions/mackopes/quit-applications/index?context=${encodedContext}`;
+function getQuickLinkForApp(app: Required<RunningApp>, action: string): string {
+  return createDeeplink({
+    type: DeeplinkType.Extension,
+    command: "index",
+    context: { appName: app.name, appPath: app.path, action },
+  });
 }
 
 type CommandProps = {
-  launchContext?: { appName: string; action: string /* quit | restart */ };
+  launchContext?: { appName: string; appPath?: string; action: string /* quit | restart */ };
 };
 
 export default function Command({ launchContext }: CommandProps) {
@@ -174,12 +218,13 @@ export default function Command({ launchContext }: CommandProps) {
   const [searchText, setSearchText] = useState("");
   useEffect(() => {
     if (launchContext && launchContext.appName && launchContext.action) {
-      const { appName, action } = launchContext;
+      const { appName, appPath, action } = launchContext;
+      const app = { name: appName, path: appPath };
 
       if (action === "quit") {
-        void quitAppWithToast(appName);
+        void quitAppWithToast(app);
       } else if (action === "restart") {
-        void restartAppWithToast(appName);
+        void restartAppWithToast(app);
       }
       return;
     }
@@ -187,9 +232,7 @@ export default function Command({ launchContext }: CommandProps) {
     const loadApps = async () => {
       try {
         const appCandidatePaths = await getRunningAppsPaths();
-        const mappedApps = appCandidatePaths
-          .filter((path) => path.endsWith(".app"))
-          .map((path) => ({ name: applicationNameFromPath(path), path }));
+        const mappedApps = appCandidatePaths.map((path) => ({ name: applicationNameFromPath(path), path }));
 
         const excludedNames = preferences.excludeApplications
           ? preferences.excludeApplications.split(",").map((name: string) => name.trim().toLowerCase())
@@ -246,20 +289,13 @@ export default function Command({ launchContext }: CommandProps) {
                 onAction={async () => {
                   let remainingApps = [...apps];
 
+                  // Excluded apps were already removed from `apps` at load time (loadApps),
+                  // so every entry here is safe to quit.
                   for (const app of apps) {
-                    if (
-                      preferences.excludeApplications
-                        .split(",")
-                        .map((name: string) => name.trim())
-                        .includes(app.name)
-                    ) {
-                      continue;
-                    }
-
-                    const success = await quitAppWithToast(app.name);
+                    const success = await quitAppWithToast(app);
 
                     if (success) {
-                      remainingApps = remainingApps.filter((a) => a.name !== app.name);
+                      remainingApps = remainingApps.filter((a) => a.path !== app.path);
                     }
                   }
 
@@ -281,7 +317,7 @@ export default function Command({ launchContext }: CommandProps) {
       {apps.map((app) => (
         <List.Item
           title={app.name}
-          key={app.name}
+          key={app.path}
           id={app.path}
           icon={{ fileIcon: app.path }}
           actions={
@@ -289,11 +325,10 @@ export default function Command({ launchContext }: CommandProps) {
               <Action
                 title="Quit"
                 onAction={async () => {
-                  const success = await quitAppWithToast(app.name);
+                  const success = await quitAppWithToast(app);
 
                   if (success) {
-                    const removedAppIndex = apps.findIndex((a) => a.name === app.name);
-                    setApps((apps) => apps.toSpliced(removedAppIndex, 1));
+                    setApps((prev) => prev.filter((a) => a.path !== app.path));
                   }
 
                   if (searchText) {
@@ -304,16 +339,16 @@ export default function Command({ launchContext }: CommandProps) {
               <Action
                 title="Restart"
                 onAction={async () => {
-                  await restartAppWithToast(app.name);
+                  await restartAppWithToast(app);
                 }}
               />
               <Action.CreateQuicklink
                 title="Create Quit Quicklink"
-                quicklink={{ link: getQuickLinkForApp(app.name, "quit"), name: `Quit ${app.name}` }}
+                quicklink={{ link: getQuickLinkForApp(app, "quit"), name: `Quit ${app.name}` }}
               />
               <Action.CreateQuicklink
                 title="Create Restart Quicklink"
-                quicklink={{ link: getQuickLinkForApp(app.name, "restart"), name: `Restart ${app.name}` }}
+                quicklink={{ link: getQuickLinkForApp(app, "restart"), name: `Restart ${app.name}` }}
               />
             </ActionPanel>
           }

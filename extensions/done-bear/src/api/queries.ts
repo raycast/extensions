@@ -99,7 +99,7 @@ export const PROJECTS_ALL_QUERY = `
 `;
 
 export const TEAMS_QUERY = `
-  query DonebearTeams($first: Int!, $after: String, $workspaceId: String!) {
+  query DonebearTeams($first: Int!, $after: String, $workspaceId: ID!) {
     teams(first: $first, after: $after, filter: { workspaceId: { eq: $workspaceId } }) {
       nodes {
         id

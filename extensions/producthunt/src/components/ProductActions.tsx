@@ -1,15 +1,5 @@
 import React from "react";
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  open,
-  showToast,
-  Toast,
-  Keyboard,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, Color, open, showToast, Toast, Keyboard } from "@raycast/api";
 import { Product, User } from "../types";
 import { ProductDetailView } from "./ProductDetailView";
 import { ProductGalleryView } from "./ProductGalleryView";
@@ -40,6 +30,10 @@ interface ProductActionsProps {
   viewContext: ViewContext;
   showTopics?: boolean;
   onRefresh?: () => void;
+  signedIn?: boolean;
+  onSignIn?: () => void;
+  onSignOut?: () => void;
+  onReauthorize?: () => void;
 }
 
 export function ProductActions({
@@ -52,6 +46,10 @@ export function ProductActions({
   viewContext,
   showTopics = true,
   onRefresh,
+  signedIn,
+  onSignIn,
+  onSignOut,
+  onReauthorize,
 }: ProductActionsProps) {
   const handleUserAction = (user: User, role: string) => {
     if (user.profileUrl) {
@@ -109,7 +107,7 @@ export function ProductActions({
           <Action.Push
             title="View Gallery"
             icon={Icon.AppWindowGrid2x2}
-            shortcut={{ modifiers: ["cmd"], key: "g" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "g" }, Windows: { modifiers: ["ctrl"], key: "g" } }}
             target={<ProductGalleryView product={product} />}
           />
         )}
@@ -120,7 +118,10 @@ export function ProductActions({
             icon={Icon.Hourglass}
             title={product.previousLaunches === 1 ? "View Previous Launch" : "View Previous Launches"}
             url={product.productHubUrl}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "p" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+            }}
           />
         )}
 
@@ -204,16 +205,20 @@ export function ProductActions({
             title="Back to Featured Products"
             icon={Icon.ArrowUp}
             target={<FrontpageWrapper />}
-            shortcut={{ modifiers: ["cmd"], key: "[" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "[" }, Windows: { modifiers: ["ctrl"], key: "[" } }}
           />
         </ActionPanel.Section>
       )}
 
-      {/* Settings Section - always available so users can add/update API credentials */}
-      <ActionPanel.Section title="Settings">
-        <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-        {/* Reload is the only way to apply just-edited API keys: prefs are snapshotted at launch, so a
-            running command (and its Refresh) keeps using the old credentials until the process restarts. */}
+      {/* Account Section */}
+      <ActionPanel.Section title="Account">
+        {signedIn === false && onSignIn && (
+          <Action title="Sign in to Product Hunt" icon={Icon.Person} onAction={onSignIn} />
+        )}
+        {signedIn === true && onSignOut && (
+          <Action title="Sign out of Product Hunt" icon={Icon.Logout} onAction={onSignOut} />
+        )}
+        {onReauthorize && <Action title="Sign in Again" icon={Icon.ArrowClockwise} onAction={onReauthorize} />}
         <Action
           title="Reload Extension"
           icon={Icon.RotateClockwise}

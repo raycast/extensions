@@ -1,5 +1,5 @@
-import { openThawUrl } from "@utils";
+import { runThawAction } from "@utils";
 
 export default async function OpenSettings() {
-  await openThawUrl("open-settings", "Opened Thaw Settings");
+  await runThawAction("open-settings");
 }

@@ -10,8 +10,11 @@ export function useVessloData() {
   const [isLoading, setIsLoading] = useState(true);
   const lastExportedAt = useRef<string | null>(null);
   const lastModifiedTime = useRef<number | null>(null);
+  const isMounted = useRef(true); // Prevent setData after unmount.
 
   useEffect(() => {
+    isMounted.current = true;
+
     // Initial load
     const initialData = loadVessloData();
     setData(initialData);
@@ -43,11 +46,14 @@ export function useVessloData() {
       ) {
         lastExportedAt.current = newData.exportedAt;
         lastModifiedTime.current = newModifiedTime;
-        setData(newData);
+        if (isMounted.current) setData(newData);
       }
     }, REFRESH_INTERVAL);
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted.current = false;
+      clearInterval(interval);
+    };
   }, []); // Empty dependency array - run only once
 
   return { data, isLoading };

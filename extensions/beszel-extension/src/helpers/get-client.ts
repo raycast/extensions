@@ -7,6 +7,7 @@ import { fetch } from "undici";
 
 // @ts-expect-error - types are expecting node fetch but undici is compatible.
 global.fetch = fetch;
+// @ts-expect-error - types are expecting the node EventSource but the eventsource package is compatible.
 global.EventSource = EventSource;
 
 const BESZEL_TOKEN_KEY = "beszel-token";

@@ -126,7 +126,7 @@ function Summary({ searchResult }: { searchResult: SearchResult }) {
             <Action.OpenInBrowser
               title="Continue in Chat"
               icon={Icon.SpeechBubble}
-              url={`raycast://extensions/raycast/raycast-ai/ai-chat?fallbackText=${encodeURIComponent(prompt)}`}
+              url={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/raycast-ai/ai-chat?fallbackText=${encodeURIComponent(prompt)}`}
             />
             <DefaultActions searchResult={searchResult} />
             <Action.CopyToClipboard

@@ -1,6 +1,6 @@
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
-import { resend } from "./resend";
+import { getResend } from "./oauth";
 
 const showSuccessToast = async (items: unknown[], singular: string, plural = `${singular}s`) => {
   const numOfItems = items.length;
@@ -13,6 +13,7 @@ export const useGetDomains = () => {
   const { data, ...rest } = useCachedPromise(
     async () => {
       await showToast(Toast.Style.Animated, "Processing...", "Fetching Domains");
+      const resend = getResend();
       const res = await resend.domains.list();
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
       const data = res.data.data;
@@ -33,6 +34,7 @@ export const useGetAPIKeys = () => {
   const { data, ...rest } = useCachedPromise(
     async () => {
       await showToast(Toast.Style.Animated, "Processing...", "Fetching API Keys");
+      const resend = getResend();
       const res = await resend.apiKeys.list();
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
       const data = res.data.data;
@@ -52,6 +54,7 @@ export const useEmails = () => {
   const { data, ...rest } = useCachedPromise(
     () => async (options) => {
       await showToast(Toast.Style.Animated, "Processing...", "Fetching Emails");
+      const resend = getResend();
       const res = await resend.emails.list({ after: options.lastItem?.id });
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
       const data = res.data.data;
@@ -73,6 +76,7 @@ export const useGetEmail = (id: string) => {
   const { data, ...rest } = useCachedPromise(
     async (id: string) => {
       await showToast(Toast.Style.Animated, "Processing...", "Fetching Emails");
+      const resend = getResend();
       const res = await resend.emails.get(id);
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
       const data = res.data;
@@ -87,14 +91,15 @@ export const useGetEmail = (id: string) => {
   return { email: data, ...rest };
 };
 
-export const useAudiences = () => {
+export const useSegments = () => {
   const { data, ...rest } = useCachedPromise(
     async () => {
-      await showToast(Toast.Style.Animated, "Processing...", "Fetching Audiences");
-      const res = await resend.audiences.list();
+      await showToast(Toast.Style.Animated, "Processing...", "Fetching Segments");
+      const resend = getResend();
+      const res = await resend.segments.list();
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
       const data = res.data.data;
-      await showSuccessToast(data, "audience");
+      await showSuccessToast(data, "segment");
       return data;
     },
     [],
@@ -103,20 +108,21 @@ export const useAudiences = () => {
       onError,
     },
   );
-  return { audiences: data, ...rest };
+  return { segments: data, ...rest };
 };
-export const useContacts = (audienceId?: string) => {
+export const useContacts = (segmentId?: string) => {
   const { data, ...rest } = useCachedPromise(
-    async (audienceId?: string) => {
-      if (!audienceId) return [];
+    async (segmentId?: string) => {
+      if (!segmentId) return [];
       await showToast(Toast.Style.Animated, "Processing...", "Fetching Contacts");
-      const res = await resend.contacts.list({ audienceId });
+      const resend = getResend();
+      const res = await resend.contacts.list({ segmentId });
       if (res.error) throw new Error(res.error.message, { cause: res.error.name });
       const data = res.data.data;
       await showSuccessToast(data, "contact");
       return data;
     },
-    [audienceId],
+    [segmentId],
     {
       initialData: [],
       onError,

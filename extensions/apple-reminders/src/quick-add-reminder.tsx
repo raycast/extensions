@@ -8,14 +8,14 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import * as chrono from "chrono-node";
-import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
+import { format, addDays, addHours, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
 import { createReminder, getData } from "swift:../swift/AppleReminders";
 
 import { NewReminder } from "./create-reminder";
 import { Data } from "./hooks/useData";
 import { normalizePostCreateActions, STORAGE_KEY } from "./hooks/usePostCreateActions";
 import { runPostCreateActions } from "./post-create-shortcuts";
+import { ParsedQuickAddReminder, parseAIResponse, resolveQuickAddReminder } from "./quick-add-reminder-parser";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.QuickAddReminder }>) {
   try {
@@ -28,71 +28,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
 
     if (!environment.canAccess(AI) || preferences.dontUseAI) {
-      const text = props.arguments.text;
-
-      let reminderList;
-      let dueDate;
-      let isDateTime;
-
-      const dateMatch = chrono.parse(text);
-      if (dateMatch && dateMatch.length > 0) {
-        const chronoDate = dateMatch[0].start;
-        isDateTime = chronoDate.isCertain("hour") || chronoDate.isCertain("minute") || chronoDate.isCertain("second");
-        let date = chronoDate.date();
-
-        const hasExplicitDate =
-          chronoDate.isCertain("weekday") ||
-          chronoDate.isCertain("day") ||
-          chronoDate.isCertain("month") ||
-          chronoDate.isCertain("year");
-
-        // If the user only specified a time and it already passed today, schedule it for tomorrow.
-        if (isDateTime && !hasExplicitDate && date.getTime() < Date.now()) {
-          date = addDays(date, 1);
-        }
-
-        dueDate = isDateTime ? date.toISOString() : format(date, "yyyy-MM-dd");
-      }
-
-      const listMatch = text.match(/#(\w+)/);
-
-      if (listMatch) {
-        const data: Data = await getData();
-        reminderList = data.lists.find((list) => list.title.toLowerCase() === listMatch[1].toLowerCase());
-      }
-
-      // Clean all values matching from text and previous white space as title constant
-      const title = text
-        .replace(listMatch ? listMatch[0] : "", "")
-        .replace(dateMatch && dateMatch.length > 0 ? dateMatch[0].text : "", "")
-        .replace(/\s+/g, " ")
-        .trim();
-
-      const reminder: NewReminder = { title, listId: reminderList?.id, dueDate };
-
-      if (props.arguments.notes) {
-        reminder.notes = props.arguments.notes;
-      }
-
-      await createReminder(reminder);
-      const storedActions = await LocalStorage.getItem<string>(STORAGE_KEY);
-      await runPostCreateActions(
-        normalizePostCreateActions(storedActions ? JSON.parse(storedActions) : []),
-        "quick-add",
-      );
-
-      let formattedDueDate = "";
-      if (dueDate) {
-        // Parse the date string back to a Date object for formatting
-        const dateObj = isDateTime ? new Date(dueDate) : new Date(dueDate + "T00:00:00");
-        formattedDueDate = ` due ${format(dateObj, isDateTime ? "PPPpp" : "PPP")}`;
-      }
-      const toastMessage = `Added "${title}" to ${reminderList?.title ?? "default list"}${formattedDueDate}`;
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: toastMessage,
-      });
+      await addReminderFromText(props.arguments.text, props.arguments.notes);
       return;
     }
 
@@ -130,8 +66,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     // Pick a recent time. When referring to that time we should pick tomorrow
     const oneHourAgo = format(subHours(now, 1), "haa"); // won't work well 12:00am-12:59am
     const oneHourAgoTomorrow = format(addDays(subHours(now, 1), 1), "yyyy-MM-dd'T'HH:00:ss");
-    const oneHourFromNow = format(subHours(now, -1), "haa"); // won't work well 11:00pm-11:59pm
-    const oneHourFromNowToday = format(addDays(subHours(now, -1), 1), "yyyy-MM-dd'T'HH:00:ss");
+    const oneHourFromNow = format(addHours(now, 1), "haa"); // won't work well 11:00pm-11:59pm
+    const oneHourFromNowToday = format(addHours(now, 1), "yyyy-MM-dd'T'HH:mm:ss");
 
     const locations = await LocalStorage.getItem("saved-locations");
 
@@ -191,24 +127,31 @@ Here are some examples to help you out:
 
 Task text: "${props.fallbackText ?? props.arguments.text}"`;
 
-    const { description, ...newReminder } = await askAI(prompt);
-    if (props.arguments.notes) {
-      newReminder.notes = props.arguments.notes;
+    const inputText = props.fallbackText ?? props.arguments.text;
+
+    let description: string | undefined;
+    let resolvedReminder: ParsedQuickAddReminder;
+
+    try {
+      const { description: aiDescription, ...newReminder } = await askAI(prompt);
+      description = aiDescription;
+      resolvedReminder = resolveQuickAddReminder(newReminder, inputText, data.lists);
+
+      if (newReminder.dueDate && resolvedReminder.dueDate?.includes("T")) {
+        resolvedReminder.dueDate = applyAiLocalTimezone(resolvedReminder.dueDate);
+      }
+    } catch (error) {
+      console.log(error);
+      await addReminderFromText(inputText, props.arguments.notes);
+      return;
     }
 
-    if (newReminder.dueDate && newReminder.dueDate.includes("T")) {
-      const date = new Date(newReminder.dueDate);
-      const timezoneOffset = date.getTimezoneOffset() * 60 * 1000;
-      newReminder.dueDate = new Date(date.getTime() + timezoneOffset).toISOString();
-    }
-
-    await createReminder(newReminder);
-    const storedActions = await LocalStorage.getItem<string>(STORAGE_KEY);
-    await runPostCreateActions(normalizePostCreateActions(storedActions ? JSON.parse(storedActions) : []), "quick-add");
+    await createReminder(toNewReminder(resolvedReminder, props.arguments.notes));
+    await runStoredPostCreateActions();
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Added reminder: " + description,
+      title: "Added reminder: " + (description ?? resolvedReminder.title),
     });
   } catch (error) {
     console.log(error);
@@ -222,7 +165,7 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
   }
 }
 
-async function askAI(prompt: string): Promise<NewReminder & { description: string }> {
+async function askAI(prompt: string): Promise<ParsedQuickAddReminder> {
   const maxRetries = 3;
   let lastError: Error | undefined;
 
@@ -230,20 +173,11 @@ async function askAI(prompt: string): Promise<NewReminder & { description: strin
     try {
       // Don't specify a model - let Raycast use the user's selected model or default
       const result = await AI.ask(prompt);
-      const jsonMatch = result.match(/[{\\[]{1}([,:{}\\[\]0-9.\-+Eaeflnr-u \n\r\t]|".*?")+[}\]]{1}/gis)?.[0];
-      if (!jsonMatch) {
-        throw new Error("Invalid result returned from AI");
-      }
-      const json = JSON.parse(jsonMatch.trim());
-      if (json.recurrence && !json.dueDate) {
-        throw new Error("Recurrence without dueDate");
-      }
-      return json;
+      return parseAIResponse(result);
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       console.log(`Retrying AI call. Retry count: ${i + 1}/${maxRetries}. Error: ${lastError.message}`);
 
-      // If this is the last retry, throw the error
       if (i === maxRetries - 1) {
         throw lastError;
       }
@@ -251,4 +185,67 @@ async function askAI(prompt: string): Promise<NewReminder & { description: strin
   }
 
   throw lastError || new Error("Max retries reached. Unable to get a valid response from AI.");
+}
+
+async function addReminderFromText(text: string, notes?: string) {
+  const data: Data = await getData();
+  const resolvedReminder = resolveQuickAddReminder({ title: text }, text, data.lists);
+  const reminder = toNewReminder(resolvedReminder, notes);
+
+  await createReminder(reminder);
+  await runStoredPostCreateActions();
+
+  const listTitle = data.lists.find((list) => list.id === reminder.listId)?.title ?? "default list";
+  await showToast({
+    style: Toast.Style.Success,
+    title: `Added "${reminder.title}" to ${listTitle}${formatDueDateForToast(reminder.dueDate)}`,
+  });
+}
+
+async function runStoredPostCreateActions() {
+  const storedActions = await LocalStorage.getItem<string>(STORAGE_KEY);
+  await runPostCreateActions(normalizePostCreateActions(storedActions ? JSON.parse(storedActions) : []), "quick-add");
+}
+
+function toNewReminder(parsed: ParsedQuickAddReminder, notes?: string): NewReminder {
+  const reminder: NewReminder = {
+    title: parsed.title,
+    listId: parsed.listId,
+    dueDate: parsed.dueDate,
+    notes: notes ?? parsed.notes,
+    priority: parsed.priority,
+    address: parsed.address,
+    proximity: parsed.proximity,
+    radius: parsed.radius,
+  };
+
+  if (parsed.recurrence) {
+    reminder.recurrence = parsed.recurrence as NewReminder["recurrence"];
+  }
+
+  return reminder;
+}
+
+function applyAiLocalTimezone(dueDate: string): string {
+  const date = new Date(dueDate);
+  if (Number.isNaN(date.getTime())) {
+    return dueDate;
+  }
+
+  const timezoneOffset = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() + timezoneOffset).toISOString();
+}
+
+function formatDueDateForToast(dueDate?: string): string {
+  if (!dueDate) {
+    return "";
+  }
+
+  const isDateTime = dueDate.includes("T");
+  const dateObj = isDateTime ? new Date(dueDate) : new Date(`${dueDate}T00:00:00`);
+  if (Number.isNaN(dateObj.getTime())) {
+    return "";
+  }
+
+  return ` due ${format(dateObj, isDateTime ? "PPPpp" : "PPP")}`;
 }

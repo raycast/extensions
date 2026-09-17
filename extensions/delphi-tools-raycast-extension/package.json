@@ -1,0 +1,575 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "delphi-tools-raycast-extension",
+  "description": "Run local design and text utilities from delphitools in Raycast",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^26.0.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
+  },
+  "icon": "extension-icon.png",
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "CLI Path",
+      "description": "Path to the delphitools executable. Leave empty to use delphitools from PATH.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "delphitools"
+    },
+    {
+      "name": "defaultOutputDirectory",
+      "title": "Default Output Directory",
+      "description": "Directory for generated files. Leave empty to use the system temporary directory.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "cliDebounceDelay",
+      "title": "CLI Debounce Delay",
+      "description": "Delay in milliseconds before live commands run delphitools after input changes.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "250",
+      "default": "250"
+    }
+  ],
+  "commands": [
+    {
+      "mode": "view",
+      "name": "encode",
+      "title": "Encode Text",
+      "description": "Encode text as base64 or URL encoding",
+      "icon": "encode-icon.png",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "encoding",
+          "placeholder": "Encoding",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Base64",
+              "value": "base64"
+            },
+            {
+              "title": "URL",
+              "value": "url"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "decode",
+      "title": "Decode Text",
+      "description": "Decode base64 or URL-encoded text",
+      "icon": "decode-icon.png",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "encoding",
+          "placeholder": "Encoding",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Base64",
+              "value": "base64"
+            },
+            {
+              "title": "URL",
+              "value": "url"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "hash",
+      "title": "Hash Text",
+      "description": "Hash text with MD5, SHA-1, SHA-256, or SHA-512",
+      "icon": "hash-icon.png",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "algorithm",
+          "placeholder": "Algorithm",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "MD5",
+              "value": "md5"
+            },
+            {
+              "title": "SHA-1",
+              "value": "sha1"
+            },
+            {
+              "title": "SHA-256",
+              "value": "sha256"
+            },
+            {
+              "title": "SHA-512",
+              "value": "sha512"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "contrast",
+      "title": "Check Contrast",
+      "description": "Check WCAG contrast ratio between foreground and background colors",
+      "icon": "contrast-icon.png",
+      "arguments": [
+        {
+          "name": "bg",
+          "placeholder": "Background",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "fg",
+          "placeholder": "Foreground",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "harmony",
+      "title": "Generate Color Harmony",
+      "description": "Generate color harmonies from a base color",
+      "icon": "harmony-icon.png",
+      "arguments": [
+        {
+          "name": "colour",
+          "placeholder": "Base Color",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "harmonyType",
+          "placeholder": "Harmony Type",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Complementary",
+              "value": "complementary"
+            },
+            {
+              "title": "Analogous",
+              "value": "analogous"
+            },
+            {
+              "title": "Triadic",
+              "value": "triadic"
+            },
+            {
+              "title": "Split-Complementary",
+              "value": "split-complementary"
+            },
+            {
+              "title": "Tetradic (Square)",
+              "value": "tetradic"
+            },
+            {
+              "title": "Monochromatic",
+              "value": "monochromatic"
+            },
+            {
+              "title": "Double Complementary",
+              "value": "double-complementary"
+            },
+            {
+              "title": "Compound",
+              "value": "compound"
+            },
+            {
+              "title": "Pentadic",
+              "value": "pentadic"
+            },
+            {
+              "title": "Analogous Accent",
+              "value": "analogous-accent"
+            },
+            {
+              "title": "Golden Ratio",
+              "value": "golden"
+            },
+            {
+              "title": "Near Complementary",
+              "value": "near-complementary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "colorblind",
+      "title": "Simulate Color Blindness",
+      "description": "Simulate how a color appears with color blindness",
+      "icon": "colorblind-icon.png",
+      "arguments": [
+        {
+          "name": "colour",
+          "placeholder": "Color",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "type",
+          "placeholder": "Color Blindness Type",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Normal",
+              "value": "normal"
+            },
+            {
+              "title": "Protanopia",
+              "value": "protanopia"
+            },
+            {
+              "title": "Deuteranopia",
+              "value": "deuteranopia"
+            },
+            {
+              "title": "Tritanopia",
+              "value": "tritanopia"
+            },
+            {
+              "title": "Protanomaly",
+              "value": "protanomaly"
+            },
+            {
+              "title": "Deuteranomaly",
+              "value": "deuteranomaly"
+            },
+            {
+              "title": "Tritanomaly",
+              "value": "tritanomaly"
+            },
+            {
+              "title": "Achromatopsia",
+              "value": "achromatopsia"
+            },
+            {
+              "title": "Achromatomaly",
+              "value": "achromatomaly"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "simulate-colour-blindness-image",
+      "title": "Simulate Color Blindness (Image)",
+      "description": "Simulate how an image appears with color blindness",
+      "icon": "colorblind-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "barcode",
+      "title": "Generate Barcode",
+      "description": "Generate a barcode image from text",
+      "icon": "barcode-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "clip",
+      "title": "Trim Transparent Edges",
+      "description": "Trim transparent edges from PNG images",
+      "icon": "clip-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "convert",
+      "title": "Convert Images",
+      "description": "Convert images between formats with optional resize",
+      "icon": "convert-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "favicon",
+      "title": "Favicon Generator",
+      "description": "Generate multi-size favicon files from an image",
+      "icon": "favicon-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "crop",
+      "title": "Social Media Cropper",
+      "description": "Crop images to a social media aspect ratio",
+      "icon": "crop-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "impose",
+      "title": "Print Imposer",
+      "description": "Impose a PDF for booklet or n-up printing",
+      "icon": "impose-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "matte",
+      "title": "Matte Generator",
+      "description": "Place images on a square or aspect-ratio matte",
+      "icon": "matte-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "meta",
+      "title": "Meta Tag Generator",
+      "description": "Generate HTML meta tags",
+      "icon": "meta-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "tailwind-shades",
+      "title": "Generate Tailwind Shades",
+      "description": "Generate Tailwind CSS color shades from a base color",
+      "icon": "tailwind-shades-icon.png",
+      "arguments": [
+        {
+          "name": "colour",
+          "placeholder": "Base Color",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "mode",
+          "placeholder": "Generation Mode",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Classic",
+              "value": "classic"
+            },
+            {
+              "title": "Vivid",
+              "value": "vivid"
+            },
+            {
+              "title": "Muted",
+              "value": "muted"
+            },
+            {
+              "title": "Hue Shift",
+              "value": "hue-shift"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "line-height",
+      "title": "Compute Line Height",
+      "description": "Compute named line-height ratios for a font size",
+      "icon": "line-height-icon.png",
+      "arguments": [
+        {
+          "name": "fontSize",
+          "placeholder": "Font Size",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "paper",
+      "title": "Paper Sizes",
+      "description": "Look up paper size dimensions",
+      "icon": "paper-icon.png",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Paper Size",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "font-info",
+      "title": "Font File Explorer",
+      "description": "Inspect metadata from TTF, OTF, WOFF, or WOFF2 font files",
+      "icon": "font-info-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "shavian",
+      "title": "Transliterate to Shavian",
+      "description": "Transliterate English text to the Shavian alphabet",
+      "icon": "shavian-icon.png",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "noise",
+      "title": "Add Noise to Images",
+      "description": "Add color noise overlay to images",
+      "icon": "noise-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "palette",
+      "title": "Palette Generator",
+      "description": "Generate color palettes using various strategies",
+      "icon": "palette-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "preflight",
+      "title": "PDF Preflight",
+      "description": "Analyze PDF for print-readiness issues",
+      "icon": "preflight-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "qr",
+      "title": "QR Code Generator",
+      "description": "Generate styled QR codes",
+      "icon": "qr-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "qr-vcard",
+      "title": "QR Code Generator VCard",
+      "description": "Generate styled vCard QR codes",
+      "icon": "qr-vcard-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "regex",
+      "title": "Regex Tester",
+      "description": "Test regex patterns against text",
+      "icon": "regex-icon.png",
+      "arguments": [
+        {
+          "name": "pattern",
+          "placeholder": "Pattern",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "mode": "view",
+      "name": "rmbg",
+      "title": "Background Remover",
+      "description": "Remove background from images",
+      "icon": "rmbg-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "scroll",
+      "title": "Seamless Scroll Generator",
+      "description": "Split images for Instagram carousel scrolls",
+      "icon": "scroll-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "split",
+      "title": "Image Splitter",
+      "description": "Split an image into a grid of tiles",
+      "icon": "split-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "svgo",
+      "title": "SVG Optimiser",
+      "description": "Optimise and minify SVG files",
+      "icon": "svgo-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "trace",
+      "title": "Image Tracer",
+      "description": "Trace raster images to SVG vectors",
+      "icon": "trace-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "watermark",
+      "title": "Watermarker",
+      "description": "Composite a watermark onto images",
+      "icon": "watermark-icon.png"
+    },
+    {
+      "mode": "view",
+      "name": "zine",
+      "title": "Zine Imposer",
+      "description": "Impose 8 images into a single-sheet mini-zine layout",
+      "icon": "zine-icon.png"
+    }
+  ],
+  "title": "Delphitools",
+  "author": "abeldebruijn",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Design Tools"
+  ]
+}

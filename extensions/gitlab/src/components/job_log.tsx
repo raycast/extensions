@@ -1,14 +1,12 @@
 import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import useInterval from "use-interval";
-import { getCIRefreshInterval, getGitLabGQL, gitlab } from "../common";
-import { getErrorMessage, getIdFromGqlId, showErrorToast } from "../utils";
+import { getGitLabGQL, gitlab } from "../common";
+import { getIdFromGqlId } from "../utils";
+import { showFailureToast } from "@raycast/utils";
 import { Job } from "./jobs";
 
 const MAX_LOG_CHARS = 100_000;
-const MIN_LOG_REFRESH_MS = 5000;
 
-const TERMINAL_STATUSES = new Set(["success", "failed", "canceled", "skipped", "manual"]);
 const ESC = String.fromCharCode(27);
 const BEL = String.fromCharCode(7);
 const ANSI_REGEX = new RegExp(
@@ -18,11 +16,6 @@ const ANSI_REGEX = new RegExp(
   ].join("|"),
   "g",
 );
-
-function isTerminal(status: string | undefined): boolean {
-  if (!status) return false;
-  return TERMINAL_STATUSES.has(status.toLowerCase());
-}
 
 function stripAnsi(input: string): string {
   return input.replace(ANSI_REGEX, "");
@@ -54,8 +47,8 @@ export function JobLogView(props: { job: Job; projectFullPath: string }) {
     try {
       const text = await gitlab.getJobTrace(props.job.projectId, numericJobId.current);
       setTrace(text);
-    } catch (e) {
-      showErrorToast(getErrorMessage(e), "Failed to load job log");
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to load job log" });
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +61,7 @@ export function JobLogView(props: { job: Job; projectFullPath: string }) {
         setStatus(data.status);
       }
     } catch {
-      // status fetch failure is non-fatal — keep polling the trace
+      // status fetch failure is non-fatal — keep showing the trace
     }
     await load();
   }
@@ -76,13 +69,6 @@ export function JobLogView(props: { job: Job; projectFullPath: string }) {
   useEffect(() => {
     load();
   }, []);
-
-  const intervalMs = isTerminal(status)
-    ? null
-    : Math.max(MIN_LOG_REFRESH_MS, getCIRefreshInterval() ?? MIN_LOG_REFRESH_MS);
-  useInterval(() => {
-    refreshStatusAndTrace();
-  }, intervalMs);
 
   const browserUrl = getGitLabGQL().urlJoin(`${props.projectFullPath}/-/jobs/${numericJobId.current}`);
 

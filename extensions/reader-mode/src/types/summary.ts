@@ -2,13 +2,7 @@
  * Summary style types for article summarization
  */
 export type SummaryStyle =
-  | "overview"
-  | "opposite-sides"
-  | "five-ws"
-  | "eli5"
-  | "entities"
-  | "comprehensive"
-  | "at-a-glance";
+  "overview" | "opposite-sides" | "five-ws" | "eli5" | "entities" | "comprehensive" | "at-a-glance";
 
 /**
  * Supported languages for translation (BCP 47 locale codes)

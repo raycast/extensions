@@ -335,7 +335,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.9",
     "@raycast/utils": "^1.17.0",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

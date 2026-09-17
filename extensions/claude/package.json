@@ -101,14 +101,14 @@
     }
   ],
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.18.0",
+    "@anthropic-ai/sdk": "^0.115.0",
     "@raycast/api": "^1.78.0",
     "@raycast/utils": "^1.14.1",
     "@types/uuid": "^9.0.0",
     "cross-fetch": "^4.0.0",
     "csv-parse": "^5.5.3",
     "raycast": "^1.0.8",
-    "uuid": "^9.0.0"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
@@ -129,5 +129,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "fast-uri": "3.1.5"
+  }
 }

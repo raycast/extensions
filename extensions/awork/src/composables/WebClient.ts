@@ -95,7 +95,7 @@ const authorizeClient = async () => {
         await client.setTokens(newTokens);
         notifyTokenChanged();
       } catch {
-        confirmAlert({
+        await confirmAlert({
           title: "Something went wrong",
           message: "Please try again.",
           primaryAction: {
@@ -192,7 +192,7 @@ const getUserData = async () => {
       await LocalStorage.setItem("URL", data.workspace.url);
     })
     .catch((error: Error) => {
-      showFailureToast("Failed to fetch user data", error);
+      showFailureToast(error, { title: "Failed to fetch user data" });
       console.error(error);
     });
 };

@@ -1,7 +1,7 @@
-import { List, ActionPanel, Icon } from "@raycast/api";
-import { getFavicon, usePromise } from "@raycast/utils";
-import { useState, useRef } from "react";
-import { getBrowserTabs } from "./utils/browser";
+import { List, Action, ActionPanel, Icon } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
+import { useEffect, useState, useRef } from "react";
+import { useCachedBrowserTabs } from "./utils/use-cached-browser-tabs";
 import {
   SwitchToTabAction,
   OpenNewTabAction,
@@ -11,17 +11,26 @@ import {
   CopyTitleAction,
   CreateQuicklinkAction,
   DeduplicateTabsAction,
+  OpenInHeliumAction,
   ReloadAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
+import { filterPendingCloseTabs, releaseConfirmedPendingCloseIds, sharedPendingCloseIds } from "./utils/pending-close";
+import { isTabCloseAvailable } from "./utils/browser-control";
+
+const BROWSER_EXTENSION_URL = "https://www.raycast.com/browser-extension";
 
 export default function SearchTabs() {
   const [searchText, setSearchText] = useState("");
-  const { data: tabs, isLoading, mutate, revalidate } = usePromise(getBrowserTabs);
-  const pendingCloseIdsRef = useRef(new Set<string>());
+  const { data: tabs, freshTabs, isLoading, mutate, revalidate } = useCachedBrowserTabs();
+  const pendingCloseIdsRef = useRef(sharedPendingCloseIds);
 
-  // Keep tabs hidden while their close request is still in flight.
-  const tabsWithoutPendingClose = tabs ? tabs.filter((t) => !pendingCloseIdsRef.current.has(t.id)) : [];
+  useEffect(() => {
+    if (freshTabs) releaseConfirmedPendingCloseIds(pendingCloseIdsRef.current, freshTabs);
+  }, [freshTabs]);
+
+  // Keep tabs hidden while Helium is still reporting stale state after close.
+  const tabsWithoutPendingClose = filterPendingCloseTabs(tabs, pendingCloseIdsRef.current);
 
   // Then filter by search text
   const filteredTabs = tabsWithoutPendingClose ? filterSearchable(tabsWithoutPendingClose, searchText) : [];
@@ -37,7 +46,24 @@ export default function SearchTabs() {
         <List.EmptyView
           icon={Icon.Window}
           title="No Tabs Found"
-          description="Make sure your browser is running with open tabs"
+          description={
+            isTabCloseAvailable
+              ? "Make sure your browser is running with open tabs"
+              : "On Windows, tabs come from Raycast's browser extension — install it in Helium and make sure Helium is running. It reports tabs from every browser it is installed in, so tabs from other browsers can appear here too."
+          }
+          actions={
+            isTabCloseAvailable ? undefined : (
+              <ActionPanel>
+                {/* Opened in Helium specifically — installing it in another browser would not help. */}
+                <OpenInHeliumAction
+                  title="Get Raycast Browser Extension"
+                  icon={Icon.Download}
+                  url={BROWSER_EXTENSION_URL}
+                />
+                <Action.CopyToClipboard title="Copy Link" content={BROWSER_EXTENSION_URL} />
+              </ActionPanel>
+            )
+          }
         />
       )}
       {filteredTabs.map((tab) => (

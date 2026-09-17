@@ -1,4 +1,4 @@
-import pinyin from "pinyin";
+import { pinyin } from "pinyin-pro";
 import { LanguageHandler } from "./base";
 
 export class PinyinHandler implements LanguageHandler {
@@ -21,7 +21,7 @@ export class PinyinHandler implements LanguageHandler {
     if (chineseChars.length > 0) {
       return chineseChars.reduce((formatted, matchItem) => {
         const [char] = matchItem;
-        const pinyinCollection = pinyin(char, { style: pinyin.STYLE_NORMAL });
+        const pinyinCollection = pinyin(char, { toneType: "none", type: "array", v: true });
         return formatted.replace(char, pinyinCollection.join("") + " ");
       }, text);
     } else {

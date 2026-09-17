@@ -1,9 +1,10 @@
 import { useContext } from "react";
-import { Grid } from "@raycast/api";
+import { Color, Grid } from "@raycast/api";
 import Actions from "@/actions/actions";
 import { v4 as AHD } from "uuid";
 import { getIcon } from "u/getIcon";
 import { Context } from "u/context";
+import { iconsType } from "u/options";
 
 interface DayProps {
   type: "day" | "week" | "today" | "saturday" | "sunday" | "empty" | "name";
@@ -28,6 +29,17 @@ export function Day({ type, day, hasEvents, name }: DayProps) {
   const now = new Date();
   const todayId = `SID:${now.getDate()}`;
 
+  // Glyph SVGs are drawn in plain black; a theme-aware tint makes them adapt
+  // to light/dark mode. Today and weekend glyphs carry their own accent color.
+  const glyphTint =
+    iconsType === "glyph"
+      ? type === "name"
+        ? Color.SecondaryText
+        : type === "day"
+          ? Color.PrimaryText
+          : undefined
+      : undefined;
+
   return (
     <Grid.Item
       id={type === "today" ? todayId : AHID}
@@ -41,7 +53,7 @@ export function Day({ type, day, hasEvents, name }: DayProps) {
                   dark: "#666666",
                   adjustContrast: true,
                 }
-              : undefined,
+              : glyphTint,
         },
         tooltip: "",
       }}

@@ -11,15 +11,34 @@ export const KillSignal = {
   TERM: "15",
 };
 
-export type KillSignal = typeof KillSignal[keyof typeof KillSignal];
+export type KillSignal = (typeof KillSignal)[keyof typeof KillSignal];
+
+export function resolveKillSignal(preference: string): KillSignal {
+  if (preference === KillSignal.KILL || preference === KillSignal.TERM) {
+    return preference;
+  }
+  return KillSignal.TERM;
+}
 
 export async function kill(pid: number | number[], signal: KillSignal) {
   const pids = pid instanceof Array ? pid : [pid];
+  if (process.platform === "win32") {
+    await Promise.all(
+      pids.map((processId) => runCommand("taskkill.exe", ["/PID", String(processId), "/F"], { timeout: 2_000 })),
+    );
+    return;
+  }
+
   await runCommand("/bin/kill", [`-${signal}`, ...pids.map(String)], { timeout: 2_000 });
 }
 
 export async function killall(processname: string | string[], signal: KillSignal) {
   const processNames = processname instanceof Array ? processname : [processname];
+  if (process.platform === "win32") {
+    await Promise.all(processNames.map((name) => runCommand("taskkill.exe", ["/IM", name, "/F"], { timeout: 5_000 })));
+    return;
+  }
+
   await runCommand("/usr/bin/killall", [`-${signal}`, ...processNames], { timeout: 5_000 });
 }
 
@@ -31,7 +50,7 @@ export async function killProcess(
     killParent?: boolean;
     onKilled?: () => void;
     onError?: (error: unknown) => void;
-  }>
+  }>,
 ) {
   const { killSignal = KillSignal.TERM, killAll = false, killParent = false, onError, onKilled } = options ?? {};
 
@@ -53,8 +72,8 @@ export async function killProcess(
 
   try {
     await killer();
-    onKilled && onKilled();
+    onKilled?.();
   } catch (e) {
-    onError && onError(e);
+    onError?.(e);
   }
 }

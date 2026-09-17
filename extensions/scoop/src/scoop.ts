@@ -1,5 +1,4 @@
-import { exec } from "node:child_process";
-import type { ExecException } from "node:child_process";
+import { exec, execFile } from "node:child_process";
 import { promisify } from "node:util";
 import {
   ScoopPackage,
@@ -10,6 +9,7 @@ import {
 } from "./types/index.types";
 
 export const execp = promisify(exec);
+export const execFilep = promisify(execFile);
 
 export class ScoopManager {
   private static instance: ScoopManager;
@@ -40,6 +40,32 @@ export class ScoopManager {
       });
   }
 
+  private parseScoopSearch(stdout: string): ScoopPackage[] {
+    const lines = this.stripAnsi(stdout).trim().split("\n");
+    const packages: ScoopPackage[] = [];
+    let bucket = "";
+
+    for (const line of lines) {
+      const bucketMatch = line.match(/^'(.+)' bucket:$/);
+      if (bucketMatch) {
+        bucket = bucketMatch[1];
+        continue;
+      }
+
+      const packageMatch = line.match(/^\s+(.+?)\s+\((.+)\)(?:\s+-->\s+includes\s+'(.+)')?$/);
+      if (!packageMatch) continue;
+
+      packages.push({
+        Name: packageMatch[1],
+        Version: packageMatch[2],
+        Source: bucket,
+        Binaries: packageMatch[3] || "",
+      });
+    }
+
+    return packages;
+  }
+
   public static getInstance() {
     if (!ScoopManager.instance) {
       ScoopManager.instance = new ScoopManager();
@@ -49,16 +75,19 @@ export class ScoopManager {
 
   public async search(query: string): Promise<ScoopPackage[]> {
     try {
-      const { stdout } = await execp(`scoop search ${query}`);
-      return this.parseScoopTable(stdout, (parts) => ({
-        Name: parts[0],
-        Version: parts[1],
-        Source: parts[2],
-        Binaries: parts[3] || "",
-      }));
+      const { stdout } = await execFilep("scoop-search", [query]);
+      return this.parseScoopSearch(stdout);
     } catch (e) {
-      const error = e as ExecException & { stdout: string; stderr: string };
-      if (error.stdout?.includes("Couldn't find any packages")) {
+      const error = e as NodeJS.ErrnoException & { stdout?: string; stderr?: string };
+      if (error.code === "ENOENT") {
+        throw new Error("ScoopDash Search is not installed. Run `scoop install scoop-search` and try again.");
+      }
+
+      if (
+        error.stdout?.includes("No matches found") ||
+        error.stderr?.includes("No matches found") ||
+        error.stdout?.includes("Couldn't find any packages")
+      ) {
         return [];
       }
       console.error("Error searching for scoop packages:", error);
@@ -154,6 +183,10 @@ export class ScoopManager {
 
   public async update(packageName: string): Promise<void> {
     await execp(`scoop update ${packageName}`);
+  }
+
+  public async updateAll(): Promise<void> {
+    await execp("scoop update *");
   }
 
   public async uninstall(packageName: string): Promise<void> {

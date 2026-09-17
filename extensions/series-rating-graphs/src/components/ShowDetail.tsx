@@ -14,14 +14,14 @@ import {
   ActionPrevPage,
   ActionReload,
 } from "./Actions";
-
-const API_BASE_URL = "https://api.imdbapi.dev";
+import { getApiBaseUrl } from "../utils/api";
 
 export default function ShowDetail({ show, originalTitle }: { show: SearchResult; originalTitle: string }) {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const preferredWebsite = preferences.preferredWebsite;
+  const apiBaseUrl = getApiBaseUrl();
 
-  const details = useFetch<ShowResult>(`${API_BASE_URL}/titles/${show.id}`, {
+  const details = useFetch<ShowResult>(`${apiBaseUrl}/titles/${show.id}`, {
     keepPreviousData: true,
   });
 
@@ -31,13 +31,22 @@ export default function ShowDetail({ show, originalTitle }: { show: SearchResult
   useEffect(() => {
     setIsSeasonsCountLoading(true);
     (async () => {
-      const seasonsRes = (await (await fetch(`${API_BASE_URL}/titles/${show.id}/seasons`)).json()) as {
-        seasons: { season: string; episodeCount: number }[];
-      };
-      setIsSeasonsCountLoading(false);
-      setSeasonsCount(seasonsRes?.seasons?.length);
+      try {
+        const seasonsRes = (await (await fetch(`${apiBaseUrl}/titles/${show.id}/seasons`)).json()) as {
+          seasons: { season: string; episodeCount: number }[];
+        };
+        setSeasonsCount(seasonsRes?.seasons?.length);
+      } catch {
+        setSeasonsCount(0);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could not get seasons data",
+        });
+      } finally {
+        setIsSeasonsCountLoading(false);
+      }
     })();
-  }, []);
+  }, [apiBaseUrl, show.id]);
 
   const [isEpsLoading, setIsEpsLoading] = useState(false);
   const [allSeasons, setAllSeasons] = useState<Episode[][]>([]);
@@ -46,12 +55,21 @@ export default function ShowDetail({ show, originalTitle }: { show: SearchResult
     (async () => {
       const allEps: Episode[] = [];
 
-      const allEpsRes = (await (await fetch(`${API_BASE_URL}/titles/${show.id}/episodes?pageSize=50`)).json()) as {
-        episodes: Episode[];
-        nextPageToken: string | undefined;
-      };
-
       try {
+        const allEpsRes = (await (await fetch(`${apiBaseUrl}/titles/${show.id}/episodes?pageSize=50`)).json()) as {
+          episodes: Episode[];
+          nextPageToken: string | undefined;
+        };
+
+        if (!allEpsRes.episodes) {
+          setAllSeasons([]);
+          showToast({
+            style: Toast.Style.Failure,
+            title: "No episodes data found",
+          });
+          return;
+        }
+
         allEps.push(...allEpsRes.episodes);
 
         let nextPageToken = allEpsRes.nextPageToken;
@@ -59,7 +77,7 @@ export default function ShowDetail({ show, originalTitle }: { show: SearchResult
 
         while (hasNextPage) {
           const nextPageEpsRes = (await (
-            await fetch(`${API_BASE_URL}/titles/${show.id}/episodes?pageSize=50&pageToken=${nextPageToken}`)
+            await fetch(`${apiBaseUrl}/titles/${show.id}/episodes?pageSize=50&pageToken=${nextPageToken}`)
           ).json()) as { episodes: Episode[]; nextPageToken: string | undefined };
           await setTimeout(210);
           allEps.push(...nextPageEpsRes.episodes);
@@ -78,25 +96,18 @@ export default function ShowDetail({ show, originalTitle }: { show: SearchResult
           .sort((a, b) => Number(a) - Number(b))
           .map((season) => seasonsMap[Number(season)]);
 
-        setIsEpsLoading(false);
         setAllSeasons(allSeasons);
       } catch {
-        setIsEpsLoading(false);
         setAllSeasons([]);
-        if (!allEpsRes.episodes) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "No episodes data found",
-          });
-        } else {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Could not get episodes data",
-          });
-        }
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could not get episodes data",
+        });
+      } finally {
+        setIsEpsLoading(false);
       }
     })();
-  }, []);
+  }, [apiBaseUrl, show.id]);
 
   const isAnyLoading = details.isLoading || isEpsLoading || isSeasonsCountLoading;
 
@@ -182,7 +193,9 @@ ${
 `
           : isAnyLoading
             ? "## Loading..."
-            : "# No data found"
+            : details.error
+              ? `# Failed to fetch data\n\n${details.error.message}`
+              : "# No data found"
       }
       actions={
         <ActionPanel>

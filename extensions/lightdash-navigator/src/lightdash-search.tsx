@@ -32,7 +32,7 @@ function WelcomeScreen({ errorMessage }: { errorMessage?: string }) {
 }
 
 function openExtensionPreferences() {
-  open("raycast://extensions/endiruslan/lightdash-navigator");
+  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/endiruslan/lightdash-navigator`);
 }
 
 function getItemIcon(item: LightdashContentItem): Icon {

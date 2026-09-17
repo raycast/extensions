@@ -1,17 +1,26 @@
 import { Action, ActionPanel } from "@raycast/api";
 
-import { languages } from "../utils/language";
-
-import WikipediaPage from "./wikipedia-page";
+import { languages, Locale } from "../utils/language";
 
 import { useAvailableLanguages } from "@/hooks/usePageData";
 
-export function ChangeLanguageSubmenu({ title, language }: { title: string; language: string }) {
+export function ChangeLanguageSubmenu({
+  title,
+  language,
+  onSelect,
+}: {
+  title: string;
+  language: string;
+  onSelect: (title: string, language: Locale) => void;
+}) {
   const { data: availableLanguages, isLoading } = useAvailableLanguages(title, language);
 
   return (
     <ActionPanel.Submenu
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "l" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+      }}
       title="Change Language"
       icon={languages.find((l) => l.value === language)?.icon}
       isLoading={isLoading}
@@ -24,14 +33,7 @@ export function ChangeLanguageSubmenu({ title, language }: { title: string; lang
             return null;
           }
 
-          return (
-            <Action.Push
-              key={value}
-              icon={icon}
-              title={title}
-              target={<WikipediaPage title={translatedTitle} language={value} />}
-            />
-          );
+          return <Action key={value} icon={icon} title={title} onAction={() => onSelect(translatedTitle, value)} />;
         })}
     </ActionPanel.Submenu>
   );

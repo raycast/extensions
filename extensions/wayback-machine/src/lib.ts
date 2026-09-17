@@ -7,6 +7,7 @@ import { showFailureToast } from "@raycast/utils";
 
 export const WAYBACK_BASE_URL = "https://web.archive.org";
 export const WAYBACK_API_URL = "https://archive.org/wayback/available";
+export const WAYBACK_CDX_SERVER_API = "https://web.archive.org/cdx/search/cdx";
 
 // =============================================================================
 // Types
@@ -18,6 +19,15 @@ export const WAYBACK_API_URL = "https://archive.org/wayback/available";
 export interface WaybackSnapshot {
   url: string;
   available: boolean;
+}
+
+export interface WaybackCdxServerSnapshot {
+  original: string;
+  mimetype: string;
+  timestamp: string;
+  endtimestamp: string;
+  groupcount: string;
+  uniqcount: string;
 }
 
 // =============================================================================
@@ -146,4 +156,56 @@ export async function savePage(webpageUrl: string): Promise<void> {
   } catch (err) {
     await showFailureToast(err, { title: "Failed to save to Wayback Machine" });
   }
+}
+
+export async function fetchPages(targetUrl: string, page: number, limit: number): Promise<WaybackCdxServerSnapshot[]> {
+  const timemapUrl = buildTimemapUrl(targetUrl, page, limit);
+
+  let response: Response;
+  try {
+    response = await fetch(timemapUrl);
+  } catch (error) {
+    console.log("[search-pages] fetch error:", error);
+    throw new Error(`Network error when requesting timemap: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+  }
+
+  const data = (await response.json()) as unknown;
+
+  if (!Array.isArray(data) || data.length < 2) {
+    return [];
+  }
+
+  const rows = data.slice(1) as unknown[];
+
+  const snapshots = rows
+    .map((row) => {
+      if (!Array.isArray(row) || row.length < 6) {
+        return null;
+      }
+      const [original, mimetype, timestamp, endtimestamp, groupcount, uniqcount] = row as string[];
+      return { original, mimetype, timestamp, endtimestamp, groupcount, uniqcount };
+    })
+    .filter((item): item is WaybackCdxServerSnapshot => Boolean(item));
+
+  return snapshots;
+}
+
+// https://github.com/internetarchive/wayback/tree/master/wayback-cdx-server
+function buildTimemapUrl(rawUrl: string, page: number, limit: number) {
+  const params = new URLSearchParams({
+    url: rawUrl,
+    matchType: "prefix",
+    collapse: "urlkey",
+    output: "json",
+    fl: "original,mimetype,timestamp,endtimestamp,groupcount,uniqcount",
+    filter: "mimetype:text/html",
+    page: String(page),
+    limit: String(limit),
+  });
+
+  return `${WAYBACK_CDX_SERVER_API}?${params.toString()}`;
 }

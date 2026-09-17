@@ -89,7 +89,7 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
-    "js-yaml": "4.1.1"
+    "js-yaml": "^4.1.2"
   },
   "scripts": {
     "build": "ray build -e dist",

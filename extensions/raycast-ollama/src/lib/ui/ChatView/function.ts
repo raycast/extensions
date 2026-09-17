@@ -120,7 +120,10 @@ function GetMessagesForInference(chat: RaycastChat, query: string, image?: Rayca
   const messages: OllamaApiChatMessage[] = [];
 
   /* Add System Prompt */
-  messages.push({ role: OllamaApiChatMessageRole.SYSTEM, content: getSystemPrompt() });
+  messages.push({
+    role: OllamaApiChatMessageRole.SYSTEM,
+    content: getSystemPrompt(),
+  });
 
   /* Slice Messages */
   chat.messages
@@ -150,7 +153,11 @@ async function ToolsMcp(mcpServerNames: string[]): Promise<Tool[]> {
   } catch (error) {
     console.error(error);
     if (error instanceof Error)
-      await showToast({ style: Toast.Style.Failure, title: "Error Loading Mcp Server Config", message: error.message });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error Loading Mcp Server Config",
+        message: error.message,
+      });
     return tools;
   }
 
@@ -167,7 +174,11 @@ async function ToolsMcp(mcpServerNames: string[]): Promise<Tool[]> {
     } catch (error) {
       console.error(error);
       if (error instanceof Error)
-        await showToast({ style: Toast.Style.Failure, title: `Error on Mcp Server "${name}"`, message: error.message });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Error on Mcp Server "${name}"`,
+          message: error.message,
+        });
     }
   }
 
@@ -190,7 +201,6 @@ async function Inference(
   const msgRequestBody: OllamaApiChatMessage[] = GetMessagesForInference(chat, query, image);
   let isFirstMessage = true;
 
-  /* eslint-disable-next-line no-constant-condition */
   while (true) {
     let thinkingStarted = false;
     let responseStarted = false;
@@ -221,7 +231,10 @@ async function Inference(
       const emiter = await o.OllamaApiChat(body);
 
       /* Push first Assistant message and save changes with setChat() */
-      msgRequestBody.push({ role: OllamaApiChatMessageRole.ASSISTANT, content: "" });
+      msgRequestBody.push({
+        role: OllamaApiChatMessageRole.ASSISTANT,
+        content: "",
+      });
       if (isFirstMessage) {
         setChat((prevState) => {
           if (!prevState) return undefined;
@@ -286,7 +299,10 @@ async function Inference(
                 /* Skip all value except last Assistant Message */
                 if (!isLastAssistant) return value;
 
-                return { ...value, tool_calls: [...(value.tool_calls ?? []), ...data] };
+                return {
+                  ...value,
+                  tool_calls: [...(value.tool_calls ?? []), ...data],
+                };
               });
 
               return { ...group, messages: updatedMsg };
@@ -307,7 +323,10 @@ async function Inference(
           /* showToast when thinking process started */
           if (!thinkingStarted) {
             thinkingStarted = true;
-            await showToast({ style: Toast.Style.Animated, title: "🤔 Thinking..." });
+            await showToast({
+              style: Toast.Style.Animated,
+              title: "🤔 Thinking...",
+            });
           }
 
           const msgAssistant = msgRequestBody.findLast((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
@@ -328,7 +347,10 @@ async function Inference(
                 /* Skip all value except last Assistant Message */
                 if (!isLastAssistant) return value;
 
-                return { ...value, thinking: (value.thinking ?? "") + data };
+                return {
+                  ...value,
+                  thinking: (value.thinking ?? "") + data,
+                };
               });
 
               return { ...group, messages: updatedMsg };
@@ -343,7 +365,10 @@ async function Inference(
           /* showToast when  process started */
           if (!responseStarted) {
             responseStarted = true;
-            await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
+            await showToast({
+              style: Toast.Style.Animated,
+              title: "✍️ Typing...",
+            });
           }
 
           setChat((prevState) => {
@@ -379,11 +404,18 @@ async function Inference(
         emiter.once("done", async (data: OllamaApiChatResponse) => {
           /* Continue Iteration on ToolCalls */
           if (toolCalls.length) {
-            await showToast({ style: Toast.Style.Animated, title: "🧰 Tool Calling..." });
+            await showToast({
+              style: Toast.Style.Animated,
+              title: "🧰 Tool Calling...",
+            });
 
             const promises = await Promise.all(toolCalls);
             const toolMessages: OllamaApiChatMessage[] = promises.map(
-              (v) => <OllamaApiChatMessage>{ ...v, role: OllamaApiChatMessageRole.TOOL },
+              (v) =>
+                <OllamaApiChatMessage>{
+                  ...v,
+                  role: OllamaApiChatMessageRole.TOOL,
+                },
             );
             msgRequestBody.push(...toolMessages);
 
@@ -395,7 +427,10 @@ async function Inference(
                 /* Skip all value except last */
                 if (groupIndex != groupArr.length - 1) return group;
 
-                return { ...group, messages: group.messages.concat(toolMessages) };
+                return {
+                  ...group,
+                  messages: group.messages.concat(toolMessages),
+                };
               });
 
               return { ...prevState, messages: updatedMessages };
@@ -427,7 +462,12 @@ async function Inference(
         break;
       }
     } catch (e) {
-      if (e instanceof Error) await showToast({ style: Toast.Style.Failure, title: "Error:", message: e.message });
+      if (e instanceof Error)
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error:",
+          message: e.message,
+        });
       break;
     }
   }

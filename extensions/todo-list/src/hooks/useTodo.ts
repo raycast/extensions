@@ -9,7 +9,8 @@ import {
   editingDueDateAtom,
   editingDueDateValueAtom,
 } from "../atoms";
-import { compare, insertIntoSection } from "../utils";
+import { compare, insertIntoSection, confetti } from "../utils";
+import { preferences } from "../config";
 
 import _ from "lodash";
 import { useAtom } from "jotai";
@@ -54,11 +55,13 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
 
   // don't change section if pinned
   const markCompleted = () => {
+    const { useConfetti } = preferences;
     if (sectionKey === "pinned") {
       toggleCompleted(true);
     } else {
       moveToSection("completed");
     }
+    if (useConfetti) confetti();
   };
 
   // don't change section if pinned

@@ -1,9 +1,6 @@
-import { open } from "@raycast/api";
 import * as fs from "fs";
 import { existsSync } from "fs";
 import { URL } from "url";
-import { isDeepStrictEqual } from "util";
-import { getBuildScheme } from "./vscode";
 import {
   EntryLike,
   EntryType,
@@ -109,7 +106,7 @@ export function filterEntriesByType(filter: EntryType | null) {
 }
 
 export function filterUnpinnedEntries(pinnedEntries: EntryLike[]) {
-  return (entry: EntryLike) => pinnedEntries.find((pinnedEntry) => isDeepStrictEqual(pinnedEntry, entry)) === undefined;
+  return (entry: EntryLike) => pinnedEntries.find((pinnedEntry) => isSameEntry(pinnedEntry, entry)) === undefined;
 }
 
 export function getErrorMessage(error: unknown): string {
@@ -129,7 +126,7 @@ export function compactNumberFormat(num: number): string {
   return fmt.format(num);
 }
 
-export function sleep(ms: number) {
+function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
@@ -147,14 +144,6 @@ export async function waitForFileExists(filename: string, timeoutMs = 2000) {
     }
   }
   return false;
-}
-
-export function raycastForVSCodeURI(uri: string) {
-  return `${getBuildScheme()}://tonka3000.raycast/${uri}`;
-}
-
-export async function openURIinVSCode(uri: string) {
-  await open(raycastForVSCodeURI(uri));
 }
 
 export function isValidHexColor(color: string): boolean {

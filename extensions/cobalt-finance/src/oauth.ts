@@ -1,4 +1,4 @@
-import { OAuth } from "@raycast/api";
+import { getPreferenceValues, OAuth } from "@raycast/api";
 
 const CLIENT_ID = "jxihLeaSnvTNEHoALsPewQeLTUOVChxJ";
 const SCOPE = "openid profile email offline_access";
@@ -49,10 +49,7 @@ async function exchangeCode(
   return JSON.parse(text) as TokenResponse;
 }
 
-async function refreshToken(
-  base: string,
-  refresh: string,
-): Promise<TokenResponse> {
+async function refreshToken(base: string, refresh: string): Promise<TokenResponse> {
   const body = new URLSearchParams({
     client_id: CLIENT_ID,
     grant_type: "refresh_token",
@@ -84,6 +81,10 @@ function tokenSetFromResponse(t: TokenResponse) {
 let inflight: Promise<string> | null = null;
 
 export async function authorize(base: string): Promise<string> {
+  const apiKey = getPreferenceValues<Preferences>().apiKey?.trim();
+  if (apiKey) {
+    return apiKey;
+  }
   if (inflight) {
     return await inflight;
   }
@@ -124,12 +125,7 @@ async function doAuthorize(base: string): Promise<string> {
     scope: SCOPE,
   });
   const { authorizationCode } = await client.authorize(authRequest);
-  const tokens = await exchangeCode(
-    base,
-    authorizationCode,
-    authRequest.codeVerifier,
-    authRequest.redirectURI,
-  );
+  const tokens = await exchangeCode(base, authorizationCode, authRequest.codeVerifier, authRequest.redirectURI);
   await client.setTokens(tokenSetFromResponse(tokens));
   return tokens.access_token;
 }

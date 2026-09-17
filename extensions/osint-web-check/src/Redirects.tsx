@@ -39,9 +39,9 @@ async function getRedirects(url: string) {
     followRedirect: true,
     hooks: {
       beforeRedirect: [
-        // @ts-expect-error hush now, @types/got
         (_, response) => {
           const to = response.headers.location;
+          if (!to) return;
           redirects.push({ from, to });
           from = to;
         },

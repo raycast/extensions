@@ -1,5 +1,9 @@
 # MOCO Changelog
 
+## [v1.1.4] - 2026-08-17
+
+- Fixed malformed API base URLs
+
 ## [v1.1.3] - 2025-12-12
  - Added copy actions for project name and ID by @el-schneider
 

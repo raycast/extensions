@@ -1,5 +1,14 @@
 # spanish-tv-guide Changelog
 
+## [Bug fix] - 2026-07-21
+
+- Fix date parsing as the API now returns dates in UTC
+
+## [Bug fix] - 2026-07-06
+
+- Fix crash when the icons cache directory does not exist yet
+- Fix program title being cut off in the schedule detail sidebar
+
 ## [Bug fixes and dependency updates] - 2026-05-17
 
 - Fix timezone issue

@@ -13,6 +13,7 @@ Raycast extension to quickly connect to AirPlay/Sidecar displays while seamlessl
 ## 🎯 Use Cases
 
 Perfect for:
+
 - Extending your Mac to an iPad without losing audio on your AirPods/headphones
 - Using another Mac as a display while keeping audio on your main Mac
 - Quickly toggling between extended and single-display setups
@@ -46,6 +47,7 @@ System Settings → Privacy & Security → Accessibility → Enable Raycast
 5. Audio stays on your current output device seamlessly!
 
 **Keyboard shortcuts:**
+
 - `Enter` - Connect to selected display (or scan if empty)
 - `⌘⇧Q` - Set/clear as Quick Connect display
 - `⌘R` - Rescan for displays
@@ -66,10 +68,10 @@ Pro tip: Assign a hotkey to Quick Connect for instant access.
 
 ## 🎛️ Commands
 
-| Command | Mode | Description |
-|---------|------|-------------|
-| Connect to Display | View | Browse and connect to any available display |
-| Quick Connect | No-view | Instantly toggle your configured display |
+| Command            | Mode    | Description                                 |
+| ------------------ | ------- | ------------------------------------------- |
+| Connect to Display | View    | Browse and connect to any available display |
+| Quick Connect      | No-view | Instantly toggle your configured display    |
 
 ## 🔧 How It Works
 
@@ -95,14 +97,14 @@ Result: Any audio switch happens so fast (< 100ms) it's imperceptible to human e
 
 ## 🐛 Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| "Missing Dependencies" | Install SwitchAudioSource: `brew install switchaudio-osx` |
-| "Could not find display menu button" | System UI may have changed. Please report an issue with your macOS version |
-| "Display not found in menu" | Ensure target device is unlocked, nearby, and has AirPlay/Sidecar enabled |
-| Script fails or hangs | Check Accessibility permissions: System Settings → Privacy & Security → Accessibility → Raycast |
-| Audio still switches briefly | This is expected - the revert is < 100ms and should be imperceptible |
-| No displays found | Make sure devices are on same WiFi and Bluetooth is enabled |
+| Issue                                | Solution                                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| "Missing Dependencies"               | Install SwitchAudioSource: `brew install switchaudio-osx`                                       |
+| "Could not find display menu button" | System UI may have changed. Please report an issue with your macOS version                      |
+| "Display not found in menu"          | Ensure target device is unlocked, nearby, and has AirPlay/Sidecar enabled                       |
+| Script fails or hangs                | Check Accessibility permissions: System Settings → Privacy & Security → Accessibility → Raycast |
+| Audio still switches briefly         | This is expected - the revert is < 100ms and should be imperceptible                            |
+| No displays found                    | Make sure devices are on same WiFi and Bluetooth is enabled                                     |
 
 ## 🏗️ Technical Details
 

@@ -47,6 +47,153 @@
       "title": "Change Case",
       "description": "Change the case of the selected text or text in the clipboard",
       "mode": "view"
+    },
+    {
+      "name": "convert-camel-case",
+      "title": "Convert to camelCase",
+      "description": "Convert selected text or clipboard to camelCase",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-capital-case",
+      "title": "Convert to Capital Case",
+      "description": "Convert selected text or clipboard to Capital Case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-constant-case",
+      "title": "Convert to CONSTANT_CASE",
+      "description": "Convert selected text or clipboard to CONSTANT_CASE",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-dot-case",
+      "title": "Convert to dot.case",
+      "description": "Convert selected text or clipboard to dot.case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-header-case",
+      "title": "Convert to Header-Case",
+      "description": "Convert selected text or clipboard to Header-Case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-lower-case",
+      "title": "Convert to lower case",
+      "description": "Convert selected text or clipboard to lower case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-lower-first",
+      "title": "Convert to lower First",
+      "description": "Convert selected text or clipboard to lower First",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-no-case",
+      "title": "Convert to no case",
+      "description": "Convert selected text or clipboard to no case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-kebab-case",
+      "title": "Convert to kebab-case",
+      "description": "Convert selected text or clipboard to kebab-case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-kebab-upper-case",
+      "title": "Convert to KEBAB-UPPER-CASE",
+      "description": "Convert selected text or clipboard to KEBAB-UPPER-CASE",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-pascal-case",
+      "title": "Convert to PascalCase",
+      "description": "Convert selected text or clipboard to PascalCase",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-pascal-snake-case",
+      "title": "Convert to Pascal_Snake_Case",
+      "description": "Convert selected text or clipboard to Pascal_Snake_Case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-path-case",
+      "title": "Convert to path/case",
+      "description": "Convert selected text or clipboard to path/case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-random-case",
+      "title": "Convert to rAndOm cAsE",
+      "description": "Convert selected text or clipboard to rAndOm cAsE",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-sentence-case",
+      "title": "Convert to Sentence case",
+      "description": "Convert selected text or clipboard to Sentence case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-snake-case",
+      "title": "Convert to snake_case",
+      "description": "Convert selected text or clipboard to snake_case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-alternating-case",
+      "title": "Convert to aLtErNaTiNg cAsE",
+      "description": "Convert selected text or clipboard to aLtErNaTiNg cAsE",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-swap-case",
+      "title": "Convert to sWAP cASE",
+      "description": "Convert selected text or clipboard to sWAP cASE",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-title-case",
+      "title": "Convert to Title Case",
+      "description": "Convert selected text or clipboard to Title Case",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-upper-case",
+      "title": "Convert to UPPER CASE",
+      "description": "Convert selected text or clipboard to UPPER CASE",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "convert-upper-first",
+      "title": "Convert to Upper first",
+      "description": "Convert selected text or clipboard to Upper first",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [

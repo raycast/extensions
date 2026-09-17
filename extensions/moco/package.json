@@ -54,7 +54,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.43.2",
-    "axios": "^1.8.4",
+    "axios": "^1.18.0",
     "zod": "^3.20.6"
   },
   "devDependencies": {
@@ -75,5 +75,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "fast-uri": "3.1.5"
+  }
 }

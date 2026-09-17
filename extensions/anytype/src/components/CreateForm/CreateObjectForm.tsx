@@ -224,7 +224,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
   });
 
   function getQuicklink(): { name: string; link: string } {
-    const url = "raycast://extensions/any/anytype/create-object";
+    const url = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/any/anytype/create-object`;
 
     const defaults: Record<string, PropertyFieldValue> = {
       [itemProps.spaceId.id]: selectedSpaceId,

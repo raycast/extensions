@@ -6,6 +6,7 @@
 
 - ✅ **Check Text** - Interactive form with detailed results and corrections
 - ⚡ **Check Text Instant** - Quick selected text or clipboard check and paste (background mode)
+- 📝 **Check Selected Text** - Check what you have selected anywhere, review every correction, then replace it
 - 🌍 **30+ Languages** - Auto-detection or manual selection
 - 🎯 **Smart Sorting** - Most used languages appear first (frecency-based)
 - 💾 **Persistent Settings** - Your preferred language is remembered
@@ -67,6 +68,29 @@ npm run build
 **Note:** The command prioritizes selected text over clipboard content. If no text is selected, it uses the clipboard.
 
 Perfect for quick corrections while writing emails, documents, or messages.
+
+### Check Selected Text (Review, Then Replace)
+
+1. Select text in any application
+2. Open Raycast and type "Check Selected Text"
+3. Read the corrected text, with every change marked in place
+4. Press `↵` to replace the selection
+
+Every correction starts out applied. To go through them one at a time, press `⌘R`
+for the corrections list: `↵` switches a correction off and on, the sidebar offers
+the other replacements LanguageTool suggests, and `⌘↵` replaces the selection from
+there.
+
+**Keyboard Shortcuts:**
+- `↵` - Replace the selection with the corrected text
+- `⌘R` - Review the corrections one by one
+- `⌘L` - Check in a different language
+- `⌘⇧R` - Read the selection again and check it afresh
+- `⌘⇧C` - Copy the corrected text
+
+**Note:** Like Check Text Instant, it falls back to the clipboard when nothing is
+selected. Raycast can reopen the command showing the previous run — `⌘⇧R`, or the
+**Check again** button in the sidebar, picks up what is selected now.
 
 ## ⚙️ Configuration
 
@@ -156,16 +180,23 @@ Mother Tongue: Portuguese
 src/
 ├── check-text.tsx                # Main command (interactive form)
 ├── check-text-instant.tsx        # Background command (clipboard)
+├── check-selected-text.tsx       # Selection command (review, then replace)
 ├── components/                   # React components
 │   ├── check-text-result.tsx    # Results screen orchestrator
 │   ├── result-metadata.tsx      # Results metadata display
-│   └── result-actions.tsx       # Action panel with shortcuts
+│   ├── result-actions.tsx       # Action panel with shortcuts
+│   └── corrections-list.tsx     # Correction-by-correction review
 ├── hooks/                        # React hooks
-│   └── use-text-corrections.ts  # Corrections state management
+│   ├── use-text-corrections.ts  # Corrections state management
+│   ├── use-correction-choices.ts # Replacement chosen per correction
+│   └── use-selected-text-check.ts # Reads the selection and checks it
 ├── services/                     # Business logic
 │   └── languagetool-api.ts      # API client (Premium support)
 ├── utils/                        # Pure functions
-│   └── text-correction.ts       # Text correction algorithms
+│   ├── text-correction.ts       # Text correction algorithms
+│   ├── match-filter.ts          # Drops unusable and overlapping matches
+│   ├── match-display.ts         # Marks corrections in the rendered text
+│   └── replace-selection.ts     # Pastes over the selection
 ├── config/                       # Configuration
 │   └── api.ts                   # API endpoints and limits
 └── types.ts                     # TypeScript types

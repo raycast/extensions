@@ -48,7 +48,7 @@ export default function Command() {
       let extractColor: (path: string, colorCount: number, dominantOnly: boolean) => Promise<FinalColor[]>;
 
       if (isMac) {
-        const { extractColor: extractColorSwift } = await import("swift:../swift/extract-color");
+        const { extractColor: extractColorSwift } = await import("swift:../swift/color-picker");
         extractColor = extractColorSwift;
       } else {
         const { extract_color: extractColorRust } = await import("rust:../rust/extract-color");

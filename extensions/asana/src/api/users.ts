@@ -1,4 +1,4 @@
-import { request } from "./request";
+import { request, requestAll } from "./request";
 
 export type User = {
   gid: string;
@@ -12,11 +12,9 @@ export async function getMe() {
 }
 
 export async function getUsers(workspace: string) {
-  const { data } = await request<{ data: User[] }>("/users", {
+  return requestAll<User>("/users", {
     params: {
       workspace,
     },
   });
-
-  return data.data;
 }

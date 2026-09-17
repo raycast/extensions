@@ -8,9 +8,10 @@ You need a Bookface account to use the CLI and this extension.
 
 ## What can it do?
 
-- **Ask YC Agent** — ask the YC agent questions about the network, investors, fundraising, and more.
-- **Search YC** — search Bookface for people, YC and non-YC companies, posts, deals, schools, employers, and Startup Library articles. Filter by type, toggle a sidebar preview, or see posts and company descriptions in Raycast.
+- **Ask YC Agent** — ask the YC agent questions about the network, investors, fundraising, and more. Each answer shows what the agent searched to ground its response.
+- **Search YC** — search Bookface for people, YC and non-YC companies, posts, deals, schools, employers, Startup Library articles, and Knowledge Base entries. Filter by type, toggle a sidebar preview, or export a type's full result set as CSV.
 - **YC Account** — show the currently logged-in Bookface user.
+- **Log out of YC** — clear your stored YC CLI credentials (with a confirmation).
 
 ## Who can use it?
 
@@ -40,13 +41,14 @@ This opens your browser for OAuth (with a `--device` flag for headless/remote sh
 
 ### 3. Open Raycast
 
-Run **Search YC**, **Ask YC Agent**, or **My YC Account**. If the extension can't find the binary or you're not logged in, every command surfaces a clear empty state with the right command to copy and paste.
+Run **Search YC**, **Ask YC Agent**, or **YC Account**. If the extension can't find the binary or you're not logged in, every command surfaces a clear empty state with the right command to copy and paste.
 
 ## Preferences
 
-| Preference      | Description                                                                                                                                                                          |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **yc CLI Path** | Optional absolute path to the `yc` binary. If empty, the extension searches `$PATH` for `yc` or `ycp`, then falls back to `~/.local/bin`, `/opt/homebrew/bin`, and `/usr/local/bin`. |
+| Preference          | Description                                                                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **yc CLI Path**     | Optional absolute path to the `yc` binary. If empty, the extension searches `$PATH` for `yc` or `ycp`, then falls back to `~/.local/bin`, `/opt/homebrew/bin`, and `/usr/local/bin`. |
+| **Verbose Logging** | Logs each `yc` invocation, output size, and parse results to the Raycast console for diagnostics. Sensitive values are redacted. Off by default.                                     |
 
 Set it from Raycast → Extensions → Bookface if you've installed the binary somewhere unusual.
 
@@ -55,6 +57,7 @@ Set it from Raycast → Extensions → Bookface if you've installed the binary s
 - ⌘⇧⏎ toggles a Markdown sidebar with type-specific details for the selected result.
 - ⌘D pushes a full-screen Markdown view of post bodies, company descriptions, and Startup Library articles.
 - ⌘⇧. copies the Bookface URL; ⌘⇧M copies it as a Markdown link.
+- With a type filter selected in Search, ⌘⇧E exports that type's full result set as CSV (⌘⇧C copies it) — useful for pulling every matching company, founder, or deal, not just the first page.
 - The "Search YC" command remembers your recent searches; "Ask YC Agent" remembers your recent questions.
 
 ## Troubleshooting
