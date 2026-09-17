@@ -73,20 +73,26 @@ async function getCompressSaveLocationAndName(
   if (!saveLoc.endsWith("/")) {
     saveLoc += "/";
   }
-  let name = "";
+  let baseName = "";
   if (isSingle && preferences.useOriginalNameWhenSingle) {
-    name = path.basename(filePath);
+    baseName = path.basename(filePath);
   }
   if (isSingle && !preferences.useOriginalNameWhenSingle) {
-    name = "Archive";
+    baseName = "Archive";
   }
   if (!isSingle && preferences.useParentFolderNameWhenMultiple) {
-    name = path.basename(path.dirname(filePath));
+    baseName = path.basename(path.dirname(filePath));
   }
   if (!isSingle && !preferences.useParentFolderNameWhenMultiple) {
-    name = "Archive";
+    baseName = "Archive";
   }
-  name += COMPRESS_FORMAT_METADATA.get(format)?.ext;
+  const ext = COMPRESS_FORMAT_METADATA.get(format)?.ext || "";
+  let name = `${baseName}${ext}`;
+  let counter = 2;
+  while (fs.existsSync(path.join(saveLoc, name))) {
+    name = `${baseName} ${counter}${ext}`;
+    counter++;
+  }
   await folderExists(saveLoc);
   return { location: saveLoc, name };
 }
@@ -131,9 +137,15 @@ async function getExtractSaveLocation(zipPath: string, format: ExtractFormat): P
   if (format === ExtractFormat.GZIP) {
     zipName = zipName.substring(0, zipName.lastIndexOf("."));
   }
-  saveLoc += zipName.substring(0, zipName.lastIndexOf("."));
-  await folderExists(saveLoc);
-  return saveLoc;
+  const baseFolder = zipName.substring(0, zipName.lastIndexOf("."));
+  let targetLoc = path.join(saveLoc, baseFolder);
+  let counter = 2;
+  while (fs.existsSync(targetLoc)) {
+    targetLoc = path.join(saveLoc, `${baseFolder} ${counter}`);
+    counter++;
+  }
+  await folderExists(targetLoc);
+  return targetLoc;
 }
 
 async function folderExists(folder: string): Promise<boolean> {

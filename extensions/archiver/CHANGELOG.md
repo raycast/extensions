@@ -7,6 +7,7 @@
 - Automatically focus the password field when revealed during extraction.
 - Improved loading state responsiveness and non-blocking password validation when extracting password-protected archives.
 - Avoided extraction failures when the intended output-folder name conflicts with an existing file.
+- Assigned unique file and folder names with iterative counters during compression and extraction to prevent overwriting existing files.
 
 ## [Added Quick Compress Command] - 2025-12-17
 
