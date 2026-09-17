@@ -77,6 +77,20 @@ function headingLevel(header: string): number {
 }
 
 /**
+ * Form used to compare a block name with a break keyword: trimmed, case-
+ * insensitive, inner whitespace collapsed. The whole name must match, so the
+ * default "Break" keyword never catches a "Breakfast" block.
+ */
+function normalizeBlockName(name: string): string {
+  return name.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+export function isBreakBlock(name: string, breakKeywords: string[]): boolean {
+  const normalized = normalizeBlockName(name);
+  return breakKeywords.some((kw) => normalizeBlockName(kw) === normalized);
+}
+
+/**
  * Whether a line is exactly the configured heading (ignoring surrounding
  * whitespace), so "# Timetable" never matches "# Timetable Archive".
  */
@@ -155,7 +169,7 @@ function parseBlocks(
       const name = blockMatch[1].trim();
       const timeRange = blockMatch[2] || "";
       const target = blockMatch[3] ? parseInt(blockMatch[3]) : 0;
-      const isBreak = breakKeywords.some((kw) => name.includes(kw));
+      const isBreak = isBreakBlock(name, breakKeywords);
 
       currentBlock = {
         name,

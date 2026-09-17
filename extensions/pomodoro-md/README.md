@@ -113,7 +113,7 @@ Optional extras:
 - `(09:00~12:00)` after the block name is shown next to it; a trailing `6p` (planned total) is accepted and ignored
 - `	- Subtask title` — a subtask, indented with a tab or 2+ spaces
 - `[done]` after `Np` (or after `- ` on a subtask) marks it as already finished
-- Blocks named after a **Break Keyword** (`Break`, `Lunch`) are skipped
+- Blocks whose name is a **Break Keyword** (`Break` or `Lunch` by default) are skipped; the whole name must match, ignoring case, so add `Lunch Break` as its own keyword if you use that name
 - Markdown links in titles are displayed as their link text
 
 ### Pomodoro log
@@ -131,7 +131,7 @@ Each finished session appends one line under its task's bullet in the **Pomodoro
 | Timetable Header | `# Timetable` | Header that starts the timetable section |
 | Log Section Header | `## Work Log` | Section the pomodoro log is placed in |
 | Pomodoro Log Header | `### Pomodoro Log` | Header of the pomodoro log itself |
-| Break Keywords | `Break,Lunch` | Comma-separated block names to skip |
+| Break Keywords | `Break,Lunch` | Comma-separated block names to skip; a block is skipped when its name equals a keyword, ignoring case |
 | Quick Start Task Name | `Morning Routine` | Task started by the Quick Start command |
 | Enable Logging | `on` | Write the pomodoro log to the daily note |
 
