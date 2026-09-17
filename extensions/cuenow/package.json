@@ -5,9 +5,21 @@
   "description": "Search, create and manage your CueNow sticky notes without leaving Raycast.",
   "icon": "command-icon.png",
   "author": "sworup_ku",
-  "platforms": ["macOS"],
-  "categories": ["Productivity"],
-  "keywords": ["note", "sticky note", "notes", "scratchpad", "search notes", "sticky", "reminder"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "note",
+    "sticky note",
+    "notes",
+    "scratchpad",
+    "search notes",
+    "sticky",
+    "reminder"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -52,7 +64,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.4.1",
+    "@raycast/api": "^2.2.1",
     "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
