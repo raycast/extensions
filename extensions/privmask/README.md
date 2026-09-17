@@ -6,7 +6,7 @@ Made for the moment just before you paste an incident report, a log, or a
 customer record into Slack or a GitHub issue — when you realise there is a name
 in it.
 
-![Everything found in an incident report, with the masked text beside it](./media/findings.png)
+![Everything found in an incident report, with the masked text beside it](./metadata/privmask-1.png)
 
 ## Why this one
 

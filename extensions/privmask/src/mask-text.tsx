@@ -30,11 +30,6 @@ type DetectResponse = {
   dictionaryTermCount: number;
 };
 
-type Preferences = {
-  useModel: boolean;
-  dictionaryPath?: string;
-};
-
 const KIND_LABELS: Record<string, string> = {
   personalName: "Name",
   organizationName: "Organisation",
@@ -76,6 +71,23 @@ async function readInput(): Promise<string> {
   return (await Clipboard.readText()) ?? "";
 }
 
+/** Keeps a path's underscores and brackets out of the markdown renderer. */
+function escapeMarkdown(value: string) {
+  return value.replace(/([\\`*_[\]])/g, "\\$1");
+}
+
+/**
+ * Why ⏎ did nothing. The bar this appears in is narrow and elides the message,
+ * so the title carries the part that matters: nothing reached the clipboard.
+ */
+async function sayNotReady(message: string) {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Nothing copied yet",
+    message,
+  });
+}
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [input, setInput] = useState<string | null>(null);
@@ -84,7 +96,11 @@ export default function Command() {
   // excluded when the model's results arrive and the list is rebuilt.
   const [deselected, setDeselected] = useState<Set<string>>(new Set());
   const [waitingForModel, setWaitingForModel] = useState(true);
-  const [masked, setMasked] = useState<string>("");
+  // The masked text, together with the selection it was computed from. Copying
+  // is offered only when that selection is the one on screen: a result from
+  // before the model returned, or from before the last ⌘T, is missing exactly
+  // what the user is trying to remove.
+  const [masked, setMasked] = useState<{ text: string; of: string } | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
 
   useEffect(() => {
@@ -140,8 +156,13 @@ export default function Command() {
     // text out from under a review the user is in the middle of.
   }, []);
 
-  const findings = response?.findings ?? [];
+  // Memoised for its identity, not its cost: a fresh [] on every render would
+  // make `selected` new too, re-running the masking effect, whose setState
+  // renders again. While `response` is null — an empty input, or a failed
+  // scan — that is a loop with nothing to stop it.
+  const findings = useMemo(() => response?.findings ?? [], [response]);
   const selected = useMemo(() => findings.filter((finding) => !deselected.has(finding.id)), [findings, deselected]);
+  const selectionKey = useMemo(() => selected.map((finding) => finding.id).join("\u0000"), [selected]);
 
   useEffect(() => {
     let cancelled = false;
@@ -149,7 +170,7 @@ export default function Command() {
 
     (async () => {
       const result = (await maskText({ text: input, selected })) as { text: string };
-      if (!cancelled) setMasked(result.text);
+      if (!cancelled) setMasked({ text: result.text, of: selectionKey });
     })().catch((error) => {
       if (!cancelled) setFailure(String(error));
     });
@@ -157,7 +178,7 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-  }, [input, selected]);
+  }, [input, selected, selectionKey]);
 
   function toggle(id: string) {
     setDeselected((current) => {
@@ -172,18 +193,34 @@ export default function Command() {
   }
 
   const notices = response?.notices ?? [];
-  const preview = "```\n" + (masked || input || "") + "\n```";
+  const preview = "```\n" + (masked?.text || input || "") + "\n```";
+  // Both halves have to be current: the scan, and the masking of what it found.
+  const ready = !waitingForModel && masked?.of === selectionKey;
+  const maskedText = masked?.text ?? "";
+  // Two different waits, and saying the wrong one is its own small lie.
+  const waitingFor = waitingForModel ? "Still checking this text for names." : "Still applying your choices.";
 
   const actions = (finding?: Finding) => (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.CopyToClipboard title="Copy Masked Text" content={masked} icon={Icon.Clipboard} />
-        <Action.Paste
-          title="Paste Masked Text"
-          content={masked}
-          icon={Icon.Text}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-        />
+        {ready && <Action.CopyToClipboard title="Copy Masked Text" content={maskedText} icon={Icon.Clipboard} />}
+        {ready && (
+          <Action.Paste
+            title="Paste Masked Text"
+            content={maskedText}
+            icon={Icon.Text}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+          />
+        )}
+        {!ready && <Action title="Copy Masked Text" icon={Icon.Clipboard} onAction={() => sayNotReady(waitingFor)} />}
+        {!ready && (
+          <Action
+            title="Paste Masked Text"
+            icon={Icon.Text}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            onAction={() => sayNotReady(waitingFor)}
+          />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
         {finding && (
@@ -244,7 +281,9 @@ export default function Command() {
               key={`notice-${index}`}
               icon={{ source: Icon.Info, tintColor: Color.Blue }}
               title={notice}
-              detail={<List.Item.Detail markdown={preview} />}
+              // A notice names a path or a count, and the list column is too
+              // narrow to read one. The detail pane is where the sentence fits.
+              detail={<List.Item.Detail markdown={`${escapeMarkdown(notice)}\n\n${preview}`} />}
               actions={actions()}
             />
           ))}

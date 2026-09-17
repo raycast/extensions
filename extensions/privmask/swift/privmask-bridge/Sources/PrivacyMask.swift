@@ -59,34 +59,59 @@ struct DetectResponse: Encodable {
   let dictionaryTermCount: Int
 }
 
-private func loadTerms(_ path: String?) throws -> [String] {
-  let url = path.map(URL.init(fileURLWithPath:)) ?? DictionaryFile.defaultURL
-  return try DictionaryFile.load(from: url)
+/// The user's terms, and anything the user needs to be told about loading them.
+private struct TermList {
+  let terms: [String]
+  /// Set when a path was configured and nothing is there. A term list that
+  /// quietly loads nothing looks exactly like a text with no terms in it.
+  let notice: String?
+}
+
+/// Reads the configured term list, or the shared default when none is set.
+///
+/// The preference is typed by a person, so it arrives the way a person writes a
+/// path: `~/.config/privmask/terms.txt`, which is what the field suggests.
+/// `URL(fileURLWithPath:)` does not expand `~`, and would resolve that against
+/// the working directory instead.
+private func loadTerms(_ path: String?) throws -> TermList {
+  guard let path, !path.trimmingCharacters(in: .whitespaces).isEmpty else {
+    return TermList(terms: try DictionaryFile.load(), notice: nil)
+  }
+
+  let expanded = (path as NSString).expandingTildeInPath
+  guard FileManager.default.fileExists(atPath: expanded) else {
+    return TermList(
+      terms: [],
+      notice: "No term list at \(expanded) — your own terms were not looked for."
+    )
+  }
+  return TermList(terms: try DictionaryFile.load(from: URL(fileURLWithPath: expanded)), notice: nil)
 }
 
 /// Everything that can be found without the language model. Returns immediately.
 @raycast func detectFast(payload: DetectRequest) throws -> DetectResponse {
-  let terms = try loadTerms(payload.dictionaryPath)
-  let candidates = DetectionPipeline(dictionaryTerms: terms).detect(in: payload.text)
+  let list = try loadTerms(payload.dictionaryPath)
+  let candidates = DetectionPipeline(dictionaryTerms: list.terms).detect(in: payload.text)
   return DetectResponse(
     findings: candidates.map(Finding.init),
     modelRan: false,
-    notices: ["Looking for personal names…"],
-    dictionaryTermCount: terms.count
+    notices: [list.notice].compactMap { $0 } + ["Looking for personal names…"],
+    dictionaryTermCount: list.terms.count
   )
 }
 
 /// The same, plus whatever the on-device model adds. Seconds, not milliseconds.
 @raycast func detectFull(payload: DetectRequest) async throws -> DetectResponse {
-  let terms = try loadTerms(payload.dictionaryPath)
+  let list = try loadTerms(payload.dictionaryPath)
+  let terms = list.terms
   let pipeline = DetectionPipeline(dictionaryTerms: terms)
-  var notices: [String] = []
+  var notices: [String] = [list.notice].compactMap { $0 }
 
   guard payload.useModel else {
     return DetectResponse(
       findings: pipeline.detect(in: payload.text).map(Finding.init),
       modelRan: false,
-      notices: namelessNotices(reason: "the language model is turned off", terms: terms),
+      notices: notices + namelessNotices(reason: "the language model is turned off", terms: terms),
       dictionaryTermCount: terms.count
     )
   }
@@ -95,7 +120,7 @@ private func loadTerms(_ path: String?) throws -> [String] {
     return DetectResponse(
       findings: pipeline.detect(in: payload.text).map(Finding.init),
       modelRan: false,
-      notices: namelessNotices(reason: "this Mac runs macOS 13–25", terms: terms),
+      notices: notices + namelessNotices(reason: "this Mac runs macOS 13–25", terms: terms),
       dictionaryTermCount: terms.count
     )
   }
@@ -104,7 +129,7 @@ private func loadTerms(_ path: String?) throws -> [String] {
     return DetectResponse(
       findings: pipeline.detect(in: payload.text).map(Finding.init),
       modelRan: false,
-      notices: namelessNotices(reason: "Apple Intelligence is not available", terms: terms),
+      notices: notices + namelessNotices(reason: "Apple Intelligence is not available", terms: terms),
       dictionaryTermCount: terms.count
     )
   }
@@ -119,7 +144,7 @@ private func loadTerms(_ path: String?) throws -> [String] {
       return DetectResponse(
         findings: pipeline.detect(in: payload.text).map(Finding.init),
         modelRan: false,
-        notices: namelessNotices(reason: "the language model failed", terms: terms),
+        notices: notices + namelessNotices(reason: "the language model failed", terms: terms),
         dictionaryTermCount: terms.count
       )
     }
@@ -142,7 +167,7 @@ private func loadTerms(_ path: String?) throws -> [String] {
     return DetectResponse(
       findings: pipeline.detect(in: payload.text).map(Finding.init),
       modelRan: false,
-      notices: namelessNotices(reason: "the language model failed", terms: terms),
+      notices: notices + namelessNotices(reason: "the language model failed", terms: terms),
       dictionaryTermCount: terms.count
     )
   }
