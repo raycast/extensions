@@ -186,8 +186,9 @@ export async function isNeedPwdOnExtract(file: string, format: ExtractFormat): P
   }
   try {
     await execa(_7zaBinary, ["t", file, "-p", "-y"]);
-  } catch (error: any) {
-    const errText = String((error?.stdout || "") + " " + (error?.stderr || "") + " " + error);
+  } catch (error: unknown) {
+    const execaErr = error as { stdout?: string; stderr?: string } | undefined;
+    const errText = String((execaErr?.stdout || "") + " " + (execaErr?.stderr || "") + " " + String(error));
     if (
       errText.includes("Wrong password") ||
       errText.includes("Can not open encrypted archive") ||
@@ -206,12 +207,10 @@ export async function checkPwdOnExtract(file: string, format: ExtractFormat, pas
   }
   try {
     await execa(_7zaBinary, ["t", file, `-p${password}`, "-y"]);
-  } catch (error: any) {
-    const errText = String((error?.stdout || "") + " " + (error?.stderr || "") + " " + error);
-    if (
-      errText.includes("Wrong password") ||
-      errText.includes("Can not open encrypted archive")
-    ) {
+  } catch (error: unknown) {
+    const execaErr = error as { stdout?: string; stderr?: string } | undefined;
+    const errText = String((execaErr?.stdout || "") + " " + (execaErr?.stderr || "") + " " + String(error));
+    if (errText.includes("Wrong password") || errText.includes("Can not open encrypted archive")) {
       correct = false;
     }
   }
