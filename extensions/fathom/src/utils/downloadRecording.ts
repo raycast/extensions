@@ -15,10 +15,11 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { existsSync } from "node:fs";
+import { closeSync, existsSync, openSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import {
   acquireLease,
+  clearStatus,
   formatProgressLine,
   isAlive,
   isTerminal,
@@ -31,6 +32,7 @@ import {
   resolveDirectory,
   runnerPath,
   startDownload,
+  statusDir,
   uniquePath,
   watchStatus,
   type DownloadStatus,
@@ -79,16 +81,113 @@ const OWNER_ID = randomUUID();
 const LEASE_MS = 30_000;
 
 /**
- * Recordings this instance is currently generating.
+ * A claim on the GENERATION window, held on the filesystem.
  *
  * The status-file lease covers everything from the first byte onward, but there
  * is no status file yet while Fathom renders — so two presses inside that ~30s
- * window would each resolve media and each spawn a runner. This closes it for
- * the realistic case (two presses in one view). It is in-process only, and
- * deliberately so: nothing available here coordinates across two Raycast command
- * instances, and pretending otherwise would be worse than a named limit.
+ * window would each resolve media and each spawn a runner on the same recording.
+ *
+ * This was an in-process `Set`, which only closed the two-presses-in-one-view
+ * case. `MeetingDownloadActions` is reachable from BOTH commands (Search
+ * Meetings, and Search Team Members via `MeetingListItem`), and Raycast 2 has
+ * multiple windows — so two live JS contexts racing one recording is reachable,
+ * and a module-scope `Set` cannot see across them. A file created with `wx` can.
+ *
+ * `.claim`, not `.json`: `listStatuses()` globs `*.json`, so this stays
+ * invisible to the adoption scan rather than arriving as an unparseable status.
  */
-const preparing = new Set<string>();
+const GENERATION_CLAIM_TTL_MS = 6 * 60 * 1000;
+
+interface GenerationClaim {
+  pid: number;
+  startedAt: number;
+}
+
+/** Byte size, or 0 when the file is missing or unreadable. */
+function safeSize(file: string): number {
+  try {
+    return statSync(file).size;
+  } catch {
+    return 0;
+  }
+}
+
+function claimPath(recordingId: string): string {
+  // Recording ids are numeric strings from the API; refuse anything that could
+  // escape the directory.
+  const safe = recordingId.replace(/[^A-Za-z0-9._-]/g, "_");
+  return path.join(statusDir(), `gen-${safe}.claim`);
+}
+
+/** True when a claim is dead: its owner is gone, or it outlived the generation timeout. */
+function claimIsStale(file: string, now = Date.now()): boolean {
+  try {
+    const claim = JSON.parse(readFileSync(file, "utf8")) as GenerationClaim;
+    if (now - claim.startedAt > GENERATION_CLAIM_TTL_MS) return true;
+    try {
+      // Signal 0 tests for existence without delivering anything.
+      process.kill(claim.pid, 0);
+      return false;
+    } catch {
+      // Owner is gone — a dismissed Raycast command takes its claim with it.
+      return true;
+    }
+  } catch {
+    // Unreadable or malformed: stale, rather than wedging every later retry.
+    return true;
+  }
+}
+
+/** Claim this recording's generation window, or return false if someone else holds it. */
+function acquireGenerationClaim(recordingId: string): boolean {
+  const file = claimPath(recordingId);
+  const write = () => {
+    const fd = openSync(file, "wx");
+    try {
+      writeFileSync(fd, JSON.stringify({ pid: process.pid, startedAt: Date.now() }));
+    } finally {
+      closeSync(fd);
+    }
+  };
+
+  try {
+    write();
+    return true;
+  } catch {
+    if (!claimIsStale(file)) return false;
+    try {
+      unlinkSync(file);
+      write();
+    } catch {
+      // Lost the steal race to another instance; they own it now.
+      return false;
+    }
+    // Re-read after stealing. Two instances can both judge the same claim stale;
+    // the second one's unlink+write lands on top of the first's, so winning the
+    // `wx` call is not the same as holding the claim. Whoever the file names at
+    // the end is the owner.
+    try {
+      const claim = JSON.parse(readFileSync(file, "utf8")) as GenerationClaim;
+      return claim.pid === process.pid;
+    } catch {
+      return false;
+    }
+  }
+}
+
+function releaseGenerationClaim(recordingId: string): void {
+  const file = claimPath(recordingId);
+  try {
+    // Ownership check, not a formality: if this claim expired and another
+    // instance legitimately took it, an unconditional unlink would delete THEIR
+    // protection and let a third instance start alongside them.
+    const claim = JSON.parse(readFileSync(file, "utf8")) as GenerationClaim;
+    if (claim.pid !== process.pid) return;
+    unlinkSync(file);
+  } catch {
+    // Already gone, unreadable, or never ours to remove.
+  }
+}
 
 /**
  * Transfers this instance already watches.
@@ -154,11 +253,11 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
   // download of the same meeting.
   let reservedPath: string | undefined;
 
-  // Whether THIS call is the one holding the preparing flag. Without it the
-  // duplicate-press branch below would fall through to `finally` and clear the
-  // flag belonging to the call still in flight — disarming the guard on the
-  // second press, which is the exact case it exists for.
-  let claimedPreparing = false;
+  // Whether THIS call owns the generation claim. Without it the duplicate-press
+  // branch below would fall through to `finally` and release a claim belonging
+  // to the call still in flight — disarming the guard on the second press,
+  // which is the exact case it exists for.
+  let claimedGeneration = false;
 
   try {
     // Adopt an existing transfer rather than starting a second one.
@@ -171,7 +270,7 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
     const adopted = await adoptRunningTransfer(recordingId, toast, { revealOnComplete });
     if (adopted) return adopted;
 
-    if (preparing.has(recordingId)) {
+    if (!acquireGenerationClaim(recordingId)) {
       await toast.hide();
       await showToast({
         style: Toast.Style.Success,
@@ -180,8 +279,7 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
       });
       return undefined;
     }
-    preparing.add(recordingId);
-    claimedPreparing = true;
+    claimedGeneration = true;
 
     const media = await resolveMedia(recordingId, toast, meeting);
 
@@ -194,8 +292,23 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
     //
     // startAt: 2 matches this extension's existing export numbering, so files
     // users already have keep their names.
-    const outputPath = uniquePath(directory, filename, { startAt: 2, reserve: true });
-    reservedPath = outputPath;
+    // Resume onto a previous attempt's partial when one survived, rather than
+    // claiming a fresh name beside it.
+    const resumable = findResumablePartial(recordingId);
+    let outputPath: string;
+    if (resumable) {
+      outputPath = resumable.outputPath;
+      logger.log(
+        `[download] Resuming onto ${path.basename(resumable.partPath)} (${safeSize(resumable.partPath)} bytes already on disk)`,
+      );
+      // Deliberately NOT tracked as `reservedPath`: this name was not reserved
+      // by this call, and the partial holds real bytes. `releaseReservation`
+      // only deletes an EMPTY sidecar, so it could not destroy them — but
+      // claiming ownership of a name we did not take is wrong regardless.
+    } else {
+      outputPath = uniquePath(directory, filename, { startAt: 2, reserve: true });
+      reservedPath = outputPath;
+    }
 
     toast.title = "Downloading in Background";
     // The package's own formatter, so this first frame matches the status-file
@@ -248,6 +361,10 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
     } catch (error) {
       logger.warn(`[download] Could not clear the generation record for ${recordingId}:`, error);
     }
+
+    // The old attempt's status has been superseded by this ticket; leaving it
+    // would let a later retry match the same partial twice.
+    if (resumable) clearStatus(resumable.id);
 
     // Claim it before watching, so a second instance adopting later is told the
     // transfer is owned rather than installing a competing watcher.
@@ -302,9 +419,9 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
     await reportFailure(error, toast, { recordingId, title: meeting.title });
     return undefined;
   } finally {
-    // Released on EVERY exit, not just the happy one: a failed attempt that
-    // left the recording marked as preparing would refuse every later retry.
-    if (claimedPreparing) preparing.delete(recordingId);
+    // Released on EVERY exit, not just the happy one: a claim left on disk
+    // would refuse every later retry until its TTL expired.
+    if (claimedGeneration) releaseGenerationClaim(recordingId);
   }
 }
 
@@ -331,6 +448,38 @@ function findLiveTransfer(recordingId: string): DownloadStatus | undefined {
   // order: taking the first non-terminal entry could report a dead transfer's
   // failure and leave the one actually moving bytes with no watcher at all.
   return matches.find((status) => isAlive(status)) ?? matches[0];
+}
+
+/**
+ * A finished-but-failed transfer whose partial file still holds bytes.
+ *
+ * `findLiveTransfer` deliberately ignores terminal statuses — adoption must not
+ * attach to a dead transfer. But retry needs exactly those: the runner RETAINS
+ * the `.part` file on failure so `curl -C -` can resume onto it, and
+ * `uniquePath(..., { reserve: true })` treats an existing `<name>.part` as an
+ * occupied name. So without this, a retry was handed `Foo (2).mp4`, started from
+ * byte zero, and orphaned the partial forever — while the release notes promised
+ * it would resume.
+ *
+ * `completed` is excluded: its output exists and must never be written over.
+ * A cancelled transfer discards its partial in the runner, so it will not match.
+ */
+function findResumablePartial(recordingId: string): DownloadStatus | undefined {
+  const candidates = listStatuses().filter((status) => {
+    if (!isTerminal(status.state) || status.state === "completed") return false;
+    if (status.meta?.recordingId !== recordingId) return false;
+    // The runner finishes by renaming partPath onto outputPath. If anything
+    // occupies that name now — the user saved a file there, another attempt
+    // completed — resuming would destroy it. `uniquePath` is what normally
+    // prevents this, and the resume branch deliberately skips it, so the check
+    // has to happen here instead.
+    if (existsSync(status.outputPath)) return false;
+    return safeSize(status.partPath) > 0;
+  });
+
+  // Most bytes already transferred wins. `find()` took filesystem order, which
+  // could resume an older, smaller attempt and strand the better one.
+  return candidates.sort((a, b) => safeSize(b.partPath) - safeSize(a.partPath))[0];
 }
 
 /**

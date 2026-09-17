@@ -127,22 +127,31 @@ export function buildSearchIndex(text: string | undefined, maxChars = 2000): str
   if (!text) return "";
 
   const words = new Set<string>();
-  for (const raw of text.toLowerCase().split(/[^a-z0-9']+/)) {
+  // Unicode-aware. The previous `[^a-z0-9']+` treated every accented or
+  // non-Latin character as a separator, so "Muñoz" indexed as "mu" + "oz" and a
+  // Japanese or Cyrillic transcript indexed as nothing at all — the meeting
+  // simply stopped being findable by any word in it.
+  for (const raw of text.toLowerCase().split(/[^\p{L}\p{N}']+/u)) {
     // Single characters and pure numbers carry no search value.
-    if (raw.length < 2 || /^\d+$/.test(raw)) continue;
+    if (raw.length < 2 || /^\p{N}+$/u.test(raw)) continue;
     words.add(raw);
   }
 
   let out = "";
   for (const word of words) {
-    if (out.length + word.length + 1 > maxChars) break;
+    // `continue`, not `break`: one oversized token must not zero the whole
+    // index. Unspaced scripts (Japanese, Chinese) can yield a single "word"
+    // longer than the budget, and breaking there discarded every word after it.
+    if (out.length + word.length + 1 > maxChars) continue;
     out += (out ? " " : "") + word;
   }
   return out;
 }
 
 /** Remove transcripts whose meetings are no longer cached. */
-export function pruneTranscripts(keepRecordingIds: Set<string>): number {
+const PRUNE_GRACE_MS = 60_000;
+
+export function pruneTranscripts(keepRecordingIds: Set<string>, now = Date.now()): number {
   try {
     const dir = transcriptDir();
     let removed = 0;
@@ -150,6 +159,15 @@ export function pruneTranscripts(keepRecordingIds: Set<string>): number {
       if (!name.endsWith(".md")) continue;
       const id = name.slice(0, -3);
       if (keepRecordingIds.has(id)) continue;
+      try {
+        // Written since the caller took its snapshot — another command instance
+        // cached this meeting while we were deciding. Leaking a file is
+        // recoverable; deleting a live entry's transcript is not.
+        if (now - statSync(join(dir, name)).mtimeMs < PRUNE_GRACE_MS) continue;
+      } catch {
+        // Unreadable: leave it alone rather than guess.
+        continue;
+      }
       try {
         unlinkSync(join(dir, name));
         removed++;

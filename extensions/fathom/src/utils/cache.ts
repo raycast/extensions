@@ -1,7 +1,13 @@
 import crypto from "crypto";
 import { logger } from "@chrismessina/raycast-logger";
 import { LocalStorage } from "@raycast/api";
-import { buildSearchIndex, loadTranscript, saveTranscript } from "./transcriptStore";
+import {
+  buildSearchIndex,
+  deleteTranscript,
+  loadTranscript,
+  pruneTranscripts,
+  saveTranscript,
+} from "./transcriptStore";
 
 /**
  * Cache configuration for different data types
@@ -245,6 +251,8 @@ export async function getCachedMeeting(meetingId: string): Promise<CachedMeeting
     // Check if meeting cache is still valid
     if (!isCacheValid(data.cachedAt, CACHE_CONFIG.MEETINGS.TTL)) {
       await LocalStorage.removeItem(cacheKey);
+      // The transcript lives on disk, so dropping the key alone leaks the file.
+      deleteTranscript(meetingId);
       return null;
     }
 
@@ -402,6 +410,9 @@ async function pruneExpiredFromIndex(expiredIds: string[]): Promise<void> {
     // same race that was silently discarding 47 of 50 meeting writes.
     for (const id of expiredIds) {
       await LocalStorage.removeItem(`${CACHE_CONFIG.MEETINGS.KEY_PREFIX}${id}`);
+      // This is the path the list load actually takes; without it the
+      // single-entry fix above covers only the rarer direct read.
+      deleteTranscript(id);
     }
   } catch (error) {
     logger.error("Error pruning expired meetings from index:", error);
@@ -436,6 +447,9 @@ export async function pruneCache(keepCount: number = 50): Promise<void> {
 
     // Rewrite index with only kept IDs
     const keptIds = toKeep.map(getMeetingId).filter(Boolean);
+    // Files are not LocalStorage keys; without this the pruned meetings'
+    // transcripts stay under supportPath forever.
+    pruneTranscripts(new Set(keptIds));
     const index: CachedMeetingIndex = { meetingIds: keptIds, lastUpdated: Date.now() };
     await LocalStorage.setItem(CACHE_CONFIG.MEETINGS.INDEX_KEY, JSON.stringify(index));
   } catch (error) {
@@ -501,6 +515,8 @@ export async function clearAllCache(): Promise<void> {
 
     await LocalStorage.removeItem(CACHE_CONFIG.MEETINGS.INDEX_KEY);
     await LocalStorage.removeItem(CACHE_CONFIG.METADATA.KEY);
+    // Clearing the cache must clear the on-disk half too.
+    pruneTranscripts(new Set());
   } catch (error) {
     logger.error("Error clearing cache:", error);
   }
@@ -528,6 +544,11 @@ export function searchCachedMeetings(cachedMeetings: CachedMeetingData[], query:
       // transcripts now live on disk, so `cached.transcript` is empty on this
       // path. Falls back to the full text so an entry cached before this change
       // still searches correctly.
+      // Capped at 2 kB per meeting, deliberately: LocalStorage silently
+      // discards writes past ~500 kB TOTAL (see `transcriptStore`), so an
+      // unbounded index recreates the silent data-loss bug that module exists
+      // to prevent. A word beyond the cap is therefore not searchable from
+      // here — a known, measured trade-off, not an oversight.
       cached.transcriptIndex || cached.transcript || "",
     ]
       .join(" ")
