@@ -49,27 +49,45 @@ $protected = [Security.Cryptography.ProtectedData]::Protect(
 function unprotectWithDpapi(data: string): Buffer {
   const script = `
 Add-Type -AssemblyName System.Security
-$inputData = [Console]::In.ReadToEnd().Trim()
-$bytes = [Convert]::FromBase64String($inputData)
-$unprotected = [Security.Cryptography.ProtectedData]::Unprotect(
-    $bytes,
-    $null,
-    [Security.Cryptography.DataProtectionScope]::CurrentUser
-)
-[Convert]::ToBase64String($unprotected)
+
+try {
+    $inputData = [Console]::In.ReadToEnd().Trim()
+    $bytes = [Convert]::FromBase64String($inputData)
+    $unprotected = [Security.Cryptography.ProtectedData]::Unprotect(
+        $bytes,
+        $null,
+        [Security.Cryptography.DataProtectionScope]::CurrentUser
+    )
+    [Convert]::ToBase64String($unprotected)
+}
+catch {
+    [Console]::Error.Write("__2FAS_DPAPI_CORRUPTED__")
+    exit 42
+}
 `;
 
-  const result = execFileSync(
-    "powershell.exe",
-    ["-NoProfile", "-NonInteractive", "-Command", script],
-    {
-      input: data,
-      encoding: "utf-8",
-      stdio: ["pipe", "pipe", "pipe"],
-    },
-  ).trim();
+  try {
+    const result = execFileSync(
+      "powershell.exe",
+      ["-NoProfile", "-NonInteractive", "-Command", script],
+      {
+        input: data,
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+      },
+    ).trim();
 
-  return Buffer.from(result, "base64");
+    return Buffer.from(result, "base64");
+  } catch (error: unknown) {
+    const execError = error as { stderr?: Buffer | string };
+    const stderr = execError.stderr?.toString() ?? "";
+
+    if (stderr.includes("__2FAS_DPAPI_CORRUPTED__")) {
+      throw new VaultKeyCorrupted();
+    }
+
+    throw error;
+  }
 }
 
 export function storeVaultKey(key: Buffer): void {
@@ -160,8 +178,12 @@ export function deleteVaultKey(): void {
   if (process.platform === "win32") {
     try {
       unlinkSync(WINDOWS_KEY_PATH);
-    } catch {
-      // Key may not exist
+    } catch (error: unknown) {
+      const fsError = error as NodeJS.ErrnoException;
+
+      if (fsError.code !== "ENOENT") {
+        throw error;
+      }
     }
 
     return;
