@@ -2,7 +2,7 @@
 
 Open a specific [Comet](https://www.perplexity.ai/comet) browser profile straight from Raycast. Type `work` and hit Enter, or press a global hotkey, and Comet brings that profile's window to the front (or opens one).
 
-![Switch Comet Profile](metadata/comet-profile-switcher-1.png)
+![Switch Comet Profile](media/switch-comet-profile.png)
 
 ## Commands
 
