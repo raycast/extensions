@@ -1,5 +1,9 @@
 # Bonjour Changelog
 
+## [Features] - {PR_MERGE_DATE}
+
+- added refresh action
+
 ## [Improvements] - 2026-09-16
 
 - improved reliability
