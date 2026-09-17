@@ -214,8 +214,15 @@ export async function newWindow() {
 // and creating the window before activating keeps it on the current Space.
 // Retry activation because Safari can drop it while finishing a cold launch.
 export async function newPrivateWindow() {
-  return await runAppleScript(`
+  // The script itself may wait up to ~22s (process, menu bar, activation), so
+  // the outer timeout must comfortably exceed that budget.
+  return await runAppleScript(
+    `
     on clickPrivateItem()
+      -- AXMenuItemCmdModifiers is a bitmask over the modifiers joined with
+      -- Command: 1 = Shift, 2 = Option, 4 = Control. So ⇧⌘N reads as 1.
+      set shiftCommandMask to 1
+
       tell application "System Events"
         tell process "${safariAppIdentifier}"
           -- The File menu is always the 3rd menu bar item
@@ -233,7 +240,7 @@ export async function newPrivateWindow() {
               try
                 set cmdChar to value of attribute "AXMenuItemCmdChar" of mi
                 set cmdMods to value of attribute "AXMenuItemCmdModifiers" of mi
-                set isPrivateItem to (cmdChar is "N" and cmdMods is 1)
+                set isPrivateItem to (cmdChar is "N" and cmdMods is shiftCommandMask)
               on error
                 set isPrivateItem to false
               end try
@@ -263,11 +270,14 @@ export async function newPrivateWindow() {
           if exists process "${safariAppIdentifier}" then exit repeat
           delay 0.1
         end repeat
+        if not (exists process "${safariAppIdentifier}") then error "${safariAppIdentifier} did not launch"
+
         tell process "${safariAppIdentifier}"
           repeat 100 times
             if exists menu bar 1 then exit repeat
             delay 0.1
           end repeat
+          if not (exists menu bar 1) then error "${safariAppIdentifier} launched but its menu bar never appeared"
         end tell
       end tell
 
@@ -285,5 +295,7 @@ export async function newPrivateWindow() {
 
       return "ok"
     end run
-  `);
+  `,
+    { timeout: 45000 },
+  );
 }

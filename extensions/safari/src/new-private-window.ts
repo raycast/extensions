@@ -24,7 +24,7 @@ export default async function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Couldn't find the menu item",
-          message: `${safariAppIdentifier}'s File menu has no “New Private Window” entry.`,
+          message: `${safariAppIdentifier}'s File menu has no “New Private Window” entry — private browsing may be restricted by Screen Time or a configuration profile.`,
         });
     }
   } catch (error) {
