@@ -35,12 +35,18 @@ export function useTimer() {
 
     const tick = async () => {
       if (isCompleting) return;
-      if (state.endsAt && state.endsAt <= Date.now()) {
+      const latest = await loadState();
+      if (
+        latest.status === "running" &&
+        latest.endsAt &&
+        latest.endsAt <= Date.now()
+      ) {
         isCompleting = true;
-        const next = await completeIfNeeded(state);
+        const next = await completeIfNeeded(latest);
         setState(next);
         isCompleting = false;
       } else {
+        setState(latest);
         setNow(Date.now());
       }
     };
@@ -54,15 +60,26 @@ export function useTimer() {
     await saveState(next);
   }, []);
 
+  const update = useCallback(
+    async (transform: (current: TimerState) => TimerState) => {
+      const current = await loadState();
+      const normalized = await completeIfNeeded(current);
+      await commit(transform(normalized));
+    },
+    [commit],
+  );
+
   return {
     state,
     loaded,
     refresh,
-    start: () => commit(start(state)),
-    pause: () => commit(pause(state)),
-    reset: () => commit(reset(state)),
-    adjust: (minutes: number) => commit(adjust(state, minutes)),
-    setDuration: (minutes: number) => commit(setDuration(state, minutes)),
-    selectPhase: (phase: Phase) => commit(selectPhase(state, phase)),
+    start: () => update(start),
+    pause: () => update(pause),
+    reset: () => update(reset),
+    adjust: (minutes: number) => update((current) => adjust(current, minutes)),
+    setDuration: (minutes: number) =>
+      update((current) => setDuration(current, minutes)),
+    selectPhase: (phase: Phase) =>
+      update((current) => selectPhase(current, phase)),
   };
 }

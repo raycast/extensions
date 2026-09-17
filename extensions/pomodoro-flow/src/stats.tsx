@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { loadCompletions } from "./stats-store";
 
 const MIN_YEAR = 2020;
-const MAX_YEAR = 2030;
 const monthNames = [
   "January",
   "February",
@@ -50,10 +49,7 @@ function monthCalendar(
 }
 
 export default function StatsCommand() {
-  const currentYear = Math.min(
-    MAX_YEAR,
-    Math.max(MIN_YEAR, new Date().getFullYear()),
-  );
+  const currentYear = Math.max(MIN_YEAR, new Date().getFullYear());
   const [year, setYear] = useState(currentYear);
   const [completions, setCompletions] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,7 +106,7 @@ export default function StatsCommand() {
           <Action
             title="Next Year"
             icon={Icon.ArrowRight}
-            onAction={() => setYear((value) => Math.min(MAX_YEAR, value + 1))}
+            onAction={() => setYear((value) => value + 1)}
             shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
           />
           <Action

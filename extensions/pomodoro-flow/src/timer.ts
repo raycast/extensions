@@ -3,12 +3,12 @@ import { runAppleScript } from "@raycast/utils";
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
-import type { Phase, Preferences, TimerState } from "./types";
+import type { Phase, TimerState } from "./types";
 import { recordCompletion } from "./stats-store";
 
 const STORAGE_KEY = "pomodoro-flow.timer.v1";
 
-export function preferences(): Preferences {
+export function preferences() {
   return getPreferenceValues<Preferences>();
 }
 
@@ -44,10 +44,24 @@ export async function loadState(): Promise<TimerState> {
     const value = JSON.parse(raw) as TimerState;
     if (!value.phase || !value.status || !Number.isFinite(value.remainingMs))
       return initialState();
-    return value;
+    return normalizeDailyCount(value);
   } catch {
     return initialState();
   }
+}
+
+function dayKey(timestamp: number) {
+  const date = new Date(timestamp);
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
+function normalizeDailyCount(state: TimerState): TimerState {
+  if (
+    !state.lastCompletedAt ||
+    dayKey(state.lastCompletedAt) === dayKey(Date.now())
+  )
+    return state;
+  return { ...state, focusSessions: 0 };
 }
 
 export async function saveState(state: TimerState) {
@@ -180,18 +194,22 @@ export async function completeIfNeeded(state: TimerState): Promise<TimerState> {
   const shouldAutoStart = completedFocus
     ? prefs.autoStartBreaks
     : prefs.autoStartFocus;
+  const completedAt = state.endsAt ?? Date.now();
   const base: TimerState = {
     phase,
     status: "idle",
     remainingMs: durationFor(phase, prefs),
-    focusSessions: state.focusSessions + (completedFocus ? 1 : 0),
+    focusSessions:
+      (dayKey(state.lastCompletedAt ?? completedAt) === dayKey(completedAt)
+        ? state.focusSessions
+        : 0) + (completedFocus ? 1 : 0),
     cycleSessions,
     endsAt: undefined,
-    lastCompletedAt: Date.now(),
+    lastCompletedAt: completedAt,
   };
   const next = shouldAutoStart ? start(base) : base;
   await saveState(next);
-  if (completedFocus) await recordCompletion();
+  if (completedFocus) await recordCompletion(completedAt);
   await notifyCompletion(completedPhase, prefs.sound);
   return next;
 }

@@ -10,13 +10,3 @@ export type TimerState = {
   cycleSessions: number;
   lastCompletedAt?: number;
 };
-
-export type Preferences = {
-  focusMinutes: string;
-  shortBreakMinutes: string;
-  longBreakMinutes: string;
-  longBreakEvery: string;
-  autoStartBreaks: boolean;
-  autoStartFocus: boolean;
-  sound: boolean;
-};
