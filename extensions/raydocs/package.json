@@ -34,20 +34,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "@raycast/utils": "^1.17.0",
-    "cheerio": "^1.0.0",
-    "node-fetch": "^3.3.2",
-    "showdown": "^2.1.0"
+    "@raycast/api": "2.3.0",
+    "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "@types/showdown": "^2.0.6",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.20.3",
+    "@types/react": "19.3.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.7",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
@@ -62,5 +59,8 @@
   "platforms": [
     "macOS",
     "Windows"
+  ],
+  "contributors": [
+    "chrismessina"
   ]
 }
