@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2026-09-17
 
 - Add a `New Private Window` command that opens a new private window of the selected Safari browser. Requires Accessibility access for Raycast, as the window is opened through Safari's File menu.
 
