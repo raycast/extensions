@@ -48,11 +48,12 @@ const hasPage = (s: Source) => Boolean(s.measured && s.thumb_url);
 
 export default function Command() {
   const [pillar, setPillar] = useState<string>("all");
-  const { isLoading, data } = useCachedPromise(
+  const { isLoading, data, error, revalidate } = useCachedPromise(
     async () => {
       const res = await fetch(API);
       if (!res.ok) throw new Error(`Signal 500 API answered ${res.status}`);
       const json = (await res.json()) as Payload;
+      if (!Array.isArray(json.sources)) throw new Error("Signal 500 API returned no sources");
       return json.sources.sort((a, b) => b.rank_score - a.rank_score);
     },
     [],
@@ -75,6 +76,23 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      {/* EmptyView only renders when the list has no items: a failed fetch, an empty
+          catalogue, or a pillar/search with no matches. Cached data still shows on error. */}
+      {!isLoading && shown.length === 0 && (
+        <List.EmptyView
+          icon={error ? Icon.Warning : Icon.MagnifyingGlass}
+          title={error ? "Couldn't load the Signal 500" : data?.length ? "No sources match" : "The catalogue is empty"}
+          description={
+            error ? error.message : data?.length ? "Try another pillar or clear the search" : "Try again in a moment"
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action.OpenInBrowser title="Browse on feeds.bar" url="https://feeds.bar/signal-500/" />
+            </ActionPanel>
+          }
+        />
+      )}
       {shown.map((s) => (
         <List.Item
           key={s.id}
