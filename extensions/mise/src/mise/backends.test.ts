@@ -126,7 +126,7 @@ describe("searchBackend", () => {
   it("validates the exact spec through ls-remote for other backends and reports the newest version", async () => {
     const listRemote = vi.fn(async () => lsRemoteFixture);
     const results = await searchBackend("pipx", "black", deps({ listRemote }));
-    expect(listRemote).toHaveBeenCalledWith("pipx:black");
+    expect(listRemote).toHaveBeenCalledWith("pipx:black", { signal: undefined });
     expect(results).toEqual([
       {
         backend: "pipx",
@@ -155,6 +155,16 @@ describe("searchBackend", () => {
     });
     expect(await searchBackend("asdf", "nope", deps({ listRemote: notFound }))).toEqual([]);
     expect(await searchBackend("go", "example.invalid/nope", deps())).toEqual([]);
+  });
+
+  it("hands the abort signal to fetch and to listRemote", async () => {
+    const { signal } = new AbortController();
+    const fetch = fetchReturning({ objects: [] });
+    await searchBackend("npm", "prettier", deps({ fetch, signal }));
+    expect(fetch).toHaveBeenCalledWith(expect.any(String), { headers: undefined, signal });
+    const listRemote = vi.fn(async () => [] as RemoteVersion[]);
+    await searchBackend("pipx", "black", deps({ listRemote, signal }));
+    expect(listRemote).toHaveBeenCalledWith("pipx:black", { signal });
   });
 
   it("rethrows other ls-remote failures", async () => {

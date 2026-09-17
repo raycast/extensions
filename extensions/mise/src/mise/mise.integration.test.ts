@@ -6,7 +6,7 @@ import { listConfigFiles } from "./config";
 import { runMise } from "./exec";
 import { listInstalled } from "./installed";
 import { resolveMise, type MiseLocation } from "./locate";
-import { addGlobally, clearCache, prune, runTask, uninstall, upgrade, type MiseOperation } from "./operations";
+import { addGlobally, clearCache, prune, remove, runTask, uninstall, upgrade, type MiseOperation } from "./operations";
 import { listOutdated } from "./outdated";
 import { listRegistry } from "./registry";
 import { listRemote } from "./remote";
@@ -67,9 +67,9 @@ describe("operations dry-run against the real mise", () => {
     expect(result.stdout).toMatch(/would (update|install)/);
   });
 
-  it("uninstall removes an installed jq version", async () => {
+  it("uninstall removes an installed jq version", async (ctx) => {
     const jq = (await listInstalled(loc())).find((tool) => tool.name === "jq");
-    if (!jq) throw new Error("jq is not installed; install one version with `mise install jq`");
+    if (!jq) return ctx.skip("jq is not installed; run `mise install jq` to cover uninstall");
     const result = await dryRun(uninstall("jq", jq.versions[0].version));
     expect(result.stdout + result.stderr).toMatch(/dry-?run|would/i);
   });
@@ -93,6 +93,17 @@ describe("operations dry-run against the real mise", () => {
     expect(result.code).toBe(0);
     expect(result.stdout).toMatch(/--path/);
     expect(result.stdout).toMatch(/--no-prune/);
+  });
+
+  it("remove runs unuse, which prunes by default, then uninstall --all", async () => {
+    const op = remove("jq");
+    const unuse = await runMise(loc(), [op.args[0], "--help"]);
+    expect(unuse.code).toBe(0);
+    expect(unuse.stdout).toMatch(/prune/);
+    const [uninstallStep] = op.andThen ?? [];
+    const uninstall = await runMise(loc(), [uninstallStep[0], "--help"]);
+    expect(uninstall.code).toBe(0);
+    expect(uninstall.stdout).toMatch(/--all\b/);
   });
 
   // `mise run <task> --dry-run` hands --dry-run to the task and runs it; the flag goes before the name.

@@ -41,19 +41,30 @@ function report(args: string[], code: number | null, startedAt: number): void {
   observer?.({ args, code, ms: Date.now() - startedAt });
 }
 
-export function miseJson<T>(location: MiseLocation, args: string[], parse: (raw: unknown) => T): Promise<T> {
+export function miseJson<T>(
+  location: MiseLocation,
+  args: string[],
+  parse: (raw: unknown) => T,
+  options: { signal?: AbortSignal } = {},
+): Promise<T> {
   const fullArgs = [...args, "--json"];
   const startedAt = Date.now();
   return new Promise((resolve, reject) => {
     execFile(
       location.path,
       fullArgs,
-      { cwd: homedir(), env: envFor(location), encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+      {
+        cwd: homedir(),
+        env: envFor(location),
+        encoding: "utf8",
+        maxBuffer: 64 * 1024 * 1024,
+        signal: options.signal,
+      },
       (error, stdout, stderr) => {
         const code = error ? (typeof error.code === "number" ? error.code : null) : 0;
         report(fullArgs, code, startedAt);
         if (error) {
-          reject(new MiseExitError(args, code, stderr || error.message));
+          reject(error.name === "AbortError" ? error : new MiseExitError(args, code, stderr || error.message));
           return;
         }
         let json: unknown;

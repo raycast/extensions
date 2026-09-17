@@ -16,6 +16,10 @@ export function parseRemote(raw: unknown): RemoteVersion[] {
   });
 }
 
-export function listRemote(location: MiseLocation, tool: string): Promise<RemoteVersion[]> {
-  return miseJson(location, ["ls-remote", tool], parseRemote);
+export function listRemote(
+  location: MiseLocation,
+  tool: string,
+  options: { signal?: AbortSignal } = {},
+): Promise<RemoteVersion[]> {
+  return miseJson(location, ["ls-remote", tool], parseRemote, options);
 }

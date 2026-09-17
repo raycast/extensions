@@ -2,7 +2,7 @@ import { Clipboard, closeMainWindow, showHUD, showToast, Toast } from "@raycast/
 import { setTimeout } from "node:timers/promises";
 import { runMise, type RunResult } from "../mise/exec";
 import type { MiseLocation } from "../mise/locate";
-import { parseProgressLine, type MiseOperation } from "../mise/operations";
+import { failureMessage, parseProgressLine, type MiseOperation, type Retry } from "../mise/operations";
 import { readPreferences } from "./preferences";
 import { resolveMiseFromRaycast } from "./useMise";
 
@@ -36,8 +36,8 @@ export async function runOperation(
   let summary: string | undefined;
   let outcome: Outcome;
   let result: RunResult | undefined;
-  try {
-    result = await runMise(location, op.args, {
+  const runStep = (args: string[]) =>
+    runMise(location, args, {
       signal: controller.signal,
       onLine: (line) => {
         const progress = parseProgressLine(line);
@@ -46,6 +46,12 @@ export async function runOperation(
         toast.message = progress.message;
       },
     });
+  try {
+    result = await runStep(op.args);
+    for (const args of op.andThen ?? []) {
+      if (controller.signal.aborted || result.code !== 0) break;
+      result = await runStep(args);
+    }
     if (controller.signal.aborted) outcome = { style: Toast.Style.Failure, title: "Cancelled", message: op.title };
     else if (result.code === 0) outcome = { style: Toast.Style.Success, title: op.successTitle, message: summary };
     else outcome = failure(op, result.stderr);
@@ -56,14 +62,24 @@ export async function runOperation(
   }
   await toast.hide();
   if (closeAfterAction) await showHUD(outcome.title);
-  else await showToast({ ...outcome, primaryAction: copyLogs(outcome.logs) });
+  else {
+    const retry = outcome.logs === undefined ? undefined : op.retry?.(outcome.logs);
+    await showToast({
+      ...outcome,
+      primaryAction: retry ? retryAction(location, retry, onSuccess) : copyLogs(outcome.logs),
+      secondaryAction: retry ? copyLogs(outcome.logs) : undefined,
+    });
+  }
   if (outcome.style === Toast.Style.Success) onSuccess?.();
   return result;
 }
 
 function failure(op: MiseOperation, logs: string): Outcome {
-  const lines = logs.trim().split("\n");
-  return { style: Toast.Style.Failure, title: op.failureTitle, message: lines[lines.length - 1], logs };
+  return { style: Toast.Style.Failure, title: op.failureTitle, message: failureMessage(logs), logs };
+}
+
+function retryAction(location: MiseLocation, retry: Retry, onSuccess?: () => void): Toast.ActionOptions {
+  return { title: retry.title, onAction: () => void runOperation(location, retry.op, onSuccess) };
 }
 
 function copyLogs(logs: string | undefined): Toast.ActionOptions | undefined {

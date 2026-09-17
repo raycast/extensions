@@ -1,11 +1,12 @@
-import { Action, ActionPanel, Icon, type LaunchProps, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, type LaunchProps, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { parseBackendQuery, searchBackend, type Backend, type BackendResult } from "./mise/backends";
 import type { ConfigFile } from "./mise/config";
 import { listInstalled, type InstalledTool } from "./mise/installed";
 import type { MiseLocation } from "./mise/locate";
-import { backendKind, listRegistry, type RegistryTool } from "./mise/registry";
+import { backendKind, filterRegistry, listRegistry, type RegistryTool } from "./mise/registry";
+import { remove } from "./mise/operations";
 import { listRemote } from "./mise/remote";
 import { miseCommandLine } from "./terminal/script";
 import { docsUrl } from "./ui/docsUrl";
@@ -15,9 +16,13 @@ import { MissingMise } from "./ui/MissingMise";
 import { readPreferences } from "./ui/preferences";
 import { RunInTerminalAction } from "./ui/runInTerminal";
 import { runOperation } from "./ui/runOperation";
+import { useDebounced } from "./ui/useDebounced";
 import { useMise } from "./ui/useMise";
 
 const PLACEHOLDER = "Search tools or npm:, cargo:, gem:…";
+const REGISTRY_PREVIEW = 100;
+const MATCH_LIMIT = 50;
+const BACKEND_DEBOUNCE_MS = 250;
 
 export default function Command(props: LaunchProps) {
   const mise = useMise();
@@ -34,18 +39,30 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
   const [showDetail, setShowDetail] = useState(prefs.showDetails);
   const [searchText, setSearchText] = useState(initialSearchText);
 
-  const backendQuery = parseBackendQuery(searchText);
+  const backendQuery = parseBackendQuery(useDebounced(searchText, BACKEND_DEBOUNCE_MS));
+  const abortable = useRef<AbortController>(null);
   const backend = useCachedPromise(
     (kind: Backend, query: string) =>
-      searchBackend(kind, query, { fetch, listRemote: (spec) => listRemote(location, spec) }),
+      searchBackend(kind, query, {
+        fetch,
+        listRemote: (spec, options) => listRemote(location, spec, options),
+        signal: abortable.current?.signal,
+      }),
     [backendQuery?.backend ?? "npm", backendQuery?.query ?? ""],
-    { execute: backendQuery !== undefined, keepPreviousData: true },
+    { execute: backendQuery !== undefined, keepPreviousData: true, abortable },
   );
 
   const installedByName = new Map((installed.data ?? []).map((tool) => [tool.name, tool]));
   const tools = registry.data ?? [];
-  const installedTools = tools.filter((tool) => installedByName.has(tool.short));
-  const otherTools = tools.filter((tool) => !installedByName.has(tool.short));
+  const query = searchText.trim();
+  const matches = query ? filterRegistry(tools, query, MATCH_LIMIT) : tools;
+  const installedTools = matches.filter((tool) => installedByName.has(tool.short));
+  const otherMatches = matches.filter((tool) => !installedByName.has(tool.short));
+  const otherTools = query ? otherMatches : otherMatches.slice(0, REGISTRY_PREVIEW);
+  const registrySubtitle =
+    otherTools.length < otherMatches.length
+      ? `${otherTools.length} of ${otherMatches.length}`
+      : String(otherTools.length);
   const backendResults = backendQuery ? (backend.data ?? []) : [];
   const isLoading = registry.isLoading || installed.isLoading || backend.isLoading;
 
@@ -53,10 +70,20 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
     addGloballyTo(spec, undefined, { configFile, jobs: prefs.jobs });
   const installGlobally = (spec: string, configFile: string) =>
     runOperation(location, useGlobally(spec, configFile), installed.revalidate);
+  const removeTool = async (tool: InstalledTool) => {
+    const count = tool.versions.length;
+    const confirmed = await confirmAlert({
+      title: `Remove ${tool.name}?`,
+      message: `Removes ${tool.name} from your mise config and deletes ${count} installed version${count === 1 ? "" : "s"}.`,
+      primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+    });
+    if (confirmed) await runOperation(location, remove(tool.name), installed.revalidate);
+  };
   const itemProps = (spec: string) => ({
     installed: installedByName.get(spec),
     showDetail,
     configFiles: install.files,
+    onRemove: removeTool,
     onUseGlobally: () => installGlobally(spec, install.target),
     onUseGloballyIn: (configFile: string) => installGlobally(spec, configFile),
     terminalCommand: miseCommandLine(location, useGlobally(spec, install.target)),
@@ -68,7 +95,6 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
       key={tool.short}
       title={tool.short}
       description={tool.description}
-      keywords={[...tool.aliases, ...tool.bins]}
       tag={backendKind(tool)}
       link={{ title: "Open Documentation", url: docsUrl(tool) }}
       markdown={registryMarkdown(tool)}
@@ -81,7 +107,6 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
       key={result.spec}
       title={result.spec}
       description={result.description}
-      keywords={[searchText]}
       tag={result.backend}
       version={result.version}
       link={result.url ? { title: "Open Package Page", url: result.url } : undefined}
@@ -100,7 +125,7 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
       }
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      filtering={true}
+      filtering={false}
       throttle
     >
       {registry.error && !registry.data ? (
@@ -122,7 +147,7 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
       <List.Section title="Installed" subtitle={String(installedTools.length)}>
         {installedTools.map(renderRegistryTool)}
       </List.Section>
-      <List.Section title="Registry" subtitle={String(otherTools.length)}>
+      <List.Section title="Registry" subtitle={registrySubtitle}>
         {otherTools.map(renderRegistryTool)}
       </List.Section>
     </List>
@@ -132,7 +157,6 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
 function ToolItem({
   title,
   description,
-  keywords,
   tag,
   version,
   link,
@@ -140,6 +164,7 @@ function ToolItem({
   installed,
   showDetail,
   configFiles,
+  onRemove,
   onUseGlobally,
   onUseGloballyIn,
   terminalCommand,
@@ -147,7 +172,6 @@ function ToolItem({
 }: {
   title: string;
   description: string;
-  keywords: string[];
   tag: string;
   version?: string;
   link: { title: string; url: string } | undefined;
@@ -155,6 +179,7 @@ function ToolItem({
   installed: InstalledTool | undefined;
   showDetail: boolean;
   configFiles: ConfigFile[];
+  onRemove: (tool: InstalledTool) => void;
   onUseGlobally: () => void;
   onUseGloballyIn: (configFile: string) => void;
   terminalCommand: string;
@@ -169,11 +194,18 @@ function ToolItem({
     <List.Item
       title={title}
       subtitle={showDetail || !description ? undefined : description}
-      keywords={keywords}
       accessories={accessories}
       detail={<List.Item.Detail markdown={`${markdown}\n\n${installedMarkdown(installed)}`} />}
       actions={
         <ActionPanel>
+          {installed && (
+            <Action
+              title={`Remove ${title}…`}
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              onAction={() => onRemove(installed)}
+            />
+          )}
           <Action title="Use Globally" icon={Icon.Plus} onAction={onUseGlobally} />
           <UseGloballyIn files={configFiles} onSelect={onUseGloballyIn} />
           <RunInTerminalAction command={terminalCommand} />

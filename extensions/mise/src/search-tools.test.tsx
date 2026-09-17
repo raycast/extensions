@@ -33,6 +33,12 @@ async function act(root: ReactTestInstance, tool: string, title: string) {
 
 const useGlobally = (root: ReactTestInstance, tool: string) => act(root, tool, "Use Globally");
 
+async function actionTitles(root: ReactTestInstance, tool: string) {
+  const item = root.findAllByType(List.Item).find((n) => n.props.title === tool);
+  const panel = await render(item?.props.actions);
+  return panel.root.findAllByType(Action).map((n) => n.props.title as string);
+}
+
 describe("Search Tools", () => {
   function setup() {
     useCachedPromiseFixtures.set(listRegistry, parseRegistry(registryFixture));
@@ -80,6 +86,35 @@ describe("Search Tools", () => {
     );
   });
 
+  it("leads an installed row with Remove, which runs unuse then uninstall --all once confirmed", async () => {
+    setup();
+    const runMise = vi.spyOn(exec, "runMise").mockResolvedValue({ code: 0, stdout: "", stderr: "" });
+    const { root } = await render(<Command {...launch} />);
+    expect((await actionTitles(root, "jq"))[0]).toBe("Remove jq…");
+    expect(await actionTitles(root, "jq")).toContain("Use Globally");
+    expect((await actionTitles(root, "ripgrep"))[0]).toBe("Use Globally");
+
+    mocks.confirmAlert.mockResolvedValue(false);
+    await act(root, "jq", "Remove jq…");
+    expect(mocks.confirmAlert).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        title: "Remove jq?",
+        message: "Removes jq from your mise config and deletes 2 installed versions.",
+        primaryAction: expect.objectContaining({ title: "Remove", style: "destructive" }),
+      }),
+    );
+    expect(runMise).not.toHaveBeenCalled();
+
+    mocks.confirmAlert.mockResolvedValue(true);
+    await act(root, "jq", "Remove jq…");
+    expect(runMise.mock.calls.map((call) => call[1])).toEqual([
+      ["unuse", "jq"],
+      ["uninstall", "--all", "jq"],
+    ]);
+    expect(mocks.showToast).toHaveBeenLastCalledWith(expect.objectContaining({ title: "jq removed" }));
+    expect(useCachedPromiseFixtures.revalidateOf(listInstalled)).toHaveBeenCalledTimes(1);
+  });
+
   it("hands mise use -g to the chosen terminal from Run in Terminal and closes the window", async () => {
     setup();
     mocks.getPreferenceValues.mockReturnValue({
@@ -95,6 +130,63 @@ describe("Search Tools", () => {
     expect(mocks.closeMainWindow).toHaveBeenCalled();
   });
 
+  it("debounces the backend request so a query typed within 250ms fetches once, for the final text", async () => {
+    setup();
+    vi.useFakeTimers();
+    try {
+      const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(npmFixture)));
+      const { root } = await render(<Command {...launch} />);
+      const list = root.findByType(List);
+      await flush(() => list.props.onSearchTextChange("npm:pre"));
+      await flush(() => vi.advanceTimersByTime(100));
+      await flush(() => list.props.onSearchTextChange("npm:prettier"));
+      await flush(() => vi.advanceTimersByTime(249));
+      expect(fetch).not.toHaveBeenCalled();
+      await flush(() => vi.advanceTimersByTime(1));
+      await flush();
+      expect(fetch).toHaveBeenCalledOnce();
+      expect(fetch).toHaveBeenCalledWith(expect.stringContaining("text=prettier"), expect.anything());
+      expect(sections(root)[0].items[0].props.title).toBe("npm:prettier");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("filters the registry itself, ranking the typed name first and hiding tools that do not match", async () => {
+    setup();
+    const { root } = await render(<Command {...launch} />);
+    const list = root.findByType(List);
+    expect(list.props.filtering).toBe(false);
+
+    await flush(() => list.props.onSearchTextChange("rg"));
+    const [installed, registry] = sections(root);
+    expect(installed.items).toEqual([]);
+    expect(registry.items.map((n) => n.props.title)).toEqual(["ripgrep"]);
+
+    await flush(() => list.props.onSearchTextChange("nod"));
+    expect(sections(root).map((s) => s.items.map((n) => n.props.title))).toEqual([["node"], []]);
+  });
+
+  it("shows the first 100 registry tools with an empty query and says how many there are", async () => {
+    const extra = Array.from({ length: 120 }, (_, i) => ({
+      short: `tool-${String(i).padStart(3, "0")}`,
+      backends: ["aqua:x/y"],
+    }));
+    useCachedPromiseFixtures.set(listRegistry, parseRegistry([...registryFixture, ...extra]));
+    useCachedPromiseFixtures.set(listInstalled, parseInstalled(lsFixture));
+    useCachedPromiseFixtures.set(listConfigFiles, parseConfigFiles(configFixture));
+    const { root } = await render(<Command {...launch} />);
+    const [installed, registry] = sections(root);
+
+    expect(installed.items.map((n) => n.props.title)).toEqual(["jq", "node"]);
+    expect(registry.items).toHaveLength(100);
+    expect(registry.items[99].props.title).toBe("tool-096");
+    expect(root.findAllByType(List.Section)[1].props.subtitle).toBe("100 of 123");
+
+    await flush(() => root.findByType(List).props.onSearchTextChange("tool-119"));
+    expect(sections(root)[1].items.map((n) => n.props.title)).toEqual(["tool-119"]);
+  });
+
   it("lists installed registry tools under Installed with their versions, leaving backend specs untagged", async () => {
     setup();
     const { root } = await render(<Command {...launch} />);
@@ -107,6 +199,7 @@ describe("Search Tools", () => {
       { text: "1.8.1, 1.8.2", icon: "CheckCircle" },
     ]);
     expect(registry.title).toBe("Registry");
+    expect(root.findAllByType(List.Section)[1].props.subtitle).toBe("3");
     expect(registry.items.map((n) => n.props.title)).toEqual(["1password", "ripgrep", "ag"]);
     expect(root.findAllByType(List.Item).filter((n) => /wrangler/.test(n.props.title))).toEqual([]);
   });

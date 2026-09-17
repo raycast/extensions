@@ -38,7 +38,8 @@ export type BackendResult = {
 
 export type BackendSearchDeps = {
   fetch: typeof fetch;
-  listRemote: (spec: string) => Promise<RemoteVersion[]>;
+  listRemote: (spec: string, options: { signal?: AbortSignal }) => Promise<RemoteVersion[]>;
+  signal?: AbortSignal;
 };
 
 const QUERY = new RegExp(`^(${BACKENDS.join("|")}):(.*)$`);
@@ -59,21 +60,18 @@ export async function searchBackend(
 ): Promise<BackendResult[]> {
   switch (backend) {
     case "npm":
-      return searchNpm(query, deps.fetch);
+      return searchNpm(query, deps);
     case "cargo":
-      return searchCargo(query, deps.fetch);
+      return searchCargo(query, deps);
     case "gem":
-      return searchGem(query, deps.fetch);
+      return searchGem(query, deps);
     default:
-      return validateSpec(backend, query, deps.listRemote);
+      return validateSpec(backend, query, deps);
   }
 }
 
-async function searchNpm(query: string, fetch: typeof globalThis.fetch): Promise<BackendResult[]> {
-  const raw = await fetchJson(
-    fetch,
-    `https://registry.npmjs.org/-/v1/search?text=${encodeURIComponent(query)}&size=20`,
-  );
+async function searchNpm(query: string, deps: BackendSearchDeps): Promise<BackendResult[]> {
+  const raw = await fetchJson(deps, `https://registry.npmjs.org/-/v1/search?text=${encodeURIComponent(query)}&size=20`);
   if (!isRecord(raw) || !Array.isArray(raw.objects)) {
     throw new MiseOutputError("npm search: expected an objects array", JSON.stringify(raw));
   }
@@ -86,8 +84,8 @@ async function searchNpm(query: string, fetch: typeof globalThis.fetch): Promise
   });
 }
 
-async function searchCargo(query: string, fetch: typeof globalThis.fetch): Promise<BackendResult[]> {
-  const raw = await fetchJson(fetch, `https://crates.io/api/v1/crates?q=${encodeURIComponent(query)}&per_page=20`, {
+async function searchCargo(query: string, deps: BackendSearchDeps): Promise<BackendResult[]> {
+  const raw = await fetchJson(deps, `https://crates.io/api/v1/crates?q=${encodeURIComponent(query)}&per_page=20`, {
     "User-Agent": "raycast-mise",
   });
   if (!isRecord(raw) || !Array.isArray(raw.crates)) {
@@ -101,8 +99,8 @@ async function searchCargo(query: string, fetch: typeof globalThis.fetch): Promi
   });
 }
 
-async function searchGem(query: string, fetch: typeof globalThis.fetch): Promise<BackendResult[]> {
-  const raw = await fetchJson(fetch, `https://rubygems.org/api/v1/search.json?query=${encodeURIComponent(query)}`);
+async function searchGem(query: string, deps: BackendSearchDeps): Promise<BackendResult[]> {
+  const raw = await fetchJson(deps, `https://rubygems.org/api/v1/search.json?query=${encodeURIComponent(query)}`);
   if (!Array.isArray(raw)) throw new MiseOutputError("gem search: expected an array", JSON.stringify(raw));
   return raw.map((entry, index) => {
     if (!isRecord(entry) || typeof entry.name !== "string") {
@@ -112,14 +110,10 @@ async function searchGem(query: string, fetch: typeof globalThis.fetch): Promise
   });
 }
 
-async function validateSpec(
-  backend: Backend,
-  name: string,
-  listRemote: BackendSearchDeps["listRemote"],
-): Promise<BackendResult[]> {
+async function validateSpec(backend: Backend, name: string, deps: BackendSearchDeps): Promise<BackendResult[]> {
   let versions: RemoteVersion[];
   try {
-    versions = await listRemote(`${backend}:${name}`);
+    versions = await deps.listRemote(`${backend}:${name}`, { signal: deps.signal });
   } catch (error) {
     if (error instanceof MiseExitError && MISSING_PACKAGE.test(error.stderr)) return [];
     throw error;
@@ -140,11 +134,11 @@ function packagePage(backend: Backend, name: string): string | undefined {
 }
 
 async function fetchJson(
-  fetch: typeof globalThis.fetch,
+  { fetch, signal }: BackendSearchDeps,
   url: string,
   headers?: Record<string, string>,
 ): Promise<unknown> {
-  const response = await fetch(url, { headers });
+  const response = await fetch(url, { headers, signal });
   if (!response.ok) throw new Error(`${new URL(url).host} responded with HTTP ${response.status}`);
   return response.json();
 }

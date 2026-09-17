@@ -1,14 +1,25 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { addGlobally, clearCache, parseProgressLine, prune, runTask, uninstall, upgrade } from "./operations";
+import {
+  addGlobally,
+  clearCache,
+  failureMessage,
+  parseProgressLine,
+  prune,
+  remove,
+  runTask,
+  uninstall,
+  upgrade,
+} from "./operations";
 
 const useStderr = readFileSync(join(__dirname, "fixtures/use-stderr.txt"), "utf8");
 const uninstallStderr = readFileSync(join(__dirname, "fixtures/uninstall-stderr.txt"), "utf8");
+const lowDownloadsStderr = readFileSync(join(__dirname, "fixtures/use-low-downloads-stderr.txt"), "utf8");
 
 describe("addGlobally", () => {
   it("builds mise use -g <tool>@latest by default", () => {
-    expect(addGlobally("jq")).toEqual({
+    expect(addGlobally("jq")).toMatchObject({
       args: ["use", "-g", "jq@latest"],
       title: "Adding jq…",
       successTitle: "jq added",
@@ -33,6 +44,37 @@ describe("addGlobally", () => {
       "2",
       "jq@latest",
     ]);
+  });
+});
+
+describe("addGlobally retry", () => {
+  it("offers to allow low downloads when mise refuses an npm package for that reason", () => {
+    const retry = addGlobally("npm:agent-peek").retry?.(lowDownloadsStderr);
+    expect(retry?.title).toBe("Allow Low Downloads and Retry");
+    expect(retry?.op.args).toEqual(["use", "-g", "--tool-option", "allow_low_downloads=true", "npm:agent-peek@latest"]);
+  });
+
+  it("keeps the config file and does not offer the retry again once the option is set", () => {
+    const op = addGlobally("npm:agent-peek", "latest", { configFile: "/cfg/tools.toml" });
+    const retry = op.retry?.(lowDownloadsStderr);
+    expect(retry?.op.args.slice(0, 3)).toEqual(["use", "--path", "/cfg/tools.toml"]);
+    expect(retry?.op.retry?.(lowDownloadsStderr)).toBeUndefined();
+  });
+
+  it("offers nothing for other failures", () => {
+    expect(addGlobally("jq").retry?.("mise ERROR no such tool")).toBeUndefined();
+  });
+});
+
+describe("failureMessage", () => {
+  it("prefers mise's own error line over the trailing boilerplate", () => {
+    expect(failureMessage(lowDownloadsStderr)).toBe(
+      "Failed to install npm:agent-peek@latest: aube install failed: refusing to add agent-peek: only 17 weekly downloads (threshold: 1000)",
+    );
+  });
+
+  it("falls back to the last line when there is no mise ERROR line", () => {
+    expect(failureMessage("first\nlast")).toBe("last");
   });
 });
 
@@ -93,6 +135,18 @@ describe("uninstall", () => {
     expect(op.args).toEqual(["unuse", "--path", "/Users/lachlan/.config/mise/conf.d/tools.toml", "node@lts"]);
     expect(op.title).toBe("Uninstalling node@24.21.0…");
     expect(op.successTitle).toBe("node@24.21.0 uninstalled and removed from config");
+  });
+});
+
+describe("remove", () => {
+  it("drops the tool from config, then deletes every installed version", () => {
+    expect(remove("jq")).toEqual({
+      args: ["unuse", "jq"],
+      andThen: [["uninstall", "--all", "jq"]],
+      title: "Removing jq…",
+      successTitle: "jq removed",
+      failureTitle: "Removing jq failed",
+    });
   });
 });
 

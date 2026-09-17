@@ -1,13 +1,18 @@
+// `andThen` holds further mise command lines run in order after `args`; the first non-zero exit stops the run.
 export type MiseOperation = {
   args: string[];
+  andThen?: string[][];
   title: string;
   successTitle: string;
   failureTitle: string;
+  retry?: (stderr: string) => Retry | undefined;
 };
+
+export type Retry = { title: string; op: MiseOperation };
 
 export type Progress = { kind: "progress"; message: string } | { kind: "summary"; message: string };
 
-export type UseOptions = { configFile?: string; jobs?: number };
+export type UseOptions = { configFile?: string; jobs?: number; toolOptions?: Record<string, string> };
 export type UpgradeOptions = { bump?: boolean; inactive?: boolean; jobs?: number; prune?: boolean };
 export type UninstallOptions = { unuse?: { configFile: string; requested: string } };
 export type PruneScope = "all" | "tools" | "configs";
@@ -19,12 +24,39 @@ function jobsFlag(jobs: number | undefined): string[] {
 export function addGlobally(tool: string, version = "latest", options: UseOptions = {}): MiseOperation {
   const spec = `${tool}@${version}`;
   const target = options.configFile ? ["--path", options.configFile] : ["-g"];
+  const toolOptions = Object.entries(options.toolOptions ?? {}).flatMap(([key, value]) => [
+    "--tool-option",
+    `${key}=${value}`,
+  ]);
   return {
-    args: ["use", ...target, ...jobsFlag(options.jobs), spec],
+    args: ["use", ...target, ...jobsFlag(options.jobs), ...toolOptions, spec],
     title: `Adding ${tool}…`,
     successTitle: `${tool} added`,
     failureTitle: `Adding ${tool} failed`,
+    retry: (stderr) =>
+      LOW_DOWNLOADS_HINT.test(stderr) && !options.toolOptions?.allow_low_downloads
+        ? {
+            title: "Allow Low Downloads and Retry",
+            op: addGlobally(tool, version, {
+              ...options,
+              toolOptions: { ...options.toolOptions, allow_low_downloads: "true" },
+            }),
+          }
+        : undefined,
   };
+}
+
+// mise refuses npm packages under its weekly-download threshold and prints this hint.
+const LOW_DOWNLOADS_HINT = /allow_low_downloads = true/;
+
+export function failureMessage(stderr: string): string {
+  const lines = stderr
+    .trim()
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const error = lines.find((line) => line.startsWith("mise ERROR ") && !line.startsWith("mise ERROR Version"));
+  return error?.slice("mise ERROR ".length) ?? lines[lines.length - 1] ?? "";
 }
 
 export function upgrade(tool?: string, options: UpgradeOptions = {}): MiseOperation {
@@ -51,6 +83,18 @@ export function uninstall(tool: string, version: string, options: UninstallOptio
     title: `Uninstalling ${spec}…`,
     successTitle: unuse ? `${spec} uninstalled and removed from config` : `${spec} uninstalled`,
     failureTitle: `Uninstalling ${spec} failed`,
+  };
+}
+
+// `mise unuse` drops the request from whichever config declares it and prunes only that version;
+// versions no config asked for stay installed until uninstall --all.
+export function remove(tool: string): MiseOperation {
+  return {
+    args: ["unuse", tool],
+    andThen: [["uninstall", "--all", tool]],
+    title: `Removing ${tool}…`,
+    successTitle: `${tool} removed`,
+    failureTitle: `Removing ${tool} failed`,
   };
 }
 
