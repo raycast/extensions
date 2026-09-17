@@ -115,10 +115,12 @@ jobs:
 
       - name: Add platforms field to package.json
         id: add_platforms_field
+        env:
+          CHANGED_EXTENSIONS: ${{ steps.get_changed_extensions.outputs.paths }}
         run: |
           platforms_added=false
           modified_count=0
-          changed_extensions="${{ steps.get_changed_extensions.outputs.paths }}"
+          changed_extensions="$CHANGED_EXTENSIONS"
           if [[ -n "$changed_extensions" ]]; then
             echo "Changed extensions: $changed_extensions"
             IFS=',' read -ra extension_paths <<< "$changed_extensions"
