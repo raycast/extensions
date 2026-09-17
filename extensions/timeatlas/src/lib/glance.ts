@@ -664,27 +664,42 @@ export function summarizeDay(
     });
   }
 
-  // If no typed stages exist (legacy / unknown), fall back to summing segments
-  // that aren't IN_BED / ASLEEP parents — or all asleepSecs when type is missing.
+  // Prefer Core+Deep+REM. If none exist, fall back to ASLEEP, then IN_BED,
+  // then untyped — never sum parent sessions together with stages.
   if (!stageSecs && sleepEvents.length) {
-    const hasTypedStages = sleepEvents.some(
-      (e) => e.sleepType != null && SLEEP_STAGE_TYPES.has(e.sleepType),
-    );
-    if (!hasTypedStages) {
-      const hasParent = sleepEvents.some(
+    const sumType = (type: number) =>
+      sleepEvents
+        .filter((e) => e.sleepType === type)
+        .reduce((sum, e) => sum + (e.asleepSecs ?? 0), 0);
+
+    const asleepSecs = sumType(SleepType.ASLEEP);
+    const inBedSecs = sumType(SleepType.IN_BED);
+    const untypedSecs = sleepEvents
+      .filter(
         (e) =>
-          e.sleepType === SleepType.IN_BED || e.sleepType === SleepType.ASLEEP,
-      );
-      for (const e of sleepEvents) {
-        const type = e.sleepType ?? SleepType.ST_NOT_SPECIFIED;
-        if (
-          hasParent &&
-          (type === SleepType.IN_BED || type === SleepType.ASLEEP)
-        ) {
-          continue;
-        }
-        if (type === SleepType.AWAKE) continue;
-        stageSecs += e.asleepSecs ?? 0;
+          e.sleepType == null || e.sleepType === SleepType.ST_NOT_SPECIFIED,
+      )
+      .reduce((sum, e) => sum + (e.asleepSecs ?? 0), 0);
+
+    let fallbackType: number | null = null;
+    if (asleepSecs) {
+      stageSecs = asleepSecs;
+      fallbackType = SleepType.ASLEEP;
+    } else if (inBedSecs) {
+      stageSecs = inBedSecs;
+      fallbackType = SleepType.IN_BED;
+    } else if (untypedSecs) {
+      stageSecs = untypedSecs;
+      fallbackType = SleepType.ST_NOT_SPECIFIED;
+    }
+
+    if (fallbackType != null) {
+      for (const seg of summary.sleepSegments) {
+        const matches =
+          fallbackType === SleepType.ST_NOT_SPECIFIED
+            ? seg.type === SleepType.ST_NOT_SPECIFIED
+            : seg.type === fallbackType;
+        if (matches) seg.countsTowardTotal = true;
       }
     }
   }

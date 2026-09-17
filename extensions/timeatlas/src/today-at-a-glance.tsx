@@ -153,7 +153,22 @@ function sleepMarkdown(summary: DaySummary): string {
 
   const lines = [`# Sleep`, ""];
   if (summary.sleep) {
-    lines.push(`**${summary.sleep}** asleep (Core + Deep + REM)`, "");
+    const stageTotal = summary.sleepSegments
+      .filter((s) => s.countsTowardTotal)
+      .reduce((sum, s) => sum + s.asleepSecs, 0);
+    const usedStages = summary.sleepSegments.some(
+      (s) =>
+        s.countsTowardTotal &&
+        (s.typeName === "Core" ||
+          s.typeName === "Deep" ||
+          s.typeName === "REM"),
+    );
+    const basis = usedStages
+      ? "Core + Deep + REM"
+      : stageTotal
+        ? "recorded asleep time"
+        : "total";
+    lines.push(`**${summary.sleep}** asleep (${basis})`, "");
   }
 
   if (summary.sleepByType.length) {
