@@ -6,6 +6,9 @@ import { promisify } from "util";
 import { Clipboard, environment } from "@raycast/api";
 import tempy from "tempy";
 
+import { IGif } from "../models/gif";
+import { getDisplayName } from "./cachedGifs";
+
 const execFileAsync = promisify(execFile);
 const scriptFile = path.join(environment.supportPath, "copy-gif-as-square.swift");
 
@@ -116,18 +119,19 @@ guard CGImageDestinationFinalize(destination) else {
 }
 `;
 
-export default async function copyGifAsSquareToClipboard(url: string, name: string) {
+export default async function copyGifAsSquareToClipboard(gif: IGif) {
   if (process.platform !== "darwin") {
     throw new Error("Copy GIF as Square is only supported on macOS");
   }
 
-  const response = await fetch(url);
+  const response = await fetch(gif.download_url);
 
   if (!response.ok) {
     throw new Error(`GIF file download failed. Server responded with ${response.status}`);
   }
 
-  const squareGifName = name || path.basename(url);
+  // The script always re-encodes to a GIF, so the name must say .gif even for a Clip's MP4.
+  const squareGifName = getDisplayName(gif, ".gif");
   const inputFile = await tempy.write(Buffer.from(await response.arrayBuffer()), { extension: "gif" });
   const file = tempy.file({ name: squareGifName });
 
