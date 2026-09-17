@@ -5,13 +5,15 @@ import {
   closeMainWindow,
   showToast,
   Toast,
+  Alert,
+  confirmAlert,
   PopToRootType,
   Icon,
   environment,
 } from "@raycast/api";
 import { connect, Socket } from "net";
 import { useState, useEffect, useRef } from "react";
-import { appendFileSync, copyFileSync, chmodSync, mkdirSync } from "fs";
+import { appendFileSync, copyFileSync, chmodSync, mkdirSync, lstatSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
@@ -31,6 +33,30 @@ const CLI_ASSET_PATH = join(environment.assetsPath, "dmenu.py");
 async function installCli() {
   try {
     mkdirSync(CLI_INSTALL_DIR, { recursive: true });
+
+    // Never replace an existing executable or symlink without explicit confirmation.
+    // In particular, users may already have the X11 dmenu or another script at this path.
+    let targetExists = false;
+    try {
+      lstatSync(CLI_INSTALL_PATH);
+      targetExists = true;
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+    }
+
+    if (targetExists) {
+      const shouldReplace = await confirmAlert({
+        title: "Replace Existing dmenu CLI?",
+        message: `${CLI_INSTALL_PATH} already exists. Replacing it may overwrite your existing dmenu or script.`,
+        primaryAction: {
+          title: "Replace",
+          style: Alert.ActionStyle.Destructive,
+        },
+      });
+
+      if (!shouldReplace) return;
+    }
+
     copyFileSync(CLI_ASSET_PATH, CLI_INSTALL_PATH);
     chmodSync(CLI_INSTALL_PATH, 0o755);
     await showToast({

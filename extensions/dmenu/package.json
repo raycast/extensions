@@ -10,7 +10,9 @@
     "Developer Tools",
     "System"
   ],
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -35,7 +37,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.25"
+    "@raycast/api": "^2.4.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
