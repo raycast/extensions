@@ -11,9 +11,9 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { findFilesByName } from "./local-files";
 import {
-  parseOpaqueSharePointFile,
-  parseSharePointLocation,
+  parseSharePointTarget,
   rankLocalLibraries,
+  rankLocalSiteLibraries,
   rankSharedLibraryRoots,
   toLocalPath,
 } from "./sharepoint";
@@ -36,19 +36,10 @@ export default async function Command(): Promise<void> {
       );
     }
 
-    const sharedFile = parseOpaqueSharePointFile(
+    const target = parseSharePointTarget(
       activeSharePointTab.url,
       activeSharePointTab.title,
     );
-    const location = sharedFile
-      ? {
-          tenantName: sharedFile.tenantName,
-          siteSlug: sharedFile.siteSlug,
-          libraryName: "Shared Documents",
-          relativeSegments: [],
-          serverRelativePath: "",
-        }
-      : parseSharePointLocation(activeSharePointTab.url);
     const cloudStoragePath = path.join(homedir(), "Library", "CloudStorage");
     const cloudEntries = await readdir(cloudStoragePath, {
       withFileTypes: true,
@@ -57,7 +48,7 @@ export default async function Command(): Promise<void> {
       cloudEntries
         .filter((entry) => entry.isDirectory())
         .map((entry) => entry.name),
-      location.tenantName,
+      target.tenantName,
     );
 
     if (sharedLibraryRoots.length === 0) {
@@ -68,35 +59,36 @@ export default async function Command(): Promise<void> {
     for (const rootName of sharedLibraryRoots) {
       const rootPath = path.join(cloudStoragePath, rootName);
       const entries = await readdir(rootPath, { withFileTypes: true });
-      const rankedLibraries = rankLocalLibraries(
-        entries
-          .filter((entry) => entry.isDirectory())
-          .map((entry) => entry.name),
-        location,
-      );
+      const directoryNames = entries
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name);
+      const rankedLibraries =
+        target.kind === "shared-file"
+          ? rankLocalSiteLibraries(directoryNames, target.siteSlug)
+          : rankLocalLibraries(directoryNames, target);
       for (const libraryName of rankedLibraries) {
         candidates.push({
           libraryName,
           localPath: toLocalPath(
             rootPath,
             libraryName,
-            location.relativeSegments,
+            target.kind === "path" ? target.relativeSegments : [],
           ),
         });
       }
     }
 
     if (candidates.length === 0) {
-      throw new Error(`No synced library matches ${location.siteSlug}`);
+      throw new Error(`No synced library matches ${target.siteSlug}`);
     }
 
-    if (sharedFile) {
+    if (target.kind === "shared-file") {
       const matches: string[] = [];
       for (const candidate of candidates) {
         matches.push(
           ...(await findFilesByName(
             candidate.localPath,
-            sharedFile.fileName,
+            target.fileName,
             2 - matches.length,
           )),
         );
@@ -105,12 +97,12 @@ export default async function Command(): Promise<void> {
 
       if (matches.length === 0) {
         throw new Error(
-          `${sharedFile.fileName} is not available in ${candidates[0].libraryName}`,
+          `${target.fileName} is not available in the synced ${target.siteSlug} libraries`,
         );
       }
       if (matches.length > 1) {
         throw new Error(
-          `More than one synced file is named ${sharedFile.fileName}`,
+          `More than one synced file is named ${target.fileName}`,
         );
       }
 

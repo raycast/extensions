@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   extractServerRelativePath,
-  parseOpaqueSharePointFile,
   parseSharePointLocation,
+  parseSharePointTarget,
   rankLocalLibraries,
+  rankLocalSiteLibraries,
   rankSharedLibraryRoots,
   toLocalPath,
 } from "../src/sharepoint.ts";
@@ -29,11 +30,12 @@ const localLibraries = [
 
 test("parses an opaque SharePoint file link from its browser tab", () => {
   assert.deepEqual(
-    parseOpaqueSharePointFile(
+    parseSharePointTarget(
       "https://four12global.sharepoint.com/:x:/s/externalresources/IQCVLkupKllwSpLxIbYot-bSAVxymtds7Jb2FODnlr5EQrA?e=g2v29S",
       "FOUR12 Media schedule.xlsx",
     ),
     {
+      kind: "shared-file",
       tenantName: "four12global",
       siteSlug: "externalresources",
       fileName: "FOUR12 Media schedule.xlsx",
@@ -42,37 +44,64 @@ test("parses an opaque SharePoint file link from its browser tab", () => {
 });
 
 test("removes an Office suffix from an opaque file tab title", () => {
-  assert.equal(
-    parseOpaqueSharePointFile(
+  assert.deepEqual(
+    parseSharePointTarget(
       "https://contoso.sharepoint.com/:w:/s/communications/token",
       "Weekly Update.docx - Word",
-    )?.fileName,
-    "Weekly Update.docx",
+    ),
+    {
+      kind: "shared-file",
+      tenantName: "contoso",
+      siteSlug: "communications",
+      fileName: "Weekly Update.docx",
+    },
   );
 });
 
 test("does not treat a path-based link as an opaque file", () => {
-  assert.equal(parseOpaqueSharePointFile(exactUrl, "2026"), null);
+  assert.equal(parseSharePointTarget(exactUrl, "2026").kind, "path");
 });
 
 test("does not treat an opaque folder link as a file", () => {
-  assert.equal(
-    parseOpaqueSharePointFile(
-      "https://contoso.sharepoint.com/:f:/s/design/token",
-      "Campaign Assets",
-    ),
-    null,
+  assert.throws(
+    () =>
+      parseSharePointTarget(
+        "https://contoso.sharepoint.com/:f:/s/design/token",
+        "Campaign Assets",
+      ),
+    /finish opening/,
   );
 });
 
 test("rejects an opaque file link without an exact filename", () => {
   assert.throws(
     () =>
-      parseOpaqueSharePointFile(
+      parseSharePointTarget(
         "https://contoso.sharepoint.com/:x:/s/design/token",
         "Microsoft Excel",
       ),
     /did not expose the file name/,
+  );
+});
+
+test("finds every synced library belonging to an opaque link's site", () => {
+  assert.deepEqual(
+    rankLocalSiteLibraries(
+      [
+        ...localLibraries,
+        "Resources External - Brand Assets",
+        "External - Documents",
+      ],
+      "externalresources",
+    ),
+    ["Resources External - Documents", "Resources External - Brand Assets"],
+  );
+});
+
+test("supports a partial site name when finding possible libraries", () => {
+  assert.deepEqual(
+    rankLocalSiteLibraries(localLibraries, "creative.branding"),
+    ["Creative - Documents"],
   );
 });
 

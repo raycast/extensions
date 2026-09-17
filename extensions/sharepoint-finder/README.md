@@ -22,9 +22,9 @@ multiple Microsoft organizations on the same Mac.
 
 ## Privacy
 
-The extension reads the active SharePoint tab URL and checks local OneDrive
-paths. It does not request Microsoft Graph access, download files, or send data
-to another service.
+The extension reads the active SharePoint tab URL and title, then checks local
+OneDrive paths. It does not request Microsoft Graph access, download files, or
+send data to another service.
 
 ## Troubleshooting
 

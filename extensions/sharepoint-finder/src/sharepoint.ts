@@ -8,11 +8,15 @@ export type SharePointLocation = {
   serverRelativePath: string;
 };
 
-export type OpaqueSharePointFile = {
+type OpaqueSharePointFile = {
   tenantName: string;
   siteSlug: string;
   fileName: string;
 };
+
+export type SharePointTarget =
+  | ({ kind: "path" } & SharePointLocation)
+  | ({ kind: "shared-file" } & OpaqueSharePointFile);
 
 function decodeRepeatedly(value: string): string {
   let decoded = value;
@@ -92,7 +96,7 @@ function fileNameFromTabTitle(tabTitle: string | undefined): string {
   return fileName;
 }
 
-export function parseOpaqueSharePointFile(
+function parseOpaqueSharePointFile(
   browserUrl: string,
   tabTitle: string | undefined,
 ): OpaqueSharePointFile | null {
@@ -111,6 +115,16 @@ export function parseOpaqueSharePointFile(
     siteSlug: match[2],
     fileName: fileNameFromTabTitle(tabTitle),
   };
+}
+
+export function parseSharePointTarget(
+  browserUrl: string,
+  tabTitle: string | undefined,
+): SharePointTarget {
+  const sharedFile = parseOpaqueSharePointFile(browserUrl, tabTitle);
+  if (sharedFile) return { kind: "shared-file", ...sharedFile };
+
+  return { kind: "path", ...parseSharePointLocation(browserUrl) };
 }
 
 export function extractServerRelativePath(browserUrl: string): string {
@@ -233,6 +247,65 @@ export function rankLocalLibraries(
 
   return rankByRemoteName(siteNames, location.siteSlug).map(
     (siteName) => `${siteName}${suffix}`,
+  );
+}
+
+type LocalSiteLibraryCandidate = {
+  libraryName: string;
+  siteName: string;
+};
+
+function localSiteLibraryCandidates(
+  directoryNames: string[],
+): LocalSiteLibraryCandidate[] {
+  const delimiter = " - ";
+  return directoryNames.flatMap((libraryName) => {
+    const candidates: LocalSiteLibraryCandidate[] = [];
+    let delimiterIndex = libraryName.indexOf(delimiter);
+    while (delimiterIndex > 0) {
+      candidates.push({
+        libraryName,
+        siteName: libraryName.slice(0, delimiterIndex),
+      });
+      delimiterIndex = libraryName.indexOf(
+        delimiter,
+        delimiterIndex + delimiter.length,
+      );
+    }
+    return candidates;
+  });
+}
+
+function uniqueLibraryNames(candidates: LocalSiteLibraryCandidate[]): string[] {
+  return [...new Set(candidates.map(({ libraryName }) => libraryName))];
+}
+
+export function rankLocalSiteLibraries(
+  directoryNames: string[],
+  siteSlug: string,
+): string[] {
+  const candidates = localSiteLibraryCandidates(directoryNames);
+  const remoteKey = normalizeName(siteSlug);
+  const exactMatches = candidates.filter(
+    ({ siteName }) => normalizeName(siteName) === remoteKey,
+  );
+  if (exactMatches.length > 0) return uniqueLibraryNames(exactMatches);
+
+  const reorderedMatches = candidates.filter(({ siteName }) =>
+    matchesReorderedWords(siteName, siteSlug),
+  );
+  if (reorderedMatches.length > 0) {
+    return uniqueLibraryNames(reorderedMatches);
+  }
+
+  const rankedSiteNames = rankByRemoteName(
+    [...new Set(candidates.map(({ siteName }) => siteName))],
+    siteSlug,
+  );
+  return uniqueLibraryNames(
+    rankedSiteNames.flatMap((siteName) =>
+      candidates.filter((candidate) => candidate.siteName === siteName),
+    ),
   );
 }
 
