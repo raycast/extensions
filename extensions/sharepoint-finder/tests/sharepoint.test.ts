@@ -85,7 +85,7 @@ test("prefers Resources External over Resources", () => {
   );
 });
 
-test("matches a SharePoint site whose words are reversed in OneDrive", () => {
+test("prefers an exact reordered site over a partial prefix match", () => {
   const location = {
     tenantName: "four12global",
     siteSlug: "externalresources",
@@ -93,9 +93,10 @@ test("matches a SharePoint site whose words are reversed in OneDrive", () => {
     relativeSegments: [],
     serverRelativePath: "/sites/externalresources/Shared Documents",
   };
-  assert.deepEqual(rankLocalLibraries(localLibraries, location), [
-    "Resources External - Documents",
-  ]);
+  assert.deepEqual(
+    rankLocalLibraries([...localLibraries, "External - Documents"], location),
+    ["Resources External - Documents"],
+  );
 });
 
 test("rejects ambiguous reordered site names", () => {

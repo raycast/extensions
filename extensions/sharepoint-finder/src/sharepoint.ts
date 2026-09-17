@@ -170,20 +170,28 @@ export function rankLocalLibraries(
     name.toLocaleLowerCase().endsWith(suffix.toLocaleLowerCase()),
   );
   const siteNames = matchingNames.map((name) => name.slice(0, -suffix.length));
-  const rankedSiteNames = rankByRemoteName(siteNames, location.siteSlug);
-
-  if (rankedSiteNames.length > 0) {
-    return rankedSiteNames.map((siteName) => `${siteName}${suffix}`);
+  const remoteKey = normalizeName(location.siteSlug);
+  const exactMatches = siteNames.filter(
+    (siteName) => normalizeName(siteName) === remoteKey,
+  );
+  if (exactMatches.length !== 0) {
+    return exactMatches.length === 1 ? [`${exactMatches[0]}${suffix}`] : [];
   }
 
-  // OneDrive display names can contain the same site words in a different order
-  // from SharePoint's URL slug. Only accept a single exact word permutation.
+  // OneDrive display names can order site words differently from SharePoint's
+  // URL slug. Prefer one exact permutation over any partial prefix match.
   const reorderedMatches = siteNames.filter((siteName) =>
     matchesReorderedWords(siteName, location.siteSlug),
   );
-  if (reorderedMatches.length !== 1) return [];
+  if (reorderedMatches.length !== 0) {
+    return reorderedMatches.length === 1
+      ? [`${reorderedMatches[0]}${suffix}`]
+      : [];
+  }
 
-  return [`${reorderedMatches[0]}${suffix}`];
+  return rankByRemoteName(siteNames, location.siteSlug).map(
+    (siteName) => `${siteName}${suffix}`,
+  );
 }
 
 export function toLocalPath(
