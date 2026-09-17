@@ -142,7 +142,6 @@ Each finished session appends one line under its task's bullet in the **Pomodoro
 - **The menu bar countdown updates every 10 seconds** in the background — Raycast's minimum interval — and every second while the menu is open.
 - **End-of-timer prompts come from the menu bar command.** If you disable Pomodoro.md Timer, a finished pomodoro is still logged by whichever command you run next, but nothing opens when the time is up.
 - **Task lines must start at the left margin** (`- 2p …`), and **subtasks must be indented** with a tab or at least two spaces; a single space is not recognised.
-- **Tasks are matched by title** when marking them done, so two tasks that share the same first 20 characters can be ambiguous.
 
 ## Development
 
