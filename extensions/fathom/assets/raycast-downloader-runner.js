@@ -316,9 +316,25 @@ const EXIT_CODES = {
  * "curl exited 22".
  */
 function classifyCurlFailure(input) {
-    const { exitCode, signal, httpCode, stderrTail, cancelled } = input;
+    const { exitCode, signal, httpCode, stderrTail, cancelled, followRedirects = true } = input;
     if (cancelled || signal === "SIGTERM" || signal === "SIGINT") {
         return new errors_1.DownloadError("cancelled", "Download cancelled.", { exitCode, signal });
+    }
+    // A 3xx only reaches here when redirects were DISABLED: with `location` set,
+    // curl reports the status of the final hop, never the redirect itself. curl
+    // exits 0 for an unfollowed redirect, so without this branch the code falls
+    // past EXIT_CODES[0] into the last-resort message and reports
+    // "Download failed (curl exit 0)." for a perfectly explicable outcome.
+    // Gated on a CLEAN exit: curl exits 47 ("Too many redirects") while reporting
+    // a 3xx http_code, and that is a redirect loop, not an unfollowed redirect.
+    // Letting this branch win would relabel it.
+    if (exitCode === 0 && httpCode !== undefined && httpCode >= 300 && httpCode < 400) {
+        return new errors_1.DownloadError(
+        // `http_client`, not a new code: the request did not yield the body and
+        // the caller must change something (enable redirects, drop a conditional
+        // header, pass the final URL) — exactly the non-retryable bucket
+        // `http_client` names.
+        "http_client", unfollowedRedirectMessage(httpCode, followRedirects), { httpStatus: httpCode, exitCode, signal });
     }
     if (httpCode !== undefined && httpCode >= 400) {
         const code = (0, errors_1.classifyHttpStatus)(httpCode);
@@ -331,6 +347,21 @@ function classifyCurlFailure(input) {
     // Last resort: curl's own words are more useful than a bare number.
     const detail = stderrTail?.trim().split("\n").pop()?.trim();
     return new errors_1.DownloadError("unknown", detail ? `Download failed: ${detail}` : `Download failed (curl exit ${exitCode ?? "unknown"}).`, { exitCode, signal, httpStatus: httpCode });
+}
+/**
+ * Wording for a 3xx that curl exited 0 on.
+ *
+ * `location` does NOT guarantee the absence of a final 3xx: curl only follows a
+ * response that carries a usable `Location`. A 304 (the caller sent a
+ * conditional header) and a 300 (multiple choices, no `Location`) both end the
+ * transfer as themselves, with redirects fully enabled.
+ */
+function unfollowedRedirectMessage(status, followRedirects) {
+    if (status === 304)
+        return "The server reported the file as unchanged (HTTP 304) and sent no content.";
+    if (!followRedirects)
+        return `The server redirected (HTTP ${status}) but redirects are disabled.`;
+    return `The server returned a redirect that could not be followed (HTTP ${status}).`;
 }
 function httpErrorMessage(status) {
     switch (status) {
@@ -1618,12 +1649,14 @@ function main() {
     // zero-byte or absent file makes curl error rather than start cleanly.
     const existingBytes = (0, node_fs_1.existsSync)(payload.partPath) ? safeSize(payload.partPath) : 0;
     const resume = Boolean(payload.resume) && existingBytes > 0;
+    const followRedirects = payload.followRedirects ?? true;
     let configPath;
     try {
         const config = (0, curl_1.buildCurlConfig)({
             url: payload.url,
             outputPath: payload.partPath,
             headers: payload.headers,
+            followRedirects,
             resume,
             speedLimitBytes: payload.speedLimitBytes,
             stallSeconds: payload.stallSeconds,
@@ -1734,15 +1767,43 @@ function main() {
         removeConfig();
         const writeOut = (0, curl_1.parseWriteOut)(stdout);
         const httpCode = writeOut.httpCode;
-        const succeeded = exitCode === 0 && (httpCode === undefined || (httpCode >= 200 && httpCode < 400));
+        // Success is strictly 2xx. A 3xx is NEVER a downloaded file:
+        //
+        //  - redirects off: curl writes the redirect BODY to the `.part` file and
+        //    exits 0, so accepting it renames a stub to the user's expected
+        //    filename and publishes it as a completed download;
+        //  - redirects ON: `location` only follows a response carrying a usable
+        //    `Location`, so a 304 (caller sent a conditional header) or a 300 is
+        //    still the final status. A 304 writes NO body, which on a resumed
+        //    transfer would publish the existing partial as if it were whole.
+        //
+        // When redirects were followed and the transfer really succeeded, curl
+        // reports the 2xx of the final hop, so nothing legitimate is lost here.
+        const httpOk = httpCode === undefined || (httpCode >= 200 && httpCode < 300);
+        const succeeded = exitCode === 0 && httpOk;
         if (!succeeded) {
-            const error = (0, curl_1.classifyCurlFailure)({ exitCode, signal, httpCode, stderrTail: stderr });
+            const error = (0, curl_1.classifyCurlFailure)({ exitCode, signal, httpCode, stderrTail: stderr, followRedirects });
             // The .part file is retained so a retry can resume — but only when it
             // holds something to resume FROM. curl creates the file on open, so a
             // request that failed before its first byte (404, DNS, TLS) leaves a
             // 0-byte file that can never be resumed and that the user has no way to
             // account for sitting in their Downloads folder.
-            discardEmptyPart(payload.partPath);
+            // …except whatever a 3xx wrote, which is never resumable content. curl
+            // writes the redirect BODY to the `.part` file, so a later retry would
+            // `continue-at` past that HTML and splice the real file onto it — the
+            // exact silent corruption `fail` exists to prevent.
+            //
+            // Rolled back to `existingBytes` rather than deleted outright: on a
+            // resumed transfer those bytes are the user's real progress and a 304
+            // response in particular means the partial is still valid. Only the bytes
+            // THIS attempt appended are garbage.
+            const redirectStub = error.httpStatus !== undefined && error.httpStatus >= 300 && error.httpStatus < 400;
+            if (redirectStub && existingBytes > 0)
+                truncatePart(payload.partPath, existingBytes);
+            else if (redirectStub)
+                discardPart(payload.partPath);
+            else
+                discardEmptyPart(payload.partPath);
             const cancelled = error.code === "cancelled";
             persist({
                 state: cancelled ? "cancelled" : "failed",
@@ -1893,6 +1954,24 @@ function notify(payload, subtitle, message) {
  * Only the empty case — where there is provably nothing to resume from — is
  * safe to discard.
  */
+/** Roll a `.part` file back to the byte count it held before this attempt. */
+function truncatePart(partPath, bytes) {
+    try {
+        (0, node_fs_1.truncateSync)(partPath, bytes);
+    }
+    catch {
+        // Best effort: the worst case is a partial that a later resume rejects.
+    }
+}
+/** Remove a `.part` file outright, whatever it holds. */
+function discardPart(partPath) {
+    try {
+        (0, node_fs_1.unlinkSync)(partPath);
+    }
+    catch {
+        // Best effort.
+    }
+}
 function discardEmptyPart(partPath) {
     try {
         if ((0, node_fs_1.existsSync)(partPath) && (0, node_fs_1.statSync)(partPath).size === 0)

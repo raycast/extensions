@@ -1,6 +1,7 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { countOf } from "@chrismessina/raycast-kit";
 import { logger } from "@chrismessina/raycast-logger";
 import { getPreferenceValues, open, showInFinder, showToast, Toast } from "@raycast/api";
 import { getMeetingSummary, getMeetingTranscript } from "../fathom/api";
@@ -347,7 +348,7 @@ export async function exportTeamMembers(args: {
     await showToast({
       style: Toast.Style.Success,
       title: exportTitle,
-      message: `${members.length} members saved to ${savedFilename}`,
+      message: `${countOf(members.length, "member")} saved to ${savedFilename}`,
       primaryAction: {
         title: "Open File",
         onAction: () => {

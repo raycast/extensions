@@ -1,4 +1,4 @@
-import { showError } from "@chrismessina/raycast-kit";
+import { countOf, showError } from "@chrismessina/raycast-kit";
 import { logger } from "@chrismessina/raycast-logger";
 import { useCallback, useMemo, useState } from "react";
 import { Action, ActionPanel, Detail, Icon, List, openExtensionPreferences } from "@raycast/api";
@@ -125,6 +125,22 @@ function Command() {
     await loadMore();
   }, [apiKeyPresent, loadMore]);
 
+  // Reaching further back is MANUAL, and deliberately so.
+  //
+  // Raycast fires `pagination.onLoadMore` on scroll near the bottom of the
+  // RENDERED list. With `filtering={false}` that is the FILTERED set, so a query
+  // matching one meeting renders one row, there is nothing to scroll, and the
+  // searchable corpus stays frozen at whatever is cached — every older meeting
+  // invisible to search.
+  //
+  // An automatic version of this was tried and removed. Each pass walks up to 5
+  // pages with `include_transcript=true`, and the effect re-fired the instant
+  // `isFetchingBackground` went false — including right after a failure — so a
+  // rate-limited API got a fresh burst in the same second it rejected the last
+  // one. Measured 2026-09-17: three passes, nine 429s, and an error screen.
+  // A keypress per batch is the backpressure; do not make this automatic again
+  // without a real cooldown and a rate-limit circuit breaker.
+
   // Combine error sources: explicit missing key OR runtime API error
   const error: Error | undefined = !apiKeyPresent
     ? new Error("API_KEY_MISSING: No API key configured. Please set your Fathom API Key in Extension Preferences.")
@@ -245,6 +261,15 @@ function Command() {
       ? allFilteredMeetings.length
       : thisWeekMeetings.length + lastWeekMeetings.length + previousMonthMeetings.length + olderMeetings.length;
 
+  const loadOlderAction = hasMore ? (
+    <Action
+      title="Search Older Meetings"
+      icon={Icon.Clock}
+      shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
+      onAction={() => void loadMoreMeetings()}
+    />
+  ) : null;
+
   return (
     <List
       isLoading={isLoading}
@@ -255,6 +280,7 @@ function Command() {
       navigationTitle={filterDisplayName ? `Meetings: ${filterDisplayName}` : "Search Meetings"}
       actions={
         <ActionPanel>
+          {loadOlderAction}
           <RefreshCacheAction onRefresh={refreshCache} onStop={stopFetch} isFetchingBackground={isFetchingBackground} />
         </ActionPanel>
       }
@@ -287,11 +313,14 @@ function Command() {
             filterDisplayName
               ? `No meetings found for ${filterDisplayName}`
               : searchText
-                ? "No meetings match your search"
+                ? hasMore
+                  ? "Nothing in the meetings loaded so far. Use Search Older Meetings to look further back."
+                  : "No meetings match your search."
                 : "Your recent meetings will appear here"
           }
           actions={
             <ActionPanel>
+              {loadOlderAction}
               <Action title="Refresh Cache" icon={Icon.ArrowClockwise} onAction={refreshCache} />
             </ActionPanel>
           }
@@ -300,7 +329,7 @@ function Command() {
         // Flat chronological list (when searching or team-filtering)
         <List.Section
           title={searchText ? "Search Results" : filterDisplayName || "Filtered Meetings"}
-          subtitle={`${totalMeetings} meetings`}
+          subtitle={countOf(totalMeetings, "meeting")}
         >
           {allFilteredMeetings.map((meeting) => (
             <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
@@ -310,7 +339,7 @@ function Command() {
         // Grouped view (default browse)
         <>
           {thisWeekMeetings.length > 0 && (
-            <List.Section title="This Week" subtitle={`${thisWeekMeetings.length} meetings`}>
+            <List.Section title="This Week" subtitle={countOf(thisWeekMeetings.length, "meeting")}>
               {thisWeekMeetings.map((meeting) => (
                 <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
@@ -318,7 +347,7 @@ function Command() {
           )}
 
           {lastWeekMeetings.length > 0 && (
-            <List.Section title="Last Week" subtitle={`${lastWeekMeetings.length} meetings`}>
+            <List.Section title="Last Week" subtitle={countOf(lastWeekMeetings.length, "meeting")}>
               {lastWeekMeetings.map((meeting) => (
                 <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
@@ -326,7 +355,7 @@ function Command() {
           )}
 
           {previousMonthMeetings.length > 0 && (
-            <List.Section title="Previous Month" subtitle={`${previousMonthMeetings.length} meetings`}>
+            <List.Section title="Previous Month" subtitle={countOf(previousMonthMeetings.length, "meeting")}>
               {previousMonthMeetings.map((meeting) => (
                 <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}
@@ -334,7 +363,7 @@ function Command() {
           )}
 
           {olderMeetings.length > 0 && (
-            <List.Section title="Older" subtitle={`${olderMeetings.length} meetings`}>
+            <List.Section title="Older" subtitle={countOf(olderMeetings.length, "meeting")}>
               {olderMeetings.map((meeting) => (
                 <MeetingListItem key={meeting.id} meeting={meeting} onRefresh={refreshCache} />
               ))}

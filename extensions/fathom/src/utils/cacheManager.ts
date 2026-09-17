@@ -9,6 +9,7 @@
  * - Supports aborting background fetches
  */
 
+import { countOf } from "@chrismessina/raycast-kit";
 import { logger } from "@chrismessina/raycast-logger";
 import { showToast, Toast } from "@raycast/api";
 import { listMeetings } from "../fathom/api";
@@ -44,6 +45,8 @@ class CacheManager {
   private nextCursor: string | undefined = undefined;
   private hasMoreMeetings = true;
   private isLoadingMore = false;
+  /** True only while `fetchRemainingPages` is walking pages from launch. */
+  private isFetchingRemainingPages = false;
 
   // Separate abort tokens for each fetch path so they don't cancel each other
   private remainingPagesToken = 0;
@@ -240,6 +243,7 @@ class CacheManager {
     alreadyCached: Meeting[],
   ): Promise<void> {
     const token = this.remainingPagesToken;
+    this.isFetchingRemainingPages = true;
     this.setFetchingBackground(true);
 
     const progressToast = await showToast({
@@ -292,7 +296,7 @@ class CacheManager {
       await updateCacheMetadataFromMeetings(this.cachedMeetings);
 
       progressToast.style = Toast.Style.Success;
-      progressToast.title = `${allMeetings.length} meetings ready`;
+      progressToast.title = `${countOf(allMeetings.length, "meeting")} ready`;
       progressToast.primaryAction = undefined;
       if (this.hasMoreMeetings) {
         progressToast.message = "Scroll to the bottom to load older meetings";
@@ -301,6 +305,10 @@ class CacheManager {
       progressToast.hide();
       throw error;
     } finally {
+      // Cleared on EVERY exit — the two mid-loop aborts return from inside the
+      // try, so anything left only on the success path would strand the flag
+      // and disable manual loading for the rest of the session.
+      this.isFetchingRemainingPages = false;
       if (this.remainingPagesToken === token) {
         this.setFetchingBackground(false);
       }
@@ -379,6 +387,23 @@ class CacheManager {
       return;
     }
 
+    // Launch pagination publishes `nextCursor` BEFORE it walks, and its queue
+    // key differs from this one, so a manual load starting now would request
+    // overlapping pages concurrently. Their cache writes race — and
+    // `cacheApiResults` returns silently while another write is in flight — so
+    // the loser's pages are dropped while `nextCursor` still advances past
+    // them. Those meetings then stay missing until a full refresh, which for a
+    // search feature means the meeting being looked for is silently absent.
+    if (this.isFetchingRemainingPages) {
+      logger.log("[CacheManager] Background pagination in progress — skipping manual load");
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Still Loading Meetings",
+        message: "Already fetching more — try again once it finishes.",
+      });
+      return;
+    }
+
     const cursor = this.nextCursor;
     const token = ++this.loadMoreToken;
     const requestKey = `load-more-meetings:${cursor}:${JSON.stringify(filter)}`;
@@ -435,10 +460,14 @@ class CacheManager {
           await updateCacheMetadataFromMeetings(this.cachedMeetings);
 
           progressToast.style = Toast.Style.Success;
-          progressToast.title = `${fetched.length} older meetings loaded`;
+          progressToast.title = `${countOf(fetched.length, "older meeting")} loaded`;
           progressToast.primaryAction = undefined;
           progressToast.message = this.hasMoreMeetings ? "Scroll to the bottom to load more" : "All meetings loaded";
         } catch (error) {
+          // Hide FIRST: the animated "Fetching older meetings…" toast was left
+          // spinning forever on every failure path, including a 429, so the UI
+          // claimed work was still in flight after it had stopped.
+          await progressToast.hide();
           await showContextualError(error, {
             action: "load more meetings",
             fallbackTitle: "Failed to Load More Meetings",
