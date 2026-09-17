@@ -16,7 +16,11 @@ export default async function StopTimerCommand() {
     return;
   }
 
-  await finish(running, false);
+  if (!(await finish(running, false))) {
+    // Claimed by another command (or replaced) between settle() and here.
+    await showHUD("No active timer");
+    return;
+  }
   const label = running.subtaskTitle || running.taskTitle;
   await showHUD(running.isBreak ? "☕ Break stopped" : `⏹ ${label} — stopped`);
 }

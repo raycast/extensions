@@ -27,22 +27,28 @@ export async function settle(): Promise<SettledTimer> {
   const timer = await getTimer();
   if (!timer) return { running: null };
   if (!isExpired(timer)) return { running: timer };
-  await finish(timer, true);
-  return { running: null, finished: timer };
+  if (await finish(timer, true)) return { running: null, finished: timer };
+  // Someone else claimed it first (and reports it), or a newer timer has
+  // replaced it in the meantime: report whatever is running now.
+  const current = await getTimer();
+  return { running: current && !isExpired(current) ? current : null };
 }
 
 /**
- * Close out a session: clear the timer, record it (breaks are not logged),
- * and append it to the daily note.
+ * Close out a session: claim the timer, record it (breaks are not logged),
+ * and append it to the daily note. Returns false when the timer could not be
+ * claimed because another caller already finished it or a newer timer has
+ * replaced it; nothing is written in that case.
  */
 export async function finish(
   timer: TimerState,
   completed: boolean,
-): Promise<void> {
-  // Clear first, so another caller settling at the same moment (a menu bar
-  // refresh, a second command) finds nothing left to finish.
-  await clearTimer();
-  if (timer.isBreak) return;
+): Promise<boolean> {
+  // clearTimer() removes only this instance, and only one caller succeeds.
+  // That caller alone records the session, so concurrent settles (a menu bar
+  // refresh, a second command) cannot log it twice or clear a newer timer.
+  if (!(await clearTimer(timer.id))) return false;
+  if (timer.isBreak) return true;
 
   const scheduledEnd = timer.startedAt + timer.duration;
   const log = {
@@ -52,19 +58,20 @@ export async function finish(
     endedAt: completed ? scheduledEnd : Math.min(Date.now(), scheduledEnd),
     completed,
   };
-  // addLog() dedupes on startedAt; skip the note when the session was
-  // already recorded by a concurrent caller.
+  // Second line of defence: addLog() dedupes on startedAt.
   if (await addLog(log)) {
     await createLogWriter().writeLog(log);
   }
+  return true;
 }
 
 /**
- * Settle, then stop whatever is still running. Returns the timer that was
- * stopped early, or null if nothing was running.
+ * Settle, then stop whatever is still running. Returns the timer that this
+ * call stopped early, or null if nothing was running (or it was claimed by
+ * someone else first).
  */
 export async function stopRunning(): Promise<TimerState | null> {
   const { running } = await settle();
-  if (running) await finish(running, false);
-  return running;
+  if (!running) return null;
+  return (await finish(running, false)) ? running : null;
 }
