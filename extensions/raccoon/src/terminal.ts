@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { rememberYes } from "./once.ts";
 
 const run = promisify(execFile);
 
@@ -51,13 +52,22 @@ export async function supportsFixOnly(rcc: string): Promise<boolean> {
  * not refused - it is ignored - so a caller that needs one has to check.
  */
 export async function supportsAuditFlag(rcc: string, flag: string): Promise<boolean> {
+	// Remembered per binary and flag: asking is a process, and it was being
+	// spent on every single fix - `usableRcc()` asks before each one, so five
+	// checks fixed one at a time meant five `rcc audit --help` runs for an
+	// answer that cannot change while that binary is the one on disk.
+	return askOnce(`${rcc}\u0000${flag}`);
+}
+
+const askOnce = rememberYes(async (key: string) => {
+	const [rcc, flag] = key.split("\u0000");
 	try {
 		const { stdout } = await run(rcc, ["audit", "--help"], { timeout: 15_000 });
 		return stdout.includes(flag);
 	} catch {
 		return false;
 	}
-}
+});
 
 /**
  * Run a command in Terminal.app.

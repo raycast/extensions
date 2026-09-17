@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { cacheUntilRejected } from "./once.ts";
+import { cacheUntilRejected, rememberYes } from "./once.ts";
 
 test("the answer is read once and handed to everyone after", async () => {
 	let reads = 0;
@@ -38,4 +38,54 @@ test("callers that arrive while the read is in flight share the one read", async
 	const [a, b] = await Promise.all([read(), read()]);
 	assert.equal(a, b);
 	assert.equal(reads, 1);
+});
+
+test("a capability answered yes is remembered, and asked only once", async () => {
+	let asks = 0;
+	const supports = rememberYes(async () => {
+		asks += 1;
+		return true;
+	});
+	assert.equal(await supports("/opt/homebrew/bin/rcc --fix-only"), true);
+	assert.equal(await supports("/opt/homebrew/bin/rcc --fix-only"), true);
+	assert.equal(asks, 1);
+});
+
+test("a no is asked again: the binary may have been upgraded since", async () => {
+	// supportsAuditFlag turns any failure into false, so a sticky false would
+	// keep the reader out of the fixes for the rest of the session - including
+	// after they upgrade rcc with Raycast still open.
+	let asks = 0;
+	const supports = rememberYes(async () => {
+		asks += 1;
+		return asks > 1;
+	});
+	assert.equal(await supports("rcc --fix-only"), false);
+	assert.equal(await supports("rcc --fix-only"), true);
+	assert.equal(await supports("rcc --fix-only"), true);
+	assert.equal(asks, 2);
+});
+
+test("each binary and flag is remembered on its own", async () => {
+	const asked: string[] = [];
+	const supports = rememberYes(async (key: string) => {
+		asked.push(key);
+		return true;
+	});
+	await supports("/opt/homebrew/bin/rcc --fix-only");
+	await supports("/usr/local/bin/rcc --fix-only");
+	await supports("/opt/homebrew/bin/rcc --only");
+	assert.equal(asked.length, 3);
+});
+
+test("a question that threw is asked again", async () => {
+	let asks = 0;
+	const supports = rememberYes(async () => {
+		asks += 1;
+		if (asks === 1) throw new Error("rcc vanished");
+		return true;
+	});
+	await assert.rejects(supports("rcc --fix-only"));
+	assert.equal(await supports("rcc --fix-only"), true);
+	assert.equal(asks, 2);
 });

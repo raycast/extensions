@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
+import { chmod, mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
-import { newestFirst, stampToDate, summarise } from "./audit-runs.ts";
+import { newestFirst, readHistory, stampToDate, summarise } from "./audit-runs.ts";
 
 const RUN = JSON.stringify({
 	timestamp: "2026-01-01_09:00:00",
@@ -59,4 +62,35 @@ test("newest first", () => {
 		[...rows].sort(newestFirst).map((r) => r.stamp.slice(0, 10)),
 		["2026-03-01", "2026-02-01", "2026-01-01"],
 	);
+});
+
+async function archive(): Promise<string> {
+	const dir = await mkdtemp(join(tmpdir(), "rcc-history-"));
+	const report = JSON.stringify({ audit_type: "basic", pass: 20, warning: 3, fail: 1, results: [] });
+	await writeFile(join(dir, "audit_2026-09-02_01:32:46.json"), report);
+	await writeFile(join(dir, "audit_2026-09-01_01:32:46.json"), report);
+	return dir;
+}
+
+test("a run that cannot be read is named, not dropped in silence", async () => {
+	// The catch was written for a file whose JSON is broken and swallowed a file
+	// that cannot be opened at all: the row simply never appeared, and nothing
+	// anywhere said one was missing.
+	const dir = await archive();
+	await chmod(join(dir, "audit_2026-09-01_01:32:46.json"), 0o000);
+	const read = await readHistory(dir);
+	assert.equal(read.runs.length, 1);
+	assert.deepEqual(read.unreadable, ["audit_2026-09-01_01:32:46.json"]);
+	await chmod(join(dir, "audit_2026-09-01_01:32:46.json"), 0o644);
+});
+
+test("an archive that reads cleanly reports nothing unreadable", async () => {
+	const read = await readHistory(await archive());
+	assert.equal(read.runs.length, 2);
+	assert.deepEqual(read.unreadable, []);
+});
+
+test("a machine with no archive is an answer, not a failure", async () => {
+	const read = await readHistory(join(tmpdir(), "rcc-history-that-is-not-there"));
+	assert.deepEqual(read, { runs: [], unreadable: [] });
 });

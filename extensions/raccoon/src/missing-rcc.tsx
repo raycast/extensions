@@ -29,6 +29,7 @@ export function MissingRcc() {
 	const [log, setLog] = useState("");
 	const [isInstalling, setIsInstalling] = useState(false);
 	const running = useRef(false);
+	const controllerRef = useRef<AbortController | undefined>(undefined);
 
 	const install = async () => {
 		// A ref, not the isInstalling state: two presses of Enter land in the
@@ -39,8 +40,10 @@ export function MissingRcc() {
 		running.current = true;
 		setIsInstalling(true);
 		setLog("");
+		const controller = new AbortController();
+		controllerRef.current = controller;
 		try {
-			const exit = await streamInstall((chunk) => setLog((previous) => previous + chunk.text));
+			const exit = await streamInstall((chunk) => setLog((previous) => previous + chunk.text), controller.signal);
 			// brew failing is the ordinary outcome worth reporting - no
 			// Homebrew, no tap, no network - and it used to end with the same
 			// screen and no word said, indistinguishable from success.
@@ -48,8 +51,10 @@ export function MissingRcc() {
 			if (!outcome.installed) {
 				await showToast({
 					style: Toast.Style.Failure,
-					title: "Homebrew could not install rcc",
-					message: outcome.why,
+					title: outcome.stopped ? "Installation stopped" : "Homebrew could not install rcc",
+					message: outcome.stopped
+						? "Homebrew may have left a partly installed formula behind. Pressing Install again picks it up."
+						: outcome.why,
 				});
 				return;
 			}
@@ -113,7 +118,19 @@ export function MissingRcc() {
 			markdown={markdown}
 			actions={
 				<ActionPanel>
-					<Action title="Install with Homebrew" icon={Icon.Download} onAction={install} />
+					{/* Stop only aborts: `running` and `isInstalling` are cleared where
+					    they already are, in install()'s finally. Clearing them here
+					    would let a second Install start inside spawnTree's three
+					    second grace window, with two brews on the same Cellar. */}
+					{isInstalling ? (
+						<Action
+							title="Stop the Installation"
+							icon={Icon.Stop}
+							onAction={() => controllerRef.current?.abort()}
+						/>
+					) : (
+						<Action title="Install with Homebrew" icon={Icon.Download} onAction={install} />
+					)}
 					<Action title="Set Raccoon CLI Path" icon={Icon.Gear} onAction={openExtensionPreferences} />
 					<Action.CopyToClipboard title="Copy Install Command" content={INSTALL_COMMAND} />
 					<Action.OpenInBrowser title="Open Raccoon on GitHub" url={REPO_URL} />

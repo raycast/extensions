@@ -36,7 +36,8 @@ function tint(run: PastAudit): Color {
 
 export default function Command() {
 	const { data, isLoading, revalidate, error } = usePromise(readHistory);
-	const runs = data ?? [];
+	const runs = data?.runs ?? [];
+	const unreadable = data?.unreadable ?? [];
 	const empty = emptyState(
 		error,
 		{
@@ -67,6 +68,22 @@ export default function Command() {
 				description={empty.description}
 				actions={<ActionPanel>{refresh}</ActionPanel>}
 			/>
+			{/* A saved run that will not open is worth a word: it used to be one
+			    row fewer and nothing said so. */}
+			{unreadable.length > 0 ? (
+				<List.Item
+					key="unreadable"
+					icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+					title={`${unreadable.length} saved ${unreadable.length === 1 ? "run" : "runs"} could not be read`}
+					subtitle={unreadable.join(", ")}
+					actions={
+						<ActionPanel>
+							<Action.ShowInFinder title="Show the Archive in Finder" path={HISTORY_DIR} />
+							{refresh}
+						</ActionPanel>
+					}
+				/>
+			) : null}
 			{runs.map((run) => (
 				<List.Item
 					key={run.file}

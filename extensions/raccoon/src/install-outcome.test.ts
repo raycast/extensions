@@ -22,3 +22,13 @@ test("a killed brew is not a success, whatever its exit code says", () => {
 	assert.equal(outcome.installed, false);
 	assert.match(outcome.installed === false ? outcome.why : "", /stopped by SIGTERM/);
 });
+
+test("an install the reader stopped is not an install that failed", () => {
+	// Same screen, two different sentences: brew refusing is news, and a reader
+	// who pressed Stop already knows what happened.
+	const stopped = installOutcome({ code: 0, signal: "SIGTERM" }, "brew install rcc");
+	assert.equal(stopped.installed === false && stopped.stopped, true);
+
+	const failed = installOutcome({ code: 1, signal: null }, "brew install rcc");
+	assert.equal(failed.installed === false && failed.stopped, false);
+});

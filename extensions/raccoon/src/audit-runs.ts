@@ -72,26 +72,45 @@ export function newestFirst(a: PastAudit, b: PastAudit): number {
 	return b.stamp.localeCompare(a.stamp);
 }
 
-/** Every run rcc has kept, or an empty list on a machine that has none. */
-export async function readHistory(dir: string = HISTORY_DIR): Promise<PastAudit[]> {
+/** What the archive held, and what of it could not be opened. */
+export type HistoryRead = { runs: PastAudit[]; unreadable: string[] };
+
+/**
+ * Every run rcc has kept, plus the names of the files that would not open.
+ *
+ * The two are reported apart because they used to be the same thing: one catch
+ * covered both a file whose JSON is broken and a file that cannot be read at
+ * all, and either way the row simply never appeared. A saved audit that has
+ * become unreadable is worth a word; silently having one fewer row is not an
+ * answer.
+ *
+ * A file that vanished between the listing and the read is not counted: that is
+ * the scheduled audit rotating its own archive, not something to report.
+ */
+export async function readHistory(dir: string = HISTORY_DIR): Promise<HistoryRead> {
 	let names: string[];
 	try {
 		names = await readdir(dir);
 	} catch (error) {
 		// No audit has ever been run here. That is an answer, not a failure.
-		if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+		if ((error as NodeJS.ErrnoException).code === "ENOENT") return { runs: [], unreadable: [] };
 		throw error;
 	}
+	const unreadable: string[] = [];
 	const runs = await Promise.all(
 		names
 			.filter((name) => FILE.test(name))
 			.map(async (name) => {
 				try {
 					return summarise(name, await readFile(join(dir, name), "utf8"));
-				} catch {
+				} catch (error) {
+					if ((error as NodeJS.ErrnoException).code !== "ENOENT") unreadable.push(name);
 					return undefined;
 				}
 			}),
 	);
-	return runs.filter((run): run is PastAudit => run !== undefined).sort(newestFirst);
+	return {
+		runs: runs.filter((run): run is PastAudit => run !== undefined).sort(newestFirst),
+		unreadable: unreadable.sort(),
+	};
 }
