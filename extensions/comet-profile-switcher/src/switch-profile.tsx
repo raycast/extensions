@@ -1,6 +1,24 @@
-import { Action, ActionPanel, Color, Icon, Image, Keyboard, List, open, openExtensionPreferences } from "@raycast/api";
-import { useCallback, useState } from "react";
-import { CometProfile, getProfiles, getUserDataDir, isCometInstalled, profileDeeplink } from "./comet";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Image,
+  Keyboard,
+  LaunchProps,
+  List,
+  open,
+  openExtensionPreferences,
+} from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
+import {
+  CometProfile,
+  getProfiles,
+  getUserDataDir,
+  isCometInstalled,
+  ProfileLaunchContext,
+  profileDeeplink,
+} from "./comet";
 import { openProfile } from "./launch";
 import { join } from "node:path";
 
@@ -9,11 +27,19 @@ function profileIcon(profile: CometProfile): Image.ImageLike {
   return { source: Icon.PersonCircle, tintColor: profile.color ?? Color.PrimaryText };
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext?: ProfileLaunchContext }>) {
   // getProfiles() is synchronous and cached, so the list renders fully on first paint.
   const [profiles, setProfiles] = useState<CometProfile[]>(getProfiles);
   const refresh = useCallback(() => setProfiles(getProfiles()), []);
   const installed = isCometInstalled();
+
+  // Launched via deeplink with a profile in the context: open it right away instead of showing the list.
+  const wanted = props.launchContext?.profile;
+  const direct = wanted && installed ? profiles.find((p) => p.directory === wanted) : undefined;
+  useEffect(() => {
+    if (direct) openProfile(direct, {}, profiles.length);
+  }, [direct]);
+  if (direct) return <List isLoading />;
 
   if (!installed) {
     return (

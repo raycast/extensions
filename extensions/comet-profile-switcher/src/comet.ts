@@ -1,4 +1,4 @@
-import { Cache, environment, getPreferenceValues, Application } from "@raycast/api";
+import { Cache, environment, getPreferenceValues } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
@@ -17,12 +17,6 @@ export interface CometProfile {
   lastUsed: boolean;
   /** Whether this profile currently has an open window (per Comet's own bookkeeping). */
   active: boolean;
-}
-
-interface Preferences {
-  cometApp?: Application;
-  userDataDir?: string;
-  alwaysNewWindow?: boolean;
 }
 
 interface LocalStateProfileEntry {
@@ -54,19 +48,19 @@ function expandHome(p: string): string {
 }
 
 export function getUserDataDir(): string {
-  const { userDataDir } = getPreferenceValues<Preferences>();
+  const { userDataDir } = getPreferenceValues<ExtensionPreferences>();
   const dir = userDataDir?.trim();
   return dir ? expandHome(dir) : DEFAULT_USER_DATA_DIR;
 }
 
 export function getAppPath(): string {
-  const { cometApp } = getPreferenceValues<Preferences>();
+  const { cometApp } = getPreferenceValues<ExtensionPreferences>();
   if (cometApp?.path && existsSync(cometApp.path)) return cometApp.path;
   return DEFAULT_APP_PATH;
 }
 
 export function alwaysNewWindow(): boolean {
-  return getPreferenceValues<Preferences>().alwaysNewWindow === true;
+  return getPreferenceValues<ExtensionPreferences>().alwaysNewWindow === true;
 }
 
 export function isCometInstalled(): boolean {
@@ -248,22 +242,20 @@ export function launchProfile(profile: CometProfile, options: LaunchOptions = {}
 }
 
 /** Deeplink to one of this extension's commands. */
-export function commandDeeplink(command: string, args?: Record<string, string>): string {
-  const base = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/${command}`;
-  return args ? `${base}?arguments=${encodeURIComponent(JSON.stringify(args))}` : base;
+export function commandDeeplink(command: string): string {
+  return `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/${command}`;
 }
 
-/** Name of the generated per-profile command (see scripts/sync-profiles.mjs; must match its slug rule). */
-export function profileCommandName(profile: CometProfile): string {
-  const slug =
-    profile.directory
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "profile";
-  return `profile-${slug}`;
+/** Launch context accepted by the "Switch Comet Profile" command to open a profile straight away. */
+export interface ProfileLaunchContext {
+  profile?: string;
 }
 
-/** Deeplink that opens this profile. Usable from Quicklinks, Shortcuts.app, a terminal, etc. */
+/**
+ * Deeplink that opens this profile via the "Switch Comet Profile" command's launch context.
+ * Usable from Quicklinks, Shortcuts.app, a terminal, etc.
+ */
 export function profileDeeplink(profile: CometProfile): string {
-  return commandDeeplink(profileCommandName(profile));
+  const context: ProfileLaunchContext = { profile: profile.directory };
+  return `${commandDeeplink("switch-profile")}?context=${encodeURIComponent(JSON.stringify(context))}`;
 }
