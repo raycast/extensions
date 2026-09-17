@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import {
+	buildDropIn,
 	currentUsername,
 	install,
 	isInstalled,
@@ -90,8 +91,11 @@ export default function Command() {
 		"```",
 		`${SUDOERS_PATH}`,
 		"",
-		`Defaults:${currentUsername()} timestamp_type=global`,
-		`Defaults:${currentUsername()} timestamp_timeout=${session}`,
+		// The file itself, not a second copy of it written out here: these two
+		// lines were the drop-in's contents transcribed by hand, and a change
+		// to buildDropIn would have left this screen describing a file that no
+		// longer looked like this.
+		buildDropIn(currentUsername(), session),
 		"```",
 		"",
 		"The file is checked with `visudo -c` before it is installed, and only the final copy runs",

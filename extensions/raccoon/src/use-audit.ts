@@ -28,7 +28,14 @@ export function useAudit({ rcc, deep, timeout }: { rcc: string | null; deep: boo
 			return splitGroups(parseGroups(await runRcc(["audit", "--list-checks"])));
 		},
 		[rcc ?? ""],
-		{ execute: rcc !== null },
+		{
+			execute: rcc !== null,
+			// A probe that fails already has its answer: run the audit whole.
+			// Without this, usePromise raises its own "Failed to fetch latest
+			// data" toast over a screen that is working correctly - a warning
+			// about nothing, in front of an audit that is running.
+			onError: () => {},
+		},
 	);
 
 	const split = plan.data;
