@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cuenow",
+  "title": "CueNow",
+  "description": "Search, create and manage your CueNow sticky notes without leaving Raycast.",
+  "icon": "command-icon.png",
+  "author": "sworup_ku",
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
+  "keywords": ["note", "sticky note", "notes", "scratchpad", "search notes", "sticky", "reminder"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "subtitle": "CueNow",
+      "description": "Create a new CueNow sticky note and start typing.",
+      "icon": "create-note.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "CueNow",
+      "description": "Search every CueNow note by title or content, then open, hide, copy or delete it.",
+      "icon": "search-notes.png",
+      "mode": "view"
+    },
+    {
+      "name": "show-all-notes",
+      "title": "Show All Notes",
+      "subtitle": "CueNow",
+      "description": "Bring every CueNow sticky note back onto the screen.",
+      "icon": "show-all-notes.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "hide-all-notes",
+      "title": "Hide All Notes",
+      "subtitle": "CueNow",
+      "description": "Clear every CueNow sticky note off the screen without deleting them.",
+      "icon": "hide-all-notes.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "CueNow",
+      "description": "Open the CueNow settings window.",
+      "icon": "open-settings.png",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
