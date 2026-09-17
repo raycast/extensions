@@ -172,7 +172,7 @@ export default function SignInCommand() {
       actions={
         <ActionPanel>
           {mode === "oauth" && !signedIn && (
-            <Action title="Sign in with SnapTrade" icon={Icon.Person} onAction={doSignIn} />
+            <Action title="Sign In with SnapTrade" icon={Icon.Person} onAction={doSignIn} />
           )}
           {mode === "oauth" && signedIn && (
             <Action title="Sign out" icon={Icon.Logout} style={Action.Style.Destructive} onAction={doSignOut} />

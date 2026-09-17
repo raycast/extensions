@@ -46,7 +46,7 @@ function EmptyActions({ kind, onRetry }: { kind: EmptyKind; onRetry?: () => Prom
   return (
     <ActionPanel>
       {kind === "sign-in" && (
-        <Action title="Sign in with SnapTrade" icon={Icon.Person} onAction={() => launch("sign-in")} />
+        <Action title="Sign In with SnapTrade" icon={Icon.Person} onAction={() => launch("sign-in")} />
       )}
       {kind === "not-configured" && (
         <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />

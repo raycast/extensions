@@ -81,7 +81,7 @@ export function NavigationActions() {
       <Action title="Show Fog" icon={Icon.Cloud} onAction={() => launch("show-fog")} />
       <Action title="Show Activities" icon={Icon.Receipt} onAction={() => launch("show-activities")} />
       <Action title="Connect Brokerage" icon={Icon.Link} onAction={() => launch("connect-brokerage")} />
-      <Action title="Sign in with SnapTrade" icon={Icon.Person} onAction={() => launch("sign-in")} />
+      <Action title="Sign In with SnapTrade" icon={Icon.Person} onAction={() => launch("sign-in")} />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
     </ActionPanel.Section>
   );
