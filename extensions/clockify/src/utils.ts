@@ -295,6 +295,10 @@ export async function stopCurrentTimer(callback?: () => void): Promise<void> {
  *   - null        — nothing is running, confirmed by the API (the endpoint returns `[]`)
  *   - undefined   — could not tell, so callers should leave whatever they are showing alone
  *                   instead of flashing "No Timer" on a transient network error.
+ *
+ * Deliberately does *not* write the cache. The answer is only true as of when the request was
+ * issued, and the caller may have changed the timer since — so persisting is the caller's decision,
+ * via cacheActiveTimeEntry(), once it knows the result has not been superseded.
  */
 export async function fetchActiveTimeEntry(): Promise<TimeEntry | null | undefined> {
   const { workspaceId, userId } = await resolveConfig();
@@ -307,10 +311,7 @@ export async function fetchActiveTimeEntry(): Promise<TimeEntry | null | undefin
 
   // Don't take the filter purely on trust: only treat the entry as running if it really has no end.
   const entry = (data as TimeEntry[])[0];
-  const active = entry && isInProgress(entry) ? entry : null;
-
-  cacheActiveTimeEntry(active);
-  return active;
+  return entry && isInProgress(entry) ? entry : null;
 }
 
 /**
@@ -325,7 +326,7 @@ export async function fetchActiveTimeEntry(): Promise<TimeEntry | null | undefin
  * `null` is stored explicitly, and is distinct from the key being absent: "confirmed nothing is
  * running" must not be mistaken for "never asked".
  */
-function cacheActiveTimeEntry(entry: TimeEntry | null): void {
+export function cacheActiveTimeEntry(entry: TimeEntry | null): void {
   try {
     cache.set(ACTIVE_ENTRY_CACHE_KEY, JSON.stringify(entry));
   } catch (e) {
