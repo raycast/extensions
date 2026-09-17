@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Fix] - 2026-09-17
+
+- Fix `Caffeinate for ...` and `Caffeinate Until` showing the HUD without actually starting `caffeinate` — the work now runs before the HUD closes the view command.
+
 ## [Fix] - 2026-09-15
 
 - Restore inline hours, minutes, and seconds arguments for `Caffeinate for ...` and use an invisible view to reset command state after submission.
