@@ -41,7 +41,7 @@ screen. What that means differs per command, because the commands differ:
 | Git            | push that clean repository        | push every clean one               |
 | SSH            | add a passphrase, fix permissions | fix every key that needs it        |
 | Xcode          | delete DerivedData                | that, and shut the simulators down |
-| Trash          | empty it                          | the same; there is one trash       |
+| Trash          | empty it, every volume at once    | the same; Finder empties them all  |
 
 Where nothing is put right by a command (battery, disk, network, backup, fonts,
 PATH overlaps) both keystrokes open the one place the setting actually lives.

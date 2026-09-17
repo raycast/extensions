@@ -2,6 +2,16 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
+- Emptying the trash empties every mounted volume's, because Finder is what
+  does it. The screen lists the other volumes and the confirmation counts them,
+  rather than quoting the home trash for a deletion that is larger than that.
+- A command that streams its work - Apps, Upgrade, a raw run, a fleet scan - is
+  given up on after fifteen minutes of printing nothing, and says that is what
+  happened. The bound is on silence rather than duration: these commands are
+  legitimately long.
+- The Homebrew install on the "CLI not found" screen can be stopped.
+- Audit History names the saved runs it could not read instead of quietly
+  listing one fewer.
 - Cmd+Shift+E on the security audit saves the report as a document - Markdown,
   RTF, HTML, CSV or JSON - and reveals it in Finder. The audit is re-run rather
   than rendered from what is on screen: a report handed to someone else has to
