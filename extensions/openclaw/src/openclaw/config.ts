@@ -114,7 +114,7 @@ function readOpenClawFileConfig(): FileGatewayConfig {
       found: true,
       remoteGatewayUrl:
         typeof gateway.remote?.url === "string"
-          ? toGatewayUrl(gateway.remote.url)
+          ? gateway.remote.url.trim()
           : undefined,
       local: {
         token: stringCredential(gateway.auth?.token),
@@ -126,8 +126,13 @@ function readOpenClawFileConfig(): FileGatewayConfig {
       },
       remoteMode: gateway.mode === "remote",
     };
-  } catch {
-    return { found: false, local: {}, remote: {} };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return { found: false, local: {}, remote: {} };
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Could not read ~/.openclaw/openclaw.json: ${message}`);
   }
 }
 
@@ -156,6 +161,19 @@ function remoteGatewayUrl(
   return gatewayUrl;
 }
 
+function configuredRemoteGatewayUrl(
+  file: FileGatewayConfig,
+): string | undefined {
+  if (!file.remoteGatewayUrl) return undefined;
+
+  try {
+    return toGatewayUrl(file.remoteGatewayUrl);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`gateway.remote.url is invalid: ${message}`);
+  }
+}
+
 function resolveConnection(
   mode: ConnectionMode,
   endpoint: string,
@@ -172,32 +190,34 @@ function resolveConnection(
       );
     }
     if (file.remoteMode) {
-      if (!file.remoteGatewayUrl) {
+      const gatewayUrl = configuredRemoteGatewayUrl(file);
+      if (!gatewayUrl) {
         throw new Error(
           "gateway.mode is remote, but gateway.remote.url is missing from OpenClaw configuration.",
         );
       }
       if (
-        !isLoopbackGateway(file.remoteGatewayUrl) &&
-        new URL(file.remoteGatewayUrl).protocol !== "wss:"
+        !isLoopbackGateway(gatewayUrl) &&
+        new URL(gatewayUrl).protocol !== "wss:"
       ) {
         throw new Error(
           "gateway.remote.url requires a secure wss:// URL when it is not loopback.",
         );
       }
       return {
-        gatewayUrl: file.remoteGatewayUrl,
+        gatewayUrl,
         credentials: file.remote,
       };
     }
     return { gatewayUrl: LOOPBACK_GATEWAY_URL, credentials: file.local };
   }
 
+  const configuredGatewayUrl = configuredRemoteGatewayUrl(file);
   const gatewayUrl = remoteGatewayUrl(
     mode,
-    endpoint || file.remoteGatewayUrl || "",
+    endpoint || configuredGatewayUrl || "",
   );
-  const credentials = file.remoteGatewayUrl === gatewayUrl ? file.remote : {};
+  const credentials = configuredGatewayUrl === gatewayUrl ? file.remote : {};
   return { gatewayUrl, credentials };
 }
 
