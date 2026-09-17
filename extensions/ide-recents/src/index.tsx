@@ -49,7 +49,10 @@ function removalSummary(report: RemovalReport): string {
     .filter((result) => result.removedCount > 0)
     .map((result) => `${result.providerName}: removed ${result.removedCount}`);
   const failed = report.failures.map((result) => `${result.providerName}: ${result.error}`);
-  return [...removed, ...failed].join(" · ").slice(0, 240);
+  const noBackup = report.results.some((result) => result.backupFailures.length > 0)
+    ? ["no .bak backup could be written"]
+    : [];
+  return [...removed, ...failed, ...noBackup].join(" · ").slice(0, 240);
 }
 
 async function readHiddenPaths(): Promise<string[]> {
@@ -227,15 +230,20 @@ export default function Command() {
 
     const notes: string[] = [];
     if (isBatch) notes.push(`${items.length} projects hidden`);
-    if (backupFailed) notes.push("no .bak backup could be written");
 
+    const deletedTitle =
+      report.totalRemoved > 0
+        ? `Deleted ${report.totalRemoved} record${report.totalRemoved === 1 ? "" : "s"} from the IDE databases`
+        : "No matching record left in the IDE databases";
+
+    // The databases were modified without a copy to fall back on, so this is
+    // not a plain success and must not be reported as one.
     await showToast({
-      style: Toast.Style.Success,
-      title:
-        report.totalRemoved > 0
-          ? `Deleted ${report.totalRemoved} record${report.totalRemoved === 1 ? "" : "s"} from the IDE databases`
-          : "No matching record left in the IDE databases",
-      message: [scope, ...notes].join(" · "),
+      style: backupFailed ? Toast.Style.Failure : Toast.Style.Success,
+      title: backupFailed ? "Deleted, but no .bak backup was created" : deletedTitle,
+      message: backupFailed
+        ? `${scope} is gone from the IDE databases and this list, but the databases were changed without a .bak copy`
+        : [scope, ...notes].join(" · "),
     });
   };
 
@@ -495,7 +503,7 @@ export default function Command() {
                     <Action.CopyToClipboard
                       title="Copy Path"
                       content={item.path}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.CopyPath}
                     />
                     <Action.CopyToClipboard
                       title="Copy Terminal Command"
