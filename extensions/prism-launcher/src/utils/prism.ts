@@ -12,7 +12,7 @@ import { getDownloadsFolderPath, getShortcutTargetPath } from "./powershell";
 /**
  * Convert a local filesystem path to a `file://` URL that Raycast's `Image.source`
  */
-function toFileUrl(p: string | undefined): string | undefined {
+export function toFileUrl(p: string | undefined): string | undefined {
   return p ? pathToFileURL(p).href : undefined;
 }
 
@@ -284,12 +284,15 @@ export async function saveScreenshotToDownloads(screenshot: Screenshot): Promise
 
   const extension = path.extname(screenshot.path);
   let destination = path.join(downloadsPath, `${screenshot.name}${extension}`);
-  for (let suffix = 1; await fs.pathExists(destination); suffix++) {
-    destination = path.join(downloadsPath, `${screenshot.name} (${suffix})${extension}`);
+  for (let suffix = 1; ; suffix++) {
+    try {
+      await fs.copy(screenshot.path, destination, { overwrite: false, errorOnExist: true });
+      return destination;
+    } catch (error) {
+      if (!(await fs.pathExists(destination))) throw error;
+      destination = path.join(downloadsPath, `${screenshot.name} (${suffix})${extension}`);
+    }
   }
-
-  await fs.copy(screenshot.path, destination);
-  return destination;
 }
 
 /**

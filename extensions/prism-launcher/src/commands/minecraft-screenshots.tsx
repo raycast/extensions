@@ -11,6 +11,7 @@ import {
   loadInstances,
   loadScreenshotsFromInstance,
   saveScreenshotToDownloads,
+  toFileUrl,
 } from "../utils/prism";
 import NoInstall from "./no-install";
 
@@ -47,7 +48,7 @@ function InstanceScreenshotsGrid({ instance }: { instance: Instance }) {
         screenshots.map((screenshot) => (
           <Grid.Item
             key={screenshot.path}
-            content={{ source: screenshot.path }}
+            content={{ source: toFileUrl(screenshot.path) ?? screenshot.path }}
             title={screenshot.name}
             quickLook={{ path: screenshot.path, name: screenshot.name }}
             actions={
@@ -114,25 +115,33 @@ export default function MinecraftScreenshots() {
       {...(isPrismInstalled ? { isLoading: instances === undefined } : { isLoading: isPrismInstalledLoading })}
     >
       <When condition={isPrismInstalled}>
-        {instances?.map((instance, index) => (
-          <List.Item
-            key={`instance-${index}`}
-            title={instance.name}
-            subtitle={getInstanceSubtitle(instance)}
-            keywords={getInstanceKeywords(instance)}
-            accessories={getInstanceAccessories(instance)}
-            icon={{ source: instance.icon ?? "instance-icon.png" }}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="View Screenshots"
-                  icon={Icon.Image}
-                  target={<InstanceScreenshotsGrid instance={instance} />}
-                />
-              </ActionPanel>
-            }
+        {instances && instances.length > 0 ? (
+          instances.map((instance, index) => (
+            <List.Item
+              key={`instance-${index}`}
+              title={instance.name}
+              subtitle={getInstanceSubtitle(instance)}
+              keywords={getInstanceKeywords(instance)}
+              accessories={getInstanceAccessories(instance)}
+              icon={{ source: instance.icon ?? "instance-icon.png" }}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Screenshots"
+                    icon={Icon.Image}
+                    target={<InstanceScreenshotsGrid instance={instance} />}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))
+        ) : (
+          <List.EmptyView
+            icon={Icon.Image}
+            title="No screenshots found"
+            description="No instance has any screenshots yet"
           />
-        ))}
+        )}
       </When>
       <Unless condition={isPrismInstalled}>
         <NoInstall />
