@@ -141,6 +141,16 @@ export interface ServiceEnvironment {
   supportsBuildFields: boolean;
 }
 
+export interface Domain {
+  domainId: string;
+  host: string;
+  path?: string | null;
+  port?: number | null;
+  https?: boolean;
+  /** Compose only - which container in the stack serves this domain. */
+  serviceName?: string | null;
+}
+
 interface Issue {
   code?: string;
   expected?: string;

@@ -20,6 +20,10 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - View Environment
             - Edit Variables
             - Copy Environment File
+        - View Domains (Applications and Compose stacks)
+            - Open Domain
+            - Copy URL
+            - Delete Domain
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
     - View Docker (Containers)
