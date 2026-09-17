@@ -15,6 +15,7 @@ export default function ShowPortfolio() {
   const { push } = useNavigation();
 
   const accounts = snapshot?.accounts ?? [];
+  const failures = snapshot?.failures ?? [];
   const nw = netWorth(accounts.map((a) => a.account));
   const change = dayChange(accounts);
   const groups = groupByInstitution(accounts);
@@ -46,10 +47,15 @@ export default function ShowPortfolio() {
                     ? [
                         {
                           tag: {
-                            value: mask(formatSigned(c.amount, c.currency), privacy),
+                            value: mask(
+                              `${formatSigned(c.amount, c.currency)}${c.complete ? "" : " · partial"}`,
+                              privacy,
+                            ),
                             color: c.amount >= 0 ? Color.Green : Color.Red,
                           },
-                          tooltip: "Change vs previous day (SnapTrade balance history)",
+                          tooltip: c.complete
+                            ? "Change vs previous SnapTrade balance snapshot (includes deposits)"
+                            : `Change for ${c.covered} of ${c.covered + c.missing} ${c.currency} accounts; ${c.missing} have no balance history`,
                         },
                       ]
                     : [];
@@ -84,6 +90,29 @@ export default function ShowPortfolio() {
               ))}
             </List.Section>
           ))}
+          {failures.length > 0 && (
+            <List.Section
+              title="Couldn't load"
+              subtitle={`${failures.length} account${failures.length === 1 ? "" : "s"} excluded from totals`}
+            >
+              {failures.map((f) => (
+                <List.Item
+                  key={f.account.id}
+                  icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+                  title={f.account.name ?? f.account.number}
+                  subtitle={f.account.institution_name}
+                  accessories={[{ text: f.message, tooltip: f.message }]}
+                  actions={
+                    <ActionPanel>
+                      <RefreshAction onRefresh={refresh} />
+                      <Action.CopyToClipboard title="Copy Error" content={f.message} />
+                      <NavigationActions />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          )}
         </>
       )}
     </List>

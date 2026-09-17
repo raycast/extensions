@@ -72,12 +72,18 @@ export default function SignInCommand() {
     setBusy(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Signing out…" });
     try {
-      await signOut();
+      const result = await signOut();
       cacheClear();
       await reload();
-      toast.style = Toast.Style.Success;
-      toast.title = "Signed out";
-      toast.message = "Tokens revoked and removed from Raycast.";
+      if (result.revoked) {
+        toast.style = Toast.Style.Success;
+        toast.title = "Signed out";
+        toast.message = "Session revoked at SnapTrade and tokens removed from Raycast.";
+      } else {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Signed out locally only";
+        toast.message = `SnapTrade revoke failed (${result.error ?? "unknown error"}). Tokens were removed from Raycast; the access token expires on its own within 10 hours.`;
+      }
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Sign-out failed";

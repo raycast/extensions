@@ -192,7 +192,19 @@ export interface AccountSnapshot {
   dayChange?: { amount: number; currency: string; asOf: string };
 }
 
+/** An account whose data couldn't be loaded. The rest of the portfolio is still shown. */
+export interface AccountFailure {
+  account: Account;
+  message: string;
+}
+
 export interface PortfolioSnapshot {
   accounts: AccountSnapshot[];
+  failures: AccountFailure[];
   fetchedAt: string;
+}
+
+export interface ActivitiesResult {
+  activities: Activity[];
+  failures: AccountFailure[];
 }

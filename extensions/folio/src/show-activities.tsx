@@ -56,7 +56,7 @@ function titleFor(a: Activity): string {
 
 export default function ShowActivities() {
   const [filter, setFilter] = useState<ActivityFilter>("all");
-  const { activities, isLoading, error, refresh } = useActivities(ACTIVITY_WINDOW_DAYS);
+  const { activities, failures, isLoading, error, refresh } = useActivities(ACTIVITY_WINDOW_DAYS);
   const { privacy, ready, toggle } = usePrivacy();
   const visible = sortActivitiesDesc(filterActivities(activities ?? [], filter));
   const sections = new Map<string, Activity[]>();
@@ -79,45 +79,70 @@ export default function ShowActivities() {
     >
       {error && !activities ? (
         <ListEmpty kind={classifyError(error)} error={error} onRetry={refresh} />
-      ) : !isLoading && visible.length === 0 ? (
+      ) : !isLoading && visible.length === 0 && failures.length === 0 ? (
         <ListEmpty kind="no-data" onRetry={refresh} />
       ) : (
-        [...sections.entries()].map(([month, items]) => (
-          <List.Section key={month} title={month} subtitle={`${items.length}`}>
-            {items.map((a, i) => {
-              const code = a.currency?.code;
-              const amount = mask(formatSigned(a.amount, code), privacy);
-              return (
+        <>
+          {failures.length > 0 && (
+            <List.Section
+              title="Couldn't load"
+              subtitle={`${failures.length} account${failures.length === 1 ? "" : "s"} excluded`}
+            >
+              {failures.map((f) => (
                 <List.Item
-                  key={a.id ?? `${month}-${i}`}
-                  icon={iconFor((a.type ?? "").toUpperCase())}
-                  title={titleFor(a)}
-                  subtitle={a.description}
-                  keywords={[a.type ?? "", a.symbol?.raw_symbol ?? "", a.institution ?? "", a.account?.name ?? ""]}
-                  accessories={[
-                    { tag: `${a.institution ?? ""}${a.account?.name ? ` · ${a.account.name}` : ""}` },
-                    ...(a.units && a.price
-                      ? [{ text: `${mask(formatUnits(a.units), privacy)} @ ${formatMoney(a.price, code)}` }]
-                      : []),
-                    { text: { value: amount, color: (a.amount ?? 0) >= 0 ? Color.Green : Color.PrimaryText } },
-                    { date: activityDate(a) ?? undefined, tooltip: formatDate(a.trade_date) },
-                  ]}
+                  key={f.account.id}
+                  icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+                  title={f.account.name ?? f.account.number}
+                  subtitle={f.account.institution_name}
+                  accessories={[{ text: f.message, tooltip: f.message }]}
                   actions={
                     <ActionPanel>
-                      <Action.CopyToClipboard
-                        title="Copy Activity"
-                        content={`${formatDate(a.trade_date)} · ${titleFor(a)} · ${formatSigned(a.amount, code)} ${code ?? ""}`}
-                      />
-                      <PrivacyAction privacy={privacy} onToggle={toggle} />
                       <RefreshAction onRefresh={refresh} />
+                      <Action.CopyToClipboard title="Copy Error" content={f.message} />
                       <NavigationActions />
                     </ActionPanel>
                   }
                 />
-              );
-            })}
-          </List.Section>
-        ))
+              ))}
+            </List.Section>
+          )}
+          {[...sections.entries()].map(([month, items]) => (
+            <List.Section key={month} title={month} subtitle={`${items.length}`}>
+              {items.map((a, i) => {
+                const code = a.currency?.code;
+                const amount = mask(formatSigned(a.amount, code), privacy);
+                return (
+                  <List.Item
+                    key={a.id ?? `${month}-${i}`}
+                    icon={iconFor((a.type ?? "").toUpperCase())}
+                    title={titleFor(a)}
+                    subtitle={a.description}
+                    keywords={[a.type ?? "", a.symbol?.raw_symbol ?? "", a.institution ?? "", a.account?.name ?? ""]}
+                    accessories={[
+                      { tag: `${a.institution ?? ""}${a.account?.name ? ` · ${a.account.name}` : ""}` },
+                      ...(a.units && a.price
+                        ? [{ text: `${mask(formatUnits(a.units), privacy)} @ ${formatMoney(a.price, code)}` }]
+                        : []),
+                      { text: { value: amount, color: (a.amount ?? 0) >= 0 ? Color.Green : Color.PrimaryText } },
+                      { date: activityDate(a) ?? undefined, tooltip: formatDate(a.trade_date) },
+                    ]}
+                    actions={
+                      <ActionPanel>
+                        <Action.CopyToClipboard
+                          title="Copy Activity"
+                          content={`${formatDate(a.trade_date)} · ${titleFor(a)} · ${formatSigned(a.amount, code)} ${code ?? ""}`}
+                        />
+                        <PrivacyAction privacy={privacy} onToggle={toggle} />
+                        <RefreshAction onRefresh={refresh} />
+                        <NavigationActions />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
+            </List.Section>
+          ))}
+        </>
       )}
     </List>
   );

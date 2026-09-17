@@ -46,15 +46,43 @@ export function netWorth(accounts: Account[]): NetWorth {
   return { byCurrency, primary: byCurrency[0] ?? null, accountCount: count };
 }
 
-/** Sums per-account day changes, per currency. Null when no account reported one. */
-export function dayChange(snapshots: AccountSnapshot[]): CurrencyTotal[] | null {
-  const totals = new Map<string, number>();
+export interface DayChange extends CurrencyTotal {
+  /** True when every account in this currency reported a change. Otherwise the sum only covers some accounts. */
+  complete: boolean;
+  /** Accounts in this currency with no balance history (SnapTrade doesn't return it on every plan/brokerage). */
+  missing: number;
+  covered: number;
+}
+
+/**
+ * Sums per-account day changes per currency and says whether the sum is complete.
+ * Never presents a partial sum as the portfolio's change: callers hide or label incomplete entries.
+ * Null when no account reported a change at all.
+ */
+export function dayChange(snapshots: AccountSnapshot[]): DayChange[] | null {
+  const byCurrency = new Map<string, { amount: number; covered: number; missing: number }>();
   for (const s of snapshots) {
-    if (!s.dayChange) continue;
-    totals.set(s.dayChange.currency, (totals.get(s.dayChange.currency) ?? 0) + s.dayChange.amount);
+    const currency = (s.dayChange?.currency ?? s.account.balance?.total?.currency)?.toUpperCase();
+    if (!currency) continue;
+    const entry = byCurrency.get(currency) ?? { amount: 0, covered: 0, missing: 0 };
+    if (s.dayChange) {
+      entry.amount += s.dayChange.amount;
+      entry.covered += 1;
+    } else {
+      entry.missing += 1;
+    }
+    byCurrency.set(currency, entry);
   }
-  if (totals.size === 0) return null;
-  return [...totals.entries()].map(([currency, amount]) => ({ currency, amount }));
+  const out = [...byCurrency.entries()]
+    .filter(([, e]) => e.covered > 0)
+    .map(([currency, e]) => ({
+      currency,
+      amount: e.amount,
+      complete: e.missing === 0,
+      missing: e.missing,
+      covered: e.covered,
+    }));
+  return out.length > 0 ? out : null;
 }
 
 // ---------- Positions ----------
@@ -191,7 +219,7 @@ export function withWeights(positions: FlatPosition[]): FlatPosition[] {
     .sort((a, b) => (b.marketValue ?? -Infinity) - (a.marketValue ?? -Infinity));
 }
 
-/** Case-insensitive ticker match: exact raw symbol first, then prefix, then substring on description. */
+/** Case-insensitive match: exact ticker first, then ticker prefix, then substring on name, account or institution. */
 export function searchPositions(positions: FlatPosition[], query: string): FlatPosition[] {
   const q = query.trim().toUpperCase();
   if (!q) return positions;
@@ -200,7 +228,14 @@ export function searchPositions(positions: FlatPosition[], query: string): FlatP
     const full = p.ticker.toUpperCase();
     if (raw === q || full === q) return 3;
     if (raw.startsWith(q) || full.startsWith(q)) return 2;
-    if (full.includes(q) || p.description.toUpperCase().includes(q)) return 1;
+    if (
+      full.includes(q) ||
+      p.description.toUpperCase().includes(q) ||
+      p.accountName.toUpperCase().includes(q) ||
+      p.institution.toUpperCase().includes(q)
+    ) {
+      return 1;
+    }
     return 0;
   };
   return positions

@@ -66,6 +66,16 @@ export default function ShowFog() {
       ? `No trades in the last ${streak.days} days.`
       : `${streak.days} day${streak.days === 1 ? "" : "s"} since your last trade (${formatDate(streak.lastTrade?.toISOString())}).`,
   ];
+  const excluded = [...portfolio.snapshot.failures, ...acts.failures];
+  if (excluded.length > 0) {
+    const names = [
+      ...new Set(excluded.map((f) => `${f.account.institution_name} · ${f.account.name ?? f.account.number}`)),
+    ];
+    md.push(
+      "",
+      `> ⚠️ Excluded because they couldn't be loaded: ${names.join(", ")}. Cash and streaks above don't include them.`,
+    );
+  }
 
   return (
     <Detail

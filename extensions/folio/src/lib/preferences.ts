@@ -1,16 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface FolioPreferences {
-  authWorkerUrl: string;
-  oauthClientId: string;
-  useFixtures: boolean;
-  enableDevPersonalKey: boolean;
-  devClientId?: string;
-  devConsumerKey?: string;
-}
-
-export function prefs(): FolioPreferences {
-  const p = getPreferenceValues<FolioPreferences>();
+/** Normalized view of the manifest preferences. The shape comes from Raycast's generated `Preferences` type. */
+export function prefs() {
+  const p = getPreferenceValues<Preferences>();
   return {
     authWorkerUrl: (p.authWorkerUrl ?? "").trim().replace(/\/+$/, ""),
     oauthClientId: (p.oauthClientId ?? "").trim(),
@@ -20,6 +12,8 @@ export function prefs(): FolioPreferences {
     devConsumerKey: p.devConsumerKey?.trim() || undefined,
   };
 }
+
+export type FolioPreferences = ReturnType<typeof prefs>;
 
 export type AuthMode = "fixtures" | "dev-personal-key" | "oauth";
 

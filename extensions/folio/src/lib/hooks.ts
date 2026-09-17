@@ -24,7 +24,7 @@ export function usePortfolio() {
 export function useActivities(days = ACTIVITY_WINDOW_DAYS) {
   const mode = authMode();
   const { data, isLoading, error, revalidate } = useCachedPromise(
-    (d: number, m: string) => loadActivities(d).then((a) => ({ activities: a, mode: m })),
+    (d: number, m: string) => loadActivities(d).then((r) => ({ ...r, mode: m })),
     [days, mode],
     {
       keepPreviousData: true,
@@ -34,7 +34,7 @@ export function useActivities(days = ACTIVITY_WINDOW_DAYS) {
     cacheClear();
     await revalidate();
   }, [revalidate]);
-  return { activities: data?.activities, isLoading, error, refresh };
+  return { activities: data?.activities, failures: data?.failures ?? [], isLoading, error, refresh };
 }
 
 export function useConnections() {

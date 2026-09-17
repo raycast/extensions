@@ -157,17 +157,33 @@ export async function isSignedIn(): Promise<boolean> {
   return Boolean(tokens?.accessToken);
 }
 
-/** Revokes the refresh token (and access token as a hint) through the worker, then forgets both. */
-export async function signOut(): Promise<void> {
+export interface SignOutResult {
+  /** True if SnapTrade confirmed the revocation (or there was nothing to revoke). */
+  revoked: boolean;
+  /** Why revocation failed, when it did. Local tokens are removed regardless. */
+  error?: string;
+}
+
+/**
+ * Revokes the refresh token through the worker (one retry), then removes both tokens locally.
+ * Local sign-out always completes; the result says whether SnapTrade actually revoked the session
+ * so the UI can tell the truth instead of claiming a revoke that didn't happen.
+ */
+export async function signOut(): Promise<SignOutResult> {
   const tokens = await client.getTokens();
-  if (tokens?.refreshToken) {
+  let revoked = !tokens?.refreshToken;
+  let error: string | undefined;
+  for (let attempt = 0; tokens?.refreshToken && !revoked && attempt < 2; attempt += 1) {
     try {
       await workerPost("/oauth/revoke", { token: tokens.refreshToken, token_type_hint: "refresh_token" });
-    } catch {
-      // Best effort: local sign-out must succeed even if the worker is unreachable.
+      revoked = true;
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 1000));
     }
   }
   await client.removeTokens();
+  return { revoked, error };
 }
 
 /** Display-only claims from the id_token. Not verified; never sent anywhere. */

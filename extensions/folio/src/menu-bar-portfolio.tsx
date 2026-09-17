@@ -30,7 +30,9 @@ export default function MenuBarPortfolio() {
             ? "Sign in"
             : "—";
   // Title layout: "<net worth> · ▲ <change>". The arrow glyph sits next to the number it describes; the icon stays neutral.
-  const delta = privacy || !primaryChange || primaryChange.amount === 0 ? null : primaryChange.amount;
+  // A partial sum (some accounts have no balance history) never goes in the title.
+  const delta =
+    privacy || !primaryChange || !primaryChange.complete || primaryChange.amount === 0 ? null : primaryChange.amount;
   const deltaText =
     delta === null
       ? ""
@@ -73,7 +75,7 @@ export default function MenuBarPortfolio() {
                   subtitle={
                     c
                       ? mask(
-                          `${up ? "▲" : "▼"} ${formatMoney(Math.abs(c.amount), c.currency)} vs previous snapshot`,
+                          `${up ? "▲" : "▼"} ${formatMoney(Math.abs(c.amount), c.currency)} vs previous snapshot${c.complete ? "" : ` (${c.covered} of ${c.covered + c.missing} accounts)`}`,
                           privacy,
                         )
                       : undefined

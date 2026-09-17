@@ -9,6 +9,7 @@ import {
   fixtureBalanceHistory,
   fixtureHoldings,
 } from "../fixtures";
+import { AuthError } from "./auth";
 import { authMode } from "./preferences";
 import {
   createConnectionPortalLink,
@@ -23,12 +24,44 @@ import { isInvestmentAccount } from "./portfolio";
 import { buildHoldings } from "./adapt";
 import type {
   Account,
+  AccountFailure,
   AccountSnapshot,
   AccountValueHistoryResponse,
+  ActivitiesResult,
   Activity,
   BrokerageAuthorization,
   PortfolioSnapshot,
 } from "./types";
+
+function describe(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
+
+/**
+ * Runs one request per account and keeps the ones that succeed. A session problem (AuthError) is
+ * rethrown because it affects every account; other per-account errors are reported alongside the
+ * healthy results. If nothing at all loaded, the first error is thrown so the empty state can show it.
+ */
+async function perAccount<T>(
+  accounts: Account[],
+  fn: (account: Account) => Promise<T>,
+): Promise<{ ok: T[]; failures: AccountFailure[] }> {
+  const results = await Promise.allSettled(accounts.map(fn));
+  const ok: T[] = [];
+  const failures: AccountFailure[] = [];
+  results.forEach((r, i) => {
+    if (r.status === "fulfilled") {
+      ok.push(r.value);
+      return;
+    }
+    if (r.reason instanceof AuthError) throw r.reason;
+    failures.push({ account: accounts[i], message: describe(r.reason) });
+  });
+  if (accounts.length > 0 && ok.length === 0) {
+    throw new Error(`Couldn't load any account (${failures[0].account.institution_name}: ${failures[0].message})`);
+  }
+  return { ok, failures };
+}
 
 export const ACTIVITY_WINDOW_DAYS = 365;
 
@@ -66,34 +99,32 @@ async function snapshotFor(
 export async function loadPortfolio(fresh = false): Promise<PortfolioSnapshot> {
   const mode = authMode();
   const accounts = (mode === "fixtures" ? FIXTURE_ACCOUNTS : await listAccounts(fresh)).filter(isInvestmentAccount);
-  const snapshots = await Promise.all(accounts.map((a) => snapshotFor(a, fresh, mode)));
-  return { accounts: snapshots, fetchedAt: new Date().toISOString() };
+  const { ok: snapshots, failures } = await perAccount(accounts, (a) => snapshotFor(a, fresh, mode));
+  return { accounts: snapshots, failures, fetchedAt: new Date().toISOString() };
 }
 
 function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Activities across all accounts for the last `days` days, newest first, each tagged with its account. */
-export async function loadActivities(days = ACTIVITY_WINDOW_DAYS, fresh = false): Promise<Activity[]> {
+/** Activities across all accounts for the last `days` days, each tagged with its account. Accounts that fail are reported, not fatal. */
+export async function loadActivities(days = ACTIVITY_WINDOW_DAYS, fresh = false): Promise<ActivitiesResult> {
   const mode = authMode();
   const accounts = (mode === "fixtures" ? FIXTURE_ACCOUNTS : await listAccounts(fresh)).filter(isInvestmentAccount);
   const end = new Date();
   const start = new Date(end.getTime() - days * 86_400_000);
-  const perAccount = await Promise.all(
-    accounts.map(async (account) => {
-      const list =
-        mode === "fixtures"
-          ? fixtureActivities(account.id, days)
-          : await getAccountActivities(account.id, isoDate(start), isoDate(end), fresh);
-      return list.map((a) => ({
-        ...a,
-        institution: a.institution ?? account.institution_name,
-        account: a.account ?? { id: account.id, name: account.name, number: account.number },
-      }));
-    }),
-  );
-  return perAccount.flat();
+  const { ok, failures } = await perAccount(accounts, async (account): Promise<Activity[]> => {
+    const list =
+      mode === "fixtures"
+        ? fixtureActivities(account.id, days)
+        : await getAccountActivities(account.id, isoDate(start), isoDate(end), fresh);
+    return list.map((a) => ({
+      ...a,
+      institution: a.institution ?? account.institution_name,
+      account: a.account ?? { id: account.id, name: account.name, number: account.number },
+    }));
+  });
+  return { activities: ok.flat(), failures };
 }
 
 export async function loadConnections(fresh = false): Promise<BrokerageAuthorization[]> {

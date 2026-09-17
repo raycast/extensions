@@ -1,6 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { computeFog, filterActivities, flattenPositions, netWorth, quietStreak, searchPositions, withWeights } from "../src/lib/portfolio.ts";
+import {
+  computeFog,
+  dayChange,
+  filterActivities,
+  flattenPositions,
+  netWorth,
+  quietStreak,
+  searchPositions,
+  withWeights,
+} from "../src/lib/portfolio.ts";
 import { formatMoney, mask } from "../src/lib/format.ts";
 import { FIXTURE_ACCOUNTS, FIXTURE_ACTIVITIES, FIXTURE_HOLDINGS } from "../src/fixtures/index.ts";
 import type { AccountSnapshot } from "../src/lib/types.ts";
@@ -114,4 +123,33 @@ test("formatting and masking", () => {
   assert.equal(formatMoney(null, "USD"), "—");
   assert.equal(mask("$1", true), "••••••");
   assert.equal(mask("$1", false), "$1");
+});
+
+test("searchPositions also matches account name and institution", () => {
+  const positions = flattenPositions(snapshots);
+  const tfsa = searchPositions(positions, "tfsa");
+  assert.ok(tfsa.length > 0);
+  assert.ok(tfsa.every((p) => p.accountName === "TFSA"));
+  const ibkr = searchPositions(positions, "interactive");
+  assert.ok(ibkr.length > 0);
+  assert.ok(ibkr.every((p) => p.institution === "Interactive Brokers"));
+  // ticker matches still outrank account matches
+  assert.equal(searchPositions(positions, "AAPL")[0].rawTicker, "AAPL");
+});
+
+test("dayChange reports completeness per currency instead of passing off a partial sum", () => {
+  const withChange = snapshots.map((s, i) => ({
+    ...s,
+    dayChange: i === 0 ? undefined : { amount: 100, currency: s.account.balance.total!.currency!, asOf: "2026-09-16" },
+  }));
+  const result = dayChange(withChange)!;
+  const cad = result.find((c) => c.currency === "CAD")!;
+  const usd = result.find((c) => c.currency === "USD")!;
+  assert.equal(cad.complete, false);
+  assert.equal(cad.missing, 1);
+  assert.equal(cad.covered, 2);
+  assert.equal(cad.amount, 200);
+  assert.equal(usd.complete, true);
+  assert.equal(usd.amount, 100);
+  assert.equal(dayChange(snapshots), null, "no history at all → null, never zero");
 });
