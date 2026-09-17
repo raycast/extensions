@@ -58,11 +58,11 @@
       "default": "sessions",
       "data": [
         {
-          "title": "Blocked sessions, by project and name",
+          "title": "Blocked Sessions, by Project and Name",
           "value": "sessions"
         },
         {
-          "title": "Counts only (2 waiting · 1 working)",
+          "title": "Counts Only (2 Waiting · 1 Working)",
           "value": "counts"
         }
       ]
@@ -76,19 +76,19 @@
       "default": "all-agents",
       "data": [
         {
-          "title": "All agents",
+          "title": "All Agents",
           "value": "all-agents"
         },
         {
-          "title": "Claude only",
+          "title": "Claude Only",
           "value": "claude"
         },
         {
-          "title": "Codex only",
+          "title": "Codex Only",
           "value": "codex"
         },
         {
-          "title": "All terminals, including plain shells",
+          "title": "All Terminals, Including Plain Shells",
           "value": "everything"
         }
       ]

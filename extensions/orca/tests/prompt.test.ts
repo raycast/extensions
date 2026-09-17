@@ -186,6 +186,7 @@ test("the last running agent of a project is the one that answered most recently
   ];
 
   assert.equal(lastAgentIn(rows, "/code/api"), "fresh");
+
   // A plain shell is not an agent, and a project with none has nothing to send to.
   assert.equal(lastAgentIn([rows[2]], "/code/api"), undefined);
   assert.equal(lastAgentIn(rows, "/code/docs"), undefined);
@@ -255,4 +256,17 @@ test("the preview says when the prompt goes to an agent already running", () => 
     previewParts({ ...base, target: "new" }, "none", "x").runs,
     "claude in /code/checkout",
   );
+});
+
+test("a pane that cannot take input is not a target, however recent", () => {
+  const live = { worktreePath: "/code/api", agentIdentity: "claude" };
+  const rows = [
+    { ...live, handle: "detached", connected: false, lastOutputAt: 90 },
+    { ...live, handle: "orphaned", orphaned: true, lastOutputAt: 80 },
+    { ...live, handle: "readonly", writable: false, lastOutputAt: 70 },
+    { ...live, handle: "usable", lastOutputAt: 10 },
+  ];
+
+  assert.equal(lastAgentIn(rows, "/code/api"), "usable");
+  assert.equal(lastAgentIn(rows.slice(0, 3), "/code/api"), undefined);
 });

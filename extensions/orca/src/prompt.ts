@@ -91,8 +91,9 @@ export type PromptTarget = "new" | "last";
 
 /**
  * The agent in this project that answered most recently — the one a person
- * means by "the running agent". Plain shells are not agents, and a project with
- * none returns nothing, which the caller treats as "start a fresh one".
+ * means by "the running agent". Plain shells are not agents, and a pane that
+ * cannot take input is no target however recent it is: the prompt would be
+ * swallowed. Nothing found means the caller starts a fresh one.
  */
 export function lastAgentIn(
   rows: {
@@ -100,11 +101,21 @@ export function lastAgentIn(
     worktreePath: string;
     agentIdentity?: string;
     lastOutputAt?: number | null;
+    connected?: boolean;
+    orphaned?: boolean;
+    writable?: boolean;
   }[],
   worktreePath: string,
 ): string | undefined {
   return rows
-    .filter((row) => row.worktreePath === worktreePath && row.agentIdentity)
+    .filter(
+      (row) =>
+        row.worktreePath === worktreePath &&
+        row.agentIdentity &&
+        row.connected !== false &&
+        row.orphaned !== true &&
+        row.writable !== false,
+    )
     .sort((a, b) => (b.lastOutputAt ?? 0) - (a.lastOutputAt ?? 0))[0]?.handle;
 }
 
