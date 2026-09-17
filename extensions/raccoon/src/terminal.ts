@@ -76,12 +76,25 @@ const askOnce = rememberYes(async (key: string) => {
  * administrator rights, and there is no tty behind a Raycast view for sudo to
  * prompt on: Touch ID and the password prompt only exist here.
  */
-export async function runInTerminal(command: string): Promise<void> {
-	const script = [
-		'tell application "Terminal"',
-		`  do script ${appleScriptQuote(command)}`,
-		"  activate",
-		"end tell",
-	].join("\n");
-	await run("/usr/bin/osascript", ["-e", script], { timeout: 15_000 });
+export async function runInTerminal(command: string, exec: Exec = osascript): Promise<void> {
+	await exec("/usr/bin/osascript", ["-e", terminalScript(command)]);
+}
+
+/** How the AppleScript is run. Injectable so a test can read what was handed over. */
+export type Exec = (file: string, args: string[]) => Promise<unknown>;
+
+const osascript: Exec = (file, args) => run(file, args, { timeout: 15_000 });
+
+/**
+ * The AppleScript that opens Terminal on a command.
+ *
+ * Its own function because the command is a shell line built from what rcc
+ * reported, and it is about to be pasted inside an AppleScript string: two
+ * quoting contexts, one inside the other, and the inner one is what a test can
+ * actually hold to account.
+ */
+export function terminalScript(command: string): string {
+	return ['tell application "Terminal"', `  do script ${appleScriptQuote(command)}`, "  activate", "end tell"].join(
+		"\n",
+	);
 }

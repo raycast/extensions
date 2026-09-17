@@ -17,6 +17,9 @@ const ICON: Record<CertStatus, Icon> = {
 	valid: Icon.CheckCircle,
 };
 
+/** The keychain a normal user owns; anything else is the system's. */
+const LOGIN_KEYCHAIN = /login\.keychain/;
+
 function Rows({ c, actions }: { c: CertsReport; actions: React.ReactNode }) {
 	// Expired first: a certificate that already stopped working is the reason
 	// anyone opens this.
@@ -51,7 +54,7 @@ function Rows({ c, actions }: { c: CertsReport; actions: React.ReactNode }) {
 					keywords={[cert.name, cert.status, cert.expires]}
 					accessories={[
 						{ text: cert.expires },
-						...(cert.keychain && !/login\.keychain/.test(cert.keychain)
+						...(cert.keychain && !LOGIN_KEYCHAIN.test(cert.keychain)
 							? [{ tag: { value: "System keychain" } }]
 							: []),
 						...(cert.self_signed ? [{ tag: { value: "self-signed" } }] : []),

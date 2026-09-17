@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { frequencyOf, scheduleSection } from "./audit-schedule.ts";
+import { frequencyOf, HOW_OFTEN, scheduleSection } from "./audit-schedule.ts";
 
 const plist = (interval: string) =>
 	`<plist><dict><key>StartCalendarInterval</key><dict>${interval}</dict></dict></plist>`;
@@ -33,4 +33,13 @@ test("a schedule in place names itself and when it runs", () => {
 		title: "Running weekly",
 		subtitle: "Sundays at 9:00",
 	});
+});
+
+test("an action names the frequency the way an action names things", () => {
+	// Raycast's own convention is Title Case for action titles, and "Run the
+	// Audit daily" ends in a lowercase word because the frequency is a value,
+	// not a label.
+	assert.equal(HOW_OFTEN.daily, "Daily");
+	assert.equal(HOW_OFTEN.weekly, "Weekly");
+	assert.equal(HOW_OFTEN.monthly, "Monthly");
 });

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, Color, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { type Frequency, readSchedule, scheduleSection, WHEN } from "./audit-schedule";
+import { type Frequency, HOW_OFTEN, readSchedule, scheduleSection, WHEN } from "./audit-schedule";
 import { runRcc } from "./rcc";
 
 /**
@@ -117,7 +117,7 @@ export default function Command() {
 										stop
 									) : (
 										<Action
-											title={`Run the Audit ${frequency}`}
+											title={`Run the Audit ${HOW_OFTEN[frequency]}`}
 											icon={Icon.Alarm}
 											onAction={() => schedule(frequency)}
 										/>

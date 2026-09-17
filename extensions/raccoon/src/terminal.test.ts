@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { appleScriptQuote, fixCommand, shellQuote } from "./terminal.ts";
+import { appleScriptQuote, fixCommand, runInTerminal, shellQuote } from "./terminal.ts";
 
 test("a check name with spaces survives the shell", () => {
 	assert.equal(shellQuote("Stealth Mode"), "'Stealth Mode'");
@@ -57,4 +57,19 @@ test("fixing nothing is refused rather than widened to everything", () => {
 	// Without the guard the flag would carry an empty value, which rcc reads
 	// as no filter at all: every fix on the machine.
 	assert.throws(() => fixCommand("/usr/local/bin/rcc", []), /No check/);
+});
+
+test("what reaches Terminal is one AppleScript argument, quoted for it", async () => {
+	// Two quoting contexts nested: a shell line inside an AppleScript string.
+	// A name with a double quote in it used to end the inner string early.
+	const calls: { file: string; args: string[] }[] = [];
+	await runInTerminal(`rm -f '/Users/me/a "file"'`, async (file, args) => {
+		calls.push({ file, args });
+	});
+	assert.equal(calls.length, 1);
+	assert.equal(calls[0].file, "/usr/bin/osascript");
+	assert.equal(calls[0].args[0], "-e");
+	assert.match(calls[0].args[1], /^tell application "Terminal"/);
+	assert.match(calls[0].args[1], /do script "rm -f '\/Users\/me\/a \\"file\\"'"/);
+	assert.match(calls[0].args[1], /end tell$/);
 });

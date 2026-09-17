@@ -47,6 +47,13 @@ export async function readSchedule(): Promise<Frequency | undefined> {
 	return frequencyOf(plist);
 }
 
+/** The frequency as an action names it: Raycast titles actions in Title Case. */
+export const HOW_OFTEN: Record<Frequency, string> = {
+	daily: "Daily",
+	weekly: "Weekly",
+	monthly: "Monthly",
+};
+
 /** When each frequency actually runs, in the words the screen uses. */
 export const WHEN: Record<Frequency, string> = {
 	daily: "Every day at 9:00",
