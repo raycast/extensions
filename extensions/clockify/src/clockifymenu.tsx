@@ -1,8 +1,10 @@
 import { Color, Icon, MenuBarExtra, open } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   addNewTimeEntry,
+  cacheActiveTimeEntry,
   fetchActiveTimeEntry,
+  getAllTimeEntriesFromLocalStorage,
   getCachedActiveTimeEntry,
   getElapsedTime,
   getTimeEntries,
@@ -19,10 +21,40 @@ import { TimeEntry } from "./types";
 class DataWrapper {
   public currentEntry: TimeEntry | null = null;
   public currentlyElapsedTime: string | null = null;
-  // Whether currentEntry came from the API rather than the cache. The cache can be stale in both
-  // directions — it misses a timer started in the web app, and it keeps showing one stopped there —
-  // so an unconfirmed `null` means "don't know yet", not "nothing is running".
-  public confirmed = false;
+  // Whether we have finished establishing what the running timer is, whether from the API or by
+  // failing to reach it. Until then currentEntry is only the cache's guess, and the cache can be
+  // stale in both directions — it misses a timer started in the web app, and it keeps showing one
+  // stopped there — so an unsettled `null` means "don't know yet", not "nothing is running".
+  //
+  // Note this is "settled", not "confirmed by the API": a failed refresh still settles, so that one
+  // unreachable request cannot also suppress the unrelated ones that depend on this.
+  public settled = false;
+}
+
+/**
+ * Up to five distinct entries to restart from, newest first.
+ *
+ * These are templates rather than history, so entries are deduplicated on the same tuple
+ * getTimeEntries() uses, and any running timer is excluded — offering to "restart" the timer that is
+ * already running is meaningless.
+ */
+function toRestartTemplates(entries: TimeEntry[]): TimeEntry[] {
+  const templates: TimeEntry[] = [];
+  const seen = new Set<string>();
+
+  for (const entry of entries) {
+    if (!entry.projectId) continue;
+    if (isInProgress(entry)) continue;
+
+    const key = `${entry.description || ""}-${entry.projectId}-${entry.taskId || ""}`;
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    templates.push(entry);
+    if (templates.length >= 5) break;
+  }
+
+  return templates;
 }
 
 export default function ClockifyMenuCommand() {
@@ -37,17 +69,30 @@ export default function ClockifyMenuCommand() {
     return {
       currentEntry: cached,
       currentlyElapsedTime: cached ? getElapsedTime(cached) : null,
-      confirmed: false,
+      settled: false,
     };
   });
-  const [recentEntries, setRecentEntries] = useState<TimeEntry[]>([]);
+  // Seeded from the cached entries list for the same reason as currentData: the refresh that would
+  // populate this fetches 500 hydrated entries and takes seconds, so waiting for it left the list
+  // blank — most visibly right after stopping a timer, which is exactly when it is wanted.
+  const [recentEntries, setRecentEntries] = useState<TimeEntry[]>(() =>
+    toRestartTemplates(getAllTimeEntriesFromLocalStorage()),
+  );
   const [todayTotal, setTodayTotal] = useState<number>(0);
+
+  // Bumped whenever this command changes the timer itself. A refresh that was issued before such a
+  // change describes the world as it was beforehand, so applying its answer afterwards would
+  // resurrect a timer the user has just stopped. Comparing generations discards those answers.
+  const generation = useRef(0);
 
   const handleStopTimer = async () => {
     try {
-      // Confirmed-empty rather than null: we know the timer is gone, so the recent-entries effect
-      // below should run instead of waiting for the next invocation to work it out.
-      await stopCurrentTimer(() => setCurrentData({ currentEntry: null, currentlyElapsedTime: null, confirmed: true }));
+      await stopCurrentTimer(() => {
+        generation.current++;
+        // Settled-empty rather than null: we know the timer is gone, so the recent-entries effect
+        // below should run instead of waiting for the next invocation to work it out.
+        setCurrentData({ currentEntry: null, currentlyElapsedTime: null, settled: true });
+      });
     } catch (error) {
       notifyFailure(error, "Could not stop timer");
     }
@@ -58,16 +103,18 @@ export default function ClockifyMenuCommand() {
       const newEntry = await addNewTimeEntry(entry.description, entry.projectId, entry.taskId, [], new Date());
 
       if (newEntry) {
+        generation.current++;
+
         // Re-read the running timer to get hydrated data with full project info
         const activeEntry = await fetchActiveTimeEntry();
         if (activeEntry) {
+          cacheActiveTimeEntry(activeEntry);
           setCurrentData({
             currentEntry: activeEntry,
             currentlyElapsedTime: getElapsedTime(activeEntry),
-            confirmed: true,
+            settled: true,
           });
         }
-        setRecentEntries([]);
       }
     } catch (error) {
       notifyFailure(error, "Could not restart timer");
@@ -77,18 +124,34 @@ export default function ClockifyMenuCommand() {
   // Correct the cached seed above from the API. The cache is only a guess: it cannot see a timer
   // started or stopped outside this extension.
   useEffect(() => {
-    fetchActiveTimeEntry().then((entry) => {
-      // undefined means the request failed — keep showing the cached guess rather than claiming
-      // there is no timer.
-      if (entry === undefined) return;
+    const issuedAt = generation.current;
 
-      // Always applied, even when it matches the seed, because `confirmed` flipping to true is what
+    fetchActiveTimeEntry().then((entry) => {
+      // Superseded by a stop or restart performed while this was in flight. Drop it entirely,
+      // including the cache write, so it cannot resurrect the old timer here or in the next process.
+      if (generation.current !== issuedAt) return;
+
+      // undefined means the request failed. Keep showing the cached guess rather than claiming there
+      // is no timer, but still settle: the supporting data below is fetched separately and may well
+      // succeed, and withholding it would show a timer with a zeroed daily total.
+      if (entry === undefined) {
+        setCurrentData((prev) => ({
+          currentEntry: prev?.currentEntry ?? null,
+          currentlyElapsedTime: prev?.currentlyElapsedTime ?? null,
+          settled: true,
+        }));
+        return;
+      }
+
+      cacheActiveTimeEntry(entry);
+
+      // Always applied, even when it matches the seed, because `settled` flipping to true is what
       // releases the effect below. When the seed was already right this re-renders with identical
       // values, which is not visible — the flash was the seed being absent, not this correction.
       setCurrentData({
         currentEntry: entry,
         currentlyElapsedTime: entry ? getElapsedTime(entry) : null,
-        confirmed: true,
+        settled: true,
       });
     });
   }, []);
@@ -104,21 +167,21 @@ export default function ClockifyMenuCommand() {
       // process alive is producing a new object every second, which both branches still do.
       if (counter % 2 === 0) {
         setCurrentData((prev) => {
-          // Only fall back to the cache while the entry is unconfirmed. Once the API has answered,
+          // Only fall back to the cache while the entry is unsettled. Once the API has answered,
           // re-reading the cache would undo it — that read is what used to make an externally
           // started timer flap back to "No Timer" a second after appearing.
-          const entry = prev?.confirmed ? prev.currentEntry : getCachedActiveTimeEntry();
+          const entry = prev?.settled ? prev.currentEntry : getCachedActiveTimeEntry();
           return {
             currentEntry: entry,
             currentlyElapsedTime: entry ? getElapsedTime(entry) : null,
-            confirmed: prev?.confirmed ?? false,
+            settled: prev?.settled ?? false,
           };
         });
       } else {
         setCurrentData((prev) => ({
           currentEntry: prev?.currentEntry || null,
           currentlyElapsedTime: prev?.currentEntry ? getElapsedTime(prev.currentEntry) : null,
-          confirmed: prev?.confirmed ?? false,
+          settled: prev?.settled ?? false,
         }));
       }
     }, 1000);
@@ -127,11 +190,11 @@ export default function ClockifyMenuCommand() {
 
   const currentEntry = currentData?.currentEntry;
   const currentlyElapsedTime = currentData?.currentlyElapsedTime;
-  const confirmed = currentData?.confirmed ?? false;
+  const settled = currentData?.settled ?? false;
 
   // Fetch recent entries when there's no active timer, or today's total when there is.
   //
-  // Waiting for `confirmed` matters for more than correctness. This effect used to run while
+  // Waiting for `settled` matters for more than correctness. This effect used to run while
   // currentData was still null, which is indistinguishable from "no timer", so every invocation
   // started a 1.2MB recent-entries fetch that its own cleanup then usually — but not always —
   // cancelled a few milliseconds later. Which of those won was a race, so whether the extension
@@ -139,38 +202,21 @@ export default function ClockifyMenuCommand() {
   //
   // Uses setTimeout to defer data fetching and allow the menu to render first
   useEffect(() => {
-    if (!confirmed) return;
+    if (!settled) return;
 
     const timeoutId = setTimeout(() => {
       if (currentEntry?.projectId) {
-        // Active timer: show today's total for this project
-        getTodayTotalTimeForProject(currentEntry.projectId).then((total) => {
-          setTodayTotal(total);
-          // Clear recent entries since we have an active timer
-          setRecentEntries([]);
-        });
+        // Active timer: show today's total for this project.
+        //
+        // The recent entries are deliberately left alone. They are only rendered when no timer is
+        // running, so clearing them here is invisible — and it used to leave the list blank for the
+        // seconds after a timer was stopped, until the refresh below caught up.
+        getTodayTotalTimeForProject(currentEntry.projectId).then(setTodayTotal);
       } else if (!currentEntry) {
-        // No active timer: show recent entries
+        // No active timer: refresh the recent entries seeded above
         getTimeEntries({})
           .then((allEntries) => {
-            const uniqueEntries: TimeEntry[] = [];
-            const seen = new Set<string>();
-
-            for (const e of allEntries) {
-              if (!e.projectId) continue;
-              // Never offer a running timer as something to restart. Shouldn't happen now that this
-              // branch requires a confirmed-empty state, but the list is fetched separately and a
-              // timer can start between the two requests.
-              if (isInProgress(e)) continue;
-              const key = `${e.description || ""}-${e.projectId}-${e.taskId || ""}`;
-              if (!seen.has(key)) {
-                seen.add(key);
-                uniqueEntries.push(e);
-                if (uniqueEntries.length >= 5) break;
-              }
-            }
-
-            setRecentEntries(uniqueEntries);
+            setRecentEntries(toRestartTemplates(allEntries));
             setTodayTotal(0);
           })
           .catch((error) => {
@@ -180,7 +226,7 @@ export default function ClockifyMenuCommand() {
     }, 0);
 
     return () => clearTimeout(timeoutId);
-  }, [confirmed, currentEntry?.projectId]);
+  }, [settled, currentEntry?.projectId]);
 
   return (
     <MenuBarExtra
