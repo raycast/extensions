@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Database Connection Actions] - 2026-09-16
+
+- Add `Copy Internal Connection String`, `Copy External Connection String` and `Copy Password` actions to database services (PostgreSQL, MySQL, MariaDB, MongoDB, Redis), matching the URIs Dokploy's own dashboard shows.
+
 ## [Deployment History and Rollback] - 2026-09-16
 
 - Add a `View Deployments` action to Applications and Compose stacks, listing past deployments with their status, build logs, and a `Roll Back` action for deployments that produced a rollback point. Running deployments can be cancelled, and history entries deleted.
