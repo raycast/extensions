@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { CompactRatingItem } from "./compact-media";
+import { toCompactRating, type CompactRatingItem } from "./compact-media";
 import { pickCandidates, type HistoryCandidate } from "./history-candidates";
 import { pickRatingMatches } from "./rating-lookup";
 import { assertSyncAdded, readSyncWrite } from "./sync-write";
@@ -104,6 +104,41 @@ test("a rating year miss is not treated as an exact match for another release", 
   const picked = pickRatingMatches([rated("Dune", 2021, 8, 1)], "Dune", undefined, 1989);
   assert.equal(picked.exact.length, 0);
   assert.equal(picked.yearHeldBy[0]?.year, 2021);
+});
+
+test("a rating with no year is not treated as a year miss", () => {
+  const picked = pickRatingMatches(
+    [{ type: "episode", title: "Good News About Hell", rating: 9, ratedAt: "2024-01-01T00:00:00.000Z", traktId: 99 }],
+    "Good News About Hell",
+    undefined,
+    2022,
+  );
+  assert.equal(picked.exact[0]?.traktId, 99);
+  assert.equal(picked.yearHeldBy.length, 0);
+});
+
+test("season and episode ratings inherit the parent show year", () => {
+  const episode = toCompactRating({
+    rated_at: "2024-01-01T00:00:00.000Z",
+    rating: 9,
+    type: "episode",
+    show: { title: "Severance", year: 2022, ids: { trakt: 154784, imdb: "tt11280740" } },
+    episode: { season: 1, number: 1, title: "Good News About Hell", ids: { trakt: 99 } },
+  });
+  assert.equal(episode.year, 2022);
+
+  const season = toCompactRating({
+    rated_at: "2024-01-01T00:00:00.000Z",
+    rating: 8,
+    type: "season",
+    show: { title: "Severance", year: 2022, ids: { trakt: 154784, imdb: "tt11280740" } },
+    season: { number: 1, ids: { trakt: 88 } },
+  });
+  assert.equal(season.year, 2022);
+
+  const picked = pickRatingMatches([episode], "Good News About Hell", undefined, 2022);
+  assert.equal(picked.exact[0]?.traktId, 99);
+  assert.equal(picked.yearHeldBy.length, 0);
 });
 
 test("readSyncWrite distinguishes added from already present", () => {

@@ -102,9 +102,15 @@ export function partitionByLookup<T>(
   }
 
   return {
-    exact: titleExact.filter((item) => yearOf(item) === appliedYear),
+    exact: titleExact.filter((item) => {
+      const itemYear = yearOf(item);
+      return itemYear === undefined || itemYear === appliedYear;
+    }),
     related,
-    yearHeldBy: titleExact.filter((item) => yearOf(item) !== appliedYear),
+    yearHeldBy: titleExact.filter((item) => {
+      const itemYear = yearOf(item);
+      return itemYear !== undefined && itemYear !== appliedYear;
+    }),
   };
 }
 

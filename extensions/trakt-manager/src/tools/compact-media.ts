@@ -241,6 +241,7 @@ export function toCompactRating(item: TraktUserRatingItem): CompactRatingItem {
   } else if (item.type === "episode" && item.episode) {
     title = item.show ? `${item.show.title}: ${item.episode.title ?? "Episode"}` : (item.episode.title ?? "Episode");
     traktId = item.episode.ids.trakt;
+    year = item.show?.year;
     const pad = (n: number) => n.toString().padStart(2, "0");
     episode = {
       season: item.episode.season,
@@ -251,6 +252,7 @@ export function toCompactRating(item: TraktUserRatingItem): CompactRatingItem {
   } else if (item.type === "season" && item.season) {
     title = item.show ? `${item.show.title} (Season ${item.season.number})` : `Season ${item.season.number}`;
     traktId = item.season.ids?.trakt ?? 0;
+    year = item.show?.year;
   }
 
   return {

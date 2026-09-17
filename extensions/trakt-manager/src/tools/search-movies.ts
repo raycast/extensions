@@ -45,9 +45,10 @@ export default async function tool(input: Input): Promise<Output> {
 
   const { items, truncated } = await searchMovieResults(searchTitle);
   const rawExact = items.filter((item) => normalizeTitle(item.movie.title) === normalizeTitle(title));
+  // An exact-title hit only decides whether a year stuffed into `title` is a filter.
+  // It must not hide related results ("Dune" still has to return "Dune: Part Two").
   const appliedYear = rawExact.length > 0 ? year : lookup.year;
-  const pool = rawExact.length > 0 ? rawExact : items;
-  const movies = appliedYear === undefined ? pool : pool.filter((item) => item.movie.year === appliedYear);
+  const movies = appliedYear === undefined ? items : items.filter((item) => item.movie.year === appliedYear);
 
   return {
     data: movies.map(toCompactMovie),

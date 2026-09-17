@@ -45,9 +45,10 @@ export default async function tool(input: Input): Promise<Output> {
 
   const { items, truncated } = await searchShowResults(searchTitle);
   const rawExact = items.filter((item) => normalizeTitle(item.show.title) === normalizeTitle(title));
+  // An exact-title hit only decides whether a year stuffed into `title` is a filter.
+  // It must not hide related results ("The Office" still has to return "The Office US").
   const appliedYear = rawExact.length > 0 ? year : lookup.year;
-  const pool = rawExact.length > 0 ? rawExact : items;
-  const shows = appliedYear === undefined ? pool : pool.filter((item) => item.show.year === appliedYear);
+  const shows = appliedYear === undefined ? items : items.filter((item) => item.show.year === appliedYear);
 
   return {
     data: shows.map(toCompactShow),
