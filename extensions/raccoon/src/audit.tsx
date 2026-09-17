@@ -20,6 +20,7 @@ import { useMemo, useState } from "react";
 import { AUDIT_CONF, readSkipList, skipCheck } from "./audit-conf";
 import { AUDIT_EXPORT_FORMATS, type AuditExportFormat, exportAudit } from "./audit-export";
 import { type AuditCheck, type AuditStatus, countByStatus, fixableCount } from "./audit-json";
+import { auditTitle } from "./audit-title";
 import { findCommand } from "./commands";
 import { MissingRcc, REPO_URL } from "./missing-rcc";
 import { RccDetail } from "./rcc-detail";
@@ -421,17 +422,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 			// Not gated on isLoading: data survives a revalidate, so gating on it
 			// collapsed the panel being read for the seven seconds of a reload.
 			isShowingDetail={(data?.results.length ?? 0) > 0}
-			navigationTitle={
-				counts
-					? !whole
-						? // A count is a verdict, and a verdict before every check
-							// has run is the worst thing this screen could say: "0
-							// fail" while FileVault and SIP have not been looked at
-							// yet reads as a clean bill of health.
-							`Security Audit: still checking${pending ? ` ${pending}` : ""}`
-						: `Security Audit: ${counts.pass} pass, ${counts.warn} warn, ${counts.fail} fail`
-					: "Security Audit"
-			}
+			navigationTitle={auditTitle({ counts, whole, pending, failed: pendingError !== undefined })}
 			filtering={false}
 			searchText={searchText}
 			onSearchTextChange={setSearchText}
