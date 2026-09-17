@@ -6,13 +6,14 @@
  * problem: `depends_on.macos` is `{}` for half the catalogue, `maximum_macos`
  * is a sibling key rather than an operator, a cask's Linux requirement is a
  * Ruby inspect string, and a formula's requirement carries a `contexts` array
- * whose only entry we may ignore is `"test"`.
+ * whose `"test"` and `"build"` entries both mean the requirement does not
+ * apply to an ordinary bottle install.
  */
 
 import { describe, expect, it } from "vitest";
 import { installabilityOf } from "./installability";
 import type { BrewHost } from "./installability";
-import type { Cask, Formula } from "../types";
+import type { Cask, Formula, FormulaRequirement } from "../types";
 
 const HOST: BrewHost = { macos: "26.6.2", arch: "arm64" };
 
@@ -113,15 +114,6 @@ describe("installabilityOf — casks", () => {
     expect(installabilityOf(intelOnly, { macos: "26.6.2", arch: "x86_64" }).installable).toBe(true);
   });
 
-  it("skips the arch gate when the brew install's arch is unknown", () => {
-    // A `customBrewPath` under a non-standard prefix: the prefix no longer says
-    // which architecture brew runs as, and a false \u2298 hides a package the
-    // user could have had.
-    const unknownArch = { macos: "26.6.2", arch: undefined };
-    const intelOnly = cask({ depends_on: { arch: [{ type: "intel", bits: 64 }] } });
-    expect(installabilityOf(intelOnly, unknownArch).installable).toBe(true);
-  });
-
   it("blocks a Linux-only cask", () => {
     // Real: koreader — the value is a Ruby inspect string; presence is the signal.
     const linux = cask({ token: "koreader", depends_on: { linux: "#<LinuxRequirement:0x000000012b1d3220>" } });
@@ -174,14 +166,33 @@ describe("installabilityOf — formulae", () => {
     expect(reason(installabilityOf(acl, HOST))).toBe("Linux only");
   });
 
-  it("keeps a build-context requirement in the check", () => {
-    // Real: anyzig, maximum_macos "15" in the build context. brew prunes this
-    // only when it pours a bottle; a source build still fails, so it counts.
+  it("ignores a build-context requirement", () => {
+    // Real: anyzig, maximum_macos "15" in the build context. Homebrew prunes a
+    // build requirement whenever it pours a bottle, which is the normal case —
+    // and brew installs this one fine on a macOS 26/27 arm64 Mac.
     const anyzig = formula({
       name: "anyzig",
       requirements: [{ name: "maximum_macos", version: "15", contexts: ["build"] }],
     });
-    expect(reason(installabilityOf(anyzig, HOST))).toBe("Requires macOS 15 or older");
+    expect(installabilityOf(anyzig, HOST).installable).toBe(true);
+  });
+
+  it("degrades to applying the requirement when contexts is not an array", () => {
+    // `contexts` is `unknown[]` off parsed JSON. A scalar has no `.some()`, and
+    // a throw here would take out the render of an entire list row.
+    const malformed = formula({
+      name: "synthetic-scalar-contexts",
+      requirements: [{ name: "maximum_macos", version: "15", contexts: "build" } as unknown as FormulaRequirement],
+    });
+    expect(reason(installabilityOf(malformed, HOST))).toBe("Requires macOS 15 or older");
+  });
+
+  it("still blocks a requirement with no context — it applies to every install", () => {
+    const always = formula({
+      name: "synthetic-no-context",
+      requirements: [{ name: "maximum_macos", version: "15", contexts: [] }],
+    });
+    expect(reason(installabilityOf(always, HOST))).toBe("Requires macOS 15 or older");
   });
 
   it("ignores a test-context requirement", () => {

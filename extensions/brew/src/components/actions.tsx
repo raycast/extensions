@@ -146,9 +146,17 @@ export function FormulaUpgradeAction(props: {
           onStart: props.onStart,
         });
         if (result.outcome === "skipped") {
-          // Brew or a pin declined rather than failed. Report it the way the
-          // batch run does, instead of painting the row red for a non-error.
-          props.onSkip?.();
+          if (props.onSkip) {
+            // Brew or a pin declined rather than failed. A view that tracks
+            // per-package status owns the row's verdict, and its `onAction`
+            // reads `false` as "failed" — so the refresh must NOT be sent here
+            // or a skip would paint the row red.
+            props.onSkip();
+            return;
+          }
+          // Nothing upgraded, but the pin on disk moved or never matched the
+          // row. The remaining callers ignore the boolean and just revalidate.
+          if (result.refresh) props.onAction(false);
           return;
         }
         if (result.outcome === "aborted") {
@@ -514,7 +522,17 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean | typeof DECLI
  * directory would not read, an unpin failed); that is already reported, and the
  * caller must not restate it as a per-package verdict.
  */
-type UpgradeOutcome = { outcome: "upgraded"; ok: boolean } | { outcome: "skipped" } | { outcome: "aborted" };
+type UpgradeOutcome =
+  | { outcome: "upgraded"; ok: boolean }
+  /**
+   * `refresh` means the caller's payload no longer matches disk, so it must
+   * revalidate even though nothing was upgraded: either a pin was lifted before
+   * brew declined, or the row was rendered from a snapshot that disagrees with
+   * the pin directory. Without it the row keeps showing the stale pin and the
+   * action keeps declining with a label that does not match what would happen.
+   */
+  | { outcome: "skipped"; refresh?: boolean }
+  | { outcome: "aborted" };
 
 /**
  * Upgrade one package, having first asked Homebrew — not the payload — whether
@@ -542,25 +560,35 @@ async function upgradeChecked(
   }
 
   // Identity, not display name: `brewName` gives a cask its title.
-  if (isPinnedPackage(pins, brewIdentifier(item), cask)) {
+  const pinnedOnDisk = isPinnedPackage(pins, brewIdentifier(item), cask);
+  // The payload is a snapshot; another command or the CLI may have moved the
+  // pin since the fetch. EITHER direction leaves the row lying about it.
+  const stalePin = pinnedOnDisk !== isPinned(item);
+  let unpinned = false;
+  if (pinnedOnDisk) {
     if (!opts?.allowUnpin) {
       await showToast({
         style: Toast.Style.Success,
         title: "Skipping Pinned Upgrades",
         message: `${brewName(item)} is pinned. Unpin it (⌘ .) to upgrade.`,
       });
-      return { outcome: "skipped" };
+      return { outcome: "skipped", refresh: stalePin };
     }
     // The pin is the only thing in the way and the user just asked for the
     // upgrade — so lift it, then proceed.
     if (!(await unpin(item as Pinnable, cask ? "cask" : "formula"))) {
       return { outcome: "aborted" };
     }
+    unpinned = true;
   }
 
   opts?.onStart?.();
   const result = await upgrade(item);
-  return result === DECLINED ? { outcome: "skipped" } : { outcome: "upgraded", ok: result };
+  // A decline still leaves the lifted pin behind: brew can exit 0 and refuse
+  // (already current, disabled, unavailable), so this is not the failure path.
+  return result === DECLINED
+    ? { outcome: "skipped", refresh: unpinned || stalePin }
+    : { outcome: "upgraded", ok: result };
 }
 
 async function upgradeAll(): Promise<boolean> {

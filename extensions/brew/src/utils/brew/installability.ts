@@ -18,17 +18,11 @@
 import type { Cask, Formula, FormulaRequirement } from "../types";
 import { compareVersions } from "./version";
 
-export type BrewArch = "arm64" | "x86_64";
-
 export interface BrewHost {
   /** `sw_vers -productVersion`, e.g. "26.6.2". Undefined when it could not be read. */
   macos: string | undefined;
-  /**
-   * Undefined when the brew install's architecture could not be determined —
-   * a `customBrewPath` under a non-standard prefix. The arch gate is skipped
-   * rather than guessed.
-   */
-  arch: BrewArch | undefined;
+  /** What `brew` itself will report as HOMEBREW_PROCESSOR: see `host.ts`. */
+  arch: "arm64" | "x86_64";
 }
 
 export type Installability = { installable: true } | { installable: false; reason: string };
@@ -40,7 +34,7 @@ function blocked(reason: string): Installability {
 }
 
 /** `cask/dsl/depends_on.rb:26-29`. An unknown type is ignored, not failed. */
-const ARCH_BY_CASK_TYPE: Record<string, BrewArch | undefined> = { arm: "arm64", intel: "x86_64" };
+const ARCH_BY_CASK_TYPE: Record<string, BrewHost["arch"] | undefined> = { arm: "arm64", intel: "x86_64" };
 
 /**
  * Homebrew compares macOS majors for ≥ 11 (`macos_version.rb` `strip_patch`),
@@ -86,8 +80,8 @@ function caskInstallability(cask: Cask, host: BrewHost): Installability {
 
   const arches = (Array.isArray(dependsOn?.arch) ? dependsOn.arch : [])
     .map(({ type }) => ARCH_BY_CASK_TYPE[type])
-    .filter((arch): arch is BrewArch => arch !== undefined);
-  if (host.arch && arches.length > 0 && !arches.includes(host.arch)) {
+    .filter((arch): arch is BrewHost["arch"] => arch !== undefined);
+  if (arches.length > 0 && !arches.includes(host.arch)) {
     return blocked(`Requires ${arches.join(" or ")}`);
   }
 
@@ -95,13 +89,32 @@ function caskInstallability(cask: Cask, host: BrewHost): Installability {
 }
 
 /**
- * Requirements in the `test` context are ignored — brew never runs the test
- * block on install. `build` stays in: a source build genuinely needs it, and
- * the cost of keeping it is a false ⊘ on a package that would have poured a
- * bottle (`formula_installer.rb:770` prunes it only in that case).
+ * Only requirements that apply to an ordinary install count.
+ *
+ * `test` never runs on install. `build` is pruned by Homebrew whenever it pours
+ * a bottle (`FormulaInstaller#expand_requirements`, via
+ * `install_bottle_for_dependent`), which is the normal case — and every
+ * `maximum_macos` requirement in the current index is build-context, so keeping
+ * them marked 16 installable formulae as ⊘ (`anyzig`, `llvm@14`-`@17`,
+ * `ghc@9.6`-`@9.10`, `zigup` and friends) and took Install, Preview Install and
+ * Run in Terminal away from all of them.
+ *
+ * The residual cost runs the other way and is the one this module always
+ * prefers: a formula with no bottle for this system, which brew really would
+ * build from source, is no longer marked — it shows Install and fails in brew
+ * with its own explanation. Marking only what brew would genuinely build needs
+ * `bottle` in the search index, which is not in the chunked cache's
+ * `valid_keys` and would cost a cache-version bump and a full re-download.
  */
+const IGNORED_CONTEXTS = ["test", "build"];
+
 function applies(requirement: FormulaRequirement): boolean {
-  return !requirement.contexts?.includes("test");
+  // `contexts` is `unknown[]` off parsed JSON, so the array is a declaration
+  // and not a guarantee. A shape this module does not understand must read as
+  // "the requirement applies" rather than throw inside a list row's render.
+  const contexts = requirement.contexts;
+  if (!Array.isArray(contexts)) return true;
+  return !contexts.some((context) => typeof context === "string" && IGNORED_CONTEXTS.includes(context));
 }
 
 function formulaInstallability(formula: Formula, host: BrewHost): Installability {
@@ -126,7 +139,7 @@ function formulaInstallability(formula: Formula, host: BrewHost): Installability
   }
 
   const arch = requirements.find((r) => r.name === "arch" && r.version);
-  if (host.arch && arch?.version && arch.version !== host.arch) {
+  if (arch?.version && arch.version !== host.arch) {
     return blocked(`Requires ${arch.version}`);
   }
 
