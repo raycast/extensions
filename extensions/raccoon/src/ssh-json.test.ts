@@ -89,10 +89,11 @@ test("keys that need attention are what the title says", () => {
 	const weak: SshKey = {
 		name: "id_rsa",
 		type: "rsa",
-		bits: 1024,
 		passphrase: false,
-		perms: "600",
-	} as SshKey;
+		public_key: true,
+		perms: "644",
+		perms_ok: false,
+	};
 	assert.match(sshTitle(sshReport({ keys: [weak] })), /1 needs? attention/);
 });
 

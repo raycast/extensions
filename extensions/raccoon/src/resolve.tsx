@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { ReactNode } from "react";
 import { runInTerminal } from "./terminal";
 
