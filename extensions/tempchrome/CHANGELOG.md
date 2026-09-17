@@ -1,6 +1,6 @@
 # TempChrome Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Quick Launch command that creates a temp profile and opens Chromium with no user interface
 - Root list with Launch Now, Launch with Options…, Recent Launches…, Manage Temp Profiles…, and Install or Update Chromium…
