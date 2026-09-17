@@ -34,7 +34,7 @@
         {
           "name": "maxRepoAgeDays",
           "type": "textfield",
-          "title": "Max Repository Age (days)",
+          "title": "Max Repository Age (Days)",
           "required": false,
           "default": "0",
           "description": "Speeds up this search by skipping repositories not updated within this many days. Set to 0 for no limit (scan every repository).",
@@ -52,7 +52,7 @@
         {
           "name": "maxRepoAgeDays",
           "type": "textfield",
-          "title": "Max Repository Age (days)",
+          "title": "Max Repository Age (Days)",
           "required": false,
           "default": "0",
           "description": "Speeds up this search by skipping repositories not updated within this many days. Set to 0 for no limit (scan every repository).",

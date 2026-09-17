@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, Color, Action, Image, Toast } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Action, Image, Toast, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useSWR, { SWRConfig } from "swr";
 
@@ -7,7 +7,9 @@ import { cacheConfig } from "../../helpers/cache";
 import { preferences } from "../../helpers/preferences";
 import { PullRequest } from "./interface";
 
-const MY_PULL_REQUESTS_CACHE_KEY = `my-open-pull-requests:${preferences.workspace}:${preferences.email}`;
+const commandPreferences = getPreferenceValues<Preferences.SearchMyOpenPullRequests>();
+
+const MY_PULL_REQUESTS_CACHE_KEY = `my-open-pull-requests:${preferences.workspace}:${preferences.email}:${commandPreferences.maxRepoAgeDays || "0"}`;
 
 export function SearchMyPullRequests() {
   return (

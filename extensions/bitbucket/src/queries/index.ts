@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { Bitbucket, Schema } from "bitbucket";
 import { preferences } from "../helpers/preferences";
 import { URLSearchParams } from "url";
@@ -133,19 +133,28 @@ const REPO_LIST_TTL_MS = 10 * 60 * 1000;
 
 type RepoWithSlug = Schema.Repository & { slug: string; updated_on?: string };
 
+// maxRepoAgeDays only exists on the two commands that scan repos (not on the shared
+// ExtensionPreferences), so it's read here with its proper per-command generated type
+// instead of being force-added to the shared `preferences` object.
+type RepoScanPreferences = Preferences.SearchAllPullRequests | Preferences.SearchMyOpenPullRequests;
+
+function maxRepoAgeDaysRaw(): string {
+  return getPreferenceValues<RepoScanPreferences>().maxRepoAgeDays;
+}
+
 function repoListCacheKey(): string {
-  return `repos:${preferences.workspace}:${preferences.maxRepoAgeDays || "0"}`;
+  return `repos:${preferences.workspace}:${preferences.email}:${maxRepoAgeDaysRaw() || "0"}`;
 }
 
 // 0 (or unset) means no limit: scan every repository.
 function maxRepoAgeMs(): number | undefined {
-  const raw = preferences.maxRepoAgeDays?.trim();
+  const raw = maxRepoAgeDaysRaw()?.trim();
   if (!raw) {
     return undefined;
   }
 
   if (!/^\d+$/.test(raw)) {
-    throw new Error(`"Max Repository Age (days)" must be a whole number, got "${raw}"`);
+    throw new Error(`"Max Repository Age (Days)" must be a whole number, got "${raw}"`);
   }
 
   const days = Number(raw);
@@ -375,7 +384,11 @@ async function scanOpenPullRequests(
       }
     }
     queue.close();
-    await setCachedRepositories(fetched);
+    try {
+      await setCachedRepositories(fetched);
+    } catch (error) {
+      console.error("[bitbucket] Failed to persist repository list cache:", error);
+    }
   };
 
   const worker = async () => {
