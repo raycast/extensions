@@ -1,5 +1,9 @@
 # RSS Reader Changelog
 
+## [Preference] - {PR_MERGE_DATE}
+
+- Added "Show Subtitle" Preference for hiding subtitle on stories
+
 ## [Duplicate Subscriptions] - 2026-04-13
 
 - Duplicate feed subscriptions to quickly create variations with different URLs
