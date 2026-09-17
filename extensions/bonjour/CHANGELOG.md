@@ -1,6 +1,6 @@
 # Bonjour Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2026-09-17
 
 - added refresh action
 
