@@ -1,6 +1,6 @@
 # Background Sounds Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-17
 
 - Fix the toggle command failing with "No matching processes belonging to you were found" when the `heard` background-sounds daemon is not running. The setting is now written even if the daemon has nothing to reload.
 
