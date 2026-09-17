@@ -14,7 +14,18 @@ import { test } from "node:test";
  */
 
 const files = readdirSync("src").filter((f) => (f.endsWith(".ts") || f.endsWith(".tsx")) && !f.endsWith(".test.ts"));
-const source = new Map(files.map((f) => [f, readFileSync(`src/${f}`, "utf8")]));
+/**
+ * The code, with the comments taken out.
+ *
+ * Every rule here is a grep, and a grep cannot tell a call from a sentence
+ * about a call: `// resolveRcc();` satisfied one of these until it was tried.
+ * Prose is where these promises get explained, so prose is what has to go.
+ */
+function withoutComments(text: string): string {
+	return text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+}
+
+const source = new Map(files.map((f) => [f, withoutComments(readFileSync(`src/${f}`, "utf8"))]));
 
 /** The body of `const <name> = async (...) => { ... };` at one indent level. */
 function bodyOf(text: string, name: string): string {
@@ -82,4 +93,29 @@ test("a command handed to Terminal says so when Terminal refuses", () => {
 			from = at + 1;
 		}
 	}
+});
+
+test("the export asks what rcc is before it runs anything", () => {
+	// rcc 1.0.0 does not refuse `--export`, it ignores it: without the gate the
+	// screen waits out a whole audit and then reports a file that was never
+	// written. The order is the guarantee, so it is the order this checks.
+	const text = source.get("audit-export.ts") ?? "";
+	const body = text.slice(text.indexOf("export async function exportAudit"));
+	const gate = body.indexOf("requireExportSupport()");
+	const run = body.indexOf("runRcc(");
+	assert.notEqual(gate, -1, "exportAudit no longer checks the version");
+	assert.notEqual(run, -1, "exportAudit no longer runs rcc; this test needs rewriting");
+	assert.ok(gate < run, "exportAudit runs rcc before checking the version it needs");
+});
+
+test("installing rcc ends by looking for it again", () => {
+	// brew saying yes is not the same as this extension being able to find it:
+	// discovery runs when a command starts, so a successful install has to send
+	// the reader through discovery again rather than leave the screen as it was.
+	const text = source.get("missing-rcc.tsx") ?? "";
+	const outcome = text.indexOf("installOutcome(");
+	const rediscover = text.indexOf("resolveRcc()", outcome);
+	const relaunch = text.indexOf("launchCommand(", outcome);
+	assert.ok(rediscover > outcome, "the install no longer looks for rcc again once brew is done");
+	assert.ok(relaunch > rediscover, "the install no longer restarts the command after finding rcc");
 });
