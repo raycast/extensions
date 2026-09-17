@@ -1,6 +1,6 @@
 # RayDocs Changelog
 
-## [Section Filtering, Offline Cache, and Markdown Actions] - {PR_MERGE_DATE}
+## [Section Filtering, Offline Cache, and Markdown Actions] - 2026-09-17
 
 - Filter the list by documentation section with a new dropdown, and tell sections apart at a glance — each one now has its own icon and colour
 - Once a page has been opened, it reappears instantly from a local cache and refreshes in the background
