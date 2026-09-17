@@ -85,6 +85,47 @@ test("prefers Resources External over Resources", () => {
   );
 });
 
+test("matches a SharePoint site whose words are reversed in OneDrive", () => {
+  const location = {
+    tenantName: "four12global",
+    siteSlug: "externalresources",
+    libraryName: "Shared Documents",
+    relativeSegments: [],
+    serverRelativePath: "/sites/externalresources/Shared Documents",
+  };
+  assert.deepEqual(rankLocalLibraries(localLibraries, location), [
+    "Resources External - Documents",
+  ]);
+});
+
+test("rejects ambiguous reordered site names", () => {
+  const location = {
+    tenantName: "four12global",
+    siteSlug: "externalresources",
+    libraryName: "Shared Documents",
+    relativeSegments: [],
+    serverRelativePath: "/sites/externalresources/Shared Documents",
+  };
+  assert.deepEqual(
+    rankLocalLibraries(
+      ["Resources External - Documents", "Resources-External - Documents"],
+      location,
+    ),
+    [],
+  );
+});
+
+test("does not loosely match a partial reordered site name", () => {
+  const location = {
+    tenantName: "four12global",
+    siteSlug: "externalresourcesarchive",
+    libraryName: "Shared Documents",
+    relativeSegments: [],
+    serverRelativePath: "/sites/externalresourcesarchive/Shared Documents",
+  };
+  assert.deepEqual(rankLocalLibraries(localLibraries, location), []);
+});
+
 test("matches the SharePoint tenant to the correct OneDrive root", () => {
   const roots = [
     "OneDrive-SharedLibraries-Contoso",

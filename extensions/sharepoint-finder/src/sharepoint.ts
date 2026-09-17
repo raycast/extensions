@@ -34,6 +34,43 @@ function normalizeName(value: string): string {
     .toLocaleLowerCase();
 }
 
+function normalizedWords(value: string): string[] {
+  return value
+    .normalize("NFKD")
+    .toLocaleLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function matchesReorderedWords(localName: string, remoteName: string): boolean {
+  const words = normalizedWords(localName);
+  if (words.length < 2) return false;
+
+  const remoteKey = normalizeName(remoteName);
+  if (
+    words.reduce((length, word) => length + word.length, 0) !== remoteKey.length
+  ) {
+    return false;
+  }
+
+  function consumesRemoteName(
+    remaining: string,
+    unusedWords: string[],
+  ): boolean {
+    if (unusedWords.length === 0) return remaining.length === 0;
+
+    return unusedWords.some((word, index) => {
+      if (!remaining.startsWith(word)) return false;
+      return consumesRemoteName(remaining.slice(word.length), [
+        ...unusedWords.slice(0, index),
+        ...unusedWords.slice(index + 1),
+      ]);
+    });
+  }
+
+  return consumesRemoteName(remoteKey, words);
+}
+
 export function extractServerRelativePath(browserUrl: string): string {
   const url = new URL(browserUrl);
   if (url.protocol !== "https:" || !url.hostname.endsWith(".sharepoint.com")) {
@@ -133,9 +170,20 @@ export function rankLocalLibraries(
     name.toLocaleLowerCase().endsWith(suffix.toLocaleLowerCase()),
   );
   const siteNames = matchingNames.map((name) => name.slice(0, -suffix.length));
-  return rankByRemoteName(siteNames, location.siteSlug).map(
-    (siteName) => `${siteName}${suffix}`,
+  const rankedSiteNames = rankByRemoteName(siteNames, location.siteSlug);
+
+  if (rankedSiteNames.length > 0) {
+    return rankedSiteNames.map((siteName) => `${siteName}${suffix}`);
+  }
+
+  // OneDrive display names can contain the same site words in a different order
+  // from SharePoint's URL slug. Only accept a single exact word permutation.
+  const reorderedMatches = siteNames.filter((siteName) =>
+    matchesReorderedWords(siteName, location.siteSlug),
   );
+  if (reorderedMatches.length !== 1) return [];
+
+  return [`${reorderedMatches[0]}${suffix}`];
 }
 
 export function toLocalPath(
