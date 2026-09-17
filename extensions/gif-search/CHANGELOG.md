@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Fix pasting and caching of GIFs] - {PR_MERGE_DATE}
+## [Fix pasting and caching of GIFs] - 2026-09-17
 
 - Fixed "Paste GIF" failing with a file-not-found error for every GIF, once any favorite had been copied
 - Fixed Copy, Paste and Download serving a previously cached GIF instead of the one selected, when "Hide Filename" is turned on
