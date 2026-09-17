@@ -26,6 +26,20 @@ export type Host = {
 };
 
 /**
+ * What rcc counts as a port: `_is_port` in bin/fleet.sh, 1 to 65535.
+ *
+ * A number outside it is not treated as a port there - the characters go back
+ * to the hostname, where ssh fails to resolve them in front of the reader.
+ * Reading it as a port here would have the screen name a port rcc will never
+ * connect on.
+ */
+function isPort(value: string): boolean {
+	if (!/^\d+$/.test(value)) return false;
+	const port = Number(value);
+	return port >= 1 && port <= 65535;
+}
+
+/**
  * One line of fleet.conf: `host[:port] [--profile NAME]`, `#` starts a comment.
  *
  * An IPv6 address carries colons of its own, and rcc has already shipped the
@@ -42,13 +56,16 @@ export function parseHostLine(raw: string): Host | undefined {
 
 	const bracketed = /^\[([^\]]+)\](?::(\d+))?$/.exec(hostport);
 	if (bracketed) {
-		return { name: bracketed[1], port: bracketed[2], profile, line };
+		const port = bracketed[2];
+		if (port === undefined) return { name: bracketed[1], profile, line };
+		if (isPort(port)) return { name: bracketed[1], port, profile, line };
+		return { name: hostport, profile, line };
 	}
 
 	const colons = (hostport.match(/:/g) ?? []).length;
 	if (colons === 1) {
 		const [name, port] = hostport.split(":");
-		if (/^\d+$/.test(port) && name !== "") {
+		if (isPort(port) && name !== "") {
 			return { name, port, profile, line };
 		}
 	}

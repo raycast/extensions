@@ -61,3 +61,16 @@ export function containerState(status: string): "up" | "exited" | "other" {
 	if (s.startsWith("exited")) return "exited";
 	return "other";
 }
+
+/**
+ * The window title for the Docker screen.
+ *
+ * Not a count when the daemon is down: bin/docker.sh reports empty lists in
+ * that case, because nothing can be enumerated without it - so "0 containers"
+ * would be an invented fact about a Mac that may well be holding twenty.
+ */
+export function dockerTitle(d: DockerReport | undefined): string {
+	if (!d || !d.installed) return "Docker";
+	if (!d.running) return "Docker: not running";
+	return `Docker: ${d.containers.length} containers, ${d.images.length} images`;
+}

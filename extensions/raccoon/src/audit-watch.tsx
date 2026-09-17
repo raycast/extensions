@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, Color, Icon, Keyboard, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { type Frequency, readSchedule } from "./audit-schedule";
+import { type Frequency, readSchedule, scheduleSection, WHEN } from "./audit-schedule";
 import { runRcc } from "./rcc";
 
 /**
@@ -18,14 +18,9 @@ import { runRcc } from "./rcc";
  * the plist and asks launchd; it runs no rcc command at all.
  */
 
-const WHEN: Record<Frequency, string> = {
-	daily: "Every day at 9:00",
-	weekly: "Sundays at 9:00",
-	monthly: "The 1st of each month at 9:00",
-};
-
 export default function Command() {
-	const { data: active, isLoading, revalidate } = usePromise(readSchedule);
+	const { data: active, isLoading, revalidate, error } = usePromise(readSchedule);
+	const section = scheduleSection(active, error !== undefined);
 
 	const schedule = async (frequency: Frequency) => {
 		const confirmed = await confirmAlert({
@@ -103,10 +98,7 @@ export default function Command() {
 			navigationTitle={active ? `Scheduled Audit: ${active}` : "Scheduled Audit"}
 			searchBarPlaceholder="Search frequencies"
 		>
-			<List.Section
-				title={active ? `Running ${active}` : "Not scheduled"}
-				subtitle={active ? WHEN[active] : "No audit runs on its own"}
-			>
+			<List.Section title={section.title} subtitle={section.subtitle}>
 				{(Object.keys(WHEN) as Frequency[]).map((frequency) => {
 					const isActive = frequency === active;
 					return (

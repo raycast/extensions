@@ -49,3 +49,25 @@ test("a colon with something other than digits after it is not a port", () => {
 	assert.equal(host?.name, "server.example:backup");
 	assert.equal(host?.port, undefined);
 });
+
+test("a port outside 1-65535 is not a port: the characters go back to the host", () => {
+	// _is_port in bin/fleet.sh, and the fallback right below it: rcc hands the
+	// whole string to ssh as a hostname, where it fails visibly, rather than
+	// connecting on a number nobody wrote.
+	assert.deepEqual(parseHostLine("build-mac:99999")?.name, "build-mac:99999");
+	assert.equal(parseHostLine("build-mac:99999")?.port, undefined);
+	assert.deepEqual(parseHostLine("build-mac:0")?.name, "build-mac:0");
+	assert.equal(parseHostLine("build-mac:0")?.port, undefined);
+});
+
+test("a bracketed address with an impossible port keeps its brackets, as rcc leaves them", () => {
+	assert.equal(parseHostLine("[fe80::1]:70000")?.name, "[fe80::1]:70000");
+	assert.equal(parseHostLine("[fe80::1]:70000")?.port, undefined);
+});
+
+test("a port inside the range is still a port", () => {
+	assert.equal(parseHostLine("build-mac:2222")?.port, "2222");
+	assert.equal(parseHostLine("[fe80::1]:22")?.name, "fe80::1");
+	assert.equal(parseHostLine("[fe80::1]:22")?.port, "22");
+	assert.equal(parseHostLine("build-mac:65535")?.port, "65535");
+});

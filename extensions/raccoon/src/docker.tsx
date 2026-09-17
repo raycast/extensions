@@ -2,7 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { dockerPrune, openApp } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
-import { containerState, parseDocker, type DockerReport } from "./docker-json";
+import { containerState, dockerTitle, parseDocker, type DockerReport } from "./docker-json";
 
 const STATE_TINT = {
 	up: Color.Green,
@@ -151,9 +151,7 @@ export default function Command() {
 		<RccList
 			command="docker"
 			parse={parseDocker}
-			navigationTitle={(d) =>
-				!d || !d.installed ? "Docker" : `Docker: ${d.containers.length} containers, ${d.images.length} images`
-			}
+			navigationTitle={dockerTitle}
 			searchBarPlaceholder="Search containers, images and volumes"
 			emptyIcon={Icon.Box}
 			emptyTitle="Nothing from Docker"
