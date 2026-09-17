@@ -1,6 +1,6 @@
 # Changelog
 
-## [Add Windows Support] - {PR_MERGE_DATE}
+## [Add Windows Support] - 2026-09-17
 
 - Add Windows support to 2FAS Authenticator.
 - Protect the vault encryption key with Windows DPAPI using the `CurrentUser` scope.
