@@ -121,3 +121,23 @@ export function smartLevel(smart: string): "ok" | "failing" | "unknown" {
 	if (smart.toLowerCase().includes("fail")) return "failing";
 	return "unknown";
 }
+
+/**
+ * The volume the screen should lead with: the fullest one.
+ *
+ * Written down because the obvious reduce is not it. `(a, b) => level(a) ===
+ * "full" ? a : b` keeps the accumulator only once it is already past 90%, and
+ * otherwise takes whatever came next - so on a Mac where nothing is that full
+ * it names the last volume in the list, and a drive at 80% listed first is
+ * headlined by a spare at 20%.
+ *
+ * A percentage that cannot be read ranks below one that can: an unknown is not
+ * an emergency, and it should not take the headline from a disk that is
+ * measurably filling up.
+ */
+export function worstVolume(volumes: Volume[]): Volume | undefined {
+	return volumes.reduce<Volume | undefined>((worst, volume) => {
+		if (!worst) return volume;
+		return (fillPercent(volume.percent) ?? -1) > (fillPercent(worst.percent) ?? -1) ? volume : worst;
+	}, undefined);
+}

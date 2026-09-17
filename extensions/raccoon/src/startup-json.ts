@@ -105,3 +105,19 @@ export function loadNow(load: string): number | null {
 	const value = Number(first);
 	return Number.isFinite(value) ? value : null;
 }
+
+/**
+ * How many things this Mac starts, and whether that number is the whole answer.
+ *
+ * Login items are read through System Events, which can refuse - and then
+ * bin/startup.sh reports login_items_error and an empty list. The section below
+ * already says "not checked" for them; a title that added the rest up and
+ * called it the total contradicted it, and understated what starts by however
+ * many login items there are.
+ */
+export function startupTitle(s: StartupReport | undefined): string {
+	if (!s) return "Startup";
+	const counted = s.login_items.length + s.user_agents.length + s.background_items.length;
+	const total = `Startup: ${counted} things this Mac starts`;
+	return s.login_items_error ? `${total}, login items not checked` : total;
+}

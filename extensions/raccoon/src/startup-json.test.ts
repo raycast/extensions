@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadNow, parseStartup } from "./startup-json.ts";
+import { loadNow, parseStartup, startupTitle, type StartupReport } from "./startup-json.ts";
 
 test("both lists and the counts are read", () => {
 	const s = parseStartup(
@@ -85,4 +85,43 @@ test("login items that could not be read are an error, not an empty list", () =>
 	);
 	assert.deepEqual(s.login_items, []);
 	assert.match(s.login_items_error, /Not authorized/);
+});
+
+const startupReport = (over: Partial<StartupReport> = {}): StartupReport =>
+	({
+		login_items: [],
+		login_items_missing: [],
+		login_items_error: "",
+		user_agents: [],
+		background_items: [],
+		daemons: [],
+		system_agents: [],
+		counts: {},
+		uptime: "",
+		...over,
+	}) as unknown as StartupReport;
+
+test("a total that silently leaves out what could not be read is not a total", () => {
+	// bin/startup.sh reports login_items_error when osascript cannot read them,
+	// and the section below already says "not checked" - while the title
+	// counted the rest and presented the sum as what this Mac starts.
+	const s = startupReport({
+		login_items_error: "System Events got an error",
+		user_agents: [{}, {}],
+		background_items: [{}],
+	} as unknown as Partial<StartupReport>);
+	assert.equal(startupTitle(s), "Startup: 3 things this Mac starts, login items not checked");
+});
+
+test("with everything read the title is the whole count", () => {
+	const s = startupReport({
+		login_items: [{}, {}],
+		user_agents: [{}],
+		background_items: [{}],
+	} as unknown as Partial<StartupReport>);
+	assert.equal(startupTitle(s), "Startup: 4 things this Mac starts");
+});
+
+test("nothing loaded yet is just the name", () => {
+	assert.equal(startupTitle(undefined), "Startup");
 });

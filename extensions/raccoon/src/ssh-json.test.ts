@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { keyLevel, parseSsh, problemCount, reason, sortKeys, type SshKey } from "./ssh-json.ts";
+import {
+	keyLevel,
+	parseSsh,
+	problemCount,
+	reason,
+	sortKeys,
+	sshTitle,
+	type SshKey,
+	type SshReport,
+} from "./ssh-json.ts";
 
 const key = (over: Partial<SshKey> = {}): SshKey => ({
 	name: "id_ed25519",
@@ -57,4 +66,36 @@ test("a healthy key is not counted as a problem", () => {
 		}),
 		0,
 	);
+});
+
+const sshReport = (over: Partial<SshReport> = {}): SshReport => ({
+	ssh_dir_present: true,
+	ssh_dir_perms: "700",
+	keys: [],
+	...over,
+});
+
+test("a ~/.ssh nobody has is not a set of keys in good order", () => {
+	assert.equal(sshTitle(sshReport({ ssh_dir_present: false })), "SSH keys: no ~/.ssh");
+});
+
+test("the directory's own mode is part of the verdict, not only the keys'", () => {
+	// The screen already paints `dir 755` red and its comment says the mode
+	// "matters as much as any key's" - while the title said all was in order.
+	assert.equal(sshTitle(sshReport({ ssh_dir_perms: "755" })), "SSH keys: ~/.ssh is 755, not 700");
+});
+
+test("keys that need attention are what the title says", () => {
+	const weak: SshKey = {
+		name: "id_rsa",
+		type: "rsa",
+		bits: 1024,
+		passphrase: false,
+		perms: "600",
+	} as SshKey;
+	assert.match(sshTitle(sshReport({ keys: [weak] })), /1 needs? attention/);
+});
+
+test("everything in order says so", () => {
+	assert.equal(sshTitle(sshReport()), "SSH keys: all in good order");
 });

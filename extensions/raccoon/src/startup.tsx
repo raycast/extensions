@@ -3,7 +3,7 @@ import { tilde } from "./paths.ts";
 import { bootoutAgents, openSettings, removeLoginItems, SETTINGS } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
-import { loadNow, parseStartup, type StartupReport, type UserAgent } from "./startup-json";
+import { startupTitle, loadNow, parseStartup, type StartupReport, type UserAgent } from "./startup-json";
 
 /** Busy relative to nothing in particular, but 4 and 8 are where a Mac feels it. */
 function loadTint(load: string): Color {
@@ -237,11 +237,7 @@ export default function Command() {
 		<RccList
 			command="startup"
 			parse={parseStartup}
-			navigationTitle={(s) =>
-				s
-					? `Startup: ${s.login_items.length + s.user_agents.length + s.background_items.length} things this Mac starts`
-					: "Startup"
-			}
+			navigationTitle={startupTitle}
 			searchBarPlaceholder="Search login items, launch agents and background items"
 			emptyIcon={Icon.Power}
 			emptyTitle="Nothing starts on its own"

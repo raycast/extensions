@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { openApp, openSettings, reveal, SETTINGS } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
-import { fillLevel, parseDisk, smartLevel, type DiskReport } from "./disk-json";
+import { worstVolume, fillLevel, parseDisk, smartLevel, type DiskReport } from "./disk-json";
 
 const FILL_TINT = {
 	ok: Color.Green,
@@ -216,9 +216,8 @@ export default function Command() {
 			command="disk"
 			parse={parseDisk}
 			navigationTitle={(d) => {
-				if (!d || d.volumes.length === 0) return "Disk";
-				const worst = d.volumes.reduce((a, b) => (fillLevel(a.percent) === "full" ? a : b));
-				return `Disk: ${worst.name} at ${worst.percent}, ${worst.free} free`;
+				const worst = d ? worstVolume(d.volumes) : undefined;
+				return worst ? `Disk: ${worst.name} at ${worst.percent}, ${worst.free} free` : "Disk";
 			}}
 			searchBarPlaceholder="Search volumes, disks and mounts"
 			emptyIcon={Icon.HardDrive}

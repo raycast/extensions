@@ -28,6 +28,7 @@ const RUNTIME_PATH = [
 	"/usr/sbin",
 	"/sbin",
 ].join(":");
+import { parseAuditReport } from "../src/audit-json.ts";
 import { parseBackup } from "../src/backup-json.ts";
 import { parseBattery } from "../src/battery-json.ts";
 import { parseCerts } from "../src/certs-json.ts";
@@ -49,6 +50,7 @@ const execFileAsync = promisify(execFile);
 const RCC = process.argv[2] ?? "rcc";
 
 const PARSERS: Record<string, (s: string) => unknown> = {
+	audit: parseAuditReport,
 	backup: parseBackup,
 	battery: parseBattery,
 	certs: parseCerts,
@@ -67,6 +69,29 @@ const PARSERS: Record<string, (s: string) => unknown> = {
 	trash: parseTrash,
 	wifi: parseWifi,
 	overlap: parseOverlap,
+};
+
+/**
+ * What to run for a command, when it is not `rcc <cmd> --json`.
+ *
+ * The audit is split the way the extension splits it: one check inside `core`
+ * asks Apple's servers and takes minutes, so the matrix runs the groups that
+ * answer at once. See src/audit-groups.ts.
+ */
+const ARGS: Record<string, string[]> = {
+	audit: ["audit", "--only", "network,auth,persistence,privacy,additional", "--json"],
+};
+
+/**
+ * Fields the parser leaves behind on purpose, named here so that every other
+ * dropped field is a failure.
+ *
+ * A parser that quietly ignores a field is how the trash screen came to count
+ * only the home trash while Finder emptied every volume: `volumes` was in the
+ * document, and nothing said it had been thrown away.
+ */
+const IGNORED: Record<string, string[]> = {
+	xcode: ["developer_dir"],
 };
 
 const emptyHome = mkdtempSync(join(tmpdir(), "rcc-empty-home-"));
@@ -97,7 +122,7 @@ for (const [cmd, parse] of Object.entries(PARSERS)) {
 		cells++;
 		let stdout = "";
 		try {
-			({ stdout } = await execFileAsync(RCC, [cmd, "--json"], {
+			({ stdout } = await execFileAsync(RCC, ARGS[cmd] ?? [cmd, "--json"], {
 				env,
 				maxBuffer: 10 * 1024 * 1024,
 				timeout: 120_000,
@@ -165,8 +190,9 @@ for (const [cmd, parse] of Object.entries(PARSERS)) {
 			continue;
 		}
 
+		let parsed: unknown;
 		try {
-			parse(stdout);
+			parsed = parse(stdout);
 		} catch (e) {
 			failures.push({
 				cmd,
@@ -174,6 +200,27 @@ for (const [cmd, parse] of Object.entries(PARSERS)) {
 				kind: "parser rejected",
 				detail: String((e as Error).message).slice(0, 160),
 			});
+			continue;
+		}
+
+		// Every field the document carried has to end up somewhere, or be named
+		// in IGNORED. Syntactically valid output that the parser silently
+		// halves is the failure this matrix exists to catch.
+		const document: unknown = JSON.parse(stdout.slice(stdout.indexOf(stdout.trimStart()[0] ?? "{")));
+		if (document && typeof document === "object" && !Array.isArray(document) && parsed && typeof parsed === "object") {
+			const kept = new Set(Object.keys(parsed as Record<string, unknown>));
+			const allowed = new Set(IGNORED[cmd] ?? []);
+			const dropped = Object.keys(document as Record<string, unknown>).filter(
+				(key) => !kept.has(key) && !allowed.has(key),
+			);
+			if (dropped.length > 0) {
+				failures.push({
+					cmd,
+					env: envName,
+					kind: "field dropped",
+					detail: dropped.join(", "),
+				});
+			}
 		}
 	}
 }

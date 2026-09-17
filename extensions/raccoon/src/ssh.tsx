@@ -6,6 +6,7 @@ import {
 	keyLevel,
 	parseSsh,
 	problemCount,
+	sshTitle,
 	reason,
 	sortKeys,
 	type KeyLevel,
@@ -170,11 +171,7 @@ export default function Command() {
 		<RccList
 			command="ssh"
 			parse={parseSsh}
-			navigationTitle={(s) => {
-				if (!s) return "SSH Keys";
-				const problems = problemCount(s);
-				return problems === 0 ? "SSH keys: all in good order" : `SSH keys: ${problems} need attention`;
-			}}
+			navigationTitle={(s) => (s ? sshTitle(s) : "SSH Keys")}
 			searchBarPlaceholder="Search keys"
 			emptyIcon={Icon.Key}
 			emptyTitle="No SSH keys found"

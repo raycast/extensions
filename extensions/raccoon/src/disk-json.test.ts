@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { fillLevel, fillPercent, parseDisk, smartLevel } from "./disk-json.ts";
+import { fillLevel, fillPercent, parseDisk, smartLevel, type Volume, worstVolume } from "./disk-json.ts";
 
 test("disks, volumes, container and network mounts are read", () => {
 	const d = parseDisk(
@@ -79,4 +79,31 @@ test("an rcc too old to know about snapshots reads as not checked", () => {
 	const report = parseDisk(old);
 	assert.equal(report.snapshots.available, false);
 	assert.equal(report.snapshots.count, 0);
+});
+
+const vol = (name: string, percent: string): Volume => ({
+	name,
+	mount: `/Volumes/${name}`,
+	used: "1G",
+	free: "1G",
+	percent,
+});
+
+test("the headline volume is the fullest one, wherever it sits in the list", () => {
+	// The old reduce kept the accumulator only when it was already over 90%,
+	// so with nothing that full it simply returned the last volume: a Mac with
+	// a drive at 80% listed first and a spare at 20% last was headlined by the
+	// spare.
+	assert.equal(worstVolume([vol("Backup", "80%"), vol("Spare", "20%")])?.name, "Backup");
+	assert.equal(worstVolume([vol("System", "46%"), vol("Data", "97%")])?.name, "Data");
+	assert.equal(worstVolume([vol("A", "50%"), vol("B", "97%"), vol("C", "60%")])?.name, "B");
+});
+
+test("a percentage that cannot be read does not outrank one that can", () => {
+	assert.equal(worstVolume([vol("Unknown", "-"), vol("Data", "10%")])?.name, "Data");
+	assert.equal(worstVolume([vol("Unknown", "-")])?.name, "Unknown");
+});
+
+test("no volumes, no headline", () => {
+	assert.equal(worstVolume([]), undefined);
 });
