@@ -152,7 +152,7 @@
     },
     {
       "name": "devClientId",
-      "title": "Personal Client ID (dev)",
+      "title": "Personal Client ID (Dev)",
       "description": "SnapTrade Personal API clientId. Only used when the developer checkbox is enabled.",
       "type": "textfield",
       "required": false,
@@ -160,7 +160,7 @@
     },
     {
       "name": "devConsumerKey",
-      "title": "Personal Consumer Key (dev)",
+      "title": "Personal Consumer Key (Dev)",
       "description": "SnapTrade Personal API consumerKey. Stored by Raycast as a password preference; never written to disk by Folio.",
       "type": "password",
       "required": false,
