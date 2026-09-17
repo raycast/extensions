@@ -17,6 +17,9 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - View Build Logs
             - Roll Back
             - Cancel / Delete
+        - View Environment
+            - Edit Variables
+            - Copy Environment File
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
     - View Docker (Containers)

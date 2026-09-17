@@ -16,6 +16,7 @@ import { useToken } from "./instances";
 import { Server, Service, ErrorResult, DatabaseKind } from "./interfaces";
 import ServiceLogs from "./service-logs";
 import DeploymentHistory from "./deployment-history";
+import ServiceEnv from "./service-env";
 import { DatabaseActions } from "./database-actions";
 import type { ServiceScope } from "./utils";
 import { getTotalServices } from "./utils";
@@ -308,6 +309,11 @@ export default function Services({
                       target={<DeploymentHistory service={{ ...service, type: service.type }} />}
                     />
                   )}
+                  <Action.Push
+                    icon={Icon.LockUnlocked}
+                    title="View Environment"
+                    target={<ServiceEnv service={service} />}
+                  />
                 </ActionPanel.Section>
                 {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
                   <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />
