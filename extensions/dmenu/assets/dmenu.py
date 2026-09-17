@@ -17,7 +17,7 @@ COMMAND = "dmenu"
 
 ACCEPT_TIMEOUT = 10      # seconds to wait for Raycast to connect
 RECV_TIMEOUT = 20        # seconds to wait for selection
-TOTAL_TIMEOUT = (ACCEPT_TIMEOUT * 2) + RECV_TIMEOUT # max runtime
+TOTAL_TIMEOUT = ACCEPT_TIMEOUT + RECV_TIMEOUT # max runtime (one accept + one recv phase)
 
 start_time = time.monotonic()
 
@@ -82,56 +82,46 @@ subprocess.run(
     stdout=subprocess.DEVNULL,
     stderr=subprocess.DEVNULL
 )
-log("raycast deeplink launched, entering accept loop")
+log("raycast deeplink launched, waiting for connection")
 
 
-sent_elements = False
 final_result = None
 
 try:
-    while not timed_out():
-        try:
-            log(f"calling accept() (sent_elements={sent_elements})")
-            conn, addr = server.accept()
-            log(f"accept() returned, peer={addr}")
-            conn.settimeout(RECV_TIMEOUT)
+    try:
+        # A single connection is used for the whole exchange: Raycast connects
+        # once, we send it the element list, and we keep reading on that same
+        # connection until it writes back the selection and closes its end.
+        log("calling accept()")
+        conn, addr = server.accept()
+        log(f"accept() returned, peer={addr}")
+        conn.settimeout(RECV_TIMEOUT)
 
-            if not sent_elements:
-                # Send items
-                log(f"sending {len(elements)} elements")
-                conn.sendall(f"{len(elements)}\n".encode())
-                for el in elements:
-                    conn.sendall((el + "\n").encode())
-                log("finished sending elements")
+        log(f"sending {len(elements)} elements")
+        conn.sendall(f"{len(elements)}\n".encode())
+        for el in elements:
+            conn.sendall((el + "\n").encode())
+        log("finished sending elements")
 
-                sent_elements = True
-                conn.close()
-                log("closed conn after sending elements; looping back to accept()")
-                continue
+        log("receiving selection data")
+        data = b""
+        while True:
+            chunk = conn.recv(1024)
+            log(f"recv() returned {len(chunk)} bytes: {chunk!r}")
+            if not chunk:
+                break
+            data += chunk
 
-            # Receive selection
-            log("receiving selection data")
-            data = b""
-            while True:
-                chunk = conn.recv(1024)
-                log(f"recv() returned {len(chunk)} bytes: {chunk!r}")
-                if not chunk:
-                    break
-                data += chunk
+        final_result = data.decode("utf-8").strip()
+        log(f"final_result = {final_result!r}")
+        conn.close()
 
-            final_result = data.decode("utf-8").strip()
-            log(f"final_result = {final_result!r}")
-            conn.close()
-            break
+    except socket.timeout:
+        log("socket.timeout raised")
+    except Exception as e:
+        log(f"exception raised: {e!r}")
 
-        except socket.timeout:
-            log("socket.timeout raised, breaking loop")
-            break
-        except Exception as e:
-            log(f"exception raised: {e!r}, breaking loop")
-            break
-
-    log(f"exited loop, timed_out={timed_out()}")
+    log(f"done, timed_out={timed_out()}")
 finally:
     server.close()
     shutil.rmtree(run_dir, ignore_errors=True)

@@ -1,7 +1,19 @@
-import { ActionPanel, List, Action, closeMainWindow, showToast, Toast, PopToRootType, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  closeMainWindow,
+  showToast,
+  Toast,
+  PopToRootType,
+  Icon,
+  environment,
+} from "@raycast/api";
 import { connect, Socket } from "net";
 import { useState, useEffect, useRef } from "react";
-import { appendFileSync } from "fs";
+import { appendFileSync, copyFileSync, chmodSync, mkdirSync } from "fs";
+import { homedir } from "os";
+import { join } from "path";
 
 const LOG_FILE = "/tmp/dmenu_ts_debug.log";
 // Unique per-module-load id: if this changes across "mounts" logged close together,
@@ -9,14 +21,39 @@ const LOG_FILE = "/tmp/dmenu_ts_debug.log";
 const INSTANCE_ID = Math.random().toString(36).slice(2, 8);
 
 type Props = {
-  arguments: {
-    socket: string;
-    prompt?: string;
-  };
+  arguments: Arguments.Dmenu;
 };
 
+const CLI_INSTALL_DIR = join(homedir(), ".local", "bin");
+const CLI_INSTALL_PATH = join(CLI_INSTALL_DIR, "dmenu");
+const CLI_ASSET_PATH = join(environment.assetsPath, "dmenu.py");
+
+async function installCli() {
+  try {
+    mkdirSync(CLI_INSTALL_DIR, { recursive: true });
+    copyFileSync(CLI_ASSET_PATH, CLI_INSTALL_PATH);
+    chmodSync(CLI_INSTALL_PATH, 0o755);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Installed dmenu CLI",
+      message: `Copied to ${CLI_INSTALL_PATH}. Make sure ~/.local/bin is on your PATH.`,
+    });
+  } catch (e) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Couldn't install CLI",
+      message: e instanceof Error ? e.message : String(e),
+    });
+  }
+}
+
 const t0 = Date.now();
+// Debug logging only ever runs during `ray develop`, never in a Store/production
+// install — and even then it never records the piped options or the selected
+// value, just event names/counts, so it can't become a plaintext record of
+// what the user searched for or picked.
 function log(msg: string) {
+  if (!environment.isDevelopment) return;
   const line = `[TS ${((Date.now() - t0) / 1000).toFixed(3)}] [inst:${INSTANCE_ID}] ${msg}`;
   console.log(line);
   try {
@@ -59,7 +96,7 @@ export default function Command({ arguments: { socket: socketPath, prompt } }: P
     s.on("connect", () => log(`Socket connected`));
 
     s.on("data", (chunk) => {
-      log(`data event: ${chunk.length} bytes: ${JSON.stringify(chunk.toString("utf8"))}`);
+      log(`data event: ${chunk.length} bytes`);
       buf += chunk.toString("utf8");
 
       const idx = buf.indexOf("\n");
@@ -70,7 +107,7 @@ export default function Command({ arguments: { socket: socketPath, prompt } }: P
 
       const count = parseInt(buf.slice(0, idx));
       if (isNaN(count)) {
-        log(`could not parse count from buffer head: ${JSON.stringify(buf.slice(0, idx))}`);
+        log(`could not parse count from buffer head (${idx} bytes)`);
         return;
       }
 
@@ -83,7 +120,7 @@ export default function Command({ arguments: { socket: socketPath, prompt } }: P
       }
 
       const items = lines.slice(0, count).filter(Boolean);
-      log(`parsed ${items.length} elements: ${JSON.stringify(items)}`);
+      log(`parsed ${items.length} elements`);
       setElements(items);
       setIsLoaded(true);
 
@@ -124,7 +161,7 @@ export default function Command({ arguments: { socket: socketPath, prompt } }: P
   }, []); // only once
 
   const handleSelection = (item: string) => {
-    log(`handleSelection called with item: ${JSON.stringify(item)}`);
+    log(`handleSelection called (item length=${item.length})`);
     const s = socket.current;
 
     if (!s) {
@@ -160,14 +197,20 @@ export default function Command({ arguments: { socket: socketPath, prompt } }: P
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="dmenu isn't meant to be launched directly"
-          description="Run it by piping a list of options into the dmenu command-line script  — (see the project README for more info)"
+          description={`Run it by piping a list of options into the dmenu command-line script.\n\nFirst time here? Use "Install Dmenu CLI" below to set it up — it copies the script bundled with this extension to ${CLI_INSTALL_PATH}.`}
+          actions={
+            <ActionPanel>
+              <Action title="Install Dmenu Cli" icon={Icon.Terminal} onAction={installCli} />
+              <Action.CopyToClipboard title="Copy Path Export Line" content={`export PATH="$HOME/.local/bin:$PATH"`} />
+            </ActionPanel>
+          }
         />
       </List>
     );
   }
 
   return (
-    <List isLoading={!isLoaded} searchBarPlaceholder={prompt ?? "Choose an option"}>
+    <List isLoading={!isLoaded} searchBarPlaceholder={prompt || "Choose an option"}>
       {elements.map((item, idx) => (
         <List.Item
           title={item}
