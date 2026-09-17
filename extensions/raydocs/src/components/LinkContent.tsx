@@ -15,6 +15,11 @@ export default function LinkContent({ link, onVisit }: Props) {
     // Suppress the hook's default failure toast — we decide below whether cached markdown
     // makes the error view (no toast) or the cached page (toast) the right surface.
     onError: () => {},
+    // Only a confirmed fetch refreshes the shared copy and its age. useCachedPromise hands back
+    // a restored value immediately while it revalidates in the background; writing that would
+    // reset the age without anything having been fetched, so a page whose refresh never
+    // succeeded would keep reading as fresh and never be re-fetched by the list's copy action.
+    onData: (markdown) => writeCachedMarkdown(link.url.markdown, markdown),
   });
 
   // Fires once per distinct `error` reference, never on a re-render where `error` is unchanged,
@@ -25,16 +30,6 @@ export default function LinkContent({ link, onVisit }: Props) {
       showFailureToast(error, { title: "Failed to Refresh Content" });
     }
   }, [error]);
-
-  // Share what we rendered so the list's "Copy as Markdown" can serve this page later,
-  // including offline. Keyed on the same URL the action will look up.
-  useEffect(() => {
-    // `!== undefined`, not truthiness: an empty document is a successful result, and treating
-    // it as absent would cache nothing and leave the view on its loading state forever.
-    if (data !== undefined) {
-      writeCachedMarkdown(link.url.markdown, data);
-    }
-  }, [link.url.markdown, data]);
 
   const markdown = data ?? (error ? `# Error\n\nFailed to load content: ${error.message}` : "**Loading...**");
 

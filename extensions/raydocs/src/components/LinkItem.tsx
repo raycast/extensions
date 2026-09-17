@@ -14,31 +14,53 @@ type Props = {
 
 export default function LinkItem({ link, onVisit, revalidate }: Props) {
   async function copyAsMarkdown() {
-    // A page already read is served from the cache, so this works offline and without a second
-    // fetch. Only a network fetch is slow enough to be worth a progress toast.
+    // A page read within the last day is copied straight from the cache: no network, works
+    // offline, no progress toast worth showing.
     const cached = readCachedMarkdown(link.url.markdown);
-    const toast =
-      cached === undefined ? await showToast({ style: Toast.Style.Animated, title: "Fetching Markdown…" }) : undefined;
+
+    if (cached && !cached.stale) {
+      try {
+        await Clipboard.copy(cached.markdown);
+        await showToast({ style: Toast.Style.Success, title: "Copied as Markdown" });
+      } catch (error) {
+        await showFailureToast(error, { title: "Could Not Copy Markdown" });
+      }
+      return;
+    }
+
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Fetching Markdown…" });
+
+    // Fetching and copying fail for unrelated reasons, so they get their own error handling —
+    // otherwise a clipboard failure reads as "could not reach the docs" and silently falls back
+    // to older text even though the fetch succeeded.
+    let markdown: string;
+    let servedFromCache = false;
 
     try {
-      let markdown = cached;
-
-      if (markdown === undefined) {
-        markdown = await getLinkMarkdown(link.url.markdown);
-        writeCachedMarkdown(link.url.markdown, markdown);
+      markdown = await getLinkMarkdown(link.url.markdown);
+      writeCachedMarkdown(link.url.markdown, markdown);
+    } catch (fetchError) {
+      if (!cached) {
+        await toast.hide();
+        await showFailureToast(fetchError, { title: "Could Not Copy Markdown" });
+        return;
       }
 
+      markdown = cached.markdown;
+      servedFromCache = true;
+    }
+
+    try {
       await Clipboard.copy(markdown);
+      toast.style = Toast.Style.Success;
+      toast.title = "Copied as Markdown";
 
-      if (toast) {
-        toast.style = Toast.Style.Success;
-        toast.title = "Copied as Markdown";
-      } else {
-        await showToast({ style: Toast.Style.Success, title: "Copied as Markdown" });
+      if (servedFromCache) {
+        toast.message = "Could not reach the docs — copied the last saved version";
       }
-    } catch (error) {
-      await toast?.hide();
-      await showFailureToast(error, { title: "Could Not Copy Markdown" });
+    } catch (copyError) {
+      await toast.hide();
+      await showFailureToast(copyError, { title: "Could Not Copy Markdown" });
     }
   }
 
