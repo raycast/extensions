@@ -50,9 +50,9 @@ function getWindowsFirefoxExe(browserApp: string): string {
  * Resolves once the child process has started successfully, or rejects
  * with a descriptive error if the executable cannot be launched.
  */
-function spawnFirefoxWindows(exe: string, url: string): Promise<void> {
+function spawnFirefoxWindows(exe: string, url: string, extraArgs: string[] = []): Promise<void> {
   return new Promise((resolve, reject) => {
-    const child = spawn(exe, [url], { detached: true, stdio: "ignore" });
+    const child = spawn(exe, [...extraArgs, url], { detached: true, stdio: "ignore" });
     child.once("spawn", () => {
       child.unref(); // let Firefox live independently of the Raycast process
       resolve();
@@ -76,14 +76,35 @@ function getBrowserApp(): string {
   return getPreferenceValues<Preferences>().browserApp || "Firefox";
 }
 
-export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
+export function buildNewTabUrl(queryText: string | null | undefined): string {
   const searchEngine = getPreferenceValues<Preferences>().searchEngine?.toLowerCase() || "google";
-  const url = queryText
+  return queryText
     ? `${SEARCH_ENGINE[searchEngine] ?? SEARCH_ENGINE["google"]}${encodeURIComponent(queryText)}`
     : "about:newtab";
+}
+
+export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
+  const url = buildNewTabUrl(queryText);
 
   try {
     await launchFirefox(url, getBrowserApp());
+    popToRoot();
+    closeMainWindow({ clearRootSearch: true });
+    return "success";
+  } catch (err) {
+    await showToast({ style: Toast.Style.Failure, title: "Failed to open Firefox", message: String(err) });
+    return "error";
+  }
+}
+
+const NEW_WINDOW_FLAG = "-new-window";
+const EMPTY_TAB_DESTINATION = "about:newtab";
+
+export async function openInNewWindow(url: string | null | undefined): Promise<boolean | string> {
+  const destination = url?.trim() || EMPTY_TAB_DESTINATION;
+
+  try {
+    await spawnFirefoxWindows(getWindowsFirefoxExe(getBrowserApp()), destination, [NEW_WINDOW_FLAG]);
     popToRoot();
     closeMainWindow({ clearRootSearch: true });
     return "success";

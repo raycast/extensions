@@ -18,12 +18,12 @@ vi.mock("child_process", () => ({
   spawn: vi.fn(),
 }));
 
-import { getPreferenceValues, showToast } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, popToRoot, showToast } from "@raycast/api";
 import { existsSync } from "fs";
 import { spawn } from "child_process";
 
 // Import after the mocks are in place so the module under test picks them up.
-import { openNewTab } from "../index";
+import { openNewTab, openInNewWindow } from "../index";
 
 const setBrowserApp = (browserApp: string) =>
   vi.mocked(getPreferenceValues).mockReturnValue({ browserApp, searchEngine: "Google" });
@@ -63,7 +63,7 @@ describe("launchFirefox on Windows (via openNewTab)", () => {
     expect(result).toBe("success");
     expect(spawn).toHaveBeenCalledWith(
       "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
-      expect.any(Array),
+      ["about:newtab"],
       expect.anything(),
     );
   });
@@ -76,7 +76,7 @@ describe("launchFirefox on Windows (via openNewTab)", () => {
     const result = await openNewTab(null);
 
     expect(result).toBe("success");
-    expect(spawn).toHaveBeenCalledWith("firefox.exe", expect.any(Array), expect.anything());
+    expect(spawn).toHaveBeenCalledWith("firefox.exe", ["about:newtab"], expect.anything());
   });
 
   it("spawns the Firefox Nightly executable when found at its known install path", async () => {
@@ -89,7 +89,7 @@ describe("launchFirefox on Windows (via openNewTab)", () => {
     expect(result).toBe("success");
     expect(spawn).toHaveBeenCalledWith(
       "C:\\Program Files\\Firefox Nightly\\firefox.exe",
-      expect.any(Array),
+      ["about:newtab"],
       expect.anything(),
     );
   });
@@ -142,6 +142,103 @@ describe("launchFirefox on Windows (via openNewTab)", () => {
         style: "FAILURE",
         message: expect.stringContaining("Firefox Developer Edition"),
       }),
+    );
+  });
+});
+
+describe("openInNewWindow on Windows", () => {
+  const originalPlatform = process.platform;
+  const exampleUrl = "https://example.com";
+
+  beforeEach(() => {
+    Object.defineProperty(process, "platform", { value: "win32", configurable: true });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
+    vi.clearAllMocks();
+  });
+
+  it("spawns Firefox with -new-window and the destination URL", async () => {
+    setBrowserApp("Firefox");
+    mockExistingPaths(["C:\\Program Files\\Mozilla Firefox\\firefox.exe"]);
+    mockSpawnSuccess();
+
+    const result = await openInNewWindow(exampleUrl);
+
+    expect(result).toBe("success");
+    expect(spawn).toHaveBeenCalledWith(
+      "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      ["-new-window", exampleUrl],
+      expect.anything(),
+    );
+  });
+
+  it("dismisses Raycast via popToRoot and closeMainWindow on success", async () => {
+    setBrowserApp("Firefox");
+    mockExistingPaths(["C:\\Program Files\\Mozilla Firefox\\firefox.exe"]);
+    mockSpawnSuccess();
+
+    await openInNewWindow(exampleUrl);
+
+    expect(popToRoot).toHaveBeenCalled();
+    expect(closeMainWindow).toHaveBeenCalledWith({ clearRootSearch: true });
+  });
+
+  it("shows Failed to open Firefox when the executable is missing", async () => {
+    setBrowserApp("Firefox Nightly");
+    mockExistingPaths([]);
+    mockSpawnSuccess();
+
+    const result = await openInNewWindow(exampleUrl);
+
+    expect(result).toBe("error");
+    expect(spawn).not.toHaveBeenCalled();
+    expect(showToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        style: "FAILURE",
+        title: "Failed to open Firefox",
+      }),
+    );
+    expect(popToRoot).not.toHaveBeenCalled();
+    expect(closeMainWindow).not.toHaveBeenCalled();
+  });
+
+  it("shows Failed to open Firefox when spawn fails", async () => {
+    setBrowserApp("Firefox");
+    mockExistingPaths(["C:\\Program Files\\Mozilla Firefox\\firefox.exe"]);
+    vi.mocked(spawn).mockImplementation(() => {
+      const child = new EventEmitter() as never;
+      (child as { unref: () => void }).unref = vi.fn();
+      queueMicrotask(() => (child as EventEmitter).emit("error", new Error("spawn ENOENT")));
+      return child;
+    });
+
+    const result = await openInNewWindow(exampleUrl);
+
+    expect(result).toBe("error");
+    expect(showToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        style: "FAILURE",
+        title: "Failed to open Firefox",
+      }),
+    );
+    expect(popToRoot).not.toHaveBeenCalled();
+    expect(closeMainWindow).not.toHaveBeenCalled();
+  });
+
+  it("spawns about:newtab when the destination is empty", async () => {
+    setBrowserApp("Firefox");
+    mockExistingPaths(["C:\\Program Files\\Mozilla Firefox\\firefox.exe"]);
+    mockSpawnSuccess();
+
+    const result = await openInNewWindow(null);
+
+    expect(result).toBe("success");
+    expect(spawn).toHaveBeenCalledWith(
+      "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      ["-new-window", "about:newtab"],
+      expect.anything(),
     );
   });
 });
