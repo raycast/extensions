@@ -5,7 +5,7 @@
 - Filter the list by documentation section with a new dropdown, and tell sections apart at a glance — each one now has its own icon and colour
 - Once a page has been opened, it reappears instantly from a local cache and refreshes in the background
 - Frequently opened pages rise to the top of their section
-- Added "Copy Markdown URL" (⌘⌃C) and "Copy as Markdown" (⌘⇧M), which copies the rendered page text
+- Added "Copy Markdown URL" (⌘⌃C) and "Copy as Markdown" (⌘⇧M), which copies the rendered page text — instantly, and without a network round-trip, for a page you have already opened
 - Added "Refresh Docs" (⌘R) to fetch the table of contents again on demand
 - A failed load now explains what happened and offers a retry instead of showing an empty list, and a failure while cached pages exist keeps showing them
 - Fixed page descriptions rendering as a broken one-cell table; they now read as a lead-in quote

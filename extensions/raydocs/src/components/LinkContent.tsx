@@ -1,5 +1,6 @@
 import { Link } from "@/types";
 import { getLinkMarkdown } from "@/utils/content";
+import { writeCachedMarkdown } from "@/utils/markdown-cache";
 import { useEffect } from "react";
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
@@ -25,7 +26,17 @@ export default function LinkContent({ link, onVisit }: Props) {
     }
   }, [error]);
 
-  const markdown = data || (error ? `# Error\n\nFailed to load content: ${error.message}` : "**Loading...**");
+  // Share what we rendered so the list's "Copy as Markdown" can serve this page later,
+  // including offline. Keyed on the same URL the action will look up.
+  useEffect(() => {
+    // `!== undefined`, not truthiness: an empty document is a successful result, and treating
+    // it as absent would cache nothing and leave the view on its loading state forever.
+    if (data !== undefined) {
+      writeCachedMarkdown(link.url.markdown, data);
+    }
+  }, [link.url.markdown, data]);
+
+  const markdown = data ?? (error ? `# Error\n\nFailed to load content: ${error.message}` : "**Loading...**");
 
   return (
     <Detail

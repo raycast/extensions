@@ -1,6 +1,7 @@
 import LinkContent from "@/components/LinkContent";
 import { Link } from "@/types";
 import { getLinkMarkdown } from "@/utils/content";
+import { readCachedMarkdown, writeCachedMarkdown } from "@/utils/markdown-cache";
 import { getLinkAppearance } from "@/utils/sections";
 import { Action, ActionPanel, Clipboard, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
@@ -13,14 +14,30 @@ type Props = {
 
 export default function LinkItem({ link, onVisit, revalidate }: Props) {
   async function copyAsMarkdown() {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Fetching Markdown…" });
+    // A page already read is served from the cache, so this works offline and without a second
+    // fetch. Only a network fetch is slow enough to be worth a progress toast.
+    const cached = readCachedMarkdown(link.url.markdown);
+    const toast =
+      cached === undefined ? await showToast({ style: Toast.Style.Animated, title: "Fetching Markdown…" }) : undefined;
 
     try {
-      await Clipboard.copy(await getLinkMarkdown(link.url.markdown));
-      toast.style = Toast.Style.Success;
-      toast.title = "Copied as Markdown";
+      let markdown = cached;
+
+      if (markdown === undefined) {
+        markdown = await getLinkMarkdown(link.url.markdown);
+        writeCachedMarkdown(link.url.markdown, markdown);
+      }
+
+      await Clipboard.copy(markdown);
+
+      if (toast) {
+        toast.style = Toast.Style.Success;
+        toast.title = "Copied as Markdown";
+      } else {
+        await showToast({ style: Toast.Style.Success, title: "Copied as Markdown" });
+      }
     } catch (error) {
-      await toast.hide();
+      await toast?.hide();
       await showFailureToast(error, { title: "Could Not Copy Markdown" });
     }
   }
