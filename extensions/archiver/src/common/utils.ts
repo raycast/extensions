@@ -173,11 +173,13 @@ export async function isNeedPwdOnExtract(file: string, format: ExtractFormat): P
     return need;
   }
   try {
-    await execa(_7zaBinary, ["t", file]);
-  } catch (error) {
+    await execa(_7zaBinary, ["t", file, "-p", "-y"]);
+  } catch (error: any) {
+    const errText = String((error?.stdout || "") + " " + (error?.stderr || "") + " " + error);
     if (
-      String(error).includes("ERROR: Wrong password") ||
-      String(error).includes("Enter password (will not be echoed):")
+      errText.includes("Wrong password") ||
+      errText.includes("Can not open encrypted archive") ||
+      errText.includes("Enter password")
     ) {
       need = true;
     }
@@ -191,9 +193,13 @@ export async function checkPwdOnExtract(file: string, format: ExtractFormat, pas
     return correct;
   }
   try {
-    await execa(_7zaBinary, ["t", file, `-p${password}`]);
-  } catch (error) {
-    if (String(error).includes("Wrong password")) {
+    await execa(_7zaBinary, ["t", file, `-p${password}`, "-y"]);
+  } catch (error: any) {
+    const errText = String((error?.stdout || "") + " " + (error?.stderr || "") + " " + error);
+    if (
+      errText.includes("Wrong password") ||
+      errText.includes("Can not open encrypted archive")
+    ) {
       correct = false;
     }
   }
