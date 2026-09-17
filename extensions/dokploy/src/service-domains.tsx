@@ -34,9 +34,16 @@ export default function ServiceDomains({ service }: { service: { id: string; typ
   });
 
   async function deleteDomain(domain: Domain) {
+    // Applications get their Traefik config updated right away. Compose domains are Docker labels
+    // instead, so the container keeps answering on this domain until the stack is redeployed - the
+    // record disappears here immediately, but the routing doesn't.
+    const isCompose = service.type === "compose";
+
     const options: Alert.Options = {
       title: `Delete ${domain.host}?`,
-      message: "The service stops answering on this domain. Nothing else about it changes.",
+      message: isCompose
+        ? "Compose domains are Docker labels - the service keeps answering on this domain until the stack is redeployed."
+        : "The service stops answering on this domain. Nothing else about it changes.",
       primaryAction: {
         style: Alert.ActionStyle.Destructive,
         title: "Delete Domain",
@@ -57,6 +64,7 @@ export default function ServiceDomains({ service }: { service: { id: string; typ
       }
       toast.style = Toast.Style.Success;
       toast.title = `Deleted ${domain.host}`;
+      if (isCompose) toast.message = "Redeploy the compose to apply the change.";
       revalidate();
     } catch (error) {
       toast.style = Toast.Style.Failure;
@@ -79,15 +87,33 @@ export default function ServiceDomains({ service }: { service: { id: string; typ
         domains.map((domain) => (
           <List.Item
             key={domain.domainId}
-            icon={{ source: Icon.Globe, tintColor: domain.https ? Color.Green : Color.SecondaryText }}
+            icon={{
+              source: Icon.Globe,
+              tintColor: domain.enabled !== false && domain.https ? Color.Green : Color.SecondaryText,
+              tooltip: domain.enabled === false ? "Domain is disabled and not routed." : undefined,
+            }}
             title={domain.host}
             subtitle={domain.path && domain.path !== "/" ? domain.path : undefined}
             accessories={[
               // The container the domain resolves to is the thing worth checking on a compose stack,
               // where getting it wrong is what makes a domain quietly serve nothing.
               ...(domain.serviceName ? [{ tag: domain.serviceName, icon: Icon.Box }] : []),
-              ...(domain.port ? [{ text: String(domain.port) }] : []),
-              { tag: domain.https ? { value: "HTTPS", color: Color.Green } : { value: "HTTP", color: Color.Orange } },
+              ...(domain.port
+                ? [
+                    {
+                      text: String(domain.port),
+                      tooltip: "The container's own port - not necessarily one reachable from outside directly.",
+                    },
+                  ]
+                : []),
+              domain.enabled === false
+                ? {
+                    tag: { value: "Disabled", color: Color.SecondaryText },
+                    tooltip: "Domain is disabled and not routed.",
+                  }
+                : {
+                    tag: domain.https ? { value: "HTTPS", color: Color.Green } : { value: "HTTP", color: Color.Orange },
+                  },
             ]}
             actions={
               <ActionPanel>
