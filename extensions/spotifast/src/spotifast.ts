@@ -44,6 +44,7 @@ export type Device = {
 };
 
 const BUNDLE_ID = "me.paolino.fastpotify";
+const SEEK_EDGE_MS = 1500;
 
 function isExecutable(path: string): boolean {
   try {
@@ -159,6 +160,28 @@ export async function openSpotifast(): Promise<void> {
       ),
     );
   }
+}
+
+/**
+ * Whether a seek by `offsetMs` has reached the reported position.
+ *
+ * A playing track's position creeps forward on its own, so any change is not
+ * enough: half the offset must show up, or the position must sit at the edge
+ * the seek was clamped to. Seeking past the end moves to the next track.
+ */
+export function seekLanded(offsetMs: number): (before: NowPlaying | null, after: NowPlaying | null) => boolean {
+  return (before, after) => {
+    if (!before || !after) return before !== after;
+    if (before.title !== after.title) return true;
+    const moved = after.positionMs - before.positionMs;
+    if (offsetMs >= 0) return moved >= offsetMs / 2 || after.positionMs >= after.durationMs - SEEK_EDGE_MS;
+    return -moved >= -offsetMs / 2 || after.positionMs <= SEEK_EDGE_MS;
+  };
+}
+
+export function formatClock(ms: number): string {
+  const seconds = Math.floor(ms / 1000);
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
 export function formatTrack(track: NowPlaying): string {
