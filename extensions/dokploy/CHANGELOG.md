@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Service Environment Variables] - {PR_MERGE_DATE}
+## [Service Environment Variables] - 2026-09-17
 
 - Add a `View Environment` action to the **Services** screen, showing a service's environment variables (masked until revealed), and for Applications its build arguments and build secrets. `Edit Variables` opens a form to change them, and `Copy Environment File` copies the raw `.env` content.
 
