@@ -1,3 +1,4 @@
+import { environment } from '@raycast/api';
 import * as childProcess from 'node:child_process';
 import * as nodePath from 'node:path';
 import * as nodeOs from 'node:os';
@@ -200,6 +201,33 @@ function generateCacheKey(
   return crypto.createHash('md5').update(data).digest('hex');
 }
 
+function cacheDirectory(): string {
+  return nodePath.join(environment.supportPath, 'cache');
+}
+
+function pad2(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
+function stampFromDate(date: Date): string {
+  return `${date.getFullYear()}${pad2(date.getMonth() + 1)}${pad2(date.getDate())}-${pad2(date.getHours())}${pad2(date.getMinutes())}${pad2(date.getSeconds())}`;
+}
+
+function readableReportFileName(url: string, fetchTime?: string): string {
+  let host = 'report';
+  try {
+    host = new URL(url).hostname || 'report';
+  } catch {
+    // Keep the fallback name when the URL cannot be parsed.
+  }
+  const safeHost = host.replace(/[^a-zA-Z0-9.-]/g, '_').slice(0, 80);
+  const date = fetchTime ? new Date(fetchTime) : new Date();
+  const stamp = Number.isNaN(date.getTime())
+    ? stampFromDate(new Date())
+    : stampFromDate(date);
+  return `lighthouse-${safeHost}-${stamp}.json`;
+}
+
 async function cleanExpiredCache(outputDir: string): Promise<void> {
   try {
     const entries = await nodeFs.readdir(outputDir);
@@ -254,14 +282,16 @@ export async function runLighthouseAudit(
   const outputDir = expandHomeDir(sanitizedOutputPath);
   await nodeFs.mkdir(outputDir, { recursive: true });
 
-  await cleanExpiredCache(outputDir);
+  const cacheDir = cacheDirectory();
+  await nodeFs.mkdir(cacheDir, { recursive: true });
+  await cleanExpiredCache(cacheDir);
 
   const cacheKey = generateCacheKey({
     url: formattedUrl,
     device,
     categories: sanitizedCategories,
   });
-  const cachePath = nodePath.join(outputDir, `${CACHE_PREFIX}${cacheKey}.json`);
+  const cachePath = nodePath.join(cacheDir, `${CACHE_PREFIX}${cacheKey}.json`);
 
   if (!force) {
     try {
@@ -270,7 +300,16 @@ export async function runLighthouseAudit(
       if (age < CACHE_TTL_MS) {
         const reportContent = await nodeFs.readFile(cachePath, 'utf-8');
         const report = JSON.parse(reportContent) as LighthouseReport;
-        return { reportPath: cachePath, report, fromCache: true };
+        const reportPath = nodePath.join(
+          outputDir,
+          readableReportFileName(formattedUrl, report.fetchTime)
+        );
+        try {
+          await nodeFs.access(reportPath);
+        } catch {
+          await nodeFs.writeFile(reportPath, reportContent);
+        }
+        return { reportPath, report, fromCache: true };
       }
     } catch {
       // Cache miss or expired, proceed to audit
@@ -295,10 +334,9 @@ export async function runLighthouseAudit(
   }
 
   const tempReportPath = nodePath.join(
-    outputDir,
-    `lighthouse-report-${Date.now()}.json`
+    cacheDir,
+    `lighthouse-tmp-${Date.now()}.json`
   );
-  await nodeFs.mkdir(nodePath.dirname(tempReportPath), { recursive: true });
 
   const args = [
     formattedUrl,
@@ -327,11 +365,16 @@ export async function runLighthouseAudit(
 
     const reportContent = await nodeFs.readFile(tempReportPath, 'utf-8');
     const report = JSON.parse(reportContent) as LighthouseReport;
+    const reportPath = nodePath.join(
+      outputDir,
+      readableReportFileName(formattedUrl, report.fetchTime)
+    );
 
     await nodeFs.writeFile(cachePath, reportContent);
+    await nodeFs.writeFile(reportPath, reportContent);
     await nodeFs.unlink(tempReportPath).catch(() => {});
 
-    return { reportPath: cachePath, report, fromCache: false };
+    return { reportPath, report, fromCache: false };
   } catch (error: unknown) {
     await nodeFs.unlink(tempReportPath).catch(() => {});
 

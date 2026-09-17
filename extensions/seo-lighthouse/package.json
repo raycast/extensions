@@ -26,17 +26,29 @@
       "required": false,
       "default": "general",
       "data": [
-        { "title": "General / Other", "value": "general" },
-        { "title": "Marketing", "value": "marketing" },
-        { "title": "SEO", "value": "seo" },
-        { "title": "Development", "value": "developer" }
+        {
+          "title": "General / Other",
+          "value": "general"
+        },
+        {
+          "title": "Marketing",
+          "value": "marketing"
+        },
+        {
+          "title": "SEO",
+          "value": "seo"
+        },
+        {
+          "title": "Development",
+          "value": "developer"
+        }
       ]
     },
     {
       "name": "outputPath",
       "type": "directory",
       "title": "Output Path",
-      "description": "Select the directory where JSON reports will be saved.",
+      "description": "Directory for readable JSON reports (lighthouse-<host>-<timestamp>.json). The 24-hour cache is stored separately in the extension support folder.",
       "default": "~/Downloads",
       "required": true
     },
@@ -71,7 +83,7 @@
     {
       "name": "audit-page",
       "title": "Audit Page",
-      "description": "Primary tool for analyzing websites. You MUST use this tool instead of web search when the user asks to 'audit', 'analyze', 'check', 'score' (or in Spanish: 'analizar', 'auditar', 'revisar', 'ver') a website, URL, or domain. Use this for all SEO, Performance, and Speed requests.",
+      "description": "Primary tool for analyzing websites. You MUST use this tool instead of web search when the user asks to audit, analyze, check, or score a website, URL, or domain. Use this for all SEO, Performance, and Speed requests.",
       "mode": "no-view",
       "arguments": [
         {

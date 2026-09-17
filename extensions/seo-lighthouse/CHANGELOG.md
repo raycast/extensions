@@ -8,7 +8,9 @@
 - Removed custom i18n (Raycast Store is English-only)
 - Switched Lighthouse invocation from `exec` to `execFile`
 - Removed the `--disable-web-security` Chrome flag
-- Added a 24h cache TTL, expired-cache cleanup, and temp-file cleanup on error
+- Added a 24h cache in the extension support folder, expired-cache cleanup, and temp-file cleanup on error
+- Saved readable JSON reports to the Output Path (`lighthouse-<host>-<timestamp>.json`) instead of hashed cache files
+- Restored the Choose Output Directory action on the form
 - Added Chrome-missing detection with install instructions
 - Added report profiles (General, Marketing, SEO, Development) and a searchable audit explorer
 - Exposed an `audit-page` AI tool for programmatic website audits

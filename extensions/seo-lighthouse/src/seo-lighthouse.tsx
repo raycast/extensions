@@ -735,7 +735,7 @@ export default function Command() {
   const preferences = getPreferenceValues();
   const { push } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<FormValues>({
+  const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
     initialValues: {
       device: 'mobile',
       performance: true,
@@ -791,6 +791,22 @@ export default function Command() {
             onSubmit={handleSubmit}
           />
           <Action
+            title="Choose Output Directory"
+            icon={Icon.Folder}
+            onAction={async () => {
+              try {
+                const folder = await runAppleScript(`
+                  set chosenFolder to choose folder with prompt "Select Output Directory"
+                  return POSIX path of chosenFolder
+                `);
+                const path = folder.trim();
+                if (path) setValue('outputPath', path);
+              } catch {
+                // User cancelled the folder picker.
+              }
+            }}
+          />
+          <Action
             title="Open Preferences"
             icon={Icon.Gear}
             onAction={openCommandPreferences}
@@ -837,7 +853,7 @@ export default function Command() {
       <Form.Separator />
       <Form.Description text="Advanced Settings" />
       <Form.TextField title="Output Folder" {...itemProps.outputPath} />
-      <Form.Description text="JSON reports are saved to this folder. Change the default in extension preferences." />
+      <Form.Description text="Readable JSON reports are saved here (lighthouse-<host>-<timestamp>.json). Use Choose Output Directory to pick a folder. A 24-hour cache lives in the extension support folder, not here." />
     </Form>
   );
 }
