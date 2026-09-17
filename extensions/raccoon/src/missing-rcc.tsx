@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { installOutcome } from "./install-outcome.ts";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { INSTALL_COMMAND, resolveRcc, streamInstall } from "./rcc";
 
 export const REPO_URL = "https://github.com/thousandflowers/Raccoon";
@@ -28,8 +28,15 @@ export const REPO_URL = "https://github.com/thousandflowers/Raccoon";
 export function MissingRcc() {
 	const [log, setLog] = useState("");
 	const [isInstalling, setIsInstalling] = useState(false);
+	const running = useRef(false);
 
 	const install = async () => {
+		// A ref, not the isInstalling state: two presses of Enter land in the
+		// same render, so both would read `false` and start their own brew,
+		// interleaving two logs into one buffer and launching the command
+		// twice when they both finish.
+		if (running.current) return;
+		running.current = true;
 		setIsInstalling(true);
 		setLog("");
 		try {
@@ -85,6 +92,7 @@ export function MissingRcc() {
 				title: "Could not run the Homebrew install",
 			});
 		} finally {
+			running.current = false;
 			setIsInstalling(false);
 		}
 	};

@@ -4,6 +4,7 @@ import { homedir } from "node:os";
 import { promisify } from "node:util";
 import { getPreferenceValues } from "@raycast/api";
 import type { RccExit } from "./exit";
+import { cacheUntilRejected } from "./once.ts";
 import { spawnTree, type Chunk as RccChunk } from "./spawn-tree.ts";
 
 const execFileAsync = promisify(execFile);
@@ -108,36 +109,35 @@ function stream(
 const PATH_COMMANDS = new Set(["env", "overlap"]);
 
 const PATH_MARKER = "__RCC_PATH__";
-let loginPath: Promise<string> | undefined;
 
 /**
  * The PATH the reader's own terminal has: what their login shell builds from
- * its startup files. Read once per process, since it costs a shell start.
+ * its startup files. Read once per process, since it costs a shell start - but
+ * a failed read is not kept, or a startup file that was slow once would leave
+ * Environment and PATH Overlaps dead until Raycast is restarted, with their own
+ * Run Again unable to reach the shell again. See cacheUntilRejected.
  */
-export function loginShellPath(): Promise<string> {
-	loginPath ??= (async () => {
-		const shell = process.env.SHELL || "/bin/zsh";
-		let out = "";
-		// Login and interactive, because PATH edits live in .zprofile and
-		// .zshrc alike. The marker keeps a chatty startup file's output out of
-		// the answer; stdin is closed so a prompt in one cannot wait forever.
-		await stream(
-			shell,
-			["-lic", `printf "\\n${PATH_MARKER}%s\\n" "$PATH"`],
-			(chunk) => {
-				if (chunk.source === "stdout") out += chunk.text;
-			},
-			AbortSignal.timeout(20_000),
-		);
-		const line = out
-			.split("\n")
-			.reverse()
-			.find((l) => l.startsWith(PATH_MARKER));
-		if (!line) throw new Error(`${shell} did not report its PATH.`);
-		return line.slice(PATH_MARKER.length);
-	})();
-	return loginPath;
-}
+export const loginShellPath = cacheUntilRejected(async (): Promise<string> => {
+	const shell = process.env.SHELL || "/bin/zsh";
+	let out = "";
+	// Login and interactive, because PATH edits live in .zprofile and
+	// .zshrc alike. The marker keeps a chatty startup file's output out of
+	// the answer; stdin is closed so a prompt in one cannot wait forever.
+	await stream(
+		shell,
+		["-lic", `printf "\\n${PATH_MARKER}%s\\n" "$PATH"`],
+		(chunk) => {
+			if (chunk.source === "stdout") out += chunk.text;
+		},
+		AbortSignal.timeout(20_000),
+	);
+	const line = out
+		.split("\n")
+		.reverse()
+		.find((l) => l.startsWith(PATH_MARKER));
+	if (!line) throw new Error(`${shell} did not report its PATH.`);
+	return line.slice(PATH_MARKER.length);
+});
 
 /** The PATH `rcc <command>` should run under. */
 export function pathFor(command: string): Promise<string> {

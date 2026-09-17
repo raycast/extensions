@@ -472,6 +472,22 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 			) : null}
 			{visible.map((check, index) => {
 				const isSkipped = skipped.has(check.name);
+				const canFixRow = check.status !== "pass" && check.fix_available !== false && !isSkipped;
+				// Raycast binds Enter to the FIRST action in the panel, whatever
+				// shortcut it carries - the rule resolve.tsx was written around. On a
+				// row with nothing of its own to fix (every passing check, which on a
+				// healthy Mac is most of them) this used to put "Fix All Shown" in the
+				// Enter slot, so looking at a clean check offered to change every
+				// failing one. It goes first only when the row's own fix is there to
+				// hold that slot; otherwise it sits below, still on Cmd+Enter.
+				const fixAll = (
+					<Action
+						title={`Fix All ${fixableVisible.length} Shown`}
+						icon={{ source: Icon.Hammer, tintColor: Color.Orange }}
+						shortcut={{ modifiers: ["cmd"], key: "return" }}
+						onAction={fixAllVisible}
+					/>
+				);
 				return (
 					<List.Item
 						key={`${check.category}/${check.name}/${index}`}
@@ -507,7 +523,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 						actions={
 							<ActionPanel>
 								<ActionPanel.Section title={check.name}>
-									{check.status !== "pass" && check.fix_available !== false && !isSkipped ? (
+									{canFixRow ? (
 										<Action
 											title={`Fix ${check.name}`}
 											icon={{
@@ -517,18 +533,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 											onAction={() => fixOne(check)}
 										/>
 									) : null}
-									<Action
-										title={`Fix All ${fixableVisible.length} Shown`}
-										icon={{
-											source: Icon.Hammer,
-											tintColor: Color.Orange,
-										}}
-										shortcut={{
-											modifiers: ["cmd"],
-											key: "return",
-										}}
-										onAction={fixAllVisible}
-									/>
+									{canFixRow ? fixAll : null}
 									<Action.CopyToClipboard
 										title="Copy Verification Command"
 										content={check.command}
@@ -537,6 +542,7 @@ export default function Command({ deep = false }: { deep?: boolean } = {}) {
 											key: "c",
 										}}
 									/>
+									{canFixRow ? null : fixAll}
 									{check.cis ? (
 										<Action.CopyToClipboard title="Copy CIS Reference" content={check.cis} />
 									) : null}
