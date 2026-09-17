@@ -11,6 +11,7 @@ vi.mock("./config", () => ({
   getJumpseatConfiguration: () => ({
     apiBaseUrl: "https://api.withjumpseat.com",
     webBaseUrl: "https://app.withjumpseat.com",
+    authBaseUrl: "https://auth.withjumpseat.com",
   }),
 }));
 

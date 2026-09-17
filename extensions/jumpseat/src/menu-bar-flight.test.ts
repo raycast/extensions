@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { UpcomingFlight } from "./api";
+import { flightSummary } from "./flight-presentation";
 import {
   menuBarTitle,
+  projectMenuBarFlight,
   resolveMenuBarLoadState,
   selectMenuBarFlight,
 } from "./menu-bar-flight";
@@ -204,5 +206,56 @@ describe("menu-bar empty and error states", () => {
     });
     expect(result.state).toBe("stale-error");
     expect(result.flights).toBe(cached);
+  });
+});
+
+describe("menu-bar cache projection", () => {
+  it("keeps operational data while excluding private and unrecognized fields", () => {
+    const source = {
+      ...flight("11111111-1111-4111-8111-111111111111", "2026-08-29T16:00:00Z"),
+      bookingNumber: "PRIVATE-BOOKING",
+      seatNumber: "PRIVATE-SEAT",
+      seatCabinClass: "PRIVATE-CABIN",
+      seatPosition: "PRIVATE-POSITION",
+      privateFutureField: "PRIVATE-FUTURE",
+    };
+    Object.assign(source.flight, { privateFutureField: "PRIVATE-FLIGHT" });
+    Object.assign(source.airline, { privateFutureField: "PRIVATE-AIRLINE" });
+    Object.assign(source.departureAirport, {
+      privateFutureField: "PRIVATE-AIRPORT",
+    });
+    const cached = JSON.parse(JSON.stringify(projectMenuBarFlight(source)));
+    expect(JSON.stringify(cached)).not.toContain("PRIVATE-");
+    for (const field of [
+      "bookingNumber",
+      "seatNumber",
+      "seatCabinClass",
+      "seatPosition",
+      "privateFutureField",
+    ]) {
+      expect(cached).not.toHaveProperty(field);
+    }
+    expect(cached.flight).not.toHaveProperty("aircraftRegistration");
+    expect(cached.departureAirport).not.toHaveProperty("name");
+    expect(cached.departureAirport).not.toHaveProperty("city");
+    expect(cached.arrivalAirport).toHaveProperty("city", "New York");
+    expect(menuBarTitle(cached, new Date("2026-08-29T12:00:00Z"))).toBe(
+      "New York in 4h",
+    );
+    expect(
+      selectMenuBarFlight([cached], new Date("2026-08-29T12:00:00Z")),
+    ).toEqual(cached);
+    expect(flightSummary(cached)).not.toContain("Seat:");
+    expect(flightSummary(cached)).not.toContain("PRIVATE-");
+    expect(source.bookingNumber).toBe("PRIVATE-BOOKING");
+  });
+
+  it("supports a missing arrival airport", () => {
+    const source = flight(
+      "11111111-1111-4111-8111-111111111111",
+      "2026-08-29T16:00:00Z",
+    );
+    source.arrivalAirport = null;
+    expect(projectMenuBarFlight(source).arrivalAirport).toBeNull();
   });
 });

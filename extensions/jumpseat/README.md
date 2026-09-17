@@ -21,9 +21,9 @@ npm install
 npm run dev
 ```
 
-The extension is pinned to the official Jumpseat API and web origins. They are not user-configurable.
+The extension is pinned to the official Jumpseat API resource (`https://api.withjumpseat.com`) and OAuth authority (`https://auth.withjumpseat.com`). They are not user-configurable; deployments may set `JUMPSEAT_AUTH_ORIGIN` to override only the OAuth authority and may temporarily allow prior HTTPS origins with the comma-separated `JUMPSEAT_TRUSTED_AUTH_ORIGINS`. Origins with HTTP, credentials, ports, paths, queries, or fragments are rejected. Fresh authorization first validates the authority's OAuth metadata and uses central OAuth only when its exact endpoints are advertised; otherwise it safely uses the released web/API flow. Central credentials persist that validated issuer and always refresh and revoke at it, rather than at a future configured origin. Missing issuer metadata is recovered only for the canonical production authority; other ambiguous credentials require reauthorization. A discovery `404` is therefore a safe server-side gate for new sessions and rollback, while already-issued sessions continue on their stored protocol and issuer.
 
-On first launch, choose **Connect Jumpseat**, sign in with the normal Jumpseat web flow, and confirm the connection. Raycast securely stores the resulting short-lived access token and rotating refresh token. The access token is limited to the `flights:upcoming:read` integration scope. Use Raycast's automatically provided OAuth logout preference to disconnect.
+On first launch, choose **Connect Jumpseat**, sign in with the normal Jumpseat web flow, and confirm the connection. New authorization uses OAuth authorization code plus PKCE S256 with client ID `jumpseat-raycast`, the Raycast callback, API resource `https://api.withjumpseat.com`, and the `flights:upcoming:read` integration scope. Raycast securely stores the resulting short-lived access token and rotating refresh token. Transient network, rate-limit, and server failures preserve stored credentials, while `401` and OAuth `invalid_grant` clear them. Whenever extension code disconnects an account, it best-effort revokes the refresh token at the authority that issued it before removing local credentials; Raycast's automatically provided OAuth logout preference remains Raycast-managed.
 
 ## Checks
 

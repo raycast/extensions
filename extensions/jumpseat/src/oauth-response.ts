@@ -54,6 +54,22 @@ export function parseRefreshResponse(
   body: unknown,
 ): JumpseatRefreshResponse | null {
   if (!isRecord(body)) return null;
+
+  // New OAuth authority responses follow RFC 6749. Keep accepting the
+  // current API response while released versions and the authority overlap.
+  if (
+    isCredential(body.access_token) &&
+    isCredential(body.refresh_token) &&
+    body.token_type === "Bearer" &&
+    isExpiresIn(body.expires_in)
+  ) {
+    return {
+      accessToken: body.access_token,
+      refreshToken: body.refresh_token,
+      expiresIn: body.expires_in,
+    };
+  }
+
   if (
     !isCredential(body.accessToken) ||
     !isCredential(body.refreshToken) ||

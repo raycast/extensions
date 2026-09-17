@@ -10,11 +10,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { useRef } from "react";
-import {
-  fetchUpcomingFlights,
-  JumpseatApiError,
-  type UpcomingFlight,
-} from "./api";
+import { JumpseatApiError } from "./api";
 import { trustedJumpseatAssetUrl } from "./assets";
 import {
   flightSummary,
@@ -31,6 +27,7 @@ import {
   formatTime,
 } from "./format";
 import {
+  type MenuBarFlight,
   isArrivedFlight,
   menuBarTitle,
   operationalMenuBarStatus,
@@ -38,8 +35,9 @@ import {
   selectMenuBarFlight,
 } from "./menu-bar-flight";
 import { getJumpseatAccessToken, jumpseatOAuthClient } from "./oauth";
+import { fetchMenuBarFlights } from "./menu-bar-data";
 
-function route(flight: UpcomingFlight): string {
+function route(flight: MenuBarFlight): string {
   return `${airportCode(flight.departureAirport)} → ${airportCode(flight.arrivalAirport)}`;
 }
 
@@ -53,7 +51,7 @@ function joinedDetails(
   return present.length > 0 ? present.join(" · ") : fallback;
 }
 
-function FlightDetails({ flight }: { flight: UpcomingFlight }) {
+function FlightDetails({ flight }: { flight: MenuBarFlight }) {
   const departure = effectiveDeparture(flight);
   const arrival = effectiveArrival(flight);
   const status =
@@ -118,10 +116,6 @@ function FlightDetails({ flight }: { flight: UpcomingFlight }) {
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Flight">
-        <MenuBarExtra.Item
-          title="Seat"
-          subtitle={valueOrFallback(flight.seatNumber, "Not added")}
-        />
         <MenuBarExtra.Item title="Aircraft" subtitle={aircraftName(flight)} />
       </MenuBarExtra.Section>
     </>
@@ -132,8 +126,8 @@ function OtherFlights({
   flights,
   selected,
 }: {
-  flights: UpcomingFlight[];
-  selected: UpcomingFlight | null;
+  flights: MenuBarFlight[];
+  selected: MenuBarFlight | null;
 }) {
   const remaining = flights.filter(
     (flight) => flight.flight.id !== selected?.flight.id,
@@ -189,7 +183,7 @@ function MenuActions({
   flight,
   refresh,
 }: {
-  flight: UpcomingFlight | null;
+  flight: MenuBarFlight | null;
   refresh: () => void;
 }) {
   return (
@@ -237,8 +231,8 @@ function MenuActions({
 
 function NextFlightInMenuBarCommand() {
   const { data, error, isLoading, revalidate } =
-    useCachedPromise(fetchUpcomingFlights);
-  const lastSuccessfulFlights = useRef<UpcomingFlight[] | undefined>(undefined);
+    useCachedPromise(fetchMenuBarFlights);
+  const lastSuccessfulFlights = useRef<MenuBarFlight[] | undefined>(undefined);
   if (!error && data) lastSuccessfulFlights.current = data;
 
   const load = resolveMenuBarLoadState({

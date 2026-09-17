@@ -8,7 +8,12 @@ function plural(value: number, singular: string): string {
   return `${value} ${singular}${value === 1 ? "" : "s"}`;
 }
 
-export function effectiveDeparture(flight: UpcomingFlight): Date {
+export function effectiveDeparture(flight: {
+  flight: Pick<
+    UpcomingFlight["flight"],
+    "actualGateDepartureTime" | "estimatedDepartureTime" | "departureTime"
+  >;
+}): Date {
   return new Date(
     flight.flight.actualGateDepartureTime ??
       flight.flight.estimatedDepartureTime ??
@@ -16,7 +21,12 @@ export function effectiveDeparture(flight: UpcomingFlight): Date {
   );
 }
 
-export function effectiveArrival(flight: UpcomingFlight): Date | null {
+export function effectiveArrival(flight: {
+  flight: Pick<
+    UpcomingFlight["flight"],
+    "actualGateArrivalTime" | "estimatedArrivalTime" | "arrivalTime"
+  >;
+}): Date | null {
   const value =
     flight.flight.actualGateArrivalTime ??
     flight.flight.estimatedArrivalTime ??
@@ -80,12 +90,15 @@ export function formatTime(
 }
 
 export function airportCode(
-  airport: UpcomingFlight["departureAirport"] | null,
+  airport: Pick<UpcomingFlight["departureAirport"], "iata" | "icao"> | null,
 ): string {
   return airport?.iata ?? airport?.icao ?? "TBD";
 }
 
-export function displayFlightNumber(flight: UpcomingFlight): string {
+export function displayFlightNumber(flight: {
+  flight: Pick<UpcomingFlight["flight"], "flightNumber">;
+  airline: Pick<UpcomingFlight["airline"], "iata">;
+}): string {
   const number = flight.flight.flightNumber.trim();
   const airlineCode = flight.airline.iata?.trim().toUpperCase();
   const compactNumber = number.replace(/\s+/g, "").toUpperCase();

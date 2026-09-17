@@ -61,4 +61,19 @@ describe("OAuth response parsing", () => {
       expiresIn: 3600,
     });
   });
+
+  it("accepts the standard OAuth refresh response", () => {
+    expect(
+      parseRefreshResponse({
+        access_token: "access-2",
+        refresh_token: "refresh-2",
+        token_type: "Bearer",
+        expires_in: 3600,
+      }),
+    ).toEqual({
+      accessToken: "access-2",
+      refreshToken: "refresh-2",
+      expiresIn: 3600,
+    });
+  });
 });
