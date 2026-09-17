@@ -14,27 +14,45 @@ import { readFileSync } from "node:fs";
 import type { ConnectionOptions } from "node:tls";
 import { Client } from "ldapts";
 
-type LdapSecurity = "none" | "starttls" | "ldaps";
-
-interface Preferences {
-  ldapHost: string;
-  ldapPort: string;
-  ldapSecurity: LdapSecurity;
-  ldapTLSVerify?: boolean;
-  ldapCACert?: string;
-  ldapUsername: string;
-  ldapPassword: string;
-  ldapSearchBase: string;
-  phonePrefix?: string;
-}
+type LdapSecurity = Preferences["ldapSecurity"];
 
 interface Person {
+  displayName?: string;
   givenName?: string;
   sn?: string;
   telephoneNumber?: string;
   department?: string;
   mail?: string;
   title?: string;
+}
+
+function personName(person: Person): string {
+  if (person.displayName?.trim()) {
+    return person.displayName.trim();
+  }
+  return [person.givenName, person.sn].filter(Boolean).join(" ").trim();
+}
+
+function isLoopbackHost(host: string): boolean {
+  const normalized = host
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, "");
+  return (
+    normalized === "localhost" ||
+    normalized.endsWith(".localhost") ||
+    normalized === "::1" ||
+    normalized === "0:0:0:0:0:0:0:1" ||
+    /^127(?:\.\d{1,3}){3}$/.test(normalized)
+  );
+}
+
+function resolvePort(port: string | undefined, security: LdapSecurity): string {
+  const trimmed = port?.trim();
+  if (trimmed) {
+    return trimmed;
+  }
+  return security === "ldaps" ? "636" : "389";
 }
 
 function firstValue(value: unknown): string | undefined {
@@ -71,7 +89,7 @@ function formatPhone(
 }
 
 function tlsOptions(preferences: Preferences): ConnectionOptions | undefined {
-  if ((preferences.ldapSecurity ?? "none") === "none") {
+  if (preferences.ldapSecurity === "none") {
     return undefined;
   }
   const options: ConnectionOptions = {
@@ -96,14 +114,36 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
 
   const abortRef = useRef<AbortController | undefined>(undefined);
+  const clientRef = useRef<Client | undefined>(undefined);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
+  useEffect(
+    () => () => {
+      abortRef.current?.abort();
+      clientRef.current?.unbind().catch(() => {});
+    },
+    [],
+  );
 
   async function search(text: string) {
     abortRef.current?.abort();
+    clientRef.current?.unbind().catch(() => {});
     if (text.trim().length < 2) {
       setResults([]);
       setIsLoading(false);
+      return;
+    }
+
+    const security = preferences.ldapSecurity;
+
+    if (security === "none" && !isLoopbackHost(preferences.ldapHost)) {
+      setResults([]);
+      setIsLoading(false);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Plain LDAP is not allowed for remote servers",
+        message:
+          "The bind password would be sent unencrypted. Switch to StartTLS or LDAPS in the extension settings.",
+      });
       return;
     }
 
@@ -111,9 +151,8 @@ export default function Command() {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    const security = preferences.ldapSecurity ?? "none";
     const scheme = security === "ldaps" ? "ldaps" : "ldap";
-    const port = preferences.ldapPort || (security === "ldaps" ? "636" : "389");
+    const port = resolvePort(preferences.ldapPort, security);
     const target = `${scheme}://${preferences.ldapHost}:${port}`;
 
     let client: Client | undefined;
@@ -125,6 +164,7 @@ export default function Command() {
         connectTimeout: 5000,
         tlsOptions: security === "ldaps" ? tls : undefined,
       });
+      clientRef.current = client;
 
       if (security === "starttls") {
         await client.startTLS(tls);
@@ -159,10 +199,13 @@ export default function Command() {
           scope: "sub",
           filter,
           attributes,
+          sizeLimit: 50,
+          timeLimit: 15,
         },
       );
 
       const people = searchEntries.map((entry): Person => ({
+        displayName: firstValue(entry.displayName),
         givenName: firstValue(entry.givenName),
         sn: firstValue(entry.sn),
         telephoneNumber: firstValue(entry.telephoneNumber),
@@ -173,16 +216,16 @@ export default function Command() {
 
       if (!controller.signal.aborted) {
         const query = text.trim().toLowerCase();
-        const nameOf = (p: Person) =>
-          `${p.givenName ?? ""} ${p.sn ?? ""}`.toLowerCase();
         people.sort((a, b) => {
           const rank = (p: Person) => {
-            if (nameOf(p).includes(query)) return 0;
+            if (personName(p).toLowerCase().includes(query)) return 0;
             if ((p.mail ?? "").toLowerCase().includes(query)) return 1;
             if ((p.telephoneNumber ?? "").includes(query)) return 2;
             return 3;
           };
-          return rank(a) - rank(b) || nameOf(a).localeCompare(nameOf(b));
+          return (
+            rank(a) - rank(b) || personName(a).localeCompare(personName(b))
+          );
         });
         setResults(people);
         setIsLoading(false);
@@ -212,6 +255,9 @@ export default function Command() {
         });
       }
     } finally {
+      if (clientRef.current === client) {
+        clientRef.current = undefined;
+      }
       await client?.unbind().catch(() => {});
     }
   }
@@ -237,11 +283,12 @@ export default function Command() {
         icon={Icon.MagnifyingGlass}
       />
       {results.map((person, index) => {
-        const name = `${person.givenName ?? ""} ${person.sn ?? ""}`.trim();
         const phone = formatPhone(
           person.telephoneNumber,
           preferences.phonePrefix,
         );
+        const name =
+          personName(person) || person.mail || phone || "Unknown entry";
         const full = `${name} (${phone})`;
         return (
           <List.Item

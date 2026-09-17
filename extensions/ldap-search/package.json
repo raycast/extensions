@@ -32,12 +32,8 @@
       "description": "How to connect to the directory server",
       "type": "dropdown",
       "required": false,
-      "default": "none",
+      "default": "starttls",
       "data": [
-        {
-          "title": "Plain (ldap://)",
-          "value": "none"
-        },
         {
           "title": "StartTLS (upgrade ldap:// to TLS)",
           "value": "starttls"
@@ -45,16 +41,19 @@
         {
           "title": "LDAPS (ldaps://)",
           "value": "ldaps"
+        },
+        {
+          "title": "Plain (ldap://, localhost only)",
+          "value": "none"
         }
       ]
     },
     {
       "name": "ldapPort",
       "title": "LDAP Port",
-      "description": "Port of your LDAP/AD server (default 389, or 636 for LDAPS)",
+      "description": "Port of your LDAP/AD server. Leave empty to use 389, or 636 for LDAPS",
       "type": "textfield",
-      "required": false,
-      "default": "389"
+      "required": false
     },
     {
       "name": "ldapUsername",
@@ -102,7 +101,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
+    "@raycast/api": "^2.4.1",
     "ldapts": "^9.0.0"
   },
   "devDependencies": {
