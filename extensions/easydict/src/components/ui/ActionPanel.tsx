@@ -160,14 +160,6 @@ function PrimaryActions({
         onCopy={() => logTrace("ActionPanel", `copy: ${copyText}`)}
       />
 
-      {onRegenerate && <Action icon={Icon.ArrowClockwise} title="Regenerate AI Result" onAction={onRegenerate} />}
-      <Action
-        icon={Icon.ArrowClockwise}
-        title="Requery All Services"
-        shortcut={Keyboard.Shortcut.Common.Refresh}
-        onAction={onRequery}
-      />
-
       <Action
         icon={isFavorite ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.Star}
         title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
@@ -207,6 +199,13 @@ function PrimaryActions({
         />
       )}
       {currentWebQueryAction}
+      {onRegenerate && <Action icon={Icon.ArrowClockwise} title="Regenerate AI Result" onAction={onRegenerate} />}
+      <Action
+        icon={Icon.ArrowClockwise}
+        title="Requery All Services"
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={onRequery}
+      />
     </ActionPanel.Section>
   );
 }
@@ -295,6 +294,7 @@ function SettingsActions({ isShowingReleasePrompt }: { isShowingReleasePrompt: b
         url={getReleaseTagUrl(EASYDICT_VERSION)}
       />
       <Action icon={Icon.Gear} title="Preferences" onAction={openCommandPreferences} />
+      <Action.OpenInBrowser icon={Icon.QuestionMark} title="Feedback" url={FEEDBACK_URL} />
       <Action
         icon={Icon.Trash}
         title="Clear Query Cache"
@@ -303,7 +303,6 @@ function SettingsActions({ isShowingReleasePrompt }: { isShowingReleasePrompt: b
           showToast({ style: Toast.Style.Success, title: "Query Cache Cleared" });
         }}
       />
-      <Action.OpenInBrowser icon={Icon.QuestionMark} title="Feedback" url={FEEDBACK_URL} />
     </ActionPanel.Section>
   );
 }
