@@ -8,6 +8,12 @@ export type SharePointLocation = {
   serverRelativePath: string;
 };
 
+export type OpaqueSharePointFile = {
+  tenantName: string;
+  siteSlug: string;
+  fileName: string;
+};
+
 function decodeRepeatedly(value: string): string {
   let decoded = value;
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -69,6 +75,42 @@ function matchesReorderedWords(localName: string, remoteName: string): boolean {
   }
 
   return consumesRemoteName(remoteKey, words);
+}
+
+function fileNameFromTabTitle(tabTitle: string | undefined): string {
+  const match = tabTitle
+    ?.trim()
+    .match(/^(.+\.[a-z0-9]{1,10})(?:\s+(?:-|–|—|\|)\s+.+)?$/i);
+  const fileName = match?.[1].trim();
+
+  if (!fileName || fileName.includes("/") || fileName.includes("\\")) {
+    throw new Error(
+      "SharePoint did not expose the file name in the browser tab",
+    );
+  }
+
+  return fileName;
+}
+
+export function parseOpaqueSharePointFile(
+  browserUrl: string,
+  tabTitle: string | undefined,
+): OpaqueSharePointFile | null {
+  const url = new URL(browserUrl);
+  if (url.protocol !== "https:" || !url.hostname.endsWith(".sharepoint.com")) {
+    return null;
+  }
+
+  const match = decodeRepeatedly(url.pathname).match(
+    /^\/:([a-z]):\/s\/([^/]+)\/[^/]+\/?$/i,
+  );
+  if (!match || match[1].toLocaleLowerCase() === "f") return null;
+
+  return {
+    tenantName: url.hostname.slice(0, -".sharepoint.com".length),
+    siteSlug: match[2],
+    fileName: fileNameFromTabTitle(tabTitle),
+  };
 }
 
 export function extractServerRelativePath(browserUrl: string): string {

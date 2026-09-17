@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sharepoint-finder",
   "title": "SharePoint Finder",
-  "description": "Open the current SharePoint folder in its synced Finder location",
+  "description": "Open the current SharePoint file or folder in its synced Finder location",
   "icon": "icon.png",
   "author": "andrew_slabbert",
   "platforms": [
@@ -17,8 +17,8 @@
   "commands": [
     {
       "name": "open-sharepoint-link",
-      "title": "Open SharePoint Folder in Finder",
-      "description": "Open the current SharePoint folder in its synced Finder location",
+      "title": "Open SharePoint in Finder",
+      "description": "Open the current SharePoint file or folder in its synced Finder location",
       "mode": "no-view",
       "keywords": [
         "onedrive",

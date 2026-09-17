@@ -1,7 +1,7 @@
 # SharePoint Finder
 
-Open the SharePoint folder in your browser, run **Open SharePoint Folder in
-Finder**, and jump directly to the same folder in your locally synced OneDrive
+Open a SharePoint file or folder in your browser, run **Open SharePoint in
+Finder**, and jump directly to the same item in your locally synced OneDrive
 library.
 
 ## Requirements
@@ -12,9 +12,9 @@ library.
 
 ## How to Use
 
-1. Open a SharePoint folder in your browser and wait for it to load.
-2. Open Raycast and run **Open SharePoint Folder in Finder**.
-3. The matching local folder opens in Finder.
+1. Open a SharePoint file or folder in your browser and wait for it to load.
+2. Open Raycast and run **Open SharePoint in Finder**.
+3. The matching local folder opens, or the matching local file is revealed.
 
 SharePoint Finder automatically detects the Microsoft tenant, SharePoint site,
 document library, and local OneDrive Shared Libraries folder. It also supports
@@ -28,7 +28,7 @@ to another service.
 
 ## Troubleshooting
 
-If the folder cannot be found, confirm that the document library is synced with
+If the item cannot be found, confirm that the document library is synced with
 the OneDrive app and available beneath `~/Library/CloudStorage`. Error
 notifications include a **Copy Full Error** action and are written to Raycast's
 extension logs.
