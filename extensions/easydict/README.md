@@ -60,6 +60,7 @@ npm install && npm run dev
 
 ## Features
 
+- [x] 🆕 Supports optional local query caching with separate Query Cache and AI Query Cache settings (Off by default; Words Only or All Text). Cached results show a clock indicator; use Requery All Services or Regenerate AI Result for fresh results, and Clear Query Cache to remove cached results.
 - [x] 🆕 Support Raycast for Windows (most features are adapted).
 - [x] 🆕 Supports using LLMs from Raycast AI or custom OpenAI-compatible endpoints for translation and word lookup.
 - [x] Works out of the box for easily looking up words or translating text.
