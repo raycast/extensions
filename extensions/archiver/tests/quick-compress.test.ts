@@ -42,6 +42,15 @@ test("does not reveal the compressed archive when the preference is disabled", a
   expect(showInFinder).not.toHaveBeenCalled();
 });
 
+test("normalizes folder paths by removing trailing slash before compressing", async () => {
+  getSelectedFinderItems.mockResolvedValueOnce([{ path: "/tmp/my-folder/" }]);
+  const { default: Command } = await import("../src/quick-compress");
+
+  await Command();
+
+  expect(compress).toHaveBeenCalledWith(["/tmp/my-folder"], "ZIP");
+});
+
 test("declares the Finder reveal preference in Archiver settings", async () => {
   const manifest = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
   const quickCompress = manifest.commands.find((command: { name: string }) => command.name === "quick-compress");

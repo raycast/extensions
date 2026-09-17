@@ -132,14 +132,6 @@ async function getExtractSaveLocation(zipPath: string, format: ExtractFormat): P
     zipName = zipName.substring(0, zipName.lastIndexOf("."));
   }
   saveLoc += zipName.substring(0, zipName.lastIndexOf("."));
-  if (fs.existsSync(saveLoc) && !fs.statSync(saveLoc).isDirectory()) {
-    const originalSaveLoc = saveLoc;
-    let suffix = 2;
-    do {
-      saveLoc = `${originalSaveLoc} ${suffix}`;
-      suffix += 1;
-    } while (fs.existsSync(saveLoc));
-  }
   await folderExists(saveLoc);
   return saveLoc;
 }
@@ -175,13 +167,13 @@ function deleteFile(file: string) {
   fs.rmSync(file, { force: true, recursive: true });
 }
 
-export function isNeedPwdOnExtract(file: string, format: ExtractFormat): boolean {
+export async function isNeedPwdOnExtract(file: string, format: ExtractFormat): Promise<boolean> {
   let need = false;
   if (format !== ExtractFormat["7Z"] && format !== ExtractFormat.ZIP) {
     return need;
   }
   try {
-    execaSync(_7zaBinary, ["t", file]);
+    await execa(_7zaBinary, ["t", file]);
   } catch (error) {
     if (
       String(error).includes("ERROR: Wrong password") ||
@@ -193,13 +185,13 @@ export function isNeedPwdOnExtract(file: string, format: ExtractFormat): boolean
   return need;
 }
 
-export function checkPwdOnExtract(file: string, format: ExtractFormat, password: string): boolean {
+export async function checkPwdOnExtract(file: string, format: ExtractFormat, password: string): Promise<boolean> {
   let correct = true;
   if (format !== ExtractFormat["7Z"] && format !== ExtractFormat.ZIP) {
     return correct;
   }
   try {
-    execaSync(_7zaBinary, ["t", file, `-p${password}`]);
+    await execa(_7zaBinary, ["t", file, `-p${password}`]);
   } catch (error) {
     if (String(error).includes("Wrong password")) {
       correct = false;

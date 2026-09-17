@@ -11,7 +11,7 @@ import {
   popToRoot,
   Form,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   checkPwdOnExtract,
   ensureBinary,
@@ -33,13 +33,26 @@ export default function Command() {
   const [needPwd, updateNeedPwdState] = useState<boolean>(false);
   const [pwdError, updatePwdErrorState] = useState<string | undefined>();
   const [isLoading, updateLoadingState] = useState<boolean>(true);
+  const passwordFieldRef = useRef<Form.PasswordField>(null);
 
   useEffect(() => {
     ensureBinary();
     if (preferences.defaultExtractSelected) {
       getFinderItem();
+    } else {
+      updateLoadingState(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (needPwd) {
+      passwordFieldRef.current?.focus();
+      const timer = setTimeout(() => {
+        passwordFieldRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [needPwd]);
 
   async function getFinderItem() {
     updateLoadingState(true);
@@ -49,7 +62,7 @@ export default function Command() {
         return;
       }
       const supports = selectedFinderItems
-        .map((item) => item.path)
+        .map((item) => path.resolve(item.path))
         .filter((item) => isSupportExtractFormat(path.extname(item)) !== null);
 
       if (!supports.length) {
@@ -62,7 +75,8 @@ export default function Command() {
       };
       updateFileState(file);
       if (getFileSize(file.path) <= PRE_PWD_CHECK_THRESHOLD) {
-        updateNeedPwdState(isNeedPwdOnExtract(file.path, file.format));
+        const need = await isNeedPwdOnExtract(file.path, file.format);
+        updateNeedPwdState(need);
         updatePwdCheckedState(true);
       }
       updatePwdErrorState(undefined);
@@ -75,9 +89,10 @@ export default function Command() {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          {file && !isLoading && (
+          {file && !isLoading ? (
             <Action.SubmitForm
               title="Start Extract"
               icon={Icon.Maximize}
@@ -90,25 +105,34 @@ export default function Command() {
                 updateLoadingState(true);
                 try {
                   if (!pwdChecked) {
-                    const need = isNeedPwdOnExtract(file.path, file.format);
+                    const need = await isNeedPwdOnExtract(file.path, file.format);
                     updateNeedPwdState(need);
                     updatePwdCheckedState(true);
                     if (need) {
+                      updateLoadingState(false);
+                      setTimeout(() => {
+                        passwordFieldRef.current?.focus();
+                      }, 50);
                       return;
                     }
                   }
                   if (needPwd && !value.password) {
-                    updatePwdErrorState("The password should't be empty");
+                    updatePwdErrorState("The password shouldn't be empty");
+                    passwordFieldRef.current?.focus();
+                    updateLoadingState(false);
                     return;
                   }
-                  if (needPwd && value.password && !checkPwdOnExtract(file.path, file.format, value.password)) {
+                  const toast = await showToast({ title: "Extracting...", style: Toast.Style.Animated });
+                  if (needPwd && value.password && !(await checkPwdOnExtract(file.path, file.format, value.password))) {
+                    await toast.hide();
                     updatePwdErrorState("Wrong password");
+                    passwordFieldRef.current?.focus();
+                    updateLoadingState(false);
                     return;
                   }
-                  showToast({ title: "Extracting...", style: Toast.Style.Animated });
-                  const path = await extract(file.path, file.format, value.password);
+                  const extractedPath = await extract(file.path, file.format, value.password);
                   if (preferences.revealExtracted) {
-                    await showInFinder(path);
+                    await showInFinder(extractedPath);
                   }
                   showHUD("🎉 Extract successfully");
                   popToRoot();
@@ -119,7 +143,7 @@ export default function Command() {
                 }
               }}
             />
-          )}
+          ) : null}
         </ActionPanel>
       }
     >
@@ -129,7 +153,7 @@ export default function Command() {
         info="File to be extracted"
         value={file ? [file.path] : []}
         allowMultipleSelection={false}
-        autoFocus
+        autoFocus={!needPwd}
         onChange={async (values) => {
           if (isLoading) {
             processingAlert();
@@ -144,7 +168,7 @@ export default function Command() {
               updatePwdCheckedState(false);
               return;
             }
-            const filePath = values[0];
+            const filePath = path.resolve(values[0]);
             const format = isSupportExtractFormat(path.extname(filePath));
             if (format === null) {
               await showToast({
@@ -158,8 +182,11 @@ export default function Command() {
               format,
             };
             updateFileState(file);
+            updateNeedPwdState(false);
+            updatePwdCheckedState(false);
             if (getFileSize(file.path) <= PRE_PWD_CHECK_THRESHOLD) {
-              updateNeedPwdState(isNeedPwdOnExtract(file.path, file.format));
+              const need = await isNeedPwdOnExtract(file.path, file.format);
+              updateNeedPwdState(need);
               updatePwdCheckedState(true);
             }
           } catch {
@@ -172,8 +199,10 @@ export default function Command() {
       {needPwd && (
         <Form.PasswordField
           id="password"
+          ref={passwordFieldRef}
           title="Password"
           placeholder="Enter password"
+          autoFocus
           error={pwdError}
           onChange={() => {
             updatePwdErrorState(undefined);

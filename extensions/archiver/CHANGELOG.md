@@ -1,5 +1,13 @@
 # Archiver Changelog
 
+## [Improvements and Fixes] - 2026-09-17
+
+- Added settings to control Finder reveals after compression and extraction.
+- Fixed folder name rendering when selecting a directory in the Compress command.
+- Automatically focus the password field when revealed during extraction.
+- Improved loading state responsiveness and non-blocking password validation when extracting password-protected archives.
+- Avoided extraction failures when the intended output-folder name conflicts with an existing file.
+
 ## [Added Quick Compress Command] - 2025-12-17
 
 - Added a new "Quick Compress Files" command that instantly compresses selected files without displaying an options dialog. User can also combine a shortcut for quick compression.
