@@ -6,4 +6,5 @@ export interface Preferences {
   workspace: string;
   email: string;
   apiToken: string;
+  maxRepoAgeDays: string;
 }

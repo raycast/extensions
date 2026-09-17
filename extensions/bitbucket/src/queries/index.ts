@@ -2,7 +2,6 @@ import { LocalStorage } from "@raycast/api";
 import { Bitbucket, Schema } from "bitbucket";
 import { preferences } from "../helpers/preferences";
 import { URLSearchParams } from "url";
-import { z } from "zod";
 
 const clientOptions = {
   baseUrl: "https://api.bitbucket.org/2.0",
@@ -89,8 +88,8 @@ export async function getCommitNames(repoSlug: string) {
   });
 }
 
-async function getUsername() {
-  const key = `me:${preferences.email}`;
+async function getCurrentUserUuid(): Promise<string> {
+  const key = `me-uuid:${preferences.email}`;
   const stored = await LocalStorage.getItem<string>(key);
   if (stored) {
     return stored;
@@ -98,67 +97,88 @@ async function getUsername() {
 
   const response = await bitbucket.user.get({});
   if (response.status >= 400) {
-    throw new Error(`Unable to get username: status ${response.status}`);
+    throw new Error(`Unable to get current user: status ${response.status}`);
   }
 
-  const result = response.data.username;
-  if (typeof result !== "string") {
-    throw new Error("Unable to get username: no username in response");
+  const uuid = response.data.uuid;
+  if (typeof uuid !== "string") {
+    throw new Error("Unable to get current user: no uuid in response");
   }
 
-  await LocalStorage.setItem(key, result);
-  return result;
+  await LocalStorage.setItem(key, uuid);
+  return uuid;
 }
 
-const PullRequestsResponseSchema = z.object({
-  values: z.array(
-    z.object({
-      id: z.number(),
-      author: z.object({
-        nickname: z.string(),
-        links: z.object({
-          avatar: z.object({ href: z.string() }),
-        }),
-      }),
-      title: z.string(),
-      destination: z.object({
-        repository: z.object({
-          name: z.string(),
-          full_name: z.string(),
-        }),
-      }),
-      comment_count: z.number(),
-    }),
-  ),
-});
-
-// We can't use the Bitbucket package for this, as it doesn't support this endpoint
-// We can't use listPullrequestsForUser, as this has been removed: https://community.atlassian.com/forums/Bitbucket-articles/Reminder-List-pull-requests-for-a-user-API-removal/ba-p/2935311
-export async function getMyOpenPullRequests() {
-  const response = await fetch(
-    `https://api.bitbucket.org/2.0/workspaces/${preferences.workspace}/pullrequests/${await getUsername()}?pagelen=20&sort=-created_on&state=OPEN`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${preferences.email}:${preferences.apiToken}`).toString("base64")}`,
-        Accept: "application/json",
-      },
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(`Error fetching pull requests: ${response.status} (${response.statusText})`);
-  }
-
-  return PullRequestsResponseSchema.parse(await response.json()).values;
-}
-
-type OpenPullRequest = z.infer<typeof PullRequestsResponseSchema>["values"][number] & {
+type OpenPullRequest = {
+  id: number;
+  title: string;
+  comment_count: number;
   created_on?: string;
+  author: {
+    nickname: string;
+    links: {
+      avatar: { href: string };
+    };
+  };
+  destination: {
+    repository: {
+      name: string;
+      full_name: string;
+    };
+  };
 };
 
-async function listAllRepositories(): Promise<Schema.Repository[]> {
-  const repos: Schema.Repository[] = [];
+const REPO_CONCURRENCY = 10;
+const REPO_LIST_TTL_MS = 10 * 60 * 1000;
+
+type RepoWithSlug = Schema.Repository & { slug: string; updated_on?: string };
+
+function repoListCacheKey(): string {
+  return `repos:${preferences.workspace}:${preferences.maxRepoAgeDays || "0"}`;
+}
+
+// 0 (or unset) means no limit: scan every repository.
+function maxRepoAgeMs(): number | undefined {
+  const raw = preferences.maxRepoAgeDays?.trim();
+  if (!raw) {
+    return undefined;
+  }
+
+  if (!/^\d+$/.test(raw)) {
+    throw new Error(`"Max Repository Age (days)" must be a whole number, got "${raw}"`);
+  }
+
+  const days = Number(raw);
+  return days > 0 ? days * 24 * 60 * 60 * 1000 : undefined;
+}
+
+async function getCachedRepositories(): Promise<RepoWithSlug[] | undefined> {
+  const stored = await LocalStorage.getItem<string>(repoListCacheKey());
+  if (!stored) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(stored) as { fetchedAt: number; repos: RepoWithSlug[] };
+    if (Date.now() - parsed.fetchedAt > REPO_LIST_TTL_MS) {
+      return undefined;
+    }
+    return parsed.repos;
+  } catch {
+    return undefined;
+  }
+}
+
+async function setCachedRepositories(repos: RepoWithSlug[]): Promise<void> {
+  await LocalStorage.setItem(repoListCacheKey(), JSON.stringify({ fetchedAt: Date.now(), repos }));
+}
+
+// Repos are sorted -updated_on. When maxRepoAgeDays is set, stop paginating as soon as a
+// repo older than the cutoff is seen instead of scanning the whole workspace. Yields pages
+// as they arrive so callers can start PR-fetching before later pages have loaded.
+async function* iterateAllRepositories(): AsyncGenerator<RepoWithSlug[]> {
+  const cutoff = maxRepoAgeMs();
+  const cutoffTime = cutoff !== undefined ? Date.now() - cutoff : undefined;
   let page = "1";
 
   for (;;) {
@@ -167,27 +187,47 @@ async function listAllRepositories(): Promise<Schema.Repository[]> {
       pagelen: 100,
       sort: "-updated_on",
       page,
-      fields: ["values.slug", "values.name", "values.full_name", "next"].join(","),
+      fields: ["values.slug", "values.name", "values.full_name", "values.updated_on", "next"].join(","),
     });
 
-    repos.push(...((data.values as Schema.Repository[]) ?? []));
+    const values = ((data.values as RepoWithSlug[]) ?? []).filter(
+      (repo): repo is RepoWithSlug => typeof repo.slug === "string",
+    );
 
-    if (!data.next) {
+    let hitStale = false;
+    const pageRepos: RepoWithSlug[] = [];
+    for (const repo of values) {
+      if (cutoffTime !== undefined) {
+        const updatedAt = repo.updated_on ? Date.parse(repo.updated_on) : undefined;
+        if (updatedAt !== undefined && updatedAt < cutoffTime) {
+          hitStale = true;
+          break;
+        }
+      }
+      pageRepos.push(repo);
+    }
+
+    if (pageRepos.length > 0) {
+      yield pageRepos;
+    }
+
+    if (hitStale || !data.next) {
       break;
     }
 
     const nextParams = new URLSearchParams(data.next.split("?")[1]);
     page = nextParams.get("page") ?? String(Number(page) + 1);
   }
-
-  return repos;
 }
 
-async function listOpenPullRequestsForRepo(repo: {
-  slug: string;
-  name?: string;
-  full_name?: string;
-}): Promise<OpenPullRequest[]> {
+async function listOpenPullRequestsForRepo(
+  repo: {
+    slug: string;
+    name?: string;
+    full_name?: string;
+  },
+  authorUuid?: string,
+): Promise<OpenPullRequest[]> {
   const pullRequests: OpenPullRequest[] = [];
   let page = "1";
 
@@ -199,6 +239,7 @@ async function listOpenPullRequestsForRepo(repo: {
       page,
       sort: "-created_on",
       state: "OPEN",
+      ...(authorUuid ? { q: `author.uuid="${authorUuid}"` } : {}),
       fields: [
         "values.id",
         "values.title",
@@ -254,39 +295,53 @@ async function listOpenPullRequestsForRepo(repo: {
   return pullRequests;
 }
 
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  concurrency: number,
-  mapper: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = [];
-  let index = 0;
+// Repos are pushed as they're discovered (instantly from cache, or page-by-page from the
+// API) while a fixed pool of workers drains the queue, so PR fetches for early repos
+// overlap with later repo-list pages still loading instead of waiting on the full list.
+class RepoQueue {
+  private pending: RepoWithSlug[] = [];
+  private waiters: ((repo: RepoWithSlug | undefined) => void)[] = [];
+  private closed = false;
 
-  async function worker() {
-    while (index < items.length) {
-      const current = index++;
-      results[current] = await mapper(items[current]);
+  push(repo: RepoWithSlug) {
+    const waiter = this.waiters.shift();
+    if (waiter) {
+      waiter(repo);
+    } else {
+      this.pending.push(repo);
     }
   }
 
-  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()));
-  return results;
+  close() {
+    this.closed = true;
+    while (this.waiters.length > 0) {
+      this.waiters.shift()?.(undefined);
+    }
+  }
+
+  next(): Promise<RepoWithSlug | undefined> {
+    if (this.pending.length > 0) {
+      return Promise.resolve(this.pending.shift());
+    }
+    if (this.closed) {
+      return Promise.resolve(undefined);
+    }
+    return new Promise((resolve) => this.waiters.push(resolve));
+  }
 }
 
 export type OpenPullRequestsResult = { values: OpenPullRequest[]; failedRepoCount: number };
 
 const PROGRESS_EMIT_INTERVAL_MS = 200;
 
-// Bitbucket has no workspace-wide PR endpoint; iterate repos then fetch open PRs per repo.
-// Repos are sorted -updated_on, so onProgress lets callers render the most-active repos'
-// PRs as soon as they land instead of waiting for every repo to finish.
-export async function getAllOpenPullRequests(
+// Bitbucket has no workspace-wide PR endpoint; iterate repos then fetch open PRs per repo
+// (optionally server-side filtered to one author via fetchForRepo). Repos are sorted
+// -updated_on, so onProgress lets callers render the most-active repos' PRs as soon as
+// they land instead of waiting for every repo to finish.
+async function scanOpenPullRequests(
+  fetchForRepo: (repo: RepoWithSlug) => Promise<OpenPullRequest[]>,
   onProgress?: (partial: OpenPullRequestsResult) => void,
 ): Promise<OpenPullRequestsResult> {
-  const repos = (await listAllRepositories()).filter(
-    (repo): repo is Schema.Repository & { slug: string } => typeof repo.slug === "string",
-  );
-
   const collected: OpenPullRequest[] = [];
   let failedRepoCount = 0;
   let lastEmit = 0;
@@ -300,19 +355,70 @@ export async function getAllOpenPullRequests(
     return { values, failedRepoCount };
   };
 
-  await mapWithConcurrency(repos, 10, async (repo) => {
-    try {
-      collected.push(...(await listOpenPullRequestsForRepo(repo)));
-    } catch {
-      failedRepoCount += 1;
+  const queue = new RepoQueue();
+
+  const feedRepos = async () => {
+    const cached = await getCachedRepositories();
+    if (cached) {
+      for (const repo of cached) {
+        queue.push(repo);
+      }
+      queue.close();
+      return;
     }
 
-    const now = Date.now();
-    if (onProgress && now - lastEmit >= PROGRESS_EMIT_INTERVAL_MS) {
-      lastEmit = now;
-      onProgress(snapshot());
+    const fetched: RepoWithSlug[] = [];
+    for await (const page of iterateAllRepositories()) {
+      for (const repo of page) {
+        fetched.push(repo);
+        queue.push(repo);
+      }
     }
-  });
+    queue.close();
+    await setCachedRepositories(fetched);
+  };
+
+  const worker = async () => {
+    for (;;) {
+      const repo = await queue.next();
+      if (!repo) {
+        break;
+      }
+
+      try {
+        collected.push(...(await fetchForRepo(repo)));
+      } catch (error) {
+        failedRepoCount += 1;
+        const status = (error as { status?: number } | undefined)?.status;
+        console.error(`[bitbucket] PR fetch failed for ${repo.full_name ?? repo.slug} (status ${status ?? "?"})`);
+      }
+
+      const now = Date.now();
+      if (onProgress && now - lastEmit >= PROGRESS_EMIT_INTERVAL_MS) {
+        lastEmit = now;
+        onProgress(snapshot());
+      }
+    }
+  };
+
+  await Promise.all([feedRepos(), ...Array.from({ length: REPO_CONCURRENCY }, () => worker())]);
 
   return snapshot();
+}
+
+export async function getAllOpenPullRequests(
+  onProgress?: (partial: OpenPullRequestsResult) => void,
+): Promise<OpenPullRequestsResult> {
+  return scanOpenPullRequests((repo) => listOpenPullRequestsForRepo(repo), onProgress);
+}
+
+// Bitbucket removed its workspace-wide "PRs for a user" endpoint (the one path segment
+// away from just being a filter): https://community.atlassian.com/forums/Bitbucket-articles/Reminder-List-pull-requests-for-a-user-API-removal/ba-p/2935311
+// so "my open PRs" reuses the same per-repo scan as getAllOpenPullRequests, with the
+// author filter applied server-side per repo via the `q` query param.
+export async function getMyOpenPullRequests(
+  onProgress?: (partial: OpenPullRequestsResult) => void,
+): Promise<OpenPullRequestsResult> {
+  const uuid = await getCurrentUserUuid();
+  return scanOpenPullRequests((repo) => listOpenPullRequestsForRepo(repo, uuid), onProgress);
 }
