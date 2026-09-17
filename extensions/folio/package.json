@@ -1,0 +1,190 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "folio",
+  "title": "Folio",
+  "description": "Net worth, holdings, activities and idle cash from every brokerage connected to SnapTrade, read-only.",
+  "icon": "folio.png",
+  "author": "shayan_abedi",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "snaptrade",
+    "brokerage",
+    "wealthsimple",
+    "questrade",
+    "ibkr",
+    "fog",
+    "net worth"
+  ],
+  "commands": [
+    {
+      "name": "sign-in",
+      "title": "Sign in with SnapTrade",
+      "description": "Sign in to SnapTrade with OAuth (read-only) or sign out.",
+      "mode": "view",
+      "keywords": [
+        "login",
+        "logout",
+        "oauth"
+      ]
+    },
+    {
+      "name": "show-portfolio",
+      "title": "Show Portfolio",
+      "description": "Net worth and accounts grouped by institution, with holdings per account.",
+      "mode": "view",
+      "keywords": [
+        "net worth",
+        "accounts",
+        "holdings"
+      ]
+    },
+    {
+      "name": "show-positions",
+      "title": "Show Positions",
+      "description": "Every position across all accounts in one searchable list. Pass a ticker to jump straight to it.",
+      "mode": "view",
+      "keywords": [
+        "holdings",
+        "stocks",
+        "etf",
+        "ticker",
+        "symbol",
+        "search"
+      ],
+      "arguments": [
+        {
+          "name": "ticker",
+          "placeholder": "Ticker",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "show-fog",
+      "title": "Show Fog",
+      "description": "How much cash is sitting idle and for how long.",
+      "mode": "view",
+      "keywords": [
+        "idle cash",
+        "cash drag",
+        "undeployed"
+      ]
+    },
+    {
+      "name": "show-activities",
+      "title": "Show Activities",
+      "description": "Trades, dividends and deposits across all accounts.",
+      "mode": "view",
+      "keywords": [
+        "transactions",
+        "trades",
+        "dividends",
+        "deposits"
+      ]
+    },
+    {
+      "name": "connect-brokerage",
+      "title": "Connect Brokerage",
+      "description": "Open the SnapTrade Connection Portal to link a brokerage (read-only) and review existing connections.",
+      "mode": "view",
+      "keywords": [
+        "link",
+        "connection",
+        "broker"
+      ]
+    },
+    {
+      "name": "menu-bar-portfolio",
+      "title": "Menu Bar Portfolio",
+      "description": "Net worth in the menu bar, with per-account totals and idle cash.",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "keywords": [
+        "net worth",
+        "menubar"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "authWorkerUrl",
+      "title": "Auth Worker URL",
+      "description": "URL of the deployed Folio auth worker that exchanges and refreshes SnapTrade OAuth tokens. The client secret lives there, never in Raycast.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://folio-auth.shayanabedi-dev.workers.dev",
+      "placeholder": "https://folio-auth.<your-subdomain>.workers.dev"
+    },
+    {
+      "name": "oauthClientId",
+      "title": "SnapTrade OAuth Client ID",
+      "description": "Public client_id of the SnapTrade OAuth app registered by the maintainer. Not a secret.",
+      "type": "textfield",
+      "required": false,
+      "default": "FOLIO-YVIID",
+      "placeholder": "snaptrade-oauth-client-id"
+    },
+    {
+      "name": "useFixtures",
+      "title": "Data Source",
+      "label": "Use bundled fixture data (demo mode)",
+      "description": "Render sample Wealthsimple, Questrade and IBKR accounts instead of calling SnapTrade. Useful for screenshots and development.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "enableDevPersonalKey",
+      "title": "Developer",
+      "label": "Use a SnapTrade Personal API key instead of OAuth (developers only)",
+      "description": "Bypass OAuth with your own SnapTrade Personal API key (clientId + consumerKey, HMAC-signed requests). For extension development only, not for Store users.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "devClientId",
+      "title": "Personal Client ID (dev)",
+      "description": "SnapTrade Personal API clientId. Only used when the developer checkbox is enabled.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "YOUR-CLIENT-ID"
+    },
+    {
+      "name": "devConsumerKey",
+      "title": "Personal Consumer Key (dev)",
+      "description": "SnapTrade Personal API consumerKey. Stored by Raycast as a password preference; never written to disk by Folio.",
+      "type": "password",
+      "required": false,
+      "placeholder": "consumer key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node test/run.mjs"
+  }
+}
