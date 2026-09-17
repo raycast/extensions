@@ -98,6 +98,7 @@ function SearchTools({ location, initialSearchText }: { location: MiseLocation; 
       searchBarAccessory={
         install.isLoading ? null : <InstallTargetDropdown files={install.files} onChange={install.setTarget} />
       }
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       filtering={true}
       throttle

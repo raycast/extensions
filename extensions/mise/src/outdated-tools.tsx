@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { MiseLocation } from "./mise/locate";
 import { listOutdated } from "./mise/outdated";
 import { outdatedOptions, readPreferences } from "./ui/preferences";
+import { loadErrorInView, loadErrorMessage } from "./ui/LoadError";
 import { useMise } from "./ui/useMise";
 
 export default function Command() {
@@ -29,19 +30,28 @@ function openOutdatedTools(upgrade?: string) {
 
 function OutdatedTools({ location }: { location: MiseLocation }) {
   const [prefs] = useState(readPreferences);
-  const outdated = useCachedPromise(listOutdated, [location, outdatedOptions(prefs)]);
+  const outdated = useCachedPromise(listOutdated, [location, outdatedOptions(prefs)], loadErrorInView);
   const tools = outdated.data ?? [];
   const count = tools.length;
+  const failure = outdated.data === undefined ? outdated.error : undefined;
 
   return (
     <MenuBarExtra
       icon={Icon.ArrowUp}
       title={count > 0 ? String(count) : undefined}
-      tooltip={`mise: ${count} outdated tools`}
+      tooltip={failure ? "mise: could not check outdated tools" : `mise: ${count} outdated tools`}
       isLoading={outdated.isLoading}
     >
       <MenuBarExtra.Section title="Outdated">
-        {count === 0 && <MenuBarExtra.Item title="All tools up to date" />}
+        {failure && (
+          <MenuBarExtra.Item
+            title="Couldn't check outdated tools"
+            subtitle={loadErrorMessage(failure)}
+            icon={Icon.Warning}
+            onAction={outdated.revalidate}
+          />
+        )}
+        {!failure && count === 0 && <MenuBarExtra.Item title="All tools up to date" />}
         {tools.map((tool) => (
           <MenuBarExtra.Item
             key={tool.name}

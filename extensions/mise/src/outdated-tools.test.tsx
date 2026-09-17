@@ -23,6 +23,21 @@ describe("Tools Menu Bar", () => {
     });
   });
 
+  it("shows the failure with a retry when mise outdated fails, not an up-to-date menu", async () => {
+    useCachedPromiseFixtures.fail(listOutdated, new Error("GitHub rate limit exceeded"));
+    const { root } = await render(<Command />);
+    const menu = root.findByType(MenuBarExtra);
+    expect(menu.props).toMatchObject({ title: undefined, tooltip: "mise: could not check outdated tools" });
+    const titles = menu.findAllByType(MenuBarExtra.Item).map((n) => n.props.title);
+    expect(titles).not.toContain("All tools up to date");
+    const failure = menu
+      .findAllByType(MenuBarExtra.Item)
+      .find((n) => n.props.title === "Couldn't check outdated tools");
+    expect(failure?.props.subtitle).toBe("GitHub rate limit exceeded");
+    await flush(() => failure?.props.onAction());
+    expect(useCachedPromiseFixtures.revalidateOf(listOutdated)).toHaveBeenCalled();
+  });
+
   it("offers the extension preferences when the configured mise path does not exist", async () => {
     mocks.getPreferenceValues.mockReturnValue({ misePath: "/nonexistent/mise" });
     const { root } = await render(<Command />);

@@ -51,6 +51,7 @@ describe("Search Tools", () => {
     expect(backend.items[0].props.title).toBe("npm:prettier");
     expect(backend.items[0].props.accessories).toEqual([{ tag: "npm" }, { text: "3.9.7" }]);
     expect(installed.title).toBe("Installed");
+    expect(root.findByType(List).props.searchText).toBe("npm:prettier");
   });
 
   it("runs mise use -g, or --path with the dropdown's file, from Use Globally", async () => {
