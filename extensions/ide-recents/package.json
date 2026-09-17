@@ -1,8 +1,8 @@
 {
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "ide-recents",
-    "title": "IDE Recents (VS Code, Trae, Antigravity)",
-    "description": "Search and open recent projects across VS Code, Trae, and Antigravity IDE",
+    "title": "IDE Recents",
+    "description": "Search and open recent projects from VS Code, Trae, and Antigravity in one list",
     "icon": "icon.png",
     "author": "huid",
     "platforms": [
@@ -15,7 +15,7 @@
     "commands": [
         {
             "name": "index",
-            "title": "Search Recent Projects (VS Code)",
+            "title": "Search Recent Projects",
             "subtitle": "VS Code / Trae / Antigravity",
             "description": "Search and open recent projects across all supported IDEs",
             "icon": "icon.png",
@@ -34,26 +34,21 @@
         }
     ],
     "dependencies": {
-        "@raycast/api": "^1.70.0",
-        "@raycast/utils": "^1.14.0"
+        "@raycast/api": "^1.104.24"
     },
     "devDependencies": {
-        "@types/node": "^20.0.0",
-        "@types/react": "18.2.45",
-        "sharp": "^0.35.4",
-        "typescript": "^5.0.0"
-    },
-    "overrides": {
-        "@types/react": "18.2.45"
+        "@raycast/eslint-config": "^2.2.0",
+        "@types/node": "22.13.10",
+        "@types/react": "19.0.10",
+        "eslint": "^9.22.0",
+        "prettier": "^3.5.3",
+        "typescript": "^5.8.2"
     },
     "scripts": {
-        "clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\"",
-        "build:dist": "npm run clean && ray build -o dist",
-        "build": "npm run clean && ray build -e dist",
+        "build": "ray build",
         "dev": "ray develop",
-        "lint": "ray lint",
         "fix-lint": "ray lint --fix",
-        "pre-publish": "npm run lint && npm run build",
-        "publish": "npm run pre-publish && npx @raycast/api@latest publish"
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
     }
 }

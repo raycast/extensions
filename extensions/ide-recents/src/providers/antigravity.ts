@@ -9,12 +9,7 @@ export const antigravityProvider: IDEProvider = {
 
   getDatabasePaths() {
     const home = homedir();
-    return [
-      path.join(
-        home,
-        "Library/Application Support/Antigravity IDE/User/globalStorage/state.vscdb",
-      ),
-    ];
+    return [path.join(home, "Library/Application Support/Antigravity IDE/User/globalStorage/state.vscdb")];
   },
 
   getOpenCommands(projectPath: string) {

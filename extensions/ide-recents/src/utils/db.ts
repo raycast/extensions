@@ -1,19 +1,23 @@
 /**
- * 通用 SQLite 数据库读取 / 清理工具
+ * SQLite helpers for reading and cleaning up IDE "recent projects".
  *
- * 所有基于 VS Code 内核的 IDE（VS Code、Trae、Antigravity 等）都用
- * state.vscdb 里的 ItemTable 保存「最近打开的项目」，但键名并不统一：
+ * Every VS Code based editor (VS Code, Trae, Antigravity, ...) keeps its
+ * recently opened projects in the `ItemTable` of a `state.vscdb` database, but
+ * neither the database location nor the storage key is consistent:
  *
- *   ~/.vscode-shared/sharedStorage/state.vscdb          -> history.recentlyOpenedPathsList
- *   ~/Library/.../Code/User/globalStorage/state.vscdb   -> recently.opened
- *   Trae / Antigravity                                  -> history.recentlyOpenedPathsList
+ *   ~/.vscode-shared/sharedStorage/state.vscdb        -> history.recentlyOpenedPathsList
+ *   ~/Library/.../Code/User/globalStorage/state.vscdb -> recently.opened
+ *   Trae / Antigravity                                -> history.recentlyOpenedPathsList
  *
- * 不同 VS Code 版本之间也发生过键名迁移，而且同一个 IDE 可能同时存在多个库，
- * 因此这里不对「某个库固定用某个键」做任何假设：对每个真实存在的库同时
- * 尝试所有候选键，合并去重后再展示；写回时也只改命中记录的那个键。
+ * Key names have also moved between VS Code releases, and a single editor can
+ * own more than one database, so we never assume that a given database uses a
+ * given key: every existing database is queried for all candidate keys, the
+ * results are merged and de-duplicated, and writes only touch the key the
+ * records were actually found under.
  *
- * 安全性：所有 sqlite3 调用都通过 execFileSync 传参（argv / stdin），
- * 不经过 shell，数据库路径与 SQL 中的特殊字符不会被解释执行。
+ * Safety: every sqlite3 call passes its arguments through execFileSync
+ * (argv / stdin) and never goes through a shell, so special characters in
+ * database paths or SQL are never interpreted.
  */
 
 import { execFileSync } from "child_process";
@@ -21,33 +25,28 @@ import { copyFileSync, existsSync } from "fs";
 import path from "path";
 import type { IDEProvider, ProjectItem } from "../providers/types";
 
-/** 「最近打开的项目」在不同 VS Code 版本中使用的候选键名 */
-export const RECENTS_KEYS = [
-  "history.recentlyOpenedPathsList",
-  "recently.opened",
-] as const;
+/** Keys used for recently opened projects across VS Code versions */
+export const RECENTS_KEYS = ["history.recentlyOpenedPathsList", "recently.opened"] as const;
 
-/** sqlite3 可执行文件候选路径（Raycast 的 GUI 进程 PATH 很短，优先用绝对路径） */
-const SQLITE_CANDIDATES = [
-  "/usr/bin/sqlite3",
-  "/opt/homebrew/bin/sqlite3",
-  "/usr/local/bin/sqlite3",
-];
+/** Candidate sqlite3 binaries (Raycast's GUI process has a very short PATH) */
+const SQLITE_CANDIDATES = ["/usr/bin/sqlite3", "/opt/homebrew/bin/sqlite3", "/usr/local/bin/sqlite3"];
 
 const SQLITE_TIMEOUT_MS = 10000;
 const SQLITE_MAX_BUFFER = 32 * 1024 * 1024;
+
+/** `scheme:` prefix, e.g. `vscode-remote:` or `vscode-vfs:` */
+const URI_SCHEME = /^[a-zA-Z][a-zA-Z0-9+.-]*:/;
 
 let cachedSqliteBinary: string | undefined;
 
 function sqliteBinary(): string {
   if (!cachedSqliteBinary) {
-    cachedSqliteBinary =
-      SQLITE_CANDIDATES.find((candidate) => existsSync(candidate)) ?? "sqlite3";
+    cachedSqliteBinary = SQLITE_CANDIDATES.find((candidate) => existsSync(candidate)) ?? "sqlite3";
   }
   return cachedSqliteBinary;
 }
 
-/** sqlite3 调用失败时，尽量取出真正有用的那一行错误信息 */
+/** Extract the part of a sqlite3 failure that is actually useful to a user */
 function describeError(error: unknown): string {
   if (error instanceof Error) {
     const stderr = (error as { stderr?: Buffer | string }).stderr;
@@ -58,10 +57,11 @@ function describeError(error: unknown): string {
 }
 
 /**
- * 执行一条 SQL。
+ * Run a single SQL statement.
  *
- * 语句通过 stdin 送入（execFileSync 的 input），argv 只放可执行文件与库路径，
- * 既避免了 shell 解析，也避免了超长命令行参数的限制。
+ * The statement is piped through stdin (execFileSync's `input`) while argv only
+ * carries the executable and the database path, which avoids the shell and the
+ * length limit of command line arguments at the same time.
  */
 function runSqlite(dbPath: string, sql: string): string {
   try {
@@ -74,21 +74,19 @@ function runSqlite(dbPath: string, sql: string): string {
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code === "ENOENT") {
-      throw new Error("未找到 sqlite3 命令，无法访问 IDE 数据库");
+      throw new Error("sqlite3 was not found, so IDE databases cannot be read");
     }
     throw new Error(describeError(error));
   }
 }
 
-/** 读取单个键的原始值，不存在或为空时返回 null */
+/** Read the raw value of one key, or null when it is missing or empty */
 function readRawValue(dbPath: string, key: string): string | null {
   const escapedKey = key.replace(/'/g, "''");
-  const output = runSqlite(
-    dbPath,
-    `SELECT value FROM ItemTable WHERE key = '${escapedKey}' LIMIT 1;\n`,
-  );
+  const output = runSqlite(dbPath, `SELECT value FROM ItemTable WHERE key = '${escapedKey}' LIMIT 1;\n`);
 
-  // sqlite3 在 list 模式下每条记录占一行，去掉结尾换行即为原始值
+  // sqlite3 prints one record per line in list mode; the trailing newline is
+  // not part of the value.
   const value = output.replace(/\r?\n$/, "");
   return value.length > 0 ? value : null;
 }
@@ -102,10 +100,11 @@ export interface RecentsPayload {
 }
 
 /**
- * 解析一个 recents 值。
+ * Parse a recents value.
  *
- * 兼容三种历史格式：{ entries: [...] }、{ workspaces: [...] }、裸数组。
- * 从第一个 { 或 [ 开始解析，容忍前置噪声（例如 sqlite3 的启动提示）。
+ * Three historical shapes are supported: `{ entries: [...] }`,
+ * `{ workspaces: [...] }` and a bare array. Parsing starts at the first `{` or
+ * `[` to tolerate leading noise such as a sqlite3 startup banner.
  */
 export function parseRecentsPayload(raw: string): RecentsPayload | null {
   const start = raw.search(/[[{]/);
@@ -137,11 +136,11 @@ export function parseRecentsPayload(raw: string): RecentsPayload | null {
 
 export interface RecentsSnapshot extends RecentsPayload {
   dbPath: string;
-  /** 该条记录所在的键名 */
+  /** The key this snapshot was read from */
   key: string;
 }
 
-/** 读取一个数据库里所有候选键中的最近项目记录 */
+/** Read the recents records of every candidate key in one database */
 export function readRecentsSnapshots(dbPath: string): RecentsSnapshot[] {
   const snapshots: RecentsSnapshot[] = [];
 
@@ -158,37 +157,51 @@ export function readRecentsSnapshots(dbPath: string): RecentsSnapshot[] {
   return snapshots;
 }
 
-/** provider 下所有真实存在的数据库 */
+/** Every database of a provider that actually exists on disk */
 export function resolveDatabasePaths(provider: IDEProvider): string[] {
   return provider.getDatabasePaths().filter((dbPath) => existsSync(dbPath));
 }
 
 /**
- * 一条历史记录对应的打开目标。
+ * The open target of one stored entry.
  */
 export interface EntryLocation {
   /**
-   * 传给 IDE 的打开目标：
-   * - 本地项目为文件系统路径；
-   * - 远程 / 虚拟工作区为原始 URI（vscode-remote://、vscode-vfs:// 等）。
+   * What gets passed to the editor:
+   * - local projects are filesystem paths;
+   * - remote / virtual workspaces keep their original URI
+   *   (`vscode-remote://`, `vscode-vfs://`, ...).
    */
   target: string;
   type: ProjectItem["type"];
-  /** 非 file: 协议或带 remoteAuthority，本地无法校验其存在性 */
+  /** Non `file:` URIs and entries with a remoteAuthority cannot be checked locally */
   isRemote: boolean;
   exists: boolean;
 }
 
-function locationFromUri(
-  uri: string,
-  type: ProjectItem["type"],
-  forceRemote: boolean,
-): EntryLocation | null {
+/**
+ * Turn a `file:` URI into a filesystem path.
+ *
+ * `decodeURIComponent` throws on malformed escapes such as `%ZZ`, and one bad
+ * record must not take down every other record of an editor, so fall back to
+ * the raw — still readable — string instead.
+ */
+function decodeFileUri(uri: string): string {
+  const raw = uri.slice("file:".length).replace(/^\/\//, "");
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+function locationFromUri(uri: string, type: ProjectItem["type"], forceRemote: boolean): EntryLocation | null {
   if (!uri) return null;
 
-  if (forceRemote || !uri.startsWith("file:")) {
-    // 远程 / 虚拟工作区：保留原始 URI，交给 IDE 自己解析，
-    // 不要在本地解码成路径（那会得到一个必然不存在的本地路径）
+  // Remote and virtual workspaces can only be resolved by the editor itself.
+  // Decoding them into a local path would produce a path that can never exist,
+  // so the raw URI is kept and the entry is never treated as missing.
+  if (forceRemote || (!uri.startsWith("file:") && URI_SCHEME.test(uri))) {
     return {
       target: uri,
       type: type === "workspace" ? "workspace" : "remote",
@@ -197,9 +210,11 @@ function locationFromUri(
     };
   }
 
-  const filePath = decodeURIComponent(
-    uri.slice("file:".length).replace(/^\/\//, ""),
-  );
+  // `file:` URIs and plain paths (older VS Code releases stored those) are both
+  // local paths. Treating a plain path as remote would mark it as always
+  // existing, which keeps stale entries out of the missing filter and cleanup.
+  const filePath = uri.startsWith("file:") ? decodeFileUri(uri) : uri;
+
   return {
     target: filePath,
     type,
@@ -209,8 +224,8 @@ function locationFromUri(
 }
 
 /**
- * 原始记录中我们关心的字段。
- * 真实的 recents JSON 里这些字段可能缺失或类型不同，因此一律按 unknown 处理。
+ * The fields of a stored entry we care about. In real recents JSON they may be
+ * missing or have an unexpected type, so everything is treated as unknown.
  */
 interface RawRecentsEntry {
   folderUri?: unknown;
@@ -224,17 +239,18 @@ function asRecord(entry: unknown): RawRecentsEntry | null {
   return entry && typeof entry === "object" ? (entry as RawRecentsEntry) : null;
 }
 
-/** 读取记录自带的显示名（例如 GitHub 远程仓库的 "owner/repo [GitHub]"） */
+/** Read the display name stored with an entry (e.g. "owner/repo [GitHub]" for remote repositories) */
 export function getEntryLabel(entry: unknown): string {
   const record = asRecord(entry);
   return record && typeof record.label === "string" ? record.label.trim() : "";
 }
 
 /**
- * 把一条原始记录解析成打开目标；无法识别的记录返回 null。
+ * Resolve one stored entry into an open target; returns null for entries we
+ * cannot understand.
  */
 export function resolveEntryLocation(entry: unknown): EntryLocation | null {
-  // 老版本 VS Code 直接把路径存成字符串
+  // Older VS Code versions stored the local path as a plain string
   if (typeof entry === "string") {
     return locationFromUri(entry, "folder", false);
   }
@@ -254,26 +270,12 @@ export function resolveEntryLocation(entry: unknown): EntryLocation | null {
   if (record.fileUri) {
     return locationFromUri(String(record.fileUri), "file", isRemoteEntry);
   }
-  if (record.remoteAuthority) {
-    const remoteTarget = record.folderUri || record.fileUri;
-    return remoteTarget
-      ? {
-          target: String(remoteTarget),
-          type: "remote",
-          isRemote: true,
-          exists: true,
-        }
-      : null;
-  }
 
   return null;
 }
 
-/** 将原始记录列表解析为 ProjectItem 列表（同一目标只保留一条） */
-export function parseEntries(
-  entries: unknown[],
-  sourceId: string,
-): ProjectItem[] {
+/** Resolve raw records into ProjectItems, keeping one item per target */
+export function parseEntries(entries: unknown[], sourceId: string): ProjectItem[] {
   const items: ProjectItem[] = [];
   const seen = new Set<string>();
 
@@ -285,9 +287,7 @@ export function parseEntries(
 
     const label = getEntryLabel(entry);
     const name = label || path.basename(location.target) || location.target;
-    const extension = location.isRemote
-      ? ""
-      : path.extname(location.target).slice(1).toLowerCase();
+    const extension = location.isRemote ? "" : path.extname(location.target).slice(1).toLowerCase();
 
     items.push({
       id: `${sourceId}:${location.target}`,
@@ -303,7 +303,7 @@ export function parseEntries(
   return items;
 }
 
-/** 从一个 IDE provider 读取所有最近项目（覆盖它所有存在的库与候选键） */
+/** Load every recent project of one provider, across all its databases and keys */
 export function loadProjectsFromProvider(provider: IDEProvider): ProjectItem[] {
   const items: ProjectItem[] = [];
 
@@ -312,7 +312,8 @@ export function loadProjectsFromProvider(provider: IDEProvider): ProjectItem[] {
     try {
       snapshots = readRecentsSnapshots(dbPath);
     } catch {
-      // 单个库读取失败（例如被 IDE 独占、文件损坏）不应影响其它 IDE
+      // A single unreadable database (locked by the IDE, corrupted, ...) must
+      // not hide the recents of the other editors.
       continue;
     }
 
@@ -324,14 +325,13 @@ export function loadProjectsFromProvider(provider: IDEProvider): ProjectItem[] {
   return items;
 }
 
-/** 合并多个 provider 的项目列表，按路径去重，保留多来源 */
+/** Merge the projects of all providers, de-duplicating by path but keeping every source */
 export function mergeProjects(allProjects: ProjectItem[]): ProjectItem[] {
   const map = new Map<string, ProjectItem>();
 
   for (const project of allProjects) {
     const existing = map.get(project.path);
     if (existing) {
-      // 合并来源，避免重复
       for (const src of project.sources) {
         if (!existing.sources.includes(src)) {
           existing.sources.push(src);
@@ -348,37 +348,39 @@ export function mergeProjects(allProjects: ProjectItem[]): ProjectItem[] {
   return Array.from(map.values());
 }
 
-/** 单个 IDE 的清理结果 */
+/** Cleanup result of a single editor */
 export interface ProviderRemovalResult {
   providerId: string;
   providerName: string;
-  /** 实际存在并尝试写入的数据库数量 */
+  /** Number of existing databases that were read */
   attemptedDatabases: number;
-  /** 成功删除的记录条数 */
+  /** Number of records that were actually removed */
   removedCount: number;
-  /** 命中的键名 -> 删除条数 */
+  /** Matched key name -> removed record count */
   removedByKey: Record<string, number>;
-  /** 备份失败但写入成功的库（提示用户注意） */
+  /** Databases that were written without a backup being created first */
   backupFailures: string[];
-  /** 出错信息；有值表示该 IDE 的清理没有完整完成 */
+  /** Set when the cleanup did not fully succeed */
   error?: string;
 }
 
-/** 一次清理的整体结果 */
+/** Result of one cleanup operation */
 export interface RemovalReport {
-  /** 所有 IDE 合计删除的记录条数 */
+  /** Records removed across all editors */
   totalRemoved: number;
   results: ProviderRemovalResult[];
-  /** 出错的 IDE（删除不可信，UI 必须据实提示） */
+  /** Editors whose cleanup failed (the UI must not report those as removed) */
   failures: ProviderRemovalResult[];
 }
 
-/** 写回某个键的完整 JSON 值（含 .bak 备份） */
-function writeRecentsValue(
-  dbPath: string,
-  snapshot: RecentsSnapshot,
-  entries: unknown[],
-): void {
+/** A database path shortened to something a user can recognize in a message */
+export function describeDatabase(dbPath: string): string {
+  const parts = dbPath.split(path.sep).filter(Boolean);
+  return parts.slice(-3, -1).join("/") || dbPath;
+}
+
+/** Write a full JSON value back to one key (callers create the backup first) */
+function writeRecentsValue(dbPath: string, snapshot: RecentsSnapshot, entries: unknown[]): void {
   let root: unknown;
   if (snapshot.container === "array") {
     root = entries;
@@ -390,22 +392,17 @@ function writeRecentsValue(
   const json = JSON.stringify(root).replace(/'/g, "''");
   const escapedKey = snapshot.key.replace(/'/g, "''");
 
-  runSqlite(
-    dbPath,
-    `UPDATE ItemTable SET value = '${json}' WHERE key = '${escapedKey}';\n`,
-  );
+  runSqlite(dbPath, `UPDATE ItemTable SET value = '${json}' WHERE key = '${escapedKey}';\n`);
 }
 
 /**
- * 从单个 IDE 的所有数据库中删除指定目标（附带 .bak 备份）。
+ * Remove the given targets from every database of one editor.
  *
- * 只回写真正命中记录的那个键，未命中的键保持原样，
- * 因此不会因为「猜错键名」而把某个库的最近项目整体清空。
+ * Only the key the records were actually found under is written back, so an
+ * incorrect guess about the key name can never wipe an editor's recents. See
+ * `removePathsFromAllDatabases` for the guaranteed order of backup and writes.
  */
-export function removePathsFromProvider(
-  provider: IDEProvider,
-  targetsToRemove: string[],
-): ProviderRemovalResult {
+export function removePathsFromProvider(provider: IDEProvider, targetsToRemove: string[]): ProviderRemovalResult {
   const result: ProviderRemovalResult = {
     providerId: provider.id,
     providerName: provider.name,
@@ -419,68 +416,76 @@ export function removePathsFromProvider(
   const errors: string[] = [];
 
   for (const dbPath of resolveDatabasePaths(provider)) {
-    const dbLabel = path.basename(path.dirname(dbPath));
+    const dbLabel = describeDatabase(dbPath);
 
     let snapshots: RecentsSnapshot[];
     try {
       snapshots = readRecentsSnapshots(dbPath);
     } catch (error) {
-      errors.push(`${dbLabel}: 读取失败（${describeError(error)}）`);
+      errors.push(`${dbLabel}: could not be read (${describeError(error)})`);
       continue;
     }
 
     result.attemptedDatabases += 1;
 
-    for (const snapshot of snapshots) {
-      const kept = snapshot.entries.filter((entry) => {
-        const location = resolveEntryLocation(entry);
-        // 解析不了的记录一律保留，避免误删
-        return !location || !removeSet.has(location.target);
-      });
+    // Work out what each key would look like after the removal, and skip the
+    // database entirely when nothing matches.
+    const pending = snapshots
+      .map((snapshot) => {
+        const kept = snapshot.entries.filter((entry) => {
+          const location = resolveEntryLocation(entry);
+          // Entries we cannot resolve are always kept, to avoid deleting the wrong thing
+          return !location || !removeSet.has(location.target);
+        });
+        return {
+          snapshot,
+          kept,
+          removed: snapshot.entries.length - kept.length,
+        };
+      })
+      .filter((item) => item.removed > 0);
 
-      const removed = snapshot.entries.length - kept.length;
-      if (removed === 0) continue;
+    if (pending.length === 0) continue;
 
-      let backupFailed = false;
-      try {
-        copyFileSync(dbPath, `${dbPath}.bak`);
-      } catch {
-        backupFailed = true;
-      }
+    // Exactly one backup per database, and always before the first write:
+    // backing up per key would replace the original copy with an already
+    // modified database.
+    let backupFailed = false;
+    try {
+      copyFileSync(dbPath, `${dbPath}.bak`);
+    } catch {
+      backupFailed = true;
+    }
 
+    let writtenKeys = 0;
+    for (const { snapshot, kept, removed } of pending) {
       try {
         writeRecentsValue(dbPath, snapshot, kept);
       } catch (error) {
-        errors.push(
-          `${dbLabel} (${snapshot.key}): 写入失败（${describeError(error)}）`,
-        );
+        errors.push(`${dbLabel} (${snapshot.key}): could not be written (${describeError(error)})`);
         continue;
       }
 
+      writtenKeys += 1;
       result.removedCount += removed;
-      result.removedByKey[snapshot.key] =
-        (result.removedByKey[snapshot.key] ?? 0) + removed;
-      if (backupFailed) {
-        result.backupFailures.push(dbPath);
-      }
+      result.removedByKey[snapshot.key] = (result.removedByKey[snapshot.key] ?? 0) + removed;
+    }
+
+    if (backupFailed && writtenKeys > 0 && !result.backupFailures.includes(dbPath)) {
+      result.backupFailures.push(dbPath);
     }
   }
 
   if (errors.length > 0) {
-    result.error = errors.join("；");
+    result.error = errors.join("; ");
   }
 
   return result;
 }
 
-/** 从所有已注册 IDE 的数据库中删除指定目标 */
-export function removePathsFromAllDatabases(
-  providers: IDEProvider[],
-  targetsToRemove: string[],
-): RemovalReport {
-  const results = providers.map((provider) =>
-    removePathsFromProvider(provider, targetsToRemove),
-  );
+/** Remove the given targets from every database of every registered editor */
+export function removePathsFromAllDatabases(providers: IDEProvider[], targetsToRemove: string[]): RemovalReport {
+  const results = providers.map((provider) => removePathsFromProvider(provider, targetsToRemove));
 
   return {
     totalRemoved: results.reduce((sum, item) => sum + item.removedCount, 0),

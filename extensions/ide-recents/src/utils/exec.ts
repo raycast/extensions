@@ -4,9 +4,9 @@ import path from "path";
 import type { OpenCommand } from "../providers/types";
 
 /**
- * Raycast 以 GUI 进程运行，默认 PATH 很短
- * （通常是 /usr/bin:/bin:/usr/sbin:/sbin），
- * 因此在查找 IDE CLI 之前显式补齐常见的安装位置。
+ * Raycast runs as a GUI process with a very short PATH (usually
+ * /usr/bin:/bin:/usr/sbin:/sbin), so the common install locations are added
+ * explicitly before looking for an IDE CLI.
  */
 const EXTRA_SEARCH_PATHS = [
   "/usr/local/bin",
@@ -22,12 +22,10 @@ const EXTRA_SEARCH_PATHS = [
 const EXEC_TIMEOUT_MS = 15000;
 const EXEC_MAX_BUFFER = 4 * 1024 * 1024;
 
-/** 构造执行 IDE CLI 时使用的环境变量 */
+/** Environment used when running an IDE CLI */
 export function buildExecEnv(): NodeJS.ProcessEnv {
   const currentPath = process.env.PATH ? process.env.PATH.split(":") : [];
-  const pathEntries = Array.from(
-    new Set([...EXTRA_SEARCH_PATHS, ...currentPath].filter(Boolean)),
-  );
+  const pathEntries = Array.from(new Set([...EXTRA_SEARCH_PATHS, ...currentPath].filter(Boolean)));
 
   return {
     ...process.env,
@@ -42,11 +40,12 @@ export interface CommandResult {
 }
 
 /**
- * 执行一条打开命令。
+ * Run one open command.
  *
- * 使用 execFile 而非 exec：可执行文件与参数分开传递，不经过 shell。
- * 因此项目路径中即便包含空格、引号、$()、反引号、分号等字符，
- * 也只会被当作普通参数，既不会被解释执行，也不会因转义问题而打不开。
+ * `execFile` is used instead of `exec`, so the executable and its arguments are
+ * passed separately and no shell is involved. A project path that contains
+ * spaces, quotes, `$()`, backticks or semicolons is therefore only ever treated
+ * as an argument: it is neither interpreted nor mangled by escaping.
  */
 export function runOpenCommand(command: OpenCommand): Promise<CommandResult> {
   return new Promise((resolve) => {
@@ -72,15 +71,15 @@ export function runOpenCommand(command: OpenCommand): Promise<CommandResult> {
   });
 }
 
-/** 按 POSIX 规则对单个参数加引号 */
+/** Quote a single argument using POSIX rules */
 function quoteForShell(value: string): string {
   if (/^[A-Za-z0-9_@%+=:,./-]+$/.test(value)) return value;
   return `'${value.replace(/'/g, `'\\''`)}'`;
 }
 
 /**
- * 把一条打开命令渲染成可以直接粘进终端的字符串。
- * 仅用于展示 / 复制到剪贴板，不参与实际执行。
+ * Render an open command as a string that can be pasted into a terminal.
+ * Used for display and "Copy Terminal Command" only — never for execution.
  */
 export function formatOpenCommand(command: OpenCommand): string {
   return [command.command, ...command.args].map(quoteForShell).join(" ");

@@ -2,7 +2,7 @@ import { homedir } from "os";
 import path from "path";
 import type { IDEProvider } from "./types";
 
-/** Trae CLI 的候选绝对路径（按优先级尝试） */
+/** Candidate absolute paths of the Trae CLI, tried in order */
 const TRAE_CLI_PATHS = [
   "/usr/local/bin/trae",
   "/opt/homebrew/bin/trae",
@@ -16,12 +16,7 @@ export const traeProvider: IDEProvider = {
 
   getDatabasePaths() {
     const home = homedir();
-    return [
-      path.join(
-        home,
-        "Library/Application Support/Trae/User/globalStorage/state.vscdb",
-      ),
-    ];
+    return [path.join(home, "Library/Application Support/Trae/User/globalStorage/state.vscdb")];
   },
 
   getOpenCommands(projectPath: string) {

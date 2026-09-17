@@ -2,7 +2,7 @@ import { homedir } from "os";
 import path from "path";
 import type { IDEProvider } from "./types";
 
-/** VS Code CLI 的候选绝对路径（按优先级尝试） */
+/** Candidate absolute paths of the VS Code CLI, tried in order */
 const VSCODE_CLI_PATHS = [
   "/usr/local/bin/code",
   "/opt/homebrew/bin/code",
@@ -17,18 +17,12 @@ export const vscodeProvider: IDEProvider = {
   getDatabasePaths() {
     const home = homedir();
     return [
-      // VS Code 1.118+ 新版共享存储（近期版本中键名为 history.recentlyOpenedPathsList）
+      // VS Code 1.118+ shared storage (stores recents under `history.recentlyOpenedPathsList`)
       path.join(home, ".vscode-shared/sharedStorage/state.vscdb"),
-      // macOS 传统全局用户存储（近期版本中键名为 recently.opened）
-      path.join(
-        home,
-        "Library/Application Support/Code/User/globalStorage/state.vscdb",
-      ),
+      // Classic per-user global storage (stores recents under `recently.opened`)
+      path.join(home, "Library/Application Support/Code/User/globalStorage/state.vscdb"),
       // Code - Insiders
-      path.join(
-        home,
-        "Library/Application Support/Code - Insiders/User/globalStorage/state.vscdb",
-      ),
+      path.join(home, "Library/Application Support/Code - Insiders/User/globalStorage/state.vscdb"),
     ];
   },
 

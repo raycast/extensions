@@ -1,6 +1,6 @@
 # IDE Recents
 
-A Raycast extension to search and open recent projects across multiple IDEs — VS Code, Trae, and Antigravity IDE — from a single unified interface.
+Search and open recent projects from VS Code, Trae, and Antigravity IDE — in a single Raycast list.
 
 ## Supported IDEs
 
@@ -12,12 +12,13 @@ A Raycast extension to search and open recent projects across multiple IDEs — 
 
 ## Features
 
-- 🔍 **Unified Search**: Search recent projects across all installed IDEs in one place.
-- 🏷️ **Smart Deduplication**: Projects opened in multiple IDEs show once with all source IDE tags.
-- 🎯 **IDE Filtering**: Filter projects by IDE using the dropdown selector.
-- ⚡ **Multi-Open**: Choose which IDE to open a project in directly from the action panel.
-- 📋 **Copy Actions**: Copy file paths or CLI commands to clipboard.
-- 🎨 **Rich Visual Tags**: Color-coded badges showing project type (Directory, Workspace, Remote) and source IDE.
+- 🔍 **Unified search**: every editor's recent projects in one list, with no preference to switch first.
+- 🏷️ **Smart deduplication**: a project opened in several IDEs shows up once, with one tag per source IDE.
+- 🎯 **IDE filtering**: narrow the list down to a single editor from the dropdown.
+- ⚡ **Open anywhere**: press `↵` for the most recent editor, or pick one of the others with `⌘1`, `⌘2`, `⌘3`.
+- 🧹 **Missing project cleanup**: stale entries are flagged, and can be deleted from the IDE databases in one go.
+- 🙈 **Hide without deleting**: hide entries from the list and restore them later; the databases stay untouched.
+- 📋 **Copy actions**: copy a path, or a terminal command that opens the project in its IDE.
 
 ## Prerequisites
 
@@ -25,7 +26,7 @@ A Raycast extension to search and open recent projects across multiple IDEs — 
 - (Recommended) IDE CLI commands installed in your `PATH`:
   - **VS Code**: `Cmd+Shift+P` → `Shell Command: Install 'code' command in PATH`
   - **Trae**: CLI is typically auto-installed at `/usr/local/bin/trae`
-  - **Antigravity IDE**: Falls back to the bundled CLI at the app path if not in `PATH`
+  - **Antigravity IDE**: falls back to the CLI bundled with the app if it is not in `PATH`
 
 ## Where the data comes from
 
@@ -40,8 +41,24 @@ locations and both key names used across versions:
 | Trae | `~/Library/Application Support/Trae/User/globalStorage/state.vscdb` |
 | Antigravity IDE | `~/Library/Application Support/Antigravity IDE/User/globalStorage/state.vscdb` |
 
-Removing an entry from the IDE database rewrites only the key that actually holds it and
-keeps a `.bak` copy next to the database before writing.
+Remote and virtual workspaces (for example `vscode-remote://` and `vscode-vfs://` entries
+from GitHub or dev containers) are kept as URIs, marked as remote, and are never treated as
+missing because their existence cannot be checked locally.
+
+## Hide, restore, and delete
+
+The list distinguishes three operations:
+
+| Action | What it changes |
+| --- | --- |
+| **Hide from List** | Only Raycast's own list. The IDE databases are left untouched. |
+| **Restore to List** / **Restore All Hidden Projects** | Brings hidden entries back. Nothing is written to the databases. |
+| **Delete from IDE Databases** | Removes the entry from every IDE database that still lists it, then hides it from the list. |
+
+Deleting rewrites only the key that actually holds the record, and writes a `.bak` copy of
+each database before it is modified. A removal is only reported as successful when every
+database could be updated — if one fails, the entry stays in the list and the failure is
+shown, so the list never claims a removal that did not happen.
 
 ## Adding New IDE Support
 

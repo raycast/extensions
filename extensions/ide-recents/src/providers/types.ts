@@ -1,40 +1,42 @@
 /**
- * IDEProvider — 多 IDE 抽象层核心接口
+ * IDEProvider — the interface behind every supported editor.
  *
- * 每个 IDE（VS Code、Trae、Antigravity 等）实现该接口，
- * 提供数据库路径、打开命令和品牌信息。
- * 新增 IDE 只需创建一个新文件并在 registry.ts 中注册。
+ * Each editor (VS Code, Trae, Antigravity, ...) implements it to expose its
+ * database paths, its open commands and its branding. Adding an editor means
+ * adding one file next to this one and registering it in registry.ts.
  */
 
 /**
- * 一条候选打开命令。
+ * One candidate open command.
  *
- * 必须拆分成「可执行文件 + 参数数组」两部分，由调用方用 execFile 直接执行，
- * 不经过 shell；因此项目路径中包含空格、引号、$()、反引号等字符时，
- * 既不会被 shell 解释执行，也不会因为转义问题而打不开。
+ * The executable and its arguments are kept apart so callers can run them with
+ * `execFile` without a shell. A project path then travels as a single argument:
+ * characters such as spaces, quotes, `$()` or backticks are never interpreted,
+ * and a path containing them still opens.
  */
 export interface OpenCommand {
-  /** 可执行文件的绝对路径，或 PATH 中的命令名 */
+  /** Absolute path of the executable, or a command name resolved through PATH */
   command: string;
-  /** 逐项传给可执行文件的参数（不拼接、不转义） */
+  /** Arguments handed to the executable one by one (never concatenated or escaped) */
   args: string[];
 }
 
 export interface IDEProvider {
-  /** 唯一标识 */
+  /** Stable identifier */
   id: string;
-  /** 显示名称 */
+  /** Display name */
   name: string;
-  /** 品牌色（HEX） */
+  /** Brand color (hex) */
   color: string;
   /**
-   * 候选数据库路径列表（按优先级排列）。
-   * 读取与清理会覆盖其中所有真实存在的库，而不只是第一个。
+   * Candidate database paths, most relevant first.
+   * Reading and cleanup cover every path that exists, not just the first one.
    */
   getDatabasePaths(): string[];
   /**
-   * 打开项目的候选命令列表（按优先级依次尝试）。
-   * 项目路径必须以独立参数传入，禁止拼接进 command 字符串。
+   * Candidate open commands, tried in order.
+   * The project path must stay a separate argument and must never be
+   * concatenated into the command string.
    */
   getOpenCommands(projectPath: string): OpenCommand[];
 }
@@ -43,15 +45,16 @@ export interface ProjectItem {
   id: string;
   name: string;
   /**
-   * 供 IDE 打开的目标：
-   * - 本地项目为文件系统路径；
-   * - 远程 / 虚拟工作区（vscode-remote://、vscode-vfs:// 等）为原始 URI。
+   * What the editor should open:
+   * - a filesystem path for local projects;
+   * - the original URI for remote / virtual workspaces
+   *   (`vscode-remote://`, `vscode-vfs://`, ...).
    */
   path: string;
   type: "folder" | "workspace" | "remote" | "file";
   extension: string;
-  /** 项目来源 IDE 列表（同一路径可能被多个 IDE 打开过） */
+  /** Editors this path was opened from (the same path can come from several) */
   sources: string[];
-  /** 本地路径是否存在；远程 / 虚拟工作区无法在本地校验，恒为 true */
+  /** Whether the local path exists; always true for remote / virtual workspaces */
   exists?: boolean;
 }
