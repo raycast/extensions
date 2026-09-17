@@ -1,11 +1,12 @@
 import { CompactMovie, toCompactMovie } from "./compact-media";
 import { describeYearFilter, searchMovieResults } from "./resolve-media";
+import { normalizeTitle, resolveLookupQuery } from "./title-text";
 
 type Input = {
   /**
    * The title of the movie to search for in the Trakt database.
    * Case-insensitive, supports partial titles.
-   * Example: "inception", "the matrix"
+   * A trailing year ("Dune 1989", "Dune (1989)") is parsed the same as `year`.
    */
   title: string;
   /**
@@ -39,15 +40,26 @@ type Output = {
  */
 export default async function tool(input: Input): Promise<Output> {
   const { title, year } = input;
+  const lookup = resolveLookupQuery(title, year);
+  const searchTitle = lookup.text ?? title;
 
-  const { items, truncated } = await searchMovieResults(title);
-  const movies = year === undefined ? items : items.filter((item) => item.movie.year === year);
+  const { items, truncated } = await searchMovieResults(searchTitle);
+  const rawExact = items.filter((item) => normalizeTitle(item.movie.title) === normalizeTitle(title));
+  const appliedYear = rawExact.length > 0 ? year : lookup.year;
+  const pool = rawExact.length > 0 ? rawExact : items;
+  const movies = appliedYear === undefined ? pool : pool.filter((item) => item.movie.year === appliedYear);
 
   return {
     data: movies.map(toCompactMovie),
     matchesForTitle: items.length,
     truncated,
-    message: describeYearFilter(title, year, movies.length, items.length, truncated),
+    message: describeYearFilter(
+      rawExact.length > 0 ? title : searchTitle,
+      appliedYear,
+      movies.length,
+      items.length,
+      truncated,
+    ),
     hasMore: false,
   };
 }

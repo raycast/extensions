@@ -24,6 +24,13 @@ export const TraktIdSchemaWithTime = TraktIdSchema.extend({
   watched_at: z.string(),
 });
 
+export const TraktRatingItemSchema = TraktIdSchema.extend({
+  rating: z.number().int().min(1).max(10),
+  rated_at: z.string().optional(),
+});
+
+export type TraktRatingItem = z.infer<typeof TraktRatingItemSchema>;
+
 export const TraktRecommendationRequestSchema = TraktPaginationSchema.merge(TraktExtendedSchema).extend({
   ignore_collected: z.coerce.boolean(),
   ignore_watchlisted: z.coerce.boolean(),
@@ -37,6 +44,37 @@ export const TraktSearchSchema = TraktPaginationSchema.merge(TraktExtendedSchema
   query: z.string(),
   fields: z.enum(["title", "title,aliases", "title,aliases,translations"]).optional(),
 });
+
+export const TraktIdLookupQuerySchema = z.object({
+  type: z.enum(["movie", "show", "season", "episode"]),
+});
+
+const TraktLookupEntitySchema = z.object({
+  title: z.string().optional(),
+  year: z.number().optional(),
+  ids: z.object({
+    trakt: z.number(),
+  }),
+});
+
+/**
+ * Response of Trakt's ID lookup. Only the fields needed to name an item are modelled, since
+ * this is used to tell a user which item a write action is about to touch.
+ */
+export const TraktIdLookupSchema = z.array(
+  z.object({
+    type: z.string(),
+    movie: TraktLookupEntitySchema.optional(),
+    show: TraktLookupEntitySchema.optional(),
+    season: TraktLookupEntitySchema.extend({ number: z.number().optional() }).optional(),
+    episode: TraktLookupEntitySchema.extend({
+      season: z.number().optional(),
+      number: z.number().optional(),
+    }).optional(),
+  }),
+);
+
+export type TraktIdLookupEntry = z.infer<typeof TraktIdLookupSchema>[number];
 
 export const TraktPaginationWithSortingSchema = TraktPaginationSchema.merge(TraktSortingSchema);
 
@@ -275,6 +313,42 @@ export const TraktShowDetailedProgressSchema = z.object({
 
 export type TraktShowProgressQuery = z.infer<typeof TraktShowProgressQuerySchema>;
 export type TraktShowDetailedProgress = z.infer<typeof TraktShowDetailedProgressSchema>;
+
+export const TraktUserRatingItemSchema = z.object({
+  rated_at: z.string(),
+  rating: z.number(),
+  type: z.string(),
+  movie: TraktMovieBaseItem.optional(),
+  show: TraktShowBaseItem.optional(),
+  season: z
+    .object({
+      number: z.number(),
+      ids: z
+        .object({
+          trakt: z.number(),
+          tvdb: z.number().optional().nullable(),
+          tmdb: z.number().optional().nullable(),
+        })
+        .optional(),
+    })
+    .optional(),
+  episode: z
+    .object({
+      season: z.number(),
+      number: z.number(),
+      title: z.string().optional().nullable(),
+      ids: z.object({
+        trakt: z.number(),
+        tvdb: z.number().optional().nullable(),
+        imdb: z.string().optional().nullable(),
+        tmdb: z.number().optional().nullable(),
+      }),
+    })
+    .optional(),
+});
+
+export const TraktUserRatingListSchema = z.array(TraktUserRatingItemSchema);
+export type TraktUserRatingItem = z.infer<typeof TraktUserRatingItemSchema>;
 
 export const TraktUserStatsSchema = z.object({
   movies: z

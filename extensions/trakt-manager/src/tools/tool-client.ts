@@ -2,6 +2,9 @@ import { initTraktClient } from "../lib/client";
 
 export const TOOL_TIMEOUT_MS = 15000;
 
+/** Trakt caps `limit` at 250 on paginated sync endpoints as of June 2026. */
+export const TRAKT_LOOKUP_PAGE_SIZE = 250;
+
 export const toolTraktClient = initTraktClient();
 
 export function getToolSignal(): AbortSignal {

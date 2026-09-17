@@ -98,14 +98,59 @@
       "description": "Get watching progress, completed episode counts, and season details for a TV show on Trakt"
     },
     {
+      "name": "add-to-watchlist",
+      "title": "Add to Watchlist",
+      "description": "Add a movie or TV show to your Trakt watchlist"
+    },
+    {
+      "name": "remove-from-watchlist",
+      "title": "Remove from Watchlist",
+      "description": "Remove a movie or TV show from your Trakt watchlist"
+    },
+    {
+      "name": "mark-movie-watched",
+      "title": "Mark Movie as Watched",
+      "description": "Mark a movie as watched in your Trakt history"
+    },
+    {
+      "name": "mark-episode-watched",
+      "title": "Mark Episode as Watched",
+      "description": "Mark a specific TV show episode as watched in your Trakt history"
+    },
+    {
+      "name": "mark-show-watched",
+      "title": "Mark Show as Watched",
+      "description": "Mark an entire TV show (all seasons and episodes) as watched in your Trakt history"
+    },
+    {
+      "name": "rate-media",
+      "title": "Rate Media",
+      "description": "Rate a movie, TV show, or episode on Trakt with a score from 1 to 10"
+    },
+    {
       "name": "get-history",
       "title": "Get Watch History",
       "description": "Definitively check whether and when a movie or show was watched, or browse recent Trakt watch history"
     },
     {
+      "name": "remove-from-history",
+      "title": "Remove from History",
+      "description": "Remove a movie, TV show, or episode from your Trakt watch history"
+    },
+    {
       "name": "get-recommendations",
       "title": "Get Recommendations",
       "description": "Get personalized movie and TV show recommendations based on your Trakt habits"
+    },
+    {
+      "name": "get-ratings",
+      "title": "Get Ratings",
+      "description": "Get your ratings for movies, TV shows, and episodes or search your rating for a specific title"
+    },
+    {
+      "name": "remove-rating",
+      "title": "Remove Rating",
+      "description": "Remove your rating for a movie, TV show, season, or episode on Trakt"
     },
     {
       "name": "get-season-episodes",

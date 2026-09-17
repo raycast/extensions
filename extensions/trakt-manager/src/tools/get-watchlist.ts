@@ -1,7 +1,8 @@
 import { withPagination } from "../lib/schema";
 import { CompactMovie, CompactShow, toCompactMovie, toCompactShow } from "./compact-media";
-import { identifyTraktIdKinds, isMatchableTitle, normalizeTitle } from "./resolve-media";
-import { executeToolCall, toolTraktClient } from "./tool-client";
+import { identifyTraktIdKinds, isMatchableTitle } from "./resolve-media";
+import { classifyTitleMatch, partitionByLookup, resolveLookupQuery } from "./title-text";
+import { executeToolCall, TRAKT_LOOKUP_PAGE_SIZE, toolTraktClient } from "./tool-client";
 
 type Input = {
   /**
@@ -22,6 +23,11 @@ type Input = {
    * Movie and show IDs overlap: pass `type` ("movies" or "shows") with this field.
    */
   traktId?: number;
+  /**
+   * Optional release year. Use it when several identically named titles are on the
+   * watchlist. A year stuffed into `query` ("Dune 1989") is parsed the same way.
+   */
+  year?: number;
   /**
    * The page number for paginated results (when listing items). Defaults to 1.
    */
@@ -77,8 +83,8 @@ async function fetchAllPagesForQuery<
     signal: AbortSignal,
   ) => Promise<{ status: number; body: T[]; headers: Headers }>,
   matcher: (item: T) => boolean,
-  maxPages = 20,
-  pageSize = 100,
+  maxPages = 100,
+  pageSize = TRAKT_LOOKUP_PAGE_SIZE,
 ): Promise<{ matches: T[]; totalCount: number; scanned: number; exhaustive: boolean }> {
   const matches: T[] = [];
   let totalCount = 0;
@@ -112,12 +118,13 @@ async function fetchAllPagesForQuery<
  * - To view your watchlist, supply `type` and an optional `limit` (default: 30).
  */
 export default async function tool(input: Input): Promise<Output> {
-  const { type = "all", query, traktId, page = 1, limit = 30 } = input;
+  const { type = "all", query, traktId, year, page = 1, limit = 30 } = input;
+  const lookup = resolveLookupQuery(query, year);
   const safeLimit = Math.min(Math.max(limit, 1), 100);
 
   // Fast path: search for a specific item in the watchlist
   if (query || traktId) {
-    if (query && traktId === undefined && !isMatchableTitle(query)) {
+    if (query && traktId === undefined && !isMatchableTitle(lookup.text ?? query)) {
       return {
         found: false,
         inWatchlist: false,
@@ -175,25 +182,16 @@ export default async function tool(input: Input): Promise<Output> {
       scanShows = kinds[0] === "show";
     }
 
-    const normalizedQuery = query ? normalizeTitle(query) : undefined;
+    const classifyAgainst = (title: string, id: number, q: string | undefined) =>
+      classifyTitleMatch(title, q, { requested: traktId, item: id });
 
-    /**
-     * Accents cannot be allowed to decide the verdict: comparing raw text makes "Amelie" miss
-     * "Amélie" while the reply below still claims every entry was searched. Containment is kept
-     * so near misses can be surfaced, but only an outright title match counts as being in the
-     * watchlist, otherwise "Dune: Part Two" would answer for "Dune".
-     */
-    const classify = (title: string, id: number): "exact" | "partial" | "none" => {
-      if (traktId !== undefined && id === traktId) return "exact";
-      if (!normalizedQuery) return "none";
-
-      const normalizedTitle = normalizeTitle(title);
-      if (normalizedTitle === normalizedQuery) return "exact";
-
-      return normalizedTitle.includes(normalizedQuery) ? "partial" : "none";
+    const matchesFilter = (title: string, id: number) => {
+      if (classifyAgainst(title, id, query) !== "none") return true;
+      if (lookup.text && lookup.text !== query?.trim()) {
+        return classifyAgainst(title, id, lookup.text) !== "none";
+      }
+      return false;
     };
-
-    const matchesFilter = (title: string, id: number) => classify(title, id) !== "none";
 
     let matchedMovies: CompactMovie[] = [];
     let matchedShows: CompactShow[] = [];
@@ -241,35 +239,60 @@ export default async function tool(input: Input): Promise<Output> {
       exhaustive = exhaustive && result.exhaustive;
     }
 
-    const matched = [...matchedMovies, ...matchedShows];
-    const exactCount = matched.filter((item) => classify(item.title, item.traktId) === "exact").length;
-    const relatedCount = matched.length - exactCount;
-    const isFound = exactCount > 0;
+    const moviesPick = partitionByLookup(
+      matchedMovies,
+      (item) => item.title,
+      (item) => item.traktId,
+      (item) => item.year,
+      query,
+      traktId,
+      year,
+    );
+    const showsPick = partitionByLookup(
+      matchedShows,
+      (item) => item.title,
+      (item) => item.traktId,
+      (item) => item.year,
+      query,
+      traktId,
+      year,
+    );
+    const yearExact = [...moviesPick.exact, ...showsPick.exact];
+    const yearHeldBy = [...moviesPick.yearHeldBy, ...showsPick.yearHeldBy];
+    const related = [...moviesPick.related, ...showsPick.related];
+    const isFound = yearExact.length > 0;
     const target = query ?? `Trakt ID ${traktId}`;
+    const yearLabel = lookup.year !== undefined ? ` (${lookup.year})` : "";
     const plural = (count: number) => (count === 1 ? "y" : "ies");
+    const definitive = exhaustive && (isFound || yearHeldBy.length === 0);
 
     let message: string;
     if (isFound) {
       message =
-        relatedCount > 0
-          ? `Found ${exactCount} item(s) titled "${target}" in your watchlist, plus ${relatedCount} related ` +
-            `entr${plural(relatedCount)} whose title contains it.`
-          : `Found ${exactCount} matching item(s) in your watchlist.`;
-    } else if (relatedCount > 0) {
+        related.length > 0
+          ? `Found ${yearExact.length} item(s) titled "${target}"${yearLabel} in your watchlist, plus ${related.length} related ` +
+            `entr${plural(related.length)} whose title contains it.`
+          : `Found ${yearExact.length} matching item(s) in your watchlist.`;
+    } else if (yearHeldBy.length > 0) {
+      const known = yearHeldBy.map((item) => `"${item.title}"${item.year ? ` (${item.year})` : ""}`).join(", ");
       message =
-        `"${target}" itself is not in your watchlist, but ${relatedCount} related entr${plural(relatedCount)} ` +
-        `share part of that title: ${matched.map((item) => `"${item.title}"`).join(", ")}. Ask the user whether ` +
+        `"${target}" is on your watchlist, but not for ${lookup.year}: ${known}. ` +
+        `Ask which release they mean instead of reporting a confirmed absence.`;
+    } else if (related.length > 0) {
+      message =
+        `"${target}" itself is not in your watchlist, but ${related.length} related entr${plural(related.length)} ` +
+        `share part of that title: ${related.map((item) => `"${item.title}"`).join(", ")}. Ask the user whether ` +
         `they meant one of those rather than answering with a flat no.`;
-    } else if (exhaustive) {
-      message = `Confirmed: "${target}" is not in your watchlist (searched every entry).`;
+    } else if (definitive) {
+      message = `Confirmed: "${target}"${yearLabel} is not in your watchlist (searched every entry).`;
     } else {
-      message = `"${target}" was not found, but the watchlist is too large to scan entirely. This result is NOT definitive.`;
+      message = `"${target}"${yearLabel} was not found, but the watchlist is too large to scan entirely. This result is NOT definitive.`;
     }
 
     return {
       found: isFound,
       inWatchlist: isFound,
-      exhaustive,
+      exhaustive: definitive,
       message,
       matchedMovies: matchedMovies.length > 0 ? matchedMovies : undefined,
       matchedShows: matchedShows.length > 0 ? matchedShows : undefined,
