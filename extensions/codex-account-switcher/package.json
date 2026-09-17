@@ -89,7 +89,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^2.4.1"
+    "@raycast/api": "^2.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

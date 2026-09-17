@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -9,6 +9,7 @@ import {
   List,
   Toast,
   confirmAlert,
+  getPreferenceValues,
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
@@ -17,13 +18,11 @@ import {
   CODEX_AUTH_INSTALL_URL,
   CodexAccount,
   CodexAuthError,
-  getRefreshMode,
   listAccounts,
   loginAccount,
   removeAccount,
   switchAccount,
 } from "./lib/codex-auth";
-import { getCopy } from "./lib/i18n";
 import {
   accountSubtitle,
   accountTitle,
@@ -45,16 +44,19 @@ type ViewState = {
 
 export default function Command() {
   const [state, setState] = useState<ViewState>({ accounts: [], isLoading: true });
-  const refreshMode = getRefreshMode();
-  const copy = getCopy();
+  const latestLoadId = useRef(0);
+  const refreshMode = getPreferenceValues<Preferences.SwitchCodexAccount>().refreshMode;
 
   const load = useCallback(async () => {
+    const loadId = ++latestLoadId.current;
     setState((current) => ({ ...current, isLoading: true, error: undefined, errorCode: undefined }));
     try {
       const result = await listAccounts(refreshMode);
+      if (loadId !== latestLoadId.current) return;
       setState({ accounts: result.accounts, isLoading: false });
     } catch (error) {
-      const message = error instanceof Error ? error.message : copy.unableToReadAccounts;
+      if (loadId !== latestLoadId.current) return;
+      const message = error instanceof Error ? error.message : "Unable to Read Codex Accounts";
       setState({
         accounts: [],
         isLoading: false,
@@ -62,7 +64,7 @@ export default function Command() {
         errorCode: error instanceof CodexAuthError ? error.code : undefined,
       });
     }
-  }, [copy, refreshMode]);
+  }, [refreshMode]);
 
   useEffect(() => {
     void load();
@@ -71,60 +73,60 @@ export default function Command() {
   const performSwitch = useCallback(
     async (account: CodexAccount) => {
       if (account.active) {
-        await showToast({ style: Toast.Style.Success, title: copy.accountAlreadyActive });
+        await showToast({ style: Toast.Style.Success, title: "This account is already active" });
         return;
       }
 
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: copy.switchingTo(accountTitle(account)),
+        title: `Switching to ${accountTitle(account)}`,
       });
       try {
         await switchAccount(account.account_key);
         toast.style = Toast.Style.Success;
-        toast.title = copy.switchedTo(accountTitle(account));
-        toast.message = copy.restartCodexClient;
+        toast.title = `Switched to ${accountTitle(account)}`;
+        toast.message = "Restart any running Codex client to apply the change";
         await load();
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = copy.switchFailed;
-        toast.message = error instanceof CodexAuthError ? error.message : copy.tryAgain;
+        toast.title = "Unable to Switch Account";
+        toast.message = error instanceof CodexAuthError ? error.message : "Try again later";
       }
     },
-    [copy, load],
+    [load],
   );
 
   const performLogin = useCallback(async () => {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: copy.openingCodexLogin,
-      message: copy.completeLoginInBrowser,
+      title: "Opening Codex Login",
+      message: "Complete the sign-in process in your browser",
     });
     try {
       await loginAccount();
       toast.style = Toast.Style.Success;
-      toast.title = copy.accountAdded;
-      toast.message = copy.newAccountIsActive;
+      toast.title = "Account Added";
+      toast.message = "The new account is now active";
       await load();
     } catch (error) {
       toast.style = Toast.Style.Failure;
-      toast.title = copy.loginFailed;
-      toast.message = error instanceof CodexAuthError ? error.message : copy.tryAgain;
+      toast.title = "Unable to Sign In";
+      toast.message = error instanceof CodexAuthError ? error.message : "Try again later";
     }
-  }, [copy, load]);
+  }, [load]);
 
   const performRemove = useCallback(
     async (account: CodexAccount) => {
       const confirmed = await confirmAlert({
         icon: Icon.Trash,
-        title: copy.removeAccountTitle(accountTitle(account)),
+        title: `Remove ${accountTitle(account)}?`,
         message: account.active
           ? state.accounts.length === 1
-            ? copy.removeLastActiveAccountMessage
-            : copy.removeActiveAccountMessage
-          : copy.removeAccountMessage,
+            ? "This is the last saved account and is currently active. Removing it will also remove the local Codex login."
+            : "This account is currently active. After removal, codex-auth will select another saved account."
+          : "This account will be removed from codex-auth. This action cannot be undone.",
         primaryAction: {
-          title: copy.removeAccount,
+          title: "Remove Account",
           style: Alert.ActionStyle.Destructive,
         },
       });
@@ -132,94 +134,76 @@ export default function Command() {
 
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: copy.removingAccount(accountTitle(account)),
+        title: `Removing ${accountTitle(account)}`,
       });
       try {
         await removeAccount(account.account_key);
         toast.style = Toast.Style.Success;
-        toast.title = copy.accountRemoved;
-        toast.message = account.active ? copy.activeAccountUpdated : undefined;
+        toast.title = "Account Removed";
+        toast.message = account.active ? "The active Codex account has been updated" : undefined;
         await load();
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = copy.removeFailed;
-        toast.message = error instanceof CodexAuthError ? error.message : copy.tryAgain;
+        toast.title = "Unable to Remove Account";
+        toast.message = error instanceof CodexAuthError ? error.message : "Try again later";
       }
     },
-    [copy, load, state.accounts.length],
+    [load, state.accounts.length],
   );
 
   return (
-    <List isLoading={state.isLoading} searchBarPlaceholder={copy.searchPlaceholder}>
+    <List isLoading={state.isLoading} searchBarPlaceholder="Search accounts, aliases, or workspaces">
       {state.errorCode === "executable_not_found" ? (
         <List.EmptyView
           icon={Icon.Terminal}
-          title={copy.codexAuthRequired}
-          description={copy.codexAuthRequiredDescription}
+          title="codex-auth Is Required"
+          description="Install codex-auth 0.3.0 or newer, then retry."
           actions={
             <ActionPanel>
               <Action.CopyToClipboard
-                title={copy.copyInstallCommand}
+                title="Copy Install Command"
                 content={CODEX_AUTH_INSTALL_COMMAND}
-                onCopy={() =>
-                  void showToast({ style: Toast.Style.Success, title: copy.installCommandCopied })
-                }
+                onCopy={() => void showToast({ style: Toast.Style.Success, title: "Install command copied" })}
               />
-              <Action.OpenInBrowser
-                title={copy.openInstallationGuide}
-                icon={Icon.Link}
-                url={CODEX_AUTH_INSTALL_URL}
-              />
-              <Action title={copy.retry} icon={Icon.ArrowClockwise} onAction={load} />
-              <Action
-                title={copy.openExtensionPreferences}
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action.OpenInBrowser title="Open Installation Guide" icon={Icon.Link} url={CODEX_AUTH_INSTALL_URL} />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={load} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
       ) : state.error ? (
         <List.EmptyView
           icon={Icon.Warning}
-          title={copy.unableToReadAccounts}
+          title="Unable to Read Codex Accounts"
           description={state.error}
           actions={
             <ActionPanel>
-              <Action title={copy.retry} icon={Icon.ArrowClockwise} onAction={load} />
+              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={load} />
               <Action
-                title={copy.addAccount}
+                title="Add Account"
                 icon={Icon.AddPerson}
                 shortcut={Keyboard.Shortcut.Common.New}
                 onAction={performLogin}
               />
-              <Action
-                title={copy.openExtensionPreferences}
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
       ) : state.accounts.length === 0 && !state.isLoading ? (
         <List.EmptyView
           icon={Icon.PersonCircle}
-          title={copy.noSavedAccounts}
-          description={copy.noSavedAccountsDescription}
+          title="No Saved Accounts"
+          description="Sign in to Codex to add an account here."
           actions={
             <ActionPanel>
               <Action
-                title={copy.addAccount}
+                title="Add Account"
                 icon={Icon.AddPerson}
                 shortcut={Keyboard.Shortcut.Common.New}
                 onAction={performLogin}
               />
-              <Action title={copy.refresh} icon={Icon.ArrowClockwise} onAction={load} />
-              <Action
-                title={copy.openExtensionPreferences}
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -233,7 +217,7 @@ export default function Command() {
             keywords={[account.email, account.alias ?? "", account.account_name ?? "", account.plan ?? ""]}
             accessories={[
               {
-                text: usageWindowName(account.usage.primary, copy.fiveHour),
+                text: usageWindowName(account.usage.primary, "5-hour"),
                 tooltip: resetTooltip(account.usage.primary),
               },
               {
@@ -247,7 +231,7 @@ export default function Command() {
                 },
               },
               {
-                text: usageWindowName(account.usage.secondary, copy.week),
+                text: usageWindowName(account.usage.secondary, "Week"),
                 tooltip: resetTooltip(account.usage.secondary),
               },
               {
@@ -256,7 +240,7 @@ export default function Command() {
               },
               {
                 tag: {
-                  value: planLabel(account.plan) ?? copy.unknown,
+                  value: planLabel(account.plan) ?? "Unknown",
                   color: planColor(account.plan),
                 },
                 tooltip: `${usageSummary(account)}\n${sourceTooltip(account.usage)}`,
@@ -265,35 +249,31 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title={account.active ? copy.currentAccount : copy.switchToThisAccount}
+                  title={account.active ? "Current Account" : "Switch to This Account"}
                   icon={account.active ? Icon.CheckCircle : Icon.ArrowRight}
                   onAction={() => performSwitch(account)}
                 />
                 <Action
-                  title={copy.addAccount}
+                  title="Add Account"
                   icon={Icon.AddPerson}
                   shortcut={Keyboard.Shortcut.Common.New}
                   onAction={performLogin}
                 />
                 <Action
-                  title={copy.refreshUsage}
+                  title="Refresh Usage"
                   icon={Icon.ArrowClockwise}
                   shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={load}
                 />
-                <Action.CopyToClipboard title={copy.copyEmail} content={account.email} />
+                <Action.CopyToClipboard title="Copy Email" content={account.email} />
                 <Action
-                  title={copy.removeAccount}
+                  title="Remove Account"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => performRemove(account)}
                 />
-                <Action
-                  title={copy.openExtensionPreferences}
-                  icon={Icon.Gear}
-                  onAction={openExtensionPreferences}
-                />
+                <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }
           />

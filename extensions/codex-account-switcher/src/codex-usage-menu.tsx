@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Clipboard,
   Color,
   Icon,
   LaunchType,
   MenuBarExtra,
+  getPreferenceValues,
   launchCommand,
   open,
   openExtensionPreferences,
@@ -16,17 +17,9 @@ import {
   CodexAccount,
   CodexAuthError,
   UsageWindow,
-  getRefreshMode,
   listAccounts,
 } from "./lib/codex-auth";
-import { getCopy } from "./lib/i18n";
-import {
-  accountTitle,
-  remainingPercent,
-  resetTooltip,
-  updatedAtLabel,
-  windowLabel,
-} from "./lib/presentation";
+import { accountTitle, remainingPercent, resetTooltip, updatedAtLabel, windowLabel } from "./lib/presentation";
 
 type MenuState = {
   account?: CodexAccount;
@@ -37,22 +30,25 @@ type MenuState = {
 
 export default function Command() {
   const [state, setState] = useState<MenuState>({ isLoading: true });
-  const refreshMode = getRefreshMode();
-  const copy = getCopy();
+  const latestLoadId = useRef(0);
+  const refreshMode = getPreferenceValues<Preferences.CodexUsageMenu>().refreshMode;
 
   const load = useCallback(async () => {
+    const loadId = ++latestLoadId.current;
     setState((current) => ({ ...current, isLoading: true, error: undefined, errorCode: undefined }));
     try {
       const result = await listAccounts(refreshMode, true);
+      if (loadId !== latestLoadId.current) return;
       setState({ account: result.accounts.find((account) => account.active), isLoading: false });
     } catch (error) {
+      if (loadId !== latestLoadId.current) return;
       setState({
         isLoading: false,
-        error: error instanceof Error ? error.message : copy.unableToReadUsage,
+        error: error instanceof Error ? error.message : "Unable to read Codex usage.",
         errorCode: error instanceof CodexAuthError ? error.code : undefined,
       });
     }
-  }, [copy, refreshMode]);
+  }, [refreshMode]);
 
   useEffect(() => {
     void load();
@@ -62,40 +58,28 @@ export default function Command() {
   const displayedAccountTitle = account ? accountTitle(account) : undefined;
   const primaryRemaining = remainingPercent(account?.usage.primary ?? null);
   const menuTitle = primaryRemaining === null ? undefined : `${primaryRemaining}%`;
-  const tooltip = account
-    ? `${accountTitle(account)} · ${windowLabel(account.usage.primary, copy.fiveHour)}`
-    : state.error;
+  const tooltip = account ? `${accountTitle(account)} · ${windowLabel(account.usage.primary, "5-hour")}` : state.error;
   const installRequired = state.errorCode === "executable_not_found";
 
   return (
     <MenuBarExtra
-      icon={
-        state.error ? Icon.Warning : { source: "menu-bar-icon-outline-v2.png", tintColor: Color.PrimaryText }
-      }
+      icon={state.error ? Icon.Warning : { source: "menu-bar-icon-outline-v2.png", tintColor: Color.PrimaryText }}
       title={menuTitle}
       tooltip={tooltip}
       isLoading={state.isLoading}
     >
       {installRequired ? (
         <>
-          <MenuBarExtra.Item icon={Icon.Terminal} title={copy.codexAuthRequired} />
+          <MenuBarExtra.Item icon={Icon.Terminal} title="codex-auth Is Required" />
           <MenuBarExtra.Section>
-            <MenuBarExtra.Item
-              icon={Icon.Clipboard}
-              title={copy.copyInstallCommand}
-              onAction={copyInstallCommand}
-            />
+            <MenuBarExtra.Item icon={Icon.Clipboard} title="Copy Install Command" onAction={copyInstallCommand} />
             <MenuBarExtra.Item
               icon={Icon.Link}
-              title={copy.openInstallationGuide}
+              title="Open Installation Guide"
               onAction={() => open(CODEX_AUTH_INSTALL_URL)}
             />
-            <MenuBarExtra.Item icon={Icon.ArrowClockwise} title={copy.retry} onAction={load} />
-            <MenuBarExtra.Item
-              icon={Icon.Gear}
-              title={copy.extensionPreferences}
-              onAction={openExtensionPreferences}
-            />
+            <MenuBarExtra.Item icon={Icon.ArrowClockwise} title="Retry" onAction={load} />
+            <MenuBarExtra.Item icon={Icon.Gear} title="Extension Preferences" onAction={openExtensionPreferences} />
           </MenuBarExtra.Section>
         </>
       ) : state.error ? (
@@ -108,28 +92,18 @@ export default function Command() {
             title={displayedAccountTitle ?? account.email}
             subtitle={displayedAccountTitle === account.email ? undefined : account.email}
           />
-          <MenuBarExtra.Section title={copy.remainingUsage}>
-            <MenuBarExtra.Item
-              title={menuUsageLabel(account.usage.primary, copy.fiveHour, false)}
-              onAction={load}
-            />
-            <MenuBarExtra.Item
-              title={menuUsageLabel(account.usage.secondary, copy.week, true)}
-              onAction={load}
-            />
+          <MenuBarExtra.Section title="Remaining Usage">
+            <MenuBarExtra.Item title={menuUsageLabel(account.usage.primary, "5-hour", false)} onAction={load} />
+            <MenuBarExtra.Item title={menuUsageLabel(account.usage.secondary, "Week", true)} onAction={load} />
             <MenuBarExtra.Item title={updatedAtLabel(account.usage)} />
           </MenuBarExtra.Section>
         </>
       ) : null}
       {!installRequired ? (
         <MenuBarExtra.Section>
-          <MenuBarExtra.Item icon={Icon.Switch} title={copy.switchAccount} onAction={openSwitcher} />
-          <MenuBarExtra.Item icon={Icon.ArrowClockwise} title={copy.refresh} onAction={load} />
-          <MenuBarExtra.Item
-            icon={Icon.Gear}
-            title={copy.extensionPreferences}
-            onAction={openExtensionPreferences}
-          />
+          <MenuBarExtra.Item icon={Icon.Switch} title="Switch Account" onAction={openSwitcher} />
+          <MenuBarExtra.Item icon={Icon.ArrowClockwise} title="Refresh" onAction={load} />
+          <MenuBarExtra.Item icon={Icon.Gear} title="Extension Preferences" onAction={openExtensionPreferences} />
         </MenuBarExtra.Section>
       ) : null}
     </MenuBarExtra>
@@ -147,5 +121,5 @@ function menuUsageLabel(window: UsageWindow | null, fallback: string, includeRes
 
 async function copyInstallCommand() {
   await Clipboard.copy(CODEX_AUTH_INSTALL_COMMAND);
-  await showHUD(getCopy().installCommandCopied);
+  await showHUD("Install command copied");
 }

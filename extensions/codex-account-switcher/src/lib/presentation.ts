@@ -1,6 +1,5 @@
 import { Color } from "@raycast/api";
 import type { CodexAccount, UsageSnapshot, UsageWindow } from "./codex-auth";
-import { getCopy } from "./i18n";
 
 export function accountTitle(account: CodexAccount): string {
   return account.alias || account.account_name || account.email;
@@ -52,11 +51,14 @@ export function remainingPercent(window: UsageWindow | null): number | null {
 
 export function usageWindowName(window: UsageWindow | null, fallback: string): string {
   if (!window) return fallback;
-  const copy = getCopy();
   const duration = window.window_minutes;
-  if (duration >= 7 * 24 * 60) return copy.week;
-  if (duration >= 24 * 60) return copy.days(Math.round(duration / 1440));
-  return copy.hours(Math.round(duration / 60));
+  if (duration >= 7 * 24 * 60) return "Week";
+  if (duration >= 24 * 60) {
+    const days = Math.round(duration / 1440);
+    return `${days} ${days === 1 ? "day" : "days"}`;
+  }
+  const hours = Math.round(duration / 60);
+  return `${hours} ${hours === 1 ? "hour" : "hours"}`;
 }
 
 export function percentageLabel(window: UsageWindow | null): string {
@@ -70,35 +72,29 @@ export function windowLabel(window: UsageWindow | null, fallback: string): strin
 
 export function resetTooltip(window: UsageWindow | null, includeDate = true): string | undefined {
   if (!window?.resets_at) return undefined;
-  const copy = getCopy();
   const date = new Date(window.resets_at * 1000);
-  return copy.resetTime(
-    new Intl.DateTimeFormat(copy.locale, {
-      ...(includeDate ? { month: "numeric", day: "numeric" } : {}),
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date),
-  );
+  return `Resets: ${new Intl.DateTimeFormat("en-US", {
+    ...(includeDate ? { month: "numeric", day: "numeric" } : {}),
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date)}`;
 }
 
 export function sourceLabel(usage: UsageSnapshot): string {
-  const copy = getCopy();
   const labels = {
-    api: copy.sourceRealtime,
-    local: copy.sourceLocal,
-    cache: copy.sourceCache,
-    none: copy.sourceNone,
+    api: "Current",
+    local: "Local Cache",
+    cache: "Cached",
+    none: "Unavailable",
   } as const;
-  if (usage.refresh.status === "http_error" && usage.refresh.http_status)
-    return `HTTP ${usage.refresh.http_status}`;
-  if (usage.refresh.status === "missing_auth") return copy.missingAuthentication;
-  if (usage.refresh.status === "error") return copy.refreshFailed;
+  if (usage.refresh.status === "http_error" && usage.refresh.http_status) return `HTTP ${usage.refresh.http_status}`;
+  if (usage.refresh.status === "missing_auth") return "Authentication Missing";
+  if (usage.refresh.status === "error") return "Refresh Failed";
   return labels[usage.source];
 }
 
 export function updatedAtLabel(usage: UsageSnapshot): string {
-  const copy = getCopy();
-  if (!usage.updated_at) return copy.updateTimeUnknown;
+  if (!usage.updated_at) return "Update Time Unknown";
 
   const updated = new Date(usage.updated_at * 1000);
   const now = new Date();
@@ -106,28 +102,26 @@ export function updatedAtLabel(usage: UsageSnapshot): string {
     updated.getFullYear() === now.getFullYear() &&
     updated.getMonth() === now.getMonth() &&
     updated.getDate() === now.getDate();
-  const formatted = new Intl.DateTimeFormat(copy.locale, {
+  const formatted = new Intl.DateTimeFormat("en-US", {
     ...(sameDay ? {} : { month: "numeric", day: "numeric" }),
     hour: "2-digit",
     minute: "2-digit",
   }).format(updated);
-  return copy.updatedAt(formatted);
+  return `Updated at ${formatted}`;
 }
 
 export function sourceTooltip(usage: UsageSnapshot): string {
-  const copy = getCopy();
   const updated = usage.updated_at
-    ? new Intl.DateTimeFormat(copy.locale, {
+    ? new Intl.DateTimeFormat("en-US", {
         month: "numeric",
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
       }).format(new Date(usage.updated_at * 1000))
-    : copy.unknown;
-  return copy.sourceAndUpdateTime(sourceLabel(usage), updated);
+    : "Unknown";
+  return `Source: ${sourceLabel(usage)} · Updated: ${updated}`;
 }
 
 export function usageSummary(account: CodexAccount): string {
-  const copy = getCopy();
-  return `${windowLabel(account.usage.primary, copy.fiveHour)} · ${windowLabel(account.usage.secondary, copy.week)} · ${sourceLabel(account.usage)}`;
+  return `${windowLabel(account.usage.primary, "5-hour")} · ${windowLabel(account.usage.secondary, "Week")} · ${sourceLabel(account.usage)}`;
 }

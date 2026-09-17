@@ -5,7 +5,6 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { getPreferenceValues } from "@raycast/api";
-import { getCopy } from "./i18n";
 
 const execFileAsync = promisify(execFile);
 
@@ -71,11 +70,6 @@ type CodexAuthErrorDocument = {
   };
 };
 
-type Preferences = {
-  codexAuthPath?: string;
-  refreshMode: RefreshMode;
-};
-
 type RegistryUsage = {
   primary: UsageWindow | null;
   secondary: UsageWindow | null;
@@ -125,7 +119,7 @@ async function resolveExecutable(configuredPath?: string): Promise<string> {
   if (configured) {
     const resolved = expandedPath(configured);
     if (await isExecutable(resolved)) return resolved;
-    throw new CodexAuthError(getCopy().executableNotFoundAt(resolved), "executable_not_found");
+    throw new CodexAuthError(`Executable not found: ${resolved}`, "executable_not_found");
   }
 
   const candidates = [
@@ -139,7 +133,10 @@ async function resolveExecutable(configuredPath?: string): Promise<string> {
     if (await isExecutable(candidate)) return candidate;
   }
 
-  throw new CodexAuthError(getCopy().codexAuthNotFound, "executable_not_found");
+  throw new CodexAuthError(
+    "codex-auth was not found. Install version 0.3.0 or newer, or set its path in the extension preferences.",
+    "executable_not_found",
+  );
 }
 
 function runtimePath(): string {
@@ -157,13 +154,16 @@ function runtimePath(): string {
 
 function parseDocument<T>(stdout: string): T {
   const value = stdout.trim();
-  if (!value) throw new CodexAuthError(getCopy().emptyOutput, "empty_output");
+  if (!value) throw new CodexAuthError("codex-auth returned no data.", "empty_output");
 
   let parsed: T | CodexAuthErrorDocument;
   try {
     parsed = JSON.parse(value) as T | CodexAuthErrorDocument;
   } catch {
-    throw new CodexAuthError(getCopy().invalidOutput, "invalid_json");
+    throw new CodexAuthError(
+      "Unable to read codex-auth output. Make sure version 0.3.0 or newer is installed.",
+      "invalid_json",
+    );
   }
 
   if (typeof parsed === "object" && parsed !== null && "error" in parsed) {
@@ -189,13 +189,16 @@ async function runJson<T>(args: string[]): Promise<T> {
 
     const processError = error as Error & { stdout?: string; stderr?: string; killed?: boolean };
     if (processError.stdout?.trim()) return parseDocument<T>(processError.stdout);
-    if (processError.killed) throw new CodexAuthError(getCopy().requestTimedOut, "timeout");
+    if (processError.killed) throw new CodexAuthError("The codex-auth request timed out.", "timeout");
 
     const detail = processError.stderr?.trim() || processError.message;
     if (detail.includes("unknown flag") && detail.includes("--json")) {
-      throw new CodexAuthError(getCopy().unsupportedVersion, "unsupported_version");
+      throw new CodexAuthError(
+        "The installed codex-auth version does not support the JSON interface required by Raycast. Upgrade to version 0.3.0 or newer.",
+        "unsupported_version",
+      );
     }
-    throw new CodexAuthError(detail || getCopy().processFailed, "process_error");
+    throw new CodexAuthError(detail || "codex-auth failed.", "process_error");
   }
 }
 
@@ -212,7 +215,7 @@ async function runPlain(args: string[], timeout = 30_000): Promise<void> {
     });
   } catch (error) {
     const processError = error as Error & { stderr?: string; killed?: boolean };
-    if (processError.killed) throw new CodexAuthError(getCopy().requestTimedOut, "timeout");
+    if (processError.killed) throw new CodexAuthError("The codex-auth request timed out.", "timeout");
     throw new CodexAuthError(processError.stderr?.trim() || processError.message, "process_error");
   }
 }
@@ -225,11 +228,11 @@ async function readRegistry(): Promise<AccountList> {
   try {
     registry = JSON.parse(await readFile(registryPath, "utf8")) as RegistryDocument;
   } catch {
-    throw new CodexAuthError(getCopy().registryReadFailed(registryPath), "registry_error");
+    throw new CodexAuthError(`Unable to read ${registryPath}`, "registry_error");
   }
 
   if (!Array.isArray(registry.accounts)) {
-    throw new CodexAuthError(getCopy().unsupportedRegistry, "unsupported_registry");
+    throw new CodexAuthError("Unsupported codex-auth account registry format.", "unsupported_registry");
   }
 
   const orderedAccounts = [...registry.accounts].sort((left, right) => {
@@ -318,7 +321,7 @@ export async function listAccounts(mode: RefreshMode, activeOnly = false): Promi
     result = await readRegistry();
   }
   if (result.schema_version !== 1 || result.command !== "list" || !Array.isArray(result.accounts)) {
-    throw new CodexAuthError(getCopy().unsupportedSchema, "unsupported_schema");
+    throw new CodexAuthError("Unsupported codex-auth JSON format.", "unsupported_schema");
   }
   return result;
 }
@@ -340,18 +343,16 @@ export async function switchAccount(accountKey: string): Promise<CodexAccount> {
 
     const before = await readRegistry();
     const target = before.accounts.find((account) => account.account_key === accountKey);
-    if (!target) throw new CodexAuthError(getCopy().accountNotFound, "account_not_found");
+    if (!target) throw new CodexAuthError("The account to switch to was not found.", "account_not_found");
     await runPlain(["switch", String(target.number)]);
     const registry = await readRegistry();
-    const switchedTo = registry.accounts.find(
-      (account) => account.account_key === accountKey && account.active,
-    );
-    if (!switchedTo) throw new CodexAuthError(getCopy().switchNotConfirmed, "state_uncertain");
+    const switchedTo = registry.accounts.find((account) => account.account_key === accountKey && account.active);
+    if (!switchedTo) throw new CodexAuthError("codex-auth did not confirm the account switch.", "state_uncertain");
     result = { schema_version: 1, command: "switch", switched_to: switchedTo };
   }
 
   if (result.schema_version !== 1 || result.command !== "switch" || !result.switched_to) {
-    throw new CodexAuthError(getCopy().unsupportedSchema, "unsupported_schema");
+    throw new CodexAuthError("Unsupported codex-auth JSON format.", "unsupported_schema");
   }
   return result.switched_to;
 }
@@ -379,14 +380,16 @@ export async function removeAccount(accountKey: string): Promise<void> {
   try {
     registry = await readRegistry();
   } catch {
-    throw new CodexAuthError(getCopy().removalStateUnknown, "state_uncertain");
+    throw new CodexAuthError(
+      "Unable to verify local state after removal. Refresh the account list before trying again.",
+      "state_uncertain",
+    );
   }
 
   if (registry.accounts.some((account) => account.account_key === accountKey)) {
-    throw new CodexAuthError(getCopy().removalNotConfirmed, "state_uncertain");
+    throw new CodexAuthError(
+      "codex-auth did not confirm the removal. Refresh the account list before trying again.",
+      "state_uncertain",
+    );
   }
-}
-
-export function getRefreshMode(): RefreshMode {
-  return getPreferenceValues<Preferences>().refreshMode;
 }
