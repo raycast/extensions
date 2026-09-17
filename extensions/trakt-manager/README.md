@@ -36,6 +36,20 @@ Lists movies and shows that are in your history.
 
 Lists recommended movies and shows.
 
+## AI
+
+Raycast AI can read your Trakt account using the same sign-in as the commands above, so there is nothing extra to configure. Ask in plain language:
+
+- _"Have I already watched Dune?"_
+- _"Is Severance in my watchlist?"_
+- _"What episode am I on in Breaking Bad?"_
+- _"What should I watch next?"_
+- _"How many hours have I watched this year?"_
+
+These tools only read your account; use the commands above to make changes.
+
+When several titles share a name, mention the year (_"Butterfly 2025"_) to remove the ambiguity.
+
 ## Powered by
 
 <img src="https://trakt.tv/assets/logos/logo.tagline.positive-29126460f3e6cbf05387c299752cd30b076b25997363d71487d26123265b3d3e.svg" alt="Trakt" width="400"/>

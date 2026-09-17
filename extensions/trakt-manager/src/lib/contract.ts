@@ -17,7 +17,10 @@ import {
   TraktShowHistoryList,
   TraktShowList,
   TraktShowRecommendationList,
+  TraktShowDetailedProgressSchema,
+  TraktShowProgressQuerySchema,
   TraktUpNextQuerySchema,
+  TraktUserStatsSchema,
 } from "./schema";
 
 const c = initContract();
@@ -31,6 +34,20 @@ const TraktMovieContract = c.router({
     },
     query: TraktSearchSchema,
     summary: "Search for movies",
+  },
+  /**
+   * Title-first search. Ranked by title equality instead of relevance, so releases that
+   * share a title but little popularity surface here while the relevance-ranked search
+   * above drops them. Trakt documents both as complementary: neither is a superset.
+   */
+  searchMoviesExact: {
+    method: "GET",
+    path: "/search/movie/exact",
+    responses: {
+      200: TraktMovieList,
+    },
+    query: TraktSearchSchema,
+    summary: "Search for movies by exact title",
   },
   getWatchlistMovies: {
     method: "GET",
@@ -105,10 +122,24 @@ const TraktMovieContract = c.router({
     query: TraktHistoryQuerySchema,
     summary: "Get movie history",
   },
+  getMovieHistoryForItem: {
+    method: "GET",
+    path: "/sync/history/movies/:id",
+    responses: {
+      200: TraktMovieHistoryList,
+      404: z.unknown(),
+    },
+    pathParams: z.object({
+      id: z.coerce.number(),
+    }),
+    query: TraktHistoryQuerySchema.partial(),
+    summary: "Get the complete watch history for one specific movie",
+  },
   removeMovieFromHistory: {
     method: "POST",
     path: "/sync/history/remove",
     responses: {
+      200: z.unknown(),
       201: z.unknown(),
     },
     body: z.object({
@@ -127,6 +158,15 @@ const TraktShowContract = c.router({
     },
     query: TraktSearchSchema,
     summary: "Search for shows",
+  },
+  searchShowsExact: {
+    method: "GET",
+    path: "/search/show/exact",
+    responses: {
+      200: TraktShowList,
+    },
+    query: TraktSearchSchema,
+    summary: "Search for shows by exact title",
   },
   searchEpisodes: {
     method: "GET",
@@ -221,6 +261,19 @@ const TraktShowContract = c.router({
     query: TraktHistoryQuerySchema,
     summary: "Get show history",
   },
+  getShowHistoryForItem: {
+    method: "GET",
+    path: "/sync/history/shows/:id",
+    responses: {
+      200: TraktShowHistoryList,
+      404: z.unknown(),
+    },
+    pathParams: z.object({
+      id: z.coerce.number(),
+    }),
+    query: TraktHistoryQuerySchema.partial(),
+    summary: "Get the complete watch history for one specific show",
+  },
   removeShowFromHistory: {
     method: "POST",
     path: "/sync/history/remove",
@@ -248,6 +301,7 @@ const TraktShowContract = c.router({
     path: "/shows/:showid/seasons/:seasonNumber/episodes",
     responses: {
       200: TraktEpisodeList,
+      404: z.unknown(),
     },
     pathParams: z.object({
       showid: z.coerce.number(),
@@ -291,6 +345,19 @@ const TraktShowContract = c.router({
     query: TraktUpNextQuerySchema,
     summary: "Get up next shows",
   },
+  getShowProgress: {
+    method: "GET",
+    path: "/shows/:showid/progress/watched",
+    responses: {
+      200: TraktShowDetailedProgressSchema,
+      404: z.unknown(),
+    },
+    pathParams: z.object({
+      showid: z.coerce.number(),
+    }),
+    query: TraktShowProgressQuerySchema,
+    summary: "Get watched progress for a show",
+  },
   addSeasonToHistory: {
     method: "POST",
     path: "/sync/history",
@@ -304,10 +371,25 @@ const TraktShowContract = c.router({
   },
 });
 
+const TraktUserContract = c.router({
+  getUserStats: {
+    method: "GET",
+    path: "/users/:id/stats",
+    responses: {
+      200: TraktUserStatsSchema,
+    },
+    pathParams: z.object({
+      id: z.string().default("me"),
+    }),
+    summary: "Get user stats",
+  },
+});
+
 export const TraktContract = c.router(
   {
     movies: TraktMovieContract,
     shows: TraktShowContract,
+    users: TraktUserContract,
   },
   {
     strictStatusCodes: true,
