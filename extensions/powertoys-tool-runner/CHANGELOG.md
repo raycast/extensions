@@ -1,6 +1,6 @@
 # PowerToys Tool Runner Changelog
 
-## [Added Keyboard Manager Command] - {PR_MERGE_DATE}
+## [Added Keyboard Manager Command] - 2026-09-17
 
 - Added Keyboard Manager command to open (the new) PowerToys Keyboard Manager
 
