@@ -1,6 +1,6 @@
 # Changelog
 
-## Initial Release - 2026-09-17
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added LDAP Lookup command to search people by name or phone number in an LDAP / Active Directory directory
 - StartTLS (default), LDAPS, and plain LDAP (localhost only) connection modes with optional CA certificate configuration

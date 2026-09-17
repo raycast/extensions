@@ -101,7 +101,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.4.1",
+    "@raycast/api": "^2.2.1",
     "ldapts": "^9.0.0"
   },
   "devDependencies": {
