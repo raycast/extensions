@@ -12,7 +12,8 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useModelCatalog } from "../../hooks/useModelCatalog";
 import { EditModelAction } from "../../actions/edit-model";
-import { selectedChatModel } from "../../utils/model-selection";
+import { availableChatModels, chatModelLabel, selectedChatModel } from "../../utils/model-selection";
+import { isCommandModel } from "../../utils/model-catalog";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import { QuestionFormProps } from "../../type";
 import { checkFileValidity, formats } from "../../utils";
@@ -27,14 +28,16 @@ export const QuestionForm = ({
   isFirstCall,
 }: QuestionFormProps) => {
   const { pop } = useNavigation();
-  const { models: liveModels, isLoading } = useModelCatalog();
+  const snapshot = useModelCatalog();
   const [selectedModel, setSelectedModel] = useState(initialModel);
   const currentModel = selectedChatModel(
-    liveModels,
+    snapshot,
     selectedModel,
     initialModels.find((model) => model.id === selectedModel),
   );
-  const models = isLoading ? [...initialModels] : Object.values(liveModels);
+  const models = snapshot.isLoading
+    ? [...initialModels]
+    : availableChatModels(snapshot, initialModels.find((model) => isCommandModel(model.id)) ?? currentModel);
   if (!models.some((model) => model.id === currentModel.id)) models.push(currentModel);
 
   const [question, setQuestion] = useState<string>(initialQuestion ?? "");
@@ -165,7 +168,7 @@ export const QuestionForm = ({
         {defaultModel && <Form.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />}
         <Form.Dropdown.Section title="Custom Models">
           {separateDefaultModel.map((model) => (
-            <Form.Dropdown.Item value={model.id} title={model.name} key={model.id} />
+            <Form.Dropdown.Item value={model.id} title={chatModelLabel(model)} key={model.id} />
           ))}
         </Form.Dropdown.Section>
       </Form.Dropdown>

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, open } from '@raycast/api'
+import { Action, ActionPanel, Icon, Keyboard, List, open } from '@raycast/api'
 import { useCachedState } from '@raycast/utils'
 import { useEffect } from 'react'
 import { cache, Http, HttpService, KEY } from './service'
@@ -82,6 +82,17 @@ export default function Command() {
                   title="Copy URL to Clipboard"
                   content={service.url}
                 />
+                <ActionPanel.Section>
+                  <Action
+                    title="Refresh"
+                    icon={Icon.RotateClockwise}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    onAction={() => {
+                      cache.clear()
+                      Http.fetch()
+                    }}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

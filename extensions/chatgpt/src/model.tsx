@@ -73,7 +73,11 @@ export default function Model() {
     return (
       <ActionPanel>
         {command && <RunCommandAction command={command} />}
-        <Action title="Ask with This Model" icon={Icon.Message} onAction={() => push(<Ask initialModel={model} />)} />
+        <Action
+          title={command ? "Ask with This Command" : "Ask with This Model"}
+          icon={Icon.Message}
+          onAction={() => push(<Ask initialModel={model} />)}
+        />
         <EditModelAction modelId={model.id} />
         {createActions(model)}
         {command ? (

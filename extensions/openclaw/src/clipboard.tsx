@@ -7,6 +7,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { sendMessage } from "./api";
@@ -25,7 +26,7 @@ ${prompt}
 
 ## Clipboard Content
 \`\`\`
-${clipboardContent.slice(0, 500)}${clipboardContent.length > 500 ? "..." : ""}
+${clipboardContent.slice(0, 500)}${clipboardContent.length > 500 ? "…" : ""}
 \`\`\`
 
 ---
@@ -38,11 +39,14 @@ ${answer}`;
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Response" content={answer} />
+          <Action.CopyToClipboard
+            title="Copy Response"
+            content={answer}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
           <Action.CopyToClipboard
             title="Copy All"
             content={`Prompt: ${prompt}\n\nClipboard: ${clipboardContent}\n\nResponse: ${answer}`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
           <Action.Paste
             title="Paste Response"
@@ -67,9 +71,9 @@ export default function Command() {
         const text = await Clipboard.readText();
         setClipboardContent(text || "");
       } catch {
-        showToast({
+        await showToast({
           style: Toast.Style.Failure,
-          title: "Failed to read clipboard",
+          title: "Could Not Read Clipboard",
         });
       } finally {
         setIsLoading(false);
@@ -80,7 +84,10 @@ export default function Command() {
 
   async function handleSubmit() {
     if (!clipboardContent.trim()) {
-      showToast({ style: Toast.Style.Failure, title: "Clipboard is empty" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Clipboard Is Empty",
+      });
       return;
     }
 
@@ -101,11 +108,11 @@ export default function Command() {
         />,
       );
     } catch (error) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
-        title: "Error",
+        title: "Could Not Ask OpenClaw",
         message:
-          error instanceof Error ? error.message : "Failed to get response",
+          error instanceof Error ? error.message : "OpenClaw did not respond.",
       });
     } finally {
       setIsLoading(false);
@@ -113,7 +120,7 @@ export default function Command() {
   }
 
   if (isLoading && !clipboardContent) {
-    return <Detail isLoading={true} markdown="Reading clipboard..." />;
+    return <Detail isLoading={true} markdown="Reading clipboard…" />;
   }
 
   return (
@@ -128,7 +135,7 @@ export default function Command() {
       <Form.TextArea
         id="prompt"
         title="Prompt"
-        placeholder="What would you like to know about this? (default: What is this?)"
+        placeholder='Ask about the clipboard. Leave blank for "What is this?"'
         value={prompt}
         onChange={setPrompt}
         autoFocus
@@ -138,7 +145,7 @@ export default function Command() {
         title="Clipboard Preview"
         text={
           clipboardContent.slice(0, 300) +
-            (clipboardContent.length > 300 ? "..." : "") || "(empty)"
+            (clipboardContent.length > 300 ? "…" : "") || "(empty)"
         }
       />
     </Form>

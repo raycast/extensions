@@ -1,5 +1,9 @@
 # Bonjour Changelog
 
+## [Features] - 2026-09-17
+
+- added refresh action
+
 ## [Improvements] - 2026-09-16
 
 - improved reliability

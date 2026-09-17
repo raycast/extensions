@@ -21,7 +21,7 @@ export const TraktIdSchema = z.object({
 });
 
 export const TraktIdSchemaWithTime = TraktIdSchema.extend({
-  watched_at: z.string().date(),
+  watched_at: z.string(),
 });
 
 export const TraktRecommendationRequestSchema = TraktPaginationSchema.merge(TraktExtendedSchema).extend({
@@ -29,9 +29,13 @@ export const TraktRecommendationRequestSchema = TraktPaginationSchema.merge(Trak
   ignore_watchlisted: z.coerce.boolean(),
 });
 
+/**
+ * Trakt's text search ignores the `years` filter available on its other endpoints,
+ * so callers must filter by year themselves over the full result set.
+ */
 export const TraktSearchSchema = TraktPaginationSchema.merge(TraktExtendedSchema).extend({
   query: z.string(),
-  fields: z.enum(["title"]),
+  fields: z.enum(["title", "title,aliases", "title,aliases,translations"]).optional(),
 });
 
 export const TraktPaginationWithSortingSchema = TraktPaginationSchema.merge(TraktSortingSchema);
@@ -221,6 +225,108 @@ export type TraktMovieRecommendationList = z.infer<typeof TraktMovieRecommendati
 export type TraktShowRecommendationList = z.infer<typeof TraktShowRecommendationList>;
 export type TraktMovieBaseItem = z.infer<typeof TraktMovieBaseItem>;
 export type TraktShowBaseItem = z.infer<typeof TraktShowBaseItem>;
+
+export const TraktShowProgressQuerySchema = z.object({
+  hidden: z.coerce.boolean().optional(),
+  specials: z.coerce.boolean().optional(),
+  count_specials: z.coerce.boolean().optional(),
+  last_activity: z.coerce.boolean().optional(),
+  extended: z.enum(["full", "cloud9", "full,cloud9"]).optional(),
+});
+
+export const TraktProgressEpisodeSchema = z.object({
+  season: z.number(),
+  number: z.number(),
+  title: z.string().optional().nullable(),
+  ids: z.object({
+    trakt: z.number(),
+    tvdb: z.number().optional().nullable(),
+    imdb: z.string().optional().nullable(),
+    tmdb: z.number().optional().nullable(),
+  }),
+  overview: z.string().optional().nullable(),
+  rating: z.number().optional().nullable(),
+  first_aired: z.string().optional().nullable(),
+});
+
+export const TraktProgressSeasonEpisodeSchema = z.object({
+  number: z.number(),
+  completed: z.boolean(),
+  last_watched_at: z.string().optional().nullable(),
+});
+
+export const TraktProgressSeasonSchema = z.object({
+  number: z.number(),
+  title: z.string().optional().nullable(),
+  aired: z.number(),
+  completed: z.number(),
+  episodes: z.array(TraktProgressSeasonEpisodeSchema).optional(),
+});
+
+export const TraktShowDetailedProgressSchema = z.object({
+  aired: z.number(),
+  completed: z.number(),
+  last_watched_at: z.string().optional().nullable(),
+  reset_at: z.string().optional().nullable(),
+  next_episode: TraktProgressEpisodeSchema.optional().nullable(),
+  last_episode: TraktProgressEpisodeSchema.optional().nullable(),
+  seasons: z.array(TraktProgressSeasonSchema).optional(),
+});
+
+export type TraktShowProgressQuery = z.infer<typeof TraktShowProgressQuerySchema>;
+export type TraktShowDetailedProgress = z.infer<typeof TraktShowDetailedProgressSchema>;
+
+export const TraktUserStatsSchema = z.object({
+  movies: z
+    .object({
+      plays: z.number().default(0),
+      watched: z.number().default(0),
+      minutes: z.number().default(0),
+      collected: z.number().default(0),
+      ratings: z.number().default(0),
+      comments: z.number().default(0),
+    })
+    .optional(),
+  shows: z
+    .object({
+      watched: z.number().default(0),
+      collected: z.number().default(0),
+      ratings: z.number().default(0),
+      comments: z.number().default(0),
+    })
+    .optional(),
+  seasons: z
+    .object({
+      ratings: z.number().default(0),
+      comments: z.number().default(0),
+    })
+    .optional(),
+  episodes: z
+    .object({
+      plays: z.number().default(0),
+      watched: z.number().default(0),
+      minutes: z.number().default(0),
+      collected: z.number().default(0),
+      ratings: z.number().default(0),
+      comments: z.number().default(0),
+    })
+    .optional(),
+  network: z
+    .object({
+      friends: z.number().default(0),
+      followers: z.number().default(0),
+      following: z.number().default(0),
+    })
+    .optional(),
+  ratings: z
+    .object({
+      total: z.number().default(0),
+      distribution: z.record(z.string(), z.number()).optional(),
+    })
+    .optional(),
+});
+
+export type TraktUserStats = z.infer<typeof TraktUserStatsSchema>;
 
 export const TraktPaginationHeaderSchema = z.object({
   "x-pagination-page": z.coerce.number().default(0),

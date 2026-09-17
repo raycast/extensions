@@ -1,0 +1,53 @@
+import { CompactShow, toCompactShow } from "./compact-media";
+import { describeYearFilter, searchShowResults } from "./resolve-media";
+
+type Input = {
+  /**
+   * The title of the TV show to search for in the Trakt database.
+   * Case-insensitive, supports partial titles.
+   * Example: "breaking bad", "severance", "the office"
+   */
+  title: string;
+  /**
+   * The release year of the TV show to filter the results.
+   * Optional integer, e.g. 2008.
+   */
+  year?: number;
+};
+
+type Output = {
+  data: CompactShow[];
+  /**
+   * How many shows Trakt returned for the title, before the `year` filter.
+   * When `truncated` is false, a value above 0 with an empty `data` means the title exists
+   * but not for that year. When it is true, an empty `data` proves nothing.
+   */
+  matchesForTitle: number;
+  /**
+   * True when Trakt returned as many releases as it can for the title, so others exist out
+   * of reach. Never report an absence as a fact while this is true.
+   */
+  truncated: boolean;
+  message?: string;
+  hasMore: boolean;
+};
+
+/**
+ * Search for TV shows in the Trakt database by title and optional year.
+ * Returns a compact list of TV shows with their traktId, title, year, network, and genres.
+ * Use this to obtain a show \`traktId\` before a targeted lookup.
+ */
+export default async function tool(input: Input): Promise<Output> {
+  const { title, year } = input;
+
+  const { items, truncated } = await searchShowResults(title);
+  const shows = year === undefined ? items : items.filter((item) => item.show.year === year);
+
+  return {
+    data: shows.map(toCompactShow),
+    matchesForTitle: items.length,
+    truncated,
+    message: describeYearFilter(title, year, shows.length, items.length, truncated),
+    hasMore: false,
+  };
+}

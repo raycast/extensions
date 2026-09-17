@@ -9,14 +9,25 @@ const apiRoot =
   "/Applications/Raycast.app/Contents/Resources/macos-app_RaycastDesktopApp.bundle/Contents/Resources/api";
 const available = fs.existsSync(path.join(apiRoot, "node_modules/@raycast/api/index.js"));
 
-async function launch(entry, initialStorage = {}, preferenceOverrides = {}, supportDirectory, launchContext) {
+async function launch(entry, initialStorage = {}, preferenceOverrides = {}, options = {}) {
+  const { supportDirectory, launchContext, initialCache, browserExtension = false } = options;
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "chatgpt-runtime-test-"));
   fs.mkdirSync(path.join(dir, "support"));
   fs.symlinkSync(path.join(apiRoot, "node_modules"), path.join(dir, "node_modules"));
   const sdkRequire = createRequire(require.resolve("@raycast/api/package.json"));
   const esbuild = sdkRequire("esbuild");
   await esbuild.build({
-    entryPoints: [path.resolve("src", `${entry}.tsx`)],
+    ...(initialCache
+      ? {
+          stdin: {
+            contents: `import { Cache } from "@raycast/api";
+              const cache = new Cache({ namespace: "abielzulio.chatgpt" });
+              for (const [key, value] of Object.entries(${JSON.stringify(initialCache)})) cache.set(key, value);
+              export { default } from ${JSON.stringify(path.resolve("src", `${entry}.tsx`))};`,
+            resolveDir: process.cwd(),
+          },
+        }
+      : { entryPoints: [path.resolve("src", `${entry}.tsx`)] }),
     outfile: path.join(dir, "command.cjs"),
     bundle: true,
     platform: "node",
@@ -31,7 +42,14 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, supp
   );
   const worker = new Worker(path.join(dir, "worker.cjs"), {
     env: { ...process.env, NODE_ENV: "test" },
-    workerData: { isDevelopment: false, appearance: "light", textSize: "medium", useSystemProxy: false, systemCAs: [] },
+    workerData: {
+      isDevelopment: false,
+      appearance: "light",
+      textSize: "medium",
+      useSystemProxy: false,
+      systemCAs: [],
+      isBrowserExtensionInstalled: browserExtension,
+    },
   });
   const events = new EventEmitter();
   const storage = new Map(Object.entries(initialStorage));
@@ -101,6 +119,12 @@ async function launch(entry, initialStorage = {}, preferenceOverrides = {}, supp
           break;
         case "clipboardRead":
           value = { text: "", file: undefined };
+          break;
+        case "browserExtensionGetTabs":
+          value = { value: [{ tabId: 1, title: "Fixture page", url: "https://example.com/", active: true }] };
+          break;
+        case "browserExtensionGetContent":
+          value = { value: "Fixture page content" };
           break;
         case "showAlert":
           alerts.push(params);

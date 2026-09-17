@@ -6,7 +6,7 @@
 /extensions/1loc                                                    @kud @kgrhartlage @sxn @xmok
 /extensions/1password                                               @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @henrik-dmg @superwhys @Luk4h @LitoMore @vimtor @Pavelas @iml885203
 /extensions/2fa-directory                                           @andreaselia @pernielsentikaer @xmok
-/extensions/2fas-authenticator                                      @LockeAG
+/extensions/2fas-authenticator                                      @LockeAG @MushuDG
 /extensions/40-questions                                            @dnnsmnstrr
 /extensions/42-api                                                  @maujogue
 /extensions/5devs                                                   @gustavo-fior @guivictorr
@@ -1930,7 +1930,7 @@
 /extensions/openai-gpt                                              @simicvm @DorukAkinci @EvilMouth
 /extensions/openai-speak                                            @jnchman
 /extensions/openai-translator                                       @douo @dekura @leeonfield @ridemountainpig
-/extensions/openclaw                                                @leveragedrobot @leveragedrobot @RaviTharuma
+/extensions/openclaw                                                @leveragedrobot @leveragedrobot @RaviTharuma @Olli0103
 /extensions/opencode-sessions                                       @mike182uk @mormubis @0xdhrv
 /extensions/opencodex-usage                                         @list-jonas @AviralSaxena
 /extensions/openfortivpn                                            @rafalpetryka
@@ -2317,7 +2317,7 @@
 /extensions/raycast-zabbix                                          @MassimilianoPasquini97
 /extensions/raycast-zoxide                                          @mrpunkin
 /extensions/raycaster                                               @stevedylandev
-/extensions/raydocs                                                 @teziovsky
+/extensions/raydocs                                                 @teziovsky @chrismessina
 /extensions/raydoom                                                 @Saketh-Chandra
 /extensions/raylog-markdown-tasks                                   @Dillon-McCardell
 /extensions/raynab                                                  @gogocharli @omarshahine @damian-duchnowski
