@@ -49,14 +49,30 @@ export function shutdownSimulators(): string {
 }
 
 /**
- * Remove a dangling symlink. Tries without sudo first: a link in ~/.local/bin
- * belongs to the reader, and asking for a password to delete their own file is
- * how a tool teaches people to type it without reading.
+ * Remove a dangling symlink.
+ *
+ * A link the reader owns is deleted with a plain `rm`: asking for a password to
+ * delete your own file is how a tool teaches people to type it without reading.
+ * The scan covers every directory on PATH, though, so a link can also sit in a
+ * root-owned one - and only then is sudo written into the command, as a
+ * fallback after the plain attempt, with the screen saying it may be needed.
  */
-export function removeSymlink(links: string[]): string {
+export function removeSymlink(links: string[], home: string = homedir()): string {
 	if (links.length === 0) throw new Error("No symlink to remove.");
 	const args = links.map(q).join(" ");
-	return `rm -f ${args} 2>/dev/null || sudo rm -f ${args}`;
+	return needsRoot(links, home) ? `rm -f ${args} 2>/dev/null || sudo rm -f ${args}` : `rm -f ${args}`;
+}
+
+/**
+ * Whether deleting these links may have to ask for a password.
+ *
+ * The links come from every directory on PATH, not from the home directory, so
+ * one of them can sit in a place only root can write - and then the plain `rm`
+ * is refused and the fallback runs as root. The screen says so before it is
+ * agreed to rather than after.
+ */
+export function needsRoot(links: string[], home: string = homedir()): boolean {
+	return links.some((link) => !link.startsWith(`${home}/`));
 }
 
 /** Forget a remembered Wi-Fi network. Needs admin rights, always. */

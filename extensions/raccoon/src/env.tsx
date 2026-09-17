@@ -1,9 +1,21 @@
 import { Action, Color, Icon, List } from "@raycast/api";
 import { tilde } from "./paths.ts";
-import { removeSymlink, reveal, whichAll } from "./fixes";
+import { needsRoot, removeSymlink, reveal, whichAll } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
 import { parseEnv, problems, shortVersion, type EnvReport } from "./env-json";
+
+/**
+ * The confirmation, plus the one thing the command's own text does not spell
+ * out: that it may end up running as root. PATH is scanned in full, so a
+ * broken link can sit in a directory only root can write to, and then the
+ * plain `rm` is refused and the fallback asks for a password.
+ */
+function withRootNote(detail: string, links: string[]): string {
+	return needsRoot(links)
+		? `${detail}\n\nOne of these is outside your home, so this may ask for your password.`
+		: detail;
+}
 
 function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 	const missing = e.path.filter((p) => !p.exists);
@@ -17,7 +29,10 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 			? {
 					title: `Remove ${e.broken_symlinks.length} Broken Symlinks`,
 					command: removeSymlink(e.broken_symlinks.map((b) => b.link)),
-					detail: e.broken_symlinks.map((b) => b.name).join(", "),
+					detail: withRootNote(
+						e.broken_symlinks.map((b) => b.name).join(", "),
+						e.broken_symlinks.map((b) => b.link),
+					),
 					destructive: true,
 					count: e.broken_symlinks.length,
 				}
@@ -51,7 +66,9 @@ function Rows({ e, actions }: { e: EnvReport; actions: React.ReactNode }) {
 									one={{
 										title: "Remove This Symlink",
 										command: removeSymlink([b.link]),
-										detail: `${b.link} points at ${b.target}, which is gone.`,
+										detail: withRootNote(`${b.link} points at ${b.target}, which is gone.`, [
+											b.link,
+										]),
 										destructive: true,
 									}}
 									all={allBroken}

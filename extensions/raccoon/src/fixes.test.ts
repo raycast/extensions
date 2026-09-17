@@ -11,6 +11,7 @@ import {
 	killPids,
 	removeLoginItems,
 	removeSymlink,
+	needsRoot,
 	gitPush,
 	gitPushAll,
 	repoStatus,
@@ -40,10 +41,32 @@ test("forgetting several networks runs one command per network", () => {
 });
 
 test("a dangling symlink is removed without sudo first", () => {
-	const cmd = removeSymlink(["/usr/local/bin/cagent"]);
-	// A link in the reader's own bin directory must not ask for a password.
+	const cmd = removeSymlink(["/usr/local/bin/cagent"], "/Users/me");
+	// Outside the reader's home: the plain attempt comes first, and root is
+	// only asked for if that one is refused.
 	assert.ok(cmd.startsWith("rm -f '/usr/local/bin/cagent'"));
 	assert.ok(cmd.includes("|| sudo rm -f"));
+});
+
+test("a link the reader owns is deleted without ever reaching for sudo", () => {
+	// PATH is scanned in full, so most broken links are in the reader's own
+	// ~/.local/bin - and asking for a password to delete your own dangling
+	// symlink is how a tool teaches people to type it without reading.
+	const cmd = removeSymlink(["/Users/me/.local/bin/cagent"], "/Users/me");
+	assert.equal(cmd, "rm -f '/Users/me/.local/bin/cagent'");
+	assert.ok(!cmd.includes("sudo"));
+});
+
+test("one link outside the home is enough for the whole command to need root", () => {
+	const cmd = removeSymlink(["/Users/me/.local/bin/a", "/usr/local/sbin/b"], "/Users/me");
+	assert.ok(cmd.includes("|| sudo rm -f"));
+});
+
+test("a home directory is a whole path segment, not a prefix", () => {
+	// /Users/median is not inside /Users/me, however it starts.
+	assert.ok(removeSymlink(["/Users/median/bin/a"], "/Users/me").includes("sudo"));
+	assert.ok(!needsRoot(["/Users/me/bin/a"], "/Users/me"));
+	assert.ok(needsRoot(["/usr/local/sbin/b"], "/Users/me"));
 });
 
 test("a login item name is passed as a quoted AppleScript string", () => {
