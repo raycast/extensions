@@ -1,0 +1,6 @@
+*.md
+raycast-env.d.ts
+node_modules
+metadata
+.agents
+*.txt

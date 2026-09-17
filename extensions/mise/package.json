@@ -1,0 +1,240 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mise",
+  "title": "Mise",
+  "description": "Search, install and upgrade the dev tools managed by mise.",
+  "icon": "mise.png",
+  "author": "lachieh",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "mise",
+    "asdf",
+    "version manager",
+    "node",
+    "python",
+    "go",
+    "rust",
+    "mise-en-place",
+    "jdx"
+  ],
+  "commands": [
+    {
+      "name": "search-tools",
+      "title": "Search Tools",
+      "subtitle": "Mise",
+      "description": "Search the mise registry and add tools to your global config",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showDetails",
+          "type": "checkbox",
+          "required": false,
+          "title": "Details",
+          "label": "Show details panel by default",
+          "description": "Open Search Tools with the details panel showing.",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "installed-tools",
+      "title": "Show Installed Tools",
+      "subtitle": "Mise",
+      "description": "Browse installed mise tools, set global versions, upgrade and uninstall",
+      "mode": "view"
+    },
+    {
+      "name": "show-outdated",
+      "title": "Show Outdated Tools",
+      "subtitle": "Mise",
+      "description": "List outdated mise tools and upgrade them",
+      "mode": "view"
+    },
+    {
+      "name": "tasks",
+      "title": "Manage Tasks",
+      "subtitle": "Mise",
+      "description": "Run global mise tasks in your terminal or capture their output",
+      "mode": "view"
+    },
+    {
+      "name": "outdated-tools",
+      "title": "Tools Menu Bar",
+      "subtitle": "Mise",
+      "description": "Show outdated mise tools in the menu bar and upgrade them",
+      "mode": "menu-bar",
+      "interval": "12h"
+    },
+    {
+      "name": "upgrade-all",
+      "title": "Upgrade All Tools",
+      "subtitle": "Mise",
+      "description": "Upgrade every outdated mise tool",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "pruneReplaced",
+          "type": "checkbox",
+          "required": false,
+          "title": "Replaced Versions",
+          "label": "Uninstall replaced versions",
+          "description": "Add --prune to mise upgrade, so the versions an upgrade replaces are uninstalled at once.",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "prune",
+      "title": "Prune Unused Versions",
+      "subtitle": "Mise",
+      "description": "Delete installed tool versions that no config uses",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "pruneScope",
+          "type": "dropdown",
+          "required": false,
+          "title": "Prune Scope",
+          "description": "Prune unused tool versions, stale config links, or both.",
+          "default": "all",
+          "data": [
+            {
+              "title": "Tool versions and config links",
+              "value": "all"
+            },
+            {
+              "title": "Tool versions only (--tools)",
+              "value": "tools"
+            },
+            {
+              "title": "Config links only (--configs)",
+              "value": "configs"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Cache",
+      "subtitle": "Mise",
+      "description": "Delete mise's cache files",
+      "mode": "no-view",
+      "disabledByDefault": true
+    }
+  ],
+  "preferences": [
+    {
+      "name": "misePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Mise Path",
+      "description": "Absolute path to the mise binary. Leave empty to detect automatically.",
+      "placeholder": "/Users/you/.local/bin/mise"
+    },
+    {
+      "name": "terminalApp",
+      "type": "appPicker",
+      "required": false,
+      "title": "Terminal Application",
+      "description": "Used by Run in Terminal actions. Defaults to Terminal."
+    },
+    {
+      "name": "upgradeBump",
+      "type": "checkbox",
+      "required": false,
+      "title": "Upgrade Behavior",
+      "label": "Upgrade past the configured range",
+      "description": "Add --bump to mise upgrade and mise outdated, so a tool pinned to a range moves to the latest version and the version in your config is rewritten.",
+      "default": false
+    },
+    {
+      "name": "includeInactive",
+      "type": "checkbox",
+      "required": false,
+      "title": "Inactive Tools",
+      "label": "Include inactive tools",
+      "description": "Add --inactive to mise outdated and mise upgrade, so installed versions no config activates are checked and upgraded too.",
+      "default": false
+    },
+    {
+      "name": "uninstallRemovesConfig",
+      "type": "checkbox",
+      "required": false,
+      "title": "Uninstall Behavior",
+      "label": "Remove the tool from config when uninstalling a configured version",
+      "description": "Uninstalling a version that a config file requests runs mise unuse on that file instead of mise uninstall, so the tool is removed from the config as well.",
+      "default": false
+    },
+    {
+      "name": "jobs",
+      "type": "textfield",
+      "required": false,
+      "title": "Parallel Jobs",
+      "description": "Number of tools mise installs or upgrades at once (-j). Leave empty for mise's default.",
+      "placeholder": "8"
+    },
+    {
+      "name": "showInactive",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Installed Tools List",
+      "label": "Show inactive tools in Show Installed Tools",
+      "description": "List installed versions that no config activates in their own Inactive section.",
+      "default": true
+    },
+    {
+      "name": "closeAfterAction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Window Behavior",
+      "label": "Close window after actions",
+      "description": "Close the Raycast window after install, upgrade and uninstall and show the result as a HUD.",
+      "default": false
+    },
+    {
+      "name": "debugLogging",
+      "type": "checkbox",
+      "required": false,
+      "title": "Debug Logging",
+      "label": "Log mise commands to the console",
+      "description": "Print every mise command line, its exit code and duration to the extension's console.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@raycast/eslint-plugin": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/react-test-renderer": "19.0.0",
+    "eslint": "^10.10.0",
+    "oxfmt": "^0.68.0",
+    "oxlint": "^1.83.0",
+    "prettier": "^3.9.7",
+    "react-test-renderer": "19.0.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "oxlint --fix && oxfmt",
+    "lint": "oxlint && oxfmt --check",
+    "test": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:all": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
