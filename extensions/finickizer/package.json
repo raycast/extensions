@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "finickizer",
+  "title": "Finickizer",
+  "description": "Browser chooser for Finicky: open a link once, or remember a rule for its domain",
+  "icon": "finickizer.png",
+  "author": "trollfred",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "choose",
+      "title": "Choose Browser",
+      "description": "Pick a browser for a URL, optionally remembering a Finicky rule for its domain",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://…",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "browsers",
+      "title": "Manage Browsers",
+      "description": "Pick and order the apps shown by Choose Browser",
+      "mode": "view"
+    },
+    {
+      "name": "rules",
+      "title": "Manage Rules",
+      "description": "List, reorder, retarget and delete the rules remembered from the chooser",
+      "mode": "view"
+    },
+    {
+      "name": "patch",
+      "title": "Patch Finicky Config",
+      "description": "Make Finicky load ~/.finickizer.js, which wraps your own config, and pick when the chooser opens",
+      "mode": "view"
+    },
+    {
+      "name": "unpatch",
+      "title": "Unpatch Finicky Config",
+      "description": "Move your own config back to ~/.finicky.js, optionally deleting the remembered rules",
+      "mode": "view"
+    },
+    {
+      "name": "reload",
+      "title": "Reload Finicky Config",
+      "description": "Make Finicky pick up edits to your own config. Also runs by itself every minute.",
+      "mode": "no-view",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1",
+    "tldts": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
