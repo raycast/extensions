@@ -1,6 +1,6 @@
 # OpenClaw Changelog
 
-## [Gateway-Native Control Center] - {PR_MERGE_DATE}
+## [Gateway-Native Control Center] - 2026-09-17
 
 - Added a native Control Center for Gateway health, tasks, sessions, agents, nodes, channels, and usage
 - Replaced the optional HTTP integration with OpenClaw's native Gateway WebSocket protocol
