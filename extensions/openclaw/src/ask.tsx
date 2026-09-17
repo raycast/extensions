@@ -7,8 +7,9 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { askQuestion } from "./api";
 
 function ResultView({
@@ -31,11 +32,14 @@ ${answer}`;
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Answer" content={answer} />
+          <Action.CopyToClipboard
+            title="Copy Answer"
+            content={answer}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
           <Action.CopyToClipboard
             title="Copy All"
             content={`Q: ${question}\n\nA: ${answer}`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
         </ActionPanel>
       }
@@ -52,54 +56,30 @@ ${question}
 
 ---
 
-*Asking OpenClaw...*`}
+*Waiting for OpenClaw…*`}
     />
   );
 }
 
 function AskForm({ initialQuestion }: { initialQuestion?: string }) {
   const [question, setQuestion] = useState(initialQuestion || "");
-  const [isLoading, setIsLoading] = useState(false);
-  const [showingResult, setShowingResult] = useState(false);
-  const [answer, setAnswer] = useState("");
   const { push } = useNavigation();
 
   async function handleSubmit() {
-    if (!question.trim()) {
-      showToast({
+    const trimmedQuestion = question.trim();
+    if (!trimmedQuestion) {
+      await showToast({
         style: Toast.Style.Failure,
-        title: "Please enter a question",
+        title: "Enter a Question",
       });
       return;
     }
 
-    setIsLoading(true);
-    push(<LoadingView question={question} />);
-
-    try {
-      const result = await askQuestion(question);
-      setAnswer(result);
-      setShowingResult(true);
-      push(<ResultView question={question} answer={result} />);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message:
-          error instanceof Error ? error.message : "Failed to get response",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  if (showingResult) {
-    return <ResultView question={question} answer={answer} />;
+    push(<AskResult question={trimmedQuestion} />);
   }
 
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Ask OpenClaw" onSubmit={handleSubmit} />
@@ -121,28 +101,48 @@ function AskForm({ initialQuestion }: { initialQuestion?: string }) {
 export default function Command(
   props: LaunchProps<{ arguments: Arguments.Ask }>,
 ) {
-  const initialQuestion = props.arguments?.question;
+  const initialQuestion = props.arguments?.question?.trim();
 
-  // If question provided as argument, ask immediately
   if (initialQuestion) {
-    return <ImmediateAsk question={initialQuestion} />;
+    return <AskResult question={initialQuestion} />;
   }
 
   return <AskForm />;
 }
 
-function ImmediateAsk({ question }: { question: string }) {
+function AskResult({ question }: { question: string }) {
   const [answer, setAnswer] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const request = useRef<
+    { question: string; promise: Promise<string> } | undefined
+  >(undefined);
 
   useEffect(() => {
-    askQuestion(question)
-      .then(setAnswer)
-      .catch((e) => setError(e.message));
-  }, []);
+    if (!request.current || request.current.question !== question) {
+      request.current = { question, promise: askQuestion(question) };
+    }
+
+    let active = true;
+    request.current.promise
+      .then((result) => {
+        if (active) setAnswer(result);
+      })
+      .catch((reason: unknown) => {
+        if (!active) return;
+        setError(
+          reason instanceof Error
+            ? reason.message
+            : "OpenClaw did not respond.",
+        );
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [question]);
 
   if (error) {
-    return <Detail markdown={`## Error\n\n${error}`} />;
+    return <Detail markdown={`## Could not ask OpenClaw\n\n${error}`} />;
   }
 
   if (!answer) {
