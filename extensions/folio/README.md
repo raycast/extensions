@@ -43,7 +43,7 @@ Fog is cash that isn't doing anything. The amount is the sum of cash balances ac
 Folio is read-only and keeps your data on your Mac. Details:
 
 - The extension never sends `clientId`, `consumerKey`, `userId`, `userSecret`, `timestamp` or a `Signature` header. Bearer only.
-- Tokens are stored through `OAuth.PKCEClient.setTokens`. Sign out revokes the refresh token through the worker and then removes both tokens.
+- Tokens are stored through `OAuth.PKCEClient.setTokens`. Sign out revokes the refresh token through the worker (one retry) and then removes both tokens. If SnapTrade can't be reached, you're told the session was only removed locally.
 - On a 401 the extension refreshes once and retries once. If that fails it clears the session and asks you to sign in again.
 - The `id_token` (if `openid` was granted) is only decoded locally to show your email on the sign-in screen. It is never sent anywhere.
 - Portfolio data goes directly from Raycast to SnapTrade. The only server component, the open-source auth worker, sees your one-time sign-in code and tokens in transit and stores nothing.
