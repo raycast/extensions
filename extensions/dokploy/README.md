@@ -13,13 +13,13 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Deploy / Redeploy / Rebuild Service
         - Start / Stop / Reload Service
         - View Service Logs
-        - View Environment
-            - Edit Variables
-            - Copy Environment File
         - View Deployments (Applications and Compose stacks)
             - View Build Logs
             - Roll Back
             - Cancel / Delete
+        - View Environment
+            - Edit Variables
+            - Copy Environment File
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
     - View Docker (Containers)

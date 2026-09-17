@@ -298,11 +298,6 @@ export default function Services({
                       onAction={() => runServiceAction(service, action)}
                     />
                   ))}
-                  <Action.Push
-                    icon={Icon.LockUnlocked}
-                    title="View Environment"
-                    target={<ServiceEnv service={service} />}
-                  />
                   {/* compose.readLogs requires a containerId, which this screen doesn't have; leave compose out until that's picked. */}
                   {service.type !== "compose" && (
                     <Action.Push icon={Icon.Terminal} title="View Logs" target={<ServiceLogs service={service} />} />
@@ -314,6 +309,11 @@ export default function Services({
                       target={<DeploymentHistory service={{ ...service, type: service.type }} />}
                     />
                   )}
+                  <Action.Push
+                    icon={Icon.LockUnlocked}
+                    title="View Environment"
+                    target={<ServiceEnv service={service} />}
+                  />
                 </ActionPanel.Section>
                 {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
                   <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />

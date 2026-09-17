@@ -11,21 +11,47 @@ export interface EnvLine {
   /** Set only on the first line of a `KEY=value` assignment; absent on comments, blanks and continuation lines. */
   key?: string;
   value?: string;
+  /**
+   * True for a line that continues the still-open quoted value of the assignment above it.
+   *
+   * A masking pass can't safely re-derive this from `raw` alone - a continuation line can look like
+   * a comment, a blank line, or a fresh `KEY=value` assignment, and only the parser walking the
+   * string top to bottom actually knows which one it really is.
+   */
+  continuation?: boolean;
 }
 
-type Quote = '"' | "'";
+type Quote = '"' | "'" | "`";
+
+/**
+ * True if `text` contains `quote` at a position that isn't escaped - matching `dotenv`'s own quoted
+ * value syntax (`\"` inside a double-quoted value doesn't close it). Backslash-counting rather than
+ * a plain `includes`: an escaped quote right before a real one (`\"...\""`) is common enough in
+ * JSON-shaped values that treating it as a close would cut the value short and leave the rest
+ * flowing into "new assignment" lines - which is exactly the class of bug this file has already
+ * gotten wrong twice.
+ */
+function hasUnescapedQuote(text: string, quote: Quote): boolean {
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] !== quote) continue;
+    let backslashes = 0;
+    for (let j = i - 1; j >= 0 && text[j] === "\\"; j--) backslashes++;
+    if (backslashes % 2 === 0) return true;
+  }
+  return false;
+}
 
 /**
  * `dotenv` (which Dokploy parses `env` with) lets a value span multiple lines when it opens a quote
- * it doesn't close on the same line - a PEM key is the common case. Returns the quote character the
- * value opened with if so, so the caller can treat following lines as its continuation rather than
- * new assignments.
+ * it doesn't close on the same line - a PEM key is the common case. Single, double and backtick
+ * quotes all support this. Returns the quote character the value opened with if so, so the caller
+ * can treat following lines as its continuation rather than new assignments.
  */
 function unclosedQuote(value: string): Quote | undefined {
   const trimmed = value.trimStart();
   const quote = trimmed[0];
-  if (quote !== '"' && quote !== "'") return undefined;
-  return trimmed.indexOf(quote, 1) === -1 ? quote : undefined;
+  if (quote !== '"' && quote !== "'" && quote !== "`") return undefined;
+  return hasUnescapedQuote(trimmed.slice(1), quote) ? undefined : quote;
 }
 
 export function parseEnv(env: string): EnvLine[] {
@@ -34,10 +60,8 @@ export function parseEnv(env: string): EnvLine[] {
 
   for (const raw of env.split("\n")) {
     if (openQuote) {
-      lines.push({ raw });
-      // A raw `includes` rather than tracking escapes: this only has to be conservative enough to
-      // know when the multi-line value is *still open*, not to parse it correctly.
-      if (raw.includes(openQuote)) openQuote = undefined;
+      lines.push({ raw, continuation: true });
+      if (hasUnescapedQuote(raw, openQuote)) openQuote = undefined;
       continue;
     }
 
@@ -75,16 +99,21 @@ export function countVariables(lines: EnvLine[]): number {
  * leaks the one value it failed to recognise. The mask is a fixed width so it doesn't give away the
  * length of what it's hiding either.
  *
- * Only a blank line or a `#` comment is shown as-is - never a bare `line.raw` fallback, and never
- * just the text after a line's own `=`. A continuation line of a multi-line value has no `=` of its
- * own and would otherwise pass straight through unmasked, and one that happens to contain a stray
- * `=` (a base64 line, say) would otherwise be split into a "key" that is actually secret content.
+ * A continuation line is masked unconditionally, and first - before anything that looks at its
+ * text - because it can look exactly like a blank line, a `#` comment or a fresh assignment while
+ * actually being part of the value above it. Only a genuinely top-level blank line or `#` comment
+ * is shown as-is, and even a top-level comment is masked if it looks like a commented-out assignment
+ * (contains its own `=`): a value stashed in a disabled line is still a value.
  */
 export function maskValues(lines: EnvLine[]): string {
   return lines
     .map((line) => {
+      if (line.continuation) return "••••••••";
+
       const trimmed = line.raw.trim();
-      if (trimmed === "" || trimmed.startsWith("#")) return line.raw;
+      if (trimmed === "") return line.raw;
+      if (trimmed.startsWith("#")) return trimmed.includes("=") ? "••••••••" : line.raw;
+
       return line.key !== undefined ? `${line.key}=••••••••` : "••••••••";
     })
     .join("\n");
