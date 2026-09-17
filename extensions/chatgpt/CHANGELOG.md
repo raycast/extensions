@@ -1,5 +1,11 @@
 # Changelog
 
+## [Separate Chat Models and AI Commands] - 2026-09-17
+
+- Show base models in Ask Question, Full Text Input and Summarize Website. Add Ask with This Command in Models to start a command conversation.
+- Preserve command settings when continuing a conversation and identify the command with a `Command:` prefix. Saved conversations retain their settings if the command is deleted.
+- Keep the last selected base model when starting or continuing a command conversation. Resolve old command selections to their base model, or Default when unavailable.
+
 ## [Feature] - 2026-09-15
 
 - Create and edit AI commands in Models, including creating a command from the selected model.

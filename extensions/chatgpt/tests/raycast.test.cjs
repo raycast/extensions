@@ -20,11 +20,27 @@ const writer = {
   enableReasoningEffortChange: true,
   reasoningEffort: "high",
 };
+const editor = { ...writer, id: "editor", name: "Editor", option: "editor-v1", prompt: "Editor instructions" };
 const fixture = { models: JSON.stringify({ writer }), commands: "{}" };
+const inheritedCommand = {
+  id: "rewrite",
+  name: "Rewrite",
+  configurationMode: "inherit",
+  baseModelId: "writer",
+  overrideModel: true,
+  model: "command-only-model",
+  overridePrompt: true,
+  prompt: "Command-only instructions",
+  temperature: "0.9",
+  contentSource: "selectedText",
+  isDisplayInput: true,
+};
+const commandFixture = { ...fixture, commands: JSON.stringify({ rewrite: inheritedCommand }) };
 const body = (tree) => tree.navigationStack.body;
 const actions = (tree) => tree.actions?.sections.flatMap((s) => s.items) || [];
 const field = (tree, id) => body(tree).items?.find((item) => item.id === id);
 const value = (tree, id) => field(tree, id)?.value?.value;
+const menuItems = (dropdown) => dropdown.menu.sections.flatMap((section) => section.items);
 const page = (title) => (tree) => body(tree).navigationTitle === title && !body(tree).isLoading;
 let eventCount = 0;
 async function action(app, title, data) {
@@ -72,7 +88,7 @@ function cacheDirectory(t) {
   return support;
 }
 async function rememberWriter(support, initialStorage = fixture, prefs = {}) {
-  const app = await launch("model", initialStorage, prefs, support);
+  const app = await launch("model", initialStorage, prefs, { supportDirectory: support });
   try {
     await app.waitFor(page("Models"));
     await select(app, "writer");
@@ -191,10 +207,15 @@ test(
     await action(app, "Continue in Chat");
     await app.waitFor(page("Ask"));
     assert.equal(body(app.tree).searchBarAccessory.value.value, `command-${saved.id}`);
+    assert.equal(
+      menuItems(body(app.tree).searchBarAccessory).find((item) => item.id === `command-${saved.id}`).title,
+      "Command: Independent rewrite",
+    );
     await action(app, "Edit AI Command");
     await app.waitFor(page("Edit AI Command"));
     assert.equal(value(app.tree, "configurationMode"), "independent");
     assert.equal(value(app.tree, "model"), "solo-v1");
+    assert.equal(value(app.tree, "prompt"), "");
     assert.equal(value(app.tree, "vision"), true);
     assert.equal(value(app.tree, "reasoningEffort"), "low");
   },
@@ -223,51 +244,96 @@ test("an independent command can select a model fetched from the configured endp
   assert.equal(api.requests[0].model, "remote-two");
 });
 
-test("existing command quicklinks run the migrated command and continue with its configuration", native, async (t) => {
-  const api = await provider(t);
-  const support = cacheDirectory(t);
-  const legacy = {
-    id: "existing-quicklink",
-    name: "Quicklink command",
-    model: "quicklink-model",
-    temperature: "0.4",
-    prompt: "Preserve my command instructions",
-    contentSource: "selectedText",
-    isDisplayInput: true,
-  };
-  const initialStorage = await rememberWriter(
-    support,
-    { models: fixture.models, commands: JSON.stringify({ [legacy.id]: legacy }) },
-    api.prefs,
-  );
-  const app = await launch("search-ai-command", initialStorage, api.prefs, support, { commandId: legacy.id });
-  t.after(app.close);
-  await app.waitFor((tree) => body(tree).kind === "Detail" && body(tree).markdown?.includes("Fixture answer"));
-  assert.equal(api.requests.length, 1);
-  assert.equal(api.requests[0].model, legacy.model);
-  assert.equal(api.requests[0].temperature, 0.4);
-  assert.deepEqual(api.requests[0].messages, [
-    { role: "system", content: legacy.prompt },
-    { role: "user", content: "Text to rewrite" },
-  ]);
-  await action(app, "Continue in Chat");
-  await app.waitFor(page("Ask"));
-  assert.equal(body(app.tree).searchBarAccessory.value.value, `command-${legacy.id}`);
-  await app.callback(body(app.tree).searchBarAccessory.onChange, {
-    value: `command-${legacy.id}`,
-    eventCount: ++eventCount,
-  });
-  const savedStorage = Object.fromEntries(app.storage);
-  await app.close();
-  const ordinaryAsk = await launch("ask", savedStorage, api.prefs, support);
-  t.after(ordinaryAsk.close);
-  await ordinaryAsk.waitFor(page("Ask"));
-  assert.equal(
-    body(ordinaryAsk.tree).searchBarAccessory.value.value,
-    "writer",
-    "continuing a command keeps Ask's remembered model",
-  );
-});
+test(
+  "existing command quicklinks continue with labeled command settings and remember only explicitly chosen bases",
+  native,
+  async (t) => {
+    const api = await provider(t);
+    const support = cacheDirectory(t);
+    const legacy = {
+      id: "existing-quicklink",
+      name: "Quicklink command",
+      model: "quicklink-model",
+      temperature: "0.4",
+      prompt: "Preserve my command instructions",
+      contentSource: "selectedText",
+      isDisplayInput: true,
+    };
+    const initialStorage = await rememberWriter(
+      support,
+      { models: JSON.stringify({ writer, editor }), commands: JSON.stringify({ [legacy.id]: legacy }) },
+      api.prefs,
+    );
+    const app = await launch("search-ai-command", initialStorage, api.prefs, {
+      supportDirectory: support,
+      launchContext: { commandId: legacy.id },
+    });
+    t.after(app.close);
+    await app.waitFor((tree) => body(tree).kind === "Detail" && body(tree).markdown?.includes("Fixture answer"));
+    assert.equal(api.requests.length, 1);
+    assert.equal(api.requests[0].model, legacy.model);
+    assert.equal(api.requests[0].temperature, 0.4);
+    assert.deepEqual(api.requests[0].messages, [
+      { role: "system", content: legacy.prompt },
+      { role: "user", content: "Text to rewrite" },
+    ]);
+    await action(app, "Continue in Chat");
+    await app.waitFor(page("Ask"));
+    assert.equal(body(app.tree).searchBarAccessory.value.value, `command-${legacy.id}`);
+    await app.callback(body(app.tree).searchBarAccessory.onChange, {
+      value: `command-${legacy.id}`,
+      eventCount: ++eventCount,
+    });
+    await app.callback(body(app.tree).onSearchTextChange, { value: "Explain the result", eventCount: ++eventCount });
+    await app.waitFor((tree) => body(tree).searchBarText.value === "Explain the result");
+    await action(app, "Get Answer");
+    await app.waitFor((tree) => !body(tree).isLoading && api.requests.length === 2);
+    assert.equal(api.requests[1].model, legacy.model);
+    assert.equal(api.requests[1].temperature, 0.4);
+    assert.deepEqual(api.requests[1].messages, [
+      { role: "system", content: legacy.prompt },
+      { role: "user", content: "Text to rewrite" },
+      { role: "assistant", content: "Fixture answer" },
+      { role: "user", content: "Explain the result" },
+    ]);
+    await action(app, "Full Text Input");
+    await app.waitFor((tree) => field(tree, "question"));
+    const sessionId = `command-${legacy.id}`;
+    assert.deepEqual(
+      menuItems(field(app.tree, "model"))
+        .map((item) => item.id)
+        .sort(),
+      [sessionId, "default", "editor", "writer"].sort(),
+    );
+    assert.equal(
+      menuItems(field(app.tree, "model")).find((item) => item.id === sessionId).title,
+      "Command: Quicklink command",
+    );
+    await change(app, "model", "editor");
+    assert.ok(
+      menuItems(field(app.tree, "model")).some(
+        (item) => item.id === sessionId && item.title === "Command: Quicklink command",
+      ),
+      "the conversation command remains selectable after choosing a base",
+    );
+    await change(app, "model", sessionId);
+    await change(app, "question", "One more question");
+    await submit(app, "Submit");
+    await app.waitFor((tree) => page("Ask")(tree) && api.requests.length === 3);
+    assert.equal(api.requests[2].model, legacy.model);
+    assert.equal(api.requests[2].messages[0].content, legacy.prompt);
+    const savedStorage = Object.fromEntries(app.storage);
+    await app.close();
+    const ordinaryAsk = await launch("ask", savedStorage, api.prefs, { supportDirectory: support });
+    t.after(ordinaryAsk.close);
+    await ordinaryAsk.waitFor(page("Ask"));
+    assert.equal(
+      body(ordinaryAsk.tree).searchBarAccessory.value.value,
+      "editor",
+      "a base chosen explicitly inside a command conversation is remembered; switching back to the command is not",
+    );
+  },
+);
 
 test(
   "AI Commands handles failed remove, reset and delete-all writes and remains usable for retry",
@@ -383,8 +449,8 @@ test(
     assert.equal(api.requests[0].temperature, 0.9);
     assert.equal(api.requests[0].reasoning_effort, undefined);
     assert.equal(api.requests[0].messages[0].content, "Command instructions");
-    await action(app, "Continue in Chat");
-    await app.waitFor(page("Ask"));
+    await back(app);
+    await app.waitFor(page("Models"));
     await action(app, "Edit AI Command");
     await app.waitFor(page("Edit AI Command"));
     await change(app, "configurationMode", "independent");
@@ -394,7 +460,7 @@ test(
     assert.equal(value(app.tree, "vision"), false);
     assert.equal(value(app.tree, "prompt"), "Command instructions");
     await submit(app, "Save AI Command");
-    await app.waitFor(page("Ask"));
+    await app.waitFor(page("Models"));
     assert.equal(JSON.parse(app.storage.get(CATALOG_STORAGE_KEY)).commands[saved.id].baseModelId, undefined);
     await action(app, "Edit AI Command");
     await app.waitFor(page("Edit AI Command"));
@@ -419,15 +485,20 @@ test(
     assert.equal(value(app.tree, "prompt"), "Updated base instructions");
     await change(app, "configurationMode", "inherit");
     await submit(app, "Save AI Command");
+    await app.waitFor(page("Models"));
+    await action(app, "Run AI Command");
+    await app.waitFor((tree) => body(tree).kind === "Detail" && body(tree).markdown?.includes("Fixture answer"));
+    await action(app, "Continue in Chat");
     await app.waitFor(page("Ask"));
+    assert.equal(body(app.tree).searchBarAccessory.value.value, `command-${saved.id}`);
     await app.callback(body(app.tree).onSearchTextChange, { value: "Next question", eventCount: ++eventCount });
     await app.waitFor((tree) => body(tree).searchBarText.value === "Next question");
     await action(app, "Get Answer");
-    await app.waitFor((tree) => !body(tree).isLoading && api.requests.length === 2);
-    assert.equal(api.requests[1].model, "writer-v2");
-    assert.equal(api.requests[1].temperature, 0.6);
-    assert.equal(api.requests[1].reasoning_effort, "low");
-    assert.equal(api.requests[1].messages[0].content, "Updated base instructions");
+    await app.waitFor((tree) => !body(tree).isLoading && api.requests.length === 3);
+    assert.equal(api.requests[2].model, "writer-v2");
+    assert.equal(api.requests[2].temperature, 0.6);
+    assert.equal(api.requests[2].reasoning_effort, "low");
+    assert.equal(api.requests[2].messages[0].content, "Updated base instructions");
   },
 );
 
@@ -466,6 +537,8 @@ test(
     assert.equal(body(app.tree).selectedItemId.value, `command-${saved.id}`);
     await select(app, `command-${saved.id}`);
     assert.equal(body(app.tree).detail.markdown, writer.prompt);
+    assert.ok(actions(app.tree).some((item) => item.title === "Ask with This Command"));
+    assert.ok(!actions(app.tree).some((item) => item.title === "Ask with This Model"));
     await action(app, "Edit AI Command");
     await app.waitFor(page("Edit AI Command"));
     await change(app, "prompt", "Only output corrected text");
@@ -482,12 +555,36 @@ test(
     await action(app, "Continue in Chat");
     await app.waitFor(page("Ask"));
     assert.equal(body(app.tree).searchBarAccessory.value.value, `command-${saved.id}`);
+    assert.equal(
+      menuItems(body(app.tree).searchBarAccessory).find((item) => item.id === `command-${saved.id}`).title,
+      "Command: Rewrite selection",
+    );
+    await action(app, "Full Text Input");
+    await app.waitFor((tree) => field(tree, "question"));
+    await change(app, "question", "Follow up");
     await action(app, "Edit AI Command");
     await app.waitFor(page("Edit AI Command"));
+    assert.equal(value(app.tree, "prompt"), "Only output corrected text");
+    await change(app, "name", "Revised rewrite");
     await change(app, "prompt", "Updated command instructions");
     await submit(app, "Save AI Command");
+    await app.waitFor((tree) => field(tree, "question"));
+    assert.equal(value(app.tree, "question"), "Follow up");
+    assert.equal(
+      menuItems(field(app.tree, "model")).find((item) => item.id === `command-${saved.id}`).title,
+      "Command: Revised rewrite",
+    );
+    await submit(app, "Submit");
     await app.waitFor(page("Ask"));
-    assert.equal(api.requests.length, 1, "editing must not rerun the command behind the current page");
+    await app.waitFor((tree) => !body(tree).isLoading && api.requests.length === 2);
+    assert.equal(api.requests[1].model, writer.option);
+    assert.equal(api.requests[1].messages[0].content, "Updated command instructions");
+    assert.equal(api.requests.length, 2, "editing must not rerun the command behind the current page");
+    assert.equal(JSON.parse(app.storage.get(CATALOG_STORAGE_KEY)).models.writer.prompt, writer.prompt);
+    assert.equal(
+      menuItems(body(app.tree).searchBarAccessory).find((item) => item.id === `command-${saved.id}`).title,
+      "Command: Revised rewrite",
+    );
   },
 );
 
@@ -663,17 +760,36 @@ test(
   },
 );
 
+test("Ask and Full Text Input list only base models and submit the selected base settings", native, async (t) => {
+  const api = await provider(t);
+  const app = await launch("ask", fixture, api.prefs);
+  t.after(app.close);
+  await app.waitFor(page("Ask"));
+  const dropdownItems = (dropdown) => dropdown.menu.sections.flatMap((section) => section.items).map((item) => item.id);
+  assert.ok(Object.keys(JSON.parse(app.storage.get(CATALOG_STORAGE_KEY)).commands).length > 0);
+  assert.deepEqual(dropdownItems(body(app.tree).searchBarAccessory).sort(), ["default", "writer"]);
+  await action(app, "Full Text Input");
+  await app.waitFor((tree) => body(tree).kind === "Form" && field(tree, "question"));
+  assert.deepEqual(dropdownItems(field(app.tree, "model")).sort(), ["default", "writer"]);
+  await change(app, "model", "writer");
+  await change(app, "question", "A normal question");
+  await submit(app, "Submit");
+  await app.waitFor((tree) => page("Ask")(tree) && api.requests.length === 1);
+  assert.equal(api.requests[0].model, writer.option);
+  assert.equal(api.requests[0].messages[0].content, writer.prompt);
+});
+
 test("Ask without an explicit preset restores the last model across separate command launches", native, async (t) => {
   const support = cacheDirectory(t);
   const savedStorage = await rememberWriter(support);
-  let app = await launch("ask", savedStorage, {}, support);
+  let app = await launch("ask", savedStorage, {}, { supportDirectory: support });
   t.after(() => app.close());
   await app.waitFor(page("Ask"));
   assert.equal(body(app.tree).searchBarAccessory.value.value, "writer");
   await app.callback(body(app.tree).searchBarAccessory.onChange, { value: "default", eventCount: ++eventCount });
   await app.waitFor((tree) => body(tree).searchBarAccessory.value.value === "default");
   await app.close();
-  app = await launch("ask", savedStorage, {}, support);
+  app = await launch("ask", savedStorage, {}, { supportDirectory: support });
   await app.waitFor(page("Ask"));
   assert.equal(body(app.tree).searchBarAccessory.value.value, "default", "manual dropdown changes are remembered");
   await action(app, "Full Text Input");
@@ -687,10 +803,219 @@ test("Ask without an explicit preset restores the last model across separate com
   await app.waitFor((tree) => body(tree).kind === "Form" && field(tree, "question"));
   await change(app, "model", "writer");
   await app.close();
-  app = await launch("ask", savedStorage, {}, support);
+  app = await launch("ask", savedStorage, {}, { supportDirectory: support });
   await app.waitFor(page("Ask"));
   assert.equal(body(app.tree).searchBarAccessory.value.value, "writer", "manual full-input changes are remembered");
 });
+
+test(
+  "Ask replaces an old remembered command with its base model and persists the repaired selection",
+  native,
+  async (t) => {
+    const support = cacheDirectory(t);
+    const app = await launch(
+      "ask",
+      commandFixture,
+      {},
+      {
+        supportDirectory: support,
+        initialCache: { select_model: "command-rewrite" },
+      },
+    );
+    t.after(app.close);
+    await app.waitFor(page("Ask"));
+    assert.equal(body(app.tree).searchBarAccessory.value.value, "writer");
+    const catalog = JSON.parse(app.storage.get(CATALOG_STORAGE_KEY));
+    delete catalog.commands.rewrite;
+    const savedStorage = { [CATALOG_STORAGE_KEY]: JSON.stringify(catalog) };
+    await app.close();
+    const reopened = await launch("ask", savedStorage, {}, { supportDirectory: support });
+    t.after(reopened.close);
+    await reopened.waitFor(page("Ask"));
+    assert.equal(
+      body(reopened.tree).searchBarAccessory.value.value,
+      "writer",
+      "cache no longer depends on the command",
+    );
+  },
+);
+
+test(
+  "Ask replaces a remembered preset that no longer exists and persists the repaired selection",
+  native,
+  async (t) => {
+    const support = cacheDirectory(t);
+    const app = await launch(
+      "ask",
+      fixture,
+      {},
+      { supportDirectory: support, initialCache: { select_model: "retired" } },
+    );
+    t.after(app.close);
+    await app.waitFor(page("Ask"));
+    assert.equal(body(app.tree).searchBarAccessory.value.value, "default");
+    const catalog = JSON.parse(app.storage.get(CATALOG_STORAGE_KEY));
+    catalog.models.retired = { ...writer, id: "retired", name: "Retired" };
+    await app.close();
+    // Restoring the ID proves the cache was rewritten instead of resolving the stale ID again.
+    const reopened = await launch(
+      "ask",
+      { [CATALOG_STORAGE_KEY]: JSON.stringify(catalog) },
+      {},
+      { supportDirectory: support },
+    );
+    t.after(reopened.close);
+    await reopened.waitFor(page("Ask"));
+    assert.equal(body(reopened.tree).searchBarAccessory.value.value, "default", "the repaired choice was remembered");
+  },
+);
+
+test(
+  "Summarize repairs a command selection and submits exactly once with the displayed base model",
+  native,
+  async (t) => {
+    const api = await provider(t);
+    const app = await launch("summarize", commandFixture, api.prefs, {
+      browserExtension: true,
+      initialCache: { select_model: "command-rewrite" },
+    });
+    t.after(app.close);
+    await app.waitFor((tree) => field(tree, "model") && !body(tree).isLoading);
+    assert.deepEqual(
+      field(app.tree, "model")
+        .menu.sections.flatMap((section) => section.items)
+        .map((item) => item.id)
+        .sort(),
+      ["default", "writer"],
+    );
+    assert.equal(value(app.tree, "model"), "writer");
+    const question = value(app.tree, "question");
+    assert.match(question, /Fixture page content/);
+    await action(app, "Submit");
+    await app.waitFor((tree) => page("Ask")(tree) && api.requests.length > 0);
+    assert.equal(api.requests.length, 1);
+    assert.equal(body(app.tree).searchBarAccessory.value.value, "writer");
+    assert.deepEqual(api.requests[0].messages, [
+      { role: "system", content: writer.prompt },
+      { role: "user", content: question },
+    ]);
+    assert.equal(api.requests[0].model, writer.option);
+    await action(app, "Edit Model");
+    await app.waitFor(page("Edit Model"));
+    await change(app, "temperature", "0.7");
+    await submit(app, "Submit");
+    await app.waitFor(page("Ask"));
+    assert.equal(api.requests.length, 1, "model updates do not resubmit the initial summary");
+  },
+);
+
+test(
+  "an old command conversation resumes with labeled command settings and retains its messages",
+  native,
+  async (t) => {
+    const api = await provider(t);
+    const conversation = {
+      id: "past-command-conversation",
+      model: {
+        ...writer,
+        id: "command-rewrite",
+        name: "Rewrite",
+        option: inheritedCommand.model,
+        prompt: inheritedCommand.prompt,
+      },
+      chats: [
+        { id: "past-chat", question: "Past question", answer: "Past answer", created_at: "2026-09-10T00:00:00Z" },
+      ],
+      pinned: false,
+      created_at: "2026-09-10T00:00:00Z",
+      updated_at: "2026-09-10T00:00:00Z",
+    };
+    const app = await launch(
+      "conversation",
+      { ...commandFixture, conversations: JSON.stringify([conversation]) },
+      api.prefs,
+    );
+    t.after(app.close);
+    await app.waitFor((tree) => body(tree).kind === "List" && !body(tree).isLoading);
+    const savedItem = body(app.tree)
+      .sections.flatMap((section) => section.items)
+      .find((item) => item.id === conversation.id);
+    assert.ok(savedItem.accessories.some((accessory) => accessory.tag === "Command: Rewrite"));
+    await select(app, conversation.id);
+    await action(app, "Continue Ask");
+    await app.waitFor(page("Ask"));
+    assert.equal(body(app.tree).searchBarAccessory.value.value, "command-rewrite");
+    assert.equal(
+      menuItems(body(app.tree).searchBarAccessory).find((item) => item.id === "command-rewrite").title,
+      "Command: Rewrite",
+    );
+    await app.callback(body(app.tree).onSearchTextChange, { value: "Next question", eventCount: ++eventCount });
+    await app.waitFor((tree) => body(tree).searchBarText.value === "Next question");
+    await action(app, "Get Answer");
+    await app.waitFor((tree) => page("Ask")(tree) && api.requests.length === 1);
+    assert.equal(api.requests[0].model, inheritedCommand.model);
+    assert.deepEqual(api.requests[0].messages, [
+      { role: "system", content: inheritedCommand.prompt },
+      { role: "user", content: "Past question" },
+      { role: "assistant", content: "Past answer" },
+      { role: "user", content: "Next question" },
+    ]);
+  },
+);
+
+test(
+  "Ask with This Command starts a labeled command conversation without replacing the remembered base",
+  native,
+  async (t) => {
+    const api = await provider(t);
+    const support = cacheDirectory(t);
+    const solo = {
+      id: "solo",
+      name: "Solo",
+      configurationMode: "independent",
+      model: "solo-model",
+      prompt: "Solo instructions",
+      temperature: "0.5",
+      contentSource: "selectedText",
+      isDisplayInput: true,
+    };
+    const initialStorage = await rememberWriter(support, { ...fixture, commands: JSON.stringify({ solo }) }, api.prefs);
+    const app = await launch("model", initialStorage, api.prefs, { supportDirectory: support });
+    t.after(app.close);
+    await app.waitFor(page("Models"));
+    await select(app, "command-solo");
+    await action(app, "Ask with This Command");
+    await app.waitFor(page("Ask"));
+    assert.equal(body(app.tree).searchBarAccessory.value.value, "command-solo");
+    assert.deepEqual(
+      menuItems(body(app.tree).searchBarAccessory)
+        .map((item) => item.id)
+        .sort(),
+      ["command-solo", "default", "writer"],
+    );
+    assert.equal(
+      menuItems(body(app.tree).searchBarAccessory).find((item) => item.id === "command-solo").title,
+      "Command: Solo",
+    );
+    await app.callback(body(app.tree).onSearchTextChange, { value: "Solo question", eventCount: ++eventCount });
+    await app.waitFor((tree) => body(tree).searchBarText.value === "Solo question");
+    await action(app, "Get Answer");
+    await app.waitFor((tree) => !body(tree).isLoading && api.requests.length === 1);
+    assert.equal(api.requests[0].model, "solo-model");
+    assert.equal(api.requests[0].temperature, 0.5);
+    assert.deepEqual(api.requests[0].messages, [
+      { role: "system", content: "Solo instructions" },
+      { role: "user", content: "Solo question" },
+    ]);
+    const savedStorage = Object.fromEntries(app.storage);
+    await app.close();
+    const ordinaryAsk = await launch("ask", savedStorage, api.prefs, { supportDirectory: support });
+    t.after(ordinaryAsk.close);
+    await ordinaryAsk.waitFor(page("Ask"));
+    // An independent command written to the cache would resolve to Default instead.
+    assert.equal(body(ordinaryAsk.tree).searchBarAccessory.value.value, "writer");
+  },
+);
 
 test("continuing a saved conversation uses its model without replacing Ask's remembered model", native, async (t) => {
   const support = cacheDirectory(t);
@@ -710,7 +1035,7 @@ test("continuing a saved conversation uses its model without replacing Ask's rem
       conversations: JSON.stringify([conversation]),
     },
     {},
-    support,
+    { supportDirectory: support },
   );
   t.after(app.close);
   await app.waitFor((tree) => body(tree).kind === "List" && !body(tree).isLoading);
@@ -720,7 +1045,7 @@ test("continuing a saved conversation uses its model without replacing Ask's rem
   assert.equal(body(app.tree).searchBarAccessory.value.value, "default");
   const savedStorage = Object.fromEntries(app.storage);
   await app.close();
-  const ordinaryAsk = await launch("ask", savedStorage, {}, support);
+  const ordinaryAsk = await launch("ask", savedStorage, {}, { supportDirectory: support });
   t.after(ordinaryAsk.close);
   await ordinaryAsk.waitFor(page("Ask"));
   assert.equal(body(ordinaryAsk.tree).searchBarAccessory.value.value, "writer");
