@@ -27,3 +27,11 @@ export function trashDetail(t: TrashReport): string {
 export function trashTotal(t: TrashReport): number {
 	return t.volumes.reduce((total, v) => total + v.count, t.count);
 }
+
+/**
+ * The name a reader would use for a volume's trash: the volume, not the path.
+ * `/Volumes/Backup/.Trashes/501` is "Backup" to everyone except the filesystem.
+ */
+export function volumeName(path: string): string {
+	return /^\/Volumes\/([^/]+)\//.exec(path)?.[1] ?? path;
+}

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { trashDetail } from "./trash-detail.ts";
+import { trashDetail, volumeName } from "./trash-detail.ts";
 
 const home = { path: "/Users/me/.Trash", size: "464K", count: 4 };
 
@@ -32,4 +32,13 @@ test("two volumes are two volumes", () => {
 		],
 	};
 	assert.match(trashDetail(t), /820 items on 2 other volumes/);
+});
+
+test("a volume's trash is named after the volume, not after the path it sits in", () => {
+	assert.equal(volumeName("/Volumes/Backup/.Trashes/501"), "Backup");
+	assert.equal(volumeName("/Volumes/My Disk/.Trashes/501"), "My Disk");
+});
+
+test("a path that is not under /Volumes is shown as it is", () => {
+	assert.equal(volumeName("/Users/me/.Trash"), "/Users/me/.Trash");
 });

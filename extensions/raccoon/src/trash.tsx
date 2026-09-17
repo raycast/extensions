@@ -3,6 +3,7 @@ import { emptyTrash, reveal } from "./fixes";
 import { RccList } from "./rcc-list";
 import { RowActions } from "./resolve";
 import { parseTrash } from "./simple-json";
+import { trashDetail, trashTotal, volumeName } from "./trash-detail";
 
 /** A trash worth emptying, one worth noting, or one that is already empty. */
 function weight(count: number): Color {
@@ -25,14 +26,18 @@ export default function Command() {
 				// Emptying is the only thing anyone does here, so it is what
 				// Enter does from any of the three rows, and Cmd+Enter is the
 				// same act: there is one trash, not a screen of them.
+				// Every mounted volume's trash goes with it, because Finder is what
+				// empties it - so the count and the sentence come from the whole
+				// report, not from the home trash alone.
+				const total = trashTotal(t);
 				const empty =
-					t.count > 0
+					total > 0
 						? {
 								title: "Empty the Trash",
 								command: emptyTrash(),
-								detail: `${t.count} ${t.count === 1 ? "item" : "items"}, ${t.size}`,
+								detail: trashDetail(t),
 								destructive: true,
-								count: t.count,
+								count: total,
 							}
 						: undefined;
 				const rowActions = <RowActions one={empty} all={empty} shared={actions} />;
@@ -83,6 +88,27 @@ export default function Command() {
 							/>
 						}
 					/>,
+					// A mounted volume keeps its own trash, and emptying the
+					// trash empties that one too. Listed rather than only
+					// counted in the confirmation, so the reader sees which
+					// drive the items are on before they agree to it.
+					...t.volumes.map((v) => (
+						<List.Item
+							key={v.path}
+							icon={{ source: Icon.HardDrive, tintColor: weight(v.count) }}
+							title={volumeName(v.path)}
+							subtitle={`${v.count} ${v.count === 1 ? "item" : "items"}`}
+							keywords={[v.path]}
+							accessories={[{ tag: { value: v.size, color: weight(v.count) } }]}
+							actions={
+								<RowActions
+									one={{ title: "Show This Trash in Finder", command: reveal(v.path) }}
+									all={empty}
+									shared={actions}
+								/>
+							}
+						/>
+					)),
 				];
 			}}
 		</RccList>
