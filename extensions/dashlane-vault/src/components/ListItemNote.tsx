@@ -47,13 +47,13 @@ export const ListItemNote = ({ note }: Props) => {
       accessories={accessories}
       actions={
         <ActionPanel>
-          {isInitialLoaded && note.content && (
-            <Action.CopyToClipboard title="Copy Note Content" content={note.content} concealed />
-          )}
           <ActionPanel.Section title="Item Actions">
             <FavoriteActions item={note} />
           </ActionPanel.Section>
           <SyncAction />
+          {isInitialLoaded && note.content && (
+            <Action.CopyToClipboard title="Copy Note Content" content={note.content} concealed />
+          )}
         </ActionPanel>
       }
     />
