@@ -1,5 +1,10 @@
 # Sesh Changelog
 
+## [Run CLI commands without a shell] - 2026-09-18
+
+- Pass arguments to `sesh`, `tmux` and `open` directly instead of through a shell, so session names containing quotes, `$` or other special characters connect correctly, and terminal apps with spaces in their name open correctly
+- Apply changes to the Environment Path preference immediately, without needing to reload the extension
+
 ## [Force LANG / LC_ALL to UTF-8 Locale] - 2026-06-26
 - Force LANG and LC_ALL to UTF-8 to allow emoji and other multibyte names to be rendered correctly
 
