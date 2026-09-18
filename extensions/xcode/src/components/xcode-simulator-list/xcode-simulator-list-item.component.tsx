@@ -88,6 +88,19 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
               <Action
+                icon={Icon.Cloud}
+                title="Trigger iCloud Sync"
+                shortcut={{ modifiers: ["cmd"], key: "i" }}
+                onAction={() =>
+                  operationWithUserFeedback(
+                    "Please wait",
+                    `iCloud Sync triggered on ${props.simulator.name}`,
+                    `Failed to trigger iCloud Sync on ${props.simulator.name}`,
+                    () => XcodeSimulatorService.triggerIcloudSync(props.simulator)
+                  )
+                }
+              />
+              <Action
                 icon={Icon.Moon}
                 title="Toggle Dark/Light Mode"
                 shortcut={{ modifiers: ["cmd"], key: "d" }}
@@ -108,19 +121,6 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
                       });
                     }
                   })
-                }
-              />
-              <Action
-                icon={Icon.Cloud}
-                title="Trigger iCloud Sync"
-                shortcut={{ modifiers: ["cmd"], key: "i" }}
-                onAction={() =>
-                  operationWithUserFeedback(
-                    "Please wait",
-                    `iCloud Sync triggered on ${props.simulator.name}`,
-                    `Failed to trigger iCloud Sync on ${props.simulator.name}`,
-                    () => XcodeSimulatorService.triggerIcloudSync(props.simulator)
-                  )
                 }
               />
             </>

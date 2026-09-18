@@ -15,9 +15,10 @@ import { XcodeSimulatorStateFilter } from "../models/xcode-simulator/xcode-simul
 import { LocalStorage } from "@raycast/api";
 
 /**
- * LocalStorage key for the recent simulators history.
+ * LocalStorage key prefix for the recent simulators history.
+ * Each simulator is stored under its own key to avoid read-modify-write races.
  */
-const RECENT_SIMULATORS_KEY = "xcode_recent_simulators_v1";
+const RECENT_SIMULATOR_KEY_PREFIX = "xcode_recent_simulator_";
 
 /**
  * XcodeSimulatorService
@@ -93,7 +94,22 @@ export class XcodeSimulatorService {
       .map((group) => {
         return { runtime: group.key, simulators: group.values };
       })
-      .sort((lhs, rhs) => rhs.runtime.localeCompare(lhs.runtime));
+      .sort((lhs, rhs) => {
+        // Sort by numeric version parts (newest first).
+        // e.g. "iOS 17.0" > "iOS 9.0", "tvOS 2.0" > "iOS 17.0"
+        const a = lhs.runtime.split(" ");
+        const b = rhs.runtime.split(" ");
+        const osCmp = a[0].localeCompare(b[0]);
+        if (osCmp !== 0) return osCmp;
+        const aVersion = a.slice(1).join(".").split(".").map(Number);
+        const bVersion = b.slice(1).join(".").split(".").map(Number);
+        for (let i = 0; i < Math.max(aVersion.length, bVersion.length); i++) {
+          const aPart = aVersion[i] ?? 0;
+          const bPart = bVersion[i] ?? 0;
+          if (aPart !== bPart) return bPart - aPart;
+        }
+        return 0;
+      });
   }
 
   /**
@@ -312,12 +328,24 @@ export class XcodeSimulatorService {
 
   /**
    * Retrieve the recent simulator history from LocalStorage.
+   * Each simulator is stored under its own key to avoid read-modify-write races.
    * @returns A map of simulator UDID to last-used timestamp.
    */
   static async getRecentSimulatorHistory(): Promise<Record<string, number>> {
     try {
-      const raw = await LocalStorage.getItem<string>(RECENT_SIMULATORS_KEY);
-      return raw ? JSON.parse(raw) : {};
+      // LocalStorage doesn't support listing keys by prefix,
+      // so we keep a lightweight index of known UDIDs.
+      const indexRaw = await LocalStorage.getItem<string>("xcode_recent_simulator_index");
+      const udidList: string[] = indexRaw ? JSON.parse(indexRaw) : [];
+
+      const history: Record<string, number> = {};
+      for (const udid of udidList) {
+        const raw = await LocalStorage.getItem<string>(`${RECENT_SIMULATOR_KEY_PREFIX}${udid}`);
+        if (raw) {
+          history[udid] = Number(raw);
+        }
+      }
+      return history;
     } catch {
       return {};
     }
@@ -325,13 +353,22 @@ export class XcodeSimulatorService {
 
   /**
    * Track usage of a simulator by updating its last-used timestamp in LocalStorage.
+   * Each simulator is stored under its own key to avoid read-modify-write races
+   * when multiple operations run concurrently.
    * @param udid The UDID of the simulator to track.
    */
   static async trackSimulatorUsage(udid: string): Promise<void> {
     try {
-      const history = await XcodeSimulatorService.getRecentSimulatorHistory();
-      history[udid] = Date.now();
-      await LocalStorage.setItem(RECENT_SIMULATORS_KEY, JSON.stringify(history));
+      const key = `${RECENT_SIMULATOR_KEY_PREFIX}${udid}`;
+      await LocalStorage.setItem(key, String(Date.now()));
+
+      // Update the index of known UDIDs
+      const indexRaw = await LocalStorage.getItem<string>("xcode_recent_simulator_index");
+      const udidList: string[] = indexRaw ? JSON.parse(indexRaw) : [];
+      if (!udidList.includes(udid)) {
+        udidList.push(udid);
+        await LocalStorage.setItem("xcode_recent_simulator_index", JSON.stringify(udidList));
+      }
     } catch {
       // Silently ignore tracking errors
     }
