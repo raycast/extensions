@@ -71,19 +71,23 @@ export async function readWorkspaceSummaries(): Promise<WorkspaceSummary[]> {
 }
 
 export function createSnapStateURL(command: string, parameters: Record<string, string> = {}): string {
-  const url = new URL(`snapstate://${command}`);
-  for (const [key, value] of Object.entries(parameters)) {
-    url.searchParams.set(key, value);
-  }
-  return url.toString();
+  // URLSearchParams form-encodes spaces as `+`, which custom URL schemes may
+  // treat as a literal plus. Emit `%20` so SnapState decodes every name back
+  // to the exact string the user typed.
+  const query = new URLSearchParams(parameters).toString().replace(/\+/g, "%20");
+  return query ? `snapstate://${command}?${query}` : `snapstate://${command}`;
 }
 
 export async function openSnapState(command: string, parameters: Record<string, string> = {}): Promise<void> {
   await open(createSnapStateURL(command, parameters));
 }
 
+export function pluralize(count: number, singular: string): string {
+  return `${count} ${singular}${count === 1 ? "" : "s"}`;
+}
+
 export function workspaceAccessory(workspace: WorkspaceSummary): string {
-  const apps = `${workspace.appCount} app${workspace.appCount === 1 ? "" : "s"}`;
-  const displays = `${workspace.displayCount} display${workspace.displayCount === 1 ? "" : "s"}`;
+  const apps = pluralize(workspace.appCount, "app");
+  const displays = pluralize(workspace.displayCount, "display");
   return `${apps} · ${displays}`;
 }
