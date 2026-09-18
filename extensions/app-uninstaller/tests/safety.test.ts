@@ -21,7 +21,6 @@ describe("checkRemovable accepts", () => {
     join(HOME, "Library/Preferences/com.example.app.plist"),
     join(HOME, "Library/Preferences/ByHost/com.example.app.1234.plist"),
     "/Library/LaunchDaemons/com.example.helper.plist",
-    "/private/var/db/receipts/com.example.app.bom",
   ];
 
   for (const path of allowed) {
@@ -46,6 +45,10 @@ describe("checkRemovable rejects", () => {
     ["an Applications sub-folder", "/Applications/Utilities"],
     ["a path deeper than its root allows", join(HOME, "Library/Caches/com.example.app/Sub")],
     ["a trailing separator", join(HOME, "Library/Caches/com.example.app/")],
+    // Receipts are cleared with `pkgutil --forget`, never by moving the files:
+    // pkgutil keeps a database alongside them that a plain move would desync.
+    ["an installer receipt", "/private/var/db/receipts/com.example.app.bom"],
+    ["the receipts directory", "/private/var/db/receipts"],
   ];
 
   for (const [name, path] of rejected) {

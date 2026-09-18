@@ -36,7 +36,8 @@ The design assumption is that the matcher will eventually be wrong about somethi
 - **An allow-list, not a deny-list.** A path is removable only if it resolves inside one of the known application directories, is not that directory itself, and is no deeper than that directory permits. Everything else is refused.
 - **Symlinks cannot escape.** The *parent* of each path is resolved before the check, so a symlinked folder inside a search directory cannot redirect a deletion elsewhere. The link itself stays removable.
 - **Shared and system directories are protected.** `Application Support/Google` is never removable — only one app's folder inside it is. Neither is anything owned by macOS (`com.apple.*`, Keychains, Mail, Safari, iCloud…).
-- **Privileges are escalated only when you ask, and only by macOS.** Root-owned items — every App Store application, and anything under `/Library` — are separated out and never included in an ordinary removal. Removing them is a distinct action that raises the system's own password dialog; the extension never sees your password, and a failed removal never silently retries as root.
+- **Privileges are escalated only when you ask, and only by macOS.** Root-owned items — every App Store application, and anything under `/Library` — are separated out and never included in an ordinary removal. Removing them is a distinct action on your explicit selection, which raises the system's own password dialog; the extension never sees your password, and a failed removal never silently retries as root. Unsure matches are no more pre-selected there than anywhere else.
+- **Nothing in the Trash is overwritten.** A privileged move goes into a new, empty, user-owned folder in the Trash named after the app, so it can never land on top of a same-named item already there.
 - **Nothing is interpolated into the privileged command.** Paths reach it as `argv` and are quoted by AppleScript's `quoted form of`, so a file name containing `$(…)`, `;` or quotes is one literal argument to `mv`. Every path is validated once more immediately before root acts, and the batch is refused entirely if any one of them fails.
 - **No shell strings.** Every external call uses `execFile` with an argument list, so nothing in a filename is ever interpreted as shell syntax.
 - **No network access, no telemetry.** The extension makes no outbound connections of any kind.
@@ -92,6 +93,7 @@ npm run build
 | `scan.ts` | Walking the search directories and measuring what it finds |
 | `safety.ts` | The path guard — what may and may not be removed |
 | `size.ts` | Disk usage for a batch of paths |
+| `elevate.ts` | The privileged move, and the authorization it needs |
 | `remove.ts` | Moving to the Trash, failure diagnosis, and the commands for what it will not touch |
 
 ## Contributing

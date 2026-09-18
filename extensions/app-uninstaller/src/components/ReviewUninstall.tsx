@@ -46,9 +46,15 @@ const SECTIONS: { confidence: Confidence; title: string; subtitle: string }[] = 
   { confidence: "low", title: "Unsure", subtitle: "Check these before selecting them" },
 ];
 
-/** Items we are confident about are pre-selected; the rest are an opt-in. */
+/**
+ * Items we are confident about are pre-selected; the rest are an opt-in.
+ *
+ * This applies to items needing administrator rights too. They are removed by a
+ * separate action, but that action must not quietly include an unsure match just
+ * because it happens to be root-owned — least of all while running as root.
+ */
 function defaultSelection(items: Leftover[]): Set<string> {
-  return new Set(items.filter((item) => item.confidence !== "low" && !item.needsAdmin).map((item) => item.path));
+  return new Set(items.filter((item) => item.confidence !== "low").map((item) => item.path));
 }
 
 export function ReviewUninstall({
@@ -77,13 +83,14 @@ export function ReviewUninstall({
 
   useEffect(() => {
     if (data && !initialized) {
-      setSelected(defaultSelection(removable));
+      setSelected(defaultSelection([...removable, ...adminOnly]));
       setInitialized(true);
     }
-  }, [data, initialized, removable]);
+  }, [data, initialized, removable, adminOnly]);
 
   const chosen = removable.filter((item) => selected.has(item.path));
   const chosenSize = chosen.reduce((total, item) => total + item.size, 0);
+  const chosenAdmin = adminOnly.filter((item) => selected.has(item.path));
 
   function toggle(path: string) {
     setSelected((current) => {
@@ -149,6 +156,7 @@ export function ReviewUninstall({
     const confirmed = await confirmAlert({
       title: `Move ${items.length} item${items.length === 1 ? "" : "s"} to the Trash as administrator?`,
       message:
+        `${items.map((item) => item.path).join("\n")}\n\n` +
         `${formatBytes(size)} owned by root. macOS will ask for your password — it handles that itself, and the extension never sees it. ` +
         `The files are moved to the Trash, not deleted.`,
       icon: Icon.Lock,
@@ -159,7 +167,10 @@ export function ReviewUninstall({
     const toast = await showToast({ style: Toast.Style.Animated, title: "Waiting for authentication…" });
 
     try {
-      await trashAsAdmin(items.map((item) => item.path));
+      await trashAsAdmin(
+        items.map((item) => item.path),
+        app.name,
+      );
       toast.style = Toast.Style.Success;
       toast.title = `Moved ${items.length} item${items.length === 1 ? "" : "s"} to the Trash`;
       toast.message = formatBytes(size);
@@ -191,10 +202,18 @@ export function ReviewUninstall({
       <ActionPanel>
         {item.needsAdmin && (
           <Action
+            icon={selected.has(item.path) ? Icon.Circle : Icon.CheckCircle}
+            title={selected.has(item.path) ? "Deselect" : "Select"}
+            onAction={() => toggle(item.path)}
+          />
+        )}
+        {item.needsAdmin && (
+          <Action
             icon={Icon.Lock}
-            title={`Move ${adminOnly.length} Item${adminOnly.length === 1 ? "" : "s"} to Trash as Administrator`}
+            title={`Move ${chosenAdmin.length} Selected to Trash as Administrator`}
             style={Action.Style.Destructive}
-            onAction={() => performAdminRemoval(adminOnly)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={() => performAdminRemoval(chosenAdmin)}
           />
         )}
         {failure?.settingsUrl && failure.settingsLabel && (
@@ -349,7 +368,11 @@ export function ReviewUninstall({
           {adminOnly.map((item) => (
             <List.Item
               key={item.path}
-              icon={{ source: Icon.Lock, tintColor: Color.SecondaryText }}
+              icon={
+                selected.has(item.path)
+                  ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                  : { source: Icon.Circle, tintColor: Color.SecondaryText }
+              }
               title={item.label}
               subtitle={tildify(item.path)}
               accessories={accessories(item)}

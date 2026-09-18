@@ -31,6 +31,14 @@ export interface SearchRoot {
   scope: "user" | "system";
 }
 
+/**
+ * `/private/var/db/receipts` is deliberately absent.
+ *
+ * An installer receipt is not a plain file to move: `pkgutil` keeps its own
+ * database alongside the `.bom` and `.plist`, so removing them directly leaves
+ * it inconsistent. Receipts are reported separately and cleared with
+ * `pkgutil --forget`, which is the supported route.
+ */
 export const SEARCH_ROOTS: SearchRoot[] = [
   { path: join(HOME, "Library/Application Support"), label: "Application Support", depth: 2, scope: "user" },
   { path: join(HOME, "Library/Containers"), label: "Sandbox Container", depth: 1, scope: "user" },
@@ -59,7 +67,6 @@ export const SEARCH_ROOTS: SearchRoot[] = [
   { path: "/Library/Extensions", label: "Kernel Extension", depth: 1, scope: "system" },
   { path: "/Library/Internet Plug-Ins", label: "Internet Plug-In", depth: 1, scope: "system" },
   { path: "/Library/QuickLook", label: "Quick Look Plug-In", depth: 1, scope: "system" },
-  { path: "/private/var/db/receipts", label: "Installer Receipt", depth: 1, scope: "system" },
 ];
 
 export const HOMEBREW_CASKROOMS = ["/opt/homebrew/Caskroom", "/usr/local/Caskroom"];
