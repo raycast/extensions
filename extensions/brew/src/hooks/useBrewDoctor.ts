@@ -16,25 +16,40 @@ export function useBrewDoctor() {
   // `usePromise` populates this with the controller for the in-flight call and
   // aborts it on unmount or revalidate.
   const abortable = useRef<AbortController>(null);
+  // Which run owns the progress toast — see the same guard in
+  // `useDryRunPreview`. `usePromise` supersedes a run by aborting it and
+  // starting the next one without waiting for the old to settle, and Raycast's
+  // hide acts on whatever toast is visible rather than on ours.
+  const toastRun = useRef(0);
 
   const result = usePromise(
     async (): Promise<DoctorReport> => {
       // ~8s of silence otherwise, including on a refresh where the previous
       // report stays on screen and an in-document placeholder would never be
-      // seen. Hidden only on success: Raycast's hide carries no toast id and
-      // acts on whichever toast is visible (`src/utils/toast.ts`), so hiding
-      // after a failure would dismiss the failure toast `onError` just raised.
+      // seen. Raycast's hide carries no toast id and acts on whichever toast is
+      // visible (`src/utils/toast.ts`), so the hides below are guarded on both
+      // WHEN they fire — never after a real failure, whose own toast must keep
+      // the slot — and WHETHER this run still owns the toast.
+      const mine = ++toastRun.current;
+      // Best-effort and never awaited into the result: a hide that rejects must
+      // not turn a finished report into "Doctor Failed".
+      const clearProgress = (toast: Toast) => {
+        if (toastRun.current !== mine) return; // superseded — not our toast any more
+        toast.hide().catch((hideErr) => brewLogger.log("Failed to hide doctor progress toast", hideErr));
+      };
+
       const progress = await showToast({ style: Toast.Style.Animated, title: "Running brew doctor…" });
       try {
         const report = await brewDoctor(abortable.current?.signal);
-        await progress.hide();
+        clearProgress(progress);
         return report;
       } catch (err) {
         // An unmount or a superseded revalidate aborts the run, and an abort
-        // raises no toast — so this one must clear itself. A real failure is
-        // left alone: `onError`'s failure toast replaces it, and hiding here
-        // would dismiss that instead.
-        if (isAbortError(err)) await progress.hide();
+        // raises no toast of its own — `showBrewFailureToast` returns early on
+        // one and `usePromise` suppresses `onError` for it — so this toast must
+        // clear itself. A real failure is left alone: `onError` puts a failure
+        // toast up, and hiding here would dismiss that instead.
+        if (isAbortError(err)) clearProgress(progress);
         throw err;
       }
     },

@@ -31,6 +31,10 @@ The chunked index can promise a record that its chunk no longer supplies; `brewS
 
 Also replace the current recursive key filter in `src/utils/cache.ts` with exact top-level field selection. Its key-name matcher retains nested subtrees when a nested key happens to be whitelisted. On the 2026-09-17 cask snapshot, removing `artifacts` still retained it for 23 casks; it also retained unrequested `variations` for 351 casks and `language_variations` for 29. This wastes cache and command memory, undermining the sliding-window search design. Preserve the fields the UI reads and add fixture coverage for both retained top-level fields and rejected nested fields.
 
+### Give progress toasts an owner
+
+Raycast's toast hide carries no toast id: it dismisses whichever toast is on screen. Anything holding an animated toast across an await can therefore dismiss a toast that now belongs to something else — most damagingly a failure toast, which silently swallows the error. `useDryRunPreview` and `useBrewDoctor` guard this with a per-run token, but the same shape is unguarded in `usePopularityRanks`, the Show Details lookup in `src/components/installPreview.tsx`, the lazy detail fetches in `caskInfo.tsx` and `formulaInfo.tsx`, and every holder of a `showActionToast` handle. Give the rule one implementation those call sites share, rather than repeating the token by hand.
+
 ### Avoid unnecessary global Homebrew updates
 
 Replace the unconditional `brew update` used by the outdated refresh and Check for Updates with `brew update-if-needed`, while preserving cancellation, error reporting, and Homebrew-major-version invalidation when an update actually runs. Homebrew documents this command specifically as the fast no-op replacement for scripts. It reduces waiting and needless tap work without weakening freshness when an update is due.

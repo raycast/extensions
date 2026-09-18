@@ -10,6 +10,7 @@ import {
   ensureError,
   getErrorMessage,
   isAbortError,
+  uiLogger,
   isCask,
   parseDryRun,
   showBrewFailureToast,
@@ -356,6 +357,13 @@ function useDryRunPreview<A>(
   progressTitle: string,
 ) {
   const abortable = useRef<AbortController>(null);
+  // Which run owns the progress toast. `usePromise` supersedes a run by
+  // aborting it, swapping the controller and calling the next one WITHOUT
+  // waiting for the old one to settle (@raycast/utils) — so run N's abort lands
+  // after run N+1 has already put its own toast up. Raycast's hide carries no
+  // toast id and acts on whatever is visible, so an unguarded hide there
+  // dismisses N+1's toast and leaves the live run with no progress at all.
+  const toastRun = useRef(0);
 
   const { data, error, isLoading, revalidate } = usePromise(
     async (value: A) => {
@@ -364,23 +372,31 @@ function useDryRunPreview<A>(
       //
       // It lives HERE rather than in an effect on `isLoading` deliberately.
       // Raycast's hide carries no toast id — it acts on whichever toast is on
-      // screen (see `src/utils/toast.ts`) — so a deferred cleanup can dismiss
-      // a LATER toast, and the obvious candidate is the failure toast that
-      // `onError` raises microseconds earlier. Hiding only on the success path
-      // makes that unreachable: on failure this toast is left alone, and
-      // `showToast` replaces the visible toast outright, so the failure toast
-      // takes the slot on its own.
+      // screen (see `src/utils/toast.ts`) — so every hide below is guarded
+      // twice: by WHEN it fires (never after a real failure, whose own toast
+      // must keep the slot) and by WHETHER this run still owns the toast.
+      const mine = ++toastRun.current;
+      // Best-effort, never awaited into the result: a hide that rejects must not
+      // turn a finished dry run into a "Preview failed" (`settle` in
+      // `src/utils/toast.ts` takes the same line).
+      const clearProgress = (toast: Toast) => {
+        if (toastRun.current !== mine) return; // superseded — the toast is not ours any more
+        toast.hide().catch((hideErr) => uiLogger.log("Failed to hide preview progress toast", hideErr));
+      };
+
       const progress = await showToast({ style: Toast.Style.Animated, title: progressTitle });
       try {
         const { stdout, stderr } = await run(value, abortable.current?.signal);
-        await progress.hide();
+        clearProgress(progress);
         return { stdout, raw: [stdout, stderr].filter(Boolean).join("\n") };
       } catch (err) {
         // Backing out of this view aborts the run, and an abort raises no toast
-        // of its own — so this one has to clear itself or spin on after the user
-        // has gone. A real failure is the opposite case: `onError` replaces this
-        // toast, and hiding here would dismiss THAT one.
-        if (isAbortError(err)) await progress.hide();
+        // of its own — `showBrewFailureToast` returns early on one and
+        // `usePromise` suppresses `onError` for it — so this toast has to clear
+        // itself or spin on after the user has gone. A real failure is the
+        // opposite case: `onError` puts a failure toast up, and hiding here
+        // would dismiss THAT one.
+        if (isAbortError(err)) clearProgress(progress);
         throw err;
       }
     },
