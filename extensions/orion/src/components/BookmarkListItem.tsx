@@ -10,8 +10,8 @@ import OpenInOrionAction from "./OpenInOrionAction";
 const Actions = (props: { bookmark: Bookmark }) => (
   <ActionPanel title={props.bookmark.url}>
     <ActionPanel.Section>
-      <OpenInOrionAction url={props.bookmark.url} />
       <Action.OpenInBrowser title="Open in Default Browser" url={props.bookmark.url} />
+      <OpenInOrionAction url={props.bookmark.url} />
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CopyUrlAction url={props.bookmark.url} />

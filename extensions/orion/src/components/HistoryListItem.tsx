@@ -11,8 +11,8 @@ const Actions = (props: { entry: HistoryItem; searchText?: string }) => {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <OpenInOrionAction url={props.entry.url} />
         <Action.OpenInBrowser title="Open in Default Browser" url={props.entry.url} />
+        <OpenInOrionAction url={props.entry.url} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <CopyUrlAction url={props.entry.url} />

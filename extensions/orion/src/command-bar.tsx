@@ -104,8 +104,12 @@ function historyFrecency(hit: Hit): number {
 
 type RankedHit = { hit: Hit; tier: number };
 
+// Used only for deduplicating destinations across sources. Unlike
+// `normalizedAddress` (a lenient match used for relevance scoring), this must
+// not conflate distinct destinations: scheme (http vs https) and a trailing
+// slash can each point to a genuinely different resource.
 function canonicalUrl(url: string): string {
-  return normalizedAddress(url);
+  return url.trim();
 }
 
 function compareRankedHits(a: RankedHit, b: RankedHit): number {
@@ -153,13 +157,19 @@ function deduplicateRankedHits(candidates: RankedHit[]): RankedHit[] {
   });
 }
 
-function uniqueUrls<T extends { url: string }>(items: T[], seen: Set<string>): T[] {
-  return items.filter((item) => {
+// Applies `limit` while building the result, not after: registering a URL
+// that the limit ends up hiding would let that invisible candidate suppress
+// a matching, otherwise-visible result in a later section.
+function uniqueUrls<T extends { url: string }>(items: T[], seen: Set<string>, limit: number): T[] {
+  const result: T[] = [];
+  for (const item of items) {
+    if (result.length >= limit) break;
     const key = canonicalUrl(item.url);
-    if (seen.has(key)) return false;
+    if (seen.has(key)) continue;
     seen.add(key);
-    return true;
-  });
+    result.push(item);
+  }
+  return result;
 }
 
 export default function Command() {
@@ -254,20 +264,24 @@ export default function Command() {
   const exactTabSection = uniqueUrls(
     tabHits.filter((t) => tabKey(t) !== topTabKey),
     seenUrls,
-  ).slice(0, hasQuery ? LIMITS.tabs : tabHits.length);
+    hasQuery ? LIMITS.tabs : tabHits.length,
+  );
   const tabSection = exactTabSection;
   const bookmarkSection = uniqueUrls(
     bookmarkHits.filter((b) => `bm-${b.uuid}` !== topUrlKey),
     seenUrls,
-  ).slice(0, LIMITS.bookmarks);
+    LIMITS.bookmarks,
+  );
   const readingSection = uniqueUrls(
     readingHits.filter((b) => `rl-${b.uuid}` !== topUrlKey),
     seenUrls,
-  ).slice(0, LIMITS.reading);
+    LIMITS.reading,
+  );
   const historySection = uniqueUrls(
     historyHits.filter((h) => `hist-${h.id}` !== topUrlKey),
     seenUrls,
-  ).slice(0, LIMITS.history);
+    LIMITS.history,
+  );
   const address = isWebAddress(query) ? normalizeWebAddress(query) : undefined;
 
   // Keep selection controlled while the local sources resolve. A session lasts
