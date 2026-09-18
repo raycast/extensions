@@ -84,6 +84,18 @@ test("reads quoted CSV values", async (context) => {
   assert.deepEqual(await parseRecipientFile(file), ["+255712345678"]);
 });
 
+test("reads CSV files with a UTF-8 BOM", async (context) => {
+  const directory = await mkdtemp(join(tmpdir(), "notify-africa-sms-"));
+  context.after(() => rm(directory, { recursive: true, force: true }));
+  const headerFile = join(directory, "with-header-bom.csv");
+  const headerlessFile = join(directory, "headerless-bom.csv");
+  await writeFile(headerFile, "\ufeffphone\n255712345678\n");
+  await writeFile(headerlessFile, "\ufeff255713456789\n");
+
+  assert.deepEqual(await parseRecipientFile(headerFile), ["+255712345678"]);
+  assert.deepEqual(await parseRecipientFile(headerlessFile), ["+255713456789"]);
+});
+
 test("rejects an unrecognized header and duplicate imported recipients", async (context) => {
   const directory = await mkdtemp(join(tmpdir(), "notify-africa-sms-"));
   context.after(() => rm(directory, { recursive: true, force: true }));

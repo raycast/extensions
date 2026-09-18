@@ -24,7 +24,7 @@ export async function parseRecipientFile(filePath: string): Promise<string[]> {
     throw new InputError("The selected file could not be read.");
   }
 
-  const rows = parseCsv(text).filter((row) => row.some(Boolean));
+  const rows = parseCsv(stripBom(text)).filter((row) => row.some(Boolean));
 
   if (!rows.length) {
     throw new InputError("The selected file is empty.");
@@ -110,6 +110,10 @@ function parseCsv(text: string): string[][] {
   row.push(cell.trim());
   rows.push(row);
   return rows;
+}
+
+function stripBom(text: string): string {
+  return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
 }
 
 function normalizeHeader(value: string): string {
