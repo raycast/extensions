@@ -34,7 +34,13 @@ function bucketed(
 ): (apps: InstalledApp[]) => Bucket[] {
   return (apps) => {
     const groups: InstalledApp[][] = bands.map(() => []);
-    for (const app of apps) groups[assign(app)].push(app);
+    for (const app of apps) {
+      // A band table is meant to be exhaustive, but an app matching none of them
+      // must still land somewhere: indexing with -1 throws and takes the whole
+      // view down with it.
+      const index = assign(app);
+      groups[index >= 0 ? index : bands.length - 1].push(app);
+    }
     return bands.map((band, index) => ({ title: band.title, apps: groups[index] })).filter((b) => b.apps.length > 0);
   };
 }
@@ -73,7 +79,9 @@ export function groupApps(
     .sort((a, b) => (usage[a.path]?.lastUsed ?? 0) - (usage[b.path]?.lastUsed ?? 0));
 
   const banded = bucketed(AGE_BANDS, (app) => {
-    const days = (Date.now() - (usage[app.path]?.lastUsed ?? 0)) / DAY;
+    // Clamped at zero: a timestamp in the future — clock skew, or a file
+    // restored from an archive — would otherwise match no band at all.
+    const days = Math.max(0, Date.now() - (usage[app.path]?.lastUsed ?? 0)) / DAY;
     return AGE_BANDS.findIndex((band) => days >= band.minDays);
   })(known);
 

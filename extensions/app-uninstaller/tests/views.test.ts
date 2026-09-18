@@ -62,6 +62,28 @@ describe("groupApps by last used", () => {
   });
 });
 
+describe("groupApps with unusable timestamps", () => {
+  it("does not crash on a date in the future", () => {
+    // Clock skew or a file restored from an archive can date an app forwards.
+    const usage = { [big.path]: { lastUsed: Date.now() + 5 * DAY, source: "spotlight" as const } };
+    const buckets = groupApps("lastUsed", [big], sizes, usage);
+    assert.equal(buckets.length, 1);
+    assert.equal(buckets[0].title, "Within the last month");
+  });
+
+  it("reads a future date as used today rather than never", () => {
+    const usage = { [big.path]: { lastUsed: Date.now() + 365 * DAY, source: "activity" as const } };
+    const titles = groupApps("lastUsed", [big], sizes, usage).map((b) => b.title);
+    assert.ok(!titles.includes("No sign of ever being used"));
+  });
+
+  it("survives a size that matches no band", () => {
+    // Defensive: a negative size cannot occur today, but the view must not die
+    // if a band table ever stops being exhaustive.
+    assert.doesNotThrow(() => groupApps("size", [big], { [big.path]: -1 }, {}));
+  });
+});
+
 describe("groupApps by name", () => {
   it("is a single flat list", () => {
     const buckets = groupApps("name", apps, sizes, {});
