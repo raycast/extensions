@@ -1,12 +1,50 @@
 import { Cache, LaunchType, LocalStorage, Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
+import { createHash } from "crypto";
 import uniqWith from "lodash.uniqwith";
 import { FetcherArgs, FetcherResponse, TimeEntry, Project, Task, User, Workspace } from "./types";
 import { showFailureToast } from "@raycast/utils";
 
 const cache = new Cache();
-const TIME_ENTRIES_CACHE_KEY = "clockify/timeEntries";
-const PROJECTS_CACHE_KEY = "clockify/projects";
-const ACTIVE_ENTRY_CACHE_KEY = "clockify/activeEntry";
+
+/**
+ * Cache keys are scoped to the configured account.
+ *
+ * `Cache` is never cleared, and `LocalStorage.clear()` only runs when a token is *rejected* —
+ * swapping to a different valid token clears nothing. With unscoped keys, one account's cached
+ * entries could therefore be read, and offered as things to click, while signed in as another. Since
+ * project ids are workspace-bound Clockify rejected the resulting request rather than writing to the
+ * wrong place, but it was still the previous account's data on screen.
+ *
+ * The scope is a truncated SHA-256 of the API key: derived synchronously, so the caches can still be
+ * read during render for an immediate first paint, and not reversible back to the key. Switching
+ * accounts moves to a different set of keys rather than clearing the old ones, so there is no
+ * invalidation step to forget.
+ *
+ * Resolved lazily rather than at module scope so that unreadable preferences degrade to a shared
+ * scope instead of preventing the command from loading at all.
+ */
+let accountScopeMemo: string | undefined;
+
+function accountScope(): string {
+  if (accountScopeMemo === undefined) {
+    let token = "";
+
+    try {
+      token = getPreferenceValues<Preferences>().token ?? "";
+    } catch {
+      // Preferences not readable yet; a shared scope beats failing to load.
+    }
+
+    accountScopeMemo = createHash("sha256").update(token).digest("hex").slice(0, 12);
+  }
+
+  return accountScopeMemo;
+}
+
+const timeEntriesCacheKey = () => `clockify/${accountScope()}/timeEntries`;
+const projectsCacheKey = () => `clockify/${accountScope()}/projects`;
+const activeEntryCacheKey = () => `clockify/${accountScope()}/activeEntry`;
+const tasksCacheKey = (projectId: string) => `clockify/${accountScope()}/project[${projectId}]`;
 
 /**
  * Shows a toast, unless the command cannot show one.
@@ -231,7 +269,7 @@ export async function getTimeEntries({ onError }: { onError?: (state: boolean) =
       (a: TimeEntry, b: TimeEntry) =>
         a.projectId === b.projectId && a.taskId === b.taskId && a.description === b.description,
     );
-    cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(filteredEntries));
+    cache.set(timeEntriesCacheKey(), JSON.stringify(filteredEntries));
 
     return filteredEntries;
   } else {
@@ -258,7 +296,7 @@ export async function stopCurrentTimer(callback?: () => void): Promise<void> {
 
     // Update the cache directly or call the callback to refetch
     try {
-      const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+      const entriesString = cache.get(timeEntriesCacheKey());
       if (entriesString) {
         const entries: TimeEntry[] = JSON.parse(entriesString as string);
         if (entries && entries.length > 0) {
@@ -266,7 +304,7 @@ export async function stopCurrentTimer(callback?: () => void): Promise<void> {
           const activeEntryIndex = entries.findIndex((entry) => !entry.timeInterval.end);
           if (activeEntryIndex !== -1) {
             entries[activeEntryIndex].timeInterval.end = new Date().toISOString();
-            cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(entries));
+            cache.set(timeEntriesCacheKey(), JSON.stringify(entries));
           }
         }
       }
@@ -328,7 +366,7 @@ export async function fetchActiveTimeEntry(): Promise<TimeEntry | null | undefin
  */
 export function cacheActiveTimeEntry(entry: TimeEntry | null): void {
   try {
-    cache.set(ACTIVE_ENTRY_CACHE_KEY, JSON.stringify(entry));
+    cache.set(activeEntryCacheKey(), JSON.stringify(entry));
   } catch (e) {
     console.error("Error caching active time entry:", e);
   }
@@ -342,7 +380,7 @@ export function cacheActiveTimeEntry(entry: TimeEntry | null): void {
  */
 export function getCachedActiveTimeEntry(): TimeEntry | null {
   try {
-    const stored = cache.get(ACTIVE_ENTRY_CACHE_KEY);
+    const stored = cache.get(activeEntryCacheKey());
     if (stored === undefined) return getCurrentlyActiveTimeEntry();
 
     const entry = JSON.parse(stored) as TimeEntry | null;
@@ -355,7 +393,7 @@ export function getCachedActiveTimeEntry(): TimeEntry | null {
 
 export function getCurrentlyActiveTimeEntry(): TimeEntry | null {
   try {
-    const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+    const entriesString = cache.get(timeEntriesCacheKey());
     if (!entriesString) {
       return null;
     }
@@ -377,7 +415,7 @@ export function getCurrentlyActiveTimeEntry(): TimeEntry | null {
 
 export function getAllTimeEntriesFromLocalStorage(): TimeEntry[] {
   try {
-    const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+    const entriesString = cache.get(timeEntriesCacheKey());
     if (!entriesString) {
       return [];
     }
@@ -460,7 +498,7 @@ export async function getProjects({ onError }: { onError?: (state: boolean) => v
   }
 
   if (data?.length) {
-    cache.set(PROJECTS_CACHE_KEY, JSON.stringify(data));
+    cache.set(projectsCacheKey(), JSON.stringify(data));
     return data;
   } else {
     return [];
@@ -484,7 +522,7 @@ async function findCachedProject(projectId: string): Promise<Project | undefined
     console.error("Error reading cached projects:", e);
   }
 
-  for (const source of [stored, cache.get(PROJECTS_CACHE_KEY)]) {
+  for (const source of [stored, cache.get(projectsCacheKey())]) {
     if (!source) continue;
 
     try {
@@ -523,7 +561,7 @@ export async function isProjectBillable(projectId: string): Promise<boolean | un
 
 export async function getTasksForProject(projectId: string): Promise<Task[]> {
   const { workspaceId } = await resolveConfig();
-  const cacheKey = `project[${projectId}]`;
+  const cacheKey = tasksCacheKey(projectId);
 
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/projects/${projectId}/tasks?page-size=1000`);
   if (error) {
@@ -577,12 +615,12 @@ export async function addNewTimeEntry(
 
     // Update the cache directly
     try {
-      const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+      const entriesString = cache.get(timeEntriesCacheKey());
       if (entriesString) {
         const entries = JSON.parse(entriesString as string);
         // Add the new entry to the beginning of the array
         entries.unshift(data);
-        cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(entries));
+        cache.set(timeEntriesCacheKey(), JSON.stringify(entries));
       }
     } catch (e) {
       console.error("Error updating cache:", e);
