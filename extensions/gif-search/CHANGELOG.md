@@ -1,5 +1,11 @@
 # GIF Search Changelog
 
+## [Separate GIF copy and paste] - 2026-09-18
+
+- Paste GIF and Paste GIF Square now resolve the file and call paste directly, without copying first or closing the window before paste.
+- Read the default action preference when building the action panel so it does not retain a previous selection.
+- Add regression coverage for cached favorites, copy and paste operations, failures, and default actions.
+
 ## [Fix pasting and caching of GIFs] - 2026-09-17
 
 - Fixed "Paste GIF" failing with a file-not-found error for every GIF, once any favorite had been copied
