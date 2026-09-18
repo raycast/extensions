@@ -28,8 +28,8 @@ The bundled Swift helper handles discovery and activation through macOS Accessib
 
 ## Requirements
 
-- macOS 27 Golden Gate on a Mac with Apple silicon
-- Raycast and Accessibility access for the bundled `menubar-helper`
+- Raycast on macOS and Accessibility access for the bundled `menubar-helper`
+- macOS 27 Golden Gate on Apple silicon to open icons hidden through System Settings → Menu Bar
 
 ## Get started
 
@@ -51,11 +51,11 @@ For an icon hidden through macOS's **Menu Bar** setting, the helper temporarily 
 
 Results depend on what each app exposes through Accessibility. The extension removes duplicates when it can identify the same element, frame, or identifier without conflicting positions. A cached result can be briefly out of date until the next scan finishes; use **Refresh Items** if an app changes. An app may control where its own panel opens.
 
-Tested locally on macOS 27 with Apple silicon. Earlier macOS versions have not been verified.
+The helper includes Apple silicon and Intel binaries. Opening icons hidden through System Settings → Menu Bar requires macOS 27, which is available only on Apple silicon. Visible-icon search on earlier macOS versions and Intel hardware has not been physically verified.
 
 ## Development
 
-Run `npm install` and `npm run dev` to load the extension locally. After changing the Swift helper, run `./build-helper.sh` to rebuild `assets/menubar-helper`. Run `npm run build` and `npm run lint` to check the Raycast extension. The bundled helper is built from [swift/MenuBarHelper.swift](swift/MenuBarHelper.swift) for Apple silicon and macOS 27.
+Run `npm install` and `npm run dev` to load the extension locally. After changing the Swift helper, run `./build-helper.sh` to rebuild `assets/menubar-helper`. Run `npm run build` and `npm run lint` to check the Raycast extension. The bundled helper is built from [swift/MenuBarHelper.swift](swift/MenuBarHelper.swift) for Apple silicon and Intel Macs.
 
 For a local development installation, Raycast copies the helper to `~/.config/raycast/extensions/menu-bar-icon-search/assets/`. Rebuilding the helper may require granting Accessibility access again.
 

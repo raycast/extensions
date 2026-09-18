@@ -26,6 +26,8 @@ private struct Reply: Codable {
 }
 
 private enum MenuBar {
+    private typealias Entry = (Item, AXUIElement, CGRect?)
+
     static func attribute(_ element: AXUIElement, _ name: String) -> CFTypeRef? {
         var value: CFTypeRef?
         return AXUIElementCopyAttributeValue(element, name as CFString, &value) == .success ? value : nil
@@ -49,7 +51,7 @@ private enum MenuBar {
         return CGRect(origin: point, size: dimensions)
     }
 
-    static func entries(for app: NSRunningApplication) -> [(Item, AXUIElement, CGRect?)] {
+    private static func entries(for app: NSRunningApplication) -> [Entry] {
         let axApp = AXUIElementCreateApplication(app.processIdentifier)
         AXUIElementSetMessagingTimeout(axApp, 0.25)
         guard let bar = attribute(axApp, kAXExtrasMenuBarAttribute as String),
@@ -92,22 +94,28 @@ private enum MenuBar {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = 5
         queue.qualityOfService = .userInitiated
+        let group = DispatchGroup()
         let lock = NSLock()
-        var found: [(Item, AXUIElement, CGRect?)] = []
+        var found: [Entry] = []
         for app in apps {
+            group.enter()
             queue.addOperation {
+                defer { group.leave() }
                 let entries = entries(for: app)
                 lock.lock()
                 found.append(contentsOf: entries)
                 lock.unlock()
             }
         }
-        queue.waitUntilAllOperationsAreFinished()
+        _ = group.wait(timeout: .now() + 10)
+        lock.lock()
+        let snapshot = found
+        lock.unlock()
 
         // AX sometimes exposes the same physical item twice (for example on
         // multiple displays). Keep separate items with distinct positions.
-        var seen: [(Item, AXUIElement, CGRect?)] = []
-        for entry in found.sorted(by: {
+        var seen: [Entry] = []
+        for entry in snapshot.sorted(by: {
             let a = "\($0.0.appName) \($0.0.title)"
             let b = "\($1.0.appName) \($1.0.title)"
             return a.localizedStandardCompare(b) == .orderedAscending
@@ -130,8 +138,31 @@ private enum MenuBar {
         return Scan(trusted: true, items: seen.map(\.0))
     }
 
+    private static func matchingEntry(in entries: [Entry], index: Int, title: String,
+                                      identifier: String, role: String, itemCount: Int,
+                                      allowDynamicTitle: Bool) -> Entry? {
+        if !identifier.isEmpty {
+            if let match = entries.first(where: { $0.0.index == index && $0.0.identifier == identifier }) {
+                return match
+            }
+            let matches = entries.filter { $0.0.identifier == identifier }
+            return matches.count == 1 ? matches[0] : nil
+        }
+        let titleMatches = entries.filter { $0.0.title == title }
+        if let match = titleMatches.first(where: { $0.0.index == index }) {
+            return match
+        }
+        if titleMatches.count == 1 { return titleMatches[0] }
+        // A changing title is safe to ignore only when this app owns a single item.
+        guard allowDynamicTitle, !role.isEmpty,
+              itemCount == 1, entries.count == 1,
+              let match = entries.first, match.0.index == index,
+              match.0.role == role else { return nil }
+        return match
+    }
+
     static func press(pid: Int32, index: Int, title: String, identifier: String,
-                      role: String, itemCount: Int) -> Reply {
+                      role: String, itemCount: Int, bundlePath: String) -> Reply {
         let originalCursor = CGEvent(source: nil)?.location
         guard AXIsProcessTrusted() else {
             return Reply(ok: false, error: "Grant Accessibility access to Raycast or the helper.")
@@ -139,26 +170,26 @@ private enum MenuBar {
         guard let app = NSWorkspace.shared.runningApplications.first(where: { $0.processIdentifier == pid }) else {
             return Reply(ok: false, error: "The app is no longer running.")
         }
+        guard bundlePath.isEmpty || app.bundleURL?.path == bundlePath else {
+            return Reply(ok: false, error: "The app changed. Refresh the list.")
+        }
         let entries = entries(for: app)
-        let match = (!identifier.isEmpty ? entries.first(where: {
-            $0.0.index == index && $0.0.identifier == identifier
-        }) : nil)
-            ?? (!identifier.isEmpty ? entries.first(where: { $0.0.identifier == identifier }) : nil)
-            ?? entries.first(where: { $0.0.index == index && $0.0.title == title })
-            ?? entries.first(where: { $0.0.title == title })
-            ?? entries.first(where: {
-                $0.0.index == index && (role.isEmpty || $0.0.role == role)
-                    && (entries.count == itemCount || entries.count == 1)
-            })
+        let match = matchingEntry(in: entries, index: index, title: title,
+                                  identifier: identifier, role: role, itemCount: itemCount,
+                                  allowDynamicTitle: !bundlePath.isEmpty)
         guard let (_, element, box) = match else {
             return Reply(ok: false, error: "The menu bar item changed. Refresh the list.")
         }
-        if !isHostedInMenuBar(pid: pid), !(app.bundleIdentifier ?? "").hasPrefix("com.apple.") {
-            return revealPressAndRestore(app: app, pid: pid, index: index, title: title,
-                                         identifier: identifier, role: role, itemCount: itemCount,
-                                         originalCursor: originalCursor)
+        if #available(macOS 27, *) {
+            let isHosted = isHostedInMenuBar(pid: pid)
+            if !isHosted, !(app.bundleIdentifier ?? "").hasPrefix("com.apple.") {
+                return revealPressAndRestore(app: app, pid: pid, index: index, title: title,
+                                             identifier: identifier, role: role, itemCount: itemCount,
+                                             allowDynamicTitle: !bundlePath.isEmpty,
+                                             originalCursor: originalCursor)
+            }
         }
-        if let box, isVisibleMenuBarFrame(box), isHostedInMenuBar(pid: pid) {
+        if let box, isVisibleMenuBarFrame(box) {
             return clickVisibleItem(at: CGPoint(x: box.midX, y: box.midY), originalCursor: originalCursor)
         }
         AXUIElementSetMessagingTimeout(element, 0.35)
@@ -251,7 +282,11 @@ private enum MenuBar {
 
     private static func revealPressAndRestore(app: NSRunningApplication, pid: Int32, index: Int,
                                               title: String, identifier: String, role: String,
-                                              itemCount: Int, originalCursor: CGPoint?) -> Reply {
+                                              itemCount: Int, allowDynamicTitle: Bool,
+                                              originalCursor: CGPoint?) -> Reply {
+        guard #available(macOS 27, *) else {
+            return Reply(ok: false, error: "Opening hidden icons requires macOS 27.")
+        }
         let appName = app.localizedName ?? app.bundleIdentifier ?? ""
         guard !appName.isEmpty else { return Reply(ok: false, error: "Could not identify the application.") }
         let settingsWasOpen = settingsHasVisibleWindow()
@@ -293,8 +328,9 @@ private enum MenuBar {
         usleep(400_000)
         let oldWindows = Set(presentedWindows(for: pid, appName: appName).map(\.0))
         let fresh = entries(for: app)
-        let target = fresh.first { $0.0.index == index && (identifier.isEmpty || $0.0.identifier == identifier) }
-            ?? fresh.first { $0.0.title == title }
+        let target = matchingEntry(in: fresh, index: index, title: title,
+                                   identifier: identifier, role: role, itemCount: itemCount,
+                                   allowDynamicTitle: allowDynamicTitle)
         guard let (_, element, box) = target else {
             return Reply(ok: false, error: "The revealed item could not be found.")
         }
@@ -392,10 +428,10 @@ func output<T: Encodable>(_ value: T) {
 let args = Array(CommandLine.arguments.dropFirst())
 switch args.first {
 case "scan": output(MenuBar.scan())
-case "press" where args.count == 7:
+case "press" where args.count == 8:
     if let pid = Int32(args[1]), let index = Int(args[2]), let itemCount = Int(args[6]) {
         output(MenuBar.press(pid: pid, index: index, title: args[3], identifier: args[4],
-                             role: args[5], itemCount: itemCount))
+                             role: args[5], itemCount: itemCount, bundlePath: args[7]))
     } else { output(Reply(ok: false, error: "Invalid arguments.")) }
 default: output(Reply(ok: false, error: "Invalid command."))
 }

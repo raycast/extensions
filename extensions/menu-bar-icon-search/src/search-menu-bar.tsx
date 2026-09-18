@@ -36,9 +36,7 @@ type MenuItem = {
 type Scan = { trusted: boolean; items: MenuItem[] };
 
 export default function Command() {
-  const { includeSystemItems } = getPreferenceValues<{
-    includeSystemItems: boolean;
-  }>();
+  const { includeSystemItems } = getPreferenceValues<Preferences>();
   const [search, setSearch] = useState("");
   const [scan, setScan] = useState<Scan | null>(null);
   const [error, setError] = useState("");
@@ -101,6 +99,7 @@ export default function Command() {
         item.identifier ?? "",
         item.role ?? "",
         String(item.itemCount ?? 0),
+        item.bundlePath ?? "",
       ]);
       const response = JSON.parse(stdout) as { ok: boolean; error?: string };
       if (!response.ok)
