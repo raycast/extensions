@@ -4,9 +4,13 @@ import { getAppPreferences } from "./preferences";
 import { formatTime, PomodoroLog } from "./timer";
 import { LogWriter } from "./log-writer";
 import { appendLogEntry } from "./log-markdown";
+import { SessionLock, assertHeld } from "./lock";
 
 export class DailyNoteLogWriter implements LogWriter {
-  async writeLog(log: PomodoroLog): Promise<void> {
+  // The note is read, edited and written back as a whole. The session lock
+  // keeps that read-modify-write from interleaving with another command's.
+  async writeLog(lock: SessionLock, log: PomodoroLog): Promise<void> {
+    assertHeld(lock);
     const prefs = getAppPreferences();
     const filePath = getDailyNotePath(
       prefs.dailyNotePath,

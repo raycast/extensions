@@ -11,7 +11,7 @@ import {
   CompletionContext,
   completedTypeOf,
   settle,
-  stopRunning,
+  stopSession,
 } from "./session";
 
 export default function MenuBarCommand() {
@@ -39,7 +39,14 @@ export default function MenuBarCommand() {
   }, [timer]);
 
   async function sync() {
-    const { running, finished } = await settle();
+    const settled = await settle();
+    if (settled.status === "busy") {
+      // Another command is updating the timer; keep what we show and let
+      // the next refresh catch up.
+      setLoading(false);
+      return;
+    }
+    const { running, finished } = settled;
     setTimer(running);
     if (running) setRemaining(formatRemaining(getRemainingMs(running)));
     setLoading(false);
@@ -66,7 +73,11 @@ export default function MenuBarCommand() {
   }
 
   async function handleStop() {
-    await stopRunning();
+    const result = await stopSession();
+    if (result.status === "busy") {
+      await showHUD("⏳ Timer is busy — try again");
+      return;
+    }
     setTimer(null);
   }
 

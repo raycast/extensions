@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { Task } from "./parser";
-import { TaskSource, TaskGroup } from "./task-source";
+import { TaskSource, TaskGroup, MarkResult } from "./task-source";
 
 const TASKS_KEY = "pomodoro-md-tasks";
 
@@ -32,19 +32,20 @@ export class ManualTaskSource implements TaskSource {
     await saveTasks(filtered);
   }
 
-  async markDone(taskTitle: string): Promise<void> {
+  async markDone(taskTitle: string): Promise<MarkResult> {
     const tasks = await loadTasks();
     const task = tasks.find((t) => t.title === taskTitle);
     if (task) {
       task.done = true;
       await saveTasks(tasks);
     }
+    return "ok";
   }
 
   async markSubtaskDone(
     taskTitle: string,
     subtaskTitle: string,
-  ): Promise<void> {
+  ): Promise<MarkResult> {
     const tasks = await loadTasks();
     const task = tasks.find((t) => t.title === taskTitle);
     if (task) {
@@ -54,5 +55,6 @@ export class ManualTaskSource implements TaskSource {
         await saveTasks(tasks);
       }
     }
+    return "ok";
   }
 }

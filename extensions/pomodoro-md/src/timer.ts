@@ -1,8 +1,9 @@
 import { LocalStorage } from "@raycast/api";
 import { randomUUID } from "crypto";
+import { SessionLock, assertHeld } from "./lock";
 
 export interface TimerState {
-  id: string; // Identifies this timer instance; see clearTimer()
+  id: string; // Identifies this timer instance
   taskTitle: string;
   subtaskTitle?: string;
   startedAt: number; // Unix timestamp ms
@@ -11,6 +12,7 @@ export interface TimerState {
 }
 
 export interface PomodoroLog {
+  id?: string; // TimerState.id of the session (absent in logs written before ids)
   taskTitle: string;
   subtaskTitle?: string;
   startedAt: number;
@@ -18,67 +20,73 @@ export interface PomodoroLog {
   completed: boolean; // true = finished, false = stopped early
 }
 
+export interface TimerSpec {
+  taskTitle: string;
+  subtaskTitle?: string;
+  durationMinutes: number;
+  isBreak?: boolean;
+}
+
 const TIMER_KEY = "pomodoro-md-timer";
 const LOG_KEY = "pomodoro-md-logs";
+
+// Reads need no lock: they only observe. Every write below takes a
+// SessionLock argument, so it can only be reached from inside
+// withSessionLock() — see session.ts, the sole caller.
 
 export async function getTimer(): Promise<TimerState | null> {
   const raw = await LocalStorage.getItem<string>(TIMER_KEY);
   if (!raw) return null;
   const state = JSON.parse(raw) as TimerState;
   // Timers stored before ids existed: derive a stable one so they can still
-  // be claimed and cleared.
+  // be finished and cleared.
   if (!state.id) state.id = `legacy-${state.startedAt}`;
   return state;
 }
 
-export async function startTimer(
-  taskTitle: string,
-  durationMinutes: number,
-  subtaskTitle?: string,
-  isBreak = false,
-): Promise<void> {
-  const state: TimerState = {
+/** Build a timer that starts now. Pure; nothing is stored until saveTimer(). */
+export function newTimer(spec: TimerSpec): TimerState {
+  return {
     id: randomUUID(),
-    taskTitle,
-    subtaskTitle,
+    taskTitle: spec.taskTitle,
+    subtaskTitle: spec.subtaskTitle,
     startedAt: Date.now(),
-    duration: durationMinutes * 60 * 1000,
-    isBreak,
+    duration: spec.durationMinutes * 60 * 1000,
+    isBreak: spec.isBreak ?? false,
   };
+}
+
+export async function saveTimer(
+  lock: SessionLock,
+  state: TimerState,
+): Promise<void> {
+  assertHeld(lock);
   await LocalStorage.setItem(TIMER_KEY, JSON.stringify(state));
 }
 
-export async function startBreak(durationMinutes: number): Promise<void> {
-  await startTimer("Break", durationMinutes, undefined, true);
-}
-
-/**
- * Remove the stored timer, but only if it is still the instance identified
- * by `id`. Returns whether this call removed it.
- *
- * This is the claim step for finishing a session: of several commands that
- * read the same expired timer (the menu bar refresh and a command launched at
- * the same moment), exactly one gets `true` and goes on to log it. A caller
- * holding a stale timer never removes a newer one started in the meantime.
- */
-export async function clearTimer(id: string): Promise<boolean> {
-  const current = await getTimer();
-  if (!current || current.id !== id) return false;
+export async function removeTimer(lock: SessionLock): Promise<void> {
+  assertHeld(lock);
   await LocalStorage.removeItem(TIMER_KEY);
-  return true;
 }
 
 // Keep logs for 30 days so LocalStorage does not grow unbounded.
 const LOG_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 
 /**
- * Record a finished session. Returns false when a session with the same
- * start time is already recorded, so callers can skip downstream writes.
+ * Record a finished session. Returns false when it is already recorded, so
+ * callers can skip downstream writes. Sessions are identified by timer id;
+ * older entries without one fall back to the start time.
  */
-export async function addLog(entry: PomodoroLog): Promise<boolean> {
+export async function addLog(
+  lock: SessionLock,
+  entry: PomodoroLog,
+): Promise<boolean> {
+  assertHeld(lock);
   const cutoff = Date.now() - LOG_RETENTION_MS;
   const logs = (await getLogs()).filter((l) => l.endedAt >= cutoff);
-  if (logs.some((l) => l.startedAt === entry.startedAt)) return false;
+  const same = (l: PomodoroLog) =>
+    entry.id && l.id ? l.id === entry.id : l.startedAt === entry.startedAt;
+  if (logs.some(same)) return false;
   logs.push(entry);
   await LocalStorage.setItem(LOG_KEY, JSON.stringify(logs));
   return true;

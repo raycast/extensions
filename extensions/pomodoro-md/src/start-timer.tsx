@@ -22,8 +22,6 @@ import {
 } from "./task-source";
 import {
   TimerState,
-  startTimer,
-  startBreak,
   getLastLog,
   getRemainingMs,
   formatRemaining,
@@ -33,9 +31,19 @@ import {
   CompletionContext,
   completedTypeOf,
   settle,
-  finish,
-  stopRunning,
+  startSession,
+  stopSession,
 } from "./session";
+
+// Another command held the session lock for the whole wait. Nothing was
+// written; the user just has to try again.
+async function notifyBusy() {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Timer is busy",
+    message: "Another command is updating it — try again",
+  });
+}
 
 interface ResumeTarget {
   taskTitle: string;
@@ -73,7 +81,9 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
   // Timer state shown by the view; called on mount and after every change,
   // since the view stays open behind the HUD and must not go stale.
   async function refresh() {
-    const { running, finished } = await settle();
+    const settled = await settle();
+    if (settled.status === "busy") return; // keep what is shown; next refresh catches up
+    const { running, finished } = settled;
     setActiveTimer(running);
     // Opened directly (not via the menu bar) after a session ran out:
     // show the completion prompt just the same.
@@ -94,7 +104,9 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
   }, [completion]);
 
   async function handleStartPomodoro(task: Task, subtaskTitle?: string) {
-    const { running } = await settle();
+    const settled = await settle();
+    if (settled.status === "busy") return notifyBusy();
+    const { running } = settled;
     let minutes = pomoDuration;
     if (running && !running.isBreak) {
       // Pomodoro running — confirm switch and preserve remaining time
@@ -108,19 +120,37 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
       if (!confirmed) return;
       minutes = remainingMs / 60000;
     }
-    // A running break is simply dropped; a pomodoro is logged as stopped early.
-    if (running) await finish(running, false);
+    // The dialog ran outside the lock, so start only if the timer we decided
+    // on is still the stored one. A running break is dropped; a pomodoro is
+    // logged as stopped early — both inside startSession().
+    const started = await startSession(
+      { taskTitle: task.title, subtaskTitle, durationMinutes: minutes },
+      { expectCurrentId: running?.id ?? null },
+    );
+    if (started.status === "busy") return notifyBusy();
+    if (started.status === "changed") {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Timer changed",
+        message: "Another command changed the timer — pick again",
+      });
+      await refresh();
+      return;
+    }
 
     const label = subtaskTitle || task.title;
-    await startTimer(task.title, minutes, subtaskTitle);
     setCompletedType(undefined);
     await refresh();
     await showHUD(`🍅 ${label} — ${Math.ceil(minutes)}min`);
   }
 
   async function handleStartBreak() {
-    await stopRunning();
-    await startBreak(breakDuration);
+    const started = await startSession({
+      taskTitle: "Break",
+      durationMinutes: breakDuration,
+      isBreak: true,
+    });
+    if (started.status !== "ok") return notifyBusy();
     setCompletedType(undefined);
     await refresh();
     await showHUD(`☕ Break — ${breakDuration}min`);
@@ -128,8 +158,12 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
 
   async function handleResume() {
     if (!lastTask) return;
-    await stopRunning();
-    await startTimer(lastTask.taskTitle, pomoDuration, lastTask.subtaskTitle);
+    const started = await startSession({
+      taskTitle: lastTask.taskTitle,
+      subtaskTitle: lastTask.subtaskTitle,
+      durationMinutes: pomoDuration,
+    });
+    if (started.status !== "ok") return notifyBusy();
     setCompletedType(undefined);
     await refresh();
     const label = lastTask.subtaskTitle || lastTask.taskTitle;
@@ -137,14 +171,24 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
   }
 
   async function handleStopTimer() {
-    await stopRunning();
+    const result = await stopSession();
+    if (result.status === "busy") return notifyBusy();
     await refresh();
-    await showToast({ style: Toast.Style.Success, title: "Timer stopped" });
+    await showToast({
+      style: Toast.Style.Success,
+      title: result.stopped
+        ? "Timer stopped"
+        : result.finished
+          ? "Timer had already finished"
+          : "No active timer",
+    });
   }
 
   async function handleMarkDone(task: Task) {
     if (taskSource.markDone) {
-      await taskSource.markDone(task.title);
+      if ((await taskSource.markDone(task.title)) === "busy") {
+        return notifyBusy();
+      }
       const updated = await taskSource.getTasks();
       setGroups(updated);
       await showToast({
@@ -156,7 +200,11 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
 
   async function handleMarkSubtaskDone(task: Task, subtaskTitle: string) {
     if (taskSource.markSubtaskDone) {
-      await taskSource.markSubtaskDone(task.title, subtaskTitle);
+      if (
+        (await taskSource.markSubtaskDone(task.title, subtaskTitle)) === "busy"
+      ) {
+        return notifyBusy();
+      }
       const updated = await taskSource.getTasks();
       setGroups(updated);
       await showToast({

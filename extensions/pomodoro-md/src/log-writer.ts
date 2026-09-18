@@ -1,9 +1,11 @@
 import { getAppPreferences } from "./preferences";
 import { DailyNoteLogWriter } from "./dailynote-logger";
 import { PomodoroLog } from "./timer";
+import { SessionLock } from "./lock";
 
 export interface LogWriter {
-  writeLog(log: PomodoroLog): Promise<void>;
+  /** Append one session to the log. Only called while the session lock is held. */
+  writeLog(lock: SessionLock, log: PomodoroLog): Promise<void>;
 }
 
 class NullLogWriter implements LogWriter {

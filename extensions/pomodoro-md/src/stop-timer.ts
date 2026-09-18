@@ -1,26 +1,30 @@
 import { showHUD } from "@raycast/api";
-import { settle, finish } from "./session";
+import { stopSession } from "./session";
 
 export default async function StopTimerCommand() {
-  const { running, finished } = await settle();
+  const result = await stopSession();
 
-  if (finished) {
-    // Ran out before we got here; settle() already logged it as completed.
-    const label = finished.subtaskTitle || finished.taskTitle;
-    await showHUD(finished.isBreak ? "☕ Break over" : `✅ ${label} — done!`);
+  if (result.status === "busy") {
+    await showHUD("⏳ Timer is busy — try again");
     return;
   }
 
-  if (!running) {
+  if (result.finished) {
+    // Ran out before we got here; it has been logged as completed.
+    const label = result.finished.subtaskTitle || result.finished.taskTitle;
+    await showHUD(
+      result.finished.isBreak ? "☕ Break over" : `✅ ${label} — done!`,
+    );
+    return;
+  }
+
+  if (!result.stopped) {
     await showHUD("No active timer");
     return;
   }
 
-  if (!(await finish(running, false))) {
-    // Claimed by another command (or replaced) between settle() and here.
-    await showHUD("No active timer");
-    return;
-  }
-  const label = running.subtaskTitle || running.taskTitle;
-  await showHUD(running.isBreak ? "☕ Break stopped" : `⏹ ${label} — stopped`);
+  const label = result.stopped.subtaskTitle || result.stopped.taskTitle;
+  await showHUD(
+    result.stopped.isBreak ? "☕ Break stopped" : `⏹ ${label} — stopped`,
+  );
 }
