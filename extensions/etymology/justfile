@@ -11,7 +11,7 @@
 # Two branches, because one of them is publishable and the other is not:
 #
 #   main    what goes to the store. Carries nothing it cannot ship.
-#   local   main + the Etymonline excerpt, which pulls proprietary prose.
+#   local   main + personal additions that are not part of the extension.
 #
 # Work on main. Run `just local` to fold main into the local branch and install
 # that. Publishing happens from main and refuses to run anywhere else.
@@ -93,13 +93,9 @@ langcodes:
 # Run before committing.
 check: types lint parsers
 
-# Refuse to publish while the Etymonline integration is present.
-store-check:
-    node scripts/check-store-ready.mjs
+# Run this after any change to main if you want those additions on your machine.
 
-# Run this after any change to main if you want the excerpt on your machine.
-
-# Rebase the Etymonline branch onto main and install it.
+# Rebase the personal branch onto main and install it.
 local:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -109,9 +105,9 @@ local:
     fi
     start=$(git branch --show-current)
     # If local carries no commit of its own, rebasing fast-forwards it onto main
-    # and silently discards the excerpt. That happened once; hence this check.
+    # and silently discards it. That happened once; hence this check.
     if [ "$(git rev-list --count main..local)" -eq 0 ]; then
-      echo "branch 'local' has no commits of its own — the excerpt is not on it." >&2
+      echo "branch 'local' has no commits of its own — nothing to install." >&2
       echo "Recover with: git checkout local && git revert --no-commit <the" >&2
       echo "commit that removed it> && git commit" >&2
       exit 1
@@ -125,16 +121,15 @@ local:
     fi
     just install
     # Back to main deliberately. The installed build stays as it was just built,
-    # so you keep the excerpt, but your checkout sits on the branch you are
+    # so you keep those additions, but your checkout sits on the branch you are
     # supposed to be editing. Sitting on 'local' is how a fix ends up committed
     # to a branch that never gets published.
     git checkout -q main
     echo
-    echo "Installed from 'local' — the Etymonline excerpt is available; tick it"
-    echo "in Raycast -> Extensions -> Etymology."
+    echo "Installed from 'local'."
     echo "Checkout returned to 'main'. Edit here."
 
-# Install the publishable version, without the Etymonline excerpt.
+# Install main, the publishable version.
 public:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -164,5 +159,5 @@ _publishable:
 # terminal exactly as if you had typed it.
 
 # Open the pull request against raycast/extensions.
-publish: _publishable store-check check
+publish: _publishable check
     npx @raycast/api@latest publish

@@ -28,8 +28,7 @@ src/
 │   ├── templates.ts  derivation templates -> tree
 │   ├── tree.ts       data-ety-tree-json -> tree
 │   ├── relations.ts  both Wiktionary relation vocabularies -> one Relation
-│   ├── search.ts     title autocomplete
-│   └── etymonline.ts LOCAL ONLY - see below, must not ship
+│   └── search.ts     title autocomplete
 ├── components/     EntryDetail (pushed recursively), EntryActions
 └── tools/          get-etymology, the AI tool
 ```
@@ -67,45 +66,22 @@ Re-derived once, 2026-09-14. Do not re-research these.
 
 ```
 main    what gets published. Carries nothing it cannot ship.
-local   main + one commit adding the Etymonline excerpt. Never merge it back.
+local   main plus personal additions that are not part of the extension.
 ```
 
-All work happens on `main`. `just local` rebases the local branch onto main and
-installs that; `just public` installs main. `just publish` refuses to run off
-main, and `just store-check` fails on local and passes on main, so the two states
-cannot be confused for one another.
+All work happens on `main`. `just local` rebases the personal branch onto main and
+installs it; `just public` installs main; `just publish` refuses to run off main.
+The additions and the notes explaining them live on `local`, so `main` has no
+notion of them at all — which is the point, since the published diff is read by
+people reviewing the extension.
 
-Keeping the excerpt as a *single* commit on `local` is what makes the rebase
-cheap: it touches four files (`src/sources/etymonline.ts`, `src/preferences.ts`,
-`src/components/EntryDetail.tsx`, `package.json`) and conflicts only when those
-same four move on main.
+Keeping them as a *single* commit is what makes the rebase cheap, and it makes
+`git log main..local` a complete audit of the difference.
 
 If `local` ever ends up with zero commits of its own, `git rebase main`
-fast-forwards it and the excerpt disappears from the tip — it is still in history,
-recoverable with `git revert --no-commit <the commit that removed it>`. `just
-local` checks for this before rebasing, because it happened once.
-
-## Why Etymonline is local only
-
-`src/sources/etymonline.ts` fetches an excerpt from etymonline.com. It must never
-reach the store.
-
-Checked 2026-09-17: no public API; `robots.txt` allows `/word/` and `/search` for
-`*` and disallows `/api/`; the terms at `etymonline.com/legal/terms` say nothing
-about scraping or automated access but declare the content "the exclusive
-property of Etymonline". Owned by Harper Family LLC, proprietary, no open licence.
-A self-identifying User-Agent is served normally, so there is no need to pose as a
-browser and the code does not.
-
-Reading it yourself on your own machine is one thing; shipping an extension that
-reproduces those entries for everyone is another. Hence: a preference off by
-default, a capped excerpt rather than a mirror, and `npm run check-store-ready`,
-which exits non-zero while the module, the preference or its use site exists.
-
-The parser keys on a `<section>` whose class list contains `prose`. The page is
-Tailwind utility classes with no embedded JSON, no semantic class and no
-microdata, so that anchor will break on any restyle. It fails to `undefined` and
-the pane falls back to the link.
+fast-forwards it and those additions vanish from the tip — still in history,
+recoverable with `git revert --no-commit <the commit that removed them>`. `just
+local` checks before rebasing, because it happened once.
 
 ## Rules
 
@@ -128,13 +104,9 @@ just register     ray develop — teaches Raycast the extension exists
 just build        code change; live as soon as it compiles
 just install      build + restart; needed for any manifest change
 just check        types + lint + parsers
-just store-check  refuses to publish while Etymonline is present
+just local        rebase the personal branch onto main and install it
+just public       install main, the publishable version
 ```
-
-**There is no private build and no public build.** There is one build. The
-Etymonline excerpt is a preference that ships off; the only thing that differs at
-publish time is that the module is deleted first. To use it locally: `just
-install`, then Raycast → Extensions → Etymology → tick *Show Etymonline Excerpt*.
 
 `register` is the non-obvious one. `ray build` writes into
 `~/.config/raycast/extensions/etymology/` but never tells the app anything, so a
@@ -147,9 +119,8 @@ moved a template argument or renamed an HTML attribute; that script asks for eig
 words whose ancestry is not in dispute and fails when an answer stops coming back.
 Run it before any release.
 
-The install workflow lives in README.md too, minus Etymonline. The README is the
-store listing: a reviewer reads it, and it must not carry instructions for pulling
-proprietary content.
+The install workflow lives in README.md too. Remember what the README is: the
+store listing, read by whoever reviews the extension. Keep it about the extension.
 
 ## Publishing
 
