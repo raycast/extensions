@@ -10,7 +10,7 @@
 import { useRef } from "react";
 import { Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { brewDoctor, DoctorReport, brewLogger, isBrewLockError, showBrewFailureToast } from "../utils";
+import { brewDoctor, DoctorReport, brewLogger, isAbortError, isBrewLockError, showBrewFailureToast } from "../utils";
 
 export function useBrewDoctor() {
   // `usePromise` populates this with the controller for the in-flight call and
@@ -25,9 +25,18 @@ export function useBrewDoctor() {
       // acts on whichever toast is visible (`src/utils/toast.ts`), so hiding
       // after a failure would dismiss the failure toast `onError` just raised.
       const progress = await showToast({ style: Toast.Style.Animated, title: "Running brew doctor…" });
-      const report = await brewDoctor(abortable.current?.signal);
-      await progress.hide();
-      return report;
+      try {
+        const report = await brewDoctor(abortable.current?.signal);
+        await progress.hide();
+        return report;
+      } catch (err) {
+        // An unmount or a superseded revalidate aborts the run, and an abort
+        // raises no toast — so this one must clear itself. A real failure is
+        // left alone: `onError`'s failure toast replaces it, and hiding here
+        // would dismiss that instead.
+        if (isAbortError(err)) await progress.hide();
+        throw err;
+      }
     },
     [],
     {

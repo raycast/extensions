@@ -49,6 +49,7 @@ export {
   UnsupportedMacOSError,
   isBrewError,
   isNetworkError,
+  isAbortError,
   isBrewLockError,
   isPinnedRefusal,
   upgradeSkipReason,

@@ -258,6 +258,18 @@ export function isNetworkError(error: unknown): error is NetworkError {
 /**
  * Check if an error is a BrewLockError.
  */
+/**
+ * A cancelled operation, not a failure.
+ *
+ * Worth a named predicate because an abort is the one ending that raises NO
+ * toast of its own: `showBrewFailureToast` returns early on it. Anything
+ * holding an in-progress toast therefore has to clear that toast itself on an
+ * abort, or leave a spinner running after the user has walked away.
+ */
+export function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
 export function isBrewLockError(error: unknown): error is BrewLockError {
   return error instanceof BrewLockError;
 }

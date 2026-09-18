@@ -9,6 +9,7 @@ import {
   brewUpgradeCommand,
   ensureError,
   getErrorMessage,
+  isAbortError,
   isCask,
   parseDryRun,
   showBrewFailureToast,
@@ -370,9 +371,18 @@ function useDryRunPreview<A>(
       // `showToast` replaces the visible toast outright, so the failure toast
       // takes the slot on its own.
       const progress = await showToast({ style: Toast.Style.Animated, title: progressTitle });
-      const { stdout, stderr } = await run(value, abortable.current?.signal);
-      await progress.hide();
-      return { stdout, raw: [stdout, stderr].filter(Boolean).join("\n") };
+      try {
+        const { stdout, stderr } = await run(value, abortable.current?.signal);
+        await progress.hide();
+        return { stdout, raw: [stdout, stderr].filter(Boolean).join("\n") };
+      } catch (err) {
+        // Backing out of this view aborts the run, and an abort raises no toast
+        // of its own — so this one has to clear itself or spin on after the user
+        // has gone. A real failure is the opposite case: `onError` replaces this
+        // toast, and hiding here would dismiss THAT one.
+        if (isAbortError(err)) await progress.hide();
+        throw err;
+      }
     },
     [arg],
     {
