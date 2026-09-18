@@ -391,9 +391,7 @@ export class XcodeSimulatorService {
         const { stdout } = await execAsync(`xcrun simctl ui ${xcodeSimulator.udid} appearance`);
         const currentIsDark = stdout.trim().toLowerCase().includes("dark");
         const newMode = currentIsDark ? "light" : "dark";
-        await execAsync(
-          `xcrun devicectl device settings appearance --device ${xcodeSimulator.udid} --mode ${newMode}`
-        );
+        await execAsync(`xcrun devicectl device settings appearance --device ${xcodeSimulator.udid} --mode ${newMode}`);
         await XcodeSimulatorService.trackSimulatorUsage(xcodeSimulator.udid);
         return newMode;
       } catch {
