@@ -26,7 +26,7 @@
     {
       "name": "save-to-summy",
       "title": "Save to Summy",
-      "description": "Choose a link, text, or files to save and summarise in Summy.",
+      "description": "Choose a link, text, or files to save and summarize in Summy.",
       "icon": "summy-icon.png",
       "mode": "view"
     },

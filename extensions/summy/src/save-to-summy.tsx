@@ -53,7 +53,7 @@ export default function Command() {
 
       toast.style = Toast.Style.Success;
       toast.title = successTitle(values);
-      toast.message = "Summy is summarising it now.";
+      toast.message = "Summy is summarizing it now.";
       await popToRoot();
     } catch (error) {
       toast.style = Toast.Style.Failure;
@@ -67,7 +67,6 @@ export default function Command() {
   return (
     <Form
       isLoading={isSaving}
-      navigationTitle="Save to Summy"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save to Summy" icon={Icon.Plus} onSubmit={save} />
@@ -88,7 +87,7 @@ export default function Command() {
           <Form.TextArea
             id="text"
             title="Text"
-            placeholder="Paste or type what you want Summy to summarise"
+            placeholder="Paste or type what you want Summy to summarize"
             autoFocus
           />
         </>
@@ -105,7 +104,7 @@ export default function Command() {
         />
       ) : null}
 
-      <Form.Description text="Summy will save your selection and start summarising it straight away." />
+      <Form.Description text="Summy will save your selection and start summarizing it straight away." />
     </Form>
   );
 }

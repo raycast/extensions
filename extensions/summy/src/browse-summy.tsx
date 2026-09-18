@@ -144,14 +144,14 @@ function ItemActions(props: {
       {item.sourceUrl ? <Action.CopyToClipboard title="Copy Original Link" content={item.sourceUrl} /> : null}
       <ActionPanel.Section>
         <Action
-          title="Summarise Again"
+          title="Summarize Again"
           icon={Icon.ArrowClockwise}
           onAction={async () => {
             const toast = await showToast({ style: Toast.Style.Animated, title: "Sending back to Summy…" });
             try {
               await onRegenerate();
               toast.style = Toast.Style.Success;
-              toast.title = "Summarising Again";
+              toast.title = "Summarizing Again";
             } catch (error) {
               toast.style = Toast.Style.Failure;
               toast.title = "Couldn’t Restart Summary";
@@ -276,7 +276,7 @@ function ItemDetail(props: {
     if (pollGeneration.current === generation) {
       await showToast({
         style: Toast.Style.Animated,
-        title: "Still Summarising",
+        title: "Still Summarizing",
         message: "Use Refresh to check again.",
       });
     }
@@ -321,10 +321,10 @@ function detailMarkdown(item: SummyItem): string {
   const image = item.imageUrl ? `![${title}](<${encodeURI(item.imageUrl)}>)\n\n` : "";
 
   if (item.status === "pending" || item.status === "processing") {
-    return `${image}# ${title}\n\n## Summarising…\n\nThis item will update when its summary is ready.`;
+    return `${image}# ${title}\n\n## Summarizing…\n\nThis item will update when its summary is ready.`;
   }
   if (item.status === "error") {
-    return `${image}# ${title}\n\n## Couldn’t summarise this item\n\nUse **Summarise Again** from the action menu to retry.`;
+    return `${image}# ${title}\n\n## Couldn’t summarize this item\n\nUse **Summarize Again** from the action menu to retry.`;
   }
 
   const points = (item.summaryPoints ?? [])
@@ -374,7 +374,7 @@ function itemIcon(item: SummyItem): Image.ImageLike {
 function statusName(item: SummyItem): string {
   if (item.status === "done") return "Ready";
   if (item.status === "error") return "Needs attention";
-  return "Summarising";
+  return "Summarizing";
 }
 
 function statusIcon(item: SummyItem): Icon {

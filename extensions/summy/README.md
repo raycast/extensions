@@ -23,8 +23,8 @@ Choose what you want to save:
 - **Some Text** accepts pasted or typed text with an optional title.
 - **A File** accepts images, PDFs, and text-based files such as Markdown, JSON, CSV, and plain text.
 
-Summy saves your selection and begins summarising it straight away.
+Summy saves your selection and begins summarizing it straight away.
 
 ### Browse Summy
 
-Search saved titles, summaries, and sources, or filter the list by type. Open an item to read its full summary and suggested questions inside Raycast. You can also open the original source, copy the summary, retry summarisation, or delete the item.
+Search saved titles, summaries, and sources, or filter the list by type. Open an item to read its full summary and suggested questions inside Raycast. You can also open the original source, copy the summary, retry summarization, or delete the item.
