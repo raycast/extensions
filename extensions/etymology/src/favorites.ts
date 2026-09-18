@@ -43,6 +43,7 @@ export async function has(favorite: Favorite): Promise<boolean> {
   return (await list()).some((f) => same(f, favorite));
 }
 
+/** Case-sensitive, matching Wiktionary titles and the cache key: `Polish` is not `polish`. */
 function same(a: Favorite, b: Favorite): boolean {
-  return a.lang === b.lang && a.term.toLowerCase() === b.term.toLowerCase();
+  return a.lang === b.lang && a.term === b.term;
 }

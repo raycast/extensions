@@ -24,8 +24,13 @@ const PARSE_VERSION = 2;
 
 const cache = new Cache({ namespace: "entries" });
 
+/**
+ * Case-sensitive, because Wiktionary titles are. `Polish` and `polish` are two
+ * different pages with two different etymologies, and lowercasing the key served
+ * whichever was looked up first for both, for thirty days.
+ */
 function key(term: string, lang: string): string {
-  return `v${PARSE_VERSION}:${lang}:${term.toLowerCase()}`;
+  return `v${PARSE_VERSION}:${lang}:${term}`;
 }
 
 export function read(term: string, lang: string): Entry | undefined {

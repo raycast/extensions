@@ -5,8 +5,7 @@
 const API = "https://en.wiktionary.org/w/api.php";
 const REST = "https://en.wiktionary.org/w/rest.php/v1";
 
-const USER_AGENT =
-  "raycast-etymology/1.0 (bot; https://github.com/raycast/extensions/tree/main/extensions/etymology)";
+const USER_AGENT = "raycast-etymology/1.0 (bot; https://github.com/raycast/extensions/tree/main/extensions/etymology)";
 
 const TIMEOUT_MS = 15_000;
 const RETRIES = 2;
@@ -44,11 +43,7 @@ interface ParseResponse<T> {
   error?: { code: string; info: string };
 }
 
-async function parse<T>(
-  title: string,
-  prop: string,
-  extra: Record<string, string> = {},
-): Promise<T> {
+async function parse<T>(title: string, prop: string, extra: Record<string, string> = {}): Promise<T> {
   const params = new URLSearchParams({
     action: "parse",
     page: title,
@@ -123,8 +118,7 @@ export async function expandLanguageName(code: string): Promise<string | undefin
  * than the body. The category holds roughly 46,000 English entries.
  */
 export async function randomTermWithTree(): Promise<string> {
-  const url =
-    "https://en.wiktionary.org/wiki/Special:RandomInCategory/Category:English_entries_with_etymology_trees";
+  const url = "https://en.wiktionary.org/wiki/Special:RandomInCategory/Category:English_entries_with_etymology_trees";
 
   const res = await fetch(url, {
     headers: { "User-Agent": USER_AGENT },

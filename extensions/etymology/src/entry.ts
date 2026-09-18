@@ -42,11 +42,7 @@ export async function reloadEntry(term: string, lang = "en"): Promise<Entry> {
  * Wiktionary titles are case-sensitive and lemmas are lowercase, so a word taken
  * from the start of a sentence, or from a selection, misses on the first try.
  */
-async function fetchWithCaseFallback(
-  term: string,
-  lang: string,
-  skipTree: boolean,
-): Promise<Entry> {
+async function fetchWithCaseFallback(term: string, lang: string, skipTree: boolean): Promise<Entry> {
   try {
     return await fetchEntry(term, { lang, skipTree });
   } catch (error) {

@@ -8,12 +8,13 @@
 // whole right-hand column saying a second time what the left already said.
 
 import { useEffect, useState } from "react";
-import { Detail, Icon, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { EtymNode } from "../model";
 import { loadEntry, reloadEntry } from "../entry";
 import { earliest, entryMarkdown, relationKey } from "../render";
-import { preferences } from "../preferences";
+import { pageUrl } from "../sources";
+import { languageName } from "../langcodes";
 import { EntryActions } from "./EntryActions";
 import * as favorites from "../favorites";
 
@@ -23,10 +24,10 @@ interface Props {
 }
 
 export function EntryDetail({ term, lang = "en" }: Props) {
-  const [view, setView] = useState(preferences().defaultView);
+  const [view, setView] = useState(getPreferenceValues<Preferences>().defaultView);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const { data: entry, isLoading, mutate } = useCachedPromise(loadEntry, [term, lang]);
+  const { data: entry, isLoading, error, mutate, revalidate } = useCachedPromise(loadEntry, [term, lang]);
 
   useEffect(() => {
     favorites.has({ term, lang, langName: "" }).then(setIsFavorite);
@@ -50,6 +51,37 @@ export function EntryDetail({ term, lang = "en" }: Props) {
     await showToast({ style: Toast.Style.Success, title: "Refreshed" });
   };
 
+  // A failed lookup used to land here silently: isLoading false, entry empty, so
+  // the pane showed the bare word and no actions at all - not even a retry.
+  if (error && !entry) {
+    return (
+      <Detail
+        navigationTitle={term}
+        markdown={[
+          `# ${term}`,
+          "Could not reach Wiktionary.",
+          `\`${error.message}\``,
+          "Retry with ⌘R, or open the page in a browser.",
+        ].join("\n\n")}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Retry"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={revalidate}
+            />
+            <Action.OpenInBrowser
+              title="Open in Wiktionary"
+              url={pageUrl(term, languageName(lang))}
+              shortcut={Keyboard.Shortcut.Common.Open}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
   if (!entry) {
     return <Detail isLoading={isLoading} markdown={`# ${term}`} navigationTitle={term} />;
   }
@@ -67,11 +99,7 @@ export function EntryDetail({ term, lang = "en" }: Props) {
         <Detail.Metadata>
           <Detail.Metadata.Label title="Language" text={entry.langName} icon={Icon.Globe} />
           {oldest && (
-            <Detail.Metadata.Label
-              title="Earliest"
-              text={`${oldest.langName} ${oldest.term}`}
-              icon={Icon.Clock}
-            />
+            <Detail.Metadata.Label title="Earliest" text={`${oldest.langName} ${oldest.term}`} icon={Icon.Clock} />
           )}
           <RelationKey tree={tree} />
           <Detail.Metadata.Separator />

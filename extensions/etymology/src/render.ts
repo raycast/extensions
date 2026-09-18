@@ -61,15 +61,11 @@ export function treeMarkdown(node: EtymNode): string {
   // A table rather than a fenced block. A code block is drawn as a grey slab in
   // dim monospace, so the terms came out fainter than the attribution beneath
   // them; a table gives them a column of their own in the interface font.
-  const rows = path.map(
-    (n) => `| ${RELATION_MARKS[n.relation]} | ${cell(n.langName)} | ${cell(term(n))} |`,
-  );
+  const rows = path.map((n) => `| ${RELATION_MARKS[n.relation]} | ${cell(n.langName)} | ${cell(term(n))} |`);
   // Labelled, not blank. Markdown requires a header row and Raycast draws it
   // regardless, so an empty one renders as an unexplained grey band above the
   // first ancestor.
-  const table = rows.length
-    ? ["|  | Language | Term |", "| :-: | --- | --- |", ...rows].join("\n")
-    : "";
+  const table = rows.length ? ["|  | Language | Term |", "| :-: | --- | --- |", ...rows].join("\n") : "";
 
   const alsoLine = branches.length
     ? `Also from ${branches.map((b) => `${b.langName} **${escapeMarkdown(b.term)}**`).join(", ")}`
@@ -217,9 +213,7 @@ export function entryMarkdown(entry: Entry, view: "tree" | "prose"): string {
   if (!body) {
     return [
       heading,
-      `Wiktionary has no etymology for **${entry.term}**${
-        entry.langName ? ` under ${entry.langName}` : ""
-      }.`,
+      `Wiktionary has no etymology for **${entry.term}**${entry.langName ? ` under ${entry.langName}` : ""}.`,
     ].join("\n\n");
   }
   return [heading, body].join("\n\n");

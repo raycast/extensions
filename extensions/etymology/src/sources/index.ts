@@ -9,7 +9,7 @@
 // Each rung degrades into the next. A word never fails, it only gets thinner.
 
 import { Definition, Entry, EtymSection } from "../model";
-import { languageName, resolveUnknownLanguages } from "../langcodes";
+import { languageCode, languageName, resolveUnknownLanguages } from "../langcodes";
 import { fetchHtml, fetchWikitext, pageUrl } from "./client";
 import { buildTree, languageCodes } from "./templates";
 import { treesForLanguage } from "./tree";
@@ -44,13 +44,22 @@ export async function fetchEntry(term: string, options: FetchOptions = {}): Prom
   const body = languageSection(wikitext, heading);
   const section = body ? { language: heading, body } : firstLanguageSection(wikitext);
 
+  // When the page has no section for the language we asked for, the entry takes
+  // on the language it actually found. Leaving `lang` as the requested code let
+  // a French-only page be cached, linked and tree-built as though it were
+  // English: right content, wrong identity, and a cache key that collides with
+  // a genuine English entry for the same spelling.
+  const found = section && section.language !== heading ? languageCode(section.language) : undefined;
+  const actualLang = found ?? lang;
+  const actualName = section?.language ?? heading;
+
   const base: Entry = {
     term,
-    lang,
-    langName: heading,
+    lang: actualLang,
+    langName: actualName,
     sections: [],
     source: "none",
-    pageUrl: pageUrl(term, heading),
+    pageUrl: pageUrl(term, actualName),
     fetchedAt: Date.now(),
   };
 
@@ -63,8 +72,7 @@ export async function fetchEntry(term: string, options: FetchOptions = {}): Prom
   // single etymology the parts of speech are its siblings and apply to all of it.
   const scopes = blocks.length > 1 ? etymologyScopes(section.body) : [];
   const shared = blocks.length > 1 ? [] : partsOfSpeech(section.body);
-  const definitionsAt = (i: number): PosSection[] =>
-    blocks.length > 1 ? partsOfSpeech(scopes[i] ?? "") : shared;
+  const definitionsAt = (i: number): PosSection[] => (blocks.length > 1 ? partsOfSpeech(scopes[i] ?? "") : shared);
 
   // A word can have definitions and no etymology at all. Showing what it means
   // beats an empty pane saying Wiktionary knows nothing about it.
@@ -72,7 +80,6 @@ export async function fetchEntry(term: string, options: FetchOptions = {}): Prom
     const only = renderDefinitions(shared);
     return {
       ...base,
-      langName: section.language,
       sections: only.length ? [{ definitions: only }] : [],
       source: only.length ? "prose" : "none",
     };
@@ -86,7 +93,7 @@ export async function fetchEntry(term: string, options: FetchOptions = {}): Prom
   const sections: EtymSection[] = blocks.map((block, i) => ({
     label: multiple ? block.label : undefined,
     prose: toPlainText(block.body, languageName) || undefined,
-    tree: buildTree(term, lang, block.body),
+    tree: buildTree(term, actualLang, block.body),
     definitions: renderDefinitions(definitionsAt(i)),
   }));
 
@@ -102,7 +109,7 @@ export async function fetchEntry(term: string, options: FetchOptions = {}): Prom
   const partial = Boolean(options.skipTree) && treeBlocks.length > 0;
 
   if (!options.skipTree && treeBlocks.length > 0) {
-    const trees = treesForLanguage(await fetchHtml(term), lang);
+    const trees = treesForLanguage(await fetchHtml(term), actualLang);
     let next = 0;
 
     for (let i = 0; i < blocks.length; i++) {
@@ -115,7 +122,7 @@ export async function fetchEntry(term: string, options: FetchOptions = {}): Prom
     }
   }
 
-  return { ...base, langName: section.language, sections, source, partial };
+  return { ...base, sections, source, partial };
 }
 
 /** Sense wikitext down to prose, dropping any that render to nothing. */

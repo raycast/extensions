@@ -5,14 +5,13 @@
 // ever in flight: the fetch is hoisted here and keyed on a debounced selection,
 // because a detail rendered per row would fetch every row the cursor touches.
 
-import { useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Action, ActionPanel, Icon, Keyboard, List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { EtymNode } from "./model";
 import { loadPreview } from "./entry";
 import { earliest, entryMarkdown, relationKey } from "./render";
 import { pageUrl, suggest } from "./sources";
-import { preferences } from "./preferences";
 import { useDebouncedValue } from "./hooks";
 import { EntryDetail } from "./components/EntryDetail";
 import * as favorites from "./favorites";
@@ -30,9 +29,11 @@ export default function Command() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pinned, setPinned] = useState<favorites.Favorite[]>([]);
 
-  useEffect(() => {
+  const refreshPinned = useCallback(() => {
     favorites.list().then(setPinned);
   }, []);
+
+  useEffect(refreshPinned, [refreshPinned]);
 
   const trimmed = query.trim();
   const browsing = trimmed.length === 0;
@@ -77,7 +78,7 @@ export default function Command() {
     keepPreviousData: false,
   });
 
-  const view = preferences().defaultView;
+  const view = getPreferenceValues<Preferences>().defaultView;
 
   function detailFor(row: Row) {
     if (row.id !== target?.id) return <List.Item.Detail markdown="" />;
@@ -97,19 +98,10 @@ export default function Command() {
         metadata={
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="Language" text={entry.langName} />
-            {oldest && (
-              <List.Item.Detail.Metadata.Label
-                title="Earliest"
-                text={`${oldest.langName} ${oldest.term}`}
-              />
-            )}
+            {oldest && <List.Item.Detail.Metadata.Label title="Earliest" text={`${oldest.langName} ${oldest.term}`} />}
             <RelationKey tree={tree} />
             <List.Item.Detail.Metadata.Separator />
-            <List.Item.Detail.Metadata.Link
-              title="Source"
-              target={entry.pageUrl}
-              text="Wiktionary"
-            />
+            <List.Item.Detail.Metadata.Link title="Source" target={entry.pageUrl} text="Wiktionary" />
           </List.Item.Detail.Metadata>
         }
       />
@@ -135,7 +127,7 @@ export default function Command() {
             subtitle={row.subtitle}
             icon={row.icon}
             detail={detailFor(row)}
-            actions={<Actions term={row.term} lang={row.lang} />}
+            actions={<Actions term={row.term} lang={row.lang} onPop={refreshPinned} />}
           />
         ))}
       </List.Section>
@@ -144,9 +136,7 @@ export default function Command() {
         icon={browsing ? Icon.Star : Icon.MagnifyingGlass}
         title={browsing ? "Search a word" : "Nothing on Wiktionary"}
         description={
-          browsing
-            ? "Type above, or pin words from an entry to keep them here."
-            : `No entry matches “${trimmed}”.`
+          browsing ? "Type above, or pin words from an entry to keep them here." : `No entry matches “${trimmed}”.`
         }
       />
     </List>
@@ -166,19 +156,18 @@ function RelationKey({ tree }: { tree?: EtymNode }) {
   );
 }
 
-function Actions({ term, lang }: { term: string; lang: string }) {
+function Actions({ term, lang, onPop }: { term: string; lang: string; onPop: () => void }) {
   return (
     <ActionPanel>
+      {/* Pinning happens inside the pushed entry, so the list has to re-read
+          storage on the way back; otherwise it redraws yesterday's pins. */}
       <Action.Push
         title="Show Etymology"
         icon={Icon.Tree}
         target={<EntryDetail term={term} lang={lang} />}
+        onPop={onPop}
       />
-      <Action.OpenInBrowser
-        title="Open in Wiktionary"
-        url={pageUrl(term)}
-        shortcut={Keyboard.Shortcut.Common.Open}
-      />
+      <Action.OpenInBrowser title="Open in Wiktionary" url={pageUrl(term)} shortcut={Keyboard.Shortcut.Common.Open} />
     </ActionPanel>
   );
 }

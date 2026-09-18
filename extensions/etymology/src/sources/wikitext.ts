@@ -46,10 +46,7 @@ export function etymologySections(languageSection: string): Section[] {
     const next = /^=+[^\n]*?=+[ \t]*$/m.exec(languageSection.slice(from));
     out.push({
       label: m[1],
-      body: (next
-        ? languageSection.slice(from, from + next.index)
-        : languageSection.slice(from)
-      ).trim(),
+      body: (next ? languageSection.slice(from, from + next.index) : languageSection.slice(from)).trim(),
     });
   }
   return out;
@@ -353,9 +350,7 @@ function renderTemplate(t: Template, langName: (code: string) => string): string
   // language and renders nothing, leaving "Cognate with ,,,,,,,."
   const plus = name.endsWith("+");
   const base = plus ? name.slice(0, -1) : name;
-  const derivational = /^(inh|bor|der|lbor|slbor|ubor|obor|uder|cal|calq|calque|clq|psm|sl)$/.test(
-    base,
-  );
+  const derivational = /^(inh|bor|der|lbor|slbor|ubor|obor|uder|cal|calq|calque|clq|psm|sl)$/.test(base);
   const comparative = /^(cog|ncog|noncog|cognate)$/.test(base);
 
   if (derivational || comparative) {
@@ -398,17 +393,14 @@ function renderTemplate(t: Template, langName: (code: string) => string): string
   // Morphological templates read naturally as "a + b". An empty first component
   // is the headword standing in for itself, as in {{suffix|en||-ic}}, which
   // Wiktionary renders as a leading "+ -ic".
-  if (
-    /^(af|affix|suffix|suf|prefix|pre|confix|com|compound|blend|surf|univerbation|univ)$/.test(name)
-  ) {
+  if (/^(af|affix|suffix|suf|prefix|pre|confix|com|compound|blend|surf|univerbation|univ)$/.test(name)) {
     const slots = t.args.slice(1);
     const parts = slots.map((arg, i) => inner(t.named[`alt${i + 1}`] || arg));
     const rendered = parts.filter(Boolean).join(" + ");
     return slots.length > 1 && !slots[0] ? `+ ${rendered}` : rendered;
   }
 
-  if (name === "doublet")
-    return `doublet of ${t.args.slice(1).map(inner).filter(Boolean).join(", ")}`;
+  if (name === "doublet") return `doublet of ${t.args.slice(1).map(inner).filter(Boolean).join(", ")}`;
   if (name === "coin") return t.args[1] ? `coined by ${inner(t.args[1])}` : "";
 
   return "";

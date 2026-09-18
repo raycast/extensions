@@ -5,6 +5,3 @@ dist/
 
 # `ray build` regenerates this from package.json on every build.
 raycast-env.d.ts
-
-# Internal working notes. Stays on disk; never ships to the store.
-CLAUDE.md

@@ -32,6 +32,20 @@ export function isKnownLanguage(code: string): boolean {
   return code in load() || resolved.has(code);
 }
 
+let byName: Map<string, string> | undefined;
+
+/**
+ * Canonical name back to code, for the one case that needs it: a page whose
+ * heading is not the language we asked for. Without the code, the entry would
+ * carry another language's content under the requested language's identity.
+ */
+export function languageCode(name: string): string | undefined {
+  if (!byName) {
+    byName = new Map(Object.entries(load()).map(([code, canonical]) => [canonical, code]));
+  }
+  return byName.get(name);
+}
+
 /**
  * Fill in codes the bundled table does not have, so the next render names them.
  * Best effort: failures leave the raw code in place, which is still readable.
