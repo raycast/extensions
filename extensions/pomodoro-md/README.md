@@ -91,7 +91,7 @@ Keeps the remaining time in the menu bar while you work, with the current task n
 
 ## Manual Mode
 
-The default, and the one to use if you just want a pomodoro timer. Tasks live inside Raycast: type a name into **Start Pomodoro** to add one and start it, then **Mark as Done** or **Remove Task** from the action panel (`⌘K`). No files are written, so there is no setup — switch to Daily Note mode whenever you want the log in your notes.
+The default, and the one to use if you just want a pomodoro timer. Tasks live inside Raycast: type a name into **Start Pomodoro** to add one and start it, then **Mark as Done** or **Remove Task** from the action panel (`⌘K`). Nothing is written to your notes, so there is no setup — switch to Daily Note mode whenever you want the log in your notes.
 
 ![Manual mode: a task list kept inside Raycast](media/manual.png)
 
@@ -137,8 +137,10 @@ Each finished session appends one line under its task's bullet in the **Pomodoro
 
 ## Limitations
 
-- **Manual mode keeps no log.** Nothing is written anywhere; Raycast only remembers your last task so you can resume it. Markdown logging is what Daily Note mode is for.
+- **Manual mode keeps no markdown log.** Sessions stay inside Raycast's storage (30 days), which is only used to offer your last task for resuming. Markdown logging is what Daily Note mode is for.
 - **Only today's note is written.** Pomodoro.md never edits an older note, and it does not create the note either — if today's file doesn't exist yet, the log is skipped. A session that runs past midnight is logged in the note for the day it *ended*.
+- **Commands take turns updating the timer.** Every change to the timer, the session history and the note is serialized through a lock file in the extension's support directory, so two commands can never finish the same session twice or overwrite each other's edit. If another command holds it for more than two seconds you see "Timer is busy — try again": the start or stop you asked for did **not** happen, so repeat it.
+- **No retries after a failure.** If writing the log or the note fails (or the command is killed mid-way), that session is not written again later. Edits made by other apps — Obsidian, a sync client — are outside the lock and can still collide with a write.
 - **The menu bar countdown updates every 10 seconds** in the background — Raycast's minimum interval — and every second while the menu is open.
 - **End-of-timer prompts come from the menu bar command.** If you disable Pomodoro.md Timer, a finished pomodoro is still logged by whichever command you run next, but nothing opens when the time is up.
 - **Task lines must start at the left margin** (`- 2p …`), and **subtasks must be indented** with a tab or at least two spaces; a single space is not recognised.
