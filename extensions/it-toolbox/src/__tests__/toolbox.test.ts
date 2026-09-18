@@ -359,4 +359,96 @@ test("formatTimestamp is self-consistent across seconds and milliseconds", () =>
   assert.strictEqual(f.time, "08:00:00");
 });
 
+test("parseDateFlexible rejects dates that do not exist", () => {
+  // Date would otherwise roll these forward: Feb 30 -> Mar 1, month 13 -> next January
+  assert.strictEqual(parseDateFlexible("2024-02-30"), null);
+  assert.strictEqual(parseDateFlexible("2024-13-01"), null);
+  assert.strictEqual(parseDateFlexible("2024-00-10"), null);
+  assert.strictEqual(parseDateFlexible("2023-02-29"), null);
+  assert.strictEqual(parseDateFlexible("2024-06-01 25:00:00"), null);
+  // the real ones still parse
+  assert.strictEqual(parseDateFlexible("2024-02-29")?.getDate(), 29);
+  assert.strictEqual(parseDateFlexible("2024-12-31")?.getMonth(), 11);
+});
+
+test("nextCronRuns treats day-of-month and day-of-week as alternatives", () => {
+  // "0 0 1 * 1" fires on the 1st of every month AND on every Monday
+  const runs = nextCronRuns("0 0 1 * 1", 12, new Date(2026, 0, 1, 0, 0, 0));
+  assert.ok(
+    runs.some((d) => d.getDate() === 1),
+    "expected at least one first-of-month run",
+  );
+  assert.ok(
+    runs.some((d) => d.getDay() === 1),
+    "expected at least one Monday run",
+  );
+  assert.ok(
+    runs.every((d) => d.getDate() === 1 || d.getDay() === 1),
+    "every predicted run must satisfy one of the two restricted fields",
+  );
+
+  // With only one of the two restricted it is still a plain AND
+  assert.ok(nextCronRuns("0 0 * * 1", 5, new Date(2026, 0, 1, 0, 0, 0)).every((d) => d.getDay() === 1));
+});
+
+test("diffLines keeps line numbers aligned across a trimmed prefix and suffix", () => {
+  const lines = diffLines(["a", "b", "c", "d", "e"].join("\n"), ["a", "b", "X", "Y", "e"].join("\n"));
+  assert.deepStrictEqual(
+    lines.filter((l) => l.type === "same").map((l) => l.value),
+    ["a", "b", "e"],
+  );
+  assert.strictEqual(lines[0].leftNumber, 1);
+  assert.strictEqual(lines[0].rightNumber, 1);
+  const last = lines[lines.length - 1];
+  assert.strictEqual(last.value, "e");
+  assert.strictEqual(last.leftNumber, 5);
+  assert.strictEqual(last.rightNumber, 5);
+});
+
+test("diffLines stays cheap when two large files share a long prefix", () => {
+  const shared = Array.from({ length: 20000 }, (_, i) => `line ${i}`);
+  const lines = diffLines([...shared, "old tail"].join("\n"), [...shared, "new tail"].join("\n"));
+  const stats = diffStats(lines);
+  assert.strictEqual(stats.added, 1);
+  assert.strictEqual(stats.removed, 1);
+  assert.strictEqual(stats.unchanged, 20000);
+});
+
+test("diffLines refuses inputs whose diff table would be too large", () => {
+  const a = Array.from({ length: 3000 }, (_, i) => `a${i}`).join("\n");
+  const b = Array.from({ length: 3000 }, (_, i) => `b${i}`).join("\n");
+  assert.throws(() => diffLines(a, b), /Too much text to diff/);
+});
+
+test("generatePassword always covers every selected character set", () => {
+  const options = {
+    length: 4,
+    lowercase: true,
+    uppercase: true,
+    digits: true,
+    symbols: true,
+    excludeAmbiguous: false,
+  };
+  const classes = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^a-zA-Z0-9]/];
+  for (let i = 0; i < 300; i++) {
+    const password = generatePassword(options);
+    assert.strictEqual(password.length, 4);
+    classes.forEach((c) => assert.ok(c.test(password), `missing a class in ${password}`));
+  }
+  // still holds once ambiguous characters are excluded
+  const strict = { ...options, excludeAmbiguous: true };
+  for (let i = 0; i < 200; i++) {
+    const password = generatePassword(strict);
+    classes.forEach((c) => assert.ok(c.test(password), `missing a class in ${password}`));
+  }
+});
+
+test("parseColor rejects out-of-range RGB channels instead of clamping them", () => {
+  assert.throws(() => parseColor("rgb(300,0,0)"), /Unrecognized color format/);
+  assert.throws(() => parseColor("rgb(0,256,0)"), /Unrecognized color format/);
+  const rgb = parseColor("rgb(255,128,0)");
+  assert.deepStrictEqual(rgb, { r: 255, g: 128, b: 0 });
+  assert.strictEqual(rgbToHex(rgb), "#ff8000");
+});
+
 console.log(`\nAll ${passed} tests passed`);

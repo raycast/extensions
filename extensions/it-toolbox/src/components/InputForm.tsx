@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
-import { ReactNode, useCallback, useMemo, useState } from "react";
+import { ReactNode, useCallback, useState } from "react";
 import { ResultList, ResultRow } from "./ResultList";
 
 interface InputFormProps {
@@ -46,19 +46,17 @@ export function InputForm({
 }: InputFormProps) {
   const { push } = useNavigation();
   const [values, setValues] = useState<Record<string, string>>({ input: initialValue ?? "" });
-  const [defaultsTick, setDefaultsTick] = useState(0);
 
   const setValue = (key: string, value: string) => setValues((prev) => ({ ...prev, [key]: value }));
 
   // Live values = compute() called with an empty input; fall back to defaults() so both
   // paths render through exactly the same code.
-  const defaultRows = useMemo(() => {
-    void defaultsTick;
+  const computeLiveRows = useCallback(() => {
     if (!defaults) return [];
     const fromCompute = compute({ ...values, input: "" });
     if (fromCompute && fromCompute.length) return fromCompute;
     return defaults(values);
-  }, [compute, defaults, values, defaultsTick]);
+  }, [compute, defaults, values]);
 
   const showDefaults = useCallback(
     () =>
@@ -66,10 +64,12 @@ export function InputForm({
         <ResultList
           sectionTitle={defaultsSectionTitle ?? "Live Values"}
           searchBarPlaceholder={defaultsSearchBarPlaceholder ?? "Filter results…"}
-          rows={defaultRows}
+          // Resolved when the action runs, not read from render state, so "Refresh Live
+          // Values" pushes the current instant instead of the rows captured at mount.
+          rows={computeLiveRows()}
         />,
       ),
-    [push, defaultRows, defaultsSearchBarPlaceholder, defaultsSectionTitle],
+    [push, computeLiveRows, defaultsSearchBarPlaceholder, defaultsSectionTitle],
   );
 
   return (
@@ -98,10 +98,7 @@ export function InputForm({
               title="Refresh Live Values"
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-              onAction={() => {
-                setDefaultsTick((t) => t + 1);
-                showDefaults();
-              }}
+              onAction={showDefaults}
             />
           ) : null}
         </ActionPanel>

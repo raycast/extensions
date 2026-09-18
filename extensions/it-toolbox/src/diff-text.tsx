@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DiffLine, diffLines, diffStats } from "./utils/toolbox";
 
@@ -15,8 +15,13 @@ export default function Command() {
             title="Compare"
             icon={Icon.ArrowRight}
             onSubmit={(values: { left?: string; right?: string }) => {
-              const lines = diffLines(values.left ?? "", values.right ?? "", ignoreCase, ignoreWhitespace);
-              push(<DiffResult lines={lines} />);
+              try {
+                const lines = diffLines(values.left ?? "", values.right ?? "", ignoreCase, ignoreWhitespace);
+                push(<DiffResult lines={lines} />);
+              } catch (error) {
+                // diffLines refuses inputs whose LCS table would be too large to build safely.
+                showToast({ style: Toast.Style.Failure, title: "Cannot compare", message: (error as Error).message });
+              }
             }}
           />
         </ActionPanel>

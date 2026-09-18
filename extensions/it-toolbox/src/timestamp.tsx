@@ -57,15 +57,11 @@ function fieldsOf(date: Date): Record<FieldKey, string> {
   const f = formatTimestamp(date);
   const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0).getTime();
   const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59).getTime();
-  const weekStart = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate() - (date.getDay() === 0 ? 6 : date.getDay() - 1),
-    0,
-    0,
-    0,
-  ).getTime();
-  const weekEnd = weekStart + 7 * 24 * 3600 * 1000 - 1000;
+  const mondayOffset = date.getDay() === 0 ? 6 : date.getDay() - 1;
+  const weekStart = new Date(date.getFullYear(), date.getMonth(), date.getDate() - mondayOffset, 0, 0, 0).getTime();
+  // Derived from local calendar fields rather than "weekStart + 168h": a week containing a
+  // daylight-saving change is 167 or 169 hours long.
+  const weekEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() - mondayOffset + 7, 0, 0, -1).getTime();
   return {
     datetime: f.datetime,
     seconds: String(f.seconds),

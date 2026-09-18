@@ -14,11 +14,11 @@ export default function Command() {
         const rows: ResultRow[] = [];
 
         if (/^\d+$/.test(input)) {
+          // An all-digit input is an integer, not a dotted quad. Keep this branch exclusive so
+          // the IP parsing below does not also run and add a bogus "Invalid IP address" row.
           const ip = longToIp(Number(input) >>> 0);
           rows.push({ id: "ip", title: ip, subtitle: "Integer to IP", icon: Icon.Globe, copyValue: ip });
-        }
-
-        if (input.includes("/")) {
+        } else if (input.includes("/")) {
           try {
             const info = analyzeCidr(input);
             const entries: Array<[string, string]> = [

@@ -17,7 +17,17 @@ export function parseDateFlexible(input: string): Date | null {
   const m = raw.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
   if (m) {
     const [, y, mo, d, h = "0", mi = "0", s = "0"] = m;
-    return new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(s));
+    const date = new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(s));
+    // Date rolls impossible values forward (2024-02-30 becomes 2024-03-01), so reject the
+    // input unless every submitted field survived the round trip.
+    const exact =
+      date.getFullYear() === Number(y) &&
+      date.getMonth() === Number(mo) - 1 &&
+      date.getDate() === Number(d) &&
+      date.getHours() === Number(h) &&
+      date.getMinutes() === Number(mi) &&
+      date.getSeconds() === Number(s);
+    return exact ? date : null;
   }
 
   const parsed = new Date(raw);
@@ -652,6 +662,11 @@ export function parseCron(expression: string): number[][] {
 
 export function nextCronRuns(expression: string, count = 10, from: Date = new Date()): Date[] {
   const [minutes, hours, days, months, weekdays] = parseCron(expression);
+  // In five-field cron, restricting both day-of-month and day-of-week means "either", not
+  // "both": `0 0 1 * 1` fires on the 1st of every month *and* on every Monday. The plain
+  // AND only applies when at least one of the two fields is `*`.
+  const fields = expression.trim().split(/\s+/);
+  const bothRestricted = fields.length === 5 && fields[2] !== "*" && fields[4] !== "*";
   const results: Date[] = [];
   const cursor = new Date(from.getTime());
   cursor.setSeconds(0, 0);
@@ -659,12 +674,13 @@ export function nextCronRuns(expression: string, count = 10, from: Date = new Da
   const limit = new Date(from.getTime() + 5 * 366 * 24 * 60 * 60 * 1000);
 
   while (results.length < count && cursor <= limit) {
+    const dayMatch = days.includes(cursor.getDate());
+    const weekdayMatch = weekdays.includes(cursor.getDay());
     if (
       minutes.includes(cursor.getMinutes()) &&
       hours.includes(cursor.getHours()) &&
       months.includes(cursor.getMonth() + 1) &&
-      days.includes(cursor.getDate()) &&
-      weekdays.includes(cursor.getDay())
+      (bothRestricted ? dayMatch || weekdayMatch : dayMatch && weekdayMatch)
     ) {
       results.push(new Date(cursor.getTime()));
     }
@@ -699,6 +715,9 @@ export interface DiffLine {
   rightNumber?: number;
 }
 
+/** Cap on the LCS table size, in cells, so two huge inputs cannot exhaust memory. */
+const DIFF_CELL_LIMIT = 4_000_000;
+
 /** Line-by-line diff based on the longest common subsequence */
 export function diffLines(left: string, right: string, ignoreCase = false, ignoreWhitespace = false): DiffLine[] {
   const normalize = (line: string) => {
@@ -713,38 +732,61 @@ export function diffLines(left: string, right: string, ignoreCase = false, ignor
   const na = a.map(normalize);
   const nb = b.map(normalize);
 
-  const dp: number[][] = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
-  for (let i = a.length - 1; i >= 0; i--) {
-    for (let j = b.length - 1; j >= 0; j--) {
-      dp[i][j] = na[i] === nb[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  // Peel off the shared prefix and suffix before building the LCS table. Those lines are
+  // equal by definition, so this is exact, and it keeps the table small for the usual case
+  // of two large files that differ in only a few places.
+  let head = 0;
+  while (head < a.length && head < b.length && na[head] === nb[head]) head++;
+  let tail = 0;
+  while (tail < a.length - head && tail < b.length - head && na[a.length - 1 - tail] === nb[b.length - 1 - tail]) {
+    tail++;
+  }
+
+  const midA = a.slice(head, a.length - tail);
+  const midB = b.slice(head, b.length - tail);
+  if ((midA.length + 1) * (midB.length + 1) > DIFF_CELL_LIMIT) {
+    throw new Error(`Too much text to diff (${a.length} vs ${b.length} lines). Compare smaller sections instead.`);
+  }
+
+  const dp: number[][] = Array.from({ length: midA.length + 1 }, () => new Array(midB.length + 1).fill(0));
+  for (let i = midA.length - 1; i >= 0; i--) {
+    for (let j = midB.length - 1; j >= 0; j--) {
+      dp[i][j] = na[head + i] === nb[head + j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
     }
   }
 
   const result: DiffLine[] = [];
-  let i = 0;
-  let j = 0;
   let leftNo = 1;
   let rightNo = 1;
-  while (i < a.length && j < b.length) {
-    if (na[i] === nb[j]) {
-      result.push({ type: "same", value: a[i], leftNumber: leftNo++, rightNumber: rightNo++ });
+  for (let k = 0; k < head; k++) {
+    result.push({ type: "same", value: a[k], leftNumber: leftNo++, rightNumber: rightNo++ });
+  }
+
+  let i = 0;
+  let j = 0;
+  while (i < midA.length && j < midB.length) {
+    if (na[head + i] === nb[head + j]) {
+      result.push({ type: "same", value: midA[i], leftNumber: leftNo++, rightNumber: rightNo++ });
       i++;
       j++;
     } else if (dp[i + 1][j] >= dp[i][j + 1]) {
-      result.push({ type: "remove", value: a[i], leftNumber: leftNo++ });
+      result.push({ type: "remove", value: midA[i], leftNumber: leftNo++ });
       i++;
     } else {
-      result.push({ type: "add", value: b[j], rightNumber: rightNo++ });
+      result.push({ type: "add", value: midB[j], rightNumber: rightNo++ });
       j++;
     }
   }
-  while (i < a.length) {
-    result.push({ type: "remove", value: a[i], leftNumber: leftNo++ });
+  while (i < midA.length) {
+    result.push({ type: "remove", value: midA[i], leftNumber: leftNo++ });
     i++;
   }
-  while (j < b.length) {
-    result.push({ type: "add", value: b[j], rightNumber: rightNo++ });
+  while (j < midB.length) {
+    result.push({ type: "add", value: midB[j], rightNumber: rightNo++ });
     j++;
+  }
+  for (let k = 0; k < tail; k++) {
+    result.push({ type: "same", value: a[a.length - tail + k], leftNumber: leftNo++, rightNumber: rightNo++ });
   }
   return result;
 }
@@ -785,14 +827,26 @@ export function generatePassword(options: PasswordOptions): string {
   const length = Math.max(4, Math.min(256, options.length));
   const chars = randomInts(length, pool.length).map((i) => pool[i]);
 
-  sets.forEach((set, idx) => {
-    const available = set.split("").filter((c) => pool.includes(c));
-    if (!available.length) return;
-    const pos = randomInts(1, length)[0];
-    chars[pos] = available[randomInts(1, available.length)[0]];
-    void idx;
+  // Guarantee one character from every selected set. Choosing a slot per set independently
+  // lets two sets land on the same index and overwrite each other, which silently drops a
+  // required character class — and happens often for short passwords. Reserve distinct
+  // slots instead: "length" is at least 4 and there are at most 4 sets, so there are always
+  // enough of them.
+  const required = sets.map((set) => set.split("").filter((c) => pool.includes(c))).filter((set) => set.length > 0);
+  const slots = shuffled([...Array(length).keys()]).slice(0, required.length);
+  required.forEach((set, idx) => {
+    chars[slots[idx]] = set[randomInts(1, set.length)[0]];
   });
   return chars.join("");
+}
+
+/** Fisher-Yates shuffle driven by crypto randomness */
+function shuffled<T>(items: T[]): T[] {
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = cryptoRandomInt(0, i + 1);
+    [items[i], items[j]] = [items[j], items[i]];
+  }
+  return items;
 }
 
 export function randomInts(count: number, maxExclusive: number): number[] {
@@ -912,7 +966,12 @@ export function rgbToHex({ r, g, b }: Rgb): string {
 export function parseRgbString(input: string): Rgb | null {
   const match = input.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
   if (!match) return null;
-  return { r: Number(match[1]), g: Number(match[2]), b: Number(match[3]) };
+  const [r, g, b] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  // Reject out-of-range channels rather than accepting them: rgbToHex clamps to 255 while the
+  // HSL, CMYK and contrast rows use the raw numbers, so "rgb(300,0,0)" would describe two
+  // different colours in the same list.
+  if (r > 255 || g > 255 || b > 255) return null;
+  return { r, g, b };
 }
 
 export function rgbToHsl({ r, g, b }: Rgb): { h: number; s: number; l: number } {
