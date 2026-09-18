@@ -52,6 +52,25 @@ export interface DownloadResult {
   duration?: number;
 }
 
+/**
+ * Should the caller release the `<outputPath>.part` it reserved?
+ *
+ * True only when the runner never took the reservation. `!result.id` is the test:
+ * only the pre-ticket `.catch` omits an id, and every path through it either never
+ * claimed the file or released it on the way out.
+ *
+ * NEVER on `conflict` — that means another process is alive and writing to this
+ * exact `.part`, and `releaseReservation` unlinks any sidecar still at zero bytes,
+ * so releasing during the live runner's TTFB deletes its file and its final rename
+ * fails with ENOENT. Bytes lost, silently.
+ *
+ * Lives here, exported, because both commands need it and the two copies drifted:
+ * the `conflict` guard was added to one and not the other, which was the bug.
+ */
+export function shouldReleaseReservation(result: DownloadResult): boolean {
+  return !result.success && !result.id && result.errorCode !== "conflict";
+}
+
 export type ProgressCallback = (progress: DownloadProgress) => void;
 
 export interface DownloadHandle {
@@ -311,8 +330,14 @@ export function downloadBatch(
         item.status = "failed";
         item.error = result.error;
         item.errorCode = result.errorCode;
+        if (shouldReleaseReservation(result)) {
+          releaseReservation(item.outputPath);
+        }
       }
     } catch (error) {
+      // Unreachable today — `downloadFile`'s promise only ever resolves. Kept as
+      // a status update, with NO release: without a result there is nothing to
+      // prove the reservation is ours to remove.
       item.status = "failed";
       item.error = getErrorMessage(error);
     } finally {

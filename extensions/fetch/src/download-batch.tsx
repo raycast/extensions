@@ -115,6 +115,11 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       const startedAt = Date.now();
       let resolved = 0;
 
+      // Paths handed out by THIS batch. Overwrite mode uses it to avoid giving
+      // two URLs the same name; it is local to the pass, so nothing leaks between
+      // batches and there is no global to reset.
+      const taken = new Set<string>();
+
       try {
         for (let offset = 0; offset < urls.length; offset += batchSize) {
           if (prepareCancelledRef.current) {
@@ -133,7 +138,9 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
                 url,
                 outputDirectory,
                 preferences.overwriteExisting,
+                taken,
               );
+              taken.add(outputPath);
               items[index] = { id: `download-${startedAt}-${index}`, url, filename, outputPath };
               resolved++;
               onResolved(resolved);
@@ -177,6 +184,10 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       prepareCancelledRef.current = false;
       setIsDownloading(true);
       setIsPreparing(true);
+      // A batch that starts without going through Start Over or Retry (a second
+      // launchContext delivery, a future entry point) would otherwise render with
+      // "Download More Files" live from the first frame.
+      setIsFinished(false);
 
       // Resolving filenames requires a HEAD per URL, which is slow for large
       // batches — show a counter immediately so the list is never silently blank.
@@ -272,7 +283,13 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       const failedItems = finalResult.items.filter((i) => i.status === "failed" || i.status === "cancelled");
       const failedCount = failedItems.length;
 
-      setIsFinished(true);
+      // Gated on the live-batch set, not on this batch alone: a row that failed
+      // early can already be running as a retry in its own batch, and offering
+      // "Download More Files" while that is live is how Start Over orphaned it.
+      // Both tails and `handleStartOver` key on this same set deliberately.
+      if (liveBatchesRef.current.size === 0) {
+        setIsFinished(true);
+      }
 
       if (failedCount > 0) {
         const cancelledCount = failedItems.filter((i) => i.status === "cancelled").length;
@@ -412,11 +429,9 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       const untrack = trackBatch(handle);
       await handle.promise.finally(untrack);
 
-      // Re-offer the way back to the form once nothing else is still running.
-      const stillActive = downloadItemsRef.current.some(
-        (i) => i.id !== item.id && (i.status === "downloading" || i.status === "pending"),
-      );
-      if (!stillActive) {
+      // Same gate as the batch tail — item statuses and handle liveness are not
+      // the same thing, and disagreeing about it let a retry outlive the view.
+      if (liveBatchesRef.current.size === 0) {
         setIsFinished(true);
       }
     },
@@ -441,11 +456,13 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
   const handleStartOver = useCallback(() => {
     setIsDownloading(false);
     setIsFinished(false);
-    setDownloadItems([]);
-    // Only reachable once the batch has settled, so every handle has already
-    // untracked itself — this is belt-and-braces against a stale Cancel All.
+    // Cancel BEFORE clearing the rows: `handle.cancel()` ends in a synchronous
+    // `emitProgress()`, which calls `setDownloadItems`, so clearing first would be
+    // undone. The set is empty whenever this is reachable; the order still matters.
+    for (const handle of liveBatchesRef.current) handle.cancel();
     liveBatchesRef.current.clear();
     setLiveBatchCount(0);
+    setDownloadItems([]);
   }, []);
 
   const handleCancelPreparation = useCallback(() => {

@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { releaseReservation } from "@chrismessina/raycast-downloader/paths";
 import { showError } from "@chrismessina/raycast-kit";
 import { Clipboard, launchCommand, LaunchProps, LaunchType } from "@raycast/api";
-import { downloadFile } from "./lib/downloader";
+import { downloadFile, shouldReleaseReservation } from "./lib/downloader";
 import { addToHistory } from "./lib/history";
 import { logDebug, logInfo } from "./lib/logger";
 import { getPreferences } from "./lib/preferences";
@@ -124,9 +124,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   // Wait for completion
   const result = await handle.promise;
 
-  // Startup failed before the runner took ownership of the reserved `.part`
-  // (missing runner, missing curl, bad path) — release it so the name stays free.
-  if (!result.success && result.bytesDownloaded === undefined && !result.id) {
+  if (shouldReleaseReservation(result)) {
     releaseReservation(outputPath);
   }
 

@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { closeSync, openSync } from "fs";
 import { basename, extname, join } from "path";
 import { sanitizeFilename, uniquePath } from "@chrismessina/raycast-downloader/paths";
 import { logDebug, logInfo, logWarn } from "./logger";
@@ -279,15 +280,81 @@ export function isValidUrl(url: string): boolean {
   }
 }
 
+/**
+ * Bidirectional-text controls that `sanitizeFilename` does not remove — it strips
+ * `\x00-\x1f\x7f` and `<>:"|?*`, all of which are ASCII.
+ *
+ * U+202E RIGHT-TO-LEFT OVERRIDE is the classic attachment spoof: a server sends
+ * `\u202Efdp.exe` and Finder renders it as `exe.pdf`. Reachable only since this
+ * file learned to decode non-ASCII header values at all, so it is removed here
+ * rather than left for the user to notice.
+ */
+const BIDI_CONTROLS = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g;
+
+/** Every filename this module hands out goes through here. */
+function safeFilename(raw: string): string {
+  return sanitizeFilename(raw.replace(BIDI_CONTROLS, "").trim());
+}
+
 export function extractFilename(url: string, contentDisposition?: string): string {
   // Try Content-Disposition header first
   if (contentDisposition) {
-    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/i);
+    // RFC 5987 `filename*` wins when present — it is the one that can carry
+    // non-ASCII. It is `charset'language'percent-encoded-value`, so the old
+    // regex (which matched `filename*` too, stripped the apostrophes and never
+    // decoded) turned `filename*=UTF-8''caf%C3%A9.pdf` into the literal
+    // `UTF-8caf%C3%A9.pdf` on disk.
+    const extended = contentDisposition.match(/filename\*\s*=\s*([^;\n]+)/i);
+    if (extended) {
+      // Split BEFORE stripping quotes. `'` is a structural delimiter here, not a
+      // quote character: stripping it first turned `filename*=UTF-8''` (empty
+      // value) into `UTF-8'`, which is under three parts, so the charset itself
+      // became the filename — and being non-empty it beat a perfectly good plain
+      // `filename` in the same header. Only a MATCHED pair of double quotes is
+      // stripped, and only from the value.
+      const raw = extended[1].trim().replace(/^"(.*)"$/, "$1");
+      const parts = raw.split("'");
+      const hasExtendedForm = parts.length >= 3;
+      // The charset is the FIRST field and it is not decoration. `decodeURIComponent`
+      // is UTF-8-only, so an ISO-8859-1 value like `caf%E9.pdf` — valid Latin-1,
+      // invalid standalone UTF-8 — made it throw and silently fall back.
+      const charset = hasExtendedForm && parts[0] ? parts[0] : "utf-8";
+      const value = hasExtendedForm ? parts.slice(2).join("'") : raw;
+      try {
+        // Percent-decode to BYTES first, then apply the declared charset. Going
+        // straight to text would re-impose UTF-8 on bytes that aren't.
+        // Percent-decode to BYTES, then apply the declared charset. `latin1` maps
+        // each code unit to one byte, so an unescaped char and a `%XX` escape both
+        // land as themselves; `decodeURIComponent` would re-impose UTF-8 on bytes
+        // that aren't, which is what made ISO-8859-1 values throw.
+        const raw8 = Buffer.from(
+          value.replace(/%([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16))),
+          "latin1",
+        );
+        const decoded = new TextDecoder(charset, { fatal: true }).decode(raw8);
+        const clean = safeFilename(decoded);
+        // Gate on the SANITIZED value, not the raw one. `sanitizeFilename` collapses
+        // degenerate input (".", "..", " . ") to the generic "download", and taking
+        // that would discard a perfectly good plain `filename` in the same header —
+        // the same "worthless value beats a valid one" shape as the empty case above.
+        if (clean !== "download" || /[\p{L}\p{N}]/u.test(decoded)) {
+          logDebug("Filename extracted from Content-Disposition (RFC 5987)", { filename: clean, charset });
+          return clean;
+        }
+      } catch {
+        // Unknown charset, or bytes that aren't valid in it. Fall through to `filename`.
+        logWarn("Undecodable filename* in Content-Disposition", { raw, charset });
+      }
+    }
+
+    // Plain `filename`. `\s*=` rather than `[^;=\n]*=` so this cannot also match
+    // the `filename*` form handled above.
+    const filenameMatch = contentDisposition.match(/filename\s*=\s*((['"]).*?\2|[^;\n]*)/i);
     if (filenameMatch) {
       const filename = filenameMatch[1].replace(/['"]/g, "").trim();
       if (filename) {
         logDebug("Filename extracted from Content-Disposition", { filename });
-        return sanitizeFilename(filename);
+        return safeFilename(filename);
       }
     }
   }
@@ -313,9 +380,9 @@ export function extractFilename(url: string, contentDisposition?: string): strin
     }
 
     logDebug("Filename extracted from URL", { url, filename });
-    return sanitizeFilename(filename);
+    return safeFilename(filename);
   } catch {
-    return sanitizeFilename(generateDefaultFilename(url));
+    return safeFilename(generateDefaultFilename(url));
   }
 }
 
@@ -331,17 +398,47 @@ function generateDefaultFilename(url: string): string {
 }
 
 /**
+ * Reserve `<direct>.part` for overwrite mode, reporting whether `direct` is usable.
+ *
+ * The reservation matters even in overwrite mode: without a marker on disk, a
+ * sibling's `uniquePath` sees a free name and picks the same one.
+ *
+ * An existing partial is NOT a reason to step aside here. Overwrite means the user
+ * already said to clobber this name, and if a runner really is live on it the
+ * package detects that itself and fails with `conflict` plus text telling them to
+ * wait or pick another destination — better than us inferring liveness from a
+ * marker file that outlives a killed process.
+ *
+ * Every OTHER errno is a reason to step aside: ENAMETOOLONG, EACCES, ENOTDIR and
+ * friends mean this path is unusable, and `uniquePath` both budgets the name length
+ * and surfaces an unwritable directory as a throw the commands already handle.
+ */
+function reserveDirect(direct: string): boolean {
+  try {
+    closeSync(openSync(`${direct}.part`, "wx"));
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === "EEXIST";
+  }
+}
+
+/**
  * Resolve a final output path for a URL: fetch HEAD metadata, extract a filename
  * (prefers Content-Disposition, falls back to URL path), ensure it has an extension
  * based on Content-Type, and either use the base path directly (overwrite) or
  * generate a collision-free unique path.
  *
- * Shared by the single-download and batch-download flows.
+ * `taken` is the set of paths already handed out by THIS batch. Overwrite means
+ * "replace a file that existed before the batch", never "let two URLs in one batch
+ * fight over one name" — and the caller resolving the batch is the only thing that
+ * knows which is which. Callers add each result to it; `download` passes nothing,
+ * because a single URL has no siblings.
  */
 export async function resolveOutputPath(
   url: string,
   outputDirectory: string,
   overwrite: boolean,
+  taken?: ReadonlySet<string>,
 ): Promise<{ filename: string; outputPath: string }> {
   const headInfo = await fetchHeadInfo(url);
 
@@ -352,9 +449,11 @@ export async function resolveOutputPath(
   // `<path>.part`, so two concurrent callers can't be handed the same name. That
   // is also the exact file the detached runner streams into, so the reservation
   // and the download are the same artifact — nothing to release on the happy path.
-  const outputPath = overwrite
-    ? join(outputDirectory, filename)
-    : uniquePath(outputDirectory, filename, { reserve: true });
+  const direct = join(outputDirectory, filename);
+  const outputPath =
+    overwrite && !taken?.has(direct) && reserveDirect(direct)
+      ? direct
+      : uniquePath(outputDirectory, filename, { reserve: true });
 
   return { filename, outputPath };
 }
