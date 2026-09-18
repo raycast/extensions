@@ -1,4 +1,5 @@
 import { useLocalStorage } from "@raycast/utils";
+import { updateIds } from "../lib/storage";
 
 const KEY = "charter-favorites";
 
@@ -11,7 +12,7 @@ export function useFavorites() {
   }
 
   async function toggle(id: string): Promise<boolean> {
-    const next = isFavorite(id) ? favorites.filter((item) => item !== id) : [...favorites, id];
+    const next = await updateIds(KEY, (ids) => (ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id]));
     await setValue(next);
     return next.includes(id);
   }

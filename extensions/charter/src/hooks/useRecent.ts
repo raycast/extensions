@@ -1,4 +1,5 @@
 import { useLocalStorage } from "@raycast/utils";
+import { updateIds } from "../lib/storage";
 
 const KEY = "charter-recent";
 const LIMIT = 5;
@@ -9,10 +10,12 @@ export function useRecent() {
   const recent = value ?? [];
 
   async function record(id: string) {
-    await setValue([id, ...recent.filter((item) => item !== id)].slice(0, LIMIT));
+    const next = await updateIds(KEY, (ids) => [id, ...ids.filter((item) => item !== id)].slice(0, LIMIT));
+    await setValue(next);
   }
 
   async function clear() {
+    await updateIds(KEY, () => []);
     await setValue([]);
   }
 

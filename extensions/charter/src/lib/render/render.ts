@@ -1,12 +1,14 @@
+import { randomUUID } from "node:crypto";
 import { mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import puppeteer from "puppeteer-core";
+import puppeteer, { type Browser } from "puppeteer-core";
 import { buildPage, captureSelector, MAX_WIDTH } from "./page";
 import type { ChartSource } from "./source";
 
 export interface RenderOptions {
-  executable: string;
+  /** Browsers to try in order: the one chosen in preferences, then the ones found installed. */
+  executables: string[];
   vendorDir: string;
   /** Where the page and the PNG are written. */
   workDir: string;
@@ -27,10 +29,11 @@ const TIMEOUT = 20000;
 const KEEP_FOR = 60 * 60 * 1000;
 
 /**
- * Each render is its own file, so views lower in the navigation stack keep
- * theirs for Copy Image and Save. Renders older than an hour are swept.
+ * Each render gets its own name, so two commands rendering at once cannot
+ * overwrite each other and views lower in the navigation stack keep their
+ * picture for Copy Image and Save. Renders older than an hour are swept.
  */
-export function newImagePath(workDir: string): string {
+export function newImagePath(workDir: string, id = randomUUID()): string {
   mkdirSync(workDir, { recursive: true });
   const cutoff = Date.now() - KEEP_FOR;
   for (const entry of readdirSync(workDir)) {
@@ -38,7 +41,27 @@ export function newImagePath(workDir: string): string {
     const path = join(workDir, entry);
     if (statSync(path).mtimeMs < cutoff) rmSync(path, { force: true });
   }
-  return join(workDir, `render-${Date.now()}.png`);
+  return join(workDir, `render-${id}.png`);
+}
+
+/** Tries each browser in turn, so an app chosen in preferences that cannot drive a page falls back. */
+async function launch(executables: string[]): Promise<Browser> {
+  let lastError: unknown;
+  for (const executablePath of executables) {
+    try {
+      return await puppeteer.launch({
+        executablePath,
+        headless: true,
+        timeout: TIMEOUT,
+        args: ["--no-first-run", "--no-default-browser-check", "--hide-scrollbars"],
+      });
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError instanceof Error
+    ? new Error(`No browser could be started. ${lastError.message}`)
+    : new Error("No browser could be started.");
 }
 
 function abortError(): Error {
@@ -50,16 +73,13 @@ function abortError(): Error {
 /** Draws the source in a headless Chromium and captures the chart element at 2x. */
 export async function renderInBrowser(source: ChartSource, options: RenderOptions): Promise<RenderedImage> {
   if (options.signal?.aborted) throw abortError();
-  const pagePath = join(options.workDir, "render.html");
-  const imagePath = newImagePath(options.workDir);
+  const id = randomUUID();
+  const imagePath = newImagePath(options.workDir, id);
+  // The page holds the user's diagram, so it is named per render and deleted afterwards.
+  const pagePath = join(options.workDir, `page-${id}.html`);
   writeFileSync(pagePath, buildPage(source, options.dark, options.vendorDir));
 
-  const browser = await puppeteer.launch({
-    executablePath: options.executable,
-    headless: true,
-    timeout: TIMEOUT,
-    args: ["--no-first-run", "--no-default-browser-check", "--hide-scrollbars"],
-  });
+  const browser = await launch(options.executables);
   const close = () => browser.close().catch(() => undefined);
   options.signal?.addEventListener("abort", close, { once: true });
   try {
@@ -84,5 +104,6 @@ export async function renderInBrowser(source: ChartSource, options: RenderOption
   } finally {
     options.signal?.removeEventListener("abort", close);
     await close();
+    rmSync(pagePath, { force: true });
   }
 }

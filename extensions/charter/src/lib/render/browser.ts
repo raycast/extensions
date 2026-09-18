@@ -21,15 +21,13 @@ function candidates(): string[] {
   );
 }
 
-/** The preferred app when it resolves, otherwise the first known browser that is installed. */
-export function findBrowser(preferred?: string): string | undefined {
-  if (preferred) {
-    const executable = executableFor(preferred);
-    if (executable) return executable;
-  }
-  for (const candidate of candidates()) {
-    const executable = executableFor(candidate);
-    if (executable) return executable;
-  }
-  return undefined;
+/**
+ * Browsers to try, the app chosen in preferences first. The picker allows any
+ * app, so an unsuitable choice falls through to the ones we know rather than
+ * failing the render.
+ */
+export function findBrowsers(preferred?: string): string[] {
+  const paths = preferred ? [preferred, ...candidates()] : candidates();
+  const executables = paths.map((path) => executableFor(path)).filter((path): path is string => Boolean(path));
+  return [...new Set(executables)];
 }
