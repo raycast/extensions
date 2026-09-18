@@ -348,9 +348,8 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
     // The generation record exists to survive a dismissal WHILE FATHOM RENDERS.
     // Once bytes are moving, the runner's own status file is the durable record
     // and this one is dead weight — so it is dropped here rather than at
-    // settlement. That also retires a race: a settle handler firing late used to
-    // delete whatever job now sat under this recording's key, including a newer
-    // one belonging to a different, live transfer.
+    // settlement, which also keeps a late settle handler from deleting a record
+    // that by then belongs to a different, live transfer.
     //
     // The log call belongs inside this guard too: on the outer try it was the
     // one statement past the point of no return that could still route a live
@@ -468,28 +467,35 @@ function findResumablePartial(recordingId: string): DownloadStatus | undefined {
   const candidates = listStatuses().filter((status) => {
     if (!isTerminal(status.state) || status.state === "completed") return false;
     if (status.meta?.recordingId !== recordingId) return false;
-    // Redirect corruption is handled in the PACKAGE, not here.
+    // The runner marked these bytes as contaminated: it wrote a redirect body
+    // into the partial and could neither trim it back nor delete it, so a resume
+    // would take its offset from the polluted length and splice the real
+    // recording onto the end of the HTML.
     //
-    // `@chrismessina/raycast-downloader` 0.1.2 rolls a redirect body off the
-    // tail of a resumed partial, verifies the resulting length, and deletes the
-    // partial when it cannot. Only if the filesystem denies deletion too do
-    // garbage bytes survive, and the runner records that case.
+    // This is the only signal worth branching on, and it took two wrong guesses
+    // to learn that. Keying on a 3xx status rejected partials whose rollback had
+    // SUCCEEDED — a 304 leaves the original bytes perfectly valid. Keying on
+    // `bytesDownloaded === 0` caught an early network failure that had written
+    // real bytes. Both stranded good partials that nothing then cleaned up.
+    // `partialUnsafe` answers the actual question; do not substitute a proxy.
     //
-    // Two consumer-side guards were tried here and both were worse than none.
-    // Keying on a 3xx status rejected partials whose rollback SUCCEEDED — a 304
-    // in particular leaves the original bytes valid — stranding them forever
-    // while each retry took a fresh filename and nothing cleaned the old file.
-    // Keying on `bytesDownloaded === 0` overloads a signal the runner also
-    // leaves at zero after an early network failure that wrote real bytes, so
-    // it refused safe partials for the same cost. A guard that strands hundreds
-    // of megabytes on a common path is a worse trade than the pathological one
-    // it defends against, so the honest answer is to let the package own this
-    // until it exposes an explicit unsafe-partial marker to key on.
-    // The runner finishes by renaming partPath onto outputPath. If anything
-    // occupies that name now — the user saved a file there, another attempt
-    // completed — resuming would destroy it. `uniquePath` is what normally
-    // prevents this, and the resume branch deliberately skips it, so the check
-    // has to happen here instead.
+    // No safety filtering here — 0.1.4 owns that, and doing it from the status
+    // is now actively harmful.
+    //
+    // The package records provenance beside the partial in `<partPath>.state`
+    // and enforces it: it resumes only bytes whose identity and validator match,
+    // resets a partial it cannot vouch for, and fails outright rather than
+    // downloading onto contaminated ones. Excluding such a status here does not
+    // avoid the problem — it allocates a FRESH filename, downloads a second
+    // copy, and leaves the contaminated partial orphaned in the user's
+    // directory, which is the one outcome nobody wants.
+    //
+    // Three predicates were tried before this and every one was wrong: a 3xx
+    // status rejected partials whose rollback had succeeded, `bytesDownloaded`
+    // rejected partials after an early failure that wrote real bytes, and
+    // `partialUnsafe` on the status was never readable by a retry, which takes a
+    // new id. Hand the path back and let the runner decide resume, reset or
+    // fail.
     if (existsSync(status.outputPath)) return false;
     return safeSize(status.partPath) > 0;
   });
@@ -856,8 +862,6 @@ async function presentOutcome(status: DownloadStatus, progressToast: Toast, reve
  * sensitive. Under 1.5.0 a symbolic value survives (`"runner_failed"` logs
  * intact) but a NUMERIC one is zeroed — `code: 404` becomes `0`, which reads as
  * a real value rather than a redaction. `errorCode` sidesteps that entirely.
- * (An earlier version of this comment said any `code` became `******`; that was
- * true of an older logger and is no longer what happens.)
  */
 function logDownloadFailure(error: unknown, context: Record<string, unknown>): void {
   const detail: Record<string, unknown> = { ...context };
@@ -893,6 +897,20 @@ function logDownloadFailure(error: unknown, context: Record<string, unknown>): v
 async function reportFailure(error: unknown, toast: Toast, context: Record<string, unknown> = {}): Promise<void> {
   await toast.hide();
   logDownloadFailure(error, context);
+
+  // `conflict` is not a failure the user should retry: 0.1.4 refuses a second
+  // live download onto one output path rather than racing the first, so another
+  // transfer is already writing that file. It is raised by `startDownload`
+  // BEFORE any status exists — checking a terminal status for it, as a first
+  // attempt at this did, is unreachable code — so it has to be caught here.
+  if (error instanceof Error && (error as Error & { code?: string }).code === "conflict") {
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Already Downloading",
+      message: "Another download is already writing this file.",
+    });
+    return;
+  }
 
   if (error instanceof DownloadJobError) {
     if (error.kind === "cancelled") return;

@@ -113,6 +113,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DEFAULT_STALL_SECONDS = exports.DEFAULT_SPEED_LIMIT_BYTES = void 0;
 exports.hasCurl = hasCurl;
 exports.buildCurlConfig = buildCurlConfig;
+exports.assertCallerHeaders = assertCallerHeaders;
 exports.parseCurlMeter = parseCurlMeter;
 exports.parseCurlSize = parseCurlSize;
 exports.parseCurlDuration = parseCurlDuration;
@@ -155,7 +156,7 @@ exports.DEFAULT_STALL_SECONDS = 120;
  * delete once curl has started.
  */
 function buildCurlConfig(options) {
-    const { url, outputPath, headers = {}, followRedirects = true, resume = false, speedLimitBytes = exports.DEFAULT_SPEED_LIMIT_BYTES, stallSeconds = exports.DEFAULT_STALL_SECONDS, connectTimeoutSeconds = 30, limitRateBytes, maxTimeSeconds, } = options;
+    const { url, outputPath, headers = {}, followRedirects = true, resume = false, speedLimitBytes = exports.DEFAULT_SPEED_LIMIT_BYTES, stallSeconds = exports.DEFAULT_STALL_SECONDS, connectTimeoutSeconds = 30, limitRateBytes, maxTimeSeconds, dumpHeaderPath, ifRange, } = options;
     const lines = [
         `url = "${escapeConfigValue(url)}"`,
         `output = "${escapeConfigValue(outputPath)}"`,
@@ -184,12 +185,42 @@ function buildCurlConfig(options) {
         lines.push("continue-at = -");
     if (limitRateBytes !== undefined)
         lines.push(`limit-rate = ${limitRateBytes}`);
+    if (dumpHeaderPath)
+        lines.push(`dump-header = "${escapeConfigValue(dumpHeaderPath)}"`);
+    // Only meaningful alongside `continue-at`, which is what generates the Range
+    // this validates. Harmless without one: a server ignores `If-Range` on an
+    // unranged request.
+    if (ifRange)
+        lines.push(`header = "${escapeConfigValue(`If-Range: ${ifRange}`)}"`);
     if (maxTimeSeconds !== undefined)
         lines.push(`max-time = ${maxTimeSeconds}`);
+    assertCallerHeaders(headers);
     for (const [name, value] of Object.entries(headers)) {
         lines.push(`header = "${escapeConfigValue(`${name}: ${value}`)}"`);
     }
     return lines.join("\n") + "\n";
+}
+/**
+ * Refuse caller headers that would fight the resume machinery.
+ *
+ * `Range` and `If-Range` belong to the transport. Caller headers are appended
+ * AFTER the generated ones, so a second `If-Range` — or a hand-written `Range`
+ * — is what a server or proxy may act on, and the resume guard silently stops
+ * guarding: a 206 comes back for bytes that do not continue the partial, curl
+ * exits 0, and the spliced file is published.
+ *
+ * Refused rather than dropped, because a caller who passed one meant something
+ * by it and deserves to be told it cannot work. Exported so `startDownload` can
+ * fail before it claims a path or spawns anything, rather than minutes later
+ * inside a detached process.
+ */
+function assertCallerHeaders(headers = {}) {
+    for (const name of Object.keys(headers)) {
+        if (/^(range|if-range)$/i.test(name.trim())) {
+            throw new errors_1.DownloadError("validation", `The ${name.trim()} header is managed by the downloader and cannot be set by a caller. ` +
+                `Use the resume option instead.`);
+        }
+    }
 }
 /**
  * Escape a value for curl's config quoting.
@@ -1299,6 +1330,15 @@ function readStatusFile(path) {
             !Number.isFinite(parsed.startedAt)) {
             return null;
         }
+        // A malformed flag is COERCED to unsafe rather than rejecting the whole
+        // status. Both directions of the alternative are worse: read as falsy it
+        // reports a contaminated partial as safe, and rejecting the file makes a
+        // live download invisible to `watchStatus` and un-cancellable through
+        // `killDownload`, which both read through here. Only this field is treated
+        // this way — it is advisory, where every field above is structural.
+        if (parsed.partialUnsafe !== undefined && typeof parsed.partialUnsafe !== "boolean") {
+            parsed.partialUnsafe = true;
+        }
         return parsed;
     }
     catch {
@@ -1628,6 +1668,443 @@ function pruneStatuses(options = {}) {
 }
 //# sourceMappingURL=status.js.map
   },
+  "partial": function (exports, module) {
+"use strict";
+/**
+ * What is known about a `.part` file, bound to the PATH rather than to a
+ * download id.
+ *
+ * Everything else in this package is addressed by id: statuses, locks, leases.
+ * That is correct for reporting an attempt and wrong for protecting a file,
+ * because the file is shared. Several ids can name one `outputPath`, a retry
+ * routinely uses a new id, and a consumer can point an unrelated download at a
+ * path a previous one left bytes in. An id-keyed record cannot answer the only
+ * question that matters here — "may I append to THIS file?" — without scanning
+ * every status on disk and hoping none was pruned.
+ *
+ * So the answer lives beside the file, in two sidecars with different lifetimes:
+ *
+ *   `<partPath>.state`  durable. Survives attempts, and is what makes a
+ *                       contaminated partial refuse to be resumed onto by an
+ *                       attempt that knows nothing about the one that spoiled
+ *                       it. Removed only when the partial is verifiably gone or
+ *                       has been replaced.
+ *   `<partPath>.claim`  ephemeral. Says an attempt is live against this path
+ *                       right now, and is how a second one is refused instead
+ *                       of racing it. Created with `wx`, so the claim is the
+ *                       filesystem's answer rather than ours.
+ *
+ * Measured, and the reason this module exists (curl 8.7.1, local server):
+ * seeding an 8-byte partial with garbage and resuming against a Range-capable
+ * server exits 0, reports 206, and produces `XXXXXXXX89ABCDEFGHIJ` where the
+ * canonical body is `0123456789ABCDEFGHIJ`. curl cannot detect it — a range
+ * request is a promise that the prefix is already correct. Only the side that
+ * wrote the prefix can keep that promise.
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.statePath = statePath;
+exports.claimPath = claimPath;
+exports.headerPath = headerPath;
+exports.urlFingerprint = urlFingerprint;
+exports.resourceFingerprint = resourceFingerprint;
+exports.mayResume = mayResume;
+exports.readPartialState = readPartialState;
+exports.writePartialState = writePartialState;
+exports.markPartialUnsafe = markPartialUnsafe;
+exports.clearPartialState = clearPartialState;
+exports.resetPartial = resetPartial;
+exports.claimPartialPath = claimPartialPath;
+exports.updatePartialClaim = updatePartialClaim;
+exports.releasePartialClaim = releasePartialClaim;
+exports.partialClaimHolder = partialClaimHolder;
+exports.parseValidators = parseValidators;
+const node_crypto_1 = require("node:crypto");
+const node_fs_1 = require("node:fs");
+const paths_1 = __req__("paths");
+const status_1 = __req__("status");
+function statePath(partPath) {
+    return `${partPath}.state`;
+}
+function claimPath(partPath) {
+    return `${partPath}.claim`;
+}
+/** Header dump for the in-flight attempt. Transient; removed when it is parsed. */
+function headerPath(partPath) {
+    return `${partPath}.headers`;
+}
+/**
+ * A URL reduced to something safe to leave on disk.
+ *
+ * Hashed rather than stored: a signed URL is a bearer credential, and this file
+ * sits in the user's Downloads folder next to the partial. The hash answers the
+ * only question asked of it — "is this the same URL as last time?" — and
+ * answers nothing else.
+ */
+function urlFingerprint(url) {
+    return (0, node_crypto_1.createHash)("sha256").update(url).digest("hex").slice(0, 32);
+}
+/**
+ * Identity of the RESOURCE a URL names, ignoring the query string.
+ *
+ * Two signed URLs for one file differ only in their signature parameters, so
+ * dropping the query is what lets a re-signed link resume. It is deliberately
+ * the weaker test: an API that selects the resource with a query parameter
+ * (`?file=123`) produces one fingerprint for two different files, which is why
+ * a resume on a resource match alone is not permitted — see `mayResume`.
+ */
+function resourceFingerprint(url) {
+    try {
+        const parsed = new URL(url);
+        return (0, node_crypto_1.createHash)("sha256").update(`${parsed.origin}${parsed.pathname}`).digest("hex").slice(0, 32);
+    }
+    catch {
+        // Not a parseable URL: fall back to the whole string, which is strictly
+        // safer — it can only refuse a resume, never permit a wrong one.
+        return urlFingerprint(url);
+    }
+}
+/**
+ * May the bytes described by `state` be appended to, for a request to `url`?
+ *
+ * Three cases, and only the first two are yes:
+ *
+ *  - the exact URL matches: the same request produced these bytes;
+ *  - the RESOURCE matches and a validator was recorded: probably a re-signed
+ *    link, and if it is not, `If-Range` makes the server answer 200 and curl
+ *    refuse (exit 33) rather than splice. The validator is what makes the
+ *    weaker identity test safe, so it is required rather than nice to have;
+ *  - anything else, including a partial with nothing recorded about it.
+ */
+function mayResume(state, url) {
+    if (!state || state.unsafe)
+        return false;
+    // A validator is required for EVERY resume, including one where the URL is
+    // byte-for-byte the same. A stable URL is not a stable resource — a
+    // `latest.zip`, a regenerated export, a redirect that now points somewhere
+    // else — and the identity recorded here is of the REQUEST url, while the
+    // bytes came from whatever the final hop served. `If-Range` is the only part
+    // of this that the server participates in, and without it a changed
+    // representation comes back 206 and splices silently.
+    //
+    // The cost is real: a server that sends neither `ETag` nor `Last-Modified`
+    // cannot be resumed at all, and restarts instead. Both are near-universal on
+    // static object storage, which is what signed download links serve.
+    if (!(state.etag ?? state.lastModified))
+        return false;
+    if (state.urlHash && state.urlHash === urlFingerprint(url))
+        return true;
+    return Boolean(state.resourceHash) && state.resourceHash === resourceFingerprint(url);
+}
+function readPartialState(partPath) {
+    try {
+        const parsed = JSON.parse((0, node_fs_1.readFileSync)(statePath(partPath), "utf8"));
+        if (parsed?.v !== 1)
+            return undefined;
+        // A malformed `unsafe` reads as unsafe, never as safe: the whole point of
+        // the field is that being wrong in the other direction corrupts a file.
+        if (parsed.unsafe !== undefined && parsed.unsafe !== true)
+            return { ...parsed, unsafe: true };
+        return parsed;
+    }
+    catch {
+        // Absent, unreadable, or corrupt. Absence is NOT proof of safety — it is
+        // the normal state for a partial written by an older version — so callers
+        // treat it as "nothing recorded", not as "verified clean".
+        return undefined;
+    }
+}
+/**
+ * Replace the durable state for a partial.
+ *
+ * Written through a temporary file and renamed, because a reader that catches
+ * this file half-written gets `undefined` from `readPartialState` — which reads
+ * as "nothing recorded" and permits the resume this file exists to forbid.
+ */
+function writePartialState(partPath, state) {
+    const target = statePath(partPath);
+    const temp = `${target}.${process.pid}.tmp`;
+    try {
+        (0, paths_1.writeSecretFile)(temp, JSON.stringify(state));
+        (0, node_fs_1.renameSync)(temp, target);
+        return true;
+    }
+    catch {
+        try {
+            (0, node_fs_1.unlinkSync)(temp);
+        }
+        catch {
+            // Best effort.
+        }
+        return false;
+    }
+}
+/**
+ * Record that the bytes in this partial must never be resumed onto.
+ *
+ * Merges rather than replaces: the validators already recorded stay useful for
+ * the attempt that eventually replaces the file. Returns false when the marker
+ * could not be persisted, which is a worse failure than it looks — the caller
+ * then has a contaminated file that nothing on disk warns about, and must say
+ * so in the status instead.
+ */
+function markPartialUnsafe(partPath) {
+    const existing = readPartialState(partPath) ?? { v: 1 };
+    return writePartialState(partPath, { ...existing, unsafe: true });
+}
+function clearPartialState(partPath) {
+    try {
+        (0, node_fs_1.unlinkSync)(statePath(partPath));
+    }
+    catch {
+        // Already gone, or never written.
+    }
+}
+/**
+ * Make a partial safe to start over from, and forget everything known about it.
+ *
+ * Truncation rather than deletion, deliberately: the empty `.part` is also the
+ * RESERVATION on the final filename (`uniquePath({reserve: true})`), and
+ * deleting it hands that name to the next caller while this download is still
+ * going to use it. Falls back to deletion when truncation is refused, since a
+ * lost reservation beats contaminated bytes.
+ *
+ * Returns false when the bytes are still there afterwards.
+ */
+function resetPartial(partPath) {
+    let fd;
+    try {
+        // Bound to ONE descriptor, like `rollbackPartial`: doing this by pathname
+        // across stat / truncate / re-stat lets another attempt replace the file
+        // mid-sequence, and the reset then lands on somebody else's healthy partial.
+        fd = (0, node_fs_1.openSync)(partPath, "r+");
+        if (!(0, node_fs_1.fstatSync)(fd).isFile())
+            return false;
+        (0, node_fs_1.ftruncateSync)(fd, 0);
+        if ((0, node_fs_1.fstatSync)(fd).size !== 0)
+            return false;
+        clearPartialState(partPath);
+        return true;
+    }
+    catch {
+        // Fall through to deletion.
+    }
+    finally {
+        if (fd !== undefined) {
+            try {
+                (0, node_fs_1.closeSync)(fd);
+            }
+            catch {
+                /* nothing useful to do */
+            }
+        }
+    }
+    try {
+        (0, node_fs_1.unlinkSync)(partPath);
+        clearPartialState(partPath);
+        // Re-take the reservation the unlink just gave up. Between the two,
+        // `uniquePath({reserve: true})` in another process can hand this filename
+        // to someone else — while this download still intends to publish to it.
+        // Best effort: failing to re-create is not a reason to refuse a download
+        // that is now safe to run.
+        try {
+            (0, node_fs_1.closeSync)((0, node_fs_1.openSync)(partPath, "wx", 0o600));
+        }
+        catch {
+            // Someone else already took it, or the directory is unwritable.
+        }
+        return true;
+    }
+    catch {
+        return !(0, node_fs_1.existsSync)(partPath);
+    }
+}
+/**
+ * Claim this path for one live attempt, or report who holds it.
+ *
+ * `openSync(path, "wx")` is the whole mechanism: the filesystem decides, once,
+ * which of two simultaneous callers wins. Anything built on "read, then decide,
+ * then write" loses to the other process between the read and the write, which
+ * is the case this is here to prevent.
+ *
+ * A claim whose owner is dead is STOLEN rather than honoured. A runner killed
+ * mid-transfer leaves its claim behind, and a claim that outlives its owner
+ * would wedge that filename until someone deleted a file they have no reason to
+ * know about.
+ */
+function claimPartialPath(partPath, owner) {
+    const path = claimPath(partPath);
+    const claim = { ...owner, token: (0, node_crypto_1.randomUUID)() };
+    if (tryCreateClaim(path, claim))
+        return claim.token;
+    const held = readClaim(path);
+    // A claim that cannot be read or identified is NOT treated as abandoned: with
+    // atomic creation above, an unreadable claim means the file is damaged rather
+    // than half-written, and stealing on that basis is how two runners end up
+    // appending to one file. A refused download is recoverable; a spliced one is
+    // not. `releasePartialClaim(force)` is the way out for a caller that knows
+    // better.
+    if (!held || claimOwnerAlive(held))
+        return undefined;
+    try {
+        (0, node_fs_1.unlinkSync)(path);
+    }
+    catch {
+        // Someone else got there first; the create below decides between us.
+    }
+    return tryCreateClaim(path, claim) ? claim.token : undefined;
+}
+/**
+ * Re-point a claim at the runner once it has a pid of its own.
+ *
+ * Refuses to write over a claim that is no longer ours: between taking it and
+ * updating it, a stale-steal by another process can have replaced it, and
+ * overwriting that would take a path a live attempt now owns.
+ */
+function updatePartialClaim(partPath, owner) {
+    const path = claimPath(partPath);
+    const held = readClaim(path);
+    if (held?.token !== owner.token)
+        return;
+    try {
+        (0, paths_1.writeSecretFile)(path, JSON.stringify(owner));
+    }
+    catch {
+        // The claim stays as taken; a later staleness check then falls back to the
+        // spawning process's identity, which is strictly more conservative.
+    }
+}
+/**
+ * Release a claim this caller holds.
+ *
+ * `token` is checked against what is on disk, because the release can arrive
+ * late: a spawn `error` event fires after `startDownload` has thrown, by which
+ * time the caller may have retried and taken a NEW claim. Deleting that one
+ * hands the path to a third attempt while the second is still writing.
+ *
+ * `force` exists for `killDownload`, which has just terminated the holder and
+ * is cleaning up on its behalf.
+ */
+function releasePartialClaim(partPath, token, force = false) {
+    const path = claimPath(partPath);
+    if (!force) {
+        const held = readClaim(path);
+        if (!held || (token !== undefined && held.token !== token))
+            return;
+    }
+    try {
+        (0, node_fs_1.unlinkSync)(path);
+    }
+    catch {
+        // Already released.
+    }
+}
+/** Who holds this path right now, if anyone alive does. */
+function partialClaimHolder(partPath) {
+    const held = readClaim(claimPath(partPath));
+    return held && claimOwnerAlive(held) ? held : undefined;
+}
+/**
+ * Create the claim file COMPLETE, or not at all.
+ *
+ * `open(path, "wx")` is atomic but creates an EMPTY file, and the JSON lands a
+ * moment later. In that window a second process reads an empty claim, calls it
+ * malformed, unlinks it, and creates its own — while the first process happily
+ * writes to its now-unlinked descriptor and reports success. Both then believe
+ * they own the path, which is the exact outcome the claim exists to prevent.
+ *
+ * `link()` closes the window: the content is written to a private temporary
+ * file first, and the link into place either succeeds atomically or fails
+ * because someone else is already there. A reader never sees a partial claim.
+ */
+function tryCreateClaim(path, owner) {
+    const temp = `${path}.${process.pid}.${owner.token.slice(0, 8)}.tmp`;
+    try {
+        (0, paths_1.writeSecretFile)(temp, JSON.stringify(owner));
+        (0, node_fs_1.linkSync)(temp, path);
+        return true;
+    }
+    catch {
+        return false;
+    }
+    finally {
+        try {
+            (0, node_fs_1.unlinkSync)(temp);
+        }
+        catch {
+            // Never created, or already unlinked.
+        }
+    }
+}
+function readClaim(path) {
+    try {
+        const parsed = JSON.parse((0, node_fs_1.readFileSync)(path, "utf8"));
+        // `startedAtMs` is required, not optional. Filling a missing one from the
+        // pid currently running under that number makes the identity check compare
+        // a process to itself and pass tautologically — so an unrelated program
+        // that inherited the pid would hold the path forever.
+        if (!Number.isInteger(parsed?.pid) || parsed.pid <= 0)
+            return undefined;
+        if (!Number.isFinite(parsed.startedAtMs))
+            return undefined;
+        return parsed;
+    }
+    catch {
+        return undefined;
+    }
+}
+/**
+ * Is the claim's owner still running?
+ *
+ * Reuses the `(pid, startedAtMs)` identity every other liveness check in this
+ * package uses, by shaping the claim into the same question `isAlive` already
+ * answers: a pid alone is recycled, and acting on a recycled pid means
+ * honouring a claim held by an unrelated program.
+ */
+function claimOwnerAlive(claim) {
+    try {
+        process.kill(claim.pid, 0);
+    }
+    catch {
+        return false;
+    }
+    const actual = (0, status_1.processStartTimeMs)(claim.pid);
+    // Tolerance because `ps` reports whole seconds.
+    if (actual !== undefined)
+        return Math.abs(actual - claim.startedAtMs) < 2000;
+    // Identity unverifiable on this platform. `isAlive` biases toward "dead" here
+    // and recovers via the runner's heartbeat — a claim has no heartbeat, and the
+    // biases point the other way besides: calling a live holder dead means two
+    // processes appending to one file, while calling a dead one alive means a
+    // download the user can retry or redirect. Bias to ALIVE.
+    return true;
+}
+/**
+ * Pull the `If-Range` validators out of a curl header dump.
+ *
+ * Only a STRONG ETag is usable: RFC 9110 forbids a weak validator in
+ * `If-Range`, because two weak-equivalent representations may differ byte for
+ * byte — which is exactly the difference a resumed transfer cannot survive.
+ * `Last-Modified` is the documented fallback.
+ */
+function parseValidators(dump) {
+    const result = {};
+    // A redirect chain dumps several header blocks; the last one wins, since it
+    // describes the response that actually produced the bytes.
+    for (const line of dump.split(/\r?\n/)) {
+        const etag = /^etag:\s*(.+)$/i.exec(line);
+        if (etag) {
+            const value = etag[1].trim();
+            result.etag = /^W\//i.test(value) ? undefined : value;
+            continue;
+        }
+        const modified = /^last-modified:\s*(.+)$/i.exec(line);
+        if (modified)
+            result.lastModified = modified[1].trim();
+    }
+    return result;
+}
+//# sourceMappingURL=partial.js.map
+  },
 };
 var __cache__ = {};
 function __req__(name) {
@@ -1661,6 +2138,7 @@ const node_fs_1 = require("node:fs");
 const node_path_1 = require("node:path");
 const curl_1 = __req__("curl");
 const paths_1 = __req__("paths");
+const partial_1 = __req__("partial");
 const status_1 = __req__("status");
 const HEARTBEAT_MS = 500;
 function main() {
@@ -1711,11 +2189,58 @@ function main() {
         }
     };
     persist({});
+    /**
+     * Record what the bytes currently in the `.part` file are, so the NEXT
+     * attempt can decide whether it may append to them.
+     *
+     * Called on every path that leaves a partial behind — failure and
+     * cancellation alike — because a cancelled transfer is the one users resume
+     * most. Without this the next attempt sees only a byte count, which is not
+     * evidence of anything.
+     */
+    const recordPartialForResume = () => {
+        const validators = readValidators(payload.partPath);
+        const existing = (0, partial_1.readPartialState)(payload.partPath);
+        (0, partial_1.writePartialState)(payload.partPath, {
+            v: 1,
+            ...(existing?.unsafe ? { unsafe: true } : {}),
+            urlHash,
+            resourceHash: (0, partial_1.resourceFingerprint)(payload.url),
+            // Validators from THIS response describe the bytes this attempt wrote;
+            // keep the previous ones when the server sent none rather than dropping
+            // the only proof the partial has.
+            ...(validators.etag ?? existing?.etag ? { etag: validators.etag ?? existing?.etag } : {}),
+            ...(validators.lastModified ?? existing?.lastModified
+                ? { lastModified: validators.lastModified ?? existing?.lastModified }
+                : {}),
+        });
+    };
+    /** Every transient file this attempt owns, gone. The claim goes with them. */
+    const releasePath = () => {
+        discardHeaderDump(payload.partPath);
+        (0, partial_1.releasePartialClaim)(payload.partPath, payload.claimToken);
+    };
+    /**
+     * The partial holds bytes that must never be appended to, and this runner
+     * could not remove them. The durable marker is what stops the next attempt;
+     * the status field is how a consumer finds out.
+     */
+    const failUnsafePartial = (message) => {
+        (0, partial_1.markPartialUnsafe)(payload.partPath);
+        releasePath();
+        persist({
+            state: "failed",
+            finishedAt: Date.now(),
+            partialUnsafe: true,
+            error: { code: "integrity", message },
+        });
+    };
     const failSetup = (code, error) => {
         // `uniquePath(..., { reserve: true })` creates this empty `.part` before
         // launching us. No transfer has begun on setup failure, so retaining it
         // cannot help resume and instead burns the original filename forever.
         discardEmptyPart(payload.partPath);
+        releasePath();
         persist({
             state: "failed",
             finishedAt: Date.now(),
@@ -1730,10 +2255,54 @@ function main() {
         process.exit(1);
         return;
     }
-    // Resume only when there is something to resume from; `-C -` against a
-    // zero-byte or absent file makes curl error rather than start cleanly.
-    const existingBytes = (0, node_fs_1.existsSync)(payload.partPath) ? safeSize(payload.partPath) : 0;
+    // What is already on disk, and what is KNOWN about it.
+    //
+    // A byte offset is not a licence to append. curl cannot check the prefix — a
+    // range request asserts it is already correct — so a partial whose provenance
+    // we cannot establish is reset rather than resumed. Measured against a
+    // Range-capable server: an 8-byte garbage prefix resumes to exit 0, HTTP 206,
+    // and a published file reading `XXXXXXXX89ABCDEFGHIJ`.
+    let existingBytes = (0, node_fs_1.existsSync)(payload.partPath) ? safeSize(payload.partPath) : 0;
+    const partialState = (0, partial_1.readPartialState)(payload.partPath);
+    const urlHash = (0, partial_1.urlFingerprint)(payload.url);
+    if (existingBytes > 0 && partialState?.unsafe) {
+        // A previous attempt spoiled these bytes and said so. Start over — but only
+        // once the spoiled bytes are provably gone, because failing to remove them
+        // and downloading anyway is the corruption this marker exists to prevent.
+        if (!(0, partial_1.resetPartial)(payload.partPath)) {
+            failUnsafePartial(`The partial file for ${payload.filename} holds data from a failed attempt and could not be cleared. Delete ${payload.partPath} and try again.`);
+            process.exit(1);
+            return;
+        }
+        existingBytes = 0;
+    }
+    else if (existingBytes > 0 && !(0, partial_1.mayResume)(partialState, payload.url)) {
+        // These bytes were not put here by this download.
+        //
+        // Either they carry another URL's fingerprint, or they carry none at all —
+        // a partial from before this package recorded provenance, or a file that
+        // simply happens to sit at this path. Both are the same question, and the
+        // honest answer to "is this a correct prefix of what I am about to fetch?"
+        // is "unknown". A range request asserts that it IS correct, so an unknown
+        // prefix may not be resumed onto: the splice is invisible to curl, to the
+        // server, and to every size check downstream.
+        //
+        // The cost is one re-download, once, for a partial this version did not
+        // write. Provenance is recorded as soon as the response headers land, so a
+        // runner that is SIGKILLed mid-transfer still leaves a resumable partial —
+        // the sleep-and-resume case the package exists for is unaffected.
+        if (!(0, partial_1.resetPartial)(payload.partPath)) {
+            failUnsafePartial(`The partial file for ${payload.filename} cannot be identified as part of this download, and could not be cleared. Delete ${payload.partPath} and try again.`);
+            process.exit(1);
+            return;
+        }
+        existingBytes = 0;
+    }
     const resume = Boolean(payload.resume) && existingBytes > 0;
+    // `If-Range` only where the validator describes the bytes we are appending
+    // to. With a strong ETag, a changed resource comes back 200 and curl refuses
+    // (exit 33) instead of splicing; `Last-Modified` is the documented fallback.
+    const ifRange = resume ? (partialState?.etag ?? partialState?.lastModified) : undefined;
     const followRedirects = payload.followRedirects ?? true;
     let configPath;
     try {
@@ -1746,6 +2315,8 @@ function main() {
             speedLimitBytes: payload.speedLimitBytes,
             stallSeconds: payload.stallSeconds,
             limitRateBytes: payload.limitRateBytes,
+            dumpHeaderPath: (0, partial_1.headerPath)(payload.partPath),
+            ifRange,
         });
         configPath = `${payload.partPath}.curlrc`;
         (0, paths_1.writeSecretFile)(configPath, config);
@@ -1783,6 +2354,7 @@ function main() {
     persist({ state: "downloading", bytesDownloaded: existingBytes });
     let stdout = "";
     let stderr = "";
+    let provenanceRecorded = false;
     let lastBytes = existingBytes;
     let lastByteAt = Date.now();
     child.stdout?.on("data", (chunk) => {
@@ -1797,6 +2369,14 @@ function main() {
         const progress = (0, curl_1.parseCurlMeter)(stderr);
         if (!progress)
             return;
+        // A meter line means the response arrived, so curl has dumped its headers.
+        // Recorded HERE rather than at exit because the transfers that most need a
+        // resumable partial are the ones with no exit at all: a SIGKILLed runner, a
+        // machine that slept and never woke the process. Written once.
+        if (!provenanceRecorded) {
+            provenanceRecorded = true;
+            recordPartialForResume();
+        }
         // curl reports bytes for THIS invocation; a resumed transfer starts at 0.
         const absolute = resume ? existingBytes + progress.bytesDownloaded : progress.bytesDownloaded;
         if (absolute > lastBytes) {
@@ -1821,7 +2401,10 @@ function main() {
     const finishCancelled = () => {
         clearInterval(heartbeat);
         removeConfig();
-        // Keep the .part file: cancellation should still allow a later resume.
+        // Keep the .part file: cancellation should still allow a later resume — and
+        // record what those bytes are, which is what MAKES the later resume safe.
+        recordPartialForResume();
+        releasePath();
         persist({ state: "cancelled", finishedAt: Date.now() });
         process.exit(0);
     };
@@ -1838,6 +2421,7 @@ function main() {
         clearInterval(heartbeat);
         removeConfig();
         discardEmptyPart(payload.partPath);
+        releasePath();
         persist({
             state: "failed",
             finishedAt: Date.now(),
@@ -1883,19 +2467,52 @@ function main() {
             // response in particular means the partial is still valid. Only the bytes
             // THIS attempt appended are garbage.
             const redirectStub = error.httpStatus !== undefined && error.httpStatus >= 300 && error.httpStatus < 400;
+            // curl REFUSING to resume: it asked for a range and got a whole body.
+            // Measured — that happens both when the server has no Range support and
+            // when `If-Range` says the resource changed underneath us, and curl
+            // leaves the partial untouched either way. Those bytes can never complete
+            // this download, and every retry resumes onto them again, so the file is
+            // reset here instead of being retained as if it were progress.
+            // Scoped to a 2xx answer, NOT every exit 33. curl reports 33 for any
+            // non-206 response to a ranged request, including a 304 — and a 304 says
+            // the partial is STILL VALID, so resetting there would destroy real
+            // progress to fix a conditional header the caller chose to send.
+            const rangeRefused = exitCode === 33 && httpCode !== undefined && httpCode >= 200 && httpCode < 300;
+            if (rangeRefused) {
+                if (!(0, partial_1.resetPartial)(payload.partPath)) {
+                    failUnsafePartial(`The partial file for ${payload.filename} cannot be resumed and could not be cleared. Delete ${payload.partPath} and try again.`);
+                    process.exit(1);
+                    return;
+                }
+            }
             // `rolledBack` is READ, not discarded. When the partial could not be made
             // safe — deletion denied AND emptying denied — the redirect body is still
             // on disk, and the next attempt would compute `existingBytes` from that
             // longer file and `curl -C -` the real recording onto the end of it. That
             // is precisely the corruption this branch exists to prevent, so it has to
-            // reach the status: a consumer cannot see a cleanup failure any other way.
+            // reach the status as `partialUnsafe`: a consumer cannot see a cleanup
+            // failure any other way, and `bytesDownloaded: 0` cannot carry it (an
+            // empty response and a failed setup both report zero too).
             let unsafePartial = false;
             if (redirectStub && existingBytes > 0)
                 unsafePartial = !(0, paths_1.rollbackPartial)(payload.partPath, existingBytes);
+            // The zero-prefix case is NOT exempt. Nothing needs preserving, so the
+            // whole file goes — but if the delete is denied the redirect body is
+            // still on disk, and `resume` defaults to true, so the next attempt
+            // appends the real download to it. Same corruption, same flag.
             else if (redirectStub)
-                discardPart(payload.partPath);
+                unsafePartial = !discardPart(payload.partPath);
             else
                 discardEmptyPart(payload.partPath);
+            // The marker goes on DISK, beside the file it describes. The status field
+            // says the same thing, but a status is addressed by id — and a retry with
+            // a new id, which is the normal case, never reads it. The one thing that
+            // must not happen is the next attempt appending to these bytes.
+            if (unsafePartial)
+                (0, partial_1.markPartialUnsafe)(payload.partPath);
+            else
+                recordPartialForResume();
+            releasePath();
             const cancelled = error.code === "cancelled";
             const message = unsafePartial
                 ? `${error.message} The partial file could not be cleaned up and must not be resumed; delete it before retrying.`
@@ -1907,7 +2524,7 @@ function main() {
                 // `{ ...status, ...next }`, so an explicit undefined would overwrite a
                 // real byte count — and readStatusFile rejects a status whose
                 // bytesDownloaded is not finite, making the whole file unreadable.
-                ...(unsafePartial ? { bytesDownloaded: 0 } : {}),
+                ...(unsafePartial ? { bytesDownloaded: 0, partialUnsafe: true } : {}),
                 error: { code: error.code, message, httpStatus: error.httpStatus },
             });
             // Cancellation is deliberately silent: the user performed it, so telling
@@ -1941,6 +2558,9 @@ function main() {
                     message: `Incomplete download: expected ${expected} bytes, got ${finalBytes}.`,
                 },
             });
+            // Genuine bytes, just not all of them — resumable, so record what they are.
+            recordPartialForResume();
+            releasePath();
             process.exit(1);
             return;
         }
@@ -1953,6 +2573,7 @@ function main() {
                 bytesDownloaded: 0,
                 error: { code: "integrity", message: "The server returned an empty file." },
             });
+            releasePath();
             process.exit(1);
             return;
         }
@@ -1969,6 +2590,11 @@ function main() {
             (0, node_fs_1.renameSync)(payload.partPath, payload.outputPath);
         }
         catch (error) {
+            // The rename failed, so the bytes are still in the `.part` file — and they
+            // are a complete, correct copy. Record them: this is the one failure
+            // where the partial is not partial.
+            recordPartialForResume();
+            releasePath();
             persist({
                 state: "failed",
                 finishedAt: Date.now(),
@@ -1977,12 +2603,34 @@ function main() {
             process.exit(1);
             return;
         }
+        // The partial became the finished file, so everything recorded about it
+        // describes a path that no longer holds bytes. Cleared AFTER the rename:
+        // until that lands, the state is still the truth about what is on disk.
+        (0, partial_1.clearPartialState)(payload.partPath);
+        releasePath();
         persist({ state: "completed", finishedAt: Date.now(), bytesDownloaded: finalBytes, speedBytesPerSec: undefined, etaSeconds: undefined });
         // After the status write: a watching window should update immediately, and
         // a notification that hangs must not delay it.
         notify(payload, "Download Complete", payload.filename);
         process.exit(0);
     });
+}
+/** Read the validators curl dumped, if it got as far as response headers. */
+function readValidators(partPath) {
+    try {
+        return (0, partial_1.parseValidators)((0, node_fs_1.readFileSync)((0, partial_1.headerPath)(partPath), "utf8"));
+    }
+    catch {
+        return {};
+    }
+}
+function discardHeaderDump(partPath) {
+    try {
+        (0, node_fs_1.unlinkSync)((0, partial_1.headerPath)(partPath));
+    }
+    catch {
+        // Never written, or already gone.
+    }
 }
 function safeSize(path) {
     try {
@@ -2055,13 +2703,22 @@ function notify(payload, subtitle, message) {
  * safe to discard.
  */
 /** Roll a `.part` file back to the byte count it held before this attempt. */
-/** Remove a `.part` file outright, whatever it holds. */
+/**
+ * Remove a `.part` file outright, whatever it holds.
+ *
+ * Returns false when the file is still there afterwards. NOT best-effort-and-
+ * forget: this runs on a partial holding a redirect body, and a caller that
+ * ignores the outcome leaves contaminated bytes on disk with nothing recording
+ * that they are contaminated — the next attempt resumes onto them.
+ */
 function discardPart(partPath) {
     try {
         (0, node_fs_1.unlinkSync)(partPath);
+        return true;
     }
     catch {
-        // Best effort.
+        // Gone already is success; anything else means it is still there.
+        return !(0, node_fs_1.existsSync)(partPath);
     }
 }
 function discardEmptyPart(partPath) {
