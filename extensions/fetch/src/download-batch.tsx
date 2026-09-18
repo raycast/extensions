@@ -28,6 +28,7 @@ import {
   extractUrlStringsFromText,
   getRangeInfo,
   hasRangePattern,
+  nextAvailablePath,
   resolveOutputPath,
 } from "./lib/url-utils";
 import { DownloadListView } from "./views/download-list-view";
@@ -383,7 +384,13 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
 
   const handleRetry = useCallback(
     async (item: BatchDownloadItem) => {
-      logDebug("Retrying failed download", { url: item.url });
+      // `conflict` means another live runner holds this exact path, so retrying the
+      // same path fails identically every time — the only action the row offers
+      // would never work. Take the next free name instead.
+      const outputPath =
+        item.errorCode === "conflict" ? nextAvailablePath(item.outputPath, item.filename) : item.outputPath;
+
+      logDebug("Retrying failed download", { url: item.url, outputPath });
 
       // A retry makes the batch active again. Without this, "Download More Files"
       // stays available and would abandon the running retry mid-flight.
@@ -396,7 +403,9 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
             ? {
                 ...i,
                 status: "pending" as DownloadStatus,
+                outputPath,
                 error: undefined,
+                errorCode: undefined,
                 progress: { percent: 0, bytesDownloaded: 0, totalBytes: 0, speed: 0, eta: 0 },
               }
             : i,
@@ -410,7 +419,7 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
             id: item.id,
             url: item.url,
             filename: item.filename,
-            outputPath: item.outputPath,
+            outputPath,
             options: {
               followRedirects: preferences.followRedirects,
               timeout: preferences.defaultTimeout,

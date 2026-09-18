@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 import { closeSync, openSync } from "fs";
-import { basename, extname, join } from "path";
+import { basename, dirname, extname, join } from "path";
 import { sanitizeFilename, uniquePath } from "@chrismessina/raycast-downloader/paths";
 import { logDebug, logInfo, logWarn } from "./logger";
 
@@ -395,6 +395,15 @@ function generateDefaultFilename(url: string): string {
   } catch {
     return `download_${Date.now()}`;
   }
+}
+
+/**
+ * A fresh reserved path next to `outputPath`, for retrying a download whose name
+ * turned out to be taken. Keeps the directory and filename, takes the next free
+ * suffix.
+ */
+export function nextAvailablePath(outputPath: string, filename: string): string {
+  return uniquePath(dirname(outputPath), filename, { reserve: true });
 }
 
 /**
