@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "charter",
+  "title": "Charter - Chart and Diagram Catalog",
+  "description": "Browse chart and diagram types with Mermaid, shadcn and ECharts examples, docs and prompt snippets, and draw Mermaid and ECharts on your Mac",
+  "icon": "charter.png",
+  "author": "aic",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "keywords": [
+    "chart",
+    "diagram",
+    "mermaid",
+    "echarts",
+    "shadcn",
+    "recharts",
+    "visualization"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-charts",
+      "title": "Browse Charts",
+      "subtitle": "Charter",
+      "description": "Browse chart and diagram types by family through a Mermaid, shadcn or ECharts lens, and copy the docs link, example or prompt snippet",
+      "mode": "view"
+    },
+    {
+      "name": "render-chart",
+      "title": "Render Chart",
+      "subtitle": "Charter",
+      "description": "Draw a Mermaid diagram or an Apache ECharts option from the selection, the clipboard or a pasted source, then copy or save the picture",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "browser",
+      "title": "Browser",
+      "description": "A Chromium-based browser that draws the charts. Leave empty to use Google Chrome, Chromium, Brave, Arc or Microsoft Edge, whichever is installed.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "krokiUrl",
+      "title": "Kroki Server",
+      "description": "Draws Mermaid diagrams when no browser is found, and only when you ask. Point it at your own Kroki to keep diagrams off the public server.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://kroki.io",
+      "placeholder": "https://kroki.io"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1",
+    "puppeteer-core": "^25.11.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "echarts": "^6.1.0",
+    "esbuild": "^0.27.7",
+    "eslint": "^10.5.0",
+    "mermaid": "^12.0.0",
+    "prettier": "^3.8.5",
+    "topojson-client": "^3.1.0",
+    "typescript": "^6.0.3",
+    "world-atlas": "^2.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint && node scripts/check-copy.mjs",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "thumbnails": "node scripts/render-thumbnails.mjs",
+    "vendor": "node scripts/vendor.mjs",
+    "shadcn": "node scripts/shadcn.mjs"
+  }
+}
