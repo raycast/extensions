@@ -407,6 +407,7 @@ exports.releaseReservation = releaseReservation;
 exports.writeSecretFile = writeSecretFile;
 exports.uniquePath = uniquePath;
 exports.sanitizeFilename = sanitizeFilename;
+exports.rollbackPartial = rollbackPartial;
 const node_fs_1 = require("node:fs");
 const node_os_1 = require("node:os");
 const node_path_1 = require("node:path");
@@ -712,6 +713,90 @@ function truncateToBytes(value, maxBytes) {
         used += size;
     }
     return result || value.slice(0, 1);
+}
+/**
+ * Roll a `.part` file back to a byte count that is known good.
+ *
+ * Used after an unfollowed 3xx: curl writes the redirect BODY into the partial,
+ * and on a RESUMED transfer the bytes before it are the user's real progress,
+ * so the tail is removed rather than the whole file.
+ *
+ * Returns false when the partial cannot be left in a state that is safe to
+ * resume from, and does everything it can to make it non-resumable first. A
+ * resume runs `curl -C -`, which appends from the file's CURRENT size, so a
+ * partial still carrying redirect HTML gets the real recording spliced onto the
+ * end of it and published under the user's filename. Losing progress is
+ * recoverable; a corrupt media file is not.
+ *
+ * Three things here are load-bearing:
+ *
+ *  - **Every operation is bound to ONE open file descriptor.** Doing this by
+ *    pathname across stat / truncate / re-stat is a TOCTOU: another attempt or
+ *    an external actor can replace the file mid-sequence, and the cleanup then
+ *    lands on a healthy partial belonging to someone else.
+ *  - **The size is VERIFIED after truncating.** A truncate that throws is
+ *    obvious; one that leaves the file longer than asked is not, and only the
+ *    second corrupts the next resume.
+ *  - **`keepBytes` is validated before anything destructive runs.** It is a
+ *    caller-supplied number on an exported function, and a negative value
+ *    reaches `ftruncateSync`, throws, and would otherwise fall through to the
+ *    cleanup path — turning bad input into deleted progress.
+ */
+function rollbackPartial(partPath, keepBytes) {
+    // Reject bad input BEFORE any destructive step, and without cleanup: the
+    // partial is not known to be unsafe, the argument is.
+    if (!Number.isInteger(keepBytes) || keepBytes < 0)
+        return false;
+    let fd;
+    try {
+        fd = (0, node_fs_1.openSync)(partPath, "r+");
+        const stat = (0, node_fs_1.fstatSync)(fd);
+        // Only a regular file is ours to truncate; a symlink or device is not.
+        if (!stat.isFile())
+            return false;
+        if (stat.size <= keepBytes)
+            return true;
+        (0, node_fs_1.ftruncateSync)(fd, keepBytes);
+        if ((0, node_fs_1.fstatSync)(fd).size === keepBytes)
+            return true;
+    }
+    catch {
+        // Fall through: the partial is not known-safe, so it is neutralised below.
+    }
+    finally {
+        if (fd !== undefined) {
+            try {
+                (0, node_fs_1.closeSync)(fd);
+            }
+            catch {
+                /* nothing useful to do */
+            }
+        }
+    }
+    return neutralisePartial(partPath);
+}
+/**
+ * Delete a partial that cannot be vouched for, and report that it is unsafe.
+ *
+ * Always returns false. Deletion is the only cleanup worth attempting: an
+ * earlier version also tried emptying the file, but that fallback cannot fire —
+ * any filesystem state permitting `truncate(path, 0)` also permits the
+ * `ftruncateSync` above, which would have succeeded and returned already.
+ *
+ * When deletion is denied too, the redirect body stays on disk and NOTHING here
+ * can change that. The return value is then the entire mitigation: the runner
+ * records it in the status so a consumer refuses to resume this path, because
+ * `curl -C -` would otherwise append the real recording after the HTML.
+ */
+function neutralisePartial(partPath) {
+    try {
+        (0, node_fs_1.unlinkSync)(partPath);
+    }
+    catch {
+        // Denied. The caller's `false` and the status it writes are what protect
+        // the next attempt now.
+    }
+    return false;
 }
 //# sourceMappingURL=paths.js.map
   },
@@ -1798,17 +1883,32 @@ function main() {
             // response in particular means the partial is still valid. Only the bytes
             // THIS attempt appended are garbage.
             const redirectStub = error.httpStatus !== undefined && error.httpStatus >= 300 && error.httpStatus < 400;
+            // `rolledBack` is READ, not discarded. When the partial could not be made
+            // safe — deletion denied AND emptying denied — the redirect body is still
+            // on disk, and the next attempt would compute `existingBytes` from that
+            // longer file and `curl -C -` the real recording onto the end of it. That
+            // is precisely the corruption this branch exists to prevent, so it has to
+            // reach the status: a consumer cannot see a cleanup failure any other way.
+            let unsafePartial = false;
             if (redirectStub && existingBytes > 0)
-                truncatePart(payload.partPath, existingBytes);
+                unsafePartial = !(0, paths_1.rollbackPartial)(payload.partPath, existingBytes);
             else if (redirectStub)
                 discardPart(payload.partPath);
             else
                 discardEmptyPart(payload.partPath);
             const cancelled = error.code === "cancelled";
+            const message = unsafePartial
+                ? `${error.message} The partial file could not be cleaned up and must not be resumed; delete it before retrying.`
+                : error.message;
             persist({
                 state: cancelled ? "cancelled" : "failed",
                 finishedAt: Date.now(),
-                error: { code: error.code, message: error.message, httpStatus: error.httpStatus },
+                // Conditional spread, NOT `unsafePartial ? 0 : undefined`: persist does
+                // `{ ...status, ...next }`, so an explicit undefined would overwrite a
+                // real byte count — and readStatusFile rejects a status whose
+                // bytesDownloaded is not finite, making the whole file unreadable.
+                ...(unsafePartial ? { bytesDownloaded: 0 } : {}),
+                error: { code: error.code, message, httpStatus: error.httpStatus },
             });
             // Cancellation is deliberately silent: the user performed it, so telling
             // them it happened is noise. A genuine failure is the opposite — with the
@@ -1955,14 +2055,6 @@ function notify(payload, subtitle, message) {
  * safe to discard.
  */
 /** Roll a `.part` file back to the byte count it held before this attempt. */
-function truncatePart(partPath, bytes) {
-    try {
-        (0, node_fs_1.truncateSync)(partPath, bytes);
-    }
-    catch {
-        // Best effort: the worst case is a partial that a later resume rejects.
-    }
-}
 /** Remove a `.part` file outright, whatever it holds. */
 function discardPart(partPath) {
     try {

@@ -468,6 +468,23 @@ function findResumablePartial(recordingId: string): DownloadStatus | undefined {
   const candidates = listStatuses().filter((status) => {
     if (!isTerminal(status.state) || status.state === "completed") return false;
     if (status.meta?.recordingId !== recordingId) return false;
+    // Redirect corruption is handled in the PACKAGE, not here.
+    //
+    // `@chrismessina/raycast-downloader` 0.1.2 rolls a redirect body off the
+    // tail of a resumed partial, verifies the resulting length, and deletes the
+    // partial when it cannot. Only if the filesystem denies deletion too do
+    // garbage bytes survive, and the runner records that case.
+    //
+    // Two consumer-side guards were tried here and both were worse than none.
+    // Keying on a 3xx status rejected partials whose rollback SUCCEEDED — a 304
+    // in particular leaves the original bytes valid — stranding them forever
+    // while each retry took a fresh filename and nothing cleaned the old file.
+    // Keying on `bytesDownloaded === 0` overloads a signal the runner also
+    // leaves at zero after an early network failure that wrote real bytes, so
+    // it refused safe partials for the same cost. A guard that strands hundreds
+    // of megabytes on a common path is a worse trade than the pathological one
+    // it defends against, so the honest answer is to let the package own this
+    // until it exposes an explicit unsafe-partial marker to key on.
     // The runner finishes by renaming partPath onto outputPath. If anything
     // occupies that name now — the user saved a file there, another attempt
     // completed — resuming would destroy it. `uniquePath` is what normally

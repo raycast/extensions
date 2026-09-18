@@ -47,7 +47,21 @@ meetings, teams, and team members, and to download meeting recordings.
 - Pagination: page 1 is fetched and displayed first, then pages 2–5 are background-fetched.
   They are accumulated across the loop and written to the cache **once**, after it finishes
   (`fetchRemainingPages`) — not merged page by page. The list uses Raycast's `pagination` prop
-  (`pageSize: 20`) for infinite scroll — there is no "Load More" action or shortcut.
+  (`pageSize: 20`) for infinite scroll.
+- **Search only covers what is cached, and that is why ⌘L exists.** `filtering={false}` means
+  the list filters itself, so the RENDERED list is the filtered set — and Raycast only fires
+  `onLoadMore` when the user scrolls near the bottom of what is rendered. A query matching one
+  meeting renders one row, nothing scrolls, and the corpus never grows. "Search Older Meetings"
+  (⌘L) fetches the next batch on demand, from the list and from the empty view where scrolling
+  is impossible by definition.
+- Reaching further back is **manual on purpose**. An automatic version was removed: its effect
+  depended on `isFetchingBackground`, so a failed pass re-fired it the instant that flipped
+  false, and each pass walks up to 5 pages carrying `include_transcript=true`. Measured
+  2026-09-17: three passes, nine 429s, an error screen. Do not make it automatic again without
+  a cooldown and a rate-limit circuit breaker.
+- A failed load-more must NOT set the view-level error. It used to, which swapped the list for
+  an error view whose panel has no ⌘L action and which Refresh does not clear — so one 429
+  removed the only way to retry.
 - Go through the `cacheManager` singleton and the `useCachedMeetings()` hook; do not read
   the cache directly from a component.
 
