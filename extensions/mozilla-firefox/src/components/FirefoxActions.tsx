@@ -7,6 +7,7 @@ function OpenInNewWindowAction({ url }: { url?: string }) {
   return (
     <Action
       title="Open in New Window"
+      icon={{ source: Icon.Window }}
       shortcut={{
         macOS: { modifiers: ["ctrl"], key: "enter" },
         Windows: { modifiers: ["ctrl"], key: "enter" },
