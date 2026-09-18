@@ -8,7 +8,7 @@ import {
   addLog,
   isExpired,
 } from "./timer";
-import { SessionLock, withSessionLock } from "./lock";
+import { LockResult, SessionLock, withSessionLock } from "./lock";
 import { createLogWriter } from "./log-writer";
 
 // Every change to the stored timer goes through this module, inside one
@@ -16,8 +16,11 @@ import { createLogWriter } from "./log-writer";
 // mid-update, two commands cannot both finish the same session, and a
 // command holding a stale timer cannot clear a newer one.
 //
-// Callers must handle `status: "busy"`: another command held the lock for the
-// whole wait, nothing was written, and the user should be told to retry.
+// Callers must handle two failure results, in both of which nothing was
+// written: `status: "busy"` — another command held the lock for the whole
+// wait, so the user should retry — and `status: "error"` — the lock could
+// not be taken at all (permissions, support directory, ...), which is shown
+// with its cause rather than as "try again".
 
 export type CompletedType = "pomodoro" | "break";
 
@@ -35,6 +38,33 @@ export interface Busy {
   status: "busy";
 }
 
+export interface Failed {
+  status: "error";
+  error: unknown;
+}
+
+export type Unavailable = Busy | Failed;
+
+/** Map a lock that was not acquired to the result callers see. */
+function unavailable(result: LockResult<unknown>): Unavailable {
+  if (result.acquired) throw new Error("lock was acquired");
+  return result.reason === "busy"
+    ? { status: "busy" }
+    : { status: "error", error: result.error };
+}
+
+/** Human-readable cause for an `error` result. */
+export function describeError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+export function isUnavailable(result: {
+  status: string;
+}): result is Unavailable {
+  return result.status === "busy" || result.status === "error";
+}
+
 export interface Settled {
   status: "ok";
   running: TimerState | null;
@@ -46,9 +76,9 @@ export interface Settled {
  * duration is treated as finished: it is logged and cleared here, so no
  * command ever sees an "expired but still running" timer.
  */
-export async function settle(): Promise<Settled | Busy> {
+export async function settle(): Promise<Settled | Unavailable> {
   const result = await withSessionLock(settleLocked);
-  return result.acquired ? result.value : { status: "busy" };
+  return result.acquired ? result.value : unavailable(result);
 }
 
 export interface StartOptions {
@@ -64,7 +94,7 @@ export interface StartOptions {
 export type Started =
   | { status: "ok"; timer: TimerState }
   | { status: "changed"; running: TimerState | null }
-  | Busy;
+  | Unavailable;
 
 /**
  * Finish whatever is stored (an expired timer is logged as completed, a
@@ -91,12 +121,12 @@ export async function startSession(
     await saveTimer(lock, timer);
     return { status: "ok", timer } as Started;
   });
-  return result.acquired ? result.value : { status: "busy" };
+  return result.acquired ? result.value : unavailable(result);
 }
 
 export type Stopped =
   | { status: "ok"; stopped: TimerState | null; finished?: TimerState }
-  | Busy;
+  | Unavailable;
 
 /**
  * Stop the stored timer. Returns the timer this call stopped early, or
@@ -113,7 +143,7 @@ export async function stopSession(): Promise<Stopped> {
     await finishLocked(lock, current, false);
     return { status: "ok", stopped: current } as Stopped;
   });
-  return result.acquired ? result.value : { status: "busy" };
+  return result.acquired ? result.value : unavailable(result);
 }
 
 async function settleLocked(lock: SessionLock): Promise<Settled> {

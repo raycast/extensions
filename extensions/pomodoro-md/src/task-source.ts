@@ -8,18 +8,25 @@ export interface TaskGroup {
   tasks: Task[];
 }
 
-/** "busy": another command held the session lock; nothing was changed. */
-export type MarkResult = "ok" | "busy";
+/**
+ * Outcome of a task edit. "busy": another command held the session lock for
+ * the whole wait; "error": the lock could not be taken. In both cases nothing
+ * was changed.
+ */
+export type EditResult =
+  | { status: "ok" }
+  | { status: "busy" }
+  | { status: "error"; error: unknown };
 
 export interface TaskSource {
   getTasks(): Promise<TaskGroup[]>;
-  addTask?(title: string): Promise<void>;
-  removeTask?(taskTitle: string): Promise<void>;
-  markDone?(taskTitle: string): Promise<MarkResult>;
+  addTask?(title: string): Promise<EditResult>;
+  removeTask?(taskTitle: string): Promise<EditResult>;
+  markDone?(taskTitle: string): Promise<EditResult>;
   markSubtaskDone?(
     taskTitle: string,
     subtaskTitle: string,
-  ): Promise<MarkResult>;
+  ): Promise<EditResult>;
 }
 
 export type TaskMode = "manual" | "dailynote";

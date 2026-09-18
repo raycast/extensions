@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { Task } from "./parser";
-import { TaskSource, TaskGroup, MarkResult } from "./task-source";
+import { TaskSource, TaskGroup, EditResult } from "./task-source";
+import { withSessionLock } from "./lock";
 
 const TASKS_KEY = "pomodoro-md-tasks";
 
@@ -20,41 +21,58 @@ export class ManualTaskSource implements TaskSource {
     return [{ name: "Tasks", tasks }];
   }
 
-  async addTask(title: string): Promise<void> {
-    const tasks = await loadTasks();
-    tasks.push({ pomodoros: 1, title, subtasks: [], done: false });
-    await saveTasks(tasks);
+  async addTask(title: string): Promise<EditResult> {
+    return this.edit((tasks) => {
+      tasks.push({ pomodoros: 1, title, subtasks: [], done: false });
+      return true;
+    });
   }
 
-  async removeTask(taskTitle: string): Promise<void> {
-    const tasks = await loadTasks();
-    const filtered = tasks.filter((t) => t.title !== taskTitle);
-    await saveTasks(filtered);
+  async removeTask(taskTitle: string): Promise<EditResult> {
+    return this.edit((tasks) => {
+      const idx = tasks.findIndex((t) => t.title === taskTitle);
+      if (idx === -1) return false;
+      tasks.splice(idx, 1);
+      return true;
+    });
   }
 
-  async markDone(taskTitle: string): Promise<MarkResult> {
-    const tasks = await loadTasks();
-    const task = tasks.find((t) => t.title === taskTitle);
-    if (task) {
+  async markDone(taskTitle: string): Promise<EditResult> {
+    return this.edit((tasks) => {
+      const task = tasks.find((t) => t.title === taskTitle);
+      if (!task) return false;
       task.done = true;
-      await saveTasks(tasks);
-    }
-    return "ok";
+      return true;
+    });
   }
 
   async markSubtaskDone(
     taskTitle: string,
     subtaskTitle: string,
-  ): Promise<MarkResult> {
-    const tasks = await loadTasks();
-    const task = tasks.find((t) => t.title === taskTitle);
-    if (task) {
-      const sub = task.subtasks.find((s) => s.title === subtaskTitle);
-      if (sub) {
-        sub.done = true;
-        await saveTasks(tasks);
-      }
-    }
-    return "ok";
+  ): Promise<EditResult> {
+    return this.edit((tasks) => {
+      const sub = tasks
+        .find((t) => t.title === taskTitle)
+        ?.subtasks.find((s) => s.title === subtaskTitle);
+      if (!sub) return false;
+      sub.done = true;
+      return true;
+    });
+  }
+
+  /**
+   * Load the list, let `edit` change it, and save it back if it did. The
+   * read-modify-write runs under the session lock so two quick actions
+   * cannot overwrite each other's change.
+   */
+  private async edit(edit: (tasks: Task[]) => boolean): Promise<EditResult> {
+    const result = await withSessionLock(async () => {
+      const tasks = await loadTasks();
+      if (edit(tasks)) await saveTasks(tasks);
+    });
+    if (result.acquired) return { status: "ok" };
+    return result.reason === "busy"
+      ? { status: "busy" }
+      : { status: "error", error: result.error };
   }
 }

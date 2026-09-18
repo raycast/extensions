@@ -1,11 +1,17 @@
 import { showHUD } from "@raycast/api";
-import { stopSession } from "./session";
+import { describeError, stopSession } from "./session";
 
 export default async function StopTimerCommand() {
   const result = await stopSession();
 
   if (result.status === "busy") {
     await showHUD("⏳ Timer is busy — try again");
+    return;
+  }
+  if (result.status === "error") {
+    await showHUD(
+      `⚠️ Could not stop the timer: ${describeError(result.error)}`,
+    );
     return;
   }
 

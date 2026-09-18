@@ -29,20 +29,37 @@ import {
 import {
   CompletedType,
   CompletionContext,
+  Unavailable,
   completedTypeOf,
+  describeError,
+  isUnavailable,
   settle,
   startSession,
   stopSession,
 } from "./session";
 
-// Another command held the session lock for the whole wait. Nothing was
-// written; the user just has to try again.
-async function notifyBusy() {
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Timer is busy",
-    message: "Another command is updating it — try again",
-  });
+// While another command holds the session lock, a refresh is retried a few
+// times before giving up, so the view recovers on its own.
+const REFRESH_RETRY_MS = 300;
+const REFRESH_MAX_RETRIES = 5;
+
+// Nothing was written in either case. "busy": another command held the
+// session lock for the whole wait — just try again. "error": the lock could
+// not be taken at all — show the cause.
+async function reportUnavailable(result: Unavailable) {
+  if (result.status === "busy") {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Timer is busy",
+      message: "Another command is updating it — try again",
+    });
+  } else {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not update the timer",
+      message: describeError(result.error),
+    });
+  }
 }
 
 interface ResumeTarget {
@@ -80,20 +97,39 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
 
   // Timer state shown by the view; called on mount and after every change,
   // since the view stays open behind the HUD and must not go stale.
-  async function refresh() {
-    const settled = await settle();
-    if (settled.status === "busy") return; // keep what is shown; next refresh catches up
-    const { running, finished } = settled;
-    setActiveTimer(running);
-    // Opened directly (not via the menu bar) after a session ran out:
-    // show the completion prompt just the same.
-    if (finished) setCompletedType(completedTypeOf(finished));
+  async function loadLastTask() {
     const last = await getLastLog();
     setLastTask(
       last
         ? { taskTitle: last.taskTitle, subtaskTitle: last.subtaskTitle }
         : null,
     );
+  }
+
+  async function refresh(attempt = 0) {
+    const settled = await settle();
+    if (settled.status === "busy") {
+      // Reading the log needs no lock: do it now so the view never stays in
+      // its loading state, then try the timer again shortly.
+      await loadLastTask();
+      if (attempt < REFRESH_MAX_RETRIES) {
+        setTimeout(() => refresh(attempt + 1), REFRESH_RETRY_MS);
+      } else {
+        await reportUnavailable(settled);
+      }
+      return;
+    }
+    if (settled.status === "error") {
+      await loadLastTask();
+      await reportUnavailable(settled);
+      return;
+    }
+    const { running, finished } = settled;
+    setActiveTimer(running);
+    // Opened directly (not via the menu bar) after a session ran out:
+    // show the completion prompt just the same.
+    if (finished) setCompletedType(completedTypeOf(finished));
+    await loadLastTask();
   }
 
   // Re-run when relaunched with a new completion context while already open.
@@ -105,7 +141,7 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
 
   async function handleStartPomodoro(task: Task, subtaskTitle?: string) {
     const settled = await settle();
-    if (settled.status === "busy") return notifyBusy();
+    if (isUnavailable(settled)) return reportUnavailable(settled);
     const { running } = settled;
     let minutes = pomoDuration;
     if (running && !running.isBreak) {
@@ -127,7 +163,7 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
       { taskTitle: task.title, subtaskTitle, durationMinutes: minutes },
       { expectCurrentId: running?.id ?? null },
     );
-    if (started.status === "busy") return notifyBusy();
+    if (isUnavailable(started)) return reportUnavailable(started);
     if (started.status === "changed") {
       await showToast({
         style: Toast.Style.Failure,
@@ -150,7 +186,7 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
       durationMinutes: breakDuration,
       isBreak: true,
     });
-    if (started.status !== "ok") return notifyBusy();
+    if (isUnavailable(started)) return reportUnavailable(started);
     setCompletedType(undefined);
     await refresh();
     await showHUD(`☕ Break — ${breakDuration}min`);
@@ -163,7 +199,7 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
       subtaskTitle: lastTask.subtaskTitle,
       durationMinutes: pomoDuration,
     });
-    if (started.status !== "ok") return notifyBusy();
+    if (isUnavailable(started)) return reportUnavailable(started);
     setCompletedType(undefined);
     await refresh();
     const label = lastTask.subtaskTitle || lastTask.taskTitle;
@@ -172,7 +208,7 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
 
   async function handleStopTimer() {
     const result = await stopSession();
-    if (result.status === "busy") return notifyBusy();
+    if (isUnavailable(result)) return reportUnavailable(result);
     await refresh();
     await showToast({
       style: Toast.Style.Success,
@@ -186,9 +222,8 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
 
   async function handleMarkDone(task: Task) {
     if (taskSource.markDone) {
-      if ((await taskSource.markDone(task.title)) === "busy") {
-        return notifyBusy();
-      }
+      const result = await taskSource.markDone(task.title);
+      if (isUnavailable(result)) return reportUnavailable(result);
       const updated = await taskSource.getTasks();
       setGroups(updated);
       await showToast({
@@ -200,11 +235,8 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
 
   async function handleMarkSubtaskDone(task: Task, subtaskTitle: string) {
     if (taskSource.markSubtaskDone) {
-      if (
-        (await taskSource.markSubtaskDone(task.title, subtaskTitle)) === "busy"
-      ) {
-        return notifyBusy();
-      }
+      const result = await taskSource.markSubtaskDone(task.title, subtaskTitle);
+      if (isUnavailable(result)) return reportUnavailable(result);
       const updated = await taskSource.getTasks();
       setGroups(updated);
       await showToast({
@@ -216,7 +248,8 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
 
   async function handleRemoveTask(task: Task) {
     if (taskSource.removeTask) {
-      await taskSource.removeTask(task.title);
+      const result = await taskSource.removeTask(task.title);
+      if (isUnavailable(result)) return reportUnavailable(result);
       const updated = await taskSource.getTasks();
       setGroups(updated);
       await showToast({
@@ -230,7 +263,8 @@ function TaskListView({ completion }: { completion?: CompletionContext }) {
     const title = searchText.trim();
     const task: Task = { pomodoros: 1, title, subtasks: [], done: false };
     if (isManual && taskSource.addTask) {
-      await taskSource.addTask(title);
+      const result = await taskSource.addTask(title);
+      if (isUnavailable(result)) return reportUnavailable(result);
       const updated = await taskSource.getTasks();
       setGroups(updated);
     }

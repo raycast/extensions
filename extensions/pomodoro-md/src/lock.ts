@@ -13,9 +13,11 @@ const ACQUIRE_TIMEOUT_MS = 2000;
 const RETRY_INTERVAL_MS = 25;
 
 /**
- * Proof that the session lock is held. Functions that mutate shared state
- * (the stored timer, the session log, the daily note) require it as an
- * argument, so they cannot be called from outside `withSessionLock`.
+ * Marker that the session lock is held. Functions that mutate shared state
+ * (the stored timer, the session log, the daily note, the manual task list)
+ * take it as an argument so that, by convention, they are only reachable
+ * from inside `withSessionLock`. It is a plain object, not a capability:
+ * it must not be stored or used after the callback returns.
  */
 export interface SessionLock {
   readonly held: true;

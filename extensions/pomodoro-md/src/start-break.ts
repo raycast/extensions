@@ -1,5 +1,5 @@
 import { showHUD } from "@raycast/api";
-import { startSession } from "./session";
+import { describeError, startSession } from "./session";
 import { getAppPreferences } from "./preferences";
 
 export default async function StartBreakCommand() {
@@ -14,6 +14,12 @@ export default async function StartBreakCommand() {
   });
   if (result.status === "busy") {
     await showHUD("⏳ Timer is busy — try again");
+    return;
+  }
+  if (result.status === "error") {
+    await showHUD(
+      `⚠️ Could not start the break: ${describeError(result.error)}`,
+    );
     return;
   }
   await showHUD(`☕ Break — ${breakDuration}min`);

@@ -8,7 +8,7 @@ import {
   taskLineTitle,
 } from "./parser";
 import { getAppPreferences } from "./preferences";
-import { TaskSource, TaskGroup, MarkResult } from "./task-source";
+import { TaskSource, TaskGroup, EditResult } from "./task-source";
 import { withSessionLock } from "./lock";
 
 const DONE_TASK_RE = /^- \d+p\s+\[done\]/;
@@ -41,7 +41,7 @@ export class DailyNoteTaskSource implements TaskSource {
       }));
   }
 
-  async markDone(taskTitle: string): Promise<MarkResult> {
+  async markDone(taskTitle: string): Promise<EditResult> {
     // Titles are compared exactly as parsed, so "Agenda" never marks
     // "Prepare Agenda".
     return this.editTimetable((lines, range) => {
@@ -59,7 +59,7 @@ export class DailyNoteTaskSource implements TaskSource {
   async markSubtaskDone(
     taskTitle: string,
     subtaskTitle: string,
-  ): Promise<MarkResult> {
+  ): Promise<EditResult> {
     return this.editTimetable((lines, range) => {
       let inTask = false;
       for (let i = range[0]; i < range[1]; i++) {
@@ -94,7 +94,7 @@ export class DailyNoteTaskSource implements TaskSource {
    */
   private async editTimetable(
     edit: (lines: string[], range: [number, number]) => boolean,
-  ): Promise<MarkResult> {
+  ): Promise<EditResult> {
     const result = await withSessionLock(async () => {
       if (!fs.existsSync(this.filePath)) return;
       const lines = fs.readFileSync(this.filePath, "utf-8").split("\n");
@@ -109,6 +109,9 @@ export class DailyNoteTaskSource implements TaskSource {
         fs.writeFileSync(this.filePath, lines.join("\n"), "utf-8");
       }
     });
-    return result.acquired ? "ok" : "busy";
+    if (result.acquired) return { status: "ok" };
+    return result.reason === "busy"
+      ? { status: "busy" }
+      : { status: "error", error: result.error };
   }
 }
