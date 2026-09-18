@@ -96,7 +96,6 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish",
-    "langcodes": "node scripts/build-langcodes.mjs",
-    "check-store-ready": "node scripts/check-store-ready.mjs"
+    "langcodes": "node scripts/build-langcodes.mjs"
   }
 }
