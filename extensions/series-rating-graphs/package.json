@@ -28,188 +28,16 @@
       "subtitle": "Series Rating Graphs"
     }
   ],
-  "tools": [
-    {
-      "name": "search-shows",
-      "title": "Search Shows",
-      "description": "Search for TV shows"
-    },
-    {
-      "name": "get-show-details",
-      "title": "Get TV Show Details",
-      "description": "Get details about a TV show"
-    }
-  ],
-  "ai": {
-    "instructions": "Provide TV show information and ratings graphs as a Markdown table.\n\n- Always call \"search-shows\" first for a show name.\n- Only call \"get-show-details\" after obtaining an ID from \"search-shows\".\n- If multiple results are plausible, ask the user to choose using the title, startYear, and endYear in this format: \"title (startYear–endYear)\".\n- Do not invent missing values.\n- Preserve ratingsTable exactly as returned by \"get-show-details\".\n\nHow to write the details:\n[title]\n> [originalTitle] (write this only when it differs from title)\n\nSeasons: [seasonsCount]\nRelease Date: [startYear]–[endYear]\nRating: [rating.aggregateRating] ([rating.voteCount] votes)\n\n[plot]\n\n[ratingsTable]",
-    "evals": [
-      {
-        "input": "@series-rating-graphs give me Daredevil's ratings",
-        "mocks": {
-          "search-shows": [
-            {
-              "id": "tt3322312",
-              "title": "Daredevil",
-              "originalTitle": "Daredevil",
-              "startYear": 2015,
-              "endYear": 2018,
-              "rating": {
-                "aggregateRating": 8.6,
-                "voteCount": 539949
-              }
-            }
-          ],
-          "get-show-details": {
-            "id": "tt3322312",
-            "title": "Daredevil",
-            "originalTitle": "Daredevil",
-            "startYear": 2015,
-            "endYear": 2018,
-            "seasonsCount": 3,
-            "plot": "A blind lawyer by day, vigilante by night. Matt Murdock fights the crime of New York as Daredevil.",
-            "rating": {
-              "aggregateRating": 8.6,
-              "voteCount": 539949
-            },
-            "ratingsTable": "> 🏆 Awesome | 🟩 Great | 🟨 Good | 🟧 Regular | 🟥 Bad | 🟪 Garbage\n\n| Ep # | S1 |\n| --- | --- |\n| 1 | 🟩8.4 |\n| 2 | 🟩8.9 |"
-          }
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "search-shows",
-              "arguments": {
-                "title": "Daredevil"
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "get-show-details",
-              "arguments": {
-                "id": "tt3322312"
-              }
-            }
-          },
-          {
-            "meetsCriteria": "Presents the selected Daredevil show's title, seasons count, release years, aggregate rating, vote count, plot, and the ratingsTable returned by get-show-details without changing it."
-          }
-        ]
-      },
-      {
-        "input": "@series-rating-graphs show me ratings for The Office",
-        "mocks": {
-          "search-shows": [
-            {
-              "id": "tt0386676",
-              "title": "The Office",
-              "originalTitle": "The Office",
-              "startYear": 2005,
-              "endYear": 2013,
-              "rating": {
-                "aggregateRating": 9,
-                "voteCount": 846264
-              }
-            },
-            {
-              "id": "tt0290978",
-              "title": "The Office",
-              "originalTitle": "The Office",
-              "startYear": 2001,
-              "endYear": 2003,
-              "rating": {
-                "aggregateRating": 8.5,
-                "voteCount": 133616
-              }
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "search-shows",
-              "arguments": {
-                "title": "The Office"
-              }
-            }
-          },
-          {
-            "not": {
-              "callsTool": "get-show-details"
-            }
-          },
-          {
-            "meetsCriteria": "Explains that multiple shows match and asks the user to choose, listing each result as title (startYear–endYear)."
-          }
-        ]
-      },
-      {
-        "input": "@series-rating-graphs I mean The Office US from 2005",
-        "mocks": {
-          "search-shows": [
-            {
-              "id": "tt0386676",
-              "title": "The Office",
-              "originalTitle": "The Office",
-              "startYear": 2005,
-              "endYear": 2013,
-              "rating": {
-                "aggregateRating": 9,
-                "voteCount": 846264
-              }
-            }
-          ],
-          "get-show-details": [
-            {
-              "id": "tt0386676",
-              "title": "The Office",
-              "originalTitle": "The Office",
-              "startYear": 2005,
-              "endYear": 2013,
-              "seasonsCount": 9,
-              "plot": "A mockumentary on a group of typical office workers, where the workday consists of ego clashes, inappropriate behavior, tedium and romance.",
-              "rating": {
-                "aggregateRating": 9,
-                "voteCount": 846264
-              },
-              "ratingsTable": "| Ep # | S1 |\n| --- | --- |\n| 1 | 🟨7.3 |"
-            }
-          ]
-        },
-        "expected": [
-          {
-            "callsTool": {
-              "name": "search-shows",
-              "arguments": {
-                "title": "The Office US from 2005"
-              }
-            }
-          },
-          {
-            "callsTool": {
-              "name": "get-show-details",
-              "arguments": {
-                "id": "tt0386676"
-              }
-            }
-          },
-          {
-            "meetsCriteria": "Presents the details for the 2005–2013 version of The Office and preserves the ratingsTable exactly."
-          }
-        ]
-      }
-    ]
-  },
   "dependencies": {
-    "@raycast/api": "^2.3.1",
+    "@raycast/api": "^2.4.1",
     "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "26.5.1",
+    "@types/node": "26.6.1",
     "@types/react": "19.3.0",
     "eslint": "^10.10.0",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.8",
     "typescript": "^6.0.3"
   },
   "scripts": {
@@ -293,8 +121,5 @@
       "required": false,
       "default": true
     }
-  ],
-  "allowScripts": {
-    "esbuild": true
-  }
+  ]
 }
