@@ -36,32 +36,30 @@ export function brewInstalledDate(item: Cask | Formula): Date | undefined {
 /**
  * The version currently installed, or undefined if the package is not installed.
  *
- * A formula can have several kegs, and `installed` is ordered oldest-first — so
- * taking the first entry names a keg the user is not running. Verified on a
- * real machine: `docker-compose`, `pnpm` and `railway` each had two kegs, and
- * in every one `installed[0]` was the SUPERSEDED version while `linked_keg`
- * held the active one. `linked_keg` is null for a keg-only formula, which is
- * the only case that falls back to the first entry.
+ * Delegates to `effectiveKeg` so a formula's version and every tag rendered
+ * beside it (see `formatPackageVersion`) name the SAME keg. They used to
+ * disagree: this read `installed.first()` while `effectiveKeg` read the last
+ * entry, so a keg-only formula with two kegs rendered the version of one and
+ * the "dependency" tag of the other.
  */
 export function brewInstalledVersion(item: Cask | Formula): string | undefined {
-  if (isCask(item)) {
-    return item.installed;
-  }
-  return item.installed?.find((keg) => keg.version === item.linked_keg)?.version ?? item.installed?.first()?.version;
+  return isCask(item) ? item.installed : effectiveKeg(item)?.version;
 }
 
 /**
- * The keg brew itself would read: the linked one, or the newest installed when
- * nothing is linked (`brew info --json=v2` lists kegs oldest-first).
+ * The best approximation of the keg brew reads, from what the JSON exposes.
  *
- * `brew leaves` and `brew list --installed-on-request` both key off a SINGLE
- * keg's tab (`Formula#any_installed_keg`), never a union over every keg — a
- * formula can have two kegs whose tabs disagree, and the linked one is the one
- * in effect.
+ * Homebrew keys off a SINGLE keg's tab, never a union over every keg — a
+ * formula can have two kegs whose tabs disagree. Its own order of preference is
+ * the OPT link first, then the linked keg, then the newest installed
+ * (`Formula#any_installed_prefix`, `Tab.for_formula`, `upgrade.rb`).
  *
- * A keg-only formula reports `linked_keg: null` even when it is opt-linked, so
- * this falls back to the newest keg where brew would read the opt-linked one.
- * The two differ only after installing an older version over a newer one.
+ * `brew info --json=v2` publishes no opt-link target: `linked_keg` carries only
+ * the linked version (`formula.rb`), and a keg-only formula reports it as null
+ * even while opt-linked. So this reads the linked keg, then falls back to the
+ * newest — `installed` is sorted ascending by version, so that is the last
+ * entry. The gap is real and not fixable from this payload: where an opt link
+ * points at an OLDER keg, brew reads that one and this reads the newest.
  */
 export const effectiveKeg = (formula: Formula): InstalledVersion | undefined =>
   formula.installed?.find((version) => version.version === formula.linked_keg) ??

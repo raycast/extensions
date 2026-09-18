@@ -240,14 +240,29 @@ export async function brewFindPackage(name: string): Promise<FindPackageResult> 
     return { status: "unavailable" };
   }
 
+  // An index entry promises a chunk read will produce the record, but a chunk
+  // written by an older build — or half-written, or since pruned — can hand
+  // back nothing. Reporting that as "found" with no package let `isCask()`
+  // throw a TypeError, which surfaced as a misleading "Lookup failed".
+  // The indexes and chunks disagree, which is "cannot answer", not "not there".
   const formulaEntry = formulaIndex.entries.find((entry) => entry.n === target || entry.a?.includes(target));
   if (formulaEntry) {
-    return { status: "found", package: (await fetchFormulaItems([formulaEntry]))[0] };
+    const formula = (await fetchFormulaItems([formulaEntry]))[0];
+    if (!formula) {
+      searchLogger.log("Index entry with no chunk record", { name, kind: "formula" });
+      return { status: "unavailable" };
+    }
+    return { status: "found", package: formula };
   }
 
   const caskEntry = caskIndex.entries.find((entry) => entry.n === target);
   if (caskEntry) {
-    return { status: "found", package: (await fetchCaskItems([caskEntry]))[0] };
+    const cask = (await fetchCaskItems([caskEntry]))[0];
+    if (!cask) {
+      searchLogger.log("Index entry with no chunk record", { name, kind: "cask" });
+      return { status: "unavailable" };
+    }
+    return { status: "found", package: cask };
   }
 
   searchLogger.log("Package not found in index", { name });

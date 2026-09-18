@@ -83,13 +83,19 @@ describe("brewInstalledVersion", () => {
     expect(brewInstalledVersion(pnpm)).toBe("11.24.0");
   });
 
-  it("falls back to the first keg when nothing is linked — a keg-only formula", () => {
+  it("falls back to the NEWEST keg when nothing is linked — a keg-only formula", () => {
+    // `installed` is sorted ascending by version, and a keg-only formula reports
+    // `linked_keg: null` even while opt-linked. Homebrew would read the OPT link
+    // first, which this payload does not publish — the newest keg is the closest
+    // approximation available, not a claim about what brew reads. This asserted
+    // the FIRST keg until 2026-09-17, which disagreed with `effectiveKeg` — the
+    // same row rendered one keg's version beside another keg's tags.
     const kegOnly = formula({
       installed: [{ version: "1.0.0" }, { version: "2.0.0" }] as Formula["installed"],
       linked_keg: null,
       keg_only: true,
     });
-    expect(brewInstalledVersion(kegOnly)).toBe("1.0.0");
+    expect(brewInstalledVersion(kegOnly)).toBe("2.0.0");
   });
 
   it("ignores a linked_keg that names no installed keg", () => {
@@ -147,5 +153,30 @@ describe("formatPackageVersion", () => {
   it("falls back to the offered version when nothing is installed", () => {
     const notInstalled = formula({ versions: { stable: "1.0.0", bottle: true }, installed: [] });
     expect(formatPackageVersion(notInstalled)).toBe("1.0.0 (bottled)");
+  });
+
+  it("names ONE keg for both the version and the tags when nothing is linked", () => {
+    // A keg-only formula reports `linked_keg: null` even while opt-linked, so
+    // both readers fall back — and they used to fall back to opposite ends of
+    // the list, rendering the OLDEST keg's version beside the NEWEST keg's
+    // `installed_on_request` tag. What this pins is that ONE keg supplies both;
+    // which keg is the approximation documented on `effectiveKeg`. Shape
+    // captured from `readline` (keg_only, linked_keg null); the second keg is
+    // synthetic, since this machine now carries only 8.3.3.
+    const readline = formula({
+      name: "readline",
+      keg_only: true,
+      linked_keg: null,
+      versions: { stable: "8.3.6", bottle: true },
+      outdated: false,
+      installed: [
+        { version: "8.3.3", installed_on_request: true },
+        { version: "8.3.6", installed_on_request: false },
+      ] as Formula["installed"],
+    });
+    // The newest keg is the one this picks, and it was NOT installed on
+    // request — so "dependency" must sit beside 8.3.6, never beside 8.3.3.
+    expect(brewInstalledVersion(readline)).toBe("8.3.6");
+    expect(formatPackageVersion(readline)).toBe("8.3.6 (bottled, installed, dependency)");
   });
 });

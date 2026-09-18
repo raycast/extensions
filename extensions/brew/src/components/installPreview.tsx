@@ -97,13 +97,15 @@ function ShowDetailsAction(props: {
           const result = await brewFindPackage(props.name);
           await toast.hide();
           if (result.status === "unavailable") {
-            // The lookup reads the cached package index and deliberately will
-            // not build one, so before the first search there is nothing to
-            // read. That is not the same as "no such package" — say so.
+            // Two ways to get here, and neither is "no such package": the
+            // cached index has not been downloaded yet (the lookup reads it and
+            // deliberately will not build one), or the index named a record its
+            // chunk did not hold. The first wants a search, the second wants
+            // the cache rebuilt — so name both rather than assert the one.
             await showBrewFailureToast(
               "Details not available yet",
               new Error(
-                `The Homebrew package index has not been downloaded yet. Run a search once, then look up ${props.name} again.`,
+                `The Homebrew package index could not be read for ${props.name}. Run a search to download it, or clear the cache and search again.`,
               ),
             );
             return;
@@ -349,12 +351,27 @@ export function PreviewList(props: {
 function useDryRunPreview<A>(
   run: (arg: A, signal?: AbortSignal) => Promise<{ stdout: string; stderr: string }>,
   arg: A,
+  /** Shown in an animated toast while the dry run is in flight. */
+  progressTitle: string,
 ) {
   const abortable = useRef<AbortController>(null);
 
   const { data, error, isLoading, revalidate } = usePromise(
     async (value: A) => {
+      // The navigation loader alone is a thin signal for a dry run that waits
+      // on bottle manifests over the network, so the wait gets a named toast.
+      //
+      // It lives HERE rather than in an effect on `isLoading` deliberately.
+      // Raycast's hide carries no toast id — it acts on whichever toast is on
+      // screen (see `src/utils/toast.ts`) — so a deferred cleanup can dismiss
+      // a LATER toast, and the obvious candidate is the failure toast that
+      // `onError` raises microseconds earlier. Hiding only on the success path
+      // makes that unreachable: on failure this toast is left alone, and
+      // `showToast` replaces the visible toast outright, so the failure toast
+      // takes the slot on its own.
+      const progress = await showToast({ style: Toast.Style.Animated, title: progressTitle });
       const { stdout, stderr } = await run(value, abortable.current?.signal);
+      await progress.hide();
       return { stdout, raw: [stdout, stderr].filter(Boolean).join("\n") };
     },
     [arg],
@@ -435,7 +452,11 @@ export function InstallPreview(props: {
   const name = brewName(item);
   const command = brewInstallCommand(item);
 
-  const { data, error, isLoading, revalidate } = useDryRunPreview(brewInstallDryRun, item);
+  const { data, error, isLoading, revalidate } = useDryRunPreview(
+    brewInstallDryRun,
+    item,
+    `Previewing install of ${brewName(item)}…`,
+  );
   const sections = data && parseDryRun(data.stdout);
   // Nothing that actually installs is reachable until the preview has settled
   // AND succeeded: a failed dry run is not a plan, so there is nothing here the
@@ -516,7 +537,11 @@ export function UpgradePreview(props: {
   const targetName = target ? brewName(target) : undefined;
   const command = target ? brewUpgradeCommand(target) : "brew upgrade";
 
-  const { data, error, isLoading, revalidate } = useDryRunPreview(brewUpgradeDryRun, target);
+  const { data, error, isLoading, revalidate } = useDryRunPreview(
+    brewUpgradeDryRun,
+    target,
+    targetName ? `Previewing upgrade of ${targetName}…` : "Previewing upgrades…",
+  );
   const plan = data && parseUpgradeDryRun(data.raw);
   // Nothing that actually upgrades is reachable until the preview has settled
   // AND succeeded — an upgrade started over the loading row would run before
@@ -605,7 +630,10 @@ export function UpgradePreview(props: {
           <>
             <ActionPanel.Section>
               {upgradeTarget && <Actions.FormulaUpgradeAction formula={upgradeTarget} onAction={props.onAction} />}
-              {canUpgrade && <Actions.FormulaUpgradeAllAction onAction={props.onAction} />}
+              {/* Whole-machine only. A preview of ONE package must not offer to
+                  upgrade everything — the view names a single package, and the
+                  action would act on every outdated one. */}
+              {canUpgrade && !target && <Actions.FormulaUpgradeAllAction onAction={props.onAction} />}
               {canUpgrade && <RunInTerminalAction verb="Upgrade" command={command} />}
             </ActionPanel.Section>
             <PreviewCopyActions

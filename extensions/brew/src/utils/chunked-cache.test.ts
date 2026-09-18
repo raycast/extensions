@@ -94,7 +94,7 @@ interface RawCaskFull extends RawCask {
 }
 
 describe("buildChunkedCache (committed fixtures)", () => {
-  it("keeps requirements, disabled, languages and artifacts through the stream filter", async () => {
+  it("keeps requirements, disabled and languages through the stream filter, and drops artifacts", async () => {
     const dir = await mkdtemp(path.join(os.tmpdir(), "brew-chunk-fixture-"));
     try {
       const formulaConfig = configIn(dir);
@@ -137,9 +137,11 @@ describe("buildChunkedCache (committed fixtures)", () => {
       const casks = await loadItemsFromChunks<RawCaskFull>(caskConfig, caskIndex.entries);
       const byToken = new Map(casks.map((c) => [c.token, c]));
       expect(byToken.get("battle-net")?.languages?.length).toBeGreaterThan(0);
-      expect(
-        byToken.get("1password-cli")?.artifacts?.some((a) => typeof a === "object" && a !== null && "binary" in a),
-      ).toBe(true);
+      // `artifacts` is off the whitelist: every cask carries one and keeping it
+      // more than doubled the cask cache. 1password-cli is the fixture that
+      // HAS a `binary` stanza, so if the filter ever lets the field back in,
+      // this is where it shows up.
+      expect(byToken.get("1password-cli")?.artifacts).toBeUndefined();
       expect(byToken.get("0-ad")?.depends_on?.macos).toBeDefined();
     } finally {
       await rm(dir, { recursive: true, force: true });
@@ -194,9 +196,10 @@ describe("buildChunkedCache", () => {
     }
   }, 120_000);
 
-  // `languages` and `artifacts` are kept for the commits that read them; the
-  // stream filter drops anything not whitelisted, and nothing else would catch
-  // the loss until a feature quietly stopped working.
+  // `languages` is kept for the commands that read it; the stream filter drops
+  // anything not whitelisted, and nothing else would catch the loss until a
+  // feature quietly stopped working. `artifacts` is asserted ABSENT — it is the
+  // one field deliberately given up, to keep the cask cache small.
   it("keeps the cask keys later commands read", async () => {
     if (!(await fileExists(CASK_SOURCE))) {
       return;
@@ -226,7 +229,7 @@ describe("buildChunkedCache", () => {
       const loaded = await loadItemsFromChunks<RawCask>(config, entries);
       loaded.forEach((item) => {
         expect(item.languages?.length ?? 0).toBeGreaterThan(0);
-        expect(item.artifacts?.length ?? 0).toBeGreaterThan(0);
+        expect(item.artifacts).toBeUndefined();
       });
     } finally {
       await rm(dir, { recursive: true, force: true });

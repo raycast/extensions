@@ -181,7 +181,20 @@ const valid_keys = [
   "requirements",
   "disabled",
   "languages",
-  "artifacts",
+  // `artifacts` is deliberately NOT here. Every cask carries one, and keeping
+  // it grew the chunked cask cache from 2.73 MB to 6.75 MB (measured against
+  // the live API on 2026-09-17, 7,735 casks) — inflating exactly the per-page
+  // memory the sliding-window paging exists to cap. Its only reader,
+  // `caskHasSymlinkArtifacts`, already treats an absent field as "unknown, so
+  // offer the action and let the dry-run answer".
+  //
+  // The cost, stated plainly: on Homebrew 7 the Symlinks section now shows for
+  // EVERY cask, including one with nothing to link, where the dry-run then
+  // reports no changes. The Detail view does not rescue this — `CaskInfo`
+  // refetches only when `homepage`, `tap` or `desc` is missing, and all three
+  // survive the filter, so a cached cask never refetches and has no artifacts
+  // there either. Restoring the precise gate means storing a derived boolean
+  // rather than the whole array.
 ];
 
 /**
@@ -356,7 +369,10 @@ export async function downloadRemoteToCache(
 const CHUNK_SIZE = 500;
 
 /** Current schema version for chunked cache */
-export const CHUNKED_CACHE_VERSION = 2;
+// 3: `artifacts` dropped from `valid_keys` (see the note there). Bumped so the
+// oversized v2 cask cache is rebuilt rather than carried until brew next
+// updates, which is what makes the memory saving land for existing users.
+export const CHUNKED_CACHE_VERSION = 3;
 
 /**
  * Get configuration for chunked cache paths.

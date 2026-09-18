@@ -56,9 +56,8 @@ function DoctorContent() {
   // The run this view is showing — not "now", which would tick on every render.
   const checkedAt = useMemo(() => new Date().toLocaleTimeString(), [data]);
 
-  // brew doctor takes several seconds; say so before the process starts.
   if (isLoading && !data) {
-    return <Detail isLoading markdown={"# Running brew doctor…\n\nThis takes a few seconds."} />;
+    return <Detail isLoading />;
   }
 
   // The hook already showed a failure toast with Copy Logs.
