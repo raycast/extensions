@@ -47,7 +47,7 @@ function formatScore(score: number) {
 export default function ConnectCommand() {
   const [isConnecting, setIsConnecting] = useState(false);
 
-  const { data, isLoading, revalidate } = useCachedPromise(
+  const { data, isLoading, error, revalidate } = useCachedPromise(
     async () => {
       if (!(await isTmuxRunning())) {
         throw new TmuxNotRunningError();
@@ -80,8 +80,29 @@ export default function ConnectCommand() {
     }
   }
 
+  const refreshAction = (
+    <Action
+      title="Refresh Sessions"
+      icon={Icon.ArrowClockwise}
+      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      onAction={revalidate}
+    />
+  );
+
   return (
     <List isLoading={isLoading || isConnecting}>
+      <List.EmptyView
+        icon={error ? Icon.Warning : Icon.MagnifyingGlass}
+        title={error ? "Couldn't load sessions" : "No sessions found"}
+        description={
+          error
+            ? error instanceof TmuxNotRunningError
+              ? "Start tmux, then press ⌘R to retry."
+              : "Press ⌘R to retry."
+            : "Press ⌘R to refresh."
+        }
+        actions={<ActionPanel>{refreshAction}</ActionPanel>}
+      />
       {sessions.map((session, index) => {
         const accessories = [];
 
@@ -108,12 +129,7 @@ export default function ConnectCommand() {
             actions={
               <ActionPanel>
                 <Action title="Connect to Session" onAction={() => connect(session.Name)} />
-                <Action
-                  title="Refresh Sessions"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={revalidate}
-                />
+                {refreshAction}
               </ActionPanel>
             }
           />
