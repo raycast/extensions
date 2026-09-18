@@ -1,10 +1,22 @@
-<img src="media/menu-bar-icon.png" width="64" height="64" alt="Menu Bar Icon Search icon">
+<p align="center">
+  <img src="media/menu-bar-icon.png" width="96" alt="Menu Bar Icon Search icon" />
+</p>
 
-# Menu Bar Icon Search
+<h1 align="center">Menu Bar Icon Search</h1>
 
-**Find a menu bar app, press Return, and open its icon without hunting across the top of your screen.**
+<p align="center">
+  Find a menu bar app, press Return, and open its icon.
+</p>
 
-By **Marc Güell Segarra** · [ondori.dev](https://ondori.dev)
+<p align="center">
+  By <strong>Marc Güell Segarra</strong> · <a href="https://ondori.dev">ondori.dev</a>
+</p>
+
+<p align="center">
+  <img src="media/menu-bar-icon-search-preview.png" width="850" alt="Raycast showing menu bar app icons with CleanShot X selected" />
+  <br />
+  <sub>Search by app or item name, then press Return to open its menu.</sub>
+</p>
 
 Menu Bar Icon Search is a Raycast extension for the app icons on the right side of the macOS menu bar. It can also open icons hidden with macOS's **Menu Bar** setting: it reveals the icon, opens it in the real menu bar, and restores its hidden state when the menu closes.
 
