@@ -210,6 +210,17 @@ function isLoopback(hostname: string): boolean {
   );
 }
 
+/**
+ * A legacy (server-encrypted) secret is returned as plaintext, so retrieving one
+ * over plain HTTP would put it on the wire in the clear. Loopback is allowed so
+ * local development still works.
+ */
+function assertSafeTransport(url: URL): void {
+  if (url.protocol !== "https:" && !isLoopback(url.hostname)) {
+    throw new Error("Refusing to fetch a secret over plain HTTP. Use an https:// server.");
+  }
+}
+
 export interface WhisperLink {
   /**
    * Base URL of the server holding the secret, including any path prefix
@@ -228,7 +239,9 @@ export function parseWhisperLink(input: string): WhisperLink {
   if (!trimmed) throw new Error("Paste a Whisper link first.");
 
   if (UUID_RE.test(trimmed)) {
-    return { baseUrl: getWhisperUrl(), id: trimmed, key: null };
+    const configured = getWhisperUrl();
+    assertSafeTransport(new URL(configured));
+    return { baseUrl: configured, id: trimmed, key: null };
   }
 
   let url: URL;
@@ -237,11 +250,7 @@ export function parseWhisperLink(input: string): WhisperLink {
   } catch {
     throw new Error("This does not look like a Whisper link.");
   }
-  if (url.protocol !== "https:" && !isLoopback(url.hostname)) {
-    // A legacy (server-encrypted) secret comes back as plaintext, so retrieving
-    // one over plain HTTP would put it on the wire in the clear.
-    throw new Error("Refusing to fetch a secret over plain HTTP. Ask the sender for an https:// link.");
-  }
+  assertSafeTransport(url);
   const id = url.searchParams.get("shared_secret_id");
   if (!id || !UUID_RE.test(id)) {
     throw new Error("This link has no valid secret id.");

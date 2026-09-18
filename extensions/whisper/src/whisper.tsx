@@ -8,13 +8,9 @@ function override(value: string | undefined): string | undefined {
   return value && value !== USE_DEFAULT ? value : undefined;
 }
 
-interface Arguments {
-  secret: string;
-  duration?: string;
-  selfDestruct?: string;
-}
-
-export default async function main(props: LaunchProps<{ arguments: Arguments }>) {
+// Argument types come from `Arguments.Whisper`, generated from package.json,
+// so they cannot drift from the manifest.
+export default async function main(props: LaunchProps<{ arguments: Arguments.Whisper }>) {
   const secret = props.arguments.secret;
 
   if (!secret.trim()) {
