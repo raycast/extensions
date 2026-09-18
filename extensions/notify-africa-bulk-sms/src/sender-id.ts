@@ -1,12 +1,12 @@
-import { LocalStorage, showToast, Toast } from '@raycast/api';
-import { useEffect, useState } from 'react';
-import { requireSenderId } from './lib.js';
+import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { requireSenderId } from "./lib.js";
 
-const PINNED_SENDER_ID_KEY = 'pinnedSenderId';
+const PINNED_SENDER_ID_KEY = "pinnedSenderId";
 
 export function usePinnedSenderId() {
-  const [senderId, setSenderId] = useState('');
-  const [pinnedSenderId, setPinnedSenderId] = useState('');
+  const [senderId, setSenderId] = useState("");
+  const [pinnedSenderId, setPinnedSenderId] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -30,9 +30,8 @@ export function usePinnedSenderId() {
     } catch (caught) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Sender ID was not pinned',
-        message:
-          caught instanceof Error ? caught.message : 'Check the Sender ID.',
+        title: "Sender ID was not pinned",
+        message: caught instanceof Error ? caught.message : "Check the Sender ID.",
       });
       return;
     }
@@ -42,16 +41,16 @@ export function usePinnedSenderId() {
     setPinnedSenderId(nextSenderId);
     await showToast({
       style: Toast.Style.Success,
-      title: 'Sender ID pinned',
+      title: "Sender ID pinned",
     });
   }
 
   async function clearPinnedSenderId() {
     await LocalStorage.removeItem(PINNED_SENDER_ID_KEY);
-    setPinnedSenderId('');
+    setPinnedSenderId("");
     await showToast({
       style: Toast.Style.Success,
-      title: 'Pinned Sender ID cleared',
+      title: "Pinned Sender ID cleared",
     });
   }
 

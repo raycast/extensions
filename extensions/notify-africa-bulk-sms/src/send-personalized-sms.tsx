@@ -1,42 +1,19 @@
-import {
-  Action,
-  ActionPanel,
-  confirmAlert,
-  Detail,
-  Form,
-  getPreferenceValues,
-  showToast,
-  Toast,
-} from '@raycast/api';
-import { useState } from 'react';
-import { sendSingle } from './api.js';
-import {
-  InputError,
-  parsePersonalizedMessages,
-  requireSenderId,
-  type SmsMessage,
-} from './lib.js';
-import {
-  personalizedResultsMarkdown,
-  type PersonalizedSmsResult,
-} from './result-ui.js';
-import { usePinnedSenderId } from './sender-id.js';
+import { Action, ActionPanel, confirmAlert, Detail, Form, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
+import { sendSingle } from "./api.js";
+import { InputError, parsePersonalizedMessages, requireSenderId, type SmsMessage } from "./lib.js";
+import { personalizedResultsMarkdown, type PersonalizedSmsResult } from "./result-ui.js";
+import { usePinnedSenderId } from "./sender-id.js";
 
-type Preferences = { apiKey: string };
 type FormValues = { senderId: string; messages: string };
 
 export default function SendPersonalizedSms() {
   const [results, setResults] = useState<PersonalizedSmsResult[]>();
   const [senderIdError, setSenderIdError] = useState<string>();
   const [messagesError, setMessagesError] = useState<string>();
+  const [isSending, setIsSending] = useState(false);
   const { apiKey } = getPreferenceValues<Preferences>();
-  const {
-    senderId,
-    setSenderId,
-    pinnedSenderId,
-    pinSenderId,
-    clearPinnedSenderId,
-  } = usePinnedSenderId();
+  const { senderId, setSenderId, pinnedSenderId, pinSenderId, clearPinnedSenderId } = usePinnedSenderId();
 
   if (results) {
     return (
@@ -44,10 +21,7 @@ export default function SendPersonalizedSms() {
         markdown={personalizedResultsMarkdown(results)}
         actions={
           <ActionPanel>
-            <Action
-              title="Send More SMS"
-              onAction={() => setResults(undefined)}
-            />
+            <Action title="Send More SMS" onAction={() => setResults(undefined)} />
           </ActionPanel>
         }
       />
@@ -55,6 +29,8 @@ export default function SendPersonalizedSms() {
   }
 
   async function handleSubmit(values: FormValues) {
+    if (isSending) return;
+
     setSenderIdError(undefined);
     setMessagesError(undefined);
 
@@ -75,47 +51,48 @@ export default function SendPersonalizedSms() {
     }
 
     try {
+      setIsSending(true);
       const confirmed = await confirmAlert({
-        title: 'Send Personalized SMS?',
-        message: `This sends ${messages.length} individual message${messages.length === 1 ? '' : 's'}.`,
-        primaryAction: { title: 'Send SMS' },
+        title: "Send Personalized SMS?",
+        message: `This sends ${messages.length} individual message${messages.length === 1 ? "" : "s"}.`,
+        primaryAction: { title: "Send SMS" },
       });
 
-      if (!confirmed) return;
+      if (!confirmed) {
+        setIsSending(false);
+        return;
+      }
 
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: 'Sending personalized SMS…',
+        title: "Sending personalized SMS…",
       });
       const nextResults = await sendMessages(apiKey, senderId, messages);
-      toast.style = nextResults.every((result) => result.outcome === 'Accepted')
+      toast.style = nextResults.every((result) => result.outcome === "Accepted")
         ? Toast.Style.Success
         : Toast.Style.Failure;
-      toast.title = 'Personalized SMS complete';
+      toast.title = "Personalized SMS complete";
       setResults(nextResults);
     } catch (caught) {
-      const message =
-        caught instanceof Error ? caught.message : 'Unable to send SMS.';
+      const message = caught instanceof Error ? caught.message : "Unable to send SMS.";
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Personalized SMS was not sent',
+        title: "Personalized SMS was not sent",
         message,
       });
+    } finally {
+      setIsSending(false);
     }
   }
 
   return (
     <Form
+      isLoading={isSending}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Review and Send" onSubmit={handleSubmit} />
+          <Action.SubmitForm title={isSending ? "Sending…" : "Review and Send"} onSubmit={handleSubmit} />
           <Action title="Pin Sender ID" onAction={pinSenderId} />
-          {pinnedSenderId ? (
-            <Action
-              title="Clear Pinned Sender ID"
-              onAction={clearPinnedSenderId}
-            />
-          ) : null}
+          {pinnedSenderId ? <Action title="Clear Pinned Sender ID" onAction={clearPinnedSenderId} /> : null}
         </ActionPanel>
       }
     >
@@ -130,9 +107,7 @@ export default function SendPersonalizedSms() {
       <Form.TextArea
         id="messages"
         title="Recipients and Messages"
-        placeholder={
-          '255712345678 | Your verification code is 482901\n255713456789 | Your verification code is 102938'
-        }
+        placeholder={"255712345678 | Your verification code is 482901\n255713456789 | Your verification code is 102938"}
         info="Use one Tanzania phone number | message entry per line."
         error={messagesError}
       />
@@ -141,7 +116,7 @@ export default function SendPersonalizedSms() {
 }
 
 function inputMessage(caught: unknown): string {
-  return caught instanceof InputError ? caught.message : 'Check this field.';
+  return caught instanceof InputError ? caught.message : "Check this field.";
 }
 
 async function sendMessages(
@@ -156,13 +131,13 @@ async function sendMessages(
       const response = await sendSingle(apiKey, senderId, message);
       results.push({
         recipient: message.recipient,
-        outcome: 'Accepted',
+        outcome: "Accepted",
         messageId: response.messageId,
       });
     } catch (caught) {
       results.push({
         recipient: message.recipient,
-        outcome: caught instanceof Error ? caught.message : 'Failed',
+        outcome: caught instanceof Error ? caught.message : "Failed",
       });
     }
   }

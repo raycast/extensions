@@ -30,7 +30,7 @@ Enter Tanzania recipients separated by commas or new lines, then enter one share
 
 ### Send SMS from File
 
-Choose one UTF-8 `.csv` or `.xlsx` file, provide the Sender ID UUID and a shared message, then preview the parsed recipients before sending. The extension reads CSV files and the first XLSX worksheet locally; it accepts a `phone`, `phone_number`, `phone number`, `phoneNumber`, `numbers`, `recipient`, or `msisdn` column (case-insensitive), or a headerless first column of Tanzania numbers. Numbers may use `071...`, `7...`, `255...`, or `+255...` form.
+Choose one UTF-8 `.csv` file, provide the Sender ID UUID and a shared message, then preview the parsed recipients before sending. The extension accepts a `phone`, `phone_number`, `phone number`, `phoneNumber`, `numbers`, `recipient`, or `msisdn` column (case-insensitive), or a headerless first column of Tanzania numbers. Numbers may use `071...`, `7...`, `255...`, or `+255...` form.
 
 The source file and its parsed recipients are never uploaded or saved by the extension.
 

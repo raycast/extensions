@@ -1,4 +1,4 @@
-import type { BulkSendResponse } from './api.js';
+import type { BulkSendResponse } from "./api.js";
 
 export type PersonalizedSmsResult = {
   recipient: string;
@@ -7,18 +7,12 @@ export type PersonalizedSmsResult = {
 };
 
 export function bulkResultMarkdown(result: BulkSendResponse): string {
-  const status =
-    result.rejectedCount > 0
-      ? 'Sent with some rejected messages'
-      : 'Batch accepted by Notify Africa';
+  const status = result.rejectedCount > 0 ? "Sent with some rejected messages" : "Batch accepted by Notify Africa";
   const messageIdRows = result.results
     .map((item, index) => ({ index: index + 1, messageId: item.messageId }))
     .filter((item) => item.messageId)
-    .map(
-      (item) =>
-        `| ${item.index} | \`${escapeTableCell(item.messageId ?? '')}\` |`,
-    )
-    .join('\n');
+    .map((item) => `| ${item.index} | \`${escapeTableCell(item.messageId ?? "")}\` |`)
+    .join("\n");
 
   return `# SMS Send Summary
 
@@ -40,30 +34,26 @@ ${
     ? `| # | Message ID |
 | ---: | --- |
 ${messageIdRows}`
-    : 'No message IDs were returned for this request.'
+    : "No message IDs were returned for this request."
 }`;
 }
 
-export function personalizedResultsMarkdown(
-  results: PersonalizedSmsResult[],
-): string {
-  const accepted = results.filter((result) => result.outcome === 'Accepted');
+export function personalizedResultsMarkdown(results: PersonalizedSmsResult[]): string {
+  const accepted = results.filter((result) => result.outcome === "Accepted");
   const failed = results.length - accepted.length;
   const rows = results
     .map((result, index) => {
-      const status = result.outcome === 'Accepted' ? 'Accepted' : 'Failed';
+      const status = result.outcome === "Accepted" ? "Accepted" : "Failed";
       const detail =
-        result.outcome === 'Accepted'
-          ? (result.messageId ?? 'Accepted without message ID')
-          : result.outcome;
+        result.outcome === "Accepted" ? (result.messageId ?? "Accepted without message ID") : result.outcome;
 
       return `| ${index + 1} | ${result.recipient} | ${status} | ${escapeTableCell(detail)} |`;
     })
-    .join('\n');
+    .join("\n");
 
   return `# Personalized SMS Summary
 
-> ${accepted.length === results.length ? 'All messages were accepted.' : 'Some messages need attention.'}
+> ${accepted.length === results.length ? "All messages were accepted." : "Some messages need attention."}
 
 ## Delivery
 
@@ -84,19 +74,19 @@ export function importPreviewMarkdown(recipients: string[]): string {
   const rows = recipients
     .slice(0, 10)
     .map((recipient, index) => `| ${index + 1} | ${recipient} |`)
-    .join('\n');
+    .join("\n");
   const remaining = recipients.length - 10;
 
   return `# Import Preview
 
-> Ready to send one shared SMS to ${formatNumber(recipients.length)} recipient${recipients.length === 1 ? '' : 's'}.
+> Ready to send one shared SMS to ${formatNumber(recipients.length)} recipient${recipients.length === 1 ? "" : "s"}.
 
 ## Recipients
 
 | # | Phone number |
 | ---: | --- |
 ${rows}
-${remaining > 0 ? `\n${formatNumber(remaining)} more recipient${remaining === 1 ? '' : 's'} will be included.` : ''}
+${remaining > 0 ? `\n${formatNumber(remaining)} more recipient${remaining === 1 ? "" : "s"} will be included.` : ""}
 
 ## Privacy
 
@@ -108,5 +98,5 @@ function formatNumber(value: number): string {
 }
 
 function escapeTableCell(value: string): string {
-  return value.replaceAll('|', '\\|').replaceAll('\n', ' ');
+  return value.replaceAll("|", "\\|").replaceAll("\n", " ");
 }

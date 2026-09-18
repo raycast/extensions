@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notify-africa-bulk-sms",
   "version": "1.0.0",
   "description": "Send personalized bulk SMS with Notify Africa from Raycast.",
@@ -18,8 +19,7 @@
   },
   "packageManager": "npm@10.9.3",
   "dependencies": {
-    "@raycast/api": "^2.4.1",
-    "exceljs": "^4.4.0"
+    "@raycast/api": "^2.4.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -69,7 +69,7 @@
     {
       "name": "send-sms-from-file",
       "title": "Send SMS from File",
-      "description": "Send one SMS body to recipients in a CSV or XLSX file.",
+      "description": "Send one SMS body to recipients in a CSV file.",
       "mode": "view"
     }
   ]
