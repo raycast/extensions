@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api"
 import { useEffect, useState } from "react";
 import {
   openSnapState,
+  pluralize,
   readWorkspaceSummaries,
   SNAPSTATE_DOWNLOAD_URL,
   WorkspaceSummary,
@@ -81,7 +82,7 @@ export default function RestoreWorkspace() {
             icon="icon.png"
             title={workspace.name}
             subtitle={workspaceAccessory(workspace)}
-            accessories={[{ text: `${workspace.windowCount} windows` }]}
+            accessories={[{ text: pluralize(workspace.windowCount, "window") }]}
             actions={
               <ActionPanel>
                 <Action title="Restore Workspace" icon={Icon.Play} onAction={() => restore(workspace)} />
