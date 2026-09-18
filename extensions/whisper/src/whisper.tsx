@@ -1,6 +1,13 @@
 import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { copyConcealed, createSecret, formatDuration, getDefaults, parseDuration } from "./shared";
 
+const USE_DEFAULT = "default";
+
+/** Returns the argument only when it is a real override, not the "use my default" sentinel. */
+function override(value: string | undefined): string | undefined {
+  return value && value !== USE_DEFAULT ? value : undefined;
+}
+
 interface Arguments {
   secret: string;
   duration?: string;
@@ -16,9 +23,13 @@ export default async function main(props: LaunchProps<{ arguments: Arguments }>)
   }
 
   const defaults = getDefaults();
-  const durationSeconds =
-    (props.arguments.duration && parseDuration(props.arguments.duration)) || defaults.durationSeconds;
-  const selfDestruct = props.arguments.selfDestruct ? props.arguments.selfDestruct === "true" : defaults.selfDestruct;
+  // Raycast remembers dropdown arguments between launches, so an explicit
+  // "Use my default" entry keeps a stale choice from silently overriding the
+  // preferences. Anything else is a deliberate one-off override.
+  const durationArg = override(props.arguments.duration);
+  const selfDestructArg = override(props.arguments.selfDestruct);
+  const durationSeconds = (durationArg && parseDuration(durationArg)) || defaults.durationSeconds;
+  const selfDestruct = selfDestructArg ? selfDestructArg === "true" : defaults.selfDestruct;
 
   try {
     await showToast({ style: Toast.Style.Animated, title: "Encrypting secret..." });

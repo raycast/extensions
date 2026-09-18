@@ -7,7 +7,9 @@
 - Links and revealed secrets are copied as concealed so they never appear in Raycast's Clipboard History
 - The quick command masks the secret while you type and offers expiration and self-destruct as dropdowns instead of trailing text
 - New preferences for the default expiration and self-destruct behaviour, applied by every command and the AI tool
-- Secrets larger than 64 KB are rejected before upload with a clear message
+- Secrets larger than 64 KB are rejected before upload with a clear message, measured on the encrypted payload so the limit is exact
+- Retrieval refuses plain-HTTP links to remote servers, and keeps any path prefix in a self-hosted server URL
+- Breaking: the quick command's first argument was renamed from `text` to `secret`, so any Quicklink built on the old name needs updating. Expiration and self-destruct are now dropdowns that default to "Use my default"
 
 ## [Zero-Knowledge Encryption & Multiple Values] - 2026-09-16
 

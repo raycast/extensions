@@ -31,7 +31,7 @@ When you first run the extension, you can optionally configure a custom Whisper 
 
 ### Whisper (Quick Command)
 
-Create a secret link in one shot. The first argument is the secret itself and is masked while you type. The two optional dropdowns override your default expiration (`30m`, `1h`, `24h`, `7d`) and self-destruct behaviour.
+Create a secret link in one shot. The first argument is the secret itself and is masked while you type. The two dropdowns stay on **Use my default** unless you pick an expiration (`30m`, `1h`, `24h`, `7d`) or a self-destruct choice for that run.
 
 **Examples:**
 
@@ -45,7 +45,7 @@ Select any text in the frontmost app and run the command (assign it a hotkey for
 
 ### Retrieve Secret
 
-Paste a Whisper link (it is pre-filled when your clipboard already holds one). The extension checks the link without consuming it, asks for confirmation when the secret is single-view, then fetches the encrypted payload and decrypts it locally with the key from the link's `#k=` fragment. Single secrets open in a detail view with Copy, Show/Hide and Paste actions; Multiple Values secrets open as a list where each value can be copied on its own or all of them as JSON. Values are masked until you choose to show them.
+Paste a Whisper link (it is pre-filled when your clipboard already holds one). Links to remote servers must use `https://`. The extension checks the link without consuming it, asks for confirmation when the secret is single-view, then fetches the encrypted payload and decrypts it locally with the key from the link's `#k=` fragment. Single secrets open in a detail view with Copy, Show/Hide and Paste actions; Multiple Values secrets open as a list where each value can be copied on its own or all of them as JSON. Values are masked until you choose to show them.
 
 ### Create Secret (Form)
 

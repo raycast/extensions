@@ -8,6 +8,9 @@ const MAX_DURATION_SECONDS = 7 * 86400; // 7 days
 /** Server-side cap on the stored payload (see Whisper's MAX_SECRET_SIZE). */
 export const MAX_SECRET_BYTES = 64 * 1024;
 const NONCE_BYTES = 12;
+const TAG_BYTES = 16;
+/** What AES-GCM adds on top of the plaintext: the nonce we prepend + the auth tag. */
+const PAYLOAD_OVERHEAD_BYTES = NONCE_BYTES + TAG_BYTES;
 const KEY_BYTES = 32;
 
 export const DURATION_OPTIONS = [
@@ -138,9 +141,12 @@ export async function createSecret(
   expirationTimestamp: number,
   selfDestruct: boolean,
 ): Promise<string> {
-  const plaintextBytes = Buffer.byteLength(secret, "utf8");
-  if (plaintextBytes > MAX_SECRET_BYTES) {
-    throw new Error(`Secret is too large (${Math.ceil(plaintextBytes / 1024)} KB). The maximum is 64 KB.`);
+  // The server caps the *stored payload* (nonce + ciphertext + tag), not the
+  // plaintext, so account for the overhead or near-limit secrets slip past this
+  // check and fail with a raw server error instead of this message.
+  const payloadBytes = Buffer.byteLength(secret, "utf8") + PAYLOAD_OVERHEAD_BYTES;
+  if (payloadBytes > MAX_SECRET_BYTES) {
+    throw new Error(`Secret is too large (${Math.ceil(payloadBytes / 1024)} KB once encrypted). The maximum is 64 KB.`);
   }
 
   const base = getWhisperUrl();
@@ -191,10 +197,26 @@ export async function createSecret(
 // ---------------------------------------------------------------------------
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** Path a share link points at; everything before it is the server's base URL. */
+const SHARE_PATH = "/get_secret";
+
+function isLoopback(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname === "127.0.0.1" ||
+    hostname === "[::1]" ||
+    hostname === "::1"
+  );
+}
 
 export interface WhisperLink {
-  /** Origin of the server that holds the secret (from the link, or the configured server for a bare id). */
-  origin: string;
+  /**
+   * Base URL of the server holding the secret, including any path prefix
+   * (a server at https://host/whisper keeps the /whisper). Taken from the link,
+   * or from the configured server for a bare id.
+   */
+  baseUrl: string;
   id: string;
   /** base64url key from the #k= fragment; absent on legacy server-encrypted links. */
   key: string | null;
@@ -206,7 +228,7 @@ export function parseWhisperLink(input: string): WhisperLink {
   if (!trimmed) throw new Error("Paste a Whisper link first.");
 
   if (UUID_RE.test(trimmed)) {
-    return { origin: getWhisperUrl(), id: trimmed, key: null };
+    return { baseUrl: getWhisperUrl(), id: trimmed, key: null };
   }
 
   let url: URL;
@@ -215,13 +237,21 @@ export function parseWhisperLink(input: string): WhisperLink {
   } catch {
     throw new Error("This does not look like a Whisper link.");
   }
+  if (url.protocol !== "https:" && !isLoopback(url.hostname)) {
+    // A legacy (server-encrypted) secret comes back as plaintext, so retrieving
+    // one over plain HTTP would put it on the wire in the clear.
+    throw new Error("Refusing to fetch a secret over plain HTTP. Ask the sender for an https:// link.");
+  }
   const id = url.searchParams.get("shared_secret_id");
   if (!id || !UUID_RE.test(id)) {
     throw new Error("This link has no valid secret id.");
   }
   const fragment = url.hash.startsWith("#") ? url.hash.slice(1) : url.hash;
   const key = fragment.startsWith("k=") ? fragment.slice(2) : null;
-  return { origin: url.origin, id, key: key && key.length > 0 ? key : null };
+  // Strip only the share path, so a server hosted under a prefix keeps it.
+  const prefixEnd = url.pathname.lastIndexOf(SHARE_PATH);
+  const prefix = prefixEnd > 0 ? url.pathname.slice(0, prefixEnd) : "";
+  return { baseUrl: url.origin + prefix, id, key: key && key.length > 0 ? key : null };
 }
 
 export function looksLikeWhisperLink(text: string | undefined): boolean {
@@ -247,7 +277,7 @@ export interface SecretMetadata {
 export async function fetchSecretMetadata(link: WhisperLink): Promise<SecretMetadata | null> {
   let response: Response;
   try {
-    response = await fetch(`${link.origin}/secret/${link.id}/meta`);
+    response = await fetch(`${link.baseUrl}/secret/${link.id}/meta`);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Network request failed";
     throw new Error(`Could not reach Whisper server: ${message}`);
@@ -278,7 +308,7 @@ export interface RetrievedSecret {
 export async function retrieveSecret(link: WhisperLink): Promise<RetrievedSecret> {
   let response: Response;
   try {
-    response = await fetch(`${link.origin}/secret/${link.id}?source=raycast`, {
+    response = await fetch(`${link.baseUrl}/secret/${link.id}?source=raycast`, {
       headers: { Accept: "application/json" },
     });
   } catch (err) {
@@ -317,8 +347,15 @@ export async function retrieveSecret(link: WhisperLink): Promise<RetrievedSecret
   return { plaintext: await decryptSecret(link.key, data.secret), selfDestruct, clientEncrypted };
 }
 
+export interface StructuredRow {
+  /** Unique across the payload: a top-level "a › b" cannot collide with section a / key b. */
+  id: string;
+  label: string;
+  value: string;
+}
+
 /** Flattens a Multiple Values payload (top-level and one level of sections) into rows. */
-export function parseStructuredSecret(plaintext: string): { key: string; value: string }[] | null {
+export function parseStructuredSecret(plaintext: string): StructuredRow[] | null {
   let parsed: unknown;
   try {
     parsed = JSON.parse(plaintext);
@@ -327,14 +364,14 @@ export function parseStructuredSecret(plaintext: string): { key: string; value: 
   }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
 
-  const rows: { key: string; value: string }[] = [];
+  const rows: StructuredRow[] = [];
   for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
     if (typeof value === "string") {
-      rows.push({ key, value });
+      rows.push({ id: JSON.stringify([key]), label: key, value });
     } else if (value && typeof value === "object" && !Array.isArray(value)) {
       for (const [subKey, subValue] of Object.entries(value as Record<string, unknown>)) {
         if (typeof subValue !== "string") return null;
-        rows.push({ key: `${key} › ${subKey}`, value: subValue });
+        rows.push({ id: JSON.stringify([key, subKey]), label: `${key} › ${subKey}`, value: subValue });
       }
     } else {
       return null;

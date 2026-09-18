@@ -16,6 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import {
   fetchSecretMetadata,
+  StructuredRow,
   looksLikeWhisperLink,
   parseStructuredSecret,
   parseWhisperLink,
@@ -75,6 +76,13 @@ export default function Command() {
           });
           if (!confirmed) return;
         }
+      } else if (!parsed.key) {
+        // Server predates /meta, so we cannot tell whether this secret is
+        // end-to-end encrypted. Fetching would consume a single-view link and
+        // only then discover we have no key, so refuse before the request.
+        throw new Error(
+          "This link has no #k= key and this server cannot confirm the secret's type. Fetching it could destroy the link without revealing anything \u2014 ask the sender for the full link.",
+        );
       } else {
         // Server predates /meta: we cannot tell whether the link is single-view.
         const confirmed = await confirmAlert({
@@ -184,7 +192,7 @@ function SingleSecretDetail({ secret }: { secret: RetrievedSecret }) {
   );
 }
 
-function StructuredSecretList({ rows, secret }: { rows: { key: string; value: string }[]; secret: RetrievedSecret }) {
+function StructuredSecretList({ rows, secret }: { rows: StructuredRow[]; secret: RetrievedSecret }) {
   const [revealed, setRevealed] = useState(false);
   const toggleAction = (
     <Action
@@ -212,8 +220,8 @@ function StructuredSecretList({ rows, secret }: { rows: { key: string; value: st
       <List.Section title="Your Secrets" subtitle={destructionNote(secret)}>
         {rows.map((row) => (
           <List.Item
-            key={row.key}
-            title={row.key}
+            key={row.id}
+            title={row.label}
             subtitle={revealed ? row.value : "•".repeat(Math.min(row.value.length, 24))}
             icon={Icon.Key}
             actions={
