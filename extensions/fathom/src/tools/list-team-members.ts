@@ -1,6 +1,6 @@
-import { logger } from "@chrismessina/raycast-logger";
 import { listTeamMembers, listTeams } from "../fathom/api";
 import type { TeamMember } from "../types/Types";
+import { logger } from "@chrismessina/raycast-logger";
 
 type Input = {
   /**

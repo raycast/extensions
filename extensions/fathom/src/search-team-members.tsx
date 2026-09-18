@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
-import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { TeamMemberActions } from "./actions/TeamMemberActions";
+import { useMemo, useState } from "react";
 import { listTeamMembers, listTeams } from "./fathom/api";
-import { hasApiKey, isApiKeyKnownInvalid } from "./fathom/auth";
 import type { Paginated, TeamMember } from "./types/Types";
+import { TeamMemberActions } from "./actions/TeamMemberActions";
 import { useDebouncedValue } from "./utils/debounce";
+import { hasApiKey, isApiKeyKnownInvalid } from "./fathom/auth";
 import { classifyError, ErrorType, getUserFriendlyError } from "./utils/errorHandling";
 
 function renderError(error: Error, onRefresh: () => void) {

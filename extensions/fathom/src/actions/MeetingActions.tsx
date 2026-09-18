@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, Keyboard, showHUD } from "@raycast/api";
-import { MeetingSummaryDetail, MeetingTranscriptDetail } from "../search-meetings";
+import { useState, useEffect } from "react";
 import type { Meeting } from "../types/Types";
-import { cacheManager } from "../utils/cacheManager";
 import { exportMeeting } from "../utils/export";
+import { MeetingSummaryDetail, MeetingTranscriptDetail } from "../search-meetings";
 import { MeetingActionItemsDetail } from "../view-action-items";
 import { MeetingDownloadActions } from "./DownloadActions";
 import { RefreshCacheAction } from "./RefreshCacheAction";
+import { cacheManager } from "../utils/cacheManager";
 
 function useFetchingBackground() {
   const [isFetching, setIsFetching] = useState(() => cacheManager.isFetchingBackground());

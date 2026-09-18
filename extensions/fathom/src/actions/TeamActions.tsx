@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import type { Team, TeamMember } from "../types/Types";
-import { showContextualError } from "../utils/errorHandling";
 import { exportTeamMembers } from "../utils/export";
+import { showContextualError } from "../utils/errorHandling";
 
 /**
  * Displays an action panel with various actions related to the given team.

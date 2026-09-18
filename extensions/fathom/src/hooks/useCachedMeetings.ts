@@ -1,9 +1,9 @@
-import { logger } from "@chrismessina/raycast-logger";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { resetApiKeyValidation } from "../fathom/auth";
-import type { ActionItem, Meeting, MeetingFilter } from "../types/Types";
+import type { MeetingFilter, Meeting, ActionItem } from "../types/Types";
 import { searchCachedMeetings, type CachedMeetingData } from "../utils/cache";
 import { cacheManager } from "../utils/cacheManager";
+import { resetApiKeyValidation } from "../fathom/auth";
+import { logger } from "@chrismessina/raycast-logger";
 
 function toError(err: unknown): Error {
   return err instanceof Error ? err : new Error(String(err));

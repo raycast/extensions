@@ -1,10 +1,10 @@
-import fs from "fs";
-import path from "path";
-import { Action, ActionPanel, environment, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, showToast, Toast, environment } from "@raycast/api";
 import type { TeamMember } from "../types/Types";
-import { showContextualError } from "../utils/errorHandling";
 import { exportAsVCard, exportTeamMembers } from "../utils/export";
 import MemberMeetingsView from "../views/MemberMeetingsView";
+import { showContextualError } from "../utils/errorHandling";
+import path from "path";
+import fs from "fs";
 
 export function TeamMemberActions(props: {
   member: TeamMember;

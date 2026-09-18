@@ -45,14 +45,13 @@
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-downloader": "^0.1.4",
+    "@chrismessina/raycast-downloader": "^0.1.5",
     "@chrismessina/raycast-kit": "^0.2.0",
     "@chrismessina/raycast-logger": "^1.5.0",
     "@raycast/api": "^2.2.1",
     "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^20.17.10",
     "@types/react": "19.1.13",
@@ -66,8 +65,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish",
-    "copy-runner": "node -e \"const p=require('path'),f=require('fs'),s=p.join('node_modules','@chrismessina','raycast-downloader','dist','runner.bundle.js');if(!f.existsSync(s))throw new Error('Missing '+s+' — run the package build.');f.copyFileSync(s,p.join('assets','raycast-downloader-runner.js'))\""
+    "publish": "npm run verify-runner && npx @raycast/api@latest publish",
+    "copy-runner": "node -e \"const p=require('path'),f=require('fs'),s=p.join('node_modules','@chrismessina','raycast-downloader','dist','runner.bundle.js');if(!f.existsSync(s))throw new Error('Missing '+s+' — run the package build.');f.copyFileSync(s,p.join('assets','raycast-downloader-runner.js'))\"",
+    "verify-runner": "node -e \"const f=require('fs'),p=require('path'),c=require('crypto');const a=p.join('assets','raycast-downloader-runner.js'),b=p.join('node_modules','@chrismessina','raycast-downloader','dist','runner.bundle.js');const h=x=>{if(!f.existsSync(x))throw new Error('Missing '+x+' \\u2014 run npm install, then npm run copy-runner.');return c.createHash('sha256').update(f.readFileSync(x)).digest('hex')};const A=h(a),B=h(b);if(A!==B){console.error('Runner asset is STALE \\u2014 it does not match the installed package.\\\\n  asset : '+A+'\\\\n  bundle: '+B+'\\\\nRun: npm run copy-runner');process.exit(1)}console.log('runner asset matches the installed bundle ('+A.slice(0,12)+')')\""
   },
   "preferences": [
     {

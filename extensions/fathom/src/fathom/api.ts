@@ -1,9 +1,9 @@
-import { logger } from "@chrismessina/raycast-logger";
-import type { Meeting, MeetingFilter, Paginated, Summary, Team, TeamMember, Transcript } from "../types/Types";
-import { parseTimestamp } from "../utils/dates";
-import { formatTranscriptToMarkdown } from "../utils/formatting";
+import type { MeetingFilter, Paginated, Meeting, Summary, Transcript, Team, TeamMember } from "../types/Types";
+import { getFathomApiKey, markApiKeyValid, markApiKeyInvalid } from "./auth";
 import { isNumber, toStringOrUndefined } from "../utils/typeGuards";
-import { getFathomApiKey, markApiKeyInvalid, markApiKeyValid } from "./auth";
+import { formatTranscriptToMarkdown } from "../utils/formatting";
+import { parseTimestamp } from "../utils/dates";
+import { logger } from "@chrismessina/raycast-logger";
 
 const BASE = "https://api.fathom.ai/external/v1";
 

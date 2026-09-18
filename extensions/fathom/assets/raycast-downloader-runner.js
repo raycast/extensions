@@ -2081,20 +2081,43 @@ function claimOwnerAlive(claim) {
 /**
  * Pull the `If-Range` validators out of a curl header dump.
  *
+ * Returns the LAST response block's validators and nothing else. A dump holds
+ * one block per hop, and only the final one describes the bytes that reached
+ * disk — see the boundary reset below for what carrying one forward costs.
+ *
  * Only a STRONG ETag is usable: RFC 9110 forbids a weak validator in
  * `If-Range`, because two weak-equivalent representations may differ byte for
  * byte — which is exactly the difference a resumed transfer cannot survive.
  * `Last-Modified` is the documented fallback.
  */
 function parseValidators(dump) {
-    const result = {};
-    // A redirect chain dumps several header blocks; the last one wins, since it
-    // describes the response that actually produced the bytes.
+    let result = {};
     for (const line of dump.split(/\r?\n/)) {
+        // A status line starts a new response, and everything learned from the
+        // previous one is DISCARDED rather than carried forward.
+        //
+        // Per-field last-wins is not the same rule and is wrong here: a 302 that
+        // carries an `ETag` followed by a final 200 that carries none leaves the
+        // redirect's validator in place, describing bytes it has never seen. The
+        // next attempt sends it as `If-Range`, the server finds it does not match
+        // and answers 200 instead of 206, curl refuses to append (exit 33), and the
+        // partial is reset — so the resume quietly becomes a full re-download of a
+        // file that may be hundreds of megabytes.
+        if (/^HTTP\/\d(?:\.\d)?\s+\d{3}/i.test(line)) {
+            result = {};
+            continue;
+        }
         const etag = /^etag:\s*(.+)$/i.exec(line);
         if (etag) {
             const value = etag[1].trim();
-            result.etag = /^W\//i.test(value) ? undefined : value;
+            // A weak validator is forbidden in `If-Range`: two weak-equivalent
+            // representations may differ byte for byte, which is exactly the
+            // difference a resumed transfer cannot survive. Deleted rather than set
+            // to undefined so the key is absent, not present-and-empty.
+            if (/^W\//i.test(value))
+                delete result.etag;
+            else
+                result.etag = value;
             continue;
         }
         const modified = /^last-modified:\s*(.+)$/i.exec(line);
@@ -2201,18 +2224,30 @@ function main() {
     const recordPartialForResume = () => {
         const validators = readValidators(payload.partPath);
         const existing = (0, partial_1.readPartialState)(payload.partPath);
+        // Whether THIS attempt got a response at all decides whose validators apply.
+        //
+        // A header dump exists only once curl has read response headers, and from
+        // that moment the bytes this attempt is writing belong to that response —
+        // so its validators are the whole answer, including when it supplied none.
+        // Falling back to an older validator there is the same defect this release
+        // fixes in `parseValidators`, one level up: a validator recorded against
+        // bytes it never described. It is reachable through a weak `ETag`, which
+        // `parseValidators` drops by design, and the fallback would then resurrect
+        // a strong one from an unrelated earlier response and send it as
+        // `If-Range` — precisely what the server just told us not to do.
+        //
+        // NOT keyed on the file's size: curl buffers, so a transfer can be minutes
+        // into a response with a `.part` file still reporting zero bytes. Measured,
+        // and it is why the first version of this check kept the stale validator.
+        const etag = validators ? validators.etag : existing?.etag;
+        const lastModified = validators ? validators.lastModified : existing?.lastModified;
         (0, partial_1.writePartialState)(payload.partPath, {
             v: 1,
             ...(existing?.unsafe ? { unsafe: true } : {}),
             urlHash,
             resourceHash: (0, partial_1.resourceFingerprint)(payload.url),
-            // Validators from THIS response describe the bytes this attempt wrote;
-            // keep the previous ones when the server sent none rather than dropping
-            // the only proof the partial has.
-            ...(validators.etag ?? existing?.etag ? { etag: validators.etag ?? existing?.etag } : {}),
-            ...(validators.lastModified ?? existing?.lastModified
-                ? { lastModified: validators.lastModified ?? existing?.lastModified }
-                : {}),
+            ...(etag ? { etag } : {}),
+            ...(lastModified ? { lastModified } : {}),
         });
     };
     /** Every transient file this attempt owns, gone. The claim goes with them. */
@@ -2327,6 +2362,10 @@ function main() {
         process.exit(1);
         return;
     }
+    // A runner killed mid-transfer leaves its header dump behind, and reading it
+    // as THIS attempt's response is exactly the stale-validator bug one release
+    // over. Cleared before curl can write a new one.
+    discardHeaderDump(payload.partPath);
     const child = (0, node_child_process_1.spawn)("curl", ["-K", configPath], { stdio: ["ignore", "pipe", "pipe"] });
     // The config holds the download URL, which for signed-URL APIs is a bearer
     // credential — so it comes off disk as soon as curl has read it.
@@ -2615,13 +2654,20 @@ function main() {
         process.exit(0);
     });
 }
-/** Read the validators curl dumped, if it got as far as response headers. */
+/**
+ * The validators curl dumped for THIS attempt, or undefined if it never got a
+ * response.
+ *
+ * The two cases must stay distinguishable: an empty object means "this response
+ * carried no usable validator", which is an answer, while undefined means "no
+ * response yet", which is not.
+ */
 function readValidators(partPath) {
     try {
         return (0, partial_1.parseValidators)((0, node_fs_1.readFileSync)((0, partial_1.headerPath)(partPath), "utf8"));
     }
     catch {
-        return {};
+        return undefined;
     }
 }
 function discardHeaderDump(partPath) {
