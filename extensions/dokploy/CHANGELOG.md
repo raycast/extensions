@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [View Service Domains] - {PR_MERGE_DATE}
+## [View Service Domains] - 2026-09-18
 
 - Add a `View Domains` action to Applications and Compose stacks, listing the domains pointing at the service with `Open Domain`, `Copy URL` and `Delete Domain` actions.
 
