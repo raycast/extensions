@@ -16,7 +16,8 @@ import path from "path";
 import os from "os";
 import { mkdtemp, rm, stat } from "fs/promises";
 import { buildChunkedCache, loadIndex, loadItemsFromChunks } from "./cache";
-import type { ChunkedCacheConfig, IndexEntry } from "./types";
+import { compactCaskArtifacts } from "./brew/link";
+import type { CaskArtifact, ChunkedCacheConfig, IndexEntry } from "./types";
 
 const SOURCE_URL = "https://formulae.brew.sh/api/formula.json";
 
@@ -74,7 +75,8 @@ interface RawCask {
   token: string;
   desc?: string;
   languages?: string[];
-  artifacts?: unknown[];
+  artifacts?: CaskArtifact[];
+  has_symlink_artifacts?: boolean;
 }
 
 /** Casks whose real records carry a non-empty `languages[]` (captured 2026-09-14). */
@@ -129,6 +131,9 @@ describe("buildChunkedCache (committed fixtures)", () => {
           c: chunkNumber,
           i: indexInChunk,
         }),
+        undefined,
+        undefined,
+        compactCaskArtifacts,
       );
 
       const caskIndex = await loadIndex(caskConfig);
@@ -137,11 +142,14 @@ describe("buildChunkedCache (committed fixtures)", () => {
       const casks = await loadItemsFromChunks<RawCaskFull>(caskConfig, caskIndex.entries);
       const byToken = new Map(casks.map((c) => [c.token, c]));
       expect(byToken.get("battle-net")?.languages?.length).toBeGreaterThan(0);
-      // `artifacts` is off the whitelist: every cask carries one and keeping it
-      // more than doubled the cask cache. 1password-cli is the fixture that
-      // HAS a `binary` stanza, so if the filter ever lets the field back in,
-      // this is where it shows up.
+      // `artifacts` reaches the build — it has to, to be read — but is reduced
+      // to one boolean before it is written. 1password-cli is the fixture that
+      // HAS a `binary` stanza and 0-ad is the one that does not, so both halves
+      // of the derivation are asserted against real records; if the array ever
+      // survives to disk again, this is where it shows up.
       expect(byToken.get("1password-cli")?.artifacts).toBeUndefined();
+      expect(byToken.get("1password-cli")?.has_symlink_artifacts).toBe(true);
+      expect(byToken.get("0-ad")?.has_symlink_artifacts).toBe(false);
       expect(byToken.get("0-ad")?.depends_on?.macos).toBeDefined();
     } finally {
       await rm(dir, { recursive: true, force: true });
@@ -198,8 +206,9 @@ describe("buildChunkedCache", () => {
 
   // `languages` is kept for the commands that read it; the stream filter drops
   // anything not whitelisted, and nothing else would catch the loss until a
-  // feature quietly stopped working. `artifacts` is asserted ABSENT — it is the
-  // one field deliberately given up, to keep the cask cache small.
+  // feature quietly stopped working. `artifacts` is asserted ABSENT and its
+  // derived flag PRESENT — the array is what keeps the cask cache small by not
+  // being stored, and the flag is the whole reason it is still parsed.
   it("keeps the cask keys later commands read", async () => {
     if (!(await fileExists(CASK_SOURCE))) {
       return;
@@ -214,13 +223,21 @@ describe("buildChunkedCache", () => {
     };
 
     try {
-      await buildChunkedCache<RawCask>(CASK_SOURCE, CASK_SOURCE_URL, config, (item, chunkNumber, indexInChunk) => ({
-        id: item.token,
-        n: item.token.toLowerCase(),
-        d: item.desc?.toLowerCase(),
-        c: chunkNumber,
-        i: indexInChunk,
-      }));
+      await buildChunkedCache<RawCask>(
+        CASK_SOURCE,
+        CASK_SOURCE_URL,
+        config,
+        (item, chunkNumber, indexInChunk) => ({
+          id: item.token,
+          n: item.token.toLowerCase(),
+          d: item.desc?.toLowerCase(),
+          c: chunkNumber,
+          i: indexInChunk,
+        }),
+        undefined,
+        undefined,
+        compactCaskArtifacts,
+      );
 
       const index = await loadIndex(config);
       const entries = index.entries.filter((entry) => WITH_LANGUAGES.includes(entry.id));
@@ -230,6 +247,7 @@ describe("buildChunkedCache", () => {
       loaded.forEach((item) => {
         expect(item.languages?.length ?? 0).toBeGreaterThan(0);
         expect(item.artifacts).toBeUndefined();
+        expect(typeof item.has_symlink_artifacts).toBe("boolean");
       });
     } finally {
       await rm(dir, { recursive: true, force: true });

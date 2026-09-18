@@ -37,6 +37,7 @@ import { isCask, normalizeOutdatedResults } from "./helpers";
 import { execBrew, execBrewJson } from "./commands";
 import { parseBrewVulns, VulnResults } from "./vulns";
 import { invalidateBrewMajorVersion } from "./brew-version";
+import { compactCaskArtifacts } from "./link";
 import { brewLogger, cacheLogger } from "../logger";
 
 /// Cache Paths
@@ -60,6 +61,7 @@ const caskRemote: ChunkedRemote<Cask> = {
   url: caskURL,
   cachePath: caskCachePath,
   chunkedConfig: getChunkedCacheConfig("cask"),
+  compact: compactCaskArtifacts,
 };
 
 /** Extract index entry from a Formula */
@@ -663,7 +665,15 @@ async function ensureChunkedCache<T>(
     await downloadRemoteToCache(remote.url, remote.cachePath, onProgress, signal);
 
     // Stream the downloaded file into chunks + index + meta.
-    await buildChunkedCache(remote.cachePath, remote.url, remote.chunkedConfig, extractIndex, onProgress, signal);
+    await buildChunkedCache(
+      remote.cachePath,
+      remote.url,
+      remote.chunkedConfig,
+      extractIndex,
+      onProgress,
+      signal,
+      remote.compact,
+    );
     return;
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") throw err;

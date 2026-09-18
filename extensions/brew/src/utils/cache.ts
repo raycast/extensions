@@ -181,20 +181,15 @@ const valid_keys = [
   "requirements",
   "disabled",
   "languages",
-  // `artifacts` is deliberately NOT here. Every cask carries one, and keeping
-  // it grew the chunked cask cache from 2.73 MB to 6.75 MB (measured against
-  // the live API on 2026-09-17, 7,735 casks) — inflating exactly the per-page
-  // memory the sliding-window paging exists to cap. Its only reader,
-  // `caskHasSymlinkArtifacts`, already treats an absent field as "unknown, so
-  // offer the action and let the dry-run answer".
-  //
-  // The cost, stated plainly: on Homebrew 7 the Symlinks section now shows for
-  // EVERY cask, including one with nothing to link, where the dry-run then
-  // reports no changes. The Detail view does not rescue this — `CaskInfo`
-  // refetches only when `homepage`, `tap` or `desc` is missing, and all three
-  // survive the filter, so a cached cask never refetches and has no artifacts
-  // there either. Restoring the precise gate means storing a derived boolean
-  // rather than the whole array.
+  // `artifacts` survives the filter but is NOT stored. Every cask carries one,
+  // and keeping the arrays puts the chunked cask cache at 6.75 MB — inflating
+  // exactly the per-page memory the sliding-window paging exists to cap. It
+  // still has to reach the build to be read at all, so `compactCaskArtifacts`
+  // (the `compact` hook, passed by `caskRemote`) derives the one boolean the UI
+  // asks of it and drops the array before the record is written to a chunk.
+  // That leaves the chunks at 2.79 MB with the Symlinks section still gated
+  // precisely — measured against the live API on 2026-09-18, 7,728 casks.
+  "artifacts",
 ];
 
 /**
@@ -372,7 +367,10 @@ const CHUNK_SIZE = 500;
 // 3: `artifacts` dropped from `valid_keys` (see the note there). Bumped so the
 // oversized v2 cask cache is rebuilt rather than carried until brew next
 // updates, which is what makes the memory saving land for existing users.
-export const CHUNKED_CACHE_VERSION = 3;
+// 4: `artifacts` reduced to the derived `has_symlink_artifacts` instead of
+// being dropped outright, so the Symlinks section is gated precisely again. A
+// v3 cask chunk has neither field and would leave every cask reading "unknown".
+export const CHUNKED_CACHE_VERSION = 4;
 
 /**
  * Get configuration for chunked cache paths.
@@ -458,6 +456,12 @@ export async function buildChunkedCache<T>(
   extractIndex: IndexExtractor<T>,
   onProgress?: DownloadProgressCallback,
   signal?: AbortSignal,
+  /**
+   * Shrink each record before it is written to a chunk. Runs on the freshly
+   * parsed object, which nothing else holds, so it may mutate in place; see
+   * `compactCaskArtifacts`. Omitted for formulae, which store what they parse.
+   */
+  compact?: (item: T) => T,
 ): Promise<void> {
   // Check for abort before starting
   if (signal?.aborted) {
@@ -526,7 +530,9 @@ export async function buildChunkedCache<T>(
 
     pipeline.on("data", (data) => {
       if (data && typeof data === "object" && "value" in data) {
-        const item = data.value as T;
+        // Compact BEFORE indexing, so the index is extracted from the record
+        // that will actually be on disk rather than from a fuller one.
+        const item = compact ? compact(data.value as T) : (data.value as T);
         const indexInChunk = currentChunk.length;
 
         // Build index entry

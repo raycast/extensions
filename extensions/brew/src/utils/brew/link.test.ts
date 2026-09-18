@@ -11,8 +11,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { caskHasSymlinkArtifacts, parseCaskLinkDryRun } from "./link";
-import type { CaskArtifact } from "../types";
+import { caskHasSymlinkArtifacts, compactCaskArtifacts, parseCaskLinkDryRun } from "./link";
+import type { Cask, CaskArtifact } from "../types";
 
 describe("parseCaskLinkDryRun", () => {
   it("reads the single path of an unlink", () => {
@@ -97,5 +97,38 @@ describe("caskHasSymlinkArtifacts", () => {
 
   it("is undefined when the record predates the field", () => {
     expect(caskHasSymlinkArtifacts({})).toBeUndefined();
+  });
+
+  it("reads the derived flag when the array is gone", () => {
+    expect(caskHasSymlinkArtifacts({ has_symlink_artifacts: true })).toBe(true);
+    expect(caskHasSymlinkArtifacts({ has_symlink_artifacts: false })).toBe(false);
+  });
+
+  it("prefers the array over a stale derived flag", () => {
+    expect(caskHasSymlinkArtifacts({ artifacts: fontInter, has_symlink_artifacts: true })).toBe(false);
+  });
+});
+
+describe("compactCaskArtifacts", () => {
+  it("replaces the array with the answer read from it", () => {
+    expect(compactCaskArtifacts({ artifacts: [{ binary: ["op"] }] })).toEqual({ has_symlink_artifacts: true });
+    expect(compactCaskArtifacts({ artifacts: [{ font: ["Inter.ttf"] }] })).toEqual({ has_symlink_artifacts: false });
+  });
+
+  it("drops the variations that smuggle a second copy of the arrays", () => {
+    const record: Pick<Cask, "artifacts" | "has_symlink_artifacts"> & {
+      variations?: unknown;
+      language_variations?: unknown;
+    } = {
+      artifacts: [{ binary: ["op"] }],
+      variations: { sequoia: { artifacts: [{ binary: ["op"] }] } },
+      language_variations: [{ artifacts: [] }],
+    };
+    expect(compactCaskArtifacts(record)).toEqual({ has_symlink_artifacts: true });
+  });
+
+  it("leaves a record with no artifacts unknown rather than claiming false", () => {
+    const record: Pick<Cask, "artifacts" | "has_symlink_artifacts"> & { token: string } = { token: "acme" };
+    expect(compactCaskArtifacts(record)).toEqual({ token: "acme" });
   });
 });

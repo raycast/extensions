@@ -33,15 +33,49 @@ const CASK_SYMLINK_STANZAS = ["binary", "manpage", "bash_completion", "zsh_compl
 /**
  * Whether this cask has anything link/unlink could change.
  *
- * `undefined` — not `false` — when the record carries no `artifacts` at all
- * (an older chunk cache): unknown means offer the actions and let the dry-run
- * answer, rather than hiding a working action on missing evidence.
+ * `artifacts` is the source of truth and is read first — a record straight from
+ * `brew info --json=v2` always carries it. The chunked cache does not: it keeps
+ * `has_symlink_artifacts`, the same answer derived at build time, because the
+ * array itself more than doubled the cache (see `valid_keys` in `cache.ts`).
+ *
+ * `undefined` — not `false` — when neither is present (a chunk cache written
+ * before the derived flag existed): unknown means offer the actions and let the
+ * dry-run answer, rather than hiding a working action on missing evidence.
  */
-export function caskHasSymlinkArtifacts(cask: Pick<Cask, "artifacts">): boolean | undefined {
-  if (!cask.artifacts) return undefined;
-  return cask.artifacts.some((artifact) =>
-    CASK_SYMLINK_STANZAS.some((stanza) => Object.prototype.hasOwnProperty.call(artifact, stanza)),
-  );
+export function caskHasSymlinkArtifacts(cask: Pick<Cask, "artifacts" | "has_symlink_artifacts">): boolean | undefined {
+  if (cask.artifacts) {
+    return cask.artifacts.some((artifact) =>
+      CASK_SYMLINK_STANZAS.some((stanza) => Object.prototype.hasOwnProperty.call(artifact, stanza)),
+    );
+  }
+  return cask.has_symlink_artifacts;
+}
+
+/**
+ * Replace a cask's `artifacts[]` with the one bit of it the UI reads.
+ *
+ * Called once per record while the chunked cache is being built, on an object
+ * that nothing else has seen yet — so it mutates rather than copying 7,700
+ * records. A cask with no `artifacts` at all is left untouched: the field is
+ * absent because the source said nothing, and writing `false` there would turn
+ * "unknown" into a claim the data does not support.
+ *
+ * `variations` and `language_variations` go too. Neither is on the cache's
+ * whitelist and nothing reads either, but `stream-json`'s filter matches PATHS
+ * rather than top-level keys, so `variations.<os>.artifacts` matches on
+ * `artifacts` and drags its whole parent subtree through — a second, per-OS
+ * copy of the arrays, 900 KB of it across the catalogue (measured 2026-09-18).
+ * Dropping the top-level array while leaving those would give most of the
+ * saving back.
+ */
+export function compactCaskArtifacts<T extends Pick<Cask, "artifacts" | "has_symlink_artifacts">>(cask: T): T {
+  const has = caskHasSymlinkArtifacts(cask);
+  if (has !== undefined) cask.has_symlink_artifacts = has;
+  delete cask.artifacts;
+  const leaked = cask as T & { variations?: unknown; language_variations?: unknown };
+  delete leaked.variations;
+  delete leaked.language_variations;
+  return cask;
 }
 
 const DRY_RUN_HEADER = /^Would (link|remove):$/;

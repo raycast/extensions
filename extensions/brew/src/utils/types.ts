@@ -58,6 +58,14 @@ export interface Cask extends Installable {
   /** From `brew info --json=v2` and the formulae.brew.sh index. Absent on records that predate it. */
   artifacts?: CaskArtifact[];
   /**
+   * Derived, not from brew: whether `artifacts[]` held a stanza that
+   * `brew link --cask` would touch. The chunked cache stores this in place of
+   * the array, which is far larger than the one bit read from it. Absent on
+   * chunks written before the flag existed, and on live `brew info` records,
+   * which carry the array itself — read both through `caskHasSymlinkArtifacts`.
+   */
+  has_symlink_artifacts?: boolean;
+  /**
    * Language codes the cask can be installed as (`brew install --language=`).
    * Empty for almost every cask; absent from records that predate the field.
    */
@@ -328,4 +336,10 @@ export interface ChunkedRemote<T> extends Remote<T> {
   index?: CacheIndex;
   /** In-flight index fetch for deduplication */
   indexFetch?: Promise<CacheIndex>;
+  /**
+   * Shrink a record before it is written to a chunk — the hook for a field
+   * worth reading but not worth storing whole (see `compactCaskArtifacts`).
+   * Runs on a freshly parsed object, so it may mutate in place.
+   */
+  compact?: (item: T) => T;
 }
