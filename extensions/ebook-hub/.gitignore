@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+raycast-env.d.ts
+.raycast-swift-build/
+.DS_Store
+*.log
+.claude/settings.local.json
+# CocoIndex Code (ccc)
+/.cocoindex_code/
