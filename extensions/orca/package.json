@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "orca",
   "title": "Orca",
-  "description": "Inspect and control agents running in the Orca orchestrator",
+  "description": "Unofficial extension for the Orca agent orchestrator: see which agents are waiting for input and start new ones",
   "icon": "icon.png",
   "author": "dmitry_s",
   "categories": [

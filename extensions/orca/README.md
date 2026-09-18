@@ -2,6 +2,10 @@
 
 Raycast extension for the [Orca](https://orca.stably.ai) agent orchestrator.
 
+> Unofficial and community-maintained. Not affiliated with, endorsed by or
+> supported by Stably, the makers of Orca. The icon is Orca's own app icon,
+> used to make the extension recognisable.
+
 Its job is to answer one question fast: **which agent is stuck waiting on me?**
 
 ## Commands
@@ -181,5 +185,6 @@ Tests cover the pure functions in `src/orca.ts` — the join, the filters, the
 section order, the summary — against fixtures in `tests/fixtures/`, which are
 real snapshots of a running Orca captured while an agent was blocked.
 
-The icon is an original drawing — an orca, matching the app this extension
-drives. It is not the app's own mark.
+The icon is Orca's own app icon, taken from
+`Orca.app/Contents/Resources/icon.icns`, the way other community extensions use
+the icon of the app they drive.
