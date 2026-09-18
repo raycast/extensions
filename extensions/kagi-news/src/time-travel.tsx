@@ -1,11 +1,13 @@
 // time-travel.tsx
 // Time Travel command - browse Kagi News archives by selecting a specific date
 
-import { List, Action, ActionPanel, Icon, getPreferenceValues, Form } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, getPreferenceValues, Form, Color } from "@raycast/api";
 import { useState } from "react";
 import { useCategoryFeed } from "./hooks/useCategoryFeed";
-import { useFetch, useCachedState } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import { useBatchesByDate } from "./hooks/useBatchesByDate";
+import { useFavoriteCategories } from "./hooks/useFavoriteCategories";
+import { FavoritesAction } from "./components/FavoritesAction";
 import type { BatchItem } from "./interfaces";
 import { ArticleDetail } from "./views/ArticleDetail";
 import { EventDetail } from "./views/EventDetail";
@@ -15,6 +17,7 @@ import { CategoryItem } from "./interfaces";
 
 interface BatchCategoryResponse {
   id: string;
+  categoryId: string;
   categoryName: string;
 }
 
@@ -114,7 +117,10 @@ function BatchSelectorScreen({
 // Article List Component
 function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: string; onBackToBatches: () => void }) {
   const preferences = getPreferenceValues<Preferences>();
-  const [selectedCategory, setSelectedCategory] = useCachedState<string>("time-travel-selected-category", "");
+  // Not persisted across sessions: category ids are scoped to this batch, so a value cached
+  // from a previous batch would be stale and briefly fail before self-correcting (see onData below)
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const { isFavorite } = useFavoriteCategories();
 
   const { data: categoriesData, isLoading: loadingCategories } = useFetch<BatchCategoriesData>(
     selectedBatch
@@ -141,21 +147,30 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
     categoriesData?.categories?.map((cat: BatchCategoryResponse) => ({
       id: cat.id,
       name: cat.categoryName,
+      categoryId: cat.categoryId,
     })) || [];
 
   if (categoriesData?.hasOnThisDay) {
     categories.push({
       id: "onthisday",
       name: "Today in History",
+      categoryId: "onthisday",
     });
   }
 
   categories.push({
     id: "chaos",
     name: "Chaos Index",
+    categoryId: "chaos",
   });
 
-  const sortedCategories = categories.sort((a, b) => a.name.localeCompare(b.name));
+  // Sort categories: favorites first (alphabetically), then others (alphabetically), matching Daily News
+  const sortedCategories = [
+    ...categories.filter((cat) => isFavorite(cat.categoryId)).sort((a, b) => a.name.localeCompare(b.name)),
+    ...categories.filter((cat) => !isFavorite(cat.categoryId)).sort((a, b) => a.name.localeCompare(b.name)),
+  ];
+
+  const currentCategory = sortedCategories.find((cat) => cat.id === selectedCategory);
 
   const {
     articles,
@@ -177,7 +192,14 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
           onChange={(newValue) => setSelectedCategory(newValue)}
         >
           {sortedCategories.map((category) => (
-            <List.Dropdown.Item key={category.id} title={category.name} value={category.id} />
+            <List.Dropdown.Item
+              key={category.id}
+              title={category.name}
+              icon={
+                isFavorite(category.categoryId) ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.StarDisabled
+              }
+              value={category.id}
+            />
           ))}
         </List.Dropdown>
       }
@@ -207,6 +229,7 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
                   icon={Icon.Eye}
                   target={<ChaosIndexDetail score={chaosIndex.score} description={chaosIndex.description} />}
                 />
+                <FavoritesAction category={currentCategory} />
               </ActionPanel>
             }
           />
@@ -229,6 +252,7 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
                     actions={
                       <ActionPanel>
                         <Action.Push title="View Event" icon={Icon.Eye} target={<EventDetail event={event} />} />
+                        <FavoritesAction category={currentCategory} />
                       </ActionPanel>
                     }
                   />
@@ -245,6 +269,7 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
                     actions={
                       <ActionPanel>
                         <Action.Push title="View Event" icon={Icon.Eye} target={<EventDetail event={event} />} />
+                        <FavoritesAction category={currentCategory} />
                       </ActionPanel>
                     }
                   />
@@ -264,6 +289,7 @@ function ArticleListScreen({ selectedBatch, onBackToBatches }: { selectedBatch: 
             actions={
               <ActionPanel>
                 <Action.Push title="View Article" icon={Icon.Eye} target={<ArticleDetail article={article} />} />
+                <FavoritesAction category={currentCategory} />
               </ActionPanel>
             }
           />

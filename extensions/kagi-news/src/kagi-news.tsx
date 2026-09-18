@@ -10,29 +10,18 @@ import { stripHtml } from "./utils";
 import { ArticleDetail } from "./views/ArticleDetail";
 import { EventDetail } from "./views/EventDetail";
 import { ChaosIndexDetail } from "./views/ChaosIndexDetail";
-import { Category } from "./interfaces";
-
-// Extracted favorites action component
-function FavoritesAction({ category }: { category: Category | undefined }) {
-  const { isFavorite, toggleFavorite } = useFavoriteCategories();
-
-  if (!category) return null;
-
-  return (
-    <Action
-      title={isFavorite(category.id) ? "Remove from Favorites" : "Add to Favorites"}
-      icon={isFavorite(category.id) ? Icon.StarDisabled : { source: Icon.Star, tintColor: Color.Yellow }}
-      onAction={() => toggleFavorite(category.id)}
-    />
-  );
-}
+import { FavoritesAction } from "./components/FavoritesAction";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  // Persisted across days as the stable categoryId slug (e.g. "world"), never the per-batch id
   const [selectedCategory, setSelectedCategory] = useCachedState<string>("selected-category", "");
 
   const { categories, isLoading: loadingCategories, error: categoriesError } = useCategories();
   const { isFavorite } = useFavoriteCategories();
+
+  // Resolve the persisted slug to this batch's actual category (and its per-batch id)
+  const currentCategory = categories.find((cat) => cat.categoryId === selectedCategory);
 
   const {
     articles,
@@ -42,16 +31,13 @@ export default function Command() {
     error: contentError,
     isOnThisDay,
     isChaosIndex,
-  } = useCategoryFeed(selectedCategory, preferences.language);
+  } = useCategoryFeed(currentCategory?.id ?? "", preferences.language);
 
   // Sort categories: favorites first (alphabetically), then others (alphabetically)
   const sortedCategories = [
-    ...categories.filter((cat) => isFavorite(cat.id)).sort((a, b) => a.name.localeCompare(b.name)),
-    ...categories.filter((cat) => !isFavorite(cat.id)).sort((a, b) => a.name.localeCompare(b.name)),
+    ...categories.filter((cat) => isFavorite(cat.categoryId)).sort((a, b) => a.name.localeCompare(b.name)),
+    ...categories.filter((cat) => !isFavorite(cat.categoryId)).sort((a, b) => a.name.localeCompare(b.name)),
   ];
-
-  // Get current category for action
-  const currentCategory = categories.find((cat) => cat.id === selectedCategory);
 
   return (
     <List
@@ -64,10 +50,12 @@ export default function Command() {
         >
           {sortedCategories.map((category) => (
             <List.Dropdown.Item
-              key={category.id}
+              key={category.categoryId}
               title={category.name}
-              icon={isFavorite(category.id) ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.StarDisabled}
-              value={category.id}
+              icon={
+                isFavorite(category.categoryId) ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.StarDisabled
+              }
+              value={category.categoryId}
             />
           ))}
         </List.Dropdown>
