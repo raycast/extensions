@@ -1,5 +1,5 @@
-import { accessSync, constants, copyFileSync, existsSync } from "fs";
-import { Clipboard } from "@raycast/api";
+import { accessSync, constants, copyFileSync, existsSync, statSync } from "fs";
+import path from "path";
 import tempy from "tempy";
 
 import { IGif } from "../models/gif";
@@ -13,7 +13,7 @@ import {
 } from "./cachedGifs";
 import { isSavedNow } from "./localGifs";
 
-export default async function copyFileToClipboard(gif: IGif, service: CacheableService | null) {
+export default async function resolveGifFile(gif: IGif, service: CacheableService | null) {
   const displayName = getDisplayName(gif);
   // Without a resolved provider there is no safe cache identity, so skip the cache entirely
   // rather than sharing one namespace between providers.
@@ -22,13 +22,17 @@ export default async function copyFileToClipboard(gif: IGif, service: CacheableS
   if (cacheKey) {
     const staged = await stageFromCache(cacheKey, displayName);
     if (staged) {
-      await copyToClipboard(staged);
-      return staged;
+      return verifyGifFile(staged);
     }
   }
 
   // Download the file if it's not found in the cache
-  const response = await fetch(gif.download_url);
+  let response: Response;
+  try {
+    response = await fetch(gif.download_url);
+  } catch (error) {
+    throw new Error("Failed to download GIF", { cause: error });
+  }
 
   if (response.status !== 200) {
     throw new Error(`GIF file download failed. Server responded with ${response.status}`);
@@ -51,12 +55,11 @@ export default async function copyFileToClipboard(gif: IGif, service: CacheableS
     await cacheIfStillFavorite(file, cacheKey, gif, service);
   }
 
-  await copyToClipboard(file);
-  return file;
+  return verifyGifFile(file);
 }
 
 /**
- * Caching is an optimisation, so a failure here must not fail the copy the user asked for.
+ * Caching is an optimisation, so a failure here must not fail the operation the user asked for.
  * Membership is re-read rather than passed in, because the GIF can leave Favorites while the
  * download above is in flight — a stale flag would recreate the entry that removal just evicted.
  */
@@ -102,11 +105,10 @@ async function stageFromCache(cacheKey: string, displayName: string) {
   return staged;
 }
 
-async function copyToClipboard(file: string) {
-  try {
-    await Clipboard.copy({ file });
-  } catch (e) {
-    const error = e as Error;
-    throw new Error(`Failed to copy GIF: "${error.message}"`);
+function verifyGifFile(file: string) {
+  if (!path.isAbsolute(file) || !statSync(file, { throwIfNoEntry: false })?.isFile()) {
+    throw new Error("Resolved GIF file is missing or its path is not absolute");
   }
+  accessSync(file, constants.R_OK);
+  return file;
 }

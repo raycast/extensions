@@ -3,7 +3,7 @@ import { execFile } from "child_process";
 import { existsSync, mkdirSync } from "fs";
 import { readFile, writeFile, unlink } from "fs/promises";
 import { promisify } from "util";
-import { Clipboard, environment } from "@raycast/api";
+import { environment } from "@raycast/api";
 import tempy from "tempy";
 
 import { IGif } from "../models/gif";
@@ -119,7 +119,7 @@ guard CGImageDestinationFinalize(destination) else {
 }
 `;
 
-export default async function copyGifAsSquareToClipboard(gif: IGif) {
+export default async function resolveSquareGifFile(gif: IGif) {
   if (process.platform !== "darwin") {
     throw new Error("Copy GIF as Square is only supported on macOS");
   }
@@ -138,7 +138,6 @@ export default async function copyGifAsSquareToClipboard(gif: IGif) {
   try {
     await ensureScriptFile();
     await execFileAsync("/usr/bin/swift", [scriptFile, inputFile, file]);
-    await Clipboard.copy({ file });
   } finally {
     await unlink(inputFile).catch(() => undefined);
   }
