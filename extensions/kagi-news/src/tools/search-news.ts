@@ -29,6 +29,10 @@ type Input = {
 };
 
 export default async function (input: Input) {
+  if (input.query.trim().length < 3) {
+    return { error: "Search query must be at least 3 characters long." };
+  }
+
   const preferences = getPreferenceValues<Preferences>();
   const limit = Math.min(Math.max(input.limit ?? 8, 1), 15);
   const categoryFilter = input.category?.trim().toLowerCase();
@@ -56,7 +60,9 @@ export default async function (input: Input) {
     query: input.query,
     category: input.category,
     totalCount: categoryFilter ? undefined : totalCount,
-    hasMore: categoryFilter ? matchingResults.length > limit : hasMore,
+    // With a category filter, more matches could exist beyond the one fetched page even if
+    // this page's own matches fit within `limit` - so still defer to the raw API's hasMore.
+    hasMore: categoryFilter ? matchingResults.length > limit || hasMore : hasMore,
     stories: articles.map((article, index) => ({
       ...toAIStorySummary(article),
       category: limitedResults[index].categoryName || article.category,

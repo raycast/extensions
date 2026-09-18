@@ -3,6 +3,7 @@
 
 import { List, Action, ActionPanel, Icon, getPreferenceValues, Color } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import { useEffect } from "react";
 import { useCategoryFeed } from "./hooks/useCategoryFeed";
 import { useCategories } from "./hooks/useCategories";
 import { useFavoriteCategories } from "./hooks/useFavoriteCategories";
@@ -22,6 +23,16 @@ export default function Command() {
 
   // Resolve the persisted slug to this batch's actual category (and its per-batch id)
   const currentCategory = categories.find((cat) => cat.categoryId === selectedCategory);
+
+  // Fall back to World (or the first category) if the persisted selection doesn't match any
+  // category today - e.g. right after upgrading from a version that cached a different kind of
+  // identifier, or if a previously selected category simply isn't in today's batch.
+  useEffect(() => {
+    if (!loadingCategories && categories.length > 0 && !currentCategory) {
+      const fallback = categories.find((cat) => cat.categoryId === "world") || categories[0];
+      setSelectedCategory(fallback.categoryId);
+    }
+  }, [loadingCategories, categories, currentCategory, setSelectedCategory]);
 
   const {
     articles,
