@@ -40,7 +40,10 @@ export function expandHome(path: string): string {
 
 export function collapseHome(path: string): string {
   const home = homedir();
-  return path.startsWith(home) ? `~${path.slice(home.length)}` : path;
+  if (path === home) {
+    return "~";
+  }
+  return path.startsWith(`${home}/`) ? `~${path.slice(home.length)}` : path;
 }
 
 export function databasePath(): string {
@@ -107,6 +110,9 @@ export async function openInWu(paths: string[], newWindow: boolean): Promise<voi
   const application = await wuApp();
   if (!application) {
     throw new Error("Wu is not installed.");
+  }
+  if (newWindow) {
+    throw new Error("Opening a new window needs Wu's command line tool. Install it from the Wu menu.");
   }
   await run("open", ["-a", application.path, ...paths]);
 }

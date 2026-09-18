@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { parse } from "smol-toml";
 import { extensionsDir } from "./wu";
 
 type InstalledExtension = {
@@ -48,14 +49,19 @@ export default function Command() {
 
 async function loadInstalledExtensions(): Promise<InstalledExtension[]> {
   const root = extensionsDir();
-  const entries = await readdir(root, { withFileTypes: true }).catch(() => []);
+  const entries = await readdir(root, { withFileTypes: true }).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === "ENOENT") {
+      return [];
+    }
+    throw error;
+  });
   const extensions = await Promise.all(
     entries
       .filter((entry) => entry.isDirectory())
       .map(async (entry) => {
         const path = join(root, entry.name);
         const manifest = await readFile(join(path, "extension.toml"), "utf8").catch(() => "");
-        const fields = parseStringFields(manifest);
+        const fields = stringFields(manifest);
         return {
           id: fields.id ?? entry.name,
           name: fields.name ?? entry.name,
@@ -69,12 +75,17 @@ async function loadInstalledExtensions(): Promise<InstalledExtension[]> {
   return extensions.sort((left, right) => left.name.localeCompare(right.name));
 }
 
-function parseStringFields(toml: string): Record<string, string> {
+function stringFields(toml: string): Record<string, string> {
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = parse(toml);
+  } catch {
+    return {};
+  }
   const fields: Record<string, string> = {};
-  for (const line of toml.split("\n")) {
-    const match = /^([A-Za-z_]+)\s*=\s*"(.*)"\s*$/.exec(line);
-    if (match) {
-      fields[match[1]] = match[2];
+  for (const [key, value] of Object.entries(parsed)) {
+    if (typeof value === "string") {
+      fields[key] = value;
     }
   }
   return fields;
