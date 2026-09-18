@@ -9,10 +9,6 @@
 </p>
 
 <p align="center">
-  By <strong>Marc Güell Segarra</strong> · <a href="https://ondori.dev">ondori.dev</a>
-</p>
-
-<p align="center">
   <img src="media/menu-bar-icon-search-preview.png" width="850" alt="Raycast showing menu bar app icons with CleanShot X selected" />
   <br />
   <sub>Search by app or item name, then press Return to open its menu.</sub>
