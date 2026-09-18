@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Separate GIF copy and paste] - {PR_MERGE_DATE}
+## [Separate GIF copy and paste] - 2026-09-18
 
 - Paste GIF and Paste GIF Square now resolve the file and call paste directly, without copying first or closing the window before paste.
 - Read the default action preference when building the action panel so it does not retain a previous selection.
