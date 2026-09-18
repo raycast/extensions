@@ -30,12 +30,31 @@ export type AddCardResult =
 
 export type RemoveCardResult = { success: true } | { success: false; error: string };
 
-export type RequestCardPayload = {
-  word: string;
-  context: string;
-};
+/**
+ * What saving a searched-for word to the user's Inoh drafts did. "Already
+ * saved" is a success: the word is waiting in the web app either way, and the
+ * user is told so rather than being handed an error for repeating themselves.
+ */
+export type SaveDraftResult =
+  | { status: "saved"; word: string }
+  | { status: "already-saved"; word: string }
+  | { status: "failed"; error: string };
 
-export type RequestCardResult = { success: true } | { success: false; error: string };
+/** Which dictionary a card request is headed for; mirrors `card_requests.destination`. */
+export type CardRequestDestination = "private" | "public";
+
+/**
+ * What asking for a card did.
+ *
+ * A refusal carries the database's own words, because the gates it trips — the
+ * monthly allowance, today's ceiling, a word already in flight — are the only
+ * authority on why. The word stays written down as a draft either way, so a
+ * refusal costs the user nothing they typed.
+ */
+export type RequestCardResult =
+  | { status: "queued"; word: string }
+  | { status: "refused"; word: string; reason: string; isPlanLimit: boolean }
+  | { status: "failed"; error: string };
 
 /**
  * What "Search Word from Screenshot" got out of a screen capture. Mirrors the
