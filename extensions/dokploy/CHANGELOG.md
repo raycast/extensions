@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Add Domain Action] - {PR_MERGE_DATE}
+
+- Add an `Add Domain` action to Applications and Compose stacks. Compose stacks get a container picker sourced from the compose file; either kind can auto-fill a `*.traefik.me` host via `Generate Domain`, or check its DNS against the target server via `Validate Domain` before saving.
+
 ## [View Service Domains] - 2026-09-18
 
 - Add a `View Domains` action to Applications and Compose stacks, listing the domains pointing at the service with `Open Domain`, `Copy URL` and `Delete Domain` actions.

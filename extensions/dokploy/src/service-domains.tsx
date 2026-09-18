@@ -1,5 +1,18 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { useFetch, useForm, FormValidation } from "@raycast/utils";
+import { useState } from "react";
 import { useToken } from "./instances";
 import { Domain, ErrorResult } from "./interfaces";
 
@@ -20,7 +33,11 @@ export function domainUrl(domain: Domain): string {
 }
 
 /** The domains pointing at one service. */
-export default function ServiceDomains({ service }: { service: { id: string; type: DomainableKind; name: string } }) {
+export default function ServiceDomains({
+  service,
+}: {
+  service: { id: string; type: DomainableKind; name: string; appName?: string };
+}) {
   const { url, headers } = useToken();
 
   const {
@@ -82,6 +99,15 @@ export default function ServiceDomains({ service }: { service: { id: string; typ
           icon={Icon.Globe}
           title="No Domains"
           description={`${service.name} is not reachable on any domain yet.`}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                icon={Icon.Plus}
+                title="Add Domain"
+                target={<AddDomainForm service={service} onCreated={revalidate} />}
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         domains.map((domain) => (
@@ -120,6 +146,11 @@ export default function ServiceDomains({ service }: { service: { id: string; typ
                 <Action.OpenInBrowser title="Open Domain" url={domainUrl(domain)} />
                 <Action.CopyToClipboard title="Copy URL" content={domainUrl(domain)} />
                 <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />
+                <Action.Push
+                  icon={Icon.Plus}
+                  title="Add Domain"
+                  target={<AddDomainForm service={service} onCreated={revalidate} />}
+                />
                 <Action
                   icon={Icon.Trash}
                   title="Delete Domain"
@@ -132,5 +163,265 @@ export default function ServiceDomains({ service }: { service: { id: string; typ
         ))
       )}
     </List>
+  );
+}
+
+const CERTIFICATE_TYPES = [
+  { value: "letsencrypt", title: "Let's Encrypt" },
+  { value: "none", title: "None" },
+  { value: "custom", title: "Custom" },
+];
+
+/** The `<kind>.one` fields this form needs - just enough to drive Generate/Check DNS. */
+interface ServiceServerDetail {
+  serverId?: string | null;
+}
+
+/** A compose stack's `loadServices` response isn't documented anywhere - handled defensively. */
+function parseContainerNames(data: unknown): string[] {
+  if (!Array.isArray(data)) return [];
+  return data
+    .map((item) => {
+      if (typeof item === "string") return item;
+      if (item && typeof item === "object") {
+        const { name, serviceName } = item as { name?: string; serviceName?: string };
+        return name ?? serviceName ?? null;
+      }
+      return null;
+    })
+    .filter((name): name is string => Boolean(name));
+}
+
+interface AddDomainFormValues {
+  host: string;
+  containerServiceName: string;
+  path: string;
+  port: string;
+  https: boolean;
+  certificateType: string;
+}
+
+/**
+ * Adding a domain needs two things the read-only domains list doesn't: a container to route to
+ * (Compose only - an application has just the one), and a way to get a working host without the
+ * user having to hand-configure DNS first. `Generate Domain` covers the latter for servers with a
+ * public IP; `Check DNS` is an advisory step for everyone else, since Dokploy itself doesn't block
+ * saving a domain whose DNS isn't right yet - only Let's Encrypt issuance later does.
+ */
+function AddDomainForm({
+  service,
+  onCreated,
+}: {
+  service: { id: string; type: DomainableKind; name: string; appName?: string };
+  onCreated: () => void;
+}) {
+  const { url, headers } = useToken();
+  const { pop } = useNavigation();
+  const [isBusy, setIsBusy] = useState(false);
+  const isCompose = service.type === "compose";
+
+  const { data: containers, isLoading: containersLoading } = useFetch<string[], string[]>(
+    `${url}compose.loadServices?composeId=${service.id}&type=fetch`,
+    {
+      headers,
+      initialData: [],
+      execute: isCompose,
+      parseResponse: async (response) => {
+        if (!response.ok) {
+          const err = (await response.json()) as ErrorResult;
+          throw new Error(err.message);
+        }
+        return parseContainerNames(await response.json());
+      },
+    },
+  );
+
+  const { data: serverDetail } = useFetch<ServiceServerDetail, ServiceServerDetail | undefined>(
+    `${url}${service.type}.one?${ID_FIELDS[service.type]}=${service.id}`,
+    { headers },
+  );
+  const serverId = serverDetail?.serverId;
+
+  const { handleSubmit, itemProps, values, setValue } = useForm<AddDomainFormValues>({
+    async onSubmit(formValues) {
+      const toast = await showToast(Toast.Style.Animated, `Adding ${formValues.host}…`);
+      try {
+        const trimmedPath = formValues.path.trim();
+        const body: Record<string, unknown> = {
+          host: formValues.host.trim(),
+          path: trimmedPath && trimmedPath !== "/" ? trimmedPath : null,
+          port: formValues.port.trim() ? Number(formValues.port) : null,
+          https: formValues.https,
+          certificateType: formValues.https ? formValues.certificateType : undefined,
+          domainType: service.type,
+          ...(isCompose
+            ? { composeId: service.id, serviceName: formValues.containerServiceName }
+            : { applicationId: service.id }),
+        };
+
+        const response = await fetch(url + "domain.create", {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body),
+        });
+        if (!response.ok) {
+          const err = (await response.json()) as ErrorResult;
+          throw new Error(err.message);
+        }
+        toast.style = Toast.Style.Success;
+        toast.title = "Added domain";
+        onCreated();
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not add domain";
+        toast.message = `${error}`;
+      }
+    },
+    initialValues: {
+      host: "",
+      containerServiceName: "",
+      path: "/",
+      port: "",
+      https: true,
+      certificateType: "letsencrypt",
+    },
+    validation: {
+      host: FormValidation.Required,
+      containerServiceName: (value) => {
+        if (isCompose && !value) return "Select a container";
+      },
+      port: (value) => {
+        if (!value) return;
+        const port = Number(value);
+        if (!Number.isInteger(port) || port < 1 || port > 65535) return "Enter a port between 1 and 65535";
+      },
+    },
+  });
+
+  async function generateDomain() {
+    if (!serverId) return;
+    setIsBusy(true);
+    const toast = await showToast(Toast.Style.Animated, "Checking eligibility…");
+    try {
+      const eligibleResponse = await fetch(`${url}domain.canGenerateTraefikMeDomains?serverId=${serverId}`, {
+        headers,
+      });
+      if (!eligibleResponse.ok) {
+        const err = (await eligibleResponse.json()) as ErrorResult;
+        throw new Error(err.message);
+      }
+      const eligible = (await eligibleResponse.json()) as boolean;
+      if (!eligible) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Can't generate a traefik.me domain";
+        toast.message = "This server doesn't have a public IP address.";
+        return;
+      }
+
+      toast.title = "Generating domain…";
+      const response = await fetch(`${url}domain.generateDomain`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ appName: service.appName ?? service.name, serverId }),
+      });
+      if (!response.ok) {
+        const err = (await response.json()) as ErrorResult;
+        throw new Error(err.message);
+      }
+      const result = (await response.json()) as unknown;
+      const generatedHost =
+        typeof result === "string"
+          ? result
+          : ((result as { domain?: string; host?: string })?.domain ??
+            (result as { domain?: string; host?: string })?.host);
+      if (!generatedHost) throw new Error("Dokploy did not return a domain.");
+
+      setValue("host", generatedHost);
+      toast.style = Toast.Style.Success;
+      toast.title = "Generated domain";
+      toast.message = generatedHost;
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not generate domain";
+      toast.message = `${error}`;
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  async function checkDns() {
+    if (!values.host.trim()) {
+      await showToast(Toast.Style.Failure, "Enter a host first");
+      return;
+    }
+    setIsBusy(true);
+    const toast = await showToast(Toast.Style.Animated, "Checking DNS…");
+    try {
+      const response = await fetch(`${url}domain.validateDomain`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ domain: values.host.trim(), ...(serverId ? { serverId } : {}) }),
+      });
+      if (!response.ok) {
+        const err = (await response.json()) as ErrorResult;
+        throw new Error(err.message);
+      }
+      const result = (await response.json()) as unknown;
+      const valid =
+        typeof result === "boolean"
+          ? result
+          : Boolean(
+              (result as { valid?: boolean; isValid?: boolean })?.valid ??
+                (result as { valid?: boolean; isValid?: boolean })?.isValid,
+            );
+
+      toast.style = valid ? Toast.Style.Success : Toast.Style.Failure;
+      toast.title = valid ? "DNS points to this server" : "DNS does not point to this server yet";
+      if (!valid) {
+        toast.message = "The domain won't work until its DNS record points here. You can still save it now.";
+      }
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not check DNS";
+      toast.message = `${error}`;
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  return (
+    <Form
+      isLoading={containersLoading || isBusy}
+      navigationTitle={`${service.name} - Add Domain`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Check} title="Add Domain" onSubmit={handleSubmit} />
+          {serverId && <Action icon={Icon.Wand} title="Generate Domain (Traefik.me)" onAction={generateDomain} />}
+          <Action icon={Icon.Network} title="Validate Domain" onAction={checkDns} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Host" placeholder="app.example.com" {...itemProps.host} />
+      {isCompose && (
+        <Form.Dropdown
+          title="Container"
+          info="Which container in the stack this domain routes to."
+          {...itemProps.containerServiceName}
+        >
+          {containers?.map((name) => <Form.Dropdown.Item key={name} title={name} value={name} />)}
+        </Form.Dropdown>
+      )}
+      <Form.TextField title="Path" placeholder="/" {...itemProps.path} />
+      <Form.TextField title="Port" placeholder="3000" info="The container's own port." {...itemProps.port} />
+      <Form.Checkbox title="HTTPS" label="Serve this domain over HTTPS" {...itemProps.https} />
+      {values.https && (
+        <Form.Dropdown title="Certificate Type" {...itemProps.certificateType}>
+          {CERTIFICATE_TYPES.map((type) => (
+            <Form.Dropdown.Item key={type.value} title={type.title} value={type.value} />
+          ))}
+        </Form.Dropdown>
+      )}
+    </Form>
   );
 }
