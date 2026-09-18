@@ -1,12 +1,5 @@
 import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
-import { copyConcealed, createSecret, formatDuration, getDefaults, parseDuration } from "./shared";
-
-const USE_DEFAULT = "default";
-
-/** Returns the argument only when it is a real override, not the "use my default" sentinel. */
-function override(value: string | undefined): string | undefined {
-  return value && value !== USE_DEFAULT ? value : undefined;
-}
+import { copyConcealed, createSecret, formatDuration, getDefaults } from "./shared";
 
 // Argument types come from `Arguments.Whisper`, generated from package.json,
 // so they cannot drift from the manifest.
@@ -18,14 +11,10 @@ export default async function main(props: LaunchProps<{ arguments: Arguments.Whi
     return;
   }
 
-  const defaults = getDefaults();
-  // Raycast remembers dropdown arguments between launches, so an explicit
-  // "Use my default" entry keeps a stale choice from silently overriding the
-  // preferences. Anything else is a deliberate one-off override.
-  const durationArg = override(props.arguments.duration);
-  const selfDestructArg = override(props.arguments.selfDestruct);
-  const durationSeconds = (durationArg && parseDuration(durationArg)) || defaults.durationSeconds;
-  const selfDestruct = selfDestructArg ? selfDestructArg === "true" : defaults.selfDestruct;
+  // Expiration and self-destruct come from preferences only. Raycast remembers
+  // command arguments between launches, so a dropdown here would keep sending a
+  // stale choice long after the user changed their defaults.
+  const { durationSeconds, selfDestruct } = getDefaults();
 
   try {
     await showToast({ style: Toast.Style.Animated, title: "Encrypting secret..." });

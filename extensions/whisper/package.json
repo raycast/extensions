@@ -18,7 +18,7 @@
       "name": "whisper",
       "title": "Whisper",
       "subtitle": "Whisper",
-      "description": "Quickly create an encrypted secret link",
+      "description": "Quickly create an encrypted secret link using your default expiration and self-destruct settings",
       "keywords": [
         "secret",
         "password",
@@ -34,54 +34,6 @@
           "placeholder": "Secret",
           "type": "password",
           "required": true
-        },
-        {
-          "name": "duration",
-          "placeholder": "Expires in",
-          "type": "dropdown",
-          "required": false,
-          "data": [
-            {
-              "title": "Use my default",
-              "value": "default"
-            },
-            {
-              "title": "30 minutes",
-              "value": "30m"
-            },
-            {
-              "title": "1 hour",
-              "value": "1h"
-            },
-            {
-              "title": "24 hours",
-              "value": "24h"
-            },
-            {
-              "title": "7 days",
-              "value": "7d"
-            }
-          ]
-        },
-        {
-          "name": "selfDestruct",
-          "placeholder": "Self-destruct",
-          "type": "dropdown",
-          "required": false,
-          "data": [
-            {
-              "title": "Use my default",
-              "value": "default"
-            },
-            {
-              "title": "Self-destruct after first view",
-              "value": "true"
-            },
-            {
-              "title": "Allow multiple views",
-              "value": "false"
-            }
-          ]
         }
       ]
     },

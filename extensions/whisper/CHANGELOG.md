@@ -5,11 +5,11 @@
 - New Retrieve Secret command: paste a Whisper link to fetch and decrypt the secret on your device, with a confirmation before a single-view link is consumed; Multiple Values secrets are shown as a list with per-value copy
 - New Whisper Selected Text command: encrypt the selected text (or the clipboard) into a link with your default settings, ideal behind a hotkey
 - Links and revealed secrets are copied as concealed so they never appear in Raycast's Clipboard History
-- The quick command masks the secret while you type and offers expiration and self-destruct as dropdowns instead of trailing text
+- The quick command masks the secret while you type instead of showing it in the search bar
 - New preferences for the default expiration and self-destruct behaviour, applied by every command and the AI tool
 - Secrets larger than 64 KB are rejected before upload with a clear message, measured on the encrypted payload so the limit is exact
 - Retrieval refuses plain-HTTP links to remote servers, and keeps any path prefix in a self-hosted server URL
-- Breaking: the quick command's first argument was renamed from `text` to `secret`, so any Quicklink built on the old name needs updating. Expiration and self-destruct are now dropdowns that default to "Use my default"
+- Breaking: the quick command now takes a single masked `secret` argument, replacing the old `text` argument and its trailing `1h false` syntax, so any Quicklink built on the old name needs updating. Expiration and self-destruct follow your preferences; use Create Secret when you want to choose them per secret
 
 ## [Zero-Knowledge Encryption & Multiple Values] - 2026-09-16
 

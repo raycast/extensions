@@ -31,13 +31,12 @@ When you first run the extension, you can optionally configure a custom Whisper 
 
 ### Whisper (Quick Command)
 
-Create a secret link in one shot. The first argument is the secret itself and is masked while you type. The two dropdowns stay on **Use my default** unless you pick an expiration (`30m`, `1h`, `24h`, `7d`) or a self-destruct choice for that run.
+Create a secret link in one shot. The secret is masked while you type, and the link lands on your clipboard. Expiration and self-destruct come from your preferences — use **Create Secret** when you want to choose them for a single secret.
 
 **Examples:**
 
-- `my-api-key` → your defaults (1h expiration, self-destructs unless changed in preferences)
-- `my-password` + `24 hours` → 24h expiration, self-destructs
-- `my-note` + `7 days` + `Allow multiple views` → 7 days, viewable multiple times
+- `my-api-key` → encrypted link on the clipboard, using your default expiration and self-destruct
+- `correct horse battery staple` → spaces are fine, the whole argument is the secret
 
 ### Whisper Selected Text
 
