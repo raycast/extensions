@@ -1,5 +1,9 @@
 # Prism Launcher Changelog
 
+## [New Addition] - 2026-09-18
+
+- Add command: Minecraft Screenshots – browse an instance's screenshots in a gallery, with actions to copy, save, open, show in Finder or delete
+
 ## [New Addition] - 2026-09-16
 
 - Instances now show their Minecraft version and mod loader (Forge, NeoForge, Fabric, Quilt, ...) in the list

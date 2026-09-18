@@ -17,6 +17,7 @@ import { Server, Service, ErrorResult, DatabaseKind } from "./interfaces";
 import ServiceLogs from "./service-logs";
 import DeploymentHistory from "./deployment-history";
 import ServiceEnv from "./service-env";
+import ServiceDomains from "./service-domains";
 import { DatabaseActions } from "./database-actions";
 import type { ServiceScope } from "./utils";
 import { getTotalServices } from "./utils";
@@ -314,6 +315,13 @@ export default function Services({
                     title="View Environment"
                     target={<ServiceEnv service={service} />}
                   />
+                  {(service.type === "application" || service.type === "compose") && (
+                    <Action.Push
+                      icon={Icon.Globe}
+                      title="View Domains"
+                      target={<ServiceDomains service={{ ...service, type: service.type }} />}
+                    />
+                  )}
                 </ActionPanel.Section>
                 {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
                   <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />
