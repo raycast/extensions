@@ -1,6 +1,6 @@
 # RSS Reader Changelog
 
-## [Preference] - {PR_MERGE_DATE}
+## [Preference] - 2026-09-18
 
 - Added "Show Subtitle" Preference for hiding subtitle on stories
 
