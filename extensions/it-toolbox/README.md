@@ -94,4 +94,3 @@ write a `.tsx` file that wraps it in `InputForm` and register it in the `command
 ## License
 
 MIT
-# raycast-it-toolbox
