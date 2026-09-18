@@ -2,7 +2,6 @@ import { MenuBarCollectors, MenuBarSnapshot, MENU_BAR_SNAPSHOT_SCHEMA_VERSION } 
 
 export const fixtureCollectors = (): MenuBarCollectors => ({
   cpu: async () => "42",
-  backgroundMemory: async () => ({ totalMem: "16", freeMemPercentage: "25", freeMem: "4" }),
   backgroundStorage: async () => [
     { diskName: "Macintosh HD", totalSize: "500", totalAvailableStorage: "200", usedStorage: "300" },
   ],

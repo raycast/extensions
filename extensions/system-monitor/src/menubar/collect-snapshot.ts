@@ -3,7 +3,6 @@ import { statfs } from "fs/promises";
 import { cpus, freemem, totalmem } from "os";
 
 import { DiskInterface } from "../Interfaces";
-import { getMemoryUsage } from "../Memory/MemoryUtils";
 import { getNetworkData } from "../Network/NetworkUtils";
 import { getBatteryData } from "../Power/PowerUtils";
 import { calculateDiskStorage, getOSInfo } from "../SystemInfo/SystemUtils";
@@ -57,7 +56,7 @@ async function collectCpuUsage(): Promise<string> {
   return totalDelta <= 0 ? "0" : Math.round((1 - idleDelta / totalDelta) * 100).toString();
 }
 
-async function collectBackgroundMemory(): Promise<MenuBarMemory> {
+async function collectMemoryUsage(): Promise<MenuBarMemory> {
   const totalMb = totalmem() / 1024 / 1024;
   const usedMb = (totalmem() - freemem()) / 1024 / 1024;
   return memorySummary(totalMb, usedMb);
@@ -78,11 +77,6 @@ async function collectBackgroundStorage() {
   ];
 }
 
-async function collectFullMemory(): Promise<MenuBarMemory> {
-  const memory = await getMemoryUsage();
-  return memorySummary(memory.memTotal, memory.memUsed);
-}
-
 async function collectNetworkUsage(): Promise<NetworkUsage> {
   const current = await getNetworkData();
   let upload = 0;
@@ -101,11 +95,10 @@ async function collectNetworkUsage(): Promise<NetworkUsage> {
 
 export const defaultMenuBarCollectors: MenuBarCollectors = {
   cpu: collectCpuUsage,
-  backgroundMemory: collectBackgroundMemory,
   backgroundStorage: collectBackgroundStorage,
   osInfo: getOSInfo,
   storage: calculateDiskStorage,
-  memory: collectFullMemory,
+  memory: collectMemoryUsage,
   network: collectNetworkUsage,
   battery: getBatteryData,
   temperature: getTemperatureData,
@@ -212,7 +205,7 @@ export async function collectMenuBarSnapshot({
     if (pinnedStat === "cpu") {
       values.cpuUsage = await collectValue(collectors.cpu, previous?.values.cpuUsage, now, validCpu);
     } else if (pinnedStat === "memory") {
-      values.memory = await collectValue(collectors.backgroundMemory, previous?.values.memory, now, validMemory);
+      values.memory = await collectValue(collectors.memory, previous?.values.memory, now, validMemory);
     } else if (pinnedStat === "storage") {
       values.storage = await collectValue(collectors.backgroundStorage, previous?.values.storage, now, validStorage);
     }

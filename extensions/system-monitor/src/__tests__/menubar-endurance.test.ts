@@ -67,7 +67,7 @@ describe("menu-bar background endurance", () => {
       const collectors: MenuBarCollectors = {
         ...base,
         cpu: tracked(base.cpu),
-        backgroundMemory: tracked(base.backgroundMemory),
+        memory: tracked(base.memory),
         backgroundStorage: tracked(base.backgroundStorage),
         network: vi.fn(async () => {
           throw new Error("background nettop collector must not run");

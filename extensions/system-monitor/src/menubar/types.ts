@@ -43,7 +43,6 @@ export interface MenuBarSnapshot {
 
 export interface MenuBarCollectors {
   cpu: () => Promise<string>;
-  backgroundMemory: () => Promise<MenuBarMemory>;
   backgroundStorage: () => Promise<DiskInterface[]>;
   osInfo: () => Promise<OSInfo>;
   storage: () => Promise<DiskInterface[]>;

@@ -16,7 +16,7 @@ describe("collectMenuBarSnapshot", () => {
   it.each<[PinnedStat, keyof MenuBarCollectors | undefined]>([
     ["none", undefined],
     ["cpu", "cpu"],
-    ["memory", "backgroundMemory"],
+    ["memory", "memory"],
     ["storage", "backgroundStorage"],
     ["battery", undefined],
     ["network", undefined],
@@ -54,7 +54,6 @@ describe("collectMenuBarSnapshot", () => {
     expect(collectors.network).toHaveBeenCalledOnce();
     expect(collectors.battery).toHaveBeenCalledOnce();
     expect(collectors.temperature).toHaveBeenCalledOnce();
-    expect(collectors.backgroundMemory).not.toHaveBeenCalled();
     expect(collectors.backgroundStorage).not.toHaveBeenCalled();
   });
 
