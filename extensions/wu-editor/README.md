@@ -4,7 +4,7 @@ Open your recent [Wu](https://github.com/farshed/wu) projects, files, and settin
 
 ## Commands
 
-- **Open Recent Project**: lists the folders you opened in Wu, newest first. Press Enter to open one, or ⌘ Enter to open it in a new window.
+- **Open Recent Project**: lists the folders you opened in Wu, newest first. Press `Enter` to open one, or `⌘ Enter` to open it in a new window.
 - **Open New Window**: opens an empty Wu window.
 - **Open with Wu**: opens the files or folders selected in Finder. With nothing selected, opens the front Finder window's folder.
 - **Open Settings** and **Open Keymap**: open Wu's `settings.json` or `keymap.json`.
