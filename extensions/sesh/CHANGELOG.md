@@ -1,6 +1,6 @@
 # Sesh Changelog
 
-## [Run CLI commands without a shell] - {PR_MERGE_DATE}
+## [Run CLI commands without a shell] - 2026-09-18
 
 - Pass arguments to `sesh`, `tmux` and `open` directly instead of through a shell, so session names containing quotes, `$` or other special characters connect correctly, and terminal apps with spaces in their name open correctly
 - Apply changes to the Environment Path preference immediately, without needing to reload the extension
