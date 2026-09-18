@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "app-uninstaller",
+  "title": "App Uninstaller - Remove Apps and Leftovers",
+  "description": "Completely uninstall macOS applications, including the caches, containers, preferences and launch agents they leave behind.",
+  "icon": "command-icon.png",
+  "author": "quentinved",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "uninstall-app",
+      "title": "Uninstall Application",
+      "description": "Find every file an application left on disk and move the ones you approve to the Trash",
+      "mode": "view",
+      "keywords": [
+        "uninstall",
+        "remove",
+        "delete",
+        "cleaner",
+        "leftovers",
+        "app cleaner"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "25.3.0",
+    "@types/react": "19.2.14",
+    "eslint": "10.0.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
