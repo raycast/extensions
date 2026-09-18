@@ -14,7 +14,7 @@
   <sub>Search by app or item name, then press Return to open its menu.</sub>
 </p>
 
-Menu Bar Icon Search is a Raycast extension for the app icons on the right side of the macOS menu bar. It can also open icons hidden with macOS's **Menu Bar** setting: it reveals the icon, opens it in the real menu bar, and restores its hidden state when the menu closes.
+Menu Bar Icon Search is a Raycast extension for the app icons on the right side of the macOS menu bar. It can also open icons hidden with macOS's **Menu Bar** setting through Accessibility.
 
 > **Looking for File, Edit, and other menus of the active app?** Raycast's built-in **Search Menu Bar Items** command does that. This extension searches the app icons on the other side of the menu bar.
 
@@ -29,7 +29,7 @@ One thing was still missing: a fast way to open the menu of a hidden app icon. I
 - **Search by app or item name.** Results show each app's icon and update as you type.
 - **Stay on the keyboard.** Use ↑ and ↓ to choose an icon, then press Return to open it.
 - **Start with results.** The last successful scan appears immediately while a fresh scan runs.
-- **Open hidden icons in place.** For supported macOS-hidden icons, the extension reveals the icon temporarily and restores your menu bar afterward. Your pointer returns to its original position.
+- **Open hidden icons.** The extension asks macOS to press the selected item, without changing which icons you have chosen to show.
 - **Keep system controls optional.** Wi-Fi, Sound, Control Center, and other macOS items are excluded by default and can be enabled in the extension's preferences.
 
 The bundled Swift helper handles discovery and activation through macOS Accessibility. It runs only for a scan or an activation; there is no separate app or resident background process. The last scan is stored locally by Raycast.
@@ -37,7 +37,6 @@ The bundled Swift helper handles discovery and activation through macOS Accessib
 ## Requirements
 
 - Raycast on macOS and Accessibility access for the bundled `menubar-helper`
-- macOS 27 Golden Gate on Apple silicon to open icons hidden through System Settings → Menu Bar
 
 ## Get started
 
@@ -55,11 +54,11 @@ The bundled Swift helper handles discovery and activation through macOS Accessib
 
 ## Hidden icons and limitations
 
-For an icon hidden through macOS's **Menu Bar** setting, the helper temporarily enables the app's switch, opens the icon in the real menu bar, and turns the switch off after the menu or panel closes. System Settings may briefly load in the background. If the helper is forcibly terminated while a menu is open, you may need to turn the switch off manually. Icons hidden by other tools may not have a corresponding macOS switch.
+The helper presses the selected item through Accessibility and lets macOS position its menu. A hidden item's menu may open at the upper-left corner of the screen because macOS does not expose an on-screen position for its icon. The extension does not reveal the icon or change its Menu Bar setting. Some apps may not support an Accessibility press.
 
 Results depend on what each app exposes through Accessibility. The extension removes duplicates when it can identify the same element, frame, or identifier without conflicting positions. A cached result can be briefly out of date until the next scan finishes; use **Refresh Items** if an app changes. An app may control where its own panel opens.
 
-The helper includes Apple silicon and Intel binaries. Opening icons hidden through System Settings → Menu Bar requires macOS 27, which is available only on Apple silicon. Visible-icon search on earlier macOS versions and Intel hardware has not been physically verified.
+The helper includes Apple silicon and Intel binaries. Visible-icon search on earlier macOS versions and Intel hardware has not been physically verified.
 
 ## Development
 

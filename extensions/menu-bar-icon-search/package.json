@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "menu-bar-icon-search",
   "title": "Menu Bar Icon Search",
-  "description": "Search and open menu bar app icons, including icons hidden by macOS 27.",
+  "description": "Search and open menu bar app icons, including hidden icons.",
   "icon": "menu-bar-icon.png",
   "author": "mguellsegarra",
   "homepage": "https://ondori.dev",
