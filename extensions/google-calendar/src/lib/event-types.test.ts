@@ -5,6 +5,7 @@ import {
   BIRTHDAYS_VIEW_CALENDAR_ID,
   resolveCalendarIdForEventsList,
   resolveEventTypesForList,
+  resolvePickerCalendarId,
   SCHEDULE_EVENT_TYPES,
 } from "./event-types";
 
@@ -37,6 +38,19 @@ describe("resolveEventTypesForList", () => {
     assert.deepEqual(resolveEventTypesForList({ calendarId: BIRTHDAYS_VIEW_CALENDAR_ID, showBirthdays: true }), [
       "birthday",
     ]);
+  });
+});
+
+describe("resolvePickerCalendarId", () => {
+  it("maps Contacts birthdays calendars onto the virtual Birthdays picker value", () => {
+    assert.equal(
+      resolvePickerCalendarId("addressbook#contacts@group.v.calendar.google.com"),
+      BIRTHDAYS_VIEW_CALENDAR_ID,
+    );
+    assert.equal(resolvePickerCalendarId("#contacts@group.v.calendar.google.com"), BIRTHDAYS_VIEW_CALENDAR_ID);
+    assert.equal(resolvePickerCalendarId(BIRTHDAYS_VIEW_CALENDAR_ID), BIRTHDAYS_VIEW_CALENDAR_ID);
+    assert.equal(resolvePickerCalendarId("primary"), "primary");
+    assert.equal(resolvePickerCalendarId(undefined), undefined);
   });
 });
 

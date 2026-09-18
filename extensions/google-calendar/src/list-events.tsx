@@ -6,7 +6,7 @@ import useCalendars from "./hooks/useCalendars";
 import { useState, useMemo } from "react";
 import EventActions from "./components/EventActions";
 import CalendarSelector from "./components/CalendarSelector";
-import { BIRTHDAYS_VIEW_CALENDAR_ID } from "./lib/event-types";
+import { isBirthdaysView, resolvePickerCalendarId } from "./lib/event-types";
 
 function getAccessories(event: calendar_v3.Schema$Event, showLocation: boolean) {
   const accessories = new Array<List.Item.Accessory>();
@@ -124,14 +124,16 @@ export function getEventSection(date: Date, now = new Date()) {
 function Command(props: LaunchProps) {
   const { calendarId } = (props.launchContext ?? {}) as { calendarId?: string };
   const { showLocation } = getPreferenceValues<Preferences.ListEvents>();
-  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(calendarId ?? null);
+  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(
+    resolvePickerCalendarId(calendarId) ?? null,
+  );
   const { data, isLoading, pagination, revalidate } = useEvents(selectedCalendarId);
   const { data: calendars, isLoading: calendarsIsLoading, revalidate: revalidateCalendars } = useCalendars();
 
   const selectedCalendar = useMemo(() => {
     const allCalendars = [...(calendars?.selected ?? []), ...(calendars?.unselected ?? [])];
     const primaryCalendar = allCalendars.find((calendar) => calendar.primary);
-    if (selectedCalendarId === BIRTHDAYS_VIEW_CALENDAR_ID) {
+    if (isBirthdaysView(selectedCalendarId)) {
       return primaryCalendar ?? { id: "primary" };
     }
     const selected =
@@ -203,7 +205,7 @@ function Command(props: LaunchProps) {
           calendars={calendars ?? []}
           onCalendarChange={setSelectedCalendarId}
           storeValue={typeof calendarId === "undefined"}
-          defaultValue={calendarId}
+          defaultValue={resolvePickerCalendarId(calendarId)}
         />
       }
     >

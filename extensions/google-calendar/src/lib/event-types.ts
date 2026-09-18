@@ -31,6 +31,12 @@ export function isBirthdaysView(calendarId?: string | null): boolean {
   return calendarId === BIRTHDAYS_VIEW_CALENDAR_ID || isContactsBirthdaysCalendar(calendarId);
 }
 
+/** Map a Contacts birthdays calendar onto the virtual List Events Birthdays picker value. */
+export function resolvePickerCalendarId(calendarId?: string | null): string | undefined {
+  if (!calendarId) return undefined;
+  return isContactsBirthdaysCalendar(calendarId) ? BIRTHDAYS_VIEW_CALENDAR_ID : calendarId;
+}
+
 /** Google calendar to query; the virtual Birthdays view reads birthday events on primary. */
 export function resolveCalendarIdForEventsList(calendarId?: string | null): string {
   if (!calendarId || calendarId === BIRTHDAYS_VIEW_CALENDAR_ID) {

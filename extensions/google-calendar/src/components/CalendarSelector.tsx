@@ -1,6 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { UseCalendarsData } from "../hooks/useCalendars";
-import { BIRTHDAYS_VIEW_CALENDAR_ID, isContactsBirthdaysCalendar } from "../lib/event-types";
+import { BIRTHDAYS_VIEW_CALENDAR_ID, isContactsBirthdaysCalendar, resolvePickerCalendarId } from "../lib/event-types";
 
 const CalendarSelector = ({
   calendars,
@@ -15,13 +15,14 @@ const CalendarSelector = ({
 }) => {
   const visibleCalendars = calendars.selected.filter((calendar) => !isContactsBirthdaysCalendar(calendar.id));
   const hiddenCalendars = calendars.unselected.filter((calendar) => !isContactsBirthdaysCalendar(calendar.id));
+  const pickerDefaultValue = resolvePickerCalendarId(defaultValue);
 
   return (
     <List.Dropdown
       tooltip="Select Calendar"
-      onChange={onCalendarChange}
+      onChange={(calendarId) => onCalendarChange(resolvePickerCalendarId(calendarId) ?? null)}
       storeValue={storeValue}
-      defaultValue={defaultValue}
+      defaultValue={pickerDefaultValue}
     >
       <List.Dropdown.Section title="Visible Calendars">
         {visibleCalendars.map((calendar) => (
