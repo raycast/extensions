@@ -14,3 +14,25 @@ export function formatBytes(bytes: number): string {
 export function tildify(path: string): string {
   return path === HOME || path.startsWith(`${HOME}/`) ? `~${path.slice(HOME.length)}` : path;
 }
+
+const DAY = 86_400_000;
+
+/** "today", "3 days ago", "5 months ago", "over a year ago". */
+export function formatAge(epochMs: number): string {
+  if (!epochMs) return "unknown";
+
+  const days = Math.floor((Date.now() - epochMs) / DAY);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 30) return `${days} days ago`;
+
+  // Months are counted in 30-day steps and years in 365, so a value between the
+  // two would otherwise round to "over 0 years ago". Below a year, stay in months.
+  if (days < 365) {
+    const months = Math.min(11, Math.max(1, Math.floor(days / 30)));
+    return `${months} month${months === 1 ? "" : "s"} ago`;
+  }
+
+  const years = Math.floor(days / 365);
+  return years === 1 ? "over a year ago" : `over ${years} years ago`;
+}

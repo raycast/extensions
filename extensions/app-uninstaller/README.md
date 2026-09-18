@@ -6,7 +6,10 @@ Dragging an app to the Trash leaves its data on disk. Most uninstallers fix that
 
 ## What it does
 
-1. Lists the applications installed in `/Applications`, `/Applications/Utilities` and `~/Applications`, with each bundle's size. Sort by size to find what is worth removing.
+1. Lists the applications installed in `/Applications`, `/Applications/Utilities` and `~/Applications`, with each bundle's size, in whichever view answers your question:
+   - **All Applications** — a flat alphabetical list.
+   - **By Size** (the default) — banded into *1 GB and up*, *100 MB – 1 GB*, *10 – 100 MB* and *Under 10 MB*, so the ones worth reclaiming lead.
+   - **By Last Used** — banded into *No sign of ever being used*, *Over a year ago*, *6 – 12 months ago*, *1 – 6 months ago* and *Within the last month*. Age is read from Spotlight where it knows, which is only about a quarter of installed apps; for the rest it is estimated from when the app last wrote its preferences, saved state or container. Each row says which of the two it is, because an estimate is not a launch date.
 2. Scans the ~30 directories macOS applications write into, and attributes each hit to an app.
 3. Groups the results by how certain the match is, with the reason shown on every row.
 4. Moves the items you approve to the Trash, and explains anything macOS refused to move so you can fix it and retry with `⌘Y`.
@@ -93,6 +96,8 @@ npm run build
 | `scan.ts` | Walking the search directories and measuring what it finds |
 | `safety.ts` | The path guard — what may and may not be removed |
 | `size.ts` | Disk usage for a batch of paths |
+| `usage.ts` | When each app was last used, and how confidently |
+| `views.ts` | Grouping the list by size or by age |
 | `elevate.ts` | The privileged move, and the authorization it needs |
 | `remove.ts` | Moving to the Trash, failure diagnosis, and the commands for what it will not touch |
 

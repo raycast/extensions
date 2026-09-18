@@ -2,7 +2,8 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Lists applications installed in `/Applications`, `/Applications/Utilities` and `~/Applications`, with bundle sizes and sorting by size
+- Lists applications installed in `/Applications`, `/Applications/Utilities` and `~/Applications`, with bundle sizes
+- Views the list by size band or by how long ago each app was last used, so the ones worth reclaiming lead
 - Scans ~30 macOS locations for caches, containers, preferences, launch agents and privileged helpers
 - Groups findings as Certain / Likely / Unsure, with the reason shown on every row
 - Moves approved items to the Trash; never deletes outright, and escalates only when you choose to and authenticate
