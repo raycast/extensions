@@ -130,3 +130,28 @@ community edits, run `npx @raycast/api@latest pull-contributions`.
 
 Author field is `zak_katz`, matching the other extensions. `metadata/` still
 needs 2000x1250 screenshots before the first PR.
+
+## Why Etymonline is local only
+
+`src/sources/etymonline.ts` fetches an excerpt from etymonline.com. It must never
+reach the store, which is why it lives on this branch and not on `main`.
+
+Checked 2026-09-17: no public API; `robots.txt` allows `/word/` and `/search` for
+`*` and disallows `/api/`; the terms at `etymonline.com/legal/terms` say nothing
+about scraping or automated access but declare the content "the exclusive
+property of Etymonline". Owned by Harper Family LLC, proprietary, no open licence.
+A self-identifying User-Agent is served normally, so there is no need to pose as a
+browser and the code does not.
+
+Reading it yourself on your own machine is one thing; shipping an extension that
+reproduces those entries for everyone is another. Hence: a preference off by
+default, a capped excerpt rather than a mirror, and `just store-check`, which
+exits non-zero while the module, the preference or its use site exists.
+
+The parser keys on a `<section>` whose class list contains `prose`. The page is
+Tailwind utility classes with no embedded JSON, no semantic class and no
+microdata, so that anchor will break on any restyle. It fails to `undefined` and
+the pane falls back to the link.
+
+To use it: `just local`, then Raycast → Extensions → Etymology → tick
+*Show Etymonline Excerpt*.
