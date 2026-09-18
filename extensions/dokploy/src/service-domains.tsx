@@ -220,21 +220,23 @@ function AddDomainForm({
   const [isBusy, setIsBusy] = useState(false);
   const isCompose = service.type === "compose";
 
-  const { data: containers, isLoading: containersLoading } = useFetch<string[], string[]>(
-    `${url}compose.loadServices?composeId=${service.id}&type=fetch`,
-    {
-      headers,
-      initialData: [],
-      execute: isCompose,
-      parseResponse: async (response) => {
-        if (!response.ok) {
-          const err = (await response.json()) as ErrorResult;
-          throw new Error(err.message);
-        }
-        return parseContainerNames(await response.json());
-      },
+  const {
+    data: containers,
+    isLoading: containersLoading,
+    error: containersError,
+    revalidate: retryContainers,
+  } = useFetch<string[], string[]>(`${url}compose.loadServices?composeId=${service.id}&type=fetch`, {
+    headers,
+    initialData: [],
+    execute: isCompose,
+    parseResponse: async (response) => {
+      if (!response.ok) {
+        const err = (await response.json()) as ErrorResult;
+        throw new Error(err.message);
+      }
+      return parseContainerNames(await response.json());
     },
-  );
+  });
 
   const { data: serverDetail } = useFetch<ServiceServerDetail, ServiceServerDetail | undefined>(
     `${url}${service.type}.one?${ID_FIELDS[service.type]}=${service.id}`,
@@ -373,7 +375,7 @@ function AddDomainForm({
           ? result
           : Boolean(
               (result as { valid?: boolean; isValid?: boolean })?.valid ??
-                (result as { valid?: boolean; isValid?: boolean })?.isValid,
+              (result as { valid?: boolean; isValid?: boolean })?.isValid,
             );
 
       toast.style = valid ? Toast.Style.Success : Toast.Style.Failure;
@@ -399,19 +401,27 @@ function AddDomainForm({
           <Action.SubmitForm icon={Icon.Check} title="Add Domain" onSubmit={handleSubmit} />
           {serverId && <Action icon={Icon.Wand} title="Generate Domain (Traefik.me)" onAction={generateDomain} />}
           <Action icon={Icon.Network} title="Validate Domain" onAction={checkDns} />
+          {isCompose && containersError && (
+            <Action icon={Icon.ArrowClockwise} title="Retry Loading Containers" onAction={() => retryContainers()} />
+          )}
         </ActionPanel>
       }
     >
       <Form.TextField title="Host" placeholder="app.example.com" {...itemProps.host} />
-      {isCompose && (
-        <Form.Dropdown
-          title="Container"
-          info="Which container in the stack this domain routes to."
-          {...itemProps.containerServiceName}
-        >
-          {containers?.map((name) => <Form.Dropdown.Item key={name} title={name} value={name} />)}
-        </Form.Dropdown>
-      )}
+      {isCompose &&
+        (containersError ? (
+          <Form.Description title="Container" text={`Could not load containers: ${containersError}`} />
+        ) : (
+          <Form.Dropdown
+            title="Container"
+            info="Which container in the stack this domain routes to."
+            {...itemProps.containerServiceName}
+          >
+            {containers?.map((name) => (
+              <Form.Dropdown.Item key={name} title={name} value={name} />
+            ))}
+          </Form.Dropdown>
+        ))}
       <Form.TextField title="Path" placeholder="/" {...itemProps.path} />
       <Form.TextField title="Port" placeholder="3000" info="The container's own port." {...itemProps.port} />
       <Form.Checkbox title="HTTPS" label="Serve this domain over HTTPS" {...itemProps.https} />
