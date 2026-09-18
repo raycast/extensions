@@ -117,17 +117,20 @@ export default function Command() {
               <Action.OpenInBrowser
                 title="Browse the Full Signal 500"
                 url="https://feeds.bar/signal-500/"
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "o" }, Windows: { modifiers: ["ctrl"], key: "o" } }}
               />
               <Action.CopyToClipboard
                 title="Copy Feed URL"
                 content={s.feed_url}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
               />
               <Action.CopyToClipboard
                 title="Copy Website URL"
                 content={`https://${s.domain}`}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                }}
               />
             </ActionPanel>
           }
