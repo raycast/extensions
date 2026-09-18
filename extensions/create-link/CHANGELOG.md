@@ -1,6 +1,6 @@
 # Create Link Changelog
 
-## [Clipboard Links for Slack] - {PR_MERGE_DATE}
+## [Clipboard Links for Slack] - 2026-09-18
 
 - Add Copy Clipboard URL for Slack with rich HTML and plain-text URL clipboard representations.
 - Fetch page titles from HTML or authenticated GitHub CLI lookups for pull requests, issues, and discussions.
