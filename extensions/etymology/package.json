@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "etymology",
+  "title": "Etymology",
+  "description": "Trace where a word comes from, one ancestor at a time, using Wiktionary's etymology data.",
+  "icon": "extension-icon.png",
+  "author": "zak_katz",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-etymology",
+      "title": "Search Etymology",
+      "description": "Look up a word and walk its chain of ancestors",
+      "mode": "view"
+    },
+    {
+      "name": "lookup-selection",
+      "title": "Look up Selection",
+      "description": "Show the etymology of the currently selected text",
+      "mode": "view"
+    },
+    {
+      "name": "random-etymology",
+      "title": "Show Random Etymology",
+      "description": "Open a random word that has a full etymology tree",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-etymology",
+      "title": "Get Etymology",
+      "description": "Return the etymology of an English word as a chain of ancestors, each with its term, language and relation (inherited, borrowed, derived, affix). Sourced from English Wiktionary."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultView",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default View",
+      "description": "How an entry is rendered when it opens",
+      "default": "tree",
+      "data": [
+        {
+          "title": "Tree (ancestors as a chain)",
+          "value": "tree"
+        },
+        {
+          "title": "Prose (Wiktionary's own wording)",
+          "value": "prose"
+        }
+      ]
+    },
+    {
+      "name": "markdownTemplate",
+      "type": "textfield",
+      "required": false,
+      "title": "Markdown Template",
+      "description": "Format used by Copy as Markdown. Placeholders: {term} {chain} {prose} {url} {attribution}",
+      "default": "## {term}\n\n{chain}\n\n{prose}\n\n{attribution}"
+    },
+    {
+      "name": "showEtymonline",
+      "type": "checkbox",
+      "required": false,
+      "title": "Etymonline",
+      "label": "Show Etymonline Action",
+      "description": "Add an action that opens the word on etymonline.com",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.3.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "langcodes": "node scripts/build-langcodes.mjs",
+    "check-store-ready": "node scripts/check-store-ready.mjs"
+  }
+}
