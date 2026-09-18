@@ -1,5 +1,9 @@
 # Transmission Changelog
 
+## [Update dependencies] - {PR_MERGE_DATE}
+
+- Update `react` and `react-dom` to match the current Raycast runtime
+
 ## [Fix] - 2025-06-25
 
 - Fixed generation of SVG files
