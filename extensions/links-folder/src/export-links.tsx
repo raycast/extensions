@@ -17,7 +17,7 @@ import * as path from "path";
 import * as os from "os";
 import { fileURLToPath } from "url";
 import { rankByQuery } from "./search";
-import { searchFolders } from "./folder-search";
+import { searchFolders, SCAN_LEVELS } from "./folder-search";
 
 function getPreferencePath(): string | undefined {
   try {
@@ -111,6 +111,19 @@ function getLocations(remembered?: string): Location[] {
   return [known ?? toLocation(remembered), ...standard.filter((location) => location !== known)];
 }
 
+// Wording that depends on the platform: Spotlight makes the search complete on macOS, elsewhere it is bounded
+const SEARCH_HINT =
+  process.platform === "darwin"
+    ? "Type in Save Location to search all your folders, including iCloud Drive."
+    : `Type in Save Location to search the folders in your home directory, up to ${SCAN_LEVELS} levels deep. For anything deeper, paste its path in Other Folder.`;
+
+const PATH_FIELD_HELP =
+  process.platform === "darwin"
+    ? "Overrides Save Location. In Finder, select a folder and press ⌥⌘C to copy its path, then paste it here. ~ works too."
+    : process.platform === "win32"
+      ? "Overrides Save Location. In File Explorer, select a folder and press Ctrl+Shift+C to copy its path, then paste it here."
+      : "Overrides Save Location. Paste the full path of a folder here.";
+
 export default function ExportCommand() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [selected, setSelected] = useState<Location | null>(null);
@@ -120,7 +133,7 @@ export default function ExportCommand() {
   const [customPath, setCustomPath] = useState("");
   const [customPathError, setCustomPathError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
-  const latestSearch = useRef(0);
+  const searchController = useRef<AbortController | undefined>(undefined);
 
   // Load the last used folder from LocalStorage on mount and preselect it
   useEffect(() => {
@@ -139,10 +152,14 @@ export default function ExportCommand() {
     })();
   }, []);
 
+  // Stop any running search when the form closes
+  useEffect(() => () => searchController.current?.abort(), []);
+
   // Typing in the dropdown searches every folder under the home directory, including iCloud Drive
   function handleSearchTextChange(text: string) {
     setSearchText(text);
-    const searchId = ++latestSearch.current;
+    searchController.current?.abort(); // stop the search for the previous text instead of letting it run on
+    searchController.current = undefined;
 
     if (!text.trim()) {
       setSearchResults([]);
@@ -150,15 +167,17 @@ export default function ExportCommand() {
       return;
     }
 
+    const controller = new AbortController();
+    searchController.current = controller;
     setIsSearching(true);
-    searchFolders(text)
+    searchFolders(text, controller.signal)
       .then((folders) => {
-        if (searchId !== latestSearch.current) return; // a newer search replaced this one
+        if (controller.signal.aborted) return; // a newer search replaced this one
         setSearchResults(folders.map(toLocation));
         setIsSearching(false);
       })
       .catch(() => {
-        if (searchId === latestSearch.current) setIsSearching(false);
+        if (!controller.signal.aborted) setIsSearching(false);
       });
   }
 
@@ -198,7 +217,7 @@ export default function ExportCommand() {
         title: "Exported Successfully",
         message: `Saved as ${fileName}`,
         primaryAction: {
-          title: "Show in Finder",
+          title: process.platform === "darwin" ? "Show in Finder" : "Show in Explorer",
           onAction: () => showInFinder(exportPath),
         },
       });
@@ -236,7 +255,9 @@ export default function ExportCommand() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Choose a destination to export your links.json file. Type in Save Location to search all your folders, including iCloud Drive. Raycast will remember this location for your next export." />
+      <Form.Description
+        text={`Choose a destination to export your links.json file. ${SEARCH_HINT} Raycast will remember this location for your next export.`}
+      />
 
       <Form.Dropdown
         id="destination"
@@ -266,7 +287,7 @@ export default function ExportCommand() {
         id="customPath"
         title="Other Folder"
         placeholder="Optional: paste a folder path"
-        info="Overrides Save Location. In Finder, select a folder and press ⌥⌘C to copy its path, then paste it here. ~ works too."
+        info={PATH_FIELD_HELP}
         value={customPath}
         onChange={(value) => {
           setCustomPath(value);

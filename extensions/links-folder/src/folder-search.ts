@@ -6,11 +6,12 @@ import { rankByQuery } from "./search";
 
 // Finds folders by name anywhere under the home directory (which includes iCloud Drive).
 // On macOS this asks Spotlight, which is already indexed and answers in a fraction of a second.
-// Elsewhere it falls back to a bounded scan of the home directory.
+// Elsewhere it falls back to a bounded scan of the home directory (SCAN_LEVELS levels deep), which is
+// why the UI states that limit there. Searches can be cancelled so old queries stop using the disk.
 
 const MAX_RESULTS = 50;
 const MAX_CANDIDATES = 2000; // ranked before the (slower) write-access check
-const MAX_SCAN_DEPTH = 5;
+export const SCAN_LEVELS = 6;
 const MAX_SCAN_FOLDERS = 20000;
 const SPOTLIGHT_TIMEOUT_MS = 5000;
 
@@ -23,7 +24,7 @@ const ALLOWED_LIBRARY_FOLDERS = [
 function isExcluded(folder: string, home: string): boolean {
   const segments = path.relative(home, folder).split(path.sep);
   if (segments.some((segment) => segment.startsWith(".") || segment === "node_modules")) return true;
-  if (segments[0] !== "Library") return false;
+  if (process.platform !== "darwin" || segments[0] !== "Library") return false;
   return !ALLOWED_LIBRARY_FOLDERS.some((allowed) => allowed.every((segment, index) => segments[index] === segment));
 }
 
@@ -36,7 +37,7 @@ function isWritable(folder: string): boolean {
   }
 }
 
-function searchWithSpotlight(tokens: string[], home: string): Promise<string[]> {
+function searchWithSpotlight(tokens: string[], home: string, signal?: AbortSignal): Promise<string[]> {
   // Every word has to appear in the folder name; "cd" makes the match case and diacritic insensitive
   const query = [
     'kMDItemContentType == "public.folder"',
@@ -47,26 +48,29 @@ function searchWithSpotlight(tokens: string[], home: string): Promise<string[]> 
     execFile(
       "/usr/bin/mdfind",
       ["-onlyin", home, query],
-      { maxBuffer: 32 * 1024 * 1024, timeout: SPOTLIGHT_TIMEOUT_MS },
+      { maxBuffer: 32 * 1024 * 1024, timeout: SPOTLIGHT_TIMEOUT_MS, signal },
       (_error, stdout) =>
         resolve(
-          String(stdout ?? "")
-            .split("\n")
-            .filter(Boolean),
+          signal?.aborted
+            ? []
+            : String(stdout ?? "")
+                .split("\n")
+                .filter(Boolean),
         ),
     );
   });
 }
 
-async function searchByScanning(tokens: string[], home: string): Promise<string[]> {
+async function searchByScanning(tokens: string[], home: string, signal?: AbortSignal): Promise<string[]> {
   const found: string[] = [];
   let level = [home];
   let visited = 0;
 
-  for (let depth = 0; depth <= MAX_SCAN_DEPTH && level.length > 0 && visited < MAX_SCAN_FOLDERS; depth++) {
+  for (let depth = 0; depth < SCAN_LEVELS && level.length > 0 && visited < MAX_SCAN_FOLDERS; depth++) {
     const nextLevel: string[] = [];
 
     for (const dir of level) {
+      if (signal?.aborted) return [];
       if (visited++ >= MAX_SCAN_FOLDERS) break;
 
       let entries: fs.Dirent[];
@@ -78,6 +82,8 @@ async function searchByScanning(tokens: string[], home: string): Promise<string[
 
       for (const entry of entries) {
         if (!entry.isDirectory() || entry.name.startsWith(".") || entry.name === "node_modules") continue;
+        // AppData is hidden by Windows and huge, it would use up the scan budget for nothing
+        if (dir === home && entry.name === "AppData") continue;
         const folder = path.join(dir, entry.name);
         nextLevel.push(folder);
         const name = entry.name.toLowerCase();
@@ -91,7 +97,7 @@ async function searchByScanning(tokens: string[], home: string): Promise<string[
   return found;
 }
 
-export async function searchFolders(query: string): Promise<string[]> {
+export async function searchFolders(query: string, signal?: AbortSignal): Promise<string[]> {
   // Quotes, backslashes and asterisks have a meaning in Spotlight queries, so they are dropped
   const tokens = query
     .toLowerCase()
@@ -102,7 +108,10 @@ export async function searchFolders(query: string): Promise<string[]> {
 
   const home = os.homedir();
   const matches =
-    process.platform === "darwin" ? await searchWithSpotlight(tokens, home) : await searchByScanning(tokens, home);
+    process.platform === "darwin"
+      ? await searchWithSpotlight(tokens, home, signal)
+      : await searchByScanning(tokens, home, signal);
+  if (signal?.aborted) return [];
 
   const candidates = matches
     .filter((folder) => !isExcluded(folder, home))

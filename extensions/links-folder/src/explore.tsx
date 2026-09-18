@@ -664,6 +664,8 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
     secondary: item.type === "link" ? getDomainOnly(item.url) : undefined,
   });
   const visibleItems = rankByQuery(currentItems, searchText, getSearchable);
+  // Search reorders and hides items, so moving "one step" would swap with an item that is not on screen
+  const isSearching = searchText.trim().length > 0;
 
   // Raycast keeps the highlighted row while it is still in the results, so select the best match explicitly
   function handleSearchTextChange(text: string) {
@@ -853,18 +855,22 @@ function FolderList({ folderId, breadcrumbs = ["Links Folder"] }: { folderId: st
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={() => duplicateItem(item.id)}
                 />
-                <Action
-                  title="Move up"
-                  icon={Icon.ArrowUp}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
-                  onAction={() => moveItem(item.id, -1)}
-                />
-                <Action
-                  title="Move Down"
-                  icon={Icon.ArrowDown}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-                  onAction={() => moveItem(item.id, 1)}
-                />
+                {!isSearching && (
+                  <>
+                    <Action
+                      title="Move up"
+                      icon={Icon.ArrowUp}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                      onAction={() => moveItem(item.id, -1)}
+                    />
+                    <Action
+                      title="Move Down"
+                      icon={Icon.ArrowDown}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                      onAction={() => moveItem(item.id, 1)}
+                    />
+                  </>
+                )}
                 <Action
                   title={item.type === "link" ? "Delete Link" : "Delete Folder"}
                   icon={Icon.Trash}
