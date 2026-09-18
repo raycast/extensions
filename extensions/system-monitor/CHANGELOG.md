@@ -1,5 +1,12 @@
 # System Monitor Changelog
 
+## [Menu Bar Process Safety] - {PR_MERGE_DATE}
+
+- Keep background refreshes process-free by collecting CPU, memory, and storage with Node and macOS system calls
+- Reuse cached network, temperature, and battery values until the menu is opened instead of starting `nettop` or `temperature-reader` every 10 seconds
+- Prevent overlapping background workers with a stale-recoverable cross-process lease
+- Validate and bound the versioned menu-bar snapshot cache
+
 ## [Disk Tab] - 2026-08-05
 
 - Add a Disk tab with capacity, per-volume breakdown, APFS volume details and live disk I/O rates via `iostat`
