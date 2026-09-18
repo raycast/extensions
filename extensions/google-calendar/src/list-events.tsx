@@ -6,6 +6,7 @@ import useCalendars from "./hooks/useCalendars";
 import { useState, useMemo } from "react";
 import EventActions from "./components/EventActions";
 import CalendarSelector from "./components/CalendarSelector";
+import { BIRTHDAYS_VIEW_CALENDAR_ID } from "./lib/event-types";
 
 function getAccessories(event: calendar_v3.Schema$Event, showLocation: boolean) {
   const accessories = new Array<List.Item.Accessory>();
@@ -130,6 +131,9 @@ function Command(props: LaunchProps) {
   const selectedCalendar = useMemo(() => {
     const allCalendars = [...(calendars?.selected ?? []), ...(calendars?.unselected ?? [])];
     const primaryCalendar = allCalendars.find((calendar) => calendar.primary);
+    if (selectedCalendarId === BIRTHDAYS_VIEW_CALENDAR_ID) {
+      return primaryCalendar ?? { id: "primary" };
+    }
     const selected =
       selectedCalendarId && selectedCalendarId !== "primary"
         ? allCalendars.find((calendar) => calendar.id === selectedCalendarId)

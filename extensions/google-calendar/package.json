@@ -14,7 +14,8 @@
     "dangkhoipro",
     "0xdhrv",
     "peduarte",
-    "oguma0923"
+    "oguma0923",
+    "alerix"
   ],
   "categories": [
     "Productivity",
@@ -56,6 +57,15 @@
           "title": "Display",
           "label": "Show location",
           "description": "Show the event's location as an accessory in the list",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showBirthdays",
+          "type": "checkbox",
+          "title": "Display",
+          "label": "Show birthdays",
+          "description": "Include Google Contacts birthday events when listing the primary calendar. Off by default because birthdays often flood upcoming events.",
           "default": false,
           "required": false
         },
@@ -293,5 +303,10 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "esbuild@0.28.1": true,
+    "fsevents@2.3.3": true
+  }
 }
