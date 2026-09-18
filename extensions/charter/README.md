@@ -2,11 +2,11 @@
 
 A catalog of chart and diagram types for Raycast. Browse by family, pick the library you are working in, and copy the docs link, a complete example or a prompt snippet for it without leaving the keyboard. Charter also draws Mermaid diagrams and ECharts options on your machine.
 
-![Browse Charts as a grid](metadata/charter-1.png)
+![Browse Charts as a grid](media/charter-1.jpg)
 
-![Browse Charts as a list with the detail panel](metadata/charter-2.png)
+![Browse Charts as a list with the detail panel](media/charter-2.jpg)
 
-![Render Chart showing a Venn diagram](metadata/charter-3.png)
+![Render Chart showing a Venn diagram](media/charter-3.jpg)
 
 ## Commands
 
