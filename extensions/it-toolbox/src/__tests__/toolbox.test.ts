@@ -391,6 +391,20 @@ test("nextCronRuns treats day-of-month and day-of-week as alternatives", () => {
   assert.ok(nextCronRuns("0 0 * * 1", 5, new Date(2026, 0, 1, 0, 0, 0)).every((d) => d.getDay() === 1));
 });
 
+test("nextCronRuns treats a stepped wildcard day field as a wildcard", () => {
+  // Vixie cron sets DOM_STAR/DOW_STAR from the field's *first character*, so `*/2` counts
+  // as `*` and the two day fields stay ANDed: `0 0 */2 * 1` is "Mondays on odd dates".
+  const runs = nextCronRuns("0 0 */2 * 1", 6, new Date(2026, 8, 17, 0, 0, 0));
+  assert.strictEqual(runs.length, 6);
+  assert.ok(
+    runs.every((d) => d.getDay() === 1 && d.getDate() % 2 === 1),
+    `expected only odd-date Mondays, got ${runs.map((d) => `${d.toDateString()}`).join(", ")}`,
+  );
+
+  // ...while a genuinely restricted day field on either side still selects the OR path
+  assert.ok(nextCronRuns("0 0 1-31/2 * 1", 6, new Date(2026, 8, 17, 0, 0, 0)).some((d) => d.getDay() !== 1));
+});
+
 test("diffLines keeps line numbers aligned across a trimmed prefix and suffix", () => {
   const lines = diffLines(["a", "b", "c", "d", "e"].join("\n"), ["a", "b", "X", "Y", "e"].join("\n"));
   assert.deepStrictEqual(

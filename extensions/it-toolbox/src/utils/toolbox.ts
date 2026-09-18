@@ -664,9 +664,13 @@ export function nextCronRuns(expression: string, count = 10, from: Date = new Da
   const [minutes, hours, days, months, weekdays] = parseCron(expression);
   // In five-field cron, restricting both day-of-month and day-of-week means "either", not
   // "both": `0 0 1 * 1` fires on the 1st of every month *and* on every Monday. The plain
-  // AND only applies when at least one of the two fields is `*`.
+  // AND only applies when at least one of the two fields is `*`. Vixie cron decides this
+  // from the *first character* of the field alone, so a stepped wildcard such as `*/2`
+  // still counts as `*` and stays on the AND path (cronie entry.c sets DOM_STAR/DOW_STAR
+  // from the first character; cron.c then picks AND when either flag is set).
   const fields = expression.trim().split(/\s+/);
-  const bothRestricted = fields.length === 5 && fields[2] !== "*" && fields[4] !== "*";
+  const isUnrestrictedDay = (field: string) => field.startsWith("*") || field === "?";
+  const bothRestricted = fields.length === 5 && !isUnrestrictedDay(fields[2]) && !isUnrestrictedDay(fields[4]);
   const results: Date[] = [];
   const cursor = new Date(from.getTime());
   cursor.setSeconds(0, 0);
