@@ -28,6 +28,20 @@ import { openNewTab, openInNewWindow } from "../index";
 const setBrowserApp = (browserApp: string) =>
   vi.mocked(getPreferenceValues).mockReturnValue({ browserApp, searchEngine: "Google" });
 
+async function withLocalAppData<T>(value: string, run: () => Promise<T>): Promise<T> {
+  const original = process.env.LOCALAPPDATA;
+  process.env.LOCALAPPDATA = value;
+  try {
+    return await run();
+  } finally {
+    if (original === undefined) {
+      delete process.env.LOCALAPPDATA;
+    } else {
+      process.env.LOCALAPPDATA = original;
+    }
+  }
+}
+
 // Makes existsSync resolve `true` only for the given set of paths.
 const mockExistingPaths = (existingPaths: string[]) =>
   vi.mocked(existsSync).mockImplementation((candidate) => existingPaths.includes(String(candidate)));
@@ -68,15 +82,55 @@ describe("launchFirefox on Windows (via openNewTab)", () => {
     );
   });
 
-  it("falls back to the bare firefox.exe (PATH) for release Firefox when not found at known paths", async () => {
+  it("does not fall back to firefox.exe and shows an actionable error when release Firefox is not found", async () => {
     setBrowserApp("Firefox");
     mockExistingPaths([]);
     mockSpawnSuccess();
 
     const result = await openNewTab(null);
 
-    expect(result).toBe("success");
-    expect(spawn).toHaveBeenCalledWith("firefox.exe", ["about:newtab"], expect.anything());
+    expect(result).toBe("error");
+    expect(spawn).not.toHaveBeenCalled();
+    expect(showToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        style: "FAILURE",
+        message: expect.stringContaining("Firefox"),
+      }),
+    );
+  });
+
+  it("spawns the per-user LocalAppData Firefox executable when Program Files is missing", async () => {
+    await withLocalAppData("C:\\Users\\TestUser\\AppData\\Local", async () => {
+      setBrowserApp("Firefox");
+      mockExistingPaths(["C:\\Users\\TestUser\\AppData\\Local\\Mozilla Firefox\\firefox.exe"]);
+      mockSpawnSuccess();
+
+      const result = await openNewTab(null);
+
+      expect(result).toBe("success");
+      expect(spawn).toHaveBeenCalledWith(
+        "C:\\Users\\TestUser\\AppData\\Local\\Mozilla Firefox\\firefox.exe",
+        ["about:newtab"],
+        expect.anything(),
+      );
+    });
+  });
+
+  it("spawns Firefox from LocalAppData\\Programs when the top-level LocalAppData install is missing", async () => {
+    await withLocalAppData("C:\\Users\\TestUser\\AppData\\Local", async () => {
+      setBrowserApp("Firefox");
+      mockExistingPaths(["C:\\Users\\TestUser\\AppData\\Local\\Programs\\Mozilla Firefox\\firefox.exe"]);
+      mockSpawnSuccess();
+
+      const result = await openNewTab(null);
+
+      expect(result).toBe("success");
+      expect(spawn).toHaveBeenCalledWith(
+        "C:\\Users\\TestUser\\AppData\\Local\\Programs\\Mozilla Firefox\\firefox.exe",
+        ["about:newtab"],
+        expect.anything(),
+      );
+    });
   });
 
   it("spawns the Firefox Nightly executable when found at its known install path", async () => {

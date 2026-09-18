@@ -2,14 +2,15 @@ import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
 import { buildNewTabUrl, openHistoryTab, openInNewWindow, openNewTab, setActiveTab } from "../actions";
 import { HistoryEntry, Tab } from "../interfaces";
 
-const isWindows = process.platform === "win32";
-
 function OpenInNewWindowAction({ url }: { url?: string }) {
-  if (!isWindows) return null;
+  if (process.platform !== "win32") return null;
   return (
     <Action
       title="Open in New Window"
-      shortcut={{ modifiers: ["ctrl"], key: "enter" }}
+      shortcut={{
+        macOS: { modifiers: ["ctrl"], key: "enter" },
+        Windows: { modifiers: ["ctrl"], key: "enter" },
+      }}
       onAction={() => openInNewWindow(url)}
     />
   );

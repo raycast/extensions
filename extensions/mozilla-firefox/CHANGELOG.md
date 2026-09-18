@@ -1,5 +1,11 @@
 # Mozilla Firefox Changelog
 
+## [Windows Launch Fixes] - {PR_MERGE_DATE}
+
+- Added an Open in New Window action on Windows to open the selected URL in a new Firefox window
+- Opening URLs on Windows now finds Firefox installed under `%LOCALAPPDATA%` (per-user / non-Program Files installs)
+- Windows never spawns an unverified `firefox.exe` from PATH; if no known install path exists, an actionable error is shown for every variant including Release
+
 ## [Live Bookmarks & Search Fixes] - 2026-09-12
 
 - Search Bookmarks now reads live from `moz_bookmarks` in `places.sqlite` instead of the daily `bookmarkbackups` lz4 file, so new bookmarks show up immediately
