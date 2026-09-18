@@ -5,11 +5,21 @@ import type { ScriptCommand } from "./types";
  * brand or category. Encoding three axes into those two strings is therefore a naming convention
  * rather than a schema, and this module is the one place that knows it:
  *
- *     title        @work · Sprint Board
- *     packageName  Linear
+ *     title        Sprint Board
+ *     packageName  Linear · @work · #dev
  *
  *     title        Watch Later
  *     packageName  YouTube · #media
+ *
+ * The title is only ever the name. Raycast renders it bold and in full, so a sigil there is the first
+ * thing read on every row it decorates and the thing least likely to differ between neighbours — thirty
+ * work commands in a row all led with the same five characters. Both sigils live on the subtitle, which
+ * Raycast searches just as it searches the title, so nothing typeable is lost by moving them.
+ *
+ * The environment used to lead the title (`@work · Sprint Board` / `Linear`), and commands written in
+ * that form are still read correctly: the title-anchored sigil is honoured first, then the subtitle.
+ * Only the writer changed. Nothing here rewrites a file on disk, so a collection migrates one command
+ * at a time as its commands are recreated.
  *
  * Everything here degrades rather than fails. A command written by someone who has never heard of
  * the convention still parses — it simply has no environment and no category, and its brand is
@@ -25,45 +35,19 @@ const ENVIRONMENT_PATTERN = new RegExp(`^@([\\p{L}\\p{N}][\\p{L}\\p{N}_-]*)\\s*$
 /** `Brand · #category`, and the looser `Brand #category` that predates the separator. */
 const CATEGORY_PATTERN = new RegExp(`^(.*?)\\s*(?:${SEPARATOR}\\s*)?#([\\p{L}\\p{N}][\\p{L}\\p{N}_-]*)\\s*$`, "u");
 
-export type Facets = {
-  /** `work` from `@work · Name`, absent for personal commands. */
-  environment?: string;
-  /** The title with the scope stripped — what the command actually is. */
-  name: string;
-  /** `packageName` with any category removed. Undefined when the field is empty. */
-  brand?: string;
-  /** `media` from `YouTube · #media`, absent when untagged. */
-  category?: string;
-};
+/**
+ * A whole field inside `packageName` that is nothing but a sigil and a token. Anchored as a complete
+ * field, so `Chat @ Mozilla` stays a brand — and so does `Brand · @ · #`, since a bare sigil has no token.
+ * A brand that is itself a bare handle (`@kud`) is the one shape this cannot tell from a scope.
+ */
+const SIGIL_FIELD = /^([@#])([\p{L}\p{N}][\p{L}\p{N}_-]*)$/u;
 
 const clean = (value: string | undefined) => {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
 };
 
-export const facetsOf = (command: Pick<ScriptCommand, "title" | "packageName">): Facets => {
-  const environmentMatch = command.title.match(ENVIRONMENT_PATTERN);
-  const environment = environmentMatch ? environmentMatch[1].toLowerCase() : undefined;
-  const name = clean(environmentMatch ? environmentMatch[2] : command.title) ?? command.title;
-
-  const rawPackage = clean(command.packageName);
-  const categoryMatch = rawPackage?.match(CATEGORY_PATTERN);
-
-  return {
-    environment,
-    name,
-    brand: clean(categoryMatch ? categoryMatch[1] : rawPackage),
-    category: categoryMatch ? categoryMatch[2].toLowerCase() : undefined,
-  };
-};
-
-/**
- * A whole field inside `packageName` that is nothing but a sigil and a token. Anchored as a complete
- * field, so `Chat @ Mozilla` stays a brand.
- */
-const TYPED_SIGIL_FIELD = /^([@#])([\p{L}\p{N}][\p{L}\p{N}_-]*)$/u;
-
-export type TypedPackage = {
+export type SplitPackage = {
   /** What is left once any sigil field has been lifted out. Undefined when nothing remains. */
   brand?: string;
   environment?: string;
@@ -78,28 +62,24 @@ export type TypedPackage = {
 };
 
 /**
- * Splits a hand-typed `packageName` into the axes it is actually carrying, for the create form only.
- * `Linear · @work` is someone reaching for the Environment control through the wrong field: taken
- * literally it is a brand named `Linear · @work`, which slugs into a `linear-work.` filename the
- * convention has no name for, and which the list view then reads back as a brand rather than a scope.
- *
- * Read-side parsing is deliberately untouched — `facetsOf` still takes the scope from the title, as
- * the convention says. This describes what a person typed, never how a command on disk is interpreted.
+ * Splits a `packageName` into the axes it is carrying. One reader serves both sides: the list view
+ * interprets a command on disk with it, and the create form runs what a person typed through it so that
+ * `Linear · @work` — someone reaching for the Environment control through the wrong field — is taken as a
+ * brand and a scope rather than as a brand named literally that, which would slug into a `linear-work.`
+ * filename the convention has no name for.
  */
-export const splitTypedPackage = (packageName: string | undefined): TypedPackage => {
+export const splitPackage = (packageName: string | undefined): SplitPackage => {
   const fields = (clean(packageName) ?? "")
     .split(SEPARATOR)
     .map((field) => field.trim())
     .filter(Boolean);
 
-  const sigils = fields.map((field) => field.match(TYPED_SIGIL_FIELD)).filter((match) => match !== null);
+  const sigils = fields.map((field) => field.match(SIGIL_FIELD)).filter((match) => match !== null);
   const firstOf = (sigil: string) => sigils.find((match) => match[1] === sigil);
   const valueOf = (sigil: string) => firstOf(sigil)?.[2].toLowerCase();
   const extras = sigils.filter((match) => match !== firstOf(match[1])).map((match) => match[0]);
 
-  // The looser `Brand #category` form is honoured here too, because `facetsOf` honours it — a shape the
-  // reader accepts and the filename does not is the same disagreement in a smaller costume.
-  const rawBrand = fields.filter((field) => !TYPED_SIGIL_FIELD.test(field)).join(` ${SEPARATOR} `);
+  const rawBrand = fields.filter((field) => !SIGIL_FIELD.test(field)).join(` ${SEPARATOR} `);
   const categoryMatch = rawBrand.match(CATEGORY_PATTERN);
 
   return {
@@ -107,6 +87,34 @@ export const splitTypedPackage = (packageName: string | undefined): TypedPackage
     environment: valueOf("@"),
     category: valueOf("#") ?? categoryMatch?.[2].toLowerCase(),
     extras,
+  };
+};
+
+export type Facets = {
+  /** `work` from `Linear · @work`, or from the older `@work · Name`; absent for personal commands. */
+  environment?: string;
+  /** The title with any scope stripped — what the command actually is. */
+  name: string;
+  /** `packageName` with its sigil fields removed. Undefined when nothing remains. */
+  brand?: string;
+  /** `media` from `YouTube · #media`, absent when untagged. */
+  category?: string;
+};
+
+/**
+ * The title-anchored form is read first so that a command carrying both — a shape nothing writes, but
+ * a hand edit can produce — keeps the scope its title has always shown in Raycast's own list.
+ */
+export const facetsOf = (command: Pick<ScriptCommand, "title" | "packageName">): Facets => {
+  const environmentMatch = command.title.match(ENVIRONMENT_PATTERN);
+  const name = clean(environmentMatch ? environmentMatch[2] : command.title) ?? command.title;
+  const split = splitPackage(command.packageName);
+
+  return {
+    environment: environmentMatch ? environmentMatch[1].toLowerCase() : split.environment,
+    name,
+    brand: split.brand,
+    category: split.category,
   };
 };
 
