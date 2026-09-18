@@ -1,6 +1,6 @@
 # Image to ASCII Changelog
 
-## [Update API Endpoint] - {PR_MERGE_DATE}
+## [Update API Endpoint] - 2026-09-18
 
 - Update the image to ASCII API endpoint to `ascii-image-converter.yencheng.dev`
 
