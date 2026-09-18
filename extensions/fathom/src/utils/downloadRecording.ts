@@ -15,7 +15,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { closeSync, existsSync, openSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, linkSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import {
   acquireLease,
@@ -33,6 +33,7 @@ import {
   runnerPath,
   startDownload,
   statusDir,
+  withStatusLock,
   uniquePath,
   watchStatus,
   type DownloadStatus,
@@ -101,15 +102,13 @@ const GENERATION_CLAIM_TTL_MS = 6 * 60 * 1000;
 interface GenerationClaim {
   pid: number;
   startedAt: number;
+  /** Identifies THIS acquisition, so a release cannot remove a successor's claim. */
+  token: string;
 }
 
-/** Byte size, or 0 when the file is missing or unreadable. */
-function safeSize(file: string): number {
-  try {
-    return statSync(file).size;
-  } catch {
-    return 0;
-  }
+/** Lock id for a recording's generation claim. The package validates this shape. */
+function lockId(recordingId: string): string {
+  return `gen-${recordingId.replace(/[^A-Za-z0-9._-]/g, "_")}`;
 }
 
 function claimPath(recordingId: string): string {
@@ -119,73 +118,173 @@ function claimPath(recordingId: string): string {
   return path.join(statusDir(), `gen-${safe}.claim`);
 }
 
-/** True when a claim is dead: its owner is gone, or it outlived the generation timeout. */
-function claimIsStale(file: string, now = Date.now()): boolean {
+function readClaim(file: string): GenerationClaim | undefined {
   try {
-    const claim = JSON.parse(readFileSync(file, "utf8")) as GenerationClaim;
-    if (now - claim.startedAt > GENERATION_CLAIM_TTL_MS) return true;
-    try {
-      // Signal 0 tests for existence without delivering anything.
-      process.kill(claim.pid, 0);
-      return false;
-    } catch {
-      // Owner is gone — a dismissed Raycast command takes its claim with it.
-      return true;
-    }
+    const parsed = JSON.parse(readFileSync(file, "utf8")) as Partial<GenerationClaim>;
+    // `token` is intentionally NOT required. A claim written before tokens
+    // existed carries only pid and startedAt, and rejecting it here would make
+    // it unreadable — which the acquire path reads as damage and refuses,
+    // wedging that recording on "Already Preparing" forever. A legacy claim is
+    // recognisable, so it gets the same TTL and dead-owner recovery as any
+    // other; it simply cannot be released by token.
+    if (!Number.isInteger(parsed?.pid) || !Number.isFinite(parsed?.startedAt)) return undefined;
+    return parsed as GenerationClaim;
   } catch {
-    // Unreadable or malformed: stale, rather than wedging every later retry.
+    return undefined;
+  }
+}
+
+/**
+ * Create the claim atomically, content and all.
+ *
+ * Written to a temp file and `link`ed into place rather than `openSync(path,
+ * "wx")`: an exclusive create makes an EMPTY file and fills it a moment later,
+ * and in that window another instance reads an empty claim, calls it damaged,
+ * and takes the recording while this one still believes it holds it. `link`
+ * publishes a file that is already complete. (This is the mechanism
+ * `@chrismessina/raycast-downloader` adopted for its own path claims in 0.1.4,
+ * for exactly this reason.)
+ */
+function tryCreateClaim(file: string, claim: GenerationClaim): boolean {
+  const temp = `${file}.${process.pid}.${claim.token.slice(0, 8)}.tmp`;
+  try {
+    writeFileSync(temp, JSON.stringify(claim), { mode: 0o600 });
+  } catch {
+    return false;
+  }
+  try {
+    linkSync(temp, file);
+    return true;
+  } catch {
+    return false;
+  } finally {
+    try {
+      unlinkSync(temp);
+    } catch {
+      /* the link succeeded or the temp never landed */
+    }
+  }
+}
+
+/**
+ * True when an UNREADABLE claim is old enough to be debris rather than a race.
+ *
+ * Refusing a malformed claim outright is fail-closed, which is right for a
+ * moment — but it never becomes right again, and that wedges the recording on
+ * "Already Preparing" permanently with no way out but deleting a file the user
+ * has no reason to know about. Reachable in practice: the previous `wx`-based
+ * implementation created an empty file and filled it a moment later, so a crash
+ * in that window left exactly this.
+ *
+ * Keyed on mtime, not content, because there is no content to trust. One
+ * generation timeout is the bound: nothing legitimately mid-publication is that
+ * old, and a real claim would have been readable and handled above.
+ */
+function malformedClaimIsRecoverable(file: string, now = Date.now()): boolean {
+  try {
+    return now - statSync(file).mtimeMs > GENERATION_CLAIM_TTL_MS;
+  } catch {
+    // Vanished between the failed read and here — treat as free.
     return true;
   }
 }
 
-/** Claim this recording's generation window, or return false if someone else holds it. */
-function acquireGenerationClaim(recordingId: string): boolean {
-  const file = claimPath(recordingId);
-  const write = () => {
-    const fd = openSync(file, "wx");
-    try {
-      writeFileSync(fd, JSON.stringify({ pid: process.pid, startedAt: Date.now() }));
-    } finally {
-      closeSync(fd);
-    }
-  };
-
+/** True when a claim's owner is provably gone, or it outlived the generation timeout. */
+function claimAbandoned(claim: GenerationClaim, now = Date.now()): boolean {
+  if (now - claim.startedAt > GENERATION_CLAIM_TTL_MS) return true;
   try {
-    write();
-    return true;
+    // Signal 0 tests for existence without delivering anything.
+    process.kill(claim.pid, 0);
+    return false;
   } catch {
-    if (!claimIsStale(file)) return false;
+    return true;
+  }
+}
+
+/**
+ * Claim this recording's generation window; returns the token, or undefined.
+ *
+ * An UNREADABLE claim is not treated as abandoned. With atomic creation above,
+ * a claim that will not parse means the file is damaged, not half-written, and
+ * stealing on that basis is how two instances both start generating. A refused
+ * download is recoverable; a duplicated one wastes a render.
+ *
+ * Acquire and release both run under a per-recording file lock, so the
+ * read-decide-replace sequence is atomic against another instance doing the
+ * same. An atomic create alone was not enough: two instances could both judge
+ * one claim abandoned and each replace the other's.
+ *
+ * That exclusion is strong, not absolute. `withStatusLock` is deliberately
+ * never fatal — after its wait expires it runs the callback UNSYNCHRONIZED
+ * rather than failing, so under a wedged filesystem two instances can still
+ * reach this sequence together and duplicate a generation request. The package
+ * would need a strict lock mode to close it. Worth knowing before trusting this
+ * as mutual exclusion under degraded conditions; it is not worth a guard here,
+ * because a guard that refuses downloads whenever a lock is slow trades a rare
+ * duplicate render for a common broken feature.
+ */
+function acquireGenerationClaim(recordingId: string): string | undefined {
+  const file = claimPath(recordingId);
+  const claim: GenerationClaim = { pid: process.pid, startedAt: Date.now(), token: randomUUID() };
+
+  // The whole read-decide-replace runs under one per-recording lock.
+  //
+  // An atomic create alone is not enough, and this is the race a previous
+  // version shipped with: two instances both read the same abandoned claim,
+  // the first unlinks and links its own, and the second then unlinks THAT and
+  // links its own. Both creates succeed, both callers believe they hold the
+  // recording, and both send a non-idempotent POST and download the file.
+  //
+  // There is no downstream bound on that, which an earlier comment here claimed
+  // there was: each call reserves its own `uniquePath`, so the two transfers
+  // have DIFFERENT output paths and `startDownload`'s conflict check never
+  // fires. Two full recordings land.
+  return withStatusLock(lockId(recordingId), undefined, () => {
+    if (tryCreateClaim(file, claim)) return claim.token;
+
+    const held = readClaim(file);
+    if (held) {
+      if (!claimAbandoned(held)) return undefined;
+    } else if (!malformedClaimIsRecoverable(file)) {
+      // Unreadable and not yet old enough to be sure it is debris rather than a
+      // claim mid-publication. Refuse; a later attempt will pass the grace.
+      return undefined;
+    }
+
     try {
       unlinkSync(file);
-      write();
     } catch {
-      // Lost the steal race to another instance; they own it now.
-      return false;
+      // Already gone; the create below still decides.
     }
-    // Re-read after stealing. Two instances can both judge the same claim stale;
-    // the second one's unlink+write lands on top of the first's, so winning the
-    // `wx` call is not the same as holding the claim. Whoever the file names at
-    // the end is the owner.
-    try {
-      const claim = JSON.parse(readFileSync(file, "utf8")) as GenerationClaim;
-      return claim.pid === process.pid;
-    } catch {
-      return false;
-    }
-  }
+    return tryCreateClaim(file, claim) ? claim.token : undefined;
+  });
 }
 
-function releaseGenerationClaim(recordingId: string): void {
+/** Release only the claim this call acquired. */
+function releaseGenerationClaim(recordingId: string, token: string): void {
   const file = claimPath(recordingId);
+  // Same lock as acquire: the token check and the unlink are two filesystem
+  // operations, so without it a claim that expired between them could be stolen
+  // by another instance and then deleted here — handing the recording to a
+  // third caller while the second is still resolving media.
+  withStatusLock(lockId(recordingId), undefined, () => {
+    // Token, not pid: an expired claim legitimately taken by another instance
+    // must not be removed by ours, and a recycled pid would match.
+    if (readClaim(file)?.token !== token) return;
+    try {
+      unlinkSync(file);
+    } catch {
+      /* already gone */
+    }
+  });
+}
+
+/** Byte size, or 0 when the file is missing or unreadable. */
+function safeSize(file: string): number {
   try {
-    // Ownership check, not a formality: if this claim expired and another
-    // instance legitimately took it, an unconditional unlink would delete THEIR
-    // protection and let a third instance start alongside them.
-    const claim = JSON.parse(readFileSync(file, "utf8")) as GenerationClaim;
-    if (claim.pid !== process.pid) return;
-    unlinkSync(file);
+    return statSync(file).size;
   } catch {
-    // Already gone, unreadable, or never ours to remove.
+    return 0;
   }
 }
 
@@ -257,7 +356,7 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
   // branch below would fall through to `finally` and release a claim belonging
   // to the call still in flight — disarming the guard on the second press,
   // which is the exact case it exists for.
-  let claimedGeneration = false;
+  let generationToken: string | undefined;
 
   try {
     // Adopt an existing transfer rather than starting a second one.
@@ -270,7 +369,8 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
     const adopted = await adoptRunningTransfer(recordingId, toast, { revealOnComplete });
     if (adopted) return adopted;
 
-    if (!acquireGenerationClaim(recordingId)) {
+    generationToken = acquireGenerationClaim(recordingId);
+    if (!generationToken) {
       await toast.hide();
       await showToast({
         style: Toast.Style.Success,
@@ -279,7 +379,6 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
       });
       return undefined;
     }
-    claimedGeneration = true;
 
     const media = await resolveMedia(recordingId, toast, meeting);
 
@@ -420,7 +519,7 @@ export async function downloadRecording(options: DownloadRecordingOptions): Prom
   } finally {
     // Released on EVERY exit, not just the happy one: a claim left on disk
     // would refuse every later retry until its TTL expired.
-    if (claimedGeneration) releaseGenerationClaim(recordingId);
+    if (generationToken) releaseGenerationClaim(recordingId, generationToken);
   }
 }
 
