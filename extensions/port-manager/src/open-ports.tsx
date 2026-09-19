@@ -10,9 +10,11 @@ import Toasts from "./feedback/Toasts";
 import { useNamedPorts } from "./hooks/useNamedPorts";
 import useProcesses from "./hooks/useProcesses";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
-import { classifyExposure, exposureColor, exposureDescription } from "./utilities/exposure";
+import { Exposure, classifyExposure, exposureColor, exposureDescription } from "./utilities/exposure";
 import { getProcessMarkdown } from "./utilities/getProcessMarkdown";
 import { platformShortcut } from "./utilities/platform";
+
+type ExposureFilter = Exposure | "all";
 
 export default function Command() {
   const { primaryPortAction } = getPreferenceValues();
@@ -20,11 +22,32 @@ export default function Command() {
   const { getNamedPort } = useNamedPorts();
 
   const [isShowingDetail, setIsShowingDetail] = useCachedState("showDetail", true);
+  const [exposureFilter, setExposureFilter] = useCachedState<ExposureFilter>("exposureFilter", "all");
 
-  const hasProcesses = (processes?.length ?? 0) > 0;
+  const visibleProcesses = processes?.filter(
+    (p) => exposureFilter === "all" || p.portInfo?.some((i) => classifyExposure(i.host) === exposureFilter),
+  );
+
+  const hasProcesses = (visibleProcesses?.length ?? 0) > 0;
 
   return (
-    <List isShowingDetail={isShowingDetail} isLoading={isLoadingProcesses} searchBarPlaceholder="Search Open Ports">
+    <List
+      isShowingDetail={isShowingDetail}
+      isLoading={isLoadingProcesses}
+      searchBarPlaceholder="Search Open Ports"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter by exposure"
+          value={exposureFilter}
+          onChange={(value) => setExposureFilter(value as ExposureFilter)}
+        >
+          <List.Dropdown.Item title="All Ports" value="all" icon={Icon.Plug} />
+          <List.Dropdown.Item title="Localhost Only" value="loopback" icon={Icon.Lock} />
+          <List.Dropdown.Item title="Reachable from Network" value="all-interfaces" icon={Icon.Globe} />
+          <List.Dropdown.Item title="Specific Interface" value="specific" icon={Icon.Network} />
+        </List.Dropdown>
+      }
+    >
       {processesError ? (
         <List.EmptyView
           icon={Icon.Warning}
@@ -40,7 +63,11 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.Plug}
           title="No Open Ports"
-          description="No processes are listening on TCP ports."
+          description={
+            exposureFilter === "all"
+              ? "No processes are listening on TCP ports."
+              : "No listening port matches this exposure filter."
+          }
           actions={
             <ActionPanel>
               <Action title="Reload" icon={Icon.ArrowClockwise} onAction={revalidateProcesses} />
@@ -48,7 +75,7 @@ export default function Command() {
           }
         />
       ) : null}
-      {processes?.map((p) => {
+      {visibleProcesses?.map((p) => {
         const actions = [
           {
             action: (

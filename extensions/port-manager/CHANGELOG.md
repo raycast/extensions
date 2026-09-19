@@ -1,5 +1,10 @@
 # Port Manager Changelog
 
+## [Exposure] - {PR_MERGE_DATE}
+
+- Colour each port tag by how exposed it is: green for loopback only, orange for a wildcard bind reachable from the network, blue for one specific interface
+- Add an Exposure row to the detail panel and a search-bar filter to show only localhost, network-reachable or interface-bound ports
+
 ## [Command Line in Details] - 2026-09-19
 
 - Show the full command line of a process in the detail panel and make it searchable, so several listeners with the same executable (`node`, `python`, …) can be told apart
