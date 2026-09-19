@@ -7,7 +7,15 @@ interface Preferences {
   multiPathSeparator: string;
   copyUrlContent: string;
   copyWhenUnSupported: string;
+  spotifyLinkTarget: string;
 }
 
-export const { showCopyTip, showLastCopy, showTabTitle, multiPathSeparator, copyUrlContent, copyWhenUnSupported } =
-  getPreferenceValues<Preferences>();
+export const {
+  showCopyTip,
+  showLastCopy,
+  showTabTitle,
+  multiPathSeparator,
+  copyUrlContent,
+  copyWhenUnSupported,
+  spotifyLinkTarget,
+} = getPreferenceValues<Preferences>();

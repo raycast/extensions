@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copy-path",
   "title": "Copy Path",
-  "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
+  "description": "Copy the path of the open folder, selected file, the URL of the current browser tab, or the Spotify link of what is playing.",
   "icon": "copy-path.png",
   "author": "koinzhang",
   "contributors": [
     "ridemountainpig",
     "INCHMAN1900",
-    "arjan"
+    "arjan",
+    "dans_huang"
   ],
   "categories": [
     "Developer Tools",
@@ -18,14 +19,15 @@
   "keywords": [
     "tab",
     "web",
-    "link"
+    "link",
+    "spotify"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "copy-path",
       "title": "Copy Path or URL",
-      "description": "Copy the path of the open folder, selected file or the URL of the current browser tab.",
+      "description": "Copy the path of the open folder, selected file, the URL of the current browser tab, or the Spotify link of what is playing.",
       "mode": "no-view"
     }
   ],
@@ -146,6 +148,24 @@
         {
           "title": "Bundle ID",
           "value": "bundleId"
+        }
+      ]
+    },
+    {
+      "name": "spotifyLinkTarget",
+      "type": "dropdown",
+      "required": false,
+      "title": "Spotify Link",
+      "description": "When Spotify is frontmost, select which link to copy for music. Podcasts always copy the episode link.",
+      "default": "track",
+      "data": [
+        {
+          "title": "Track",
+          "value": "track"
+        },
+        {
+          "title": "Album",
+          "value": "album"
         }
       ]
     }

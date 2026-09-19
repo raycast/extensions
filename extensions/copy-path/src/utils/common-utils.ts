@@ -6,6 +6,7 @@ import {
   getFocusWindowPath,
   getFocusWindowTitle,
   getQSpacePathUrls,
+  getSpotifyCurrentTrack,
   getVSCodeActiveFilePath,
   getWebkitBrowserPath,
 } from "./applescript-utils";
@@ -29,6 +30,7 @@ import {
   showCopyTip,
   showLastCopy,
   showTabTitle,
+  spotifyLinkTarget,
 } from "../types/preferences";
 import parseUrl from "parse-url";
 import * as os from "node:os";
@@ -222,6 +224,80 @@ export const copyBrowserTabUrl = async (frontmostApp: Application) => {
       return url;
     }
   }
+};
+
+// spotify:episode:ID -> https://open.spotify.com/episode/ID
+const spotifyUriToUrl = (uri: string) => {
+  const parts = uri.split(":");
+  if (parts.length < 3 || parts[0] !== "spotify") {
+    return "";
+  }
+  const id = parts[parts.length - 1];
+  const kind = parts[parts.length - 2];
+  return `https://open.spotify.com/${kind}/${id}`;
+};
+
+// Spotify's AppleScript dictionary has no album id, but the public track page
+// carries <meta name="music:album" content="https://open.spotify.com/album/ID"/>.
+const SPOTIFY_FETCH_TIMEOUT_MS = 5000;
+const fetchSpotifyAlbumUrl = async (trackUrl: string) => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SPOTIFY_FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(trackUrl, {
+      signal: controller.signal,
+      headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15" },
+    });
+    if (!res.ok) {
+      return "";
+    }
+    const html = await res.text();
+    const match = html.match(/music:album"\s+content="(https:\/\/open\.spotify\.com\/album\/[A-Za-z0-9]+)"/);
+    return match ? match[1] : "";
+  } catch (e) {
+    return "";
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+export const copySpotifyUrl = async () => {
+  const track = await getSpotifyCurrentTrack();
+  const itemUrl = track ? spotifyUriToUrl(track.uri) : "";
+  if (!track || isEmpty(itemUrl)) {
+    await showFailureHUD({ title: "Nothing Playing in Spotify", style: Toast.Style.Failure });
+    return "";
+  }
+  const isEpisode = track.uri.includes(":episode:");
+  let url = itemUrl;
+  let icon = "🎧 ";
+  // episodes report the show name in "album"; tracks report the artist
+  let label = [track.album, track.name].filter((s) => !isEmpty(s)).join(" – ");
+  if (isEpisode) {
+    // podcasts: always the episode link; "album" holds the show name
+  } else if (spotifyLinkTarget !== "album") {
+    icon = "🎵 ";
+    label = [track.artist, track.name].filter((s) => !isEmpty(s)).join(" – ");
+  } else {
+    const albumUrl = await fetchSpotifyAlbumUrl(itemUrl);
+    if (isEmpty(albumUrl)) {
+      // offline or page layout changed: fall back to the track link, and say so
+      icon = "🎵 (album lookup failed) ";
+      label = [track.artist, track.name].filter((s) => !isEmpty(s)).join(" – ");
+    } else {
+      url = albumUrl;
+      icon = "💿 ";
+      label = [track.artist, track.album].filter((s) => !isEmpty(s)).join(" – ");
+    }
+  }
+  let copyContent = parseURL(url);
+  if (showTabTitle && !isEmpty(label)) {
+    copyContent = `${label}\n${copyContent}`;
+  }
+  await Clipboard.copy(copyContent);
+  await showSuccessHUD(icon + (isEmpty(label) ? copyContent : label));
+  await customUpdateCommandMetadata(isEmpty(label) ? url : label);
+  return url;
 };
 
 const parseURL = (url: string) => {
