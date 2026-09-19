@@ -81,7 +81,8 @@ function assertOptionalIntegerRating(rating: number | undefined): number | undef
 
 /**
  * Get ratings you have given to movies, TV shows, seasons, or episodes on Trakt,
- * or check the score of a specific title.
+ * or check the score of a specific title. Season rows can be listed or found by
+ * `query`; they cannot be rated or unrated through `rate-media` / `remove-rating`.
  */
 export default async function tool(input: Input): Promise<Output> {
   const { type = "all", rating, query, traktId, year, page = 1, limit = 30 } = input;

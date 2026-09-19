@@ -12,7 +12,9 @@ type Input = {
   type: "movie" | "show" | "episode";
   /**
    * The unique Trakt ID of the media item.
-   * Obtain this first from `get-ratings`, `search-movies`, `search-shows`, or `get-season-episodes`.
+   * Obtain this first from `get-ratings` (movie, show, or episode rows only),
+   * `search-movies`, `search-shows`, or `get-season-episodes`. Season ratings
+   * from `get-ratings` cannot be removed here.
    */
   traktId: number;
   /**

@@ -40,7 +40,7 @@ instructions: |
   - To mark an ENTIRE TV series (all seasons and episodes) as watched, use `mark-show-watched`. Only use this when the user explicitly asks to mark the whole show as watched.
   - To remove a movie, TV show, or episode from watch history, use `remove-from-history`.
   - To rate a movie, TV show, or episode, use `rate-media` with a whole number between 1 and 10. Decimal scores are rejected, so round before calling and tell the user which score you used. Seasons cannot be rated through these tools.
-  - To remove a rating from a movie, TV show, or episode, use `remove-rating`.
+  - To remove a rating from a movie, TV show, or episode, use `remove-rating`. Season ratings can appear in `get-ratings` but cannot be added or removed through these tools.
   - All write and destructive tools automatically prompt the user with a confirmation dialog before executing. The dialog names the item by looking its Trakt ID up on Trakt, so a wrong ID surfaces there rather than silently modifying the wrong item.
 
 evals:

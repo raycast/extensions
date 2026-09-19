@@ -150,7 +150,7 @@
     {
       "name": "remove-rating",
       "title": "Remove Rating",
-      "description": "Remove your rating for a movie, TV show, season, or episode on Trakt"
+      "description": "Remove your rating for a movie, TV show, or episode on Trakt"
     },
     {
       "name": "get-season-episodes",
