@@ -37,8 +37,22 @@ function writeCachedSite(accountKey: string, site: CachedJiraSite) {
   siteCache.set(accountKey, JSON.stringify(site));
 }
 
+function getOAuthAccountKey(token: string) {
+  const [, payload] = token.split(".");
+  if (!payload) {
+    return null;
+  }
+
+  try {
+    const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { sub?: unknown };
+    return typeof claims.sub === "string" && claims.sub !== "" ? `oauth:${claims.sub}` : null;
+  } catch {
+    return null;
+  }
+}
+
 async function resolveCredentials(
-  accountKey: string,
+  accountKey: string | null,
   authorizationHeader: string,
   load: () => Promise<CachedJiraSite>,
 ) {
@@ -49,11 +63,13 @@ async function resolveCredentials(
   const loadAndCache = async () => {
     const site = await load();
     apply(site);
-    writeCachedSite(accountKey, site);
+    if (accountKey) {
+      writeCachedSite(accountKey, site);
+    }
   };
 
-  const cachedSite = readCachedSite(accountKey);
-  if (!cachedSite) {
+  const cachedSite = accountKey ? readCachedSite(accountKey) : null;
+  if (!accountKey || !cachedSite) {
     await loadAndCache();
     return;
   }
@@ -118,7 +134,7 @@ export const jira = OAuthService.jira({
   async onAuthorize({ token }) {
     const authorizationHeader = `Bearer ${token}`;
 
-    await resolveCredentials("oauth", authorizationHeader, async () => {
+    await resolveCredentials(getOAuthAccountKey(token), authorizationHeader, async () => {
       const sitesResponse = await fetch("https://api.atlassian.com/oauth/token/accessible-resources", {
         headers: {
           Authorization: authorizationHeader,
