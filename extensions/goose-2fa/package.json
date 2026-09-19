@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "goose-2fa",
+  "title": "Goose 2FA",
+  "description": "与 uTools 端共用同一份数据源 JSON 的双因素验证码管理器：验证码、分组、回收站、导入导出、截图识码与真实输入",
+  "icon": "icon.png",
+  "author": "eachann_",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "private": false,
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "codes",
+      "title": "验证码",
+      "subtitle": "Goose 2FA",
+      "description": "搜索账户，复制、粘贴或真实输入动态验证码",
+      "mode": "view",
+      "keywords": [
+        "2fa",
+        "otp",
+        "totp",
+        "hotp",
+        "验证码",
+        "动态口令",
+        "goose"
+      ]
+    },
+    {
+      "name": "manage-data",
+      "title": "账户与数据",
+      "subtitle": "Goose 2FA",
+      "description": "账户、分组、回收站、导入导出与数据源文件状态",
+      "mode": "view",
+      "keywords": [
+        "账户",
+        "分组",
+        "回收站",
+        "导入",
+        "导出",
+        "数据源"
+      ]
+    },
+    {
+      "name": "scan-qr",
+      "title": "截图识码",
+      "subtitle": "Goose 2FA",
+      "description": "截屏识别二维码或迁移码并导入账户",
+      "mode": "view",
+      "keywords": [
+        "扫码",
+        "截图",
+        "qr",
+        "二维码",
+        "迁移"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "dataFile",
+      "title": "数据源文件",
+      "description": "指定 JSON 文件后即以它为准（与 uTools 端同一个文件，保存也回写它）。留空则该端只用本地库。",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "node scripts/build-helper.mjs && ray build -e dist",
+    "dev": "node scripts/build-helper.mjs && ray develop",
+    "lint": "ray lint",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.9.0"
+  }
+}
