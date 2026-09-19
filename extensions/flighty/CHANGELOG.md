@@ -1,5 +1,10 @@
 # Flighty Changelog
 
+## [Fix Airline Logos] - {PR_MERGE_DATE}
+
+- Load airline logos from the current Flighty UUID endpoint
+- Bump package dependencies
+
 ## [Copy Flight Number Action] - 2026-05-22
 
 - Add action to copy flight number
