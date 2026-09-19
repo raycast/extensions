@@ -41,7 +41,7 @@ export function isSignedIn(state: BlipState): boolean {
   return Boolean(state.auth?.user_id);
 }
 
-/** Your own devices, excluding this Mac. Online first, then most recently seen. */
+/** Your own devices, excluding the one Raycast is running on. Online first, then most recently seen. */
 export function myDevices(state: BlipState): DeviceRecipient[] {
   const me = selfUser(state);
   const userId = state.auth?.user_id;

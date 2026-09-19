@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { execFile } from "node:child_process";
 import { getState } from "../blip/client";
 import type { BlipState } from "../blip/client";
-import { BlipUnavailableError, socketExists } from "../blip/drpc";
+import { BlipUnavailableError } from "../blip/errors";
 import { demoState } from "../blip/demo";
+import { openBlip } from "../platform";
 
 const LONG_POLL_MS = 20_000;
 const RETRY_MS = 2_000;
@@ -95,22 +95,23 @@ export function useBlipState(): BlipStateHook {
   };
 }
 
-/** Launches Blip in the background and waits for its socket to come up. */
+/**
+ * Launches Blip in the background and waits for it to answer.
+ *
+ * Asking for state is the only honest readiness test. On Windows the socket file
+ * outlives the app, so its presence says nothing about whether Blip is hosting.
+ */
 export async function launchBlip(timeoutMs = 15_000): Promise<boolean> {
-  await new Promise<void>((resolve, reject) => {
-    execFile("open", ["-g", "-b", "net.blip.macos"], (err) => (err ? reject(err) : resolve()));
-  });
+  await openBlip(true);
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    if (socketExists()) {
-      try {
-        await getState(undefined, 2_000);
-        return true;
-      } catch {
-        // not ready yet
-      }
+    try {
+      await getState(undefined, 2_000);
+      return true;
+    } catch {
+      // Blip is still starting up.
     }
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 1_000));
   }
   return false;
 }

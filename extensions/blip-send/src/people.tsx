@@ -22,7 +22,10 @@ import type { DeviceRecipient, PersonRecipient } from "./blip/model";
 import { BlipUnavailable, NotSignedIn } from "./components/BlipUnavailable";
 import { FilesForm } from "./components/FilesForm";
 import { deviceIcon, personIcon, presenceAccessory } from "./components/icons";
+import { OpenBlipAction } from "./components/OpenBlipAction";
 import { useBlipState } from "./hooks/useBlipState";
+import { thisComputer } from "./platform";
+import { Shortcuts } from "./shortcuts";
 
 /** Blip Devices and Contacts: see who you can reach, rename or remove a device, drop a contact. */
 export default function Command() {
@@ -41,27 +44,22 @@ export default function Command() {
       navigationTitle="Blip Devices and Contacts"
       searchBarPlaceholder="Search devices and contacts"
     >
-      <List.Section title="This Mac">
+      <List.Section title={thisComputer}>
         {mine && state && (
           <List.Item
-            title={mine.name || "This Mac"}
+            title={mine.name || thisComputer}
             subtitle={state.auth?.email}
             icon={deviceIcon(mine.kind, true)}
             accessories={[{ tag: { value: "You", color: Color.Blue } }]}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Rename This Mac"
+                  title={`Rename ${thisComputer}`}
                   icon={Icon.Pencil}
                   target={<RenameDevice device={mine} onDone={refresh} />}
                 />
                 <Action.CopyToClipboard title="Copy Account Email" content={state.auth?.email ?? ""} />
-                <Action.Open
-                  title="Open Blip"
-                  target="/Applications/Blip.app"
-                  icon={Icon.Bolt}
-                  shortcut={{ modifiers: ["cmd"], key: "b" }}
-                />
+                <OpenBlipAction shortcut={Shortcuts.openBlip} />
               </ActionPanel>
             }
           />
@@ -141,7 +139,7 @@ function DeviceActions({ recipient, refresh }: { recipient: DeviceRecipient; ref
           title="Remove Device"
           icon={Icon.Trash}
           style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           onAction={remove}
         />
       </ActionPanel.Section>
@@ -192,11 +190,7 @@ function PersonActions({
       <ActionPanel.Section>
         <Action.Push title="Send Files…" icon={Icon.Upload} target={<FilesForm />} />
         {person.email && (
-          <Action.CopyToClipboard
-            title="Copy Email"
-            content={person.email}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
+          <Action.CopyToClipboard title="Copy Email" content={person.email} shortcut={Shortcuts.copyEmail} />
         )}
       </ActionPanel.Section>
       <ActionPanel.Section>
@@ -204,7 +198,7 @@ function PersonActions({
           title="Remove Contact"
           icon={Icon.RemovePerson}
           style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           onAction={removeContact}
         />
         <Action title="Block Person" icon={Icon.XMarkCircle} style={Action.Style.Destructive} onAction={block} />

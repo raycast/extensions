@@ -22,6 +22,8 @@ import { relativeTime } from "../blip/format";
 import { contacts, isSignedIn, myDevices, sendFiles, summarizeFiles, toPerson } from "../blip/model";
 import type { PersonRecipient, Recipient } from "../blip/model";
 import { useBlipState } from "../hooks/useBlipState";
+import { fileManager, fileManagerIcon } from "../platform";
+import { Shortcuts } from "../shortcuts";
 import { BlipUnavailable, NotSignedIn } from "./BlipUnavailable";
 import { deviceIcon, personIcon, presenceAccessory } from "./icons";
 import { TransfersList } from "./TransfersList";
@@ -207,7 +209,7 @@ function RecipientActions({
         {onChangeFiles && (
           <Action
             title="Choose Different Files"
-            icon={Icon.Finder}
+            icon={fileManagerIcon}
             shortcut={Keyboard.Shortcut.Common.Open}
             onAction={onChangeFiles}
           />
@@ -215,22 +217,18 @@ function RecipientActions({
       </ActionPanel.Section>
       <ActionPanel.Section>
         {recipient.kind === "person" && recipient.email && (
-          <Action.CopyToClipboard
-            title="Copy Email"
-            content={recipient.email}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
+          <Action.CopyToClipboard title="Copy Email" content={recipient.email} shortcut={Shortcuts.copyEmail} />
         )}
         <Action.ShowInFinder
-          title={files.length === 1 ? "Show File in Finder" : "Show Files in Finder"}
+          title={files.length === 1 ? `Show File in ${fileManager}` : `Show Files in ${fileManager}`}
           path={files[0]}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          shortcut={Shortcuts.showInFileManager}
         />
         <Action.Push
           title="Show Transfers"
           icon={Icon.List}
           target={<TransfersList />}
-          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          shortcut={Shortcuts.showTransfers}
         />
       </ActionPanel.Section>
     </ActionPanel>

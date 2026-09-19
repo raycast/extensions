@@ -6,11 +6,13 @@ import {
   confirmAlert,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import path from "node:path";
 import { useState } from "react";
 import { dispatch } from "../blip/client";
 import type { BlipState } from "../blip/client";
@@ -28,8 +30,11 @@ import {
 import { defaultSavePath, isSignedIn, receivedItemPaths, statusLabel, transfers } from "../blip/model";
 import type { TransferView } from "../blip/model";
 import { useBlipState } from "../hooks/useBlipState";
+import { fileManager } from "../platform";
+import { Shortcuts } from "../shortcuts";
 import { BlipUnavailable, NotSignedIn } from "./BlipUnavailable";
 import { statusColor, transferIcon } from "./icons";
+import { OpenBlipAction } from "./OpenBlipAction";
 
 interface Props {
   /** Transfer to select when the list opens (used right after sending). */
@@ -230,7 +235,7 @@ function TransferActions({
   const id = view.id;
   const received = view.incoming && view.status === "Completed" ? receivedItemPaths(view) : [];
   const sourcePaths = !view.incoming
-    ? Object.values(view.transfer.archive_stub?.disk_locations ?? {}).filter((p) => p.startsWith("/"))
+    ? Object.values(view.transfer.archive_stub?.disk_locations ?? {}).filter((p) => path.isAbsolute(p))
     : [];
 
   async function run(title: string, action: () => Promise<void>, success?: string) {
@@ -269,11 +274,11 @@ function TransferActions({
     );
   };
 
-  const finderActions = (
+  const revealActions = (
     <>
       {received.length > 0 && (
         <Action.ShowInFinder
-          title={received.length === 1 ? "Show in Finder" : "Show Files in Finder"}
+          title={received.length === 1 ? `Show in ${fileManager}` : `Show Files in ${fileManager}`}
           path={received[0]}
         />
       )}
@@ -281,7 +286,7 @@ function TransferActions({
       {received.length === 0 && view.savePath && view.status === "Completed" && (
         <Action.ShowInFinder title="Show Save Folder" path={view.savePath} />
       )}
-      {sourcePaths.length > 0 && <Action.ShowInFinder title="Show Source in Finder" path={sourcePaths[0]} />}
+      {sourcePaths.length > 0 && <Action.ShowInFinder title={`Show Source in ${fileManager}`} path={sourcePaths[0]} />}
     </>
   );
 
@@ -317,7 +322,7 @@ function TransferActions({
           title="Cancel Transfer"
           icon={Icon.Stop}
           style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["ctrl"], key: "c" }}
+          shortcut={Shortcuts.cancelTransfer}
           onAction={() =>
             run(
               "Could not cancel",
@@ -333,25 +338,20 @@ function TransferActions({
   return (
     <ActionPanel title={view.title}>
       <ActionPanel.Section>
-        {view.active ? transferActions : finderActions}
-        {view.active ? finderActions : transferActions}
+        {view.active ? transferActions : revealActions}
+        {view.active ? revealActions : transferActions}
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
           title="Toggle Details"
           icon={Icon.Sidebar}
-          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          shortcut={Shortcuts.toggleDetails}
           onAction={onToggleDetail}
         />
         {view.itemNames.length > 0 && (
           <Action.CopyToClipboard title="Copy File Names" content={view.itemNames.join("\n")} />
         )}
-        <Action.Open
-          title="Open Blip"
-          target="/Applications/Blip.app"
-          icon={Icon.Bolt}
-          shortcut={{ modifiers: ["cmd"], key: "b" }}
-        />
+        <OpenBlipAction shortcut={Shortcuts.openBlip} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         {!view.active && !view.transfer.is_dismissed && (
@@ -366,7 +366,7 @@ function TransferActions({
             title="Remove Transfer"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
             onAction={remove}
           />
         )}

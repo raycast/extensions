@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "blip-send",
   "title": "Blip Send",
-  "description": "Send files from Finder to your Blip devices and contacts, and manage transfers, without opening the Blip window.",
+  "description": "Send files from Finder or File Explorer to your Blip devices and contacts, and manage transfers, without opening the Blip window.",
   "icon": "blip-send.png",
   "author": "andrew_beniston",
   "categories": [
@@ -11,14 +11,15 @@
   ],
   "license": "MIT",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
       "name": "send",
       "title": "Send Files with Blip",
       "subtitle": "Blip",
-      "description": "Send the selected Finder items, or chosen files, to one of your devices or contacts.",
+      "description": "Send the items selected in Finder or File Explorer, or files you choose, to one of your devices or contacts.",
       "mode": "view"
     },
     {

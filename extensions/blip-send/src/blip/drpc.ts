@@ -1,16 +1,14 @@
 import net from "node:net";
-import os from "node:os";
-import path from "node:path";
-import fs from "node:fs";
+import { endpoint } from "./bridge";
+import { BlipRpcError, BlipUnavailableError } from "./errors";
 
 /**
- * Minimal client for the DRPC wire protocol (github.com/storj/drpc) over a Unix socket.
+ * Minimal client for the DRPC wire protocol (github.com/storj/drpc).
  *
- * Blip's desktop app hosts its Go core behind this socket. The same socket serves
- * Blip's own Share extension, so the protocol is stable across the app's processes.
+ * Blip's desktop app hosts its Go core behind a local socket on both platforms, and the
+ * same socket serves Blip's own share extension, so the protocol is stable across the
+ * app's processes. Where that socket lives, and how to reach it, is bridge.ts's problem.
  */
-
-export const SOCKET_PATH = path.join(os.homedir(), "Library/Group Containers/AY8UB8KTUX.blip/Library/Caches/sock");
 
 const enum Kind {
   Invoke = 1,
@@ -18,20 +16,6 @@ const enum Kind {
   Error = 3,
   Close = 5,
   CloseSend = 6,
-}
-
-export class BlipUnavailableError extends Error {
-  constructor(message = "Blip is not running") {
-    super(message);
-    this.name = "BlipUnavailableError";
-  }
-}
-
-export class BlipRpcError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "BlipRpcError";
-  }
 }
 
 function appendVarint(out: number[], value: number | bigint) {
@@ -90,17 +74,14 @@ function parseFrames(buf: Buffer): [Frame[], Buffer] {
   return [frames, buf.subarray(offset)];
 }
 
-export function socketExists(): boolean {
-  return fs.existsSync(SOCKET_PATH);
-}
-
 /**
  * Performs one unary RPC. Opens a fresh connection per call, which mirrors how
  * drpc clients behave and keeps the state machine trivial.
  */
-export function invoke(rpc: string, request: Uint8Array, timeoutMs = 10_000): Promise<Buffer> {
+export async function invoke(rpc: string, request: Uint8Array, timeoutMs = 10_000): Promise<Buffer> {
+  const target = await endpoint();
   return new Promise((resolve, reject) => {
-    const socket = net.connect(SOCKET_PATH);
+    const socket = net.connect(target);
     let buffer: Buffer = Buffer.alloc(0);
     const parts: Buffer[] = [];
     let settled = false;

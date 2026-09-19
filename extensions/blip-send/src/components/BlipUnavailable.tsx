@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { launchBlip } from "../hooks/useBlipState";
+import { isWindows, thisComputerInline } from "../platform";
+import { OpenBlipAction } from "./OpenBlipAction";
 
 interface Props {
   onReady?: () => void;
@@ -23,7 +25,9 @@ export function BlipUnavailable({ onReady, navigationTitle }: Props) {
     } else {
       toast.style = Toast.Style.Failure;
       toast.title = "Blip did not start";
-      toast.message = "Open Blip from your Applications folder, then try again.";
+      toast.message = isWindows
+        ? "Open Blip from the Start menu, then try again."
+        : "Open Blip from your Applications folder, then try again.";
     }
   }
 
@@ -32,7 +36,7 @@ export function BlipUnavailable({ onReady, navigationTitle }: Props) {
       <List.EmptyView
         icon={Icon.Bolt}
         title="Blip is not running"
-        description="This extension talks to the Blip app on your Mac. Open Blip and stay signed in, then come back."
+        description={`This extension talks to the Blip app on ${thisComputerInline}. Open Blip and stay signed in, then come back.`}
         actions={
           <ActionPanel>
             <Action title="Open Blip" icon={Icon.Bolt} onAction={open} />
@@ -53,7 +57,7 @@ export function NotSignedIn() {
         description="Blip is running but no account is signed in. Finish the sign-in inside Blip, then come back."
         actions={
           <ActionPanel>
-            <Action.Open title="Open Blip" target="/Applications/Blip.app" icon={Icon.Bolt} />
+            <OpenBlipAction />
           </ActionPanel>
         }
       />
