@@ -1,5 +1,10 @@
 # Port Manager Changelog
 
+## [Verified Kills] - {PR_MERGE_DATE}
+
+- After a kill, wait for the process to actually exit before reporting success. A process that ignores the signal now shows "Process Still Running" with a one-key Force Kill instead of a false "Killed Process"
+- The same check applies to Kill Parent, to the Kill Process Listening on command and to the menu bar
+
 ## [Exposure] - 2026-09-19
 
 - Colour each port tag by how exposed it is: green for loopback only, orange for a wildcard bind reachable from the network, blue for one specific interface

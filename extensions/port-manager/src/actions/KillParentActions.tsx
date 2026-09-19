@@ -23,6 +23,7 @@ export default function KillParentActions(props: {
   process: Process;
   onError?: (err: unknown) => Promise<void> | void;
   onKilled?: () => Promise<void> | void;
+  onSurvived?: (pid: number) => Promise<void> | void;
 }) {
   if (!isProcessWithKillableParent(props.process)) {
     return null;
@@ -40,6 +41,7 @@ export default function KillParentActions(props: {
               killSignal: resolveKillSignal(preferences.killSignal),
               killParent: true,
               onKilled: props.onKilled,
+              onSurvived: props.onSurvived,
               onError: props.onError,
             });
           } else {
@@ -61,6 +63,7 @@ export default function KillParentActions(props: {
 
               killParent: true,
               onKilled: props.onKilled,
+              onSurvived: props.onSurvived,
               onError: props.onError,
             });
           } else {
@@ -76,6 +79,7 @@ export default function KillParentActions(props: {
               killSignal: KillSignal.KILL,
               killParent: true,
               onKilled: props.onKilled,
+              onSurvived: props.onSurvived,
               onError: props.onError,
             });
           } else {

@@ -8,6 +8,7 @@ const preferences = getPreferenceValues<Preferences>();
 export default function KillActions(props: {
   process: ProcessInfo;
   onKilled?: () => Promise<void> | void;
+  onSurvived?: (pid: number) => Promise<void> | void;
   onError?: (err: unknown) => Promise<void> | void;
 }) {
   if (isWindows || preferences.killSignal === KillSignal.TERM || preferences.killSignal === KillSignal.KILL) {
@@ -19,6 +20,7 @@ export default function KillActions(props: {
           await killProcess(props.process, {
             killSignal: resolveKillSignal(preferences.killSignal),
             onKilled: props.onKilled,
+            onSurvived: props.onSurvived,
             onError: props.onError,
           })
         }
@@ -34,6 +36,7 @@ export default function KillActions(props: {
           await killProcess(props.process, {
             killSignal: KillSignal.TERM,
             onKilled: props.onKilled,
+            onSurvived: props.onSurvived,
             onError: props.onError,
           })
         }
@@ -44,6 +47,7 @@ export default function KillActions(props: {
           await killProcess(props.process, {
             killSignal: KillSignal.KILL,
             onKilled: props.onKilled,
+            onSurvived: props.onSurvived,
             onError: props.onError,
           })
         }

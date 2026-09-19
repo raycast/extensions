@@ -1,6 +1,6 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
 import Process from "./models/Process";
-import { KillSignal, kill } from "./utilities/killProcess";
+import { KillSignal, kill, waitForExit } from "./utilities/killProcess";
 import { CommandExitError } from "./utilities/runCommand";
 
 function isInteger(str: string): boolean {
@@ -37,6 +37,29 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     if (pids.length === 0) throw new Error(`No process is listening on port ${port}.`);
 
     await kill(pids.map(Number), KillSignal.TERM);
+
+    // `kill` only reports delivery; make sure the processes actually went away.
+    const survivors: number[] = [];
+    for (const pid of pids.map(Number)) {
+      if (!(await waitForExit(pid))) survivors.push(pid);
+    }
+
+    if (survivors.length > 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Process Still Running",
+        message: `Process ${survivors.join(", ")} did not exit after SIGTERM.`,
+        primaryAction: {
+          title: "Force Kill (SIGKILL)",
+          onAction: async (toast) => {
+            toast.hide();
+            await kill(survivors, KillSignal.KILL);
+          },
+        },
+      });
+      return;
+    }
+
     showToast({
       style: Toast.Style.Success,
       title: "Success",
