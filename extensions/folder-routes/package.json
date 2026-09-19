@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "folder-routes",
+  "title": "Folder Routes",
+  "description": "Copy or move files quickly with reusable destinations. Manage them in bulk with CSV and JSON, or add folders directly from Finder.",
+  "icon": "extension-icon.png",
+  "author": "jonathancem",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "conflictBehavior",
+      "title": "File Conflicts",
+      "description": "Choose what happens when an item with the same name already exists in a destination.",
+      "type": "dropdown",
+      "required": true,
+      "default": "prompt",
+      "data": [
+        {
+          "title": "Prompt",
+          "value": "prompt"
+        },
+        {
+          "title": "Skip",
+          "value": "skip"
+        },
+        {
+          "title": "Overwrite",
+          "value": "overwrite"
+        },
+        {
+          "title": "Keep Both",
+          "value": "keep-both"
+        }
+      ]
+    },
+    {
+      "name": "destinationsCsvFile",
+      "title": "Destinations CSV",
+      "description": "Optional override for ~/Library/Application Support/Folder Routes/destinations.csv. Edit the CSV manually and run Overwrite Destinations from CSV, or use Add/Manage Destinations to keep it updated automatically.",
+      "type": "file",
+      "placeholder": "~/Library/Application Support/Folder Routes/destinations.csv",
+      "required": false
+    },
+    {
+      "name": "newFinderFoldersCopy",
+      "title": "Copy New Finder Folders",
+      "label": "Show for Copy",
+      "description": "Choose whether folders added from Finder should appear in Copy Selected Files To by default.",
+      "type": "checkbox",
+      "required": true,
+      "default": true
+    },
+    {
+      "name": "newFinderFoldersMove",
+      "title": "Move New Finder Folders",
+      "label": "Show for Move",
+      "description": "Choose whether folders added from Finder should appear in Move Selected Files To by default.",
+      "type": "checkbox",
+      "required": true,
+      "default": true
+    },
+    {
+      "name": "newFinderFoldersPinned",
+      "title": "Pin New Finder Folders",
+      "label": "Pin by Default",
+      "description": "Choose whether folders added from Finder should be pinned by default.",
+      "type": "checkbox",
+      "required": true,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "copy-selected-files-to",
+      "title": "Copy Selected Files to",
+      "description": "Copy the Finder selection to a saved destination folder.",
+      "mode": "view"
+    },
+    {
+      "name": "move-selected-files-to",
+      "title": "Move Selected Files to",
+      "description": "Move the Finder selection to a saved destination folder.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-destinations",
+      "title": "Manage Destinations",
+      "description": "Add, edit, import, export, pin, and remove destination folders.",
+      "mode": "view"
+    },
+    {
+      "name": "add-selected-finder-folders",
+      "title": "Add Destinations",
+      "description": "Add selected Finder folders to the destination library.",
+      "mode": "no-view"
+    },
+    {
+      "name": "synchronize-destinations-from-csv",
+      "title": "Overwrite Destinations from CSV",
+      "description": "Replace the destination library with the configured CSV.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "tsx": "^4.20.6",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
