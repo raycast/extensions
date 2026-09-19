@@ -1,0 +1,203 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "life-dashboard",
+  "title": "Life Dashboard",
+  "description": "Your life at a glance: progress, milestones, countdowns, seasons, Ramadans and Christmases, fun body stats, a life grid, and a menu bar — memento mori, but make it fun.",
+  "icon": "life-progress-icon.png",
+  "author": "ezz_hassan",
+  "categories": [
+    "Fun",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "life-progress",
+      "title": "Life Progress",
+      "subtitle": "Life Dashboard",
+      "description": "Everything at a glance: progress, celebrated moments, body stats, remaining time, work life, countdowns, and milestones — with a quote to set the tone.",
+      "mode": "view",
+      "interval": "1h"
+    },
+    {
+      "name": "life-grid",
+      "title": "Life Grid",
+      "subtitle": "Life Dashboard",
+      "description": "Your whole life as a grid of months — colored by life stage, one row per year.",
+      "mode": "view"
+    },
+    {
+      "name": "life-menubar",
+      "title": "Life Progress Menu Bar",
+      "subtitle": "Life Dashboard",
+      "description": "Pin your life progress to the macOS menu bar — the dropdown carries stats, countdowns, and the next milestone.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "toggle-menubar",
+      "title": "Toggle Menu Bar",
+      "subtitle": "Life Dashboard",
+      "description": "Show or hide the Life Progress menu bar item.",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-countdown",
+      "title": "Create Countdown",
+      "subtitle": "Life Dashboard",
+      "description": "Count down to any date — see days, weeks, months, and years remaining in the dashboard and menu bar.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-countdowns",
+      "title": "Manage Countdowns",
+      "subtitle": "Life Dashboard",
+      "description": "Create, edit, and delete your countdowns.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "birthday",
+      "type": "textfield",
+      "required": true,
+      "title": "Birthday",
+      "description": "Your birthday, format 1995-01-01 — the anchor for every stat.",
+      "placeholder": "1995-01-01"
+    },
+    {
+      "name": "deathAge",
+      "type": "textfield",
+      "required": false,
+      "title": "Life Expectancy (years)",
+      "description": "Used for remaining-time stats. Default 80, minimum 50.",
+      "placeholder": "80",
+      "default": "80"
+    },
+    {
+      "name": "workStartDate",
+      "type": "textfield",
+      "required": false,
+      "title": "First Working Day",
+      "description": "For paycheck and work-life stats, format 2019-09-01. Leave empty to hide the Work section.",
+      "placeholder": "2019-09-01"
+    },
+    {
+      "name": "paycheckCadence",
+      "title": "Paycheck Cadence",
+      "description": "How often you get paid, for the paychecks counter.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Monthly",
+          "value": "monthly"
+        },
+        {
+          "title": "Every two weeks",
+          "value": "biweekly"
+        }
+      ],
+      "required": false,
+      "default": "monthly"
+    },
+    {
+      "name": "weekStart",
+      "title": "Week Start",
+      "description": "The day your week starts, for days-left-this-week.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Sunday",
+          "value": "Sunday"
+        },
+        {
+          "title": "Monday",
+          "value": "Monday"
+        },
+        {
+          "title": "Saturday",
+          "value": "Saturday"
+        }
+      ],
+      "required": false,
+      "default": "Sunday"
+    },
+    {
+      "name": "progressSymbol",
+      "title": "Progress Bar Symbol",
+      "description": "Symbol used for text progress bars.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "■",
+          "value": "■"
+        },
+        {
+          "title": "●",
+          "value": "●"
+        },
+        {
+          "title": "♥︎",
+          "value": "♥︎"
+        },
+        {
+          "title": "★",
+          "value": "★"
+        }
+      ],
+      "required": false,
+      "default": "■"
+    },
+    {
+      "name": "showQuotes",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show a quote in Life Progress and the menu bar",
+      "default": true,
+      "description": "Open Life Progress and the menu bar with a rotating memento-mori quote."
+    },
+    {
+      "name": "showChristmas",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Christmases celebrated",
+      "default": true,
+      "description": "Count the Christmases you have celebrated."
+    },
+    {
+      "name": "showRamadan",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Ramadans lived",
+      "default": true,
+      "description": "Count the Ramadans you have lived (Umm al-Qura calendar)."
+    },
+    {
+      "name": "showLunarYears",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show lunar (Hijri) years",
+      "default": true,
+      "description": "Count the lunar (Hijri) years you have witnessed."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
