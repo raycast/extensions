@@ -1,0 +1,74 @@
+{
+  "name": "burette-raycast",
+  "title": "Burette",
+  "description": "Open and search molecular structures in Burette from Raycast.",
+  "icon": "icon.png",
+  "author": "SergeiNikolenko",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search-structures",
+      "title": "Search Structures",
+      "description": "Search molecular files and open them in Burette",
+      "mode": "view"
+    },
+    {
+      "name": "recent-structures",
+      "title": "Recent Structures",
+      "description": "Open recently modified molecular files",
+      "mode": "view"
+    },
+    {
+      "name": "open-selected",
+      "title": "Open Selected in Burette",
+      "description": "Open the selected Finder file in Burette",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "searchRoots",
+      "title": "Search Folders",
+      "description": "Folders scanned by Search Structures and Recent Structures",
+      "type": "textfield",
+      "default": "~/Documents,~/Downloads,~/Desktop",
+      "required": false
+    },
+    {
+      "name": "buretteAppName",
+      "title": "Burette Application Name",
+      "type": "textfield",
+      "default": "Burette",
+      "required": true,
+      "description": "The installed macOS application name used to open structures"
+    },
+    {
+      "name": "cliPath",
+      "title": "Development CLI Path",
+      "description": "Optional path to scripts/burette-agent.mjs for dev checkouts",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
