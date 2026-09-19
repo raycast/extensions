@@ -3,6 +3,7 @@
 ## [Fix] - {PR_MERGE_DATE}
 
 - Fixed the **New Tab** command always searching with Google regardless of Zen's configured default search engine. Added a **Browser Default** search engine preference (now the default): queries are handed to Zen itself, which resolves them with its own default search engine.
+- Hardened the Windows search commands so the search query is passed to PowerShell as a literal, preventing queries containing quotes or `$(...)` expressions from being interpreted as PowerShell code.
 
 ## [Fix Open Workspace Command for Recent Zen Versions] - 2026-06-05
 

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, open, popToRoot } from "@raycast/api";
 import { HistoryEntry, Shortcut, WorkspaceEntry } from "../interfaces";
 import { SEARCH_ENGINE } from "../constants";
-import { runShortcut, openNewTab } from "../actions";
+import { runShortcut, openNewTab, newTabPowerShellScript, searchPowerShellScript } from "../actions";
 import { platform } from "os";
 import { runPowerShellScript } from "@raycast/utils";
 
@@ -20,7 +20,7 @@ function NewTabAction({ query }: { query?: string }) {
           const searchUrlPrefix = SEARCH_ENGINE[getPreferenceValues().searchEngine.toLowerCase()];
           if (!searchUrlPrefix) {
             if (platform() === "win32") {
-              await runPowerShellScript(query ? `Start-Process "zen" "-search" "${query}"` : `Start-Process "zen"`);
+              await runPowerShellScript(newTabPowerShellScript(query));
             } else {
               // Raycast's open() rejects bare search terms, so paste the query
               // into Zen's new-tab address bar and let Zen resolve it.
@@ -31,7 +31,7 @@ function NewTabAction({ query }: { query?: string }) {
             return;
           }
           if (platform() === "win32") {
-            await runPowerShellScript(`Start-Process "zen" "${searchUrlPrefix}${query || ""}"`);
+            await runPowerShellScript(searchPowerShellScript(searchUrlPrefix, query));
           } else {
             open(`${searchUrlPrefix}${query || ""}`, "zen");
           }
