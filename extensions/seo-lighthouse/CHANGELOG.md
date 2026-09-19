@@ -1,6 +1,6 @@
 # SEO Lighthouse Changelog
 
-## [Scorecard Dashboard] - {PR_MERGE_DATE}
+## [Scorecard Dashboard] - 2026-09-19
 
 - Added a Speedtest-style SVG scorecard with category gauges and Core Web Vitals
 - Added copy/save scorecard image actions on macOS
