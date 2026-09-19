@@ -4,7 +4,7 @@ import { detectDeterministic } from "./detection/deterministic";
 import { mergeSpans } from "./detection/merge";
 import { detectSemantic } from "./detection/semantic";
 import { applyMasking } from "./masking/apply";
-import { type RawPreferences, toSettings } from "./preferences";
+import { toSettings } from "./preferences";
 import { buildSummary } from "./summary";
 
 /** Pasting more than this into a chat is not the use case, and it keeps a
@@ -29,7 +29,7 @@ export default async function maskAndPaste(): Promise<void> {
     return;
   }
 
-  const settings = toSettings(getPreferenceValues<RawPreferences>());
+  const settings = toSettings(getPreferenceValues<Preferences.MaskAndPaste>());
 
   const spans = [...detectDeterministic(text)];
 

@@ -4,8 +4,9 @@ import { isSirenValid, isSiretValid } from "./validators/french-business";
 import { isIbanValid } from "./validators/iban";
 import { isMaskableIpv4, isMaskableIpv6 } from "./validators/ip";
 
+// Stop at the next marker so unclosed blocks cannot repeatedly scan the rest.
 const PEM_BLOCK =
-  /-----BEGIN (?:[A-Z0-9]+ )*PRIVATE KEY-----[\s\S]{1,20000}?-----END (?:[A-Z0-9]+ )*PRIVATE KEY-----/g;
+  /-----BEGIN (?:[A-Z0-9]+ )*PRIVATE KEY-----(?:(?!-----)[\s\S])+-----END (?:[A-Z0-9]+ )*PRIVATE KEY-----/g;
 
 const JWT = /\beyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g;
 

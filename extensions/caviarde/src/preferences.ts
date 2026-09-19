@@ -5,16 +5,6 @@ export const DEFAULT_TIMEOUT_MS = 3500;
 const MIN_TIMEOUT_MS = 250;
 const MAX_TIMEOUT_MS = 30_000;
 
-export interface RawPreferences {
-  readonly detectorUrl?: string;
-  readonly detectorTimeoutMs?: string;
-  readonly authToken?: string;
-  readonly phoneRegions?: string;
-  readonly maskPersons?: boolean;
-  readonly maskLocations?: boolean;
-  readonly maskOrganizations?: boolean;
-}
-
 export interface Settings {
   readonly detectorUrl: string;
   readonly detectorTimeoutMs: number;
@@ -42,7 +32,7 @@ export function parsePhoneRegions(raw: string | undefined): string[] {
   return [...seen];
 }
 
-export function toSettings(raw: RawPreferences): Settings {
+export function toSettings(raw: Partial<Preferences>): Settings {
   const url = (raw.detectorUrl ?? "").trim();
   return {
     detectorUrl: url.length > 0 ? url : "http://127.0.0.1:5002",

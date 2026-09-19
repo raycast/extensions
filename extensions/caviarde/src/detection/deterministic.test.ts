@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { applyMasking } from "../masking/apply";
 import { detectDeterministic } from "./deterministic";
+import { mergeSpans } from "./merge";
 import type { EntityType } from "./types";
 
 function found(text: string): Array<[EntityType, string]> {
@@ -175,6 +177,68 @@ describe("secrets", () => {
     const pem =
       "-----BEGIN RSA PRIVATE KEY-----\nMIIEabc\ndef\n-----END RSA PRIVATE KEY-----";
     expect(found(`voici\n${pem}\nfin`)).toEqual([["PRIVATE_KEY", pem]]);
+  });
+
+  it.each([20_000, 20_001, 64_000, 999_900])(
+    "masks a PEM block with %i characters between its markers in full",
+    (size) => {
+      const body = ("A".repeat(63) + "\n")
+        .repeat(Math.ceil(size / 64))
+        .slice(0, size - 2);
+      const pem = `-----BEGIN PRIVATE KEY-----\n${body}\n-----END PRIVATE KEY-----`;
+      const text = `voici\n${pem}\nfin`;
+      const spans = detectDeterministic(text);
+      expect(spans).toEqual([
+        {
+          type: "PRIVATE_KEY",
+          start: 6,
+          end: 6 + pem.length,
+          layer: "deterministic",
+        },
+      ]);
+      expect(applyMasking(text, mergeSpans(spans)).masked).toBe(
+        "voici\n[PRIVATE_KEY_1]\nfin",
+      );
+    },
+  );
+
+  it("keeps consecutive PEM blocks separate and preserves the text between", () => {
+    const body = ("A".repeat(63) + "\n").repeat(400);
+    const first = `-----BEGIN RSA PRIVATE KEY-----\n${body}-----END RSA PRIVATE KEY-----`;
+    const second =
+      "-----BEGIN EC PRIVATE KEY-----\nBBBB\n-----END EC PRIVATE KEY-----";
+    const text = `${first}\nkeep this\n${second}`;
+    expect(found(text)).toEqual([
+      ["PRIVATE_KEY", first],
+      ["PRIVATE_KEY", second],
+    ]);
+    expect(
+      applyMasking(text, mergeSpans(detectDeterministic(text))).masked,
+    ).toBe("[PRIVATE_KEY_1]\nkeep this\n[PRIVATE_KEY_2]");
+  });
+
+  it("catches a PEM block with legacy encryption headers", () => {
+    const pem =
+      "-----BEGIN RSA PRIVATE KEY-----\n" +
+      "Proc-Type: 4,ENCRYPTED\n" +
+      "DEK-Info: AES-256-CBC,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n\n" +
+      "BBBB\n-----END RSA PRIVATE KEY-----";
+    expect(found(pem)).toEqual([["PRIVATE_KEY", pem]]);
+  });
+
+  it("does not rescan the remaining input for each unterminated PEM block", () => {
+    const text = "-----BEGIN PRIVATE KEY-----\nAAAA\n".repeat(30_000);
+    const start = performance.now();
+    expect(detectDeterministic(text)).toEqual([]);
+    expect(performance.now() - start).toBeLessThan(2000);
+  });
+
+  it("finds a complete PEM block after an unterminated one", () => {
+    const pem =
+      "-----BEGIN EC PRIVATE KEY-----\nBBBB\n-----END EC PRIVATE KEY-----";
+    expect(found(`-----BEGIN PRIVATE KEY-----\nAAAA\n${pem}`)).toEqual([
+      ["PRIVATE_KEY", pem],
+    ]);
   });
 
   it("ignores prose that merely mentions a key", () => {

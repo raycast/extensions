@@ -27,7 +27,7 @@ import {
   DOCKER_CANDIDATES,
   DOCKER_HOME_CANDIDATES,
 } from "./detector/image";
-import { type RawPreferences, type Settings, toSettings } from "./preferences";
+import { type Settings, toSettings } from "./preferences";
 
 const HEALTH_TIMEOUT_MS = 2000;
 const READY_ATTEMPTS = 30;
@@ -388,7 +388,7 @@ async function run(
 
 export default function SetUpDetector() {
   const [settings] = useState(() =>
-    toSettings(getPreferenceValues<RawPreferences>()),
+    toSettings(getPreferenceValues<Preferences.SetupDetector>()),
   );
   const [checks, setChecks] = useState<Check[]>(INITIAL);
   const [selected, setSelected] = useState<string>("runtime");
