@@ -215,7 +215,10 @@ function BackupForm({ service, initial, onSaved }: { service: BackupService; ini
           enabled: values.enabled,
           prefix: values.prefix.trim(),
           destinationId: values.destinationId,
-          keepLatestCount: values.keepLatestCount.trim() ? Number(values.keepLatestCount) : undefined,
+          // Dokploy encodes "keep all" as 0, not a missing value - and backup.update's schema
+          // requires a number (unlike backup.create, where it's optional), so this must always be
+          // sent as one or a save with an empty field fails server-side.
+          keepLatestCount: values.keepLatestCount.trim() ? Number(values.keepLatestCount) : 0,
           database: values.database.trim(),
           databaseType: service.type,
           [ID_FIELDS[service.type]]: service.id,
@@ -246,7 +249,8 @@ function BackupForm({ service, initial, onSaved }: { service: BackupService; ini
       schedule: initial?.schedule ?? "0 0 * * *",
       destinationId: initial?.destinationId ?? "",
       database: initial?.database ?? "",
-      keepLatestCount: initial?.keepLatestCount != null ? String(initial.keepLatestCount) : "",
+      // Both "never set" and Dokploy's own "keep all" encoding (0) read back as blank here.
+      keepLatestCount: initial?.keepLatestCount ? String(initial.keepLatestCount) : "",
       enabled: initial?.enabled ?? true,
     },
     validation: {
@@ -257,7 +261,7 @@ function BackupForm({ service, initial, onSaved }: { service: BackupService; ini
       keepLatestCount: (value) => {
         if (!value) return;
         const count = Number(value);
-        if (!Number.isInteger(count) || count < 1) return "Enter a whole number of 1 or more";
+        if (!Number.isInteger(count) || count < 0) return "Enter a whole number of 0 or more";
       },
     },
   });

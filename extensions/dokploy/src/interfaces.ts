@@ -154,7 +154,7 @@ export interface Domain {
   enabled?: boolean;
 }
 
-/** A scheduled database backup, as returned by `overview.backups` (org-wide, filtered client-side). */
+/** A scheduled database backup - the `backups` relation embedded in `<kind>.one`'s response. */
 export interface Backup {
   backupId: string;
   /** Cron expression. */
