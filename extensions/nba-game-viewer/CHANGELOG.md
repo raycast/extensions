@@ -1,5 +1,9 @@
 # NBA Game Viewer Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fixed score requests for NBA and WNBA games.
+
 ## [Fixes] - 2025-04-16
 
 - Fixed a bug incorrectly comparing the scores as string - [#18573](https://github.com/raycast/extensions/issues/18573)
