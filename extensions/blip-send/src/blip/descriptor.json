@@ -1,0 +1,1378 @@
+{
+  "nested": {
+    "rpc": {
+      "nested": {
+        "Service": {
+          "methods": {
+            "GetState": {
+              "requestType": "rpc.StateRequest",
+              "responseType": "rpc.BinaryStateResponse"
+            },
+            "Dispatch": {
+              "requestType": "rpc.DispatchRequest",
+              "responseType": "google.protobuf.Empty"
+            }
+          }
+        },
+        "StateRequest": {
+          "oneofs": {
+            "_last_rcvd": {
+              "oneof": ["last_rcvd"]
+            }
+          },
+          "fields": {
+            "last_rcvd": {
+              "type": "uint64",
+              "id": 1,
+              "options": {
+                "proto3_optional": true
+              }
+            }
+          }
+        },
+        "BinaryStateResponse": {
+          "fields": {
+            "id": {
+              "type": "uint64",
+              "id": 1
+            },
+            "state": {
+              "type": "bytes",
+              "id": 2
+            }
+          }
+        },
+        "DispatchRequest": {
+          "fields": {
+            "event": {
+              "type": "bytes",
+              "id": 1
+            }
+          }
+        }
+      }
+    },
+    "frontend": {
+      "nested": {
+        "State": {
+          "oneofs": {
+            "session": {
+              "oneof": ["registration", "auth"]
+            }
+          },
+          "fields": {
+            "version": {
+              "type": "int32",
+              "id": 1
+            },
+            "user_agent": {
+              "type": "blip.UserAgent",
+              "id": 50
+            },
+            "config": {
+              "type": "frontend.Config",
+              "id": 100
+            },
+            "registration": {
+              "type": "frontend.Registration",
+              "id": 200
+            },
+            "auth": {
+              "type": "frontend.Auth",
+              "id": 201
+            },
+            "onboarding": {
+              "type": "frontend.Onboarding",
+              "id": 300
+            },
+            "messaging": {
+              "type": "frontend.Messaging",
+              "id": 400
+            },
+            "users": {
+              "type": "frontend.Users",
+              "id": 500
+            },
+            "transfers": {
+              "keyType": "string",
+              "type": "frontend.Transfer",
+              "id": 600
+            },
+            "transfer_notification_responses": {
+              "keyType": "string",
+              "type": "frontend.TransferNotificationResponse",
+              "id": 700
+            },
+            "searches": {
+              "keyType": "string",
+              "type": "frontend.Search",
+              "id": 800
+            },
+            "notifications": {
+              "type": "frontend.PushNotifications",
+              "id": 901
+            },
+            "plan": {
+              "type": "blip.Plan",
+              "id": 1000
+            },
+            "system_info": {
+              "type": "frontend.SystemInfo",
+              "id": 1100
+            },
+            "launch_time": {
+              "type": "google.protobuf.Timestamp",
+              "id": 90000
+            },
+            "shutting_down": {
+              "type": "bool",
+              "id": 90001
+            },
+            "test_plain_text": {
+              "type": "string",
+              "id": 99999
+            }
+          }
+        },
+        "MessagingStatus": {
+          "values": {
+            "CLOSED": 0,
+            "PENDING": 1,
+            "OPEN": 2,
+            "CLOSING": 3
+          }
+        },
+        "NotificationPermissionStatus": {
+          "values": {
+            "UNKNOWN": 0,
+            "CHECKING": 1,
+            "DENIED": 2,
+            "GRANTED": 3
+          }
+        },
+        "Config": {
+          "fields": {
+            "auto_accept_disabled": {
+              "type": "bool",
+              "id": 2
+            },
+            "auto_save_media_to_library": {
+              "type": "bool",
+              "id": 3
+            },
+            "custom_default_save_path": {
+              "type": "string",
+              "id": 4
+            },
+            "limit_upload_mbps": {
+              "type": "uint32",
+              "id": 5
+            },
+            "limit_download_mbps": {
+              "type": "uint32",
+              "id": 6
+            }
+          }
+        },
+        "Users": {
+          "fields": {
+            "discovered": {
+              "keyType": "string",
+              "type": "blip.User",
+              "id": 1
+            },
+            "contacts": {
+              "keyType": "string",
+              "type": "bool",
+              "id": 3
+            },
+            "recent_interactions": {
+              "rule": "repeated",
+              "type": "frontend.PeerInteraction",
+              "id": 4
+            }
+          }
+        },
+        "PeerInteraction": {
+          "fields": {
+            "time": {
+              "type": "google.protobuf.Timestamp",
+              "id": 1
+            },
+            "peer_id": {
+              "type": "blip.PeerId",
+              "id": 2
+            },
+            "initiated_by_peer": {
+              "type": "bool",
+              "id": 3
+            }
+          }
+        },
+        "Messaging": {
+          "fields": {
+            "status": {
+              "type": "frontend.MessagingStatus",
+              "id": 1
+            },
+            "prevent_reconnect": {
+              "type": "bool",
+              "id": 2
+            },
+            "initial_sync_complete": {
+              "type": "bool",
+              "id": 3
+            },
+            "error": {
+              "type": "frontend.Err",
+              "id": 999
+            }
+          }
+        },
+        "PushNotifications": {
+          "fields": {
+            "permissions": {
+              "type": "frontend.NotificationPermissionStatus",
+              "id": 1
+            },
+            "service_type": {
+              "type": "int32",
+              "id": 2
+            },
+            "token": {
+              "type": "bytes",
+              "id": 3
+            }
+          }
+        },
+        "SystemInfo": {
+          "fields": {
+            "is_asleep": {
+              "type": "bool",
+              "id": 1
+            },
+            "is_network_available": {
+              "type": "bool",
+              "id": 2
+            },
+            "available_network_kind": {
+              "type": "string",
+              "id": 3
+            }
+          }
+        },
+        "ErrCode": {
+          "values": {
+            "Unknown": 0,
+            "Internal": 500,
+            "NotFound": 404,
+            "Invalid": 400,
+            "Unauthorized": 401,
+            "NotImplemented": 501,
+            "Network": 600
+          }
+        },
+        "Err": {
+          "fields": {
+            "code": {
+              "type": "int32",
+              "id": 1
+            },
+            "msg": {
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "Auth": {
+          "fields": {
+            "token": {
+              "type": "bytes",
+              "id": 201
+            },
+            "user_id": {
+              "type": "string",
+              "id": 202
+            },
+            "email": {
+              "type": "string",
+              "id": 203
+            },
+            "device_id": {
+              "type": "string",
+              "id": 204
+            }
+          }
+        },
+        "Registration": {
+          "oneofs": {
+            "_error": {
+              "oneof": ["error"]
+            }
+          },
+          "fields": {
+            "status": {
+              "type": "frontend.Registration.registration_status",
+              "id": 1
+            },
+            "attempt_id": {
+              "type": "string",
+              "id": 2
+            },
+            "email": {
+              "type": "string",
+              "id": 4
+            },
+            "code_expiry": {
+              "type": "google.protobuf.Timestamp",
+              "id": 3
+            },
+            "error": {
+              "type": "frontend.Err",
+              "id": 999,
+              "options": {
+                "proto3_optional": true
+              }
+            }
+          },
+          "nested": {
+            "registration_status": {
+              "values": {
+                "NOT_STARTED": 0,
+                "SENDING_CODE": 1,
+                "CODE_SENT": 2,
+                "REGISTERING": 3
+              }
+            }
+          }
+        },
+        "Transfer": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 100
+            },
+            "peer_id": {
+              "type": "blip.PeerId",
+              "id": 200
+            },
+            "content_job_count": {
+              "type": "uint32",
+              "id": 300
+            },
+            "archive_stub": {
+              "type": "bsarchive.Metadata",
+              "id": 400
+            },
+            "unpack_state": {
+              "type": "string",
+              "id": 500
+            },
+            "local_err": {
+              "type": "frontend.TransferErr",
+              "id": 600
+            },
+            "remote_err": {
+              "type": "frontend.TransferErr",
+              "id": 601
+            },
+            "direction": {
+              "type": "frontend.Transfer.Direction",
+              "id": 700
+            },
+            "status": {
+              "type": "frontend.Transfer.Status",
+              "id": 800
+            },
+            "is_resumable": {
+              "type": "bool",
+              "id": 900
+            },
+            "is_dismissed": {
+              "type": "bool",
+              "id": 1000
+            },
+            "progress": {
+              "type": "int64",
+              "id": 1100
+            },
+            "stats": {
+              "type": "frontend.ConnStats",
+              "id": 1200
+            },
+            "updated_at": {
+              "type": "google.protobuf.Timestamp",
+              "id": 1300
+            }
+          },
+          "nested": {
+            "Status": {
+              "values": {
+                "UnknownStatus": 0,
+                "Created": 1,
+                "InviteRequested": 2,
+                "Invited": 3,
+                "Pending": 4,
+                "Active": 5,
+                "Paused": 6,
+                "ResumeRequested": 7,
+                "Completed": 8,
+                "Cancelled": 9
+              }
+            },
+            "Direction": {
+              "values": {
+                "UnknownDirection": 0,
+                "Incoming": 1,
+                "Outgoing": 2
+              }
+            }
+          }
+        },
+        "TransferErr": {
+          "fields": {
+            "code": {
+              "type": "frontend.TransferErr.Code",
+              "id": 1
+            },
+            "msg": {
+              "type": "string",
+              "id": 2
+            },
+            "action_required": {
+              "type": "bool",
+              "id": 3
+            },
+            "fatal": {
+              "type": "bool",
+              "id": 4
+            }
+          },
+          "nested": {
+            "Code": {
+              "values": {
+                "Unknown": 0,
+                "UnpackNoSpace": 100,
+                "UnpackNoPermission": 101,
+                "UnpackNotExist": 102,
+                "UnpackNoVolume": 103,
+                "UnpackIntegrity": 104,
+                "PackNoPermission": 201,
+                "PackNotExist": 202,
+                "PackNoVolume": 203,
+                "PackIntegrity": 204,
+                "Connection": 300,
+                "UserCancel": 400,
+                "UserDecline": 401,
+                "UserRevokeInvite": 402,
+                "UserPause": 403
+              }
+            }
+          }
+        },
+        "ConnStats": {
+          "fields": {
+            "kbps": {
+              "type": "double",
+              "id": 1
+            },
+            "is_relayed": {
+              "type": "bool",
+              "id": 2
+            },
+            "is_wan": {
+              "type": "bool",
+              "id": 5
+            },
+            "is_end_to_end_encrypted": {
+              "type": "bool",
+              "id": 6
+            },
+            "is_starved": {
+              "type": "bool",
+              "id": 3
+            },
+            "stripes": {
+              "type": "int32",
+              "id": 4
+            }
+          }
+        },
+        "TransferNotificationResponse": {
+          "fields": {
+            "accept": {
+              "type": "bool",
+              "id": 1
+            },
+            "expected_peer_id": {
+              "type": "blip.PeerId",
+              "id": 2
+            },
+            "expected_stub": {
+              "type": "bsarchive.Metadata",
+              "id": 3
+            }
+          }
+        },
+        "Onboarding": {
+          "fields": {
+            "current_step": {
+              "type": "frontend.Onboarding.Step",
+              "id": 1
+            },
+            "did_skip_splash": {
+              "type": "bool",
+              "id": 100
+            },
+            "did_skip_companion_device_setup": {
+              "type": "bool",
+              "id": 101
+            },
+            "did_skip_enable_notifications": {
+              "type": "bool",
+              "id": 102
+            },
+            "did_skip_enable_media_library": {
+              "type": "bool",
+              "id": 103
+            },
+            "did_skip_share_instructions": {
+              "type": "bool",
+              "id": 104
+            }
+          },
+          "nested": {
+            "Step": {
+              "fields": {
+                "kind": {
+                  "type": "frontend.Onboarding.Step.Kind",
+                  "id": 1
+                },
+                "is_saving": {
+                  "type": "bool",
+                  "id": 2
+                },
+                "save_error": {
+                  "type": "frontend.Err",
+                  "id": 3
+                }
+              },
+              "nested": {
+                "Kind": {
+                  "values": {
+                    "Splash": 0,
+                    "EmailEntry": 1,
+                    "CodeEntry": 2,
+                    "Profile": 3,
+                    "CompanionDeviceSetup": 4,
+                    "EnableNotifications": 5,
+                    "EnableMediaLibrary": 6,
+                    "ShareInstructions": 7,
+                    "Complete": 8
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Search": {
+          "fields": {
+            "query": {
+              "type": "string",
+              "id": 1
+            },
+            "fetch_status": {
+              "type": "frontend.Search.Status",
+              "id": 2
+            },
+            "local_results": {
+              "rule": "repeated",
+              "type": "blip.PeerId",
+              "id": 3
+            },
+            "server_results": {
+              "rule": "repeated",
+              "type": "blip.PeerId",
+              "id": 4
+            }
+          },
+          "nested": {
+            "Status": {
+              "values": {
+                "Unknown": 0,
+                "InProgress": 1,
+                "Failed": 2,
+                "Complete": 3
+              }
+            }
+          }
+        }
+      }
+    },
+    "blip": {
+      "nested": {
+        "UserAgent": {
+          "fields": {
+            "device_make": {
+              "type": "string",
+              "id": 100
+            },
+            "device_model": {
+              "type": "string",
+              "id": 101
+            },
+            "device_kind": {
+              "type": "blip.DeviceKind",
+              "id": 102
+            },
+            "os_name": {
+              "type": "string",
+              "id": 200
+            },
+            "os_version": {
+              "type": "string",
+              "id": 201
+            },
+            "app_id": {
+              "type": "string",
+              "id": 300
+            },
+            "app_name": {
+              "type": "string",
+              "id": 301
+            },
+            "app_version": {
+              "type": "string",
+              "id": 302
+            },
+            "app_build": {
+              "type": "string",
+              "id": 304
+            }
+          }
+        },
+        "DeviceKind": {
+          "values": {
+            "GenericDevice": 0,
+            "Phone": 2,
+            "Tablet": 3,
+            "Laptop": 4,
+            "Desktop": 5
+          }
+        },
+        "DeviceReach": {
+          "fields": {
+            "is_online": {
+              "type": "bool",
+              "id": 1
+            },
+            "is_pushable": {
+              "type": "bool",
+              "id": 2
+            }
+          }
+        },
+        "DeviceSettings": {
+          "fields": {
+            "allow_diagnostics": {
+              "type": "bool",
+              "id": 1
+            }
+          }
+        },
+        "Device": {
+          "fields": {
+            "device_id": {
+              "type": "string",
+              "id": 1
+            },
+            "kind": {
+              "type": "blip.DeviceKind",
+              "id": 2
+            },
+            "name": {
+              "type": "string",
+              "id": 3
+            },
+            "reach": {
+              "type": "blip.DeviceReach",
+              "id": 4
+            },
+            "last_online": {
+              "type": "google.protobuf.Timestamp",
+              "id": 5
+            },
+            "is_self": {
+              "type": "bool",
+              "id": 6
+            },
+            "settings": {
+              "type": "blip.DeviceSettings",
+              "id": 1000
+            }
+          }
+        },
+        "Plan": {
+          "fields": {
+            "subscribed_at": {
+              "type": "google.protobuf.Timestamp",
+              "id": 1
+            }
+          }
+        },
+        "PlanKind": {
+          "values": {
+            "Unknown": 0,
+            "Free": 1,
+            "Paid": 2
+          }
+        },
+        "User": {
+          "fields": {
+            "user_id": {
+              "type": "string",
+              "id": 8
+            },
+            "email": {
+              "type": "string",
+              "id": 1
+            },
+            "name": {
+              "type": "string",
+              "id": 2
+            },
+            "avatar_uuid": {
+              "type": "bytes",
+              "id": 5
+            },
+            "avatar_micro_rep": {
+              "type": "bytes",
+              "id": 6
+            },
+            "devices": {
+              "keyType": "string",
+              "type": "blip.Device",
+              "id": 7
+            },
+            "is_contact": {
+              "type": "bool",
+              "id": 9
+            },
+            "is_self": {
+              "type": "bool",
+              "id": 10
+            },
+            "is_searchable": {
+              "type": "bool",
+              "id": 11
+            },
+            "plan_kind": {
+              "type": "blip.PlanKind",
+              "id": 12
+            },
+            "created_at": {
+              "type": "google.protobuf.Timestamp",
+              "id": 13
+            },
+            "enriched_at": {
+              "type": "google.protobuf.Timestamp",
+              "id": 9999
+            }
+          }
+        },
+        "PeerId": {
+          "fields": {
+            "user_id": {
+              "type": "string",
+              "id": 1
+            },
+            "device_id": {
+              "type": "string",
+              "id": 2
+            }
+          }
+        }
+      }
+    },
+    "bsarchive": {
+      "nested": {
+        "Metadata": {
+          "fields": {
+            "items": {
+              "keyType": "string",
+              "type": "bsarchive.AnyItem",
+              "id": 1
+            },
+            "disk_locations": {
+              "keyType": "string",
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "File": {
+          "fields": {
+            "size": {
+              "type": "int64",
+              "id": 1
+            },
+            "mod_time_ms": {
+              "type": "int64",
+              "id": 2
+            },
+            "is_executable": {
+              "type": "bool",
+              "id": 3
+            }
+          }
+        },
+        "Folder": {
+          "fields": {}
+        },
+        "Link": {
+          "fields": {
+            "destination": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "FolderStub": {
+          "fields": {
+            "size": {
+              "type": "int64",
+              "id": 1
+            },
+            "children": {
+              "type": "int64",
+              "id": 2
+            }
+          }
+        },
+        "AnyItem": {
+          "oneofs": {
+            "item": {
+              "oneof": ["file", "folder", "link", "folder_stub"]
+            }
+          },
+          "fields": {
+            "file": {
+              "type": "bsarchive.File",
+              "id": 1
+            },
+            "folder": {
+              "type": "bsarchive.Folder",
+              "id": 2
+            },
+            "link": {
+              "type": "bsarchive.Link",
+              "id": 3
+            },
+            "folder_stub": {
+              "type": "bsarchive.FolderStub",
+              "id": 4
+            }
+          }
+        }
+      }
+    },
+    "event": {
+      "nested": {
+        "SetUserAgent": {
+          "fields": {
+            "user_agent": {
+              "type": "blip.UserAgent",
+              "id": 1
+            }
+          }
+        },
+        "UpdateUser": {
+          "oneofs": {
+            "_name": {
+              "oneof": ["name"]
+            },
+            "_is_searchable": {
+              "oneof": ["is_searchable"]
+            }
+          },
+          "fields": {
+            "name": {
+              "type": "string",
+              "id": 1,
+              "options": {
+                "proto3_optional": true
+              }
+            },
+            "is_searchable": {
+              "type": "bool",
+              "id": 2,
+              "options": {
+                "proto3_optional": true
+              }
+            }
+          }
+        },
+        "UpdateDevice": {
+          "oneofs": {
+            "_name": {
+              "oneof": ["name"]
+            }
+          },
+          "fields": {
+            "device_id": {
+              "type": "string",
+              "id": 1
+            },
+            "name": {
+              "type": "string",
+              "id": 2,
+              "options": {
+                "proto3_optional": true
+              }
+            },
+            "settings": {
+              "type": "event.UpdateDevice.Settings",
+              "id": 3
+            }
+          },
+          "nested": {
+            "Settings": {
+              "oneofs": {
+                "_allow_diagnostics": {
+                  "oneof": ["allow_diagnostics"]
+                }
+              },
+              "fields": {
+                "allow_diagnostics": {
+                  "type": "bool",
+                  "id": 1,
+                  "options": {
+                    "proto3_optional": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "RemoveDevice": {
+          "fields": {
+            "device_id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "RemoveContact": {
+          "fields": {
+            "user_id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "AddBlockedUser": {
+          "fields": {
+            "block_user_id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "RemoveBlockedUser": {
+          "fields": {
+            "unblock_user_id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "SendRegistrationCodeRequested": {
+          "fields": {
+            "email": {
+              "type": "string",
+              "id": 1
+            },
+            "device_name": {
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "RegistrationRequested": {
+          "fields": {
+            "code": {
+              "type": "string",
+              "id": 1
+            },
+            "device_dedupe_id": {
+              "type": "string",
+              "id": 2
+            },
+            "device_name": {
+              "type": "string",
+              "id": 3
+            },
+            "device_kind": {
+              "type": "blip.DeviceKind",
+              "id": 4
+            }
+          }
+        },
+        "RemoveDeviceThenLogout": {
+          "fields": {}
+        },
+        "Logout": {
+          "fields": {}
+        },
+        "NotificationTokenGenerated": {
+          "fields": {
+            "service_kind": {
+              "type": "int32",
+              "id": 1
+            },
+            "token": {
+              "type": "bytes",
+              "id": 2
+            }
+          }
+        },
+        "NotificationPermissionsChanged": {
+          "fields": {
+            "value": {
+              "type": "frontend.NotificationPermissionStatus",
+              "id": 1
+            }
+          }
+        },
+        "TransferCreateRequested": {
+          "oneofs": {
+            "_peer_id": {
+              "oneof": ["peer_id"]
+            }
+          },
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            },
+            "peer_id": {
+              "type": "blip.PeerId",
+              "id": 2,
+              "options": {
+                "proto3_optional": true
+              }
+            }
+          }
+        },
+        "TransferRemoveRequested": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            },
+            "delete_files": {
+              "type": "bool",
+              "id": 2
+            }
+          }
+        },
+        "TransferAddContentRequested": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            },
+            "locations": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "TransferRemoveContentRequested": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            },
+            "paths": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "TransferInviteRequested": {
+          "oneofs": {
+            "_peer_id": {
+              "oneof": ["peer_id"]
+            }
+          },
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            },
+            "peer_id": {
+              "type": "blip.PeerId",
+              "id": 2,
+              "options": {
+                "proto3_optional": true
+              }
+            }
+          }
+        },
+        "TransferAcceptanceRequested": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            },
+            "save_path": {
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "TransferDeclineRequested": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "TransferRespondFromNotification": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            },
+            "response": {
+              "type": "frontend.TransferNotificationResponse",
+              "id": 2
+            }
+          }
+        },
+        "TransferHandleNotificationResponseIfExists": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "TransferPauseRequested": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "TransferCancellationRequested": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "TransferResume": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "TransferSetAutoAccept": {
+          "fields": {
+            "auto_accept": {
+              "type": "bool",
+              "id": 1
+            }
+          }
+        },
+        "TransferSetAutoSaveToMediaLibrary": {
+          "fields": {
+            "auto_save": {
+              "type": "bool",
+              "id": 1
+            }
+          }
+        },
+        "TransferSetCustomDefaultSavePath": {
+          "fields": {
+            "path": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "TransferSetSpeedLimits": {
+          "oneofs": {
+            "_upload_mbps": {
+              "oneof": ["upload_mbps"]
+            },
+            "_download_mbps": {
+              "oneof": ["download_mbps"]
+            }
+          },
+          "fields": {
+            "upload_mbps": {
+              "type": "uint32",
+              "id": 1,
+              "options": {
+                "proto3_optional": true
+              }
+            },
+            "download_mbps": {
+              "type": "uint32",
+              "id": 2,
+              "options": {
+                "proto3_optional": true
+              }
+            }
+          }
+        },
+        "TransferDismiss": {
+          "fields": {
+            "transfer_id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "OnboardingSkipSplash": {
+          "fields": {}
+        },
+        "OnboardingSkipCompanionDeviceSetup": {
+          "fields": {}
+        },
+        "OnboardingSkipEnableNotifications": {
+          "fields": {}
+        },
+        "OnboardingSkipEnableMediaLibrary": {
+          "fields": {}
+        },
+        "OnboardingSkipShareInstructions": {
+          "fields": {}
+        },
+        "OnboardingCloseOccurred": {
+          "fields": {}
+        },
+        "SetUserAvatar": {
+          "fields": {
+            "file_path": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "Search": {
+          "fields": {
+            "id": {
+              "type": "string",
+              "id": 1
+            },
+            "query": {
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "AbandonSearch": {
+          "fields": {
+            "id": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "SaveToMediaLibrary": {
+          "fields": {
+            "locations": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "SetAllowConnectionDiagnostics": {
+          "fields": {
+            "allowed": {
+              "type": "bool",
+              "id": 1
+            }
+          }
+        },
+        "InsertAnalyticsEvent": {
+          "fields": {
+            "name": {
+              "type": "string",
+              "id": 1
+            },
+            "props": {
+              "keyType": "string",
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "NetworkAvailable": {
+          "fields": {
+            "kind": {
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "NetworkUnavailable": {
+          "fields": {}
+        },
+        "SystemIsAwake": {
+          "fields": {}
+        },
+        "SystemIsAsleep": {
+          "fields": {}
+        }
+      }
+    },
+    "google": {
+      "nested": {
+        "protobuf": {
+          "nested": {
+            "Empty": {
+              "fields": {}
+            },
+            "Timestamp": {
+              "fields": {
+                "seconds": {
+                  "type": "int64",
+                  "id": 1
+                },
+                "nanos": {
+                  "type": "int32",
+                  "id": 2
+                }
+              }
+            },
+            "Any": {
+              "fields": {
+                "type_url": {
+                  "type": "string",
+                  "id": 1
+                },
+                "value": {
+                  "type": "bytes",
+                  "id": 2
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

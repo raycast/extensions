@@ -1,0 +1,26 @@
+syntax = "proto3";
+package blip;
+
+import "device.proto";
+import "google/protobuf/timestamp.proto";
+
+enum PlanKind {
+  Unknown = 0;
+  Free = 1;
+  Paid = 2;
+}
+
+message User {
+  string user_id = 8;
+  string email = 1;
+  string name = 2;
+  bytes avatar_uuid = 5;
+  bytes avatar_micro_rep = 6;
+  map<string, blip.Device> devices = 7;
+  bool is_contact = 9;
+  bool is_self = 10;
+  bool is_searchable = 11;
+  blip.PlanKind plan_kind = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp enriched_at = 9999;
+}

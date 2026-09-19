@@ -1,0 +1,29 @@
+syntax = "proto3";
+package frontend;
+
+import "frontend/error.proto";
+
+message Onboarding {
+  message Step {
+    enum Kind {
+      Splash = 0;
+      EmailEntry = 1;
+      CodeEntry = 2;
+      Profile = 3;
+      CompanionDeviceSetup = 4;
+      EnableNotifications = 5;
+      EnableMediaLibrary = 6;
+      ShareInstructions = 7;
+      Complete = 8;
+    }
+    frontend.Onboarding.Step.Kind kind = 1;
+    bool is_saving = 2;
+    frontend.Err save_error = 3;
+  }
+  frontend.Onboarding.Step current_step = 1;
+  bool did_skip_splash = 100;
+  bool did_skip_companion_device_setup = 101;
+  bool did_skip_enable_notifications = 102;
+  bool did_skip_enable_media_library = 103;
+  bool did_skip_share_instructions = 104;
+}
