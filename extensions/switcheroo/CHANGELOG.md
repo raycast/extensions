@@ -24,3 +24,7 @@
 - Supports the Switcheroo daemon installed independently via Homebrew
   (`brew install switcheroo`) or the standalone `install.sh` script. The daemon
   is not bundled with this extension and must be installed separately.
+
+- README documents step-by-step Homebrew setup, the standalone `install.sh`
+  path, Accessibility permission grant for each layout, local install before
+  Store approval, troubleshooting, and update/uninstall steps.
