@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "amionline",
+  "title": "Am I Online",
+  "description": "Check whether you are actually online and see which part of the connection is failing when you are not.",
+  "icon": "icon.png",
+  "author": "mert_tufekci",
+  "categories": ["System", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "status",
+      "title": "Check Connection",
+      "subtitle": "Am I Online",
+      "description": "A detailed, layer-by-layer connection check with a clear verdict.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "customTargets",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom targets",
+      "description": "Also check these hosts. Comma or newline separated. Use host:port (e.g. 192.168.1.222:8081) or a full URL.",
+      "default": "",
+      "placeholder": "192.168.1.222:8081, https://example.com"
+    },
+    {
+      "name": "showEgressIp",
+      "type": "checkbox",
+      "required": false,
+      "title": "Privacy",
+      "label": "Show your public IP address in results",
+      "description": "Your public IP is read from the Cloudflare check and shown only when this is on. It is never stored or sent anywhere else.",
+      "default": false
+    },
+    {
+      "name": "identifyUpstream",
+      "type": "checkbox",
+      "required": false,
+      "title": "DNS",
+      "label": "Identify the upstream resolver behind a local DNS (one extra lookup)",
+      "description": "Runs one extra DNS lookup (whoami.akamai.net) to reveal the public resolver your local DNS forwards to.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
