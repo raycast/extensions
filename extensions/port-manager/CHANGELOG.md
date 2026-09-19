@@ -1,6 +1,6 @@
 # Port Manager Changelog
 
-## [Command Line in Details] - {PR_MERGE_DATE}
+## [Command Line in Details] - 2026-09-19
 
 - Show the full command line of a process in the detail panel and make it searchable, so several listeners with the same executable (`node`, `python`, …) can be told apart
 - Add "Command Line" to the Copy Info submenu
