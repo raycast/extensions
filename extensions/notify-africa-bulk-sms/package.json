@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "notify-africa-bulk-sms",
+  "version": "1.0.0",
+  "description": "Send personalized bulk SMS with Notify Africa from Raycast.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "tsc -p tsconfig.test.json && node --test .test-dist/tests/*.test.js",
+    "publish": "ray publish"
+  },
+  "author": "john_ndelembi",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "packageManager": "npm@10.9.3",
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.9.7",
+    "react": "19.0.0",
+    "react-devtools": "6.1.1",
+    "typescript": "^5.9.3"
+  },
+  "title": "Notify Africa",
+  "icon": "notify 513.png",
+  "categories": [
+    "Communication"
+  ],
+  "keywords": [
+    "notify africa",
+    "bulk sms",
+    "sms",
+    "messaging",
+    "tanzania"
+  ],
+  "access": "public",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "A Notify Africa API key authorized for Bulk SMS.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "send-personalized-sms",
+      "title": "Send Personalized SMS",
+      "description": "Send a distinct SMS to each recipient.",
+      "mode": "view"
+    },
+    {
+      "name": "send-bulk-sms",
+      "title": "Send SMS",
+      "description": "Send one SMS body to many recipients.",
+      "mode": "view"
+    },
+    {
+      "name": "send-sms-from-file",
+      "title": "Send SMS from File",
+      "description": "Send one SMS body to recipients in a CSV file.",
+      "mode": "view"
+    }
+  ]
+}
