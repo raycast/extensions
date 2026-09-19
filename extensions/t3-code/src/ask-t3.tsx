@@ -37,6 +37,7 @@ export default function Command() {
   const [runtimeMode, setRuntimeMode] = useState<RuntimeMode>("full-access");
   const [envMode, setEnvMode] = useState<ThreadEnvMode>("local");
   const [branchError, setBranchError] = useState<string | undefined>();
+  const [baseBranch, setBaseBranch] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
 
   const { data, isLoading, error, revalidate } = usePromise(async () => {
@@ -70,6 +71,23 @@ export default function Command() {
     );
     setRuntimeMode(inherited.runtimeMode);
     setEnvMode(inherited.envMode);
+
+    const project = data.snapshot.projects.find(
+      (candidate) => candidate.id === activeProjectId,
+    );
+    if (!project) {
+      return;
+    }
+    let cancelled = false;
+    setBaseBranch(undefined);
+    void defaultBaseBranch(project.workspaceRoot).then((branch) => {
+      if (!cancelled) {
+        setBaseBranch(branch);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [data, activeProjectId]);
 
   if (error) {
@@ -123,11 +141,11 @@ export default function Command() {
       let worktreePath: string | null = null;
       if (envMode === "worktree") {
         toast.title = "Creating worktree";
-        const baseBranch = await defaultBaseBranch(project.workspaceRoot);
         worktreePath = await createWorktree({
           workspaceRoot: project.workspaceRoot,
           branch,
-          baseBranch,
+          baseBranch:
+            baseBranch ?? (await defaultBaseBranch(project.workspaceRoot)),
         });
       }
 
@@ -246,7 +264,11 @@ export default function Command() {
           placeholder="MKT-1234-short-slug"
           error={branchError}
           onChange={() => setBranchError(undefined)}
-          info="Branched from origin/main into ~/.t3/worktrees/<repo>/<branch>."
+          info={`Branched from ${
+            baseBranch
+              ? `origin/${baseBranch}`
+              : "the repository default branch"
+          } into ~/.t3/worktrees/<repo>/<branch>.`}
         />
       ) : null}
     </Form>
