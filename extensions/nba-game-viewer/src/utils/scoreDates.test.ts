@@ -22,7 +22,7 @@ describe("scoreDates", () => {
     expect(getScoreDates(today, 2)).toEqual(getScoreDates(today, "2"));
   });
 
-  it("caps the number of previous score days", () => {
+  it("caps the maximum number of previous score days (control)", () => {
     const dates = getScoreDates(today, "30");
 
     expect(dates).toHaveLength(31);
