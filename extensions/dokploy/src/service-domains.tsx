@@ -199,6 +199,7 @@ interface AddDomainFormValues {
   port: string;
   https: boolean;
   certificateType: string;
+  customCertResolver: string;
 }
 
 /**
@@ -255,6 +256,10 @@ function AddDomainForm({
           port: formValues.port.trim() ? Number(formValues.port) : null,
           https: formValues.https,
           certificateType: formValues.https ? formValues.certificateType : undefined,
+          customCertResolver:
+            formValues.https && formValues.certificateType === "custom"
+              ? formValues.customCertResolver.trim()
+              : undefined,
           domainType: service.type,
           ...(isCompose
             ? { composeId: service.id, serviceName: formValues.containerServiceName }
@@ -287,6 +292,7 @@ function AddDomainForm({
       port: "",
       https: true,
       certificateType: "letsencrypt",
+      customCertResolver: "",
     },
     validation: {
       host: FormValidation.Required,
@@ -297,6 +303,11 @@ function AddDomainForm({
         if (!value) return;
         const port = Number(value);
         if (!Number.isInteger(port) || port < 1 || port > 65535) return "Enter a port between 1 and 65535";
+      },
+      customCertResolver: (value) => {
+        if (values.https && values.certificateType === "custom" && !value?.trim()) {
+          return "Enter the Traefik certificate resolver to use";
+        }
       },
     },
   });
@@ -431,6 +442,14 @@ function AddDomainForm({
             <Form.Dropdown.Item key={type.value} title={type.title} value={type.value} />
           ))}
         </Form.Dropdown>
+      )}
+      {values.https && values.certificateType === "custom" && (
+        <Form.TextField
+          title="Certificate Resolver"
+          placeholder="my-resolver"
+          info="The Traefik cert resolver to use for this domain."
+          {...itemProps.customCertResolver}
+        />
       )}
     </Form>
   );
