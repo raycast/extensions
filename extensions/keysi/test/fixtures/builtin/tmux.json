@@ -1,0 +1,28 @@
+{
+  "id": "tmux",
+  "name": "tmux",
+  "match": {
+    "bundleIDs": [],
+    "processNames": [
+      "tmux"
+    ]
+  },
+  "mode": "replace",
+  "priority": 50,
+  "groups": [
+    {
+      "title": {
+        "en": "Panes"
+      },
+      "items": [
+        {
+          "title": {
+            "en": "Split horizontally"
+          },
+          "keys": "Ctrl-b %",
+          "raw": true
+        }
+      ]
+    }
+  ]
+}
