@@ -235,6 +235,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "quantral",
+    title: "Quantral",
+    description:
+      "Stock sentiment scores (0-100) per company from the retail investor and market commentator sources Quantral tracks, plus top signals, monthly recaps and the mentions behind each score. Hosted remote server with OAuth sign-in; Quantral subscription required.",
+    icon: "https://app.quantral.com/mcp-icon.png?v=2",
+    homepage: "https://quantral.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.quantral.com/api/mcp"],
+    },
+  },
+  {
     name: "kagimcp",
     title: "Kagi Search",
     description: "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",

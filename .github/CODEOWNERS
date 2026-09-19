@@ -528,7 +528,7 @@
 /extensions/copilot-workspace                                       @colebemis @pernielsentikaer
 /extensions/copy-gcp-icons                                          @pomdtr
 /extensions/copy-notion-markdown-link                               @atzzCokeK
-/extensions/copy-path                                               @koinzhang @ridemountainpig @INCHMAN1900 @arjanflac
+/extensions/copy-path                                               @koinzhang @ridemountainpig @INCHMAN1900 @arjanflac @dans-huang
 /extensions/copy-skeet-link                                         @justin
 /extensions/copy-text-files                                         @netcookies
 /extensions/copymoveto                                              @kumamaki @pernielsentikaer @ridemountainpig @ridemountainpig
@@ -1692,6 +1692,7 @@
 /extensions/mobius-materials                                        @tjwds
 /extensions/mochi                                                   @kawamataryo
 /extensions/moco                                                    @eviscares @el-schneider
+/extensions/modbus-toolkit                                          @TwoMental
 /extensions/model-context-protocol-registry                         @thomaspaulmann @nagauta @pernielsentikaer
 /extensions/models-dev                                              @carlesandres
 /extensions/modify-hash                                             @tisfeng @0xdhrv
@@ -2520,7 +2521,7 @@
 /extensions/series-rating-graphs                                    @muhammadrizo-y @0xdhrv
 /extensions/serverless-framework-docs                               @yemilgr
 /extensions/servicenow                                              @robertoalvarezalonso
-/extensions/sesh                                                    @joshmedeski @sebb3 @pernielsentikaer
+/extensions/sesh                                                    @joshmedeski @sebb3 @pernielsentikaer @tharropoulos
 /extensions/session                                                 @jamesjlyons @pernielsentikaer @benkates
 /extensions/setapp                                                  @lardissone
 /extensions/setlist-fm                                              @csigritz

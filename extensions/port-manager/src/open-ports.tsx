@@ -10,6 +10,7 @@ import Toasts from "./feedback/Toasts";
 import { useNamedPorts } from "./hooks/useNamedPorts";
 import useProcesses from "./hooks/useProcesses";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
+import { getProcessMarkdown } from "./utilities/getProcessMarkdown";
 import { platformShortcut } from "./utilities/platform";
 
 export default function Command() {
@@ -17,7 +18,7 @@ export default function Command() {
   const { processes, revalidateProcesses, isLoadingProcesses, processesError } = useProcesses();
   const { getNamedPort } = useNamedPorts();
 
-  const [isShowingDetail, setIsShowingDetail] = useCachedState("showDetail", false);
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("showDetail", true);
 
   const hasProcesses = (processes?.length ?? 0) > 0;
 
@@ -146,9 +147,11 @@ export default function Command() {
             keywords={p.portInfo
               ?.map((i) => `${i.port}`)
               .concat(p.portInfo?.map((i) => `${i.host}`))
-              .concat(p.portInfo?.map((i) => `${i.name}`))}
+              .concat(p.portInfo?.map((i) => `${i.name}`))
+              .concat(p.commandLine !== undefined ? [p.commandLine] : [])}
             detail={
               <List.Item.Detail
+                markdown={getProcessMarkdown(p)}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Name" text={p.name} />
@@ -190,7 +193,7 @@ export default function Command() {
               />
             }
             actions={<ActionPanel>{actions.map((a) => a.action)}</ActionPanel>}
-            accessories={isShowingDetail ? undefined : getProcessAccessories(p)}
+            accessories={getProcessAccessories(p)}
           />
         );
       })}

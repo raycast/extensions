@@ -44,5 +44,8 @@ export function getWordAccessories(item: ListDisplayItem): List.Item.Accessory[]
       wordAccessories = [...wordAccessories, ...pronunciationAccessory];
     }
   }
+  if (item.fromCache) {
+    wordAccessories.push({ icon: Icon.Clock, tooltip: "Loaded from query cache" });
+  }
   return wordAccessories;
 }
