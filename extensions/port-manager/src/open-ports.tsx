@@ -178,10 +178,10 @@ export default function Command() {
             key={p.pid}
             title={p.name ?? "Untitled Process"}
             subtitle={isShowingDetail ? "" : (p.user ?? "")}
-            keywords={p.portInfo
+            keywords={shown.portInfo
               ?.map((i) => `${i.port}`)
-              .concat(p.portInfo?.map((i) => `${i.host}`))
-              .concat(p.portInfo?.map((i) => `${i.name}`))
+              .concat(shown.portInfo?.map((i) => `${i.host}`))
+              .concat(shown.portInfo?.map((i) => `${i.name}`))
               .concat(p.commandLine !== undefined ? [p.commandLine] : [])}
             detail={
               <List.Item.Detail
