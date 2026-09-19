@@ -13,6 +13,7 @@ import { usePromise } from "@raycast/utils";
 import { ErrorView } from "./thread-list";
 import {
   createWorktree,
+  defaultBaseBranch,
   focusThread,
   getShell,
   inheritedSettings,
@@ -20,6 +21,7 @@ import {
   modelChoices,
   modelKey,
   parseModelKey,
+  removeWorktree,
   RUNTIME_MODES,
   RuntimeMode,
   startSession,
@@ -58,8 +60,14 @@ export default function Command() {
     if (!data || !activeProjectId) {
       return;
     }
-    const inherited = inheritedSettings(data.snapshot, activeProjectId);
-    setSelectedModel(modelKey(inherited.modelSelection));
+    const inherited = inheritedSettings(
+      data.snapshot,
+      activeProjectId,
+      data.models[0]?.selection,
+    );
+    setSelectedModel(
+      inherited.modelSelection ? modelKey(inherited.modelSelection) : undefined,
+    );
     setRuntimeMode(inherited.runtimeMode);
     setEnvMode(inherited.envMode);
   }, [data, activeProjectId]);
@@ -99,29 +107,47 @@ export default function Command() {
       title: "Starting session",
     });
     try {
+      const modelSelection = selectedModel
+        ? parseModelKey(selectedModel)
+        : inheritedSettings(
+            data.snapshot,
+            project.id,
+            data.models[0]?.selection,
+          ).modelSelection;
+      if (!modelSelection) {
+        throw new Error(
+          "No model is available. Enable a provider in T3 Code, then try again.",
+        );
+      }
+
       let worktreePath: string | null = null;
       if (envMode === "worktree") {
         toast.title = "Creating worktree";
+        const baseBranch = await defaultBaseBranch(project.workspaceRoot);
         worktreePath = await createWorktree({
           workspaceRoot: project.workspaceRoot,
           branch,
-          baseBranch: "main",
+          baseBranch,
         });
       }
 
-      const modelSelection = selectedModel
-        ? parseModelKey(selectedModel)
-        : inheritedSettings(data.snapshot, project.id).modelSelection;
-
       toast.title = "Sending prompt";
-      await startSession({
-        projectId: project.id,
-        prompt,
-        modelSelection,
-        runtimeMode,
-        branch: envMode === "worktree" ? branch : null,
-        worktreePath,
-      });
+      try {
+        await startSession({
+          projectId: project.id,
+          prompt,
+          modelSelection,
+          runtimeMode,
+          branch: envMode === "worktree" ? branch : null,
+          worktreePath,
+        });
+      } catch (sessionError) {
+        // Nothing was started, so the worktree this command just made is litter.
+        if (worktreePath) {
+          await removeWorktree(project.workspaceRoot, worktreePath, branch);
+        }
+        throw sessionError;
+      }
 
       await LocalStorage.setItem(LAST_PROJECT_KEY, project.id);
       await toast.hide();

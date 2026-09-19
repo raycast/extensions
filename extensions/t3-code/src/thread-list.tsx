@@ -5,6 +5,7 @@ import {
   Icon,
   List,
   closeMainWindow,
+  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -82,11 +83,13 @@ export default function ThreadList({
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={searchBarPlaceholder}>
-      <List.EmptyView
-        title={emptyTitle}
-        description={emptyDescription}
-        icon={Icon.Message}
-      />
+      {isLoading ? null : (
+        <List.EmptyView
+          title={emptyTitle}
+          description={emptyDescription}
+          icon={Icon.Message}
+        />
+      )}
       {threads.map((thread) => (
         <List.Item
           key={thread.id}
@@ -107,8 +110,19 @@ export default function ThreadList({
                 title="Open in T3 Code"
                 icon={Icon.ArrowRight}
                 onAction={async () => {
+                  // T3 is driven through its command palette, which matches on
+                  // title, so identical titles cannot be told apart from here.
+                  const ambiguous =
+                    threads.filter(
+                      (candidate) => candidate.title === thread.title,
+                    ).length > 1;
                   await closeMainWindow();
                   await focusThread(thread.title);
+                  if (ambiguous) {
+                    await showHUD(
+                      "Several threads share this title - check you landed on the right one",
+                    );
+                  }
                 }}
               />
               <Action.CopyToClipboard

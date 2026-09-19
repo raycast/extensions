@@ -13,21 +13,18 @@
     {
       "name": "ask-t3",
       "title": "Prompt T3 Code",
-      "subtitle": "T3 Code",
       "description": "Start a new T3 Code session with a prompt.",
       "mode": "view"
     },
     {
       "name": "waiting-threads",
       "title": "Waiting T3 Threads",
-      "subtitle": "T3 Code",
       "description": "Active threads where the agent has stopped and the ball is in your court.",
       "mode": "view"
     },
     {
       "name": "search-threads",
       "title": "Search T3 Threads",
-      "subtitle": "T3 Code",
       "description": "Search every live thread and open it in T3 Code.",
       "mode": "view"
     }
@@ -38,7 +35,8 @@
       "type": "password",
       "required": true,
       "title": "Access Token",
-      "description": "Bearer token from: t3 auth session issue --ttl 365d --label raycast --token-only"
+      "description": "Bearer token from: t3 auth session issue --ttl 365d --label raycast --token-only",
+      "placeholder": "Paste the token printed by t3 auth session issue"
     },
     {
       "name": "origin",
@@ -46,7 +44,8 @@
       "required": false,
       "title": "Server Origin",
       "default": "",
-      "description": "Override the T3 server origin. Empty reads ~/.t3/userdata/server-runtime.json."
+      "description": "Override the T3 server origin. Empty reads ~/.t3/userdata/server-runtime.json.",
+      "placeholder": "http://127.0.0.1:3773"
     },
     {
       "name": "appName",
@@ -54,7 +53,8 @@
       "required": false,
       "title": "App Name",
       "default": "T3 Code (Nightly)",
-      "description": "macOS application name used to launch T3 Code when the server is unreachable."
+      "description": "macOS application name used to launch T3 Code when the server is unreachable.",
+      "placeholder": "T3 Code"
     }
   ],
   "dependencies": {
@@ -78,5 +78,8 @@
   },
   "allowScripts": {
     "esbuild@0.27.7": true
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

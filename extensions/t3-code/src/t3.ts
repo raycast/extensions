@@ -8,12 +8,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const run = promisify(execFile);
 
-export type Preferences = {
-  token: string;
-  origin?: string;
-  appName?: string;
-};
-
 export type ModelSelection = {
   instanceId: string;
   model: string;
@@ -92,7 +86,7 @@ export type EnvironmentDescriptor = {
  * branch on `kind` to decide whether offering "Launch T3 Code" makes sense. */
 export class T3Error extends Error {
   constructor(
-    readonly kind: "unreachable" | "unauthorized" | "http",
+    readonly kind: "unreachable" | "unauthorized" | "http" | "insecure-origin",
     message: string,
   ) {
     super(message);
@@ -103,6 +97,30 @@ export const RUNTIME_DIR = join(homedir(), ".t3", "userdata");
 export const WORKTREES_DIR = join(homedir(), ".t3", "worktrees");
 
 export const preferences = () => getPreferenceValues<Preferences>();
+
+const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "[::1]"]);
+
+/** The token is a long-lived credential for the local T3 server, so it only ever
+ * travels to loopback or over TLS. A plain-http remote origin is refused rather
+ * than silently leaking the bearer to whoever is on the wire. */
+function assertTokenSafeOrigin(origin: string): void {
+  let url: URL;
+  try {
+    url = new URL(origin);
+  } catch {
+    throw new T3Error(
+      "insecure-origin",
+      `"${origin}" is not a valid server origin.`,
+    );
+  }
+  if (url.protocol === "https:" || LOOPBACK_HOSTS.has(url.hostname)) {
+    return;
+  }
+  throw new T3Error(
+    "insecure-origin",
+    `Refusing to send the access token to ${url.origin} over plain HTTP. Use https:// or a loopback address.`,
+  );
+}
 
 /** A configured origin wins; otherwise the running server publishes its own port. The
  * file survives restarts with a stale port, so a failed fetch still means "not running". */
@@ -135,6 +153,7 @@ export async function resolveOrigin(): Promise<string> {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const origin = await resolveOrigin();
+  assertTokenSafeOrigin(origin);
   const { token } = preferences();
   let response: Response;
   try {
@@ -228,8 +247,9 @@ export function liveProjects(snapshot: ShellSnapshot): Project[] {
 export function inheritedSettings(
   snapshot: ShellSnapshot,
   projectId: string,
+  fallbackModel?: ModelSelection,
 ): {
-  modelSelection: ModelSelection;
+  modelSelection: ModelSelection | undefined;
   runtimeMode: RuntimeMode;
   envMode: ThreadEnvMode;
 } {
@@ -244,13 +264,10 @@ export function inheritedSettings(
         thread.modelSelection,
     )
     .sort((a, b) => threadTimestamp(b) - threadTimestamp(a))[0];
+  // No hardcoded default: a provider this machine has disabled would be rejected
+  // by the server, so fall back to whatever the picker is actually offering.
   const modelSelection =
-    newest?.modelSelection ??
-    project?.defaultModelSelection ??
-    ({
-      instanceId: "claudeAgent",
-      model: "claude-sonnet-5",
-    } satisfies ModelSelection);
+    newest?.modelSelection ?? project?.defaultModelSelection ?? fallbackModel;
   const runtimeMode = newest?.runtimeMode ?? "full-access";
   const envMode = project?.defaultThreadEnvMode ?? "local";
   return { modelSelection, runtimeMode, envMode };
@@ -397,6 +414,54 @@ export function worktreePathFor(workspaceRoot: string, branch: string): string {
 
 /** T3 prepares worktrees on its WebSocket path only, so the extension does the same
  * two steps itself: fetch the base, then add the worktree where T3 would have put it. */
+/** The default branch of a repository is whatever origin/HEAD points at, not
+ * necessarily `main`. Falls back to the checked-out branch when there is no
+ * remote to ask. */
+export async function defaultBaseBranch(
+  workspaceRoot: string,
+): Promise<string> {
+  try {
+    const { stdout } = await run("git", [
+      "-C",
+      workspaceRoot,
+      "symbolic-ref",
+      "--short",
+      "refs/remotes/origin/HEAD",
+    ]);
+    const ref = stdout.trim();
+    if (ref.startsWith("origin/")) {
+      return ref.slice("origin/".length);
+    }
+  } catch {
+    // no origin, or origin/HEAD was never resolved on this clone
+  }
+  try {
+    const { stdout } = await run("git", [
+      "-C",
+      workspaceRoot,
+      "rev-parse",
+      "--abbrev-ref",
+      "HEAD",
+    ]);
+    return stdout.trim() || "main";
+  } catch {
+    return "main";
+  }
+}
+
+async function hasOrigin(workspaceRoot: string): Promise<boolean> {
+  try {
+    const { stdout } = await run("git", ["-C", workspaceRoot, "remote"]);
+    return stdout.split("\n").some((remote) => remote.trim() === "origin");
+  } catch {
+    return false;
+  }
+}
+
+/** T3 prepares worktrees on its WebSocket path only, so the extension does the same
+ * two steps itself: fetch the base, then add the worktree where T3 would have put it.
+ * A repository with an origin must fetch successfully, otherwise the new branch would
+ * silently start from a stale local ref. */
 export async function createWorktree(input: {
   workspaceRoot: string;
   branch: string;
@@ -404,17 +469,23 @@ export async function createWorktree(input: {
 }): Promise<string> {
   const target = worktreePathFor(input.workspaceRoot, input.branch);
   let base = input.baseBranch;
-  try {
-    await run("git", [
-      "-C",
-      input.workspaceRoot,
-      "fetch",
-      "origin",
-      input.baseBranch,
-    ]);
+  if (await hasOrigin(input.workspaceRoot)) {
+    try {
+      await run("git", [
+        "-C",
+        input.workspaceRoot,
+        "fetch",
+        "origin",
+        input.baseBranch,
+      ]);
+    } catch (error) {
+      throw new Error(
+        `Could not fetch origin/${input.baseBranch}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
     base = `origin/${input.baseBranch}`;
-  } catch {
-    // no origin, or the base branch only exists locally
   }
   await run("git", [
     "-C",
@@ -427,6 +498,27 @@ export async function createWorktree(input: {
     base,
   ]);
   return target;
+}
+
+/** Undoes createWorktree when a later step of starting the session fails. */
+export async function removeWorktree(
+  workspaceRoot: string,
+  worktreePath: string,
+  branch: string,
+): Promise<void> {
+  try {
+    await run("git", [
+      "-C",
+      workspaceRoot,
+      "worktree",
+      "remove",
+      "--force",
+      worktreePath,
+    ]);
+    await run("git", ["-C", workspaceRoot, "branch", "-D", branch]);
+  } catch {
+    // leave whatever could not be cleaned up; the session error is what matters
+  }
 }
 
 export async function startSession(input: {
@@ -455,22 +547,33 @@ export async function startSession(input: {
     createdAt,
   });
 
-  await dispatch({
-    type: "thread.turn.start",
-    commandId: randomUUID(),
-    threadId,
-    message: {
-      messageId: randomUUID(),
-      role: "user",
-      text: input.prompt,
-      attachments: [],
-    },
-    modelSelection: input.modelSelection,
-    titleSeed: title,
-    runtimeMode: input.runtimeMode,
-    interactionMode: "default",
-    createdAt: new Date().toISOString(),
-  });
+  try {
+    await dispatch({
+      type: "thread.turn.start",
+      commandId: randomUUID(),
+      threadId,
+      message: {
+        messageId: randomUUID(),
+        role: "user",
+        text: input.prompt,
+        attachments: [],
+      },
+      modelSelection: input.modelSelection,
+      titleSeed: title,
+      runtimeMode: input.runtimeMode,
+      interactionMode: "default",
+      createdAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    // An empty thread is worse than none: drop it so a retry does not pile up
+    // half-started sessions in the sidebar.
+    await dispatch({
+      type: "thread.delete",
+      commandId: randomUUID(),
+      threadId,
+    }).catch(() => undefined);
+    throw error;
+  }
 
   return threadId;
 }
