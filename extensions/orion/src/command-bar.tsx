@@ -13,6 +13,7 @@ import TabListItem from "./components/TabListItem";
 import UrlListItem, { UrlItem } from "./components/UrlListItem";
 import SuggestionListItem from "./components/SuggestionListItem";
 import OpenInOrionAction from "./components/OpenInOrionAction";
+import { searchTabsWithFallback } from "./tabSearch";
 
 import { Bookmark, HistoryItem, Tab } from "./types";
 import { buildSearchUrl, extractDomainName, getSearchEngineName, isLauncherTab, splitSearchTerms } from "./utils";
@@ -117,7 +118,11 @@ export default function Command() {
   const topTabKey = topHit?.kind === "tab" ? topHit.key : undefined;
   const topUrlKey = topHit?.kind === "url" ? topHit.key : undefined;
 
-  const tabSection = tabHits.filter((t) => tabKey(t) !== topTabKey).slice(0, hasQuery ? LIMITS.tabs : tabHits.length);
+  const exactTabSection = tabHits
+    .filter((t) => tabKey(t) !== topTabKey)
+    .slice(0, hasQuery ? LIMITS.tabs : tabHits.length);
+  const fuzzyTabSection = hasQuery && tabHits.length === 0 ? searchTabsWithFallback(openTabs, query, LIMITS.tabs) : [];
+  const tabSection = exactTabSection.length > 0 ? exactTabSection : fuzzyTabSection;
   const bookmarkSection = bookmarkHits.filter((b) => `bm-${b.uuid}` !== topUrlKey).slice(0, LIMITS.bookmarks);
   const readingSection = readingHits.filter((b) => `rl-${b.uuid}` !== topUrlKey).slice(0, LIMITS.reading);
   const historySection = historyHits.filter((h) => `hist-${h.id}` !== topUrlKey).slice(0, LIMITS.history);
@@ -170,7 +175,7 @@ export default function Command() {
       )}
 
       {tabSection.length > 0 && (
-        <List.Section title="Open Tabs">
+        <List.Section title={fuzzyTabSection.length > 0 ? "Open Tabs (Fuzzy Matches)" : "Open Tabs"}>
           {tabSection.map((t) => (
             <TabListItem key={tabKey(t)} tab={t} refresh={refresh} closeLaunchers />
           ))}
