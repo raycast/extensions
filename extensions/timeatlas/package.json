@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timeatlas",
+  "title": "Timeatlas",
+  "description": "Notes and daily glance for Time Atlas.",
+  "icon": "icon.png",
+  "author": "shak",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "add-note",
+      "title": "Add Note",
+      "description": "Write a note to the Time Atlas iCloud directory for any date.",
+      "mode": "view"
+    },
+    {
+      "name": "today-at-a-glance",
+      "title": "Today at a Glance",
+      "description": "In-window summary of today's sleep, places, distance, and notes from Time Atlas.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "icloudPath",
+      "title": "Time Atlas iCloud Folder",
+      "description": "Optional override. Leave empty to use the default Time Atlas iCloud Documents folder.",
+      "type": "directory",
+      "required": false,
+      "placeholder": "~/Library/Mobile Documents/iCloud~com~timeatlaslabs~Pat/Documents"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "jszip": "^3.10.1",
+    "protobufjs": "^8.8.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
