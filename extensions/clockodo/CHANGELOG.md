@@ -1,6 +1,6 @@
 # Clockodo Changelog
 
-## [Upgrade dependencies for v2 compatibility] - {PR_MERGE_DATE}
+## [Upgrade dependencies for v2 compatibility] - 2026-09-19
 
 - Upgrade all dependencies for v2 compatibility
 
