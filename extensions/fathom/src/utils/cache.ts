@@ -567,7 +567,7 @@ interface CachedTranscript {
   /** Identity of the bytes this was read from, so a changed file is noticed. */
   mtimeMs: number;
   size: number;
-  /** When that identity was last confirmed against the file. */
+  /** Monotonic timestamp of when that identity was last confirmed. */
   checkedAt: number;
 }
 
@@ -595,10 +595,16 @@ let transcriptCacheBytes = 0;
  *
  * A missing transcript is never cached: it can appear at any moment, and its
  * `stat` throws without ever reading, so there is nothing to rate-limit.
+ *
+ * The window is measured on `performance.now()`, not the wall clock. An NTP
+ * correction or a daylight-saving jump moves `Date.now()` backwards, which
+ * makes an entry's age negative and pins it inside the window — a stale
+ * transcript held until the clock catches up. This is the same reason the
+ * download helper does not time out on wall-clock time.
  */
 function transcriptTextFor(recordingId: string): string {
   const hit = transcriptTextCache.get(recordingId);
-  const now = Date.now();
+  const now = performance.now();
   if (hit !== undefined && now - hit.checkedAt < TRANSCRIPT_FRESHNESS_MS) return hit.text;
 
   let stat: { mtimeMs: number; size: number };
