@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "magic-eraser",
+  "title": "Magic Eraser",
+  "description": "Remove bullet, number, and checkbox list markers from the clipboard while keeping bold, italics, links, and spacing — cleans up Notion to-do junk that 'paste without formatting' leaves behind.",
+  "icon": "icon-v2.png",
+  "author": "dakota_younger",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "clipboard",
+    "markdown",
+    "notion",
+    "bullets",
+    "checkbox"
+  ],
+  "commands": [
+    {
+      "name": "erase-clipboard",
+      "title": "Magic Eraser",
+      "description": "Remove bullet/number/checkbox list markers, keep bold, links, and spacing",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "marked": "^14.1.4",
+    "turndown": "^7.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/turndown": "^5.0.6",
+    "eslint": "^8.57.0",
+    "pngjs": "^7.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "install-local": "ray build -e dev"
+  }
+}
