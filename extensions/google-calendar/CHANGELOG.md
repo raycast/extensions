@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Hide contact birthdays from List Events by default] - {PR_MERGE_DATE}
+## [Hide contact birthdays from List Events by default] - 2026-09-19
 
 - Exclude Google `birthday` events from List Events on the primary calendar so contact birthdays no longer flood the upcoming schedule
 - Add an opt-in "Show birthdays" preference on List Events for users who want them included
