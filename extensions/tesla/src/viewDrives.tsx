@@ -74,7 +74,7 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Total Range Used"
-                      text={`Used ${drive.rated_range_used} to go ${getDistance(
+                      text={`${drive.rated_range_used} to go ${getDistance(
                         drive.odometer_distance,
                         distanceType
                       ).toFixed(2)} ${distanceType}`}
