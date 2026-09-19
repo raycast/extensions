@@ -1,8 +1,7 @@
-import { getPreferenceValues, Icon, MenuBarExtra, open, openExtensionPreferences } from '@raycast/api';
+import { Color, getPreferenceValues, Icon, MenuBarExtra, open, openExtensionPreferences } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import { dailyChallengeLiteQuery, endpoint, potdStatusQuery } from './api';
 import { PotdProblem, PotdStatusResponse } from './types';
-import { Color, getPreferenceValues, Icon, MenuBarExtra, open, openExtensionPreferences } from '@raycast/api';
 
 // LeetCode's recentAcSubmissionList caps at 20, so if today's daily is followed
 // by 20+ other accepted problems before the reset it can scroll out of view and
