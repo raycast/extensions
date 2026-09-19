@@ -4,6 +4,7 @@ import { Item, Vault } from "./types";
 const ITEMS_CACHE_KEY = "proton_pass_items_cache";
 const VAULTS_CACHE_KEY = "proton_pass_vaults_cache";
 const VAULT_ITEMS_CACHE_PREFIX = `${ITEMS_CACHE_KEY}_`;
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 interface CachedData<T> {
   data: T;
@@ -11,11 +12,10 @@ interface CachedData<T> {
 }
 
 function isCacheValid<T>(cached: CachedData<T>): boolean {
-  const { cacheExpiration } = getPreferenceValues<{ cacheExpiration?: string }>();
-  if (cacheExpiration === "never") return true;
+  const { cacheExpiration } = getPreferenceValues<Preferences>();
 
   const minutes = Number(cacheExpiration);
-  const ttlMs = Number.isFinite(minutes) && minutes > 0 ? minutes * 60 * 1000 : 5 * 60 * 1000;
+  const ttlMs = Number.isFinite(minutes) && minutes > 0 ? minutes * 60 * 1000 : CACHE_TTL_MS;
 
   return Date.now() - cached.timestamp < ttlMs;
 }

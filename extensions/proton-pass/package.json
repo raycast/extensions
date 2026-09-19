@@ -138,10 +138,6 @@
         {
           "title": "30 days",
           "value": "43200"
-        },
-        {
-          "title": "Never",
-          "value": "never"
         }
       ]
     },

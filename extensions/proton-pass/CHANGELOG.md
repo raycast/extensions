@@ -1,8 +1,8 @@
 # proton-pass Changelog
 
-## [Improvements] - 2026-09-18
+## [Improvements] - {PR_MERGE_DATE}
 
-- Add a Cache Expiration preference for cached vault and item metadata: 5 minutes, 1 hour, 5 hours, 1 day, 7 days, 30 days, or Never (default: 5 minutes)
+- Add a Cache Expiration preference for cached vault and item metadata: 5 minutes, 1 hour, 5 hours, 1 day, 7 days, or 30 days (default: 5 minutes)
 
 ## [Windows Support] - 2026-08-30
 
