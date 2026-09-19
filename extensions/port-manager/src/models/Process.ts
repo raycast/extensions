@@ -63,7 +63,7 @@ export default class Process implements ProcessInfo {
     };
   }
 
-  private static async getProcessDetails(pids: number[]) {
+  private static async getProcessDetails(pids: number[], options: { commandLine: boolean } = { commandLine: true }) {
     const uniquePids = Array.from(new Set(pids.filter((pid) => Number.isFinite(pid) && pid > 0)));
     const details = new Map<number, ProcessDetails>();
 
@@ -98,9 +98,11 @@ export default class Process implements ProcessInfo {
         });
       }
 
-      for (const [pid, commandLine] of await Process.getCommandLines(uniquePids)) {
-        const entry = details.get(pid);
-        if (entry !== undefined) entry.commandLine = commandLine;
+      if (options.commandLine) {
+        for (const [pid, commandLine] of await Process.getCommandLines(uniquePids)) {
+          const entry = details.get(pid);
+          if (entry !== undefined) entry.commandLine = commandLine;
+        }
       }
     } catch {
       return details;
@@ -382,6 +384,7 @@ export default class Process implements ProcessInfo {
       Array.from(processDetails.values()).flatMap((process) =>
         process.parentPid === undefined ? [] : [process.parentPid],
       ),
+      { commandLine: false },
     );
 
     for (const [pid, details] of processDetails) {
