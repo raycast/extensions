@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "t3-code",
+  "title": "T3 Code",
+  "description": "Start T3 Code sessions, search threads, and jump to the ones waiting on you.",
+  "icon": "icon.png",
+  "author": "skilux",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-t3",
+      "title": "Prompt T3 Code",
+      "description": "Start a new T3 Code session with a prompt.",
+      "mode": "view"
+    },
+    {
+      "name": "waiting-threads",
+      "title": "Waiting T3 Threads",
+      "description": "Active threads where the agent has stopped and the ball is in your court.",
+      "mode": "view"
+    },
+    {
+      "name": "search-threads",
+      "title": "Search T3 Threads",
+      "description": "Search every live thread and open it in T3 Code.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Bearer token from: t3 auth session issue --ttl 365d --label raycast --token-only",
+      "placeholder": "Paste the token printed by t3 auth session issue"
+    },
+    {
+      "name": "origin",
+      "type": "textfield",
+      "required": false,
+      "title": "Server Origin",
+      "default": "",
+      "description": "Override the T3 server origin. Empty reads ~/.t3/userdata/server-runtime.json.",
+      "placeholder": "http://127.0.0.1:3773"
+    },
+    {
+      "name": "appName",
+      "type": "textfield",
+      "required": false,
+      "title": "App Name",
+      "default": "T3 Code (Nightly)",
+      "description": "macOS application name used to launch T3 Code when the server is unreachable.",
+      "placeholder": "T3 Code"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
