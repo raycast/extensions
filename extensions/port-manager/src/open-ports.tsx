@@ -13,7 +13,7 @@ import useProcesses from "./hooks/useProcesses";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
 import { Exposure, classifyExposure, exposureColor, exposureDescription } from "./utilities/exposure";
 import { getProcessMarkdown } from "./utilities/getProcessMarkdown";
-import { KillSignal, killProcess } from "./utilities/killProcess";
+import { forceKill } from "./utilities/killProcess";
 import { isWindows, platformShortcut } from "./utilities/platform";
 
 type ExposureFilter = Exposure | "all";
@@ -93,12 +93,11 @@ export default function Command() {
                   showToast(Toasts.KillProcess.Success(p));
                   revalidateProcesses();
                 }}
-                onSurvived={(pid) => {
-                  const forceKill = isWindows
+                onSurvived={(survivor) => {
+                  const force = isWindows
                     ? undefined
                     : () =>
-                        killProcess(p, {
-                          killSignal: KillSignal.KILL,
+                        forceKill(survivor, {
                           onKilled: () => {
                             showToast(Toasts.KillProcess.Success(p));
                             revalidateProcesses();
@@ -108,7 +107,7 @@ export default function Command() {
                             revalidateProcesses();
                           },
                         });
-                  showToast(Toasts.KillProcess.Survived({ name: p.name, pid }, forceKill));
+                  showToast(Toasts.KillProcess.Survived({ name: p.name, pid: survivor.pid }, force));
                   revalidateProcesses();
                 }}
                 onError={(err) => {
@@ -145,15 +144,13 @@ export default function Command() {
                   showToast(Toasts.KillProcess.Success(p));
                   revalidateProcesses();
                 }}
-                onSurvived={(pid) => {
-                  const forceKill = isWindows
+                onSurvived={(survivor) => {
+                  const force = isWindows
                     ? undefined
                     : () =>
-                        killProcess(p, {
-                          killSignal: KillSignal.KILL,
-                          killParent: true,
+                        forceKill(survivor, {
                           onKilled: () => {
-                            showToast(Toasts.KillProcess.Success({ pid }));
+                            showToast(Toasts.KillProcess.Success({ pid: survivor.pid }));
                             revalidateProcesses();
                           },
                           onError: (err) => {
@@ -161,7 +158,7 @@ export default function Command() {
                             revalidateProcesses();
                           },
                         });
-                  showToast(Toasts.KillProcess.Survived({ pid }, forceKill));
+                  showToast(Toasts.KillProcess.Survived({ pid: survivor.pid }, force));
                   revalidateProcesses();
                 }}
                 onError={async (err) => {

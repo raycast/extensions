@@ -1,6 +1,6 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
 import Process from "./models/Process";
-import { KillSignal, kill, waitForExit } from "./utilities/killProcess";
+import { KillSignal, Survivor, kill, killSurvivor, processFingerprint, waitForExit } from "./utilities/killProcess";
 import { CommandExitError } from "./utilities/runCommand";
 
 function isInteger(str: string): boolean {
@@ -39,21 +39,44 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     await kill(pids.map(Number), KillSignal.TERM);
 
     // `kill` only reports delivery; make sure the processes actually went away.
-    const survivors: number[] = [];
-    for (const pid of pids.map(Number)) {
-      if (!(await waitForExit(pid))) survivors.push(pid);
-    }
+    const survivorPids = await waitForExit(pids.map(Number));
 
-    if (survivors.length > 0) {
+    if (survivorPids.length > 0) {
+      const survivors: Survivor[] = await Promise.all(
+        survivorPids.map(async (pid) => ({ pid, startedAt: await processFingerprint(pid) })),
+      );
+
       showToast({
         style: Toast.Style.Failure,
         title: "Process Still Running",
-        message: `Process ${survivors.join(", ")} did not exit after SIGTERM.`,
+        message: `Process ${survivorPids.join(", ")} did not exit after SIGTERM.`,
         primaryAction: {
           title: "Force Kill (SIGKILL)",
           onAction: async (toast) => {
-            toast.hide();
-            await kill(survivors, KillSignal.KILL);
+            toast.style = Toast.Style.Animated;
+            toast.title = "Force Killing…";
+            toast.primaryAction = undefined;
+
+            const failures: string[] = [];
+            for (const survivor of survivors) {
+              try {
+                await killSurvivor(survivor, KillSignal.KILL);
+              } catch (error) {
+                failures.push(error instanceof Error ? error.message : String(error));
+              }
+            }
+            const stillRunning = await waitForExit(survivors.map((survivor) => survivor.pid));
+
+            if (failures.length > 0 || stillRunning.length > 0) {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Force Kill Failed";
+              toast.message = [...failures, ...stillRunning.map((pid) => `Process ${pid} is still running`)].join(" ");
+              return;
+            }
+
+            toast.style = Toast.Style.Success;
+            toast.title = "Success";
+            toast.message = `Process ${survivorPids.join(", ")} was killed.`;
           },
         },
       });

@@ -4,6 +4,7 @@
 
 - After a kill, wait for the process to actually exit before reporting success. A process that ignores the signal now shows "Process Still Running" with a one-key Force Kill instead of a false "Killed Process"
 - The same check applies to Kill Parent, to the Kill Process Listening on command and to the menu bar
+- Force Kill re-checks the process start time before signalling, so a PID recycled while the toast was on screen is never killed by mistake
 
 ## [Exposure] - 2026-09-19
 

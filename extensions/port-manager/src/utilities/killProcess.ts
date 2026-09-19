@@ -1,4 +1,5 @@
 import { ProcessInfo } from "../models/interfaces";
+import { isWindows } from "./platform";
 import { runCommand } from "./runCommand";
 
 export const KillSignal = {
@@ -24,6 +25,26 @@ export class ProcessSurvivedError extends Error {
   }
 }
 
+export class ProcessGoneError extends Error {
+  constructor(public readonly pid: number) {
+    super(`Process ${pid} has already exited`);
+    this.name = "ProcessGoneError";
+  }
+}
+
+export class ProcessReplacedError extends Error {
+  constructor(public readonly pid: number) {
+    super(`PID ${pid} now belongs to a different process, nothing was killed`);
+    this.name = "ProcessReplacedError";
+  }
+}
+
+/** A process that outlived a signal, with enough identity to recognise it again later. */
+export interface Survivor {
+  pid: number;
+  startedAt?: string;
+}
+
 /** Signal 0 delivers nothing: ESRCH means the process is gone, EPERM means it is alive but not ours. */
 export function isRunning(pid: number) {
   try {
@@ -34,13 +55,60 @@ export function isRunning(pid: number) {
   }
 }
 
-/** Resolves true once the process has exited, false if it is still there after the grace period. */
-export async function waitForExit(pid: number) {
-  for (let attempt = 0; attempt < EXIT_POLL_ATTEMPTS; attempt += 1) {
+/** Polls every PID against one shared deadline and returns the ones that are still running. */
+export async function waitForExit(pids: number | number[]) {
+  let remaining = (Array.isArray(pids) ? pids : [pids]).filter(isRunning);
+
+  for (let attempt = 0; attempt < EXIT_POLL_ATTEMPTS && remaining.length > 0; attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, EXIT_POLL_INTERVAL_MS));
-    if (!isRunning(pid)) return true;
+    remaining = remaining.filter(isRunning);
   }
-  return false;
+
+  return remaining;
+}
+
+/**
+ * The process start time, which together with the PID survives PID reuse. A toast can sit on
+ * screen indefinitely, and the PID it captured may belong to something else by the time the
+ * action is pressed.
+ */
+export async function processFingerprint(pid: number) {
+  if (isWindows) return undefined;
+
+  try {
+    const { stdout } = await runCommand("/bin/ps", ["-o", "lstart=", "-p", String(pid)], { timeout: 2_000 });
+    const startedAt = stdout.trim().replace(/\s+/g, " ");
+    return startedAt.length > 0 ? startedAt : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function toSurvivor(pid: number): Promise<Survivor> {
+  return { pid, startedAt: await processFingerprint(pid) };
+}
+
+/** Sends the signal only if the PID still belongs to the process the survivor was captured from. */
+export async function killSurvivor(survivor: Survivor, signal: KillSignal) {
+  if (!isRunning(survivor.pid)) throw new ProcessGoneError(survivor.pid);
+  if (survivor.startedAt !== undefined && (await processFingerprint(survivor.pid)) !== survivor.startedAt) {
+    throw new ProcessReplacedError(survivor.pid);
+  }
+  await kill(survivor.pid, signal);
+}
+
+/** The follow-up to a survived kill: SIGKILL with an identity check, then one more exit check. */
+export async function forceKill(
+  survivor: Survivor,
+  callbacks: { onKilled?: () => void; onError?: (error: unknown) => void },
+) {
+  try {
+    await killSurvivor(survivor, KillSignal.KILL);
+    if ((await waitForExit(survivor.pid)).length > 0) throw new ProcessSurvivedError(survivor.pid);
+    callbacks.onKilled?.();
+  } catch (error) {
+    callbacks.onError?.(error);
+  }
 }
 
 export function resolveKillSignal(preference: string): KillSignal {
@@ -80,7 +148,7 @@ export async function killProcess(
     killParent?: boolean;
     onKilled?: () => void;
     /** The signal was delivered but the process did not exit. Falls back to `onError` when absent. */
-    onSurvived?: (pid: number) => void;
+    onSurvived?: (survivor: Survivor) => void;
     onError?: (error: unknown) => void;
   }>,
 ) {
@@ -116,8 +184,8 @@ export async function killProcess(
 
     // `kill` exiting 0 only means the signal was delivered. A process that ignores SIGTERM is
     // still listening, so wait briefly for it to actually go before reporting success.
-    if (pid !== undefined && !(await waitForExit(pid))) {
-      if (onSurvived !== undefined) onSurvived(pid);
+    if (pid !== undefined && (await waitForExit(pid)).length > 0) {
+      if (onSurvived !== undefined) onSurvived(await toSurvivor(pid));
       else onError?.(new ProcessSurvivedError(pid));
       return;
     }

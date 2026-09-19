@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { ProcessInfo } from "../models/interfaces";
-import { KillSignal, killProcess, resolveKillSignal } from "../utilities/killProcess";
+import { KillSignal, Survivor, killProcess, resolveKillSignal } from "../utilities/killProcess";
 import { isWindows } from "../utilities/platform";
 
 const preferences = getPreferenceValues<Preferences>();
@@ -8,7 +8,7 @@ const preferences = getPreferenceValues<Preferences>();
 export default function KillActions(props: {
   process: ProcessInfo;
   onKilled?: () => Promise<void> | void;
-  onSurvived?: (pid: number) => Promise<void> | void;
+  onSurvived?: (survivor: Survivor) => Promise<void> | void;
   onError?: (err: unknown) => Promise<void> | void;
 }) {
   if (isWindows || preferences.killSignal === KillSignal.TERM || preferences.killSignal === KillSignal.KILL) {
