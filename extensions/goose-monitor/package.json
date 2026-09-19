@@ -1,0 +1,152 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "goose-monitor",
+  "title": "Goose Monitor",
+  "description": "按名称、PID 或端口查找应用并结束。辅助进程归到所属应用下。",
+  "icon": "icon.png",
+  "author": "eachann_",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "manage-processes",
+      "title": "管理进程",
+      "subtitle": "goose-monitor",
+      "description": "按名称、PID 或端口查找并结束应用",
+      "mode": "view",
+      "keywords": [
+        "process",
+        "kill",
+        "cpu",
+        "memory",
+        "port",
+        "activity",
+        "task",
+        "进程",
+        "结束",
+        "内存",
+        "端口",
+        "活动监视器"
+      ]
+    },
+    {
+      "name": "menu-bar-cpu",
+      "title": "CPU 菜单栏",
+      "subtitle": "goose-monitor",
+      "description": "状态栏 CPU 竖胶囊，点开看用户/系统、能效/性能核心与 Top CPU",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "menu-bar-mem",
+      "title": "内存菜单栏",
+      "subtitle": "goose-monitor",
+      "description": "状态栏内存直方图，点开查看压力、分解与 Top 内存",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "refreshDuration",
+      "title": "刷新",
+      "description": "进程列表刷新间隔",
+      "type": "dropdown",
+      "required": false,
+      "default": "3000",
+      "data": [
+        {
+          "title": "关闭",
+          "value": "0"
+        },
+        {
+          "title": "每秒",
+          "value": "1000"
+        },
+        {
+          "title": "每 2 秒",
+          "value": "2000"
+        },
+        {
+          "title": "每 3 秒",
+          "value": "3000"
+        },
+        {
+          "title": "每 5 秒",
+          "value": "5000"
+        }
+      ]
+    },
+    {
+      "name": "showPID",
+      "title": "显示",
+      "label": "显示 PID",
+      "description": "在列表中显示进程 PID",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "showPath",
+      "title": "",
+      "label": "显示路径",
+      "description": "在列表中显示可执行路径",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "closeWindowAfterQuit",
+      "title": "结束后",
+      "label": "关闭窗口",
+      "description": "结束进程后关闭 Raycast 窗口",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "showCpuMenuBar",
+      "title": "菜单栏",
+      "label": "显示 CPU 菜单栏",
+      "description": "在 macOS 菜单栏显示 CPU 胶囊；只隐藏菜单栏图标，命令本身仍启用",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showMemoryMenuBar",
+      "title": "",
+      "label": "显示内存菜单栏",
+      "description": "在 macOS 菜单栏显示内存压力胶囊；只隐藏菜单栏图标，命令本身仍启用",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "bun test",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "private": false
+}
