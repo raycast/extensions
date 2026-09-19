@@ -1,5 +1,20 @@
 import { Icon, Color } from "@raycast/api";
-import { CheckReport, LayerStatus, VERDICT_META } from "./types";
+import { CheckReport, LayerStatus, Verdict, VERDICT_META } from "./types";
+
+export function verdictColor(verdict: Verdict): Color {
+  switch (VERDICT_META[verdict].color) {
+    case "Green":
+      return Color.Green;
+    case "Yellow":
+      return Color.Yellow;
+    case "Orange":
+      return Color.Orange;
+    case "Red":
+      return Color.Red;
+    default:
+      return Color.SecondaryText;
+  }
+}
 
 export function statusIcon(s: LayerStatus): Icon {
   switch (s) {

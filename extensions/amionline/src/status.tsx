@@ -1,7 +1,17 @@
-import { List, Icon, ActionPanel, Action, Clipboard, showToast, Toast, openCommandPreferences } from "@raycast/api";
+import {
+  List,
+  Icon,
+  Color,
+  ActionPanel,
+  Action,
+  Clipboard,
+  showToast,
+  Toast,
+  openCommandPreferences,
+} from "@raycast/api";
 import { useCheck } from "./useCheck";
-import { VERDICT_META, LayerResult, CheckReport } from "./types";
-import { statusIcon, statusColor, diagnostics } from "./ui";
+import { LayerResult, CheckReport } from "./types";
+import { statusIcon, statusColor, diagnostics, verdictColor } from "./ui";
 
 const SECTIONS: { title: string; test: (l: LayerResult) => boolean }[] = [
   { title: "Local network", test: (l) => ["iface", "gateway", "vpn", "proxy"].includes(l.id) },
@@ -35,11 +45,16 @@ function Actions({ data, revalidate }: { data?: CheckReport; revalidate: () => v
 
 export default function Command() {
   const { data, isLoading, revalidate } = useCheck();
-  const meta = data ? VERDICT_META[data.verdict] : VERDICT_META.CHECKING;
 
   return (
     <List isLoading={isLoading} navigationTitle="Am I Online" searchBarPlaceholder="Filter checks…">
-      <List.Section title={`${meta.emoji}  ${data?.title ?? "Checking…"}`} subtitle={data?.reason}>
+      <List.Section title="Status">
+        <List.Item
+          icon={{ source: Icon.CircleFilled, tintColor: data ? verdictColor(data.verdict) : Color.SecondaryText }}
+          title={data?.title ?? "Checking…"}
+          subtitle={data?.reason}
+          actions={<Actions data={data} revalidate={revalidate} />}
+        />
         {data?.egressIp ? (
           <List.Item
             title="Public IP"
