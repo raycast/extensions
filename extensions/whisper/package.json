@@ -103,19 +103,19 @@
       "description": "Used by Whisper, Whisper Selected Text, the AI tool and as the form's initial value",
       "data": [
         {
-          "title": "30 minutes",
+          "title": "30 Minutes",
           "value": "30m"
         },
         {
-          "title": "1 hour",
+          "title": "1 Hour",
           "value": "1h"
         },
         {
-          "title": "24 hours",
+          "title": "24 Hours",
           "value": "24h"
         },
         {
-          "title": "7 days",
+          "title": "7 Days",
           "value": "7d"
         }
       ]
