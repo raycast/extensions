@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "creative-brief-check",
+  "title": "Creative Brief Check",
+  "description": "Review a visual brief for missing production constraints before generation.",
+  "icon": "extension-icon.png",
+  "access": "public",
+  "author": "FosterMartyn735",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "check-brief",
+      "title": "Check Creative Brief",
+      "subtitle": "Creative Brief Check",
+      "description": "Check whether a visual brief contains the constraints needed for production.",
+      "mode": "view",
+      "keywords": [
+        "creative",
+        "brief",
+        "image",
+        "video",
+        "prompt",
+        "review"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
