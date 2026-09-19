@@ -24,7 +24,7 @@ When you first run the extension, you can optionally configure a custom Whisper 
 | Preference            | Description                                                        | Required | Default                               |
 | --------------------- | ------------------------------------------------------------------ | -------- | ------------------------------------- |
 | Whisper Server URL   | URL of the Whisper server (for self-hosted instances)              | No       | `https://whisper.quentinvedrenne.com` |
-| Default Expiration   | Expiration used by quick commands and the AI tool, and pre-selected in the form | No | `1 hour`                      |
+| Default Expiration   | Expiration used by quick commands and the AI tool, and pre-selected in the form | No | `1 Hour`                      |
 | Default Self-Destruct | Whether new secrets are deleted after the first view by default     | No       | On                                    |
 
 ## Commands
