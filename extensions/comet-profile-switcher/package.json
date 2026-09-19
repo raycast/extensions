@@ -1,0 +1,232 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "comet-profile-switcher",
+  "title": "Comet Profile Switcher",
+  "description": "Open any Comet browser profile from Raycast. Assign profiles to commands and give each its own alias or hotkey.",
+  "icon": "icon.png",
+  "author": "alexa",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "switch-profile",
+      "title": "Switch Comet Profile",
+      "subtitle": "Comet",
+      "description": "Browse your Comet profiles and open one. Focuses the profile's window if it is already open.",
+      "mode": "view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser",
+        "perplexity"
+      ]
+    },
+    {
+      "name": "slot-1",
+      "title": "Profile 1",
+      "subtitle": "Comet",
+      "description": "Opens the Comet profile you assign to this command. Give it an alias or hotkey so that profile is one keystroke away.",
+      "mode": "no-view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "profile",
+          "title": "Comet Profile",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Work",
+          "description": "The profile this command opens: its name as shown in Comet's profile menu (e.g. Work), or its folder name (e.g. Profile 2)."
+        }
+      ]
+    },
+    {
+      "name": "slot-2",
+      "title": "Profile 2",
+      "subtitle": "Comet",
+      "description": "Opens the Comet profile you assign to this command. Give it an alias or hotkey so that profile is one keystroke away.",
+      "mode": "no-view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "profile",
+          "title": "Comet Profile",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Work",
+          "description": "The profile this command opens: its name as shown in Comet's profile menu (e.g. Work), or its folder name (e.g. Profile 2)."
+        }
+      ]
+    },
+    {
+      "name": "slot-3",
+      "title": "Profile 3",
+      "subtitle": "Comet",
+      "description": "Opens the Comet profile you assign to this command. Give it an alias or hotkey so that profile is one keystroke away.",
+      "mode": "no-view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser"
+      ],
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "profile",
+          "title": "Comet Profile",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Work",
+          "description": "The profile this command opens: its name as shown in Comet's profile menu (e.g. Work), or its folder name (e.g. Profile 2)."
+        }
+      ]
+    },
+    {
+      "name": "slot-4",
+      "title": "Profile 4",
+      "subtitle": "Comet",
+      "description": "Opens the Comet profile you assign to this command. Give it an alias or hotkey so that profile is one keystroke away.",
+      "mode": "no-view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser"
+      ],
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "profile",
+          "title": "Comet Profile",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Work",
+          "description": "The profile this command opens: its name as shown in Comet's profile menu (e.g. Work), or its folder name (e.g. Profile 2)."
+        }
+      ]
+    },
+    {
+      "name": "slot-5",
+      "title": "Profile 5",
+      "subtitle": "Comet",
+      "description": "Opens the Comet profile you assign to this command. Give it an alias or hotkey so that profile is one keystroke away.",
+      "mode": "no-view",
+      "keywords": [
+        "comet",
+        "profile",
+        "browser"
+      ],
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "profile",
+          "title": "Comet Profile",
+          "type": "textfield",
+          "required": true,
+          "placeholder": "Work",
+          "description": "The profile this command opens: its name as shown in Comet's profile menu (e.g. Work), or its folder name (e.g. Profile 2)."
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cometApp",
+      "title": "Comet Application",
+      "description": "The Comet app to launch. Change this only if Comet is not in /Applications.",
+      "type": "appPicker",
+      "required": false,
+      "default": "ai.perplexity.comet"
+    },
+    {
+      "name": "userDataDir",
+      "title": "Comet Data Directory",
+      "description": "Where Comet keeps its profiles. Leave blank for the default location.",
+      "type": "directory",
+      "required": false,
+      "placeholder": "~/Library/Application Support/Comet"
+    },
+    {
+      "name": "alwaysNewWindow",
+      "title": "Windows",
+      "label": "Always open a new window",
+      "description": "By default Comet focuses an existing window for the profile if one is open. Enable this to open a fresh window every time.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "sync": "node scripts/sync-profiles.mjs",
+    "local": "node scripts/sync-profiles.mjs && cd .local && npx ray develop"
+  }
+}
