@@ -1,0 +1,305 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "password-toolkit",
+  "title": "Password Toolkit",
+  "description": "Generate passwords and passphrases with custom lengths, characters, and formats.",
+  "icon": "password-toolkit-icon.png",
+  "author": "Mamedoff",
+  "website": "https://mamedoff.me/",
+  "categories": [
+    "Security",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "showCopyHud",
+      "title": "Clipboard",
+      "description": "Show a small confirmation after copying or pasting.",
+      "type": "checkbox",
+      "label": "Show confirmation HUD",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "pasteAfterGenerating",
+      "title": "",
+      "description": "Paste the generated secret into the active app after copying it.",
+      "type": "checkbox",
+      "label": "Paste after generating",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "clearClipboardAfterDelay",
+      "title": "",
+      "description": "After 60 seconds, clear the clipboard only if it still contains the generated secret.",
+      "type": "checkbox",
+      "label": "Clear clipboard after 60 seconds",
+      "required": false,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "generate-passphrase",
+      "title": "Generate Secure Passphrase",
+      "description": "Creates a fresh passphrase.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "capitalize",
+          "title": "Passphrase Settings",
+          "description": "Capitalize each word.",
+          "type": "checkbox",
+          "label": "Capitalize words",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "includeNumber",
+          "title": "",
+          "description": "Add one random digit to one random word.",
+          "type": "checkbox",
+          "label": "Include one random digit",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "wordCount",
+          "title": "Word Count",
+          "description": "Use 1 to 64 words. Six or more are recommended.",
+          "type": "textfield",
+          "required": false,
+          "default": "6",
+          "placeholder": "6"
+        },
+        {
+          "name": "wordSeparatorPreset",
+          "title": "Word Separator",
+          "description": "Choose Use Custom Separator to use the custom field below.",
+          "type": "dropdown",
+          "required": false,
+          "default": "settings",
+          "data": [
+            {
+              "title": "Default (Hyphen)",
+              "value": "settings"
+            },
+            {
+              "title": "Hyphen (-)",
+              "value": "hyphen"
+            },
+            {
+              "title": "Space",
+              "value": "space"
+            },
+            {
+              "title": "Period (.)",
+              "value": "period"
+            },
+            {
+              "title": "Comma (,)",
+              "value": "comma"
+            },
+            {
+              "title": "Underscore (_)",
+              "value": "underscore"
+            },
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Use Custom Separator",
+              "value": "custom"
+            }
+          ]
+        },
+        {
+          "name": "customWordSeparator",
+          "title": "Custom Separator",
+          "description": "Used only when Word Separator is set to Use Custom Separator.",
+          "type": "textfield",
+          "required": false,
+          "default": "-",
+          "placeholder": "-"
+        },
+        {
+          "name": "customFormatPreset",
+          "title": "Passphrase Format",
+          "description": "Use Settings Above uses the passphrase settings. Choose Use Custom Pattern to use the field below.",
+          "type": "dropdown",
+          "required": false,
+          "default": "settings",
+          "data": [
+            {
+              "title": "Use Settings Above",
+              "value": "settings"
+            },
+            {
+              "title": "Words + One Digit",
+              "value": "words-one-digit"
+            },
+            {
+              "title": "Words Only",
+              "value": "words-only"
+            },
+            {
+              "title": "Lowercase Words",
+              "value": "lowercase-words"
+            },
+            {
+              "title": "Words + 4 Digits",
+              "value": "words-four-digits"
+            },
+            {
+              "title": "Underscore + One Digit",
+              "value": "underscore-one-digit"
+            },
+            {
+              "title": "Dot Separated + Symbols",
+              "value": "dot-symbols"
+            },
+            {
+              "title": "Compact Words + Digits",
+              "value": "compact-digits"
+            },
+            {
+              "title": "Mixed Random Middle",
+              "value": "random-middle"
+            },
+            {
+              "title": "Uppercase Code",
+              "value": "uppercase-code"
+            },
+            {
+              "title": "Words + 2 Symbols",
+              "value": "words-two-symbols"
+            },
+            {
+              "title": "Use Custom Pattern",
+              "value": "custom"
+            }
+          ]
+        },
+        {
+          "name": "customFormat",
+          "title": "Custom Pattern",
+          "description": "Used only with Use Custom Pattern. {words} uses Word Count and Word Separator. Weak formats require confirmation.",
+          "type": "textfield",
+          "required": false,
+          "default": "{words:capitalize}{number:random}",
+          "placeholder": "{words:capitalize}{number:random}"
+        }
+      ]
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Secure Password",
+      "description": "Creates a fresh password.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "passwordLength",
+          "title": "Password Length",
+          "description": "Use 4 to 64 characters.",
+          "type": "textfield",
+          "required": false,
+          "default": "12",
+          "placeholder": "12"
+        },
+        {
+          "name": "includeUppercase",
+          "title": "Characters Used",
+          "description": "Include uppercase letters.",
+          "type": "checkbox",
+          "label": "Uppercase",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "includeLowercase",
+          "title": "",
+          "description": "Include lowercase letters.",
+          "type": "checkbox",
+          "label": "Lowercase",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "includeNumbers",
+          "title": "",
+          "description": "Include numbers.",
+          "type": "checkbox",
+          "label": "Numbers",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "includeSymbols",
+          "title": "",
+          "description": "Include symbols from Allow The Following Symbols.",
+          "type": "checkbox",
+          "label": "Symbols",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "allowedSymbols",
+          "title": "Allow The Following Symbols",
+          "description": "Used only when Symbols is enabled.",
+          "type": "textfield",
+          "required": false,
+          "default": "!^()$+@&#%*",
+          "placeholder": "!^()$+@&#%*"
+        },
+        {
+          "name": "excludedCharacters",
+          "title": "Exclude Characters",
+          "description": "Removes these characters from all selected character types.",
+          "type": "textfield",
+          "required": false,
+          "default": "",
+          "placeholder": "oO0ilI1"
+        },
+        {
+          "name": "excludeSimilarCharacters",
+          "title": "",
+          "description": "Also removes o, O, 0, i, l, I, and 1.",
+          "type": "checkbox",
+          "label": "Exclude similar characters",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "proper-lockfile": "^4.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.20.3",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/react": "^19.3.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "engines": {
+    "node": ">=24.21.0"
+  }
+}
