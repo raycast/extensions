@@ -253,7 +253,9 @@ function AddDomainForm({
         const body: Record<string, unknown> = {
           host: formValues.host.trim(),
           path: trimmedPath && trimmedPath !== "/" ? trimmedPath : null,
-          port: formValues.port.trim() ? Number(formValues.port) : null,
+          // Omitted, not null - Dokploy only applies its own 3000 default when the field is
+          // missing entirely; a null port makes Traefik fall back to 80 instead.
+          port: formValues.port.trim() ? Number(formValues.port) : undefined,
           https: formValues.https,
           certificateType: formValues.https ? formValues.certificateType : undefined,
           customCertResolver:
@@ -277,6 +279,7 @@ function AddDomainForm({
         }
         toast.style = Toast.Style.Success;
         toast.title = "Added domain";
+        if (isCompose) toast.message = "Redeploy the compose to apply the change.";
         onCreated();
         pop();
       } catch (error) {
@@ -327,7 +330,7 @@ function AddDomainForm({
       const eligible = (await eligibleResponse.json()) as boolean;
       if (!eligible) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Can't generate a traefik.me domain";
+        toast.title = "Can't generate a domain";
         toast.message = "This server doesn't have a public IP address.";
         return;
       }
@@ -410,7 +413,7 @@ function AddDomainForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} title="Add Domain" onSubmit={handleSubmit} />
-          {serverId && <Action icon={Icon.Wand} title="Generate Domain (Traefik.me)" onAction={generateDomain} />}
+          {serverId && <Action icon={Icon.Wand} title="Generate Domain" onAction={generateDomain} />}
           <Action icon={Icon.Network} title="Validate Domain" onAction={checkDns} />
           {isCompose && containersError && (
             <Action icon={Icon.ArrowClockwise} title="Retry Loading Containers" onAction={() => retryContainers()} />
