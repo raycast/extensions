@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-repository-browser",
+  "title": "GitHub Repository Browser",
+  "description": "Search your GitHub repositories, personal and organizations, in one place",
+  "icon": "extension-icon.png",
+  "author": "streetturtle",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "github-repository-browser",
+      "title": "Browse GitHub Repositories",
+      "subtitle": "Personal and Organizations",
+      "description": "Search repositories across your personal account and organizations, and jump straight to their issues or pull requests",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "token",
+          "title": "Personal Access Token",
+          "description": "GitHub personal access token with read access to the organizations and repos",
+          "type": "password",
+          "required": true,
+          "placeholder": "ghp_..."
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
