@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getPreferenceValues } from "@raycast/api";
+import getScoreDates from "./scoreDates";
 
 type GetScoresArgs = {
   league: string;
@@ -8,16 +9,10 @@ type GetScoresArgs = {
 const getScores = async ({ league }: GetScoresArgs) => {
   const baseUrl = `https://site.api.espn.com/apis/site/v2/sports/basketball/${league}/scoreboard`;
   const { numDaysScores } = getPreferenceValues<Preferences>();
-  const today = new Date();
-  const dates = [];
 
-  for (let offset = Number(numDaysScores); offset >= 0; offset--) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - offset);
-    dates.push(date.toISOString().split("T")[0].replace(/-/g, ""));
-  }
+  const dates = getScoreDates(new Date(), numDaysScores);
 
-  const responses = await Promise.all(
+  const responses = await Promise.allSettled(
     dates.map((date) =>
       axios.get(baseUrl, {
         params: {
@@ -30,7 +25,13 @@ const getScores = async ({ league }: GetScoresArgs) => {
     ),
   );
 
-  return responses.flatMap(({ data }) => data.events);
+  const rejected = responses.filter((response): response is PromiseRejectedResult => response.status === "rejected");
+
+  if (rejected.length === responses.length) {
+    throw rejected[0].reason;
+  }
+
+  return responses.flatMap((response) => (response.status === "fulfilled" ? (response.value.data.events ?? []) : []));
 };
 
 export default getScores;
