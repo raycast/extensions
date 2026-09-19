@@ -37,7 +37,12 @@ export default function Command() {
   const [runtimeMode, setRuntimeMode] = useState<RuntimeMode>("full-access");
   const [envMode, setEnvMode] = useState<ThreadEnvMode>("local");
   const [branchError, setBranchError] = useState<string | undefined>();
-  const [baseBranch, setBaseBranch] = useState<string>();
+  // Keyed by project: an unkeyed cache still reads as valid for the moment
+  // between switching projects and the effect resolving the new one.
+  const [baseBranch, setBaseBranch] = useState<{
+    projectId: string;
+    branch: string;
+  }>();
   const [submitting, setSubmitting] = useState(false);
 
   const { data, isLoading, error, revalidate } = usePromise(async () => {
@@ -82,7 +87,7 @@ export default function Command() {
     setBaseBranch(undefined);
     void defaultBaseBranch(project.workspaceRoot).then((branch) => {
       if (!cancelled) {
-        setBaseBranch(branch);
+        setBaseBranch({ projectId: project.id, branch });
       }
     });
     return () => {
@@ -144,8 +149,9 @@ export default function Command() {
         worktreePath = await createWorktree({
           workspaceRoot: project.workspaceRoot,
           branch,
-          baseBranch:
-            baseBranch ?? (await defaultBaseBranch(project.workspaceRoot)),
+          // Resolved here rather than read from state, so the branch always
+          // belongs to the project being submitted.
+          baseBranch: await defaultBaseBranch(project.workspaceRoot),
         });
       }
 
