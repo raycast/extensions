@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Fix stale menu bar state and menu bar actions doing nothing] - {PR_MERGE_DATE}
+## [Fix stale menu bar state and menu bar actions doing nothing] - 2026-09-19
 
 - The menu bar now reflects timers started or stopped outside the extension, such as in the Clockify web app. It previously determined the running timer from a local cache that could not see those changes, so a timer started elsewhere took two refresh cycles to appear, and one stopped elsewhere could keep counting up indefinitely. The running timer is now read from Clockify on each refresh, so it updates within one 10-second refresh interval.
 - Fixed "Stop Timer" and the recent-timer restarts in the menu bar silently doing nothing. Menu bar commands run in the background, where the Toast API is unavailable and throws; as both actions began by showing a toast, they aborted before the request was ever sent.
