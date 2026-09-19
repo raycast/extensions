@@ -291,16 +291,26 @@ export async function fetchSecretMetadata(link: WhisperLink): Promise<SecretMeta
     const message = err instanceof Error ? err.message : "Network request failed";
     throw new Error(`Could not reach Whisper server: ${message}`);
   }
-  if (response.status === 404 || response.status === 405) return null;
-  if (!response.ok) {
-    throw new Error(`Whisper server error (${response.status}).`);
+  // A secret that is gone answers 404 *with* a metadata body, so the status
+  // alone cannot separate "this secret no longer exists" from "this server has
+  // no such route". Trust the body shape instead.
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
   }
-  const data = (await response.json()) as { exists?: boolean; client_encrypted?: boolean; self_destruct?: boolean };
-  return {
-    exists: data.exists === true,
-    clientEncrypted: data.client_encrypted === true,
-    selfDestruct: data.self_destruct === true,
-  };
+  if (data !== null && typeof data === "object" && typeof (data as { exists?: unknown }).exists === "boolean") {
+    const meta = data as { exists: boolean; client_encrypted?: unknown; self_destruct?: unknown };
+    return {
+      exists: meta.exists,
+      clientEncrypted: meta.client_encrypted === true,
+      selfDestruct: meta.self_destruct === true,
+    };
+  }
+  // No metadata body: an older server without the endpoint, or a real failure.
+  if (response.status === 404 || response.status === 405) return null;
+  throw new Error(`Whisper server error (${response.status}).`);
 }
 
 export interface RetrievedSecret {
