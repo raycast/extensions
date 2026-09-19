@@ -235,7 +235,9 @@ async function listOpenPullRequestsForRepo(
     name?: string;
     full_name?: string;
   },
-  authorUuid?: string,
+  // Matches the scope of Bitbucket's removed workspace-wide "PRs for a user" endpoint:
+  // PRs the user authored OR is a requested reviewer on, not just authored ones.
+  involvedUuid?: string,
 ): Promise<OpenPullRequest[]> {
   const pullRequests: OpenPullRequest[] = [];
   let page = "1";
@@ -248,7 +250,7 @@ async function listOpenPullRequestsForRepo(
       page,
       sort: "-created_on",
       state: "OPEN",
-      ...(authorUuid ? { q: `author.uuid="${authorUuid}"` } : {}),
+      ...(involvedUuid ? { q: `(author.uuid="${involvedUuid}" OR reviewers.uuid="${involvedUuid}")` } : {}),
       fields: [
         "values.id",
         "values.title",
@@ -428,7 +430,7 @@ export async function getAllOpenPullRequests(
 // Bitbucket removed its workspace-wide "PRs for a user" endpoint (the one path segment
 // away from just being a filter): https://community.atlassian.com/forums/Bitbucket-articles/Reminder-List-pull-requests-for-a-user-API-removal/ba-p/2935311
 // so "my open PRs" reuses the same per-repo scan as getAllOpenPullRequests, with the
-// author filter applied server-side per repo via the `q` query param.
+// author-or-reviewer filter applied server-side per repo via the `q` query param.
 export async function getMyOpenPullRequests(
   onProgress?: (partial: OpenPullRequestsResult) => void,
 ): Promise<OpenPullRequestsResult> {
