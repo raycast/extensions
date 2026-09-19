@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jev",
+  "title": "Jev",
+  "description": "Type what you want in plain English and Jev figures out what to do — open a recent download, launch an app, find a file, or open a site.",
+  "icon": "icon.png",
+  "author": "naz3eh",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-jev",
+      "title": "Ask Jev",
+      "subtitle": "Type it, press ↵",
+      "description": "Turn a plain-English request into a concrete action: open a recent download, launch an app, find a file, or open a site.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "TypeSafe API Key",
+      "description": "Your TypeSafe API key from https://docs.typesafe.ai — kept on-device, sent only to api.typesafe.ai.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "@typesafe-ai/sdk": "^0.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
