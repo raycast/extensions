@@ -1,0 +1,366 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "calypso",
+  "title": "Calypso",
+  "description": "Chat with any self-hosted or OpenAI-compatible model, with web search, private-knowledge (RAG) and page-fetch tools — in a Raycast command and as an AI Extension you can @mention in AI Chat.",
+  "icon": "calypso.png",
+  "author": "jonathan_mallinger",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "Chat with Calypso",
+      "description": "Multi-turn conversation with your model. Follow-ups keep the thread; web search, knowledge search and page fetch stay available across turns.",
+      "mode": "view"
+    },
+    {
+      "name": "ask-calypso",
+      "title": "Ask Calypso",
+      "subtitle": "Auto-select endpoint",
+      "description": "Ask whichever configured endpoint answers first, falling back to the cloud provider.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Ask your model…",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "calypso-status",
+      "title": "Calypso Status",
+      "subtitle": "Configured endpoints",
+      "description": "Health, loaded model and context size for both configured endpoints.",
+      "mode": "view"
+    },
+    {
+      "name": "ask-calypso-1",
+      "title": "Ask Fallback Endpoint",
+      "subtitle": "Secondary server",
+      "description": "Ask the fallback endpoint specifically; falls back only to the cloud provider.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Ask the fallback endpoint…",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ask-calypso-2",
+      "title": "Ask Primary Endpoint",
+      "subtitle": "Primary server",
+      "description": "Ask the primary endpoint specifically; falls back only to the cloud provider.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Ask the primary endpoint…",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Base URL",
+      "description": "OpenAI-compatible base URL of your primary model server (llama.cpp, vLLM, Ollama, LM Studio, or any hosted provider).",
+      "type": "textfield",
+      "required": false,
+      "default": "http://localhost:8080/v1"
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model id as served by your endpoint. Leave blank to use whatever the server loads by default.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Optional bearer token. Leave blank if your server needs no auth.",
+      "type": "password",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "maxTokens",
+      "title": "Max Tokens",
+      "description": "Upper bound on the response. If your server reserves a reasoning budget, keep this well above it — the think block is spent first and a tight cap returns an empty answer.",
+      "type": "textfield",
+      "required": false,
+      "default": "4096"
+    },
+    {
+      "name": "temperature",
+      "title": "Temperature",
+      "description": "Leave blank to use each endpoint's built-in sampling defaults. Set a value to override both endpoints.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "systemPrompt",
+      "title": "System Prompt",
+      "description": "Optional system message prepended to every request.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "showReasoning",
+      "title": "Show Reasoning",
+      "label": "Render the model's think block above the answer",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Render the model's think block above the answer instead of hiding it."
+    },
+    {
+      "name": "fallbackBaseUrl",
+      "title": "Fallback Base URL",
+      "description": "Optional second endpoint, tried when the primary does not respond.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "fallbackModel",
+      "title": "Fallback Model",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "description": "Model id at the fallback endpoint. Leave blank to use that server's default."
+    },
+    {
+      "name": "preferredEndpoint",
+      "title": "Preferred Endpoint",
+      "description": "Which endpoint to try first. Auto prefers the primary. Pinning one still falls back if it is unreachable.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto — primary, then fallback",
+          "value": "auto"
+        },
+        {
+          "title": "Primary endpoint",
+          "value": "calypso-2"
+        },
+        {
+          "title": "Fallback endpoint",
+          "value": "calypso-1"
+        }
+      ]
+    },
+    {
+      "name": "enableTools",
+      "title": "Tools",
+      "label": "Let the model call web search, the knowledge base, and page fetch",
+      "description": "Requires a server built with tool-calling support (for llama.cpp, run it with --jinja). If the server rejects tools the extension silently answers without them.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "maxToolRounds",
+      "title": "Max Tool Rounds",
+      "description": "How many times the model may call tools before it must answer. Capped at 8.",
+      "type": "textfield",
+      "required": false,
+      "default": "4"
+    },
+    {
+      "name": "searxngUrl",
+      "title": "SearXNG URL",
+      "description": "Base URL of a SearXNG instance for the web_search tool. Leave blank to disable web search.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "ragUrl",
+      "title": "RAG API URL",
+      "description": "Base URL of an OpenAI-compatible RAG service exposing POST /v1/search. Leave blank to disable knowledge search.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "ragApiKey",
+      "title": "RAG API Key",
+      "description": "API key for your RAG service, sent as the x-api-key header. Leave blank if your RAG needs no auth.",
+      "type": "password",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "ragCollection",
+      "title": "RAG Collection",
+      "description": "Restrict rag_search to one collection. Leave blank to search everything.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "firecrawlUrl",
+      "title": "Firecrawl URL",
+      "description": "Base URL of a Firecrawl instance for page fetching. Leave blank to disable page fetch.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "cloudProvider",
+      "title": "Cloud Fallback",
+      "description": "Provider to use when no local rig answers.",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        {
+          "title": "None (local only)",
+          "value": "none"
+        },
+        {
+          "title": "Cerebras",
+          "value": "cerebras"
+        },
+        {
+          "title": "Groq",
+          "value": "groq"
+        },
+        {
+          "title": "Inception",
+          "value": "inception"
+        }
+      ]
+    },
+    {
+      "name": "cloudApiKey",
+      "title": "Cloud API Key",
+      "description": "API key for the chosen cloud fallback provider. Without it the fallback stays off.",
+      "type": "password",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "cloudModel",
+      "title": "Cloud Model",
+      "description": "Model id at the cloud provider. Blank uses that provider's default.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.8.2",
+    "@raycast/eslint-config": "^2.0.4",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "fix-lint": "ray lint --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  },
+  "tools": [
+    {
+      "name": "search-web",
+      "title": "Search Web",
+      "description": "Search the web using a self-hosted SearXNG instance. Use for current events, documentation and anything public."
+    },
+    {
+      "name": "search-knowledge",
+      "title": "Search Knowledge Base",
+      "description": "Search the user's PRIVATE knowledge base (RAG) for their internal projects, research notes and prior work. Use this before the web for anything about their own systems — this content is not public."
+    },
+    {
+      "name": "fetch-page",
+      "title": "Fetch Page",
+      "description": "Fetch a specific URL and return it as markdown, via self-hosted Firecrawl."
+    },
+    {
+      "name": "ask-calypso",
+      "title": "Ask Calypso",
+      "description": "Put a question to the user's own model and return its answer. Use when the question benefits from a locally-hosted model that runs its own search and knowledge-base rounds internally."
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@calypso search the web for the latest llama.cpp release",
+        "mocks": {
+          "search-web": "1. llama.cpp releases — https://github.com/ggml-org/llama.cpp/releases\n   Latest tagged build."
+        },
+        "expected": [
+          {
+            "callsTool": "search-web"
+          }
+        ]
+      },
+      {
+        "input": "@calypso what do my own notes say about the deployment topology?",
+        "mocks": {
+          "search-knowledge": "Topology note: the gateway fronts two model servers, primary and fallback."
+        },
+        "expected": [
+          {
+            "callsTool": "search-knowledge"
+          }
+        ]
+      },
+      {
+        "input": "@calypso read https://example.com and summarise it",
+        "mocks": {
+          "fetch-page": "# Example Domain\n\nThis domain is for use in illustrative examples."
+        },
+        "expected": [
+          {
+            "callsTool": "fetch-page"
+          }
+        ]
+      },
+      {
+        "input": "@calypso ask your local model to explain prompt injection",
+        "mocks": {
+          "ask-calypso": "Prompt injection is when untrusted input is interpreted as instructions by an LLM rather than as data."
+        },
+        "expected": [
+          {
+            "callsTool": "ask-calypso"
+          }
+        ]
+      }
+    ]
+  }
+}
