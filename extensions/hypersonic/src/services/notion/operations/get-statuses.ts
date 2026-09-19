@@ -3,7 +3,7 @@ import { loadPreferences } from '@/services/storage'
 import { Status } from '@/types/status'
 import { normalizeStatus } from '../utils/normalize-status'
 
-export async function getStatuses(databaseName: string): Promise<Status[]> {
+export async function getStatuses(databaseId: string): Promise<Status[]> {
   const preferences = await loadPreferences()
   const statusProperty = preferences.properties.status
 
@@ -17,12 +17,10 @@ export async function getStatuses(databaseName: string): Promise<Status[]> {
   }
 
   const notionClient = await notion()
-  const databases = await notionClient.search({
-    query: databaseName,
-    filter: { property: 'object', value: 'database' },
-  })
+  const database = (await notionClient.databases.retrieve({
+    database_id: databaseId,
+  })) as any
 
-  const database = databases.results[0] as any
   const options = database?.properties[statusProperty.name]?.status?.options
   const groups = database?.properties[statusProperty.name]?.status?.groups
 
