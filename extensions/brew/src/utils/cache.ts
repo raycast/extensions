@@ -14,13 +14,19 @@ import { Readable } from "stream";
 import { ReadableStream } from "stream/web";
 import { chain } from "stream-chain";
 import { parser } from "stream-json";
-import { filter } from "stream-json/filters/Filter";
-import { streamArray } from "stream-json/streamers/StreamArray";
+// Kebab-case with the extension: stream-json 3.x exposes everything through an
+// `exports` map and the old PascalCase subpaths (`filters/Filter`) resolve to
+// nothing. `@types/stream-json` is deliberately NOT installed — it still
+// describes 1.x, so it type-checks the dead specifiers clean while they fail at
+// runtime. 3.x ships its own types.
+import { filter } from "stream-json/filters/filter.js";
+import { streamArray } from "stream-json/streamers/stream-array.js";
 import { pipeline as streamPipeline } from "stream/promises";
 import { DownloadProgressCallback, ChunkedCacheConfig, ChunkedCacheMeta, CacheIndex, IndexEntry } from "./types";
 import { cacheLogger, fetchLogger } from "./logger";
 import { analyticsCacheFiles } from "./brew/analyticsParse";
 import { NetworkError, ParseError, ensureError } from "./errors";
+import { copyLogsAction } from "./toast";
 
 /// Cache Paths
 
@@ -119,7 +125,12 @@ export async function clearCache(): Promise<void> {
   } catch (err) {
     const error = ensureError(err);
     cacheLogger.error("Failed to clear cache", { error: error.message });
-    await showToast(Toast.Style.Failure, "Failed to clear cache", error.message);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to clear cache",
+      message: error.message,
+      primaryAction: copyLogsAction(`Failed to clear cache\n\n${error.message}`, { hideToast: true }),
+    });
   }
 }
 
@@ -165,6 +176,20 @@ const valid_keys = [
   "keg_only",
   "linked_keg",
   "pinned",
+  // Platform constraints, so the list can tell that brew would refuse to
+  // install a package here. `\bdisabled\b` does not match `disable_reason`.
+  "requirements",
+  "disabled",
+  "languages",
+  // `artifacts` survives the filter but is NOT stored. Every cask carries one,
+  // and keeping the arrays puts the chunked cask cache at 6.75 MB — inflating
+  // exactly the per-page memory the sliding-window paging exists to cap. It
+  // still has to reach the build to be read at all, so `compactCaskArtifacts`
+  // (the `compact` hook, passed by `caskRemote`) derives the one boolean the UI
+  // asks of it and drops the array before the record is written to a chunk.
+  // That leaves the chunks at 2.79 MB with the Symlinks section still gated
+  // precisely — measured against the live API on 2026-09-18, 7,728 casks.
+  "artifacts",
 ];
 
 /**
@@ -339,7 +364,13 @@ export async function downloadRemoteToCache(
 const CHUNK_SIZE = 500;
 
 /** Current schema version for chunked cache */
-export const CHUNKED_CACHE_VERSION = 1;
+// 3: `artifacts` dropped from `valid_keys` (see the note there). Bumped so the
+// oversized v2 cask cache is rebuilt rather than carried until brew next
+// updates, which is what makes the memory saving land for existing users.
+// 4: `artifacts` reduced to the derived `has_symlink_artifacts` instead of
+// being dropped outright, so the Symlinks section is gated precisely again. A
+// v3 cask chunk has neither field and would leave every cask reading "unknown".
+export const CHUNKED_CACHE_VERSION = 4;
 
 /**
  * Get configuration for chunked cache paths.
@@ -425,6 +456,12 @@ export async function buildChunkedCache<T>(
   extractIndex: IndexExtractor<T>,
   onProgress?: DownloadProgressCallback,
   signal?: AbortSignal,
+  /**
+   * Shrink each record before it is written to a chunk. Runs on the freshly
+   * parsed object, which nothing else holds, so it may mutate in place; see
+   * `compactCaskArtifacts`. Omitted for formulae, which store what they parse.
+   */
+  compact?: (item: T) => T,
 ): Promise<void> {
   // Check for abort before starting
   if (signal?.aborted) {
@@ -493,7 +530,9 @@ export async function buildChunkedCache<T>(
 
     pipeline.on("data", (data) => {
       if (data && typeof data === "object" && "value" in data) {
-        const item = data.value as T;
+        // Compact BEFORE indexing, so the index is extracted from the record
+        // that will actually be on disk rather than from a fuller one.
+        const item = compact ? compact(data.value as T) : (data.value as T);
         const indexInChunk = currentChunk.length;
 
         // Build index entry

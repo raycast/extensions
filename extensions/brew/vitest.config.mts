@@ -17,6 +17,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@raycast/api": fileURLToPath(new URL("./src/utils/__mocks__/raycast-api.ts", import.meta.url)),
+      // The logger package is CommonJS and `require`s `@raycast/api` from
+      // within node_modules, where the alias above cannot reach it. Anything
+      // that logs was therefore untestable.
+      "@chrismessina/raycast-logger": fileURLToPath(
+        new URL("./src/utils/__mocks__/raycast-logger.ts", import.meta.url),
+      ),
     },
   },
 });

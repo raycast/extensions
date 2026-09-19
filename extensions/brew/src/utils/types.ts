@@ -53,10 +53,41 @@ export interface Cask extends Installable {
   pinned_version?: string | null;
   depends_on: CaskDependency;
   conflicts_with?: { cask: string[] };
+  /** Homebrew refuses to install a disabled cask. Absent from pre-2026 chunk caches. */
+  disabled?: boolean;
+  /** From `brew info --json=v2` and the formulae.brew.sh index. Absent on records that predate it. */
+  artifacts?: CaskArtifact[];
+  /**
+   * Derived, not from brew: whether `artifacts[]` held a stanza that
+   * `brew link --cask` would touch. The chunked cache stores this in place of
+   * the array, which is far larger than the one bit read from it. Absent on
+   * chunks written before the flag existed, and on live `brew info` records,
+   * which carry the array itself — read both through `caskHasSymlinkArtifacts`.
+   */
+  has_symlink_artifacts?: boolean;
+  /**
+   * Language codes the cask can be installed as (`brew install --language=`).
+   * Empty for almost every cask; absent from records that predate the field.
+   */
+  languages?: string[];
+}
+
+/**
+ * One entry of a cask's `artifacts[]`, keyed by its stanza name (`binary`,
+ * `app`, `manpage`, `zap`, …). `target` is present only for `Relocated`
+ * artifacts (`cask/cask.rb`); the stanza values vary by kind, hence `unknown`.
+ */
+export interface CaskArtifact {
+  target?: string;
+  [stanza: string]: unknown;
 }
 
 export interface CaskDependency {
   macos?: { [key: string]: string[] };
+  /** A separate key rather than a `<=` under `macos` (cask/dsl/depends_on.rb). */
+  maximum_macos?: { [key: string]: string[] };
+  /** A Ruby inspect string in the API JSON; only its presence is meaningful. */
+  linux?: unknown;
   /** Casks can depend on formulae and other casks, not just an OS version. */
   formula?: string[];
   cask?: string[];
@@ -65,9 +96,35 @@ export interface CaskDependency {
 
 /// Formula Types
 
+/**
+ * One entry of a formula's `requirements[]`: `macos`, `maximum_macos`, `arch`,
+ * `linux`, `xcode`, … `version` is a macOS major ("11"…"27") or an arch name,
+ * and is null for a bare requirement. `contexts` is `["build"]`/`["test"]` or
+ * empty, and is typed loosely because the API is free to add shapes to it.
+ */
+export interface FormulaRequirement {
+  name: string;
+  version: string | null;
+  contexts?: unknown[];
+}
+
 export interface Formula extends Installable, Nameable {
+  /**
+   * Homebrew's rebuild counter for the SAME upstream version, absent from
+   * `versions.stable`. A revision bump is a real upgrade — `brew outdated`
+   * reports `2026.8.19` → `2026.8.19_1` — so anything naming the available
+   * version has to compose the two. Optional because the search index strips
+   * the field; only `brew info` output carries it.
+   */
+  revision?: number;
   license: string | null;
   aliases: string[];
+  /**
+   * Names this formula used to go by. `brew leaves` counts them among a
+   * formula's `possible_names` when deciding whether anything depends on it
+   * (`cmd/leaves.rb`). Optional: only `brew info` output carries the key.
+   */
+  oldnames?: string[];
   dependencies: string[];
   build_dependencies: string[];
   installed: InstalledVersion[];
@@ -75,6 +132,13 @@ export interface Formula extends Installable, Nameable {
   linked_keg: string | null;
   pinned: boolean;
   conflicts_with?: string[];
+  /**
+   * Optional across the board: a chunk cache built before the keys were kept,
+   * a persisted `useCachedPromise` result, and `brew info --json=v2` (which
+   * always reports `requirements: []`) all lack them.
+   */
+  requirements?: FormulaRequirement[];
+  disabled?: boolean;
 }
 
 export interface InstalledVersion {
@@ -87,6 +151,8 @@ export interface InstalledVersion {
   installed_on_request: boolean;
   /** Unix seconds when this version was installed. Absent from the web API. */
   time?: number;
+  /** Tab runtime deps for this keg. Present in `brew info --json=v2 --installed` output only. */
+  runtime_dependencies?: { full_name: string; version: string; declared_directly?: boolean }[];
 }
 
 export interface Versions {
@@ -144,6 +210,17 @@ export interface OutdatedCask extends Outdated {
 export interface InstallableResults {
   formulae: Formula[];
   casks: Cask[];
+  /**
+   * How many matched IN TOTAL, before a search limit truncated the arrays
+   * above. A plain field rather than the `totalLength` expando the arrays also
+   * carry: `useCachedPromise` persists through `JSON.stringify`, which keeps
+   * array ELEMENTS and silently drops extra array properties — so a result
+   * served from the cache had no totals at all, and the list believed it was
+   * showing everything.
+   *
+   * Absent on installed results, which are never truncated.
+   */
+  totals?: { formulae: number; casks: number };
 }
 
 export interface OutdatedResults {
@@ -259,4 +336,10 @@ export interface ChunkedRemote<T> extends Remote<T> {
   index?: CacheIndex;
   /** In-flight index fetch for deduplication */
   indexFetch?: Promise<CacheIndex>;
+  /**
+   * Shrink a record before it is written to a chunk — the hook for a field
+   * worth reading but not worth storing whole (see `compactCaskArtifacts`).
+   * Runs on a freshly parsed object, so it may mutate in place.
+   */
+  compact?: (item: T) => T;
 }
