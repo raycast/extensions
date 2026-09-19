@@ -24,6 +24,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - Open Domain
             - Copy URL
             - Delete Domain
+            - Add Domain
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
     - View Docker (Containers)
