@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-19
 
 - Parse Modbus RTU, Modbus TCP, and Modbus ASCII requests and responses.
 - Decode common read, write, diagnostic, mask-write, and exception messages.
