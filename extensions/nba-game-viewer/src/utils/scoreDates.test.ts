@@ -22,12 +22,16 @@ describe("scoreDates", () => {
     expect(getScoreDates(today, 2)).toEqual(getScoreDates(today, "2"));
   });
 
-  it("returns one date per day for a large preference, without clamping", () => {
-    const dates = getScoreDates(today, "400");
+  it("caps the number of previous score days", () => {
+    const dates = getScoreDates(today, "30");
 
-    expect(dates).toHaveLength(401);
-    expect(dates[0]).toBe("20250815");
-    expect(dates[400]).toBe("20260919");
+    expect(dates).toHaveLength(31);
+    expect(dates[0]).toBe("20260820");
+    expect(dates[30]).toBe("20260919");
+  });
+
+  it("caps a preference one day above the number of previous score days", () => {
+    expect(getScoreDates(today, "31")).toEqual(getScoreDates(today, "30"));
   });
 
   it("returns only today for a preference that is not a finite number of days", () => {
@@ -36,9 +40,9 @@ describe("scoreDates", () => {
     }
   });
 
-  it("returns only today for a finite preference that steps past the dates a Date can hold", () => {
+  it("caps a finite preference that would step past the dates a Date can hold", () => {
     for (const numDaysScores of [String(Number.MAX_VALUE), "1e15"]) {
-      expect(getScoreDates(today, numDaysScores)).toEqual(["20260919"]);
+      expect(getScoreDates(today, numDaysScores)).toEqual(getScoreDates(today, "30"));
     }
   });
 
