@@ -154,6 +154,25 @@ export interface Domain {
   enabled?: boolean;
 }
 
+/** A scheduled database backup, as returned by `overview.backups` (org-wide, filtered client-side). */
+export interface Backup {
+  backupId: string;
+  /** Cron expression. */
+  schedule: string;
+  enabled?: boolean | null;
+  prefix: string;
+  destinationId: string;
+  destination?: { name: string } | null;
+  keepLatestCount?: number | null;
+  /** The database name inside the engine to dump - not this extension's `Service.name`. */
+  database: string;
+  databaseType?: "postgres" | "mariadb" | "mysql" | "mongo" | "web-server" | "libsql";
+  postgresId?: string | null;
+  mariadbId?: string | null;
+  mysqlId?: string | null;
+  mongoId?: string | null;
+}
+
 interface Issue {
   code?: string;
   expected?: string;
