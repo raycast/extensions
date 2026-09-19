@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "groundcrew",
+  "title": "Groundcrew",
+  "description": "Browse and monitor tasks managed by the Groundcrew CLI.",
+  "icon": "icon.png",
+  "author": "shubhsherl",
+  "platforms": ["macOS"],
+  "categories": ["Developer Tools", "Productivity"],
+  "keywords": ["groundcrew", "tasks", "automation", "cli"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "crewPath",
+      "title": "Groundcrew Executable Path",
+      "description": "Absolute path to the crew executable. Leave blank to auto-discover from PATH, Homebrew, or an nvm install. Set it explicitly for other setups (fnm, asdf, or a wrapper script) — see the extension README.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/crew"
+    },
+    {
+      "name": "editorApp",
+      "title": "Editor Application",
+      "description": "Application used for \"Open in Editor\" on a task worktree (e.g. Visual Studio Code, Cursor). Leave blank to use the macOS \"Open With\" picker.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Visual Studio Code"
+    }
+  ],
+  "commands": [
+    {
+      "name": "browse-groundcrew-tasks",
+      "title": "Browse Groundcrew Tasks",
+      "description": "Browse tasks managed by the local Groundcrew CLI.",
+      "mode": "view"
+    },
+    {
+      "name": "groundcrew-status",
+      "title": "Groundcrew Status",
+      "description": "View the status of the local Groundcrew CLI.",
+      "mode": "view"
+    },
+    {
+      "name": "start-groundcrew-task",
+      "title": "Start Groundcrew Task",
+      "description": "Start a Groundcrew task by ticket number.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "taskId",
+          "placeholder": "tem-3925 or linear:tem-3925",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "groundcrew-doctor",
+      "title": "Groundcrew Doctor",
+      "description": "Diagnose Groundcrew host prerequisites, configuration, and Linear reachability.",
+      "mode": "view"
+    },
+    {
+      "name": "open-groundcrew-workspace",
+      "title": "Open Groundcrew Workspace",
+      "description": "Open an existing pull request or branch in a Groundcrew worktree.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "target",
+          "placeholder": "PR number/URL or branch name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Pull Request",
+          "data": [
+            { "title": "Pull Request", "value": "pr" },
+            { "title": "Branch", "value": "branch" }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/react-test-renderer": "^19.0.0",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "react-test-renderer": "^19.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
