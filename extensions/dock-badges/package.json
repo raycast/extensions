@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dock-badges",
+  "title": "Dock Badges",
+  "description": "Notification badge counts from your Dock, in the menu bar \u2014 for people who hide their Dock.",
+  "icon": "extension-icon.png",
+  "author": "mrpunkin",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-dock-badges",
+      "title": "Show Dock Badges",
+      "subtitle": "Dock Badges",
+      "description": "Menu bar item showing the summed notification badge count of every app in your Dock.",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "symbol",
+          "title": "Icon",
+          "description": "Symbol shown in the menu bar. It turns red whenever a Dock app has notifications; Bell and App also gain a badge.",
+          "type": "dropdown",
+          "required": false,
+          "default": "circle",
+          "data": [
+            {
+              "title": "Circle",
+              "value": "circle"
+            },
+            {
+              "title": "Bell",
+              "value": "bell"
+            },
+            {
+              "title": "App",
+              "value": "app"
+            }
+          ]
+        },
+        {
+          "name": "symbolStyle",
+          "title": "Icon Style",
+          "description": "Filled or outline rendering of the menu bar symbol.",
+          "type": "dropdown",
+          "required": false,
+          "default": "filled",
+          "data": [
+            {
+              "title": "Filled",
+              "value": "filled"
+            },
+            {
+              "title": "Outline",
+              "value": "outline"
+            }
+          ]
+        },
+        {
+          "name": "showCount",
+          "title": "Count",
+          "label": "Show Total Count",
+          "description": "Show the summed badge count next to the menu bar icon. When disabled, only the badge on the icon indicates notifications.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "hideWhenClear",
+          "label": "Hide When Clear",
+          "description": "Remove the menu bar item entirely while no Dock app has a badge.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Visibility"
+        }
+      ]
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "dock",
+    "badge",
+    "notifications",
+    "menu bar",
+    "unread"
+  ]
+}
