@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+.build/
+
+# Generated
+raycast-env.d.ts
+*.tsbuildinfo
+.eslintcache
+
+# Environment
+.env
+.env.*
+
+# Logs and OS
+*.log
+.DS_Store
