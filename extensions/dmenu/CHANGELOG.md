@@ -1,6 +1,6 @@
 # dmenu Changelog
 
-## [1.0.0] - 2026-09-19
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Fixed
 - The CLI installer now asks for confirmation before replacing an existing `~/.local/bin/dmenu` path.
