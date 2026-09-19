@@ -87,11 +87,14 @@ either side of a threshold in two different documents. One sample proves nothing
 - Integration tests skip themselves when the detector is down, mirroring how the
   extension degrades.
 - Image sources live in `media/`, images the extension loads at runtime in
-  `assets/`, and the store checklist verifies that separation. There is no
-  `metadata/`: the store's `metadata-images` check wants a Raycast Window Capture
-  composite, centred with roughly 12% padding on every side, and the store page
-  renders the README regardless, so the illustration lives in `media/` and is shown
-  there.
+  `assets/`, and `metadata/` holds the store screenshots. The store's
+  `metadata-images` check enforces exactly 2000x1250 and roughly 12% padding on
+  every side, which a designed illustration cannot satisfy by guesswork: take
+  those with Raycast's Window Capture, which composes the window to their
+  geometry. It saves into `metadata/` only if that folder already exists, and
+  captures at the density of the screen in use, so a non-Retina display yields
+  1000x625 and fails. The README illustration stays in `media/`; the store page
+  renders the README as well as the carousel.
 - Changing the icon needs a full Raycast restart. `assets/icon.png` is regenerated
   from `media/icon.svg` with `sips`, not `qlmanage`, which flattens transparency
   onto white. The wider illustrations go the other way: `qlmanage` renders their
@@ -105,14 +108,27 @@ anything sitting in the folder ships, including agent scratch directories. Publi
 from a throwaway `git clone` rather than from the working copy, which also pins
 what goes out to a commit that exists on the remote.
 
-It requires `package-lock.json` at version 2 or above and refuses outright when
-`pnpm-lock.yaml` is present, so delete that one in the clone after installing.
+It requires `package-lock.json` at version 2 or above, refuses outright when
+`pnpm-lock.yaml` is present, and refuses again on a dirty working tree. Those
+three pull in opposite directions: the install needs the pnpm lockfile, the
+publish forbids it, and deleting a tracked file is itself a change to commit.
+
+```bash
+git clone <repo> && cd <clone>
+pnpm install --frozen-lockfile
+rm CLAUDE.md pnpm-lock.yaml
+git commit -qam "chore: trim for publishing"
+pnpm exec ray publish
+```
+
+`CLAUDE.md` is a symlink and has no business in a monorepo. The commit comes after
+the deletions and never before, and it stays in the clone. The command needs an
+interactive terminal for its GitHub sign-in, so it will not run through a
+non-TTY shell.
+
 Regenerate `package-lock.json` with `npm install --package-lock-only` in a
 directory holding only the manifest: run in place, npm reads pnpm's virtual store
 and fails to resolve.
-
-`CLAUDE.md` is a symlink and has no business in a monorepo; drop it in the clone
-too. The command needs an interactive terminal for its GitHub sign-in.
 
 ## Where things are documented
 

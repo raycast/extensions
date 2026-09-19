@@ -4,6 +4,8 @@ import {
   type DetectorEntity,
 } from "../detector/client";
 import type { EntityType, SemanticSkipReason, Span } from "./types";
+import { isCardNumber } from "./validators/card";
+import { isIbanValid } from "./validators/iban";
 import { isNonIdentifyingIp } from "./validators/ip";
 
 /** Past this the detector costs more than the hotkey is worth, so the layer is
@@ -45,6 +47,14 @@ function requestedLabels(options: SemanticOptions): string[] {
   return labels;
 }
 
+const VALIDATORS: Partial<
+  Readonly<Record<EntityType, (value: string) => boolean>>
+> = {
+  CARD: isCardNumber,
+  IBAN: isIbanValid,
+  IP: (value) => !isNonIdentifyingIp(value),
+};
+
 function toSpan(entity: DetectorEntity, text: string): Span | null {
   const type = LABEL_TO_TYPE[entity.entity_type];
   if (type === undefined) return null;
@@ -55,11 +65,25 @@ function toSpan(entity: DetectorEntity, text: string): Span | null {
   )
     return null;
 
-  // The detector has its own IP pass and reports loopback too.
-  const value = text.slice(entity.start, entity.end);
-  if (type === "IP" && isNonIdentifyingIp(value)) return null;
+  // The detector's structured pass is checksum-only, so it reports a Luhn-valid
+  // timestamp as a card. Its spans go through the same validators as the
+  // deterministic layer, or enabling the model would undo identifier
+  // preservation.
+  const accepts = VALIDATORS[type];
+  if (accepts !== undefined && !accepts(text.slice(entity.start, entity.end)))
+    return null;
 
   return { type, start: entity.start, end: entity.end, layer: "semantic" };
+}
+
+/** Exported so the mapping can be tested without reaching the detector. */
+export function entitiesToSpans(
+  entities: readonly DetectorEntity[],
+  text: string,
+): Span[] {
+  return entities
+    .map((entity) => toSpan(entity, text))
+    .filter((span): span is Span => span !== null);
 }
 
 export async function detectSemantic(
@@ -88,9 +112,5 @@ export async function detectSemantic(
 
   if (!outcome.ok) return { ok: false, reason: outcome.reason };
 
-  const spans = outcome.entities
-    .map((entity) => toSpan(entity, text))
-    .filter((span): span is Span => span !== null);
-
-  return { ok: true, spans };
+  return { ok: true, spans: entitiesToSpans(outcome.entities, text) };
 }

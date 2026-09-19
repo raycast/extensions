@@ -1,5 +1,7 @@
-import { describe, expect, it } from "vitest";
-import { containerArgs, readPullProgress } from "./docker";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { describe, expect, it, vi } from "vitest";
+import { containerArgs, imageSize, readPullProgress } from "./docker";
 import {
   CONTAINER_NAME,
   CONTAINER_PORT,
@@ -9,6 +11,42 @@ import {
   FLOORS,
   PATCH_TARGET,
 } from "./image";
+
+vi.mock("node:child_process", async (importOriginal) => {
+  const original = await importOriginal<typeof import("node:child_process")>();
+  const { promisify } = await import("node:util");
+  return {
+    ...original,
+    execFile: Object.assign(vi.fn(), { [promisify.custom]: vi.fn() }),
+  };
+});
+
+describe("installed image size", () => {
+  const run = vi.mocked(promisify(execFile));
+
+  it("reads the pinned image size and displays decimal GB", async () => {
+    run.mockResolvedValueOnce({ stdout: "2441234567\n", stderr: "" });
+    expect(await imageSize("/usr/local/bin/docker")).toBe("2.44 GB");
+    expect(run).toHaveBeenLastCalledWith(
+      "/usr/local/bin/docker",
+      ["image", "inspect", "--format", "{{.Size}}", DETECTOR_IMAGE],
+      expect.objectContaining({ timeout: 15_000 }),
+    );
+  });
+
+  it.each(["", "<no value>", "NaN", "-1", "1.5", "9007199254740992"])(
+    "omits an invalid size %j",
+    async (stdout) => {
+      run.mockResolvedValueOnce({ stdout, stderr: "" });
+      expect(await imageSize("/usr/local/bin/docker")).toBeNull();
+    },
+  );
+
+  it("omits the size when inspection fails", async () => {
+    run.mockRejectedValueOnce(new Error("Image unavailable"));
+    expect(await imageSize("/usr/local/bin/docker")).toBeNull();
+  });
+});
 
 describe("detector image", () => {
   it("is pinned by digest, never by tag", () => {

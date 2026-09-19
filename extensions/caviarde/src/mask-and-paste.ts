@@ -3,7 +3,6 @@ import { propagateFirstNames } from "./detection/coreference";
 import { detectDeterministic } from "./detection/deterministic";
 import { mergeSpans } from "./detection/merge";
 import { detectSemantic } from "./detection/semantic";
-import type { SemanticSkipReason } from "./detection/types";
 import { applyMasking } from "./masking/apply";
 import { type RawPreferences, toSettings } from "./preferences";
 import { buildSummary } from "./summary";
@@ -22,17 +21,16 @@ export default async function maskAndPaste(): Promise<void> {
   }
 
   if (text.trim().length === 0) {
-    await showHUD("Clipboard is empty");
+    await showHUD("No text to paste");
     return;
   }
   if (text.length > MAX_INPUT_CHARS) {
-    await showHUD("Clipboard too large to mask");
+    await showHUD("Text too long to mask. Copy a smaller selection");
     return;
   }
 
   const settings = toSettings(getPreferenceValues<RawPreferences>());
 
-  let skipped: SemanticSkipReason | undefined;
   const spans = [...detectDeterministic(text)];
 
   const semantic = await detectSemantic(text, {
@@ -46,7 +44,6 @@ export default async function maskAndPaste(): Promise<void> {
   });
 
   if (semantic.ok) spans.push(...semantic.spans);
-  else skipped = semantic.reason;
 
   const merged = mergeSpans(spans);
   const withFirstNames = mergeSpans([
@@ -62,5 +59,5 @@ export default async function maskAndPaste(): Promise<void> {
     return;
   }
 
-  await showHUD(buildSummary(counts, skipped));
+  await showHUD(buildSummary(counts, !semantic.ok));
 }

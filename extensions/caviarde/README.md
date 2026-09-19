@@ -16,6 +16,11 @@ on the fly. One hotkey, no interface, and nothing leaves your machine by default
 
 </div>
 
+![Mask and Paste replaces fictional names, an email and a phone number while preserving technical context](media/mask-and-paste.gif)
+
+*Recorded with fictional sample data. Repeated names keep the same placeholder,
+while the order number and loopback address stay unchanged.*
+
 ---
 
 *Caviarder*, in French, means to black out a passage in a document. Censors did it
@@ -23,10 +28,6 @@ with black ink; this does it with placeholders.
 
 You copy something with people in it. You press one key. What you paste is the
 same text with the people taken out.
-
-![Caviarde masking copied text: the clipboard holds a name, a location, an email,
-a phone number, a card and an IBAN; the pasted result replaces each with a
-numbered placeholder](media/screenshot.png)
 
 A ticket, a log excerpt, a database row, an email thread, a CSV, a stack trace:
 whatever is in the clipboard, the same key does the same thing.
@@ -60,12 +61,10 @@ The same reflex covers all of them: mask the clipboard, then paste.
 
 ## Install
 
-> [!IMPORTANT]
-> **Caviarde is not in the Raycast Store yet.** Until it is, build it from
-> source with the commands below. It takes about a minute and needs no account.
+For a source installation, the following commands compile the extension and
+register it in Raycast. An installation from the Store can skip to the shortcut.
 
-**1. Build it.** The last command compiles the extension and registers it in
-Raycast, which is all that installing means here.
+**1. Build from source.**
 
 ```bash
 git clone https://github.com/gldywn/caviarde.git
@@ -91,10 +90,10 @@ your container runtime, pulls a digest-pinned image, starts it on loopback and
 waits until it answers, showing where it is the whole time. Docker Desktop,
 OrbStack, Rancher Desktop and colima all work.
 
-The first run downloads about **1.3 GB**, which you can leave running in the
-background. The container then holds roughly 2.2 GB of memory and starts in
-seconds. Nothing is exposed beyond `127.0.0.1`, it runs read-only with every
-capability dropped, and the image is pinned by sha256 digest rather than by tag.
+The first run downloads the detector image in the background, even if the setup
+window is closed. Once installed, its size is read from the container runtime.
+The managed container listens only on `127.0.0.1`, runs read-only with every
+capability dropped, and uses an image pinned by sha256 digest rather than by tag.
 
 <details>
 <summary><b>Working on Caviarde itself</b></summary>
@@ -139,7 +138,7 @@ When the detector is unreachable, nothing breaks. Caviarde masks with patterns
 alone and names what it skipped:
 
 ```
-2 masked: 1 email, 1 IBAN (partial: names and places not checked)
+Pasted. 2 values masked. Names, locations and organisations not checked
 ```
 
 ## Privacy
@@ -169,7 +168,7 @@ glossed over.
 
 | Preference | Default | What it does |
 |---|---|---|
-| Detector URL | `http://127.0.0.1:5002` | Where the semantic detector lives |
+| Detector URL | `http://127.0.0.1:5002` | Where the semantic detector lives. Set up Detector only manages this loopback form |
 | Detector Timeout | `3500` ms | Past this, fall back to patterns alone |
 | Auth Token | empty | Bearer token, for a detector that is not local |
 | Phone Regions | `FR` | Without a region, only `+33`-style numbers are found |

@@ -26,6 +26,11 @@ to begin with an issuer prefix, so a number outside those ranges is left alone
 even when its check digit is right. The cost is the reverse case, a card from an
 issuer outside the listed ranges, which is not masked at all.
 
+The semantic layer follows the same rules. The detector runs its own structured
+pass, and that pass is checksum-only, so its cards and IBANs are re-validated
+here before being accepted. Without that, turning the detector on would mask the
+very identifiers the deterministic layer is careful to leave alone.
+
 ## Names
 
 Full names in prose are detected by the semantic layer. Two cases are handled

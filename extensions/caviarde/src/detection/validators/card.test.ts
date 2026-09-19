@@ -47,3 +47,17 @@ describe("identifiers that satisfy Luhn without being cards", () => {
     });
   }
 });
+
+describe("separators", () => {
+  // The deterministic layer used to strip these before calling, so a validator
+  // that could not would silently reject every spaced card the detector returns.
+  it("accepts a card written with spaces or hyphens", () => {
+    expect(isCardNumber("4111 1111 1111 1111")).toBe(true);
+    expect(isCardNumber("4111-1111-1111-1111")).toBe(true);
+  });
+
+  it("refuses anything that is not a digit or a separator", () => {
+    expect(isCardNumber("4111x1111 1111 1111")).toBe(false);
+    expect(isCardNumber("ref-4111111111111111")).toBe(false);
+  });
+});

@@ -30,7 +30,7 @@
       "type": "textfield",
       "required": false,
       "title": "Detector URL",
-      "description": "Base URL of the local PasteGuard detector. Leave the default unless you moved it.",
+      "description": "Base URL of the local PasteGuard detector. Set up Detector only manages http://127.0.0.1:<port>. For any other address, start the detector yourself.",
       "default": "http://127.0.0.1:5002"
     },
     {
@@ -98,7 +98,7 @@
     "@types/react": "19.2.18",
     "eslint": "10.8.0",
     "typescript": "5.9.3",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   },
   "scripts": {
     "build": "ray build -e dist",

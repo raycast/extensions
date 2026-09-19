@@ -1,9 +1,12 @@
 import {
+  Action,
+  ActionPanel,
   Color,
   environment,
   getPreferenceValues,
   Icon,
   List,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { join } from "node:path";
 import { useEffect, useRef, useState } from "react";
@@ -11,19 +14,24 @@ import {
   daemonIsUp,
   findDocker,
   imageIsPresent,
+  imageSize,
   readPullProgress,
   removeStoppedContainer,
   startContainer,
   startPull,
 } from "./detector/docker";
 import { loopbackPort } from "./detector/endpoint";
-import { type RawPreferences, toSettings } from "./preferences";
+import {
+  CONTAINER_NAME,
+  DETECTOR_IMAGE,
+  DOCKER_CANDIDATES,
+  DOCKER_HOME_CANDIDATES,
+} from "./detector/image";
+import { type RawPreferences, type Settings, toSettings } from "./preferences";
 
 const HEALTH_TIMEOUT_MS = 2000;
 const READY_ATTEMPTS = 30;
 const POLL_MS = 1000;
-const BAR_WIDTH = 20;
-const IMAGE_SIZE = "1.3 GB";
 
 type Key = "runtime" | "image" | "container";
 type State = "waiting" | "busy" | "ok" | "fail";
@@ -43,40 +51,53 @@ const TITLES: Record<Key, string> = {
   container: "Detector",
 };
 
-const RUNTIMES = "Docker Desktop, OrbStack, Rancher Desktop and colima";
-const AGAIN = "then run this command again";
+const RUNTIMES = "Docker Desktop, OrbStack, Rancher Desktop or colima";
+const AGAIN = "then run Set up Detector again";
 const DEGRADED =
-  "Caviarde keeps masking patterns without it: email addresses, phone numbers, IBANs, cards and keys.";
+  "Caviarde can still mask recognised patterns, including emails, phone numbers and IBANs.";
+const NEEDED_FOR_LOCAL =
+  "This image is only needed when Set up Detector starts a local detector.";
 
 const TEXT = {
-  checking: "Checking.",
-  runtimeReady: "Ready to run the detector.",
-  runtimeMissing: `No container runtime is installed. ${RUNTIMES} were checked.\n\nInstall one, ${AGAIN}.`,
-  runtimeStopped: `The container runtime is installed but not responding.\n\nStart it, ${AGAIN}.`,
+  checking: "",
+  runtimeReady: "",
+  runtimeMissing: `**No supported container runtime was found.**\n\nOpen or install ${RUNTIMES}, ${AGAIN}.`,
+  runtimeStopped: `**The container runtime is not responding.**\n\nOpen it, ${AGAIN}.`,
   imageUncheckable:
-    "The image cannot be checked until the container runtime is running.",
-  imageReady: "The pinned image is on disk.",
-  imagePreparing: "Preparing the download.",
-  imageForeign:
-    "The pinned image is not on disk, so the detector answering on this address is a different one.",
-  imageAbsent:
-    "The pinned image is not on disk, and there is no local detector for this command to start it for.",
-  detectorStarting:
-    "Starting the container. The model takes a few seconds to load.",
+    "The image can be checked once the container runtime is running.",
+  imageReady: "",
+  imagePreparing: "",
+  imageForeign: NEEDED_FOR_LOCAL,
+  imageAbsent: NEEDED_FOR_LOCAL,
+  detectorStarting: "Waiting for the detector to respond.",
   detectorReady:
-    "The semantic layer is active. The container restarts whenever the runtime does.",
-  detectorForeign:
-    "A detector is already running on this address, so nothing was restarted.",
-  detectorNeedsRuntime: `The detector needs a container runtime.\n\n${DEGRADED}`,
-  detectorRemote: `The Detector URL does not point at this machine, so this command cannot start or manage it. Point it back at loopback, or start that detector yourself.\n\n${DEGRADED}`,
-  detectorNeedsImage: `The detector cannot start until the image is downloaded.\n\n${DEGRADED}`,
-  detectorRefused: `The container could not start and nothing is answering on this address. The port is most likely in use.\n\n${DEGRADED}`,
-  detectorSilent:
-    "The container started but has not answered within a minute.\n\nRun this command again in a moment.",
+    "### Detector ready\n\n**The detector is responding.** Copy some text and run Mask and Paste to try it.\n\nMake sure you've assigned a keyboard shortcut to Mask and Paste. Use **Open Preferences** to adjust Caviarde's settings.",
+  detectorNeedsRuntime: `**A running container runtime is needed to start the detector.**\n\n${DEGRADED}`,
+  detectorUnmanageable: `**This address cannot be managed by Set up Detector.**\n\nFor automatic setup, set Detector URL to \`http://127.0.0.1:5002\`. Otherwise, start the detector yourself.\n\n${DEGRADED}`,
+  detectorNeedsImage: `**The detector image is unavailable.**\n\nDownload the detector image before starting the detector.\n\n${DEGRADED}`,
+  detectorRefused: `**The container could not start and the detector is not responding.**\n\nCheck your container runtime, ${AGAIN}.\n\n${DEGRADED}`,
+  detectorSilent: `**The detector has not responded yet.**\n\nWait a moment, ${AGAIN}.\n\n${DEGRADED}`,
 } as const;
 
-const DOWNLOAD_FAILED = (reason: string) =>
-  `The download failed. Docker reported:\n\n> ${reason}\n\nResolve it, ${AGAIN}.`;
+const [IMAGE_REPOSITORY, IMAGE_DIGEST] = DETECTOR_IMAGE.split("@sha256:");
+const DETAIL_HELP: Record<Key, string> = {
+  runtime: `### Container runtime lookup
+
+The **first executable found** in this order is used. A successful \`docker info\` check confirms that the runtime responds.
+
+${[...DOCKER_CANDIDATES, ...DOCKER_HOME_CANDIDATES.map((path) => `~/${path}`)]
+  .map((path, index) => `${index + 1}. \`${path}\``)
+  .join("\n")}
+
+\`~\` is the home directory.`,
+  image:
+    "### Detector image policy\n\nThe local setup image is **pinned by digest** in the source code and is **not updated automatically**. Its details are below.",
+  container: "",
+};
+
+/** The reason docker gives is not interpolated: it is arbitrary text, and the
+ * runtime already shows it in full. */
+const DOWNLOAD_FAILED = `**The image could not be downloaded.**\n\nCheck the error reported by your container runtime, ${AGAIN}.`;
 const CONTINUES = "The download continues if this window is closed.";
 
 const INITIAL: Check[] = (["runtime", "image", "container"] as const).map(
@@ -104,21 +125,29 @@ const ICONS: Record<State, Icon> = {
   fail: Icon.XMarkCircle,
 };
 
-/** Rules rather than blocks: Raycast has no block glyphs in its code font and
- * pulls them from a fallback whose heights do not line up. */
-function bar(done: number, total: number): string {
-  const filled = total > 0 ? Math.round((done / total) * BAR_WIDTH) : 0;
-  return `\`${"━".repeat(filled)}${"─".repeat(BAR_WIDTH - filled)}\``;
-}
+const FACT_ICONS: Record<string, Icon> = {
+  Address: Icon.Link,
+  Access: Icon.Shield,
+  Binary: Icon.Cog,
+  Layers: Icon.Layers,
+  Size: Icon.HardDrive,
+};
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function detectorAnswers(baseUrl: string): Promise<boolean> {
+/** The token goes out here too: a detector that also protects /health works
+ * for masking while this screen would call it unreachable. */
+async function detectorAnswers(
+  baseUrl: string,
+  authToken: string,
+): Promise<boolean> {
   try {
     const response = await fetch(`${baseUrl.replace(/\/+$/, "")}/health`, {
       signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
+      headers:
+        authToken.length > 0 ? { Authorization: `Bearer ${authToken}` } : {},
     });
     return response.ok;
   } catch {
@@ -147,7 +176,7 @@ async function pullImage(
       update("image", {
         state: "fail",
         status: "Download failed",
-        body: DOWNLOAD_FAILED(progress.error),
+        body: DOWNLOAD_FAILED,
       });
       return false;
     }
@@ -157,31 +186,34 @@ async function pullImage(
 
     const layers = progress?.layers ?? 0;
     const done = progress?.done ?? 0;
-    const percent = layers === 0 ? 0 : Math.round((done / layers) * 100);
+    // One representation of progress, not three. Completed layers are not a
+    // share of the bytes, so a bar and a percentage would both overstate it.
     update("image", {
       state: "busy",
-      // The accessory column is narrow, and anything longer is ellipsised.
-      status: layers === 0 ? "Starting" : `${percent}%`,
-      body:
-        layers === 0
-          ? `${TEXT.imagePreparing}\n\n${CONTINUES}`
-          : `${bar(done, layers)}  **${percent}%**\n\n${CONTINUES}`,
+      status: "Downloading",
+      body: CONTINUES,
       facts: [
-        ["Layers", layers === 0 ? "Counting" : `${done} of ${layers}`],
-        ["Size", IMAGE_SIZE],
+        ["Layers", layers === 0 ? "Checking" : `${done} of ${layers} complete`],
       ],
     });
     await sleep(POLL_MS);
   }
 }
 
-async function run(update: Update, finish: () => void): Promise<void> {
-  const url = toSettings(getPreferenceValues<RawPreferences>()).detectorUrl;
-  const alreadyUp = await detectorAnswers(url);
+async function run(
+  settings: Settings,
+  update: Update,
+  finish: () => void,
+): Promise<void> {
+  const url = settings.detectorUrl;
+  const alreadyUp = await detectorAnswers(url, settings.authToken);
   const port = loopbackPort(url);
   const address: [string, string] = ["Address", url];
 
-  const detectorFacts: [string, string][] = [
+  // "Loopback only" is claimed only for a container this command published on
+  // 127.0.0.1. For a detector that was already answering, nothing here has
+  // verified where it listens.
+  const managedFacts: [string, string][] = [
     address,
     ["Access", "Loopback only"],
   ];
@@ -195,14 +227,18 @@ async function run(update: Update, finish: () => void): Promise<void> {
     });
     update("image", {
       state: "waiting",
-      status: "Unknown",
+      status: "Not checked",
       body: TEXT.imageUncheckable,
     });
     update("container", {
       state: alreadyUp ? "ok" : "fail",
-      status: alreadyUp ? "Running" : "Not running",
-      body: alreadyUp ? TEXT.detectorForeign : TEXT.detectorNeedsRuntime,
-      facts: detectorFacts,
+      status: alreadyUp ? "Running" : "Unavailable",
+      body: alreadyUp
+        ? TEXT.detectorReady
+        : port === null
+          ? TEXT.detectorUnmanageable
+          : TEXT.detectorNeedsRuntime,
+      facts: [address],
     });
     finish();
     return;
@@ -212,20 +248,24 @@ async function run(update: Update, finish: () => void): Promise<void> {
   if (!(await daemonIsUp(docker))) {
     update("runtime", {
       state: "fail",
-      status: "Not running",
+      status: "Unavailable",
       body: TEXT.runtimeStopped,
       facts: [runtime],
     });
     update("image", {
       state: "waiting",
-      status: "Unknown",
+      status: "Not checked",
       body: TEXT.imageUncheckable,
     });
     update("container", {
       state: alreadyUp ? "ok" : "fail",
-      status: alreadyUp ? "Running" : "Not running",
-      body: alreadyUp ? TEXT.detectorForeign : TEXT.detectorNeedsRuntime,
-      facts: detectorFacts,
+      status: alreadyUp ? "Running" : "Unavailable",
+      body: alreadyUp
+        ? TEXT.detectorReady
+        : port === null
+          ? TEXT.detectorUnmanageable
+          : TEXT.detectorNeedsRuntime,
+      facts: [address],
     });
     finish();
     return;
@@ -237,27 +277,30 @@ async function run(update: Update, finish: () => void): Promise<void> {
     facts: [runtime],
   });
 
-  const imageReady: Patch = {
-    state: "ok",
-    status: "On disk",
-    body: TEXT.imageReady,
-    facts: [["Size", IMAGE_SIZE]],
+  const imageReady = async () => {
+    const size = await imageSize(docker);
+    update("image", {
+      state: "ok",
+      status: "Installed",
+      body: TEXT.imageReady,
+      facts: size === null ? [] : [["Size", size]],
+    });
   };
 
   let onDisk = await imageIsPresent(docker);
   if (onDisk) {
-    update("image", imageReady);
+    await imageReady();
   } else if (alreadyUp) {
     // Something else is serving the port, so downloading would fix nothing.
     update("image", {
-      state: "fail",
-      status: "Not on disk",
+      state: "waiting",
+      status: "Not installed",
       body: TEXT.imageForeign,
     });
   } else if (port === null) {
     update("image", {
       state: "waiting",
-      status: "Not on disk",
+      status: "Not installed",
       body: TEXT.imageAbsent,
     });
   } else {
@@ -266,22 +309,22 @@ async function run(update: Update, finish: () => void): Promise<void> {
     if (!onDisk) {
       update("container", {
         state: "fail",
-        status: "Not running",
+        status: "Unavailable",
         body: TEXT.detectorNeedsImage,
-        facts: detectorFacts,
+        facts: [address],
       });
       finish();
       return;
     }
-    update("image", imageReady);
+    await imageReady();
   }
 
   if (alreadyUp) {
     update("container", {
       state: "ok",
       status: "Running",
-      body: TEXT.detectorForeign,
-      facts: detectorFacts,
+      body: TEXT.detectorReady,
+      facts: [address],
     });
     finish();
     return;
@@ -290,8 +333,8 @@ async function run(update: Update, finish: () => void): Promise<void> {
   if (port === null) {
     update("container", {
       state: "fail",
-      status: "Not running",
-      body: TEXT.detectorRemote,
+      status: "Unavailable",
+      body: TEXT.detectorUnmanageable,
       facts: [address],
     });
     finish();
@@ -302,7 +345,7 @@ async function run(update: Update, finish: () => void): Promise<void> {
     state: "busy",
     status: "Starting",
     body: TEXT.detectorStarting,
-    facts: detectorFacts,
+    facts: managedFacts,
   });
   await removeStoppedContainer(docker);
 
@@ -318,12 +361,12 @@ async function run(update: Update, finish: () => void): Promise<void> {
   }
 
   for (let attempt = 0; attempt < READY_ATTEMPTS; attempt++) {
-    if (await detectorAnswers(url)) {
+    if (await detectorAnswers(url, settings.authToken)) {
       update("container", {
         state: "ok",
         status: "Running",
         body: TEXT.detectorReady,
-        facts: detectorFacts,
+        facts: managedFacts,
       });
       finish();
       return;
@@ -336,14 +379,17 @@ async function run(update: Update, finish: () => void): Promise<void> {
 
   update("container", {
     state: "fail",
-    status: "Not running",
+    status: "Not responding",
     body: refused ? TEXT.detectorRefused : TEXT.detectorSilent,
-    facts: detectorFacts,
+    facts: managedFacts,
   });
   finish();
 }
 
 export default function SetUpDetector() {
+  const [settings] = useState(() =>
+    toSettings(getPreferenceValues<RawPreferences>()),
+  );
   const [checks, setChecks] = useState<Check[]>(INITIAL);
   const [selected, setSelected] = useState<string>("runtime");
   const [working, setWorking] = useState(true);
@@ -371,15 +417,15 @@ export default function SetUpDetector() {
       }
     };
 
-    void run(update, () => setWorking(false));
-  }, []);
+    void run(settings, update, () => setWorking(false));
+  }, [settings]);
 
   return (
     <List
       isLoading={working}
       isShowingDetail
       navigationTitle="Set up Detector"
-      searchBarPlaceholder="Setting up the detector"
+      searchBarPlaceholder="Setup status"
       selectedItemId={selected}
       onSelectionChange={(id) => {
         if (id !== null) setSelected(id);
@@ -392,19 +438,94 @@ export default function SetUpDetector() {
           icon={{ source: ICONS[check.state], tintColor: COLOURS[check.state] }}
           title={check.title}
           accessories={[{ text: check.status }]}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
+              {check.key === "container" && (
+                <Action.CopyToClipboard
+                  title="Copy Address"
+                  content={settings.detectorUrl}
+                />
+              )}
+              {check.key === "image" && (
+                <Action.CopyToClipboard
+                  title="Copy Image Reference"
+                  content={DETECTOR_IMAGE}
+                />
+              )}
+            </ActionPanel>
+          }
           detail={
             <List.Item.Detail
-              markdown={`## ${check.title}\n\n${check.body}`}
+              markdown={
+                [check.body, DETAIL_HELP[check.key]]
+                  .filter(Boolean)
+                  .join("\n\n") || undefined
+              }
               metadata={
-                check.facts.length === 0 ? undefined : (
+                check.facts.length === 0 &&
+                check.key === "runtime" ? undefined : (
                   <List.Item.Detail.Metadata>
                     {check.facts.map(([label, value]) => (
                       <List.Item.Detail.Metadata.Label
                         key={label}
                         title={label}
                         text={value}
+                        icon={FACT_ICONS[label]}
                       />
                     ))}
+                    {check.key === "image" && (
+                      <>
+                        <List.Item.Detail.Metadata.Label
+                          title="Image"
+                          text={IMAGE_REPOSITORY}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="SHA-256"
+                          text={IMAGE_DIGEST}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Setup container"
+                          text={CONTAINER_NAME}
+                        />
+                      </>
+                    )}
+                    {check.key === "container" && (
+                      <>
+                        <List.Item.Detail.Metadata.Label
+                          title="Detector Timeout (ms)"
+                          text={String(settings.detectorTimeoutMs)}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Auth Token"
+                          text={
+                            settings.authToken.length > 0 ? "Set" : "Not set"
+                          }
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Phone Regions"
+                          text={settings.phoneRegions.join(", ") || "None"}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Mask person names"
+                          text={settings.maskPersons ? "Enabled" : "Disabled"}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Mask locations and addresses"
+                          text={settings.maskLocations ? "Enabled" : "Disabled"}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="Mask company and organisation names"
+                          text={
+                            settings.maskOrganizations ? "Enabled" : "Disabled"
+                          }
+                        />
+                      </>
+                    )}
                   </List.Item.Detail.Metadata>
                 )
               }

@@ -18,6 +18,8 @@ const ISSUER_RANGES: readonly (readonly [number, number, number])[] = [
   [4, 2221, 2720], // Mastercard, the 2-series
   [4, 3528, 3589], // JCB
   [4, 6011, 6011], // Discover
+  // Never add UATP, prefix 1: every epoch millisecond timestamp starts with a
+  // 1 until 2033, which is the exact false positive this list exists to stop.
 ];
 
 function hasIssuerPrefix(digits: string): boolean {
@@ -29,7 +31,11 @@ function hasIssuerPrefix(digits: string): boolean {
   );
 }
 
-export function isCardNumber(digits: string): boolean {
+/** Accepts the separators a card is written with, and nothing else: stripping
+ * every non-digit would turn a string with letters in it into a valid card. */
+export function isCardNumber(candidate: string): boolean {
+  const digits = candidate.replace(/[\s-]/g, "");
+  if (!/^\d+$/.test(digits)) return false;
   if (digits.length < 13 || digits.length > 19) return false;
   return hasIssuerPrefix(digits) && isLuhnValid(digits);
 }

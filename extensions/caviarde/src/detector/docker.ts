@@ -80,6 +80,22 @@ export async function imageIsPresent(docker: string): Promise<boolean> {
   }
 }
 
+export async function imageSize(docker: string): Promise<string | null> {
+  try {
+    const { stdout } = await run(
+      docker,
+      ["image", "inspect", "--format", "{{.Size}}", DETECTOR_IMAGE],
+      { timeout: 15_000, env: dockerEnv(docker) },
+    );
+    const value = stdout.trim();
+    const bytes = Number(value);
+    if (!/^\d+$/.test(value) || !Number.isSafeInteger(bytes)) return null;
+    return `${(bytes / 1_000_000_000).toFixed(2)} GB`;
+  } catch {
+    return null;
+  }
+}
+
 /** Detached, with its output journalled: the pull survives the window closing,
  * and the log is what lets the view show progress when it reopens. */
 export function startPull(docker: string, logPath: string): void {

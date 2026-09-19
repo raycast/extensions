@@ -78,7 +78,7 @@ src/
   detector/
     client.ts                the single HTTP module
     image.ts                 pinned digest, thresholds, docker probe paths
-    endpoint.ts              the port the managed container must publish on
+    endpoint.ts              which Detector URLs the setup command can manage
     docker.ts                container lifecycle
   masking/
     placeholders.ts          [TYPE_N] assignment
@@ -157,7 +157,7 @@ behind a lock inside the detector.
 - The semantic layer is skipped above 6,000 characters, roughly a thousand words.
   Skipped, not truncated: truncating would mask a name in the first half of a
   document and leave the same name exposed in the second, which reads as
-  protection that is not there. The HUD says detection was partial.
+  protection that is not there. The HUD names the categories not checked.
 - Nothing is processed above 1,000,000 characters.
 
 Empty and whitespace-only clipboards exit early and never call the detector.
@@ -170,10 +170,10 @@ deterministic-only, and the HUD says so. No path produces an error dialog or an
 unmasked paste.
 
 ```
-3 masked: 2 names, 1 email
-2 masked: 1 email, 1 IBAN (partial: names and places not checked)
-Nothing to mask
-Clipboard is empty
+Pasted. 2 names, 1 email masked
+Pasted. 2 values masked. Names, locations and organisations not checked
+Pasted. Nothing detected
+No text to paste
 ```
 
 ## Preferences

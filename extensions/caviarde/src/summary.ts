@@ -1,4 +1,4 @@
-import type { EntityType, SemanticSkipReason } from "./detection/types";
+import type { EntityType } from "./detection/types";
 
 const NOUNS: Readonly<Record<EntityType, readonly [string, string]>> = {
   PERSON: ["name", "names"],
@@ -17,15 +17,10 @@ const NOUNS: Readonly<Record<EntityType, readonly [string, string]>> = {
   PRIVATE_KEY: ["private key", "private keys"],
 };
 
-/** Phrased as what went unchecked rather than what failed: a user with no
- * detector sees this on every paste, and a fault reads as a broken install. */
-const SKIP_NOTE: Readonly<Record<SemanticSkipReason, string>> = {
-  unreachable: "names and places not checked",
-  timeout: "detector too slow, names not checked",
-  "too-large": "text too long, names not checked",
-  disabled: "name detection off",
-  failed: "detector error, names not checked",
-};
+/** One note for every reason, because the user acts on the same thing in all of
+ * them: those three kinds were not looked for. Naming the cause instead would
+ * read as a fault on every paste made without a detector. */
+const NOT_CHECKED = "Names, locations and organisations not checked";
 
 /** Ordered so the HUD reads consistently rather than by map insertion. */
 const ORDER: readonly EntityType[] = [
@@ -45,9 +40,13 @@ const ORDER: readonly EntityType[] = [
   "PRIVATE_KEY",
 ];
 
+/** A HUD cannot be given a duration, so a long line simply flashes past. Past
+ * this, the total alone is what a reader can actually take in. */
+const MAX_CATEGORIES = 3;
+
 export function buildSummary(
   counts: ReadonlyMap<EntityType, number>,
-  skipped?: SemanticSkipReason,
+  skipped?: boolean,
 ): string {
   const parts: string[] = [];
   let total = 0;
@@ -60,8 +59,16 @@ export function buildSummary(
     parts.push(`${count} ${count === 1 ? singular : plural}`);
   }
 
-  const note = skipped === undefined ? "" : ` (partial: ${SKIP_NOTE[skipped]})`;
-  if (total === 0) return `Nothing to mask${note}`;
+  if (total === 0) {
+    return skipped === true
+      ? `Pasted unchanged. ${NOT_CHECKED}`
+      : "Pasted. Nothing detected";
+  }
 
-  return `${total} masked: ${parts.join(", ")}${note}`;
+  const values = `${total} ${total === 1 ? "value" : "values"} masked`;
+  if (skipped === true) return `Pasted. ${values}. ${NOT_CHECKED}`;
+
+  return parts.length <= MAX_CATEGORIES
+    ? `Pasted. ${parts.join(", ")} masked`
+    : `Pasted. ${values}`;
 }

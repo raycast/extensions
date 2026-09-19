@@ -135,7 +135,7 @@ const FINDERS: readonly Finder[] = [
   findIban,
   simple("SIRET", SIRET_CANDIDATE, (m) => isSiretValid(digitsOf(m))),
   findSiren,
-  simple("CARD", CARD_CANDIDATE, (m) => isCardNumber(digitsOf(m))),
+  simple("CARD", CARD_CANDIDATE, isCardNumber),
   simple("PHONE", PHONE_INTERNATIONAL),
   simple("PHONE", PHONE_FRENCH),
 ];

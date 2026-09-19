@@ -1,7 +1,9 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { applyMasking } from "../masking/apply";
+import { propagateFirstNames } from "./coreference";
 import { detectDeterministic } from "./deterministic";
 import { mergeSpans } from "./merge";
+import { IDENTIFIER_CASES } from "./identifiers.fixture";
 import { detectSemantic, type SemanticOptions } from "./semantic";
 
 const BASE_URL = process.env.CAVIARDE_DETECTOR_URL ?? "http://127.0.0.1:5002";
@@ -139,4 +141,27 @@ describe("live detector", () => {
     const result = await detectSemantic("x".repeat(6_001), OPTIONS);
     expect(result).toEqual({ ok: false, reason: "too-large" });
   });
+
+  /** The invariant was locked on the deterministic layer alone, which is how a
+   * Luhn-valid timestamp came back as a card once the model was enabled. This
+   * runs the whole pipeline, the layer that actually reaches the clipboard. */
+  for (const [name, text] of IDENTIFIER_CASES) {
+    it(`leaves a ${name} alone with the detector running`, async ({ skip }) => {
+      if (!detectorUp) skip();
+
+      const semantic = await detectSemantic(text, OPTIONS);
+      expect(semantic.ok).toBe(true);
+      if (!semantic.ok) return;
+
+      const merged = mergeSpans([
+        ...detectDeterministic(text),
+        ...semantic.spans,
+      ]);
+      const spans = mergeSpans([
+        ...merged,
+        ...propagateFirstNames(text, merged),
+      ]);
+      expect(applyMasking(text, spans).masked).toBe(text);
+    });
+  }
 });
