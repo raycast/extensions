@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1280" viewBox="0 0 1280 1280" font-family="Menlo, 'SF Mono', monospace">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="320" x2="0" y2="960" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#20202A"/>
+      <stop offset="1" stop-color="#0E0E13"/>
+    </linearGradient>
+    <linearGradient id="plate" gradientUnits="userSpaceOnUse" x1="1023.25" y1="2044.13" x2="1023.75" y2="2.86569">
+      <stop offset="0" stop-color="#AE0A14"/>
+      <stop offset="1" stop-color="#F7481E"/>
+    </linearGradient>
+    <clipPath id="squircle"><rect width="2048" height="2048" rx="458"/></clipPath>
+  </defs>
+
+  <rect width="1280" height="1280" fill="url(#bg)"/>
+
+  <g transform="translate(0,320)">
+
+    <g transform="translate(90,140) scale(0.0625)" clip-path="url(#squircle)">
+      <rect width="2048" height="2048" fill="url(#plate)"/>
+      <path fill="#F5F0E6" d="M 371.606 1326.26 C 343.305 1249.6 332.444 1189.76 324.059 1109.73 C 288.881 773.965 452.428 451.339 779.166 333.735 C 972.969 263.98 1171.98 277.445 1360.47 362.839 C 1511.55 431.597 1625.35 553.494 1682.42 709.916 C 1692.13 736.712 1700.43 763.994 1707.3 791.653 L 1485.23 845.109 C 1443.15 855.144 1398.39 865.021 1356.76 876.085 C 1323.74 788.891 1265.78 709.526 1178.59 670.936 C 1095.66 634.233 989.103 633.085 904.693 665.54 C 825.916 696.617 762.823 757.886 729.45 835.719 C 681.804 944.442 679.059 1101.31 722.584 1211.82 C 739.787 1255.22 766.345 1294.29 800.366 1326.25 L 371.606 1326.26 z"/>
+      <path fill="#141414" d="M 1362.94 1178.21 C 1384.76 1184.1 1407.19 1191.59 1428.86 1198.29 L 1544.2 1234.1 C 1597.67 1250.86 1655.57 1267.22 1708.13 1285.66 C 1701.29 1299.84 1695.11 1312.61 1687.41 1326.31 L 1891.73 1326.16 L 1891.75 1656.79 L 1410.96 1657.02 C 1404.97 1661.52 1382.06 1672.19 1374.84 1675.56 C 1317.32 1702.38 1252.69 1725.12 1189.79 1736.43 C 1039.78 1763.39 872.353 1748.01 732.125 1687.11 C 717.122 1680.59 685.04 1665.95 671.791 1656.9 L 153.51 1656.75 L 153.581 1326.35 L 371.606 1326.26 L 800.366 1326.25 L 1275.55 1326.25 C 1316.88 1280.43 1342.27 1235.98 1362.94 1178.21 z"/>
+      <path fill="#F5F0E6" d="M 671.791 1656.9 L 1152.05 1656.93 L 1324.11 1656.96 C 1351.7 1656.96 1383.64 1656.19 1410.96 1657.02 C 1404.97 1661.52 1382.06 1672.19 1374.84 1675.56 C 1317.32 1702.38 1252.69 1725.12 1189.79 1736.43 C 1039.78 1763.39 872.353 1748.01 732.125 1687.11 C 717.122 1680.59 685.04 1665.95 671.791 1656.9 z"/>
+      <path fill="#F5F0E6" d="M 1362.94 1178.21 C 1384.76 1184.1 1407.19 1191.59 1428.86 1198.29 L 1544.2 1234.1 C 1597.67 1250.86 1655.57 1267.22 1708.13 1285.66 C 1701.29 1299.84 1695.11 1312.61 1687.41 1326.31 L 1275.55 1326.25 C 1316.88 1280.43 1342.27 1235.98 1362.94 1178.21 z"/>
+    </g>
+
+    <text x="90" y="365" font-family="Helvetica Neue, Arial, sans-serif" font-size="78" font-weight="600" fill="#F2F2F5">Caviarde</text>
+    <text x="94" y="418" font-family="Helvetica Neue, Arial, sans-serif" font-size="27" fill="#9A9AA8">Mask personal data in your clipboard</text>
+    <text x="94" y="456" font-family="Helvetica Neue, Arial, sans-serif" font-size="27" fill="#9A9AA8">before you paste it anywhere.</text>
+    <text x="94" y="516" font-family="Helvetica Neue, Arial, sans-serif" font-size="19" letter-spacing="2" fill="#6A6A78">RAYCAST EXTENSION · MACOS · LOCAL-FIRST</text>
+
+    <text x="640" y="140" font-family="Helvetica Neue, Arial, sans-serif" font-size="18" letter-spacing="3" fill="#7A7A8A">CLIPBOARD</text>
+    <rect x="640" y="160" width="550" height="112" rx="16" fill="#1B1B22" stroke="#33333F" stroke-width="2"/>
+    <text x="672" y="206" font-size="23" fill="#C9C9D4">Hi, <tspan fill="#FF8A6B">Rose Martin</tspan> reports a</text>
+    <text x="672" y="244" font-size="23" fill="#C9C9D4">problem, <tspan fill="#FF8A6B">rose@acme-solutions.com</tspan></text>
+
+    <rect x="855" y="304" width="120" height="52" rx="26" fill="#2A2A34" stroke="#43434F" stroke-width="2"/>
+    <text x="915" y="339" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="23" fill="#E8E8F0">⌥ ⌘ V</text>
+
+    <text x="640" y="408" font-family="Helvetica Neue, Arial, sans-serif" font-size="18" letter-spacing="3" fill="#7A7A8A">PASTED</text>
+    <rect x="640" y="428" width="550" height="112" rx="16" fill="#1B1B22" stroke="#33333F" stroke-width="2"/>
+    <text x="672" y="474" font-size="23" fill="#C9C9D4">Hi, <tspan fill="#6FE39A">[PERSON_1]</tspan> reports a</text>
+    <text x="672" y="512" font-size="23" fill="#C9C9D4">problem, <tspan fill="#6FE39A">[EMAIL_1]</tspan></text>
+
+  </g>
+</svg>
