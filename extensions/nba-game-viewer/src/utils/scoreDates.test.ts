@@ -40,9 +40,9 @@ describe("scoreDates", () => {
     }
   });
 
-  it("caps a finite preference that would step past the dates a Date can hold", () => {
+  it("returns only today for a finite preference that steps past the dates a Date can hold", () => {
     for (const numDaysScores of [String(Number.MAX_VALUE), "1e15"]) {
-      expect(getScoreDates(today, numDaysScores)).toEqual(getScoreDates(today, "30"));
+      expect(getScoreDates(today, numDaysScores)).toEqual(["20260919"]);
     }
   });
 
