@@ -42,6 +42,7 @@ export interface HistoryItem {
   url: string;
   lastVisitTime: string;
   lastVisitDate: string;
+  visitCount: number;
 }
 
 // Tabs

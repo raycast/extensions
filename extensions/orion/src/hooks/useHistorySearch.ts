@@ -23,16 +23,16 @@ const getHistoryQuery = (searchText?: string) => {
         .join(" AND ")
     : undefined;
   return `
-      SELECT DISTINCT history_items.ID as id,
-                      TITLE            as title,
-                      URL              as url,
-                      LAST_VISIT_TIME  as lastVisitTime, DATE (LAST_VISIT_TIME) as lastVisitDate
+      SELECT ID as id,
+             TITLE as title,
+             URL as url,
+             LAST_VISIT_TIME as lastVisitTime,
+             DATE(LAST_VISIT_TIME) as lastVisitDate,
+             COALESCE(VISIT_COUNT, 0) as visitCount
       FROM history_items
-          INNER JOIN visits
-      ON visits.HISTORY_ITEM_ID = history_items.ID
-          ${whereClause ? `WHERE ${whereClause}` : ""}
+      ${whereClause ? `WHERE ${whereClause}` : ""}
       ORDER BY LAST_VISIT_TIME DESC
-          LIMIT ${LIMIT}
+      LIMIT ${LIMIT}
   `;
 };
 
