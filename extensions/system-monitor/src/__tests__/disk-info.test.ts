@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseDiskStorage, physicalStoreDevice } from "../lib/disk-info";
+import { parseDiskStorage, physicalStoreDevice, shortDiskSize } from "../lib/disk-info";
 
 // Captured from real `df -kP` output (2026-08-04) with an external APFS SSD
 // mounted; system volumes and non-disk filesystems included as macOS reports
@@ -50,5 +50,35 @@ describe("physicalStoreDevice", () => {
 
   it("returns null when parsing fails", () => {
     expect(physicalStoreDevice("Unknown")).toBeNull();
+  });
+});
+
+describe("parseDiskStorage boot flag and mount", () => {
+  it("marks only the volume mounted at / as the boot volume", () => {
+    const entries = parseDiskStorage(DF_OUTPUT);
+    expect(entries.map((entry) => entry.isBoot)).toEqual([true, false]);
+  });
+
+  it("keeps the mount point so same-named volumes stay distinguishable", () => {
+    const nested =
+      DF_OUTPUT + "/dev/disk6s1     976490576 250167000 253203000    26%    /Volumes/Archive/DagninBackup\n";
+    const entries = parseDiskStorage(nested);
+    expect(entries.map((entry) => entry.mount)).toEqual([
+      "/",
+      "/Volumes/DagninBackup",
+      "/Volumes/Archive/DagninBackup",
+    ]);
+    expect(entries[1].diskName).toBe(entries[2].diskName);
+  });
+});
+
+describe("shortDiskSize", () => {
+  it("keeps only the human-readable size from diskutil", () => {
+    // Captured from `diskutil info disk0` on an M1 Pro (2026-09-02).
+    expect(shortDiskSize("500.3 GB (500277792768 Bytes) (exactly 977105064 512-Byte-Units)")).toBe("500.3 GB");
+  });
+
+  it("passes through values with no byte breakdown", () => {
+    expect(shortDiskSize("Unknown")).toBe("Unknown");
   });
 });
