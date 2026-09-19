@@ -61,10 +61,18 @@ async function checkCustom(t: CustomTarget): Promise<LayerResult> {
       return { id, label: t.raw, status: "fail", detail: err.name === "TimeoutError" ? "timeout" : "unreachable" };
     }
   }
-  const r = await net.tcpProbe(t.host, t.port ?? 80, 3000);
-  return r.reachable
-    ? { id, label: t.raw, status: "ok", latencyMs: r.latencyMs, detail: `tcp ${t.port}` }
-    : { id, label: t.raw, status: "fail", detail: "unreachable" };
+  const port = t.port ?? 80;
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    return { id, label: t.raw, status: "fail", detail: "invalid port" };
+  }
+  try {
+    const r = await net.tcpProbe(t.host, port, 3000);
+    return r.reachable
+      ? { id, label: t.raw, status: "ok", latencyMs: r.latencyMs, detail: `tcp ${port}` }
+      : { id, label: t.raw, status: "fail", detail: "unreachable" };
+  } catch {
+    return { id, label: t.raw, status: "fail", detail: "unreachable" };
+  }
 }
 
 /**
@@ -197,7 +205,7 @@ export async function runCheck(prefs: EnginePrefs): Promise<CheckReport> {
 
   // Verdict: online if a single verified HTTPS check succeeds. Only when nothing verifies
   // do we run the captive-portal probe and fall back to the offline verdicts.
-  const dnsBroken = !dnsOk && dnsServers.length > 0;
+  const dnsBroken = !dnsOk && !internet.hostnameVerified;
   let verdict = onlineVerdict(internet.confirmed, 1, internet.ipVerified, dnsBroken);
   if (!verdict) {
     const captive = await detectCaptive(3000);

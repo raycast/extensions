@@ -2,18 +2,12 @@ import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { runCheck, EnginePrefs } from "./engine";
 
-interface RawPrefs {
-  customTargets?: string;
-  showEgressIp: boolean;
-  identifyUpstream: boolean;
-}
-
 export function getEnginePrefs(): EnginePrefs {
-  const p = getPreferenceValues<RawPrefs>();
+  const p = getPreferenceValues<Preferences>();
   return {
     customTargets: p.customTargets || "",
-    showEgressIp: Boolean(p.showEgressIp),
-    identifyUpstream: Boolean(p.identifyUpstream),
+    showEgressIp: p.showEgressIp,
+    identifyUpstream: p.identifyUpstream,
   };
 }
 

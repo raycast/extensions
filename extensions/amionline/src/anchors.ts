@@ -82,6 +82,8 @@ export interface InternetCheck {
   confirmed: number;
   // True when an IP-based endpoint verified, i.e. we reached the internet without needing DNS.
   ipVerified: boolean;
+  // True when a hostname-based endpoint verified, which proves DNS resolution actually works.
+  hostnameVerified: boolean;
   egressIp?: string;
 }
 
@@ -94,6 +96,7 @@ export async function verifyInternet(timeoutMs = 3000): Promise<InternetCheck> {
     results,
     confirmed: results.filter((r) => r.ok).length,
     ipVerified: results.some((r, i) => ANCHORS[i].ipBased === true && r.ok),
+    hostnameVerified: results.some((r, i) => ANCHORS[i].ipBased !== true && r.ok),
     egressIp: results.find((r) => r.egressIp)?.egressIp,
   };
 }

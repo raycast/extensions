@@ -21,7 +21,7 @@
       "name": "customTargets",
       "type": "textfield",
       "required": false,
-      "title": "Custom targets",
+      "title": "Custom Targets",
       "description": "Also check these hosts. Comma or newline separated. Use host:port (e.g. 192.168.1.222:8081) or a full URL.",
       "default": "",
       "placeholder": "192.168.1.222:8081, https://example.com"

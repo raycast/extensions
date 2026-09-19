@@ -79,7 +79,13 @@ export interface TcpResult {
 export function tcpProbe(host: string, port: number, timeoutMs = 2000): Promise<TcpResult> {
   return new Promise((resolve) => {
     const start = Date.now();
-    const sock = connect({ host, port });
+    let sock: ReturnType<typeof connect>;
+    try {
+      sock = connect({ host, port });
+    } catch {
+      resolve({ reachable: false, refused: false });
+      return;
+    }
     let done = false;
     const finish = (r: TcpResult) => {
       if (done) return;
