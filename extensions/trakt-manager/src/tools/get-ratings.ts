@@ -1,4 +1,4 @@
-import { withPagination } from "../lib/schema";
+import { scanPageComplete, withPagination } from "../lib/schema";
 import { CompactRatingItem, toCompactRating } from "./compact-media";
 import { describeRatingScope, pickRatingMatches } from "./rating-lookup";
 import { describeMedia, identifyTraktIdKinds, isMatchableTitle } from "./resolve-media";
@@ -25,8 +25,9 @@ type Input = {
   query?: string;
   /**
    * Optional Trakt ID to check your rating for a specific item.
-   * Movie, show, season and episode IDs overlap: pass `type` ("movies", "shows",
-   * "seasons" or "episodes") with this field. A bare ID with `type: "all"` is refused.
+   * Movie, show and episode IDs overlap: pass `type` ("movies", "shows" or "episodes")
+   * with this field. A bare ID with `type: "all"` is refused. Season IDs cannot be
+   * looked up (`/search/trakt/:id` does not return seasons); use `query` instead.
    */
   traktId?: number;
   /**
@@ -95,8 +96,8 @@ export default async function tool(input: Input): Promise<Output> {
         rated: false,
         exhaustive: false,
         message:
-          `Trakt ID ${traktId} cannot be looked up with \`type: "all"\`: movie, show, season and episode ` +
-          `IDs overlap. Pass \`type: "movies"\`, \`"shows"\`, \`"seasons"\` or \`"episodes"\` instead of ` +
+          `Trakt ID ${traktId} cannot be looked up with \`type: "all"\`: movie, show and episode ` +
+          `IDs overlap. Pass \`type: "movies"\`, \`"shows"\` or \`"episodes"\` instead of ` +
           `answering from this ID.`,
         ratings: [],
         hasMore: false,
@@ -121,16 +122,28 @@ export default async function tool(input: Input): Promise<Output> {
       }
     }
 
-    if (traktId !== undefined && (type === "seasons" || type === "episodes")) {
-      const kind = type === "seasons" ? "season" : "episode";
+    if (traktId !== undefined && type === "seasons") {
+      return {
+        found: false,
+        rated: false,
+        exhaustive: false,
+        message:
+          `Trakt season IDs cannot be looked up: /search/trakt/:id does not return seasons. ` +
+          `Use \`query\` with \`type: "seasons"\` instead of answering from this ID.`,
+        ratings: [],
+        hasMore: false,
+      };
+    }
+
+    if (traktId !== undefined && type === "episodes") {
       try {
-        await describeMedia(kind, traktId);
+        await describeMedia("episode", traktId);
       } catch {
         return {
           found: false,
           rated: false,
           exhaustive: false,
-          message: `Trakt ID ${traktId} is not a ${kind}. Pass the matching \`type\` instead of answering from this call.`,
+          message: `Trakt ID ${traktId} is not an episode. Pass the matching \`type\` instead of answering from this call.`,
           ratings: [],
           hasMore: false,
         };
@@ -171,7 +184,7 @@ export default async function tool(input: Input): Promise<Output> {
       const paginated = withPagination(res);
       scanned.push(...paginated.data.map(toCompactRating));
 
-      if (paginated.data.length < pageSize || p >= paginated.pagination["x-pagination-page-count"]) {
+      if (scanPageComplete(paginated.data.length, paginated.pagination, pageSize)) {
         exhaustive = true;
         break;
       }

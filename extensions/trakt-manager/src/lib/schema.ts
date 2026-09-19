@@ -417,3 +417,16 @@ export const withPagination = <T>(args: { status: number; body: T; headers: Head
     pagination: parsedHeaders,
   };
 };
+
+/**
+ * Trakt clamps `limit` per endpoint. The requested size is not what was served, so a scan
+ * must stop on `X-Pagination-Limit` (or page-count), not on the number we asked for.
+ */
+export function scanPageComplete(
+  pageLength: number,
+  pagination: z.infer<typeof TraktPaginationHeaderSchema>,
+  requestedLimit: number,
+): boolean {
+  const servedLimit = pagination["x-pagination-limit"] || requestedLimit;
+  return pageLength < servedLimit || pagination["x-pagination-page"] >= pagination["x-pagination-page-count"];
+}

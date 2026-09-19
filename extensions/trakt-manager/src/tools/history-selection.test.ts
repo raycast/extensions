@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { toCompactRating, type CompactRatingItem } from "./compact-media";
 import { pickCandidates, type HistoryCandidate } from "./history-candidates";
 import { pickRatingMatches } from "./rating-lookup";
+import { scanPageComplete } from "../lib/schema";
 import { assertSyncAdded, readSyncWrite } from "./sync-write";
 import { describeYearFilter, isMatchableTitle, normalizeTitle, resolveLookupQuery } from "./title-text";
 
@@ -208,6 +209,20 @@ test("1984 stays a title and Blade Runner 2049 is not stripped to Blade Runner",
     nineteenEightyFour.candidates.map((item) => item.traktId),
     [9],
   );
+});
+
+test("scanPageComplete uses the served limit, not the requested one", () => {
+  const clamped = {
+    "x-pagination-page": 1,
+    "x-pagination-limit": 100,
+    "x-pagination-page-count": 3,
+    "x-pagination-item-count": 250,
+  };
+  assert.equal(scanPageComplete(100, clamped, 250), false);
+  assert.equal(scanPageComplete(40, clamped, 250), true);
+
+  const last = { ...clamped, "x-pagination-page": 3 };
+  assert.equal(scanPageComplete(100, last, 250), true);
 });
 
 test("a 201 with every count at zero is not a write", () => {

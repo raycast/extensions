@@ -6,17 +6,18 @@ import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
   /**
-   * The type of media to rate: "movie", "show", "season", or "episode".
+   * The type of media to rate: "movie", "show", or "episode".
+   * Seasons are not supported: Trakt's ID lookup does not return them.
    */
-  type: "movie" | "show" | "season" | "episode";
+  type: "movie" | "show" | "episode";
   /**
    * The unique Trakt ID of the media item to rate.
    * Obtain this first from `search-movies`, `search-shows`, `get-up-next`, `get-watchlist`,
-   * `get-ratings` (season IDs), or `get-season-episodes` (episode IDs).
+   * or `get-season-episodes` (episode IDs).
    */
   traktId: number;
   /**
-   * Optional title of the movie, TV show, season, or episode. Ignored: confirmation
+   * Optional title of the movie, TV show, or episode. Ignored: confirmation
    * always uses the title Trakt holds for `traktId`.
    */
   title?: string;
@@ -56,7 +57,6 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const typeMap: Record<string, string> = {
     movie: "Movie",
     show: "TV Show",
-    season: "Season",
     episode: "Episode",
   };
 
@@ -73,7 +73,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 };
 
 /**
- * Rate a movie, TV show, season, or episode on Trakt (rating score between 1 and 10).
+ * Rate a movie, TV show, or episode on Trakt (rating score between 1 and 10).
  * Requires a valid `traktId`.
  * A confirmation dialog is shown to the user before recording the rating.
  */

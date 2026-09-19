@@ -1,4 +1,4 @@
-import { withPagination } from "../lib/schema";
+import { scanPageComplete, withPagination } from "../lib/schema";
 import { CompactMovie, CompactShow, toCompactMovie, toCompactShow } from "./compact-media";
 import { identifyTraktIdKinds, isMatchableTitle } from "./resolve-media";
 import { classifyTitleMatch, partitionByLookup, resolveLookupQuery } from "./title-text";
@@ -103,7 +103,7 @@ async function fetchAllPagesForQuery<
       }
     }
 
-    if (paginated.data.length < pageSize || p >= paginated.pagination["x-pagination-page-count"]) {
+    if (scanPageComplete(paginated.data.length, paginated.pagination, pageSize)) {
       exhaustive = true;
       break;
     }

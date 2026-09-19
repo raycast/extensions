@@ -6,9 +6,10 @@ import { executeToolCall, toolTraktClient } from "./tool-client";
 
 type Input = {
   /**
-   * The type of media whose rating should be removed: "movie", "show", "season", or "episode".
+   * The type of media whose rating should be removed: "movie", "show", or "episode".
+   * Seasons are not supported: Trakt's ID lookup does not return them.
    */
-  type: "movie" | "show" | "season" | "episode";
+  type: "movie" | "show" | "episode";
   /**
    * The unique Trakt ID of the media item.
    * Obtain this first from `get-ratings`, `search-movies`, `search-shows`, or `get-season-episodes`.
@@ -30,7 +31,6 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const typeMap: Record<string, string> = {
     movie: "Movie",
     show: "TV Show",
-    season: "Season",
     episode: "Episode",
   };
 
@@ -48,7 +48,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 };
 
 /**
- * Remove your rating for a movie, TV show, season, or episode on Trakt.
+ * Remove your rating for a movie, TV show, or episode on Trakt.
  * Requires a valid `traktId`.
  * A destructive confirmation dialog is shown to the user before removing the rating.
  */

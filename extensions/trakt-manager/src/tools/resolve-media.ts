@@ -225,7 +225,7 @@ export async function resolveMovie(title: string, year?: number): Promise<Resolv
   return pickBestMatch(candidates, rawExact ? title : (lookup.text ?? title), rawExact ? year : lookup.year);
 }
 
-export type MediaKind = "movie" | "show" | "season" | "episode";
+export type MediaKind = "movie" | "show" | "episode";
 
 function withYear(title: string, year?: number): string {
   return year ? `${title} (${year})` : title;
@@ -243,12 +243,6 @@ function buildLabel(kind: MediaKind, traktId: number, entry: TraktIdLookupEntry)
 
   if (kind === "show" && entry.show) {
     return withYear(entry.show.title ?? `Show ${traktId}`, entry.show.year);
-  }
-
-  if (kind === "season" && entry.season) {
-    const showTitle = entry.show?.title ?? `Show ${traktId}`;
-    const number = entry.season.number;
-    return number === undefined ? `${showTitle}, a season` : `${showTitle}, season ${number}`;
   }
 
   if (kind === "episode" && entry.episode) {
@@ -273,6 +267,9 @@ function buildLabel(kind: MediaKind, traktId: number, entry: TraktIdLookupEntry)
  * written rather than the caller's label, otherwise a user can approve "Dune (2021)" while a
  * different item gets modified. A failed lookup propagates and blocks the write, which is the
  * safe outcome.
+ *
+ * `/search/trakt/:id` documents `movie`, `show`, `episode`, `person` and `list`.
+ * `type=season` is ignored, so seasons are never resolved here.
  */
 export async function describeMedia(kind: MediaKind, traktId: number): Promise<string> {
   const res = await executeToolCall(

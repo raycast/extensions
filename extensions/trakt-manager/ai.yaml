@@ -15,7 +15,7 @@ instructions: |
   - To check if a specific title is in the watchlist (e.g. "DTF est dans ma watchlist ?", "Is Inception in my watchlist?"), call `get-watchlist` ONCE with the `query` parameter (e.g. `query: "DTF"`). That scan pages through the watchlist locally and stops at a page cap — it is not a server-side title search. Trust a negative ONLY when `exhaustive` is true. `inWatchlist` covers that exact title only; entries that merely contain it (a sequel, a spin-off) come back in `matchedMovies` / `matchedShows`, so mention them instead of answering with a flat no. A year miss (Dune 1989 asked, Dune 2021 present) is not a confirmed absence.
   - To check what score you gave to a title (e.g. "Quelle note ai-je mise à Severance ?"), call `get-ratings` with the `query` parameter (e.g. `query: "Severance"`). `rated` / `userRating` cover that exact title only; entries that merely contain it come back in `ratings`, so mention them instead of answering with a flat no. Never conclude "never rated" from a browse page.
   - When several releases share a title, pass `year` on `get-ratings` the same way you do on `get-history`. A response that names another year is not a never-rated. Do not pass `rating` to hide other scores: the tool still reports the real score if it differs.
-  - When retrying a ratings lookup with a `traktId`, always pass `type: "movies"`, `"shows"`, `"seasons"` or `"episodes"`. A bare ID with `type: "all"` is refused because those namespaces overlap.
+  - When retrying a ratings lookup with a `traktId`, always pass `type: "movies"`, `"shows"` or `"episodes"`. A bare ID with `type: "all"` is refused because those namespaces overlap. Season IDs cannot be looked up; use `query` with `type: "seasons"`.
   - When retrying a lookup with a `traktId` from `search-movies` or `search-shows`, always pass `type: "movies"` or `type: "shows"` to match the tool that produced the ID. Never send a bare `traktId` with the default `type: "all"`.
   - When the user asks to simply see their watchlist, watch history, or ratings, fetch only page 1 and summarize it. Mention the total item count and offer the next page instead of querying page after page.
 
@@ -39,8 +39,8 @@ instructions: |
   - To mark a specific TV episode as watched, use `mark-episode-watched` with `showTraktId`, `seasonNumber`, and `episodeNumber`.
   - To mark an ENTIRE TV series (all seasons and episodes) as watched, use `mark-show-watched`. Only use this when the user explicitly asks to mark the whole show as watched.
   - To remove a movie, TV show, or episode from watch history, use `remove-from-history`.
-  - To rate a movie, TV show, season, or episode, use `rate-media` with a whole number between 1 and 10. Decimal scores are rejected, so round before calling and tell the user which score you used.
-  - To remove a rating from a movie, TV show, season, or episode, use `remove-rating`.
+  - To rate a movie, TV show, or episode, use `rate-media` with a whole number between 1 and 10. Decimal scores are rejected, so round before calling and tell the user which score you used. Seasons cannot be rated through these tools.
+  - To remove a rating from a movie, TV show, or episode, use `remove-rating`.
   - All write and destructive tools automatically prompt the user with a confirmation dialog before executing. The dialog names the item by looking its Trakt ID up on Trakt, so a wrong ID surfaces there rather than silently modifying the wrong item.
 
 evals:
