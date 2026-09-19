@@ -567,25 +567,40 @@ interface CachedTranscript {
   /** Identity of the bytes this was read from, so a changed file is noticed. */
   mtimeMs: number;
   size: number;
+  /** When that identity was last confirmed against the file. */
+  checkedAt: number;
 }
 
 const transcriptTextCache = new Map<string, CachedTranscript>();
 const TRANSCRIPT_CACHE_BUDGET_BYTES = 32 * 1024 * 1024;
+const TRANSCRIPT_FRESHNESS_MS = 2_000;
 let transcriptCacheBytes = 0;
 
 /**
  * Lowercased transcript text, reused while the file behind it is unchanged.
  *
- * Validated with a `stat` on every call rather than trusted. The other command
- * in this extension writes these files into the same directory, so this process
- * can hold text that is stale — or hold the ABSENCE of a transcript that has
- * since appeared, which hides that meeting from every later search until the
- * command closes. Nothing in-process would ever learn either.
+ * Validated with a `stat` rather than trusted. The other command in this
+ * extension writes these files into the same directory, so this process can
+ * hold text that is stale — or hold the ABSENCE of a transcript that has since
+ * appeared, which hides that meeting from every later search until the command
+ * closes. Nothing in-process would ever learn either.
  *
- * A `stat` is cheap next to a read, and is paid only for meetings whose index
- * already missed. A missing transcript is never cached.
+ * That `stat` is rate-limited per entry, because this runs on the RENDER path:
+ * every keystroke re-filters the whole corpus, so validating each hit would put
+ * hundreds of synchronous file checks between the key and the frame. A recent
+ * hit is reused untouched, so the steady-state cost of typing is a Map lookup.
+ * The window bounds how long a transcript written by the other command stays
+ * invisible — seconds, not the life of the command, which is the bug this
+ * validation exists to prevent.
+ *
+ * A missing transcript is never cached: it can appear at any moment, and its
+ * `stat` throws without ever reading, so there is nothing to rate-limit.
  */
 function transcriptTextFor(recordingId: string): string {
+  const hit = transcriptTextCache.get(recordingId);
+  const now = Date.now();
+  if (hit !== undefined && now - hit.checkedAt < TRANSCRIPT_FRESHNESS_MS) return hit.text;
+
   let stat: { mtimeMs: number; size: number };
   try {
     stat = statSync(transcriptPath(recordingId));
@@ -596,8 +611,10 @@ function transcriptTextFor(recordingId: string): string {
     return "";
   }
 
-  const hit = transcriptTextCache.get(recordingId);
-  if (hit !== undefined && hit.mtimeMs === stat.mtimeMs && hit.size === stat.size) return hit.text;
+  if (hit !== undefined && hit.mtimeMs === stat.mtimeMs && hit.size === stat.size) {
+    hit.checkedAt = now;
+    return hit.text;
+  }
 
   const text = (loadTranscript(recordingId) ?? "").toLowerCase();
   if (!text) {
@@ -621,7 +638,7 @@ function transcriptTextFor(recordingId: string): string {
     transcriptTextCache.delete(oldest);
   }
 
-  transcriptTextCache.set(recordingId, { text, mtimeMs: stat.mtimeMs, size: stat.size });
+  transcriptTextCache.set(recordingId, { text, mtimeMs: stat.mtimeMs, size: stat.size, checkedAt: now });
   transcriptCacheBytes += cost;
   return text;
 }
