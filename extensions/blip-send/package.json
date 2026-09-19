@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "blip-send",
+  "title": "Blip Send",
+  "description": "Send files from Finder to your Blip devices and contacts, and manage transfers, without opening the Blip window.",
+  "icon": "blip-send.png",
+  "author": "andrew_beniston",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "send",
+      "title": "Send Files with Blip",
+      "subtitle": "Blip",
+      "description": "Send the selected Finder items, or chosen files, to one of your devices or contacts.",
+      "mode": "view"
+    },
+    {
+      "name": "transfers",
+      "title": "Blip Transfers",
+      "subtitle": "Blip",
+      "description": "See live progress, accept or decline incoming transfers, and pause, resume or cancel.",
+      "mode": "view"
+    },
+    {
+      "name": "people",
+      "title": "Blip Devices and Contacts",
+      "subtitle": "Blip",
+      "description": "Browse your devices and contacts, rename or remove a device, and search people on Blip.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "afterSend",
+      "type": "dropdown",
+      "required": false,
+      "title": "After Sending",
+      "description": "What Raycast does once the transfer has started.",
+      "default": "close",
+      "data": [
+        {
+          "title": "Close Raycast",
+          "value": "close"
+        },
+        {
+          "title": "Show transfer progress",
+          "value": "progress"
+        }
+      ]
+    },
+    {
+      "name": "savePath",
+      "type": "directory",
+      "required": false,
+      "title": "Save Incoming Files To",
+      "description": "Folder used when you accept a transfer from Raycast. Leave empty to use Blip's own setting."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1",
+    "protobufjs": "^7.5.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "protobufjs-cli": "^1.2.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "gen:proto": "node scripts/gen-proto.mjs"
+  }
+}
