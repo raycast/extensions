@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Support Little Arc and Peek] - {PR_MERGE_DATE}
+## [Support Little Arc and Peek] - 2026-09-19
 
 - Fix Arc: copy the URL of a focused Little Arc window or Peek preview instead of the underlying tab of the main window (#12677)
 
