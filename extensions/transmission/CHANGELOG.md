@@ -1,6 +1,6 @@
 # Transmission Changelog
 
-## [Update dependencies] - {PR_MERGE_DATE}
+## [Update dependencies] - 2026-09-19
 
 - Update `react` and `react-dom` to match the current Raycast runtime
 
