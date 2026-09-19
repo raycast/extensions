@@ -1,6 +1,6 @@
 # Port Manager Changelog
 
-## [Exposure] - {PR_MERGE_DATE}
+## [Exposure] - 2026-09-19
 
 - Colour each port tag by how exposed it is: green for loopback only, orange for a wildcard bind reachable from the network, blue for one specific interface
 - Add an Exposure row to the detail panel and a search-bar filter to show only localhost, network-reachable or interface-bound ports
