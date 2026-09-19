@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reepl",
+  "title": "Reepl",
+  "description": "Create, schedule, publish, and manage Reepl content from Raycast",
+  "icon": "icon.png",
+  "author": "abhi",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "homepage": "https://www.reepl.io",
+  "keywords": [
+    "LinkedIn",
+    "content",
+    "publishing",
+    "social media",
+    "automation",
+    "API"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "run-operation",
+      "title": "Run Reepl API Operation",
+      "description": "Execute any supported Reepl API operation",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Reepl API Key",
+      "description": "API key from app.reepl.io/settings/api-keys"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "tsx": "^4.23.5",
+    "typescript": "^7.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "tsx --test test/api.test.ts"
+  }
+}
