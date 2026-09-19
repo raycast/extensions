@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lunar-calendar",
+  "title": "Lunar Calendar",
+  "description": "A simple Chinese Lunar Calendar extension to check lunar dates, traditional festivals, and public holidays.",
+  "icon": "extension-icon.png",
+  "author": "bpktnmbwrp",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lunar",
+      "title": "Lunar Calendar",
+      "subtitle": "Show Chinese Lunar Calendar",
+      "description": "View monthly lunar calendar with traditional festivals and holidays",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "cross-fetch": "^4.1.0",
+    "lunar-javascript": "^1.7.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
