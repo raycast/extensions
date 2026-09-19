@@ -1,3 +1,4 @@
+import { statSync } from "node:fs";
 import crypto from "crypto";
 import { logger } from "@chrismessina/raycast-logger";
 import { LocalStorage } from "@raycast/api";
@@ -7,6 +8,7 @@ import {
   loadTranscript,
   pruneTranscripts,
   saveTranscript,
+  transcriptPath,
 } from "./transcriptStore";
 
 /**
@@ -559,16 +561,52 @@ export async function clearAllCache(): Promise<void> {
  * Typical use sits far below the budget — `pruneCache` keeps 50 meetings by
  * default, roughly 3 MB of transcript.
  */
-const transcriptTextCache = new Map<string, string>();
+interface CachedTranscript {
+  /** Lowercased file contents. */
+  text: string;
+  /** Identity of the bytes this was read from, so a changed file is noticed. */
+  mtimeMs: number;
+  size: number;
+}
+
+const transcriptTextCache = new Map<string, CachedTranscript>();
 const TRANSCRIPT_CACHE_BUDGET_BYTES = 32 * 1024 * 1024;
 let transcriptCacheBytes = 0;
 
-/** Lowercased transcript text, read from disk once. Empty when absent. */
+/**
+ * Lowercased transcript text, reused while the file behind it is unchanged.
+ *
+ * Validated with a `stat` on every call rather than trusted. The other command
+ * in this extension writes these files into the same directory, so this process
+ * can hold text that is stale — or hold the ABSENCE of a transcript that has
+ * since appeared, which hides that meeting from every later search until the
+ * command closes. Nothing in-process would ever learn either.
+ *
+ * A `stat` is cheap next to a read, and is paid only for meetings whose index
+ * already missed. A missing transcript is never cached.
+ */
 function transcriptTextFor(recordingId: string): string {
+  let stat: { mtimeMs: number; size: number };
+  try {
+    stat = statSync(transcriptPath(recordingId));
+  } catch {
+    // No file yet. Drop anything held and do NOT record the absence — it can
+    // appear at any moment from the other command.
+    forgetTranscriptWords(recordingId);
+    return "";
+  }
+
   const hit = transcriptTextCache.get(recordingId);
-  if (hit !== undefined) return hit;
+  if (hit !== undefined && hit.mtimeMs === stat.mtimeMs && hit.size === stat.size) return hit.text;
 
   const text = (loadTranscript(recordingId) ?? "").toLowerCase();
+  if (!text) {
+    forgetTranscriptWords(recordingId);
+    return "";
+  }
+
+  // Replacing an entry: release what it held before accounting for the new one.
+  forgetTranscriptWords(recordingId);
   const cost = estimatedBytes(text);
 
   // One transcript larger than the whole budget is searched but NOT retained.
@@ -579,11 +617,11 @@ function transcriptTextFor(recordingId: string): string {
   while (transcriptCacheBytes + cost > TRANSCRIPT_CACHE_BUDGET_BYTES && transcriptTextCache.size > 0) {
     const oldest = transcriptTextCache.keys().next().value;
     if (oldest === undefined) break;
-    transcriptCacheBytes -= estimatedBytes(transcriptTextCache.get(oldest) ?? "");
+    transcriptCacheBytes -= estimatedBytes(transcriptTextCache.get(oldest)?.text ?? "");
     transcriptTextCache.delete(oldest);
   }
 
-  transcriptTextCache.set(recordingId, text);
+  transcriptTextCache.set(recordingId, { text, mtimeMs: stat.mtimeMs, size: stat.size });
   transcriptCacheBytes += cost;
   return text;
 }
@@ -603,7 +641,7 @@ function estimatedBytes(text: string): number {
 export function forgetTranscriptWords(recordingId: string): void {
   const held = transcriptTextCache.get(recordingId);
   if (held === undefined) return;
-  transcriptCacheBytes -= estimatedBytes(held);
+  transcriptCacheBytes -= estimatedBytes(held.text);
   transcriptTextCache.delete(recordingId);
 }
 
