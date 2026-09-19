@@ -2,7 +2,7 @@
 
 ## [Database Backups] - {PR_MERGE_DATE}
 
-- Add a `View Backups` action to Postgres, MariaDB, MySQL and MongoDB services, listing scheduled S3 backups with `Add Backup`, `Edit Backup`, `Run Backup Now` and `Delete Backup` actions.
+- Add a `View Backups` action to Postgres, MariaDB, MySQL and MongoDB services, listing scheduled S3 backups with `Add Backup`, `Edit Backup`, `Run Backup Now` and `Delete Backup` actions. The backup form can also create a new destination on the spot via `Add Destination`, without leaving to the separate Destinations command.
 
 ## [Add Domain Action] - 2026-09-19
 
