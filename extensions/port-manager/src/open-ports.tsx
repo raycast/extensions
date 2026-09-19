@@ -9,8 +9,8 @@ import { ShowInFinderActionMenu } from "./actions/ShowInFinderActionMenu";
 import Toasts from "./feedback/Toasts";
 import { useNamedPorts } from "./hooks/useNamedPorts";
 import useProcesses from "./hooks/useProcesses";
-import codeBlock from "./utilities/codeBlock";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
+import { getProcessMarkdown } from "./utilities/getProcessMarkdown";
 import { platformShortcut } from "./utilities/platform";
 
 export default function Command() {
@@ -18,7 +18,7 @@ export default function Command() {
   const { processes, revalidateProcesses, isLoadingProcesses, processesError } = useProcesses();
   const { getNamedPort } = useNamedPorts();
 
-  const [isShowingDetail, setIsShowingDetail] = useCachedState("showDetail", false);
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("showDetail", true);
 
   const hasProcesses = (processes?.length ?? 0) > 0;
 
@@ -151,7 +151,7 @@ export default function Command() {
               .concat(p.commandLine !== undefined ? [p.commandLine] : [])}
             detail={
               <List.Item.Detail
-                markdown={p.commandLine !== undefined ? `**Command Line**\n\n${codeBlock(p.commandLine)}` : undefined}
+                markdown={getProcessMarkdown(p)}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Name" text={p.name} />
