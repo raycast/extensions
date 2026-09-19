@@ -37,22 +37,8 @@ function writeCachedSite(accountKey: string, site: CachedJiraSite) {
   siteCache.set(accountKey, JSON.stringify(site));
 }
 
-function getOAuthAccountKey(token: string) {
-  const [, payload] = token.split(".");
-  if (!payload) {
-    return null;
-  }
-
-  try {
-    const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { sub?: unknown };
-    return typeof claims.sub === "string" && claims.sub !== "" ? `oauth:${claims.sub}` : null;
-  } catch {
-    return null;
-  }
-}
-
 async function resolveCredentials(
-  accountKey: string | null,
+  accountKey: string,
   authorizationHeader: string,
   load: () => Promise<CachedJiraSite>,
 ) {
@@ -63,13 +49,11 @@ async function resolveCredentials(
   const loadAndCache = async () => {
     const site = await load();
     apply(site);
-    if (accountKey) {
-      writeCachedSite(accountKey, site);
-    }
+    writeCachedSite(accountKey, site);
   };
 
-  const cachedSite = accountKey ? readCachedSite(accountKey) : null;
-  if (!accountKey || !cachedSite) {
+  const cachedSite = readCachedSite(accountKey);
+  if (!cachedSite) {
     await loadAndCache();
     return;
   }
@@ -125,6 +109,8 @@ export const jiraWithApiToken = {
   },
 };
 
+const oauthSiteCacheKey = "oauth";
+
 export const jira = OAuthService.jira({
   clientId: "NAeIO0L9UVdGqKj5YF32HhcysfBCP31P",
   authorizeUrl: "https://jira.oauth.raycast.com/authorize",
@@ -134,7 +120,7 @@ export const jira = OAuthService.jira({
   async onAuthorize({ token }) {
     const authorizationHeader = `Bearer ${token}`;
 
-    await resolveCredentials(getOAuthAccountKey(token), authorizationHeader, async () => {
+    await resolveCredentials(oauthSiteCacheKey, authorizationHeader, async () => {
       const sitesResponse = await fetch("https://api.atlassian.com/oauth/token/accessible-resources", {
         headers: {
           Authorization: authorizationHeader,
@@ -161,6 +147,16 @@ export const jira = OAuthService.jira({
     });
   },
 });
+
+// The cached site belongs to the account that signed in last. Signing in through the browser is
+// the only point where another account can be connected (first connection, or a re-connection after
+// the refresh token was rejected), so the cached site is dropped before the sign-in starts. Stored
+// tokens are reused or refreshed without a sign-in, and those keep the account.
+const signIn = jira.client.authorize.bind(jira.client);
+jira.client.authorize = (options) => {
+  siteCache.remove(oauthSiteCacheKey);
+  return signIn(options);
+};
 
 let jiraCredentials: JiraCredentials | null = null;
 
