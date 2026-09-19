@@ -76,7 +76,7 @@ function resolveMappingValues(
 }
 
 function parseField(label: string, input: unknown, source: string, collection: string, record: string): ReferenceField {
-  const sensitiveLabel = SENSITIVE_PATTERN.test(label);
+  const sensitiveLabel = SENSITIVE_PATTERN.test(label) || getActionDefinition(label)?.sensitive === true;
   const scalar = scalarToString(input);
   if (scalar !== undefined) {
     return {

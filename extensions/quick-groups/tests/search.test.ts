@@ -12,6 +12,7 @@ machines:
       ssh: root@192.168.1.46
       open: https://192.168.1.46:8006
     api_token: swordfish
+    pwd: hunter2
     login:
       value: admin
       pwd: even-more-secret
@@ -39,6 +40,7 @@ describe("searchRecords", () => {
 
   it("does not index pwd action targets", () => {
     expect(searchRecords(index, "even-more-secret")).toHaveLength(0);
+    expect(searchRecords(index, "hunter2")).toHaveLength(0);
     expect(searchRecords(index, "admin")).toHaveLength(1);
   });
 

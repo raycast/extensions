@@ -93,6 +93,20 @@ services:
     expect(password.values).toEqual([]);
   });
 
+  it("masks a scalar field registered as a sensitive action", () => {
+    const { records } = parseReferenceYaml(
+      `
+services:
+  router:
+    pwd: hunter2
+`,
+      "secrets.yaml",
+    );
+    const password = records[0].fields[0];
+    expect(password).toMatchObject({ label: "pwd", effectiveValue: "hunter2", sensitive: true });
+    expect(password.values).toEqual(["hunter2"]);
+  });
+
   it("substitutes sibling values in annotated fields", () => {
     const { records, diagnostics } = parseReferenceYaml(
       `

@@ -10,7 +10,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createExampleFile } from "./create-example";
 import { displayValue, FieldActions, iconForAction, titleCase } from "./field-ui";
 import { resolveGroupsDirectory } from "./groups-directory";
@@ -121,6 +121,9 @@ export default function Command() {
     () => [...new Set(records.map((record) => record.collection))].sort((a, b) => a.localeCompare(b)),
     [records],
   );
+  useEffect(() => {
+    if (collection !== "__all__" && !collections.includes(collection)) setCollection("__all__");
+  }, [collection, collections]);
   const matches = useMemo(
     () =>
       searchRecords(index, searchText).filter((record) => collection === "__all__" || record.collection === collection),

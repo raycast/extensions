@@ -23,6 +23,7 @@
     {
       "name": "search-groups",
       "title": "Search Groups",
+      "subtitle": "Quick Groups",
       "description": "Search grouped records from local YAML files",
       "keywords": [
         "qg",
@@ -34,6 +35,7 @@
     {
       "name": "browse-fields",
       "title": "Browse Fields",
+      "subtitle": "Quick Groups",
       "description": "Browse grouped values by field",
       "keywords": [
         "fields",
