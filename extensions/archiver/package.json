@@ -41,7 +41,7 @@
       "name": "revealInFinder",
       "type": "checkbox",
       "required": false,
-      "title": "",
+      "title": "Finder",
       "description": "Reveal the compressed file in Finder after compression completes",
       "label": "Reveal Compressed File in Finder",
       "default": true
@@ -50,7 +50,6 @@
       "name": "revealExtracted",
       "type": "checkbox",
       "required": false,
-      "title": "",
       "description": "Reveal extracted files in Finder after extraction completes",
       "label": "Reveal Extracted Files in Finder",
       "default": true

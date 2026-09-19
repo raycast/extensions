@@ -1,4 +1,4 @@
-import { afterEach, expect, mock, test } from "bun:test";
+import { afterEach, expect, mock, spyOn, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 
 const getPreferenceValues = mock(() => ({ defaultCompressionFormat: "ZIP", revealInFinder: true }));
@@ -6,23 +6,31 @@ const getSelectedFinderItems = mock(async () => [{ path: "/tmp/example.txt" }]);
 const showInFinder = mock(async () => undefined);
 const showHUD = mock(async () => undefined);
 const showToast = mock(() => undefined);
-const compress = mock(async () => "/tmp/example.zip");
-const ensureBinary = mock(async () => undefined);
 
 mock.module("@raycast/api", () => ({
+  environment: { assetsPath: "/tmp", supportPath: "/tmp" },
   getPreferenceValues,
   getSelectedFinderItems,
   showInFinder,
   showHUD,
   showToast,
   Toast: { Style: { Animated: "animated" } },
+  Alert: {},
+  confirmAlert: () => Promise.resolve(false),
+  Icon: {},
+  Color: {},
 }));
 mock.module("@raycast/utils", () => ({ showFailureToast: mock(() => undefined) }));
-mock.module("../src/common/utils", () => ({ compress, ensureBinary }));
+
+const utils = await import("../src/common/utils");
+const compress = spyOn(utils, "compress").mockImplementation(async () => "/tmp/example.zip");
+const ensureBinary = spyOn(utils, "ensureBinary").mockImplementation(async () => undefined);
 
 afterEach(() => {
   mock.clearAllMocks();
   getPreferenceValues.mockReturnValue({ defaultCompressionFormat: "ZIP", revealInFinder: true });
+  compress.mockImplementation(async () => "/tmp/example.zip");
+  ensureBinary.mockImplementation(async () => undefined);
 });
 
 test("reveals the compressed archive when the preference is enabled", async () => {

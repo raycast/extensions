@@ -1,67 +1,64 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+let mockPreferences: Record<string, unknown> = {
+  useOriginalNameWhenSingle: false,
+  useParentFolderNameWhenMultiple: false,
+  locationSaveCompressed: "",
+  locationSaveExtracted: "",
+};
+
+mock.module("@raycast/api", () => ({
+  environment: { assetsPath: "/tmp", supportPath: "/tmp" },
+  getPreferenceValues: () => mockPreferences,
+  Color: { Orange: "orange", Red: "red", Yellow: "yellow", Green: "green" },
+  Alert: {},
+  confirmAlert: () => Promise.resolve(false),
+  Icon: {},
+}));
+
 describe("unique naming logic", () => {
-  test("generates unique file names with iterative counter", () => {
+  test("generates unique file names with iterative counter via getCompressSaveLocationAndName", async () => {
+    const { getCompressSaveLocationAndName } = await import("../src/common/utils");
+    const { CompressFormat } = await import("../src/common/const");
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "archiver-test-compress-"));
     try {
-      const baseName = "Archive";
-      const ext = ".zip";
+      const filePath = path.join(tmpDir, "file.txt");
 
-      function getNextName() {
-        let name = `${baseName}${ext}`;
-        let counter = 2;
-        while (fs.existsSync(path.join(tmpDir, name))) {
-          name = `${baseName} ${counter}${ext}`;
-          counter++;
-        }
-        return name;
-      }
+      const res1 = await getCompressSaveLocationAndName(true, filePath, CompressFormat.ZIP);
+      expect(res1.name).toBe("Archive.zip");
+      expect(res1.location).toBe(tmpDir + "/");
+      fs.writeFileSync(path.join(res1.location, res1.name), "content");
 
-      const name1 = getNextName();
-      expect(name1).toBe("Archive.zip");
-      fs.writeFileSync(path.join(tmpDir, name1), "content");
+      const res2 = await getCompressSaveLocationAndName(true, filePath, CompressFormat.ZIP);
+      expect(res2.name).toBe("Archive 2.zip");
+      fs.writeFileSync(path.join(res2.location, res2.name), "content");
 
-      const name2 = getNextName();
-      expect(name2).toBe("Archive 2.zip");
-      fs.writeFileSync(path.join(tmpDir, name2), "content");
-
-      const name3 = getNextName();
-      expect(name3).toBe("Archive 3.zip");
-      fs.writeFileSync(path.join(tmpDir, name3), "content");
+      const res3 = await getCompressSaveLocationAndName(true, filePath, CompressFormat.ZIP);
+      expect(res3.name).toBe("Archive 3.zip");
+      fs.writeFileSync(path.join(res3.location, res3.name), "content");
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 
-  test("generates unique extract folder names with iterative counter", () => {
+  test("generates unique extract folder names with iterative counter via getExtractSaveLocation", async () => {
+    const { getExtractSaveLocation } = await import("../src/common/utils");
+    const { ExtractFormat } = await import("../src/common/const");
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "archiver-test-extract-"));
     try {
-      const baseFolder = "Archive";
+      const zipPath = path.join(tmpDir, "Archive.zip");
 
-      function getNextFolder() {
-        let targetLoc = path.join(tmpDir, baseFolder);
-        let counter = 2;
-        while (fs.existsSync(targetLoc)) {
-          targetLoc = path.join(tmpDir, `${baseFolder} ${counter}`);
-          counter++;
-        }
-        return targetLoc;
-      }
-
-      const folder1 = getNextFolder();
+      const folder1 = await getExtractSaveLocation(zipPath, ExtractFormat.ZIP);
       expect(folder1).toBe(path.join(tmpDir, "Archive"));
-      fs.mkdirSync(folder1);
 
-      const folder2 = getNextFolder();
+      const folder2 = await getExtractSaveLocation(zipPath, ExtractFormat.ZIP);
       expect(folder2).toBe(path.join(tmpDir, "Archive 2"));
-      fs.mkdirSync(folder2);
 
-      const folder3 = getNextFolder();
+      const folder3 = await getExtractSaveLocation(zipPath, ExtractFormat.ZIP);
       expect(folder3).toBe(path.join(tmpDir, "Archive 3"));
-      fs.mkdirSync(folder3);
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }

@@ -63,7 +63,7 @@ export async function compressBy7za(items: string[], format: CompressFormat, pas
   return resPath;
 }
 
-async function getCompressSaveLocationAndName(
+export async function getCompressSaveLocationAndName(
   isSingle: boolean,
   filePath: string,
   format: CompressFormat,
@@ -127,7 +127,7 @@ export async function extractBy7za(file: string, format: ExtractFormat, password
   return location;
 }
 
-async function getExtractSaveLocation(zipPath: string, format: ExtractFormat): Promise<string> {
+export async function getExtractSaveLocation(zipPath: string, format: ExtractFormat): Promise<string> {
   const preferences: IExtractPreferences = getPreferenceValues();
   let saveLoc = preferences.locationSaveExtracted || path.dirname(zipPath);
   if (!saveLoc.endsWith("/")) {
