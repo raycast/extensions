@@ -10,7 +10,8 @@
     "xulobeats",
     "pernielsentikaer",
     "taken",
-    "eduardo_gomez"
+    "eduardo_gomez",
+    "rsperezn"
   ],
   "categories": [
     "Fun"
@@ -21,7 +22,18 @@
       "name": "timezone-buddy",
       "title": "Timezone Buddy",
       "description": "View buddies and the time for their timezones.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "openInCompareView",
+          "title": "Default View",
+          "label": "Open in compare view",
+          "description": "Open straight into the Compare All Buddies grid instead of the buddy list.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "timezone-buddy-menubar",
