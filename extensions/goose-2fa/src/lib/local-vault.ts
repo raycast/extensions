@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import type { SyncSnapshot } from "../../../src/lib/data-transfer";
+import type { SyncSnapshot } from "../../vendor/lib/data-transfer";
 import { snapshotFromLocal } from "./vault-ops";
 
 // 未配置数据源文件时使用的 Raycast 本地库（加密 LocalStorage），键名与 uTools 端一致。

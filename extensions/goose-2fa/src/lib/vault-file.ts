@@ -12,14 +12,14 @@ import {
 } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
-import { parseSyncSnapshot, type SyncSnapshot } from "../../../src/lib/data-transfer";
+import { parseSyncSnapshot, type SyncSnapshot } from "../../vendor/lib/data-transfer";
 import {
   SYNC_LOCK_WAIT_MS,
   SYNC_MAX_BYTES,
   isSameSyncContent,
   normalizeSyncPath,
   syncLockPath,
-} from "../../../shared/sync-protocol";
+} from "../../vendor/shared/sync-protocol";
 
 export type VaultFileRead =
   | { status: "ok"; content: string; snapshot: SyncSnapshot; mtimeMs: number; size: number }

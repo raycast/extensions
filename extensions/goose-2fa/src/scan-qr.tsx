@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, List, Toast, popToRoot, showToast } from "@raycast/api";
 import { unlinkSync } from "node:fs";
 import { useEffect, useState } from "react";
-import { parseImportBundle } from "../../src/lib/data-transfer";
-import type { NewAccountInput } from "../../src/lib/types";
+import { parseImportBundle } from "../vendor/lib/data-transfer";
+import type { NewAccountInput } from "../vendor/lib/types";
 import { commit } from "./lib/commit";
 import { captureScreenToTempFile, detectBarcodes } from "./lib/helper";
 import { addAccounts } from "./lib/vault-ops";

@@ -1,5 +1,5 @@
 import { Toast, showToast } from "@raycast/api";
-import type { SyncSnapshot } from "../../../src/lib/data-transfer";
+import type { SyncSnapshot } from "../../vendor/lib/data-transfer";
 import { getVaultState, updateVault } from "./vault-store";
 
 /** 统一提交入口：写盘成功才提示成功，失败时把数据源文件的真实原因报给用户。 */

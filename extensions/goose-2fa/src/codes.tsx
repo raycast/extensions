@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
-import { useMemo, useState } from "react";
-import { buildGroupTallies, filterByGroup, UNGROUPED_KEY } from "../../src/lib/groups";
-import { formatCode } from "../../src/lib/otp";
-import { filterAccounts } from "../../src/lib/search";
-import type { AccountData, VaultGroup } from "../../src/lib/types";
+import { useEffect, useMemo, useState } from "react";
+import type { LaunchProps } from "@raycast/api";
+import { buildGroupTallies, filterByGroup, UNGROUPED_KEY } from "../vendor/lib/groups";
+import { formatCode } from "../vendor/lib/otp";
+import { filterAccounts } from "../vendor/lib/search";
+import type { AccountData, VaultGroup } from "../vendor/lib/types";
 import { commit } from "./lib/commit";
 import { deliverCode } from "./lib/deliver";
 import { useOtpCodes } from "./lib/use-otp";
@@ -12,9 +13,11 @@ import { clearSyncLock, refreshVault, useVault } from "./lib/vault-store";
 
 const ALL_GROUPS = "__all__";
 
-export default function Codes() {
+export default function Codes(props: LaunchProps<{ arguments: { query?: string } }>) {
   const vault = useVault();
-  const [query, setQuery] = useState("");
+  const argQuery = props.arguments?.query?.trim() ?? "";
+  const [query, setQuery] = useState(argQuery);
+  const [quickDone, setQuickDone] = useState(false);
   const [group, setGroup] = useState<string>(ALL_GROUPS);
   const codes = useOtpCodes(vault.accounts);
   const tallies = useMemo(
@@ -25,6 +28,16 @@ export default function Codes() {
     const byGroup = filterByGroup(vault.accounts, group === ALL_GROUPS ? null : group);
     return filterAccounts(byGroup, query);
   }, [vault.accounts, group, query]);
+
+  useEffect(() => {
+    if (quickDone || !argQuery || vault.status === "loading") return;
+    if (visible.length !== 1) return;
+    const account = visible[0];
+    const code = codes[account.id]?.code;
+    if (!code || code === "------") return;
+    setQuickDone(true);
+    void deliverCode(account, code, "paste");
+  }, [argQuery, vault.status, visible, codes, quickDone]);
 
   return (
     <List
@@ -147,12 +160,12 @@ function CodeItem({
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action title="复制验证码" icon={Icon.Clipboard} onAction={() => void deliverCode(account, code, "copy")} />
           <Action
             title="粘贴到前台应用"
             icon={Icon.Clipboard}
             onAction={() => void deliverCode(account, code, "paste")}
           />
+          <Action title="复制验证码" icon={Icon.Clipboard} onAction={() => void deliverCode(account, code, "copy")} />
           <Action
             title="真实输入到前台应用"
             icon={Icon.Keyboard}

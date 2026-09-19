@@ -1,5 +1,5 @@
 import { Clipboard, Toast, closeMainWindow, showHUD, showToast } from "@raycast/api";
-import type { AccountData } from "../../../src/lib/types";
+import type { AccountData } from "../../vendor/lib/types";
 import { typeText } from "./helper";
 import { consumeHotp } from "./vault-store";
 

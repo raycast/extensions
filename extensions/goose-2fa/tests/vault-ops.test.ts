@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { exportAsSyncJson } from "../../src/lib/data-transfer";
-import type { AccountData, NewAccountInput } from "../../src/lib/types";
+import { exportAsSyncJson } from "../vendor/lib/data-transfer";
+import type { AccountData, NewAccountInput } from "../vendor/lib/types";
 import {
   addGroup,
   emptyTrash,

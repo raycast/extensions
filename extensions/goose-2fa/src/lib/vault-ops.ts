@@ -3,11 +3,11 @@ import {
   exportAsSyncJson,
   parseImportBundle,
   type SyncSnapshot,
-} from "../../../src/lib/data-transfer";
-import { normalizeStoredAccounts } from "../../../src/lib/account-validation";
-import { nextGroupOrder, normalizeGroupName } from "../../../src/lib/groups";
-import type { AccountData, NewAccountInput, VaultGroup } from "../../../src/lib/types";
-import { keepHotpFloor, pruneExpiredTrash } from "../../../shared/vault-ops";
+} from "../../vendor/lib/data-transfer";
+import { normalizeStoredAccounts } from "../../vendor/lib/account-validation";
+import { nextGroupOrder, normalizeGroupName } from "../../vendor/lib/groups";
+import type { AccountData, NewAccountInput, VaultGroup } from "../../vendor/lib/types";
+import { keepHotpFloor, pruneExpiredTrash } from "../../vendor/shared/vault-ops";
 
 export function normalizeGroups(value: unknown): VaultGroup[] {
   if (!Array.isArray(value)) return [];

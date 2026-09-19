@@ -1,14 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { exportAsSyncJson, type SyncSnapshot } from "../../../src/lib/data-transfer";
-import type { AccountData, VaultGroup } from "../../../src/lib/types";
+import { exportAsSyncJson, type SyncSnapshot } from "../../vendor/lib/data-transfer";
+import type { AccountData, VaultGroup } from "../../vendor/lib/types";
 import {
   isSameSyncContent,
   isSameSyncStat,
   parseSyncLockInfo,
   type SyncFileStat,
   type SyncLockInfo,
-} from "../../../shared/sync-protocol";
+} from "../../vendor/shared/sync-protocol";
 import { readLocalVault, writeLocalVault } from "./local-vault";
 import { clearVaultLock, readVaultFile, resolveVaultPath, writeVaultFile, type VaultFileRead } from "./vault-file";
 import { mergeExternalSnapshot } from "./vault-ops";

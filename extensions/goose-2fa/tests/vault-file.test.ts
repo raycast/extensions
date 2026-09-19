@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
-import { normalizeSyncPath, syncLockPath } from "../../shared/sync-protocol";
-import { exportAsSyncJson } from "../../src/lib/data-transfer";
+import { normalizeSyncPath, syncLockPath } from "../vendor/shared/sync-protocol";
+import { exportAsSyncJson } from "../vendor/lib/data-transfer";
 import {
   clearVaultLock,
   lockPathFor,

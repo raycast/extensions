@@ -18,7 +18,7 @@
       "name": "codes",
       "title": "验证码",
       "subtitle": "Goose 2FA",
-      "description": "搜索账户，复制、粘贴或真实输入动态验证码",
+      "description": "搜索账户；带参数且唯一命中时直接粘贴验证码",
       "mode": "view",
       "keywords": [
         "2fa",
@@ -28,6 +28,14 @@
         "验证码",
         "动态口令",
         "goose"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "账户名",
+          "type": "text",
+          "required": false
+        }
       ]
     },
     {

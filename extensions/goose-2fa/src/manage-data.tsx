@@ -12,9 +12,9 @@ import {
 } from "@raycast/api";
 import { readFileSync, writeFileSync } from "node:fs";
 import { useState } from "react";
-import { normalizeNewAccountInput } from "../../src/lib/account-validation";
-import { exportAsJson, exportAsSyncJson } from "../../src/lib/data-transfer";
-import type { AccountData, VaultGroup } from "../../src/lib/types";
+import { normalizeNewAccountInput } from "../vendor/lib/account-validation";
+import { exportAsJson, exportAsSyncJson } from "../vendor/lib/data-transfer";
+import type { AccountData, VaultGroup } from "../vendor/lib/types";
 import { commit } from "./lib/commit";
 import { normalizePath } from "./lib/vault-file";
 import {

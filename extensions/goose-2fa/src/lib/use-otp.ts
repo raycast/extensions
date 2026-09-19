@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { generateHOTP, generateTOTP } from "../../../src/lib/otp";
-import type { AccountData } from "../../../src/lib/types";
+import { generateHOTP, generateTOTP } from "../../vendor/lib/otp";
+import type { AccountData } from "../../vendor/lib/types";
 
 export interface OtpCode {
   code: string;
