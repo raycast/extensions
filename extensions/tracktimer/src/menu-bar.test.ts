@@ -10,6 +10,14 @@ const mocks = vi.hoisted(() => ({
   execute: vi.fn(),
   mode: "timer",
 }));
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((next) => {
+    resolve = next;
+  });
+  return { promise, resolve };
+}
 vi.mock("./session", () => ({
   session: () => ({ ...mocks, api: mocks, baseUrl: "https://tracktimer.app" }),
 }));
@@ -88,5 +96,27 @@ it("clears values on refresh failure instead of showing stale earnings", async (
   mocks.getSummary.mockRejectedValue(new Error("Could not reach TrackTimer"));
   fireEvent.click(screen.getByText("Refresh"));
   await waitFor(() => expect(screen.getByRole("status").textContent).toBe("Unavailable"));
+  expect(screen.queryByText("Stop Timer")).toBeNull();
+});
+it("ignores a refresh that started before the post-stop refresh", async () => {
+  const active = { id: "active", projectName: "Project", elapsedSeconds: 125 };
+  const staleTimer = deferred<typeof active>();
+  mocks.getTimer
+    .mockResolvedValueOnce(active)
+    .mockImplementationOnce(() => staleTimer.promise)
+    .mockResolvedValueOnce(null);
+
+  render(createElement(Command));
+  await screen.findByText("Stop Timer");
+
+  fireEvent.click(screen.getByText("Refresh"));
+  await waitFor(() => expect(mocks.getTimer).toHaveBeenCalledTimes(2));
+  fireEvent.click(screen.getByText("Stop Timer"));
+
+  await waitFor(() => expect(mocks.getTimer).toHaveBeenCalledTimes(3));
+  await waitFor(() => expect(screen.getByText("No running timer")).toBeTruthy());
+
+  staleTimer.resolve(active);
+  await new Promise((resolve) => setTimeout(resolve, 0));
   expect(screen.queryByText("Stop Timer")).toBeNull();
 });

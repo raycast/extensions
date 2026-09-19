@@ -8,13 +8,15 @@ const mocks = vi.hoisted(() => ({
   execute: vi.fn(),
   getClients: vi.fn(),
   getProjects: vi.fn(),
+  cachedClients: vi.fn(),
+  cachedProjects: vi.fn(),
   closeMainWindow: vi.fn(),
 }));
 vi.mock("./session", () => ({
   session: () => ({
     ...mocks,
     api: mocks,
-    cached: { clients: () => [], projects: () => [] },
+    cached: { clients: mocks.cachedClients, projects: mocks.cachedProjects },
     baseUrl: "https://tracktimer.app",
   }),
 }));
@@ -90,6 +92,8 @@ beforeEach(() => {
   mocks.pending.mockResolvedValue({ id: "old" });
   mocks.getClients.mockResolvedValue([{ id: "client", name: "Client" }]);
   mocks.getProjects.mockResolvedValue([{ id: "project", name: "Selected project" }]);
+  mocks.cachedClients.mockReturnValue([]);
+  mocks.cachedProjects.mockReturnValue([]);
   mocks.execute.mockResolvedValue({ timer: null });
 });
 afterEach(cleanup);
@@ -114,4 +118,26 @@ it("still validates the selected project when a previous action is pending", asy
   fireEvent.click(screen.getByRole("button", { name: "Start Timer" }));
   await screen.findByText("Choose a project and keep the note within 500 characters.");
   expect(mocks.execute).not.toHaveBeenCalled();
+});
+it("keeps submission blocked until client and project reloads both finish", async () => {
+  mocks.cachedClients.mockReturnValue([{ id: "client", name: "Client" }]);
+  mocks.cachedProjects.mockReturnValue([{ id: "cached-project", name: "Cached project" }]);
+  let resolveProjects!: (projects: { id: string; name: string }[]) => void;
+  mocks.getProjects.mockImplementation(
+    () =>
+      new Promise<{ id: string; name: string }[]>((resolve) => {
+        resolveProjects = resolve;
+      }),
+  );
+
+  render(createElement(TimerForm));
+  await waitFor(() => expect(mocks.getProjects).toHaveBeenCalledWith("client", true));
+
+  fireEvent.click(screen.getByRole("button", { name: "Start Timer" }));
+  expect(mocks.execute).not.toHaveBeenCalled();
+
+  resolveProjects([{ id: "project", name: "Selected project" }]);
+  await screen.findByRole("option", { name: "Selected project" });
+  fireEvent.click(screen.getByRole("button", { name: "Start Timer" }));
+  await waitFor(() => expect(mocks.execute).toHaveBeenCalled());
 });

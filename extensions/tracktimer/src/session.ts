@@ -15,7 +15,7 @@ type Completion = {
 };
 
 export function session() {
-  const prefs = getPreferenceValues<{ apiToken: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const baseUrl = TRACKTIMER_URL;
   const api = new TrackTimerApi({ baseUrl, token: prefs.apiToken });
   const connectionId = createHash("sha256")

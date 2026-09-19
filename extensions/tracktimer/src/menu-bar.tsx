@@ -33,9 +33,11 @@ export default function Command() {
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState(false);
   const busy = useRef(false);
-  const { displayMode = "timer" } = getPreferenceValues<{ displayMode?: string }>();
+  const refreshVersion = useRef(0);
+  const { displayMode = "timer" } = getPreferenceValues<Preferences.MenuBar>();
   const refresh = useCallback(
     async (forceSummary = false) => {
+      const version = ++refreshVersion.current;
       setLoading(true);
       try {
         const [active, today, operation] = await Promise.all([
@@ -43,16 +45,18 @@ export default function Command() {
           connection.getSummary(Intl.DateTimeFormat().resolvedOptions().timeZone, forceSummary),
           connection.pending(),
         ]);
+        if (version !== refreshVersion.current) return;
         setTimer(active);
         setSummary(today);
         setPending(Boolean(operation));
         setError(undefined);
       } catch (e) {
+        if (version !== refreshVersion.current) return;
         setTimer(null);
         setSummary(undefined);
         setError(e instanceof Error ? e.message : "Could not refresh TrackTimer.");
       } finally {
-        setLoading(false);
+        if (version === refreshVersion.current) setLoading(false);
       }
     },
     [connection],

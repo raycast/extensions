@@ -27,7 +27,9 @@ export default function TimerForm({ onStarted }: { onStarted?: () => Promise<voi
   const [projectId, setProjectId] = useState(() => projects[0]?.id ?? "");
   const [note, setNote] = useState("");
   const [billable, setBillable] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [clientsLoading, setClientsLoading] = useState(true);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string>();
   const [pending, setPending] = useState(false);
   const [startingAt, setStartingAt] = useState<number>();
@@ -42,9 +44,10 @@ export default function TimerForm({ onStarted }: { onStarted?: () => Promise<voi
   }, [startingAt]);
   const busy = useRef(false);
   const [reload, setReload] = useState(0);
+  const loading = clientsLoading || projectsLoading || submitting;
   useEffect(() => {
     let current = true;
-    setLoading(true);
+    setClientsLoading(true);
     // Render cached options immediately, then revalidate every time this form opens.
     Promise.all([connection.api.getClients(true), connection.pending()])
       .then(([items, operation]) => {
@@ -60,7 +63,7 @@ export default function TimerForm({ onStarted }: { onStarted?: () => Promise<voi
         if (current) setError(e instanceof Error ? e.message : "Could not load clients.");
       })
       .finally(() => {
-        if (current) setLoading(false);
+        if (current) setClientsLoading(false);
       });
     return () => {
       current = false;
@@ -68,11 +71,14 @@ export default function TimerForm({ onStarted }: { onStarted?: () => Promise<voi
   }, [connection, reload]);
   useEffect(() => {
     let current = true;
+    setProjectsLoading(true);
     const cached = connection.cached.projects(clientId);
     setProjects(cached ?? []);
     setProjectId(cached?.[0]?.id ?? "");
-    if (!clientId) return;
-    setLoading(true);
+    if (!clientId) {
+      setProjectsLoading(false);
+      return;
+    }
     connection.api
       .getProjects(clientId, true)
       .then((items) => {
@@ -88,7 +94,7 @@ export default function TimerForm({ onStarted }: { onStarted?: () => Promise<voi
         if (current) setError(e instanceof Error ? e.message : "Could not load projects.");
       })
       .finally(() => {
-        if (current) setLoading(false);
+        if (current) setProjectsLoading(false);
       });
     return () => {
       current = false;
@@ -101,7 +107,7 @@ export default function TimerForm({ onStarted }: { onStarted?: () => Promise<voi
       return;
     }
     busy.current = true;
-    setLoading(true);
+    setSubmitting(true);
     setError(undefined);
     setStartingLabel(
       note.trim() || projects.find((project) => project.id === projectId)?.name || "Timer",
@@ -134,7 +140,7 @@ export default function TimerForm({ onStarted }: { onStarted?: () => Promise<voi
     } finally {
       setStartingAt(undefined);
       busy.current = false;
-      setLoading(false);
+      setSubmitting(false);
     }
   }
   return (
