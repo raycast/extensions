@@ -1,0 +1,247 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ticktick-cloud",
+  "title": "TickTick Cloud",
+  "description": "Manage TickTick tasks on Windows through TickTick's official cloud API.",
+  "icon": "tick-logo.png",
+  "author": "raycast.swimwear444",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "defaultTitle",
+      "description": "Default title for new task.",
+      "defaultValue": "none",
+      "title": "Default Title",
+      "required": true,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        },
+        {
+          "title": "Selection",
+          "value": "selection"
+        }
+      ]
+    },
+    {
+      "name": "defaultDate",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Today",
+          "value": "today"
+        },
+        {
+          "title": "Tomorrow",
+          "value": "tomorrow"
+        },
+        {
+          "title": "Day after Tomorrow",
+          "value": "dayAfterTomorrow"
+        },
+        {
+          "title": "Next Week",
+          "value": "nextWeek"
+        }
+      ],
+      "default": "none",
+      "required": false,
+      "title": "Default Date",
+      "description": "Default date for new task."
+    },
+    {
+      "name": "authMode",
+      "title": "Authentication",
+      "type": "dropdown",
+      "required": false,
+      "description": "Choose how to authenticate with TickTick.",
+      "data": [
+        {
+          "title": "OAuth (Recommended)",
+          "value": "oauth"
+        },
+        {
+          "title": "API Token",
+          "value": "apiToken"
+        }
+      ]
+    },
+    {
+      "name": "apiToken",
+      "title": "TickTick API Token",
+      "type": "password",
+      "required": false,
+      "description": "Used only when Authentication is API Token."
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Today",
+      "subtitle": "TickTick",
+      "description": "Show today to-do tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "next7Days",
+      "title": "Next 7 Days",
+      "subtitle": "TickTick",
+      "description": "Show next 7 days to-do tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "subtitle": "TickTick",
+      "description": "Show Inbox to-do tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Tasks",
+      "subtitle": "TickTick",
+      "description": "Search tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Add Task",
+      "subtitle": "TickTick",
+      "description": "Add task in TickTick.",
+      "mode": "view"
+    },
+    {
+      "name": "quickAdd",
+      "title": "Quick Add Task",
+      "subtitle": "TickTick",
+      "description": "Quick way to add task in TickTick.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "Get tasks in smart list"
+    },
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add task to TickTick"
+    },
+    {
+      "name": "get-lists",
+      "title": "Get Lists",
+      "description": "Get Lists in TickTick"
+    }
+  ],
+  "ai": {
+    "instructions": "",
+    "evals": [
+      {
+        "input": "@ticktick-cloud get tasks in today",
+        "mocks": {
+          "get-tasks": {
+            "ok": true,
+            "data": {
+              "view": "today",
+              "freshness": "fresh",
+              "partial": false,
+              "sections": []
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tasks",
+              "arguments": {
+                "smartProjectId": "today"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@ticktick-cloud get tasks in next 7 days",
+        "mocks": {
+          "get-tasks": {
+            "ok": true,
+            "data": {
+              "view": "next7Days",
+              "freshness": "fresh",
+              "partial": false,
+              "sections": []
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tasks",
+              "arguments": {
+                "smartProjectId": "next7Days"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "^2.0.0",
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "moment-timezone": "^0.5.44",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^2.8.7",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "test:contract": "vitest run --config vitest.contract.config.ts",
+    "typecheck": "tsc --noEmit"
+  }
+}
