@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add AudioPod AI MCP Server] - {PR_MERGE_DATE}
+
+- Add AudioPod AI to the official registry: text-to-speech in 200+ languages, voice cloning and conversion, music generation, stem and speaker separation, transcription with word-level timestamps, noise removal and media conversion. Remote Streamable HTTP server at https://mcp.audiopod.ai through `mcp-remote`, authenticated with an AudioPod API key.
+
 ## [Add EmpirioLabs AI MCP Server] - 2026-09-14
 
 - Add EmpirioLabs AI to the community registry: 180+ AI models, media generation, web search and research, batch jobs, GPU Cloud and hosted agents as tools. Remote Streamable HTTP server at https://mcp.empiriolabs.ai/mcp through `mcp-remote`; OAuth 2.1 sign-in or an EmpirioLabs API key.
