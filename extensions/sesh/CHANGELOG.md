@@ -1,6 +1,6 @@
 # Sesh Changelog
 
-## [Open instantly from cache] - 2026-09-18
+## [Open instantly from cache] - {PR_MERGE_DATE}
 
 - Open the session list instantly from cache while it refreshes in the background, instead of showing an empty list on every launch
 - Add a Refresh Sessions action (⌘R) to reload the list on demand
