@@ -1,6 +1,7 @@
 import { LocalStorage, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
 import {
   getNetworkServices,
+  isSessionGone,
   LAST_USED_KEY,
   loadFavoriteOrder,
   loadFavorites,
@@ -34,10 +35,12 @@ export default async () => {
       }
     }
   } catch (err) {
+    if (isSessionGone(err)) return;
+
     await showToast({
       style: Toast.Style.Failure,
       title: `Failed to toggle ${lastUsedName}`,
       message: String(err),
-    });
+    }).catch(() => undefined);
   }
 };
