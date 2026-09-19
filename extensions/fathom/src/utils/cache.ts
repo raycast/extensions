@@ -137,7 +137,7 @@ export async function cacheMeetingsBatch(
       saveTranscript(meetingId, fullTranscript);
       // The file just changed, so any word set built from the previous one is
       // wrong — it would match text that is gone and miss text that is new.
-      forgetTranscriptWords(meetingId);
+      forgetTranscript(meetingId);
 
       // Summaries are duplicated the same way — the outer `summary` field AND
       // `meeting.summaryText`. Keep one copy. (Not the cause of the vanishing
@@ -258,7 +258,7 @@ export async function getCachedMeeting(meetingId: string): Promise<CachedMeeting
       await LocalStorage.removeItem(cacheKey);
       // The transcript lives on disk, so dropping the key alone leaks the file.
       deleteTranscript(meetingId);
-      forgetTranscriptWords(meetingId);
+      forgetTranscript(meetingId);
       return null;
     }
 
@@ -419,7 +419,7 @@ async function pruneExpiredFromIndex(expiredIds: string[]): Promise<void> {
       // This is the path the list load actually takes; without it the
       // single-entry fix above covers only the rarer direct read.
       deleteTranscript(id);
-      forgetTranscriptWords(id);
+      forgetTranscript(id);
     }
   } catch (error) {
     logger.error("Error pruning expired meetings from index:", error);
@@ -607,29 +607,27 @@ function transcriptTextFor(recordingId: string): string {
   const now = performance.now();
   if (hit !== undefined && now - hit.checkedAt < TRANSCRIPT_FRESHNESS_MS) return hit.text;
 
-  let stat: { mtimeMs: number; size: number };
+  let stat: { mtimeMs: number; size: number } | undefined;
   try {
     stat = statSync(transcriptPath(recordingId));
   } catch {
-    // No file yet. Drop anything held and do NOT record the absence — it can
-    // appear at any moment from the other command.
-    forgetTranscriptWords(recordingId);
-    return "";
+    // No file yet — and the absence is never recorded, because the other
+    // command can write one at any moment.
   }
 
-  if (hit !== undefined && hit.mtimeMs === stat.mtimeMs && hit.size === stat.size) {
+  if (stat !== undefined && hit !== undefined && hit.mtimeMs === stat.mtimeMs && hit.size === stat.size) {
     hit.checkedAt = now;
     return hit.text;
   }
 
-  const text = (loadTranscript(recordingId) ?? "").toLowerCase();
-  if (!text) {
-    forgetTranscriptWords(recordingId);
-    return "";
-  }
+  // Past this point anything held is wrong: the file is gone, or these are
+  // different bytes. Release it once, before any path that replaces it.
+  forgetTranscript(recordingId);
+  if (stat === undefined) return "";
 
-  // Replacing an entry: release what it held before accounting for the new one.
-  forgetTranscriptWords(recordingId);
+  const text = (loadTranscript(recordingId) ?? "").toLowerCase();
+  if (!text) return "";
+
   const cost = estimatedBytes(text);
 
   // One transcript larger than the whole budget is searched but NOT retained.
@@ -637,11 +635,11 @@ function transcriptTextFor(recordingId: string): string {
   // this cache exists to enforce, for the life of the command.
   if (cost > TRANSCRIPT_CACHE_BUDGET_BYTES) return text;
 
-  while (transcriptCacheBytes + cost > TRANSCRIPT_CACHE_BUDGET_BYTES && transcriptTextCache.size > 0) {
-    const oldest = transcriptTextCache.keys().next().value;
-    if (oldest === undefined) break;
-    transcriptCacheBytes -= estimatedBytes(transcriptTextCache.get(oldest)?.text ?? "");
-    transcriptTextCache.delete(oldest);
+  // Insertion order, so this walks oldest first. `forgetTranscript` owns the
+  // byte accounting; a second copy of it here is how the counter drifts.
+  for (const id of transcriptTextCache.keys()) {
+    if (transcriptCacheBytes + cost <= TRANSCRIPT_CACHE_BUDGET_BYTES) break;
+    forgetTranscript(id);
   }
 
   transcriptTextCache.set(recordingId, { text, mtimeMs: stat.mtimeMs, size: stat.size, checkedAt: now });
@@ -661,7 +659,7 @@ function estimatedBytes(text: string): number {
 }
 
 /** Forget one meeting's cached transcript — it changed or went away. */
-export function forgetTranscriptWords(recordingId: string): void {
+function forgetTranscript(recordingId: string): void {
   const held = transcriptTextCache.get(recordingId);
   if (held === undefined) return;
   transcriptCacheBytes -= estimatedBytes(held.text);
@@ -669,7 +667,7 @@ export function forgetTranscriptWords(recordingId: string): void {
 }
 
 /** Drop every cached transcript — the corpus changed underneath. */
-export function clearFullTranscriptCache(): void {
+function clearFullTranscriptCache(): void {
   transcriptTextCache.clear();
   transcriptCacheBytes = 0;
 }
@@ -681,8 +679,6 @@ export function searchCachedMeetings(cachedMeetings: CachedMeetingData[], query:
 
   const searchTerms = query.toLowerCase().split(/\s+/);
   logger.log(`[searchCachedMeetings] Searching ${cachedMeetings.length} meetings for: "${query}"`);
-
-  let diskReads = 0;
 
   const results = cachedMeetings.filter((cached) => {
     const meeting = cached.meeting as { title?: string; meetingTitle?: string; recordingId?: string; id?: string };
@@ -716,11 +712,10 @@ export function searchCachedMeetings(cachedMeetings: CachedMeetingData[], query:
 
     const transcript = transcriptTextFor(recordingId);
     if (!transcript) return false;
-    diskReads += 1;
 
     return unmatched.every((term) => transcript.includes(term));
   });
 
-  logger.log(`[searchCachedMeetings] Found ${results.length} matches (${diskReads} consulted on disk)`);
+  logger.log(`[searchCachedMeetings] Found ${results.length} matches`);
   return results;
 }
