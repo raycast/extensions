@@ -290,7 +290,10 @@ export default class Process implements ProcessInfo {
       if (portInfo === undefined) continue;
 
       const values = valuesByPid.get(pid) ?? { pid, protocol: "TCP", internetProtocol: protocol, portInfo: [] };
-      values.portInfo?.push(portInfo);
+      // A dual-stack listener shows up once for tcp4 and once for tcp6 with the same address.
+      if (!values.portInfo?.some((existing) => existing.host === portInfo.host && existing.port === portInfo.port)) {
+        values.portInfo?.push(portInfo);
+      }
       valuesByPid.set(pid, values);
     }
 
