@@ -104,7 +104,24 @@ export async function killProcess(row: AppRow, options: KillOptions = {}): Promi
   const pendingPids: number[] = [];
   const errors: string[] = [];
 
+  // 发信号前再采一轮：PID 可能已复用，startedAt 对不上就跳过。
+  const plannedStarted = new Map<number, string>();
   for (const pid of order) {
+    const proc = byPid.get(pid);
+    if (proc) plannedStarted.set(pid, proc.startedAt);
+  }
+  let liveRaw: RawProc[];
+  try {
+    liveRaw = await enumerate();
+  } catch (error) {
+    return { ok: false, killed: [], error: (error as Error).message || "Failed to re-inspect processes." };
+  }
+  const liveByPid = new Map(liveRaw.map((proc) => [proc.pid, proc]));
+
+  for (const pid of order) {
+    const planned = plannedStarted.get(pid);
+    const live = liveByPid.get(pid);
+    if (!planned || !live || live.startedAt !== planned) continue;
     try {
       process.kill(pid, signal);
       pendingPids.push(pid);

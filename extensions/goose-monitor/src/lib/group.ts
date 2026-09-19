@@ -113,7 +113,8 @@ export function groupProcesses(raw: RawProc[]): AppRow[] {
       key = identity;
       display = bundle.name;
       bundlePath = bundle.bundle;
-      graphical = true;
+      // 系统路径下的无头 .app（XProtect 等）不当界面应用；isGraphicalApp 已排除 /System|/Library|/usr。
+      graphical = isGraphicalApp(proc.exe);
     } else if (proc.exe) {
       identity = `exe:${proc.exe}`;
       key = `${identity}#${findExecutableTreeRootPid(proc, byPid)}`;
