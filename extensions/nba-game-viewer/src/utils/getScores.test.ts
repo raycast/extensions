@@ -7,6 +7,8 @@ import axios from "axios";
 import { getPreferenceValues } from "@raycast/api";
 import getScores from "./getScores";
 
+type ScoreboardRequest = { params: { dates: string } };
+
 const mockedGet = vi.mocked(axios.get);
 const mockedPreferences = vi.mocked(getPreferenceValues);
 
@@ -18,9 +20,9 @@ const respondWith = (events: unknown[] | undefined) => {
   mockedGet.mockImplementation(async () => ({ data: { events } }));
 };
 
-const requestedDates = () => mockedGet.mock.calls.map(([, config]) => config?.params.dates as string);
+const requestedDates = () => mockedGet.mock.calls.map(([, config]) => (config as ScoreboardRequest).params.dates);
 
-const requestedUrls = () => mockedGet.mock.calls.map(([url]) => url as string);
+const requestedUrls = () => mockedGet.mock.calls.map(([url]) => url);
 
 describe("getScores", () => {
   beforeEach(() => {
@@ -45,19 +47,17 @@ describe("getScores", () => {
     await getScores({ league: "nba" });
 
     expect(requestedDates()).toEqual(["20260917", "20260918", "20260919"]);
-    expect(requestedUrls()).toEqual(Array(3).fill("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"));
+    expect(requestedUrls()).toEqual(
+      Array(3).fill("https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"),
+    );
   });
 
   it("returns the events of every requested day in order", async () => {
     mockedGet.mockImplementation(async (_url, config) => ({
-      data: { events: [`game-${(config as { params: { dates: string } }).params.dates}`] },
+      data: { events: [`game-${(config as ScoreboardRequest).params.dates}`] },
     }));
 
-    await expect(getScores({ league: "wnba" })).resolves.toEqual([
-      "game-20260917",
-      "game-20260918",
-      "game-20260919",
-    ]);
+    await expect(getScores({ league: "wnba" })).resolves.toEqual(["game-20260917", "game-20260918", "game-20260919"]);
   });
 
   it("requests only today when no previous days are configured", async () => {
@@ -102,7 +102,7 @@ describe("getScores", () => {
 
   it("keeps the scores of the days that answered when one day fails", async () => {
     mockedGet.mockImplementation(async (_url, config) => {
-      const { dates } = (config as { params: { dates: string } }).params;
+      const { dates } = (config as ScoreboardRequest).params;
       if (dates === "20260918") {
         throw new Error("Request failed with status code 400");
       }

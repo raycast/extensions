@@ -6,14 +6,7 @@
  * than an empty object, which would read every preference as `undefined` and
  * let a test pass through a branch the shipped default never reaches.
  */
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-
-type Preference = { name: string; default?: unknown };
-
-const manifest = JSON.parse(
-  readFileSync(fileURLToPath(new URL("../../../package.json", import.meta.url)), "utf8"),
-) as { preferences: Preference[] };
+import manifest from "../../../package.json";
 
 const defaults = Object.fromEntries(manifest.preferences.map(({ name, default: value }) => [name, value]));
 
