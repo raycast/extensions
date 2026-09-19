@@ -13,7 +13,8 @@ import useProcesses from "./hooks/useProcesses";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
 import { Exposure, classifyExposure, exposureColor, exposureDescription } from "./utilities/exposure";
 import { getProcessMarkdown } from "./utilities/getProcessMarkdown";
-import { platformShortcut } from "./utilities/platform";
+import { forceKill } from "./utilities/killProcess";
+import { isWindows, platformShortcut } from "./utilities/platform";
 
 type ExposureFilter = Exposure | "all";
 
@@ -92,6 +93,23 @@ export default function Command() {
                   showToast(Toasts.KillProcess.Success(p));
                   revalidateProcesses();
                 }}
+                onSurvived={(survivor) => {
+                  const force = isWindows
+                    ? undefined
+                    : () =>
+                        forceKill(survivor, {
+                          onKilled: () => {
+                            showToast(Toasts.KillProcess.Success(p));
+                            revalidateProcesses();
+                          },
+                          onError: (err) => {
+                            showToast(Toasts.KillProcess.Error(err));
+                            revalidateProcesses();
+                          },
+                        });
+                  showToast(Toasts.KillProcess.Survived({ name: p.name, pid: survivor.pid }, force));
+                  revalidateProcesses();
+                }}
                 onError={(err) => {
                   showToast(Toasts.KillProcess.Error(err));
                   revalidateProcesses();
@@ -124,6 +142,23 @@ export default function Command() {
                 process={p}
                 onKilled={() => {
                   showToast(Toasts.KillProcess.Success(p));
+                  revalidateProcesses();
+                }}
+                onSurvived={(survivor) => {
+                  const force = isWindows
+                    ? undefined
+                    : () =>
+                        forceKill(survivor, {
+                          onKilled: () => {
+                            showToast(Toasts.KillProcess.Success({ pid: survivor.pid }));
+                            revalidateProcesses();
+                          },
+                          onError: (err) => {
+                            showToast(Toasts.KillProcess.Error(err));
+                            revalidateProcesses();
+                          },
+                        });
+                  showToast(Toasts.KillProcess.Survived({ pid: survivor.pid }, force));
                   revalidateProcesses();
                 }}
                 onError={async (err) => {
