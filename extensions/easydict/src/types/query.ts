@@ -39,6 +39,8 @@ export interface RuntimeServiceConfig {
   providerKey: string;
   order: number;
   icon?: ProviderIconConfig;
+  /** Stable fingerprint of request-affecting configuration. Used only as input to a hashed cache key. */
+  cacheIdentity?: string;
 }
 
 export interface RuntimeServiceMetadata {
@@ -65,10 +67,12 @@ export interface DictionaryResult<T = unknown> extends ProviderResult<T, Diction
 export interface TranslationQueryResult<T = unknown> extends TranslationResult<T>, RuntimeServiceMetadata {
   displaySections: DisplaySection[];
   hideDisplay: boolean;
+  fromCache?: boolean;
 }
 
 export interface DictionaryQueryResult<T = unknown> extends DictionaryResult<T>, RuntimeServiceMetadata {
   displaySections: DisplaySection[];
+  fromCache?: boolean;
 }
 
 export type QueryResult<T = unknown> = TranslationQueryResult<T> | DictionaryQueryResult<T>;

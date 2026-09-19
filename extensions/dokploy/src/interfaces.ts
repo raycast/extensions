@@ -141,6 +141,19 @@ export interface ServiceEnvironment {
   supportsBuildFields: boolean;
 }
 
+export interface Domain {
+  domainId: string;
+  host: string;
+  path?: string | null;
+  /** The container's own port, not necessarily one reachable from outside directly. */
+  port?: number | null;
+  https?: boolean;
+  /** Compose only - which container in the stack serves this domain. */
+  serviceName?: string | null;
+  /** False once the router backing this domain has been removed - Dokploy still lists it, but it 404s. */
+  enabled?: boolean;
+}
+
 interface Issue {
   code?: string;
   expected?: string;

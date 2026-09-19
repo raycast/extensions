@@ -6,6 +6,7 @@ import {
   TraktShowBaseItem,
   TraktShowHistoryListItem,
   TraktShowListItem,
+  TraktUserRatingItem,
   TraktUserStats,
 } from "../lib/schema";
 
@@ -71,6 +72,21 @@ export type CompactHistoryItem = {
     season: number;
     number: number;
     title: string;
+    episodeLabel: string;
+  };
+};
+
+export type CompactRatingItem = {
+  type: string;
+  title: string;
+  year?: number;
+  rating: number;
+  ratedAt: string;
+  traktId: number;
+  episode?: {
+    season: number;
+    number: number;
+    title?: string;
     episodeLabel: string;
   };
 };
@@ -205,6 +221,48 @@ export function toCompactShowHistory(item: TraktShowHistoryListItem): CompactHis
       title: item.episode.title,
       episodeLabel: `S${s}E${e}`,
     },
+  };
+}
+
+export function toCompactRating(item: TraktUserRatingItem): CompactRatingItem {
+  let title = "Unknown";
+  let traktId = 0;
+  let year: number | undefined;
+  let episode: CompactRatingItem["episode"];
+
+  if (item.type === "movie" && item.movie) {
+    title = item.movie.title;
+    traktId = item.movie.ids.trakt;
+    year = item.movie.year;
+  } else if (item.type === "show" && item.show) {
+    title = item.show.title;
+    traktId = item.show.ids.trakt;
+    year = item.show.year;
+  } else if (item.type === "episode" && item.episode) {
+    title = item.show ? `${item.show.title}: ${item.episode.title ?? "Episode"}` : (item.episode.title ?? "Episode");
+    traktId = item.episode.ids.trakt;
+    year = item.show?.year;
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    episode = {
+      season: item.episode.season,
+      number: item.episode.number,
+      title: item.episode.title ?? undefined,
+      episodeLabel: `S${pad(item.episode.season)}E${pad(item.episode.number)}`,
+    };
+  } else if (item.type === "season" && item.season) {
+    title = item.show ? `${item.show.title} (Season ${item.season.number})` : `Season ${item.season.number}`;
+    traktId = item.season.ids?.trakt ?? 0;
+    year = item.show?.year;
+  }
+
+  return {
+    type: item.type,
+    title,
+    year,
+    rating: item.rating,
+    ratedAt: item.rated_at,
+    traktId,
+    episode,
   };
 }
 

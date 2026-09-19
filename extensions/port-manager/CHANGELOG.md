@@ -1,5 +1,22 @@
 # Port Manager Changelog
 
+## [Verified Kills] - 2026-09-19
+
+- After a kill, wait for the process to actually exit before reporting success. A process that ignores the signal now shows "Process Still Running" with a one-key Force Kill instead of a false "Killed Process"
+- The same check applies to Kill Parent, to the Kill Process Listening on command and to the menu bar
+- Force Kill re-checks the process start time before signalling, so a PID recycled while the toast was on screen is never killed by mistake
+
+## [Exposure] - 2026-09-19
+
+- Colour each port tag by how exposed it is: green for loopback only, orange for a wildcard bind reachable from the network, blue for one specific interface
+- Add an Exposure row to the detail panel and a search-bar filter to show only localhost, network-reachable or interface-bound ports
+
+## [Command Line in Details] - 2026-09-19
+
+- Show the full command line of a process in the detail panel and make it searchable, so several listeners with the same executable (`node`, `python`, …) can be told apart
+- Add "Command Line" to the Copy Info submenu
+- Give the detail panel a header with the process name and its listening addresses, and open it by default on first run
+
 ## [Windows Support] - 2026-09-01
 
 - Fix "Open Ports" command on non-english windows locales

@@ -18,8 +18,8 @@ import { getDefaultAction } from "../preferences";
 import { GifDetails } from "./GifDetails";
 import { IGif } from "../models/gif";
 
-import copyFileToClipboard from "../lib/copyFileToClipboard";
-import copyGifAsSquareToClipboard from "../lib/copyGifAsSquareToClipboard";
+import resolveGifFile from "../lib/resolveGifFile";
+import resolveSquareGifFile from "../lib/resolveSquareGifFile";
 import stripQParams from "../lib/stripQParams";
 import downloadFile from "../lib/downloadFile";
 import { isCacheableService, removeGifFromCache } from "../lib/cachedGifs";
@@ -114,7 +114,8 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   async function copyGif() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Copying GIF" });
-      const file = await copyFileToClipboard(item, cacheableService);
+      const file = await resolveGifFile(item, cacheableService);
+      await Clipboard.copy({ file });
       await trackUsage();
       await closeMainWindow();
       await showToast({ style: Toast.Style.Success, title: `Copied GIF "${path.basename(file)}" to clipboard` });
@@ -126,7 +127,8 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   async function copyGifAsSquare() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Copying GIF Square" });
-      const file = await copyGifAsSquareToClipboard(item);
+      const file = await resolveSquareGifFile(item);
+      await Clipboard.copy({ file });
       await trackUsage();
       await closeMainWindow();
       await showToast({ style: Toast.Style.Success, title: `Copied square GIF "${path.basename(file)}"` });
@@ -149,7 +151,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   async function pasteGifSquare() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Pasting GIF Square" });
-      const file = await pasteCopiedFile(() => copyGifAsSquareToClipboard(item));
+      const file = await pasteResolvedFile(() => resolveSquareGifFile(item));
       await showToast({ style: Toast.Style.Success, title: `Pasted square GIF "${path.basename(file)}"` });
     } catch (error) {
       console.error(error);
@@ -158,12 +160,11 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   }
 
   async function pasteGifFromUrl() {
-    return pasteCopiedFile(() => copyFileToClipboard(item, cacheableService));
+    return pasteResolvedFile(() => resolveGifFile(item, cacheableService));
   }
 
-  async function pasteCopiedFile(getFile: () => Promise<string>) {
+  async function pasteResolvedFile(getFile: () => Promise<string>) {
     const file = await getFile();
-    await closeMainWindow();
     await Clipboard.paste({ file });
     await trackUsage();
     return file;

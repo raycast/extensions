@@ -1,5 +1,6 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
+import { getAIProviderCacheIdentity } from "@/ai-providers/cacheIdentity";
 import { getAIProviderQueryMode, resolveAIProviderIcon } from "@/ai-providers/runtime";
 import type { AIProviderProfile } from "@/ai-providers/types";
 import { myPreferences } from "@/consts";
@@ -66,6 +67,7 @@ const staticDictionaryServicesWithOrder: DictionaryServiceConfig[] = staticDicti
   enabledInPreferences: myPreferences[service.preference],
   order,
   type: service.type,
+  cacheIdentity: service.type,
   enabled: service.isEnabled ?? (() => myPreferences[service.preference]),
   createProvider: () => new service.provider(),
   canTriggerAutomaticAudio: true,
@@ -97,6 +99,7 @@ export function resolveDictionaryServices(
       order: profile.order,
       type: DictionaryType.AI,
       icon: resolveAIProviderIcon(profile),
+      cacheIdentity: getAIProviderCacheIdentity(profile, 1),
       enabled: (queryWordInfo) => getAIProviderQueryMode(profile, queryWordInfo) === "dictionary",
       createProvider: () => createAIDictionaryProvider(profile, onNativeJSONUnsupported),
       canTriggerAutomaticAudio: false,

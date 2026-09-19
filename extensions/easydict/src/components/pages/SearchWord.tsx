@@ -85,6 +85,7 @@ export default function SearchWord({ initialQueryText, fallbackText }: SearchWor
     autoSelectedTargetLanguageItem,
     queryText,
     queryTextWithTextInfo,
+    regenerateService,
     clearQueryResult,
     setAutoSelectedTargetLanguageItem,
   } = useQueryEngine(config.preferredLanguage1, config.preferredLanguage2, resolvedServiceSnapshot);
@@ -308,6 +309,16 @@ export default function SearchWord({ initialQueryText, fallbackText }: SearchWor
                       isFavorite={isFavorite}
                       onToggleFavorite={onToggleFavorite}
                       onLanguageUpdate={updateSelectedTargetLanguageItem}
+                      onRequery={() =>
+                        queryText(searchText, userSelectedTargetLanguageItem.youdaoLangCode, { bypassCache: true })
+                      }
+                      onRegenerate={
+                        item.serviceId?.startsWith("profile:")
+                          ? () => {
+                              if (item.serviceId) regenerateService(item.serviceId);
+                            }
+                          : undefined
+                      }
                     />
                   }
                 />

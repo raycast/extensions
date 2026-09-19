@@ -528,7 +528,7 @@
 /extensions/copilot-workspace                                       @colebemis @pernielsentikaer
 /extensions/copy-gcp-icons                                          @pomdtr
 /extensions/copy-notion-markdown-link                               @atzzCokeK
-/extensions/copy-path                                               @koinzhang @ridemountainpig @INCHMAN1900 @arjanflac
+/extensions/copy-path                                               @koinzhang @ridemountainpig @INCHMAN1900 @arjanflac @dans-huang
 /extensions/copy-skeet-link                                         @justin
 /extensions/copy-text-files                                         @netcookies
 /extensions/copymoveto                                              @kumamaki @pernielsentikaer @ridemountainpig @ridemountainpig
@@ -767,7 +767,7 @@
 /extensions/duckduckgo-image-search                                 @jag-k @anwarulislam
 /extensions/duden                                                   @ahinderling
 /extensions/dungeons-and-dragons                                    @RobErskine @0xdhrv
-/extensions/dust-tt                                                 @vineus @vineus @fontanierh @stang @Fraggle @adrsimon
+/extensions/dust-tt                                                 @vineus @vineus @fontanierh @stang @Fraggle @adrsimon @LeandreLeBizec
 /extensions/dutch-article                                           @ahmeed83
 /extensions/dynamic-font-size                                       @nilshoenson @tavlean
 /extensions/e18e-module-replacements                                @tmwrnr
@@ -1017,7 +1017,7 @@
 /extensions/ghostty                                                 @JarryChung @FriendlyUsername @AlexIsMaking @degouville @mathisfoxius @JoaoGFdev @pernielsentikaer
 /extensions/ghq                                                     @konojunya @alinnow
 /extensions/gif-maker                                               @TristanGabl
-/extensions/gif-search                                              @josephschmitt @tmwrnr @j3lte @samuelkraft @ridemountainpig @Spookywy @seanparkross @YourMCGeek @thomaspaulmann @artisticmedic @clins1994 @0xdhrv
+/extensions/gif-search                                              @josephschmitt @tmwrnr @j3lte @samuelkraft @ridemountainpig @Spookywy @seanparkross @YourMCGeek @thomaspaulmann @artisticmedic @clins1994 @0xdhrv @Olli0103
 /extensions/gift-stardew-valley                                     @NaoRojas @myusualonewastaken
 /extensions/gist-rocket                                             @tgrecojs
 /extensions/gistly                                                  @rafalzawadzki
@@ -1077,7 +1077,7 @@
 /extensions/goodreads                                               @shettypuneeth @xmok
 /extensions/google-advanced-search                                  @developerlover
 /extensions/google-books                                            @Ali-Parandeh @xmok @chrismessina
-/extensions/google-calendar                                         @thomaspaulmann @j3lte @markusjura @fabitosh @geekyed @dangkhoipro @0xdhrv @peduarte @oguma0923
+/extensions/google-calendar                                         @thomaspaulmann @j3lte @markusjura @fabitosh @geekyed @dangkhoipro @0xdhrv @peduarte @oguma0923 @Aler1x
 /extensions/google-calendar-quickadd                                @Baguirre03 @ridemountainpig
 /extensions/google-chrome                                           @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta @a-laughlin @tleo19 @Tarocch1 @rsperezn @drewbabel @haydencbarnes @pernielsentikaer @j3lte @0xdhrv @xmok @hayk94 @alexibuild @os-moussao @kirill-markin
 /extensions/google-chrome-profiles                                  @frouo @erics118 @jschmidtcordeiro @NirRosh @joshcarty @smpeotn @radekcabaj
@@ -1692,6 +1692,7 @@
 /extensions/mobius-materials                                        @tjwds
 /extensions/mochi                                                   @kawamataryo
 /extensions/moco                                                    @eviscares @el-schneider
+/extensions/modbus-toolkit                                          @TwoMental
 /extensions/model-context-protocol-registry                         @thomaspaulmann @nagauta @pernielsentikaer
 /extensions/models-dev                                              @carlesandres
 /extensions/modify-hash                                             @tisfeng @0xdhrv
@@ -2121,7 +2122,7 @@
 /extensions/porkbun                                                 @xmok @djpowers
 /extensions/port                                                    @etayalony
 /extensions/port-from-project-name                                  @Vethya
-/extensions/port-manager                                            @lucaschultz @Sheraff @ridemountainpig @pernielsentikaer @0xdhrv @MaaxGr
+/extensions/port-manager                                            @lucaschultz @Sheraff @ridemountainpig @pernielsentikaer @0xdhrv @MaaxGr @crazykid95
 /extensions/portal-wholesale                                        @nickdichev
 /extensions/portfolio-tracker                                       @FilipSwiatczak @ridemountainpig
 /extensions/portless                                                @nbaglivo @drewmcdonald
@@ -2419,7 +2420,7 @@
 /extensions/rounding-number                                         @HackettLai
 /extensions/royal-tsx                                               @carceneaux
 /extensions/rpass                                                   @rxtsel
-/extensions/rss-reader                                              @fuksman @pernielsentikaer @pomdtr @xmok @alexibuild @degouville
+/extensions/rss-reader                                              @fuksman @pernielsentikaer @pomdtr @xmok @alexibuild @degouville @MassimilianoPasquini97
 /extensions/rsync-commands                                          @maxfahl
 /extensions/rtl-reader                                              @Xoshbin
 /extensions/ruby-evaluate                                           @obahareth
@@ -2520,7 +2521,7 @@
 /extensions/series-rating-graphs                                    @muhammadrizo-y @0xdhrv
 /extensions/serverless-framework-docs                               @yemilgr
 /extensions/servicenow                                              @robertoalvarezalonso
-/extensions/sesh                                                    @joshmedeski @sebb3 @pernielsentikaer
+/extensions/sesh                                                    @joshmedeski @sebb3 @pernielsentikaer @tharropoulos
 /extensions/session                                                 @jamesjlyons @pernielsentikaer @benkates
 /extensions/setapp                                                  @lardissone
 /extensions/setlist-fm                                              @csigritz

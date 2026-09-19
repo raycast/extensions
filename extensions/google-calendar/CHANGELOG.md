@@ -1,5 +1,13 @@
 # Google Calendar Changelog
 
+## [Hide contact birthdays from List Events by default] - 2026-09-19
+
+- Exclude Google `birthday` events from List Events on the primary calendar so contact birthdays no longer flood the upcoming schedule
+- Add an opt-in "Show birthdays" preference on List Events for users who want them included
+- Still show birthdays when the dedicated Contacts birthdays calendar is selected
+- Add a Birthdays option in the List Events calendar picker that shows contact birthdays without mixing them into the primary schedule
+- Keep Birthdays selected in the List Events picker when launched from the Contacts birthdays calendar
+
 ## [Fix event list month sorting and multi-year grouping] - 2026-09-03
 
 - Fix chronological sorting of month sections in List Events so months are no longer sorted alphabetically.

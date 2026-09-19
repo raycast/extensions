@@ -1,6 +1,7 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { Bitbucket, Schema } from "bitbucket";
 import { preferences } from "../helpers/preferences";
+import { extractReviewers, Reviewer } from "../helpers/reviewers";
 import { URLSearchParams } from "url";
 
 const clientOptions = {
@@ -76,6 +77,66 @@ export async function pullRequestsGetQuery(repoSlug: string) {
     repo_slug: repoSlug,
     pagelen: 20,
     sort: "-created_on",
+    // List endpoints omit `participants` by default (performance) — `+` adds it
+    // to the default field set instead of restricting the response to just this.
+    fields: "+values.participants",
+  });
+}
+
+export async function getPullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.get({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function approvePullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.createApproval({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function declinePullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.decline({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function unapprovePullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.deleteApproval({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function requestChangesOnPullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.addChangeRequest({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function undoRequestChangesOnPullRequest(repoSlug: string, pullRequestId: number) {
+  return await bitbucket.pullrequests.deleteChangeRequest({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+  });
+}
+
+export async function addPullRequestComment(repoSlug: string, pullRequestId: number, comment: string) {
+  return await bitbucket.pullrequests.createComment({
+    ...defaults,
+    repo_slug: repoSlug,
+    pull_request_id: pullRequestId,
+    _body: { type: "pullrequest_comment", content: { raw: comment } },
   });
 }
 
@@ -88,7 +149,10 @@ export async function getCommitNames(repoSlug: string) {
   });
 }
 
-async function getCurrentUserUuid(): Promise<string> {
+// Bitbucket removed its workspace-wide "PRs for a user" endpoint (see getMyOpenPullRequests
+// below), so this is the only place that still needs the current user's identity — just
+// the uuid, used to filter each repo's PR list server-side.
+export async function getCurrentUserUuid(): Promise<string> {
   const key = `me-uuid:${preferences.email}`;
   const stored = await LocalStorage.getItem<string>(key);
   if (stored) {
@@ -112,8 +176,10 @@ async function getCurrentUserUuid(): Promise<string> {
 type OpenPullRequest = {
   id: number;
   title: string;
+  state: "OPEN" | "MERGED" | "DECLINED" | "SUPERSEDED";
   comment_count: number;
   created_on?: string;
+  reviewers: Reviewer[];
   author: {
     nickname: string;
     links: {
@@ -124,6 +190,7 @@ type OpenPullRequest = {
     repository: {
       name: string;
       full_name: string;
+      slug: string;
     };
   };
 };
@@ -260,6 +327,9 @@ async function listOpenPullRequestsForRepo(
         "values.author.links.avatar.href",
         "values.destination.repository.name",
         "values.destination.repository.full_name",
+        "values.participants.state",
+        "values.participants.user.nickname",
+        "values.participants.user.uuid",
         "next",
       ].join(","),
     });
@@ -273,8 +343,10 @@ async function listOpenPullRequestsForRepo(
       pullRequests.push({
         id: pr.id,
         title: pr.title,
+        state: (pr.state as OpenPullRequest["state"]) ?? "OPEN",
         comment_count: (pr.comment_count as number) ?? 0,
         created_on: pr.created_on,
+        reviewers: extractReviewers(pr.participants as Schema.Participant[] | undefined),
         author: {
           nickname: author.nickname,
           links: {
@@ -290,6 +362,7 @@ async function listOpenPullRequestsForRepo(
               (pr.destination?.repository?.full_name as string) ??
               repo.full_name ??
               `${preferences.workspace}/${repo.slug}`,
+            slug: (pr.destination?.repository?.slug as string) ?? repo.slug,
           },
         },
       });
