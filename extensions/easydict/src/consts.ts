@@ -13,7 +13,7 @@ export const userAgent =
 
 export const networkTimeout = 15000;
 
-export const EASYDICT_VERSION = "3.2.0";
+export const EASYDICT_VERSION = "3.3.0";
 
 const GITHUB_REPO = "https://github.com/tisfeng/Raycast-Easydict";
 
@@ -25,6 +25,29 @@ export function getReleaseTagUrl(version: string): string {
 
 export const RELEASE_MARKDOWN = `
 ## [v${EASYDICT_VERSION}]
+
+### ✨ New Features
+
+#### Optional Query Caching
+
+- Added local caching for completed dictionary lookups and translations, with separate **Query Cache** and **AI Query Cache** settings. Both default to **Off** and offer **Words Only** and **All Text** modes.
+- Language detection can reuse confirmed results for inputs covered by either cache setting.
+- Cached results show a clock indicator. Use **Requery All Services** to fetch fresh results, **Regenerate AI Result** to refresh one AI provider, or **Clear Query Cache** to remove cached results.
+
+### 💎 Improvements
+
+- Improved result previews, detailed views, and saved favorites with clearer headings, pronunciation and language direction, and compact tables for short word translations, word forms, and phrases.
+- Google Translate now supports full translations of text longer than 1,830 characters, with paragraph breaks preserved.
+
+### 🐞 Bug Fixes
+
+- Fixed Google Translate failures caused by the previous web translation endpoint.
+- Favorites now show language codes when **Flags are not languages** is enabled, keeping the source and target languages distinguishable.
+
+---
+
+<details>
+<summary>Recent Updates [v3.2.0]</summary>
 
 ### ⚠️ Behavioral Changes
 
@@ -47,25 +70,34 @@ export const RELEASE_MARKDOWN = `
 - Use **Show Stroke Order** from live or saved translation results to view stroke-order diagrams for Chinese characters.
   - Thanks to [@MagEk1511](https://github.com/MagEk1511)
 
----
-
-<details>
-<summary>Recent Updates [v3.1.0]</summary>
-
-### ✨ New Features
-
-- Added Favorite Words to save translation results and browse/manage them offline.
-  - Thanks to [@TTsWorld](https://github.com/TTsWorld)
-
-### 🔧 Maintenance
-
-- Updated dependencies.
-
 </details>
 
 ---
 
 ## [v${EASYDICT_VERSION}]
+
+### ✨ 新特性
+
+#### 可选查询缓存
+
+- 新增已完成的词典查询和翻译结果的本地缓存，可分别通过 **Query Cache** 和 **AI Query Cache** 设置。两项默认均为 **Off**，可选择 **Words Only** 或 **All Text** 模式。
+- 当任一缓存设置允许缓存当前输入时，语言检测也可复用已确认的检测结果。
+- 缓存结果会显示时钟标识。可使用 **Requery All Services** 重新查询所有服务、**Regenerate AI Result** 重新生成单个 AI Provider 的结果，或使用 **Clear Query Cache** 清除查询缓存。
+
+### 💎 改进
+
+- 优化结果预览、详情页和收藏内容的排版，让标题、音标和翻译方向更清晰，并用紧凑表格展示简短的单词译文、词形和短语。
+- Google 翻译现在支持完整翻译超过 1,830 字符的长文本，并保留段落换行。
+
+### 🐞 修复
+
+- 修复旧网页翻译接口导致的 Google 翻译失败。
+- 启用 **Flags are not languages** 后，收藏列表会显示语言代码，便于区分源语言和目标语言。
+
+---
+
+<details>
+<summary>最近更新 [v3.2.0]</summary>
 
 ### ⚠️ 行为变更
 
@@ -87,20 +119,6 @@ export const RELEASE_MARKDOWN = `
 
 - 可在实时查询或已收藏的翻译结果中选择 **Show Stroke Order**，查看汉字笔顺图。
   - 感谢 [@MagEk1511](https://github.com/MagEk1511)
-
----
-
-<details>
-<summary>最近更新 [v3.1.0]</summary>
-
-### ✨ 新特性
-
-- 新增收藏单词，支持保存翻译结果并离线浏览和管理。
-  - 感谢 [@TTsWorld](https://github.com/TTsWorld)
-
-### 🔧 维护
-
-- 更新项目依赖项。
 
 </details>
 
