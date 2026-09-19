@@ -46,7 +46,8 @@
     "alexi.build",
     "shivraj-roy",
     "ridemountainpig",
-    "clemenzi"
+    "clemenzi",
+    "ray.dhruv"
   ],
   "pastContributors": [
     "bkeys818",
@@ -593,10 +594,13 @@
     "@types/react": "^19.1.10",
     "eslint": "^9.33.0",
     "prettier": "^3.6.2",
+    "react-test-renderer": "19.0.0",
     "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build",
+    "test": "node --test src/__tests__/library.test.mjs",
+    "test:memory": "node --expose-gc --max-old-space-size=100 src/__tests__/memory.mjs",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
