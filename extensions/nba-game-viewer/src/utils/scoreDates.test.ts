@@ -18,8 +18,36 @@ describe("scoreDates", () => {
     }
   });
 
+  it("returns dates for a numeric preference as well as a string one", () => {
+    expect(getScoreDates(today, 2)).toEqual(getScoreDates(today, "2"));
+  });
+
+  it("returns one date per day for a large preference, without clamping", () => {
+    const dates = getScoreDates(today, "400");
+
+    expect(dates).toHaveLength(401);
+    expect(dates[0]).toBe("20250815");
+    expect(dates[400]).toBe("20260919");
+  });
+
   it("crosses a month boundary", () => {
     expect(getScoreDates(new Date("2026-10-01T12:00:00.000Z"), "2")).toEqual(["20260929", "20260930", "20261001"]);
+  });
+
+  it("crosses a year boundary", () => {
+    expect(getScoreDates(new Date("2027-01-01T12:00:00.000Z"), "2")).toEqual(["20261230", "20261231", "20270101"]);
+  });
+
+  it("crosses the end of a leap February", () => {
+    expect(getScoreDates(new Date("2028-03-01T12:00:00.000Z"), "2")).toEqual(["20280228", "20280229", "20280301"]);
+  });
+
+  it("leaves the date it was given untouched", () => {
+    const given = new Date("2026-09-19T12:00:00.000Z");
+
+    getScoreDates(given, "7");
+
+    expect(given.toISOString()).toBe("2026-09-19T12:00:00.000Z");
   });
 
   describe("across a daylight-saving change", () => {
@@ -34,8 +62,16 @@ describe("scoreDates", () => {
       process.env.TZ = previousTz;
     });
 
-    it("steps one UTC date at a time", () => {
+    it("steps one UTC date at a time when the clocks go forward", () => {
       expect(getScoreDates(new Date("2026-03-09T23:30:00.000Z"), "2")).toEqual(["20260307", "20260308", "20260309"]);
+    });
+
+    it("steps one UTC date at a time when the clocks go back", () => {
+      expect(getScoreDates(new Date("2026-11-03T00:30:00.000Z"), "2")).toEqual(["20261101", "20261102", "20261103"]);
+    });
+
+    it("steps one UTC date at a time away from a change (control: local stepping agrees here)", () => {
+      expect(getScoreDates(new Date("2026-06-15T23:30:00.000Z"), "2")).toEqual(["20260613", "20260614", "20260615"]);
     });
   });
 });

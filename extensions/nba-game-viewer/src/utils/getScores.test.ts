@@ -52,6 +52,23 @@ describe("getScores", () => {
     );
   });
 
+  it("requests the shipped default of seven previous days plus today", async () => {
+    setPreference("7");
+
+    await getScores({ league: "wnba" });
+
+    expect(requestedDates()).toEqual([
+      "20260912",
+      "20260913",
+      "20260914",
+      "20260915",
+      "20260916",
+      "20260917",
+      "20260918",
+      "20260919",
+    ]);
+  });
+
   it("returns the events of every requested day in order", async () => {
     mockedGet.mockImplementation(async (_url, config) => ({
       data: { events: [`game-${(config as ScoreboardRequest).params.dates}`] },
@@ -84,8 +101,24 @@ describe("getScores", () => {
     expect(requestedDates()).toEqual(["20260919"]);
   });
 
+  it("requests only today when the preference was never set", async () => {
+    mockedPreferences.mockReturnValue({} as ReturnType<typeof getPreferenceValues>);
+
+    await getScores({ league: "wnba" });
+
+    expect(requestedDates()).toEqual(["20260919"]);
+  });
+
   it("requests only today when the preference is negative", async () => {
     setPreference("-1");
+
+    await getScores({ league: "wnba" });
+
+    expect(requestedDates()).toEqual(["20260919"]);
+  });
+
+  it("requests only today when the preference is a negative fraction", async () => {
+    setPreference("-0.5");
 
     await getScores({ league: "wnba" });
 
@@ -112,8 +145,41 @@ describe("getScores", () => {
     await expect(getScores({ league: "wnba" })).resolves.toEqual(["game-20260917", "game-20260919"]);
   });
 
+  it("keeps the later days when the first day is the one that fails", async () => {
+    mockedGet.mockImplementation(async (_url, config) => {
+      const { dates } = (config as ScoreboardRequest).params;
+      if (dates === "20260917") {
+        throw new Error("Request failed with status code 400");
+      }
+      return { data: { events: [`game-${dates}`] } };
+    });
+
+    await expect(getScores({ league: "wnba" })).resolves.toEqual(["game-20260918", "game-20260919"]);
+  });
+
+  it("keeps the one day that answered when the others fail or bring no events", async () => {
+    mockedGet.mockImplementation(async (_url, config) => {
+      const { dates } = (config as ScoreboardRequest).params;
+      if (dates === "20260917") {
+        throw new Error("Request failed with status code 400");
+      }
+      if (dates === "20260918") {
+        return { data: {} };
+      }
+      return { data: { events: [`game-${dates}`] } };
+    });
+
+    await expect(getScores({ league: "wnba" })).resolves.toEqual(["game-20260919"]);
+  });
+
   it("treats a day without an events array as a day without games", async () => {
     respondWith(undefined);
+
+    await expect(getScores({ league: "wnba" })).resolves.toEqual([]);
+  });
+
+  it("treats a day whose events are null as a day without games", async () => {
+    mockedGet.mockImplementation(async () => ({ data: { events: null } }));
 
     await expect(getScores({ league: "wnba" })).resolves.toEqual([]);
   });
@@ -124,5 +190,21 @@ describe("getScores", () => {
     });
 
     await expect(getScores({ league: "wnba" })).rejects.toThrow("Request failed with status code 400");
+  });
+
+  it("throws the oldest day's error when every day fails for a different reason", async () => {
+    mockedGet.mockImplementation(async (_url, config) => {
+      throw new Error(`failed ${(config as ScoreboardRequest).params.dates}`);
+    });
+
+    await expect(getScores({ league: "wnba" })).rejects.toThrow(/^failed 20260917$/);
+  });
+
+  it("sends the scoreboard query parameters unchanged (control: base sends them too)", async () => {
+    await getScores({ league: "wnba" });
+
+    for (const [, config] of mockedGet.mock.calls) {
+      expect(config).toMatchObject({ params: { region: "us", lang: "en", contentorigin: "espn" } });
+    }
   });
 });
