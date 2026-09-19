@@ -1,5 +1,12 @@
 # Brew Changelog
 
+## [Show Upgrade Actions] - {PR_MERGE_DATE}
+
+- `Upgrade` is now the primary action for the selected formula or cask
+- `Upgrade All` is the secondary action (if available)
+- Selection can be toggled via the `⌘⇧X` shortcut
+- Select/Deselect all can be toggled via the `⌘⇧A` shortcut
+
 ## [Cask pinning, Homebrew 6] - 2026-09-08
 
 - **Casks can now be pinned**, just like formulae — pin a cask and it is locked out of upgrades, gets its own section in Show Installed, and shows the same pin icon everywhere. Homebrew has supported this since 5.1.12
