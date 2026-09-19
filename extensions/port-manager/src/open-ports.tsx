@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { CopyCommandsActionsMenu } from "./actions/CopyCommandsActionMenu";
 import CopyInfoActionsMenu from "./actions/CopyInfoActionsMenu";
@@ -10,6 +10,7 @@ import Toasts from "./feedback/Toasts";
 import { useNamedPorts } from "./hooks/useNamedPorts";
 import useProcesses from "./hooks/useProcesses";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
+import { classifyExposure, exposureColor, exposureDescription } from "./utilities/exposure";
 import { getProcessMarkdown } from "./utilities/getProcessMarkdown";
 import { platformShortcut } from "./utilities/platform";
 
@@ -174,18 +175,25 @@ export default function Command() {
                       <List.Item.Detail.Metadata.TagList title="Ports">
                         {p.portInfo.map((i, index) => {
                           const name = getNamedPort(i.port)?.name;
-                          if (name !== undefined) {
-                            return (
-                              <List.Item.Detail.Metadata.TagList.Item
-                                key={index}
-                                text={`${i.port} (${name})`}
-                                color={Color.Green}
-                              />
-                            );
-                          }
-
-                          return <List.Item.Detail.Metadata.TagList.Item key={index} text={`${i.port}`} />;
+                          return (
+                            <List.Item.Detail.Metadata.TagList.Item
+                              key={index}
+                              text={name !== undefined ? `${i.port} (${name})` : `${i.port}`}
+                              color={exposureColor(classifyExposure(i.host))}
+                            />
+                          );
                         })}
+                      </List.Item.Detail.Metadata.TagList>
+                    )}
+                    {p.portInfo && p.portInfo.length > 0 && (
+                      <List.Item.Detail.Metadata.TagList title="Exposure">
+                        {Array.from(new Set(p.portInfo.map((i) => classifyExposure(i.host)))).map((exposure) => (
+                          <List.Item.Detail.Metadata.TagList.Item
+                            key={exposure}
+                            text={exposureDescription(exposure)}
+                            color={exposureColor(exposure)}
+                          />
+                        ))}
                       </List.Item.Detail.Metadata.TagList>
                     )}
                   </List.Item.Detail.Metadata>
