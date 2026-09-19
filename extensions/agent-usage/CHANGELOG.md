@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Multiple Claude accounts] - {PR_MERGE_DATE}
+## [Multiple Claude accounts] - 2026-09-19
 
 ### New Features
 
