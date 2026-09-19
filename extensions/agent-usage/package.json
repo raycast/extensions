@@ -117,6 +117,14 @@
       "required": false
     },
     {
+      "name": "additionalClaudeHomes",
+      "type": "textfield",
+      "title": "Additional Claude Homes (Optional)",
+      "placeholder": "~/.claude-personal, ~/.claude-work",
+      "description": "Comma-separated CLAUDE_CONFIG_DIR directories to include in addition to the default Claude home",
+      "required": false
+    },
+    {
       "name": "showClinePass",
       "type": "checkbox",
       "label": "Show ClinePass",

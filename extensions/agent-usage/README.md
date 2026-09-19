@@ -23,7 +23,7 @@ Track usage across your AI coding agents in one place.
 | --------------- | --------------------------- | :--------: | :------: | :-----: | :-----------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **AIHubMix**    | AIHubMix user self API      |     ✓      |    —     |    ✓    |       —       | Paste the Access Key from https://console.aihubmix.com/setting, or set `AIHUBMIX_ACCESS_KEY`                                                                                     |
 | **Amp**         | Local SQLite database       |     —      |    —     |    —    |       —       | Auto-detected from local database                                                                                                                                                |
-| **Claude**      | Anthropic OAuth Usage API   |     —      |    ✓     |    —    |       —       | Auto-detected after `claude` login                                                                                                                                               |
+| **Claude**      | Anthropic OAuth Usage API   |     —      |    ✓     |    —    |       ✓       | Run `claude` to log in, and add extra `CLAUDE_CONFIG_DIR` paths under **Additional Claude Homes** for more accounts                                                              |
 | **ClinePass**   | Cline API                   |     ✓      |    —     |    —    |       ✓       | Auto-detected from the local Cline login, or add a user ID and API key via Manage Accounts                                                                                       |
 | **Codex**       | OpenAI API                  |     ✓      |    —     |    —    |       ✓       | Run `codex login`, add additional `CODEX_HOME` paths in preferences, or paste a token manually                                                                                   |
 | **Copilot**     | GitHub Copilot internal API |     ✓      |    —     |    ✓    |       ✓       | Add named accounts, sign in with GitHub CLI, or use `GH_TOKEN`/`GITHUB_TOKEN`                                                                                                    |
@@ -46,7 +46,7 @@ Track usage across your AI coding agents in one place.
 - **Manual Key** — Enter API key/token directly in Raycast extension preferences
 - **OpenCode** — Auto-detected from `~/.local/share/opencode/auth.json`
 - **Env Var** — Auto-detected from shell environment variables
-- **Multi-Account** — Support for multiple named accounts via "Manage Accounts" action (⌘M)
+- **Multi-Account** — One row per account: auto-discovered from local logins and extra home directories, plus named accounts added via the "Manage Accounts" action (⌘M) where the provider takes a manual key
 
 ### ClinePass Credentials
 
@@ -109,14 +109,14 @@ The legacy `Copilot Authorization Token` preference remains supported as a `Pref
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action                                 |
-| -------- | -------------------------------------- |
-| `↵`      | Refresh usage data                     |
-| `⌘C`     | Copy usage details                     |
-| `⌘⇧C`    | Copy API key (multi-account providers) |
-| `⌘M`     | Manage Accounts (multi-account)        |
-| `⌘⌥↑`    | Move agent up                          |
-| `⌘⌥↓`    | Move agent down                        |
+| Shortcut | Action                          |
+| -------- | ------------------------------- |
+| `↵`      | Refresh usage data              |
+| `⌘C`     | Copy usage details              |
+| `⌘⇧C`    | Copy API key (when available)   |
+| `⌘M`     | Manage Accounts (multi-account) |
+| `⌘⌥↑`    | Move agent up                   |
+| `⌘⌥↓`    | Move agent down                 |
 
 ## Development
 

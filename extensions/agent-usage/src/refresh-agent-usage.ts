@@ -4,7 +4,7 @@ import {
   useAihubmixUsage,
   useAmpUsage,
   useAntigravityUsage,
-  useClaudeUsage,
+  useClaudeAccounts,
   useCopilotAccounts,
   useCursorUsage,
   useDeepSeekUsage,
@@ -26,7 +26,7 @@ const providers = {
   showAihubmix: useAihubmixUsage,
   showAmp: useAmpUsage,
   showAntigravity: useAntigravityUsage,
-  showClaude: useClaudeUsage,
+  showClaude: useClaudeAccounts,
   showCopilot: useCopilotAccounts,
   showCursor: useCursorUsage,
   showDeepSeek: useDeepSeekUsage,
@@ -52,7 +52,10 @@ export default async function Command(): Promise<void> {
       .filter(([key]) => prefs[key as keyof typeof providers] !== false)
       .map(async ([key, provider]) => {
         const result = await provider.refresh(manual);
-        if (result.error || (Array.isArray(result.usage) && result.usage.some((row) => row.error))) {
+        if (
+          result.error ||
+          (Array.isArray(result.usage) && result.usage.some((row: { error?: unknown }) => row.error))
+        ) {
           console.error(`Usage refresh failed for ${key}`);
           return false;
         }
