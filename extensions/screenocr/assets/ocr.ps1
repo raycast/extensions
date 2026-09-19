@@ -256,8 +256,36 @@ function Select-ScreenRegion {
             }
         })
         $form.Add_KeyDown({ param($sender, $event) if ($event.KeyCode -eq [System.Windows.Forms.Keys]::Escape) { $sender.DialogResult = [System.Windows.Forms.DialogResult]::Cancel; $sender.Close() } })
-        $form.Add_Shown({ param($sender, $event) $sender.Activate() })
-        $dialogResult = $form.ShowDialog()
+        $form.Add_Shown({
+            param($sender, $event)
+            $overlay = $sender
+            $requestFocus = {
+                if (-not $overlay.IsDisposed -and $overlay.Visible) {
+                    $overlay.BringToFront()
+                    $overlay.Activate()
+                    [void]$overlay.Focus()
+                }
+            }.GetNewClosure()
+            [void]$overlay.BeginInvoke([System.Action]$requestFocus)
+        })
+        $escapeTimer = New-Object System.Windows.Forms.Timer
+        $escapeTimer.Interval = 30
+        try {
+            $escapeTimer.Add_Tick({
+                if ($form.Visible -and -not $form.IsDisposed -and
+                    [ScreenOcrNative.Dpi]::GetAsyncKeyState(27) -lt 0) {
+                    $escapeTimer.Stop()
+                    $form.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+                    $form.Close()
+                }
+            })
+            $escapeTimer.Start()
+            $dialogResult = $form.ShowDialog()
+        }
+        finally {
+            $escapeTimer.Stop()
+            $escapeTimer.Dispose()
+        }
         if ($dialogResult -ne [System.Windows.Forms.DialogResult]::OK -or -not $state.Done) { return $null }
         if ($state.Selection.Width -lt 3 -or $state.Selection.Height -lt 3) { return $null }
         return $state.Selection
@@ -359,6 +387,8 @@ try {
 public static extern bool SetProcessDpiAwarenessContext(IntPtr value);
 [DllImport("user32.dll")]
 public static extern bool SetProcessDPIAware();
+[DllImport("user32.dll")]
+public static extern short GetAsyncKeyState(int virtualKey);
 '@
     try {
         if (-not [ScreenOcrNative.Dpi]::SetProcessDpiAwarenessContext([IntPtr]::new(-4))) { [void][ScreenOcrNative.Dpi]::SetProcessDPIAware() }

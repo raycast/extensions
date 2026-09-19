@@ -247,7 +247,7 @@ Invoke-Test 'capture mutex accepts an abandoned owner while its named object rem
     try {
         $startInfo = New-Object System.Diagnostics.ProcessStartInfo
         $startInfo.FileName = Join-Path $PSHOME 'powershell.exe'
-        $startInfo.Arguments = '-NoLogo -NoProfile -NonInteractive -Command "$mutex = [System.Threading.Mutex]::new($false, ''Local\Raycast.ScreenOCR.Capture''); [void]$mutex.WaitOne(); [Console]::Out.Write(''held''); [Console]::Out.Flush(); [Environment]::Exit(0)"'
+        $startInfo.Arguments = '-NoLogo -NoProfile -NonInteractive -Command "$mutex = [System.Threading.Mutex]::new($false, ''Local\Raycast.ScreenOCR.Capture''); [void]$mutex.WaitOne(); [Console]::Out.Write(''held''); [Console]::Out.Flush(); [System.Diagnostics.Process]::GetCurrentProcess().Kill()"'
         $startInfo.UseShellExecute = $false
         $startInfo.CreateNoWindow = $true
         $startInfo.RedirectStandardOutput = $true
@@ -262,7 +262,7 @@ Invoke-Test 'capture mutex accepts an abandoned owner while its named object rem
             $holder.WaitForExit()
             throw 'The abandoned-mutex holder did not exit within 10 seconds.'
         }
-        Assert-Equal $holder.ExitCode 0 'The abandoned-mutex holder failed.'
+        Assert-Equal $holder.ExitCode ([int](-1)) 'The abandoned-mutex holder did not terminate as expected.'
         Assert-Equal $stdoutTask.Result 'held' 'The abandoned-mutex holder did not acquire the mutex.'
         Assert-True ([string]::IsNullOrWhiteSpace($stderrTask.Result)) 'The abandoned-mutex holder wrote diagnostics to stderr.'
 

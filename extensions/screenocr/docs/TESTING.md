@@ -19,6 +19,16 @@ npm run build
 
 The existing Swift integration requires macOS and Xcode for `ray build` production compilation. Raycast CLI 1.104.20 skips Swift compilation during Windows development builds; a conditional runtime import does not remove the macOS production-build requirement.
 
+## Windows development on the release app
+
+With Raycast for Windows 2.4.0.0 and CLI 1.104.20, use:
+
+```powershell
+npm.cmd run dev -- --target release
+```
+
+The CLI defaults to the `x` target on Windows. In the tested installation this built successfully but Raycast reported "Missing executable". Selecting `release` resolved command loading. No package upgrade was needed.
+
 ## Windows PowerShell verification
 
 Commit `a8a0cb304b3a99d9434294fde59d072660245d19` passed all 11 native tests with no failures or skips on a GitHub-hosted Windows 11 Enterprise ARM runner using Windows PowerShell 5.1.26100.9168 and the installed en-US OCR capability. The suite recognized its generated text image through the real Windows OCR engine. [Native test log](https://github.com/duckieeeduck/extensions/actions/runs/34206099847/job/101995812295).
@@ -39,18 +49,47 @@ npm run test:windows
 
 This executes Windows PowerShell 5.1 against the shipped helper. It parses the helper, tests CJK spacing and resize bounds, checks the language-inventory subprocess and exact language selection, and runs WinRT OCR against a generated text image. A Latin-script OCR language pack is required. A nonzero exit or any failed test blocks validation. Report skipped cases separately; this test does not exercise the screen-selection UI or Raycast focus.
 
-## Windows desktop checks — pending
+## Windows desktop verification — 19 September 2026
 
-- Install and run the built extension in Raycast using the Windows PowerShell 5.1 helper.
-- Verify region, all-monitor and clipboard OCR against known text; confirm no Raycast window is included in the capture.
-- Test Escape, right-click, clicks without a drag, reverse-direction drags, repeated launches and process timeout. Confirm the overlay and helper exit and the previous clipboard survives cancellation.
-- Test displays left of and above the primary display, portrait displays, and mixed 100%, 125%, 150% and 200% scaling. Compare the selected physical pixels to the visible rectangle.
-- Test copy, paste and copy-and-paste into an ordinary editor. Verify that focus returns to the intended app and the clipboard behavior matches the preference.
-- Test Auto, an installed explicit language, a removed explicit OCR pack, no OCR packs, and an installed language absent from profile preferences. Confirm there is no silent explicit-language fallback.
-- Test Chinese/Japanese text, Korean word spacing, mixed-script text, fullwidth numbers, blank images and line-break removal.
-- Test clipboard images, copied PNG/JPEG/BMP/GIF/TIFF files, transparent images, unsupported WebP, corrupt files, busy clipboard access, tiny images and extreme aspect ratios. Confirm file handles are released.
-- Test both enabled and disabled notifications; confirm barcode invocation reports its macOS limitation without invoking Swift.
-- Do not claim ARM64 support without testing the corresponding host and process architecture.
+A user-operated Lenovo running Windows 11 Home Single Language (build 26100, reported 64-bit), Windows PowerShell 5.1.26100.7462 and Raycast 2.4.0.0 passed the following checks on one display. Node was 24.19.0 and npm 11.17.0. Exact CPU architecture and display scaling were not recorded; supplied screenshots were 1920 x 1080.
+
+The final checkout passed **49 mocked behavior tests and 14 native Windows tests**, with zero failures/skips and both exit codes 0. [Redacted final transcript and SHA-256 hashes](validation/windows-2026-09-19.txt). The three modified source files were reconstructed from base `71e27c858a555b6060e2e7b01a3a4a358291fabc` plus the submitted patch; all three hashes matched the transcript exactly.
+
+The desktop findings exposed and led to these fixes:
+
+- Windows development builds rejected named imports from the skipped Swift module. Namespace import/destructuring preserves the same macOS calls while allowing the Windows bundle to compile.
+- Escape only cancelled after mouse interaction. The Windows overlay now also polls the current Escape key state while its dialog is open, then stops/disposes that timer. The deferred focus request alone did not fix the failure.
+- The abandoned-lock test hung during normal process shutdown. It now deliberately terminates its lock-holder process, checks the expected exit code as an integer, and retains the acquisition and recovery assertions.
+
+| Desktop check | Observed result |
+| --- | --- |
+| Language command | Lists Auto, en-GB and en-US; en-US selected for OCR tests |
+| Region capture | Known lines recognized exactly; overlay closes on mouse release |
+| Escape cancellation | Works before and after mouse interaction after the fix |
+| Right-click and click-without-drag cancellation | Overlay closes and clipboard remains unchanged |
+| Subsequent capture after cancellation | Works |
+| Clipboard-image OCR | Clean two-line sample matches region OCR exactly |
+| Copy, paste, copy-and-paste | Correct text, one automatic insertion at intended Notepad cursor, clipboard reusable in both mode |
+| Full-screen capture on one display | Known lines recognized; Raycast search window excluded |
+| Identical text near top and bottom | Both copies recognized exactly |
+
+These are user-reported desktop observations, supported by supplied screenshots/text; no screencast was collected. The native suite uses real OCR but does not exercise the Escape timer or selection UI.
+
+### Accuracy observations
+
+A small 277 x 93 dark screenshot with a spelling underline produced character substitutions in "ScreenOCR"; a clean sample passed. The underline has not been established as the cause. Full-screen recognition interpreted some UI symbols as letters. No systematic bottom-of-screen accuracy loss was demonstrated. Startup delay was reported but not measured.
+
+### Windows checks still pending
+
+- Multiple monitors, mixed 100/125/150/200% scaling, negative desktop coordinates, portrait displays and boundary-crossing selections. A Mac with an external display does not validate this Windows helper.
+- Simultaneous interactive captures, reverse-direction drags and timeout cleanup. Automated cross-process contention tests are separate evidence.
+- Complete desktop language-pack removal/no-pack scenarios and multilingual fixtures.
+- Clipboard format/error matrix (copied files, transparency, corrupt/unsupported/busy inputs and extremes), notifications and barcode limitation UI.
+- End-to-end cross-extension callbacks and a short Windows recording.
+
+### Dependency audit
+
+The local npm audit reported five vulnerabilities. They remain unresolved; dependencies were not upgraded. In particular, the esbuild Windows file-serving advisory was identified. A search finding no direct serving references is not a security clearance. Review dependency updates separately from the hash-verified source patch.
 
 ## macOS compatibility checks — pending on device
 
@@ -68,4 +107,4 @@ The Swift source is identical to upstream commit `4729145871e638f806082b1f9e4fb7
 - On macOS, confirm the existing callback behavior is preserved; this Windows contribution does not change its implementation semantics.
 - Confirm existing command IDs, Store identity and saved macOS language choices are retained.
 
-Attach a short Windows recording showing region OCR, cancellation and clipboard OCR, plus the macOS smoke-test results, before marking the PR ready for review.
+For maintainer review, distinguish the completed single-display Windows checks from the pending items above. A Windows recording and native macOS smoke-test results remain requested evidence; do not describe this PR as fully release-validated.
