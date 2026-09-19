@@ -2,10 +2,8 @@ import { getPreferenceValues } from "@raycast/api";
 import { getUserSelectedLanguages } from "../hooks";
 import * as swiftBridge from "swift:../../swift";
 
-const {
-  detectBarcode: detectBarcodeSwift,
-  recognizeText: recognizeTextSwift,
-} = swiftBridge;
+const { detectBarcode: detectBarcodeSwift, recognizeText: recognizeTextSwift } =
+  swiftBridge;
 
 export const recognizeText = async (isFullScreen = false) => {
   const preference = getPreferenceValues<Preferences>();

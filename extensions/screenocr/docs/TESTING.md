@@ -53,7 +53,7 @@ This executes Windows PowerShell 5.1 against the shipped helper. It parses the h
 
 A user-operated Lenovo running Windows 11 Home Single Language (build 26100, reported 64-bit), Windows PowerShell 5.1.26100.7462 and Raycast 2.4.0.0 passed the following checks on one display. Node was 24.19.0 and npm 11.17.0. Exact CPU architecture and display scaling were not recorded; supplied screenshots were 1920 x 1080.
 
-The final checkout passed **49 mocked behavior tests and 14 native Windows tests**, with zero failures/skips and both exit codes 0. [Redacted final transcript and SHA-256 hashes](validation/windows-2026-09-19.txt). The three modified source files were reconstructed from base `71e27c858a555b6060e2e7b01a3a4a358291fabc` plus the submitted patch; all three hashes matched the transcript exactly.
+The final checkout passed **49 mocked behavior tests and 14 native Windows tests**, with zero failures/skips and both exit codes 0. [Redacted final transcript and SHA-256 hashes](validation/windows-2026-09-19.txt). The three modified source files were reconstructed from base `71e27c858a555b6060e2e7b01a3a4a358291fabc` plus the submitted patch; all three hashes matched the transcript exactly at commit `822a4d5315644c9b0ef39efe91aa14f7b2139b2b`. A subsequent CI-required formatting-only change wraps the namespace destructuring differently in `src/ocr/macos.ts`; its raw hash therefore differs without changing the calls or behavior.
 
 The desktop findings exposed and led to these fixes:
 
