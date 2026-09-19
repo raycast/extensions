@@ -386,7 +386,7 @@ function AddDomainForm({
           ? result
           : Boolean(
               (result as { valid?: boolean; isValid?: boolean })?.valid ??
-              (result as { valid?: boolean; isValid?: boolean })?.isValid,
+                (result as { valid?: boolean; isValid?: boolean })?.isValid,
             );
 
       toast.style = valid ? Toast.Style.Success : Toast.Style.Failure;
@@ -428,9 +428,7 @@ function AddDomainForm({
             info="Which container in the stack this domain routes to."
             {...itemProps.containerServiceName}
           >
-            {containers?.map((name) => (
-              <Form.Dropdown.Item key={name} title={name} value={name} />
-            ))}
+            {containers?.map((name) => <Form.Dropdown.Item key={name} title={name} value={name} />)}
           </Form.Dropdown>
         ))}
       <Form.TextField title="Path" placeholder="/" {...itemProps.path} />
