@@ -1,6 +1,6 @@
 # Trakt Manager Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-09-19
 
 ### Added
 
