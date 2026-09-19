@@ -1,0 +1,44 @@
+# File Search by Usage Changelog
+
+## [Initial Version] - {PR_MERGE_DATE}
+
+- Search the folders you choose and your own usage history in one ranked list.
+- Match Raycast File Search shortcuts for Show in Finder, Open With, and Move to Trash; add a hidden-file toggle on `⇧⌘.` for the current command run.
+- Order the first four actions as Open, Show in Finder, Quick Look, and Open With, keeping Show in Finder in Raycast's secondary `⌘↩` position.
+- Add All Types, Directory, and File filters alongside independent, remembered sort choices in the top-right dropdown.
+- Build a name index with `fd` and query it with SQLite full-text search; requires `fd` and runs only when you ask for it with Rebuild Search Index (`⌘⇧R`).
+- Choose which folders the index covers and which names to ignore in Search Index Settings, with the built-in exclusions listed alongside your own and index stats for disk usage, entry counts, and the last scan duration.
+- Automatically include all provider folders under `~/Library/CloudStorage`, not just Google Drive, and list them in Search Index Settings.
+- Keep nested scopes independent, so excluding `~/Library` from the home scan does not suppress explicitly included CloudStorage providers; avoid duplicate traversal and preserve child coverage during incomplete scans.
+- Pass ignore patterns to `fd` unchanged, so its glob syntax works, and optionally respect `.gitignore`, `.ignore`, and `.fdignore` files found while indexing.
+- Drop entries for a folder removed from the scope on the next rebuild that reaches the end of every remaining folder; a rebuild that stops early keeps them.
+- Rank history, pins, cached results, and indexed names together, and publish one finished list per query.
+- Answer each settled query with a single database lookup, so rows do not appear one at a time and the list does not reorder while you read it.
+- Cap each query at 50 ranked matches and each cached source at 50 entries; stream directory reads and report partial coverage when capped.
+- Push type, extension, date, size, and hidden-file filters into the database query, so they decide which matches reach the ranking limit.
+- Limit the displayed list to 50 rows and build action menus and details only for the selected item to reduce memory use.
+- Keep search active on first launch, reopening, and rapid edits back to the same query.
+- Synchronize typed text with Raycast's input updates to prevent stale queries from overwriting the search bar.
+- Keep query text independent of incoming results so rapid typing is not overwritten by older updates or folder initialization.
+- Keep the first item highlighted as startup and folder results arrive, request focus after publishing rows, and recover missing selection without requiring a native selection event.
+- Ignore intermediate automatic selections until the current first row is acknowledged; preserve subsequent user selection and parent-navigation focus.
+- Use a compact single-line location and status heading.
+- Add Return to Start (`⌘⇧H`) in Actions to clear the query and folder without leaving the command or growing the screen stack.
+- Query the index at three characters and say how many more are needed below that; keep memory results available at any length.
+- Keep healthy folder reads moving past stalled files; collection does not depend on scrolling.
+- Coordinate deletion with pending history and cache writes; bound cached-path metadata reads and retain cached results when metadata stalls.
+- Navigate folders with `⌥⌘↓` and `⌥⌘↑`, or type an absolute or home-relative path.
+- Use native navigation with a lightweight root and one active search route, without saved folder history; release each previous result view.
+- Return to the empty start screen with native Back; preserve typed queries when restarting search, including during development-mode effect replay.
+- Detach native control callbacks when results are discarded so development tools cannot retain their index arrays.
+- Filter with `-d`, `-f`, `ext:`, `after:`, `before:`, `size:`, and dot-prefixed hidden-file queries.
+- Learn query-to-item shortcuts and allow frequently used folders to be pinned.
+- Follow Google Drive shortcuts when indexing, so a shared folder is findable by the name you gave it in My Drive and its contents by their own names, under the path you see in Finder.
+- Show whether results are complete, truncated, running on memory alone because no index has been built, or based on a location the last rebuild left incomplete.
+- Report unreadable folders, unreadable indexes, and usage-metadata failures without discarding existing results.
+- Keep valid usage metadata when one item cannot be read, and report the result as partial.
+- Keep the previous index when the drive is offline or unmounted. A scan that stops early merges what it found and never deletes. Only a scan that reached the end of a location replaces that location's coverage and removes names it no longer finds.
+- Prevent overlapping manual indexing runs from replacing each other's results.
+- Prevent indexing from restoring data after deletion completes.
+- Refresh open folders asynchronously, keep search usable while the index is being rebuilt, and cancel obsolete queries and scans.
+- Keep usage data and indexes on the Mac, with actions to reset rankings or delete all extension data, including the index database and the bytes it freed.
