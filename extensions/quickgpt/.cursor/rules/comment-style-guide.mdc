@@ -1,0 +1,74 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Comment Style Guide
+
+This rule defines the comment style requirements for the codebase.
+
+## General Guidelines
+
+- **All comments must be in English**
+- Comments should be clear, concise, and provide meaningful context
+- Follow existing comment style patterns in nearby files
+
+## File Header Comments
+
+Use a descriptive JSDoc-style comment at the top of each file:
+
+```typescript
+/**
+ * This file provides utility functions for [purpose].
+ * It supports [key features/capabilities]:
+ * - Feature 1
+ * - Feature 2
+ * - Feature 3
+ * 
+ * [Any additional important context about the file]
+ */
+```
+
+## Section Headers
+
+Use simple centered headers for major code sections:
+
+```typescript
+/* Types & Constants */
+
+// code here...
+
+/* Utility Functions */
+
+// code here...
+```
+
+## Function Documentation
+
+Use JSDoc format for all functions:
+
+```typescript
+/**
+ * Brief description of what the function does.
+ * Additional details if needed.
+ * 
+ * @param paramName Description of the parameter
+ * @param anotherParam Description of another parameter
+ * @returns Description of the return value
+ */
+function exampleFunction(paramName: string, anotherParam: number): ReturnType {
+  // implementation
+}
+```
+
+## Inline Comments
+
+- Use inline comments sparingly for non-obvious code
+- Keep inline comments concise and to the point
+- Example: `const regex = /pattern/g; // Matches all occurrences of pattern`
+
+## Reference Files
+
+For reference on proper comment style, see:
+- [placeholderFormatter.ts](mdc:src/utils/placeholderFormatter.ts)
+- [fileSystemUtils.ts](mdc:src/utils/fileSystemUtils.ts)
