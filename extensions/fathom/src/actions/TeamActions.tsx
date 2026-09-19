@@ -120,7 +120,7 @@ export function TeamActions(props: {
         title="Copy All Details"
         content={JSON.stringify(team, null, 2)}
         icon={Icon.Document}
-        shortcut={Keyboard.Shortcut.Common.Pin}
+        shortcut={Keyboard.Shortcut.Common.Copy}
       />
       {onRefresh && (
         <Action

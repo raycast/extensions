@@ -102,7 +102,13 @@ export function TeamMemberActions(props: {
           title="Copy All Details"
           content={JSON.stringify(member, null, 2)}
           icon={Icon.Document}
-          shortcut={Keyboard.Shortcut.Common.Pin}
+          // NOT Common.Copy: "Copy Email Address" above already holds it in this
+          // panel. No Common member means "copy everything", so this is
+          // platform-explicit rather than borrowed from an unrelated verb.
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "a" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+          }}
         />
       </ActionPanel.Section>
 
@@ -146,7 +152,13 @@ export function TeamMemberActions(props: {
                 });
               }}
               icon={Icon.Document}
-              shortcut={Keyboard.Shortcut.Common.CopyName}
+              // Was Common.CopyName, which is neither what this does nor free:
+              // "Copy Name" holds it earlier in this same panel, and sections do
+              // not scope shortcuts. Pairs with the single-member export above.
+              shortcut={{
+                macOS: { modifiers: ["cmd", "opt"], key: "e" },
+                Windows: { modifiers: ["ctrl", "alt"], key: "e" },
+              }}
             />
           </>
         )}

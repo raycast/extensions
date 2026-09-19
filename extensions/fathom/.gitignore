@@ -23,3 +23,6 @@ docs/*.log
 .claude/
 .github/docs/
 .github/private/
+
+# Local agent tooling; ray publish copies it otherwise, so it is stashed at publish time.
+.compound-engineering/

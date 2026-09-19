@@ -133,6 +133,9 @@ export async function cacheMeetingsBatch(
       // inside `meeting`.
       const fullTranscript = transcript ?? (meeting as { transcriptText?: string })?.transcriptText;
       saveTranscript(meetingId, fullTranscript);
+      // The file just changed, so any word set built from the previous one is
+      // wrong — it would match text that is gone and miss text that is new.
+      forgetTranscriptWords(meetingId);
 
       // Summaries are duplicated the same way — the outer `summary` field AND
       // `meeting.summaryText`. Keep one copy. (Not the cause of the vanishing
@@ -253,6 +256,7 @@ export async function getCachedMeeting(meetingId: string): Promise<CachedMeeting
       await LocalStorage.removeItem(cacheKey);
       // The transcript lives on disk, so dropping the key alone leaks the file.
       deleteTranscript(meetingId);
+      forgetTranscriptWords(meetingId);
       return null;
     }
 
@@ -413,6 +417,7 @@ async function pruneExpiredFromIndex(expiredIds: string[]): Promise<void> {
       // This is the path the list load actually takes; without it the
       // single-entry fix above covers only the rarer direct read.
       deleteTranscript(id);
+      forgetTranscriptWords(id);
     }
   } catch (error) {
     logger.error("Error pruning expired meetings from index:", error);
@@ -450,6 +455,9 @@ export async function pruneCache(keepCount: number = 50): Promise<void> {
     // Files are not LocalStorage keys; without this the pruned meetings'
     // transcripts stay under supportPath forever.
     pruneTranscripts(new Set(keptIds));
+    // The in-memory copies outlive the files otherwise, so a pruned meeting
+    // would keep matching searches until the command is relaunched.
+    clearFullTranscriptCache();
     const index: CachedMeetingIndex = { meetingIds: keptIds, lastUpdated: Date.now() };
     await LocalStorage.setItem(CACHE_CONFIG.MEETINGS.INDEX_KEY, JSON.stringify(index));
   } catch (error) {
@@ -517,6 +525,7 @@ export async function clearAllCache(): Promise<void> {
     await LocalStorage.removeItem(CACHE_CONFIG.METADATA.KEY);
     // Clearing the cache must clear the on-disk half too.
     pruneTranscripts(new Set());
+    clearFullTranscriptCache();
   } catch (error) {
     logger.error("Error clearing cache:", error);
   }
@@ -526,6 +535,84 @@ export async function clearAllCache(): Promise<void> {
  * Perform full-text search over cached meetings
  * Searches titles, summaries, and transcripts
  */
+/**
+ * On-disk transcripts held in memory for the life of this command instance.
+ *
+ * Stores the RAW lowercased text, not a word set. A word set is far smaller,
+ * but `buildSearchIndex` drops one-character tokens and bare numbers and splits
+ * on punctuation — so `a`, `42` and `follow-up` stop matching. Those worked
+ * before transcripts moved to disk, and a fallback whose whole purpose is "what
+ * the index could not answer" must not introduce a second class of things it
+ * cannot answer either. Substring semantics here are the same semantics the
+ * transcript had when it lived in LocalStorage.
+ *
+ * Bounded by an estimate of RETAINED BYTES rather than entry count, because
+ * transcripts vary by an order of magnitude and a count says nothing about
+ * memory. The estimate is deliberately conservative: two bytes per UTF-16 code
+ * unit plus a per-entry allowance, so a non-ASCII transcript is not counted as
+ * though it were ASCII. An earlier version
+ * capped at 200 entries against a 500-meeting corpus, which was worse than no
+ * cache: a scan evicted exactly what the next scan needed and re-read every
+ * file each time. Eviction is insertion-order; a miss costs a re-read, never
+ * correctness.
+ *
+ * Typical use sits far below the budget — `pruneCache` keeps 50 meetings by
+ * default, roughly 3 MB of transcript.
+ */
+const transcriptTextCache = new Map<string, string>();
+const TRANSCRIPT_CACHE_BUDGET_BYTES = 32 * 1024 * 1024;
+let transcriptCacheBytes = 0;
+
+/** Lowercased transcript text, read from disk once. Empty when absent. */
+function transcriptTextFor(recordingId: string): string {
+  const hit = transcriptTextCache.get(recordingId);
+  if (hit !== undefined) return hit;
+
+  const text = (loadTranscript(recordingId) ?? "").toLowerCase();
+  const cost = estimatedBytes(text);
+
+  // One transcript larger than the whole budget is searched but NOT retained.
+  // Evicting everything and storing it anyway would hold more than the limit
+  // this cache exists to enforce, for the life of the command.
+  if (cost > TRANSCRIPT_CACHE_BUDGET_BYTES) return text;
+
+  while (transcriptCacheBytes + cost > TRANSCRIPT_CACHE_BUDGET_BYTES && transcriptTextCache.size > 0) {
+    const oldest = transcriptTextCache.keys().next().value;
+    if (oldest === undefined) break;
+    transcriptCacheBytes -= estimatedBytes(transcriptTextCache.get(oldest) ?? "");
+    transcriptTextCache.delete(oldest);
+  }
+
+  transcriptTextCache.set(recordingId, text);
+  transcriptCacheBytes += cost;
+  return text;
+}
+
+/**
+ * Conservative retained size for a cached string.
+ *
+ * `String.length` counts UTF-16 code units, not bytes, so a transcript in a
+ * non-Latin script would be undercounted by half against a budget expressed in
+ * bytes. The per-entry allowance covers the Map entry and the key.
+ */
+function estimatedBytes(text: string): number {
+  return text.length * 2 + 128;
+}
+
+/** Forget one meeting's cached transcript — it changed or went away. */
+export function forgetTranscriptWords(recordingId: string): void {
+  const held = transcriptTextCache.get(recordingId);
+  if (held === undefined) return;
+  transcriptCacheBytes -= estimatedBytes(held);
+  transcriptTextCache.delete(recordingId);
+}
+
+/** Drop every cached transcript — the corpus changed underneath. */
+export function clearFullTranscriptCache(): void {
+  transcriptTextCache.clear();
+  transcriptCacheBytes = 0;
+}
+
 export function searchCachedMeetings(cachedMeetings: CachedMeetingData[], query: string): CachedMeetingData[] {
   if (!query.trim()) {
     return cachedMeetings;
@@ -534,29 +621,45 @@ export function searchCachedMeetings(cachedMeetings: CachedMeetingData[], query:
   const searchTerms = query.toLowerCase().split(/\s+/);
   logger.log(`[searchCachedMeetings] Searching ${cachedMeetings.length} meetings for: "${query}"`);
 
+  let diskReads = 0;
+
   const results = cachedMeetings.filter((cached) => {
-    const meeting = cached.meeting as { title?: string; meetingTitle?: string };
-    const searchableText = [
+    const meeting = cached.meeting as { title?: string; meetingTitle?: string; recordingId?: string; id?: string };
+    // `transcriptIndex` is a deduplicated word set capped at 2 kB, because
+    // LocalStorage silently discards writes past ~500 kB TOTAL (see
+    // `transcriptStore`) — an unbounded index recreates the data-loss bug that
+    // module exists to prevent. `cached.transcript` covers entries written
+    // before transcripts moved to disk.
+    const indexed = [
       meeting.title || "",
       meeting.meetingTitle || "",
       cached.summary || "",
-      // `transcriptIndex` (a deduplicated word set) rather than the full text:
-      // transcripts now live on disk, so `cached.transcript` is empty on this
-      // path. Falls back to the full text so an entry cached before this change
-      // still searches correctly.
-      // Capped at 2 kB per meeting, deliberately: LocalStorage silently
-      // discards writes past ~500 kB TOTAL (see `transcriptStore`), so an
-      // unbounded index recreates the silent data-loss bug that module exists
-      // to prevent. A word beyond the cap is therefore not searchable from
-      // here — a known, measured trade-off, not an oversight.
       cached.transcriptIndex || cached.transcript || "",
     ]
       .join(" ")
       .toLowerCase();
 
-    return searchTerms.every((term) => searchableText.includes(term));
+    const unmatched = searchTerms.filter((term) => !indexed.includes(term));
+    if (unmatched.length === 0) return true;
+
+    // The index missed at least one term, and a miss is not an answer: the cap
+    // means a word later in the transcript is simply absent from it. Measured
+    // by a reviewer on a 2,979-word transcript, only 194 words were indexed.
+    // So consult the full text on disk for the terms the index could not
+    // settle. Per-meeting on purpose — an earlier attempt only ran when the
+    // whole query returned zero results, which meant one match anywhere
+    // suppressed the fallback for every other meeting and left the truncation
+    // case unfixed.
+    const recordingId = meeting.recordingId || meeting.id;
+    if (!recordingId) return false;
+
+    const transcript = transcriptTextFor(recordingId);
+    if (!transcript) return false;
+    diskReads += 1;
+
+    return unmatched.every((term) => transcript.includes(term));
   });
 
-  logger.log(`[searchCachedMeetings] Found ${results.length} matches`);
+  logger.log(`[searchCachedMeetings] Found ${results.length} matches (${diskReads} consulted on disk)`);
   return results;
 }

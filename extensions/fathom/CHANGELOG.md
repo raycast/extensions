@@ -8,6 +8,7 @@
 - **Copy Download Link** (⌘⇧L): Copy a direct link to the recording. The link is signed and expires within 24 hours.
 - **Resumable transfers**: An interrupted download resumes from where it stopped instead of starting over, and a cancelled one leaves no partial file behind.
 - **Live progress**: Percentage, transferred size, speed, and time remaining, with a Cancel action throughout.
+- **Transcript search reaches the whole transcript.** Transcripts moved to disk with a compact index in storage, and a word appearing later in a long meeting fell outside it. Search now consults the transcript on disk whenever that index cannot answer.
 - **Search Older Meetings** (⌘L): search covers the meetings loaded so far, so a match further back can be missing. This fetches another batch of older meetings on demand, and the empty state now says when there is more to look through rather than reporting no results.
 
 ### Changed

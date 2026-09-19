@@ -1,7 +1,0 @@
-# Learnings store location.
-#
-# NOT the default `docs`: `ray publish` copies the extension root minus nine
-# hardcoded names, and `docs/` is not one of them — so a store there would be
-# published into raycast/extensions. `.github` IS excluded, so this keeps the
-# store private while remaining a normal repo-relative directory inside the repo.
-docs_root: .github/private/docs
