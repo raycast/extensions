@@ -1,6 +1,6 @@
 # Port Manager Changelog
 
-## [Verified Kills] - {PR_MERGE_DATE}
+## [Verified Kills] - 2026-09-19
 
 - After a kill, wait for the process to actually exit before reporting success. A process that ignores the signal now shows "Process Still Running" with a one-key Force Kill instead of a false "Killed Process"
 - The same check applies to Kill Parent, to the Kill Process Listening on command and to the menu bar
