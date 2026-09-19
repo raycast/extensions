@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.DS_Store
+*.sqlite*
+*.log
+.env
+.env.*
+!.env.example
+*.rayext
+raycast-env.d.ts

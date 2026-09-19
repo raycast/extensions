@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "resource-inspector",
+  "title": "Resource Inspector",
+  "description": "Inspect memory, CPU, disk activity, and Git worktrees. Deliberately close one app, process, or container, or remove one selected worktree.",
+  "icon": "icon.png",
+  "author": "juhas96",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juhas96/raycast-resource-inspector.git"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "worktrees",
+      "title": "Manage Git Worktrees",
+      "description": "Find worktrees across providers, review branches and creation dates, and remove one selected checkout",
+      "mode": "view"
+    },
+    {
+      "name": "inactive",
+      "title": "Inactive Resources",
+      "description": "Opt in to inactivity notifications for chosen programs; Force Quit only when you click",
+      "mode": "view"
+    },
+    {
+      "name": "inspect",
+      "title": "Inspect Resources",
+      "description": "Inspect apps, processes, and containers before choosing one to close",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Usage History",
+      "description": "Review locally recorded memory, CPU, and disk activity",
+      "mode": "view"
+    },
+    {
+      "name": "diagnostics",
+      "title": "Recent Diagnostics",
+      "description": "Read recent macOS resource reports, separate from recorded history",
+      "mode": "view"
+    },
+    {
+      "name": "record",
+      "title": "Record Resource Usage",
+      "description": "Record a lightweight local snapshot approximately once a minute",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "settings",
+      "title": "Resource Inspector Settings",
+      "description": "Pause recording, clear history, and check monitoring status",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build:native": "sh scripts/build-native.sh",
+    "build": "npm run build:native && ray build -e dist --exit-on-error",
+    "dev": "npm run build:native && ray develop",
+    "lint": "tsc --noEmit && prettier --check src tests native package.json tsconfig.json",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "lint:store": "ray lint --exit-on-error",
+    "publish": "ray publish --exit-on-error"
+  },
+  "dependencies": {
+    "@raycast/api": "latest",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^10.10.0",
+    "prettier": "^3.6.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  },
+  "preferences": [
+    {
+      "name": "trackingScope",
+      "title": "Tracking Scope",
+      "description": "Applies to live lists, new recordings, history views, and diagnostics. Overall memory pressure and swap remain visible. Existing history is retained until normal expiry.",
+      "type": "dropdown",
+      "required": false,
+      "default": "third-party",
+      "data": [
+        {
+          "title": "Exclude macOS Services and Built-in Apple Apps",
+          "value": "third-party"
+        },
+        {
+          "title": "Apps and Tools \u2014 Exclude macOS Services",
+          "value": "apps"
+        },
+        {
+          "title": "All Resources",
+          "value": "all"
+        }
+      ]
+    }
+  ]
+}
