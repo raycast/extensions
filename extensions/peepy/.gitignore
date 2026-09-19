@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Raycast build output
+dist/
+build/
+*.raycast.build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor folders
+.vscode/
+.idea/
+*.swp
+
+# Scratch / test artifacts
+tmp-test/
+test-output.txt
+
+# Marketing kit (keep private)
+marketing/
