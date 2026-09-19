@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import getObsidianFiles from "../helpers/get-obsidian-files";
 import { getLocalStorageFiles } from "../helpers/localstorage-files";
 import { File } from "../types";
@@ -7,12 +7,17 @@ export type FilesHook = {
   files: File[];
   loading: boolean;
   backgroundLoading: boolean;
+  updateFile: (file: File) => void;
 };
 
 export default function useFiles(): FilesHook {
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(true);
   const [backgroundLoading, setBackgroundLoading] = useState(true);
+
+  const updateFile = useCallback((updated: File) => {
+    setFiles((current) => current.map((file) => (file.fullPath === updated.fullPath ? updated : file)));
+  }, []);
 
   useEffect(() => {
     async function loadFiles() {
@@ -43,5 +48,6 @@ export default function useFiles(): FilesHook {
     files,
     loading,
     backgroundLoading,
+    updateFile,
   };
 }
