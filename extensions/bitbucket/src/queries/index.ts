@@ -452,8 +452,16 @@ async function scanOpenPullRequests(
     }
 
     const fetched: RepoWithSlug[] = [];
+    const seenSlugs = new Set<string>();
     for await (const page of iterateAllRepositories()) {
       for (const repo of page) {
+        // Sorting by -updated_on while paginating a live, actively-pushed workspace can
+        // shift a repo's rank between page fetches, causing it to reappear on a later
+        // page. De-dupe by slug so its PRs aren't fetched (and shown) twice.
+        if (seenSlugs.has(repo.slug)) {
+          continue;
+        }
+        seenSlugs.add(repo.slug);
         fetched.push(repo);
         queue.push(repo);
       }
