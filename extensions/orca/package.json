@@ -1,0 +1,128 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orca",
+  "title": "Orca",
+  "description": "Unofficial extension for the Orca agent orchestrator: see which agents are waiting for input and start new ones",
+  "icon": "icon.png",
+  "author": "dmitry_s",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-agents",
+      "title": "List All Agents",
+      "subtitle": "Orca",
+      "description": "List every Claude/Codex agent running in Orca, grouped by project",
+      "mode": "view"
+    },
+    {
+      "name": "agents-summary",
+      "title": "Show Waiting Agents",
+      "subtitle": "Orca",
+      "description": "Keeps the count of agents waiting for input in the root search, refreshed in the background",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "add-prompt",
+      "title": "Add Prompt",
+      "subtitle": "Orca",
+      "description": "Save a prompt as a named Raycast command that starts an agent in Orca",
+      "mode": "view"
+    },
+    {
+      "name": "run-prompt",
+      "title": "Run Prompt",
+      "subtitle": "Orca",
+      "description": "Runs a saved prompt; opens the builder when started without one",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "extra",
+          "placeholder": "Add to the prompt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "summaryMode",
+      "title": "Root Search Subtitle",
+      "description": "What the Orca Agents command shows under its name in the root search, refreshed in the background every minute. It does not affect List All Agents — that command opens on all agents, with the blocked ones on top, and its own dropdown narrows the view.",
+      "type": "dropdown",
+      "required": false,
+      "default": "sessions",
+      "data": [
+        {
+          "title": "Blocked Sessions, by Project and Name",
+          "value": "sessions"
+        },
+        {
+          "title": "Counts Only (2 Waiting · 1 Working)",
+          "value": "counts"
+        }
+      ]
+    },
+    {
+      "name": "agentFilter",
+      "title": "Agent Types",
+      "description": "Which panes count as agents worth listing.",
+      "type": "dropdown",
+      "required": false,
+      "default": "all-agents",
+      "data": [
+        {
+          "title": "All Agents",
+          "value": "all-agents"
+        },
+        {
+          "title": "Claude Only",
+          "value": "claude"
+        },
+        {
+          "title": "Codex Only",
+          "value": "codex"
+        },
+        {
+          "title": "All Terminals, Including Plain Shells",
+          "value": "everything"
+        }
+      ]
+    },
+    {
+      "name": "orcaPath",
+      "title": "Orca CLI Path",
+      "description": "Path to the orca executable. Defaults to the one bundled with Orca.app.",
+      "type": "textfield",
+      "required": false,
+      "default": "/Applications/Orca.app/Contents/Resources/bin/orca"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"tests/**/*.test.ts\""
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
