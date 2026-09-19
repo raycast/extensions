@@ -1,27 +1,48 @@
-import { ActionPanel, List, showToast, Color, Action, Icon, Image, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { ActionPanel, List, showToast, Color, Action, Icon, Image, Toast, getPreferenceValues } from "@raycast/api";
+import { useEffect, useState } from "react";
+import useSWR, { SWRConfig } from "swr";
 
-import { getMyOpenPullRequests, getCurrentUserUuid } from "./../../queries";
+import { getMyOpenPullRequests, getCurrentUserUuid, OpenPullRequestsResult } from "./../../queries";
 import {
   ApprovePullRequestAction,
   DeclinePullRequestAction,
   RequestChangesAction,
   ShowPullRequestDetailAction,
 } from "./actions";
+import { cacheConfig } from "../../helpers/cache";
+import { preferences } from "../../helpers/preferences";
 import { PullRequest } from "./interface";
 import { getPullRequestKey } from "./../../helpers/pullRequestKey";
 import { ReviewState, setReviewState } from "./../../helpers/reviewState";
-import { buildReviewAccessories, extractReviewers, findMyReviewState } from "./../../helpers/reviewers";
+import { buildReviewAccessories, findMyReviewState } from "./../../helpers/reviewers";
 
-interface State {
-  pullRequests?: PullRequest[];
-  error?: Error;
-}
+const commandPreferences = getPreferenceValues<Preferences.SearchMyOpenPullRequests>();
+
+const MY_PULL_REQUESTS_CACHE_KEY = `my-open-pull-requests:${preferences.workspace}:${preferences.email}:${commandPreferences.maxRepoAgeDays || "0"}`;
 
 export function SearchMyPullRequests() {
-  const [state, setState] = useState<State>({});
+  return (
+    <SWRConfig value={cacheConfig}>
+      <SearchMyPullRequestsList />
+    </SWRConfig>
+  );
+}
+
+function SearchMyPullRequestsList() {
+  const [progress, setProgress] = useState<OpenPullRequestsResult>();
+  const { data, error, isLoading, isValidating, mutate } = useSWR(MY_PULL_REQUESTS_CACHE_KEY, async () => {
+    setProgress(undefined);
+    return getMyOpenPullRequests(setProgress);
+  });
+  const result = data ?? progress;
+
   const [reviewStates, setReviewStates] = useState<Map<string, ReviewState>>(new Map());
   const [myUuid, setMyUuid] = useState<string | null>(null);
+  // `mutate`'s updater only sees SWR's cache, which is still empty during a cold
+  // load (the list renders from `progress` at that point) — track declined keys
+  // separately so the row disappears immediately regardless of which state it
+  // was rendered from.
+  const [declinedKeys, setDeclinedKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     getCurrentUserUuid()
@@ -29,56 +50,63 @@ export function SearchMyPullRequests() {
       .catch(() => setMyUuid(null));
   }, []);
 
+  const pullRequests: PullRequest[] | undefined = result?.values
+    .map((pr) => ({
+      id: pr.id,
+      title: pr.title,
+      state: pr.state,
+      repo: {
+        name: pr.destination?.repository?.name ?? "",
+        fullName: pr.destination?.repository?.full_name ?? "",
+        slug: pr.destination?.repository?.slug ?? "",
+      },
+      commentCount: pr.comment_count,
+      author: {
+        url: pr.author?.links?.avatar?.href ?? "",
+        nickname: pr.author?.nickname,
+      },
+      reviewers: pr.reviewers ?? [],
+    }))
+    .filter((pr) => !declinedKeys.has(getPullRequestKey(pr)));
+
   useEffect(() => {
-    async function fetchPRs() {
-      try {
-        const pullRequests = await getMyOpenPullRequests();
-
-        const prs =
-          pullRequests.map((pr) => ({
-            id: pr.id,
-            title: pr.title,
-            state: pr.state,
-            repo: {
-              name: pr.destination?.repository?.name,
-              fullName: pr.destination?.repository?.full_name,
-              slug: pr.destination?.repository?.slug,
-            },
-            commentCount: pr.comment_count,
-            author: {
-              url: pr.author?.links?.avatar?.href,
-              nickname: pr.author?.nickname,
-            },
-            reviewers: extractReviewers(pr.participants),
-          })) ?? [];
-        setState({ pullRequests: prs });
-      } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
-      }
+    if (!isValidating && data && data.failedRepoCount > 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Some repositories failed to load",
+        message: `Could not fetch pull requests from ${data.failedRepoCount} ${
+          data.failedRepoCount === 1 ? "repository" : "repositories"
+        }. Results may be incomplete.`,
+      });
     }
+  }, [isValidating, data]);
 
-    fetchPRs();
-  }, []);
-
-  if (state.error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed loading repositories",
-      message: state.error.message,
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed loading pull requests",
+        message: error instanceof Error ? error.message : "Something went wrong",
+      });
+    }
+  }, [error]);
 
   function removePullRequest(key: string) {
-    setState((current) => ({
-      ...current,
-      pullRequests: current.pullRequests?.filter((pr) => getPullRequestKey(pr) !== key),
-    }));
+    setDeclinedKeys((current) => new Set(current).add(key));
+    mutate(
+      (current) =>
+        current && {
+          ...current,
+          values: current.values.filter((pr) => `${pr.destination?.repository?.slug}#${pr.id}` !== key),
+        },
+      { revalidate: false },
+    );
   }
 
   return (
-    <List isLoading={!state.pullRequests && !state.error} searchBarPlaceholder="Search by name...">
-      <List.Section title="Open Pull Requests" subtitle={state.pullRequests?.length + ""}>
-        {state.pullRequests?.map((pr) => {
+    <List isLoading={isLoading || isValidating} searchBarPlaceholder="Search by name...">
+      <List.Section title="Open Pull Requests" subtitle={pullRequests?.length + ""}>
+        {pullRequests?.map((pr) => {
           const key = getPullRequestKey(pr);
           const reviewState = reviewStates.has(key)
             ? (reviewStates.get(key) ?? null)

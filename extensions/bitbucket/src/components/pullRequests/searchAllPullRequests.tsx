@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, Color, Action, Icon, Image, Toast } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Action, Icon, Image, Toast, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useSWR, { SWRConfig } from "swr";
 
@@ -16,7 +16,9 @@ import { getPullRequestKey } from "./../../helpers/pullRequestKey";
 import { ReviewState, setReviewState } from "./../../helpers/reviewState";
 import { buildReviewAccessories, findMyReviewState } from "./../../helpers/reviewers";
 
-const PULL_REQUESTS_CACHE_KEY = `all-open-pull-requests:${preferences.workspace}:${preferences.email}`;
+const commandPreferences = getPreferenceValues<Preferences.SearchAllPullRequests>();
+
+const PULL_REQUESTS_CACHE_KEY = `all-open-pull-requests:${preferences.workspace}:${preferences.email}:${commandPreferences.maxRepoAgeDays || "0"}`;
 
 export function SearchAllPullRequests() {
   return (
