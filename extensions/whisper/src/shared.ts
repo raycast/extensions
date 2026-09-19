@@ -308,8 +308,10 @@ export async function fetchSecretMetadata(link: WhisperLink): Promise<SecretMeta
       selfDestruct: meta.self_destruct === true,
     };
   }
-  // No metadata body: an older server without the endpoint, or a real failure.
-  if (response.status === 404 || response.status === 405) return null;
+  // No metadata body. A server without the endpoint answers 404/405 in plain
+  // text, and a 2xx we cannot read is no more informative, so fall back to the
+  // "unknown" path rather than inventing an error for it.
+  if (response.ok || response.status === 404 || response.status === 405) return null;
   throw new Error(`Whisper server error (${response.status}).`);
 }
 
