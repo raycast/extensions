@@ -22,14 +22,20 @@ reconfiguration.
 
 ## How it talks to T3
 
-`GET /api/orchestration/shell` for the thread list, `POST /api/orchestration/dispatch`
-for commands, `GET /.well-known/t3/environment` for the environment id used in
-`t3code://app/<environmentId>/<threadId>` deep links.
+Everything runs against the T3 Code server on this machine, over loopback:
 
-Worktrees are created by the extension with `git worktree add`, because
-`bootstrap.prepareWorktree` runs on the server's WebSocket path only and the HTTP
-dispatch handler passes commands straight to the engine. The path matches T3's own
-convention, `~/.t3/worktrees/<repo>/<branch>`.
+- `GET /api/orchestration/shell` for projects and threads.
+- `POST /api/orchestration/dispatch` for `thread.create` and `thread.turn.start`.
+- `GET /.well-known/t3/environment` to identify the environment.
+
+Opening a thread activates T3 Code and drives its command palette, because the
+desktop app registers `t3code://` for its own auth callbacks and an external URL
+only reveals the window. macOS asks for Accessibility permission the first time.
+
+Worktrees are created by the extension with `git worktree add`, since the HTTP
+dispatch handler passes commands straight to the engine and never runs the
+server's worktree bootstrap. The path matches T3's own convention,
+`~/.t3/worktrees/<repo>/<branch>`.
 
 A new session inherits the model and runtime mode from the newest thread in the same
 project, so the extension never carries its own model list.
