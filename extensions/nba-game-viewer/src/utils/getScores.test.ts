@@ -93,6 +93,18 @@ describe("getScores", () => {
     expect(requestedDates()).toEqual(["20260919"]);
   });
 
+  it("requests only today when the preference is not a finite number of days", async () => {
+    for (const numDaysScores of ["Infinity", "1e309", String(Number.MAX_VALUE)]) {
+      vi.clearAllMocks();
+      setPreference(numDaysScores);
+      respondWith([]);
+
+      await getScores({ league: "wnba" });
+
+      expect(requestedDates()).toEqual(["20260919"]);
+    }
+  });
+
   it("requests only today when the preference is blank", async () => {
     setPreference("");
 

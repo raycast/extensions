@@ -30,6 +30,18 @@ describe("scoreDates", () => {
     expect(dates[400]).toBe("20260919");
   });
 
+  it("returns only today for a preference that is not a finite number of days", () => {
+    for (const numDaysScores of ["Infinity", "-Infinity", "1e309", "NaN"]) {
+      expect(getScoreDates(today, numDaysScores)).toEqual(["20260919"]);
+    }
+  });
+
+  it("returns only today for a finite preference that steps past the dates a Date can hold", () => {
+    for (const numDaysScores of [String(Number.MAX_VALUE), "1e15"]) {
+      expect(getScoreDates(today, numDaysScores)).toEqual(["20260919"]);
+    }
+  });
+
   it("crosses a month boundary", () => {
     expect(getScoreDates(new Date("2026-10-01T12:00:00.000Z"), "2")).toEqual(["20260929", "20260930", "20261001"]);
   });
