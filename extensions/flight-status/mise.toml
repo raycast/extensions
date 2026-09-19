@@ -1,0 +1,46 @@
+# mise tasks for the Flight Status Raycast extension.
+# Run `mise tasks` to list, `mise run <task>` to execute.
+
+[tools]
+# Match Raycast's Node runtime / the declared @types/node.
+node = "22"
+
+[tasks.dev]
+description = "Run in Raycast (dev mode, hot reload)"
+run = "npm run dev"
+
+[tasks.build]
+description = "Build the extension bundle (ray build)"
+run = "npm run build"
+
+[tasks.lint]
+description = "Lint + Prettier check (ray lint)"
+run = "npm run lint"
+
+[tasks.fix]
+description = "Auto-fix lint + formatting (ray lint --fix)"
+run = "npm run fix-lint"
+
+[tasks.test]
+description = "Run the unit test suite once"
+run = "npm test"
+
+[tasks.test-watch]
+description = "Run the unit tests in watch mode"
+run = "npm run test:watch"
+
+[tasks.typecheck]
+description = "Type-check without emitting (tsc --noEmit)"
+run = "npx tsc --noEmit"
+
+[tasks.check]
+description = "Full local gate: typecheck + lint + test + build"
+depends = ["typecheck", "lint", "test", "build"]
+
+[tasks.migrate]
+description = "Apply Raycast API migration codemods"
+run = "npx @raycast/migration@latest ."
+
+[tasks.publish]
+description = "Publish to the Raycast Store (opens a review PR)"
+run = "npx @raycast/api@latest publish"
