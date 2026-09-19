@@ -103,6 +103,12 @@ export default function Command() {
                 )}
                 <Action title="Open in Glimpse" icon={Icon.AppWindow} onAction={() => openLibrary()} />
                 <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
+                  onAction={() => revalidate()}
+                />
+                <Action
                   title="Open Record Screen"
                   icon={Icon.Microphone}
                   shortcut={{
@@ -110,12 +116,6 @@ export default function Command() {
                     Windows: { modifiers: ["ctrl", "shift"], key: "r" },
                   }}
                   onAction={() => openRecord()}
-                />
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={Keyboard.Shortcut.Common.Refresh}
-                  onAction={() => revalidate()}
                 />
               </ActionPanel>
             }
@@ -159,7 +159,9 @@ function statusMarkdown(item: LibraryItem): string {
 function fileStem(name: string): string {
   const stem = name.replace(/\.[^/.]+$/, "") || name;
   // eslint-disable-next-line no-control-regex
-  return stem.replace(/[<>:"/\\|?*\x00-\x1f]/g, "-").trim() || "Transcript";
+  const safe = stem.replace(/[<>:"/\\|?*\x00-\x1f]/g, "-").trim() || "Transcript";
+  // Windows also refuses device names like CON or COM1, even with an extension.
+  return safe.replace(/^(con|prn|aux|nul|com\d|lpt\d)(?=\.|$)/i, "$1-transcript");
 }
 
 function formatDuration(seconds: number): string {

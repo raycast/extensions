@@ -56,7 +56,7 @@ export default function Command() {
       title="Add Replacement"
       icon={Icon.Plus}
       shortcut={Keyboard.Shortcut.Common.New}
-      target={<ReplacementForm draft={search.trim()} onSaved={revalidate} />}
+      target={<ReplacementForm draft={search.trim()} existing={replacements} onSaved={revalidate} />}
     />
   );
 
@@ -80,7 +80,7 @@ export default function Command() {
                 title="Edit Replacement"
                 icon={Icon.Pencil}
                 shortcut={Keyboard.Shortcut.Common.Edit}
-                target={<ReplacementForm original={replacement} onSaved={revalidate} />}
+                target={<ReplacementForm original={replacement} existing={replacements} onSaved={revalidate} />}
               />
               {addAction}
               <Action
@@ -116,10 +116,12 @@ export default function Command() {
 function ReplacementForm({
   original,
   draft,
+  existing,
   onSaved,
 }: {
   original?: Replacement;
   draft?: string;
+  existing: Replacement[];
   onSaved: () => void;
 }) {
   const { pop } = useNavigation();
@@ -146,7 +148,14 @@ function ReplacementForm({
       }
     },
     validation: {
-      from: (value) => (value?.trim() ? undefined : "Enter the text to replace."),
+      from: (value) => {
+        const from = value?.trim().toLowerCase();
+        if (!from) return "Enter the text to replace.";
+        // replacements add would overwrite another replacement with the same text.
+        if (from !== original?.from.toLowerCase() && existing.some((r) => r.from.toLowerCase() === from)) {
+          return "A replacement for this text already exists.";
+        }
+      },
     },
     initialValues: original ?? { from: draft ?? "", to: "" },
   });
