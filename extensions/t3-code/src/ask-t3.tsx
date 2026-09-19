@@ -271,8 +271,8 @@ export default function Command() {
           error={branchError}
           onChange={() => setBranchError(undefined)}
           info={`Branched from ${
-            baseBranch
-              ? `origin/${baseBranch}`
+            baseBranch?.projectId === activeProjectId
+              ? `origin/${baseBranch.branch}`
               : "the repository default branch"
           } into ~/.t3/worktrees/<repo>/<branch>.`}
         />
