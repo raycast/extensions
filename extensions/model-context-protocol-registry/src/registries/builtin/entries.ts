@@ -447,6 +447,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "sitelemetry",
+    title: "Sitelemetry",
+    description:
+      "Authorized website audits for the sites you own or maintain: security posture, technical SEO, AI visibility (GEO/AEO), analytics integrations, WCAG 2.2 accessibility and performance, returning evidence-backed findings with fixes in nine languages. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://sitelemetry.com/favicon.svg",
+    homepage: "https://sitelemetry.com/mcp-guide",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://sitelemetry.com/mcp"],
+    },
+  },
+  {
     name: "slack",
     title: "Slack",
     description: "This service provides a Model Context Provider (MCP) for interacting with Slack's API.",

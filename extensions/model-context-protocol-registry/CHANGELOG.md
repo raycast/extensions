@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Sitelemetry MCP Server] - 2026-09-19
+
+- Add Sitelemetry to the official registry: authorized website audits (security posture, technical SEO, AI visibility, analytics integrations, WCAG 2.2 accessibility and performance) with evidence-backed findings and fixes in nine languages. Remote Streamable HTTP server at https://sitelemetry.com/mcp through `mcp-remote`; OAuth 2.1 sign-in, no API key.
+
 ## [Add Quantral MCP Server] - 2026-09-19
 
 - Add Quantral to the official registry: per-company stock sentiment scores (0-100), top signals, monthly recaps and the mentions behind each score from the sources Quantral tracks. Hosted remote Streamable HTTP server at https://app.quantral.com/api/mcp through `mcp-remote`; OAuth 2.1 sign-in, Quantral subscription required.
