@@ -1,6 +1,6 @@
 # Whisper - Share Secrets
 
-## [Retrieve Secrets, Selection Sharing & Safer Defaults] - {PR_MERGE_DATE}
+## [Retrieve Secrets, Selection Sharing & Safer Defaults] - 2026-09-19
 
 - New Retrieve Secret command: paste a Whisper link to fetch and decrypt the secret on your device, with a confirmation before a single-view link is consumed; Multiple Values secrets are shown as a list with per-value copy
 - New Whisper Selected Text command: encrypt the selected text (or the clipboard) into a link with your default settings, ideal behind a hotkey
