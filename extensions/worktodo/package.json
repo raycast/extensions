@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "worktodo",
+  "title": "Worktodo",
+  "description": "Keep your tasks close at hand in the menu bar. Check priorities, see what’s due, and complete tasks without opening the full list. Use Raycast to capture tasks and organize them with projects, labels, due dates, and notes. Tasks are stored locally on your Mac, with no account required.",
+  "private": true,
+  "author": "jsn",
+  "license": "MIT",
+  "icon": "worktodo-icon.png",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "engines": {
+    "node": ">=22.22.2 <25"
+  },
+  "packageManager": "npm@11.16.0",
+  "scripts": {
+    "dev": "ray develop",
+    "dev:mcp": "npm run build:mcp && node dist/mcp/server.js",
+    "build": "npm run build:raycast",
+    "build:raycast": "ray build",
+    "build:mcp": "tsc -p tsconfig.mcp.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.mcp.json",
+    "lint": "CI=true ray lint && eslint mcp tests",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "test": "npm run build:mcp && vitest run",
+    "verify": "npm run format && npm run lint && npm run typecheck && npm test && npm run build && npm run build:mcp",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "node -e \"throw new Error('Use npm run publish for the Raycast Store')\""
+  },
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "subtitle": "Worktodo",
+      "description": "See priority tasks, overdue work, and tasks due this week from your menu bar. Complete, edit, or open a task from its submenu, or quickly create a new one.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "my-tasks",
+      "title": "All Tasks",
+      "subtitle": "Worktodo",
+      "description": "Search and manage your tasks in one place. Browse by project, label, Today, or This Week, and keep context with notes and due dates. Review completed tasks and recover items from Trash.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add",
+      "title": "Quick Add",
+      "subtitle": "Worktodo",
+      "description": "Capture a task without opening the full list. Start with a title, then add a project, labels, a due date, or notes as needed.",
+      "mode": "view"
+    },
+    {
+      "name": "backup-restore",
+      "title": "Backup & Restore",
+      "subtitle": "Worktodo",
+      "description": "Export your tasks to a JSON backup or preview a backup before restoring it. Restoring replaces your current data, with a recovery backup created automatically first.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "2.4.1"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0",
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "10.9.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11",
+    "zod": "4.4.3"
+  }
+}
