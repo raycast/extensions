@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getPreferenceValues } from "@raycast/api";
+import getScoreDates from "./scoreDates";
 
 type GetScoresArgs = {
   league: string;
@@ -8,25 +9,22 @@ type GetScoresArgs = {
 const getScores = async ({ league }: GetScoresArgs) => {
   const baseUrl = `https://site.api.espn.com/apis/site/v2/sports/basketball/${league}/scoreboard`;
   const { numDaysScores } = getPreferenceValues<Preferences>();
+  const dates = getScoreDates(new Date(), Number(numDaysScores));
 
-  const today = new Date();
-  const sevenDaysAgo = new Date(today);
-  sevenDaysAgo.setDate(today.getDate() - Number(numDaysScores));
+  const responses = await Promise.all(
+    dates.map((date) =>
+      axios.get(baseUrl, {
+        params: {
+          region: "us",
+          lang: "en",
+          contentorigin: "espn",
+          dates: date,
+        },
+      }),
+    ),
+  );
 
-  const formatDate = (date: Date) => date.toISOString().split("T")[0].replace(/-/g, "");
-
-  const startDate = formatDate(sevenDaysAgo);
-  const endDate = formatDate(today);
-
-  const params = {
-    region: "us",
-    lang: "en",
-    contentorigin: "espn",
-    dates: `${startDate}-${endDate}`,
-  };
-
-  const res = await axios.get(baseUrl, { params });
-  return res.data.events;
+  return responses.flatMap(({ data }) => data.events);
 };
 
 export default getScores;
