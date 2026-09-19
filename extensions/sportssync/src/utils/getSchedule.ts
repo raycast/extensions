@@ -92,15 +92,17 @@ export default function getScoresAndSchedule() {
 
   if (currentLeague === "f1") {
     dateRange = `${currentYear}`;
-  }
-
-  if (currentLeague === "mens-college-basketball" || currentLeague === "womens-college-basketball") {
+  } else {
     dateRange = ``;
   }
 
-  if (currentSport === "soccer") {
-    dateRange = ``;
-  }
+  // if (currentLeague === "mens-college-basketball" || currentLeague === "womens-college-basketball") {
+  //   dateRange = ``;
+  // }
+
+  // if (currentSport === "soccer") {
+  //   dateRange = ``;
+  // }
 
   const {
     isLoading: scheduleLoading,
