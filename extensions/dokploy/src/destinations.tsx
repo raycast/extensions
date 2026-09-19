@@ -114,7 +114,7 @@ export default function Destinations() {
   );
 }
 
-function CreateDestination({ onCreate }: { onCreate: () => void }) {
+export function CreateDestination({ onCreate }: { onCreate: () => void }) {
   const { url, headers } = useToken();
   const { pop } = useNavigation();
   interface FormValues {

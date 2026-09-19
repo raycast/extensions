@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Database Backups] - {PR_MERGE_DATE}
+
+- Add a `View Backups` action to Postgres, MariaDB, MySQL and MongoDB services, listing scheduled S3 backups with `Add Backup`, `Edit Backup`, `Run Backup Now` and `Delete Backup` actions. The backup form can also create a new destination on the spot via `Add Destination`, without leaving to the separate Destinations command.
+
 ## [Add Domain Action] - 2026-09-19
 
 - Add an `Add Domain` action to Applications and Compose stacks. Compose stacks get a container picker sourced from the compose file; either kind can auto-fill a generated host via `Generate Domain`, or check its DNS against the target server via `Validate Domain` before saving.
