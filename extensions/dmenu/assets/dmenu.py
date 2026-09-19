@@ -16,7 +16,7 @@ EXTENSION = "8w8kkr8typ/dmenu"
 COMMAND = "dmenu"
 
 ACCEPT_TIMEOUT = 10      # seconds to wait for Raycast to connect
-RECV_TIMEOUT = 20        # seconds to wait for selection
+RECV_TIMEOUT = 30        # seconds to wait for selection
 TOTAL_TIMEOUT = ACCEPT_TIMEOUT + RECV_TIMEOUT # max runtime (one accept + one recv phase)
 
 start_time = time.monotonic()
@@ -66,7 +66,7 @@ server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 server.settimeout(ACCEPT_TIMEOUT)
 server.bind(sock_path)
 os.chmod(sock_path, 0o600)
-server.listen(2)
+server.listen(1)
 
 log(f"listening on {sock_path}")
 
@@ -86,6 +86,7 @@ log("raycast deeplink launched, waiting for connection")
 
 
 final_result = None
+conn = None
 
 try:
     try:
@@ -114,15 +115,25 @@ try:
 
         final_result = data.decode("utf-8").strip()
         log(f"final_result = {final_result!r}")
-        conn.close()
 
     except socket.timeout:
-        log("socket.timeout raised")
+        # Gave up waiting for a selection. We deliberately don't treat this as
+        # fatal before closing conn below: closing the still-open connection
+        # here (rather than only at process exit) sends the FIN immediately,
+        # so the Raycast list sees it right away and can show a "timed out"
+        # message instead of sitting there looking alive with a dead socket
+        # behind it.
+        log("socket.timeout raised (gave up waiting for a selection)")
     except Exception as e:
         log(f"exception raised: {e!r}")
 
     log(f"done, timed_out={timed_out()}")
 finally:
+    if conn is not None:
+        try:
+            conn.close()
+        except OSError:
+            pass
     server.close()
     shutil.rmtree(run_dir, ignore_errors=True)
     log("server socket closed, run dir removed")
