@@ -1,5 +1,9 @@
 # proton-pass Changelog
 
+## [Improvements] - 2026-09-18
+
+- Add a Cache Expiration preference for cached vault and item metadata: 5 minutes, 1 hour, 5 hours, 1 day, 7 days, 30 days, or Never (default: 5 minutes)
+
 ## [Windows Support] - 2026-08-30
 
 - Add macOS and Windows x86_64 support with Proton Pass CLI 2.3.3
