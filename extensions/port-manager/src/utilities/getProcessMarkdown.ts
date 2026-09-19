@@ -11,11 +11,14 @@ function inlineCode(value: string) {
 }
 
 export function getProcessMarkdown(p: Process) {
-  const sections = [`## ${escapeInline(p.name ?? "Untitled Process")}`];
+  const ports = (p.portInfo ?? []).map((i) => i.port);
+  const name = escapeInline(p.name ?? "Untitled Process");
+
+  const sections = [ports.length > 0 ? `## Port${ports.length > 1 ? "s" : ""} ${ports.join(", ")}` : `## ${name}`];
 
   const addresses = (p.portInfo ?? []).map((i) => inlineCode(`${i.host}:${i.port}`));
   if (addresses.length > 0) {
-    sections.push(`Listening on ${addresses.join(", ")}`);
+    sections.push(`**${name}** (PID ${p.pid}) is listening on ${addresses.join(", ")}`);
   }
 
   if (p.commandLine !== undefined) {

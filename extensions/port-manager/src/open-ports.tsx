@@ -193,7 +193,7 @@ export default function Command() {
               />
             }
             actions={<ActionPanel>{actions.map((a) => a.action)}</ActionPanel>}
-            accessories={isShowingDetail ? undefined : getProcessAccessories(p)}
+            accessories={getProcessAccessories(p)}
           />
         );
       })}
