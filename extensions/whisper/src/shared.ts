@@ -14,10 +14,10 @@ const PAYLOAD_OVERHEAD_BYTES = NONCE_BYTES + TAG_BYTES;
 const KEY_BYTES = 32;
 
 export const DURATION_OPTIONS = [
-  { value: "30m", title: "30 minutes" },
-  { value: "1h", title: "1 hour" },
-  { value: "24h", title: "24 hours" },
-  { value: "7d", title: "7 days" },
+  { value: "30m", title: "30 Minutes" },
+  { value: "1h", title: "1 Hour" },
+  { value: "24h", title: "24 Hours" },
+  { value: "7d", title: "7 Days" },
 ] as const;
 
 function getWhisperUrl(): string {
