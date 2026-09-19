@@ -71,6 +71,8 @@ export interface BookmarkFormProps {
   root: string;
   state: LibraryState;
   bookmark?: Bookmark;
+  /** Prefill for create (ignored when editing). */
+  seed?: { url?: string; title?: string; desc?: string; tags?: string[] };
   onSaved: (state: LibraryState, bookmark: Bookmark) => void;
 }
 
@@ -79,13 +81,16 @@ export function BookmarkForm({
   root,
   state,
   bookmark,
+  seed,
   onSaved,
 }: BookmarkFormProps) {
   const { push, pop } = useNavigation();
-  const [url, setUrl] = useState(bookmark?.url ?? "");
-  const [title, setTitle] = useState(bookmark?.title ?? "");
-  const [desc, setDesc] = useState(bookmark?.desc ?? "");
-  const [tagsText, setTagsText] = useState((bookmark?.tags ?? []).join(", "));
+  const [url, setUrl] = useState(bookmark?.url ?? seed?.url ?? "");
+  const [title, setTitle] = useState(bookmark?.title ?? seed?.title ?? "");
+  const [desc, setDesc] = useState(bookmark?.desc ?? seed?.desc ?? "");
+  const [tagsText, setTagsText] = useState(
+    (bookmark?.tags ?? seed?.tags ?? []).join(", "),
+  );
   const tags = tagsText
     .split(/[,，]/)
     .map((tag) => tag.trim())

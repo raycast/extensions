@@ -36,6 +36,7 @@ import {
 import type { Bookmark, LibraryState, Mutation, Visit } from "./model.ts";
 import { ensureIconForBookmark, iconImageSource } from "./icon-service.ts";
 import { commit, configureDirectory, readLibrary } from "./repository.ts";
+import { aiConfigFromPreferences, suggestMetadata } from "./ai.ts";
 
 function listIcon(bookmark: Bookmark) {
   const bound = iconImageSource(bookmark.icon);
@@ -45,6 +46,17 @@ function listIcon(bookmark: Bookmark) {
 
 function hostOf(url: string): string {
   return url.replace(/^https?:\/\//i, "").split(/[/?#]/)[0] || url;
+}
+
+function looksLikeHttpUrl(value: string): boolean {
+  const trimmed = value.trim();
+  if (!/^https?:\/\//i.test(trimmed)) return false;
+  try {
+    const u = new URL(trimmed);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 function matches(bookmark: Bookmark, needle: string): boolean {
@@ -549,6 +561,66 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
+              {!conflicted && looksLikeHttpUrl(query) && (
+                <>
+                  <Action
+                    title="保存此链接"
+                    icon={Icon.Plus}
+                    onAction={() => {
+                      const url = query.trim();
+                      push(
+                        <BookmarkForm
+                          root={libraryRoot}
+                          state={libraryState}
+                          seed={{ url, title: hostOf(url) }}
+                          onSaved={(next) => setState(next)}
+                        />,
+                      );
+                    }}
+                  />
+                  <Action
+                    title="AI 保存此链接"
+                    icon={Icon.Wand}
+                    onAction={() =>
+                      void (async () => {
+                        const url = query.trim();
+                        let seed = {
+                          url,
+                          title: hostOf(url),
+                          desc: undefined as string | undefined,
+                          tags: undefined as string[] | undefined,
+                        };
+                        try {
+                          const config = aiConfigFromPreferences(preferences);
+                          const suggestion = await suggestMetadata(config, {
+                            url,
+                          });
+                          seed = {
+                            url,
+                            title: suggestion.title?.trim() || hostOf(url),
+                            desc: suggestion.desc,
+                            tags: suggestion.tags,
+                          };
+                        } catch (error) {
+                          await showToast({
+                            style: Toast.Style.Failure,
+                            title: "AI 不可用，已降级为普通保存",
+                            message: failureMessage(error),
+                          });
+                        }
+                        push(
+                          <BookmarkForm
+                            root={libraryRoot}
+                            state={libraryState}
+                            seed={seed}
+                            onSaved={(next) => setState(next)}
+                          />,
+                        );
+                      })()
+                    }
+                  />
+                </>
+              )}
               {!conflicted && (
                 <Action
                   title="新增书签"

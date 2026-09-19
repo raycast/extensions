@@ -35,10 +35,9 @@
     {
       "name": "dataDirectory",
       "title": "Dedicated Data Directory",
-      "description": "专用数据目录；已导入 goose-mark 书签。留空则用 supportPath/marks-library。",
+      "description": "专用数据目录。留空则用 supportPath/marks-library。",
       "type": "textfield",
-      "required": false,
-      "default": "/Users/eachann/.config/raycast-mark-library"
+      "required": false
     },
     {
       "name": "aiProtocol",
