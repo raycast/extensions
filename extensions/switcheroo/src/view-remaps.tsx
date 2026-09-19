@@ -2,9 +2,9 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Color,
   confirmAlert,
   Icon,
+  type Image,
   List,
   showToast,
   Toast,
@@ -21,12 +21,12 @@ import {
 import { restartService } from "./lib/service";
 import { AddRemapForm } from "./add-remap";
 
-const TYPE_ICONS: Record<RemapType, { icon: Icon; color: Color }> = {
-  modifier_remap: { icon: Icon.CommandSymbol, color: Color.Purple },
-  remap: { icon: Icon.Switch, color: Color.Yellow },
-  conditional_remap: { icon: Icon.ArrowRight, color: Color.Blue },
-  tap_hold: { icon: Icon.Clock, color: Color.Orange },
-  chord: { icon: Icon.Keyboard, color: Color.Green },
+const TYPE_ICONS: Record<RemapType, Image.ImageLike> = {
+  modifier_remap: "🎛️",
+  remap: "🔁",
+  conditional_remap: "⚡",
+  tap_hold: "⏱️",
+  chord: "🎹",
 };
 
 const TYPE_LABELS: Record<RemapType, string> = {
@@ -181,10 +181,7 @@ export default function ViewRemaps() {
               {(grouped.get(type) ?? []).map((item) => (
                 <List.Item
                   key={item.id}
-                  icon={{
-                    source: TYPE_ICONS[item.type].icon,
-                    tintColor: TYPE_ICONS[item.type].color,
-                  }}
+                  icon={TYPE_ICONS[item.type]}
                   title={item.title}
                   subtitle={item.subtitle}
                   actions={

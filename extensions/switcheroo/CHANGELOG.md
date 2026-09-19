@@ -6,6 +6,9 @@
 
 - **View Remaps** — list and manage all configured keyboard remapping rules.
 
+- Distinguish remap types with emoji icons and refreshed View Remaps and
+  Add Remap screenshots.
+
 - **Add Remap** — create a new keyboard remapping rule from Raycast.
 
 - Recover from failed edits with **Discard Edits and Reload**, without
