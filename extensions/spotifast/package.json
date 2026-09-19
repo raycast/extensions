@@ -1,0 +1,263 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spotifast",
+  "title": "Spotifast",
+  "description": "Control Spotifast, the native Spotify client: play, skip, seek, volume, shuffle, repeat, liked songs and Spotify Connect devices, with the playing track in the menu bar.",
+  "icon": "extension-icon.png",
+  "author": "Seigiard",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "binaryPath",
+      "title": "Spotifast Binary",
+      "description": "Path to the Spotifast command. Leave empty to find it in Spotifast.app or on the PATH.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/Applications/Spotifast.app/Contents/MacOS/fastpotify"
+    }
+  ],
+  "commands": [
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Player",
+      "subtitle": "Spotifast",
+      "description": "Show the playing track in the menu bar, with playback controls.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "showTrackTitle",
+          "label": "Show track title in the menu bar",
+          "description": "When off, the menu bar shows only the icon.",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "play-pause",
+      "title": "Play / Pause",
+      "subtitle": "Spotifast",
+      "description": "Toggle playback.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "subtitle": "Spotifast",
+      "description": "Skip to the next track.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "subtitle": "Spotifast",
+      "description": "Return to the previous track.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "seek-forward",
+      "title": "Skip Forward",
+      "subtitle": "Spotifast",
+      "description": "Seek forward, 15 seconds unless given.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "seconds",
+          "placeholder": "15",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "seek-backward",
+      "title": "Skip Backward",
+      "subtitle": "Spotifast",
+      "description": "Seek backward, 15 seconds unless given.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "seconds",
+          "placeholder": "15",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "volume-up",
+      "title": "Increase Volume",
+      "subtitle": "Spotifast",
+      "description": "Raise the volume, 10 percent unless given.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "percent",
+          "placeholder": "10",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "volume-down",
+      "title": "Decrease Volume",
+      "subtitle": "Spotifast",
+      "description": "Lower the volume, 10 percent unless given.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "percent",
+          "placeholder": "10",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "subtitle": "Spotifast",
+      "description": "Set the volume to a percentage.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "percent",
+          "placeholder": "0-100",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Mute",
+      "subtitle": "Spotifast",
+      "description": "Mute or unmute playback.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Spotifast",
+      "description": "Turn shuffle on or off.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "cycle-repeat",
+      "title": "Cycle Repeat",
+      "subtitle": "Spotifast",
+      "description": "Step through repeat off, repeat all and repeat one.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-like",
+      "title": "Like / Unlike Track",
+      "subtitle": "Spotifast",
+      "description": "Save the playing track to Your Library, or remove it.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "name": "devices",
+      "title": "Switch Device",
+      "subtitle": "Spotifast",
+      "description": "Move playback to another Spotify Connect device.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "open-spotifast",
+      "title": "Open Spotifast",
+      "subtitle": "Spotifast",
+      "description": "Bring the Spotifast window forward, starting the app if it is not running.",
+      "keywords": [
+        "spotifast",
+        "spotify"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.17.2",
+    "@types/react": "^19.1.10",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
