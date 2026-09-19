@@ -1,0 +1,161 @@
+{
+  "ownerName": "macOS",
+  "ownerType": "system",
+  "sourceUrl": "https://support.apple.com/en-us/102650",
+  "shortcuts": [
+    {
+      "id": "spotlight-search",
+      "commandName": "Show or Hide Spotlight Search",
+      "modifiers": ["command"],
+      "key": "Space",
+      "scope": "global"
+    },
+    {
+      "id": "finder-search-window",
+      "commandName": "Search from a Finder Window",
+      "modifiers": ["command", "option"],
+      "key": "Space",
+      "scope": "global"
+    },
+    {
+      "id": "force-quit-apps",
+      "commandName": "Force Quit Applications",
+      "modifiers": ["command", "option"],
+      "key": "Escape",
+      "scope": "global"
+    },
+    {
+      "id": "character-viewer",
+      "commandName": "Show Character Viewer",
+      "modifiers": ["control", "command"],
+      "key": "Space",
+      "scope": "global"
+    },
+    {
+      "id": "lock-screen",
+      "commandName": "Lock Screen",
+      "modifiers": ["control", "command"],
+      "key": "Q",
+      "scope": "global"
+    },
+    {
+      "id": "switch-apps",
+      "commandName": "Switch to Next App",
+      "modifiers": ["command"],
+      "key": "Tab",
+      "scope": "global"
+    },
+    {
+      "id": "switch-windows",
+      "commandName": "Switch Windows in Current App",
+      "modifiers": ["command"],
+      "key": "`",
+      "scope": "global"
+    },
+    {
+      "id": "screenshot-toolbar",
+      "commandName": "Open Screenshot and Recording Toolbar",
+      "modifiers": ["command", "shift"],
+      "key": "5",
+      "scope": "global"
+    },
+    {
+      "id": "screenshot-screen",
+      "commandName": "Take Screenshot of Screen",
+      "modifiers": ["command", "shift"],
+      "key": "3",
+      "scope": "global"
+    },
+    {
+      "id": "screenshot-selection",
+      "commandName": "Take Screenshot of Selection",
+      "modifiers": ["command", "shift"],
+      "key": "4",
+      "scope": "global"
+    },
+    {
+      "id": "quick-note",
+      "commandName": "Create Quick Note",
+      "modifiers": ["fn"],
+      "key": "Q",
+      "scope": "global"
+    },
+    {
+      "id": "full-screen",
+      "commandName": "Enter or Exit Full Screen",
+      "modifiers": ["control", "command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "open-settings",
+      "commandName": "Open Settings for Front App",
+      "modifiers": ["command"],
+      "key": ",",
+      "scope": "app"
+    },
+    {
+      "id": "hide-front-app",
+      "commandName": "Hide Front App",
+      "modifiers": ["command"],
+      "key": "H",
+      "scope": "app"
+    },
+    {
+      "id": "hide-other-apps",
+      "commandName": "Hide Other Apps",
+      "modifiers": ["command", "option"],
+      "key": "H",
+      "scope": "app"
+    },
+    {
+      "id": "minimize-front-window",
+      "commandName": "Minimize Front Window",
+      "modifiers": ["command"],
+      "key": "M",
+      "scope": "app"
+    },
+    {
+      "id": "minimize-all-windows",
+      "commandName": "Minimize All Windows of Front App",
+      "modifiers": ["command", "option"],
+      "key": "M",
+      "scope": "app"
+    },
+    {
+      "id": "quit-current-app",
+      "commandName": "Quit Current App",
+      "modifiers": ["command"],
+      "key": "Q",
+      "scope": "app"
+    },
+    {
+      "id": "close-front-window",
+      "commandName": "Close Front Window",
+      "modifiers": ["command"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "close-all-windows",
+      "commandName": "Close All Windows of Front App",
+      "modifiers": ["command", "option"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "quick-look",
+      "commandName": "Quick Look Selected Item",
+      "modifiers": [],
+      "key": "Space",
+      "scope": "app"
+    },
+    {
+      "id": "new-tab",
+      "commandName": "Open New Tab",
+      "modifiers": ["command"],
+      "key": "T",
+      "scope": "app"
+    }
+  ]
+}

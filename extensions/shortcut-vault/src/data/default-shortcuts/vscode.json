@@ -1,0 +1,280 @@
+{
+  "ownerName": "VS Code",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf",
+  "shortcuts": [
+    {
+      "id": "command-palette",
+      "commandName": "Show Command Palette",
+      "modifiers": ["command", "shift"],
+      "key": "P",
+      "scope": "app"
+    },
+    {
+      "id": "quick-open",
+      "commandName": "Quick Open",
+      "modifiers": ["command"],
+      "key": "P",
+      "scope": "app"
+    },
+    {
+      "id": "new-window",
+      "commandName": "New Window",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "close-window",
+      "commandName": "Close Window",
+      "modifiers": ["command"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "user-settings",
+      "commandName": "Open User Settings",
+      "modifiers": ["command"],
+      "key": ",",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-terminal",
+      "commandName": "Toggle Integrated Terminal",
+      "modifiers": ["control"],
+      "key": "`",
+      "scope": "app"
+    },
+    {
+      "id": "cut-line",
+      "commandName": "Cut Line",
+      "modifiers": ["command"],
+      "key": "X",
+      "scope": "app"
+    },
+    {
+      "id": "copy-line",
+      "commandName": "Copy Line",
+      "modifiers": ["command"],
+      "key": "C",
+      "scope": "app"
+    },
+    {
+      "id": "move-line-down",
+      "commandName": "Move Line Down",
+      "modifiers": ["option"],
+      "key": "Down",
+      "scope": "app"
+    },
+    {
+      "id": "move-line-up",
+      "commandName": "Move Line Up",
+      "modifiers": ["option"],
+      "key": "Up",
+      "scope": "app"
+    },
+    {
+      "id": "copy-line-down",
+      "commandName": "Copy Line Down",
+      "modifiers": ["option", "shift"],
+      "key": "Down",
+      "scope": "app"
+    },
+    {
+      "id": "copy-line-up",
+      "commandName": "Copy Line Up",
+      "modifiers": ["option", "shift"],
+      "key": "Up",
+      "scope": "app"
+    },
+    {
+      "id": "delete-line",
+      "commandName": "Delete Line",
+      "modifiers": ["command", "shift"],
+      "key": "K",
+      "scope": "app"
+    },
+    {
+      "id": "insert-line-below",
+      "commandName": "Insert Line Below",
+      "modifiers": ["command"],
+      "key": "Enter",
+      "scope": "app"
+    },
+    {
+      "id": "insert-line-above",
+      "commandName": "Insert Line Above",
+      "modifiers": ["command", "shift"],
+      "key": "Enter",
+      "scope": "app"
+    },
+    {
+      "id": "jump-to-bracket",
+      "commandName": "Jump to Matching Bracket",
+      "modifiers": ["command", "shift"],
+      "key": "\\",
+      "scope": "app"
+    },
+    {
+      "id": "indent-line",
+      "commandName": "Indent Line",
+      "modifiers": ["command"],
+      "key": "]",
+      "scope": "app"
+    },
+    {
+      "id": "outdent-line",
+      "commandName": "Outdent Line",
+      "modifiers": ["command"],
+      "key": "[",
+      "scope": "app"
+    },
+    {
+      "id": "fold-region",
+      "commandName": "Fold Region",
+      "modifiers": ["command", "option"],
+      "key": "[",
+      "scope": "app"
+    },
+    {
+      "id": "unfold-region",
+      "commandName": "Unfold Region",
+      "modifiers": ["command", "option"],
+      "key": "]",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-line-comment",
+      "commandName": "Toggle Line Comment",
+      "modifiers": ["command"],
+      "key": "/",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-block-comment",
+      "commandName": "Toggle Block Comment",
+      "modifiers": ["option", "shift"],
+      "key": "A",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-word-wrap",
+      "commandName": "Toggle Word Wrap",
+      "modifiers": ["option"],
+      "key": "Z",
+      "scope": "app"
+    },
+    {
+      "id": "find-in-files",
+      "commandName": "Find in Files",
+      "modifiers": ["command", "shift"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "find",
+      "commandName": "Find",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "replace",
+      "commandName": "Replace",
+      "modifiers": ["command", "option"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "find-next",
+      "commandName": "Find Next",
+      "modifiers": ["command"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "find-previous",
+      "commandName": "Find Previous",
+      "modifiers": ["command", "shift"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "add-selection-to-next-find-match",
+      "commandName": "Add Selection to Next Find Match",
+      "modifiers": ["command"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "go-to-line",
+      "commandName": "Go to Line",
+      "modifiers": ["control"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "show-all-symbols",
+      "commandName": "Show All Symbols",
+      "modifiers": ["command"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "go-to-symbol",
+      "commandName": "Go to Symbol",
+      "modifiers": ["command", "shift"],
+      "key": "O",
+      "scope": "app"
+    },
+    {
+      "id": "show-problems",
+      "commandName": "Show Problems",
+      "modifiers": ["command", "shift"],
+      "key": "M",
+      "scope": "app"
+    },
+    {
+      "id": "trigger-suggestion",
+      "commandName": "Trigger Suggestion",
+      "modifiers": ["control"],
+      "key": "Space",
+      "scope": "app"
+    },
+    {
+      "id": "parameter-hints",
+      "commandName": "Trigger Parameter Hints",
+      "modifiers": ["command", "shift"],
+      "key": "Space",
+      "scope": "app"
+    },
+    {
+      "id": "format-document",
+      "commandName": "Format Document",
+      "modifiers": ["option", "shift"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "quick-fix",
+      "commandName": "Quick Fix",
+      "modifiers": ["command"],
+      "key": ".",
+      "scope": "app"
+    },
+    {
+      "id": "show-references",
+      "commandName": "Show References",
+      "modifiers": ["shift"],
+      "key": "F12",
+      "scope": "app"
+    },
+    {
+      "id": "rename-symbol",
+      "commandName": "Rename Symbol",
+      "modifiers": [],
+      "key": "F2",
+      "scope": "app"
+    }
+  ]
+}
