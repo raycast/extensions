@@ -1,5 +1,12 @@
 # Trakt Manager Changelog
 
+## [Update] - 2026-09-19
+
+### Added
+
+- **AI tools that update your account** — Raycast AI can now add to and remove from the watchlist, mark movies, shows and episodes as watched, remove history entries, and rate or unrate a title. Every action asks for confirmation first, and the dialog names the item by looking its Trakt ID up on Trakt, so a wrong identifier surfaces there instead of silently modifying the wrong title.
+- A tool to read your own ratings, including a targeted lookup for the score you gave a specific title.
+
 ## [Update] - 2026-09-17
 
 ### Added
