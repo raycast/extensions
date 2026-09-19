@@ -1,5 +1,56 @@
 # Changelog
 
+## [Generate Command] - {PR_MERGE_DATE}
+
+- New **Generate** command: pick a dictionary, type a word the dictionary
+  doesn't have, say which meaning its card should teach, and Inoh makes the
+  card without leaving Raycast — a private card of your own, or a request for
+  the public dictionary
+- The action panel now always offers **Sign In** when you are signed out, from
+  every command and every view, rather than only from the ones that happened to
+  need an account
+- Signed out, the panel no longer offers the pages an account is needed for:
+  the deck and the drafts composer both answer a visitor with a sign-in screen,
+  while the dictionary is browsable and stays
+- Signed out, an action that says it signs you in now does exactly that, and
+  then carries on with what you asked for: signing in from a search miss opens
+  Generate on that word, saves the word, or adds the card you were looking at
+- Generate says an account is needed before you type rather than after you
+  press it, and signing in from there keeps what you typed and makes the card,
+  instead of handing the form back for a second press
+- A search that finds nothing now offers **Generate a Card** first, which opens
+  the command with the word already filled in and the cursor on the meaning.
+  Save to Drafts is still there, one key along
+- A word already saved to your drafts from a search miss is filled in rather
+  than written down twice, so the two halves of the flow meet
+- The form says when the month's private cards are nearly gone — "Only 3 cards
+  left this month." — in the same words the web app and the AI connector use
+- Running out says so in your plan's own words and offers **Upgrade Plan**,
+  unless you are on Pro, which has nothing above it. The word stays in your
+  drafts either way
+- A card that has gone says so and names the page it is watched from, showing
+  the dictionary it actually went to
+
+## [Drafts Link and AI Assistants] - {PR_MERGE_DATE}
+
+- The action panel now opens with ⌘K before a word is typed: **Open
+  Dictionary** and **Open Deck** lead it, with the account and the other Inoh
+  apps under them, none of which used to be reachable from an empty search
+- After a word is saved to drafts, the list says so and shows the web app link
+  that finishes the card, which used to live only in a toast that fades
+- The account row now opens Settings in the Inoh web app instead of copying
+  your email address to the clipboard
+- The Apps section now links **AI Assistants**: how to connect Claude, ChatGPT,
+  Cursor, and the rest to Inoh over MCP
+
+## [Drafts for Missing Words] - {PR_MERGE_DATE}
+
+- A word the dictionary doesn't have can now be saved to your Inoh drafts from
+  the empty search results, instead of being requested through a form
+- The card itself is made in the Inoh web app, which is where you say what the
+  word means and choose between your own private card and a request for the
+  public dictionary
+
 ## [Search Word from Screenshot] - 2026-09-04
 
 - New **Search Word from Screenshot** command: drag a box around a word
