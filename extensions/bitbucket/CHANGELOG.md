@@ -1,6 +1,6 @@
 # Bitbucket Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-09-19
 
 - Add Approve / Decline / Request Changes actions for pull requests
 - Open pull request details on Enter, open in browser on Cmd+Enter (or Enter again from the detail view), with a hint icon on each row
