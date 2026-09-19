@@ -8,6 +8,7 @@ import KillParentActions from "./actions/KillParentActions";
 import { ShowInFinderActionMenu } from "./actions/ShowInFinderActionMenu";
 import Toasts from "./feedback/Toasts";
 import { useNamedPorts } from "./hooks/useNamedPorts";
+import Process from "./models/Process";
 import useProcesses from "./hooks/useProcesses";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
 import { Exposure, classifyExposure, exposureColor, exposureDescription } from "./utilities/exposure";
@@ -76,6 +77,11 @@ export default function Command() {
         />
       ) : null}
       {visibleProcesses?.map((p) => {
+        // Only the ports that pass the filter are displayed; actions still get the full process.
+        const shown: Process =
+          exposureFilter === "all"
+            ? p
+            : { ...p, portInfo: p.portInfo?.filter((i) => classifyExposure(i.host) === exposureFilter) };
         const actions = [
           {
             action: (
@@ -179,7 +185,7 @@ export default function Command() {
               .concat(p.commandLine !== undefined ? [p.commandLine] : [])}
             detail={
               <List.Item.Detail
-                markdown={getProcessMarkdown(p)}
+                markdown={getProcessMarkdown(shown)}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Name" text={p.name} />
@@ -198,9 +204,9 @@ export default function Command() {
                       <List.Item.Detail.Metadata.Label title="Parent Path" text={p.parentPath} />
                     )}
                     <List.Item.Detail.Metadata.Label title="Protocol" text={`${p.protocol}`} />
-                    {p.portInfo && (
+                    {shown.portInfo && (
                       <List.Item.Detail.Metadata.TagList title="Ports">
-                        {p.portInfo.map((i, index) => {
+                        {shown.portInfo.map((i, index) => {
                           const name = getNamedPort(i.port)?.name;
                           return (
                             <List.Item.Detail.Metadata.TagList.Item
@@ -212,9 +218,9 @@ export default function Command() {
                         })}
                       </List.Item.Detail.Metadata.TagList>
                     )}
-                    {p.portInfo && p.portInfo.length > 0 && (
+                    {shown.portInfo && shown.portInfo.length > 0 && (
                       <List.Item.Detail.Metadata.TagList title="Exposure">
-                        {Array.from(new Set(p.portInfo.map((i) => classifyExposure(i.host)))).map((exposure) => (
+                        {Array.from(new Set(shown.portInfo.map((i) => classifyExposure(i.host)))).map((exposure) => (
                           <List.Item.Detail.Metadata.TagList.Item
                             key={exposure}
                             text={exposureDescription(exposure)}
@@ -228,7 +234,7 @@ export default function Command() {
               />
             }
             actions={<ActionPanel>{actions.map((a) => a.action)}</ActionPanel>}
-            accessories={getProcessAccessories(p)}
+            accessories={getProcessAccessories(shown)}
           />
         );
       })}
