@@ -35,23 +35,36 @@ interface BackupService {
   id: string;
   type: BackupableKind;
   name: string;
+  appName?: string;
 }
 
 /** The scheduled backups for one database. */
 export default function ServiceBackups({ service }: { service: BackupService }) {
   const { url, headers } = useToken();
+  // Falls back to the id so an unnamed service (Dokploy allows saving one without a name) still
+  // reads as *a specific service* rather than the literal string "undefined".
+  const displayName = service.name || service.appName || service.id;
 
   const {
     isLoading,
-    data: allBackups,
+    data: backups,
     error,
     revalidate,
-  } = useFetch<Backup[], Backup[]>(url + "overview.backups", {
+  } = useFetch<Backup[], Backup[]>(`${url}${service.type}.one?${ID_FIELDS[service.type]}=${service.id}`, {
     headers,
     initialData: [],
+    // `backups` is a relation embedded in `<kind>.one` - there's no endpoint scoped to just a
+    // database's own backups, unlike `overview.backups` which is an org-wide run-history log (no
+    // `backupId`, one row per past run) rather than a list of schedule configs.
+    async parseResponse(response) {
+      if (!response.ok) {
+        const err = (await response.json()) as ErrorResult;
+        throw new Error(err.message);
+      }
+      const detail = (await response.json()) as { backups?: Backup[] };
+      return detail.backups ?? [];
+    },
   });
-
-  const backups = allBackups.filter((backup) => backup[ID_FIELDS[service.type] as keyof Backup] === service.id);
 
   async function runBackupNow(backup: Backup) {
     const toast = await showToast(Toast.Style.Animated, `Running ${backup.prefix}…`);
@@ -107,14 +120,14 @@ export default function ServiceBackups({ service }: { service: BackupService }) 
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle={`${service.name} - Backups`}>
+    <List isLoading={isLoading} navigationTitle={`${displayName} - Backups`}>
       {error ? (
         <List.EmptyView icon={Icon.ExclamationMark} title="Could not load backups" description={`${error}`} />
       ) : backups.length === 0 ? (
         <List.EmptyView
           icon={Icon.Cloud}
           title="No Backups"
-          description={`${service.name} has no scheduled backups yet.`}
+          description={`${displayName} has no scheduled backups yet.`}
           actions={
             <ActionPanel>
               <Action.Push
@@ -180,6 +193,7 @@ interface BackupFormValues {
 function BackupForm({ service, initial, onSaved }: { service: BackupService; initial?: Backup; onSaved: () => void }) {
   const { url, headers } = useToken();
   const { pop } = useNavigation();
+  const displayName = service.name || service.appName || service.id;
 
   const {
     data: destinations,
@@ -249,7 +263,7 @@ function BackupForm({ service, initial, onSaved }: { service: BackupService; ini
   return (
     <Form
       isLoading={destinationsLoading}
-      navigationTitle={`${service.name} - ${initial ? "Edit" : "Add"} Backup`}
+      navigationTitle={`${displayName} - ${initial ? "Edit" : "Add"} Backup`}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} title={initial ? "Save" : "Add Backup"} onSubmit={handleSubmit} />
