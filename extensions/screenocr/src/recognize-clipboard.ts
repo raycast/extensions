@@ -1,30 +1,29 @@
 import { closeMainWindow } from "@raycast/api";
 import { handleRecognitionOutcome } from "./ocr/result";
 import { RecognitionOutcome } from "./ocr/types";
-import { detectBarcode } from "./utils";
+import { recognize } from "./utils";
 
 export default async function command() {
-  if (process.platform === "darwin") {
-    const { detectBarcodeCommand } = await import("./ocr/macos-commands");
-    return detectBarcodeCommand();
-  }
-
   let outcome: RecognitionOutcome;
   try {
     await closeMainWindow();
-    outcome = await detectBarcode();
+    outcome =
+      process.platform === "win32"
+        ? await recognize("clipboard")
+        : {
+            status: "error",
+            message: "Clipboard image OCR is available only on Windows",
+          };
   } catch (error) {
     outcome = {
       status: "error",
       message:
         error instanceof Error
           ? error.message
-          : "Failed to detect barcode/QR code",
+          : "Failed to recognize clipboard image",
     };
   }
   await handleRecognitionOutcome(outcome, {
-    subject: "detecting barcode/QR code",
-    noResultTitle: "No barcodes or QR codes detected",
-    action: "copy",
+    subject: "recognizing clipboard image",
   });
 }

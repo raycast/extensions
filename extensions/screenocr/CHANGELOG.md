@@ -1,5 +1,14 @@
 # ScreenOCR Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows support for region, full-desktop and clipboard-image recognition using the local Windows OCR engine.
+- Added installed Windows OCR-language selection with separate Windows and macOS preferences.
+- Added optional paste/copy-and-paste result actions on Windows; macOS retains its existing copy behavior.
+- Preserved existing command IDs and the cross-extension result shape; Windows callbacks distinguish cancellation and failure from recognized text.
+- Preserved the existing macOS Swift source, recognition settings and command behavior.
+- Kept barcode and QR-code recognition available on macOS with an explicit Windows limitation.
+
 ## [Fix macOS 26 (Tahoe) and macOS 27 (Golden Gate) Support] - 2026-07-23
 
 - Fixed all commands failing with "Failed to recognize text" on macOS 26 (Tahoe) and macOS 27 (Golden Gate). The system text recognition models log diagnostics to stdout, which the extension uses to return its result, corrupting the output; recognition now runs with stdout muted.
