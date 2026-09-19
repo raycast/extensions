@@ -1,12 +1,12 @@
 # Jev for Raycast
 
-Type anything into Raycast's root search, press **Tab**, and
-[Jev](https://docs.typesafe.ai/introduction) (TypeSafe's System One model)
-turns the request into a concrete action: opening your most recent download,
-launching an app, finding a file, or opening a site.
+Type anything into Raycast's root search, press **Enter** on the `Ask Jev`
+fallback row, and [Jev](https://docs.typesafe.ai/introduction) (TypeSafe's
+System One model) turns the request into a concrete action: opening your
+most recent download, launching an app, finding a file, or opening a site.
 
 ```
-⌥Space → "open the pdf i last downloaded" → Tab → Enter
+⌥Space → "open the pdf i last downloaded" → Enter on "Ask Jev" → Enter on the preview
 ```
 
 ## How it works
@@ -16,9 +16,11 @@ Raycast's settings (Setup step 4), this is the flow:
 
 1. Open Raycast root search (your normal ⌥Space or whatever you use).
 2. Type whatever you want — no command selection needed first.
-3. When nothing else matches, `Ask Jev` sits at the bottom of the list with
-   a Tab hint. **Press Tab** and your typed text is handed to Jev as
-   `LaunchProps.fallbackText`.
+3. When nothing else matches, `Ask Jev` appears in the fallback section at
+   the bottom ("Use \"…\" with Ask Jev"). **Press Enter on it** and your typed
+   text is handed to Jev as `LaunchProps.fallbackText`. (⇥Tab in root search
+   is hard-bound to Raycast's own Quick AI — it can't be retargeted, which
+   is why this flow uses Enter on the fallback row.)
 
 If you'd rather open Jev's search box directly, you can also bind a separate
 global hotkey to the command (Setup step 4).
@@ -27,16 +29,17 @@ Either way, once you're in the command, it receives your query as
 `searchText`. From there:
 
 1. Jev classifies the request (`open_download` / `open_app` / `open_file` /
-   `open_url` / `unsupported`) and, in the same request, speculatively
-   answers a few follow-up questions — which file type, which installed app,
-   which recent file, which known site — all as TypeSafe `Choice` questions
-   over real candidates: installed apps, files actually found under
-   `~/Downloads` / `~/Desktop` / `~/Documents`, and a curated site table.
-   Jev only ever *selects* from real options; it never invents a file path
-   or app name. Those same candidate lists are also handed to the
-   classifier itself as `state` (not just the raw sentence) so it can
-   recognize e.g. "cursor" as a real installed app rather than guessing
-   blind.
+   `open_url` / `unsupported`) in a first request that sees the query plus
+   your installed app list — apps are included up front so it can recognize
+   e.g. "cursor" as a real installed app rather than guessing blind. Then a
+   second request asks only the follow-up questions that action needs —
+   which file type/rank, which installed app, which recent file, which
+   known site — as TypeSafe `Choice` questions over real candidates: files
+   actually found under `~/Downloads` / `~/Desktop` / `~/Documents`, or a
+   curated site table. Jev only ever *selects* from real options; it never
+   invents a file path or app name. **Privacy note:** file names only leave
+   the device when the request is actually about opening a file, and
+   download queries need no candidate list at all.
 2. Plain TypeScript resolves the winning branch into one concrete target
    (exact file, app, or URL) — deterministic lookups (like finding the
    newest download of a given type, spotting an explicit URL in your text,
@@ -70,14 +73,14 @@ for how an answer becomes an action.
    preference — paste your key there. (You can also set/change it later via
    Raycast → `Ask Jev` → `⌘,`.)
 
-4. Make Jev your Tab target in root search: Raycast Settings → **Advanced**
-   → **Fallback Commands** → add `Ask Jev` (and drag it to the top if you
-   have other fallbacks — Tab activates the first one). This is a one-time,
-   user-granted opt-in Raycast requires for any extension's fallback
-   command — an extension can't enable it for itself, by design.
+4. Make Jev your fallback in root search: Raycast Settings → **Advanced**
+   → **Fallback Commands** → add `Ask Jev` (drag it to the top if you have
+   other fallbacks). This is a one-time, user-granted opt-in Raycast
+   requires for any extension's fallback command — an extension can't
+   enable it for itself, by design.
 
-   After this, ⌥Space → type anything → **Tab** sends the query straight to
-   Jev.
+   After this, ⌥Space → type anything → **Enter on the Ask Jev row** sends
+   the query straight to Jev.
 
    — *or*, if you'd rather have a dedicated global hotkey that opens Jev's
    search box immediately: Raycast Settings → **Extensions** → **Jev** →
@@ -85,7 +88,7 @@ for how an answer becomes an action.
    it doesn't collide with Raycast's own Option+Space).
 
 5. Try it: open root search, type `open the pdf i last downloaded`, press
-   Tab, then Enter on the preview to run it.
+   Enter on the `Ask Jev` fallback row, then Enter on the preview to run it.
 
 ## Design notes from debugging real queries
 
@@ -97,10 +100,9 @@ inputs:
 - **The classifier judged the sentence in isolation.** `open cursor` came
   back "not sure what you mean" even though Cursor was installed, because
   the `action` question never saw the list of installed apps — it was
-  guessing from the words alone. Fix: `installedApps`, `recentFiles`, and
-  `knownSites` are now part of the shared `state` for every question in the
-  request, and `action`'s instructions explicitly say to cross-check the
-  request against them.
+  guessing from the words alone. Fix: `installedApps` is part of the
+  classification request's `state` so `action` can cross-check the request
+  against real installed apps.
 - **A hard confidence cutoff rejected valid-but-unfamiliar requests before
   they were even resolved.** Anything under a 0.35 confidence score was
   thrown out regardless of what it resolved to. Fix: removed — the only

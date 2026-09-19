@@ -14,7 +14,7 @@
     {
       "name": "ask-jev",
       "title": "Ask Jev",
-      "subtitle": "Press ⇥ Tab to ask",
+      "subtitle": "Type it, press ↵",
       "description": "Turn a plain-English request into a concrete action: open a recent download, launch an app, find a file, or open a site.",
       "mode": "view"
     }

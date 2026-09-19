@@ -52,6 +52,30 @@ export async function listInstalledApps(): Promise<Application[]> {
   return appsCache;
 }
 
+/**
+ * Order apps so the ones plausibly meant by the query come first — the
+ * Choice question can only carry the first ~250 entries, so an unranked
+ * slice would make later apps unreachable.
+ */
+export function rankAppsByQuery(
+  apps: Application[],
+  query: string,
+): Application[] {
+  const tokens = tokenize(query);
+  if (tokens.length === 0) return apps;
+  return apps
+    .map((app, index) => {
+      const name = app.name.toLowerCase();
+      const score = tokens.reduce(
+        (sum, token) => sum + (name.includes(token) ? 1 : 0),
+        0,
+      );
+      return { app, index, score };
+    })
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map((entry) => entry.app);
+}
+
 async function collectFiles(
   absoluteDir: string,
   label: string,
@@ -90,12 +114,24 @@ async function collectFiles(
   return files;
 }
 
-async function listFilesIn(
-  dirName: string,
-  depth = 0,
-): Promise<FileCandidate[]> {
-  const dir = path.join(os.homedir(), dirName);
-  return collectFiles(dir, dirName, depth, { count: 0 });
+let filesCache: FileCandidate[] | null = null;
+
+/**
+ * The raw inventory of the watched folders, scanned once per session (like
+ * appsCache) with a single shared MAX_FILES_SCANNED budget across all three
+ * folders — previously each folder got its own 4,000-file counter and every
+ * keystroke-pause triggered a full rescan.
+ */
+async function getAllFiles(): Promise<FileCandidate[]> {
+  if (filesCache) return filesCache;
+  const scanned = { count: 0 };
+  const all: FileCandidate[] = [];
+  for (const folder of FOLDERS_TO_SCAN) {
+    const dir = path.join(os.homedir(), folder);
+    all.push(...(await collectFiles(dir, folder, SCAN_DEPTH, scanned)));
+  }
+  filesCache = all;
+  return all;
 }
 
 const STOPWORDS = new Set([
@@ -164,10 +200,7 @@ export async function listFileCandidates(
   query: string,
   limit = MAX_FILE_CANDIDATES,
 ): Promise<FileCandidate[]> {
-  const perFolder = await Promise.all(
-    FOLDERS_TO_SCAN.map((folder) => listFilesIn(folder, SCAN_DEPTH)),
-  );
-  const all = perFolder.flat();
+  const all = await getAllFiles();
   const queryTokens = tokenize(query);
   const now = Date.now();
 
@@ -198,7 +231,10 @@ export async function findDownload(
   fileType: string,
   rank: string,
 ): Promise<FileCandidate | null> {
-  const downloadFiles = await listFilesIn("Downloads");
+  const downloadsDir = path.join(os.homedir(), "Downloads");
+  const downloadFiles = (await getAllFiles()).filter((f) =>
+    f.absolutePath.startsWith(downloadsDir + path.sep),
+  );
   const matching = downloadFiles.filter((f) =>
     matchesFileType(path.basename(f.absolutePath), fileType),
   );

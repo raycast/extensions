@@ -12,10 +12,10 @@ import { useEffect, useState } from "react";
 import {
   listFileCandidates,
   listInstalledApps,
-  SITE_TABLE,
+  rankAppsByQuery,
 } from "./lib/candidates";
 import { isResolved, resolveAction } from "./lib/run";
-import { interpret } from "./lib/typesafe";
+import { answerFollowups, classifyAction } from "./lib/typesafe";
 
 /** Wait for typing to settle before spending a request on it. */
 const DEBOUNCE_MS = 350;
@@ -30,16 +30,20 @@ async function askJev(query: string): Promise<AskResult | null> {
   const trimmed = query.trim();
   if (!trimmed) return null;
 
-  const [apps, fileCandidates] = await Promise.all([
-    listInstalledApps(),
-    listFileCandidates(trimmed),
-  ]);
+  const apps = rankAppsByQuery(await listInstalledApps(), trimmed);
+  const appNames = apps.map((app) => app.name).slice(0, 250);
 
-  const interpretation = await interpret(
+  const action = await classifyAction(trimmed, appNames);
+
+  // Only gather (and send to the API) the candidates this action needs.
+  const fileCandidates =
+    action === "open_file" ? await listFileCandidates(trimmed) : [];
+
+  const interpretation = await answerFollowups(
     trimmed,
-    apps.map((app) => app.name),
+    action,
+    appNames,
     fileCandidates.map((f) => f.label),
-    Object.keys(SITE_TABLE),
   );
 
   return {
