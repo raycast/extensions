@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { useFetch, useForm, FormValidation } from "@raycast/utils";
 import { useToken } from "./instances";
+import { CreateDestination } from "./destinations";
 import { Backup, Destination, ErrorResult } from "./interfaces";
 
 // Redis has no `databaseType` value in Dokploy's backup API, and libsql isn't a kind this
@@ -199,6 +200,7 @@ function BackupForm({ service, initial, onSaved }: { service: BackupService; ini
     data: destinations,
     isLoading: destinationsLoading,
     error: destinationsError,
+    revalidate: revalidateDestinations,
   } = useFetch<Destination[], Destination[]>(url + "destination.all", {
     headers,
     initialData: [],
@@ -267,6 +269,11 @@ function BackupForm({ service, initial, onSaved }: { service: BackupService; ini
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} title={initial ? "Save" : "Add Backup"} onSubmit={handleSubmit} />
+          <Action.Push
+            icon={Icon.Plus}
+            title="Add Destination"
+            target={<CreateDestination onCreate={revalidateDestinations} />}
+          />
         </ActionPanel>
       }
     >
@@ -282,7 +289,7 @@ function BackupForm({ service, initial, onSaved }: { service: BackupService; ini
       ) : destinations.length === 0 ? (
         <Form.Description
           title="Destination"
-          text="Add an S3 destination first (Destinations command) to pick one here."
+          text="No S3 destinations yet - use the Add Destination action below to create one."
         />
       ) : (
         <Form.Dropdown title="Destination" {...itemProps.destinationId}>
