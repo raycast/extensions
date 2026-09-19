@@ -9,6 +9,7 @@ import { ShowInFinderActionMenu } from "./actions/ShowInFinderActionMenu";
 import Toasts from "./feedback/Toasts";
 import { useNamedPorts } from "./hooks/useNamedPorts";
 import useProcesses from "./hooks/useProcesses";
+import codeBlock from "./utilities/codeBlock";
 import { getProcessAccessories } from "./utilities/getProcessAccessories";
 import { platformShortcut } from "./utilities/platform";
 
@@ -146,9 +147,11 @@ export default function Command() {
             keywords={p.portInfo
               ?.map((i) => `${i.port}`)
               .concat(p.portInfo?.map((i) => `${i.host}`))
-              .concat(p.portInfo?.map((i) => `${i.name}`))}
+              .concat(p.portInfo?.map((i) => `${i.name}`))
+              .concat(p.commandLine !== undefined ? [p.commandLine] : [])}
             detail={
               <List.Item.Detail
+                markdown={p.commandLine !== undefined ? `**Command Line**\n\n${codeBlock(p.commandLine)}` : undefined}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Name" text={p.name} />

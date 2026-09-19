@@ -16,12 +16,13 @@ const WINDOWS_NETSTAT_ARGS = ["-ano", "-p", "TCP"];
 
 let currentProcessesRequest: Promise<Process[]> | undefined;
 
-type ProcessDetails = Pick<ProcessInfo, "name" | "parentPid" | "path" | "parentPath" | "user" | "uid">;
+type ProcessDetails = Pick<ProcessInfo, "name" | "parentPid" | "path" | "parentPath" | "user" | "uid" | "commandLine">;
 type NamedPortRecord = ReturnType<typeof getNamedPorts>;
 
 export default class Process implements ProcessInfo {
   public path?: string;
   public parentPath?: string;
+  public commandLine?: string;
 
   private constructor(
     public readonly pid: number,
@@ -96,6 +97,11 @@ export default class Process implements ProcessInfo {
           name: path.basename(processPath),
         });
       }
+
+      for (const [pid, commandLine] of await Process.getCommandLines(uniquePids)) {
+        const entry = details.get(pid);
+        if (entry !== undefined) entry.commandLine = commandLine;
+      }
     } catch {
       return details;
     }
@@ -107,6 +113,30 @@ export default class Process implements ProcessInfo {
     }
 
     return details;
+  }
+
+  /**
+   * Both `comm` and `command` can contain spaces, so they cannot share one whitespace-delimited
+   * `ps` line; the command line is read in a second call with the PID as its only other column.
+   */
+  private static async getCommandLines(pids: number[]) {
+    const commandLines = new Map<number, string>();
+
+    try {
+      const { stdout } = await runCommand("/bin/ps", ["-p", pids.join(","), "-o", "pid=", "-o", "command="], {
+        timeout: PS_TIMEOUT,
+      });
+
+      for (const line of stdout.split("\n")) {
+        const match = line.trim().match(/^(\d+)\s+(.+)$/);
+        if (match === null) continue;
+        commandLines.set(Number(match[1]), match[2]);
+      }
+    } catch {
+      // The command line is supplementary; the other details are still worth returning without it.
+    }
+
+    return commandLines;
   }
 
   private static async getWindowsProcessDetails(pids: number[]) {
@@ -133,7 +163,7 @@ export default class Process implements ProcessInfo {
     const processFilter = pids.map((pid) => `ProcessId = ${pid}`).join(" OR ");
     const script = [
       `Get-CimInstance Win32_Process -Filter "${processFilter}" -ErrorAction SilentlyContinue`,
-      "Select-Object ProcessId, ParentProcessId, Name, ExecutablePath",
+      "Select-Object ProcessId, ParentProcessId, Name, ExecutablePath, CommandLine",
       "ConvertTo-Json -Compress",
     ].join(" | ");
     const { stdout } = await runCommand("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
@@ -156,12 +186,14 @@ export default class Process implements ProcessInfo {
       const parentPid = Number(values.ParentProcessId);
       const processPath = typeof values.ExecutablePath === "string" ? values.ExecutablePath : undefined;
       const name = typeof values.Name === "string" ? values.Name : undefined;
+      const commandLine = typeof values.CommandLine === "string" ? values.CommandLine : undefined;
       if (!Number.isFinite(pid) || pid <= 0) continue;
 
       details.set(pid, {
         name,
         parentPid: Number.isFinite(parentPid) && parentPid > 0 ? parentPid : undefined,
         path: processPath,
+        commandLine,
       });
     }
 
@@ -367,6 +399,7 @@ export default class Process implements ProcessInfo {
       );
 
       process.path = values.path ?? details?.path;
+      process.commandLine = details?.commandLine;
       process.parentPath =
         values.parentPath ?? details?.parentPath ?? processAndParentDetails.get(process.parentPid ?? 0)?.path;
 

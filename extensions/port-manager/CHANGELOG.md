@@ -1,5 +1,10 @@
 # Port Manager Changelog
 
+## [Command Line in Details] - {PR_MERGE_DATE}
+
+- Show the full command line of a process in the detail panel and make it searchable, so several listeners with the same executable (`node`, `python`, …) can be told apart
+- Add "Command Line" to the Copy Info submenu
+
 ## [Windows Support] - 2026-09-01
 
 - Fix "Open Ports" command on non-english windows locales
