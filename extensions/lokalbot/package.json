@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lokalbot",
+  "title": "LokalBot",
+  "description": "A local LLM workhorse that keeps a private memory of your workday — search meeting transcripts and summaries from Raycast.",
+  "icon": "icon.png",
+  "author": "stevan_bogosavljevic",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-recall",
+      "title": "Quick Recall",
+      "description": "Search your LokalBot meeting memory by keyword across titles and summaries.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search meetings…",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "recent-meetings",
+      "title": "Recent Meetings",
+      "description": "Browse your 20 most recent captured meetings with dates, durations, and capture flags.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "CLI Path",
+      "description": "Path to lokalbot-cli. Defaults to \"lokalbot-cli\" on PATH; falls back to /Applications/LokalBot.app/Contents/Helpers/lokalbot-cli if not found.",
+      "type": "textfield",
+      "required": false,
+      "default": "lokalbot-cli"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
