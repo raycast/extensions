@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-mark",
+  "title": "Mark",
+  "description": "Local bookmarks with favicon persistence and template URLs",
+  "version": "0.1.0",
+  "private": false,
+  "license": "MIT",
+  "author": "eachann_",
+  "icon": "extension-icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Marks",
+      "description": "Search local bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "add-bookmark",
+      "title": "Add Bookmark",
+      "description": "Add a local bookmark",
+      "mode": "view"
+    },
+    {
+      "name": "manage-data",
+      "title": "Manage Marks Data",
+      "description": "Manage local library and conflicts",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "dataDirectory",
+      "title": "Dedicated Data Directory",
+      "description": "专用数据目录；已导入 goose-mark 书签。留空则用 supportPath/marks-library。",
+      "type": "textfield",
+      "required": false,
+      "default": "/Users/eachann/.config/raycast-mark-library"
+    },
+    {
+      "name": "aiProtocol",
+      "title": "AI Protocol",
+      "description": "Optional direct BYOK service",
+      "type": "dropdown",
+      "required": false,
+      "default": "openai-responses",
+      "data": [
+        {
+          "title": "OpenAI Responses",
+          "value": "openai-responses"
+        },
+        {
+          "title": "OpenAI Compatible Chat",
+          "value": "openai-compatible"
+        },
+        {
+          "title": "Anthropic",
+          "value": "anthropic"
+        }
+      ]
+    },
+    {
+      "name": "aiBaseUrl",
+      "title": "AI Base URL",
+      "description": "HTTPS endpoint including API prefix, e.g. https://api.openai.com/v1",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "aiModel",
+      "title": "AI Model",
+      "description": "Model supported by your selected service",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "openaiResponsesKey",
+      "title": "Responses API Key",
+      "description": "Only sent to your selected endpoint",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "openaiCompatibleKey",
+      "title": "Chat API Key",
+      "description": "Only sent to your selected endpoint",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "anthropicKey",
+      "title": "Anthropic API Key",
+      "description": "Only sent to your selected endpoint",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/core.test.ts",
+    "lint:code": "eslint src tests && prettier --check src tests"
+  },
+  "dependencies": {
+    "@raycast/api": "2.4.1",
+    "react": "19.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "26.5.1",
+    "@types/react": "19.3.0",
+    "eslint": "10.10.0",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3"
+  }
+}
