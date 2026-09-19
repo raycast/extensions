@@ -19,7 +19,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 const runFile = promisify(execFile);
 const helper = join(environment.assetsPath, "menubar-helper");
-const cacheKey = "menu-bar-items-v1";
+const cacheKey = "menu-bar-items-v2";
 
 type MenuItem = {
   pid: number;

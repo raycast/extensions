@@ -56,7 +56,7 @@ The bundled Swift helper handles discovery and activation through macOS Accessib
 
 The helper presses the selected item through Accessibility and lets macOS position its menu. A hidden item's menu may open at the upper-left corner of the screen because macOS does not expose an on-screen position for its icon. The extension does not reveal the icon or change its Menu Bar setting. Some apps may not support an Accessibility press.
 
-Results depend on what each app exposes through Accessibility. The extension removes duplicates when it can identify the same element, frame, or identifier without conflicting positions. A cached result can be briefly out of date until the next scan finishes; use **Refresh Items** if an app changes. An app may control where its own panel opens.
+Results depend on what each app exposes through Accessibility. Items without an Accessibility press action are not listed. The extension removes duplicates when it can identify the same element, frame, or identifier without conflicting positions. A cached result can be briefly out of date until the next scan finishes; use **Refresh Items** if an app changes. An app may control where its own panel opens.
 
 The helper includes Apple silicon and Intel binaries. Visible-icon search on earlier macOS versions and Intel hardware has not been physically verified.
 

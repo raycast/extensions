@@ -51,6 +51,13 @@ private enum MenuBar {
         return CGRect(origin: point, size: dimensions)
     }
 
+    private static func supportsPress(_ element: AXUIElement) -> Bool {
+        var actions: CFArray?
+        guard AXUIElementCopyActionNames(element, &actions) == .success,
+              let actions = actions as? [String] else { return false }
+        return actions.contains(kAXPressAction as String)
+    }
+
     private static func entries(for app: NSRunningApplication) -> [Entry] {
         let axApp = AXUIElementCreateApplication(app.processIdentifier)
         AXUIElementSetMessagingTimeout(axApp, 0.25)
@@ -58,7 +65,7 @@ private enum MenuBar {
               let children = attribute(bar as! AXUIElement, kAXChildrenAttribute as String) as? [AXUIElement] else { return [] }
         let appName = app.localizedName ?? app.bundleIdentifier ?? "PID \(app.processIdentifier)"
         let isSystemHost = app.bundleIdentifier == "com.apple.MenuBarAgent"
-        return children.enumerated().map { index, element in
+        return children.enumerated().compactMap { index, element -> Entry? in
             let itemElement: AXUIElement
             if isSystemHost,
                let hosted = attribute(element, kAXChildrenAttribute as String) as? [AXUIElement],
@@ -68,6 +75,7 @@ private enum MenuBar {
                 itemElement = element
             }
             AXUIElementSetMessagingTimeout(itemElement, 0.25)
+            guard supportsPress(itemElement) else { return nil }
             let title = string(itemElement, kAXTitleAttribute as String)
                 ?? string(itemElement, kAXDescriptionAttribute as String)
                 ?? string(itemElement, kAXHelpAttribute as String)
