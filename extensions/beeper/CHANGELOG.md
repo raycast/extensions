@@ -1,6 +1,6 @@
 # Beeper Changelog
 
-## [Fix OAuth sign-in] - {PR_MERGE_DATE}
+## [Bug Fix] - {PR_MERGE_DATE}
 
 - Switched authentication to Raycast's app redirect so Beeper accepts the OAuth callback
 
