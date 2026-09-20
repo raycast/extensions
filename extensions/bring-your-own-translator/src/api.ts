@@ -29,8 +29,8 @@ export async function translate(
   if (!text.trim() || !config.model.trim() || !config.target.trim())
     throw new Error("请填写原文、Model 和目标语言。");
   const url = new URL(config.url.trim());
-  if (url.username || url.password || url.search || url.hash)
-    throw new Error("URL 不能包含凭证、查询参数或锚点。");
+  if (url.username || url.password || url.hash)
+    throw new Error("URL 不能包含凭证或锚点。");
   if (
     url.protocol !== "https:" &&
     !(

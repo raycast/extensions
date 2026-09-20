@@ -20,7 +20,7 @@ Supply the complete endpoint URL, including the request path:
 | OpenAI / OpenAI Compatible | `https://api.openai.com/v1/chat/completions` |
 | Anthropic / Anthropic Compatible | `https://api.anthropic.com/v1/messages` |
 
-For another service, use its documented endpoint and exact model ID. API keys and usage billing are provided by your chosen service. Local services can omit the API key and use HTTP on localhost; remote endpoints require HTTPS. URLs must not contain embedded credentials, query parameters, or fragments.
+For another service, use its documented endpoint and exact model ID. API keys and usage billing are provided by your chosen service. Local services can omit the API key and use HTTP on localhost; remote endpoints require HTTPS. Query parameters (such as `api-version`) are preserved. URLs must not contain embedded credentials or fragments. OpenAI-compatible authentication uses an Authorization Bearer header; Azure API-key authentication is not currently supported.
 
 ## Usage
 

@@ -15,7 +15,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { Config, defaultPrompt, translate } from "./api";
+import { defaultPrompt, translate } from "./api";
 import { cleanInput } from "./input";
 import { loadPrompt } from "./edit-prompt";
 import languages from "./languages.json";
@@ -33,7 +33,7 @@ export default function Command({
 }
 
 function TranslationView({ input }: { input?: TranslationContext["input"] }) {
-  const preferences = getPreferenceValues<Config>();
+  const preferences = getPreferenceValues<Preferences>();
   const [busy, setBusy] = useState(false);
   const [checkingInput, setCheckingInput] = useState(true);
   const [text, setText] = useState("");

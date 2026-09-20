@@ -8,14 +8,14 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Config, defaultPrompt } from "./api";
+import { defaultPrompt } from "./api";
 import { cleanInput } from "./input";
 
 export async function loadPrompt(): Promise<string> {
   return (
     cleanInput(
       (await LocalStorage.getItem<string>("system-prompt")) ??
-        getPreferenceValues<Config>().prompt ??
+        getPreferenceValues<Preferences>().prompt ??
         "",
     ) || defaultPrompt
   );

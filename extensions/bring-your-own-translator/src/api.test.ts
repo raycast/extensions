@@ -294,3 +294,38 @@ test("saved multiline prompt overrides legacy settings and falls back safely", a
   saved = " \t";
   assert.equal(await exports.loadPrompt!(), apiModule.defaultPrompt);
 });
+
+test("endpoint query parameters reach fetch unchanged; credentials and fragments stay rejected", async () => {
+  const original = globalThis.fetch;
+  const url =
+    "https://example.com/chat/completions?api-version=2024-10-21&route=a%2Fb";
+  const config: Config = {
+    provider: "openai",
+    url,
+    model: "model",
+    target: "English",
+  };
+  let calls = 0;
+  globalThis.fetch = async (input) => {
+    calls++;
+    assert.equal(String(input), url);
+    return Response.json({ choices: [{ message: { content: "Hello" } }] });
+  };
+  try {
+    assert.equal(await translate(config, "你好"), "Hello");
+    await assert.rejects(
+      translate({ ...config, url: url + "#fragment" }, "你好"),
+      /锚点/,
+    );
+    await assert.rejects(
+      translate(
+        { ...config, url: "https://user:pass@example.com/?api-version=1" },
+        "你好",
+      ),
+      /凭证/,
+    );
+    assert.equal(calls, 1);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
