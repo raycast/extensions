@@ -187,7 +187,7 @@ export default function Command() {
     const isDark = environment.theme === "dark";
     const fullCalendarSvg = generateFullCalendarSvg(calendarData, isDark);
 
-    // Markdown 标题多语言适配
+    // Markdown 标题多语言适配（调用已做类型兼容处理的 getLanguage 函数）
     const lang = getLanguage();
     let titleText = "";
     if (lang.startsWith("zh")) {
@@ -472,6 +472,6 @@ function generateFullCalendarSvg(
     ${cellsSvg}
   </svg>`;
 
-  // 使用 encodeURIComponent 编码，避免在缺少 @types/node 环境下抛出 Cannot find name 'Buffer' 错误
+  // 使用 encodeURIComponent 编码，规避 @types/node 缺失下的 Buffer 报错
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
