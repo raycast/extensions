@@ -33,7 +33,10 @@ export default function Command() {
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="公历" value={`${year} 年 ${month} 月`} />
+          <Detail.Metadata.Label
+            title="公历"
+            value={`${year} 年 ${month} 月`}
+          />
           <Detail.Metadata.Label
             title="农历"
             value={`${Lunar.fromDate(today).getYearInGanZhi()}年 (${Lunar.fromDate(today).getYearShengXiao()}年)`}
@@ -48,7 +51,9 @@ export default function Command() {
 
 function getLanguage(): string {
   // 兼容 Raycast 不同版本的 localization 属性读取
-  const env = environment as unknown as { localization?: { language?: string } };
+  const env = environment as unknown as {
+    localization?: { language?: string };
+  };
   return env.localization?.language || "zh-CN";
 }
 
@@ -85,7 +90,11 @@ function getCalendarGrid(year: number, month: number): CalendarDay[] {
   return days;
 }
 
-function createCalendarDay(date: Date, isCurrentMonth: boolean, today: Date): CalendarDay {
+function createCalendarDay(
+  date: Date,
+  isCurrentMonth: boolean,
+  today: Date,
+): CalendarDay {
   const solar = Solar.fromDate(date);
   const lunar = solar.getLunar();
 
@@ -98,7 +107,11 @@ function createCalendarDay(date: Date, isCurrentMonth: boolean, today: Date): Ca
   let isWorkday = false;
   let isRestday = false;
 
-  const holiday = HolidayUtil.getHoliday(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  const holiday = HolidayUtil.getHoliday(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate(),
+  );
   if (holiday) {
     holidayName = holiday.getName();
     isWorkday = holiday.isWork();
@@ -121,7 +134,11 @@ function createCalendarDay(date: Date, isCurrentMonth: boolean, today: Date): Ca
   };
 }
 
-function generateMonthSvg(year: number, month: number, days: CalendarDay[]): string {
+function generateMonthSvg(
+  year: number,
+  month: number,
+  days: CalendarDay[],
+): string {
   const cellW = 80;
   const cellH = 65;
   const cols = 7;
@@ -168,14 +185,24 @@ function generateMonthSvg(year: number, month: number, days: CalendarDay[]): str
       `;
     }
 
-    const solarColor = !day.isCurrentMonth ? "#48484A" : day.isToday ? "#0A84FF" : "#FFFFFF";
+    const solarColor = !day.isCurrentMonth
+      ? "#48484A"
+      : day.isToday
+        ? "#0A84FF"
+        : "#FFFFFF";
 
-    let lunarText = day.solarTerm || (day.lunarDay === "初一" ? `${day.lunarMonth}月` : day.lunarDay);
+    let lunarText =
+      day.solarTerm ||
+      (day.lunarDay === "初一" ? `${day.lunarMonth}月` : day.lunarDay);
     if (day.holidayName && !day.solarTerm) {
       lunarText = day.holidayName;
     }
 
-    const lunarColor = day.solarTerm ? "#30D158" : day.holidayName ? "#FF9F0A" : "#8E8E93";
+    const lunarColor = day.solarTerm
+      ? "#30D158"
+      : day.holidayName
+        ? "#FF9F0A"
+        : "#8E8E93";
 
     cellsSvg += `
       <g>
