@@ -1,6 +1,6 @@
 # Hule Changelog
 
-## [Fix Installation on Raycast 2.4] - {PR_MERGE_DATE}
+## [Fix Installation on Raycast 2.4] - 2026-09-20
 
 - Build against Raycast API 2.4.0, the version the current Raycast release ships, so the extension can be installed
 
