@@ -6,6 +6,12 @@ type GetScoresArgs = {
   league: string;
 };
 
+// One request per day is the only shape the scoreboard endpoint accepts for a
+// span of days, so cap how many of them are in flight at once: the preference
+// allows up to 30 previous days, and firing all 31 requests simultaneously at a
+// public endpoint is what gets a client rate-limited.
+const REQUEST_BATCH_SIZE = 5;
+
 const readableDate = (date: string) => date.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3");
 
 const getScores = async ({ league }: GetScoresArgs) => {
@@ -14,18 +20,24 @@ const getScores = async ({ league }: GetScoresArgs) => {
 
   const dates = getScoreDates(new Date(), numDaysScores);
 
-  const responses = await Promise.allSettled(
-    dates.map((date) =>
-      axios.get(baseUrl, {
-        params: {
-          region: "us",
-          lang: "en",
-          contentorigin: "espn",
-          dates: date,
-        },
-      }),
-    ),
-  );
+  const requestScores = (date: string) =>
+    axios.get(baseUrl, {
+      params: {
+        region: "us",
+        lang: "en",
+        contentorigin: "espn",
+        dates: date,
+      },
+    });
+
+  // Batches settle one after another, and each batch keeps its own order, so
+  // `responses` stays aligned with `dates` however the requests interleave.
+  const responses: PromiseSettledResult<Awaited<ReturnType<typeof requestScores>>>[] = [];
+
+  for (let start = 0; start < dates.length; start += REQUEST_BATCH_SIZE) {
+    const batch = await Promise.allSettled(dates.slice(start, start + REQUEST_BATCH_SIZE).map(requestScores));
+    responses.push(...batch);
+  }
 
   const rejected = responses.filter((response): response is PromiseRejectedResult => response.status === "rejected");
 
