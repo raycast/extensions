@@ -1,0 +1,181 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "baalda",
+  "title": "Baalda",
+  "description": "Manage your Baalda second brain from Raycast with note capture, search, folders, and AI tools.",
+  "icon": "icon.png",
+  "author": "owendavidprice",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Capture a thought into your Baalda vault in seconds",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "description": "Create a markdown note in a selected Baalda vault and folder",
+      "mode": "view"
+    },
+    {
+      "name": "manage-notes",
+      "title": "Manage Notes",
+      "description": "Open, edit, move, rename, append to or delete Baalda notes",
+      "mode": "view"
+    },
+    {
+      "name": "create-folder",
+      "title": "Create Folder",
+      "description": "Create a folder in a selected Baalda vault",
+      "mode": "view"
+    },
+    {
+      "name": "manage-folders",
+      "title": "Manage Folders",
+      "description": "Open, move, rename or delete Baalda folders",
+      "mode": "view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Search notes across your Baalda vaults",
+      "mode": "view"
+    },
+    {
+      "name": "browse-vault",
+      "title": "Browse Vault",
+      "description": "Browse vaults, folders and recent notes",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "baalda-list-vaults",
+      "title": "List Baalda Vaults",
+      "description": "List the Baalda vaults you can access"
+    },
+    {
+      "name": "baalda-list-folders",
+      "title": "List Baalda Folders",
+      "description": "List folders in a Baalda vault, including paths and parents"
+    },
+    {
+      "name": "baalda-list-notes",
+      "title": "List Baalda Notes",
+      "description": "List notes in a Baalda vault, optionally within one folder"
+    },
+    {
+      "name": "baalda-search-notes",
+      "title": "Search Baalda Notes",
+      "description": "Semantic + keyword search across notes in your Baalda vaults"
+    },
+    {
+      "name": "baalda-read-note",
+      "title": "Read Baalda Note",
+      "description": "Read the full markdown content of a Baalda note"
+    },
+    {
+      "name": "baalda-create-note",
+      "title": "Create Baalda Note",
+      "description": "Create a new markdown note in a Baalda vault"
+    },
+    {
+      "name": "baalda-update-note",
+      "title": "Update Baalda Note",
+      "description": "Replace the full markdown content of a Baalda note"
+    },
+    {
+      "name": "baalda-append-to-note",
+      "title": "Append to Baalda Note",
+      "description": "Append markdown text to the end of an existing Baalda note"
+    },
+    {
+      "name": "baalda-edit-note",
+      "title": "Edit Baalda Note",
+      "description": "Make targeted edits to a Baalda note"
+    },
+    {
+      "name": "baalda-delete-note",
+      "title": "Delete Baalda Note",
+      "description": "Soft-delete a Baalda note while preserving its history"
+    },
+    {
+      "name": "baalda-create-folder",
+      "title": "Create Baalda Folder",
+      "description": "Create a folder in a Baalda vault"
+    },
+    {
+      "name": "baalda-delete-folder",
+      "title": "Delete Baalda Folder",
+      "description": "Delete a Baalda folder, optionally with its contents"
+    },
+    {
+      "name": "baalda-move-note",
+      "title": "Move Baalda Note",
+      "description": "Rename, move, or retitle a Baalda note"
+    },
+    {
+      "name": "baalda-move-folder",
+      "title": "Move Baalda Folder",
+      "description": "Rename or move a Baalda folder and its contents"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Baalda Server URL",
+      "description": "URL of your Baalda server. Use https://api.baalda.com for the managed service, http://localhost:3010 for a local server, or your self-hosted URL.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://api.baalda.com",
+      "placeholder": "https://api.baalda.com"
+    },
+    {
+      "name": "mcpToken",
+      "title": "MCP Token",
+      "description": "Token from Baalda desktop app → Vault Settings → MCP → Create token. Starts with mcp_. The AI is bound by the same permissions as your account.",
+      "type": "password",
+      "required": true,
+      "placeholder": "mcp_…"
+    },
+    {
+      "name": "defaultVaultId",
+      "title": "Default Vault ID (optional)",
+      "description": "Skip vault selection. Copy a vaultId from the Browse Vault command. If empty, the first accessible vault is used.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Leave empty to auto-pick first vault"
+    },
+    {
+      "name": "captureFolder",
+      "title": "Capture Folder (optional)",
+      "description": "Vault-relative folder for Quick Capture notes, e.g. Inbox. Leave empty for the vault root. The folder must already exist.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Inbox"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.2",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
