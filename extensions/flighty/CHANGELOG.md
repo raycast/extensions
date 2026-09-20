@@ -1,6 +1,6 @@
 # Flighty Changelog
 
-## [Fix Airline Logos] - {PR_MERGE_DATE}
+## [Fix Airline Logos] - 2026-09-20
 
 - Load airline logos from the current Flighty UUID endpoint
 - Bump package dependencies
