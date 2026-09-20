@@ -1,6 +1,6 @@
 # ScreenOCR Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-09-20
 
 - Added Windows support for region, full-desktop and clipboard-image recognition using the local Windows OCR engine.
 - Added installed Windows OCR-language selection with separate Windows and macOS preferences.
