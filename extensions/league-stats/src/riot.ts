@@ -106,11 +106,22 @@ let blockedUntil = 0;
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
+/**
+ * Waits for this request's turn. Turns are handed out ahead of time (loading a player starts every uncached match at
+ * once), so a 429 can arrive for one request while the others are still asleep. Each request therefore checks the
+ * penalty again when it wakes, and queues up behind it instead of firing inside it. A penalty longer than
+ * MAX_WAIT_MS is reported rather than slept through, for the requests that are still waiting as well.
+ */
 async function waitForSlot() {
-  const now = Date.now();
-  const start = Math.max(now, nextSlot, blockedUntil);
-  nextSlot = start + REQUEST_GAP_MS;
-  if (start > now) await sleep(start - now);
+  for (;;) {
+    const now = Date.now();
+    if (blockedUntil - now > MAX_WAIT_MS) throw rateLimited(Math.ceil((blockedUntil - now) / 1000));
+
+    const start = Math.max(now, nextSlot, blockedUntil);
+    nextSlot = start + REQUEST_GAP_MS;
+    if (start > now) await sleep(start - now);
+    if (blockedUntil <= Date.now()) return;
+  }
 }
 
 function rateLimited(seconds: number) {
@@ -124,8 +135,6 @@ export class RiotApi {
     const url = `https://${host}.api.riotgames.com${path}`;
 
     for (let attempt = 1; ; attempt++) {
-      const blockedFor = blockedUntil - Date.now();
-      if (blockedFor > MAX_WAIT_MS) throw rateLimited(Math.ceil(blockedFor / 1000));
       await waitForSlot();
 
       let res: Response;
