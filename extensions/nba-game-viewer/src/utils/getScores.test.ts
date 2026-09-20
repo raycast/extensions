@@ -1,16 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("axios", () => ({ default: { get: vi.fn() } }));
-vi.mock("@raycast/api", () => ({ getPreferenceValues: vi.fn() }));
+vi.mock("@raycast/api", () => ({
+  getPreferenceValues: vi.fn(),
+  showToast: vi.fn(),
+  Toast: { Style: { Success: "SUCCESS", Failure: "FAILURE", Animated: "ANIMATED" } },
+}));
 
 import axios from "axios";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import getScores from "./getScores";
 
 type ScoreboardRequest = { params: { dates: string } };
 
 const mockedGet = vi.mocked(axios.get);
 const mockedPreferences = vi.mocked(getPreferenceValues);
+const mockedShowToast = vi.mocked(showToast);
 
 const setPreference = (numDaysScores: string) => {
   mockedPreferences.mockReturnValue({ numDaysScores } as ReturnType<typeof getPreferenceValues>);
@@ -18,6 +23,16 @@ const setPreference = (numDaysScores: string) => {
 
 const respondWith = (events: unknown[] | undefined) => {
   mockedGet.mockImplementation(async () => ({ data: { events } }));
+};
+
+const failOn = (failingDates: string[]) => {
+  mockedGet.mockImplementation(async (_url, config) => {
+    const { dates } = (config as ScoreboardRequest).params;
+    if (failingDates.includes(dates)) {
+      throw new Error("Request failed with status code 400");
+    }
+    return { data: { events: [`game-${dates}`] } };
+  });
 };
 
 const requestedDates = () => mockedGet.mock.calls.map(([, config]) => (config as ScoreboardRequest).params.dates);
@@ -162,27 +177,62 @@ describe("getScores", () => {
   });
 
   it("keeps the scores of the days that answered when one day fails", async () => {
-    mockedGet.mockImplementation(async (_url, config) => {
-      const { dates } = (config as ScoreboardRequest).params;
-      if (dates === "20260918") {
-        throw new Error("Request failed with status code 400");
-      }
-      return { data: { events: [`game-${dates}`] } };
-    });
+    failOn(["20260918"]);
 
     await expect(getScores({ league: "wnba" })).resolves.toEqual(["game-20260917", "game-20260919"]);
   });
 
   it("keeps the later days when the first day is the one that fails", async () => {
-    mockedGet.mockImplementation(async (_url, config) => {
-      const { dates } = (config as ScoreboardRequest).params;
-      if (dates === "20260917") {
-        throw new Error("Request failed with status code 400");
-      }
-      return { data: { events: [`game-${dates}`] } };
-    });
+    failOn(["20260917"]);
 
     await expect(getScores({ league: "wnba" })).resolves.toEqual(["game-20260918", "game-20260919"]);
+  });
+
+  it("warns which day did not load when one day fails", async () => {
+    failOn(["20260918"]);
+
+    await getScores({ league: "wnba" });
+
+    expect(mockedShowToast).toHaveBeenCalledTimes(1);
+    expect(mockedShowToast).toHaveBeenCalledWith({
+      style: Toast.Style.Failure,
+      title: "Scores for 1 day did not load",
+      message: "2026-09-18",
+    });
+  });
+
+  it("names every day that did not load, in date order, when several fail", async () => {
+    setPreference("3");
+    failOn(["20260919", "20260917"]);
+
+    await getScores({ league: "wnba" });
+
+    expect(mockedShowToast).toHaveBeenCalledTimes(1);
+    expect(mockedShowToast).toHaveBeenCalledWith({
+      style: Toast.Style.Failure,
+      title: "Scores for 2 days did not load",
+      message: "2026-09-17, 2026-09-19",
+    });
+  });
+
+  it("warns even when the days that did answer have no games at all", async () => {
+    mockedGet.mockImplementation(async (_url, config) => {
+      if ((config as ScoreboardRequest).params.dates === "20260917") {
+        throw new Error("Request failed with status code 400");
+      }
+      return { data: { events: [] } };
+    });
+
+    await expect(getScores({ league: "wnba" })).resolves.toEqual([]);
+    expect(mockedShowToast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Scores for 1 day did not load", message: "2026-09-17" }),
+    );
+  });
+
+  it("does not warn when every day answers (control: base never toasts either)", async () => {
+    await getScores({ league: "wnba" });
+
+    expect(mockedShowToast).not.toHaveBeenCalled();
   });
 
   it("reports no games instead of an outage when the days that answered have none", async () => {
@@ -233,6 +283,9 @@ describe("getScores", () => {
     });
 
     await expect(getScores({ league: "wnba" })).rejects.toThrow("Request failed with status code 400");
+    // The hook reports a total outage through its own failure toast, so the
+    // partial-failure warning must not fire on top of it.
+    expect(mockedShowToast).not.toHaveBeenCalled();
   });
 
   it("throws when the only day requested is the one that fails", async () => {

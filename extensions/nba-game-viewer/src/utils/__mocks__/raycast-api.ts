@@ -11,3 +11,13 @@ import manifest from "../../../package.json";
 const defaults = Object.fromEntries(manifest.preferences.map(({ name, default: value }) => [name, value]));
 
 export const getPreferenceValues = () => defaults;
+
+export const Toast = {
+  Style: {
+    Success: "SUCCESS",
+    Failure: "FAILURE",
+    Animated: "ANIMATED",
+  },
+} as const;
+
+export const showToast = async (options: { style?: string; title: string; message?: string }) => options;
