@@ -1,0 +1,272 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "techgedoens",
+  "title": "Techgedöns.de",
+  "description": "The official Raycast extension for the German tech blog Techgedöns.de",
+  "icon": "icon.png",
+  "author": "Marcelismus",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "News",
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Selects the language used inside the extension commands.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Deutsch",
+          "value": "de"
+        }
+      ]
+    },
+    {
+      "name": "allArticlesInitialFilter",
+      "title": "Initial Article Filter",
+      "description": "Selects the read status shown when opening All Articles.",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "data": [
+        {
+          "title": "All Articles",
+          "value": "all"
+        },
+        {
+          "title": "Unread Articles",
+          "value": "unread"
+        },
+        {
+          "title": "Read Articles",
+          "value": "read"
+        },
+        {
+          "title": "Last Used",
+          "value": "last"
+        }
+      ]
+    },
+    {
+      "name": "articleEnterAction",
+      "title": "Return Key Action",
+      "description": "Selects whether Return shows the article in Raycast or opens it in the default browser.",
+      "type": "dropdown",
+      "required": false,
+      "default": "reader",
+      "data": [
+        {
+          "title": "Read in Raycast",
+          "value": "reader"
+        },
+        {
+          "title": "Open in Default Browser",
+          "value": "browser"
+        }
+      ]
+    },
+    {
+      "name": "archiveRetention",
+      "title": "Keep Articles",
+      "description": "Selects when stored articles are removed from the complete article list.",
+      "type": "dropdown",
+      "required": false,
+      "default": "month",
+      "data": [
+        {
+          "title": "One Week",
+          "value": "week"
+        },
+        {
+          "title": "One Month",
+          "value": "month"
+        },
+        {
+          "title": "One Year",
+          "value": "year"
+        },
+        {
+          "title": "Never Delete",
+          "value": "never"
+        }
+      ]
+    },
+    {
+      "name": "archivePageSize",
+      "title": "Articles per Load",
+      "description": "Selects how many articles are initially shown and loaded at the end of the list.",
+      "type": "dropdown",
+      "required": false,
+      "default": "30",
+      "data": [
+        {
+          "title": "15 Articles",
+          "value": "15"
+        },
+        {
+          "title": "30 Articles",
+          "value": "30"
+        },
+        {
+          "title": "45 Articles",
+          "value": "45"
+        },
+        {
+          "title": "60 Articles",
+          "value": "60"
+        },
+        {
+          "title": "90 Articles",
+          "value": "90"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "latest-articles",
+      "title": "Latest Articles",
+      "description": "Lists the latest articles from Techgedoens.de",
+      "mode": "view",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "blog",
+        "rss"
+      ]
+    },
+    {
+      "name": "all-articles",
+      "title": "All Articles",
+      "description": "Shows the saved article archive with read status and topic filters",
+      "mode": "view",
+      "keywords": [
+        "tchgdns",
+        "techgedöns",
+        "artikel",
+        "archiv",
+        "gelesen",
+        "ungelesen",
+        "rss"
+      ]
+    },
+    {
+      "name": "ask-techgedoens",
+      "title": "Ask Techgedöns",
+      "description": "Answers questions using saved Techgedöns articles",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "Question for Techgedöns",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "tchgdns",
+        "techgedöns",
+        "artikel",
+        "fragen",
+        "suche",
+        "wissen",
+        "ai"
+      ]
+    },
+    {
+      "name": "saved-articles",
+      "title": "Favorites",
+      "description": "Shows saved Techgedöns articles",
+      "mode": "view",
+      "keywords": [
+        "tchgdns",
+        "techgedöns",
+        "artikel",
+        "favoriten",
+        "gespeichert",
+        "leseliste"
+      ]
+    },
+    {
+      "name": "search-techgedoens",
+      "title": "Search Techgedöns",
+      "description": "Searches the complete Techgedöns.de article archive",
+      "mode": "view",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "suchen",
+        "archive",
+        "search",
+        "rss"
+      ]
+    },
+    {
+      "name": "refresh-articles",
+      "title": "Refresh Articles",
+      "description": "Silently refreshes the local Techgedoens.de article cache",
+      "mode": "no-view",
+      "interval": "1h",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "artikel",
+        "aktualisieren",
+        "rss"
+      ]
+    },
+    {
+      "name": "open-techgedoens",
+      "title": "Open Techgedöns.de",
+      "description": "Opens Techgedöns.de in the default browser",
+      "mode": "no-view",
+      "keywords": [
+        "tchgdns",
+        "techgedoens",
+        "techgedöns",
+        "öffnen",
+        "website",
+        "browser"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1",
+    "rss-parser": "^3.13.0",
+    "turndown": "^7.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/turndown": "5.0.6",
+    "eslint": "^10.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^6.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  }
+}
