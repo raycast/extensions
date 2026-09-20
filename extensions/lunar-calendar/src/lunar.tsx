@@ -40,6 +40,17 @@ interface HolidayMap {
   [dateStr: string]: HolidayItem; // Key 格式: YYYY-MM-DD
 }
 
+interface CalendarCell {
+  day: number;
+  isCurrentMonth: boolean;
+  solar: Solar;
+  dateStr: string;
+  lunarText: string;
+  holidayStatus: { isHoliday?: boolean; isWork?: boolean };
+  isToday: boolean;
+  isWeekend: boolean;
+}
+
 export default function Command() {
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [holidays, setHolidays] = useState<HolidayMap>({});
@@ -95,7 +106,7 @@ export default function Command() {
     if (firstDayOfWeek === -1) firstDayOfWeek = 6;
 
     const totalDays = new Date(year, month, 0).getDate();
-    const cells = [];
+    const cells: CalendarCell[] = [];
 
     // 上月补齐
     const prevMonthTotalDays = new Date(year, month - 1, 0).getDate();
@@ -298,18 +309,7 @@ function getLunarText(solar: Solar, holidayItem?: HolidayItem): string {
     return `${lunar.getMonthInChinese()}月`;
   }
 
-  return lunarDay;
-}
-
-interface CalendarCell {
-  day: number;
-  isCurrentMonth: boolean;
-  solar: Solar;
-  dateStr: string;
-  lunarText: string;
-  holidayStatus: { isHoliday?: boolean; isWork?: boolean };
-  isToday: boolean;
-  isWeekend: boolean;
+  return lunarDay || "";
 }
 
 // 渲染整张完整月历 SVG（自动根据 isDark 切换配色）
