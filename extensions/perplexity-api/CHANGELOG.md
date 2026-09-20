@@ -1,5 +1,9 @@
 # Perplexity API Changelog
 
+## [Added Integration Attribution] - {PR_MERGE_DATE}
+
+- Added Perplexity integration attribution to API requests.
+
 ## [Updated Models] - 2025-02-06
 
 - Added `Sonar Reasoning 128k` and `Sonar Reasoning Pro 128k`.
