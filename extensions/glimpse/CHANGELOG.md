@@ -1,6 +1,6 @@
 # Glimpse Changelog
 
-## [Recording Mode, Replacements, and Windows] - {PR_MERGE_DATE}
+## [Recording Mode, Replacements, and Windows] - 2026-09-20
 
 - Start, pause, resume, bookmark, and finish Glimpse recordings from Raycast.
 - Recording Status shows a timer in the menu bar while you record.
