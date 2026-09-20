@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "windhawk",
+  "title": "Windhawk",
+  "description": "Install and manage Windhawk mods, straight from Raycast",
+  "icon": "extension-icon.png",
+  "author": "muhammadrizo",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "System",
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-mods",
+      "title": "Manage Mods",
+      "description": "Manage installed Windhawk mods",
+      "mode": "view"
+    },
+    {
+      "name": "search-mods",
+      "title": "Search Mods",
+      "description": "Search and install Windhawk mods",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "installVersionOpensTo",
+          "title": "\"Install Version…\" Opens To",
+          "description": "Choose how to display versions in the \"Install Version…\" action",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Submenu",
+              "value": "submenu"
+            },
+            {
+              "title": "List",
+              "value": "list"
+            }
+          ],
+          "default": "submenu"
+        }
+      ]
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^2.4.0",
+    "@raycast/utils": "^2.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.6.2",
+    "@types/react": "19.3.0",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.8",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "CLI Path",
+      "description": "Specify the path for Windhawk CLI. Defaults to \"C:\\Program Files\\Windhawk\\windhawk-cli.exe\"",
+      "type": "file",
+      "required": false,
+      "default": "C:\\Program Files\\Windhawk\\windhawk-cli.exe"
+    }
+  ]
+}
