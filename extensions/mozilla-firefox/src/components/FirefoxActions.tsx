@@ -30,9 +30,9 @@ export function HistoryItemAction({ entry: { title, url } }: { entry: HistoryEnt
   return (
     <ActionPanel title={title}>
       <MozillaFirefoxHistoryTab url={url} />
-      {url ? <OpenInNewWindowAction url={url} /> : null}
       <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+      {url ? <OpenInNewWindowAction url={url} /> : null}
     </ActionPanel>
   );
 }
@@ -41,8 +41,8 @@ export function TabListItemAction(props: { tab: Tab }) {
   return (
     <ActionPanel title={props.tab.title}>
       <MozillaFirefoxGoToTab tab={props.tab} />
-      {props.tab.url ? <OpenInNewWindowAction url={props.tab.url} /> : null}
       <Action.CopyToClipboard title="Copy URL" content={props.tab.url} />
+      {props.tab.url ? <OpenInNewWindowAction url={props.tab.url} /> : null}
     </ActionPanel>
   );
 }
