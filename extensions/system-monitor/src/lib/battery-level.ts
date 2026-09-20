@@ -9,20 +9,12 @@ export function parseBatteryLevelPercent(batteryLevel: string | undefined): numb
   return parsed >= 0 && parsed <= 100 ? parsed : null;
 }
 
-export function formatBatteryLevelDisplay(batteryLevel: string | undefined, mode: BatteryDisplayMode): string {
+/** The charge percentage as the user asked to see it: remaining charge, or how much has been used. */
+export function batteryDisplayPercent(batteryLevel: string | undefined, mode: BatteryDisplayMode): number | null {
   const percent = parseBatteryLevelPercent(batteryLevel);
   if (percent === null) {
-    return "N/A";
+    return null;
   }
 
-  return mode === "free" ? `${percent} %` : `${100 - percent} %`;
-}
-
-export function formatBatteryLevelValue(batteryLevel: string | undefined, mode: BatteryDisplayMode): string {
-  const percent = parseBatteryLevelPercent(batteryLevel);
-  if (percent === null) {
-    return "N/A";
-  }
-
-  return mode === "free" ? percent.toString() : (100 - percent).toString();
+  return mode === "free" ? percent : 100 - percent;
 }
