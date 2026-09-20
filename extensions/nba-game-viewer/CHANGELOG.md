@@ -1,6 +1,6 @@
 # NBA Game Viewer Changelog
 
-## [Fixes] - 2026-09-20
+## [Fixes] - {PR_MERGE_DATE}
 
 - Fixed score requests for NBA and WNBA games.
 
