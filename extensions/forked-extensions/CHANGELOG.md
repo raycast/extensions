@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-09-20
 
 - Disable merge diffstat during Sync Remote and Pull Changes to avoid downloading changed files outside the sparse checkout.
 - Disable submodule recursion during synchronization fetches to avoid fetching historical trees for submodule discovery.
