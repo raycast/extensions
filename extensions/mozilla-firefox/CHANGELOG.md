@@ -2,8 +2,9 @@
 
 ## [Windows Launch Fixes] - {PR_MERGE_DATE}
 
-- Added an Open in New Window action on Windows to open the selected URL in a new Firefox window
-- Opening URLs on Windows now finds Firefox installed under `%LOCALAPPDATA%` (per-user / non-Program Files installs)
+- Added an Open in New Window action on Windows (New Tab, Search History, and Search Bookmarks) with Ctrl+Enter
+- Empty destinations open `about:newtab` in the new window
+- Opening URLs on Windows now finds Firefox under `%LOCALAPPDATA%` (per-user / non-Program Files installs)
 - Windows never spawns an unverified `firefox.exe` from PATH; if no known install path exists, an actionable error is shown for every variant including Release
 
 ## [Live Bookmarks & Search Fixes] - 2026-09-12
