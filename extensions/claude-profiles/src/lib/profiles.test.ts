@@ -50,21 +50,32 @@ test("a corrupt registry is an error, not an empty list, and is left alone", asy
   assert.equal(await readFile(registry.path, "utf8"), "{not json");
 });
 
-test("rows without the fields the app needs are skipped, the rest kept", async () => {
+test("a row missing a field rejects the registry so a later save cannot drop it", async () => {
+  await mkdir(registry.root, { recursive: true });
+  const body = JSON.stringify({
+    version: 1,
+    profiles: [
+      { id: "a" },
+      { id: "b", name: "B", dataDir: join(registry.root, "b") },
+    ],
+  });
+  await writeFile(registry.path, body);
+  await assert.rejects(registry.load(), /row 1 lacks/);
+  await assert.rejects(registry.add("Work"), RegistryError);
+  assert.equal(await readFile(registry.path, "utf8"), body);
+});
+
+test("createdAt defaults to zero when the row omits it", async () => {
   await mkdir(registry.root, { recursive: true });
   await writeFile(
     registry.path,
     JSON.stringify({
       version: 1,
-      profiles: [
-        { id: "a" },
-        { id: "b", name: "B", dataDir: join(registry.root, "b") },
-      ],
+      profiles: [{ id: "b", name: "B", dataDir: join(registry.root, "b") }],
     }),
   );
-  const rows = await registry.load();
   assert.deepEqual(
-    rows.map((p) => [p.id, p.createdAt]),
+    (await registry.load()).map((p) => [p.id, p.createdAt]),
     [["b", 0]],
   );
 });

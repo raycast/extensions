@@ -114,7 +114,14 @@ export function createRegistry(root = PROFILES_ROOT) {
         registryPath,
       );
     }
-    return rows.filter(isProfile).map((p) => ({
+    const bad = rows.findIndex((row) => !isProfile(row));
+    if (bad !== -1) {
+      throw new RegistryError(
+        `${REGISTRY_NAME} row ${bad + 1} lacks an id, name or dataDir. Profile folders are intact; fix or remove the file.`,
+        registryPath,
+      );
+    }
+    return rows.map((p) => ({
       ...p,
       createdAt: typeof p.createdAt === "number" ? p.createdAt : 0,
     }));
