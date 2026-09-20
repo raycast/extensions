@@ -235,7 +235,7 @@ export default function SwitchProfile(
                       }}
                     />
                     <Action.Push
-                      title="Rename…"
+                      title="Rename"
                       icon={Icon.Pencil}
                       shortcut={Keyboard.Shortcut.Common.Edit}
                       target={
@@ -266,7 +266,7 @@ export default function SwitchProfile(
                     </ActionPanel.Section>
                     <ActionPanel.Section>
                       <Action
-                        title="Remove from List"
+                        title="Remove from List…"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
                         shortcut={Keyboard.Shortcut.Common.Remove}
