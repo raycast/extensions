@@ -26,7 +26,7 @@ export default function useProductboardPaginated<T>(endpoint: string, query?: Re
       mapResult(result) {
         const hasMore = Boolean(result.links.next);
         const cursor = result.links.next
-          ? new URL(result.links.next).searchParams.get("pageCursor") || undefined
+          ? new URL(result.links.next, API_URL).searchParams.get("pageCursor") || undefined
           : undefined;
         return {
           data: result.data,

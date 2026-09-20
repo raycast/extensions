@@ -21,7 +21,7 @@ export type Note = {
 export type AddNote = {
   title: string;
   content: string;
-  saidBy: string;
+  saidBy?: string;
   tags: string;
 };
 

@@ -53,7 +53,7 @@ export default function AddNote({ onNoteAdded }: AddNoteProps) {
         });
         const result = (await response.json()) as POSTResponse;
 
-        if (!response.ok) {
+        if (!response.ok || !("data" in result)) {
           throw new Error("errors" in result ? result.errors[0].detail : "Productboard rejected the note");
         }
 

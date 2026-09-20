@@ -32,7 +32,9 @@ export default function Objectives() {
           title={objective.fields.name || "Unnamed objective"}
           icon={{
             source: Icon.BullsEye,
-            tintColor: objective.fields.status ? STATUS_COLOR[objective.fields.status.name] : Color.SecondaryText,
+            tintColor: objective.fields.status
+              ? (STATUS_COLOR[objective.fields.status.name] ?? Color.SecondaryText)
+              : Color.SecondaryText,
           }}
           accessories={[{ date: new Date(objective.updatedAt) }]}
           detail={<List.Item.Detail markdown={objective.fields.description || "No description"} />}
