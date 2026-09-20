@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Detect Next.js dev servers] - {PR_MERGE_DATE}
+## [Detect Next.js dev servers] - 2026-09-20
 
 - Next.js dev servers now appear. Next renames its server process to `next-server`, which has neither `next dev` nor a `node_modules` path in its command line, so it was being filtered out.
 
