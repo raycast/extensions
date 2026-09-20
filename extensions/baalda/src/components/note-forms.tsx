@@ -309,7 +309,7 @@ function EditNoteForm({ note, onDone }: { note: NoteContent; onDone?: () => void
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Operation" value={kind} onChange={(value) => setKind(value as EditKind)}>
+      <Form.Dropdown id="edit-operation" title="Operation" value={kind} onChange={(value) => setKind(value as EditKind)}>
         <Form.Dropdown.Item title="Replace exact text" value="replace" />
         <Form.Dropdown.Item title="Insert before anchor" value="insert_before" />
         <Form.Dropdown.Item title="Insert after anchor" value="insert_after" />
@@ -403,7 +403,7 @@ function MoveNoteForm({ note, onDone }: { note: NoteContent; onDone?: () => void
     >
       <Form.TextField title="File name" placeholder="note.md" {...itemProps.fileName} autoFocus />
       <Form.TextField title="Display title" placeholder="Optional title" {...itemProps.title} />
-      <Form.Dropdown title="Destination folder" value={folderId} onChange={setFolderId}>
+      <Form.Dropdown id="destination-folder" title="Destination folder" value={folderId} onChange={setFolderId}>
         <Form.Dropdown.Item title="Vault root" value={ROOT_FOLDER} />
         {!currentFolderVisible && <Form.Dropdown.Item title="Current folder (unavailable)" value={folderId} />}
         {(folders ?? []).map((folder) => (

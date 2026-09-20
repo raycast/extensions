@@ -15,13 +15,6 @@ import { getPreferenceValues } from "@raycast/api";
  *  - notes carry `relPath` (not `path`); folders carry `path` and `name`.
  */
 
-export interface Preferences {
-  serverUrl: string;
-  mcpToken: string;
-  defaultVaultId?: string;
-  captureFolder?: string;
-}
-
 export const ROOT_FOLDER = "__baalda_root__";
 
 export function prefs(): Preferences {
@@ -158,6 +151,8 @@ export interface MoveFolderResult {
 
 /* ── JSON-RPC plumbing ──────────────────────────────────────────────────── */
 
+const REQUEST_TIMEOUT_MS = 15_000;
+
 let rpcId = 0;
 let initialized = false;
 
@@ -177,9 +172,11 @@ async function rpc(method: string, params?: Record<string, unknown>): Promise<un
   }
 
   const base = serverUrl.replace(/\/+$/, "");
-  let res: Response;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
   try {
-    res = await fetch(`${base}/api/mcp`, {
+    const res = await fetch(`${base}/api/mcp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -187,28 +184,35 @@ async function rpc(method: string, params?: Record<string, unknown>): Promise<un
         Authorization: `Bearer ${mcpToken.trim()}`,
       },
       body: JSON.stringify({ jsonrpc: "2.0", id: ++rpcId, method, params }),
+      signal: controller.signal,
     });
-  } catch {
+
+    if (res.status === 401 || res.status === 403) {
+      throw new BaaldaError(
+        "Baalda rejected the MCP token (401). Check the token in extension preferences, or mint a new one in Baalda → Vault Settings → MCP.",
+      );
+    }
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new BaaldaError(`Baalda server error ${res.status} at ${base}/api/mcp. ${text.slice(0, 200)}`);
+    }
+
+    const body = (await res.json()) as JsonRpcResponse;
+    if (body.error) {
+      throw new BaaldaError(`MCP error ${body.error.code}: ${body.error.message}`);
+    }
+    return body.result;
+  } catch (error) {
+    if (error instanceof BaaldaError) throw error;
+    if (controller.signal.aborted) {
+      throw new BaaldaError(`Baalda server at ${base} did not respond within ${REQUEST_TIMEOUT_MS / 1000} seconds.`);
+    }
     throw new BaaldaError(
       `Couldn't reach the Baalda server at ${base}. Check the Server URL in extension preferences.`,
     );
+  } finally {
+    clearTimeout(timeout);
   }
-
-  if (res.status === 401 || res.status === 403) {
-    throw new BaaldaError(
-      "Baalda rejected the MCP token (401). Check the token in extension preferences, or mint a new one in Baalda → Vault Settings → MCP.",
-    );
-  }
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new BaaldaError(`Baalda server error ${res.status} at ${base}/api/mcp. ${text.slice(0, 200)}`);
-  }
-
-  const body = (await res.json()) as JsonRpcResponse;
-  if (body.error) {
-    throw new BaaldaError(`MCP error ${body.error.code}: ${body.error.message}`);
-  }
-  return body.result;
 }
 
 async function ensureInitialized(): Promise<void> {

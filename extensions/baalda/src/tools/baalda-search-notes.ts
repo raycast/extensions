@@ -9,6 +9,16 @@ type Input = {
   k?: number;
 };
 
+type SearchFailure = {
+  vault: string;
+  vaultId: string;
+  error: string;
+};
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 /**
  * Semantic + keyword search over notes in Baalda vaults.
  * Returns ranked docIds. Follow up with baalda-read-note to get full content.
@@ -28,7 +38,20 @@ export default async function tool(input: Input): Promise<string> {
     ),
   );
 
-  const results = settled.flatMap((s) => (s.status === "fulfilled" ? s.value : []));
-  if (results.length === 0) return `No notes found for "${input.query}".`;
-  return JSON.stringify(results, null, 2);
+  const results = settled.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
+  const failures = settled.flatMap((result, index): SearchFailure[] => {
+    if (result.status === "fulfilled") return [];
+    const vault = targets[index];
+    return [{ vault: vault.name, vaultId: vault.vaultId, error: errorMessage(result.reason) }];
+  });
+
+  if (targets.length > 0 && failures.length === targets.length) {
+    throw new Error(
+      `Search failed in every selected vault: ${failures
+        .map((failure) => `${failure.vault}: ${failure.error}`)
+        .join("; ")}`,
+    );
+  }
+  if (results.length === 0 && failures.length === 0) return `No notes found for "${input.query}".`;
+  return JSON.stringify(failures.length > 0 ? { results, failures } : results, null, 2);
 }

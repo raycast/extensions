@@ -93,16 +93,16 @@ export function CreateNoteForm({ defaultVaultId }: { defaultVaultId?: string } =
       isLoading={loadingVaults || loadingFolders}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Note" icon={Icon.DocumentPlus} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Note" icon={Icon.Document} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Vault" value={vaultId} onChange={setVaultId}>
+      <Form.Dropdown id="vault" title="Vault" value={vaultId} onChange={setVaultId}>
         {(vaults ?? []).map((vault) => (
           <Form.Dropdown.Item key={vault.vaultId} title={vault.name} value={vault.vaultId} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown title="Folder" value={folderId} onChange={setFolderId}>
+      <Form.Dropdown id="folder" title="Folder" value={folderId} onChange={setFolderId}>
         <Form.Dropdown.Item title="Vault root" value={ROOT_FOLDER} />
         {(folders ?? []).map((folder) => (
           <Form.Dropdown.Item key={folder.folderId} title={folder.path} value={folder.folderId} />

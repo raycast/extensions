@@ -10,6 +10,14 @@ import {
   type Vault,
 } from "./lib/baalda";
 
+type SearchMatch = SearchResult & { vaultName: string; vaultId: string };
+type SearchFailure = { vaultName: string; vaultId: string; error: string };
+type SearchResponse = { matches: SearchMatch[]; failures: SearchFailure[] };
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 /* ── Append-to-note form ────────────────────────────────────────────────── */
 
 function AppendView({ note, onDone }: { note: NoteContent; onDone: () => void }) {
@@ -103,18 +111,51 @@ export default function SearchNotes() {
     onError: (e) => void showToast({ style: Toast.Style.Failure, title: "Couldn't load vaults", message: String(e) }),
   });
 
-  const { data: results, isLoading: searching } = useCachedPromise(
-    async (q: string, filter: string, allVaults: Vault[] | undefined) => {
-      if (!q.trim() || !allVaults?.length) return [] as (SearchResult & { vaultName: string })[];
-      const targets = filter === "all" ? allVaults : allVaults.filter((v) => v.vaultId === filter);
+  const {
+    data: searchResponse,
+    error: searchError,
+    isLoading: searching,
+  } = useCachedPromise(
+    async (q: string, filter: string, allVaults: Vault[] | undefined): Promise<SearchResponse> => {
+      if (!q.trim() || !allVaults?.length) return { matches: [], failures: [] };
+
+      const targets = filter === "all" ? allVaults : allVaults.filter((vault) => vault.vaultId === filter);
       const settled = await Promise.allSettled(
-        targets.map(async (v) => (await searchNotes(v.vaultId, q, 10)).map((r) => ({ ...r, vaultName: v.name }))),
+        targets.map(async (vault) =>
+          (await searchNotes(vault.vaultId, q, 10)).map((result) => ({
+            ...result,
+            vaultName: vault.name,
+            vaultId: vault.vaultId,
+          })),
+        ),
       );
-      return settled.flatMap((s) => (s.status === "fulfilled" ? s.value : []));
+      const matches = settled.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
+      const failures = settled.flatMap((result, index): SearchFailure[] => {
+        if (result.status === "fulfilled") return [];
+        const vault = targets[index];
+        return [{ vaultName: vault.name, vaultId: vault.vaultId, error: errorMessage(result.reason) }];
+      });
+
+      if (targets.length > 0 && failures.length === targets.length) {
+        throw new Error(
+          `Search failed in every selected vault: ${failures
+            .map((failure) => `${failure.vaultName}: ${failure.error}`)
+            .join("; ")}`,
+        );
+      }
+
+      return { matches, failures };
     },
     [query, vaultFilter, vaults],
-    { keepPreviousData: true },
+    {
+      keepPreviousData: true,
+      onError: (error) =>
+        void showToast({ style: Toast.Style.Failure, title: "Search failed", message: errorMessage(error) }),
+    },
   );
+
+  const results = searchResponse?.matches ?? [];
+  const failures = searchResponse?.failures ?? [];
 
   return (
     <List
@@ -135,11 +176,30 @@ export default function SearchNotes() {
       }
     >
       <List.EmptyView
-        icon={Icon.MagnifyingGlass}
-        title={query.trim() ? "No notes found" : "Search Baalda"}
-        description={query.trim() ? `No matches for "${query}"` : "Semantic + keyword search across your vaults"}
+        icon={searchError ? Icon.Warning : Icon.MagnifyingGlass}
+        title={searchError ? "Search Failed" : query.trim() ? "No notes found" : "Search Baalda"}
+        description={
+          searchError
+            ? errorMessage(searchError)
+            : query.trim()
+              ? `No matches for "${query}"`
+              : "Semantic + keyword search across your vaults"
+        }
       />
-      {(results ?? []).map((r) => (
+      {failures.length > 0 && (
+        <List.Section title="Unavailable Vaults">
+          {failures.map((failure) => (
+            <List.Item
+              key={failure.vaultId}
+              icon={Icon.Warning}
+              title={failure.vaultName}
+              subtitle={failure.error}
+              accessories={[{ tag: "Search Failed" }]}
+            />
+          ))}
+        </List.Section>
+      )}
+      {results.map((r) => (
         <List.Item
           key={`${r.vaultName}-${r.docId}`}
           icon={Icon.Document}

@@ -95,12 +95,12 @@ export function CreateFolderForm({ defaultVaultId, onDone }: { defaultVaultId?: 
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Vault" value={vaultId} onChange={setVaultId}>
+      <Form.Dropdown id="vault" title="Vault" value={vaultId} onChange={setVaultId}>
         {(vaults ?? []).map((vault) => (
           <Form.Dropdown.Item key={vault.vaultId} title={vault.name} value={vault.vaultId} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown title="Parent folder" value={parentId} onChange={setParentId}>
+      <Form.Dropdown id="parent-folder" title="Parent folder" value={parentId} onChange={setParentId}>
         <Form.Dropdown.Item title="Vault root" value={ROOT_FOLDER} />
         {(folders ?? []).map((folder) => (
           <Form.Dropdown.Item key={folder.folderId} title={folder.path} value={folder.folderId} />
@@ -167,7 +167,7 @@ export function MoveFolderForm({ vaultId, folder, onDone }: { vaultId: string; f
       }
     >
       <Form.TextField title="Folder name" {...itemProps.name} autoFocus />
-      <Form.Dropdown title="Parent folder" value={parentId} onChange={setParentId}>
+      <Form.Dropdown id="move-parent-folder" title="Parent folder" value={parentId} onChange={setParentId}>
         <Form.Dropdown.Item title="Vault root" value={ROOT_FOLDER} />
         {(folders ?? [])
           .filter((candidate) => !blocked.has(candidate.folderId))
