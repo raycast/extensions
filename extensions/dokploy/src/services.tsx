@@ -18,11 +18,14 @@ import ServiceLogs from "./service-logs";
 import DeploymentHistory from "./deployment-history";
 import ServiceEnv from "./service-env";
 import ServiceDomains from "./service-domains";
+import ServiceBackups, { BackupableKind } from "./service-backups";
 import { DatabaseActions } from "./database-actions";
 import type { ServiceScope } from "./utils";
 import { getTotalServices } from "./utils";
 
 const DATABASE_KINDS: DatabaseKind[] = ["mariadb", "mongo", "mysql", "postgres", "redis"];
+// Redis has no `databaseType` value in Dokploy's backup API - only these four take one.
+const BACKUPABLE_KINDS: BackupableKind[] = ["mariadb", "mongo", "mysql", "postgres"];
 
 export default function Services({
   environment,
@@ -325,6 +328,13 @@ export default function Services({
                 </ActionPanel.Section>
                 {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
                   <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />
+                )}
+                {BACKUPABLE_KINDS.includes(service.type as BackupableKind) && (
+                  <Action.Push
+                    icon={Icon.Cloud}
+                    title="View Backups"
+                    target={<ServiceBackups service={{ ...service, type: service.type as BackupableKind }} />}
+                  />
                 )}
                 <Action
                   icon={Icon.Trash}
