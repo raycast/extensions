@@ -1,6 +1,6 @@
 # Perplexity API Changelog
 
-## [Added Integration Attribution] - {PR_MERGE_DATE}
+## [Added Integration Attribution] - 2026-09-20
 
 - Added Perplexity integration attribution to API requests.
 
