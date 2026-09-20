@@ -5,12 +5,8 @@
   "description": "A simple Chinese Lunar Calendar extension to check lunar dates, traditional festivals, and public holidays.",
   "icon": "extension-icon.png",
   "author": "chentao7v",
-  "platforms": [
-    "macOS"
-  ],
   "categories": [
-    "Productivity",
-    "Utilities"
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -23,7 +19,6 @@
       "icon": "extension-icon.png"
     }
   ],
-  "tools": [],
   "dependencies": {
     "@raycast/api": "^1.104.20",
     "@raycast/utils": "^2.2.7",
