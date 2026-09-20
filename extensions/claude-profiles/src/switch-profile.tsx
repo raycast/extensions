@@ -12,6 +12,7 @@ import {
   showHUD,
   showToast,
   Toast,
+  trash,
   useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
@@ -110,16 +111,20 @@ export default function SwitchProfile(
 
   async function handleDelete(profile: ClaudeProfile) {
     const confirmed = await confirmAlert({
-      title: `Delete "${profile.name}" and its data?`,
-      message: `This permanently deletes ${profile.dataDir}. This can't be undone.`,
-      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+      title: `Move "${profile.name}" to the Trash?`,
+      message: `${profile.dataDir} and its saved login and chats go to the Trash. Recover them from there if needed.`,
+      primaryAction: {
+        title: "Move to Trash",
+        style: Alert.ActionStyle.Destructive,
+      },
     });
     if (!confirmed) return;
     try {
-      await registry.remove(profile.id, true);
+      const doomed = await registry.remove(profile.id, true);
+      if (doomed) await trash(doomed);
       await revalidate();
     } catch (err) {
-      await showFailureToast(err, { title: "Couldn't remove profile" });
+      await showFailureToast(err, { title: "Couldn't move profile to Trash" });
     }
   }
 
@@ -138,17 +143,20 @@ export default function SwitchProfile(
 
   async function handleDeleteFolder(dir: string) {
     const confirmed = await confirmAlert({
-      title: `Delete ${dir}?`,
-      message:
-        "This permanently deletes its saved login and chat history. This can't be undone.",
-      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+      title: `Move ${basename(dir)} to the Trash?`,
+      message: `${dir} goes to the Trash with its saved login and chats.`,
+      primaryAction: {
+        title: "Move to Trash",
+        style: Alert.ActionStyle.Destructive,
+      },
     });
     if (!confirmed) return;
     try {
-      await registry.deleteFolder(dir);
+      const doomed = await registry.confineFolder(dir);
+      if (doomed) await trash(doomed);
       await revalidate();
     } catch (err) {
-      await showFailureToast(err, { title: "Couldn't delete folder" });
+      await showFailureToast(err, { title: "Couldn't move folder to Trash" });
     }
   }
 
@@ -273,7 +281,7 @@ export default function SwitchProfile(
                         onAction={() => handleRemove(profile)}
                       />
                       <Action
-                        title="Delete Profile & Data…"
+                        title="Move Profile to Trash…"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
                         shortcut={{
@@ -308,7 +316,7 @@ export default function SwitchProfile(
                       />
                       <Action.ShowInFinder path={dir} />
                       <Action
-                        title="Delete Folder…"
+                        title="Move Folder to Trash…"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
                         onAction={() => handleDeleteFolder(dir)}

@@ -21,11 +21,13 @@ Actions per profile:
 - **Show in Finder**
 - **Copy Data Dir Path**
 - **Remove from List**: data stays on disk; the confirmation shows where
-- **Delete Profile & Data**: the confirmation shows the folder. Refused, with a
-  message, when the folder is not inside the Claude Profiles directory
+- **Move Profile to Trash**: the confirmation shows the folder. Refused, with a
+  message, when the folder is not inside the Claude Profiles directory. The
+  folder can be recovered from the Trash afterward
 
 Folders under Claude Profiles that no list entry points at appear in a "Not in
-the List" section, with Restore to List, Show in Finder, and Delete Folder.
+the List" section, with Restore to List, Show in Finder, and Move Folder to
+Trash.
 
 ### Create Profile
 

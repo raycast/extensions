@@ -5,7 +5,6 @@ import {
   readFile,
   realpath,
   rename,
-  rm,
   stat,
   writeFile,
 } from "fs/promises";
@@ -236,20 +235,23 @@ export function createRegistry(root = PROFILES_ROOT) {
       return renamed;
     },
 
-    /** unregister a profile; with deleteData, also remove its folder if it is inside the root. */
-    async remove(id: string, deleteData: boolean): Promise<void> {
+    /**
+     * unregister a profile. with discardData, the folder is checked to sit inside the
+     * root before the registry changes, and its real path is returned for the caller
+     * to move to the Trash; null when the folder is already gone.
+     */
+    async remove(id: string, discardData: boolean): Promise<string | null> {
       const profiles = await load();
       const target = profiles.find((p) => p.id === id);
       if (!target) throw new Error(`No profile "${id}" in the list`);
-      const doomed = deleteData ? await confine(target.dataDir) : null;
+      const doomed = discardData ? await confine(target.dataDir) : null;
       await save(profiles.filter((p) => p.id !== id));
-      if (doomed) await rm(doomed, { recursive: true, force: true });
+      return doomed;
     },
 
-    /** delete an unregistered folder; refuses anything outside the root. */
-    async deleteFolder(dataDir: string): Promise<void> {
-      const doomed = await confine(dataDir);
-      if (doomed) await rm(doomed, { recursive: true, force: true });
+    /** the real path of an unregistered folder, once it is known to sit inside the root. */
+    confineFolder(dataDir: string): Promise<string | null> {
+      return confine(dataDir);
     },
   };
 }

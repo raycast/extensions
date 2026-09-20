@@ -4,6 +4,7 @@ import {
   mkdir,
   readdir,
   readFile,
+  realpath,
   rm,
   writeFile,
 } from "node:fs/promises";
@@ -109,17 +110,22 @@ test("rename changes the name and nothing else", async () => {
   await assert.rejects(registry.rename("work", "   "));
 });
 
-test("remove with deleteData removes a folder inside the root", async () => {
+test("remove with discardData hands back the folder inside the root, deleting nothing itself", async () => {
   const created = await registry.add("Work");
-  await registry.remove("work", true);
+  const doomed = await registry.remove("work", true);
+  assert.equal(doomed, await realpath(created.dataDir));
   assert.deepEqual(await registry.load(), []);
-  assert.deepEqual(await readdir(registry.root), ["profiles.json"]);
-  await assert.rejects(readdir(created.dataDir), { code: "ENOENT" });
+  assert.deepEqual(await readdir(created.dataDir), []);
+
+  await registry.add("Gone");
+  await rm(join(registry.root, "gone"), { recursive: true });
+  assert.equal(await registry.remove("gone", true), null);
 });
 
 test("remove refuses to delete a folder outside the root and keeps the row", async () => {
   const outside = join(root, "elsewhere");
   await mkdir(outside);
+  await mkdir(join(root, "Claude Profiles", "work"), { recursive: true });
   await writeFile(join(outside, "keep"), "x");
   await mkdir(registry.root, { recursive: true });
   await writeFile(
@@ -135,8 +141,12 @@ test("remove refuses to delete a folder outside the root and keeps the row", asy
   assert.equal((await registry.load()).length, 1);
   assert.deepEqual(await readdir(outside), ["keep"]);
 
-  await assert.rejects(registry.deleteFolder(registry.root), /outside/);
-  await assert.rejects(registry.deleteFolder(outside), /outside/);
+  await assert.rejects(registry.confineFolder(registry.root), /outside/);
+  await assert.rejects(registry.confineFolder(outside), /outside/);
+  assert.equal(
+    await registry.confineFolder(join(registry.root, "work")),
+    await realpath(join(registry.root, "work")),
+  );
 });
 
 test("saving leaves no temp file behind", async () => {
