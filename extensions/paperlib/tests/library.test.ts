@@ -106,6 +106,21 @@ describe("searchLibrary", () => {
     expect(result.libraryFolder).toBe("/Users/me/Documents/paperlib");
   });
 
+  it("saves an offline snapshot from the live API", async () => {
+    const files: Record<string, string> = {};
+    const apiClient = createApiClient(
+      "http://paperlib.test",
+      fakeHttp((url) => (url.endsWith("/") ? "Paperlib APIHost Extension is running." : JSON.stringify(SAMPLE))),
+    );
+
+    await searchLibrary("attention", prefs, { apiClient, fs: memoryFs(files), cacheFile: "/tmp/paperlib-cache.json" });
+
+    expect(JSON.parse(files["/tmp/paperlib-cache.json"])[0]).toMatchObject({
+      id: "abc123",
+      title: "Attention Is All You Need",
+    });
+  });
+
   it("falls back to a local JSON export", async () => {
     const fs = memoryFs({
       "/tmp/library.json": JSON.stringify([
@@ -133,6 +148,24 @@ describe("searchLibrary", () => {
     expect(result.source).toBe("local");
     expect(result.papers).toHaveLength(1);
     expect(result.papers[0].title).toBe("Local Only Paper");
+  });
+
+  it("searches the cached snapshot while Paperlib is offline", async () => {
+    const fs = memoryFs({
+      "/tmp/paperlib-cache.json": JSON.stringify(SAMPLE),
+    });
+
+    const result = await searchLibrary(
+      "vaswani",
+      { ...prefs, apiHost: "http://127.0.0.1:9" },
+      {
+        fs,
+        cacheFile: "/tmp/paperlib-cache.json",
+      },
+    );
+
+    expect(result.source).toBe("cache");
+    expect(result.papers[0].title).toBe("Attention Is All You Need");
   });
 
   it("falls back to the demo library when Paperlib is offline", async () => {
@@ -181,6 +214,9 @@ function memoryFs(files: Record<string, string>, dirs: Record<string, string[]> 
         throw new Error(`ENOENT: ${path}`);
       }
       return files[path];
+    },
+    async writeFile(path: string, data: string) {
+      files[path] = data;
     },
     async readdir(path: string) {
       if (!(path in dirs)) {

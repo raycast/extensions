@@ -14,9 +14,12 @@ import {
 export interface LibraryDeps {
   http?: HttpClient;
   fs?: FileSystem;
+  cacheFile?: string;
   apiClient?: PaperlibApiClient;
   env?: NodeJS.ProcessEnv;
 }
+
+const CACHE_MAX_AGE_MS = 10 * 60 * 1000;
 
 const SETUP_HINTS = [
   "Install Paperlib from https://paperlib.app and keep it running.",
@@ -34,6 +37,7 @@ export async function searchLibrary(
 
   if (await api.isAvailable()) {
     const papers = await api.searchPapers(query, limit);
+    await refreshOfflineCache(api, deps.fs, deps.cacheFile);
     const appLibFolder = (await api.getPreference("appLibFolder")) || preferences.libraryFolder;
     return {
       papers: papers.slice(0, limit),
@@ -44,6 +48,16 @@ export async function searchLibrary(
   }
 
   if (deps.fs) {
+    const cached = deps.cacheFile ? await loadLocalPapers(deps.fs, { file: deps.cacheFile }) : null;
+    if (cached && cached.papers.length > 0) {
+      return {
+        papers: filterPapers(cached.papers, query).slice(0, limit),
+        source: "cache",
+        sourceLabel: "Offline cache (last Paperlib sync)",
+        libraryFolder: preferences.libraryFolder,
+      };
+    }
+
     const local = await loadLocalPapers(deps.fs, {
       file: preferences.localLibraryFile,
       folder: preferences.libraryFolder,
@@ -81,6 +95,22 @@ export async function searchLibrary(
     "Paperlib is not reachable. Start the app with the API Host extension, or add a JSON/CSV library export.",
     SETUP_HINTS,
   );
+}
+
+async function refreshOfflineCache(api: PaperlibApiClient, fs?: FileSystem, cacheFile?: string): Promise<void> {
+  if (!fs?.writeFile || !cacheFile || (await isFresh(fs, cacheFile))) {
+    return;
+  }
+  await fs.writeFile(cacheFile, JSON.stringify(await api.searchPapers("")), "utf8");
+}
+
+async function isFresh(fs: FileSystem, file: string): Promise<boolean> {
+  try {
+    const info = await fs.stat(file);
+    return info.isFile() && typeof info.mtimeMs === "number" && Date.now() - info.mtimeMs < CACHE_MAX_AGE_MS;
+  } catch {
+    return false;
+  }
 }
 
 function demoResult(query: string, limit: number, label?: string, libraryFolder?: string): SearchResult {

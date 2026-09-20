@@ -38,8 +38,9 @@ That endpoint is provided by [`@future-scholars/paperlib-apihost-extension`](htt
 
 1. Pings the API Host
 2. Searches with the same Realm `LIKE[c]` query sentence Paperlib uses in general search
-3. If the host is down, reads a JSON or CSV export you point at in preferences
-4. If nothing else is available, loads a built-in demo library so the command still works in CI and first-run demos
+3. Saves a full local snapshot every 10 minutes while the host is available
+4. If the host is down, searches that snapshot, then any JSON or CSV export you point at in preferences
+5. If nothing else is available, loads a built-in demo library so the command still works in CI and first-run demos
 
 Paperlib notes are not abstracts. The detail pane uses a stored abstract when available, otherwise looks it up through Crossref or arXiv before falling back to the note.
 
@@ -63,7 +64,7 @@ To use your real library:
 3. Leave Paperlib running. Confirm `http://127.0.0.1:21227/` in a browser prints that the API Host is running.
 4. In Raycast, open the extension preferences if you changed the API Host port.
 
-Without Paperlib, leave **Use demo library when Paperlib is offline** enabled, or set **Library JSON or CSV** to an export. Paperlib's CSV export (`title,authors,doi,...`) is accepted. A JSON array of paper objects is accepted too.
+After one live search, Paperlib can be closed and the extension will search its local snapshot. The snapshot refreshes at most once every 10 minutes while Paperlib is available. You can also set **Library JSON or CSV** to an export; Paperlib's CSV export (`title,authors,doi,...`) and a JSON array of paper objects are accepted.
 
 ## Scripts
 

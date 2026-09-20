@@ -27,7 +27,7 @@ export interface PaperEntity {
   addTime?: string;
 }
 
-export type LibrarySource = "api" | "local" | "demo";
+export type LibrarySource = "api" | "cache" | "local" | "demo";
 
 export interface SearchResult {
   papers: PaperEntity[];

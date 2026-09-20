@@ -5,8 +5,9 @@ import type { PaperEntity } from "./types";
 
 export interface FileSystem {
   readFile(path: string, encoding: "utf8"): Promise<string>;
+  writeFile?(path: string, data: string, encoding: "utf8"): Promise<void>;
   readdir(path: string): Promise<string[]>;
-  stat(path: string): Promise<{ isFile(): boolean; isDirectory(): boolean }>;
+  stat(path: string): Promise<{ isFile(): boolean; isDirectory(): boolean; mtimeMs?: number }>;
 }
 
 export async function loadLocalPapers(

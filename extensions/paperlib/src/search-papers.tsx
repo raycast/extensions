@@ -9,6 +9,7 @@ import {
   Icon,
   List,
   Toast,
+  environment,
   getPreferenceValues,
   open,
   showToast,
@@ -27,6 +28,7 @@ import type { PaperEntity, SearchResult } from "./lib/types";
 
 const nodeFs = {
   readFile: (path: string, encoding: "utf8") => fs.readFile(path, encoding),
+  writeFile: (path: string, data: string, encoding: "utf8") => fs.writeFile(path, data, encoding),
   readdir: (path: string) => fs.readdir(path),
   stat: (path: string) => fs.stat(path),
 };
@@ -41,6 +43,7 @@ export default function Command() {
     async (query: string) =>
       searchLibrary(query, withDefaultLibraryFolder(preferences), {
         fs: nodeFs,
+        cacheFile: join(environment.supportPath, "paperlib-cache.json"),
         env: process.env,
       }),
     [searchText],
@@ -255,6 +258,9 @@ function PaperItem(props: {
 function sourceBadge(result: SearchResult): string {
   if (result.source === "api") {
     return "Live";
+  }
+  if (result.source === "cache") {
+    return "Offline cache";
   }
   if (result.source === "local") {
     return "Local export";
