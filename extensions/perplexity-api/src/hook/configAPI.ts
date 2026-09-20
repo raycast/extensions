@@ -6,6 +6,7 @@ const prefs = getPreferenceValues();
 const config = {
   apiKey: prefs.apikey,
   baseURL: "https://api.perplexity.ai",
+  defaultHeaders: { "X-Pplx-Integration": "raycast" },
 };
 export const openai = new OpenAI(config);
 
