@@ -5,9 +5,15 @@
   "description": "Search your Paperlib library and copy DOI, citation, or BibTeX.",
   "icon": "icon.png",
   "author": "jialinli",
-  "categories": ["Productivity", "Data"],
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
   "license": "MIT",
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-papers",
@@ -15,7 +21,14 @@
       "subtitle": "Paperlib",
       "description": "Search the local Paperlib library and copy DOI, citation, or BibTeX.",
       "mode": "view",
-      "keywords": ["paper", "bibtex", "doi", "citation", "library", "pdf"]
+      "keywords": [
+        "paper",
+        "bibtex",
+        "doi",
+        "citation",
+        "library",
+        "pdf"
+      ]
     }
   ],
   "preferences": [
@@ -62,19 +75,25 @@
       "name": "citationStyle",
       "type": "dropdown",
       "required": false,
-      "title": "Citation style",
+      "title": "Citation Style",
       "description": "Plain-text citation format copied from Search Papers. Matches Paperlib's built-in APA-style export by default.",
       "default": "apa",
       "data": [
-        { "title": "APA", "value": "apa" },
-        { "title": "Harvard", "value": "harvard" }
+        {
+          "title": "APA",
+          "value": "apa"
+        },
+        {
+          "title": "Harvard",
+          "value": "harvard"
+        }
       ]
     },
     {
       "name": "resultLimit",
       "type": "textfield",
       "required": false,
-      "title": "Result limit",
+      "title": "Result Limit",
       "description": "Maximum number of papers to load from Paperlib.",
       "default": "50",
       "placeholder": "50"

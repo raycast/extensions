@@ -1,9 +1,8 @@
-import { createServer, type Server } from "node:http";
-import { AddressInfo } from "node:net";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import { createApiClient } from "../src/lib/client";
+import { createApiClient, type HttpClient } from "../src/lib/client";
 import { searchLibrary } from "../src/lib/library";
+import { normalizePaper } from "../src/lib/normalize";
 import { buildPaperlibQuery } from "../src/lib/query";
 import type { LibraryPreferences } from "../src/lib/types";
 import { DEMO_PAPERS } from "../src/lib/demo-library";
@@ -33,42 +32,22 @@ const SAMPLE = [
 ];
 
 describe("Paperlib API Host client", () => {
-  const servers: Server[] = [];
-
-  afterEach(async () => {
-    await Promise.all(
-      servers.splice(0).map(
-        (server) =>
-          new Promise<void>((resolve, reject) => {
-            server.close((error) => (error ? reject(error) : resolve()));
-          }),
-      ),
-    );
-  });
-
   it("calls paperService.load with a Paperlib query sentence", async () => {
     let requested: string | undefined;
-    const host = await listen((req, res) => {
-      requested = req.url;
-      if (req.url === "/") {
-        res.writeHead(200, { "Content-Type": "text/plain" });
-        res.end("Paperlib APIHost Extension is running.");
-        return;
-      }
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(SAMPLE));
+    const http = fakeHttp((url) => {
+      requested = url;
+      return url.endsWith("/") ? "Paperlib APIHost Extension is running." : JSON.stringify(SAMPLE);
     });
-    servers.push(host.server);
 
-    const client = createApiClient(host.url);
-    const papers = await client.searchPapers("attention");
+    const client = createApiClient("http://paperlib.test", http);
+    const papers = await client.searchPapers("attention", 10);
 
     expect(papers).toHaveLength(1);
     expect(papers[0].title).toBe("Attention Is All You Need");
-    expect(papers[0].abstract).toBe("Transformer architecture");
+    expect(papers[0].abstract).toBe("");
     expect(requested).toContain("/PLAPI.paperService.load/");
     const args = JSON.parse(decodeURIComponent(requested!.split("?args=")[1])) as unknown[];
-    expect(args[0]).toBe(buildPaperlibQuery("attention"));
+    expect(args[0]).toBe(buildPaperlibQuery("attention", 10));
     expect(args[1]).toBe("addTime");
     expect(args[2]).toBe("desc");
   });
@@ -76,6 +55,29 @@ describe("Paperlib API Host client", () => {
   it("reports the host unavailable when Paperlib is closed", async () => {
     const client = createApiClient("http://127.0.0.1:9");
     await expect(client.isAvailable()).resolves.toBe(false);
+  });
+
+  it("retries without LIMIT on Paperlib versions that reject it", async () => {
+    const requests: string[] = [];
+    const client = createApiClient(
+      "http://paperlib.test",
+      fakeHttp((url) => {
+        requests.push(url);
+        return url.includes("LIMIT") ? { ok: false, text: "Invalid filter" } : JSON.stringify(SAMPLE);
+      }),
+    );
+
+    await expect(client.searchPapers("attention", 10)).resolves.toHaveLength(1);
+    expect(requests).toHaveLength(2);
+    expect(decodeURIComponent(requests[1])).not.toContain("LIMIT");
+  });
+});
+
+describe("normalization", () => {
+  it("does not treat false CSV flag values as true", () => {
+    expect(normalizePaper({ title: "Unflagged", flag: "false" }).flag).toBe(false);
+    expect(normalizePaper({ title: "Unflagged", flag: "0" }).flag).toBe(false);
+    expect(normalizePaper({ title: "Flagged", flag: "true" }).flag).toBe(true);
   });
 });
 
@@ -89,28 +91,19 @@ describe("searchLibrary", () => {
   };
 
   it("uses the live API host when Paperlib is running", async () => {
-    const host = await listen((req, res) => {
-      if (req.url === "/") {
-        res.writeHead(200, { "Content-Type": "text/plain" });
-        res.end("Paperlib APIHost Extension is running.");
-        return;
-      }
-      res.writeHead(200, { "Content-Type": "application/json" });
-      if (req.url?.includes("preferenceService.get")) {
-        res.end(JSON.stringify("/Users/me/Documents/paperlib"));
-        return;
-      }
-      res.end(JSON.stringify(SAMPLE));
-    });
+    const apiClient = createApiClient(
+      "http://paperlib.test",
+      fakeHttp((url) => {
+        if (url.endsWith("/")) return "Paperlib APIHost Extension is running.";
+        if (url.includes("preferenceService.get")) return JSON.stringify("/Users/me/Documents/paperlib");
+        return JSON.stringify(SAMPLE);
+      }),
+    );
 
-    try {
-      const result = await searchLibrary("attention", { ...prefs, apiHost: host.url });
-      expect(result.source).toBe("api");
-      expect(result.papers[0].authors).toContain("Vaswani");
-      expect(result.libraryFolder).toBe("/Users/me/Documents/paperlib");
-    } finally {
-      await closeServer(host.server);
-    }
+    const result = await searchLibrary("attention", prefs, { apiClient });
+    expect(result.source).toBe("api");
+    expect(result.papers[0].authors).toContain("Vaswani");
+    expect(result.libraryFolder).toBe("/Users/me/Documents/paperlib");
   });
 
   it("falls back to a local JSON export", async () => {
@@ -126,12 +119,16 @@ describe("searchLibrary", () => {
       ]),
     });
 
-    const result = await searchLibrary("lovelace", {
-      ...prefs,
-      apiHost: "http://127.0.0.1:9",
-      localLibraryFile: "/tmp/library.json",
-      useDemoFallback: false,
-    }, { fs });
+    const result = await searchLibrary(
+      "lovelace",
+      {
+        ...prefs,
+        apiHost: "http://127.0.0.1:9",
+        localLibraryFile: "/tmp/library.json",
+        useDemoFallback: false,
+      },
+      { fs },
+    );
 
     expect(result.source).toBe("local");
     expect(result.papers).toHaveLength(1);
@@ -153,15 +150,29 @@ describe("searchLibrary", () => {
     const fs = memoryFs({}, { "/data/paperlib": ["default.realm", "pdfs"] });
 
     await expect(
-      searchLibrary("anything", {
-        ...prefs,
-        apiHost: "http://127.0.0.1:9",
-        libraryFolder: "/data/paperlib",
-        useDemoFallback: false,
-      }, { fs, env: {} }),
+      searchLibrary(
+        "anything",
+        {
+          ...prefs,
+          apiHost: "http://127.0.0.1:9",
+          libraryFolder: "/data/paperlib",
+          useDemoFallback: false,
+        },
+        { fs, env: {} },
+      ),
     ).rejects.toThrow(/default\.realm/);
   });
 });
+
+function fakeHttp(reply: (url: string) => string | { ok: boolean; text: string }): HttpClient {
+  return {
+    async fetch(url) {
+      const result = reply(url);
+      const response = typeof result === "string" ? { ok: true, text: result } : result;
+      return { ok: response.ok, status: response.ok ? 200 : 500, text: async () => response.text };
+    },
+  };
+}
 
 function memoryFs(files: Record<string, string>, dirs: Record<string, string[]> = {}) {
   return {
@@ -187,17 +198,4 @@ function memoryFs(files: Record<string, string>, dirs: Record<string, string[]> 
       throw new Error(`ENOENT: ${path}`);
     },
   };
-}
-
-async function listen(handler: Parameters<typeof createServer>[0]) {
-  const server = createServer(handler);
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", () => resolve()));
-  const address = server.address() as AddressInfo;
-  return { server, url: `http://127.0.0.1:${address.port}` };
-}
-
-function closeServer(server: Server) {
-  return new Promise<void>((resolve, reject) => {
-    server.close((error) => (error ? reject(error) : resolve()));
-  });
 }

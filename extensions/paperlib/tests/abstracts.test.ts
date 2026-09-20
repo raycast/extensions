@@ -53,6 +53,22 @@ describe("abstracts", () => {
     expect(abstract).toBe("Remote abstract from Crossref.");
   });
 
+  it("uses a note only when no stored or remote abstract is available", async () => {
+    const abstract = await resolveAbstract(
+      { ...DEMO_PAPERS[0], abstract: "", note: "Paperlib note", arxiv: "" },
+      {
+        enabled: true,
+        fetcher: {
+          async fetch() {
+            return { ok: false, status: 404, text: async () => "" };
+          },
+        },
+      },
+    );
+
+    expect(abstract).toBe("Paperlib note");
+  });
+
   it("falls back to arXiv Atom summaries", async () => {
     const abstract = await resolveAbstract(
       {

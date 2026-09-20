@@ -33,7 +33,7 @@ export async function searchLibrary(
   const api = deps.apiClient ?? createApiClient(preferences.apiHost || DEFAULT_API_HOST, deps.http);
 
   if (await api.isAvailable()) {
-    const papers = await api.searchPapers(query);
+    const papers = await api.searchPapers(query, limit);
     const appLibFolder = (await api.getPreference("appLibFolder")) || preferences.libraryFolder;
     return {
       papers: papers.slice(0, limit),

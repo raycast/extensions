@@ -22,11 +22,11 @@ From **Search Papers**:
 
 Paperlib keeps the library in a local Realm database:
 
-| Location | Path |
-| --- | --- |
-| Default library folder | `~/Documents/paperlib` |
-| Database file | `~/Documents/paperlib/default.realm` |
-| Preferences | Electron `config.json` in the Paperlib user-data directory |
+| Location               | Path                                                       |
+| ---------------------- | ---------------------------------------------------------- |
+| Default library folder | `~/Documents/paperlib`                                     |
+| Database file          | `~/Documents/paperlib/default.realm`                       |
+| Preferences            | Electron `config.json` in the Paperlib user-data directory |
 
 Realm files are not readable from Raycast (native engine, and Paperlib often holds a lock). The supported live path is Paperlib's own HTTP RPC:
 
@@ -41,11 +41,11 @@ That endpoint is provided by [`@future-scholars/paperlib-apihost-extension`](htt
 3. If the host is down, reads a JSON or CSV export you point at in preferences
 4. If nothing else is available, loads a built-in demo library so the command still works in CI and first-run demos
 
-Paperlib paper records do **not** store abstracts (only notes). The detail pane shows a note when that is all the library has, and can fill a missing abstract from Crossref or arXiv.
+Paperlib notes are not abstracts. The detail pane uses a stored abstract when available, otherwise looks it up through Crossref or arXiv before falling back to the note.
 
 ## Install and run
 
-You need [Raycast](https://www.raycast.com) (macOS or Windows) and [Node.js](https://nodejs.org) 20+.
+You need [Raycast](https://www.raycast.com) (macOS or Windows) and [Node.js](https://nodejs.org) 22.14+.
 
 ```bash
 git clone <this-repo>
@@ -67,26 +67,26 @@ Without Paperlib, leave **Use demo library when Paperlib is offline** enabled, o
 
 ## Scripts
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Load the extension in Raycast developer mode |
-| `npm test` | Unit tests for search, API RPC, citations, and fallbacks |
-| `npm run build` | Package the extension with `ray build` |
-| `npm run lint` | Raycast ESLint rules (`ray lint`) |
+| Command         | What it does                                             |
+| --------------- | -------------------------------------------------------- |
+| `npm run dev`   | Load the extension in Raycast developer mode             |
+| `npm test`      | Unit tests for search, API RPC, citations, and fallbacks |
+| `npm run build` | Package the extension with `ray build`                   |
+| `npm run lint`  | Raycast ESLint rules (`ray lint`)                        |
 
 Raycast itself is not available in headless CI. Tests cover the library client against a fake API Host and the demo/local fallbacks; they do not launch the Raycast UI.
 
 ## Preferences
 
-| Preference | Default | Purpose |
-| --- | --- | --- |
-| Paperlib API Host | `http://127.0.0.1:21227` | API Host base URL |
-| Library JSON or CSV | empty | Offline export |
-| Paperlib Library Folder | `~/Documents/paperlib` | Looks for `library.json` / `papers.csv` |
-| Use demo library | on | First-run / CI fallback |
-| Fetch abstracts | on | Crossref / arXiv when Paperlib has no abstract |
-| Citation style | APA | Plain-text copy format |
-| Result limit | 50 | Cap on results shown in Raycast |
+| Preference              | Default                  | Purpose                                        |
+| ----------------------- | ------------------------ | ---------------------------------------------- |
+| Paperlib API Host       | `http://127.0.0.1:21227` | API Host base URL                              |
+| Library JSON or CSV     | empty                    | Offline export                                 |
+| Paperlib Library Folder | `~/Documents/paperlib`   | Looks for `library.json` / `papers.csv`        |
+| Use demo library        | on                       | First-run / CI fallback                        |
+| Fetch abstracts         | on                       | Crossref / arXiv when Paperlib has no abstract |
+| Citation style          | APA                      | Plain-text copy format                         |
+| Result limit            | 50                       | Cap on results shown in Raycast                |
 
 ## Development notes
 

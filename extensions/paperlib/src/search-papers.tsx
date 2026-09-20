@@ -21,7 +21,7 @@ import { citationKey, toBibTeX, toCitation } from "./lib/format";
 import { searchLibrary } from "./lib/library";
 import { missingWebLinkMessage, paperWebUrl, resolveLocalPdf } from "./lib/links";
 import { paperMarkdown } from "./lib/markdown";
-import { mapPreferences, type ExtensionPreferences } from "./lib/preferences";
+import { mapPreferences } from "./lib/preferences";
 import type { LibraryUnavailableError } from "./lib/types";
 import type { PaperEntity, SearchResult } from "./lib/types";
 
@@ -32,7 +32,7 @@ const nodeFs = {
 };
 
 export default function Command() {
-  const preferences = mapPreferences(getPreferenceValues<ExtensionPreferences>());
+  const preferences = mapPreferences(getPreferenceValues<Preferences.SearchPapers>());
   const [searchText, setSearchText] = useState("");
   const [showingDetail, setShowingDetail] = useState(true);
   const [selectedId, setSelectedId] = useState<string>();

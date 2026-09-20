@@ -11,7 +11,7 @@ export function normalizePaper(raw: unknown): PaperEntity {
   const tags = normalizeTags(record.tags);
   const folders = normalizeTags(record.folders);
   const note = asString(record.note);
-  const abstract = asString(record.abstract) || note;
+  const abstract = asString(record.abstract);
 
   return {
     id: asString(record.id ?? record._id) || slugId(asString(record.title), asString(record.doi)),
@@ -30,7 +30,7 @@ export function normalizePaper(raw: unknown): PaperEntity {
     volume: asString(record.volume),
     number: asString(record.number),
     rating: asNumber(record.rating),
-    flag: Boolean(record.flag),
+    flag: isFlagged(record.flag),
     tags,
     folders,
     addTime: record.addTime ? String(record.addTime) : undefined,
@@ -118,6 +118,10 @@ function asString(value: unknown): string {
 function asNumber(value: unknown): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function isFlagged(value: unknown): boolean {
+  return value === true || value === 1 || (typeof value === "string" && /^(true|1)$/i.test(value.trim()));
 }
 
 function stripDoi(doi: string): string {

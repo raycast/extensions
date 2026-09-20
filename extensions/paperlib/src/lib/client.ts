@@ -30,9 +30,17 @@ export class PaperlibApiClient {
     }
   }
 
-  async searchPapers(search: string): Promise<PaperEntity[]> {
-    const query = buildPaperlibQuery(search);
-    const raw = await this.rpc("PLAPI", "paperService", "load", [query, "addTime", "desc"]);
+  async searchPapers(search: string, limit?: number): Promise<PaperEntity[]> {
+    const query = buildPaperlibQuery(search, limit);
+    let raw: unknown;
+    try {
+      raw = await this.rpc("PLAPI", "paperService", "load", [query, "addTime", "desc"]);
+    } catch (error) {
+      if (!limit || !/invalid filter/i.test(String(error))) {
+        throw error;
+      }
+      raw = await this.rpc("PLAPI", "paperService", "load", [buildPaperlibQuery(search), "addTime", "desc"]);
+    }
     return normalizePapers(raw);
   }
 

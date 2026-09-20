@@ -17,17 +17,11 @@ export async function resolveAbstract(
   paper: PaperEntity,
   options: { enabled: boolean; fetcher?: AbstractFetcher } = { enabled: true },
 ): Promise<string> {
-  if (paper.abstract && paper.abstract !== paper.note) {
-    return paper.abstract;
-  }
   if (paper.abstract) {
     return paper.abstract;
   }
-  if (paper.note) {
-    return paper.note;
-  }
   if (!options.enabled) {
-    return "";
+    return paper.note;
   }
 
   const fetcher = options.fetcher ?? globalFetcher();
@@ -46,7 +40,7 @@ export async function resolveAbstract(
     }
   }
 
-  return "";
+  return paper.note;
 }
 
 async function fetchCrossrefAbstract(doi: string, fetcher: AbstractFetcher): Promise<string> {

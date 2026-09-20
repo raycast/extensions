@@ -7,7 +7,7 @@ export interface PaperEntity {
   id: string;
   title: string;
   authors: string;
-  /** Paperlib stores notes, not abstracts. We fill this from notes, local JSON, or Crossref/arXiv. */
+  /** Abstract from an import or live API response. */
   abstract: string;
   note: string;
   publication: string;

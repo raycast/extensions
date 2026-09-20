@@ -11,7 +11,7 @@ import { parsePaperlibCsv } from "../src/lib/csv";
 describe("query sentences", () => {
   it("matches Paperlib's general-mode LIKE filter", () => {
     expect(buildPaperlibQuery("attention is")).toBe(
-      '(title LIKE[c] "*attention*is*" OR authors LIKE[c] "*attention*is*" OR publication LIKE[c] "*attention*is*" OR note LIKE[c] "*attention*is*")',
+      '(title LIKE[c] "*attention*is*" OR authors LIKE[c] "*attention*is*" OR publication LIKE[c] "*attention*is*" OR note LIKE[c] "*attention*is*" OR doi LIKE[c] "*attention*is*" OR arxiv LIKE[c] "*attention*is*")',
     );
   });
 
@@ -73,7 +73,8 @@ describe("normalize + csv + markdown", () => {
     const [paper] = parsePaperlibCsv(csv);
     expect(paper.title).toBe("A Study");
     expect(paper.doi).toBe("10.1/xyz");
-    expect(paper.abstract).toBe("hello");
+    expect(paper.abstract).toBe("");
+    expect(paper.note).toBe("hello");
   });
 
   it("renders title, authors, and abstract in the detail markdown", () => {

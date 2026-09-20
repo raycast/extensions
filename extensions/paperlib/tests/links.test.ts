@@ -51,7 +51,10 @@ describe("resolveLocalPdf", () => {
   });
 
   it("joins a relative Paperlib mainURL with the library folder", () => {
-    const resolved = resolveLocalPdf(paper({ mainURL: "Vaswani2017-AttentionIsAllYouNeed.pdf" }), "/Users/me/Documents/paperlib");
+    const resolved = resolveLocalPdf(
+      paper({ mainURL: "Vaswani2017-AttentionIsAllYouNeed.pdf" }),
+      "/Users/me/Documents/paperlib",
+    );
     expect(resolved).toEqual({
       ok: true,
       path: "/Users/me/Documents/paperlib/Vaswani2017-AttentionIsAllYouNeed.pdf",

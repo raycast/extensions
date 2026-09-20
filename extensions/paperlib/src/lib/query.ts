@@ -2,7 +2,7 @@
  * Builds the Realm query sentence Paperlib's paperService.load() expects.
  * Mirrors PaperFilterOptions in app/renderer/services/paper-service.ts.
  */
-export function buildPaperlibQuery(search: string): string {
+export function buildPaperlibQuery(search: string, limit?: number): string {
   const filters: string[] = [];
   const formatted = formatSearch(search);
 
@@ -10,11 +10,12 @@ export function buildPaperlibQuery(search: string): string {
     const fuzzy = `*${formatted.split(/\s+/).join("*")}*`;
     const escaped = escapeRealmString(fuzzy);
     filters.push(
-      `(title LIKE[c] "${escaped}" OR authors LIKE[c] "${escaped}" OR publication LIKE[c] "${escaped}" OR note LIKE[c] "${escaped}")`,
+      `(title LIKE[c] "${escaped}" OR authors LIKE[c] "${escaped}" OR publication LIKE[c] "${escaped}" OR note LIKE[c] "${escaped}" OR doi LIKE[c] "${escaped}" OR arxiv LIKE[c] "${escaped}")`,
     );
   }
 
-  return filters.join(" AND ");
+  const query = filters.join(" AND ");
+  return limit ? `${query} LIMIT(${limit})` : query;
 }
 
 export function matchesLocalSearch(haystacks: string[], search: string): boolean {
