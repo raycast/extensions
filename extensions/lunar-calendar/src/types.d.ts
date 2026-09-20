@@ -1,3 +1,4 @@
+// types.d.ts
 declare module "lunar-javascript" {
   export class Lunar {
     getJieQi(): string;
