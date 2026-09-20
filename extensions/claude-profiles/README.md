@@ -5,10 +5,38 @@ login with its own chats and settings, launched as a separate Claude window.
 
 ## Commands
 
-- **Create Profile**: name a profile and open Claude with it. Sign in the first
-  time it opens.
-- **Swap Profile**: pick a saved profile and open Claude with it. Also remove a
-  profile from the list, or delete it together with its data.
+### Switch Profile
+
+Lists profiles from the registry shared with the `claude-profiles` CLI. A
+profile with an open Claude window shows a "Running" tag.
+
+Type a profile name or id as the command's argument to open it directly;
+otherwise the argument pre-filters the list.
+
+Actions per profile:
+
+- **Open Claude**
+- **Create Quicklink**: a root-search entry that opens that profile in one step
+- **Rename**
+- **Show in Finder**
+- **Copy Data Dir Path**
+- **Remove from List**: data stays on disk; the confirmation shows where
+- **Delete Profile & Data**: the confirmation shows the folder. Refused, with a
+  message, when the folder is not inside the Claude Profiles directory
+
+Folders under Claude Profiles that no list entry points at appear in a "Not in
+the List" section, with Restore to List, Show in Finder, and Delete Folder.
+
+### Create Profile
+
+Name a profile and choose whether to open it now. If a removed profile's
+folder with the same name still exists, the form says so and restores it,
+unless "Create a fresh profile instead" is ticked, which gives the new folder
+a numbered id.
+
+`profiles.json` is written atomically. If it is unreadable or malformed, the
+commands show the error and change nothing; profile folders are never touched
+by that path.
 
 ## How it works
 

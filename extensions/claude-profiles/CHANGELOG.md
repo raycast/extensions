@@ -2,6 +2,9 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Create isolated Claude Desktop profiles, each with its own login and chats
-- Open a profile with a new Claude window without signing out of another
-- Remove a profile from the list, or delete it with its data
+- Switch Profile lists profiles from the registry shared with the `claude-profiles` CLI, with a "Running" tag for any open window
+- Pass a profile name or id as the command's argument to open it directly, or use it to pre-filter the list
+- Per profile: open Claude, create a quicklink, rename, show in Finder, copy the data directory path, remove from the list, or delete the profile and its data
+- Folders not in the list appear in their own section, with options to restore, show in Finder, or delete
+- Create Profile takes a name and an option to open immediately, and offers to restore a removed profile's folder instead of creating a duplicate
+- `profiles.json` is written atomically; a broken file is reported without touching any profile folder

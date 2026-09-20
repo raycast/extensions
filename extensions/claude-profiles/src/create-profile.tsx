@@ -2,16 +2,20 @@ import {
   Action,
   ActionPanel,
   Form,
-  showToast,
   Toast,
+  showInFinder,
+  showToast,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
-import { addProfile, launchClaudeProfile } from "./lib/profiles";
+import { showFailureToast } from "@raycast/utils";
+import { basename } from "path";
+import { useRef, useState } from "react";
+import { RegistryError, launchClaudeProfile, registry } from "./lib/profiles";
 
 interface FormValues {
   name: string;
   launchNow: boolean;
+  fresh: boolean;
 }
 
 interface Props {
@@ -20,10 +24,21 @@ interface Props {
 
 export default function CreateProfile({ onCreated }: Props) {
   const [nameError, setNameError] = useState<string | undefined>();
+  const [orphan, setOrphan] = useState<string | null>(null);
+  const latestName = useRef("");
   const { pop } = useNavigation();
 
+  async function handleNameChange(value: string) {
+    setNameError(undefined);
+    latestName.current = value;
+    const found = await registry.orphanFor(value);
+    // lookups resolve out of order while typing; only the latest counts
+    if (latestName.current === value) setOrphan(found);
+  }
+
   async function handleSubmit(values: FormValues) {
-    if (!values.name.trim()) {
+    const name = values.name.trim();
+    if (!name) {
       setNameError("Required");
       return;
     }
@@ -33,9 +48,15 @@ export default function CreateProfile({ onCreated }: Props) {
       title: "Creating profile…",
     });
     try {
-      const profile = await addProfile(values.name);
+      const profile =
+        orphan && !values.fresh
+          ? await registry.restore(orphan, name)
+          : await registry.add(name);
       toast.style = Toast.Style.Success;
-      toast.title = `Created "${profile.name}"`;
+      toast.title =
+        orphan && !values.fresh
+          ? `Restored "${profile.name}"`
+          : `Created "${profile.name}"`;
 
       if (values.launchNow) {
         await launchClaudeProfile(profile.dataDir);
@@ -44,9 +65,17 @@ export default function CreateProfile({ onCreated }: Props) {
       onCreated?.();
       pop();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Couldn't create profile";
-      toast.message = error instanceof Error ? error.message : String(error);
+      toast.hide();
+      await showFailureToast(error, {
+        title: "Couldn't create profile",
+        primaryAction:
+          error instanceof RegistryError
+            ? {
+                title: "Show in Finder",
+                onAction: () => showInFinder(error.path),
+              }
+            : undefined,
+      });
     }
   }
 
@@ -63,10 +92,22 @@ export default function CreateProfile({ onCreated }: Props) {
         title="Profile Name"
         placeholder="Work, Personal, Client A…"
         error={nameError}
-        onChange={() => setNameError(undefined)}
+        onChange={handleNameChange}
         autoFocus
       />
       <Form.Description text="Creates an isolated login for Claude Desktop. Sign in fresh the first time you open it." />
+      {orphan && (
+        <>
+          <Form.Description
+            text={`A removed profile "${basename(orphan)}" still has its login and chats at ${orphan}. Submitting restores it.`}
+          />
+          <Form.Checkbox
+            id="fresh"
+            label="Create a fresh profile instead of restoring"
+            defaultValue={false}
+          />
+        </>
+      )}
       <Form.Checkbox
         id="launchNow"
         label="Open Claude with this profile now"
