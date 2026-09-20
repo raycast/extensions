@@ -1,5 +1,12 @@
 # Jira Changelog
 
+## [Search input available immediately] - 2026-09-20
+
+- Fixed commands blocking keyboard input on launch: the Jira site and user details are now cached, so the view renders right away while authentication requests run in the background
+- Fixed view commands being wrapped in an async component, which React doesn't support and could cause a render loop
+- Stopped fetching child issues for every list item (one request per row), which kept the extension busy and made typing lag while a list loaded
+- Fetch each issue type icon only once instead of once per issue
+
 ## [Fixed team field on issue creation] - 2026-08-25
 
 - Fixed the Team field showing up under "Unknown fields" (and not rendering as a dropdown) on the create-issue form for sites using the newer Atlassian Teams field (`atlassian-team`), so a team can now be selected and set on new issues
