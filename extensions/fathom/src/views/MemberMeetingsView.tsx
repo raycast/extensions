@@ -1,8 +1,9 @@
-import { List, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { countOf } from "@chrismessina/raycast-kit";
 import { useState } from "react";
-import { listMeetings } from "../fathom/api";
+import { Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { MeetingListItem } from "../components/MeetingListItem";
+import { listMeetings } from "../fathom/api";
 
 interface MemberMeetingsProps {
   email: string;
@@ -97,7 +98,7 @@ export default function MemberMeetingsView({ email, name }: MemberMeetingsProps)
           {showRecorded && recordedMeetings.length > 0 && (
             <List.Section
               title={memberName ? `Recorded by ${memberName}` : "Recorded Meetings"}
-              subtitle={`${recordedMeetings.length} meetings`}
+              subtitle={countOf(recordedMeetings.length, "meeting")}
             >
               {recordedMeetings.map((meeting) => (
                 <MeetingListItem key={`recorded-${meeting.id}`} meeting={meeting} />
@@ -106,7 +107,7 @@ export default function MemberMeetingsView({ email, name }: MemberMeetingsProps)
           )}
 
           {showInvited && invitedMeetings.length > 0 && (
-            <List.Section title="Invited To" subtitle={`${invitedMeetings.length} meetings`}>
+            <List.Section title="Invited To" subtitle={countOf(invitedMeetings.length, "meeting")}>
               {invitedMeetings.map((meeting) => (
                 <MeetingListItem key={`invited-${meeting.id}`} meeting={meeting} />
               ))}
