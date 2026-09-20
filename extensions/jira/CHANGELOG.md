@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Search input available immediately] - {PR_MERGE_DATE}
+## [Search input available immediately] - 2026-09-20
 
 - Fixed commands blocking keyboard input on launch: the Jira site and user details are now cached, so the view renders right away while authentication requests run in the background
 - Fixed view commands being wrapped in an async component, which React doesn't support and could cause a render loop
