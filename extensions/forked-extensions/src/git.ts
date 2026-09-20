@@ -294,12 +294,15 @@ const updateFromRemoteMain = async (remote: string) => {
     "fetch",
     "--prune",
     "--no-tags",
+    // Submodule discovery can lazily fetch historical trees in a treeless clone.
+    "--no-recurse-submodules",
     `--filter=${partialCloneFilter}`,
     remote,
     `+refs/heads/${mainBranch}:refs/remotes/${remote}/${mainBranch}`,
   ]);
   if (currentBranch !== mainBranch) await git(["checkout", mainBranch]);
-  await git(["merge", "--ff-only", `${remote}/${mainBranch}`]);
+  // Diffstat reads changed blobs even outside the sparse checkout, downloading unrelated extensions.
+  await git(["merge", "--ff-only", "--no-stat", `${remote}/${mainBranch}`]);
   if (currentBranch !== mainBranch) await git(["checkout", currentBranch]);
 };
 
