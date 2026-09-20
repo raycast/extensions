@@ -1,0 +1,160 @@
+{
+  "name": "screenshot-search",
+  "title": "Screenshot Search",
+  "description": "Search, preview, and paste screenshots and screen recordings",
+  "version": "1.0.0",
+  "author": "kosuke_yano",
+  "license": "MIT",
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "search-screenshots",
+      "title": "Search Screenshots",
+      "description": "Find, preview, and reuse screenshots and screen recordings",
+      "mode": "view"
+    },
+    {
+      "name": "paste-latest-screenshot",
+      "title": "Paste Latest Screenshot",
+      "description": "Paste the most recent screenshot into the active app",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "scopeFolders",
+      "type": "textfield",
+      "required": false,
+      "title": "Search Scopes",
+      "description": "Folders to scan, one per line. ~/Desktop is always included.",
+      "default": "~/Desktop\n~/Library/CloudStorage/Dropbox-TUT_DTC/Yano Kosuke/Mac/screen_shot"
+    },
+    {
+      "name": "includeAllMedia",
+      "type": "checkbox",
+      "required": false,
+      "title": "Include All Media",
+      "description": "Index all supported images and videos in watched folders.",
+      "label": "Index all supported images and videos in watched folders",
+      "default": false
+    },
+    {
+      "name": "textRecognition",
+      "type": "checkbox",
+      "required": false,
+      "title": "Text Recognition",
+      "description": "Extract searchable text from screenshots on this Mac.",
+      "label": "Extract searchable text from screenshots on this Mac",
+      "default": true
+    },
+    {
+      "name": "recognitionMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Recognition Mode",
+      "description": "Fast uses Spotlight metadata; Accurate falls back to Vision OCR.",
+      "default": "fast",
+      "data": [
+        {
+          "title": "Fast",
+          "value": "fast"
+        },
+        {
+          "title": "Accurate",
+          "value": "accurate"
+        }
+      ]
+    },
+    {
+      "name": "allowCloudFiles",
+      "type": "checkbox",
+      "required": false,
+      "title": "Allow Text Recognition for Cloud Files",
+      "description": "Let macOS download cloud-only files for OCR.",
+      "label": "Let macOS download cloud-only files for OCR",
+      "default": false
+    },
+    {
+      "name": "storageDuration",
+      "type": "dropdown",
+      "required": false,
+      "title": "Storage Duration",
+      "description": "Controls how long local OCR metadata is kept. Original files are never deleted.",
+      "default": "unlimited",
+      "data": [
+        {
+          "title": "1 Day",
+          "value": "1d"
+        },
+        {
+          "title": "1 Week",
+          "value": "1w"
+        },
+        {
+          "title": "1 Month",
+          "value": "1m"
+        },
+        {
+          "title": "3 Months",
+          "value": "3m"
+        },
+        {
+          "title": "6 Months",
+          "value": "6m"
+        },
+        {
+          "title": "1 Year",
+          "value": "1y"
+        },
+        {
+          "title": "Unlimited",
+          "value": "unlimited"
+        }
+      ]
+    },
+    {
+      "name": "columnCount",
+      "type": "dropdown",
+      "required": false,
+      "title": "Column Count",
+      "description": "Default number of columns in the screenshot grid.",
+      "default": "4",
+      "data": [
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^2.4.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  }
+}
