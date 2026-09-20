@@ -58,8 +58,10 @@ export default function Command() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
 
-  // 1. 动态加载节假日数据（带 LocalStorage 缓存）
+  // 1. 动态加载节假日数据（带 LocalStorage 缓存与防清理）
   useEffect(() => {
+    let isMounted = true;
+
     async function loadHolidays() {
       const cacheKey = `holidays_${year}`;
 
@@ -67,7 +69,9 @@ export default function Command() {
       const cachedData = await LocalStorage.getItem<string>(cacheKey);
       if (cachedData) {
         try {
-          setHolidays(JSON.parse(cachedData));
+          if (isMounted) {
+            setHolidays(JSON.parse(cachedData));
+          }
           return;
         } catch (e) {
           console.error("解析本地缓存失败", e);
@@ -84,7 +88,7 @@ export default function Command() {
           holiday?: HolidayMap;
         };
 
-        if (json.code === 0 && json.holiday) {
+        if (json.code === 0 && json.holiday && isMounted) {
           setHolidays(json.holiday);
           await LocalStorage.setItem(cacheKey, JSON.stringify(json.holiday));
         }
@@ -94,6 +98,10 @@ export default function Command() {
     }
 
     loadHolidays();
+
+    return () => {
+      isMounted = false;
+    };
   }, [year]);
 
   // 2. 构建当月日历数据
@@ -194,8 +202,15 @@ export default function Command() {
     return `# ${titleText}\n\n![Calendar](${fullCalendarSvg})`;
   }, [year, month, calendarData]);
 
-  const nextMonth = () => setCurrentDate(new Date(year, month, 1));
-  const prevMonth = () => setCurrentDate(new Date(year, month - 2, 1));
+  // 使用准确的相对月份加减，规避构造函数越界偏差
+  const nextMonth = () =>
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
+    );
+  const prevMonth = () =>
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
+    );
   const resetToday = () => setCurrentDate(new Date());
 
   return (
