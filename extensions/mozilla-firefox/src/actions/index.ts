@@ -4,7 +4,7 @@ import { existsSync } from "fs";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
-import { Preferences, Tab } from "../interfaces";
+import { Tab } from "../interfaces";
 import { SEARCH_ENGINE } from "../constants";
 
 const execAsync = promisify(exec);
@@ -85,7 +85,7 @@ async function showLaunchError(err: unknown) {
 }
 
 export function buildNewTabUrl(queryText: string | null | undefined): string {
-  const searchEngine = getPreferenceValues<Preferences>().searchEngine?.toLowerCase() || "google";
+  const searchEngine = getPreferenceValues<Preferences.NewTab>().searchEngine?.toLowerCase() || "google";
   return queryText
     ? `${SEARCH_ENGINE[searchEngine] ?? SEARCH_ENGINE["google"]}${encodeURIComponent(queryText)}`
     : "about:newtab";
