@@ -1,3 +1,4 @@
+/// <reference path="./types.d.ts" />
 import fetch from "cross-fetch";
 import {
   Detail,
