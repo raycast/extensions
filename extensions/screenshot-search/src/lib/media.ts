@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { execFile, execFileSync } from "node:child_process";
 import { promisify } from "node:util";
-import { existsSync as fileExists, promises as fs } from "node:fs";
+import { type Dirent, existsSync as fileExists, promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
@@ -34,9 +34,13 @@ const IMAGE_EXTENSIONS = new Set([
 ]);
 const VIDEO_EXTENSIONS = new Set([".m4v", ".mov", ".mp4", ".webm"]);
 const MAX_OCR_CONCURRENCY = 4;
-// ponytail: bounded walk; switch to Spotlight indexing if full-tree coverage is needed.
+// ponytail: bounded fallback walk; indexed macOS scopes avoid this ceiling.
 const MAX_SCAN_DEPTH = 8;
 const MAX_SCAN_ENTRIES_PER_SCOPE = 10_000;
+const SPOTLIGHT_MEDIA_QUERY = `(${[...IMAGE_EXTENSIONS, ...VIDEO_EXTENSIONS]
+  .map((extension) => `kMDItemFSName == "*${extension}"cd`)
+  .join(" || ")})`;
+const SPOTLIGHT_SCAN_TIMEOUT = 10_000;
 
 export type RecognitionMode = "fast" | "accurate";
 
@@ -70,6 +74,14 @@ export async function loadMediaItems(
   const seen = new Set<string>();
 
   for (const scope of scopes) {
+    const indexed = await scanIndexedDirectory(
+      scope,
+      Boolean(preferences.includeAllMedia),
+      items,
+      seen,
+    );
+    if (indexed) continue;
+
     await scanDirectory(
       scope,
       Boolean(preferences.includeAllMedia),
@@ -274,6 +286,47 @@ export function formatBytes(bytes: number): string {
 
 type ScanBudget = { remainingEntries: number };
 
+async function scanIndexedDirectory(
+  directory: string,
+  includeAllMedia: boolean,
+  items: MediaItem[],
+  seen: Set<string>,
+): Promise<boolean> {
+  if (process.platform !== "darwin") return false;
+
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync(
+      "/usr/bin/mdfind",
+      ["-onlyin", directory, SPOTLIGHT_MEDIA_QUERY],
+      {
+        encoding: "utf8",
+        timeout: SPOTLIGHT_SCAN_TIMEOUT,
+        maxBuffer: 16 * 1024 * 1024,
+      },
+    ));
+  } catch {
+    return false;
+  }
+
+  const paths = stdout
+    .split(/\r?\n/)
+    .map((filePath) => filePath.trim())
+    .filter(Boolean);
+  if (paths.length === 0) return false;
+
+  for (const filePath of paths) {
+    await addMediaItem(
+      filePath,
+      includeAllMedia,
+      isCapturePath(filePath, directory),
+      items,
+      seen,
+    );
+  }
+  return true;
+}
+
 async function scanDirectory(
   directory: string,
   includeAllMedia: boolean,
@@ -292,6 +345,7 @@ async function scanDirectory(
     return;
   }
 
+  entries.sort(compareScanEntries);
   for (const entry of entries) {
     if (entry.name.startsWith(".")) continue;
     if (budget.remainingEntries-- <= 0) return;
@@ -311,36 +365,71 @@ async function scanDirectory(
     }
     if (!entry.isFile()) continue;
 
-    const extension = path.extname(entry.name).toLocaleLowerCase();
-    const kind = IMAGE_EXTENSIONS.has(extension)
-      ? "image"
-      : VIDEO_EXTENSIONS.has(extension)
-        ? "video"
-        : undefined;
-    if (
-      !kind ||
-      (!includeAllMedia && !isCaptureScope && !looksLikeCapture(entry.name))
-    )
-      continue;
+    await addMediaItem(filePath, includeAllMedia, isCaptureScope, items, seen);
+  }
+}
 
-    const resolved = path.resolve(filePath);
-    if (seen.has(resolved)) continue;
+async function addMediaItem(
+  filePath: string,
+  includeAllMedia: boolean,
+  captureScope: boolean,
+  items: MediaItem[],
+  seen: Set<string>,
+): Promise<void> {
+  const name = path.basename(filePath);
+  const extension = path.extname(name).toLocaleLowerCase();
+  const kind = IMAGE_EXTENSIONS.has(extension)
+    ? "image"
+    : VIDEO_EXTENSIONS.has(extension)
+      ? "video"
+      : undefined;
+  if (!kind || (!includeAllMedia && !captureScope && !looksLikeCapture(name)))
+    return;
 
-    try {
-      const stats = await fs.stat(resolved);
-      seen.add(resolved);
-      items.push({
-        id: resolved,
-        path: resolved,
-        name: entry.name,
-        kind,
-        capturedAt: stats.birthtimeMs || stats.mtimeMs,
-        modifiedAt: stats.mtimeMs,
-        size: stats.size,
-      });
-    } catch {
-      // Files can disappear while a screenshot folder is being scanned.
-    }
+  const resolved = path.resolve(filePath);
+  if (seen.has(resolved)) return;
+
+  try {
+    const stats = await fs.stat(resolved);
+    if (!stats.isFile()) return;
+    seen.add(resolved);
+    items.push({
+      id: resolved,
+      path: resolved,
+      name,
+      kind,
+      capturedAt: stats.birthtimeMs || stats.mtimeMs,
+      modifiedAt: stats.mtimeMs,
+      size: stats.size,
+    });
+  } catch {
+    // Files can disappear while a screenshot folder is being scanned.
+  }
+}
+
+function compareScanEntries(a: Dirent, b: Dirent): number {
+  const priority = (entry: Dirent): number => {
+    if (entry.isFile() && looksLikeCapture(entry.name)) return 0;
+    if (entry.isDirectory() && looksLikeCaptureFolder(entry.name)) return 1;
+    return entry.isFile() ? 2 : 3;
+  };
+
+  const difference = priority(a) - priority(b);
+  if (difference !== 0) return difference;
+  return priority(a) < 2
+    ? b.name.localeCompare(a.name, undefined, { numeric: true })
+    : a.name.localeCompare(b.name, undefined, { numeric: true });
+}
+
+function isCapturePath(filePath: string, scopeDirectory: string): boolean {
+  const scope = path.resolve(scopeDirectory);
+  let current = path.dirname(path.resolve(filePath));
+
+  while (true) {
+    if (looksLikeCaptureFolder(current)) return true;
+    if (current === scope || !current.startsWith(`${scope}${path.sep}`))
+      return false;
+    current = path.dirname(current);
   }
 }
 
