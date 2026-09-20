@@ -5,6 +5,9 @@
   "description": "Switch between isolated Claude Desktop accounts without logging out",
   "icon": "icon.png",
   "author": "caleb_barzee",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"

@@ -1,13 +1,4 @@
-.DS_Store
-.raycast-swift-build/
-.tmp/
-.venv/
-__pycache__/
-*.egg-info/
-.mypy_cache/
-.pytest_cache/
-.ruff_cache/
-dist/
 node_modules/
-package-lock.json
-.claude/settings.local.json
+.raycast-swift-build/
+raycast-env.d.ts
+.DS_Store
