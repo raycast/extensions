@@ -1,5 +1,11 @@
 import fetch from "cross-fetch";
-import { Detail, ActionPanel, Action, LocalStorage, environment } from "@raycast/api";
+import {
+  Detail,
+  ActionPanel,
+  Action,
+  LocalStorage,
+  environment,
+} from "@raycast/api";
 import { useState, useMemo, useEffect } from "react";
 import { Solar, HolidayUtil } from "lunar-javascript";
 
@@ -51,8 +57,13 @@ export default function Command() {
 
       // 从网络 API 获取最新数据并更新缓存
       try {
-        const response = await fetch(`https://timor.tech/api/holiday/year/${year}/`);
-        const json = (await response.json()) as { code: number; holiday?: HolidayMap };
+        const response = await fetch(
+          `https://timor.tech/api/holiday/year/${year}/`,
+        );
+        const json = (await response.json()) as {
+          code: number;
+          holiday?: HolidayMap;
+        };
 
         if (json.code === 0 && json.holiday) {
           setHolidays(json.holiday);
@@ -155,7 +166,9 @@ export default function Command() {
     if (lang.startsWith("zh")) {
       titleText = `${year}年 ${month}月`;
     } else {
-      const monthName = new Date(year, month - 1).toLocaleString("en-US", { month: "long" });
+      const monthName = new Date(year, month - 1).toLocaleString("en-US", {
+        month: "long",
+      });
       titleText = `${monthName} ${year}`;
     }
 
@@ -171,9 +184,21 @@ export default function Command() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title={t("nextMonth")} shortcut={{ modifiers: ["cmd"], key: "arrowRight" }} onAction={nextMonth} />
-          <Action title={t("prevMonth")} shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }} onAction={prevMonth} />
-          <Action title={t("today")} shortcut={{ modifiers: ["cmd"], key: "t" }} onAction={resetToday} />
+          <Action
+            title={t("nextMonth")}
+            shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+            onAction={nextMonth}
+          />
+          <Action
+            title={t("prevMonth")}
+            shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+            onAction={prevMonth}
+          />
+          <Action
+            title={t("today")}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            onAction={resetToday}
+          />
         </ActionPanel>
       }
     />
@@ -181,7 +206,10 @@ export default function Command() {
 }
 
 // 判断是否有休假/补班状态
-function getHolidayStatus(solar: Solar, holidayItem?: HolidayItem): { isHoliday?: boolean; isWork?: boolean } {
+function getHolidayStatus(
+  solar: Solar,
+  holidayItem?: HolidayItem,
+): { isHoliday?: boolean; isWork?: boolean } {
   if (holidayItem) {
     return {
       isHoliday: holidayItem.holiday,
@@ -189,7 +217,11 @@ function getHolidayStatus(solar: Solar, holidayItem?: HolidayItem): { isHoliday?
     };
   }
 
-  const h = HolidayUtil.getHoliday(solar.getYear(), solar.getMonth(), solar.getDay());
+  const h = HolidayUtil.getHoliday(
+    solar.getYear(),
+    solar.getMonth(),
+    solar.getDay(),
+  );
   if (h) {
     return {
       isHoliday: !h.isWork(),
@@ -236,7 +268,16 @@ function getLunarText(solar: Solar, holidayItem?: HolidayItem): string {
   const jieQi = lunar.getJieQi();
   if (jieQi) return jieQi;
 
-  const mainLunarFestivals = ["除夕", "春节", "元宵节", "端午节", "七夕节", "中秋节", "重阳节", "腊八节"];
+  const mainLunarFestivals = [
+    "除夕",
+    "春节",
+    "元宵节",
+    "端午节",
+    "七夕节",
+    "中秋节",
+    "重阳节",
+    "腊八节",
+  ];
   const lunarFestivals = lunar.getFestivals();
   for (const f of lunarFestivals) {
     if (mainLunarFestivals.includes(f)) {
@@ -264,7 +305,10 @@ interface CalendarCell {
 }
 
 // 渲染整张完整月历 SVG（自动根据 isDark 切换配色）
-function generateFullCalendarSvg(calendarData: CalendarCell[], isDark: boolean) {
+function generateFullCalendarSvg(
+  calendarData: CalendarCell[],
+  isDark: boolean,
+) {
   const fontFamily = "system-ui, sans-serif";
   const colWidth = 100;
   const rowHeight = 85;
@@ -337,8 +381,12 @@ function generateFullCalendarSvg(calendarData: CalendarCell[], isDark: boolean) 
       const rectY = centerY - cardH / 2;
 
       let rectSvg = "";
-      let textColor = item.isCurrentMonth ? theme.currentMonthText : theme.otherMonthText;
-      let lunarColor = item.isCurrentMonth ? theme.currentMonthLunar : theme.otherMonthLunar;
+      let textColor = item.isCurrentMonth
+        ? theme.currentMonthText
+        : theme.otherMonthText;
+      let lunarColor = item.isCurrentMonth
+        ? theme.currentMonthLunar
+        : theme.otherMonthLunar;
       let badgeSvg = "";
 
       // 当月周末
