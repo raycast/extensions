@@ -7,6 +7,12 @@ documents the hook config contract but not this tool's response — so treat it 
 an observation with a date, not a contract, and re-run the probe if the hook
 starts missing artifacts.
 
+> ⚠️ **Partly superseded.** The captured payload below is still accurate in
+> structure, but its **URL is not** — the artifact URL scheme changed around
+> 2026-09-10 and broke the hook. See
+> [2026-09-10: the URL scheme changed and the hook went silent](#2026-09-10-the-url-scheme-changed-and-the-hook-went-silent).
+> That is the warning in the paragraph above, cashed in.
+
 ## The question this answered
 
 The extension's entire design rested on an unverified assumption: that
@@ -91,6 +97,49 @@ cheap insurance against recording other people's shared artifacts.
 Also present and unused: `transcript_path`, `prompt_id`, `permission_mode`,
 `effort`, `session_id`, `tool_use_id`. `cwd` **is** used — it is the only source
 of project attribution, and it is free at write time but impossible to backfill.
+
+## 2026-09-10: the URL scheme changed and the hook went silent
+
+**The warning at the top of this file came true.** The capture above shows
+`"url": "https://claude.ai/code/artifact/d9d100f0-84be-4702-b48e-8b7866edb387"`.
+Around 2026-09-10 that became:
+
+```text
+https://claude.ai/artifact/Xu57qA1gp4AUrcd6bZ9t8V
+```
+
+Two changes at once: the `/code` path segment went away, and the id stopped
+being a UUID. It is now a 22-character base62 slug, and — importantly — it is
+**not** the same value as `tool_response.artifact_id`, which is still a UUID and
+is a separate internal identifier. Under the old scheme the two were identical,
+which is why nothing depended on telling them apart. The URL's last segment is
+the one that survives a republish, so it remains the index's key.
+
+`record-artifact.sh` matched `[0-9a-fA-F-]{36}` and therefore matched nothing.
+Because the hook's contract is that it must **never fail a Claude Code turn**,
+it logged `no artifact URL found in payload; nothing recorded` and exited 0 —
+on every publish, for nine days, while remaining installed, executable,
+registered, and firing.
+
+**The failure mode is what matters here.** Every structural signal stayed green
+throughout. The only observable symptom was `~/.claude/artifacts.json` not
+growing, which is indistinguishable from not having published anything. Nothing
+in the extension could tell the difference, which is why the `Doctor` command
+now _runs_ the installed hook against a current-format URL rather than checking
+that it exists.
+
+**The fix, and the rule it encodes:** match the SHAPE OF THE URL and treat the
+id as an opaque token.
+
+```bash
+URL_PATTERN='https://claude\.ai/(code/)?artifact/[A-Za-z0-9_-]{16,64}'
+```
+
+The `claude.ai/…/artifact/` prefix is the stable, identifying part and carries
+the whole burden on its own. Constraining the tail bought no real precision and
+is exactly what broke. A future scheme change that keeps the prefix will now
+pass through; one that does not will be caught by Doctor's self-test rather than
+by noticing, weeks later, that the list looks short.
 
 ## `$HOME` expands in the `command` field
 

@@ -29,6 +29,14 @@ export const SETTINGS_PATHS = [
   path.join(homedir(), ".claude", "settings.local.json"),
 ];
 
+/**
+ * Where the README tells people to install the recorder.
+ *
+ * Only a default. The registration in `settings.json` is authoritative about
+ * where the script actually lives — see `resolveHookScriptPath`.
+ */
+export const DEFAULT_HOOK_SCRIPT_PATH = path.join(homedir(), ".claude", "hooks", "record-artifact.sh");
+
 export const SETUP_DOCS_URL = "https://github.com/chrismessina/raycast-claude-artifacts#setup";
 
 /**
@@ -102,6 +110,36 @@ The hook needs \`jq\` and \`perl\` — tell me if either is missing.
 Finally: tell me to publish a test artifact and check that it appears, and that if it does not, restarting Claude Code is the first thing to try — a newly registered hook is not always picked up by an already-running session.`;
 
 /**
+ * A prompt for REPAIRING an install that exists but has stopped working.
+ *
+ * Separate from `SETUP_PROMPT` because the two failures need opposite
+ * instructions. Setup appends a registration and installs a script. Repair must
+ * do neither: the registration is already correct and appending a second one
+ * would double every future publish, so the only change wanted is the script's
+ * contents.
+ *
+ * Telling someone to "run setup again" when the hook is registered and running
+ * sends them to fix the part that is not broken — which is exactly how the
+ * 2026-09 outage stayed invisible, since every structural check was green while
+ * the script silently failed to parse the new URL format.
+ */
+export const UPDATE_PROMPT = `The Claude Code hook that records my published artifacts has stopped recording them. It is installed and registered correctly — the script itself is out of date.
+
+1. Show me ${HOOK_SCRIPT_URL} so I can read it, then overwrite ~/.claude/hooks/record-artifact.sh with it and keep it executable.
+
+2. Do NOT touch ~/.claude/settings.json. The registration is already correct, and adding a second one would record every publish twice.
+
+3. Verify the updated script actually parses a current artifact URL, without touching my real index — point HOME at a scratch directory so the write lands there:
+
+d="$(mktemp -d)" && mkdir -p "$d/.claude" && echo '{"cwd":"/tmp","tool_name":"Artifact","tool_input":{},"tool_response":{"url":"https://claude.ai/artifact/RaycastDoctorSelfTest1","title":"Self-Test","audience":"owner"}}' | HOME="$d" bash ~/.claude/hooks/record-artifact.sh; cat "$d/.claude/artifacts.json"
+
+That must print a row whose id is RaycastDoctorSelfTest1. If it prints nothing, or the file does not exist, the update did not take.
+
+4. Do NOT tell me to restart Claude Code. The hook is spawned fresh for every tool call, so it reads the new file from disk on the very next publish. A restart is only needed when the REGISTRATION in settings.json changes, and step 2 says not to touch it.
+
+Then tell me to run the Run Doctor command in the Claude Artifacts Raycast extension again, and to use its Backfill action to recover the artifacts that were dropped while the hook was broken.`;
+
+/**
  * Whether a `PostToolUse` hook that records artifacts is currently registered.
  *
  * `"unknown"` is a distinct outcome from `"missing"` on purpose: an unreadable
@@ -169,26 +207,125 @@ function matchesArtifactTool(matcher: unknown): boolean {
  * but never writes the index, so exclude its stable basename while keeping the
  * recorder path otherwise unconstrained.
  */
-function runsAnArtifactRecorder(hooks: unknown): boolean {
-  if (!Array.isArray(hooks)) return false;
+function recorderCommand(hooks: unknown): string | undefined {
+  if (!Array.isArray(hooks)) return undefined;
 
-  return hooks.some(
-    (hook: HookCommand) =>
+  return (hooks as HookCommand[]).find(
+    (hook) =>
       typeof hook?.command === "string" &&
       /artifact/i.test(hook.command) &&
       !/(?:^|[/\\\s'"])probe-artifact-hook\.sh\b/i.test(hook.command),
-  );
+  )?.command as string | undefined;
 }
 
 function hasArtifactHook(settings: unknown): boolean {
-  if (typeof settings !== "object" || settings === null) return false;
+  return artifactHookCommand(settings) !== undefined;
+}
+
+/**
+ * The shell command of the registered recorder, if one is registered.
+ *
+ * Same traversal as the boolean check above, kept as one function so the two
+ * questions — "is a recorder registered?" and "which script is it?" — can never
+ * disagree about which entry counts. Doctor needs the path so it can exercise
+ * the user's ACTUAL script rather than assuming the documented location.
+ */
+function artifactHookCommand(settings: unknown): string | undefined {
+  if (typeof settings !== "object" || settings === null) return undefined;
 
   const postToolUse = (settings as { hooks?: { PostToolUse?: unknown } }).hooks?.PostToolUse;
-  if (!Array.isArray(postToolUse)) return false;
+  if (!Array.isArray(postToolUse)) return undefined;
 
-  return postToolUse.some(
-    (entry: HookEntry) => matchesArtifactTool(entry?.matcher) && runsAnArtifactRecorder(entry?.hooks),
-  );
+  for (const entry of postToolUse as HookEntry[]) {
+    if (!matchesArtifactTool(entry?.matcher)) continue;
+    const command = recorderCommand(entry?.hooks);
+    if (command) return command;
+  }
+  return undefined;
+}
+
+/**
+ * Interpreters and launchers that may PRECEDE the script in a hook command.
+ *
+ * `bash $HOME/.../record.sh` is a legal registration, and naively taking the
+ * first token diagnoses `/bin/bash` as the recorder. Matched on basename so an
+ * absolute or bare spelling behaves the same.
+ */
+const LAUNCHERS = /^(?:env|sh|bash|zsh|dash|ksh|node|perl|python|python3)$/;
+
+/** Resolve the shell's home shorthands, which are literal text in the settings file. */
+function expandHome(token: string): string {
+  return token
+    .replace(/^\$\{HOME\}/, homedir())
+    .replace(/^\$HOME/, homedir())
+    .replace(/^~(?=\/|$)/, homedir());
+}
+
+/**
+ * Pick the script out of a hook command line.
+ *
+ * Quoted segments are considered FIRST, because a path containing a space can
+ * only be expressed by quoting it and splitting on whitespace would shred it.
+ * Otherwise the first token that survives three filters wins: it must not be a
+ * `FOO=bar` environment assignment, must not be a launcher, and must expand to
+ * an absolute path.
+ *
+ * Existence is deliberately NOT a filter. Returning only paths that exist would
+ * mean a registered-but-deleted recorder silently resolves to the documented
+ * default — and if that default happens to exist, Doctor would report a healthy
+ * script while the registered one is gone. That is the exact false-healthy
+ * shape this command was written to eliminate, so a path that does not exist is
+ * returned and reported as missing.
+ */
+function scriptFromCommand(command: string): string | undefined {
+  for (const match of command.matchAll(/(=?)["']([^"']+)["']/g)) {
+    // Skip the VALUE of an environment assignment. `env CONFIG="/tmp/config"
+    // bash "$HOME/.../record-artifact.sh"` is a legal registration whose first
+    // quoted absolute path is the config, not the recorder — and resolving to
+    // it would make Doctor test the wrong file and report health for it.
+    if (match[1] === "=") continue;
+    const candidate = expandHome(match[2] ?? "");
+    if (candidate.startsWith("/") && !LAUNCHERS.test(path.basename(candidate))) return candidate;
+  }
+
+  for (const token of command.trim().split(/\s+/)) {
+    if (!token || token.includes("=")) continue;
+    const candidate = expandHome(token.replace(/^["']|["']$/g, ""));
+    if (!candidate.startsWith("/")) continue;
+    if (LAUNCHERS.test(path.basename(candidate))) continue;
+    return candidate;
+  }
+
+  return undefined;
+}
+
+/**
+ * Absolute path to the registered recorder script, or the documented default.
+ *
+ * Doctor needs this so it can exercise the user's ACTUAL script rather than
+ * assuming the documented location — testing the wrong file and reporting it
+ * healthy is worse than not testing at all.
+ */
+export async function resolveHookScriptPath(): Promise<string> {
+  for (const settingsPath of SETTINGS_PATHS) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(await readFile(settingsPath, "utf8"));
+    } catch {
+      continue;
+    }
+
+    const command = artifactHookCommand(parsed);
+    if (!command) continue;
+
+    const script = scriptFromCommand(command);
+    if (script) return script;
+  }
+
+  // Nothing registered, or a command shaped in a way this cannot read (a
+  // pipeline, a function call). The default is the honest guess, and the
+  // self-test refuses to run anything whose index is not derived from $HOME.
+  return DEFAULT_HOOK_SCRIPT_PATH;
 }
 
 function hasKillSwitch(settings: unknown): boolean {

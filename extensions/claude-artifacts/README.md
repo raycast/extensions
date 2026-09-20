@@ -51,7 +51,7 @@ cp scripts/record-artifact.sh ~/.claude/hooks/
 chmod +x ~/.claude/hooks/record-artifact.sh
 ```
 
-[`scripts/record-artifact.sh`](./scripts/record-artifact.sh) is the only thing that writes the index. It lives in the repo rather than inside the extension bundle so you can read exactly what runs on your machine before you install it — it makes no network calls and touches nothing but the index and its own log.
+[`scripts/record-artifact.sh`](./scripts/record-artifact.sh) is the only thing that writes the index as you work — the one other writer is **Backfill**, which you run by hand from **Run Doctor** and which only ever appends rows it found in your transcripts. It lives in the repo rather than inside the extension bundle so you can read exactly what runs on your machine before you install it — it makes no network calls and touches nothing but the index and its own log.
 
 Then register it in `~/.claude/settings.json`. If a `hooks.PostToolUse` array already exists, **append** this entry rather than replacing the array:
 
@@ -93,19 +93,41 @@ Open Raycast → **Search Artifacts**. Sorted most-recent-first, because the one
   "version": 1,
   "artifacts": [
     {
-      "id": "68ae915e-d201-4fc2-afb5-007449818f0c",
-      "title": "Offline Fans — Universal Import Flow Map",
-      "url": "https://claude.ai/code/artifact/68ae915e-d201-4fc2-afb5-007449818f0c",
-      "updated": "2026-07-24", // optional — absent on shared artifacts
+      // Illustrative only — not a real artifact.
+      "id": "Dq4mWqUCLwYSUCn5o4WAHr",
+      "title": "Checkout Flow — State Matrix",
+      "url": "https://claude.ai/artifact/Dq4mWqUCLwYSUCn5o4WAHr",
+      "updated": "2026-09-14", // optional — absent on shared artifacts
       "owner": "mine", // "mine" | "shared"
-      "project": "offline-fans", // optional — basename of the publishing directory
-      "cwd": "/Users/you/dev/offline-fans", // optional — powers "Open Folder"
+      "project": "example-app", // optional — basename of the publishing directory
+      "cwd": "/Users/you/dev/example-app", // optional — powers "Open Folder"
     },
   ],
 }
 ```
 
 The reader is deliberately forgiving: it accepts a bare array, skips unusable rows rather than blanking the list, de-dupes by `id` (last write wins), and sorts undated artifacts last.
+
+### When the list stops growing — the Run Doctor command
+
+The recording hook is best-effort **by contract**: it must never fail a Claude Code turn, so every failure path in it exits 0. That makes silence its only failure mode. It happened for real on 2026-09-10 — artifact URLs changed from `claude.ai/code/artifact/<uuid>` to `claude.ai/artifact/<slug>`, the hook no longer recognised its own payload, and it went on running cleanly on every publish while recording nothing for nine days. The script was installed, executable, registered, and firing the whole time.
+
+**Run Doctor** exists because none of those facts were evidence. It checks the chain end to end:
+
+| Check                             | What it means when it fails                                        |
+| --------------------------------- | ------------------------------------------------------------------ |
+| Hook Dependencies                 | `jq` or `perl` is missing, so the hook exits before doing anything |
+| Recorder Script                   | The script is absent, or present but not executable                |
+| Hook Registration                 | Nothing is registered, or hooks are switched off entirely          |
+| **Records Current Artifact URLs** | Your copy of the recorder no longer understands the payload        |
+| Artifact Index                    | The index is missing or unreadable                                 |
+| Index Coverage                    | Your transcripts contain publishes the index never got             |
+
+The fourth one is the only check that could have caught the outage, and it is the only one that tests _behaviour_: it runs **your** installed hook, with `HOME` pointed at a temporary directory, against a current-format artifact URL, and looks at whether a row came out. Your real index is never opened.
+
+**Backfill Missing Artifacts** (⌘⇧R) then recovers what was lost. Claude Code writes a transcript of every session to `~/.claude/projects/`, and a publish leaves its URL, title, and working directory there — so the artifacts are recoverable locally, with no network call. Backfill is strictly append-only: it adds rows whose `id` the index does not already have, and never modifies or removes one that is already there — so a row the hook wrote while you were reading this screen wins over the older copy in the scan. It copies the index aside first, and takes the same kernel lock the recorder uses, so it cannot lose a row to a publish landing mid-write.
+
+It can only recover what Claude Code recorded. An artifact published from the Claude desktop app, from claude.ai, or from another machine was never in a transcript on this one, and the galleries linked in every empty state remain the place to find it.
 
 ### Verifying the hook yourself
 
@@ -125,33 +147,34 @@ This is also the honest answer to "how do you know this works?": the probe is ho
 
 - **macOS** — see [Windows support](#windows-support) below
 - **[Claude Code](https://code.claude.com)**, logged in to a Claude account (Pro, Max, Team, or Enterprise)
-- **[`jq`](https://jqlang.github.io/jq/)** (`brew install jq`) for the recording hook
+- **[`jq`](https://jqlang.github.io/jq/)** (`brew install jq`) and **`perl`** (preinstalled on macOS) for the recording hook — the **Run Doctor** command reports either one missing
 - Artifacts enabled for your account
 
 ## Limitations — please read before installing
 
 This extension maintains a **local mirror**, not a live view. Be clear-eyed about what that means:
 
-- **It only records artifacts published after you install the hook**, from **machines where the hook is installed.** The one-time seed backfills your history up to setup; the hook covers everything after.
+- **It only records artifacts published after you install the hook**, from **machines where the hook is installed.** The one-time seed backfills your history up to setup; the hook covers everything after. If the hook ever misses a stretch, **Run Doctor** can recover it from your local Claude Code transcripts.
 - **Renames and deletions don't propagate.** If you rename an artifact on claude.ai, the index keeps the old title until that artifact is republished. Over months, the index will drift from reality.
 - **Artifacts created outside Claude Code** — in the Claude desktop app or on claude.ai directly — won't be captured by the hook.
 - **Chat artifacts are not supported.** Claude has two separate artifact systems; this covers Claude Code artifacts (`claude.ai/code/artifact/…`). Chat artifacts have no sanctioned programmatic access at all.
 
 Because of those last two, every state in this extension — including "no artifacts" and "no matches" — offers **View Claude Code Artifacts** (⌘⇧O) and **View Claude Artifacts** (⌘⇧G), which jump to `claude.ai/code/artifacts` and `claude.ai/artifacts`. When an artifact isn't in the index, it usually isn't missing — it was published somewhere the hook can't see, and that gallery is where it actually lives.
+
 - **Rename, Share, Delete, and Version history are not available here.** Those exist on the artifact's page on claude.ai, but they're backed by session-cookie web endpoints, not by anything the `Artifact` tool exposes — it offers only publish and list. Automating them would mean driving claude.ai with your session cookie, which [Anthropic's Consumer Terms](https://www.anthropic.com/legal/consumer-terms) prohibit (§3, automated access) and which no Store extension could ship. **Open** (⏎) takes you to the page where those controls live; that's the honest boundary.
 
 ### Why not just call an API?
 
 Because there isn't one you're allowed to use. This was researched thoroughly:
 
-| Approach                     | Why it doesn't work                                                                                                                                                                                                                                                          |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Anthropic Messages API       | Stateless. Has no access to your account's artifacts or conversations.                                                                                                                                                                                                       |
+| Approach                                                                                     | Why it doesn't work                                                                                                                                                                                                                                                          |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Anthropic Messages API                                                                       | Stateless. Has no access to your account's artifacts or conversations.                                                                                                                                                                                                       |
 | [**Compliance API**](https://platform.claude.com/docs/en/api/compliance/code/artifacts/list) | Genuinely the right endpoint — real, documented, paginated JSON. But it requires an **Enterprise** Compliance Access Key from claude.ai admin settings, and it's scoped to an entire organization (everyone's artifacts), not your personal gallery. Unavailable on Pro/Max. |
-| Headless `claude -p`         | The artifact-listing tool is an interactive-only tool. Verified: it is not exposed to headless mode.                                                                                                                                                                         |
-| claude.ai internal endpoints | Would require your session cookie. This violates Anthropic's [Consumer Terms](https://www.anthropic.com/legal/consumer-terms), which prohibit automated access outside of an API key. Not implemented, and never will be.                                                    |
-| Reading local app data       | The Claude desktop app stores no artifact index on disk — only evictable browser cache.                                                                                                                                                                                      |
-| An MCP server                | None exists. The [feature request](https://github.com/anthropics/claude-code/issues/12858) was closed as not planned.                                                                                                                                                        |
+| Headless `claude -p`                                                                         | The artifact-listing tool is an interactive-only tool. Verified: it is not exposed to headless mode.                                                                                                                                                                         |
+| claude.ai internal endpoints                                                                 | Would require your session cookie. This violates Anthropic's [Consumer Terms](https://www.anthropic.com/legal/consumer-terms), which prohibit automated access outside of an API key. Not implemented, and never will be.                                                    |
+| Reading local app data                                                                       | The Claude desktop app stores no artifact index on disk — only evictable browser cache.                                                                                                                                                                                      |
+| An MCP server                                                                                | None exists. The [feature request](https://github.com/anthropics/claude-code/issues/12858) was closed as not planned.                                                                                                                                                        |
 
 The hook approach is the one that's both **sanctioned and actually works**. If Anthropic ships a personal-scope artifacts API, this extension should be rewritten to use it — the local index is versioned so that migration stays cheap.
 
