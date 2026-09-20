@@ -77,6 +77,22 @@ describe("getScores", () => {
     await expect(getScores({ league: "wnba" })).resolves.toEqual(["game-20260917", "game-20260918", "game-20260919"]);
   });
 
+  it("returns every event of a day that has more than one game", async () => {
+    mockedGet.mockImplementation(async (_url, config) => {
+      const { dates } = (config as ScoreboardRequest).params;
+      return { data: { events: [`early-${dates}`, `late-${dates}`] } };
+    });
+
+    await expect(getScores({ league: "wnba" })).resolves.toEqual([
+      "early-20260917",
+      "late-20260917",
+      "early-20260918",
+      "late-20260918",
+      "early-20260919",
+      "late-20260919",
+    ]);
+  });
+
   it("requests only today when no previous days are configured", async () => {
     setPreference("0");
 
@@ -217,6 +233,16 @@ describe("getScores", () => {
     });
 
     await expect(getScores({ league: "wnba" })).rejects.toThrow("Request failed with status code 400");
+  });
+
+  it("throws when the only day requested is the one that fails", async () => {
+    setPreference("0");
+    mockedGet.mockImplementation(async () => {
+      throw new Error("Request failed with status code 400");
+    });
+
+    await expect(getScores({ league: "wnba" })).rejects.toThrow("Request failed with status code 400");
+    expect(requestedDates()).toEqual(["20260919"]);
   });
 
   it("throws the oldest day's error when every day fails for a different reason", async () => {

@@ -34,9 +34,19 @@ describe("scoreDates", () => {
     expect(getScoreDates(today, "31")).toEqual(getScoreDates(today, "30"));
   });
 
+  it("caps a preference far above the number of previous score days", () => {
+    expect(getScoreDates(today, "1000")).toEqual(getScoreDates(today, "30"));
+  });
+
   it("returns only today for a preference that is not a finite number of days", () => {
     for (const numDaysScores of ["Infinity", "-Infinity", "1e309", "NaN"]) {
       expect(getScoreDates(today, numDaysScores)).toEqual(["20260919"]);
+    }
+  });
+
+  it("returns only today for a preference that is absent altogether", () => {
+    for (const numDaysScores of [undefined, null]) {
+      expect(getScoreDates(today, numDaysScores as never)).toEqual(["20260919"]);
     }
   });
 
