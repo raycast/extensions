@@ -1,0 +1,148 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "handy-for-raycast",
+  "title": "Handy for Raycast",
+  "description": "The complete Raycast companion for Handy offline speech-to-text.",
+  "icon": "extension-icon.png",
+  "author": "gundu",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "handyBinaryPath",
+      "title": "Handy Binary Path",
+      "description": "The Handy executable used for recording controls.",
+      "type": "textfield",
+      "default": "/Applications/Handy.app/Contents/MacOS/Handy",
+      "required": true
+    },
+    {
+      "name": "preferPostProcessed",
+      "title": "Prefer Post-Processed Text",
+      "description": "Copy and paste the AI-refined text when a transcript has one.",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Use post-processed text by default"
+    }
+  ],
+  "commands": [
+    {
+      "name": "toggle-recording",
+      "title": "Toggle Recording",
+      "subtitle": "Handy",
+      "description": "Start or finish a Handy recording.",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-with-post-processing",
+      "title": "Record with Post-Processing",
+      "subtitle": "Handy",
+      "description": "Start or finish a recording and apply Handy's selected AI prompt.",
+      "mode": "no-view"
+    },
+    {
+      "name": "cancel-recording",
+      "title": "Cancel Recording",
+      "subtitle": "Handy",
+      "description": "Cancel the current recording or transcription.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-last-transcript",
+      "title": "Copy Last Transcript",
+      "subtitle": "Handy",
+      "description": "Copy the latest transcript to the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-last-transcript",
+      "title": "Paste Last Transcript",
+      "subtitle": "Handy",
+      "description": "Paste the latest transcript into the frontmost app.",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-transcripts",
+      "title": "Search Transcripts",
+      "subtitle": "Handy",
+      "description": "Search, inspect, copy, paste, save, rename, and delete transcript history.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-transcripts",
+      "title": "Recent Transcripts",
+      "subtitle": "Handy",
+      "description": "Quickly access your latest transcripts.",
+      "mode": "view"
+    },
+    {
+      "name": "search-recordings",
+      "title": "Search Recordings",
+      "subtitle": "Handy",
+      "description": "Find, play, reveal, and inspect saved audio recordings.",
+      "mode": "view"
+    },
+    {
+      "name": "add-dictionary-word",
+      "title": "Add Dictionary Word",
+      "subtitle": "Handy",
+      "description": "Add one or more terms to Handy's recognition dictionary.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-dictionary",
+      "title": "Manage Dictionary",
+      "subtitle": "Handy",
+      "description": "Search, add, edit, copy, and remove custom dictionary terms.",
+      "mode": "view"
+    },
+    {
+      "name": "select-model",
+      "title": "Select Model",
+      "subtitle": "Handy",
+      "description": "Inspect downloaded transcription models and select one.",
+      "mode": "view"
+    },
+    {
+      "name": "select-language",
+      "title": "Select Language",
+      "subtitle": "Handy",
+      "description": "Choose automatic detection or a supported transcription language.",
+      "mode": "view"
+    },
+    {
+      "name": "handy-dashboard",
+      "title": "Handy Dashboard",
+      "subtitle": "Handy",
+      "description": "See Handy status and launch its most useful actions.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo 'Use npm run publish to publish this Raycast extension.' && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT"
+}
