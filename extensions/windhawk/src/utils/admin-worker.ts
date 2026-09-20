@@ -144,10 +144,10 @@ function getWorkerScriptContent(cliPath: string): string {
     Set-Content -Path "${escapedFlagPath}" -Value $PID -Force
 
     while (Test-Path "${escapedFlagPath}") {
-        $pending = @(Get-ChildItem -Path "${escapedWorkDir}" -Filter "request_*.json" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime)
+        $pending = @(Get-ChildItem -Path "${escapedWorkDir}" -Filter "request_*.json" -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^request_[0-9a-fA-F-]{36}\\.json$' } | Sort-Object LastWriteTime)
         foreach ($file in $pending) {
             $req = $null
-            $responseId = "unknown"
+            $rid = $file.BaseName -replace '^request_', ''
             $out = ""
             $exit = 0
             $err = $null
@@ -156,10 +156,12 @@ function getWorkerScriptContent(cliPath: string): string {
                 Remove-Item -Path $file.FullName -Force -ErrorAction SilentlyContinue
                 $req = $raw | ConvertFrom-Json
 
-                $responseId = [string]$req.id
                 $action = [string]$req.action
                 $modId = [string]$req.modId
                 $version = [string]$req.version
+
+                if ($modId -notmatch '^[A-Za-z0-9_.-]+$') { throw "Invalid mod id" }
+                if ($version -ne "" -and $version -notmatch '^[A-Za-z0-9_.-]+$') { throw "Invalid version" }
 
                 switch ($action) {
                     "enable" { $out = & "${escapedCliPath}" mod enable $modId 2>&1; $exit = $LASTEXITCODE }
@@ -181,12 +183,12 @@ function getWorkerScriptContent(cliPath: string): string {
             }
 
             $res = @{
-                id = $responseId
+                id = $rid
                 success = (($exit -eq 0) -and ($null -eq $err))
                 output = ($out | Out-String)
                 error = $err
             }
-            $res | ConvertTo-Json | Set-Content -Path "${escapedWorkDir}\\response_$responseId.json" -Force
+            $res | ConvertTo-Json | Set-Content -Path "${escapedWorkDir}\\response_$rid.json" -Force
         }
         Start-Sleep -Milliseconds 200
     }
