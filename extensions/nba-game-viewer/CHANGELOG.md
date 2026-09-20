@@ -2,6 +2,10 @@
 
 ## [Fixes] - 2026-09-20
 
+- Fixed View Scores ignoring the default league preference
+
+## [Fixes] - 2026-09-20
+
 - Fixed score requests for NBA and WNBA games.
 
 ## [Fixes] - 2025-04-16
