@@ -1,6 +1,6 @@
 # NBA Game Viewer Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-09-20
 
 - Fixed View Scores ignoring the default league preference
 
