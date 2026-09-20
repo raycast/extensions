@@ -18,7 +18,7 @@ import { useEffect, useRef } from "react";
 
 import { GalleryActionSection } from "./actions/gallery";
 import { HookSetupDetail } from "./components/hook-setup";
-import { SETUP_PROMPT, UPDATE_PROMPT } from "./utils/hook-status";
+import { SETTINGS_PATHS, SETUP_PROMPT, updatePrompt } from "./utils/hook-status";
 import { HOOK_LOG_PATH, backfill, diagnose, diagnosticsReport } from "./utils/doctor";
 import { INDEX_PATH } from "./utils/index-file";
 import type { Artifact } from "./types/artifact";
@@ -141,43 +141,53 @@ function DoctorActions({
  * jq" has nothing to offer here, and a placeholder action that explains rather
  * than acts is worse than none — it consumes Enter.
  */
-function RemedyActions({ check }: { check: Check }) {
-  if (check.state === "ok") return null;
-
-  switch (check.id) {
-    case "registration":
+function RemedyActions({ check, scriptPath }: { check: Check; scriptPath: string }) {
+  switch (check.remedyKind) {
+    case "setup":
       return (
         <ActionPanel.Section>
           <Action.Push title="Set up Artifact Tracking" icon={Icon.Plug} target={<HookSetupDetail />} />
           <Action.CopyToClipboard title="Copy Setup Prompt" icon={Icon.Clipboard} content={SETUP_PROMPT} />
         </ActionPanel.Section>
       );
-    case "script":
+
+    case "unblock":
+      // Deliberately NOT the setup flow. The hook is already registered and a
+      // kill switch is what stops it, so running setup would append a SECOND
+      // registration — every future publish recorded twice — while leaving the
+      // switch that caused the problem untouched.
       return (
         <ActionPanel.Section>
-          <Action.CopyToClipboard title="Copy Setup Prompt" icon={Icon.Clipboard} content={SETUP_PROMPT} />
+          <Action.CopyToClipboard
+            title="Copy Settings Path"
+            icon={Icon.Finder}
+            content={SETTINGS_PATHS[0]}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
         </ActionPanel.Section>
       );
-    case "self-test":
-      // Deliberately the UPDATE prompt, not the setup one. The script is
-      // installed and registered; re-running setup would append a SECOND
-      // registration and record every future publish twice.
+
+    case "update-script":
+      // The UPDATE prompt, naming the script the registration actually points
+      // at — the setup prompt would add a duplicate registration, and a
+      // hardcoded path would repair a file this install does not use.
       return (
         <ActionPanel.Section>
-          <Action.CopyToClipboard title="Copy Hook Update Prompt" icon={Icon.Clipboard} content={UPDATE_PROMPT} />
+          <Action.CopyToClipboard
+            title="Copy Hook Update Prompt"
+            icon={Icon.Clipboard}
+            content={updatePrompt(scriptPath)}
+          />
         </ActionPanel.Section>
       );
-    case "index":
-      // `fail` is a malformed index — the file is there and worth looking at.
-      // `warn` is a MISSING one, where this action would fail at press time on
-      // a path that does not exist: the same defect the hook-log action above
-      // is gated against, and offering it precisely when the file is absent is
-      // the worst possible time.
-      return check.state === "fail" ? (
+
+    case "show-index":
+      return (
         <ActionPanel.Section>
           <Action.ShowInFinder title="Show Index in Finder" icon={Icon.Finder} path={INDEX_PATH} />
         </ActionPanel.Section>
-      ) : null;
+      );
+
     default:
       return null;
   }
@@ -304,7 +314,7 @@ export default function Doctor() {
               detail={<List.Item.Detail markdown={checkMarkdown(check)} />}
               actions={
                 <ActionPanel>
-                  <RemedyActions check={check} />
+                  <RemedyActions check={check} scriptPath={diagnosis.scriptPath} />
                   <DoctorActions diagnosis={diagnosis} revalidate={revalidate} onBackfill={onBackfill} />
                   <GalleryActionSection />
                 </ActionPanel>

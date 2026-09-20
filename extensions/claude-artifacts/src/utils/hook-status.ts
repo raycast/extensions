@@ -112,6 +112,12 @@ Finally: tell me to publish a test artifact and check that it appears, and that 
 /**
  * A prompt for REPAIRING an install that exists but has stopped working.
  *
+ * Takes the RESOLVED script path rather than hardcoding the documented one.
+ * Doctor diagnoses whatever `settings.json` actually registers, so a prompt that
+ * always names `~/.claude/hooks/record-artifact.sh` would repair a file the
+ * registration does not use — leaving recording broken while the instructions
+ * looked like they had been followed.
+ *
  * Separate from `SETUP_PROMPT` because the two failures need opposite
  * instructions. Setup appends a registration and installs a script. Repair must
  * do neither: the registration is already correct and appending a second one
@@ -123,21 +129,23 @@ Finally: tell me to publish a test artifact and check that it appears, and that 
  * 2026-09 outage stayed invisible, since every structural check was green while
  * the script silently failed to parse the new URL format.
  */
-export const UPDATE_PROMPT = `The Claude Code hook that records my published artifacts has stopped recording them. It is installed and registered correctly — the script itself is out of date.
+export function updatePrompt(scriptPath: string): string {
+  return `The Claude Code hook that records my published artifacts has stopped recording them. It is installed and registered correctly — the script itself is out of date.
 
-1. Show me ${HOOK_SCRIPT_URL} so I can read it, then overwrite ~/.claude/hooks/record-artifact.sh with it and keep it executable.
+1. Show me ${HOOK_SCRIPT_URL} so I can read it, then overwrite ${scriptPath} with it, keeping its current permissions.
 
 2. Do NOT touch ~/.claude/settings.json. The registration is already correct, and adding a second one would record every publish twice.
 
 3. Verify the updated script actually parses a current artifact URL, without touching my real index — point HOME at a scratch directory so the write lands there:
 
-d="$(mktemp -d)" && mkdir -p "$d/.claude" && echo '{"cwd":"/tmp","tool_name":"Artifact","tool_input":{},"tool_response":{"url":"https://claude.ai/artifact/RaycastDoctorSelfTest1","title":"Self-Test","audience":"owner"}}' | HOME="$d" bash ~/.claude/hooks/record-artifact.sh; cat "$d/.claude/artifacts.json"
+d="$(mktemp -d)" && mkdir -p "$d/.claude" && echo '{"cwd":"/tmp","tool_name":"Artifact","tool_input":{},"tool_response":{"url":"https://claude.ai/artifact/RaycastDoctorSelfTest1","title":"Self-Test","audience":"owner"}}' | HOME="$d" bash ${scriptPath}; cat "$d/.claude/artifacts.json"
 
 That must print a row whose id is RaycastDoctorSelfTest1. If it prints nothing, or the file does not exist, the update did not take.
 
 4. Do NOT tell me to restart Claude Code. The hook is spawned fresh for every tool call, so it reads the new file from disk on the very next publish. A restart is only needed when the REGISTRATION in settings.json changes, and step 2 says not to touch it.
 
 Then tell me to run the Run Doctor command in the Claude Artifacts Raycast extension again, and to use its Backfill action to recover the artifacts that were dropped while the hook was broken.`;
+}
 
 /**
  * Whether a `PostToolUse` hook that records artifacts is currently registered.
@@ -299,6 +307,16 @@ function scriptFromCommand(command: string): string | undefined {
   return undefined;
 }
 
+/** The interpreter a command runs its script through, if it names one. */
+function launcherFromCommand(command: string): string | undefined {
+  for (const token of command.trim().split(/\s+/)) {
+    if (!token || token.includes("=")) continue;
+    const bare = path.basename(token.replace(/^["']|["']$/g, ""));
+    if (LAUNCHERS.test(bare)) return bare === "env" ? undefined : bare;
+  }
+  return undefined;
+}
+
 /**
  * Absolute path to the registered recorder script, or the documented default.
  *
@@ -306,7 +324,21 @@ function scriptFromCommand(command: string): string | undefined {
  * assuming the documented location — testing the wrong file and reporting it
  * healthy is worse than not testing at all.
  */
-export async function resolveHookScriptPath(): Promise<string> {
+export interface ResolvedHookScript {
+  /** Absolute path to the script the registration points at. */
+  path: string;
+  /**
+   * The interpreter the registration runs it through, if any.
+   *
+   * `bash /path/rec.sh` is a legal registration and needs no execute bit — bash
+   * only has to READ the file. Losing this detail is what made Doctor demand
+   * `chmod +x` on a recorder that was working fine, and then fail its own
+   * self-test by trying to exec the script directly.
+   */
+  launcher?: string;
+}
+
+export async function resolveHookScript(): Promise<ResolvedHookScript> {
   for (const settingsPath of SETTINGS_PATHS) {
     let parsed: unknown;
     try {
@@ -319,13 +351,13 @@ export async function resolveHookScriptPath(): Promise<string> {
     if (!command) continue;
 
     const script = scriptFromCommand(command);
-    if (script) return script;
+    if (script) return { path: script, launcher: launcherFromCommand(command) };
   }
 
   // Nothing registered, or a command shaped in a way this cannot read (a
   // pipeline, a function call). The default is the honest guess, and the
   // self-test refuses to run anything whose index is not derived from $HOME.
-  return DEFAULT_HOOK_SCRIPT_PATH;
+  return { path: DEFAULT_HOOK_SCRIPT_PATH };
 }
 
 function hasKillSwitch(settings: unknown): boolean {

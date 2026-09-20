@@ -13,7 +13,7 @@ import { homedir, tmpdir } from "os";
 import path from "path";
 import { promisify } from "util";
 
-import { readHookStatus, resolveHookScriptPath } from "./hook-status";
+import { readHookStatus, resolveHookScript } from "./hook-status";
 import { INDEX_PATH, readIndex } from "./index-file";
 import { TRANSCRIPTS_DIR, scanTranscripts } from "./transcripts";
 import type { Artifact } from "../types/artifact";
@@ -41,6 +41,15 @@ export interface Check {
   detail: string;
   /** One line. Says what to do. Absent when there is nothing to do. */
   remedy?: string;
+  /**
+   * Which action resolves this check, named explicitly.
+   *
+   * The view used to switch on `id`, which cannot distinguish a registration
+   * that is MISSING from one that is DISABLED — and offering the setup flow for
+   * a disabled hook appends a SECOND registration while leaving the kill switch
+   * in place, so every future publish records twice and the block stays.
+   */
+  remedyKind?: "setup" | "update-script" | "unblock" | "show-index";
 }
 
 export interface Diagnosis {
@@ -59,6 +68,8 @@ export interface Diagnosis {
    * absent.
    */
   hookLogExists: boolean;
+  /** The recorder the registration actually points at, so prompts can name it. */
+  scriptPath: string;
 }
 
 /**
@@ -104,6 +115,15 @@ async function isExecutable(file: string): Promise<boolean> {
   }
 }
 
+async function isReadable(file: string): Promise<boolean> {
+  try {
+    await access(file, constants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Run the installed hook against a throwaway `HOME` and see whether it records.
  *
@@ -126,7 +146,7 @@ async function isExecutable(file: string): Promise<boolean> {
  * because the cost of guessing wrong is a junk row written into the user's
  * real index by their own script.
  */
-async function runHookSelfTest(scriptPath: string): Promise<{ recorded: boolean; detail: string }> {
+async function runHookSelfTest(scriptPath: string, launcher?: string): Promise<{ recorded: boolean; detail: string }> {
   let sandbox: string | undefined;
 
   try {
@@ -184,7 +204,11 @@ async function runHookSelfTest(scriptPath: string): Promise<{ recorded: boolean;
     let exitCode = 0;
     let timedOut = false;
     try {
-      await execFileAsync("/bin/sh", ["-c", 'exec "$1" < "$2"', "sh", scriptPath, payloadPath], {
+      // Run it the way the registration does. `bash /path/rec.sh` needs no
+      // execute bit, so exec'ing the script directly would fail a recorder that
+      // works perfectly in Claude Code.
+      const invocation = launcher ? `exec ${launcher} "$1" < "$2"` : 'exec "$1" < "$2"';
+      await execFileAsync("/bin/sh", ["-c", invocation, "sh", scriptPath, payloadPath], {
         env: { ...process.env, HOME: sandbox },
         timeout: 15_000,
       });
@@ -281,11 +305,12 @@ async function recentDropCount(): Promise<number | undefined> {
 export async function diagnose(): Promise<Diagnosis> {
   const checks: Check[] = [];
 
-  const [hasJq, hasPerl, scriptPath] = await Promise.all([
+  const [hasJq, hasPerl, resolved] = await Promise.all([
     commandExists("jq"),
     commandExists("perl"),
-    resolveHookScriptPath(),
+    resolveHookScript(),
   ]);
+  const { path: scriptPath, launcher } = resolved;
 
   const missingDeps = [!hasJq && "jq", !hasPerl && "perl"].filter((d): d is string => Boolean(d));
   checks.push({
@@ -308,28 +333,35 @@ export async function diagnose(): Promise<Diagnosis> {
     scriptInstalled = false;
   }
 
-  const scriptExecutable = scriptInstalled && (await isExecutable(scriptPath));
+  // A launcher-run registration (`bash /path/rec.sh`) only needs the script to
+  // be READABLE — bash opens it, it is never exec'd. Demanding the execute bit
+  // there reports a healthy recorder as broken and tells the user to chmod a
+  // file that did not need it.
+  const scriptRunnable = scriptInstalled && (await (launcher ? isReadable : isExecutable)(scriptPath));
 
   // Named once, then read twice. `detail` and `remedy` cover the same three
   // states, and expressing them as nested ternaries that branched in OPPOSITE
   // orders (`!scriptInstalled` first vs `scriptInstalled` first) made a
   // mismatch between the two invisible.
-  const scriptCondition = !scriptInstalled ? "absent" : scriptExecutable ? "ok" : "not-executable";
+  const scriptCondition = !scriptInstalled ? "absent" : scriptRunnable ? "ok" : "not-runnable";
 
   checks.push({
     id: "script",
     title: "Recorder Script",
-    state: scriptExecutable ? "ok" : "fail",
+    state: scriptRunnable ? "ok" : "fail",
     detail: {
       absent: `No script at ${scriptPath}.`,
       ok: `Installed at ${scriptPath}.`,
-      "not-executable": `Present at ${scriptPath} but not executable.`,
+      "not-runnable": launcher
+        ? `Present at ${scriptPath} but not readable.`
+        : `Present at ${scriptPath} but not executable.`,
     }[scriptCondition],
     remedy: {
       absent: "Install the recorder — the setup prompt below walks Claude Code through it.",
       ok: undefined,
-      "not-executable": `Run: chmod +x ${scriptPath}`,
+      "not-runnable": launcher ? `Run: chmod +r ${scriptPath}` : `Run: chmod +x ${scriptPath}`,
     }[scriptCondition],
+    remedyKind: scriptCondition === "absent" ? "setup" : undefined,
   });
 
   // --- Registration --------------------------------------------------------
@@ -344,6 +376,7 @@ export async function diagnose(): Promise<Diagnosis> {
       disabled: "Registered, but hooks are switched off (disableAllHooks or allowManagedHooksOnly).",
       unknown: "Could not read your Claude Code settings.",
     }[hookStatus],
+    remedyKind: hookStatus === "missing" ? "setup" : hookStatus === "disabled" ? "unblock" : undefined,
     remedy:
       hookStatus === "registered"
         ? undefined
@@ -355,9 +388,9 @@ export async function diagnose(): Promise<Diagnosis> {
   });
 
   // --- The behavioural check ----------------------------------------------
-  const selfTest = scriptExecutable
-    ? await runHookSelfTest(scriptPath)
-    : { recorded: false, detail: "Skipped — there is no executable script to run." };
+  const selfTest = scriptRunnable
+    ? await runHookSelfTest(scriptPath, launcher)
+    : { recorded: false, detail: "Skipped — there is no runnable script to test." };
 
   // Shown ONLY on the failing branch. The count is historical — every one of
   // those drops happened before whatever state the hook is in right now — so
@@ -373,13 +406,14 @@ export async function diagnose(): Promise<Diagnosis> {
   checks.push({
     id: "self-test",
     title: "Records Current Artifact URLs",
-    state: selfTest.recorded ? "ok" : scriptExecutable ? "fail" : "unknown",
+    state: selfTest.recorded ? "ok" : scriptRunnable ? "fail" : "unknown",
     detail: selfTest.detail + dropNote,
     remedy: selfTest.recorded
       ? undefined
-      : scriptExecutable
+      : scriptRunnable
         ? "Your copy of the recorder is out of date. Copy the update prompt below and paste it into Claude Code — it takes effect on the next publish, with no restart."
         : undefined,
+    remedyKind: selfTest.recorded ? undefined : scriptRunnable ? "update-script" : undefined,
   });
 
   // --- The index -----------------------------------------------------------
@@ -398,6 +432,7 @@ export async function diagnose(): Promise<Diagnosis> {
       index.problem === "malformed"
         ? "Move the file aside and let the backfill rebuild it from your transcripts."
         : undefined,
+    remedyKind: index.problem === "malformed" ? "show-index" : undefined,
   });
 
   // --- Coverage against the transcripts ------------------------------------
@@ -411,16 +446,25 @@ export async function diagnose(): Promise<Diagnosis> {
   // "everything is indexed" is a false healthy built on a scan that never
   // happened.
   const noTranscripts = scan.filesScanned === 0;
+  // An unread file is a hole in the scan, so "nothing missing" is not a claim it
+  // earned. Degrade to a warning that says exactly how big the hole is.
+  const incomplete = scan.filesFailed > 0;
 
   checks.push({
     id: "coverage",
     title: "Index Coverage",
-    state: noTranscripts ? "unknown" : missing.length === 0 ? "ok" : "warn",
+    state: noTranscripts ? "unknown" : missing.length === 0 && !incomplete ? "ok" : "warn",
     detail: noTranscripts
       ? `No transcripts found at ${TRANSCRIPTS_DIR}, so coverage could not be checked.`
       : missing.length === 0
-        ? `Nothing missing — searched ${countOf(scan.filesScanned, "transcript")}.`
-        : `${countOf(missing.length, "artifact")} missing — searched ${countOf(scan.filesScanned, "transcript")}.`,
+        ? `Nothing missing — searched ${countOf(scan.filesScanned, "transcript")}.${
+            incomplete
+              ? ` ${countOf(scan.filesFailed, "transcript")} could not be read, so this is not a complete picture.`
+              : ""
+          }`
+        : `${countOf(missing.length, "artifact")} missing — searched ${countOf(scan.filesScanned, "transcript")}.${
+            incomplete ? ` ${countOf(scan.filesFailed, "transcript")} could not be read.` : ""
+          }`,
     remedy: noTranscripts
       ? "Claude Code writes them there as you work; nothing to do if you have not used it on this machine."
       : missing.length === 0
@@ -433,7 +477,14 @@ export async function diagnose(): Promise<Diagnosis> {
     () => false,
   );
 
-  return { checks, missing, filesScanned: scan.filesScanned, canBackfill: hasJq && hasPerl, hookLogExists };
+  return {
+    checks,
+    missing,
+    filesScanned: scan.filesScanned,
+    canBackfill: hasJq && hasPerl,
+    hookLogExists,
+    scriptPath,
+  };
 }
 
 /**
@@ -532,7 +583,10 @@ jq -s -f "$DOCTOR_PROGRAM" "$INDEX" "$DOCTOR_NEW" >"$TMP" 2>/dev/null || { rm -f
 # whose id the hook wrote between the scan and the lock — correct behaviour, but
 # it means the requested count is not the added count, and a toast claiming
 # otherwise is the UI lying about its own state.
-count() { jq '[.artifacts[]? | select(type == "object")] | length' "$1" 2>/dev/null || echo 0; }
+# Normalize both accepted shapes. readIndex takes a bare array too, and the
+# merge wraps it — so counting only .artifacts scores a legacy bare-array file
+# as zero and reports every pre-existing row as newly added.
+count() { jq '[(if type == "array" then . else .artifacts end)[]? | select(type == "object")] | length' "$1" 2>/dev/null || echo 0; }
 echo $(( $(count "$TMP") - $(count "$INDEX") )) >"$DOCTOR_COUNT"
 
 mv -f "$TMP" "$INDEX" || { rm -f "$TMP"; exit 1; }

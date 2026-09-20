@@ -50,8 +50,17 @@ const CANDIDATE_MARKER = "/artifact/";
 
 export interface ScanResult {
   artifacts: Artifact[];
-  /** How many transcript files were read, so the UI can show what was covered. */
+  /** How many transcript files were read to completion. */
   filesScanned: number;
+  /**
+   * Files that could not be read at all.
+   *
+   * Counted separately because a skipped file is a HOLE in the scan: its
+   * artifacts are invisible, so "nothing missing" would be a claim the scan did
+   * not earn. Folding these into `filesScanned` is what let an incomplete scan
+   * report full coverage.
+   */
+  filesFailed: number;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -227,10 +236,9 @@ export async function scanTranscripts(): Promise<ScanResult> {
   // which is arbitrary across directories.
   const byId = new Map<string, { artifact: Artifact; at: number | undefined }>();
   let filesScanned = 0;
+  let filesFailed = 0;
 
   for (const file of files) {
-    filesScanned += 1;
-
     try {
       const lines = createInterface({
         input: createReadStream(file, { encoding: "utf8" }),
@@ -262,11 +270,15 @@ export async function scanTranscripts(): Promise<ScanResult> {
         const supersedes = !existing || (at !== undefined && (existing.at === undefined || at > existing.at));
         if (supersedes) byId.set(artifact.id, { artifact, at });
       }
+      // Counted only here, once the file has been read through. A file that
+      // vanished or could not be opened must not inflate the coverage figure.
+      filesScanned += 1;
     } catch {
-      // Unreadable file — permissions, or it vanished mid-scan. Keep going.
+      // Unreadable — permissions, or it vanished mid-scan. Keep going, but say so.
+      filesFailed += 1;
       continue;
     }
   }
 
-  return { artifacts: [...byId.values()].map((v) => v.artifact), filesScanned };
+  return { artifacts: [...byId.values()].map((v) => v.artifact), filesScanned, filesFailed };
 }
