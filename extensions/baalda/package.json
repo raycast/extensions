@@ -144,7 +144,7 @@
     },
     {
       "name": "defaultVaultId",
-      "title": "Default Vault ID (optional)",
+      "title": "Default Vault ID (Optional)",
       "description": "Skip vault selection. Copy a vaultId from the Browse Vault command. If empty, the first accessible vault is used.",
       "type": "textfield",
       "required": false,
@@ -152,7 +152,7 @@
     },
     {
       "name": "captureFolder",
-      "title": "Capture Folder (optional)",
+      "title": "Capture Folder (Optional)",
       "description": "Vault-relative folder for Quick Capture notes, e.g. Inbox. Leave empty for the vault root. The folder must already exist.",
       "type": "textfield",
       "required": false,
