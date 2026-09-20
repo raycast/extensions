@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-09-20
 
 - Add notes about the side effects of Git blame.
 
