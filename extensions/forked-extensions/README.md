@@ -45,6 +45,23 @@ You can always open your forked extension folder in the terminal to work with CL
 
 You can add a directory with the `git sparse-checkout add` command. Or use this extension's "Manage Sparse-Checkout" action to add or remove sparse-checkout directories via the UI.
 
+### "Why does my `.git` folder keep growing after opening the repository in an editor?"
+
+The `tree:0` partial clone filter postpones downloading file contents and directory trees; it does not prevent Git from downloading them when a command needs them. Sparse checkout limits the files in your working directory, not the history that Git can request. Automatic blame and file-history queries from editors or Git extensions can therefore trigger substantial background downloads, even when you only work on one extension. See GitHub's [explanation of treeless clones](https://github.blog/open-source/git/get-up-to-speed-with-partial-clone-and-shallow-clone/).
+
+For VS Code and VS Code Insiders, open **Preferences: Open Workspace Settings (JSON)** and add these settings to the existing configuration to disable built-in automatic blame:
+
+```json
+{
+  "git.blame.editorDecoration.enabled": false,
+  "git.blame.statusBarItem.enabled": false
+}
+```
+
+If you use GitLens, choose **Disable (Workspace)** from its extension menu to prevent its automatic history queries in this workspace. Disabling only inline annotations may leave other blame features active. Check other Git extensions for similar features, then run **Developer: Reload Window**. Apply this in each editor/workspace that opens the repository; workspace settings do not affect your other projects.
+
+Manually running `git blame` or querying a file's history can still download missing objects. Changing editor settings does not remove objects already downloaded. If downloads continue after closing or reloading the editor, check for leftover Git processes before using the cleanup action described below.
+
 ### "I used this extension to convert an existing full-checkout repository to sparse-checkout but my `.git` folder still has a massive size"
 
 New repositories created or reconfigured by this extension use the `tree:0` partial clone filter, disable automatic tag downloads, and only track `upstream/main` by default to keep future fetches smaller.

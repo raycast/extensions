@@ -1,5 +1,9 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvement] - 2026-09-20
+
+- Add notes about the side effects of Git blame.
+
 ## [Enhancement] - 2026-09-20
 
 - Disable merge diffstat during Sync Remote and Pull Changes to avoid downloading changed files outside the sparse checkout.
