@@ -1,5 +1,5 @@
 import type { Article } from "./articles";
-import { translateCategory, type Translations } from "./i18n";
+import { translateCategory, type Strings } from "./strings";
 
 type DetailArticle = Article & {
   isFavorite?: boolean;
@@ -8,13 +8,13 @@ type DetailArticle = Article & {
 export function createArticleDetailMarkdown(
   article: DetailArticle,
   dateFormatter: Intl.DateTimeFormat,
-  translations: Translations,
+  translations: Strings,
 ): string {
   const content = article.contentMarkdown ?? article.excerpt ?? translations.noTextAvailable;
   const { introduction, body } = separateIntroduction(content, article.excerpt);
   const metadata = [
     dateFormatter.format(article.publishedAt),
-    article.categories[0] ? translateCategory(article.categories[0], translations) : undefined,
+    article.categories[0] ? translateCategory(article.categories[0]) : undefined,
     article.isFavorite ? `★ ${translations.readLater}` : undefined,
   ].filter(Boolean);
   const sections = [`# ${escapeMarkdown(article.title)}`, `_${escapeMarkdown(metadata.join(" · "))}_`];

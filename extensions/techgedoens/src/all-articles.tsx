@@ -26,15 +26,7 @@ import {
   setArticleFavoriteStatus,
   setArticleReadStatus,
 } from "./article-archive";
-import { getTranslations, translateCategory, Translations } from "./i18n";
-
-type ArchivePreferences = {
-  allArticlesInitialFilter?: string;
-  archivePageSize?: string;
-  archiveRetention?: string;
-  articleEnterAction?: string;
-  language?: string;
-};
+import { strings, translateCategory, type Strings } from "./strings";
 
 type ArticleEnterAction = "reader" | "browser";
 type ArticleStatusFilter = "__all_statuses__" | "__favorites__" | "__read__" | "__unread__";
@@ -59,8 +51,8 @@ const CATEGORY_OPTIONS = [
 ] as const;
 
 export default function AllArticlesCommand() {
-  const preferences = getPreferenceValues<ArchivePreferences>();
-  const translations = getTranslations(preferences.language);
+  const preferences = getPreferenceValues<Preferences.AllArticles>();
+  const translations = strings;
   const detailDateFormatter = new Intl.DateTimeFormat(translations.locale, {
     dateStyle: "long",
     timeStyle: "short",
@@ -218,7 +210,7 @@ export default function AllArticlesCommand() {
           <List.Dropdown.Section>
             <List.Dropdown.Item title={translations.allTopics} value={FILTER_ALL_CATEGORIES} />
             {CATEGORY_OPTIONS.map((category) => (
-              <List.Dropdown.Item key={category} title={translateCategory(category, translations)} value={category} />
+              <List.Dropdown.Item key={category} title={translateCategory(category)} value={category} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -275,7 +267,12 @@ function matchesArticleStatus(article: ArchivedArticle, filter: ArticleStatusFil
 }
 
 function matchesArticleCategory(article: ArchivedArticle, filter: ArticleCategoryFilter): boolean {
-  return filter === FILTER_ALL_CATEGORIES || article.categories.includes(filter);
+  if (filter === FILTER_ALL_CATEGORIES) {
+    return true;
+  }
+
+  const filterLabel = translateCategory(filter);
+  return article.categories.some((category) => translateCategory(category) === filterLabel);
 }
 
 function isArticleStatusFilter(filter: string): filter is ArticleStatusFilter {
@@ -301,7 +298,7 @@ async function readLastStatusFilter(): Promise<ArticleStatusFilter> {
   return storedFilter && isArticleStatusFilter(storedFilter) ? storedFilter : FILTER_ALL_STATUSES;
 }
 
-function articleStatusTitle(status: ArticleStatusFilter, translations: Translations): string {
+function articleStatusTitle(status: ArticleStatusFilter, translations: Strings): string {
   if (status === FILTER_READ) {
     return translations.read;
   }
@@ -363,7 +360,7 @@ function ArchiveArticleItem({
   onMarkAllAsRead: () => Promise<void>;
   onFavoriteStatusChange: (article: ArchivedArticle, isFavorite: boolean) => Promise<void>;
   onReadStatusChange: (articleId: string, isRead: boolean) => Promise<void>;
-  translations: Translations;
+  translations: Strings;
 }) {
   const { push } = useNavigation();
   const primaryCategory = article.categories[0];
@@ -377,7 +374,7 @@ function ArchiveArticleItem({
   ];
 
   if (primaryCategory) {
-    accessories.push({ tag: { value: translateCategory(primaryCategory, translations), color: "#2980b9" } });
+    accessories.push({ tag: { value: translateCategory(primaryCategory), color: "#2980b9" } });
   }
 
   async function showArticle() {
@@ -473,7 +470,7 @@ function ArchiveArticleDetail({
   dateFormatter: Intl.DateTimeFormat;
   onFavoriteStatusChange: (article: ArchivedArticle, isFavorite: boolean) => Promise<void>;
   onReadStatusChange: (articleId: string, isRead: boolean) => Promise<void>;
-  translations: Translations;
+  translations: Strings;
 }) {
   const markdown = createArticleDetailMarkdown(article, dateFormatter, translations);
 

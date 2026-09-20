@@ -20,19 +20,14 @@ import {
   setArticleReadStatusForArticle,
 } from "./article-archive";
 import { readCachedArticles, refreshArticleCache } from "./article-cache";
-import { getTranslations, translateCategory, Translations } from "./i18n";
-
-type LatestArticlePreferences = {
-  articleEnterAction?: string;
-  language?: string;
-};
+import { strings, translateCategory, type Strings } from "./strings";
 
 type ArticleEnterAction = "reader" | "browser";
 type LatestArticle = Article & Pick<ArchivedArticle, "isFavorite" | "isRead">;
 
 export default function LatestArticlesCommand() {
-  const preferences = getPreferenceValues<LatestArticlePreferences>();
-  const translations = getTranslations(preferences.language);
+  const preferences = getPreferenceValues<Preferences.LatestArticles>();
+  const translations = strings;
   const detailDateFormatter = new Intl.DateTimeFormat(translations.locale, {
     dateStyle: "long",
     timeStyle: "short",
@@ -143,7 +138,7 @@ function ArticleListItem({
   onReadStatusChange: (article: LatestArticle, isRead: boolean) => Promise<void>;
   position: number;
   revalidate: () => Promise<void>;
-  translations: Translations;
+  translations: Strings;
 }) {
   const { push } = useNavigation();
   const primaryCategory = article.categories[0];
@@ -159,7 +154,7 @@ function ArticleListItem({
   if (primaryCategory) {
     accessories.push({
       tag: {
-        value: translateCategory(primaryCategory, translations),
+        value: translateCategory(primaryCategory),
         color: "#2980b9",
       },
     });
@@ -258,7 +253,7 @@ function ArticleDetail({
   dateFormatter: Intl.DateTimeFormat;
   onFavoriteStatusChange: (article: LatestArticle, isFavorite: boolean) => Promise<void>;
   onReadStatusChange: (article: LatestArticle, isRead: boolean) => Promise<void>;
-  translations: Translations;
+  translations: Strings;
 }) {
   const markdown = createArticleDetailMarkdown(article, dateFormatter, translations);
 

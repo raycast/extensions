@@ -1,16 +1,7 @@
 import { Action, ActionPanel, AI, Detail, getPreferenceValues, Icon, LaunchProps } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { ArchivedArticle, normalizeArticleRetention, refreshArticleArchive } from "./article-archive";
-import { getTranslations, Translations } from "./i18n";
-
-type AskArguments = {
-  question: string;
-};
-
-type ArchivePreferences = {
-  archiveRetention?: string;
-  language?: string;
-};
+import { strings, type Strings } from "./strings";
 
 type AskResult = {
   answer: string;
@@ -60,10 +51,10 @@ const STOP_WORDS = new Set([
   "with",
 ]);
 
-export default function AskTechgedoensCommand(props: LaunchProps<{ arguments: AskArguments }>) {
+export default function AskTechgedoensCommand(props: LaunchProps<{ arguments: Arguments.AskTechgedoens }>) {
   const question = props.arguments.question.trim();
-  const preferences = getPreferenceValues<ArchivePreferences>();
-  const translations = getTranslations(preferences.language);
+  const preferences = getPreferenceValues<Preferences.AskTechgedoens>();
+  const translations = strings;
   const retention = normalizeArticleRetention(preferences.archiveRetention);
   const { data, error, isLoading, revalidate } = useCachedPromise(answerQuestion, [question, retention, translations], {
     failureToastOptions: {
@@ -98,7 +89,7 @@ export default function AskTechgedoensCommand(props: LaunchProps<{ arguments: As
 async function answerQuestion(
   question: string,
   retention: ReturnType<typeof normalizeArticleRetention>,
-  translations: Translations,
+  translations: Strings,
 ): Promise<AskResult> {
   const articles = await refreshArticleArchive(retention);
   if (articles.length === 0) {
@@ -143,7 +134,7 @@ function selectRelevantArticles(articles: ArchivedArticle[], question: string): 
     .map(({ article }) => article);
 }
 
-function buildPrompt(question: string, sources: ArchivedArticle[], translations: Translations): string {
+function buildPrompt(question: string, sources: ArchivedArticle[], translations: Strings): string {
   const articleContext = sources
     .map((article, index) => {
       const content = article.contentMarkdown ?? article.excerpt ?? translations.noStoredArticleText;

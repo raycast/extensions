@@ -2,16 +2,11 @@ import { environment, getPreferenceValues, LaunchType, showHUD, updateCommandMet
 import { normalizeArticleRetention, readArticleArchive, refreshArticleArchive } from "./article-archive";
 import { ARTICLE_COUNT } from "./articles";
 import { refreshArticleCache } from "./article-cache";
-import { getTranslations } from "./i18n";
-
-type ArchivePreferences = {
-  archiveRetention?: string;
-  language?: string;
-};
+import { strings } from "./strings";
 
 export default async function RefreshArticlesCommand() {
-  const preferences = getPreferenceValues<ArchivePreferences>();
-  const translations = getTranslations(preferences.language);
+  const preferences = getPreferenceValues<Preferences.RefreshArticles>();
+  const translations = strings;
   const retention = normalizeArticleRetention(preferences.archiveRetention);
   try {
     const previousArticleIds = new Set((await readArticleArchive()).map((article) => article.id));

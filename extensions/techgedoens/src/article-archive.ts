@@ -3,6 +3,10 @@ import { Article, fetchArticleFeedPage } from "./articles";
 
 const ARTICLE_ARCHIVE_KEY = "article-archive-v1";
 const MAX_INCREMENTAL_FEED_PAGES = 20;
+const MAX_BACKFILL_FEED_PAGES = 200;
+const MAX_ARCHIVE_ARTICLES = 2_000;
+const MAX_ARCHIVE_BYTES = 20 * 1024 * 1024;
+const ARCHIVE_LIMIT_GUIDANCE = "Choose a shorter retention period or use Search Techgedöns to find older articles.";
 let archiveUpdateQueue: Promise<void> = Promise.resolve();
 
 export type ArticleRetention = "week" | "month" | "year" | "never";
@@ -157,22 +161,46 @@ async function fetchArticlesForRetention(retention: ArticleRetention): Promise<A
   const cutoff = getRetentionCutoff(retention);
   const articles: Article[] = [];
   const articleIds = new Set<string>();
+  let fetchedArticleBytes = 0;
 
-  for (let page = 1; ; page += 1) {
+  for (let page = 1; page <= MAX_BACKFILL_FEED_PAGES; page += 1) {
     const pageArticles = await fetchArticleFeedPage(page);
     const newArticles = pageArticles.filter((article) => !articleIds.has(article.id));
 
     if (pageArticles.length === 0 || newArticles.length === 0) {
-      break;
+      return articles;
+    }
+
+    if (articles.length + newArticles.length > MAX_ARCHIVE_ARTICLES) {
+      throw new Error(
+        `The initial archive import exceeds the ${MAX_ARCHIVE_ARTICLES.toLocaleString("en-US")} article safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
+      );
+    }
+
+    const newArticleBytes = newArticles.reduce(
+      (total, article) => total + getSerializedByteLength(JSON.stringify(article)),
+      0,
+    );
+    if (fetchedArticleBytes + newArticleBytes > MAX_ARCHIVE_BYTES) {
+      throw new Error(
+        `The initial archive import exceeds the ${formatMegabytes(MAX_ARCHIVE_BYTES)} storage safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
+      );
     }
 
     for (const article of newArticles) {
       articleIds.add(article.id);
       articles.push(article);
     }
+    fetchedArticleBytes += newArticleBytes;
 
     if (cutoff && pageArticles.some((article) => article.publishedAt < cutoff)) {
-      break;
+      return articles;
+    }
+
+    if (page === MAX_BACKFILL_FEED_PAGES) {
+      throw new Error(
+        `The initial archive import reached the ${MAX_BACKFILL_FEED_PAGES.toLocaleString("en-US")} page safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
+      );
     }
   }
 
@@ -290,5 +318,26 @@ async function writeStoredArchive(archive: {
     retention: archive.retention,
     updatedAt: archive.updatedAt,
   };
-  await LocalStorage.setItem(ARTICLE_ARCHIVE_KEY, JSON.stringify(storedArchive));
+  if (storedArchive.articles.length > MAX_ARCHIVE_ARTICLES) {
+    throw new Error(
+      `The local article archive cannot store more than ${MAX_ARCHIVE_ARTICLES.toLocaleString("en-US")} articles. ${ARCHIVE_LIMIT_GUIDANCE}`,
+    );
+  }
+
+  const serializedArchive = JSON.stringify(storedArchive);
+  if (getSerializedByteLength(serializedArchive) > MAX_ARCHIVE_BYTES) {
+    throw new Error(
+      `The local article archive exceeds the ${formatMegabytes(MAX_ARCHIVE_BYTES)} storage safety limit. ${ARCHIVE_LIMIT_GUIDANCE}`,
+    );
+  }
+
+  await LocalStorage.setItem(ARTICLE_ARCHIVE_KEY, serializedArchive);
+}
+
+function getSerializedByteLength(value: string): number {
+  return new TextEncoder().encode(value).byteLength;
+}
+
+function formatMegabytes(bytes: number): string {
+  return `${Math.round(bytes / (1024 * 1024))} MB`;
 }

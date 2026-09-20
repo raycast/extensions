@@ -15,24 +15,6 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "language",
-      "title": "Language",
-      "description": "Selects the language used inside the extension commands.",
-      "type": "dropdown",
-      "required": false,
-      "default": "en",
-      "data": [
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "Deutsch",
-          "value": "de"
-        }
-      ]
-    },
-    {
       "name": "allArticlesInitialFilter",
       "title": "Initial Article Filter",
       "description": "Selects the read status shown when opening All Articles.",

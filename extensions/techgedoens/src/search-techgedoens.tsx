@@ -23,12 +23,7 @@ import {
 } from "./article-archive";
 import { createArticleDetailMarkdown } from "./article-detail";
 import { Article, ARTICLES_PER_FEED_PAGE, fetchArticleSearchPage } from "./articles";
-import { getTranslations, translateCategory, Translations } from "./i18n";
-
-type SearchPreferences = {
-  articleEnterAction?: string;
-  language?: string;
-};
+import { strings, translateCategory, type Strings } from "./strings";
 
 type ArticleEnterAction = "browser" | "reader";
 type ArticleCategoryFilter = "__all_categories__" | (typeof CATEGORY_OPTIONS)[number];
@@ -47,8 +42,8 @@ const CATEGORY_OPTIONS = [
 ] as const;
 
 export default function SearchTechgedoensCommand() {
-  const preferences = getPreferenceValues<SearchPreferences>();
-  const translations = getTranslations(preferences.language);
+  const preferences = getPreferenceValues<Preferences.SearchTechgedoens>();
+  const translations = strings;
   const enterAction = preferences.articleEnterAction === "browser" ? "browser" : "reader";
   const detailDateFormatter = new Intl.DateTimeFormat(translations.locale, {
     dateStyle: "long",
@@ -166,9 +161,7 @@ export default function SearchTechgedoensCommand() {
   }
 
   const trimmedSearchText = searchText.trim();
-  const filteredArticles = articles.filter((article) =>
-    matchesArticleCategory(article, selectedCategory, translations),
-  );
+  const filteredArticles = articles.filter((article) => matchesArticleCategory(article, selectedCategory));
   const emptyTitle =
     trimmedSearchText.length < MINIMUM_SEARCH_LENGTH
       ? translations.searchBlogArchive
@@ -198,7 +191,7 @@ export default function SearchTechgedoensCommand() {
         >
           <List.Dropdown.Item title={translations.allTopics} value={FILTER_ALL_CATEGORIES} />
           {CATEGORY_OPTIONS.map((category) => (
-            <List.Dropdown.Item key={category} title={translateCategory(category, translations)} value={category} />
+            <List.Dropdown.Item key={category} title={translateCategory(category)} value={category} />
           ))}
         </List.Dropdown>
       }
@@ -254,7 +247,7 @@ function SearchArticleItem({
   listDateFormatter: Intl.DateTimeFormat;
   onFavoriteStatusChange: (article: ArchivedArticle, isFavorite: boolean) => Promise<void>;
   onReadStatusChange: (article: ArchivedArticle, isRead: boolean) => Promise<void>;
-  translations: Translations;
+  translations: Strings;
 }) {
   const { push } = useNavigation();
   const primaryCategory = article.categories[0];
@@ -263,7 +256,7 @@ function SearchArticleItem({
   ];
 
   if (primaryCategory) {
-    accessories.push({ tag: { value: translateCategory(primaryCategory, translations), color: "#2980b9" } });
+    accessories.push({ tag: { value: translateCategory(primaryCategory), color: "#2980b9" } });
   }
 
   async function showArticle() {
@@ -354,7 +347,7 @@ function SearchArticleDetail({
   dateFormatter: Intl.DateTimeFormat;
   onFavoriteStatusChange: (article: ArchivedArticle, isFavorite: boolean) => Promise<void>;
   onReadStatusChange: (article: ArchivedArticle, isRead: boolean) => Promise<void>;
-  translations: Translations;
+  translations: Strings;
 }) {
   return (
     <Detail
@@ -411,17 +404,13 @@ function mergeSearchResults(currentArticles: ArchivedArticle[], nextArticles: Ar
   return [...mergedArticles.values()];
 }
 
-function matchesArticleCategory(
-  article: ArchivedArticle,
-  filter: ArticleCategoryFilter,
-  translations: Translations,
-): boolean {
+function matchesArticleCategory(article: ArchivedArticle, filter: ArticleCategoryFilter): boolean {
   if (filter === FILTER_ALL_CATEGORIES) {
     return true;
   }
 
-  const filterLabel = translateCategory(filter, translations);
-  return article.categories.some((category) => translateCategory(category, translations) === filterLabel);
+  const filterLabel = translateCategory(filter);
+  return article.categories.some((category) => translateCategory(category) === filterLabel);
 }
 
 function toError(value: unknown): Error {

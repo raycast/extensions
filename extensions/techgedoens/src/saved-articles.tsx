@@ -20,19 +20,13 @@ import {
   setArticleFavoriteStatus,
   setArticleReadStatus,
 } from "./article-archive";
-import { getTranslations, translateCategory, Translations } from "./i18n";
-
-type SavedArticlePreferences = {
-  archiveRetention?: string;
-  articleEnterAction?: string;
-  language?: string;
-};
+import { strings, translateCategory, type Strings } from "./strings";
 
 type ArticleEnterAction = "reader" | "browser";
 
 export default function SavedArticlesCommand() {
-  const preferences = getPreferenceValues<SavedArticlePreferences>();
-  const translations = getTranslations(preferences.language);
+  const preferences = getPreferenceValues<Preferences.SavedArticles>();
+  const translations = strings;
   const listDateFormatter = new Intl.DateTimeFormat(translations.locale, { dateStyle: "medium" });
   const detailDateFormatter = new Intl.DateTimeFormat(translations.locale, {
     dateStyle: "long",
@@ -111,7 +105,7 @@ function SavedArticleItem({
   listDateFormatter: Intl.DateTimeFormat;
   onReadStatusChange: (articleId: string, isRead: boolean) => Promise<void>;
   onRemoveFavorite: (article: ArchivedArticle) => Promise<void>;
-  translations: Translations;
+  translations: Strings;
 }) {
   const { push } = useNavigation();
   const accessories: List.Item.Accessory[] = [
@@ -119,7 +113,7 @@ function SavedArticleItem({
   ];
   const primaryCategory = article.categories[0];
   if (primaryCategory) {
-    accessories.push({ tag: { value: translateCategory(primaryCategory, translations), color: "#2980b9" } });
+    accessories.push({ tag: { value: translateCategory(primaryCategory), color: "#2980b9" } });
   }
 
   async function showArticle() {
@@ -201,7 +195,7 @@ function SavedArticleDetail({
   article: ArchivedArticle;
   dateFormatter: Intl.DateTimeFormat;
   onRemoveFavorite: (article: ArchivedArticle) => Promise<void>;
-  translations: Translations;
+  translations: Strings;
 }) {
   const markdown = createArticleDetailMarkdown(article, dateFormatter, translations);
 

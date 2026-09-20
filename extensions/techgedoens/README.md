@@ -23,11 +23,7 @@ Read and search Techgedöns from Raycast. The extension uses the public RSS feed
 - Infinite scrolling and independent topic and read-status filters
 - Favorites remain stored regardless of the selected archive retention period
 - Automatic hourly background refresh with the latest update status shown in Raycast
-- English interface by default with an optional German command interface
-
-## Language
-
-English is the default. Select **Deutsch** under **Settings → Extensions → Techgedöns.de → Language** to use German inside command views. Raycast currently exposes extension names, command names, arguments, and preference labels in US English only, so those labels cannot switch dynamically.
+- US English command interface with the original German blog topics
 
 ## Local Development
 
@@ -36,7 +32,7 @@ English is the default. Select **Deutsch** under **Settings → Extensions → T
 3. Run `npm run dev`.
 4. Search for **Latest Articles** in Raycast.
 
-Open **All Articles** for the complete local archive. On first launch, it loads RSS pages up to the configured retention limit. The Return key action, initial article filter, retention period, page size, and interface language can be configured under **Settings → Extensions → Techgedöns.de**.
+Open **All Articles** for the complete local archive. On first launch, it loads RSS pages up to the configured retention and safety limits. The Return key action, initial article filter, retention period, and page size can be configured under **Settings → Extensions → Techgedöns.de**.
 
 ## Background Refresh
 
