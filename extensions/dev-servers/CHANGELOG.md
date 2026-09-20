@@ -1,8 +1,8 @@
 # Dev Servers Changelog
 
-## [Detect Next.js 16 dev servers] - {PR_MERGE_DATE}
+## [Detect Next.js dev servers] - {PR_MERGE_DATE}
 
-- Next.js 16 dev servers now appear when their process title is `next-server`, even though the command line no longer includes `next dev` or a `node_modules` path.
+- Next.js dev servers now appear. Next renames its server process to `next-server`, which has neither `next dev` nor a `node_modules` path in its command line, so it was being filtered out.
 
 ## [Menu bar restart fixed, plus icon and row polish] - 2026-08-03
 
