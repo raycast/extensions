@@ -1,10 +1,10 @@
 import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
-import { userMessage } from "./lib/backend";
+import { ApiError, userMessage } from "./lib/backend";
 import { appOpened, sendEvent } from "./lib/events";
 import { captureToRequest, createCard } from "./lib/gtd";
-import { getSession } from "./lib/session";
+import { clearSession, getSession } from "./lib/session";
 
-type Props = LaunchProps<{ arguments: { title: string } }>;
+type Props = LaunchProps<{ arguments: Arguments.QuickCapture }>;
 
 // No view: type it in the root search, press Enter, done. The process ends when this promise
 // resolves, so the event is awaited rather than fire-and-forget.
@@ -33,6 +33,15 @@ export default async function Command(props: Props) {
     });
     await showHUD(`Captured: ${card.title}`);
   } catch (e) {
+    if (e instanceof ApiError && e.status === 401) {
+      await clearSession();
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Signed out",
+        message: "Run Inbox or Capture to Inbox to sign in again.",
+      });
+      return;
+    }
     await showToast({ style: Toast.Style.Failure, title: "Could not capture", message: userMessage(e) });
   }
 }

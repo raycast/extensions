@@ -1,20 +1,24 @@
 import { Action, ActionPanel, Form, Icon, LaunchProps, popToRoot, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { Authed } from "./components/Authed";
-import { userMessage } from "./lib/backend";
+import { ApiError, userMessage } from "./lib/backend";
 import { sendEvent } from "./lib/events";
 import { captureToRequest, createCard } from "./lib/gtd";
 import { dashboardUrl } from "./lib/links";
 
-type Props = LaunchProps<{ arguments: { title?: string } }>;
+type Props = LaunchProps<{ arguments: Arguments.Capture }>;
 
 // The capture surface: title + optional notes, straight to the top of Inbox. The root-search
 // argument prefills the title so "Capture to Inbox call Sam" is one keystroke away from saved.
 export default function Command(props: Props) {
-  return <Authed>{() => <CaptureForm initialTitle={props.arguments.title ?? ""} />}</Authed>;
+  return (
+    <Authed>
+      {(_session, signOut) => <CaptureForm initialTitle={props.arguments.title ?? ""} signOut={signOut} />}
+    </Authed>
+  );
 }
 
-function CaptureForm({ initialTitle }: { initialTitle: string }) {
+function CaptureForm({ initialTitle, signOut }: { initialTitle: string; signOut: () => Promise<void> }) {
   const [title, setTitle] = useState(initialTitle);
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
@@ -38,6 +42,11 @@ function CaptureForm({ initialTitle }: { initialTitle: string }) {
       await showToast({ style: Toast.Style.Success, title: "Captured to Inbox", message: card.title });
       await popToRoot();
     } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        await showToast({ style: Toast.Style.Failure, title: "Signed out", message: "Sign in again to capture" });
+        await signOut();
+        return;
+      }
       await showToast({ style: Toast.Style.Failure, title: "Could not capture", message: userMessage(e) });
     } finally {
       setBusy(false);

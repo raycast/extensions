@@ -64,10 +64,12 @@ function CardList({ role, signOut }: { role: ListRole; signOut: () => Promise<vo
   const shown =
     role === "next" && contextFilter !== "all" ? cards.filter((c) => (c.context ?? "none") === contextFilter) : cards;
 
-  const run = async (label: string, fn: () => Promise<unknown>) => {
+  // The event is sent only once the request succeeded, so a failed change never reads as one.
+  const run = async (label: string, fn: () => Promise<unknown>, event: [string, Record<string, unknown>]) => {
     setBusy(true);
     try {
       await fn();
+      void sendEvent(event[0], event[1]);
       await showToast({ style: Toast.Style.Success, title: label });
       await revalidate();
     } catch (e) {
@@ -87,19 +89,21 @@ function CardList({ role, signOut }: { role: ListRole; signOut: () => Promise<vo
       void showToast({ style: Toast.Style.Failure, title: `No ${ROLE_LABEL[target]} column on your board` });
       return;
     }
-    void sendEvent("card_moved", { cardId: card.id, from: role, to: target, ...(context ? { context } : {}) });
-    void run(`Moved to ${ROLE_LABEL[target]}`, () => moveCard(card.id, moveToRoleRequest(target, column.id, context)));
+    void run(`Moved to ${ROLE_LABEL[target]}`, () => moveCard(card.id, moveToRoleRequest(target, column.id, context)), [
+      "card_moved",
+      { cardId: card.id, from: role, to: target, ...(context ? { context } : {}) },
+    ]);
   };
 
   const archive = (card: ApiCard, label: string) => {
-    void sendEvent("card_archived", { cardId: card.id, list: role });
-    void run(label, () => archiveCard(card.id));
+    void run(label, () => archiveCard(card.id), ["card_archived", { cardId: card.id, list: role }]);
   };
 
   const setContext = (card: ApiCard, context: string | null) => {
-    void sendEvent("card_context_changed", { cardId: card.id, list: role, context });
-    void run(context ? `Context set to ${contexts.get(context)?.label ?? context}` : "Context cleared", () =>
-      updateCard(card.id, { context }),
+    void run(
+      context ? `Context set to ${contexts.get(context)?.label ?? context}` : "Context cleared",
+      () => updateCard(card.id, { context }),
+      ["card_context_changed", { cardId: card.id, list: role, context }],
     );
   };
 
