@@ -169,6 +169,21 @@ describe("getScores", () => {
     await expect(getScores({ league: "wnba" })).resolves.toEqual(["game-20260918", "game-20260919"]);
   });
 
+  it("reports no games instead of an outage when the days that answered have none", async () => {
+    for (const events of [[], undefined, null]) {
+      vi.clearAllMocks();
+      mockedGet.mockImplementation(async (_url, config) => {
+        if ((config as ScoreboardRequest).params.dates === "20260917") {
+          throw new Error("Request failed with status code 400");
+        }
+        return { data: { events } };
+      });
+
+      await expect(getScores({ league: "wnba" })).resolves.toEqual([]);
+      expect(requestedDates()).toEqual(["20260917", "20260918", "20260919"]);
+    }
+  });
+
   it("keeps the one day that answered when the others fail or bring no events", async () => {
     mockedGet.mockImplementation(async (_url, config) => {
       const { dates } = (config as ScoreboardRequest).params;
