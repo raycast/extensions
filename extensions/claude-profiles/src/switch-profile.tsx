@@ -46,7 +46,7 @@ async function fetchData(): Promise<Data> {
       running[profile.id] = await isRunning(profile.dataDir);
       missing[profile.id] = await stat(profile.dataDir).then(
         () => false,
-        () => true,
+        (err: NodeJS.ErrnoException) => err.code === "ENOENT",
       );
     }),
   );
