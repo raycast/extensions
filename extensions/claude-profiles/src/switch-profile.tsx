@@ -102,11 +102,11 @@ export default function SwitchProfile(
     });
     if (!confirmed) return;
     try {
-      await registry.remove(profile.id, false);
-      await revalidate();
+      await registry.remove(profile.id);
     } catch (err) {
       await showFailureToast(err, { title: "Couldn't remove profile" });
     }
+    await revalidate();
   }
 
   async function handleDelete(profile: ClaudeProfile) {
@@ -120,18 +120,19 @@ export default function SwitchProfile(
     });
     if (!confirmed) return;
     try {
-      const doomed = await registry.remove(profile.id, true);
+      // the row goes only once the folder is safely in the Trash
+      const doomed = await registry.confineFolder(profile.dataDir);
       if (doomed) await trash(doomed);
-      await revalidate();
+      await registry.remove(profile.id);
     } catch (err) {
       await showFailureToast(err, { title: "Couldn't move profile to Trash" });
     }
+    await revalidate();
   }
 
   async function handleRestore(dir: string) {
     try {
       const restored = await registry.restore(dir);
-      await revalidate();
       await showToast({
         style: Toast.Style.Success,
         title: `Restored "${restored.name}"`,
@@ -139,6 +140,7 @@ export default function SwitchProfile(
     } catch (err) {
       await showFailureToast(err, { title: "Couldn't restore profile" });
     }
+    await revalidate();
   }
 
   async function handleDeleteFolder(dir: string) {
@@ -154,10 +156,10 @@ export default function SwitchProfile(
     try {
       const doomed = await registry.confineFolder(dir);
       if (doomed) await trash(doomed);
-      await revalidate();
     } catch (err) {
       await showFailureToast(err, { title: "Couldn't move folder to Trash" });
     }
+    await revalidate();
   }
 
   if (error && !isLoading) {

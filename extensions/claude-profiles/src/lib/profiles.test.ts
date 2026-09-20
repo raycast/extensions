@@ -83,7 +83,7 @@ test("createdAt defaults to zero when the row omits it", async () => {
 
 test("a name whose folder still exists gets a new id instead of the old login", async () => {
   await registry.add("Work");
-  await registry.remove("work", false);
+  await registry.remove("work");
   assert.deepEqual(await registry.load(), []);
   assert.equal(await registry.orphanFor("Work"), join(registry.root, "work"));
 
@@ -94,7 +94,7 @@ test("a name whose folder still exists gets a new id instead of the old login", 
 
 test("restore puts an orphan folder back under its own id", async () => {
   const first = await registry.add("Work");
-  await registry.remove("work", false);
+  await registry.remove("work");
   const back = await registry.restore(first.dataDir, "Work again");
   assert.equal(back.id, "work");
   assert.equal(back.name, "Work again");
@@ -110,19 +110,15 @@ test("rename changes the name and nothing else", async () => {
   await assert.rejects(registry.rename("work", "   "));
 });
 
-test("remove with discardData hands back the folder inside the root, deleting nothing itself", async () => {
+test("remove takes the row off the list and leaves the folder alone", async () => {
   const created = await registry.add("Work");
-  const doomed = await registry.remove("work", true);
-  assert.equal(doomed, await realpath(created.dataDir));
+  await registry.remove("work");
   assert.deepEqual(await registry.load(), []);
   assert.deepEqual(await readdir(created.dataDir), []);
-
-  await registry.add("Gone");
-  await rm(join(registry.root, "gone"), { recursive: true });
-  assert.equal(await registry.remove("gone", true), null);
+  await assert.rejects(registry.remove("work"), /No profile/);
 });
 
-test("remove refuses to delete a folder outside the root and keeps the row", async () => {
+test("confineFolder refuses anything not strictly inside the root", async () => {
   const outside = join(root, "elsewhere");
   await mkdir(outside);
   await mkdir(join(root, "Claude Profiles", "work"), { recursive: true });
@@ -137,12 +133,11 @@ test("remove refuses to delete a folder outside the root and keeps the row", asy
       ],
     }),
   );
-  await assert.rejects(registry.remove("stray", true), /outside/);
+  await assert.rejects(registry.confineFolder(outside), /outside/);
   assert.equal((await registry.load()).length, 1);
   assert.deepEqual(await readdir(outside), ["keep"]);
 
   await assert.rejects(registry.confineFolder(registry.root), /outside/);
-  await assert.rejects(registry.confineFolder(outside), /outside/);
   assert.equal(
     await registry.confineFolder(join(registry.root, "work")),
     await realpath(join(registry.root, "work")),

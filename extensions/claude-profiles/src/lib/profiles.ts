@@ -235,21 +235,15 @@ export function createRegistry(root = PROFILES_ROOT) {
       return renamed;
     },
 
-    /**
-     * unregister a profile. with discardData, the folder is checked to sit inside the
-     * root before the registry changes, and its real path is returned for the caller
-     * to move to the Trash; null when the folder is already gone.
-     */
-    async remove(id: string, discardData: boolean): Promise<string | null> {
+    /** take a profile off the list; its folder is untouched. */
+    async remove(id: string): Promise<void> {
       const profiles = await load();
-      const target = profiles.find((p) => p.id === id);
-      if (!target) throw new Error(`No profile "${id}" in the list`);
-      const doomed = discardData ? await confine(target.dataDir) : null;
+      if (!profiles.some((p) => p.id === id))
+        throw new Error(`No profile "${id}" in the list`);
       await save(profiles.filter((p) => p.id !== id));
-      return doomed;
     },
 
-    /** the real path of an unregistered folder, once it is known to sit inside the root. */
+    /** the real path of a folder once it is known to sit inside the root; null when gone. */
     confineFolder(dataDir: string): Promise<string | null> {
       return confine(dataDir);
     },
