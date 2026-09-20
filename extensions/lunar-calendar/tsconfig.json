@@ -11,5 +11,9 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "types": ["node"]
-  }
+  },
+  "include": [
+    "src/**/*",
+    "types.d.ts"
+  ]
 }
