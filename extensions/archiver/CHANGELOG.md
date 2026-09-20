@@ -1,6 +1,6 @@
 # Archiver Changelog
 
-## [Improvements and Fixes] - {PR_MERGE_DATE}
+## [Improvements and Fixes] - 2026-09-20
 
 - Added settings to control Finder reveals after compression and extraction.
 - Fixed folder name rendering when selecting a directory in the Compress command.
