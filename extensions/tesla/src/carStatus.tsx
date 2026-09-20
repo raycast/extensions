@@ -1,7 +1,6 @@
 import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import moment from "moment";
-import { Distance } from "./types/Distance";
 import { Info } from "./types/Info";
 import { TirePressures } from "./types/TirePressures";
 import { BASE_URL } from "./utils/constants";
@@ -20,12 +19,7 @@ const formatCarModelName = (modelName: string): string => {
 };
 
 export default function CarStatus() {
-  const preferences = getPreferenceValues<{
-    tessieApiKey: string;
-    VIN: string;
-    temperature: TemperatureType;
-    distance: Distance;
-  }>();
+  const preferences = getPreferenceValues<Preferences>();
 
   const API_KEY = preferences.tessieApiKey;
   const VIN = preferences.VIN;
