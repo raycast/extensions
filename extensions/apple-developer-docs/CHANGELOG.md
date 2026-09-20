@@ -1,6 +1,6 @@
 # Apple Developer Docs Changelog
 
-## [Fix Search API Streaming Protocol] - {PR_MERGE_DATE}
+## [Fix Search API Streaming Protocol] - 2026-09-20
 - Updated Apple Developer search to consume the current JSONL streaming query API.
 
 ## [Fix Search History] - 2026-05-25
