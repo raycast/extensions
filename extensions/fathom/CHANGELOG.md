@@ -1,6 +1,6 @@
 # Fathom for Raycast Changelog
 
-## [Download Recordings] - {PR_MERGE_DATE}
+## [Download Recordings] - 2026-09-20
 
 ### Added
 
