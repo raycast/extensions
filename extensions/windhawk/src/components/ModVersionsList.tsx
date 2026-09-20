@@ -4,7 +4,13 @@ import { listVersions } from "../utils/mods";
 import { timestampToLongUTCDate } from "../utils/helpers";
 import { CopyVersionAction, InstallModAction, RefreshAction } from "./Actions";
 
-export default function ModVersionsList({ id }: { id: string }) {
+export default function ModVersionsList({
+  id,
+  onVersionInstalled,
+}: {
+  id: string;
+  onVersionInstalled?: (version: string) => void | Promise<void>;
+}) {
   const {
     data: versions,
     isLoading,
@@ -38,7 +44,12 @@ export default function ModVersionsList({ id }: { id: string }) {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <InstallModAction id={id} version={ver?.version} actionTitle="Install Version" />
+                <InstallModAction
+                  id={id}
+                  version={ver?.version}
+                  actionTitle="Install Version"
+                  onSuccess={() => onVersionInstalled?.(ver?.version ?? "")}
+                />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <CopyVersionAction version={ver?.version} shortcut={Keyboard.Shortcut.Common.Copy} />

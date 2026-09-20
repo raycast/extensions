@@ -1,12 +1,19 @@
 import { execFile, execFileSync } from "node:child_process";
 import { promisify } from "node:util";
-import { readFile, unlink, writeFile, mkdir } from "node:fs/promises";
+import { readFile, unlink, writeFile, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { randomUUID } from "node:crypto";
+import { getCliPath } from "./helpers";
 
 const execFileAsync = promisify(execFile);
 
 export const TASK_NAME = "RaycastWindhawkAdminWorker";
+
+export type WorkerAction = "enable" | "disable" | "install" | "update" | "uninstall";
+
+const VALID_ACTIONS: WorkerAction[] = ["enable", "disable", "install", "update", "uninstall"];
+const VALID_ARG = /^[A-Za-z0-9_.-]+$/;
 
 // Raycast's extension host overrides LOCALAPPDATA and USERPROFILE to a temp
 // sandbox that gets wiped by temp cleaners and differs from the real profile
@@ -39,30 +46,43 @@ const WORK_DIR = join(
 const WORKER_SCRIPT_PATH = join(WORK_DIR, "worker.ps1");
 const LAUNCHER_VBS_PATH = join(WORK_DIR, "launcher.vbs");
 const FLAG_FILE = join(WORK_DIR, "running.flag");
-const REQUEST_FILE = join(WORK_DIR, "request.json");
-const RESPONSE_FILE = join(WORK_DIR, "response.json");
 const LOG_FILE = join(WORK_DIR, "setup.log");
 const SETUP_PS_PATH = join(tmpdir(), "raycast_windhawk_setup.ps1");
 const HELPER_VBS_PATH = join(tmpdir(), "raycast_windhawk_helper.vbs");
+
+async function readPid(): Promise<number | null> {
+  try {
+    const pidStr = (await readFile(FLAG_FILE, "utf-8")).trim();
+    const pid = parseInt(pidStr, 10);
+    return Number.isNaN(pid) ? null : pid;
+  } catch {
+    return null;
+  }
+}
+
+async function isProcessAlive(pid: number): Promise<boolean> {
+  try {
+    const { stdout } = await execFileAsync("tasklist.exe", ["/FI", `PID eq ${pid}`, "/NH", "/FO", "CSV"], {
+      timeout: 3000,
+    });
+    return stdout.includes(String(pid));
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Checks whether the elevated background worker is currently active and alive in Session 1.
  */
 export async function isWorkerRunning(): Promise<boolean> {
   try {
-    const pidStr = await readFile(FLAG_FILE, "utf-8");
-    const pid = parseInt(pidStr.trim(), 10);
-
-    if (Number.isNaN(pid)) {
+    const pid = await readPid();
+    if (pid === null) {
       await cleanupStaleFiles();
       return false;
     }
 
-    const { stdout } = await execFileAsync("tasklist.exe", ["/FI", `PID eq ${pid}`, "/NH", "/FO", "CSV"], {
-      timeout: 3000,
-    });
-
-    if (stdout.includes(String(pid))) {
+    if (await isProcessAlive(pid)) {
       return true;
     }
 
@@ -73,10 +93,23 @@ export async function isWorkerRunning(): Promise<boolean> {
   }
 }
 
+async function taskExists(): Promise<boolean> {
+  try {
+    await execFileAsync("schtasks.exe", ["/Query", "/TN", TASK_NAME], { timeout: 3000 });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function cleanupStaleFiles(): Promise<void> {
   await unlink(FLAG_FILE).catch(() => {});
-  await unlink(REQUEST_FILE).catch(() => {});
-  await unlink(RESPONSE_FILE).catch(() => {});
+  const entries = await readdir(WORK_DIR).catch(() => [] as string[]);
+  for (const name of entries) {
+    if (name.startsWith("request_") || name.startsWith("response_")) {
+      await unlink(join(WORK_DIR, name)).catch(() => {});
+    }
+  }
 }
 
 /**
@@ -92,6 +125,75 @@ function getLauncherVbsContent(): string {
 }
 
 /**
+ * Builds the worker's PowerShell source. The worker accepts ONLY a fixed
+ * allowlist of actions with a validated mod id/version; the Windhawk CLI path
+ * is baked in at registration time and is never taken from a request. Native
+ * exit codes drive success, not text sniffing. Requests and responses use
+ * unique per-request files so concurrent callers never collide.
+ */
+function getWorkerScriptContent(cliPath: string): string {
+  const esc = (value: string) => value.replace(/\\/g, "\\\\");
+  const escapedFlagPath = esc(FLAG_FILE);
+  const escapedWorkDir = esc(WORK_DIR);
+  const escapedCliPath = esc(cliPath);
+  const escapedLogPath = esc(LOG_FILE);
+
+  return `
+    $ErrorActionPreference = "Continue"
+    Add-Content -Path "${escapedLogPath}" -Value "$(Get-Date -Format o) worker: started pid=$PID"
+    Set-Content -Path "${escapedFlagPath}" -Value $PID -Force
+
+    while (Test-Path "${escapedFlagPath}") {
+        $pending = @(Get-ChildItem -Path "${escapedWorkDir}" -Filter "request_*.json" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime)
+        foreach ($file in $pending) {
+            $req = $null
+            $responseId = "unknown"
+            $out = ""
+            $exit = 0
+            $err = $null
+            try {
+                $raw = Get-Content -Path $file.FullName -Raw
+                Remove-Item -Path $file.FullName -Force -ErrorAction SilentlyContinue
+                $req = $raw | ConvertFrom-Json
+
+                $responseId = [string]$req.id
+                $action = [string]$req.action
+                $modId = [string]$req.modId
+                $version = [string]$req.version
+
+                switch ($action) {
+                    "enable" { $out = & "${escapedCliPath}" mod enable $modId 2>&1; $exit = $LASTEXITCODE }
+                    "disable" { $out = & "${escapedCliPath}" mod disable $modId 2>&1; $exit = $LASTEXITCODE }
+                    "update" { $out = & "${escapedCliPath}" mod update $modId 2>&1; $exit = $LASTEXITCODE }
+                    "uninstall" { $out = & "${escapedCliPath}" mod remove $modId --yes 2>&1; $exit = $LASTEXITCODE }
+                    "install" {
+                        if ($version -eq "") {
+                            $out = & "${escapedCliPath}" mod install $modId 2>&1
+                        } else {
+                            $out = & "${escapedCliPath}" mod install $modId $version 2>&1
+                        }
+                        $exit = $LASTEXITCODE
+                    }
+                    default { throw "Unknown action: $action" }
+                }
+            } catch {
+                $err = $_.Exception.Message
+            }
+
+            $res = @{
+                id = $responseId
+                success = (($exit -eq 0) -and ($null -eq $err))
+                output = ($out | Out-String)
+                error = $err
+            }
+            $res | ConvertTo-Json | Set-Content -Path "${escapedWorkDir}\\response_$responseId.json" -Force
+        }
+        Start-Sleep -Milliseconds 200
+    }
+  `;
+}
+
+/**
  * Registers the logon scheduled task and starts the elevated worker process.
  */
 export async function registerWorker(): Promise<void> {
@@ -99,50 +201,20 @@ export async function registerWorker(): Promise<void> {
     await mkdir(WORK_DIR, { recursive: true });
     await writeFile(LOG_FILE, `${new Date().toISOString()} ts: new registration attempt\n`, "utf-8").catch(() => {});
 
-    const escapedFlagPath = FLAG_FILE.replace(/\\/g, "\\\\");
-    const escapedReqPath = REQUEST_FILE.replace(/\\/g, "\\\\");
-    const escapedResPath = RESPONSE_FILE.replace(/\\/g, "\\\\");
-    const escapedLogPath = LOG_FILE.replace(/\\/g, "\\\\");
+    const cliPath = getCliPath();
+    const esc = (value: string) => value.replace(/\\/g, "\\\\");
+    const escapedFlagPath = esc(FLAG_FILE);
 
-    const workerPsContent = `
-      $ErrorActionPreference = "Continue"
-      Add-Content -Path "${escapedLogPath}" -Value "$(Get-Date -Format o) worker: started pid=$PID"
-      Set-Content -Path "${escapedFlagPath}" -Value $PID -Force
-
-      while (Test-Path "${escapedFlagPath}") {
-          if (Test-Path "${escapedReqPath}") {
-              try {
-                  $raw = Get-Content -Path "${escapedReqPath}" -Raw
-                  Remove-Item -Path "${escapedReqPath}" -Force -ErrorAction SilentlyContinue
-                  $req = $raw | ConvertFrom-Json
-
-                  $out = Invoke-Expression $req.command 2>&1 | Out-String
-
-                  $res = @{
-                      success = $true
-                      output = $out
-                  }
-                  $res | ConvertTo-Json | Set-Content -Path "${escapedResPath}" -Force
-              } catch {
-                  $res = @{
-                      success = $false
-                      error = $_.Exception.Message
-                  }
-                  $res | ConvertTo-Json | Set-Content -Path "${escapedResPath}" -Force
-              }
-          }
-          Start-Sleep -Milliseconds 200
-      }
-    `;
+    const workerPsContent = getWorkerScriptContent(cliPath);
 
     await writeFile(WORKER_SCRIPT_PATH, workerPsContent, "utf-8");
     await writeFile(LAUNCHER_VBS_PATH, getLauncherVbsContent(), "utf-8");
 
-    const launcherPathEscaped = LAUNCHER_VBS_PATH.replace(/\\/g, "\\\\");
+    const launcherPathEscaped = escapePathForPowerShell(LAUNCHER_VBS_PATH);
     const setupPsContent = `
       $ErrorActionPreference = "Stop"
       $launcher = "${launcherPathEscaped}"
-      $log = "${escapedLogPath}"
+      $log = "${escapePathForPowerShell(LOG_FILE)}"
 
       function Log($m) {
           Add-Content -Path $log -Value "$(Get-Date -Format o) setup: $m" -ErrorAction SilentlyContinue
@@ -252,13 +324,19 @@ export async function registerWorker(): Promise<void> {
   }
 }
 
+function escapePathForPowerShell(value: string): string {
+  return value.replace(/\\/g, "\\\\");
+}
+
 /**
- * Terminates the active worker process and removes the scheduled task from Windows.
+ * Terminates the active worker process, removes the scheduled task and wipes
+ * the work dir. Resolves only after the removal is verified (task gone, worker
+ * dead, flag file removed); throws if the cleanup never ran, e.g. UAC cancelled.
  */
 export async function unregisterWorker(): Promise<void> {
   try {
-    const escapedFlagPath = FLAG_FILE.replace(/\\/g, "\\\\");
-    const escapedWorkDir = WORK_DIR.replace(/\\/g, "\\\\");
+    const escapedFlagPath = escapePathForPowerShell(FLAG_FILE);
+    const escapedWorkDir = escapePathForPowerShell(WORK_DIR);
 
     const cleanupPsContent = `
       $ErrorActionPreference = "SilentlyContinue"
@@ -296,7 +374,29 @@ export async function unregisterWorker(): Promise<void> {
     await writeFile(cleanupVbsPath, cleanupVbsContent, "utf-8");
 
     await execFileAsync("wscript.exe", [cleanupVbsPath]);
+
+    let verified = false;
+    for (let i = 0; i < 30; i++) {
+      await new Promise((r) => setTimeout(r, 200));
+      const pid = await readPid();
+      const alive = pid !== null && (await isProcessAlive(pid));
+      const flagExists = await readFile(FLAG_FILE, "utf-8")
+        .then(() => true)
+        .catch(() => false);
+      const taskExistsResult = await taskExists();
+      if (!alive && !flagExists && !taskExistsResult) {
+        verified = true;
+        break;
+      }
+    }
+
     await unlink(cleanupVbsPath).catch(() => {});
+
+    if (!verified) {
+      throw new Error(
+        "Unregister did not complete - the UAC prompt may have been cancelled or cleanup failed. The admin worker may still be active.",
+      );
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to unregister admin worker: ${message}`);
@@ -304,28 +404,37 @@ export async function unregisterWorker(): Promise<void> {
 }
 
 /**
- * Sends a command to the active elevated worker.
+ * Sends an allowlisted action to the active elevated worker and returns its stdout.
+ *
+ * The worker never executes arbitrary command strings: only the fixed actions
+ * above are accepted, mod ids/versions are validated against a strict charset,
+ * and each call uses unique request/response files so concurrent callers stay isolated.
  */
-export async function runElevatedCommand(command: string): Promise<string> {
-  const active = await isWorkerRunning();
-  if (!active) {
+export async function runElevatedCommand(action: WorkerAction, modId: string, version?: string): Promise<string> {
+  if (!VALID_ACTIONS.includes(action)) {
+    throw new Error(`Blocked: unknown action "${action}".`);
+  }
+  if (!VALID_ARG.test(modId) || (version !== undefined && version !== "" && !VALID_ARG.test(version))) {
+    throw new Error("Blocked: invalid mod id or version.");
+  }
+
+  if (!(await isWorkerRunning())) {
     throw new Error("Admin worker is not running. Run registerWorker() first.");
   }
 
   try {
-    await unlink(RESPONSE_FILE).catch(() => {});
+    const requestId = randomUUID();
+    const requestPath = join(WORK_DIR, `request_${requestId}.json`);
+    const responsePath = join(WORK_DIR, `response_${requestId}.json`);
 
-    const payload = JSON.stringify({ command });
-    await writeFile(REQUEST_FILE, payload, "utf-8");
+    await writeFile(requestPath, JSON.stringify({ id: requestId, action, modId, version: version ?? "" }), "utf-8");
 
     let responseText = "";
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 50; i++) {
       await new Promise((r) => setTimeout(r, 300));
       try {
-        responseText = await readFile(RESPONSE_FILE, "utf-8");
-        if (responseText.trim().length > 0) {
-          break;
-        }
+        responseText = await readFile(responsePath, "utf-8");
+        if (responseText.trim().length > 0) break;
       } catch {
         // Response file not written yet
       }
@@ -336,21 +445,13 @@ export async function runElevatedCommand(command: string): Promise<string> {
     }
 
     const res = JSON.parse(responseText) as { success: boolean; output?: string; error?: string };
-    await unlink(RESPONSE_FILE).catch(() => {});
+    await unlink(responsePath).catch(() => {});
 
     if (!res.success) {
       throw new Error(res.error || "Elevated execution failed.");
     }
 
     const output = (res.output || "").trim();
-
-    if (
-      output.includes("is not recognized as an internal or external command") ||
-      output.includes("Access is denied")
-    ) {
-      throw new Error(output);
-    }
-
     return output || "Command executed successfully.";
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -152,7 +152,18 @@ export default function Command() {
                             shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
                           />
                         ) : (
-                          <InstallVersionAction id={id} shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }} />
+                          <InstallVersionAction
+                            id={id}
+                            onSuccess={(installedVersion) =>
+                              patchMod(id, {
+                                installed: true,
+                                enabled: true,
+                                updateAvailable: installedVersion !== version,
+                                installedVersion,
+                              })
+                            }
+                            shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
+                          />
                         )}
                       </>
                     ) : (

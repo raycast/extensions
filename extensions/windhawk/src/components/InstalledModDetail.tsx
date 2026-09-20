@@ -36,6 +36,7 @@ export default function InstalledModDetail({ modId }: { modId: string }) {
   const homepage = mod?.metadata?.homepage;
   const enabled = mod?.enabled;
   const updateAvailable = mod?.updateAvailable;
+  const availableUpdateVersion = mod?.availableUpdateVersion;
 
   return (
     <Detail
@@ -66,7 +67,7 @@ export default function InstalledModDetail({ modId }: { modId: string }) {
               <Detail.Metadata.Label
                 icon={{ source: Icon.Tag, tintColor: Color.Green }}
                 title="Available"
-                text={{ value: "Placeholder", color: Color.Green }}
+                text={{ value: availableUpdateVersion ?? "latest", color: Color.Green }}
               />
             ) : undefined}
             <Detail.Metadata.Label icon={Icon.Person} title="Author" text={author} />
@@ -76,7 +77,7 @@ export default function InstalledModDetail({ modId }: { modId: string }) {
             {mod?.metadata?.twitter ? (
               <Detail.Metadata.Link title="Twitter / X" text={twitter ?? ""} target={twitter ?? ""} />
             ) : undefined}
-            {mod?.metadata?.twitter ? (
+            {mod?.metadata?.homepage ? (
               <Detail.Metadata.Link title="Homepage" text={homepage ?? ""} target={homepage ?? ""} />
             ) : undefined}
             <Detail.Metadata.TagList title="Target Processes">

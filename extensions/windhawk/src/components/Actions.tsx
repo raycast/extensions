@@ -30,13 +30,10 @@ export function ToggleModAction<T>({
       icon={enabled ? Icon.CircleDisabled : Icon.CheckCircle}
       title={enabled ? "Disable Mod" : "Enable Mod"}
       onAction={async () => {
-        if (enabled) {
-          await disableMod(id);
-        } else {
-          await enableMod(id);
+        const ok = enabled ? await disableMod(id) : await enableMod(id);
+        if (ok) {
+          await onSuccess?.();
         }
-
-        await onSuccess?.();
       }}
     />
   );
@@ -165,16 +162,30 @@ export function InstallModAction({
       icon={Icon.ArrowDownCircle}
       title={actionTitle ? actionTitle : "Install Mod"}
       onAction={async () => {
-        await installMod(id, version);
-        await onSuccess?.();
+        if (await installMod(id, version)) {
+          await onSuccess?.();
+        }
       }}
     />
   );
 }
 
-export function InstallVersionAction({ id, shortcut }: { id: string; shortcut?: Action.Push.Props["shortcut"] }) {
+export function InstallVersionAction({
+  id,
+  shortcut,
+  onSuccess,
+}: {
+  id: string;
+  shortcut?: Action.Push.Props["shortcut"];
+  onSuccess?: (installedVersion: string) => void | Promise<void>;
+}) {
   return (
-    <Action.Push icon={Icon.List} title="Install Version…" target={<ModVersionsList id={id} />} shortcut={shortcut} />
+    <Action.Push
+      icon={Icon.List}
+      title="Install Version…"
+      target={<ModVersionsList id={id} onVersionInstalled={onSuccess} />}
+      shortcut={shortcut}
+    />
   );
 }
 
@@ -215,8 +226,9 @@ export function InstallVersionSubmenu({
           icon={index === 0 ? { source: Icon.Box, tintColor: Color.Blue } : Icon.Box}
           title={`${ver?.version ?? ""} · ${timestampToUTCDate(ver?.timestamp * 1000)}${ver?.isPreRelease ? " · 🧪" : ""}${index === 0 ? " · [latest]" : ""}`}
           onAction={async () => {
-            await installMod(id, ver?.version ?? "");
-            await onSuccess?.(ver?.version ?? "");
+            if (await installMod(id, ver?.version ?? "")) {
+              await onSuccess?.(ver?.version ?? "");
+            }
           }}
         />
       ))}
@@ -230,8 +242,9 @@ export function UpdateModAction<T>({ id, onSuccess }: { id: string; onSuccess: (
       icon={{ source: Icon.ArrowUpCircle, tintColor: Color.Green }}
       title="Update Mod"
       onAction={async () => {
-        await updateMod(id);
-        await onSuccess?.();
+        if (await updateMod(id)) {
+          await onSuccess?.();
+        }
       }}
     />
   );
@@ -260,8 +273,9 @@ export function UninstallModAction<T>({
             primaryAction: { title: "Uninstall", style: Alert.ActionStyle.Destructive },
           })
         ) {
-          await uninstallMod(id);
-          await onSuccess?.();
+          if (await uninstallMod(id)) {
+            await onSuccess?.();
+          }
         }
       }}
       shortcut={Keyboard.Shortcut.Common.Remove}
