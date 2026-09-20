@@ -44,10 +44,10 @@ After the user requested a fix, inspection of the installed Raycast image-render
 - Retained the editable SVG with explicit 16-by-16 intrinsic dimensions and `viewBox="0 0 512 512"`. Its path and silhouette are unchanged.
 - Generated the PNG using Sharp 0.35.4 / librsvg 2.62.91 at density 144 (2x the SVG's 16-unit intrinsic size), with no intermediate large bitmap, resizing pass, or sharpening filter. No package dependency was added.
 
-To regenerate with Sharp available, use:
+The editable SVG is kept in `docs/design/` so it is not bundled as a runtime asset. To regenerate with Sharp available, use:
 
 ```javascript
-await sharp("assets/worktodo-menu-bar-icon.svg", { density: 144 })
+await sharp("docs/design/worktodo-menu-bar-icon.svg", { density: 144 })
   .png()
   .toFile("assets/worktodo-menu-bar-template.png");
 ```
