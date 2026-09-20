@@ -309,7 +309,12 @@ function EditNoteForm({ note, onDone }: { note: NoteContent; onDone?: () => void
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="edit-operation" title="Operation" value={kind} onChange={(value) => setKind(value as EditKind)}>
+      <Form.Dropdown
+        id="edit-operation"
+        title="Operation"
+        value={kind}
+        onChange={(value) => setKind(value as EditKind)}
+      >
         <Form.Dropdown.Item title="Replace exact text" value="replace" />
         <Form.Dropdown.Item title="Insert before anchor" value="insert_before" />
         <Form.Dropdown.Item title="Insert after anchor" value="insert_after" />
