@@ -29,7 +29,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^2.4.0",
+    "@raycast/api": "2.4.0",
     "@raycast/utils": "^2.3.1"
   },
   "devDependencies": {
@@ -121,8 +121,5 @@
       "required": false,
       "default": true
     }
-  ],
-  "allowScripts": {
-    "esbuild@0.28.2": true
-  }
+  ]
 }

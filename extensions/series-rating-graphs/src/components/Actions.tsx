@@ -170,9 +170,10 @@ export function CopyPosterAction({ posterUrl }: { posterUrl: string }) {
           await copyImage(posterUrl);
           toast.title = "Poster copied to clipboard";
           toast.style = Toast.Style.Success;
-        } catch {
+        } catch (error) {
           toast.title = "Failed to copy poster";
           toast.style = Toast.Style.Failure;
+          toast.message = error instanceof Error ? error.message : String(error);
         }
       }}
       shortcut={Keyboard.Shortcut.Common.Copy}
@@ -203,9 +204,10 @@ export function DownloadPosterAction({ posterUrl }: { posterUrl: string }) {
             shortcut: Keyboard.Shortcut.Common.OpenWith,
           };
           if (showInFinderAfterDownload) await showInFinder(filePath ?? "");
-        } catch {
+        } catch (error) {
           toast.title = "Failed to download poster";
           toast.style = Toast.Style.Failure;
+          toast.message = error instanceof Error ? error.message : String(error);
         }
       }}
       shortcut={Keyboard.Shortcut.Common.Save}

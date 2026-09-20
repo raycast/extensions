@@ -1,6 +1,6 @@
-import { ActionPanel, List, Icon, getPreferenceValues, Grid, Keyboard, Color } from "@raycast/api";
+import { ActionPanel, List, Icon, LocalStorage, getPreferenceValues, Grid, Keyboard, Color } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   CopyPosterAction,
@@ -23,6 +23,18 @@ export default function Command() {
 
   const defaultLayout = preferences.viewMode ?? "grid";
   const [layout, setLayout] = useCachedState("layout", defaultLayout);
+
+  const [columns, setColumns] = useState(5);
+
+  useEffect(() => {
+    (async () => {
+      const lastLayoutPref = await LocalStorage.getItem<string>("layout-pref");
+      if (lastLayoutPref !== defaultLayout) {
+        setLayout(defaultLayout);
+        await LocalStorage.setItem("layout-pref", defaultLayout);
+      }
+    })();
+  }, [defaultLayout]);
 
   const toggleLayout = () => setLayout((current: string) => (current === "grid" ? "list" : "grid"));
 
@@ -55,6 +67,20 @@ export default function Command() {
         searchBarPlaceholder="Search TV Shows…"
         fit={Grid.Fit.Fill}
         aspectRatio="2/3"
+        columns={columns}
+        searchBarAccessory={
+          <Grid.Dropdown
+            tooltip="Grid Item Size"
+            storeValue
+            onChange={(newValue) => {
+              setColumns(parseInt(newValue));
+            }}
+          >
+            <Grid.Dropdown.Item title="Large" value="3" />
+            <Grid.Dropdown.Item title="Medium" value="5" />
+            <Grid.Dropdown.Item title="Small" value="8" />
+          </Grid.Dropdown>
+        }
         throttle
       >
         {hasError && searchText ? (
