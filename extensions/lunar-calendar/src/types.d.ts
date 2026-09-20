@@ -1,1 +1,1 @@
-declare module 'lunar-javascript';
+declare module "lunar-javascript";
