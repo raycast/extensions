@@ -1,6 +1,6 @@
 # Send To Memos Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-09-20
 
 - fix: dismiss Send Memo after a successful send on Raycast 2 (close the window and clear the command).
 
