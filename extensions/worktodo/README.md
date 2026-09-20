@@ -2,6 +2,8 @@
 
 Worktodo is an account-free, local-first task manager built for Raycast. It keeps tasks in a local SQLite database and combines full task management, Quick Add, and a due-this-week menu-bar workflow.
 
+![Worktodo menu bar](media/menu-bar.png)
+
 ## Use Worktodo
 
 After installing Worktodo from the Raycast Store, open any of its commands. No account, external service, Node.js, npm, or MCP setup is required for the Store extension.
