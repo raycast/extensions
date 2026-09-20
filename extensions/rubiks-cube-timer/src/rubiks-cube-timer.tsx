@@ -5,11 +5,13 @@ import { join } from "path";
 import {
   Action,
   ActionPanel,
+  Alert,
   Detail,
   Form,
   Icon,
   Keyboard,
   Toast,
+  confirmAlert,
   environment,
   showInFinder,
   showToast,
@@ -22,7 +24,9 @@ import { Solve, effectiveTime, exportToCsTimer, importFromCsTimer, mergeSolves }
 
 function formatTime(ms: number, decimals = 2): string {
   if (!Number.isFinite(ms)) return "DNF";
-  const totalSeconds = ms / 1000;
+  // Round to the displayed precision first so the carry rolls into minutes (e.g. 119.999s -> 2:00.00, not 1:60.00).
+  const factor = 10 ** decimals;
+  const totalSeconds = Math.round((ms / 1000) * factor) / factor;
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds - minutes * 60;
   const secondsStr = seconds.toFixed(decimals).padStart(decimals + 3, "0");
@@ -134,8 +138,17 @@ export default function command() {
     setSolves(solves.slice(1));
   }
 
-  function clearAll() {
-    setSolves([]);
+  async function clearAll() {
+    if (solves.length === 0) return;
+    const confirmed = await confirmAlert({
+      title: "Clear all times?",
+      message: `This permanently deletes all ${solves.length} saved solves. Export first if you want a backup.`,
+      icon: Icon.Trash,
+      primaryAction: { title: "Clear All", style: Alert.ActionStyle.Destructive },
+    });
+    if (confirmed) {
+      await setSolves([]);
+    }
   }
 
   async function exportData() {

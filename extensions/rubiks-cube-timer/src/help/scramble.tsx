@@ -2,7 +2,7 @@ const faces: string[] = ["R", "L", "U", "D", "F", "B"] as const;
 const suffixes: string[] = ["", "'", "2"] as const;
 
 const axis: Record<string, string> = {
-  R: "X",
+  R: "x",
   L: "x",
   U: "y",
   D: "y",

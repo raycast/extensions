@@ -3,7 +3,7 @@
   "name": "rubiks-cube-timer",
   "title": "Rubiks Cube Timer",
   "version": "1.0.0",
-  "description": "Gives you a random scrable and a timer",
+  "description": "Time your Rubik's Cube solves with random scrambles, session stats, and csTimer import/export.",
   "icon": "icon.png",
   "author": "nokoniko",
   "platforms": [
@@ -18,8 +18,8 @@
     {
       "name": "rubiks-cube-timer",
       "title": "Rubiks Cube Timer",
-      "subtitle": "times your solves",
-      "description": "something that shoudl work soon",
+      "subtitle": "Times your solves",
+      "description": "Generate a random scramble and time your solve, with best, ao5, and ao12 stats.",
       "mode": "view"
     }
   ],
