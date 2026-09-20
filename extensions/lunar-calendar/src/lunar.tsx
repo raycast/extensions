@@ -472,5 +472,6 @@ function generateFullCalendarSvg(
     ${cellsSvg}
   </svg>`;
 
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+  // 使用 encodeURIComponent 编码，避免在缺少 @types/node 环境下抛出 Cannot find name 'Buffer' 错误
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
