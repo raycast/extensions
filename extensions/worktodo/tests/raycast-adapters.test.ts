@@ -347,6 +347,7 @@ describe("task lifecycle actions", () => {
         direction,
         kind,
         taskId: "task-1",
+        revision: { updatedAtMs: 1_000, completedAtMs: null, trashedAtMs: null },
         taskTitle: "Submit report",
       }),
     ).toEqual({

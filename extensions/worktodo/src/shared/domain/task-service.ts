@@ -30,6 +30,10 @@ type Dependencies = {
 
 type OrderedEntity = Pick<Project, "id" | "position" | "createdAtMs">;
 
+export type TaskLifecycleOperation = "complete" | "reopen" | "trash" | "restore";
+export type TaskLifecycleRevision = Pick<Task, "updatedAtMs" | "completedAtMs" | "trashedAtMs">;
+export type GuardedTaskLifecycleResult = { status: "applied"; task: Task } | { status: "stale" };
+
 export type CreateTaskInput = {
   title: string;
   notes?: string;
@@ -420,65 +424,64 @@ export class TaskService {
   }
 
   completeTask(id: string): Task {
-    const validId = validateId(id);
-    return this.repository.transaction(() => {
-      const task = this.requireActiveTask(validId);
-      if (task.completedAtMs !== null) {
-        return task;
-      }
-      const timestamp = effectiveUpdate(task.updatedAtMs, this.operationTime());
-      const updated = { ...task, completedAtMs: timestamp, updatedAtMs: timestamp };
-      this.repository.updateTask(updated);
-      return updated;
-    });
+    return this.runLifecycleOperation(id, "complete");
   }
 
   reopenTask(id: string): Task {
-    const validId = validateId(id);
-    return this.repository.transaction(() => {
-      const task = this.requireActiveTask(validId);
-      if (task.completedAtMs === null) {
-        return task;
-      }
-      const updated = {
-        ...task,
-        completedAtMs: null,
-        updatedAtMs: effectiveUpdate(task.updatedAtMs, this.operationTime()),
-      };
-      this.repository.updateTask(updated);
-      return updated;
-    });
+    return this.runLifecycleOperation(id, "reopen");
   }
 
   trashTask(id: string): Task {
-    const validId = validateId(id);
-    return this.repository.transaction(() => {
-      const task = this.requireTask(validId);
-      if (task.trashedAtMs !== null) {
-        return task;
-      }
-      const timestamp = effectiveUpdate(task.updatedAtMs, this.operationTime());
-      const updated = { ...task, trashedAtMs: timestamp, updatedAtMs: timestamp };
-      this.repository.updateTask(updated);
-      return updated;
-    });
+    return this.runLifecycleOperation(id, "trash");
   }
 
   restoreTask(id: string): Task {
+    return this.runLifecycleOperation(id, "restore");
+  }
+
+  applyTaskLifecycleHistory(
+    id: string,
+    operation: TaskLifecycleOperation,
+    expected: TaskLifecycleRevision,
+  ): GuardedTaskLifecycleResult {
     const validId = validateId(id);
     return this.repository.transaction(() => {
-      const task = this.requireTask(validId);
-      if (task.trashedAtMs === null) {
-        return task;
+      const task = this.repository.getTask(validId);
+      if (
+        !task ||
+        task.updatedAtMs !== expected.updatedAtMs ||
+        task.completedAtMs !== expected.completedAtMs ||
+        task.trashedAtMs !== expected.trashedAtMs ||
+        ((operation === "complete" || operation === "reopen") && task.trashedAtMs !== null)
+      ) {
+        return { status: "stale" };
       }
-      const updated = {
-        ...task,
-        trashedAtMs: null,
-        updatedAtMs: effectiveUpdate(task.updatedAtMs, this.operationTime()),
-      };
-      this.repository.updateTask(updated);
-      return updated;
+      const updated = this.applyLifecycleOperation(task, operation);
+      return updated === task ? { status: "stale" } : { status: "applied", task: updated };
     });
+  }
+
+  private runLifecycleOperation(id: string, operation: TaskLifecycleOperation): Task {
+    const validId = validateId(id);
+    return this.repository.transaction(() => {
+      const task =
+        operation === "complete" || operation === "reopen"
+          ? this.requireActiveTask(validId)
+          : this.requireTask(validId);
+      return this.applyLifecycleOperation(task, operation);
+    });
+  }
+
+  private applyLifecycleOperation(task: Task, operation: TaskLifecycleOperation): Task {
+    const field = operation === "complete" || operation === "reopen" ? "completedAtMs" : "trashedAtMs";
+    const setTimestamp = operation === "complete" || operation === "trash";
+    if ((task[field] !== null) === setTimestamp) {
+      return task;
+    }
+    const timestamp = effectiveUpdate(task.updatedAtMs, this.operationTime());
+    const updated = { ...task, [field]: setTimestamp ? timestamp : null, updatedAtMs: timestamp };
+    this.repository.updateTask(updated);
+    return updated;
   }
 
   listAllTasks(viewerTimeZone: string): Task[] {

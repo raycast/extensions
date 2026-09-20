@@ -1,4 +1,5 @@
 import type { Task } from "../domain/model";
+import type { GuardedTaskLifecycleResult, TaskLifecycleOperation, TaskLifecycleRevision } from "../domain/task-service";
 
 export const TASK_COMPLETION_ACKNOWLEDGEMENT_DURATION_MS = 1_000;
 export const TASK_LIFECYCLE_HISTORY_DURATION_MS = 10_000;
@@ -7,7 +8,7 @@ export const DELAYED_COMPLETION_POLICY = { completion: "delayed" } as const;
 export const IMMEDIATE_COMPLETION_POLICY = { completion: "immediate" } as const;
 
 export type TaskLifecyclePolicy = typeof DELAYED_COMPLETION_POLICY | typeof IMMEDIATE_COMPLETION_POLICY;
-export type TaskLifecycleMutationKind = "complete" | "reopen" | "trash" | "restore";
+export type TaskLifecycleMutationKind = TaskLifecycleOperation;
 export type TaskLifecycleHistoryKind = "complete" | "trash";
 export type TaskLifecycleHistoryDirection = "undo" | "redo";
 
@@ -16,6 +17,7 @@ export type TaskLifecycleHistoryState = {
   kind: TaskLifecycleHistoryKind;
   taskId: string;
   taskTitle: string;
+  revision: TaskLifecycleRevision;
 };
 
 export type TaskLifecycleMutations = {
@@ -23,6 +25,11 @@ export type TaskLifecycleMutations = {
   reopenTask(taskId: string): Task;
   trashTask(taskId: string): Task;
   restoreTask(taskId: string): Task;
+  applyTaskLifecycleHistory(
+    taskId: string,
+    operation: TaskLifecycleMutationKind,
+    expected: TaskLifecycleRevision,
+  ): GuardedTaskLifecycleResult;
 };
 
 export type TaskLifecycleRefreshAdapter = {
@@ -126,6 +133,14 @@ export function createOperationScopedTaskLifecycleMutations(
     reopenTask: (taskId) => run("reopen", taskId),
     trashTask: (taskId) => run("trash", taskId),
     restoreTask: (taskId) => run("restore", taskId),
+    applyTaskLifecycleHistory: (taskId, operation, expected) => {
+      const session = openSession();
+      try {
+        return session.service.applyTaskLifecycleHistory(taskId, operation, expected);
+      } finally {
+        session.close();
+      }
+    },
   };
 }
 
@@ -169,6 +184,7 @@ export class TaskLifecycleInteraction {
         kind: operation,
         taskId: task.id,
         taskTitle: task.title,
+        revision: lifecycleRevision(task),
       });
       if (operation !== "complete" || this.options.policy.completion === "immediate") {
         this.refreshImmediately();
@@ -194,9 +210,15 @@ export class TaskLifecycleInteraction {
       return { status: "duplicate", task: duplicate.task, history: this.historyState };
     }
 
-    const mutation = this.mutate(operation, expected.taskId);
-    if (mutation.status === "failed") {
-      return mutation;
+    let mutation: GuardedTaskLifecycleResult;
+    try {
+      mutation = this.options.mutations.applyTaskLifecycleHistory(expected.taskId, operation, expected.revision);
+    } catch (error) {
+      return { status: "failed", operation, error };
+    }
+    if (mutation.status === "stale") {
+      this.refreshAfterExternalMutation();
+      return { status: "unavailable", history: expected };
     }
 
     if (operation === "complete" && this.options.policy.completion === "delayed") {
@@ -207,6 +229,7 @@ export class TaskLifecycleInteraction {
     const history = this.replaceHistory({
       ...current.state,
       direction: current.state.direction === "undo" ? "redo" : "undo",
+      revision: lifecycleRevision(mutation.task),
     });
     if (operation !== "complete" || this.options.policy.completion === "immediate") {
       this.refreshImmediately();
@@ -347,6 +370,13 @@ function sameHistoryState(left: TaskLifecycleHistoryState, right: TaskLifecycleH
     left.direction === right.direction &&
     left.kind === right.kind &&
     left.taskId === right.taskId &&
-    left.taskTitle === right.taskTitle
+    left.taskTitle === right.taskTitle &&
+    left.revision.updatedAtMs === right.revision.updatedAtMs &&
+    left.revision.completedAtMs === right.revision.completedAtMs &&
+    left.revision.trashedAtMs === right.revision.trashedAtMs
   );
+}
+
+function lifecycleRevision(task: Task): TaskLifecycleRevision {
+  return { updatedAtMs: task.updatedAtMs, completedAtMs: task.completedAtMs, trashedAtMs: task.trashedAtMs };
 }

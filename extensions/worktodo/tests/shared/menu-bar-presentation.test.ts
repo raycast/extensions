@@ -353,6 +353,7 @@ describe("menu-bar presentation", () => {
         direction: "undo",
         kind: "complete",
         taskId: "task-1",
+        revision: { updatedAtMs: 1_000, completedAtMs: null, trashedAtMs: null },
         taskTitle: "Submit report",
       }),
     ).toEqual({ direction: "undo", title: "Undo Completion", subtitle: "Submit report" });
@@ -361,6 +362,7 @@ describe("menu-bar presentation", () => {
         direction: "redo",
         kind: "complete",
         taskId: "task-1",
+        revision: { updatedAtMs: 1_000, completedAtMs: null, trashedAtMs: null },
         taskTitle: "Submit report",
       }),
     ).toEqual({ direction: "redo", title: "Redo Completion", subtitle: "Submit report" });
@@ -372,6 +374,7 @@ describe("menu-bar presentation", () => {
         direction: "undo",
         kind: "trash",
         taskId: "task-1",
+        revision: { updatedAtMs: 1_000, completedAtMs: null, trashedAtMs: null },
         taskTitle: "a".repeat(100),
       }),
     ).toEqual({

@@ -48,6 +48,25 @@ function mutableTaskMutations(initial = task()) {
       stored = { ...stored, trashedAtMs: null, updatedAtMs: 5_000 };
       return stored;
     }),
+    applyTaskLifecycleHistory: vi.fn((taskId, operation, expected) => {
+      if (
+        stored.updatedAtMs !== expected.updatedAtMs ||
+        stored.completedAtMs !== expected.completedAtMs ||
+        stored.trashedAtMs !== expected.trashedAtMs
+      ) {
+        return { status: "stale" };
+      }
+      const operations = {
+        complete: "completeTask",
+        reopen: "reopenTask",
+        trash: "trashTask",
+        restore: "restoreTask",
+      } as const;
+      const previousUpdatedAtMs = stored.updatedAtMs;
+      const updated = mutations[operations[operation]](taskId);
+      stored = { ...updated, updatedAtMs: Math.max(previousUpdatedAtMs + 1, updated.updatedAtMs) };
+      return { status: "applied", task: stored };
+    }),
   };
   return { mutations, getTask: () => stored };
 }
@@ -329,6 +348,22 @@ describe("task lifecycle interaction", () => {
     expect(source.mutations.completeTask).toHaveBeenCalledOnce();
     expect(reportMutationFailure).not.toHaveBeenCalled();
     expect(interaction.historyState).toMatchObject({ direction: "undo", kind: "complete" });
+  });
+
+  it("closes operation-scoped history sessions after application, stale results, and errors", () => {
+    const source = mutableTaskMutations();
+    const close = vi.fn();
+    const mutations = createOperationScopedTaskLifecycleMutations(() => ({ service: source.mutations, close }));
+    const completed = mutations.completeTask(source.getTask().id);
+    close.mockClear();
+
+    expect(mutations.applyTaskLifecycleHistory(completed.id, "reopen", completed).status).toBe("applied");
+    expect(mutations.applyTaskLifecycleHistory(completed.id, "reopen", completed).status).toBe("stale");
+    vi.mocked(source.mutations.applyTaskLifecycleHistory).mockImplementationOnce(() => {
+      throw new Error("database locked");
+    });
+    expect(() => mutations.applyTaskLifecycleHistory(completed.id, "reopen", completed)).toThrow("database locked");
+    expect(close).toHaveBeenCalledTimes(3);
   });
 
   it("disposes timers without publishing another state change", () => {
