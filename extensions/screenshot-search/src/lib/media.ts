@@ -74,14 +74,12 @@ export async function loadMediaItems(
   const seen = new Set<string>();
 
   for (const scope of scopes) {
-    const indexed = await scanIndexedDirectory(
+    await scanIndexedDirectory(
       scope,
       Boolean(preferences.includeAllMedia),
       items,
       seen,
     );
-    if (indexed) continue;
-
     await scanDirectory(
       scope,
       Boolean(preferences.includeAllMedia),
@@ -291,8 +289,8 @@ async function scanIndexedDirectory(
   includeAllMedia: boolean,
   items: MediaItem[],
   seen: Set<string>,
-): Promise<boolean> {
-  if (process.platform !== "darwin") return false;
+): Promise<void> {
+  if (process.platform !== "darwin") return;
 
   let stdout: string;
   try {
@@ -306,14 +304,14 @@ async function scanIndexedDirectory(
       },
     ));
   } catch {
-    return false;
+    return;
   }
 
   const paths = stdout
     .split(/\r?\n/)
     .map((filePath) => filePath.trim())
     .filter(Boolean);
-  if (paths.length === 0) return false;
+  if (paths.length === 0) return;
 
   for (const filePath of paths) {
     await addMediaItem(
@@ -324,7 +322,6 @@ async function scanIndexedDirectory(
       seen,
     );
   }
-  return true;
 }
 
 async function scanDirectory(
