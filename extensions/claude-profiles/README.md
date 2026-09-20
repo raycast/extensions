@@ -8,7 +8,8 @@ login with its own chats and settings, launched as a separate Claude window.
 ### Switch Profile
 
 Lists profiles from the registry shared with the `claude-profiles` CLI. A
-profile with an open Claude window shows a "Running" tag.
+profile with an open Claude window shows a "Running" tag; one whose folder is
+gone shows "Folder missing", and Remove from List clears it.
 
 Type a profile name or id as the command's argument to open it directly;
 otherwise the argument pre-filters the list.

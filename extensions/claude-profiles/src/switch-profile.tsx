@@ -16,6 +16,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { stat } from "fs/promises";
 import { basename } from "path";
 import { useEffect, useRef, useState } from "react";
 import RenameProfile from "./components/rename-profile";
@@ -32,18 +33,24 @@ interface Data {
   profiles: ClaudeProfile[];
   orphans: string[];
   running: Record<string, boolean>;
+  missing: Record<string, boolean>;
 }
 
 async function fetchData(): Promise<Data> {
   const profiles = await registry.load();
   const orphans = await registry.orphans();
   const running: Record<string, boolean> = {};
+  const missing: Record<string, boolean> = {};
   await Promise.all(
     profiles.map(async (profile) => {
       running[profile.id] = await isRunning(profile.dataDir);
+      missing[profile.id] = await stat(profile.dataDir).then(
+        () => false,
+        () => true,
+      );
     }),
   );
-  return { profiles, orphans, running };
+  return { profiles, orphans, running, missing };
 }
 
 function quicklinkFor(profile: ClaudeProfile): string {
@@ -119,13 +126,22 @@ export default function SwitchProfile(
       },
     });
     if (!confirmed) return;
+    // the row goes only once the folder is safely in the Trash
     try {
-      // the row goes only once the folder is safely in the Trash
       const doomed = await registry.confineFolder(profile.dataDir);
       if (doomed) await trash(doomed);
-      await registry.remove(profile.id);
     } catch (err) {
       await showFailureToast(err, { title: "Couldn't move profile to Trash" });
+      await revalidate();
+      return;
+    }
+    try {
+      await registry.remove(profile.id);
+    } catch (err) {
+      await showFailureToast(err, {
+        title: "Folder is in the Trash, but the list could not be updated",
+        message: `${profile.name} is marked "Folder missing"; use Remove from List once ${basename(registry.path)} is writable again.`,
+      });
     }
     await revalidate();
   }
@@ -189,6 +205,7 @@ export default function SwitchProfile(
   const profiles = data?.profiles ?? [];
   const orphans = data?.orphans ?? [];
   const running = data?.running ?? {};
+  const missing = data?.missing ?? {};
   const isEmpty =
     !isLoading && !!data && profiles.length === 0 && orphans.length === 0;
 
@@ -225,9 +242,15 @@ export default function SwitchProfile(
                 subtitle={profile.id}
                 keywords={[profile.id]}
                 accessories={
-                  running[profile.id]
-                    ? [{ tag: { value: "Running", color: Color.Green } }]
-                    : []
+                  missing[profile.id]
+                    ? [
+                        {
+                          tag: { value: "Folder missing", color: Color.Orange },
+                        },
+                      ]
+                    : running[profile.id]
+                      ? [{ tag: { value: "Running", color: Color.Green } }]
+                      : []
                 }
                 actions={
                   <ActionPanel>
