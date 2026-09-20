@@ -248,7 +248,7 @@ function getHolidayStatus(
     };
   }
 
-  return {};
+  return { isHoliday: false, isWork: false };
 }
 
 // 获取农历或节日文本
