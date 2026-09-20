@@ -96,15 +96,29 @@ export async function fetchSvgMarkup(icon: IconSearchIcon): Promise<string> {
   throw new Error(`Could not fetch live SVG for ${icon.name}. ${lastError}`);
 }
 
+const SAFE_JSX_PROPS = new Set([
+  "aria-hidden",
+  "aria-label",
+  "class",
+  "className",
+  "color",
+  "fill",
+  "height",
+  "role",
+  "size",
+  "stroke",
+  "stroke-width",
+  "strokewidth",
+  "width",
+]);
+
 function createReactSnippet(
   icon: IconSearchIcon,
   classes: string,
   customization: IconCustomization,
 ): string {
-  let usage = applyJsxClassName(
-    icon.reactUsage || `<${toPascalCase(icon.name)} />`,
-    classes,
-  );
+  const sanitizedUsage = sanitizeReactUsage(icon.reactUsage, icon);
+  let usage = applyJsxClassName(sanitizedUsage, classes);
   usage = applyJsxProp(
     usage,
     "size",
@@ -118,6 +132,85 @@ function createReactSnippet(
   const importText = normalizeReactImport(icon.reactImport);
   const snippet = importText ? `${importText}\n\n${usage}` : usage;
   return `${createCodeLicenseComment(icon)}\n${snippet}`;
+}
+
+function sanitizeReactUsage(
+  rawUsage: string | undefined,
+  icon: IconSearchIcon,
+): string {
+  const fallbackComponentName = getSafeComponentName(icon);
+  if (!rawUsage) {
+    return `<${fallbackComponentName} />`;
+  }
+
+  const trimmed = rawUsage.trim();
+  const tagMatch = /^<([A-Z][A-Za-z0-9_]*)\s*([^>]*?)\s*(?:\/>|><\/\1>)$/.exec(
+    trimmed,
+  );
+  if (!tagMatch) {
+    return `<${fallbackComponentName} />`;
+  }
+
+  const componentName = tagMatch[1];
+  const rawAttributes = tagMatch[2] || "";
+  const attrPattern =
+    /([a-zA-Z0-9_-]+)(?:\s*=\s*(?:(["'])(.*?)\2|\{([^}]+)\}))?/g;
+  let match: RegExpExecArray | null;
+  const safeAttributes: string[] = [];
+
+  while ((match = attrPattern.exec(rawAttributes)) !== null) {
+    const propName = match[1];
+    const normalizedPropName = propName.toLowerCase();
+
+    if (/^on[a-z]/i.test(propName)) continue;
+    if (
+      normalizedPropName === "dangerouslysetinnerhtml" ||
+      normalizedPropName === "ref"
+    )
+      continue;
+    if (!SAFE_JSX_PROPS.has(normalizedPropName)) continue;
+
+    const quotedVal = match[3];
+    const braceVal = match[4];
+
+    if (braceVal !== undefined) {
+      const cleanBrace = braceVal.trim();
+      if (
+        /^[0-9]+(?:\.[0-9]+)?$|^true$|^false$|^"[^"\r\n]*"$|^'[^'\r\n]*'$/.test(
+          cleanBrace,
+        )
+      ) {
+        safeAttributes.push(`${propName}={${cleanBrace}}`);
+      }
+    } else if (quotedVal !== undefined) {
+      const cleanVal = escapeAttribute(quotedVal);
+      if (!/javascript:|data:/i.test(cleanVal)) {
+        safeAttributes.push(`${propName}="${cleanVal}"`);
+      }
+    } else {
+      safeAttributes.push(propName);
+    }
+  }
+
+  const attrsString =
+    safeAttributes.length > 0 ? ` ${safeAttributes.join(" ")}` : "";
+  return `<${componentName}${attrsString} />`;
+}
+
+function getSafeComponentName(icon: IconSearchIcon): string {
+  if (icon.reactImport) {
+    const namedMatch = /import\s+\{\s*([a-zA-Z0-9_]+)/.exec(icon.reactImport);
+    if (namedMatch && /^[A-Z]/.test(namedMatch[1])) {
+      return namedMatch[1];
+    }
+    const defaultMatch = /import\s+([a-zA-Z0-9_]+)\s+from/.exec(
+      icon.reactImport,
+    );
+    if (defaultMatch && /^[A-Z]/.test(defaultMatch[1])) {
+      return defaultMatch[1];
+    }
+  }
+  return toPascalCase(icon.name) || "Icon";
 }
 
 function createInlineReactSnippet(icon: IconSearchIcon, svg: string): string {
@@ -243,18 +336,34 @@ export function normalizeIconColor(value: string): string {
 function normalizeReactImport(value: string | undefined): string {
   if (!value) return "";
   const trimmed = value.trim().replace(/;$/, "");
-  const sideEffectMatch = /^import\s+['"]([^'"]+)['"]$/.exec(trimmed);
+  const sideEffectMatch = /^import\s+['"]([@a-zA-Z0-9_/.-]+)['"]$/.exec(
+    trimmed,
+  );
   if (sideEffectMatch) return `import '${sideEffectMatch[1]}';`;
 
   const namedMatch =
-    /^import\s+\{\s*([^}]+)\s*\}\s+from\s+['"]([^'"]+)['"]$/.exec(trimmed);
-  if (!namedMatch) return value.trim();
+    /^import\s+\{\s*([a-zA-Z0-9_,\s]+)\s*\}\s+from\s+['"]([@a-zA-Z0-9_/.-]+)['"]$/.exec(
+      trimmed,
+    );
+  if (namedMatch) {
+    const importedNames = namedMatch[1]
+      .split(",")
+      .map((name) => name.trim())
+      .filter((name) => /^[a-zA-Z0-9_]+$/.test(name));
+    if (importedNames.length > 0) {
+      return `import { ${importedNames.join(", ")} } from '${namedMatch[2]}';`;
+    }
+  }
 
-  const importedName = namedMatch[1].split(",")[0]?.trim();
-  const moduleSpecifier = namedMatch[2];
-  return importedName && moduleSpecifier
-    ? `import { ${importedName} } from '${moduleSpecifier}';`
-    : value.trim();
+  const defaultMatch =
+    /^import\s+([a-zA-Z0-9_]+)\s+from\s+['"]([@a-zA-Z0-9_/.-]+)['"]$/.exec(
+      trimmed,
+    );
+  if (defaultMatch) {
+    return `import ${defaultMatch[1]} from '${defaultMatch[2]}';`;
+  }
+
+  return "";
 }
 
 function applyJsxClassName(jsx: string, classes: string): string {

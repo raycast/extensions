@@ -8,12 +8,6 @@ export type IconCustomization = {
   color: string;
 };
 
-export type Preferences = {
-  defaultFormat: OutputFormat;
-  tailwindClasses?: string;
-  defaultStyle: SearchStyle;
-};
-
 export type SourceSetOption = {
   id: string;
   name: string;

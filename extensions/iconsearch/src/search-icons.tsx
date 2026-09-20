@@ -52,7 +52,6 @@ import type {
   IconCustomization,
   IconSearchIcon,
   OutputFormat,
-  Preferences,
   SearchStyle,
   SourceSetOption,
 } from "./types";
