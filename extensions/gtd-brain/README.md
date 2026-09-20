@@ -12,7 +12,7 @@
 - **Waiting for** — who you are waiting on and for how many days; mark received or turn into a next action.
 - **Someday/Maybe** — activate an idea as a next action or a project, or let it go.
 
-Every card also has **Open on Dashboard** (⌘O) and **Copy Title** (⌘C). Changes land on the same board as the [web app](https://dashboard.gtdbrain.com/?source=raycast-store), the iOS and Android apps, and the ChatGPT / Claude connectors — instantly. Cards are archived, never deleted, so nothing is lost to a slip.
+Every card also has **Open on Dashboard** (⌘O) and **Copy Title** (⌘C). Changes land on the same board as the [web app](https://dashboard.gtdbrain.com/?source=raycast-store), the iOS and Android apps, and the ChatGPT / Claude connectors — instantly. Cards are archived, never deleted, so nothing is lost to a slip. Away from the Mac, message the GTD Brain bot on Telegram ([@GTDBrainBot](https://t.me/GTDBrainBot?start=raycast-store)), typed or as a voice note, and it lands in the same Inbox.
 
 ## Sign in
 
