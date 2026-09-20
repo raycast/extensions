@@ -8,4 +8,4 @@
 - Ask questions about archived articles with Raycast AI and linked sources.
 - Open articles in Raycast or the default browser and copy article links.
 - Refresh articles manually or with Raycast Background Refresh.
-- Use an English or German command interface.
+- Use a US English command interface with the original German blog topics.
