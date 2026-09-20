@@ -14,7 +14,7 @@ Raycast commands for searching, previewing, reusing, and pasting screenshots and
 3. Configure **Search Scopes** in the extension preferences. The system screenshot folder, CleanShot X folder, Desktop, and the supplied Dropbox `screen_shot` folder are included when they exist.
 4. Use **Add Search Scope** from the Action Panel to choose another folder.
 
-OCR uses macOS Spotlight metadata in Fast mode and Vision in Accurate mode. Storage Duration limits the local index/cache; original files are never deleted.
+OCR uses macOS Spotlight metadata in Fast mode and Vision in Accurate mode. Storage Duration limits cached OCR metadata; original files are never deleted.
 
 ## Publish
 

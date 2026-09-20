@@ -1,10 +1,14 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screenshot-search",
   "title": "Screenshot Search",
   "description": "Search, preview, and paste screenshots and screen recordings",
   "version": "1.0.0",
   "author": "kosuke_yano",
   "license": "MIT",
+  "categories": [
+    "Media"
+  ],
   "icon": "icon.png",
   "commands": [
     {

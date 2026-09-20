@@ -160,6 +160,22 @@ function parseDuration(value: string): number | undefined {
 }
 
 function parseDate(value: string): Date | undefined {
+  const localDate = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (localDate) {
+    const year = Number(localDate[1]);
+    const month = Number(localDate[2]);
+    const day = Number(localDate[3]);
+    const parsed = new Date(0);
+    parsed.setHours(0, 0, 0, 0);
+    parsed.setFullYear(year, month - 1, day);
+
+    return parsed.getFullYear() === year &&
+      parsed.getMonth() === month - 1 &&
+      parsed.getDate() === day
+      ? parsed
+      : undefined;
+  }
+
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 }

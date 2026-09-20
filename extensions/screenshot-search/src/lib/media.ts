@@ -8,7 +8,12 @@ import path from "node:path";
 const execFileAsync = promisify(execFile) as (
   file: string,
   args: string[],
-  options?: { encoding?: BufferEncoding; timeout?: number; maxBuffer?: number },
+  options?: {
+    encoding?: BufferEncoding;
+    timeout?: number;
+    maxBuffer?: number;
+    signal?: AbortSignal;
+  },
 ) => Promise<{ stdout: string; stderr: string }>;
 
 const CUSTOM_SCOPES_KEY = "custom-search-scopes";
@@ -29,17 +34,13 @@ const IMAGE_EXTENSIONS = new Set([
 ]);
 const VIDEO_EXTENSIONS = new Set([".m4v", ".mov", ".mp4", ".webm"]);
 const MAX_OCR_CONCURRENCY = 4;
+// ponytail: bounded walk; switch to Spotlight indexing if full-tree coverage is needed.
+const MAX_SCAN_DEPTH = 8;
+const MAX_SCAN_ENTRIES_PER_SCOPE = 10_000;
 
 export type RecognitionMode = "fast" | "accurate";
 
-export type ScreenshotPreferences = {
-  scopeFolders?: string;
-  includeAllMedia?: boolean;
-  textRecognition?: boolean;
-  recognitionMode?: RecognitionMode;
-  allowCloudFiles?: boolean;
-  storageDuration?: string;
-};
+export type ScreenshotPreferences = Preferences.SearchScreenshots;
 
 export type MediaItem = {
   id: string;
@@ -75,6 +76,8 @@ export async function loadMediaItems(
       items,
       seen,
       false,
+      0,
+      { remainingEntries: MAX_SCAN_ENTRIES_PER_SCOPE },
     );
   }
 
@@ -177,20 +180,6 @@ export async function writeOcrCache(cache: OcrCache): Promise<void> {
   await LocalStorage.setItem(OCR_CACHE_KEY, JSON.stringify(cache));
 }
 
-export function applyStorageDuration(
-  items: MediaItem[],
-  storageDuration: string | undefined,
-  pinned: Set<string>,
-): MediaItem[] {
-  const retention = retentionMilliseconds(storageDuration);
-  if (!retention) return items;
-
-  const cutoff = Date.now() - retention;
-  return items.filter(
-    (item) => pinned.has(item.path) || item.capturedAt >= cutoff,
-  );
-}
-
 export function pruneOcrCache(
   cache: OcrCache,
   storageDuration: string | undefined,
@@ -212,6 +201,7 @@ export async function enrichWithText(
   items: MediaItem[],
   preferences: ScreenshotPreferences,
   cache: OcrCache,
+  signal?: AbortSignal,
 ): Promise<{ items: MediaItem[]; cache: OcrCache }> {
   if (!preferences.textRecognition) return { items, cache };
 
@@ -221,6 +211,7 @@ export async function enrichWithText(
 
   async function worker(): Promise<void> {
     while (cursor < enriched.length) {
+      throwIfAborted(signal);
       const index = cursor++;
       const item = enriched[index];
       const cached = nextCache[item.path];
@@ -235,13 +226,18 @@ export async function enrichWithText(
         continue;
       }
 
-      if ((await isCloudOnly(item.path)) && !preferences.allowCloudFiles)
+      if (
+        (await isCloudOnly(item.path, signal)) &&
+        !preferences.allowCloudFiles
+      )
         continue;
 
       const text = await recognizeText(
         item,
         preferences.recognitionMode ?? "fast",
+        signal,
       );
+      throwIfAborted(signal);
       item.text = text;
       nextCache[item.path] = {
         text,
@@ -276,13 +272,18 @@ export function formatBytes(bytes: number): string {
   return `${value.toFixed(value >= 10 ? 0 : 1)} ${unit}`;
 }
 
+type ScanBudget = { remainingEntries: number };
+
 async function scanDirectory(
   directory: string,
   includeAllMedia: boolean,
   items: MediaItem[],
   seen: Set<string>,
   captureScope: boolean,
+  depth: number,
+  budget: ScanBudget,
 ): Promise<void> {
+  if (depth > MAX_SCAN_DEPTH || budget.remainingEntries <= 0) return;
   const isCaptureScope = captureScope || looksLikeCaptureFolder(directory);
   let entries;
   try {
@@ -293,6 +294,7 @@ async function scanDirectory(
 
   for (const entry of entries) {
     if (entry.name.startsWith(".")) continue;
+    if (budget.remainingEntries-- <= 0) return;
     const filePath = path.join(directory, entry.name);
 
     if (entry.isDirectory()) {
@@ -302,6 +304,8 @@ async function scanDirectory(
         items,
         seen,
         isCaptureScope,
+        depth + 1,
+        budget,
       );
       continue;
     }
@@ -412,18 +416,23 @@ async function readCustomScopes(): Promise<string[]> {
   }
 }
 
-async function isCloudOnly(filePath: string): Promise<boolean> {
+async function isCloudOnly(
+  filePath: string,
+  signal?: AbortSignal,
+): Promise<boolean> {
   if (process.platform !== "darwin") return false;
   const ubiquitous = await runCommand(
     "/usr/bin/mdls",
     ["-raw", "-name", "kMDItemFSIsUbiquitous", filePath],
     1_500,
+    signal,
   );
   if (ubiquitous !== "1") return false;
   const downloaded = await runCommand(
     "/usr/bin/mdls",
     ["-raw", "-name", "kMDItemFSIsDownloaded", filePath],
     1_500,
+    signal,
   );
   return downloaded === "0";
 }
@@ -431,19 +440,24 @@ async function isCloudOnly(filePath: string): Promise<boolean> {
 async function recognizeText(
   item: MediaItem,
   mode: RecognitionMode,
+  signal?: AbortSignal,
 ): Promise<string> {
   const spotlight = await runCommand(
     "/usr/bin/mdls",
     ["-raw", "-name", "kMDItemTextContent", item.path],
     4_000,
+    signal,
   );
   if (mode === "fast" || item.kind === "video") return cleanText(spotlight);
 
-  const vision = await runVisionOcr(item.path);
+  const vision = await runVisionOcr(item.path, signal);
   return cleanText(vision || spotlight);
 }
 
-async function runVisionOcr(filePath: string): Promise<string> {
+async function runVisionOcr(
+  filePath: string,
+  signal?: AbortSignal,
+): Promise<string> {
   if (process.platform !== "darwin") return "";
 
   const script = `
@@ -463,24 +477,35 @@ try? handler.perform([request])
 print(recognized.joined(separator: "\\n"))
 `;
 
-  return runCommand("/usr/bin/swift", ["-e", script, filePath], 20_000);
+  return runCommand("/usr/bin/swift", ["-e", script, filePath], 20_000, signal);
 }
 
 async function runCommand(
   command: string,
   args: string[],
   timeout: number,
+  signal?: AbortSignal,
 ): Promise<string> {
   try {
+    throwIfAborted(signal);
     const { stdout } = await execFileAsync(command, args, {
       encoding: "utf8",
       timeout,
       maxBuffer: 2 * 1024 * 1024,
+      signal,
     });
     return stdout.trim();
-  } catch {
+  } catch (error) {
+    if (signal?.aborted) throw error;
     return "";
   }
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (!signal?.aborted) return;
+  const error = new Error("Operation aborted");
+  error.name = "AbortError";
+  throw error;
 }
 
 function cleanText(value: string): string {

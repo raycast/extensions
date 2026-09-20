@@ -1,23 +1,11 @@
 import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import {
-  applyStorageDuration,
-  loadMediaItems,
-  readPinnedPaths,
-} from "./lib/media";
+import { loadMediaItems } from "./lib/media";
 import type { ScreenshotPreferences } from "./lib/media";
 
 export default async function PasteLatestScreenshot() {
   const preferences = getPreferenceValues<ScreenshotPreferences>();
-  const [scannedItems, pinned] = await Promise.all([
-    loadMediaItems(preferences),
-    readPinnedPaths(),
-  ]);
-  const items = applyStorageDuration(
-    scannedItems,
-    preferences.storageDuration,
-    pinned,
-  );
-  const latest = items.find((item) => item.kind === "image");
+  const scannedItems = await loadMediaItems(preferences);
+  const latest = scannedItems.find((item) => item.kind === "image");
 
   if (!latest) {
     await showToast({

@@ -13,7 +13,6 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   addCustomScope,
-  applyStorageDuration,
   chooseFolder,
   enrichWithText,
   formatBytes,
@@ -42,8 +41,7 @@ type GridActionsProps = {
 
 export default function SearchScreenshots() {
   const preferences = useMemo(
-    () =>
-      getPreferenceValues<ScreenshotPreferences & { columnCount?: string }>(),
+    () => getPreferenceValues<ScreenshotPreferences>(),
     [],
   );
   const [items, setItems] = useState<
@@ -76,11 +74,6 @@ export default function SearchScreenshots() {
         readPinnedPaths(),
         readOcrCache(),
       ]);
-      const nextItems = applyStorageDuration(
-        scannedItems,
-        preferences.storageDuration,
-        nextPinned,
-      );
       const prunedCache = pruneOcrCache(
         nextCache,
         preferences.storageDuration,
@@ -88,8 +81,8 @@ export default function SearchScreenshots() {
       );
       if (cancelled) return;
 
-      setItems(nextItems);
-      setVisibleItems(nextItems);
+      setItems(scannedItems);
+      setVisibleItems(scannedItems);
       setPinned(nextPinned);
       ocrCache.current = prunedCache;
       setIsLoading(false);
@@ -114,21 +107,33 @@ export default function SearchScreenshots() {
     }
 
     let cancelled = false;
+    const controller = new AbortController();
     setIsSearching(true);
 
     async function search() {
-      const result = await enrichWithText(items, preferences, ocrCache.current);
-      if (cancelled) return;
+      try {
+        const result = await enrichWithText(
+          items,
+          preferences,
+          ocrCache.current,
+          controller.signal,
+        );
+        if (cancelled) return;
 
-      ocrCache.current = result.cache;
-      setVisibleItems(filterItems(result.items, query));
-      setIsSearching(false);
-      await writeOcrCache(result.cache);
+        ocrCache.current = result.cache;
+        setVisibleItems(filterItems(result.items, query));
+        setIsSearching(false);
+        await writeOcrCache(result.cache);
+      } catch {
+        if (!cancelled) setIsSearching(false);
+      }
     }
 
-    void search();
+    const debounce = setTimeout(() => void search(), 250);
     return () => {
       cancelled = true;
+      clearTimeout(debounce);
+      controller.abort();
     };
   }, [items, isLoading, preferences, searchText]);
 
