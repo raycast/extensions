@@ -27,9 +27,3 @@ compiled_raycast_rust
 # misc
 .DS_Store
 raycast-env.d.ts
-
-# build / env
-dist/
-build/
-*.log
-.env*
