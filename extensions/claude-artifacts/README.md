@@ -35,9 +35,26 @@ One extension, one honest dependency.
 There is no artifacts API available to individual users, so this extension doesn't call one. Instead:
 
 1. **A Claude Code hook** watches for artifacts as they're published and appends each one to a local index at `~/.claude/artifacts.json`.
-2. **The Raycast command** reads that file — instantly, offline, no network call.
+2. **The Raycast commands** read that file — instantly, offline, no network call.
 
 That's the whole architecture. It's a local file and a list.
+
+### Commands
+
+**Search Artifacts** — the list, newest first.
+
+| Action                                                     |                                                                                                          |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Open**                                                   | ⏎                                                                                                        |
+| **Copy Link** / **Copy Title**                             | ⌘⇧C / ⌘⌥C                                                                                                |
+| **Open Folder**                                            | ⌘O — the directory the artifact was published from                                                       |
+| **Pin Artifact**                                           | ⌘. — pinned artifacts collect in a **Pinned** section at the top, and stay there inside a project filter |
+| **View Claude Code Artifacts** / **View Claude Artifacts** | ⌘⇧O / ⌘⇧G — the two galleries on claude.ai, offered in every state including the empty ones              |
+
+Filter by project once more than one project has published, and search matches title and project.
+
+**Run Doctor** — checks that recording still works, and recovers anything it missed. See
+[When the list stops growing](#when-the-list-stops-growing--the-run-doctor-command).
 
 ### Setup
 
@@ -157,7 +174,7 @@ This extension maintains a **local mirror**, not a live view. Be clear-eyed abou
 - **It only records artifacts published after you install the hook**, from **machines where the hook is installed.** The one-time seed backfills your history up to setup; the hook covers everything after. If the hook ever misses a stretch, **Run Doctor** can recover it from your local Claude Code transcripts.
 - **Renames and deletions don't propagate.** If you rename an artifact on claude.ai, the index keeps the old title until that artifact is republished. Over months, the index will drift from reality.
 - **Artifacts created outside Claude Code** — in the Claude desktop app or on claude.ai directly — won't be captured by the hook.
-- **Chat artifacts are not supported.** Claude has two separate artifact systems; this covers Claude Code artifacts (`claude.ai/code/artifact/…`). Chat artifacts have no sanctioned programmatic access at all.
+- **Chat artifacts are not supported.** Claude has two separate artifact systems; this covers Claude Code artifacts, published under `claude.ai/artifact/…` (and `claude.ai/code/artifact/…` before the scheme changed in September 2026 — both are recognised). Chat artifacts have no sanctioned programmatic access at all.
 
 Because of those last two, every state in this extension — including "no artifacts" and "no matches" — offers **View Claude Code Artifacts** (⌘⇧O) and **View Claude Artifacts** (⌘⇧G), which jump to `claude.ai/code/artifacts` and `claude.ai/artifacts`. When an artifact isn't in the index, it usually isn't missing — it was published somewhere the hook can't see, and that gallery is where it actually lives.
 

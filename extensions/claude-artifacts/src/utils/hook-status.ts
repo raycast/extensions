@@ -129,6 +129,17 @@ Finally: tell me to publish a test artifact and check that it appears, and that 
  * 2026-09 outage stayed invisible, since every structural check was green while
  * the script silently failed to parse the new URL format.
  */
+/**
+ * POSIX single-quoting, for a path going into a shell command.
+ *
+ * `scriptFromCommand` deliberately supports registered paths containing spaces,
+ * so a prompt that interpolates one bare would hand the user a command that
+ * runs the wrong file — the very inconsistency this prompt exists to fix.
+ */
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
 export function updatePrompt(scriptPath: string): string {
   return `The Claude Code hook that records my published artifacts has stopped recording them. It is installed and registered correctly — the script itself is out of date.
 
@@ -138,7 +149,7 @@ export function updatePrompt(scriptPath: string): string {
 
 3. Verify the updated script actually parses a current artifact URL, without touching my real index — point HOME at a scratch directory so the write lands there:
 
-d="$(mktemp -d)" && mkdir -p "$d/.claude" && echo '{"cwd":"/tmp","tool_name":"Artifact","tool_input":{},"tool_response":{"url":"https://claude.ai/artifact/RaycastDoctorSelfTest1","title":"Self-Test","audience":"owner"}}' | HOME="$d" bash ${scriptPath}; cat "$d/.claude/artifacts.json"
+d="$(mktemp -d)" && mkdir -p "$d/.claude" && echo '{"cwd":"/tmp","tool_name":"Artifact","tool_input":{},"tool_response":{"url":"https://claude.ai/artifact/RaycastDoctorSelfTest1","title":"Self-Test","audience":"owner"}}' | HOME="$d" bash ${shellQuote(scriptPath)}; cat "$d/.claude/artifacts.json"
 
 That must print a row whose id is RaycastDoctorSelfTest1. If it prints nothing, or the file does not exist, the update did not take.
 
@@ -307,12 +318,22 @@ function scriptFromCommand(command: string): string | undefined {
   return undefined;
 }
 
-/** The interpreter a command runs its script through, if it names one. */
+/**
+ * The interpreter a command runs its script through, if it names one.
+ *
+ * `env` is a PREFIX, not the interpreter — `env bash /path/rec.sh` runs bash.
+ * Returning early on it loses the real launcher, and Doctor then demands an
+ * execute bit the registration does not need. Skip past it and keep looking.
+ *
+ * The first token that is neither `env` nor an assignment decides: a launcher
+ * means the script is interpreted, anything else means it is the script itself.
+ */
 function launcherFromCommand(command: string): string | undefined {
   for (const token of command.trim().split(/\s+/)) {
     if (!token || token.includes("=")) continue;
     const bare = path.basename(token.replace(/^["']|["']$/g, ""));
-    if (LAUNCHERS.test(bare)) return bare === "env" ? undefined : bare;
+    if (bare === "env") continue;
+    return LAUNCHERS.test(bare) ? bare : undefined;
   }
   return undefined;
 }
