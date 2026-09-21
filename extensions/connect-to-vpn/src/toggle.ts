@@ -25,7 +25,7 @@ export default async () => {
       const service = networkServices[lastUsed];
       if (service) {
         const status = networkServices[lastUsed].status;
-        const newStatus = status === "connected" ? "disconnected" : "connecting";
+        const newStatus = status === "connected" ? "disconnecting" : "connecting";
         const newStatusMessage = status === "connected" ? "off" : "on";
         await setServiceStatus(service, newStatus);
         await showHUD(`Turned ${lastUsedName} ${newStatusMessage}`, {
