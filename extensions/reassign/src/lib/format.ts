@@ -65,7 +65,7 @@ export function humanHours(hours: number): string {
  * Returns the minutes and the matched substring, or null when none is found.
  */
 export function parseDuration(text: string): { minutes: number; match: string } | null {
-  const hm = /(\d+)\s*h\s*(\d{2})\s*m?\b/i.exec(text); // 1h30, 1h30m
+  const hm = /(\d+)\s*h(?:ours?|rs?)?\s*(\d{1,2})\s*(?:m(?:in(?:ute)?s?)?)?\b/i.exec(text); // 1h30, 1 hour 30 minutes
   if (hm) return { minutes: Number(hm[1]) * 60 + Number(hm[2]), match: hm[0] };
   const hours = /(\d+(?:\.\d+)?)\s*h(?:ours?|rs?)?\b/i.exec(text); // 2h, 1.5h
   if (hours) return { minutes: Math.round(Number(hours[1]) * 60), match: hours[0] };

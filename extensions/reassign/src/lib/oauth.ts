@@ -1,4 +1,6 @@
-import { OAuth } from "@raycast/api";
+import { LocalStorage, OAuth } from "@raycast/api";
+import { randomUUID } from "node:crypto";
+import { withSessionLock } from "./session-lock";
 import { AUTHORIZE_URL, CLIENT_ID, OAUTH_RESOURCE, RAYCAST_REDIRECT, SCOPES, TOKEN_URL } from "./wire";
 
 // The `resource` (RFC 8707) audience must ride the authorize and token calls,
@@ -37,47 +39,39 @@ interface TokenResponse {
   scope?: string;
 }
 
-/** Coalesce concurrent refreshes so parallel calls do not race the endpoint. */
-let refreshInFlight: Promise<string> | null = null;
-// Identifies the current in-flight refresh, so its cleanup never nulls a
-// successor that a sign-out let start in the meantime.
-let refreshId = 0;
-
-// Bumped on every sign-out. A refresh that started before a sign-out must not
-// store new tokens after it (that would silently undo the logout).
-let logoutEpoch = 0;
-
-// Set synchronously on sign-out, cleared only on a fresh sign-in. It closes the
-// window where a refresh starts during `signOut`'s async token removal: that
-// refresh reads the still-stored token and captures the new epoch, so only this
-// flag (checked before `setTokens`) stops it from re-authenticating.
-let signedOut = false;
-
-/** A token-endpoint failure that carries the HTTP status (undefined = network). */
-class TokenEndpointError extends Error {
-  status?: number;
-  constructor(message: string, status?: number) {
-    super(message);
-    this.name = "TokenEndpointError";
-    this.status = status;
+const SESSION_KEY = "reassign-session";
+interface SessionState {
+  generation: string;
+  signedOut: boolean;
+}
+async function sessionState(): Promise<SessionState | undefined> {
+  const value = await LocalStorage.getItem<string>(SESSION_KEY);
+  if (!value) return undefined;
+  // A corrupt value must not brick every auth call. Treat it as no session.
+  try {
+    return JSON.parse(value) as SessionState;
+  } catch {
+    return undefined;
   }
 }
 
-// Serialize every token-store mutation — sign-in, the refresh write, and
-// sign-out — so a guard check and its write can never straddle a concurrent
-// logout. Callers await the previous mutation before running, then release.
-// (Raycast runs each command in its own process, so this orders writes within a
-// command; cross-command safety is bounded by the token store, which is all the
-// API exposes.)
-let tokenLockTail: Promise<unknown> = Promise.resolve();
-function withTokenLock<T>(fn: () => Promise<T>): Promise<T> {
-  const result = tokenLockTail.then(fn, fn);
-  tokenLockTail = result.catch(() => undefined);
-  return result;
+class TokenEndpointError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code?: string,
+  ) {
+    super(message);
+  }
 }
 
 /** Run the full sign-in: authorize in the browser, then exchange the code. */
-export async function signIn(): Promise<void> {
+export async function signIn(options?: { automatic?: boolean }): Promise<void> {
+  const generation = await withSessionLock(async () => {
+    const state = await sessionState();
+    if (options?.automatic && state?.signedOut) throw new SignedOutError();
+    return state?.generation;
+  });
   const authRequest = await client.authorizationRequest({
     endpoint: AUTHORIZE_URL,
     clientId: CLIENT_ID,
@@ -86,102 +80,61 @@ export async function signIn(): Promise<void> {
   });
   const { authorizationCode } = await client.authorize(authRequest);
   const tokens = await exchangeCode(authorizationCode, authRequest.redirectURI, authRequest.codeVerifier);
-  await withTokenLock(async () => {
-    signedOut = false;
+  await withSessionLock(async () => {
+    if ((await sessionState())?.generation !== generation) throw new SignedOutError();
     await client.setTokens(tokens);
+    await LocalStorage.setItem(SESSION_KEY, JSON.stringify({ generation: randomUUID(), signedOut: false }));
   });
 }
 
 /** Return a valid token for `withAccessToken`, and start the native OAuth flow when no session lives. */
 export async function authorize(): Promise<string> {
-  const tokens = await client.getTokens();
-  if (tokens?.accessToken && !tokens.isExpired()) return tokens.accessToken;
-  if (tokens?.refreshToken) {
-    try {
-      return await refresh(tokens.refreshToken);
-    } catch (error) {
-      // A sign-out cancelled the refresh — respect the logout, never re-authenticate.
-      if (error instanceof SignedOutError) throw error;
-      // A dead grant means re-consent; a transient error must not pop a browser.
-      if (!(error instanceof NotAuthorizedError)) throw error;
-    }
+  const generation = await withSessionLock(async () => (await sessionState())?.generation);
+  try {
+    return await getAccessToken();
+  } catch (error) {
+    if (!(error instanceof NotAuthorizedError)) throw error;
+    if ((await sessionState())?.generation !== generation) throw new SignedOutError();
   }
+  // A foreground command launch is an explicit request to connect. Background
+  // reads and in-command recovery never call this provider automatically.
   await signIn();
-  const fresh = await client.getTokens();
-  if (!fresh?.accessToken) throw new Error("Sign-in returned no token");
-  return fresh.accessToken;
+  return getAccessToken();
 }
 
 /** The provider that `withAccessToken` wraps each view command with. */
 export const reassignProvider = { client, authorize };
 
-/** Clear the stored session. The next call forces a new sign-in. */
+/** Remove credentials under the same cross-command lock as refresh commits. */
 export async function signOut(): Promise<void> {
-  // Set the guards synchronously so a refresh that starts now already sees them;
-  // the removal itself runs under the lock, serialized with any refresh write.
-  signedOut = true;
-  logoutEpoch += 1;
-  refreshInFlight = null;
-  await withTokenLock(() => client.removeTokens());
+  await withSessionLock(async () => {
+    await LocalStorage.setItem(SESSION_KEY, JSON.stringify({ generation: randomUUID(), signedOut: true }));
+    await client.removeTokens();
+  });
 }
 
-/** True when a token set is stored (it may still need a refresh). */
-export async function isSignedIn(): Promise<boolean> {
-  const tokens = await client.getTokens();
-  return Boolean(tokens?.accessToken);
-}
-
-/**
- * Return a valid access token, refreshing if expired.
- * Pass `force` to refresh even when the current token looks valid (used after a
- * 401 from the API). Throws NotAuthorizedError when there is no session.
- */
+/** Background-safe: never opens the OAuth flow. */
 export async function getAccessToken(options?: { force?: boolean }): Promise<string> {
-  const tokens = await client.getTokens();
-  if (!tokens?.accessToken) {
-    throw new NotAuthorizedError();
-  }
-  const mustRefresh = options?.force || tokens.isExpired();
-  if (!mustRefresh) {
-    return tokens.accessToken;
-  }
-  if (!tokens.refreshToken) {
-    await signOut();
-    throw new NotAuthorizedError("Session expired");
-  }
-  return refresh(tokens.refreshToken);
-}
-
-/** Refresh the access token. Concurrent callers share one in-flight request. */
-async function refresh(refreshToken: string): Promise<string> {
-  if (refreshInFlight) {
-    return refreshInFlight;
-  }
-  const epoch = logoutEpoch;
-  const id = ++refreshId;
-  refreshInFlight = (async () => {
+  return withSessionLock(async () => {
+    if ((await sessionState())?.signedOut) throw new SignedOutError("Signed out of Reassign");
+    const tokens = await client.getTokens();
+    if (!tokens?.accessToken) throw new NotAuthorizedError();
+    if (!options?.force && !tokens.isExpired()) return tokens.accessToken;
+    if (!tokens.refreshToken) throw new NotAuthorizedError("Session expired");
     try {
-      const tokens = await exchangeRefresh(refreshToken);
-      // Keep the old refresh token when the server omits a new one, or the next
-      // refresh finds no token and forces an unneeded sign-in.
-      if (!tokens.refresh_token) tokens.refresh_token = refreshToken;
-      // Guard and write under the lock, so a logout cannot land between them.
-      // `signedOut` catches a refresh that started during/after a sign-out; the
-      // epoch catches one that started before a sign-out then intervening state.
-      return await withTokenLock(async () => {
-        if (signedOut || logoutEpoch !== epoch) {
-          throw new SignedOutError();
-        }
-        await client.setTokens(tokens);
-        return tokens.access_token;
-      });
-    } finally {
-      // Clear only our own slot. A sign-out may have already nulled it and a
-      // later refresh may own it now — do not clobber that successor.
-      if (refreshId === id) refreshInFlight = null;
+      const fresh = await exchangeRefresh(tokens.refreshToken);
+      if (!fresh.refresh_token) fresh.refresh_token = tokens.refreshToken;
+      await client.setTokens(fresh);
+      return fresh.access_token;
+    } catch (error) {
+      // Only the OAuth invalid_grant response confirms a revoked/expired grant.
+      if (error instanceof TokenEndpointError && error.status === 400 && error.code === "invalid_grant") {
+        await client.removeTokens();
+        throw new NotAuthorizedError("Session expired. Sign in again.");
+      }
+      throw error;
     }
-  })();
-  return refreshInFlight;
+  });
 }
 
 /** Exchange the authorization code for a token set. Sends `resource`. */
@@ -204,19 +157,7 @@ async function exchangeRefresh(refreshToken: string): Promise<TokenResponse> {
     refresh_token: refreshToken,
     client_id: CLIENT_ID,
   });
-  try {
-    return await postToken(body);
-  } catch (error) {
-    const status = error instanceof TokenEndpointError ? error.status : undefined;
-    // Only a 4xx means the grant is dead — sign out and force a fresh sign-in.
-    // A network error or a 5xx is transient: keep the session and report it, so
-    // a flaky connection does not log the user out.
-    if (status !== undefined && status >= 400 && status < 500) {
-      await signOut();
-      throw new NotAuthorizedError(error instanceof Error ? error.message : "Refresh failed");
-    }
-    throw error;
-  }
+  return postToken(body);
 }
 
 async function postToken(body: URLSearchParams): Promise<TokenResponse> {
@@ -224,10 +165,26 @@ async function postToken(body: URLSearchParams): Promise<TokenResponse> {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
+    signal: AbortSignal.timeout(15000),
   });
+  const raw: unknown = await response.json().catch(() => undefined);
+  const payload = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : undefined;
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new TokenEndpointError(`Token endpoint ${response.status}: ${text}`, response.status);
+    throw new TokenEndpointError(
+      `Could not connect to Reassign (${response.status}). Try again.`,
+      response.status,
+      typeof payload?.error === "string" ? payload.error : undefined,
+    );
   }
-  return (await response.json()) as TokenResponse;
+  if (
+    !payload ||
+    typeof payload.access_token !== "string" ||
+    !payload.access_token ||
+    (payload.refresh_token !== undefined && typeof payload.refresh_token !== "string") ||
+    (payload.expires_in !== undefined &&
+      (typeof payload.expires_in !== "number" || !Number.isFinite(payload.expires_in) || payload.expires_in <= 0))
+  ) {
+    throw new Error("Reassign returned an invalid token response. Try again.");
+  }
+  return payload as unknown as TokenResponse;
 }

@@ -47,7 +47,7 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
   const { revalidate, optimistic } = options;
   const [lastUndoToken, setLastUndoToken] = useState<string | null>(null);
 
-  async function apply(loading: string, success: string, ops: WriteOp[]): Promise<void> {
+  async function apply(loading: string, success: string, ops: WriteOp[]): Promise<boolean> {
     const toast = await showToast({ style: Toast.Style.Animated, title: loading });
     try {
       let receipt: BatchReceipt;
@@ -69,6 +69,7 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
         setLastUndoToken(token);
         applyUndoToast(toast, token);
       }
+      return true;
     } catch (error) {
       if (isApiError(error)) failToast(toast, error);
       else {
@@ -76,25 +77,26 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
         toast.title = "Something went wrong";
       }
       if (!optimistic) revalidate();
+      return false;
     }
   }
 
   // Edit path (PATCH /events/{id}). It revalidates rather than updating
   // optimistically — an edit is rarer than a reflect / shift, and the changed
   // fields (area, name) do not map to a simple local transform.
-  async function applyEdit(loading: string, success: string, id: string, patch: UpdateEventPatch): Promise<void> {
+  async function applyEdit(loading: string, success: string, id: string, patch: UpdateEventPatch): Promise<boolean> {
     const toast = await showToast({ style: Toast.Style.Animated, title: loading });
     const result = await updateEvent(id, patch);
     if (!result.ok) {
       failToast(toast, result);
-      return;
+      return false;
     }
     // A 2xx can still carry a rejected row (failed:1). Treat it as a failure.
     if (result.data.failed > 0) {
       toast.style = Toast.Style.Failure;
       toast.title = "The change did not apply";
       toast.message = "The server rejected it.";
-      return;
+      return false;
     }
     toast.style = Toast.Style.Success;
     toast.title = success;
@@ -104,6 +106,7 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
       applyUndoToast(toast, token);
     }
     revalidate();
+    return true;
   }
 
   async function runUndo(): Promise<void> {
@@ -183,8 +186,8 @@ export function AgendaActions(props: {
   date: string;
   areas: Area[];
   activityTypes: ActivityType[];
-  mutate: (loading: string, success: string, ops: WriteOp[]) => Promise<void>;
-  onEdit: (id: string, patch: UpdateEventPatch) => Promise<void>;
+  mutate: (loading: string, success: string, ops: WriteOp[]) => Promise<boolean>;
+  onEdit: (id: string, patch: UpdateEventPatch) => Promise<boolean>;
   lastUndoToken: string | null;
   runUndo: () => Promise<void>;
   nav: ReactNode;
@@ -271,7 +274,7 @@ export function AgendaActions(props: {
       )}
       <ActionPanel.Section>
         <Action
-          title="Schedule a Block…"
+          title="Add Block…"
           icon={Icon.Plus}
           shortcut={Keyboard.Shortcut.Common.New}
           onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated })}

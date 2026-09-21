@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import type { ApiError } from "../lib/api";
-import { signIn, signOut } from "../lib/oauth";
+import { signIn } from "../lib/oauth";
 import { BILLING_URL } from "../lib/wire";
 
 /** Pick the screen for an API refusal: re-auth, the Pro gate, or a retry. */
 export function refusalView(error: ApiError, onRecover: () => void) {
+  if (error.code === "signed_out") return <ReauthView onSignedIn={onRecover} automatic={false} />;
   if (error.code === "unauthenticated" || error.code === "unauthorized") {
     return <ReauthView onSignedIn={onRecover} />;
   }
@@ -13,25 +14,24 @@ export function refusalView(error: ApiError, onRecover: () => void) {
   return <ErrorView message={error.message} onRetry={onRecover} />;
 }
 
-/** Re-run the native OAuth after a mid-session grant loss; clear the stale token first. */
-function ReauthView(props: { onSignedIn: () => void }) {
+/** Re-run OAuth for session expiry; intentional logout waits for a user action. */
+function ReauthView(props: { onSignedIn: () => void; automatic?: boolean }) {
   const started = useRef(false);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState(props.automatic === false);
   // A cancelled or failed flow shows a manual retry, not a stuck spinner.
-  async function reauth() {
+  async function reauth(automatic = false) {
     setFailed(false);
     try {
-      await signOut();
-      await signIn();
+      await signIn({ automatic });
       props.onSignedIn();
     } catch {
       setFailed(true);
     }
   }
   useEffect(() => {
-    if (started.current) return;
+    if (started.current || props.automatic === false) return;
     started.current = true;
-    reauth();
+    void reauth(true);
   }, []);
   if (!failed) return <List isLoading />;
   return (
@@ -42,7 +42,7 @@ function ReauthView(props: { onSignedIn: () => void }) {
         description="Connect your Reassign account to see and plan your day."
         actions={
           <ActionPanel>
-            <Action title="Sign in to Reassign" icon={Icon.Key} onAction={reauth} />
+            <Action title="Sign in to Reassign" icon={Icon.Key} onAction={() => reauth()} />
           </ActionPanel>
         }
       />

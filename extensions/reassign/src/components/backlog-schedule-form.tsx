@@ -14,7 +14,7 @@ interface ScheduleFormValues {
  */
 export function BacklogScheduleForm(props: {
   item: BacklogItem;
-  onSubmit: (date: string, start: string) => Promise<void>;
+  onSubmit: (date: string, start: string) => Promise<boolean>;
 }) {
   const { item, onSubmit } = props;
   const { pop } = useNavigation();
@@ -23,7 +23,7 @@ export function BacklogScheduleForm(props: {
   async function submit(values: ScheduleFormValues) {
     const date = values.date ? todayISO(values.date) : defaultDate;
     const start = values.start.trim();
-    if (!/^\d{1,2}:\d{2}$/.test(start)) {
+    if (!/^([01]?\d|2[0-3]):[0-5]\d$/.test(start)) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Add a start time",
@@ -31,8 +31,7 @@ export function BacklogScheduleForm(props: {
       });
       return;
     }
-    await onSubmit(date, start);
-    pop();
+    if (await onSubmit(date, start)) pop();
   }
 
   return (

@@ -32,7 +32,7 @@ export function SearchView(props: { initialQuery?: string }) {
       throttle
       searchText={text}
       onSearchTextChange={setText}
-      navigationTitle="Search All Blocks"
+      navigationTitle="Search Blocks"
       searchBarPlaceholder="Search every block by name or notes"
     >
       {groups.map(([date, rows]) => (

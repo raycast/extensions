@@ -19,8 +19,11 @@ function Command() {
 
   // Place a parked item with the `schedule` op, then refresh the list.
   async function scheduleItem(id: string, date: string, start: string) {
-    await runMutation("Scheduling…", "Scheduled the block", () => manageBacklog([{ op: "schedule", id, date, start }]));
-    revalidate();
+    const result = await runMutation("Scheduling…", "Scheduled the block", () =>
+      manageBacklog([{ op: "schedule", id, date, start }]),
+    );
+    if (result.ok) revalidate();
+    return result.ok;
   }
 
   if (data && !data.ok) return refusalView(data, revalidate);

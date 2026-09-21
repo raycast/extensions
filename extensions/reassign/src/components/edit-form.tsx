@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import type { Scope, UpdateEventPatch } from "../lib/api";
 import type { ActivityType, Area, ScheduleEvent } from "../lib/schedule-model";
@@ -24,7 +25,7 @@ export function EditForm(props: {
   event: ScheduleEvent;
   areas: Area[];
   activityTypes: ActivityType[];
-  onSubmit: (patch: UpdateEventPatch) => Promise<void>;
+  onSubmit: (patch: UpdateEventPatch) => Promise<boolean>;
 }) {
   const { event, areas, activityTypes, onSubmit } = props;
   const { pop } = useNavigation();
@@ -40,14 +41,26 @@ export function EditForm(props: {
   const knownMirrors = mirrorIds.filter((id) => writableIds.has(id));
   const hiddenMirrors = mirrorIds.filter((id) => !writableIds.has(id));
 
-  async function submit(values: EditFormValues) {
+  const [showDetails, setShowDetails] = useState(false);
+  const [details, setDetails] = useState<Partial<EditFormValues>>({});
+  const [calendarValues, setCalendarValues] = useState<CalendarFormValues>({});
+
+  async function submit(submitted: Pick<EditFormValues, "name" | "end"> & Partial<EditFormValues>) {
+    const values: EditFormValues = {
+      notes: currentNotes,
+      areaId: currentArea?.id ?? "",
+      activityTypeId: currentActivity?.id ?? "",
+      ...details,
+      ...calendarValues,
+      ...submitted,
+    };
     const patch: UpdateEventPatch = {};
     const name = values.name.trim();
     if (name && name !== event.name) patch.name = name;
     const end = values.end.trim();
     if (end && end !== event.end) {
       // Reject a malformed end before the round-trip; the server needs HH:MM.
-      if (!/^\d{1,2}:\d{2}$/.test(end)) {
+      if (!/^([01]?\d|2[0-3]):[0-5]\d$/.test(end)) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Check the end time",
@@ -94,8 +107,7 @@ export function EditForm(props: {
         return;
       }
     }
-    await onSubmit(patch);
-    pop();
+    if (await onSubmit(patch)) pop();
   }
 
   return (
@@ -115,36 +127,62 @@ export function EditForm(props: {
         defaultValue={event.end}
         info="Change the end time to make the block longer or shorter."
       />
-      {areas.length > 0 && (
-        <Form.Dropdown id="areaId" title="Area" defaultValue={currentArea?.id ?? ""}>
-          <Form.Dropdown.Item value="" title="Unassigned" />
-          {areas.map((area) => (
-            <Form.Dropdown.Item
-              key={area.id}
-              value={area.id}
-              title={area.name}
-              icon={{ source: Icon.Dot, tintColor: area.color }}
+      <Form.Checkbox
+        id="showDetails"
+        label="Show area, activity, calendar, and notes"
+        value={showDetails}
+        onChange={setShowDetails}
+      />
+      {showDetails && (
+        <>
+          {areas.length > 0 && (
+            <Form.Dropdown
+              id="areaId"
+              title="Area"
+              value={details.areaId ?? currentArea?.id ?? ""}
+              onChange={(areaId) => setDetails((current) => ({ ...current, areaId }))}
+            >
+              <Form.Dropdown.Item value="" title="Unassigned" />
+              {areas.map((area) => (
+                <Form.Dropdown.Item
+                  key={area.id}
+                  value={area.id}
+                  title={area.name}
+                  icon={{ source: Icon.Dot, tintColor: area.color }}
+                />
+              ))}
+            </Form.Dropdown>
+          )}
+          {activityTypes.length > 0 && (
+            <Form.Dropdown
+              id="activityTypeId"
+              title="Activity"
+              value={details.activityTypeId ?? currentActivity?.id ?? ""}
+              onChange={(activityTypeId) => setDetails((current) => ({ ...current, activityTypeId }))}
+            >
+              <Form.Dropdown.Item value="" title="None" />
+              {activityTypes.map((type) => (
+                <Form.Dropdown.Item key={type.id} value={type.id} title={type.name} />
+              ))}
+            </Form.Dropdown>
+          )}
+          <Form.TextArea
+            id="notes"
+            title="Notes"
+            value={details.notes ?? currentNotes}
+            onChange={(notes) => setDetails((current) => ({ ...current, notes }))}
+          />
+          {canPickCalendar && (
+            <CalendarFields
+              writable={writable}
+              defaultId={defaultId}
+              allowDefault={false}
+              calendarDefault={calendarValues.calendarId ?? event.calendarId ?? CALENDAR_NONE}
+              mirrorDefault={calendarValues.mirrorIds ?? knownMirrors}
+              onChange={setCalendarValues}
             />
-          ))}
-        </Form.Dropdown>
-      )}
-      {activityTypes.length > 0 && (
-        <Form.Dropdown id="activityTypeId" title="Activity" defaultValue={currentActivity?.id ?? ""}>
-          <Form.Dropdown.Item value="" title="None" />
-          {activityTypes.map((type) => (
-            <Form.Dropdown.Item key={type.id} value={type.id} title={type.name} />
-          ))}
-        </Form.Dropdown>
-      )}
-      <Form.TextArea id="notes" title="Notes" defaultValue={currentNotes} />
-      {canPickCalendar && (
-        <CalendarFields
-          writable={writable}
-          defaultId={defaultId}
-          allowDefault={false}
-          calendarDefault={event.calendarId ?? CALENDAR_NONE}
-          mirrorDefault={knownMirrors}
-        />
+          )}
+        </>
       )}
       {recurring && (
         <Form.Dropdown id="scope" title="Applies to" defaultValue="this">

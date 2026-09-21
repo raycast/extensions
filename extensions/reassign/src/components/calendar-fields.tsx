@@ -90,10 +90,12 @@ export function CalendarFields(props: {
   allowDefault: boolean;
   calendarDefault: string;
   mirrorDefault: string[];
+  onChange?: (values: CalendarFormValues) => void;
 }) {
   const { writable, defaultId, allowDefault, calendarDefault, mirrorDefault } = props;
   // Controlled, so the mirror picker can follow the chosen home.
   const [chosen, setChosen] = useState(calendarDefault);
+  const [mirrors, setMirrors] = useState(mirrorDefault);
   if (writable.length === 0) return null;
   const home = writable.find((c) => c.id === defaultId) ?? writable.find((c) => c.isDefault);
   const homeId = chosen === CALENDAR_DEFAULT ? home?.id : chosen;
@@ -105,7 +107,13 @@ export function CalendarFields(props: {
         id="calendarId"
         title="Calendar"
         value={chosen}
-        onChange={setChosen}
+        onChange={(calendarId) => {
+          setChosen(calendarId);
+          const nextMirrors =
+            calendarId === CALENDAR_NONE ? [] : mirrors.filter((id) => id !== (calendarId || home?.id));
+          setMirrors(nextMirrors);
+          props.onChange?.({ calendarId, mirrorIds: nextMirrors });
+        }}
         info="Publish the block to a connected calendar, or keep it in Reassign only."
       >
         {allowDefault && (
@@ -129,7 +137,11 @@ export function CalendarFields(props: {
         <Form.TagPicker
           id="mirrorIds"
           title="Mirror to"
-          defaultValue={mirrorDefault.filter((id) => id !== homeId)}
+          value={mirrors.filter((id) => id !== homeId)}
+          onChange={(mirrorIds) => {
+            setMirrors(mirrorIds);
+            props.onChange?.({ calendarId: chosen, mirrorIds });
+          }}
           info="Also send a one-way copy to these calendars."
         >
           {mirrorChoices.map((calendar) => (

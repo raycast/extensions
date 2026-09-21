@@ -79,13 +79,7 @@ export interface ScheduleDay {
   empty?: boolean;
 }
 
-/**
- * A parked backlog item. The API documents the `capture` write shape but not the
- * read shape, so this mirrors `capture` (plus an `id`) as a documented assumption.
- * Every field is optional, so a wrong guess degrades the row instead of a crash.
- * RQ-backlog: verify the read item shape and the remove/schedule ops with a live
- * account.
- */
+/** A parked item from the paginated /schedule Inbox response. */
 export interface BacklogItem {
   id: string;
   name: string;
@@ -123,6 +117,7 @@ export interface ScheduleResponse {
   activityTypes: ActivityType[];
   userPreferences?: { timezone?: string; offset?: string; conflictPolicy?: string };
   backlogCount?: number;
+  nextBacklogOffset?: number | null;
   backlog?: BacklogItem[];
 }
 

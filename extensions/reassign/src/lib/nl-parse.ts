@@ -47,6 +47,7 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
   let dateExplicit = false;
   let start: string | undefined;
   let end: string | undefined;
+  let rangeMinutes: number | undefined;
   const results = chrono.parse(remaining, ref, { forwardDate: true });
   if (results.length > 0) {
     const result = results[0];
@@ -57,7 +58,17 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
     dateExplicit =
       result.start.isCertain("day") || result.start.isCertain("weekday") || result.start.isCertain("month");
     if (result.start.isCertain("hour")) start = toHM(result.start.date());
-    if (result.end?.isCertain("hour")) end = toHM(result.end.date());
+    if (result.end?.isCertain("hour")) {
+      end = toHM(result.end.date());
+      const from = result.start.date();
+      const to = result.end.date();
+      // Calendar minutes match the API's wall-clock ranges, including DST days.
+      rangeMinutes =
+        (Date.UTC(to.getFullYear(), to.getMonth(), to.getDate(), to.getHours(), to.getMinutes()) -
+          Date.UTC(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(), from.getMinutes())) /
+        60000;
+      if (rangeMinutes <= 0) rangeMinutes += 24 * 60;
+    }
   }
 
   let window: Window | undefined;
@@ -79,6 +90,7 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
       dateExplicit,
       start,
       end,
+      durationMinutes: rangeMinutes ?? duration?.minutes ?? 30,
       hasRecurrence,
     });
   }

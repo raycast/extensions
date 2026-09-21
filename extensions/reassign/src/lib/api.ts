@@ -1,4 +1,4 @@
-import { getAccessToken, NotAuthorizedError } from "./oauth";
+import { getAccessToken, NotAuthorizedError, SignedOutError } from "./oauth";
 import type { CalendarsResponse, ScheduleResponse } from "./schedule-model";
 import { API_BASE, ErrorCode, PATHS } from "./wire";
 
@@ -6,7 +6,7 @@ import { API_BASE, ErrorCode, PATHS } from "./wire";
 // refreshes once on 401, retries once on a 503, and never retries a 429.
 // Only the `permission` code drives the Pro-required state — branch on `code`.
 
-export type ClientCode = ErrorCode | "network" | "unauthenticated";
+export type ClientCode = ErrorCode | "network" | "unauthenticated" | "signed_out";
 
 export interface ApiError {
   ok: false;
@@ -136,7 +136,11 @@ async function request<T>(
     token = await getAccessToken();
   } catch (error) {
     if (error instanceof NotAuthorizedError) {
-      return { ok: false, code: "unauthenticated", message: error.message };
+      return {
+        ok: false,
+        code: error instanceof SignedOutError ? "signed_out" : "unauthenticated",
+        message: error.message,
+      };
     }
     return { ok: false, code: "network", message: asMessage(error) };
   }
@@ -167,7 +171,11 @@ async function request<T>(
         continue;
       } catch (error) {
         if (error instanceof NotAuthorizedError) {
-          return { ok: false, code: "unauthenticated", message: error.message };
+          return {
+            ok: false,
+            code: error instanceof SignedOutError ? "signed_out" : "unauthenticated",
+            message: error.message,
+          };
         }
         return { ok: false, code: "network", message: asMessage(error) };
       }
@@ -257,6 +265,7 @@ interface ScheduleParams {
   to?: string;
   compact?: boolean;
   includeBacklog?: boolean;
+  backlogOffset?: number;
 }
 
 /** Build the /schedule query string. A range uses from+to; backlog needs the flag. */
@@ -266,6 +275,7 @@ function scheduleQuery(params: ScheduleParams): string {
   if (params.from) q.set("from", params.from);
   if (params.to) q.set("to", params.to);
   if (params.compact) q.set("compact", "true");
+  if (params.backlogOffset !== undefined) q.set("backlogOffset", String(params.backlogOffset));
   if (params.includeBacklog) q.set("includeBacklog", "true");
   const s = q.toString();
   return s ? `?${s}` : "";
@@ -281,8 +291,33 @@ export function getScheduleRange(from: string, to: string, compact = false): Pro
 }
 
 /** Read a day plus the parked-block inbox. The backlog needs includeBacklog=true. */
-export function getScheduleWithBacklog(date: string): Promise<ApiResult<ScheduleResponse>> {
-  return request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ date, includeBacklog: true }));
+export async function getScheduleWithBacklog(date: string): Promise<ApiResult<ScheduleResponse>> {
+  const first = await request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ date, includeBacklog: true }));
+  if (!first.ok) return first;
+  const backlog = [...(first.data.backlog ?? [])];
+  let offset = first.data.nextBacklogOffset;
+  let previous = 0;
+  while (offset != null) {
+    if (!Number.isSafeInteger(offset) || offset <= previous) {
+      return { ok: false, code: "internal", message: "Could not load the complete Inbox. Try again." };
+    }
+    const page = await request<ScheduleResponse>(
+      "GET",
+      PATHS.schedule + scheduleQuery({ date, includeBacklog: true, backlogOffset: offset }),
+    );
+    if (!page.ok) return page;
+    backlog.push(...(page.data.backlog ?? []));
+    previous = offset;
+    offset = page.data.nextBacklogOffset;
+  }
+  return {
+    ok: true,
+    data: {
+      ...first.data,
+      backlog: [...new Map(backlog.map((item) => [item.id, item])).values()],
+      nextBacklogOffset: null,
+    },
+  };
 }
 
 /** The connected calendars, in picker order, plus the account default. */
@@ -356,6 +391,16 @@ export function searchEvents(
   return request<SearchResponse>("GET", `${PATHS.eventsSearch}?${q.toString()}`);
 }
 
-export function sendFeedback(message: string): Promise<ApiResult<Record<string, unknown>>> {
-  return request<Record<string, unknown>>("POST", PATHS.feedback, { message });
+export type FeedbackKind = "bug" | "idea" | "other";
+
+export function sendFeedback(
+  message: string,
+  kind: FeedbackKind = "other",
+): Promise<ApiResult<Record<string, unknown>>> {
+  return request<Record<string, unknown>>("POST", PATHS.feedback, { kind, message });
+}
+
+/** Ask Reassign AI for a preview only. Saving uses the normal reviewed form. */
+export function previewBlock(input: string): Promise<ApiResult<import("./ai-draft").AiPreview>> {
+  return request("POST", "/command", { input, mode: "line", apply: false });
 }

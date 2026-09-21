@@ -12,6 +12,7 @@ export function describeError(error: ApiError): { title: string; message?: strin
   switch (error.code) {
     case "permission":
       return { title: PRO_REQUIRED_TITLE, message: PRO_REQUIRED_MESSAGE };
+    case "signed_out":
     case "unauthenticated":
     case "unauthorized":
       return { title: "Sign in to Reassign", message: error.message };
@@ -73,7 +74,7 @@ export function applyUndoToast(toast: Toast, token: string): void {
 
 /**
  * Run a mutating call, show progress, then a success toast with an Undo button
- * when the result carries an undo token. Returns the token or null.
+ * when the result carries an undo token. Returns success and the optional undo token.
  * `getUndoToken` defaults to the `undoToken` field on a batch receipt.
  */
 export async function runMutation<T>(
@@ -81,12 +82,12 @@ export async function runMutation<T>(
   successTitle: string,
   call: () => Promise<ApiResult<T>>,
   getUndoToken: (data: T) => string | null = defaultUndoToken,
-): Promise<string | null> {
+): Promise<{ ok: boolean; undoToken: string | null }> {
   const toast = await showToast({ style: Toast.Style.Animated, title: loadingTitle });
   const result = await call();
   if (!result.ok) {
     failToast(toast, result);
-    return null;
+    return { ok: false, undoToken: null };
   }
   // A 2xx can still carry a rejected row (applied:0, failed:1). Treat it as a
   // failure, not a false success.
@@ -95,13 +96,13 @@ export async function runMutation<T>(
     toast.style = Toast.Style.Failure;
     toast.title = "The change did not apply";
     toast.message = "The server rejected it.";
-    return null;
+    return { ok: false, undoToken: null };
   }
   const token = getUndoToken(result.data);
   toast.style = Toast.Style.Success;
   toast.title = successTitle;
   if (token) applyUndoToast(toast, token);
-  return token;
+  return { ok: true, undoToken: token };
 }
 
 function defaultUndoToken(data: unknown): string | null {

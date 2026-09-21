@@ -47,6 +47,19 @@ export default function Command() {
     const proBlocked = data && !data.ok && data.code === "permission";
     return (
       <MenuBarExtra icon={Icon.Circle} isLoading={isLoading} tooltip="Reassign">
+        {data && !data.ok && ["signed_out", "unauthenticated", "unauthorized"].includes(data.code) && (
+          <MenuBarExtra.Item
+            title="Sign in to Reassign"
+            icon={Icon.Key}
+            onAction={async () => {
+              try {
+                await launchCommand({ name: "agenda", type: LaunchType.UserInitiated });
+              } catch {
+                await showHUD("Could not open Agenda. Open it from Raycast to sign in.");
+              }
+            }}
+          />
+        )}
         <MenuBarExtra.Item
           title={proBlocked ? "Reassign Pro required" : "Open Reassign"}
           onAction={() => open(proBlocked ? BILLING_URL : WEB_BASE)}
@@ -150,7 +163,7 @@ export default function Command() {
       )}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title="Schedule a Block…"
+          title="Add Block…"
           icon={Icon.Plus}
           onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated })}
         />

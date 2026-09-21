@@ -15,7 +15,7 @@ interface MoveFormValues {
  * only time op the API exposes; name, area, and duration edits use Edit Details.
  * A recurring instance adds a scope picker (this / future / all).
  */
-export function MoveForm(props: { event: ScheduleEvent; onMove: (op: MoveOp) => Promise<void> }) {
+export function MoveForm(props: { event: ScheduleEvent; onMove: (op: MoveOp) => Promise<boolean> }) {
   const { event, onMove } = props;
   const { pop } = useNavigation();
   const recurring = Boolean(event.isRecurringInstance);
@@ -41,8 +41,7 @@ export function MoveForm(props: { event: ScheduleEvent; onMove: (op: MoveOp) => 
       op.scope = (values.scope as Scope) ?? "this";
       op.occurrenceDate = event.date;
     }
-    await onMove(op);
-    pop();
+    if (await onMove(op)) pop();
   }
 
   return (

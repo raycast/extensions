@@ -20,21 +20,35 @@
       "mode": "view"
     },
     {
-      "name": "inbox",
-      "title": "Inbox",
-      "description": "See the ideas you saved without a time, and give them a slot.",
-      "mode": "view"
-    },
-    {
       "name": "add",
-      "title": "Schedule a Block",
-      "description": "Type a block in plain words to schedule it. Without a time, it goes to your Inbox.",
+      "title": "Add Block",
+      "description": "Capture an idea in your Inbox or schedule a block with a time or duration.",
       "mode": "view",
       "arguments": [
         {
           "name": "text",
           "type": "text",
           "placeholder": "deep work tomorrow 9-11",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "description": "See the ideas you saved without a time, and give them a slot.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Blocks",
+      "description": "Find blocks by name or notes across your schedule.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Search blocks",
           "required": false
         }
       ]
@@ -68,23 +82,28 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.24",
-    "@raycast/utils": "^2.3.0",
-    "chrono-node": "^2.10.1"
+    "@raycast/api": "^2.4.1",
+    "@raycast/utils": "^2.3.1",
+    "chrono-node": "^2.10.1",
+    "proper-lockfile": "^4.1.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^22.19.17",
+    "@types/proper-lockfile": "^4.1.4",
     "@types/react": "^19.0.10",
     "eslint": "^10.8.1",
     "prettier": "^3.9.6",
-    "typescript": "^5.9.3"
+    "react": "^19.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.1"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
   }
 }

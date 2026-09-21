@@ -47,8 +47,8 @@ interface KindFilter {
 /** The Agenda command: a single day (default) or the next week, one toggle apart. */
 function Command() {
   // Persist the scope and kind toggles across launches (useState resets on close).
-  const { value: storedScope, setValue: setScope } = useLocalStorage<AgendaScope>("agenda.scope", "week");
-  const scope = storedScope ?? "week";
+  const { value: storedScope, setValue: setScope } = useLocalStorage<AgendaScope>("agenda.scope", "day");
+  const scope = storedScope ?? "day";
   const { value: hideNonBlocking, setValue: setHideNonBlocking } = useLocalStorage("agenda.hideNonBlocking", false);
   const { value: hideReference, setValue: setHideReference } = useLocalStorage("agenda.hideReference", false);
   const onToggleScope = () => setScope(scope === "day" ? "week" : "day");
@@ -101,7 +101,7 @@ function KindFilterActions(props: KindFilter) {
 function SearchAction() {
   return (
     <Action.Push
-      title="Search All Blocks…"
+      title="Search Blocks…"
       icon={Icon.MagnifyingGlass}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
       target={<SearchView />}
@@ -275,7 +275,7 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
                 />
               )}
               <Action
-                title="Schedule a Block…"
+                title="Add Block…"
                 icon={Icon.Plus}
                 onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated })}
               />
@@ -409,7 +409,7 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
     return (
       <ActionPanel>
         <Action
-          title="Schedule a Block…"
+          title="Add Block…"
           icon={Icon.Plus}
           onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated })}
         />
