@@ -1,6 +1,6 @@
 # Orion Changelog
 
-## [Command Bar] - {PR_MERGE_DATE}
+## [Command Bar] - 2026-09-21
 
 - Improve Top Hit ranking with deterministic match tiers and source precedence: open tabs, bookmarks, reading list, then history. Deduplicate matching destinations and use history frecency only to resolve ties within history.
 - Keep Top Hit selected as local sources resolve, while preserving an explicit Ctrl+N/Ctrl+P selection when later results arrive.
