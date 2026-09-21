@@ -24,7 +24,7 @@ export default function Command() {
   const defaultLayout = preferences.viewMode ?? "grid";
   const [layout, setLayout] = useCachedState("layout", defaultLayout);
 
-  const [columns, setColumns] = useState(5);
+  const [columns, setColumns] = useCachedState("grid-columns", 5);
 
   useEffect(() => {
     (async () => {
@@ -71,6 +71,7 @@ export default function Command() {
         searchBarAccessory={
           <Grid.Dropdown
             tooltip="Grid Item Size"
+            value={String(columns)}
             storeValue
             onChange={(newValue) => {
               setColumns(parseInt(newValue));
