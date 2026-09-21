@@ -2,6 +2,7 @@
 
 ## [Bug fix] - {PR_MERGE_DATE}
 
+- Tint the menu bar icon with the menu bar text colour, so it no longer stays black on a dark menu bar
 - Check service status without blocking, so the background refresh no longer stalls the extension for close to two seconds every 30 seconds
 - Stop the menu bar from signalling itself, which made it refresh every service in a loop and log a failed attempt to launch itself
 - Stop holding a command open while a connection is being set up, which made Raycast report an unloaded worker when another action ran at the same time

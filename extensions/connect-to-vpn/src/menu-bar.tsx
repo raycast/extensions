@@ -1,4 +1,4 @@
-import { MenuBarExtra, environment, LaunchType } from "@raycast/api";
+import { MenuBarExtra, environment, Color, LaunchType } from "@raycast/api";
 import {
   NetworkService,
   normalizeHardwarePort,
@@ -161,7 +161,10 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      icon={isConnected ? "network-connected.png" : "network-disconnected.png"}
+      icon={{
+        source: isConnected ? "network-connected.png" : "network-disconnected.png",
+        tintColor: Color.PrimaryText,
+      }}
       tooltip="Network Services"
       isLoading={isLoading || isBackgroundRunning || needsFullRefresh}
     >

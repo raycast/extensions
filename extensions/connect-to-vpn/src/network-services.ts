@@ -31,14 +31,9 @@ export const setServiceStatus = async (
 ) => {
   const action = status === "connecting" ? "-connectpppoeservice" : "-disconnectpppoeservice";
 
-  // Report the transition before running the command rather than after it returns. networksetup
-  // takes a moment, and the menu closes on click, so a late update is one the user never sees.
+  // Show the transition in this command right away. networksetup takes a moment, and the menu
+  // closes on click, so a late update is one the user never sees.
   if (statusUpdateFunction) statusUpdateFunction(status);
-  await updateVpnStatus({
-    serviceId: service.id,
-    status,
-    timestamp: Date.now(),
-  });
 
   console.log(`Executing command for ${service.name}: ${status}`);
   try {
@@ -56,6 +51,15 @@ export const setServiceStatus = async (
   }
 
   await LocalStorage.setItem(LAST_USED_KEY, service.name);
+
+  // Signal the other commands only now that networksetup has run. Signalling first would launch
+  // the menu bar against the status from before the request, and it would take that as its
+  // baseline and never hear about the change.
+  await updateVpnStatus({
+    serviceId: service.id,
+    status,
+    timestamp: Date.now(),
+  });
 
   // Nothing waits for the service to settle here. Raycast ends a session once the action callback
   // returns, so a callback that polls for seconds outlives the session it belongs to. The service
@@ -168,19 +172,30 @@ export function useNetworkServices() {
         );
         if (cancelled) return;
 
+        const accepted = resolved.filter(([id, status]) => {
+          const service = networkServices[id];
+          if (!service) return false;
+
+          return !(checks[id] <= SETTLE_GRACE_CHECKS && status === statusBeforeTransition(service.status));
+        });
+
         setNetworkServices((currentServices) => {
           const updated = { ...currentServices };
 
-          for (const [id, status] of resolved) {
-            const service = updated[id];
-            if (!service) continue;
-            if (checks[id] <= SETTLE_GRACE_CHECKS && status === statusBeforeTransition(service.status)) continue;
-
-            updated[id] = { ...service, status };
+          for (const [id, status] of accepted) {
+            if (updated[id]) updated[id] = { ...updated[id], status };
           }
 
           return updated;
         });
+
+        // Tell the other commands once a service has actually settled, so the menu bar does not
+        // sit on the transition until its next scheduled refresh
+        for (const [id, status] of accepted) {
+          if (status === "connected" || status === "disconnected") {
+            await updateVpnStatus({ serviceId: id, status, timestamp: Date.now() });
+          }
+        }
       } catch (err) {
         if (!isSessionGone(err)) console.error("Error while waiting for a service to settle:", err);
       }
