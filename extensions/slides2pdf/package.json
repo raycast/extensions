@@ -27,7 +27,8 @@
     "macOS"
   ],
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Data"
   ],
   "license": "MIT",
   "commands": [
