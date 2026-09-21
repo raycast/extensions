@@ -1,6 +1,6 @@
 # Dokploy Changelog
 
-## [Compose Backups] - {PR_MERGE_DATE}
+## [Compose Backups] - 2026-09-21
 
 - Extend the `View Backups` action to Compose stacks: pick a container and which database engine it runs, alongside the same schedule/destination/retention fields the database version already has.
 
