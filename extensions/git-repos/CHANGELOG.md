@@ -2,7 +2,7 @@
 
 ## [Bug Fix] - {PR_MERGE_DATE}
 
-- Use `git-url-parse` so nested GitLab group paths, custom Git host subdomains, and HTTPS ports are preserved when opening repository remotes.
+- Use `git-url-parse` so nested GitLab group paths, custom Git host subdomains, and explicit ports are preserved when opening repository remotes.
 
 ## [Bug Fix] - 2026-05-24
 
