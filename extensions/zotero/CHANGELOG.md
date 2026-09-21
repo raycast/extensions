@@ -2,7 +2,7 @@
 
 ## [Open Secondary PDF] - {PR_MERGE_DATE}
 
-- Added an "Open Secondary PDF" action (`⌘⇧S`) for references with more than one pdf, e.g. supplementary material saved under the same entry. With exactly two pdfs it opens the secondary one directly; with more it shows a list of the remaining pdfs, each with Open PDF, Open in System Viewer, and Show in Finder
+- Added an "Open Secondary PDF" action (`⌘⇧↵`) for references with more than one pdf, e.g. supplementary material saved under the same entry. With exactly two pdfs it opens the secondary one directly (with Open in System Viewer and Show in Finder below it); with more it shows a list of the remaining pdfs, each with Open PDF, Open in System Viewer, and Show in Finder
 
 ## [Show PDF in Finder] - 2026-09-14
 
