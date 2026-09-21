@@ -73,7 +73,7 @@ const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], ke
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 const copyDoiShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
 const copyPDFPathShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "," };
-const openSecondaryPdfShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "s" };
+const openSecondaryPdfShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "enter" };
 
 function getURL(item: RefData): string {
   return `${
@@ -390,14 +390,33 @@ function SecondaryPdfAction({
   const { push } = useNavigation();
   const secondaries = secondaryAttachments(item);
   if (secondaries.length === 1) {
+    const s = secondaries[0];
+    const p = attachmentPath(s, zoteroPath);
     return (
-      <Action.OpenInBrowser
-        icon={Icon.ArrowRightCircleFilled}
-        title="Open Secondary PDF"
-        shortcut={openSecondaryPdfShortcut}
-        url={zoteroOpenPdfUri(item, secondaries[0].key)}
-        onOpen={onOpen}
-      />
+      <>
+        <Action.OpenInBrowser
+          icon={Icon.ArrowRightCircleFilled}
+          title="Open Secondary PDF"
+          shortcut={openSecondaryPdfShortcut}
+          url={zoteroOpenPdfUri(item, s.key)}
+          onOpen={onOpen}
+        />
+        {p && (
+          <Action
+            icon={Icon.ArrowRightCircleFilled}
+            title="Open Secondary PDF in System Viewer"
+            onAction={async () => {
+              try {
+                await open(p);
+                closeMainWindow();
+              } catch {
+                await showHUD("Failed to open attachment");
+              }
+            }}
+          />
+        )}
+        {p && isAbsolute(p) && <Action.ShowInFinder path={p} title="Show Secondary PDF in Finder" />}
+      </>
     );
   }
   return (
