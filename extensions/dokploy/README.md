@@ -26,7 +26,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - Delete Domain
             - Add Domain
         - Copy Connection String / Copy Password (Databases)
-        - View Backups (Databases)
+        - View Backups (Databases and Compose stacks)
             - Add Backup
             - Edit Backup
             - Run Backup Now

@@ -14,6 +14,7 @@ import {
 import { useFetch, useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
 import { useToken } from "./instances";
+import { useComposeContainers } from "./compose-containers";
 import { Domain, ErrorResult } from "./interfaces";
 
 // Only applications and compose stacks can have a domain; the five database kinds cannot.
@@ -177,21 +178,6 @@ interface ServiceServerDetail {
   serverId?: string | null;
 }
 
-/** A compose stack's `loadServices` response isn't documented anywhere - handled defensively. */
-function parseContainerNames(data: unknown): string[] {
-  if (!Array.isArray(data)) return [];
-  return data
-    .map((item) => {
-      if (typeof item === "string") return item;
-      if (item && typeof item === "object") {
-        const { name, serviceName } = item as { name?: string; serviceName?: string };
-        return name ?? serviceName ?? null;
-      }
-      return null;
-    })
-    .filter((name): name is string => Boolean(name));
-}
-
 interface AddDomainFormValues {
   host: string;
   containerServiceName: string;
@@ -221,23 +207,12 @@ function AddDomainForm({
   const [isBusy, setIsBusy] = useState(false);
   const isCompose = service.type === "compose";
 
-  const {
-    data: containers,
-    isLoading: containersLoading,
-    error: containersError,
-    revalidate: retryContainers,
-  } = useFetch<string[], string[]>(`${url}compose.loadServices?composeId=${service.id}&type=fetch`, {
+  const { containers, containersLoading, containersError, retryContainers } = useComposeContainers(
+    url,
     headers,
-    initialData: [],
-    execute: isCompose,
-    parseResponse: async (response) => {
-      if (!response.ok) {
-        const err = (await response.json()) as ErrorResult;
-        throw new Error(err.message);
-      }
-      return parseContainerNames(await response.json());
-    },
-  });
+    service.id,
+    isCompose,
+  );
 
   const { data: serverDetail } = useFetch<ServiceServerDetail, ServiceServerDetail | undefined>(
     `${url}${service.type}.one?${ID_FIELDS[service.type]}=${service.id}`,

@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Compose Backups] - {PR_MERGE_DATE}
+
+- Extend the `View Backups` action to Compose stacks: pick a container and which database engine it runs, alongside the same schedule/destination/retention fields the database version already has.
+
 ## [Database Backups] - 2026-09-20
 
 - Add a `View Backups` action to Postgres, MariaDB, MySQL and MongoDB services, listing scheduled S3 backups with `Add Backup`, `Edit Backup`, `Run Backup Now` and `Delete Backup` actions. The backup form can also create a new destination on the spot via `Add Destination`, without leaving to the separate Destinations command.

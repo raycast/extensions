@@ -329,7 +329,7 @@ export default function Services({
                 {DATABASE_KINDS.includes(service.type as DatabaseKind) && (
                   <DatabaseActions url={url} headers={headers} kind={service.type as DatabaseKind} service={service} />
                 )}
-                {BACKUPABLE_KINDS.includes(service.type as BackupableKind) && (
+                {(BACKUPABLE_KINDS.includes(service.type as BackupableKind) || service.type === "compose") && (
                   <Action.Push
                     icon={Icon.Cloud}
                     title="View Backups"
