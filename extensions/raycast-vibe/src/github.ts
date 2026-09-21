@@ -79,8 +79,8 @@ export async function ghAvailability(): Promise<GhAvailability> {
 }
 
 const REMOTE_PATTERNS: RegExp[] = [
-  /^git@github\.com:([^/]+)\/([^/.]+)(?:\.git)?\/?$/,
-  /^https?:\/\/github\.com\/([^/]+)\/([^/.]+)(?:\.git)?\/?$/,
+  /^git@github\.com:([^/]+)\/([^/]+?)(?:\.git)?\/?$/,
+  /^https?:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/?$/,
 ];
 
 export async function resolveGitHubRepo(

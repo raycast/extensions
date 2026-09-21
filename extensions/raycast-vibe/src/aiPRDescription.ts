@@ -43,7 +43,9 @@ async function readGh(repoRoot: string, args: string[]): Promise<string> {
   return stdout;
 }
 
-async function resolveDefaultBranch(repoRoot: string): Promise<string> {
+async function resolveDefaultBranch(
+  repoRoot: string,
+): Promise<string | undefined> {
   try {
     const out = (
       await readGh(repoRoot, [
@@ -55,10 +57,24 @@ async function resolveDefaultBranch(repoRoot: string): Promise<string> {
         ".defaultBranchRef.name",
       ])
     ).trim();
-    return out || "main";
+    if (out) return out;
   } catch {
-    return "main";
+    // fall through to git-native detection
   }
+  try {
+    const ref = (
+      await readGit(repoRoot, [
+        "symbolic-ref",
+        "--short",
+        "refs/remotes/origin/HEAD",
+      ])
+    ).trim();
+    const stripped = ref.replace(/^origin\//, "");
+    if (stripped) return stripped;
+  } catch {
+    // no origin/HEAD set — give up rather than guessing
+  }
+  return undefined;
 }
 
 function truncate(text: string): string {
@@ -87,6 +103,15 @@ export async function runAIPRDescription(
   agent: Agent,
 ): Promise<void> {
   const defaultBranch = await resolveDefaultBranch(repoRoot);
+  if (!defaultBranch) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not determine default branch",
+      message:
+        "Run `gh auth login` or `git remote set-head origin --auto` in this repo.",
+    });
+    return;
+  }
 
   let current = "";
   try {
