@@ -11,9 +11,9 @@ import {
   List,
   showInFinder,
   LaunchProps,
-} from '@raycast/api';
-import { useState, useEffect } from 'react';
-import { VideoProcessor, ensureFfmpegAvailable } from './utils/video-processor';
+} from "@raycast/api";
+import { useState, useEffect } from "react";
+import { VideoProcessor, ensureFfmpegAvailable } from "./utils/video-processor";
 import {
   SpeedMultiplier,
   Framerate,
@@ -23,7 +23,7 @@ import {
   SPEED_OPTIONS,
   FRAMERATE_OPTIONS,
   AUDIO_OPTIONS,
-} from './utils/constants';
+} from "./utils/constants";
 
 interface FormValues {
   speed: SpeedMultiplier;
@@ -32,26 +32,24 @@ interface FormValues {
   outputPath: string;
 }
 
-export default function ChangeFramerate(
-  props: LaunchProps<{ arguments: { filePath?: string } }>
-) {
+export default function ChangeFramerate(props: LaunchProps<{ arguments: { filePath?: string } }>) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ffmpegAvailable, setFfmpegAvailable] = useState<boolean | null>(null);
 
-  const [speed, setSpeed] = useState<SpeedMultiplier>('1'); // Default to normal speed
-  const [framerate, setFramerate] = useState<Framerate>('30');
-  const [audio, setAudio] = useState<AudioOption>('keep');
-  const [outputPath, setOutputPath] = useState<string>('');
+  const [speed, setSpeed] = useState<SpeedMultiplier>("1"); // Default to normal speed
+  const [framerate, setFramerate] = useState<Framerate>("30");
+  const [audio, setAudio] = useState<AudioOption>("keep");
+  const [outputPath, setOutputPath] = useState<string>("");
 
   const handleSubmit = async (values: FormValues) => {
     if (isLoading) return;
     if (!selectedFile) {
       showToast({
         style: Toast.Style.Failure,
-        title: 'No file selected',
-        message: 'Please select a video file first',
+        title: "No file selected",
+        message: "Please select a video file first",
       });
       return;
     }
@@ -69,22 +67,21 @@ export default function ChangeFramerate(
         values.outputPath
       );
 
-      showHUD('Video processing completed!');
+      showHUD("Video processing completed!");
       showToast({
         style: Toast.Style.Success,
-        title: 'Success',
+        title: "Success",
         message: `Video saved to ${outputPath}`,
       });
 
       // Open the output file in Finder
       await showInFinder(outputPath);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       setError(errorMessage);
       showToast({
         style: Toast.Style.Failure,
-        title: 'Processing failed',
+        title: "Processing failed",
         message: errorMessage,
       });
     } finally {
@@ -107,26 +104,23 @@ export default function ChangeFramerate(
   };
 
   const loadSelectedFile = async (filePath?: string) => {
+    // Invalidate the old selection before waiting for Finder, including failed reads.
+    setSelectedFile(null);
+    setOutputPath("");
+    setError(null);
     try {
-      const selectedItems = filePath
-        ? [{ path: filePath }]
-        : await getSelectedFinderItems();
+      const selectedItems = filePath ? [{ path: filePath }] : await getSelectedFinderItems();
       if (selectedItems.length > 0) {
         const file = selectedItems[0];
-        const extension = file.path.split('.').pop()?.toLowerCase();
+        const extension = file.path.split(".").pop()?.toLowerCase();
 
-        if (
-          extension &&
-          SUPPORTED_EXTENSIONS.includes(extension as SupportedExtension)
-        ) {
+        if (extension && SUPPORTED_EXTENSIONS.includes(extension as SupportedExtension)) {
           setError(null);
           setSelectedFile(file.path);
-          setOutputPath(generateOutputPath(file.path, '1', '30', 'keep'));
+          setOutputPath(generateOutputPath(file.path, speed, framerate, audio));
         } else {
           setSelectedFile(null);
-          setError(
-            `Unsupported file format: ${extension}. Supported formats: ${SUPPORTED_EXTENSIONS.join(', ')}`
-          );
+          setError(`Unsupported file format: ${extension}. Supported formats: ${SUPPORTED_EXTENSIONS.join(", ")}`);
         }
       }
     } catch {
@@ -140,11 +134,11 @@ export default function ChangeFramerate(
     framerate: Framerate,
     audio: AudioOption
   ): string => {
-    const pathParts = inputPath.split('.');
+    const pathParts = inputPath.split(".");
     pathParts.pop();
-    const basePath = pathParts.join('.');
-    const audioSuffix = audio === 'remove' ? '_noaudio' : '';
-    const speedSuffix = speed === '1' ? '' : `_x${speed}`;
+    const basePath = pathParts.join(".");
+    const audioSuffix = audio === "remove" ? "_noaudio" : "";
+    const speedSuffix = speed === "1" ? "" : `_x${speed}`;
     return `${basePath}${speedSuffix}_${framerate}fps${audioSuffix}.mp4`;
   };
 
@@ -197,10 +191,7 @@ After installation, restart Raycast and try again.
         `}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser
-              url="https://ffmpeg.org/download.html"
-              title="Download FFmpeg"
-            />
+            <Action.OpenInBrowser url="https://ffmpeg.org/download.html" title="Download FFmpeg" />
           </ActionPanel>
         }
       />
@@ -223,7 +214,7 @@ ${error}
 4. Click "Process Video"
 
 ## Supported formats:
-${SUPPORTED_EXTENSIONS.map((ext) => `- ${ext}`).join('\n')}
+${SUPPORTED_EXTENSIONS.map((ext) => `- ${ext}`).join("\n")}
         `}
         actions={
           <ActionPanel>
@@ -260,15 +251,9 @@ ${SUPPORTED_EXTENSIONS.map((ext) => `- ${ext}`).join('\n')}
           <Action
             title="Process Video (Change Framerate)"
             icon={Icon.Video}
-            onAction={() =>
-              handleSubmit({ speed, framerate, audio, outputPath })
-            }
+            onAction={() => handleSubmit({ speed, framerate, audio, outputPath })}
           />
-          <Action
-            title="Select Different File"
-            icon={Icon.Folder}
-            onAction={() => loadSelectedFile()}
-          />
+          <Action title="Select Different File" icon={Icon.Folder} onAction={() => loadSelectedFile()} />
         </ActionPanel>
       }
     >
@@ -290,12 +275,7 @@ ${SUPPORTED_EXTENSIONS.map((ext) => `- ${ext}`).join('\n')}
         }}
       >
         {FRAMERATE_OPTIONS.map((option) => (
-          <Form.Dropdown.Item
-            key={option.value}
-            value={option.value}
-            title={option.label}
-            icon={Icon.Video}
-          />
+          <Form.Dropdown.Item key={option.value} value={option.value} title={option.label} icon={Icon.Video} />
         ))}
       </Form.Dropdown>
 
@@ -334,7 +314,7 @@ ${SUPPORTED_EXTENSIONS.map((ext) => `- ${ext}`).join('\n')}
             key={option.value}
             value={option.value}
             title={option.label}
-            icon={option.value === 'keep' ? Icon.SpeakerHigh : Icon.SpeakerOff}
+            icon={option.value === "keep" ? Icon.SpeakerHigh : Icon.SpeakerOff}
           />
         ))}
       </Form.Dropdown>

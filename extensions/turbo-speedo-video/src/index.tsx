@@ -1,1 +1,1 @@
-export { default } from './adjust-video-speed';
+export { default } from "./adjust-video-speed";

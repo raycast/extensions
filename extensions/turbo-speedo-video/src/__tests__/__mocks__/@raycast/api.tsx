@@ -1,6 +1,6 @@
-import React from 'react';
+import React from "react";
 
-export const LaunchType = { UserInitiated: 'userInitiated' };
+export const LaunchType = { UserInitiated: "userInitiated" };
 export const getPreferenceValues = jest.fn(() => ({}));
 export const getSelectedFinderItems = jest.fn();
 export const showHUD = jest.fn();
@@ -11,37 +11,19 @@ export const ActionPanel = ({ children }: { children: React.ReactNode }) => (
   <div data-testid="action-panel">{children}</div>
 );
 
-export const Action = ({
-  title,
-  onAction,
-  icon,
-}: {
-  title: string;
-  onAction: () => void;
-  icon?: any;
-}) => (
+export const Action = ({ title, onAction, icon }: { title: string; onAction: () => void; icon?: any }) => (
   <button type="button" data-testid="action" onClick={onAction}>
     {title}
   </button>
 );
 
 Action.OpenInBrowser = ({ url, title }: { url: string; title: string }) => (
-  <button
-    type="button"
-    data-testid="action-open-in-browser"
-    onClick={() => window.open(url)}
-  >
+  <button type="button" data-testid="action-open-in-browser" onClick={() => window.open(url)}>
     {title}
   </button>
 );
 
-export const Detail = ({
-  markdown,
-  actions,
-}: {
-  markdown: string;
-  actions?: React.ReactNode;
-}) => (
+export const Detail = ({ markdown, actions }: { markdown: string; actions?: React.ReactNode }) => (
   <div data-testid="detail">
     <div dangerouslySetInnerHTML={{ __html: markdown }} />
     {actions}
@@ -93,15 +75,9 @@ const FormDropdown = ({
   </div>
 );
 
-FormDropdown.Item = ({
-  value,
-  title,
-  icon,
-}: {
-  value: string;
-  title: string;
-  icon?: any;
-}) => <option value={value}>{title}</option>;
+FormDropdown.Item = ({ value, title, icon }: { value: string; title: string; icon?: any }) => (
+  <option value={value}>{title}</option>
+);
 
 Form.Dropdown = FormDropdown;
 
@@ -121,28 +97,13 @@ Form.TextField = ({
   <div data-testid="form-textfield">
     <div>{title}</div>
     <div>{info}</div>
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-    />
+    <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
   </div>
 );
 
-export const List = ({ children }: { children: React.ReactNode }) => (
-  <div data-testid="list">{children}</div>
-);
+export const List = ({ children }: { children: React.ReactNode }) => <div data-testid="list">{children}</div>;
 
-List.EmptyView = ({
-  icon,
-  title,
-  description,
-}: {
-  icon: any;
-  title: string;
-  description: string;
-}) => (
+List.EmptyView = ({ icon, title, description }: { icon: any; title: string; description: string }) => (
   <div data-testid="empty-view">
     <div>{title}</div>
     <div>{description}</div>
@@ -150,17 +111,17 @@ List.EmptyView = ({
 );
 
 export const Icon = {
-  Video: 'video',
-  Clock: 'clock',
-  Play: 'play',
-  Folder: 'folder',
+  Video: "video",
+  Clock: "clock",
+  Play: "play",
+  Folder: "folder",
 };
 
 export const Toast = {
   Style: {
-    Success: 'success',
-    Failure: 'failure',
-    Animated: 'animated',
+    Success: "success",
+    Failure: "failure",
+    Animated: "animated",
   },
 };
 

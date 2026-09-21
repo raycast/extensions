@@ -44,10 +44,10 @@ npm run dev
 Before submitting changes:
 
 ```bash
+npm run build
 npm run lint
 npm run type-check
 npm test -- --runInBand
-npm run build
 ```
 
 Open and test the distribution build in Raycast, then run `npm run publish` to submit it for Store review. Publishing opens or updates a pull request in [raycast/extensions](https://github.com/raycast/extensions); the extension becomes available after Raycast approves and merges it.

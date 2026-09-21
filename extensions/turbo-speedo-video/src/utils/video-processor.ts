@@ -1,15 +1,10 @@
-import { spawn } from 'child_process';
-import { access, stat } from 'fs/promises';
-import { dirname, extname, isAbsolute, join, resolve } from 'path';
-import { getPreferenceValues } from '@raycast/api';
-import { homedir } from 'os';
+import { spawn } from "child_process";
+import { access, stat } from "fs/promises";
+import { dirname, extname, isAbsolute, join, resolve } from "path";
+import { getPreferenceValues } from "@raycast/api";
+import { homedir } from "os";
 
-import {
-  AudioOption,
-  Framerate,
-  MAX_AUDIO_SPEED,
-  SpeedMultiplier,
-} from './constants';
+import { AudioOption, Framerate, MAX_AUDIO_SPEED, SpeedMultiplier } from "./constants";
 
 interface CommandResult {
   stdout: string;
@@ -26,42 +21,36 @@ interface VideoInfo {
  * usually will not resolve. Probe the common install locations too.
  */
 const FFMPEG_CANDIDATES = [
-  'ffmpeg',
-  '/opt/homebrew/bin/ffmpeg',
-  '/usr/local/bin/ffmpeg',
+  "ffmpeg",
+  "/opt/homebrew/bin/ffmpeg",
+  "/usr/local/bin/ffmpeg",
   `${homedir()}/homebrew/bin/ffmpeg`,
-  '/opt/local/bin/ffmpeg',
-  '/usr/bin/ffmpeg',
+  "/opt/local/bin/ffmpeg",
+  "/usr/bin/ffmpeg",
 ];
 
 /** Keep only recent diagnostics so long encodes do not grow memory indefinitely. */
 function run(command: string, args: string[]): Promise<CommandResult> {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] });
-    let stdout = '';
-    let stderr = '';
-    child.stdout.on('data', (chunk: Buffer) => {
+    const child = spawn(command, args, { stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk: Buffer) => {
       stdout = (stdout + chunk.toString()).slice(-1024 * 1024);
     });
-    child.stderr.on('data', (chunk: Buffer) => {
+    child.stderr.on("data", (chunk: Buffer) => {
       stderr = (stderr + chunk.toString()).slice(-64 * 1024);
     });
-    child.on('error', reject);
-    child.on('close', (code) => {
+    child.on("error", reject);
+    child.on("close", (code) => {
       if (code === 0) resolve({ stdout, stderr });
-      else
-        reject(
-          new Error(stderr.trim() || `Command failed with exit code ${code}`)
-        );
+      else reject(new Error(stderr.trim() || `Command failed with exit code ${code}`));
     });
   });
 }
 
 function preferredFfmpegPath(): string | undefined {
-  return (
-    getPreferenceValues<{ ffmpegPath?: string }>().ffmpegPath?.trim() ||
-    undefined
-  );
+  return getPreferenceValues<Preferences>().ffmpegPath?.trim() || undefined;
 }
 
 /** Trims float noise so 1/8 renders as "0.125" rather than "0.125000000001". */
@@ -78,21 +67,21 @@ function buildAtempoChain(speed: number): string {
   let remaining = speed;
 
   while (remaining > MAX_AUDIO_SPEED) {
-    filters.push('atempo=2');
+    filters.push("atempo=2");
     remaining /= 2;
   }
   while (remaining < 0.5) {
-    filters.push('atempo=0.5');
+    filters.push("atempo=0.5");
     remaining /= 0.5;
   }
   filters.push(`atempo=${fmt(remaining)}`);
 
-  return filters.join(',');
+  return filters.join(",");
 }
 
 export class VideoProcessor {
-  private ffmpegPath = 'ffmpeg';
-  private ffprobePath = 'ffprobe';
+  private ffmpegPath = "ffmpeg";
+  private ffprobePath = "ffprobe";
 
   /** Locates a usable FFmpeg binary, caching the result on the instance. */
   async checkFfmpegAvailable(): Promise<void> {
@@ -101,21 +90,17 @@ export class VideoProcessor {
 
     for (const candidate of candidates) {
       try {
-        await run(candidate, ['-version']);
+        await run(candidate, ["-version"]);
         this.ffmpegPath = candidate;
-        this.ffprobePath = candidate.includes('/')
-          ? join(dirname(candidate), 'ffprobe')
-          : 'ffprobe';
-        await run(this.ffprobePath, ['-version']);
+        this.ffprobePath = candidate.includes("/") ? join(dirname(candidate), "ffprobe") : "ffprobe";
+        await run(this.ffprobePath, ["-version"]);
         return;
       } catch {
         // Try the next location.
       }
     }
 
-    throw new Error(
-      'FFmpeg or ffprobe was not found. Install FFmpeg or check the FFmpeg Path preference.'
-    );
+    throw new Error("FFmpeg or ffprobe was not found. Install FFmpeg or check the FFmpeg Path preference.");
   }
 
   private async probe(filePath: string): Promise<{
@@ -123,12 +108,12 @@ export class VideoProcessor {
     format?: { duration?: string };
   }> {
     const { stdout } = await run(this.ffprobePath, [
-      '-v',
-      'quiet',
-      '-print_format',
-      'json',
-      '-show_format',
-      '-show_streams',
+      "-v",
+      "quiet",
+      "-print_format",
+      "json",
+      "-show_format",
+      "-show_streams",
       filePath,
     ]);
     return JSON.parse(stdout);
@@ -139,15 +124,15 @@ export class VideoProcessor {
       const info = await this.probe(filePath);
       const streams: Array<{ codec_type?: string }> = info.streams ?? [];
 
-      if (!streams.some((stream) => stream.codec_type === 'video')) {
-        throw new Error('No video stream found');
+      if (!streams.some((stream) => stream.codec_type === "video")) {
+        throw new Error("No video stream found");
       }
       return {
-        hasAudio: streams.some((stream) => stream.codec_type === 'audio'),
-        duration: parseFloat(info.format?.duration ?? '0'),
+        hasAudio: streams.some((stream) => stream.codec_type === "audio"),
+        duration: parseFloat(info.format?.duration ?? "0"),
       };
     } catch {
-      throw new Error('Failed to analyze video file');
+      throw new Error("Failed to analyze video file");
     }
   }
 
@@ -158,13 +143,8 @@ export class VideoProcessor {
     framerate: Framerate,
     audio: AudioOption
   ): string[] {
-    if (audio === 'remove') {
-      return this.buildFfmpegArgsNoAudio(
-        inputPath,
-        outputPath,
-        speed,
-        framerate
-      );
+    if (audio === "remove") {
+      return this.buildFfmpegArgsNoAudio(inputPath, outputPath, speed, framerate);
     }
 
     const speedValue = parseFloat(speed);
@@ -172,28 +152,28 @@ export class VideoProcessor {
     const audioFilter = `[0:a:0]${buildAtempoChain(speedValue)}[a]`;
 
     return [
-      '-nostdin',
-      '-n',
-      '-loglevel',
-      'error',
-      '-i',
+      "-nostdin",
+      "-n",
+      "-loglevel",
+      "error",
+      "-i",
       inputPath,
-      '-filter_complex',
+      "-filter_complex",
       `${videoFilter};${audioFilter}`,
-      '-map',
-      '[v]',
-      '-map',
-      '[a]',
-      '-c:v',
-      'libx264',
-      '-preset',
-      'medium',
-      '-crf',
-      '23',
-      '-c:a',
-      'aac',
-      '-b:a',
-      '192k',
+      "-map",
+      "[v]",
+      "-map",
+      "[a]",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "medium",
+      "-crf",
+      "23",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "192k",
       outputPath,
     ];
   }
@@ -207,35 +187,30 @@ export class VideoProcessor {
     const speedValue = parseFloat(speed);
 
     return [
-      '-nostdin',
-      '-n',
-      '-loglevel',
-      'error',
-      '-i',
+      "-nostdin",
+      "-n",
+      "-loglevel",
+      "error",
+      "-i",
       inputPath,
-      '-vf',
+      "-vf",
       `setpts=${fmt(1 / speedValue)}*PTS,fps=${framerate}`,
-      '-an',
-      '-c:v',
-      'libx264',
-      '-preset',
-      'medium',
-      '-crf',
-      '23',
+      "-an",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "medium",
+      "-crf",
+      "23",
       outputPath,
     ];
   }
 
-  private buildOutputPath(
-    inputPath: string,
-    speed: SpeedMultiplier,
-    framerate: Framerate,
-    audio: AudioOption
-  ): string {
-    const pathParts = inputPath.split('.');
+  private buildOutputPath(inputPath: string, speed: SpeedMultiplier, framerate: Framerate, audio: AudioOption): string {
+    const pathParts = inputPath.split(".");
     pathParts.pop();
-    const basePath = pathParts.join('.');
-    const audioSuffix = audio === 'remove' ? '_noaudio' : '';
+    const basePath = pathParts.join(".");
+    const audioSuffix = audio === "remove" ? "_noaudio" : "";
 
     return `${basePath}_x${speed}_${framerate}fps${audioSuffix}.mp4`;
   }
@@ -259,24 +234,14 @@ export class VideoProcessor {
     await this.checkFfmpegAvailable();
 
     inputPath = resolve(inputPath);
-    if (
-      !(await this.fileExists(inputPath)) ||
-      !(await stat(inputPath)).isFile()
-    ) {
-      throw new Error('Input file does not exist');
+    if (!(await this.fileExists(inputPath)) || !(await stat(inputPath)).isFile()) {
+      throw new Error("Input file does not exist");
     }
 
-    const outputPath =
-      requestedOutputPath?.trim() ||
-      this.buildOutputPath(inputPath, speed, framerate, audio);
-    if (!isAbsolute(outputPath))
-      throw new Error('Output path must be absolute');
-    if (
-      !['.mp4', '.mov', '.mkv', '.m4v'].includes(
-        extname(outputPath).toLowerCase()
-      )
-    ) {
-      throw new Error('Use an MP4, MOV, MKV, or M4V output path');
+    const outputPath = requestedOutputPath?.trim() || this.buildOutputPath(inputPath, speed, framerate, audio);
+    if (!isAbsolute(outputPath)) throw new Error("Output path must be absolute");
+    if (![".mp4", ".mov", ".mkv", ".m4v"].includes(extname(outputPath).toLowerCase())) {
+      throw new Error("Use an MP4, MOV, MKV, or M4V output path");
     }
     if (await this.fileExists(outputPath)) {
       throw new Error(`Output file already exists: ${outputPath}`);
@@ -284,35 +249,25 @@ export class VideoProcessor {
 
     // A source without an audio track cannot be mapped through [0:a:0].
     const { hasAudio } = await this.getVideoInfo(inputPath);
-    const effectiveAudio: AudioOption = hasAudio ? audio : 'remove';
+    const effectiveAudio: AudioOption = hasAudio ? audio : "remove";
 
-    const args = this.buildFfmpegArgs(
-      inputPath,
-      outputPath,
-      speed,
-      framerate,
-      effectiveAudio
-    );
+    const args = this.buildFfmpegArgs(inputPath, outputPath, speed, framerate, effectiveAudio);
 
     try {
       await run(this.ffmpegPath, args);
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
-      throw new Error(
-        `FFmpeg processing failed: ${detail.split('\n').slice(-3).join(' ')}`
-      );
+      throw new Error(`FFmpeg processing failed: ${detail.split("\n").slice(-3).join(" ")}`);
     }
 
     if (!(await this.fileExists(outputPath))) {
-      throw new Error('FFmpeg processing failed: no output file was produced');
+      throw new Error("FFmpeg processing failed: no output file was produced");
     }
 
     return outputPath;
   }
 
-  async validateVideoFile(
-    filePath: string
-  ): Promise<{ valid: boolean; error?: string }> {
+  async validateVideoFile(filePath: string): Promise<{ valid: boolean; error?: string }> {
     try {
       await this.checkFfmpegAvailable();
       await this.getVideoInfo(filePath);
@@ -320,7 +275,7 @@ export class VideoProcessor {
     } catch (error) {
       return {
         valid: false,
-        error: error instanceof Error ? error.message : 'Invalid video file',
+        error: error instanceof Error ? error.message : "Invalid video file",
       };
     }
   }

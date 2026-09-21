@@ -1,3 +1,3 @@
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
-jest.mock('@raycast/api');
+jest.mock("@raycast/api");

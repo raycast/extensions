@@ -1,3 +1,4 @@
-const raycast = require('@raycast/eslint-config');
+const { defineConfig } = require("eslint/config");
+const raycast = require("@raycast/eslint-config");
 
-module.exports = [...raycast, { ignores: ['src/__tests__/**'] }];
+module.exports = defineConfig([...raycast, { ignores: ["src/__tests__/**"] }]);
