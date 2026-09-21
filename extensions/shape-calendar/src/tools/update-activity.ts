@@ -1,18 +1,22 @@
-import { createActivity } from "../api/client";
+import { updateActivity } from "../api/client";
 
 type Input = {
   /**
-   * The date for the activity in ISO format (YYYY-MM-DD)
+   * The ID of the activity to update
    */
-  date: string;
+  id: string;
+  /**
+   * New date for the activity in ISO format (YYYY-MM-DD)
+   */
+  date?: string;
   /**
    * A short descriptive title. Don't include distance/duration in the title.
    */
-  title: string;
+  title?: string;
   /**
    * The type of sport
    */
-  sportType:
+  sportType?:
     | "run"
     | "bike"
     | "swim"
@@ -37,7 +41,7 @@ type Input = {
    */
   duration?: number;
   /**
-   * Whether the activity is already completed
+   * Whether the activity is completed
    */
   completed?: boolean;
   /**
@@ -51,7 +55,7 @@ type Input = {
 };
 
 export default async function (input: Input) {
-  const { stepsJson, ...rest } = input;
+  const { id, stepsJson, ...rest } = input;
   const body = {
     ...rest,
     ...(stepsJson
@@ -66,6 +70,6 @@ export default async function (input: Input) {
         })()
       : {}),
   };
-  const activity = await createActivity(body);
+  const activity = await updateActivity(id, body);
   return activity;
 }
