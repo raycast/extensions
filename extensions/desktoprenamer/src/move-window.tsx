@@ -9,7 +9,7 @@ export default function Command() {
 
   async function moveWindow(space: Space) {
     try {
-      const preferences = getPreferenceValues<{ returnToOriginalSpace?: boolean }>();
+      const preferences = getPreferenceValues<Preferences.MoveWindow>();
       const originalSpaces = preferences.returnToOriginalSpace ? await getCurrentSpacesByDisplay() : undefined;
       const isCurrentFullscreen = currentSpace?.isFullscreen;
 
@@ -19,7 +19,7 @@ export default function Command() {
 
       await moveWindowToSpace(space.id);
 
-      if (isCurrentFullscreen === true) {
+      if (isCurrentFullscreen !== false) {
         await new Promise((resolve) => setTimeout(resolve, 1700));
       }
 

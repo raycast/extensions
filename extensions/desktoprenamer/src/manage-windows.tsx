@@ -121,15 +121,10 @@ export default function Command() {
 
     setIsExecuting(true);
 
-    const quittingPIDs = stagedWindowsArray
-      .filter((action) => action.type === "quit")
-      .map((action) => action.window.pid);
-    if (quittingPIDs.length > 0) {
-      setTerminatingPIDs((previous) => new Set([...previous, ...quittingPIDs]));
-    }
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Executing batch operations..." });
+    let toast: Toast | undefined;
 
     try {
+      toast = await showToast({ style: Toast.Style.Animated, title: "Executing batch operations..." });
       const prefs = getPreferenceValues<Preferences>();
       const originalSpaces = prefs.returnToOriginalSpace ? await getCurrentSpacesByDisplay() : undefined;
 
@@ -185,6 +180,9 @@ export default function Command() {
               await delay(400);
             }
             actionSucceeded = true;
+            if (action.type === "quit") {
+              setTerminatingPIDs((previous) => new Set([...previous, action.window.pid]));
+            }
             totalExecuted++;
           } catch (error) {
             failures.push(`${getActionLabel(action.type)} on "${action.window.title}": ${describeBatchError(error)}`);
@@ -217,9 +215,17 @@ export default function Command() {
       }
       await popToRoot();
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Batch operation failed";
-      toast.message = error instanceof Error ? error.message : undefined;
+      if (toast) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Batch operation failed";
+        toast.message = error instanceof Error ? error.message : undefined;
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Batch operation failed",
+          message: error instanceof Error ? error.message : undefined,
+        }).catch(() => undefined);
+      }
       setIsExecuting(false);
     }
   }
@@ -353,12 +359,16 @@ export default function Command() {
                           onAction={() => stageAction(win, "hide")}
                         />
                       )}
-                      <Action
-                        title={win.space.isFullscreen ? "Exit Full Screen" : "Enter Full Screen"}
-                        icon={Icon.Maximize}
-                        shortcut={{ modifiers: ["ctrl", "shift"], key: "f" }}
-                        onAction={() => stageAction(win, win.space.isFullscreen ? "exitFullScreen" : "enterFullScreen")}
-                      />
+                      {win.space.isFullscreen !== undefined && (
+                        <Action
+                          title={win.space.isFullscreen ? "Exit Full Screen" : "Enter Full Screen"}
+                          icon={Icon.Maximize}
+                          shortcut={{ modifiers: ["ctrl", "shift"], key: "f" }}
+                          onAction={() =>
+                            stageAction(win, win.space.isFullscreen ? "exitFullScreen" : "enterFullScreen")
+                          }
+                        />
+                      )}
                       <Action
                         title="Quit"
                         icon={Icon.Trash}

@@ -202,7 +202,7 @@ export interface SpaceAPISpaceRecord {
   displayID: string;
   displayName: string;
   number: number;
-  isFullscreen: boolean;
+  isFullscreen: boolean | undefined;
   appName: string | null;
   appPath: string | null;
   globalShortcutNumber: number | null;
@@ -228,8 +228,8 @@ export interface SpaceAPIWindowRecord {
   appPath: string | null;
   title: string | null;
   spaceID: string;
-  isMinimized: boolean;
-  isHidden: boolean;
+  isMinimized: boolean | undefined;
+  isHidden: boolean | undefined;
 }
 
 export interface SpaceAPIWindowsSnapshot {
@@ -246,7 +246,7 @@ export interface SpaceAPIWindowSpaceRecord {
   displayID: string;
   displayName: string;
   num: number;
-  isFullscreen: boolean;
+  isFullscreen: boolean | undefined;
 }
 
 export interface SpaceAPIWindowEntry {
@@ -256,8 +256,8 @@ export interface SpaceAPIWindowEntry {
   appPath: string;
   title: string;
   space: SpaceAPIWindowSpaceRecord;
-  isMinimized: boolean;
-  isHidden: boolean;
+  isMinimized: boolean | undefined;
+  isHidden: boolean | undefined;
 }
 
 export interface SpaceAPIInfo {

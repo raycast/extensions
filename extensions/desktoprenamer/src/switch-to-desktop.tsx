@@ -56,7 +56,7 @@ export default function Command() {
 
       await moveWindowToSpace(space.id);
 
-      if (isCurrentFullscreen) {
+      if (isCurrentFullscreen !== false) {
         await new Promise((resolve) => setTimeout(resolve, 1700));
       }
 
@@ -87,7 +87,7 @@ export default function Command() {
 
   function renderSpace(space: Space) {
     const isCurrent = currentIds.includes(space.id);
-    const isLocked = space.isFullscreen !== true && space.isLocked;
+    const isLocked = space.isFullscreen === false && space.isLocked;
     const title = isLocked ? `${space.name} 🔒` : space.name;
     return (
       <List.Item
@@ -111,7 +111,7 @@ export default function Command() {
                 onAction={() => moveWindow(space)}
               />
             )}
-            {space.isFullscreen !== true && (
+            {space.isFullscreen === false && (
               <ActionPanel.Section>
                 <Action
                   title={isLocked ? "Unlock Space" : "Lock Space"}
@@ -127,7 +127,7 @@ export default function Command() {
                 />
               </ActionPanel.Section>
             )}
-            {space.isFullscreen !== true && (
+            {space.isFullscreen === false && (
               <ActionPanel.Section>
                 <Action.Push
                   title="Rename Space"

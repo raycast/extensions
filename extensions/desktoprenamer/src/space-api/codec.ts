@@ -328,7 +328,9 @@ export function decodeStructuredRPCResponse(
       `${errorMessage} (code ${errorCode})`,
       errorCode,
       error.data,
-      errorCode === SPACE_API_ERROR_CODES.methodNotFound || errorCode === SPACE_API_ERROR_CODES.unsupportedContract,
+      errorCode === SPACE_API_ERROR_CODES.methodNotFound ||
+        errorCode === SPACE_API_ERROR_CODES.unsupportedContract ||
+        errorCode === SPACE_API_ERROR_CODES.apiDisabled,
     );
   }
   return {

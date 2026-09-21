@@ -428,13 +428,15 @@ export async function runDesktopRenamerMethod<M extends SpaceAPIMethod>(
     const result = await runSpaceAPIMethod(command, parameters, true);
     return normalizeDesktopRenamerMethodResult(command, result);
   } catch (error) {
-    // A read can safely fall back to AppleScript. A write must stop after an
-    // ambiguous API response so the same operation is never executed twice.
+    // A read can safely fall back to AppleScript. An explicit API-disabled
+    // response is also safe because DesktopRenamer rejected the request before
+    // execution. A write must otherwise stop after an ambiguous API response so
+    // the same operation is never executed twice.
     if (
       method === "automatic" &&
-      isReadSpaceAPIMethod(command) &&
       error instanceof SpaceAPIProtocolError &&
-      error.canFallback
+      error.canFallback &&
+      (isReadSpaceAPIMethod(command) || error.code === SPACE_API_ERROR_CODES.apiDisabled)
     ) {
       try {
         const result = await runAppleScript(makeAppleScriptForMethod(command, parameters));
@@ -454,7 +456,7 @@ function normalizeDesktopRenamerMethodResult<M extends SpaceAPIMethod>(
   result: unknown,
 ): SpaceAPIMethodResults[M] {
   if (result === "API Disabled") {
-    throw new SpaceAPIProtocolError("SpaceAPI Disabled", SPACE_API_ERROR_CODES.apiDisabled, { command }, false);
+    throw new SpaceAPIProtocolError("SpaceAPI Disabled", SPACE_API_ERROR_CODES.apiDisabled, { command }, true);
   }
   switch (command) {
     case "getAPIInfo": {
@@ -511,10 +513,25 @@ function normalizeDesktopRenamerMethodResult<M extends SpaceAPIMethod>(
 
 function operationResult(result: unknown): SpaceAPIOperationResult {
   if (isRecord(result) && typeof result.accepted === "boolean") {
+    if (!result.accepted) {
+      throw protocolError(
+        "DesktopRenamer rejected the operation.",
+        SPACE_API_ERROR_CODES.operationFailed,
+        { accepted: false },
+        false,
+      );
+    }
     return { accepted: result.accepted };
   }
-  if (typeof result === "boolean") return { accepted: result };
-  if (result === "true" || result === "false") return { accepted: result === "true" };
+  if (result === false || result === "false") {
+    throw protocolError(
+      "DesktopRenamer rejected the operation.",
+      SPACE_API_ERROR_CODES.operationFailed,
+      { accepted: false },
+      false,
+    );
+  }
+  if (result === true || result === "true") return { accepted: true };
   // AppleScript operations intentionally have no result value. Normalize that
   // compatibility behavior to the structured operation result for callers.
   if (result === "" || result === null || result === undefined) return { accepted: true };

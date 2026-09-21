@@ -22,6 +22,12 @@ const SPACE_API_RESULT_NOTIFICATION = `${PREFERRED_DESKTOP_RENAMER_API_PREFIX}.C
 const LEGACY_SPACE_API_COMMAND_NOTIFICATION = `${LEGACY_DESKTOP_RENAMER_API_PREFIX}.PerformCommand`;
 const LEGACY_SPACE_API_RESULT_NOTIFICATION = `${LEGACY_DESKTOP_RENAMER_API_PREFIX}.CommandResult`;
 
+function parseLegacyBoolean(value: unknown): boolean | undefined {
+  if (value === true || value === 1 || value === "true" || value === "1") return true;
+  if (value === false || value === 0 || value === "false" || value === "0") return false;
+  return undefined;
+}
+
 export function parseLegacySpaceSnapshotResult(raw: string): SpaceAPISnapshot {
   const trimmed = raw.trim();
   if (trimmed.startsWith("{")) {
@@ -99,7 +105,7 @@ function parseLegacySpaceObject(value: unknown): SpaceAPISpaceRecord {
     displayName:
       typeof record.displayName === "string" && record.displayName.length > 0 ? record.displayName : displayID,
     number,
-    isFullscreen: record.isFullscreen === true || record.isFullscreen === 1,
+    isFullscreen: parseLegacyBoolean(record.isFullscreen),
     appName: typeof record.appName === "string" ? record.appName : null,
     appPath: typeof record.appPath === "string" && record.appPath.length > 0 ? record.appPath : null,
     globalShortcutNumber:
@@ -130,7 +136,7 @@ export function parseLegacySpaceRecords(raw: string): SpaceAPISpaceRecord[] {
         displayID,
         displayName: displayID,
         number,
-        isFullscreen: parts.length >= 5 ? parts[4] === "1" : false,
+        isFullscreen: parts.length >= 5 ? parseLegacyBoolean(parts[4]?.trim()) : undefined,
         appName: null,
         appPath: parts[5] || null,
         globalShortcutNumber: null,
@@ -171,8 +177,8 @@ export function parseLegacyWindowsSnapshot(raw: string): SpaceAPIWindowsSnapshot
       appPath: parts[3] || null,
       title: parts.slice(4, titleEnd).join("|") || null,
       spaceID: currentSpace.id,
-      isMinimized: hasStateFields ? parts[parts.length - 2] === "1" : false,
-      isHidden: hasStateFields ? parts[parts.length - 1] === "1" : false,
+      isMinimized: hasStateFields ? parseLegacyBoolean(parts[parts.length - 2]?.trim()) : undefined,
+      isHidden: hasStateFields ? parseLegacyBoolean(parts[parts.length - 1]?.trim()) : undefined,
     });
   }
 
@@ -200,12 +206,9 @@ export async function runLegacySpaceAPICommand(
       maxBuffer: 10 * 1024 * 1024,
     }));
   } catch (error) {
-    throw protocolError(
-      error instanceof Error ? error.message : "Legacy SpaceAPI request failed.",
-      undefined,
-      undefined,
-      true,
-    );
+    const message = error instanceof Error ? error.message : "Legacy SpaceAPI request failed.";
+    const code = message.includes("API Disabled") ? SPACE_API_ERROR_CODES.apiDisabled : undefined;
+    throw protocolError(message, code, undefined, true);
   }
 
   const output = (stdout.trim() ? stdout : stderr).trimEnd();
@@ -336,6 +339,6 @@ if (!(success === true || String(success) === 'true' || String(success) === '1')
 }
 const result = ObjC.unwrap(response.result);
 const apiVersion = ObjC.unwrap(response.apiVersion);
-console.log(JSON.stringify({apiVersion: apiVersion || null, result: result || ''}));
+console.log(JSON.stringify({success: true, apiVersion: apiVersion || null, result: result || ''}));
 `;
 }

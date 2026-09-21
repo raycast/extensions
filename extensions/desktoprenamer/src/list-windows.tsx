@@ -301,14 +301,16 @@ export default function Command() {
                             onAction={() => handleWindowAction(entry, "hide")}
                           />
                         )}
-                        <Action
-                          title={entry.space.isFullscreen ? "Exit Full Screen" : "Enter Full Screen"}
-                          icon={Icon.Maximize}
-                          shortcut={{ modifiers: ["ctrl", "shift"], key: "f" }}
-                          onAction={() =>
-                            handleWindowAction(entry, entry.space.isFullscreen ? "exitFullScreen" : "enterFullScreen")
-                          }
-                        />
+                        {entry.space.isFullscreen !== undefined && (
+                          <Action
+                            title={entry.space.isFullscreen ? "Exit Full Screen" : "Enter Full Screen"}
+                            icon={Icon.Maximize}
+                            shortcut={{ modifiers: ["ctrl", "shift"], key: "f" }}
+                            onAction={() =>
+                              handleWindowAction(entry, entry.space.isFullscreen ? "exitFullScreen" : "enterFullScreen")
+                            }
+                          />
+                        )}
                         <Action
                           title="Quit Application"
                           icon={Icon.Trash}
