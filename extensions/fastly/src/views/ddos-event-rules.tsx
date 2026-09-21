@@ -1,8 +1,13 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, Keyboard, confirmAlert, Alert } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { DdosProtectionEvent, DdosProtectionRule, FastlyService } from "../types";
 import { getDdosEventRules, updateDdosRuleAction } from "../api";
-import { DDOS_RULE_ACTIONS, ddosRuleActionTag, ddosRuleAttributes } from "../utils/ddos-rules";
+import {
+  DDOS_RULE_ACTIONS,
+  confirmDdosRuleActionChange,
+  ddosRuleActionTag,
+  ddosRuleAttributes,
+} from "../utils/ddos-rules";
 
 interface DdosEventRulesProps {
   event: DdosProtectionEvent;
@@ -48,16 +53,8 @@ export function DdosEventRules({ event, service }: DdosEventRulesProps) {
     if (action === rule.action) {
       return;
     }
-    // Turning a rule off stops mitigation for its traffic; make sure that's intended
-    if (action === "off") {
-      const confirmed = await confirmAlert({
-        title: "Turn Off Rule",
-        message: `Turn off "${rule.name || rule.id}"? Traffic matching this rule will no longer be mitigated.`,
-        primaryAction: { title: "Turn Off", style: Alert.ActionStyle.Destructive },
-      });
-      if (!confirmed) {
-        return;
-      }
+    if (!(await confirmDdosRuleActionChange(rule, action))) {
+      return;
     }
     try {
       const updated = await updateDdosRuleAction(rule.id, action);

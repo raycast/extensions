@@ -15,7 +15,8 @@ import { DdosRuleList } from "./ddos-rule-list";
 
 export function DdosServiceList() {
   const [services, setServices] = useState<FastlyService[]>([]);
-  const [enabledIds, setEnabledIds] = useState<Set<string>>(new Set());
+  // null means the enablement lookup failed and the true state is unknown
+  const [enabledIds, setEnabledIds] = useState<Set<string> | null>(new Set());
   const [modes, setModes] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
 
@@ -31,11 +32,20 @@ export function DdosServiceList() {
         // Don't fail the whole list if enablement status can't be read (e.g. no DDoS Protection entitlement)
         getDdosProtectionEnabledServices().catch((error) => {
           console.error("Error loading DDoS Protection enablement:", error);
-          return [] as string[];
+          return null;
         }),
       ]);
       setServices(allServices);
-      setEnabledIds(new Set(enabled));
+      setEnabledIds(enabled === null ? null : new Set(enabled));
+      if (enabled === null) {
+        setModes({});
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn't determine DDoS Protection status",
+          message: "Enablement state is unknown — retry with the refresh action",
+        });
+        return;
+      }
 
       const modeEntries = await Promise.all(
         enabled.map(async (serviceId) => [serviceId, await getDdosProtectionMode(serviceId).catch(() => undefined)]),
@@ -124,8 +134,8 @@ export function DdosServiceList() {
     }
   }
 
-  const enabledServices = services.filter((service) => enabledIds.has(service.id));
-  const disabledServices = services.filter((service) => !enabledIds.has(service.id));
+  const enabledServices = enabledIds ? services.filter((service) => enabledIds.has(service.id)) : [];
+  const disabledServices = enabledIds ? services.filter((service) => !enabledIds.has(service.id)) : [];
 
   function commonActions(service: FastlyService) {
     return (
@@ -186,6 +196,36 @@ export function DdosServiceList() {
           description="Your account doesn't have any services yet."
           icon={Icon.Globe}
         />
+      ) : enabledIds === null ? (
+        <List.Section title="Enablement Status Unknown" subtitle={String(services.length)}>
+          {services.map((service) => (
+            <List.Item
+              key={service.id}
+              title={service.name}
+              subtitle={service.id}
+              icon={{ source: Icon.Shield, tintColor: Color.SecondaryText }}
+              accessories={[{ tag: { value: "Status Unknown", color: Color.Orange } }]}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action title="Retry Status Check" icon={Icon.ArrowClockwise} onAction={loadServices} />
+                    <Action.Push
+                      title="View DDoS Overview"
+                      icon={Icon.LineChart}
+                      target={<DdosStatsDetail service={service} />}
+                    />
+                    <Action.Push
+                      title="View Attack Events"
+                      icon={Icon.Bolt}
+                      target={<DdosEventList service={service} />}
+                    />
+                  </ActionPanel.Section>
+                  {commonActions(service)}
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       ) : (
         <>
           <List.Section title="DDoS Protection Enabled" subtitle={String(enabledServices.length)}>

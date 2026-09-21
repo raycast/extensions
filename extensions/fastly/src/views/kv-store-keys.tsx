@@ -29,15 +29,15 @@ export function KVStoreKeys({ store }: KVStoreKeysProps) {
       setIsLoading(true);
       const allKeys: string[] = [];
       let cursor: string | undefined;
-      // Guard against a non-advancing cursor pinning the loop
-      let pages = 0;
+      let previousCursor: string | undefined;
 
       do {
+        previousCursor = cursor;
         const response = await getKVStoreKeys(store.id, cursor);
         allKeys.push(...response.data);
         cursor = response.meta?.next_cursor;
-        pages += 1;
-      } while (cursor && pages < 20);
+        // Stop when the cursor ends or stops advancing (guards a looping API)
+      } while (cursor && cursor !== previousCursor);
 
       setKeys(allKeys);
     } catch (error) {

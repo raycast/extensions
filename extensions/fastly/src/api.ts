@@ -890,10 +890,18 @@ export async function getDdosStats(serviceId: string, hours = 24): Promise<DdosS
 // Purge API functions
 
 // Purges a single URL. The URL is host + path with no scheme; soft purge marks
-// content stale instead of removing it.
+// content stale instead of removing it. The input is parsed and rebuilt so
+// dot-segments can't traverse out of /purge/ into other API routes.
 export async function purgeUrl(url: string, soft: boolean): Promise<{ id?: string; status?: string }> {
-  const withoutScheme = url.replace(/^https?:\/\//, "");
-  return fastlyFetch<{ id?: string; status?: string }>(`/purge/${withoutScheme}`, {
+  const withoutScheme = url.trim().replace(/^https?:\/\//, "");
+  let parsed: URL;
+  try {
+    parsed = new URL(`https://${withoutScheme}`);
+  } catch {
+    throw new Error(`"${url}" is not a valid URL`);
+  }
+  const target = `${parsed.host}${parsed.pathname}${parsed.search}`;
+  return fastlyFetch<{ id?: string; status?: string }>(`/purge/${target}`, {
     method: "POST",
     headers: soft ? { "fastly-soft-purge": "1" } : {},
   });

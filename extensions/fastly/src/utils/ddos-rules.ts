@@ -1,4 +1,4 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Alert, Color, Icon, List, confirmAlert } from "@raycast/api";
 import { DdosProtectionRule } from "../types";
 
 export const DDOS_RULE_ACTIONS: Array<{ value: string; title: string; icon: Icon }> = [
@@ -22,6 +22,40 @@ export function ddosRuleActionTag(action?: string): List.Item.Accessory {
         tooltip: "Follows the service's protection mode",
       };
   }
+}
+
+// Changing a rule's action affects live traffic handling; every change gets
+// an operation-specific confirmation.
+export async function confirmDdosRuleActionChange(rule: DdosProtectionRule, action: string): Promise<boolean> {
+  const name = rule.name || rule.id;
+  const prompts: Record<string, { title: string; message: string; destructive?: boolean }> = {
+    block: {
+      title: "Block Matching Traffic",
+      message: `Set "${name}" to block? Traffic matching this rule will be denied immediately.`,
+    },
+    log: {
+      title: "Switch to Log Only",
+      message: `Set "${name}" to log? Matching traffic will be logged but no longer blocked.`,
+    },
+    default: {
+      title: "Reset to Default",
+      message: `Reset "${name}" to default? It will follow the service's protection mode.`,
+    },
+    off: {
+      title: "Turn Off Rule",
+      message: `Turn off "${name}"? Traffic matching this rule will no longer be mitigated.`,
+      destructive: true,
+    },
+  };
+  const prompt = prompts[action] ?? {
+    title: "Change Rule Action",
+    message: `Set "${name}" to ${action}?`,
+  };
+  return confirmAlert({
+    title: prompt.title,
+    message: prompt.message,
+    primaryAction: { title: prompt.title, style: prompt.destructive ? Alert.ActionStyle.Destructive : undefined },
+  });
 }
 
 // Human-readable summary of the traffic attributes a rule matches on

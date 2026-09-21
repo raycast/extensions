@@ -17,15 +17,15 @@ export function KVStoreList() {
       setIsLoading(true);
       const allStores: KVStore[] = [];
       let cursor: string | undefined;
-      // Guard against a non-advancing cursor pinning the loop
-      let pages = 0;
+      let previousCursor: string | undefined;
 
       do {
+        previousCursor = cursor;
         const response = await getKVStores(cursor);
         allStores.push(...response.data);
         cursor = response.meta?.next_cursor;
-        pages += 1;
-      } while (cursor && pages < 20);
+        // Stop when the cursor ends or stops advancing (guards a looping API)
+      } while (cursor && cursor !== previousCursor);
 
       setStores(allStores);
     } catch (error) {

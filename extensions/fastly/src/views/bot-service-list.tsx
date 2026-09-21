@@ -6,7 +6,8 @@ import { BotStatsDetail } from "./bot-stats-detail";
 
 export function BotServiceList() {
   const [services, setServices] = useState<FastlyService[]>([]);
-  const [enabledIds, setEnabledIds] = useState<Set<string>>(new Set());
+  // null means the enablement lookup failed and the true state is unknown
+  const [enabledIds, setEnabledIds] = useState<Set<string> | null>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -18,14 +19,21 @@ export function BotServiceList() {
       setIsLoading(true);
       const [allServices, enabled] = await Promise.all([
         getServices(),
-        // Don't fail the whole list if enablement status can't be read (e.g. no Bot Management entitlement)
+        // Don't fail the whole list if enablement status can't be read; track it as unknown instead
         getBotManagementEnabledServices().catch((error) => {
           console.error("Error loading Bot Management enablement:", error);
-          return [] as string[];
+          return null;
         }),
       ]);
       setServices(allServices);
-      setEnabledIds(new Set(enabled));
+      setEnabledIds(enabled === null ? null : new Set(enabled));
+      if (enabled === null) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Couldn't determine Bot Management status",
+          message: "Enablement state is unknown — retry with the refresh action",
+        });
+      }
     } catch (error) {
       console.error("Error loading services:", error);
       await showToast({
@@ -82,8 +90,8 @@ export function BotServiceList() {
     }
   }
 
-  const enabledServices = services.filter((service) => enabledIds.has(service.id));
-  const disabledServices = services.filter((service) => !enabledIds.has(service.id));
+  const enabledServices = enabledIds ? services.filter((service) => enabledIds.has(service.id)) : [];
+  const disabledServices = enabledIds ? services.filter((service) => !enabledIds.has(service.id)) : [];
 
   function commonActions(service: FastlyService) {
     return (
@@ -122,6 +130,31 @@ export function BotServiceList() {
           description="Your account doesn't have any services yet."
           icon={Icon.Globe}
         />
+      ) : enabledIds === null ? (
+        <List.Section title="Enablement Status Unknown" subtitle={String(services.length)}>
+          {services.map((service) => (
+            <List.Item
+              key={service.id}
+              title={service.name}
+              subtitle={service.id}
+              icon={{ source: Icon.Shield, tintColor: Color.SecondaryText }}
+              accessories={[{ tag: { value: "Status Unknown", color: Color.Orange } }]}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action title="Retry Status Check" icon={Icon.ArrowClockwise} onAction={loadServices} />
+                    <Action.Push
+                      title="View Bot Traffic"
+                      icon={Icon.BarChart}
+                      target={<BotStatsDetail service={service} />}
+                    />
+                  </ActionPanel.Section>
+                  {commonActions(service)}
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       ) : (
         <>
           <List.Section title="Bot Management Enabled" subtitle={String(enabledServices.length)}>
