@@ -19,6 +19,7 @@ import DeploymentHistory from "./deployment-history";
 import ServiceEnv from "./service-env";
 import ServiceDomains from "./service-domains";
 import ServiceBackups, { BackupableKind } from "./service-backups";
+import ServiceSchedules from "./service-schedules";
 import { DatabaseActions } from "./database-actions";
 import type { ServiceScope } from "./utils";
 import { getTotalServices } from "./utils";
@@ -330,6 +331,13 @@ export default function Services({
                       icon={Icon.Cloud}
                       title="View Backups"
                       target={<ServiceBackups service={{ ...service, type: service.type as BackupableKind }} />}
+                    />
+                  )}
+                  {(service.type === "application" || service.type === "compose") && (
+                    <Action.Push
+                      icon={Icon.Clock}
+                      title="View Schedules"
+                      target={<ServiceSchedules service={{ ...service, type: service.type }} />}
                     />
                   )}
                 </ActionPanel.Section>

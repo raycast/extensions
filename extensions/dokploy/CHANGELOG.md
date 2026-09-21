@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Schedules] - 2026-09-21
+
+- Add a `View Schedules` action to Applications and Compose stacks, listing scheduled shell commands with `Add Schedule`, `Edit Schedule`, `Run Now`, `View Runs` (with logs) and `Delete Schedule` actions.
+
 ## [Compose Backups] - 2026-09-21
 
 - Extend the `View Backups` action to Compose stacks: pick a container and which database engine it runs, alongside the same schedule/destination/retention fields the database version already has.

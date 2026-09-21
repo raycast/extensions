@@ -30,6 +30,12 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
             - Edit Backup
             - Run Backup Now
             - Delete Backup
+        - View Schedules (Applications and Compose stacks)
+            - Add Schedule
+            - Edit Schedule
+            - Run Now
+            - View Runs
+            - Delete Schedule
         - Copy Connection String / Copy Password (Databases)
         - Delete Service
     - View Docker (Containers)
