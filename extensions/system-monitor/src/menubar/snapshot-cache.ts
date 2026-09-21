@@ -5,7 +5,8 @@ import { OSInfo } from "../lib/os-version";
 import { TemperatureData } from "../Temperature/TemperatureUtils";
 import { MENU_BAR_SNAPSHOT_SCHEMA_VERSION, MenuBarMemory, MenuBarSnapshot, NetworkUsage, SnapshotValue } from "./types";
 
-export const MENU_BAR_SNAPSHOT_CACHE_KEY = "menubar-snapshot-v1";
+export const MENU_BAR_SNAPSHOT_CACHE_KEY = "menubar-snapshot-v2";
+export const PREVIOUS_MENU_BAR_SNAPSHOT_CACHE_KEY = "menubar-snapshot-v1";
 export const LEGACY_MENU_BAR_CACHE_KEY = "menubar-data";
 export const MAX_MENU_BAR_SNAPSHOT_BYTES = 64 * 1024;
 
@@ -180,8 +181,10 @@ export function readMenuBarSnapshot(cache: SnapshotCache = new Cache()): MenuBar
 }
 
 export function removeLegacyMenuBarCache(cache: SnapshotCache): void {
-  if (cache.remove && cache.get(LEGACY_MENU_BAR_CACHE_KEY) !== undefined) {
-    cache.remove(LEGACY_MENU_BAR_CACHE_KEY);
+  for (const key of [LEGACY_MENU_BAR_CACHE_KEY, PREVIOUS_MENU_BAR_SNAPSHOT_CACHE_KEY]) {
+    if (cache.remove && cache.get(key) !== undefined) {
+      cache.remove(key);
+    }
   }
 }
 

@@ -4,7 +4,7 @@ import { BatteryDataInterface, DiskInterface } from "../Interfaces";
 import { OSInfo } from "../lib/os-version";
 import { TemperatureData } from "../Temperature/TemperatureUtils";
 
-export const MENU_BAR_SNAPSHOT_SCHEMA_VERSION = 1 as const;
+export const MENU_BAR_SNAPSHOT_SCHEMA_VERSION = 2 as const;
 
 export type PinnedStat = "cpu" | "temperature" | "memory" | "battery" | "network" | "storage" | "none";
 

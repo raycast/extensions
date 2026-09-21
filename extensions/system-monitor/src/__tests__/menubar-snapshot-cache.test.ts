@@ -4,6 +4,7 @@ import {
   MAX_MENU_BAR_SNAPSHOT_BYTES,
   LEGACY_MENU_BAR_CACHE_KEY,
   MENU_BAR_SNAPSHOT_CACHE_KEY,
+  PREVIOUS_MENU_BAR_SNAPSHOT_CACHE_KEY,
   parseMenuBarSnapshot,
   readMenuBarSnapshot,
   removeLegacyMenuBarCache,
@@ -33,7 +34,7 @@ class MemoryCache implements SnapshotCache {
 describe("menu-bar snapshot cache", () => {
   it("ignores malformed and incompatible entries", () => {
     expect(parseMenuBarSnapshot("not json")).toBeUndefined();
-    expect(parseMenuBarSnapshot(JSON.stringify({ schemaVersion: 2 }))).toBeUndefined();
+    expect(parseMenuBarSnapshot(JSON.stringify({ ...fixtureSnapshot(), schemaVersion: 1 }))).toBeUndefined();
     expect(parseMenuBarSnapshot("x".repeat(MAX_MENU_BAR_SNAPSHOT_BYTES + 1))).toBeUndefined();
   });
 
@@ -79,12 +80,14 @@ describe("menu-bar snapshot cache", () => {
     expect(Buffer.byteLength(serialized ?? "", "utf8")).toBeLessThanOrEqual(MAX_MENU_BAR_SNAPSHOT_BYTES);
   });
 
-  it("removes the legacy unversioned cache entry", () => {
+  it("removes legacy entries with incompatible memory accounting", () => {
     const cache = new MemoryCache();
     cache.set(LEGACY_MENU_BAR_CACHE_KEY, "legacy");
+    cache.set(PREVIOUS_MENU_BAR_SNAPSHOT_CACHE_KEY, JSON.stringify(fixtureSnapshot()));
 
     removeLegacyMenuBarCache(cache);
 
     expect(cache.store.has(LEGACY_MENU_BAR_CACHE_KEY)).toBe(false);
+    expect(cache.store.has(PREVIOUS_MENU_BAR_SNAPSHOT_CACHE_KEY)).toBe(false);
   });
 });

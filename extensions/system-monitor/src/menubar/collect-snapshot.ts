@@ -1,8 +1,9 @@
 import { LaunchType } from "@raycast/api";
 import { statfs } from "fs/promises";
-import { cpus, freemem, totalmem } from "os";
+import { cpus } from "os";
 
 import { DiskInterface } from "../Interfaces";
+import { getMemoryUsage } from "../Memory/MemoryUtils";
 import { getNetworkData } from "../Network/NetworkUtils";
 import { getBatteryData } from "../Power/PowerUtils";
 import { calculateDiskStorage, getOSInfo } from "../SystemInfo/SystemUtils";
@@ -57,9 +58,8 @@ async function collectCpuUsage(): Promise<string> {
 }
 
 async function collectMemoryUsage(): Promise<MenuBarMemory> {
-  const totalMb = totalmem() / 1024 / 1024;
-  const usedMb = (totalmem() - freemem()) / 1024 / 1024;
-  return memorySummary(totalMb, usedMb);
+  const memory = await getMemoryUsage();
+  return memorySummary(memory.memTotal, memory.memUsed);
 }
 
 async function collectBackgroundStorage() {
@@ -176,6 +176,7 @@ function mapBatteryPowerState(
 }
 
 const BACKGROUND_SKIP_REASON = "External collectors are skipped during background refresh";
+const BACKGROUND_MEMORY_REASON = "Memory updates when the menu is opened";
 
 /**
  * Select and run menu-bar collectors without reading Raycast UI state or writing cache data.
@@ -195,7 +196,7 @@ export async function collectMenuBarSnapshot({
       osInfo: previousValue(previous?.values.osInfo, BACKGROUND_SKIP_REASON),
       storage: previousValue(previous?.values.storage, BACKGROUND_SKIP_REASON),
       cpuUsage: previousValue(previous?.values.cpuUsage, BACKGROUND_SKIP_REASON),
-      memory: previousValue(previous?.values.memory, BACKGROUND_SKIP_REASON),
+      memory: previousValue(previous?.values.memory, BACKGROUND_MEMORY_REASON),
       networkUsage: previousValue(previous?.values.networkUsage, BACKGROUND_SKIP_REASON),
       batteryData: previousValue(previous?.values.batteryData, BACKGROUND_SKIP_REASON),
       isOnAC: previousValue(previous?.values.isOnAC, BACKGROUND_SKIP_REASON),
@@ -204,8 +205,6 @@ export async function collectMenuBarSnapshot({
 
     if (pinnedStat === "cpu") {
       values.cpuUsage = await collectValue(collectors.cpu, previous?.values.cpuUsage, now, validCpu);
-    } else if (pinnedStat === "memory") {
-      values.memory = await collectValue(collectors.memory, previous?.values.memory, now, validMemory);
     } else if (pinnedStat === "storage") {
       values.storage = await collectValue(collectors.backgroundStorage, previous?.values.storage, now, validStorage);
     }

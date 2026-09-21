@@ -115,6 +115,7 @@ describe("menu-bar background endurance", () => {
         launches: iterations * 2,
         maxOverlappingCollectors: maxInFlight,
         nettopCollectorCalls: vi.mocked(collectors.network).mock.calls.length,
+        memoryCollectorCalls: vi.mocked(collectors.memory).mock.calls.length,
         temperatureReaderCollectorCalls: vi.mocked(collectors.temperature).mock.calls.length,
         cacheEntryCount: cache.store.size,
         cacheBytes: Buffer.byteLength(serialized, "utf8"),
@@ -128,6 +129,7 @@ describe("menu-bar background endurance", () => {
       console.info(`MENUBAR_SOAK_RESULT ${JSON.stringify(measurements)}`);
       expect(measurements.maxOverlappingCollectors).toBe(1);
       expect(measurements.nettopCollectorCalls).toBe(0);
+      expect(measurements.memoryCollectorCalls).toBe(0);
       expect(measurements.temperatureReaderCollectorCalls).toBe(0);
       expect(measurements.cacheEntryCount).toBe(1);
       expect(measurements.cacheBytes).toBeLessThanOrEqual(MAX_MENU_BAR_SNAPSHOT_BYTES);

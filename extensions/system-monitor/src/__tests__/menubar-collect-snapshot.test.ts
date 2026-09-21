@@ -16,7 +16,7 @@ describe("collectMenuBarSnapshot", () => {
   it.each<[PinnedStat, keyof MenuBarCollectors | undefined]>([
     ["none", undefined],
     ["cpu", "cpu"],
-    ["memory", "memory"],
+    ["memory", undefined],
     ["storage", "backgroundStorage"],
     ["battery", undefined],
     ["network", undefined],
@@ -40,6 +40,48 @@ describe("collectMenuBarSnapshot", () => {
 
     expect(collectors.network).not.toHaveBeenCalled();
     expect(collectors.temperature).not.toHaveBeenCalled();
+  });
+
+  it("preserves the user-collected memory value without recalculating it in the background", async () => {
+    const collectors = spies();
+    vi.mocked(collectors.memory).mockResolvedValueOnce({ totalMem: "16", freeMemPercentage: "50", freeMem: "8" });
+
+    const opened = await collectMenuBarSnapshot({
+      launchType: LaunchType.UserInitiated,
+      pinnedStat: "memory",
+      collectors,
+      now: () => 2_000,
+    });
+    const background = await collectMenuBarSnapshot({
+      launchType: LaunchType.Background,
+      pinnedStat: "memory",
+      previous: opened,
+      collectors,
+      now: () => 3_000,
+    });
+
+    expect(collectors.memory).toHaveBeenCalledOnce();
+    expect(background.values.memory).toEqual({
+      status: "cached",
+      value: { totalMem: "16", freeMemPercentage: "50", freeMem: "8" },
+      collectedAt: 2_000,
+      reason: "Memory updates when the menu is opened",
+    });
+  });
+
+  it("marks memory unavailable before the first user-opened collection", async () => {
+    const collectors = spies();
+    const snapshot = await collectMenuBarSnapshot({
+      launchType: LaunchType.Background,
+      pinnedStat: "memory",
+      collectors,
+    });
+
+    expect(collectors.memory).not.toHaveBeenCalled();
+    expect(snapshot.values.memory).toEqual({
+      status: "unavailable",
+      reason: "Memory updates when the menu is opened",
+    });
   });
 
   it("allows a user-initiated launch to collect full data", async () => {

@@ -12,7 +12,7 @@ This is a [Raycast](https://raycast.com/) extension that allows you to monitor y
 
 ❕ You can customise the menubar dropdown text in `Preferences`. Hover over the textbox to see what tags are available for each module. There are two tags that are always available: `<BR>` adds a linebreak, and `<MODE>` shows "Free" and "Used" depending on display mode.
 
-The 10-second background refresh updates CPU, memory, and storage without starting external programs. Network, temperature, and battery titles keep the last successful value collected while the menu was open. They remain unavailable until the first user-opened collection.
+The 10-second background refresh updates CPU and storage without starting external programs. Memory uses the same macOS accounting as the Memory tab and updates when you open the menu. Between openings, the menu-bar title keeps the last Memory value. Network, temperature, and battery work the same way. These values remain unavailable until the first user-opened collection.
 
 ## Data and Privacy
 

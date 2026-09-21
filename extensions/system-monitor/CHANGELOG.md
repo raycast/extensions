@@ -2,7 +2,8 @@
 
 ## [Menu Bar Process Safety] - {PR_MERGE_DATE}
 
-- Keep background refreshes process-free by collecting CPU, memory, and storage with Node and macOS system calls
+- Keep background refreshes process-free by collecting CPU and storage without external programs
+- Keep the menu-bar Memory reading consistent with the Memory tab; the background refresh reuses the last value collected when the menu was opened
 - Reuse cached network, temperature, and battery values until the menu is opened instead of starting `nettop` or `temperature-reader` every 10 seconds
 - Prevent overlapping background workers with a stale-recoverable cross-process lease
 - Validate and bound the versioned menu-bar snapshot cache
