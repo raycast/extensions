@@ -306,13 +306,27 @@ function markTimeEntriesRefreshed(): void {
  *
  * Deliberately measures the fetch, not the cache contents: stopCurrentTimer() and addNewTimeEntry()
  * amend the cached list in place without refetching, and those edits should not pass for freshness.
+ *
+ * Reports Infinity for anything it cannot make sense of — never fetched, an unparseable value, or a
+ * timestamp in the future — so the caller's single "too old?" comparison covers those cases without
+ * needing to know about them.
  */
 export function timeEntriesCacheAge(): number {
   const stored = cache.get(timeEntriesRefreshedAtCacheKey());
   if (!stored) return Infinity;
 
   const refreshedAt = Number(stored);
-  return Number.isFinite(refreshedAt) ? Date.now() - refreshedAt : Infinity;
+  if (!Number.isFinite(refreshedAt)) return Infinity;
+
+  const age = Date.now() - refreshedAt;
+
+  // A negative age means the clock has moved backwards since the timestamp was written — an NTP
+  // correction, or a machine whose clock was simply wrong until it was fixed. Only wall-clock time
+  // survives between these processes, so there is no monotonic source to compare against instead;
+  // reporting it as stale is the safe reading. Treating it as fresh would freeze the list until the
+  // clock caught back up, whereas one refresh rewrites the timestamp against the corrected clock and
+  // the anomaly resolves itself.
+  return age < 0 ? Infinity : age;
 }
 
 export async function stopCurrentTimer(callback?: () => void): Promise<void> {
