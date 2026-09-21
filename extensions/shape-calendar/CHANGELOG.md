@@ -1,6 +1,6 @@
 # Shape Calendar Changelog
 
-## [Sign In with Shape, Training Status] - {PR_MERGE_DATE}
+## [Sign In with Shape, Training Status] - 2026-09-21
 
 - Sign in with your Shape Calendar account instead of pasting an API token
 - New Training Status command with readiness, training load, and health metrics
