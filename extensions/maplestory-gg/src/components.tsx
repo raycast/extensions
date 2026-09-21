@@ -102,10 +102,12 @@ export const CharacterDetail = ({
   checkLatest,
   characterData,
   onRemoveCharacter,
+  onRefreshCharacter,
 }: {
   checkLatest?: boolean;
   characterData: CharacterData;
   onRemoveCharacter?: () => void;
+  onRefreshCharacter?: () => void | Promise<void>;
 }) => {
   const [character, setCharacter] = useState<CharacterData>(characterData);
 
@@ -119,8 +121,9 @@ export const CharacterDetail = ({
       });
       try {
         const characterData = await lookupCharacter(character.Region, character.Name);
-        setCharacter(characterData);
         await saveCharacterToFavorites(characterData, true);
+        setCharacter(characterData);
+        await onRefreshCharacter?.();
         await toast.hide();
       } catch {
         toast.style = Toast.Style.Failure;
@@ -129,7 +132,7 @@ export const CharacterDetail = ({
       }
     };
     loadLatestCharacterData();
-  }, [character.Region, character.Name, checkLatest]);
+  }, [character.Region, character.Name, checkLatest, onRefreshCharacter]);
 
   const escapeMarkdown = (value: string) => value.replace(/([\\`*_{}[\]()<>#+.!|~-])/g, "\\$1");
   const ranks = [

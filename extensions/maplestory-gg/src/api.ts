@@ -56,12 +56,11 @@ export const lookupCharacter = async (region: string, characterName: string): Pr
   // Weekly/monthly results contain EXP gained during that period, not current EXP.
   const character = await request("overall", "legendary");
   if (!character) throw new CharacterNotFoundError();
-  const [world, legion, job] = await Promise.allSettled([
+  const [world, legion, job] = await Promise.all([
     request("world", String(character.worldID)),
     request("legion", String(character.worldID)),
     request("job", character.jobName),
   ]);
-  const legionData = legion.status === "fulfilled" ? legion.value : undefined;
   return {
     Name: character.characterName,
     CharacterImageURL: character.characterImgURL,
@@ -70,12 +69,12 @@ export const lookupCharacter = async (region: string, characterName: string): Pr
     EXP: character.exp,
     Server: worlds[character.worldID] ?? `World ${character.worldID}`,
     GlobalRanking: character.rank,
-    ClassRank: job.status === "fulfilled" ? job.value?.rank : undefined,
-    ServerRank: world.status === "fulfilled" ? world.value?.rank : undefined,
-    LegionLevel: legionData?.legionLevel,
-    LegionPower: legionData?.raidPower,
-    LegionRank: legionData?.rank,
-    LegionUnavailable: !legionData,
+    ClassRank: job?.rank,
+    ServerRank: world?.rank,
+    LegionLevel: legion?.legionLevel,
+    LegionPower: legion?.raidPower,
+    LegionRank: legion?.rank,
+    LegionUnavailable: !legion,
     Region: region,
     Source: "nexon",
   };

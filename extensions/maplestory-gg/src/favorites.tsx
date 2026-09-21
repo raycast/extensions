@@ -55,6 +55,7 @@ export default function Favorites() {
                       <CharacterDetail
                         checkLatest
                         characterData={character}
+                        onRefreshCharacter={loadFavorites}
                         onRemoveCharacter={() => {
                           loadFavorites();
                         }}
