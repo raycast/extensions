@@ -1,6 +1,4 @@
-import { LaunchProps, showHUD } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
-import { useEffect, useRef } from "react";
+import { LaunchProps, LocalStorage, showHUD } from "@raycast/api";
 import { Instance, tokenForInstance } from "./instances";
 import { ErrorResult, Project, ServiceCollections } from "./interfaces";
 import { isModernProject } from "./utils";
@@ -91,77 +89,72 @@ function describe(candidate: Candidate): string {
 /**
  * Deploys a service by name without navigating Projects -> Environments -> Services.
  *
+ * A `no-view` command: Raycast calls this default export directly rather than mounting it as a
+ * React component, so it must be a plain async function - React hooks (`useState`, `useLocalStorage`,
+ * etc.) have no render/dispatcher to attach to here and throw ("Cannot read properties of null
+ * (reading 'useRef')") if used. `LocalStorage` (the plain, non-hook API) is used instead, reading
+ * the same `"instances"` key `useLocalStorage` in `instances.tsx` writes.
+ *
  * Searches every configured instance, not just the currently-active one - the extension supports
  * several Dokploy instances, and silently deploying to whichever one happens to be active when two
  * of them have a same-named service would risk deploying to the wrong server. A name that matches
  * more than one service anywhere (same instance or across instances) is refused, not guessed at.
  */
-export default function DeployService(props: LaunchProps<{ arguments: Arguments.DeployService }>) {
-  const { value: instances = [], isLoading } = useLocalStorage<Instance[]>("instances");
-  const hasRun = useRef(false);
-
-  useEffect(() => {
-    if (isLoading || hasRun.current) return;
-    hasRun.current = true;
-    void run();
-  }, [isLoading]);
-
-  async function run() {
-    const query = props.arguments.name.trim().toLowerCase();
-    if (!query) {
-      await showHUD("Enter a service name");
-      return;
-    }
-
-    if (instances.length === 0) {
-      await showHUD("No instances configured");
-      return;
-    }
-
-    const results = await Promise.allSettled(
-      instances.map(async (instance) => {
-        const { url, headers } = tokenForInstance(instance);
-        const response = await fetch(url + "project.all", { headers });
-        if (!response.ok) throw new Error(`${response.status}`);
-        const projects = (await response.json()) as Project[];
-        return candidatesForInstance(instance, projects);
-      }),
-    );
-
-    const candidates = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
-
-    const exact = candidates.filter((candidate) => matches(candidate, query) === "exact");
-    const partial = exact.length === 0 ? candidates.filter((candidate) => matches(candidate, query) === "partial") : [];
-    const found = exact.length > 0 ? exact : partial;
-
-    if (found.length === 0) {
-      await showHUD(`No service found matching "${props.arguments.name}"`);
-      return;
-    }
-
-    if (found.length > 1) {
-      const shown = found.slice(0, 3).map(describe).join(", ");
-      const rest = found.length > 3 ? ` and ${found.length - 3} more` : "";
-      await showHUD(`Multiple matches for "${props.arguments.name}": ${shown}${rest} - be more specific`);
-      return;
-    }
-
-    const [target] = found;
-    try {
-      const response = await fetch(`${target.url}${target.deployType}.deploy`, {
-        method: "POST",
-        headers: target.headers,
-        body: JSON.stringify({ [target.idField]: target.id }),
-      });
-      if (!response.ok) {
-        const err = (await response.json()) as ErrorResult;
-        throw new Error(err.message);
-      }
-      await showHUD(`Deployed "${target.name}"`);
-    } catch (error) {
-      await showHUD(`Could not deploy "${target.name}": ${error}`);
-    }
+export default async function Command(props: LaunchProps<{ arguments: Arguments.DeployService }>) {
+  const query = props.arguments.name.trim().toLowerCase();
+  if (!query) {
+    await showHUD("Enter a service name");
+    return;
   }
 
-  return null;
+  const raw = await LocalStorage.getItem<string>("instances");
+  const instances: Instance[] = raw ? JSON.parse(raw) : [];
+  if (instances.length === 0) {
+    await showHUD("No instances configured");
+    return;
+  }
+
+  const results = await Promise.allSettled(
+    instances.map(async (instance) => {
+      const { url, headers } = tokenForInstance(instance);
+      const response = await fetch(url + "project.all", { headers });
+      if (!response.ok) throw new Error(`${response.status}`);
+      const projects = (await response.json()) as Project[];
+      return candidatesForInstance(instance, projects);
+    }),
+  );
+
+  const candidates = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
+
+  const exact = candidates.filter((candidate) => matches(candidate, query) === "exact");
+  const partial = exact.length === 0 ? candidates.filter((candidate) => matches(candidate, query) === "partial") : [];
+  const found = exact.length > 0 ? exact : partial;
+
+  if (found.length === 0) {
+    await showHUD(`No service found matching "${props.arguments.name}"`);
+    return;
+  }
+
+  if (found.length > 1) {
+    const shown = found.slice(0, 3).map(describe).join(", ");
+    const rest = found.length > 3 ? ` and ${found.length - 3} more` : "";
+    await showHUD(`Multiple matches for "${props.arguments.name}": ${shown}${rest} - be more specific`);
+    return;
+  }
+
+  const [target] = found;
+  try {
+    const response = await fetch(`${target.url}${target.deployType}.deploy`, {
+      method: "POST",
+      headers: target.headers,
+      body: JSON.stringify({ [target.idField]: target.id }),
+    });
+    if (!response.ok) {
+      const err = (await response.json()) as ErrorResult;
+      throw new Error(err.message);
+    }
+    await showHUD(`Deployed "${target.name}"`);
+  } catch (error) {
+    await showHUD(`Could not deploy "${target.name}": ${error}`);
+  }
 }
