@@ -14,6 +14,8 @@ import {
 const EVENT_LOOKBACK_DAYS = 90;
 const MAX_EVENT_PAGES = 3;
 const MAX_EVENTS_FOR_RULES = 50;
+const MAX_RULE_PAGES_PER_EVENT = 5;
+const EVENT_CONCURRENCY = 10;
 
 interface DdosRuleListProps {
   // When set, only rules from this service's events are shown
@@ -41,6 +43,7 @@ function eventTimestamp(event: DdosProtectionEvent): string | undefined {
 
 export function DdosRuleList({ service }: DdosRuleListProps) {
   const [rules, setRules] = useState<AggregatedRule[]>([]);
+  const [scope, setScope] = useState<{ events: number; failed: number }>({ events: 0, failed: 0 });
   const [serviceNames, setServiceNames] = useState<Record<string, string>>({});
   const [actionFilter, setActionFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
@@ -70,13 +73,42 @@ export function DdosRuleList({ service }: DdosRuleListProps) {
       events.sort((a, b) => (eventTimestamp(b) || "").localeCompare(eventTimestamp(a) || ""));
       const recentEvents = events.slice(0, MAX_EVENTS_FOR_RULES);
 
-      const rulesPerEvent = await Promise.all(
-        recentEvents.map((event) =>
-          getDdosEventRules(event.id)
-            .then((response) => ({ event, rules: response.data || [] }))
-            .catch(() => ({ event, rules: [] as DdosProtectionRule[] })),
-        ),
-      );
+      // Follow each event's rule pages with bounded concurrency, and keep
+      // track of failures so partial results are visible instead of silent
+      async function fetchEventRules(event: DdosProtectionEvent) {
+        try {
+          const eventRules: DdosProtectionRule[] = [];
+          let ruleCursor: string | undefined;
+          let previousCursor: string | undefined;
+          let rulePages = 0;
+          do {
+            previousCursor = ruleCursor;
+            const response = await getDdosEventRules(event.id, ruleCursor);
+            eventRules.push(...(response.data || []));
+            ruleCursor = response.meta?.next_cursor || undefined;
+            rulePages += 1;
+          } while (ruleCursor && ruleCursor !== previousCursor && rulePages < MAX_RULE_PAGES_PER_EVENT);
+          return { event, rules: eventRules, failed: false };
+        } catch (fetchError) {
+          console.error(`Error loading rules for event ${event.id}:`, fetchError);
+          return { event, rules: [] as DdosProtectionRule[], failed: true };
+        }
+      }
+
+      const rulesPerEvent: Array<{ event: DdosProtectionEvent; rules: DdosProtectionRule[]; failed: boolean }> = [];
+      for (let i = 0; i < recentEvents.length; i += EVENT_CONCURRENCY) {
+        rulesPerEvent.push(...(await Promise.all(recentEvents.slice(i, i + EVENT_CONCURRENCY).map(fetchEventRules))));
+      }
+
+      const failedCount = rulesPerEvent.filter((result) => result.failed).length;
+      setScope({ events: recentEvents.length, failed: failedCount });
+      if (failedCount > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Rules from ${failedCount} ${failedCount === 1 ? "event" : "events"} couldn't be loaded`,
+          message: "The list may be missing rules — refresh to retry",
+        });
+      }
 
       const byRule = new Map<string, AggregatedRule>();
       for (const { event, rules: eventRules } of rulesPerEvent) {
@@ -160,67 +192,72 @@ export function DdosRuleList({ service }: DdosRuleListProps) {
           icon={Icon.List}
         />
       ) : (
-        visibleRules.map(({ rule, eventCount, firstSeen, lastSeen }) => {
-          const attributes = ddosRuleAttributes(rule);
-          const accessories: List.Item.Accessory[] = [];
+        <List.Section
+          title="Mitigation Rules"
+          subtitle={`from the ${scope.events} most recent ${scope.events === 1 ? "event" : "events"} (${EVENT_LOOKBACK_DAYS}d)${scope.failed > 0 ? ` · ${scope.failed} failed to load` : ""}`}
+        >
+          {visibleRules.map(({ rule, eventCount, firstSeen, lastSeen }) => {
+            const attributes = ddosRuleAttributes(rule);
+            const accessories: List.Item.Accessory[] = [];
 
-          if (!service && rule.service_id) {
+            if (!service && rule.service_id) {
+              accessories.push({
+                text: serviceNames[rule.service_id] || rule.service_id,
+                tooltip: "Service",
+              });
+            }
             accessories.push({
-              text: serviceNames[rule.service_id] || rule.service_id,
-              tooltip: "Service",
+              text: `${eventCount} ${eventCount === 1 ? "event" : "events"}`,
+              tooltip: firstSeen ? `First seen: ${new Date(firstSeen).toLocaleString()}` : undefined,
             });
-          }
-          accessories.push({
-            text: `${eventCount} ${eventCount === 1 ? "event" : "events"}`,
-            tooltip: firstSeen ? `First seen: ${new Date(firstSeen).toLocaleString()}` : undefined,
-          });
-          if (lastSeen) {
-            accessories.push({
-              date: new Date(lastSeen),
-              tooltip: `Last seen: ${new Date(lastSeen).toLocaleString()}`,
-            });
-          }
-          accessories.push(ddosRuleActionTag(rule.action));
+            if (lastSeen) {
+              accessories.push({
+                date: new Date(lastSeen),
+                tooltip: `Last seen: ${new Date(lastSeen).toLocaleString()}`,
+              });
+            }
+            accessories.push(ddosRuleActionTag(rule.action));
 
-          return (
-            <List.Item
-              key={rule.id}
-              title={rule.name || rule.id}
-              subtitle={attributes.join(" · ")}
-              keywords={[rule.id, ...attributes]}
-              icon={Icon.Fingerprint}
-              accessories={accessories}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Submenu title="Set Rule Action" icon={Icon.Pencil}>
-                    {DDOS_RULE_ACTIONS.map((action) => (
-                      <Action
-                        key={action.value}
-                        title={action.title}
-                        icon={action.icon}
-                        onAction={() => handleSetAction(rule, action.value)}
-                      />
-                    ))}
-                  </ActionPanel.Submenu>
-                  <Action.CopyToClipboard
-                    title="Copy Rule ID"
-                    content={rule.id}
-                    shortcut={{
-                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
-                      Windows: { modifiers: ["ctrl", "shift"], key: "c" },
-                    }}
-                  />
-                  <Action
-                    title="Refresh"
-                    icon={Icon.ArrowClockwise}
-                    onAction={loadRules}
-                    shortcut={Keyboard.Shortcut.Common.Refresh}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })
+            return (
+              <List.Item
+                key={rule.id}
+                title={rule.name || rule.id}
+                subtitle={attributes.join(" · ")}
+                keywords={[rule.id, ...attributes]}
+                icon={Icon.Fingerprint}
+                accessories={accessories}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Submenu title="Set Rule Action" icon={Icon.Pencil}>
+                      {DDOS_RULE_ACTIONS.map((action) => (
+                        <Action
+                          key={action.value}
+                          title={action.title}
+                          icon={action.icon}
+                          onAction={() => handleSetAction(rule, action.value)}
+                        />
+                      ))}
+                    </ActionPanel.Submenu>
+                    <Action.CopyToClipboard
+                      title="Copy Rule ID"
+                      content={rule.id}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                        Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                      }}
+                    />
+                    <Action
+                      title="Refresh"
+                      icon={Icon.ArrowClockwise}
+                      onAction={loadRules}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
       )}
     </List>
   );

@@ -117,6 +117,11 @@ export function RealtimeStats({ service }: RealtimeStatsProps) {
           // The endpoint long-polls: it returns as soon as new per-second data exists
           const response = await getRealtimeStats(service.id, timestamp);
           if (stopped) return;
+          // Paused while the long poll was in flight: drop the response without
+          // advancing the timestamp so the data is re-fetched on resume
+          if (pausedRef.current) {
+            continue;
+          }
           timestamp = response.Timestamp || timestamp;
           polls += 1;
           setHeartbeat({ polls, at: Date.now() });
@@ -207,7 +212,7 @@ ${status}
 | 5xx responses | ${formatCount(fieldValue(latest, FIELDS.status5xx))} | ${formatCount(status5xx)} | ${formatCount(totals.status5xx)} |
 | Bandwidth | — | ${formatBytes(bandwidthPerSec)}/s | ${formatBytes(totals.bandwidth)} |
 
-_Session totals count everything seen since this view opened. Polling runs only while this view stays open — switching away from Raycast pauses it._
+_Session totals include everything seen since this view opened, plus up to two minutes of buffered history from just before. Polling runs only while this view stays open — switching away from Raycast pauses it._
 
 _Connection: ${heartbeat.polls} ${heartbeat.polls === 1 ? "check" : "checks"} since opening${heartbeat.at ? `, last at ${new Date(heartbeat.at).toLocaleTimeString()}` : ""}._
 `;

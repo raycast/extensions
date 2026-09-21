@@ -142,7 +142,7 @@ export function DdosServiceList() {
       <>
         <ActionPanel.Section title="Account">
           <Action.Push
-            title="View All Rules"
+            title="View Recent Rules"
             icon={Icon.List}
             shortcut={{
               macOS: { modifiers: ["cmd", "shift"], key: "u" },

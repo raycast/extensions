@@ -242,20 +242,6 @@ ${renderStats()}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Control Panel" url={getDashboardUrl(service)} />
-          <Action.Push
-            title="Manage Versions"
-            icon={Icon.Layers}
-            target={<ServiceVersionList service={service} />}
-            shortcut={{
-              macOS: { modifiers: ["cmd", "shift"], key: "v" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "v" },
-            }}
-          />
-          <Action.Push
-            title="Watch Real-Time Stats"
-            icon={Icon.LineChart}
-            target={<RealtimeStats service={service} />}
-          />
           <Action
             title="Purge Cache"
             icon={Icon.Trash}
@@ -330,6 +316,20 @@ ${renderStats()}
               macOS: { modifiers: ["cmd", "shift"], key: "l" },
               Windows: { modifiers: ["ctrl", "shift"], key: "l" },
             }}
+          />
+          <Action.Push
+            title="Manage Versions"
+            icon={Icon.Layers}
+            target={<ServiceVersionList service={service} />}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "v" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+            }}
+          />
+          <Action.Push
+            title="Watch Real-Time Stats"
+            icon={Icon.LineChart}
+            target={<RealtimeStats service={service} />}
           />
         </ActionPanel>
       }
