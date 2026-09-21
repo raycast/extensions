@@ -1,6 +1,6 @@
 # Deepcast Changelog
 
-## [Add Thai] - {PR_MERGE_DATE}
+## [Add Thai] - 2026-09-21
 
 - Add Thai (`TH`) as a source and target language, including a `Translate into Thai` command
 
