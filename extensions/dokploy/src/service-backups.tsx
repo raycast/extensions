@@ -64,10 +64,10 @@ export default function ServiceBackups({ service }: { service: BackupService }) 
   } = useFetch<Backup[], Backup[]>(`${url}${service.type}.one?${ID_FIELDS[service.type]}=${service.id}`, {
     headers,
     initialData: [],
-    // `backups` is a relation embedded in `<kind>.one` (confirmed for the four database kinds;
-    // `compose.one` is assumed to embed the same relation, since there's no endpoint scoped to
-    // just one service's backups - `overview.backups` looks like it should be that but is
-    // actually an org-wide run-history log, no `backupId`, one row per past run).
+    // `backups` is a relation embedded in `<kind>.one`, confirmed live for all five kinds
+    // (database and compose) - there's no endpoint scoped to just one service's backups;
+    // `overview.backups` looks like it should be that but is actually an org-wide run-history
+    // log, no `backupId`, one row per past run.
     async parseResponse(response) {
       if (!response.ok) {
         const err = (await response.json()) as ErrorResult;
