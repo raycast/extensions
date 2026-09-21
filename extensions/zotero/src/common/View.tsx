@@ -290,18 +290,7 @@ export const View = ({
                       />
                     )}
                     {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
-                      <Action
-                        icon={Icon.ArrowRightCircleFilled}
-                        title="Open PDF in System Viewer"
-                        onAction={async () => {
-                          try {
-                            await open(attachmentFilePath);
-                            closeMainWindow();
-                          } catch {
-                            await showHUD("Failed to open attachment");
-                          }
-                        }}
-                      />
+                      <OpenPdfInSystemViewerAction path={attachmentFilePath} title="Open PDF in System Viewer" />
                     )}
                     {item.attachment?.key &&
                       item.attachment.key !== `` &&
@@ -376,6 +365,23 @@ export const View = ({
 
 const configureGroupsShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "l" };
 
+function OpenPdfInSystemViewerAction({ path, title }: { path: string; title: string }) {
+  return (
+    <Action
+      icon={Icon.ArrowRightCircleFilled}
+      title={title}
+      onAction={async () => {
+        try {
+          await open(path);
+          closeMainWindow();
+        } catch {
+          await showHUD("Failed to open attachment");
+        }
+      }}
+    />
+  );
+}
+
 // With exactly two pdfs, opens the secondary one directly; with three or more,
 // pushes a list of the secondary pdfs to pick from.
 function SecondaryPdfAction({
@@ -401,20 +407,7 @@ function SecondaryPdfAction({
           url={zoteroOpenPdfUri(item, s.key)}
           onOpen={onOpen}
         />
-        {p && (
-          <Action
-            icon={Icon.ArrowRightCircleFilled}
-            title="Open Secondary PDF in System Viewer"
-            onAction={async () => {
-              try {
-                await open(p);
-                closeMainWindow();
-              } catch {
-                await showHUD("Failed to open attachment");
-              }
-            }}
-          />
-        )}
+        {p && <OpenPdfInSystemViewerAction path={p} title="Open Secondary PDF in System Viewer" />}
         {p && isAbsolute(p) && <Action.ShowInFinder path={p} title="Show Secondary PDF in Finder" />}
       </>
     );
@@ -460,20 +453,7 @@ function SecondaryPdfList({
                   url={zoteroOpenPdfUri(item, s.key)}
                   onOpen={onOpen}
                 />
-                {p && (
-                  <Action
-                    icon={Icon.ArrowRightCircleFilled}
-                    title="Open PDF in System Viewer"
-                    onAction={async () => {
-                      try {
-                        await open(p);
-                        closeMainWindow();
-                      } catch {
-                        await showHUD("Failed to open attachment");
-                      }
-                    }}
-                  />
-                )}
+                {p && <OpenPdfInSystemViewerAction path={p} title="Open PDF in System Viewer" />}
                 {p && isAbsolute(p) && <Action.ShowInFinder path={p} title="Show PDF in Finder" />}
               </ActionPanel>
             }
