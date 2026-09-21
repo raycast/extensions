@@ -30,6 +30,14 @@
         "terminal",
         "folder"
       ]
+    },
+    {
+      "name": "open-last-project",
+      "title": "Open Last Project",
+      "subtitle": "Vibe",
+      "description": "Reopen the most recent Vibe project with its last-used agent",
+      "mode": "no-view",
+      "keywords": ["vibe", "recent", "reopen", "last", "project"]
     }
   ],
   "dependencies": {

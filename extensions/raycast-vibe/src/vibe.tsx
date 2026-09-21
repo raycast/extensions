@@ -11,18 +11,27 @@ import {
   Toast,
 } from "@raycast/api";
 import React from "react";
+import { Agent, agents, pickHeadlessAgent } from "./agents";
+import { AskForm } from "./views/AskForm";
+import { runAICommit } from "./aiCommit";
+import { runAIPRDescription } from "./aiPRDescription";
+import { TemplateList } from "./views/TemplateList";
 import { existsSync } from "node:fs";
 import { basename } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { WorktreeList } from "./views/WorktreeList";
+import { WorktreeAgentPicker } from "./views/WorktreeAgentPicker";
+import { GitHubDashboard } from "./views/GitHubDashboard";
+import { createPullRequestWeb, ghAvailability } from "./github";
 
 const execFileAsync = promisify(execFile);
-const RECENT_FOLDERS_KEY = "recent-vibe-folders";
+export const RECENT_FOLDERS_KEY = "recent-vibe-folders";
 const PINNED_FOLDERS_KEY = "pinned-vibe-folders";
 const MAX_RECENT_FOLDERS = 20;
-const LAST_AGENTS_KEY = "last-vibe-agents";
+export const LAST_AGENTS_KEY = "last-vibe-agents";
 
-type Folder = {
+export type Folder = {
   name: string;
   path: string;
   branch?: string;
@@ -37,100 +46,8 @@ type Folder = {
   projectType?: string;
 };
 
-type Agent = {
-  id: string;
-  name: string;
-  command: string;
-  args: string;
-  icon: Icon;
-  description: string;
-  env?: string;
-};
-
 function preferences(): Preferences.Vibe {
   return getPreferenceValues<Preferences.Vibe>();
-}
-
-function agents(): Agent[] {
-  const p = preferences();
-  const result: Agent[] = [];
-  if (p.claudeEnabled && p.claudeCommand.trim())
-    result.push({
-      id: "claude",
-      name: "Claude Code",
-      command: p.claudeCommand.trim(),
-      args: p.claudeArgs || "",
-      env: p.claudeEnv || "",
-      icon: Icon.Stars,
-      description: "Start Claude Code in this folder",
-    });
-  if (p.codexEnabled && p.codexCommand.trim())
-    result.push({
-      id: "codex",
-      name: "Codex",
-      command: p.codexCommand.trim(),
-      args: p.codexArgs || "",
-      env: p.codexEnv || "",
-      icon: Icon.Code,
-      description: "Start Codex CLI in this folder",
-    });
-  if (p.geminiEnabled && p.geminiCommand.trim())
-    result.push({
-      id: "gemini",
-      name: "Gemini CLI",
-      command: p.geminiCommand.trim(),
-      args: p.geminiArgs || "",
-      env: p.geminiEnv || "",
-      icon: Icon.Stars,
-      description: "Start Gemini CLI in this folder",
-    });
-  const customAgents = [
-    [
-      "custom",
-      p.customEnabled,
-      p.customName,
-      p.customCommand,
-      p.customArgs,
-      p.customEnv,
-    ],
-    [
-      "custom2",
-      p.custom2Enabled,
-      p.custom2Name,
-      p.custom2Command,
-      p.custom2Args,
-      p.custom2Env,
-    ],
-    [
-      "custom3",
-      p.custom3Enabled,
-      p.custom3Name,
-      p.custom3Command,
-      p.custom3Args,
-      p.custom3Env,
-    ],
-  ] as const;
-  for (const [id, enabled, name, command, args, env] of customAgents) {
-    if (enabled && command.trim())
-      result.push({
-        id,
-        name: name.trim() || "Custom Agent",
-        command: command.trim(),
-        args: args || "",
-        env: env || "",
-        icon: Icon.Terminal,
-        description: `Start ${name.trim() || "custom agent"} in this folder`,
-      });
-  }
-  result.push({
-    id: "terminal",
-    name: "Open Terminal",
-    command: "",
-    args: "",
-    icon: Icon.Terminal,
-    description: "Open a shell in this folder",
-  });
-  return result;
 }
 
 function escapeSpotlightText(value: string): string {
@@ -147,7 +64,7 @@ function isUsefulFolder(folder: string): boolean {
   );
 }
 
-function shellQuote(value: string): string {
+export function shellQuote(value: string): string {
   if (process.platform === "win32") return `'${value.replaceAll("'", "''")}'`;
   return `'${value.replaceAll("'", "'\\''")}'`;
 }
@@ -156,7 +73,7 @@ function powershellQuote(value: string): string {
   return `'${value.replaceAll("'", "''")}'`;
 }
 
-async function openPath(path: string): Promise<void> {
+export async function openPath(path: string): Promise<void> {
   if (process.platform === "win32") {
     await execFileAsync("explorer.exe", [path]);
   } else {
@@ -164,7 +81,7 @@ async function openPath(path: string): Promise<void> {
   }
 }
 
-async function openUrl(url: string): Promise<void> {
+export async function openUrl(url: string): Promise<void> {
   if (process.platform === "win32") {
     await execFileAsync("cmd.exe", ["/c", "start", "", url]);
   } else {
@@ -172,7 +89,7 @@ async function openUrl(url: string): Promise<void> {
   }
 }
 
-async function openApplication(
+export async function openApplication(
   application: string,
   path: string,
 ): Promise<void> {
@@ -231,7 +148,7 @@ type GitBranch = {
   current: boolean;
 };
 
-async function listBranches(
+export async function listBranches(
   root: string,
 ): Promise<{ local: GitBranch[]; remote: GitBranch[] }> {
   const [localOutput, remoteOutput] = await Promise.all([
@@ -260,7 +177,7 @@ async function listBranches(
   return { local, remote };
 }
 
-function gitErrorMessage(error: unknown, fallback: string): string {
+export function gitErrorMessage(error: unknown, fallback: string): string {
   const message = error instanceof Error ? error.message : String(error);
   const detail = message
     .split("\n")
@@ -274,7 +191,7 @@ function gitErrorMessage(error: unknown, fallback: string): string {
   return detail.length > 140 ? fallback : detail;
 }
 
-async function confirmGitChange(
+export async function confirmGitChange(
   title: string,
   message: string,
 ): Promise<boolean> {
@@ -393,11 +310,8 @@ async function searchFolders(query: string): Promise<Folder[]> {
   gitDirs.stdout
     .split("\n")
     .map((path) => path.trim())
-    .filter(Boolean)
-    .forEach((path) => {
-      const normalized = path.replaceAll("\\", "/");
-      paths.add(normalized.endsWith("/.git") ? normalized.slice(0, -5) : path);
-    });
+    .filter((path) => path.endsWith("/.git"))
+    .forEach((path) => paths.add(path.slice(0, -5)));
   const candidates = await enrichFolders(
     Array.from(paths)
       .slice(0, 500)
@@ -425,7 +339,7 @@ async function searchFolders(query: string): Promise<Folder[]> {
   return matches.slice(0, 100);
 }
 
-async function getPaths(key: string, max?: number): Promise<string[]> {
+export async function getPaths(key: string, max?: number): Promise<string[]> {
   const stored = await LocalStorage.getItem<string>(key);
   if (!stored) return [];
   try {
@@ -507,7 +421,10 @@ function gitAccessory(folder: Folder): { text: string; icon?: Icon }[] {
   return [{ text: parts.join(" · "), icon: Icon.Code }];
 }
 
-async function openInTerminal(folder: string, command: string): Promise<void> {
+export async function openInTerminal(
+  folder: string,
+  command: string,
+): Promise<void> {
   const p = preferences();
   if (process.platform === "win32") {
     await execFileAsync("wt.exe", [
@@ -545,7 +462,7 @@ async function openInTerminal(folder: string, command: string): Promise<void> {
   }
 }
 
-async function launchAgent(folder: string, agent: Agent): Promise<void> {
+export async function launchAgent(folder: string, agent: Agent): Promise<void> {
   const command =
     process.platform === "win32"
       ? agent.command
@@ -803,6 +720,30 @@ function FolderActions({
   pinned: boolean;
   onRefresh?: () => void;
 }) {
+  const [lastAgentId, setLastAgentId] = React.useState<string | undefined>(
+    undefined,
+  );
+  React.useEffect(() => {
+    void getLastAgents().then((map) => setLastAgentId(map[folder.path]));
+  }, [folder.path]);
+
+  const resumeAgent = React.useMemo(() => {
+    if (!lastAgentId) return undefined;
+    const match = agents().find((a) => a.id === lastAgentId);
+    return match && match.resumeArgs ? match : undefined;
+  }, [lastAgentId]);
+
+  const askAgent = React.useMemo(
+    () => pickHeadlessAgent(agents(), lastAgentId),
+    [lastAgentId],
+  );
+  const repoRoot = folder.repositoryRoot || folder.path;
+
+  const githubRemote = React.useMemo(
+    () => Boolean(folder.remote && folder.remote.includes("github.com")),
+    [folder.remote],
+  );
+
   return (
     <ActionPanel>
       <Action.Push
@@ -821,6 +762,30 @@ function FolderActions({
             void launchAgent(folder.path, terminalAgent).then(onRefresh);
         }}
       />
+      {folder.repositoryRoot ? (
+        <Action.Push
+          title="Worktrees"
+          icon={Icon.Tree}
+          target={
+            <WorktreeList
+              repoRoot={folder.repositoryRoot}
+              onRefresh={onRefresh}
+            />
+          }
+        />
+      ) : null}
+      {folder.repositoryRoot ? (
+        <Action.Push
+          title="Launch Agent in New Worktree"
+          icon={Icon.Rocket}
+          target={
+            <WorktreeAgentPicker
+              repoRoot={folder.repositoryRoot}
+              onCreated={() => onRefresh?.()}
+            />
+          }
+        />
+      ) : null}
       <Action
         title="Open in Visual Studio Code"
         icon={Icon.Code}
@@ -844,7 +809,103 @@ function FolderActions({
             });
         }}
       />
+      {folder.repositoryRoot && githubRemote ? (
+        <Action.Push
+          title="GitHub"
+          icon={Icon.Globe}
+          target={<GitHubDashboard repoRoot={folder.repositoryRoot} />}
+        />
+      ) : null}
+      {folder.repositoryRoot && githubRemote ? (
+        <Action
+          title="Create Pull Request"
+          icon={Icon.NewDocument}
+          onAction={async () => {
+            const availability = await ghAvailability();
+            if (availability === "missing") {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "GitHub CLI (gh) is not installed",
+                message: "Install it from https://cli.github.com/",
+              });
+              return;
+            }
+            if (availability === "unauthenticated") {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "GitHub CLI is not authenticated",
+                message: "Run gh auth login in a terminal.",
+              });
+              return;
+            }
+            try {
+              await createPullRequestWeb(folder.repositoryRoot!);
+            } catch (error) {
+              const message =
+                error instanceof Error && "stderr" in error
+                  ? String(
+                      (error as { stderr?: unknown }).stderr ?? error.message,
+                    )
+                  : error instanceof Error
+                    ? error.message
+                    : String(error);
+              const friendly =
+                /no upstream|no commits between|no default remote|no local branch/i.test(
+                  message,
+                )
+                  ? "Push the branch to origin first (git push -u origin <branch>)."
+                  : message;
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Could not create pull request",
+                message: friendly,
+              });
+            }
+          }}
+        />
+      ) : null}
+      {folder.repositoryRoot && githubRemote && askAgent ? (
+        <Action
+          title="AI Pull Request Description"
+          icon={Icon.Text}
+          onAction={() =>
+            void runAIPRDescription(folder.repositoryRoot!, askAgent)
+          }
+        />
+      ) : null}
 
+      {resumeAgent ? (
+        <Action
+          title={`Resume ${resumeAgent.name}`}
+          icon={Icon.Repeat}
+          onAction={() =>
+            void launchAgent(folder.path, {
+              ...resumeAgent,
+              args: resumeAgent.resumeArgs || "",
+            }).then(onRefresh)
+          }
+        />
+      ) : null}
+      {askAgent ? (
+        <Action.Push
+          title="Ask About This Repo"
+          icon={Icon.QuestionMark}
+          target={
+            <AskForm
+              folder={{ path: folder.path, name: folder.name }}
+              repoRoot={repoRoot}
+              agent={askAgent}
+            />
+          }
+        />
+      ) : null}
+      {askAgent && folder.repositoryRoot ? (
+        <Action
+          title="AI Commit Message"
+          icon={Icon.CodeBlock}
+          onAction={() => void runAICommit(repoRoot, askAgent)}
+        />
+      ) : null}
       <Action
         title="Run Again"
         icon={Icon.ArrowClockwise}
@@ -922,7 +983,7 @@ function FolderActions({
   );
 }
 
-function AgentPicker({
+export function AgentPicker({
   folder,
   onRefresh,
 }: {
@@ -949,6 +1010,19 @@ function AgentPicker({
                   void launchAgent(folder.path, agent).then(onRefresh)
                 }
               />
+              {agent.id !== "terminal" ? (
+                <Action.Push
+                  title={`Launch ${agent.name} with Prompt…`}
+                  icon={Icon.Text}
+                  target={
+                    <TemplateList
+                      folder={{ path: folder.path, name: folder.name }}
+                      agent={agent}
+                      onRefresh={onRefresh}
+                    />
+                  }
+                />
+              ) : null}
             </ActionPanel>
           }
         />
