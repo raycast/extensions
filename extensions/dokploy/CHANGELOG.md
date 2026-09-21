@@ -1,5 +1,9 @@
 # Dokploy Changelog
 
+## [Deploy Service Command] - {PR_MERGE_DATE}
+
+- Add a `Deploy Service` no-view command that deploys a service by typed name, without opening `Instances` first. Searches every configured instance and refuses to deploy when the name matches more than one service, rather than guessing which one you meant.
+
 ## [Schedules] - 2026-09-21
 
 - Add a `View Schedules` action to Applications and Compose stacks, listing scheduled shell commands with `Add Schedule`, `Edit Schedule`, `Run Now`, `View Runs` (with logs) and `Delete Schedule` actions.
