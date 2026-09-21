@@ -120,7 +120,16 @@ export default function ServiceSchedules({ service }: { service: ScheduleService
   return (
     <List isLoading={isLoading} navigationTitle={`${service.name} - Schedules`}>
       {error ? (
-        <List.EmptyView icon={Icon.ExclamationMark} title="Could not load schedules" description={`${error}`} />
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load schedules"
+          description={`${error}`}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />
+            </ActionPanel>
+          }
+        />
       ) : schedules.length === 0 ? (
         <List.EmptyView
           icon={Icon.Clock}
@@ -216,9 +225,27 @@ function ScheduleRuns({ schedule }: { schedule: Schedule }) {
   return (
     <List isLoading={isLoading} navigationTitle={`${schedule.name} - Runs`}>
       {error ? (
-        <List.EmptyView icon={Icon.ExclamationMark} title="Could not load runs" description={`${error}`} />
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load runs"
+          description={`${error}`}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />
+            </ActionPanel>
+          }
+        />
       ) : runs.length === 0 ? (
-        <List.EmptyView icon={Icon.Clock} title="No Runs Yet" description={`${schedule.name} hasn't run yet.`} />
+        <List.EmptyView
+          icon={Icon.Clock}
+          title="No Runs Yet"
+          description={`${schedule.name} hasn't run yet.`}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />
+            </ActionPanel>
+          }
+        />
       ) : (
         runs.map((run) => (
           <List.Item
