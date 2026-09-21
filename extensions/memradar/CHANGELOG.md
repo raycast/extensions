@@ -1,6 +1,6 @@
 # MemRadar Changelog
 
-## [Initial Version] - 2026-09-21
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 

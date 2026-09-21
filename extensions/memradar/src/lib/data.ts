@@ -8,6 +8,43 @@
 // says so on screen. Only a failure with no cache at all is an error state.
 import type { MarketPayload, ProductsPayload } from "./types";
 
+const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+const isStr = (v: unknown): v is string => typeof v === "string" && v.length > 0;
+
+/**
+ * A payload is usable only if EVERY item carries the fields the UI reads
+ * without guarding. The generator OMITS unknown values rather than sending
+ * null, so a missing required field means a partial or malformed file, and
+ * caching one would evict good data and then throw on render. Optional fields
+ * (brand, avg_90d_usd, all_time_low, buy_state) stay optional: their absence
+ * is the file's documented contract, not a fault.
+ */
+function productsUsable(p: ProductsPayload): boolean {
+  if (!isStr(p?.generated) || !Array.isArray(p?.products) || p.products.length === 0) return false;
+  return p.products.every(
+    (i) =>
+      isStr(i?.sku) &&
+      isStr(i?.name) &&
+      isStr(i?.url) &&
+      isNum(i?.price_usd) &&
+      (i.history_monthly === undefined ||
+        (Array.isArray(i.history_monthly) &&
+          i.history_monthly.every((e) => Array.isArray(e) && isStr(e[0]) && isNum(e[1])))),
+  );
+}
+
+function marketUsable(p: MarketPayload): boolean {
+  if (!isStr(p?.generated) || !Array.isArray(p?.segments) || p.segments.length === 0) return false;
+  return p.segments.every(
+    (s) =>
+      isStr(s?.segment) &&
+      isStr(s?.label) &&
+      s.periods !== null &&
+      typeof s.periods === "object" &&
+      Object.values(s.periods).every((x) => isNum(x?.pct_change) && isNum(x?.product_count)),
+  );
+}
+
 export const PRODUCTS_URL = "https://memradar.com/data/raycast-v1-products.json";
 export const MARKET_URL = "https://memradar.com/data/raycast-v1-market.json";
 // Matches the 4h edge cache on these files; the data itself changes once a day.
@@ -105,11 +142,11 @@ async function load<T>(
 }
 
 export function loadProducts(deps: LoadDeps): Promise<LoadResult<ProductsPayload>> {
-  return load<ProductsPayload>(deps, CACHE_KEY, PRODUCTS_URL, (p) => Boolean(p?.products?.length));
+  return load<ProductsPayload>(deps, CACHE_KEY, PRODUCTS_URL, productsUsable);
 }
 
 export function loadMarket(deps: LoadDeps): Promise<LoadResult<MarketPayload>> {
-  return load<MarketPayload>(deps, MARKET_CACHE_KEY, MARKET_URL, (p) => Boolean(p?.segments?.length));
+  return load<MarketPayload>(deps, MARKET_CACHE_KEY, MARKET_URL, marketUsable);
 }
 
 /** Whole days between the payload's own computed date and now. */

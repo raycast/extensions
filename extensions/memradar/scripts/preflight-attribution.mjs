@@ -31,6 +31,9 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const MARKET_URL = "https://memradar.com/data/raycast-v1-market.json";
 const PRODUCTS_URL = "https://memradar.com/data/raycast-v1-products.json";
+// 01 to 12, not any two digits: "2026-13" is not a month, and this check is
+// the licensing boundary rather than a formatting preference.
+const MONTH_KEY = /^\d{4}-(0[1-9]|1[0-2])$/;
 const arg = (name) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=").slice(1).join("=");
 
 const failures = [];
@@ -93,7 +96,7 @@ function checkMonthly(products) {
     const months = history.map((entry) => entry?.[0]);
     points += months.length;
     for (const m of months) {
-      if (typeof m !== "string" || !/^\d{4}-\d{2}$/.test(String(m))) {
+      if (typeof m !== "string" || !MONTH_KEY.test(String(m))) {
         problems.push(`${p.sku}: "${m}" is not a YYYY-MM month key`);
       }
     }
