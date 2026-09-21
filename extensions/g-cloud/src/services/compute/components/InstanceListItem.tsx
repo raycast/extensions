@@ -1,10 +1,14 @@
-import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Keyboard } from "@raycast/api";
 import { ComputeInstance, ComputeService } from "../ComputeService";
 import { useStreamerMode } from "../../../utils/useStreamerMode";
 import { maskIPIfEnabled } from "../../../utils/maskSensitiveData";
 import { StreamerModeAction } from "../../../components/StreamerModeAction";
 import { CloudShellAction } from "../../../components/CloudShellAction";
-import { ComputeLifecycleAction, getInstanceLifecycleActions, getInstanceStatusPresentation } from "../instanceLifecycle";
+import {
+  ComputeLifecycleAction,
+  getInstanceLifecycleActions,
+  getInstanceStatusPresentation,
+} from "../instanceLifecycle";
 
 interface InstanceListItemProps {
   instance: ComputeInstance;
@@ -73,7 +77,7 @@ export default function InstanceListItem({
               title="Create Vm Instance"
               icon={{ source: Icon.Plus }}
               onAction={onCreateVM}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Cloud Shell">

@@ -293,7 +293,9 @@ export default function ComputeInstancesView({ projectId, gcloudPath }: ComputeI
       });
 
       if (result.instance) {
-        setInstances((prevInstances) => prevInstances.map((inst) => (inst.id === instance.id ? result.instance! : inst)));
+        setInstances((prevInstances) =>
+          prevInstances.map((inst) => (inst.id === instance.id ? result.instance! : inst)),
+        );
       }
       await fetchInstances(service, { silent: true });
     } catch (error: unknown) {

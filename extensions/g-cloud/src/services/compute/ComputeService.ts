@@ -434,7 +434,9 @@ export class ComputeService {
    * @returns Promise indicating success
    */
   async startInstance(name: string, zone: string): Promise<InstanceLifecycleResult> {
-    return this.executeLifecycleOperation(name, zone, () => startComputeInstance(this.gcloudPath, this.projectId, zone, name));
+    return this.executeLifecycleOperation(name, zone, () =>
+      startComputeInstance(this.gcloudPath, this.projectId, zone, name),
+    );
   }
 
   /**
@@ -444,7 +446,9 @@ export class ComputeService {
    * @returns Promise indicating success and VM status information
    */
   async stopInstance(name: string, zone: string): Promise<InstanceLifecycleResult> {
-    return this.executeLifecycleOperation(name, zone, () => stopComputeInstance(this.gcloudPath, this.projectId, zone, name));
+    return this.executeLifecycleOperation(name, zone, () =>
+      stopComputeInstance(this.gcloudPath, this.projectId, zone, name),
+    );
   }
 
   async resumeInstance(name: string, zone: string): Promise<InstanceLifecycleResult> {
@@ -460,7 +464,9 @@ export class ComputeService {
   }
 
   async restartInstance(name: string, zone: string): Promise<InstanceLifecycleResult> {
-    return this.executeLifecycleOperation(name, zone, () => resetComputeInstance(this.gcloudPath, this.projectId, zone, name));
+    return this.executeLifecycleOperation(name, zone, () =>
+      resetComputeInstance(this.gcloudPath, this.projectId, zone, name),
+    );
   }
 
   private async executeLifecycleOperation(
@@ -504,7 +510,11 @@ export class ComputeService {
     return false;
   }
 
-  private async waitForStableInstanceState(name: string, zone: string, timeoutMs = 30000): Promise<ComputeInstance | null> {
+  private async waitForStableInstanceState(
+    name: string,
+    zone: string,
+    timeoutMs = 30000,
+  ): Promise<ComputeInstance | null> {
     const startedAt = Date.now();
     let latestInstance: ComputeInstance | null = null;
 

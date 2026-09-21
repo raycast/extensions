@@ -9,6 +9,7 @@ import {
   Alert,
   Detail,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import { ReactElement, useMemo, useCallback, useEffect, useState } from "react";
@@ -407,7 +408,11 @@ export default function ComputeInstanceDetailView({
           {/* Basic Information */}
           <Detail.Metadata.Label title="Machine Type" text={machineType} icon={{ source: Icon.Desktop }} />
           <Detail.Metadata.Label title="Zone" text={zone} icon={{ source: Icon.Globe }} />
-          <Detail.Metadata.Label title="CPU Platform" text={currentInstance.cpuPlatform} icon={{ source: Icon.Terminal }} />
+          <Detail.Metadata.Label
+            title="CPU Platform"
+            text={currentInstance.cpuPlatform}
+            icon={{ source: Icon.Terminal }}
+          />
           <Detail.Metadata.Label
             title="Created"
             text={new Date(currentInstance.creationTimestamp).toLocaleString()}
@@ -441,13 +446,13 @@ export default function ComputeInstanceDetailView({
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={() => refreshCurrentInstance(true)}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
             <Action
               title="Copy Instance Name"
               icon={Icon.Clipboard}
               onAction={copyInstanceName}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             {currentInstance.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP && (
               <Action title="Copy External IP" icon={Icon.Globe} onAction={copyExternalIP} />
