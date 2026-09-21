@@ -1,5 +1,26 @@
 import { getApplications, open } from "@raycast/api";
 
+/** Display names for Sunsama's integration/import service keys. */
+const SERVICE_NAMES: Record<string, string> = {
+  trello: "Trello",
+  github: "GitHub",
+  slack: "Slack",
+  gmail: "Gmail",
+  linear: "Linear",
+  clickup: "ClickUp",
+  todoist: "Todoist",
+  asana: "Asana",
+  notion: "Notion",
+  googleTasks: "Google Tasks",
+  googleCalendar: "Google Calendar",
+  website: "Browser",
+};
+
+/** Human name for a known service key; undefined for anything unmapped. */
+export function serviceName(service?: string): string | undefined {
+  return service ? SERVICE_NAMES[service] : undefined;
+}
+
 // Cache the promise (not the resolved value) so concurrent calls share one
 // getApplications() lookup instead of racing to populate it.
 let appNamesPromise: Promise<Set<string>> | null = null;

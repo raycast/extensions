@@ -171,6 +171,9 @@ export interface Backup {
   mariadbId?: string | null;
   mysqlId?: string | null;
   mongoId?: string | null;
+  /** Compose only - the stack backed up, and which container in it. */
+  composeId?: string | null;
+  serviceName?: string | null;
 }
 
 interface Issue {

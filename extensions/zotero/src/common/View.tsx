@@ -18,6 +18,7 @@ import { isAbsolute } from "path";
 import { LibraryRef, itemIdentity, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
 import type { CollectionOption } from "./collections";
 import { useVisitedUrls } from "./useVisitedUrls";
+import { recordInteraction } from "./interactions";
 import {
   exportRef,
   exportRefPaste,
@@ -263,6 +264,14 @@ export const View = ({
         >
           {queryResults[sectionIndex].map((item) => {
             const attachmentFilePath = resolveAttachmentPath(item, preferences.zotero_path);
+            // Opens mark an entry as interacted for the "order by last opened"
+            // preference; tracked regardless of the preference so history
+            // exists as soon as it is turned on.
+            const trackOpen = () => recordInteraction(itemIdentity(item));
+            const onOpenTracked = (url: string) => {
+              onOpen(url);
+              trackOpen();
+            };
             return (
               <List.Item
                 key={itemIdentity(item)}
@@ -286,17 +295,25 @@ export const View = ({
                         icon={Icon.ArrowRightCircleFilled}
                         title="Open PDF"
                         url={zoteroOpenPdfUri(item, item.attachment.key)}
-                        onOpen={onOpen}
+                        onOpen={onOpenTracked}
                       />
                     )}
                     {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
-                      <OpenPdfInSystemViewerAction path={attachmentFilePath} title="Open PDF in System Viewer" />
+                      <OpenPdfInSystemViewerAction
+                        path={attachmentFilePath}
+                        title="Open PDF in System Viewer"
+                        onTracked={trackOpen}
+                      />
                     )}
                     {item.attachment?.key &&
                       item.attachment.key !== `` &&
                       attachmentFilePath &&
                       isAbsolute(attachmentFilePath) && (
-                        <Action.ShowInFinder path={attachmentFilePath} title="Show PDF in Finder" />
+                        <Action.ShowInFinder
+                          path={attachmentFilePath}
+                          title="Show PDF in Finder"
+                          onShow={() => trackOpen()}
+                        />
                       )}
                     {secondaryAttachments(item).length > 0 && (
                       <SecondaryPdfAction item={item} zoteroPath={preferences.zotero_path} onOpen={onOpen} />
@@ -305,14 +322,14 @@ export const View = ({
                       icon={Icon.Link}
                       title="Open in Zotero"
                       url={zoteroSelectUri(item)}
-                      onOpen={onOpen}
+                      onOpen={onOpenTracked}
                     />
                     {getURL(item) !== "" && (
                       <Action.OpenInBrowser
                         title="Open Original Link"
                         url={getURL(item)}
                         shortcut={openExtLinkCommandShortcut}
-                        onOpen={onOpen}
+                        onOpen={onOpenTracked}
                       />
                     )}
 
@@ -365,7 +382,15 @@ export const View = ({
 
 const configureGroupsShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "l" };
 
-function OpenPdfInSystemViewerAction({ path, title }: { path: string; title: string }) {
+function OpenPdfInSystemViewerAction({
+  path,
+  title,
+  onTracked,
+}: {
+  path: string;
+  title: string;
+  onTracked?: () => void;
+}) {
   return (
     <Action
       icon={Icon.ArrowRightCircleFilled}
@@ -373,6 +398,7 @@ function OpenPdfInSystemViewerAction({ path, title }: { path: string; title: str
       onAction={async () => {
         try {
           await open(path);
+          onTracked?.();
           closeMainWindow();
         } catch {
           await showHUD("Failed to open attachment");
@@ -395,6 +421,11 @@ function SecondaryPdfAction({
 }) {
   const { push } = useNavigation();
   const secondaries = secondaryAttachments(item);
+  const trackOpen = () => recordInteraction(itemIdentity(item));
+  const onOpenTracked = (url: string) => {
+    onOpen(url);
+    trackOpen();
+  };
   if (secondaries.length === 1) {
     const s = secondaries[0];
     const p = attachmentPath(s, zoteroPath);
@@ -405,10 +436,14 @@ function SecondaryPdfAction({
           title="Open Secondary PDF"
           shortcut={openSecondaryPdfShortcut}
           url={zoteroOpenPdfUri(item, s.key)}
-          onOpen={onOpen}
+          onOpen={onOpenTracked}
         />
-        {p && <OpenPdfInSystemViewerAction path={p} title="Open Secondary PDF in System Viewer" />}
-        {p && isAbsolute(p) && <Action.ShowInFinder path={p} title="Show Secondary PDF in Finder" />}
+        {p && (
+          <OpenPdfInSystemViewerAction path={p} title="Open Secondary PDF in System Viewer" onTracked={trackOpen} />
+        )}
+        {p && isAbsolute(p) && (
+          <Action.ShowInFinder path={p} title="Show Secondary PDF in Finder" onShow={() => trackOpen()} />
+        )}
       </>
     );
   }
@@ -435,6 +470,11 @@ function SecondaryPdfList({
   zoteroPath: string;
   onOpen: (url: string) => void;
 }) {
+  const trackOpen = () => recordInteraction(itemIdentity(item));
+  const onOpenTracked = (url: string) => {
+    onOpen(url);
+    trackOpen();
+  };
   return (
     <List searchBarPlaceholder="Search PDFs...">
       {secondaries.map((s) => {
@@ -451,10 +491,12 @@ function SecondaryPdfList({
                   icon={Icon.ArrowRightCircleFilled}
                   title="Open PDF"
                   url={zoteroOpenPdfUri(item, s.key)}
-                  onOpen={onOpen}
+                  onOpen={onOpenTracked}
                 />
-                {p && <OpenPdfInSystemViewerAction path={p} title="Open PDF in System Viewer" />}
-                {p && isAbsolute(p) && <Action.ShowInFinder path={p} title="Show PDF in Finder" />}
+                {p && <OpenPdfInSystemViewerAction path={p} title="Open PDF in System Viewer" onTracked={trackOpen} />}
+                {p && isAbsolute(p) && (
+                  <Action.ShowInFinder path={p} title="Show PDF in Finder" onShow={() => trackOpen()} />
+                )}
               </ActionPanel>
             }
           />
