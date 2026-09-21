@@ -2,7 +2,7 @@
 
 ## [Bug Fix] - 2026-09-21
 
-- Use `git-url-parse` so nested GitLab group paths are preserved when opening repository remotes.
+- Use `git-url-parse` so nested GitLab group paths and custom Git host subdomains are preserved when opening repository remotes.
 
 ## [Bug Fix] - 2026-05-24
 

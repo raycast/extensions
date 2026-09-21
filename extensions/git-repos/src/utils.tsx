@@ -130,11 +130,11 @@ function gitRemotes(path: string): RemoteRepo[] {
       const config = gitConfig.remote[remoteName] as GitRemote;
       try {
         const parsed = parseGitUrl(config.url);
-        if (parsed.source && parsed.full_name && !parsed.protocols.includes("file")) {
+        if (parsed.resource && parsed.full_name && !parsed.protocols.includes("file")) {
           repos = repos.concat({
             name: remoteName,
-            host: parsed.source.toLowerCase(),
-            url: `https://${parsed.source}/${parsed.full_name}`,
+            host: parsed.resource.toLowerCase(),
+            url: `https://${parsed.resource}/${parsed.full_name}`,
           });
         }
       } catch {
