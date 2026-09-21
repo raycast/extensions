@@ -1,5 +1,11 @@
 # Docker Changelog
 
+## [Docker Context Support] - {PR_MERGE_DATE}
+
+- Use the endpoint of the current Docker CLI context (`docker context use`) when no socket path is configured, so alternative runtimes such as Colima, OrbStack, Rancher Desktop, Podman and Lima work out of the box like they do with the `docker` CLI.
+- Honor the `DOCKER_HOST` environment variable when set.
+- Accept `unix://`, `npipe://`, `tcp://`, `http://` and `https://` prefixed values in the "Socket path" preference.
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.
