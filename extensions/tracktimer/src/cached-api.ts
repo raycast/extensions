@@ -1,7 +1,21 @@
-import { type ActiveTimer, ApiError, type Client, type Project, type TrackTimerApi } from "./api";
+import {
+  type ActiveTimer,
+  ApiError,
+  type Client,
+  type DailySummary,
+  type Project,
+  type TrackTimerApi,
+} from "./api";
 import type { QueryCache } from "./query-cache";
 
 type History = Awaited<ReturnType<TrackTimerApi["getEntries"]>>;
+type SummaryCache = { context: string; summary: DailySummary };
+
+function summaryContext(timezone: string) {
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(new Date());
+  return `${timezone}:${day}`;
+}
+
 export function cachedApi(api: TrackTimerApi, cache: QueryCache) {
   const cachedTimer = () => {
     const saved = cache.read<ActiveTimer | null>("timer");
@@ -15,6 +29,10 @@ export function cachedApi(api: TrackTimerApi, cache: QueryCache) {
         }
       : null;
   };
+  const cachedSummary = (timezone: string) => {
+    const saved = cache.read<SummaryCache>("summary");
+    return saved?.data.context === summaryContext(timezone) ? saved.data.summary : undefined;
+  };
   async function read<T>(key: string, ttl: number, loader: () => Promise<T>, force: boolean) {
     try {
       return await cache.fetch(key, ttl, loader, force);
@@ -26,9 +44,8 @@ export function cachedApi(api: TrackTimerApi, cache: QueryCache) {
   }
   return {
     async getSummary(timezone: string, force = false) {
-      const day = new Intl.DateTimeFormat("en-CA", { timeZone: timezone }).format(new Date());
-      const context = `${timezone}:${day}`;
-      const saved = cache.read<{ context: string }>("summary");
+      const context = summaryContext(timezone);
+      const saved = cache.read<SummaryCache>("summary");
       const result = await read(
         "summary",
         60_000,
@@ -42,6 +59,7 @@ export function cachedApi(api: TrackTimerApi, cache: QueryCache) {
     },
     cached: {
       timer: cachedTimer,
+      summary: cachedSummary,
       entries: () => cache.read<History>("entries")?.data,
       clients: () => cache.read<Client[]>("clients")?.data,
       projects: (clientId: string) => cache.read<Project[]>(`projects:${clientId}`)?.data,

@@ -11,7 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ActiveTimer, DailySummary } from "./api";
+import { type ActiveTimer, ApiError, type DailySummary } from "./api";
 import { duration } from "./model";
 import { session } from "./session";
 
@@ -27,8 +27,13 @@ function earningsText(summary: DailySummary) {
 
 export default function Command() {
   const [connection] = useState(session);
-  const [timer, setTimer] = useState<ActiveTimer | null>(null);
-  const [summary, setSummary] = useState<DailySummary>();
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const [initial] = useState(() => ({
+    timer: connection.cached.timer(),
+    summary: connection.cached.summary(timezone),
+  }));
+  const [timer, setTimer] = useState<ActiveTimer | null>(initial.timer ?? null);
+  const [summary, setSummary] = useState<DailySummary | undefined>(initial.summary);
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState(false);
@@ -42,7 +47,7 @@ export default function Command() {
       try {
         const [active, today, operation] = await Promise.all([
           connection.api.getTimer(true),
-          connection.getSummary(Intl.DateTimeFormat().resolvedOptions().timeZone, forceSummary),
+          connection.getSummary(timezone, forceSummary),
           connection.pending(),
         ]);
         if (version !== refreshVersion.current) return;
@@ -52,14 +57,16 @@ export default function Command() {
         setError(undefined);
       } catch (e) {
         if (version !== refreshVersion.current) return;
-        setTimer(null);
-        setSummary(undefined);
+        if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+          setTimer(null);
+          setSummary(undefined);
+        }
         setError(e instanceof Error ? e.message : "Could not refresh TrackTimer.");
       } finally {
         if (version === refreshVersion.current) setLoading(false);
       }
     },
-    [connection],
+    [connection, timezone],
   );
   useEffect(() => {
     void LocalStorage.setItem("menu-bar-enabled", true);
@@ -87,15 +94,16 @@ export default function Command() {
       busy.current = false;
     }
   }
-  const title = error
-    ? "Unavailable"
-    : !summary
-      ? "TrackTimer"
-      : displayMode === "earnings"
+  const title =
+    displayMode === "timer" && timer
+      ? duration(timer.elapsedSeconds)
+      : displayMode === "earnings" && summary
         ? earningsText(summary)
-        : displayMode === "timer" && timer
-          ? duration(timer.elapsedSeconds)
-          : duration(summary.trackedSeconds);
+        : summary
+          ? duration(summary.trackedSeconds)
+          : error
+            ? "Unavailable"
+            : "TrackTimer";
   return (
     <MenuBarExtra
       icon={error ? Icon.ExclamationMark : timer ? Icon.Play : Icon.Clock}

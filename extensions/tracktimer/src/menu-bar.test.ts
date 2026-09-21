@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   getSummary: vi.fn(),
   pending: vi.fn(),
   execute: vi.fn(),
+  cachedTimer: vi.fn(),
+  cachedSummary: vi.fn(),
   mode: "timer",
 }));
 
@@ -19,7 +21,12 @@ function deferred<T>() {
   return { promise, resolve };
 }
 vi.mock("./session", () => ({
-  session: () => ({ ...mocks, api: mocks, baseUrl: "https://tracktimer.app" }),
+  session: () => ({
+    ...mocks,
+    api: mocks,
+    cached: { timer: mocks.cachedTimer, summary: mocks.cachedSummary },
+    baseUrl: "https://tracktimer.app",
+  }),
 }));
 vi.mock("@raycast/api", () => {
   const Container = ({ children }: { children?: ReactNode }) =>
@@ -60,6 +67,8 @@ beforeEach(() => {
     ],
   });
   mocks.pending.mockResolvedValue(null);
+  mocks.cachedTimer.mockReturnValue(undefined);
+  mocks.cachedSummary.mockReturnValue(undefined);
 });
 afterEach(cleanup);
 it("shows minute-level active time and stops the current timer", async () => {
@@ -90,13 +99,21 @@ it("does not offer stop when an uncertain action needs resolution", async () => 
   await screen.findByText("Resolve Pending Timer Action…");
   expect(screen.queryByText("Stop Timer")).toBeNull();
 });
-it("clears values on refresh failure instead of showing stale earnings", async () => {
+it("keeps the last known title during a transient refresh failure", async () => {
   render(createElement(Command));
   await screen.findByText("Stop Timer");
   mocks.getSummary.mockRejectedValue(new Error("Could not reach TrackTimer"));
   fireEvent.click(screen.getByText("Refresh"));
-  await waitFor(() => expect(screen.getByRole("status").textContent).toBe("Unavailable"));
+  await screen.findByText("Could not reach TrackTimer");
+  expect(screen.getByRole("status").textContent).toBe("2m");
   expect(screen.queryByText("Stop Timer")).toBeNull();
+});
+it("renders cached state while the initial refresh is pending", () => {
+  mocks.cachedTimer.mockReturnValue({ id: "active", projectName: "Project", elapsedSeconds: 125 });
+  mocks.cachedSummary.mockReturnValue({ trackedSeconds: 7200, earnings: [] });
+  mocks.getTimer.mockImplementation(() => new Promise(() => {}));
+  render(createElement(Command));
+  expect(screen.getByRole("status").textContent).toBe("2m");
 });
 it("ignores a refresh that started before the post-stop refresh", async () => {
   const active = { id: "active", projectName: "Project", elapsedSeconds: 125 };

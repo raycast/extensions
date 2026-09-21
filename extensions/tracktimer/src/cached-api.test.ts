@@ -171,8 +171,10 @@ describe("cached TrackTimer API", () => {
 });
 
 it("reuses daily totals during fast polling and refreshes on expiry, mutation, or timezone change", async () => {
-  const { getSummary, invalidateTimers, fetcher } = setup();
+  const { getSummary, cached, invalidateTimers, fetcher } = setup();
   await getSummary("UTC");
+  expect(cached.summary("UTC")).toEqual({ trackedSeconds: 60, earnings: [] });
+  expect(cached.summary("America/Panama")).toBeUndefined();
   vi.advanceTimersByTime(10_000);
   await getSummary("UTC");
   expect(fetcher).toHaveBeenCalledTimes(1);
