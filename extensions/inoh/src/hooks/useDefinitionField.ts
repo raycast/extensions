@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAnimatedEllipsis } from "./useAnimatedEllipsis";
 import { useSuggestedDefinition } from "./useSuggestedDefinition";
 import { describeSuggestionPlaceholder, isDefinitionStillSuggested } from "../lib/definition-suggestion";
@@ -33,6 +33,23 @@ export function useDefinitionField(word: string, isSignedIn: boolean) {
     if (suggestedDefinition === undefined) return;
     setDefinition((currentDefinition) => (currentDefinition.trim() === "" ? suggestedDefinition : currentDefinition));
   }, [suggestion.definition]);
+
+  // Reason: read through a ref so the effect below can see the latest answer
+  // without depending on it. Depending on it would empty the field the moment
+  // a suggestion landed in it.
+  const latestSuggestedDefinition = useRef(suggestion.definition);
+  latestSuggestedDefinition.current = suggestion.definition;
+
+  // Reason: the word has moved on, so a suggestion nobody has touched is the
+  // previous word's meaning and has to go. Left there it is not merely stale:
+  // the effect above will not write over a field that has something in it, so
+  // the new word's answer never lands and the card is made for one word with
+  // another word's definition. Anything the user has edited is theirs and stays.
+  useEffect(() => {
+    setDefinition((currentDefinition) =>
+      isDefinitionStillSuggested(currentDefinition, latestSuggestedDefinition.current) ? "" : currentDefinition,
+    );
+  }, [word]);
 
   return {
     definition,

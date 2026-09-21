@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { foldTextForComparison } from "./text-comparison";
 import type { LikelyExistingCard } from "../types";
 
 // Whether Inoh already has the card someone is about to ask for.
@@ -19,6 +20,32 @@ const SAME_CARD_SIMILARITY_THRESHOLD = 0.81;
 
 /** Columns the notice needs to name a card and show what it teaches. */
 const EXISTING_CARD_COLUMNS = "word, definition";
+
+/**
+ * How many of the user's own cards to weigh up when narrowing on the word.
+ *
+ * Reason: more than one, because the narrowing is a pattern match that a word
+ * can still widen, and asking for a single row would hand back whichever one
+ * the widened match reached first. Small, because the exact word is either
+ * among the first few or the user does not have it.
+ */
+const OWN_CARD_CANDIDATE_LIMIT = 20;
+
+/**
+ * Hides from LIKE the characters it would otherwise read as "anything".
+ *
+ * Reason: this match is meant to be exact, but `ilike` reads `%` and `_` in
+ * the word as wildcards, so a card for "100%" would answer for every card
+ * starting "100". PostgREST rewrites `*` into `%` on the way out, which no
+ * escaping here can undo, which is why the caller compares the word itself
+ * rather than trusting the rows it gets back.
+ *
+ * @param word - The word being asked for, as typed
+ * @returns The word as a LIKE pattern matching only itself
+ */
+function _escapeLikeWildcards(word: string): string {
+  return word.replace(/[\\%_]/g, "\\$&");
+}
 
 type SenseMatch = { id: string; similarity: number };
 type MatchSensesResponse = { matches?: Array<{ word: string; senses: SenseMatch[] }> };
@@ -76,11 +103,17 @@ async function _findOwnCard(userId: string, word: string): Promise<ExistingCardR
     .from("dictionary")
     .select(EXISTING_CARD_COLUMNS)
     .eq("owner_user_id", userId)
-    .ilike("word", word)
-    .limit(1);
+    .ilike("word", _escapeLikeWildcards(word))
+    .limit(OWN_CARD_CANDIDATE_LIMIT);
 
   if (error !== null) return null;
-  return ((data as ExistingCardRow[]) ?? [])[0] ?? null;
+
+  // Reason: the narrowing above is still a pattern match, so the word itself
+  // is what decides. See `_escapeLikeWildcards` for the one character that
+  // reaches the database as a wildcard whatever is done to it here.
+  const askedFor = foldTextForComparison(word);
+  const candidates = (data as ExistingCardRow[]) ?? [];
+  return candidates.find((candidate) => foldTextForComparison(candidate.word) === askedFor) ?? null;
 }
 
 /**
