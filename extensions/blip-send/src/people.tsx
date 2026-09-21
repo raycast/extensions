@@ -19,7 +19,7 @@ import type { BlipState, Device } from "./blip/client";
 import { relativeTime } from "./blip/format";
 import { contacts, isSignedIn, myDevices, thisDevice } from "./blip/model";
 import type { DeviceRecipient, PersonRecipient } from "./blip/model";
-import { BlipUnavailable, NotSignedIn } from "./components/BlipUnavailable";
+import { BlipError, BlipUnavailable, NotSignedIn } from "./components/BlipUnavailable";
 import { FilesForm } from "./components/FilesForm";
 import { deviceIcon, personIcon, presenceAccessory } from "./components/icons";
 import { OpenBlipAction } from "./components/OpenBlipAction";
@@ -29,9 +29,10 @@ import { Shortcuts } from "./shortcuts";
 
 /** Blip Devices and Contacts: see who you can reach, rename or remove a device, drop a contact. */
 export default function Command() {
-  const { state, isLoading, unavailable, refresh } = useBlipState();
+  const { state, error, isLoading, unavailable, refresh } = useBlipState();
 
   if (unavailable && !state) return <BlipUnavailable onReady={refresh} navigationTitle="Blip Devices and Contacts" />;
+  if (error && !state) return <BlipError error={error} onRetry={refresh} navigationTitle="Blip Devices and Contacts" />;
   if (state && !isSignedIn(state)) return <NotSignedIn />;
 
   const mine = state ? thisDevice(state) : undefined;

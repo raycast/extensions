@@ -24,7 +24,7 @@ import type { PersonRecipient, Recipient } from "../blip/model";
 import { useBlipState } from "../hooks/useBlipState";
 import { fileManager, fileManagerIcon } from "../platform";
 import { Shortcuts } from "../shortcuts";
-import { BlipUnavailable, NotSignedIn } from "./BlipUnavailable";
+import { BlipError, BlipUnavailable, NotSignedIn } from "./BlipUnavailable";
 import { deviceIcon, personIcon, presenceAccessory } from "./icons";
 import { TransfersList } from "./TransfersList";
 
@@ -34,10 +34,6 @@ interface Props {
   onChangeFiles?: () => void;
 }
 
-interface Preferences {
-  afterSend: "close" | "progress";
-}
-
 const SEARCH_MIN_LENGTH = 2;
 const SEARCH_DEBOUNCE_MS = 350;
 
@@ -45,14 +41,15 @@ const SEARCH_DEBOUNCE_MS = 350;
  * The recipient picker: your devices first, then contacts, then people on Blip that match the search.
  */
 export function RecipientList({ files, onChangeFiles }: Props) {
-  const { state, isLoading, unavailable, refresh } = useBlipState();
+  const { state, error, isLoading, unavailable, refresh } = useBlipState();
   const { push } = useNavigation();
   const [searchText, setSearchText] = useState("");
   const [sending, setSending] = useState(false);
   const summary = useMemo(() => summarizeFiles(files), [files]);
-  const searchId = useServerSearch(searchText, state);
+  const searchId = useServerSearch(searchText, Boolean(state));
 
   if (unavailable && !state) return <BlipUnavailable onReady={refresh} navigationTitle="Send with Blip" />;
+  if (error && !state) return <BlipError error={error} onRetry={refresh} navigationTitle="Send with Blip" />;
   if (state && !isSignedIn(state)) return <NotSignedIn />;
 
   const devices = state ? myDevices(state) : [];
@@ -243,8 +240,11 @@ function matches(query: string, ...fields: string[]): boolean {
 /**
  * Asks Blip to search its directory for the typed name or email, and tidies up
  * the search entry when the query changes or the view closes.
+ *
+ * The search only works once Blip's state has arrived, so `ready` is a dependency.
+ * A query typed during the first load then runs as soon as Blip answers.
  */
-function useServerSearch(searchText: string, state: BlipState | undefined): string | undefined {
+function useServerSearch(searchText: string, ready: boolean): string | undefined {
   const [searchId, setSearchId] = useState<string>();
   const current = useRef<string | undefined>(undefined);
 
@@ -256,7 +256,7 @@ function useServerSearch(searchText: string, state: BlipState | undefined): stri
       current.current = undefined;
       setSearchId(undefined);
     }
-    if (query.length < SEARCH_MIN_LENGTH || !state) return;
+    if (query.length < SEARCH_MIN_LENGTH || !ready) return;
     const timer = setTimeout(() => {
       const id = `raycast-${randomUUID()}`;
       current.current = id;
@@ -264,8 +264,7 @@ function useServerSearch(searchText: string, state: BlipState | undefined): stri
       void dispatch("Search", { id, query }).catch(() => undefined);
     }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-    // `state` is deliberately not a dependency: we only need it to exist.
-  }, [searchText]);
+  }, [searchText, ready]);
 
   useEffect(
     () => () => {

@@ -13,3 +13,14 @@ export class BlipRpcError extends Error {
     this.name = "BlipRpcError";
   }
 }
+
+/**
+ * A call ran out of time. A long poll that times out is normal and means the
+ * state did not change, so callers must be able to tell it apart from a failure.
+ */
+export class BlipTimeoutError extends BlipRpcError {
+  constructor(message: string) {
+    super(message);
+    this.name = "BlipTimeoutError";
+  }
+}

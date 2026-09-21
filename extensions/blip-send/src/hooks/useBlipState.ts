@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getState } from "../blip/client";
 import type { BlipState } from "../blip/client";
-import { BlipUnavailableError } from "../blip/errors";
+import { BlipTimeoutError, BlipUnavailableError } from "../blip/errors";
 import { demoState } from "../blip/demo";
 import { openBlip } from "../platform";
 
@@ -68,9 +68,8 @@ export function useBlipState(): BlipStateHook {
         } catch (e) {
           if (!alive.current || generation.current !== myGeneration) return;
           const err = e as Error;
-          // A long poll that times out simply means nothing changed.
-          const timedOut = err.name === "BlipRpcError" && /did not answer/.test(err.message);
-          if (!timedOut) {
+          // A long poll that runs out of time simply means nothing changed.
+          if (!(err instanceof BlipTimeoutError)) {
             setError(err);
             setIsLoading(false);
             if (err instanceof BlipUnavailableError) lastId.current = undefined;

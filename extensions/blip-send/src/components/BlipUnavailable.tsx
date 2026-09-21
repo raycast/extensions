@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { launchBlip } from "../hooks/useBlipState";
 import { isWindows, thisComputerInline } from "../platform";
@@ -58,6 +58,37 @@ export function NotSignedIn() {
         actions={
           <ActionPanel>
             <OpenBlipAction />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+
+interface ErrorProps {
+  error: Error;
+  onRetry: () => void;
+  navigationTitle?: string;
+}
+
+/**
+ * Shown when Blip is running but the call failed, for example when it returns an
+ * error, drops the connection, or sends state this version cannot read. Without
+ * this the list would look empty, which reads as "you have nothing" instead of
+ * "something went wrong".
+ */
+export function BlipError({ error, onRetry, navigationTitle }: ErrorProps) {
+  return (
+    <List navigationTitle={navigationTitle} searchBarPlaceholder="">
+      <List.EmptyView
+        icon={{ source: Icon.Warning, tintColor: Color.Red }}
+        title="Could not read Blip"
+        description={`${error.message}\n\nBlip may have updated. Try again, or restart Blip.`}
+        actions={
+          <ActionPanel>
+            <Action title="Try Again" icon={Icon.Redo} onAction={onRetry} />
+            <OpenBlipAction />
+            <Action.CopyToClipboard title="Copy Error Message" content={error.message} />
           </ActionPanel>
         }
       />

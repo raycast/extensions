@@ -32,7 +32,7 @@ import type { TransferView } from "../blip/model";
 import { useBlipState } from "../hooks/useBlipState";
 import { fileManager } from "../platform";
 import { Shortcuts } from "../shortcuts";
-import { BlipUnavailable, NotSignedIn } from "./BlipUnavailable";
+import { BlipError, BlipUnavailable, NotSignedIn } from "./BlipUnavailable";
 import { statusColor, transferIcon } from "./icons";
 import { OpenBlipAction } from "./OpenBlipAction";
 
@@ -42,21 +42,19 @@ interface Props {
   navigationTitle?: string;
 }
 
-interface Preferences {
-  savePath?: string;
-}
-
 const RECENT_LIMIT = 40;
 const STATUS_WIDTH = 8;
 const TIME_WIDTH = 5;
 const PEER_WIDTH = 26;
 
 export function TransfersList({ focusId, navigationTitle }: Props) {
-  const { state, isLoading, unavailable, refresh } = useBlipState();
+  const { state, error, isLoading, unavailable, refresh } = useBlipState();
   const [showDetail, setShowDetail] = useState(false);
 
   if (unavailable && !state)
     return <BlipUnavailable onReady={refresh} navigationTitle={navigationTitle ?? "Blip Transfers"} />;
+  if (error && !state)
+    return <BlipError error={error} onRetry={refresh} navigationTitle={navigationTitle ?? "Blip Transfers"} />;
   if (state && !isSignedIn(state)) return <NotSignedIn />;
 
   const all = state ? transfers(state) : [];

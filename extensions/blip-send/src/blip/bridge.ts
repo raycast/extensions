@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { assetPath, isWindows, powershell, socketPath } from "../platform";
-import { BlipRpcError, BlipUnavailableError } from "./errors";
+import { BlipTimeoutError, BlipUnavailableError } from "./errors";
 
 /**
  * Where to connect to reach Blip's core.
@@ -73,7 +73,10 @@ function start(): Bridge {
       reject(error);
     };
 
-    const timer = setTimeout(() => fail(new BlipRpcError("The Blip bridge did not start in time")), START_TIMEOUT_MS);
+    const timer = setTimeout(
+      () => fail(new BlipTimeoutError("The Blip bridge did not start in time")),
+      START_TIMEOUT_MS,
+    );
 
     child.stdout.on("data", (chunk: Buffer) => {
       announced += chunk.toString();

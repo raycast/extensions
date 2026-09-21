@@ -4,6 +4,7 @@ import path from "node:path";
 import os from "node:os";
 import { dispatch, getState } from "./client";
 import type { BlipState, Device, PeerId, Transfer, TransferStatus, User } from "./client";
+import { BlipRpcError, BlipTimeoutError } from "./errors";
 import { formatBytes, pluralize, toDate } from "./format";
 
 // ---- Recipients ----
@@ -295,6 +296,10 @@ export function summarizeFiles(paths: string[]): SendSummary {
   return { count: paths.length, bytes, label: `${what}${size}` };
 }
 
+const CONTENT_TIMEOUT_MS = 15_000;
+const CONTENT_POLL_MS = 1_500;
+const CONTENT_RETRY_MS = 150;
+
 /**
  * Creates a transfer, attaches the files, and invites the peer.
  * Returns the transfer id so callers can follow progress in the state.
@@ -302,29 +307,43 @@ export function summarizeFiles(paths: string[]): SendSummary {
 export async function sendFiles(paths: string[], peer: PeerId): Promise<string> {
   const transferId = randomUUID().toUpperCase();
   await dispatch("TransferCreateRequested", { transfer_id: transferId, peer_id: peer });
-  await dispatch("TransferAddContentRequested", { transfer_id: transferId, locations: paths });
-  await waitForContent(transferId, paths.length);
-  await dispatch("TransferInviteRequested", { transfer_id: transferId, peer_id: peer });
+  try {
+    await dispatch("TransferAddContentRequested", { transfer_id: transferId, locations: paths });
+    await waitForContent(transferId, paths.length);
+    await dispatch("TransferInviteRequested", { transfer_id: transferId, peer_id: peer });
+  } catch (error) {
+    // Remove the half-built transfer so it does not sit in Blip's list forever.
+    await dispatch("TransferRemoveRequested", { transfer_id: transferId, delete_files: false }).catch(() => undefined);
+    throw error;
+  }
   return transferId;
 }
 
+/**
+ * Waits until Blip reports every chosen item on the transfer.
+ *
+ * Blip packs the files after it accepts the content event, so inviting the peer
+ * before that finishes would send an empty transfer. Anything that stops this
+ * check from confirming the archive throws, so the caller never reports success
+ * for a transfer that was never ready.
+ */
 async function waitForContent(transferId: string, expected: number): Promise<void> {
-  const deadline = Date.now() + 5000;
-  let last: StateSnapshotLike | undefined;
+  const deadline = Date.now() + CONTENT_TIMEOUT_MS;
+  let lastId: number | undefined;
   while (Date.now() < deadline) {
-    const snapshot = await getState(last?.id, 1500).catch(() => undefined);
-    if (snapshot) {
-      last = snapshot;
-      const t = snapshot.state.transfers?.[transferId];
-      const count = Object.keys(t?.archive_stub?.items ?? {}).length;
-      if (t && count >= expected) return;
+    try {
+      const snapshot = await getState(lastId, CONTENT_POLL_MS);
+      lastId = snapshot.id;
+      const transfer = snapshot.state.transfers?.[transferId];
+      const attached = Object.keys(transfer?.archive_stub?.items ?? {}).length;
+      if (transfer && attached >= expected) return;
+    } catch (error) {
+      // A long poll that runs out of time only means nothing changed yet.
+      if (!(error instanceof BlipTimeoutError)) throw error;
     }
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise((resolve) => setTimeout(resolve, CONTENT_RETRY_MS));
   }
-}
-
-interface StateSnapshotLike {
-  id: number;
+  throw new BlipRpcError(`Blip did not attach ${pluralize(expected, "file")} within ${CONTENT_TIMEOUT_MS / 1000}s`);
 }
 
 export function defaultSavePath(state: BlipState, preference: string | undefined): string {

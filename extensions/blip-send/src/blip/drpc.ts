@@ -1,6 +1,6 @@
 import net from "node:net";
 import { endpoint } from "./bridge";
-import { BlipRpcError, BlipUnavailableError } from "./errors";
+import { BlipRpcError, BlipTimeoutError, BlipUnavailableError } from "./errors";
 
 /**
  * Minimal client for the DRPC wire protocol (github.com/storj/drpc).
@@ -96,7 +96,7 @@ export async function invoke(rpc: string, request: Uint8Array, timeoutMs = 10_00
     };
 
     const timer = setTimeout(
-      () => finish(() => reject(new BlipRpcError(`Blip did not answer ${rpc} within ${timeoutMs / 1000}s`))),
+      () => finish(() => reject(new BlipTimeoutError(`Blip did not answer ${rpc} within ${timeoutMs / 1000}s`))),
       timeoutMs,
     );
 
