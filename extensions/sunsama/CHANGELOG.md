@@ -16,7 +16,7 @@
   add subtasks, and start or stop timers. Editing, completing, rescheduling,
   or deleting a task asks you to confirm first.
 
-## [Default Channel for Linked Tasks] - {PR_MERGE_DATE}
+## [Default Channel for Linked Tasks] - 2026-09-09
 
 - A pasted link now keeps whichever channel Sunsama's own automation assigns to
   it, and falls back to your default channel when no automation fires. Picking a
@@ -24,7 +24,7 @@
 - Add Task opens its connection to Sunsama while you type, so submitting no
   longer waits for it.
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-09-05
 
 Manage your Sunsama tasks from Raycast, over Sunsama's official MCP server.
 
