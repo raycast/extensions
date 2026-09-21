@@ -2,10 +2,14 @@ import Fuse from "fuse.js";
 import { pinyin } from "pinyin-pro";
 
 import { Tab } from "./types";
+import { normalizeText } from "./utils";
 
-type SearchableTab = Tab & { titlePinyin: string };
+// Reuse the same diacritic folding the standalone "Search Tabs" command has
+// always used (`normalizeText` in utils.ts), so an unaccented query still
+// matches a tab title that has accented characters.
+const normalize = (value: string) => normalizeText(value.trim());
 
-const normalize = (value: string) => value.trim().toLocaleLowerCase();
+type SearchableTab = Tab & { titlePinyin: string; titleFolded: string };
 
 function toPinyin(value: string): string {
   return pinyin(value, { toneType: "none" }).replace(/\s+/g, "").toLocaleLowerCase();
@@ -24,12 +28,20 @@ export function searchTabsWithFallback(tabs: Tab[], query: string, limit?: numbe
   });
   if (exact.length > 0) return limit ? exact.slice(0, limit) : exact;
 
-  const searchableTabs: SearchableTab[] = tabs.map((tab) => ({ ...tab, titlePinyin: toPinyin(tab.title) }));
+  // `titleFolded` gives Fuse a diacritic-insensitive field to match against
+  // directly, rather than relying on its own edit-distance scoring to treat
+  // an accented and unaccented character as interchangeable.
+  const searchableTabs: SearchableTab[] = tabs.map((tab) => ({
+    ...tab,
+    titlePinyin: toPinyin(tab.title),
+    titleFolded: normalize(tab.title),
+  }));
   const fuse = new Fuse(searchableTabs, {
     keys: [
-      { name: "title", weight: 0.4 },
-      { name: "titlePinyin", weight: 0.35 },
-      { name: "url", weight: 0.25 },
+      { name: "title", weight: 0.3 },
+      { name: "titleFolded", weight: 0.3 },
+      { name: "titlePinyin", weight: 0.25 },
+      { name: "url", weight: 0.15 },
     ],
     threshold: 0.3,
     includeScore: true,
