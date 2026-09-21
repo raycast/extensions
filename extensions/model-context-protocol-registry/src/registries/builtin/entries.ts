@@ -151,6 +151,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "gtd-brain",
+    title: "GTD Brain",
+    description:
+      "Getting Things Done board: capture to Inbox, next actions by context, projects, waiting-for and a weekly review, on the same board as the GTD Brain web, iOS and Android apps. Hosted remote server with OAuth 2.1 sign-in (email code), no API key to paste.",
+    icon: "https://gtdbrain.com/gtdbrain/icon-512.png",
+    homepage: "https://gtdbrain.com/connect?source=raycast-mcp-registry",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.gtdbrain.com/api/gtdbrain/v1/mcp"],
+    },
+  },
+  {
     name: "e2b",
     title: "E2B Code Interpreter",
     description: "A Model Context Protocol server for running code in a secure sandbox by [E2B](https://e2b.dev/).",
