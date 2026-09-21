@@ -131,10 +131,15 @@ function gitRemotes(path: string): RemoteRepo[] {
       try {
         const parsed = parseGitUrl(config.url);
         if (parsed.resource && parsed.full_name && !parsed.protocols.includes("file")) {
+          const port =
+            parsed.port && (parsed.protocols.includes("http") || parsed.protocols.includes("https"))
+              ? `:${parsed.port}`
+              : "";
+          const host = parsed.resource.toLowerCase();
           repos = repos.concat({
             name: remoteName,
-            host: parsed.resource.toLowerCase(),
-            url: `https://${parsed.resource}/${parsed.full_name}`,
+            host,
+            url: `https://${host}${port}/${parsed.full_name}`,
           });
         }
       } catch {
