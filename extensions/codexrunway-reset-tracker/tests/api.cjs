@@ -70,6 +70,12 @@ assert.equal(
 );
 assert.equal(api.resetTodayAt(record({ completedAt: "invalid" })), null);
 assert.equal(api.statusLabel(latest), "Global reset · Completed");
+assert.equal(api.formatConfidence(0.7), "70%");
+assert.equal(api.formatConfidence(0), "0%");
+assert.equal(api.formatConfidence(1), "100%");
+assert.equal(api.formatConfidence(0.965), "97%");
+for (const value of [null, undefined, NaN, Infinity, -0.1, 1.1, "0.7"])
+  assert.equal(api.formatConfidence(value), undefined);
 assert.equal(
   api.matchesPlan(record({ scope: { plans: ["all"] } }), "pro"),
   true,

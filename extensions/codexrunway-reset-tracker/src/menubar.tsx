@@ -12,9 +12,10 @@ import {
 } from "@raycast/api";
 import { getProgressIcon, useCachedPromise } from "@raycast/utils";
 import { fetchMenuRecords } from "./notifications";
-import { statusIcon } from "./status";
+import { confidenceColor, statusIcon } from "./status";
 import {
   formatDate,
+  formatConfidence,
   recordsUrl,
   relativeTime,
   resetTodayIn,
@@ -29,6 +30,9 @@ import {
 
 /** One request serves both the latest record and the reset-today scan (API allows 20/hour). */
 const PAGE_SIZE = 10;
+
+// Raycast dims items without an action; keep informational rows enabled.
+const noop = () => {};
 
 /** "Sep 09, 2026, 10:00 GMT+8 · 2h ago" — absolute time carries the detail, relative the feel. */
 function stamp(iso: string): string {
@@ -51,6 +55,7 @@ function TimeItem({
       title={title}
       subtitle={stamp(iso)}
       tooltip={iso}
+      onAction={noop}
     />
   );
 }
@@ -71,6 +76,7 @@ export default function Command() {
     matchesPlan(record, plan),
   );
   const next = nextScheduleIn(records);
+  const confidence = formatConfidence(next?.confidence);
   const schedule = next ? scheduleTime(next) : null;
   const { resetToday, at, record: todayRecord } = resetTodayIn(records);
   const record = todayRecord ?? records[0];
@@ -126,6 +132,7 @@ export default function Command() {
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Yellow }}
             title={warning}
             subtitle="showing cached data"
+            onAction={noop}
           />
         </MenuBarExtra.Section>
       )}
@@ -144,7 +151,7 @@ export default function Command() {
             onAction={
               record.source?.url
                 ? () => open(record.source.url as string)
-                : undefined
+                : noop
             }
           />
           {record.effectiveAt && (
@@ -165,6 +172,7 @@ export default function Command() {
             icon={Icon.Tag}
             title="Plans"
             subtitle={record.scope?.plans?.map(humanize).join(", ") || "—"}
+            onAction={noop}
           />
         </MenuBarExtra.Section>
       ) : (
@@ -172,6 +180,7 @@ export default function Command() {
           <MenuBarExtra.Item
             icon={isLoading ? Icon.CircleProgress : Icon.CircleDisabled}
             title={isLoading ? "Loading…" : "No records available"}
+            onAction={noop}
           />
         </MenuBarExtra.Section>
       )}
@@ -186,12 +195,25 @@ export default function Command() {
             title={statusLabel(next)}
             subtitle={countdown ?? "timing not yet confirmed"}
             tooltip={brief(next.text)}
+            onAction={noop}
           />
         ) : (
           <MenuBarExtra.Item
             icon={Icon.CircleDisabled}
             title="No upcoming schedule"
             subtitle="in the latest records"
+            onAction={noop}
+          />
+        )}
+        {confidence && (
+          <MenuBarExtra.Item
+            icon={{
+              source: Icon.Gauge,
+              tintColor: confidenceColor(next?.confidence),
+            }}
+            title="Confidence"
+            subtitle={confidence}
+            onAction={noop}
           />
         )}
         {schedule && (
@@ -199,6 +221,7 @@ export default function Command() {
             icon={Icon.Calendar}
             title={schedule.overdue ? "Expected (awaiting)" : "Expected"}
             subtitle={schedule.time}
+            onAction={noop}
             tooltip={
               schedule.overdue
                 ? "The window has elapsed without a completion confirmation"
@@ -249,12 +272,14 @@ export default function Command() {
           <MenuBarExtra.Item
             icon={{ source: Icon.BellDisabled, tintColor: Color.Yellow }}
             title={data.notificationWarning}
+            onAction={noop}
           />
         )}
         <MenuBarExtra.Item
           icon={Icon.Filter}
           title="Plan filter"
           subtitle={humanize(plan)}
+          onAction={noop}
         />
         {data?.meta?.lastSuccessfulCheckAt && (
           <TimeItem

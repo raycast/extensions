@@ -10,6 +10,7 @@ It ships three commands:
   status (e.g. "Reset today" / "No reset confirmed") and
   auto-refreshes every 10 minutes. Click it for details and a manual
   refresh / "open source post" action, plus shortcuts to details and history.
+  The expanded menu shows the upcoming reset's confidence percentage when known.
 - **View Latest Reset** — shows the most recent confirmed reset today, or
   the latest announcement when none is found, with metadata, original text,
   and an action to copy the raw JSON.

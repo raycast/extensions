@@ -111,6 +111,17 @@ export function statusLabel(record: ResetRecord): string {
   return `${humanize(record.resetType)} reset · ${recordState(record)}`;
 }
 
+export function formatConfidence(value?: number | null): string | undefined {
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    value < 0 ||
+    value > 1
+  )
+    return undefined;
+  return `${Math.round(value * 100)}%`;
+}
+
 /** True if `iso` falls on today's calendar date (viewer's local timezone). */
 function isToday(iso?: string | null): boolean {
   if (!iso) return false;
