@@ -213,7 +213,7 @@ export class TrackTimerApi {
     return data.timer;
   }
   async getEntries(cursor?: string): Promise<{ entries: TimeEntry[]; nextCursor: string | null }> {
-    const query = new URLSearchParams({ limit: "50", ...(cursor ? { cursor } : {}) });
+    const query = new URLSearchParams({ limit: "10", ...(cursor ? { cursor } : {}) });
     const data = await this.request(`/time-entries?${query}`);
     if (
       !record(data) ||

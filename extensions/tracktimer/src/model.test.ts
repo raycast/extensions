@@ -18,6 +18,42 @@ describe("recent timers", () => {
     expect(duration(5459)).toBe("1h 30m");
     expect(duration(59)).toBe("0m");
   });
+  it("merges visually identical descriptions and retains the newest duration", () => {
+    const base = {
+      projectId: "project",
+      projectName: "Track Timer",
+      billable: true,
+      status: "completed",
+    };
+    const entries = [
+      { ...base, id: "new", note: null, durationSeconds: 7 },
+      { ...base, id: "empty", note: "" },
+      { ...base, id: "whitespace", note: "  " },
+      { ...base, id: "old", note: " Track Timer ", durationSeconds: 2580 },
+      { ...base, id: "different", note: "Other work" },
+      { ...base, id: "other-project", projectId: "other", note: null },
+    ] as TimeEntry[];
+    expect(recentEntries(entries).map((item) => item.id)).toEqual([
+      "new",
+      "different",
+      "other-project",
+    ]);
+    expect(recentEntries(entries)[0].durationSeconds).toBe(7);
+  });
+  it("keeps entries regardless of their age", () => {
+    const entries = [
+      {
+        id: "old",
+        projectId: "project",
+        projectName: "Project",
+        note: null,
+        billable: true,
+        status: "completed",
+        startedAt: "2020-01-01T00:00:00Z",
+      },
+    ] as TimeEntry[];
+    expect(recentEntries(entries)).toEqual(entries);
+  });
 });
 
 describe("display colors", () => {

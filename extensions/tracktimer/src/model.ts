@@ -4,7 +4,12 @@ export function recentEntries(entries: TimeEntry[]) {
   const seen = new Set<string>();
   return entries.filter((entry) => {
     if (entry.status !== "completed") return false;
-    const key = JSON.stringify([entry.projectId, entry.note, entry.billable]);
+    // Match the visible title, including the project-name fallback for empty notes.
+    const key = JSON.stringify([
+      entry.projectId,
+      entry.note?.trim() || entry.projectName,
+      entry.billable,
+    ]);
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

@@ -53,7 +53,13 @@ describe("TrackTimer API", () => {
     await api.getEntries("abc&limit=999");
     const url = new URL(String(fetcher.mock.calls[0]?.[0]));
     expect(url.searchParams.get("cursor")).toBe("abc&limit=999");
-    expect(url.searchParams.get("limit")).toBe("50");
+    expect(url.searchParams.get("limit")).toBe("10");
+  });
+  it("requests the newest ten entries without a date cutoff", async () => {
+    const { api, fetcher } = setup(Response.json({ entries: [], nextCursor: null }));
+    await api.getEntries();
+    const url = new URL(String(fetcher.mock.calls[0]?.[0]));
+    expect([...url.searchParams.entries()]).toEqual([["limit", "10"]]);
   });
   it("reuses the caller's persisted idempotency key on retries", async () => {
     const { api, fetcher } = setup(new Error("network failure"));
