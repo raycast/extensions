@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Homebrew 7 support] - {PR_MERGE_DATE}
+## [Homebrew 7 support] - 2026-09-21
 
 - Show Installed now lists formulae you asked for and their dependencies in separate sections; a dependency nothing else needs is tagged Unused. ⌘D still hides the dependencies section.
 - New **Run Doctor** command: shows the `brew doctor` report with every recommended fix, and runs them all with one confirmation (Fix All). Needs Homebrew 7.0
