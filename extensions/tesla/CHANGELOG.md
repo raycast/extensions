@@ -1,6 +1,6 @@
 # Tesla Changelog
 
-## [Windows Support & Car Status] - {PR_MERGE_DATE}
+## [Windows Support & Car Status] - 2026-09-21
 
 - Added Windows to the supported platforms
 - Fixed the Change Car Image picker not saving on Windows (replaced a misused `Action.SubmitForm` with a standard `Action`)
