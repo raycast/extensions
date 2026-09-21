@@ -1,11 +1,12 @@
 import Dockerode from '@priithaamer/dockerode';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
+import { Agent } from 'node:https';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { URL } from 'node:url';
 
-export type DockerOptions = Dockerode.DockerOptions & { checkServerIdentity?: () => undefined };
+export type DockerOptions = Dockerode.DockerOptions & { agent?: Agent };
 
 interface DockerContext {
   name: string;
@@ -104,12 +105,16 @@ const optionsForContext = (context: DockerContext): DockerOptions | undefined =>
   const cert = readIfExists(join(context.tlsDir, 'cert.pem'));
   const key = readIfExists(join(context.tlsDir, 'key.pem'));
 
-  if (ca || cert || key) {
+  // Like the Docker CLI, use TLS when the context ships certificates or asks to skip verification.
+  if (ca || cert || key || context.skipTLSVerify) {
     Object.assign(options, { ca, cert, key, protocol: 'https' });
   }
 
+  // docker-modem does not forward `rejectUnauthorized`, but it does forward `agent`, and agent
+  // options win over per-request options, so this disables chain and hostname verification the
+  // same way `InsecureSkipVerify` does in the CLI.
   if (context.skipTLSVerify) {
-    options.checkServerIdentity = () => undefined;
+    options.agent = new Agent({ rejectUnauthorized: false });
   }
 
   return options;
