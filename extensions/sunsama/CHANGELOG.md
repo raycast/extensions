@@ -1,6 +1,6 @@
 # Sunsama Changelog
 
-## [Task Details Pane] - {PR_MERGE_DATE}
+## [Task Details Pane] - 2026-09-21
 
 - Turn on "Show task details" in View Today's Tasks preferences to open a side
   pane with the selected task's notes, subtasks, channel, category, planned and
