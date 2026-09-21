@@ -146,6 +146,7 @@ export default function ServiceSchedules({ service }: { service: ScheduleService
                 title="Add Schedule"
                 target={<ScheduleForm service={service} onSaved={revalidate} />}
               />
+              <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => revalidate()} />
             </ActionPanel>
           }
         />
@@ -312,7 +313,10 @@ function ScheduleForm({
           cronExpression: values.cronExpression.trim(),
           command: values.command.trim(),
           shellType: values.shellType,
-          timezone: values.timezone.trim() || undefined,
+          // null, not undefined - JSON.stringify drops undefined keys entirely, and
+          // schedule.update treats a missing timezone as "leave it alone" rather than "clear it",
+          // so clearing this field on Edit would otherwise silently keep the old timezone.
+          timezone: values.timezone.trim() || null,
           enabled: values.enabled,
           // Left out on purpose - Dokploy generates its own per-schedule appName and derives the
           // run log path from it. Sending the service's own appName would make every schedule on
