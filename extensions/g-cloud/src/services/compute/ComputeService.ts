@@ -101,6 +101,19 @@ export interface InstanceLifecycleResult {
 }
 
 /**
+ * Thrown only when Google Cloud has explicitly reported that a zone operation failed. This is
+ * the sole signal that a lifecycle action was genuinely rejected server-side; any other error
+ * encountered while confirming an already-accepted operation (timeouts, transient status-check
+ * failures) must not be treated as a rejection.
+ */
+class ComputeOperationRejectedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ComputeOperationRejectedError";
+  }
+}
+
+/**
  * Compute Service class - provides optimized access to Compute Engine functionality
  * Now uses REST APIs instead of gcloud CLI for better performance
  */
@@ -474,19 +487,38 @@ export class ComputeService {
     zone: string,
     operationFactory: () => Promise<ComputeZoneOperation>,
   ): Promise<InstanceLifecycleResult> {
+    // Once operationFactory() resolves, Google has accepted the action. From this point on, only
+    // a definitive rejection (a terminal operation error) should cause the caller to roll back
+    // its optimistic UI state. Timeouts and transient follow-up failures mean we simply couldn't
+    // *confirm* the outcome yet -- the action may still be in progress or may have already
+    // succeeded server-side -- so we report "pending" (no instance snapshot) instead of trusting
+    // a status check that could still reflect the pre-action state.
     const operation = await operationFactory();
     this.clearCache("instances");
 
     const operationName = operation.name;
     if (!operationName) {
-      const instance = await this.getInstance(name, zone, { forceRefresh: true });
-      return { instance };
+      const instance = await this.getInstance(name, zone, { forceRefresh: true }).catch(() => null);
+      return { instance, isTimedOut: !instance || isInstanceTransitionalStatus(instance.status) };
     }
 
-    const operationCompleted = await this.waitForZoneOperation(zone, operationName);
-    const instance = await this.waitForStableInstanceState(name, zone);
+    let operationCompleted: boolean;
+    try {
+      operationCompleted = await this.waitForZoneOperation(zone, operationName);
+    } catch (error) {
+      if (error instanceof ComputeOperationRejectedError) {
+        throw error;
+      }
+      return { instance: null, isTimedOut: true };
+    }
+
+    if (!operationCompleted) {
+      return { instance: null, isTimedOut: true };
+    }
+
+    const instance = await this.waitForStableInstanceState(name, zone).catch(() => null);
     return {
-      isTimedOut: !operationCompleted || !instance || isInstanceTransitionalStatus(instance.status),
+      isTimedOut: !instance || isInstanceTransitionalStatus(instance.status),
       instance,
     };
   }
@@ -499,7 +531,7 @@ export class ComputeService {
       if (operation.status === "DONE") {
         const errors = operation.error?.errors?.map((error) => error.message).filter(Boolean) ?? [];
         if (errors.length > 0) {
-          throw new Error(errors.join(" "));
+          throw new ComputeOperationRejectedError(errors.join(" "));
         }
         return true;
       }
