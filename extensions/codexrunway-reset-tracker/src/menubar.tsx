@@ -92,8 +92,12 @@ export default function Command() {
           : "No reset confirmed"
       : "CodexRunway";
 
-  /** The menu bar is scarce real estate: show a countdown instead of a sentence. */
+  /** The menu bar is scarce real estate: a countdown, not a sentence. */
   const countdown = schedule ? relativeTime(schedule.start) : null;
+  /** "2h from now" -> "2h"; null once the start is behind us (`schedule.overdue` says so). */
+  const soon = countdown?.endsWith(" from now")
+    ? countdown.slice(0, -" from now".length)
+    : null;
   const progress = next ? scheduleProgress(next) : null;
 
   /** A ring filling up as the wait elapses says more than a static clock glyph. */
@@ -111,8 +115,8 @@ export default function Command() {
     ? "Update failed"
     : resetToday
       ? "Reset today"
-      : countdown?.endsWith("from now")
-        ? `Reset in ${countdown.replace(" from now", "")}`
+      : soon
+        ? `Reset in ${soon}`
         : next
           ? "Reset due"
           : record
@@ -136,6 +140,58 @@ export default function Command() {
           />
         </MenuBarExtra.Section>
       )}
+      <MenuBarExtra.Section title="Next Planned Reset">
+        {next ? (
+          <MenuBarExtra.Item
+            icon={
+              progress !== null
+                ? getProgressIcon(progress, Color.Yellow)
+                : { source: Icon.Clock, tintColor: Color.Yellow }
+            }
+            title={statusLabel(next)}
+            subtitle={
+              soon
+                ? `Expected in ${soon}`
+                : schedule?.overdue
+                  ? "awaiting confirmation"
+                  : "timing not yet confirmed"
+            }
+            tooltip={brief(next.text)}
+            onAction={noop}
+          />
+        ) : (
+          <MenuBarExtra.Item
+            icon={Icon.CircleDisabled}
+            title="No upcoming schedule"
+            subtitle="in the latest records"
+            onAction={noop}
+          />
+        )}
+        {confidence && (
+          <MenuBarExtra.Item
+            icon={{
+              source: Icon.Gauge,
+              tintColor: confidenceColor(next?.confidence),
+            }}
+            title="Confidence"
+            subtitle={confidence}
+            onAction={noop}
+          />
+        )}
+        {schedule && (
+          <MenuBarExtra.Item
+            icon={Icon.Calendar}
+            title={schedule.overdue ? "Expected (awaiting)" : "Expected"}
+            subtitle={schedule.time}
+            onAction={noop}
+            tooltip={
+              schedule.overdue
+                ? "The window has elapsed without a completion confirmation"
+                : undefined
+            }
+          />
+        )}
+      </MenuBarExtra.Section>
       {record ? (
         <MenuBarExtra.Section
           title={resetToday ? "Confirmed Reset Today" : "Latest Announcement"}
@@ -146,7 +202,7 @@ export default function Command() {
               tintColor: recordIcon?.tintColor,
             }}
             title={statusLabel(record)}
-            subtitle={relativeTime(at ?? record.announcedAt)}
+            subtitle={`${resetToday ? "Completed" : "Announced"} ${relativeTime(at ?? record.announcedAt)}`}
             tooltip={brief(record.text)}
             onAction={
               record.source?.url
@@ -184,52 +240,6 @@ export default function Command() {
           />
         </MenuBarExtra.Section>
       )}
-      <MenuBarExtra.Section title="Next Planned Reset">
-        {next ? (
-          <MenuBarExtra.Item
-            icon={
-              progress !== null
-                ? getProgressIcon(progress, Color.Yellow)
-                : { source: Icon.Clock, tintColor: Color.Yellow }
-            }
-            title={statusLabel(next)}
-            subtitle={countdown ?? "timing not yet confirmed"}
-            tooltip={brief(next.text)}
-            onAction={noop}
-          />
-        ) : (
-          <MenuBarExtra.Item
-            icon={Icon.CircleDisabled}
-            title="No upcoming schedule"
-            subtitle="in the latest records"
-            onAction={noop}
-          />
-        )}
-        {confidence && (
-          <MenuBarExtra.Item
-            icon={{
-              source: Icon.Gauge,
-              tintColor: confidenceColor(next?.confidence),
-            }}
-            title="Confidence"
-            subtitle={confidence}
-            onAction={noop}
-          />
-        )}
-        {schedule && (
-          <MenuBarExtra.Item
-            icon={Icon.Calendar}
-            title={schedule.overdue ? "Expected (awaiting)" : "Expected"}
-            subtitle={schedule.time}
-            onAction={noop}
-            tooltip={
-              schedule.overdue
-                ? "The window has elapsed without a completion confirmation"
-                : undefined
-            }
-          />
-        )}
-      </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="View Reset Details"
