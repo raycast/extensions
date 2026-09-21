@@ -3,14 +3,15 @@
  * leaves the list blank or stuck on its loading placeholder.
  */
 
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { outdatedFetchFailureCopy } from "../utils";
+import { ERROR_ICON } from "./palette";
 
 export function OutdatedErrorView({ error, onRetry }: { error: Error; onRetry: () => void }) {
   const copy = outdatedFetchFailureCopy(error);
   return (
     <List.EmptyView
-      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+      icon={ERROR_ICON}
       title={copy.title}
       description={copy.message}
       actions={

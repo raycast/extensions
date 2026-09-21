@@ -2,7 +2,7 @@
  * Installed view for displaying installed brew packages.
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
@@ -11,7 +11,7 @@ import { useBrewDependencies } from "./hooks/useBrewDependencies";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { isInstalled } from "./hooks/useBrewSearch";
 import { uiLogger } from "./utils";
-import { showInstalledPackages } from "./utils/installed";
+import { dependedOnNames, showInstalledPackages } from "./utils/installed";
 
 function InstalledContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
@@ -19,21 +19,23 @@ function InstalledContent() {
   const [showDescription, setShowDescription] = useCachedState("show-description", true);
   const { isLoading, data: installed, revalidate } = useBrewInstalled();
   const [excludeDependencies] = useBrewDependencies();
-  const { formulae, pinnedFormulae, casks, pinnedCasks } = showInstalledPackages(
+  const { formulae, dependencies, pinnedFormulae, casks, pinnedCasks } = showInstalledPackages(
     installed,
     filter,
     excludeDependencies,
   );
+  const dependedOn = useMemo(() => dependedOnNames(installed), [installed]);
 
   // Log rendering statistics
   if (installed && !isLoading) {
     uiLogger.log("Installed view rendered", {
       filter,
       formulaeDisplayed: formulae.length,
+      dependenciesDisplayed: dependencies.length,
       pinnedFormulaeDisplayed: pinnedFormulae.length,
       casksDisplayed: casks.length,
       pinnedCasksDisplayed: pinnedCasks.length,
-      totalDisplayed: formulae.length + pinnedFormulae.length + casks.length + pinnedCasks.length,
+      totalDisplayed: formulae.length + dependencies.length + pinnedFormulae.length + casks.length + pinnedCasks.length,
       totalAvailable: (installed.formulae?.size ?? 0) + (installed.casks?.size ?? 0),
     });
   }
@@ -44,6 +46,8 @@ function InstalledContent() {
   return (
     <FormulaList
       formulae={formulae}
+      dependencies={dependencies}
+      dependedOn={dependedOn}
       pinnedFormulae={pinnedFormulae}
       casks={casks}
       pinnedCasks={pinnedCasks}

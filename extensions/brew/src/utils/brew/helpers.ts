@@ -6,7 +6,7 @@
 
 import { readdir } from "fs/promises";
 import { join as path_join } from "path";
-import { Cask, Formula, Nameable, OutdatedResults } from "../types";
+import { Cask, Formula, InstalledVersion, Nameable, OutdatedResults } from "../types";
 import { preferences } from "../preferences";
 import { brewPath, brewExecutable } from "./paths";
 import { isOutdatedVersion, stripRevision } from "./version";
@@ -35,10 +35,35 @@ export function brewInstalledDate(item: Cask | Formula): Date | undefined {
 
 /**
  * The version currently installed, or undefined if the package is not installed.
+ *
+ * Delegates to `effectiveKeg` so a formula's version and every tag rendered
+ * beside it (see `formatPackageVersion`) name the SAME keg. They used to
+ * disagree: this read `installed.first()` while `effectiveKeg` read the last
+ * entry, so a keg-only formula with two kegs rendered the version of one and
+ * the "dependency" tag of the other.
  */
 export function brewInstalledVersion(item: Cask | Formula): string | undefined {
-  return isCask(item) ? item.installed : item.installed?.first()?.version;
+  return isCask(item) ? item.installed : effectiveKeg(item)?.version;
 }
+
+/**
+ * The best approximation of the keg brew reads, from what the JSON exposes.
+ *
+ * Homebrew keys off a SINGLE keg's tab, never a union over every keg — a
+ * formula can have two kegs whose tabs disagree. Its own order of preference is
+ * the OPT link first, then the linked keg, then the newest installed
+ * (`Formula#any_installed_prefix`, `Tab.for_formula`, `upgrade.rb`).
+ *
+ * `brew info --json=v2` publishes no opt-link target: `linked_keg` carries only
+ * the linked version (`formula.rb`), and a keg-only formula reports it as null
+ * even while opt-linked. So this reads the linked keg, then falls back to the
+ * newest — `installed` is sorted ascending by version, so that is the last
+ * entry. The gap is real and not fixable from this payload: where an opt link
+ * points at an OLDER keg, brew reads that one and this reads the newest.
+ */
+export const effectiveKeg = (formula: Formula): InstalledVersion | undefined =>
+  formula.installed?.find((version) => version.version === formula.linked_keg) ??
+  formula.installed?.[formula.installed.length - 1];
 
 /**
  * Is a newer version available?
@@ -82,6 +107,74 @@ export function brewIsOutdated(item: Cask | Formula): boolean {
   }
 
   return installedVersions.some((version) => isOutdatedVersion(version, stable, { stripRevision: true }));
+}
+
+/**
+ * The version this package would be upgraded TO, as Homebrew itself spells it.
+ *
+ * Not simply `versions.stable`. A formula can be rebuilt against the SAME
+ * upstream version — a revision bump — and Homebrew records that in a separate
+ * `revision` field, rendering the result `2026.8.19_1`. Reading `stable` alone
+ * printed the installed version on both sides of the arrow: "2026.8.19 →
+ * 2026.8.19" for a `yt-dlp` that was genuinely a release behind.
+ *
+ * Casks are returned untouched: their versions are opaque vendor strings
+ * (`1.164.0,86805`) and brew has no revision concept for them.
+ *
+ * Returns undefined when there is nothing on offer, which the caller must
+ * treat as "unknown" rather than printing it.
+ */
+export function brewAvailableVersion(item: Cask | Formula): string | undefined {
+  if (isCask(item)) {
+    return item.version;
+  }
+  const stable = item.versions?.stable;
+  if (!stable) {
+    return undefined;
+  }
+  // Absent on a search-index record, which strips the field — undefined has to
+  // read as "unrevved", not produce "1.0.0_undefined".
+  const revision = item.revision ?? 0;
+  return revision > 0 ? `${stable}_${revision}` : stable;
+}
+
+/**
+ * The version line: what is INSTALLED, plus what is available when they differ.
+ *
+ * Never leads with `versions.stable` on an installed package — that is the
+ * version on offer, not the one present, and labelling it "installed" claimed a
+ * version the user did not have.
+ *
+ * Lives here rather than in the component that renders it: it is pure string
+ * work over the same record `brewAvailableVersion` and `brewInstalledVersion`
+ * read, and behind a React module it could not be unit tested at all.
+ */
+export function formatPackageVersion(item: Cask | Formula): string {
+  const cask = isCask(item);
+  // Not `versions.stable`: a revision bump is a real upgrade that lives in a
+  // separate field, and reading stable alone rendered "X → X". See helpers.ts.
+  const available = brewAvailableVersion(item);
+  const installedVersion = brewInstalledVersion(item);
+
+  const status: string[] = [];
+  if (!cask && item.versions.bottle) {
+    status.push("bottled");
+  }
+  if (brewIsInstalled(item)) {
+    status.push("installed");
+  }
+  // The LINKED keg's tab, not the oldest one's: two kegs can disagree about
+  // `installed_on_request`, and brew reads the one in effect.
+  if (!isCask(item) && effectiveKeg(item)?.installed_on_request === false) {
+    status.push("dependency");
+  }
+
+  const version =
+    installedVersion && brewIsOutdated(item)
+      ? `${installedVersion} → ${available ?? "?"}`
+      : (installedVersion ?? available ?? "");
+
+  return status.length > 0 ? `${version} (${status.join(", ")})` : version;
 }
 
 /// Identifiers
@@ -209,6 +302,19 @@ export async function brewPinnedIdentifiers(): Promise<{ formulae: Set<string>; 
  */
 export function brewCaskOption(maybeCask: Cask | Nameable, zappable = false): string {
   return isCask(maybeCask) ? "--cask" + (zappable && preferences.zapCask ? " --zap" : "") : "";
+}
+
+/** How many language codes to list verbatim before collapsing to a count. */
+const LANGUAGES_INLINE_MAX = 8;
+
+/**
+ * The "Languages" metadata text for a cask, or undefined when there is nothing
+ * to show — the field is absent on old records and `[]` on almost every cask.
+ */
+export function caskLanguagesText(languages: string[] | undefined): string | undefined {
+  if (!Array.isArray(languages) || languages.length === 0) return undefined;
+  if (languages.length <= LANGUAGES_INLINE_MAX) return languages.join(", ");
+  return `${languages.length} languages`;
 }
 
 /// Installation Status

@@ -4,7 +4,7 @@
 
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { brewFetchServices, Service, isBrewLockError, getErrorMessage, fetchLogger } from "../utils";
+import { brewFetchServices, Service, isBrewLockError, getErrorMessage, fetchLogger, copyLogsAction } from "../utils";
 
 /**
  * Hook to fetch and cache brew services.
@@ -27,10 +27,12 @@ export function useBrewServices() {
         });
 
         const isLock = isBrewLockError(error);
+        const message = getErrorMessage(error);
         await showToast({
           style: Toast.Style.Failure,
           title: isLock ? "Brew is Busy" : "Failed to fetch services",
-          message: isLock ? "Another brew process is running. Please wait and try again." : getErrorMessage(error),
+          message: isLock ? "Another brew process is running. Please wait and try again." : message,
+          primaryAction: copyLogsAction(message, { hideToast: true }),
         });
       },
     },
