@@ -1,6 +1,6 @@
 # Kagi News Changelog
 
-## [1.5] - {PR_MERGE_DATE}
+## [1.5] - 2026-09-21
 
 - Added AI Extension support: ask Kagi News questions directly from Raycast AI (@Kagi News), browsing a category or searching across all dates in natural language
 - Added a favorites system to Time Travel, now synced with Daily News
