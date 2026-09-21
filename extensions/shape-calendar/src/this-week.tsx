@@ -17,7 +17,14 @@ import { Activity } from "./api/types";
 import { sportNames } from "./constants";
 import { formatDistance, formatDuration } from "./utils";
 
-const DISTANCE_SPORTS = new Set(["run", "bike", "swim", "hike", "nordicski"]);
+const DISTANCE_SPORTS = new Set([
+  "run",
+  "bike",
+  "swim",
+  "hike",
+  "skiing",
+  "nordicski",
+]);
 function formatWeekday(dateStr: string): string {
   const date = new Date(dateStr + "T00:00:00");
   const dayName = date.toLocaleDateString("en-US", { weekday: "long" });

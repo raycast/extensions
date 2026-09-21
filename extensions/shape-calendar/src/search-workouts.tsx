@@ -22,6 +22,7 @@ import {
   formatDate,
   formatStepsMarkdown,
   getDateRange,
+  toLocalDateString,
 } from "./utils";
 
 const SPORT_TYPES: SportType[] = [
@@ -30,8 +31,11 @@ const SPORT_TYPES: SportType[] = [
   "swim",
   "hike",
   "yoga",
+  "tennis",
+  "skiing",
   "nordicski",
   "strength",
+  "surf",
   "other",
 ];
 
@@ -60,6 +64,14 @@ export default function Command() {
     },
     [sportFilter],
   );
+
+  // Activities come back newest first, so the upcoming ones sit above today.
+  // Start on today's workout, or the next planned one if today is empty.
+  const today = toLocalDateString(new Date());
+  const nextDate = data?.findLast((activity) => activity.date >= today)?.date;
+  const initialItemId = data?.find(
+    (activity) => activity.date === nextDate,
+  )?.id;
 
   useEffect(() => {
     if (error) {
@@ -118,6 +130,7 @@ export default function Command() {
       searchBarPlaceholder="Search activities"
       isLoading={isLoading}
       isShowingDetail
+      selectedItemId={initialItemId}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by sport"
@@ -175,6 +188,7 @@ function ActivityItem({
 
   return (
     <List.Item
+      id={activity.id}
       title={sportName}
       accessories={[{ text: date }]}
       icon={

@@ -18,8 +18,11 @@ type Input = {
     | "swim"
     | "hike"
     | "yoga"
+    | "tennis"
+    | "skiing"
     | "nordicski"
     | "strength"
+    | "surf"
     | "other";
   /**
    * Filter by completion status: "true" for completed, "false" for planned

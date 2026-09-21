@@ -1,7 +1,13 @@
 import { LaunchProps, LaunchType, updateCommandMetadata } from "@raycast/api";
 import { getActivities } from "./api/client";
+import { hasAccessToken } from "./api/oauth";
 
 export default async function Command(props: LaunchProps) {
+  // The sign-in flow can't be shown from a background refresh.
+  if (props.launchType === LaunchType.Background && !(await hasAccessToken())) {
+    return;
+  }
+
   const today = new Date().toISOString().split("T")[0];
 
   try {
