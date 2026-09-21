@@ -10,6 +10,7 @@ export { resolveHome };
 import { existsSync, readFileSync, rmSync } from "fs";
 import { execFileSync } from "child_process";
 import { rankResults } from "./search";
+import { loadInteractions } from "./interactions";
 import initSqlJs, { Database as SqlJsDatabase } from "sql.js";
 import path = require("path");
 
@@ -21,6 +22,7 @@ export interface Preferences {
   csl_style?: string;
   cache_period?: string;
   quote_pdf_path?: boolean;
+  order_by_opens?: boolean;
 }
 
 // citekey is populated (and thus searchable) when the user either exports
@@ -720,5 +722,6 @@ export const searchResources = async (q: string, collection?: string): Promise<R
     collections,
     libraries: [...allowedLibraries],
     limit: MAX_RENDER_RESULTS,
+    interactions: preferences.order_by_opens ? await loadInteractions() : undefined,
   });
 };

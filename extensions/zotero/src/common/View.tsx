@@ -18,6 +18,7 @@ import { isAbsolute } from "path";
 import { LibraryRef, itemIdentity, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
 import type { CollectionOption } from "./collections";
 import { useVisitedUrls } from "./useVisitedUrls";
+import { recordInteraction } from "./interactions";
 import {
   exportRef,
   exportRefPaste,
@@ -262,6 +263,14 @@ export const View = ({
         >
           {queryResults[sectionIndex].map((item) => {
             const attachmentFilePath = resolveAttachmentPath(item, preferences.zotero_path);
+            // Opens mark an entry as interacted for the "order by last opened"
+            // preference; tracked regardless of the preference so history
+            // exists as soon as it is turned on.
+            const trackOpen = () => recordInteraction(itemIdentity(item));
+            const onOpenTracked = (url: string) => {
+              onOpen(url);
+              trackOpen();
+            };
             return (
               <List.Item
                 key={itemIdentity(item)}
@@ -285,7 +294,7 @@ export const View = ({
                         icon={Icon.ArrowRightCircleFilled}
                         title="Open PDF"
                         url={zoteroOpenPdfUri(item, item.attachment.key)}
-                        onOpen={onOpen}
+                        onOpen={onOpenTracked}
                       />
                     )}
                     {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
@@ -295,6 +304,7 @@ export const View = ({
                         onAction={async () => {
                           try {
                             await open(attachmentFilePath);
+                            trackOpen();
                             closeMainWindow();
                           } catch {
                             await showHUD("Failed to open attachment");
@@ -306,20 +316,24 @@ export const View = ({
                       item.attachment.key !== `` &&
                       attachmentFilePath &&
                       isAbsolute(attachmentFilePath) && (
-                        <Action.ShowInFinder path={attachmentFilePath} title="Show PDF in Finder" />
+                        <Action.ShowInFinder
+                          path={attachmentFilePath}
+                          title="Show PDF in Finder"
+                          onShow={() => trackOpen()}
+                        />
                       )}
                     <Action.OpenInBrowser
                       icon={Icon.Link}
                       title="Open in Zotero"
                       url={zoteroSelectUri(item)}
-                      onOpen={onOpen}
+                      onOpen={onOpenTracked}
                     />
                     {getURL(item) !== "" && (
                       <Action.OpenInBrowser
                         title="Open Original Link"
                         url={getURL(item)}
                         shortcut={openExtLinkCommandShortcut}
-                        onOpen={onOpen}
+                        onOpen={onOpenTracked}
                       />
                     )}
 
