@@ -167,12 +167,10 @@ export function rankResults(items: RefData[], query: string, opts: RankOptions =
   if (terms.length === 0) {
     const openedAt = opts.interactions ?? {};
     const lastOpened = (it: RefData): number => openedAt[itemIdentity(it)] ?? 0;
-    if (Object.keys(openedAt).length > 0) {
-      // Recently opened first (by when they were opened, not added), then the
-      // never-opened rest by date added.
-      return pool.sort((a, b) => lastOpened(b) - lastOpened(a) || recency(b) - recency(a)).slice(0, limit);
-    }
-    return pool.sort((a, b) => recency(b) - recency(a)).slice(0, limit);
+    // Recently opened first (by when they were opened, not added), then the
+    // never-opened rest by date added; with no interactions this reduces to
+    // date-added order.
+    return pool.sort((a, b) => lastOpened(b) - lastOpened(a) || recency(b) - recency(a)).slice(0, limit);
   }
 
   const scored: { item: RefData; score: number }[] = [];
