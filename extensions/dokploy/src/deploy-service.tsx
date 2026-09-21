@@ -1,4 +1,5 @@
-import { LaunchProps, LocalStorage, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { Instance, tokenForInstance } from "./instances";
 import { ErrorResult, Project, ServiceCollections } from "./interfaces";
 import { isModernProject } from "./utils";
@@ -27,13 +28,22 @@ const DEPLOY_TYPES: Record<Kind, string> = {
   redis: "redis",
   compose: "compose",
 };
+const KIND_ICONS: Record<Kind, string> = {
+  applications: Icon.Globe,
+  mariadb: "mariadb.svg",
+  mongo: "mongo.svg",
+  mysql: "mysql.svg",
+  postgres: "postgres.svg",
+  redis: "redis.svg",
+  compose: "circuit-board.svg",
+};
 
 interface Candidate {
   id: string;
   idField: string;
   deployType: string;
+  icon: string;
   name: string;
-  appName: string;
   instanceName: string;
   projectName: string;
   url: string;
@@ -55,12 +65,15 @@ function candidatesForInstance(instance: Instance, projects: Project[]): Candida
     for (const scope of scopesForProject(project)) {
       for (const kind of Object.keys(KIND_ID_FIELDS) as Kind[]) {
         for (const service of scope.services[kind]) {
+          const id = (service as unknown as Record<string, string>)[KIND_ID_FIELDS[kind]];
           candidates.push({
-            id: (service as unknown as Record<string, string>)[KIND_ID_FIELDS[kind]],
+            id,
             idField: KIND_ID_FIELDS[kind],
             deployType: DEPLOY_TYPES[kind],
-            name: service.name,
-            appName: service.appName,
+            icon: KIND_ICONS[kind],
+            // Dokploy allows saving a service with no name - falls back to appName, then the id,
+            // so this is never empty (matches the same fallback used in service-env.tsx and others).
+            name: service.name || service.appName || id,
             instanceName: instance.name,
             projectName: project.name,
             url,
@@ -74,87 +87,104 @@ function candidatesForInstance(instance: Instance, projects: Project[]): Candida
   return candidates;
 }
 
-function matches(candidate: Candidate, query: string): "exact" | "partial" | null {
-  const name = candidate.name.toLowerCase();
-  const appName = candidate.appName.toLowerCase();
-  if (name === query || appName === query) return "exact";
-  if (name.includes(query) || appName.includes(query)) return "partial";
-  return null;
-}
-
-function describe(candidate: Candidate): string {
-  return `${candidate.instanceName}/${candidate.projectName}/${candidate.name}`;
-}
-
 /**
- * Deploys a service by name without navigating Projects -> Environments -> Services.
+ * Lets you search for a service by name across every configured instance and deploy the one you
+ * pick - a shortcut for the common "I know the name, just deploy it" case, without navigating
+ * Projects -> Environments -> Services first.
  *
- * A `no-view` command: Raycast calls this default export directly rather than mounting it as a
- * React component, so it must be a plain async function - React hooks (`useState`, `useLocalStorage`,
- * etc.) have no render/dispatcher to attach to here and throw ("Cannot read properties of null
- * (reading 'useRef')") if used. `LocalStorage` (the plain, non-hook API) is used instead, reading
- * the same `"instances"` key `useLocalStorage` in `instances.tsx` writes.
- *
- * Searches every configured instance, not just the currently-active one - the extension supports
- * several Dokploy instances, and silently deploying to whichever one happens to be active when two
- * of them have a same-named service would risk deploying to the wrong server. A name that matches
- * more than one service anywhere (same instance or across instances) is refused, not guessed at.
+ * Always lists matches and waits for an explicit selection rather than guessing at a single "best"
+ * match and deploying it automatically - the extension supports several Dokploy instances, and two
+ * of them can have a same-named service, so picking one for the user risks deploying to the wrong
+ * server. Raycast's own List search does the matching; this only has to load every candidate once.
  */
-export default async function Command(props: LaunchProps<{ arguments: Arguments.DeployService }>) {
-  const query = props.arguments.name.trim().toLowerCase();
-  if (!query) {
-    await showHUD("Enter a service name");
-    return;
-  }
+export default function DeployService() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [error, setError] = useState<string>();
 
-  const raw = await LocalStorage.getItem<string>("instances");
-  const instances: Instance[] = raw ? JSON.parse(raw) : [];
-  if (instances.length === 0) {
-    await showHUD("No instances configured");
-    return;
-  }
+  useEffect(() => {
+    void load();
+  }, []);
 
-  const results = await Promise.allSettled(
-    instances.map(async (instance) => {
-      const { url, headers } = tokenForInstance(instance);
-      const response = await fetch(url + "project.all", { headers });
-      if (!response.ok) throw new Error(`${response.status}`);
-      const projects = (await response.json()) as Project[];
-      return candidatesForInstance(instance, projects);
-    }),
-  );
+  async function load() {
+    setIsLoading(true);
+    setError(undefined);
+    try {
+      const raw = await LocalStorage.getItem<string>("instances");
+      const instances: Instance[] = raw ? JSON.parse(raw) : [];
+      if (instances.length === 0) {
+        setCandidates([]);
+        return;
+      }
 
-  const candidates = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
+      const results = await Promise.allSettled(
+        instances.map(async (instance) => {
+          const { url, headers } = tokenForInstance(instance);
+          const response = await fetch(url + "project.all", { headers });
+          if (!response.ok) throw new Error(`${response.status}`);
+          const projects = (await response.json()) as Project[];
+          return candidatesForInstance(instance, projects);
+        }),
+      );
 
-  const exact = candidates.filter((candidate) => matches(candidate, query) === "exact");
-  const partial = exact.length === 0 ? candidates.filter((candidate) => matches(candidate, query) === "partial") : [];
-  const found = exact.length > 0 ? exact : partial;
-
-  if (found.length === 0) {
-    await showHUD(`No service found matching "${props.arguments.name}"`);
-    return;
-  }
-
-  if (found.length > 1) {
-    const shown = found.slice(0, 3).map(describe).join(", ");
-    const rest = found.length > 3 ? ` and ${found.length - 3} more` : "";
-    await showHUD(`Multiple matches for "${props.arguments.name}": ${shown}${rest} - be more specific`);
-    return;
-  }
-
-  const [target] = found;
-  try {
-    const response = await fetch(`${target.url}${target.deployType}.deploy`, {
-      method: "POST",
-      headers: target.headers,
-      body: JSON.stringify({ [target.idField]: target.id }),
-    });
-    if (!response.ok) {
-      const err = (await response.json()) as ErrorResult;
-      throw new Error(err.message);
+      setCandidates(results.flatMap((result) => (result.status === "fulfilled" ? result.value : [])));
+    } catch (err) {
+      setError(`${err}`);
+    } finally {
+      setIsLoading(false);
     }
-    await showHUD(`Deployed "${target.name}"`);
-  } catch (error) {
-    await showHUD(`Could not deploy "${target.name}": ${error}`);
   }
+
+  async function deploy(candidate: Candidate) {
+    const toast = await showToast(Toast.Style.Animated, `Deploying ${candidate.name}…`);
+    try {
+      const response = await fetch(`${candidate.url}${candidate.deployType}.deploy`, {
+        method: "POST",
+        headers: candidate.headers,
+        body: JSON.stringify({ [candidate.idField]: candidate.id }),
+      });
+      if (!response.ok) {
+        const err = (await response.json()) as ErrorResult;
+        throw new Error(err.message);
+      }
+      toast.style = Toast.Style.Success;
+      toast.title = `Deployed ${candidate.name}`;
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not deploy";
+      toast.message = `${err}`;
+    }
+  }
+
+  return (
+    <List isLoading={isLoading} navigationTitle="Deploy Service" searchBarPlaceholder="Search services to deploy…">
+      {error ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load services"
+          description={error}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => load()} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        candidates.map((candidate) => (
+          <List.Item
+            key={`${candidate.instanceName}-${candidate.id}`}
+            icon={candidate.icon}
+            title={candidate.name}
+            subtitle={`${candidate.instanceName} / ${candidate.projectName}`}
+            actions={
+              <ActionPanel>
+                <Action icon={Icon.Rocket} title="Deploy" onAction={() => deploy(candidate)} />
+                <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={() => load()} />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
+    </List>
+  );
 }

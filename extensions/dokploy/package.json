@@ -20,16 +20,8 @@
     {
       "name": "deploy-service",
       "title": "Deploy Service",
-      "description": "Deploy a service by name across all configured instances, without opening Projects/Services",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "name",
-          "placeholder": "Service name",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "description": "Search for a service by name across all configured instances and deploy the one you pick",
+      "mode": "view"
     }
   ],
   "dependencies": {

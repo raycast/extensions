@@ -2,7 +2,7 @@
 
 ## [Deploy Service Command] - {PR_MERGE_DATE}
 
-- Add a `Deploy Service` no-view command that deploys a service by typed name, without opening `Instances` first. Searches every configured instance and refuses to deploy when the name matches more than one service, rather than guessing which one you meant.
+- Add a `Deploy Service` command that searches for a service by name across every configured instance and deploys the one you pick, without opening `Instances` first. Always lists matches and waits for an explicit selection - never deploys automatically, even when only one service matches.
 
 ## [Schedules] - 2026-09-21
 

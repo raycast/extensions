@@ -44,7 +44,7 @@ This is a Raycast extension for [Dokploy](https://dokploy.com/) - _Deploy Anywhe
         - Delete S3 Destination
     - View Users
 - Deploy Service
-    - Deploys a service by name, without opening `Instances` first. Searches every configured instance - if the name matches more than one service (in the same instance or across different ones), it refuses to deploy and asks for a more specific name instead of guessing.
+    - Search for a service by name across every configured instance and deploy the one you pick, without opening `Instances` first. Always lists matches and waits for you to select one - never deploys automatically, even when only one service matches.
 
 ## 🚀 Getting Started
 
