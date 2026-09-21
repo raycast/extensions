@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvement] - {PR_MREGE_DATE}
+## [Improvement] - {PR_MERGE_DATE}
 
 - Separate repository initialization from extension list refresh
 
