@@ -12,11 +12,13 @@ import {
   open,
   useNavigation,
 } from "@raycast/api";
-import { dirname, join } from "path";
-import { RefData, Preferences, resolveHome, MAX_RENDER_RESULTS } from "./zoteroApi";
+import { RefData, Preferences, MAX_RENDER_RESULTS } from "./zoteroApi";
+import { resolveAttachmentPath } from "./attachments";
+import { isAbsolute } from "path";
 import { LibraryRef, itemIdentity, zoteroSelectUri, zoteroOpenPdfUri } from "./library";
 import type { CollectionOption } from "./collections";
 import { useVisitedUrls } from "./useVisitedUrls";
+import { recordInteraction } from "./interactions";
 import {
   exportRef,
   exportRefPaste,
@@ -72,17 +74,6 @@ const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], ke
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 const copyDoiShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
 const copyPDFPathShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "," };
-
-function resolveAttachmentPath(item: RefData, zoteroPath: string): string | null {
-  if (!item.attachment?.path || !item.attachment?.key) return null;
-  const attachmentPath = item.attachment.path;
-  if (!attachmentPath.startsWith("storage:")) {
-    return attachmentPath;
-  }
-  const filename = attachmentPath.slice("storage:".length);
-  const expandedZoteroPath = resolveHome(zoteroPath);
-  return join(dirname(expandedZoteroPath), "storage", item.attachment.key, filename);
-}
 
 function getURL(item: RefData): string {
   return `${
@@ -272,6 +263,14 @@ export const View = ({
         >
           {queryResults[sectionIndex].map((item) => {
             const attachmentFilePath = resolveAttachmentPath(item, preferences.zotero_path);
+            // Opens mark an entry as interacted for the "order by last opened"
+            // preference; tracked regardless of the preference so history
+            // exists as soon as it is turned on.
+            const trackOpen = () => recordInteraction(itemIdentity(item));
+            const onOpenTracked = (url: string) => {
+              onOpen(url);
+              trackOpen();
+            };
             return (
               <List.Item
                 key={itemIdentity(item)}
@@ -295,7 +294,7 @@ export const View = ({
                         icon={Icon.ArrowRightCircleFilled}
                         title="Open PDF"
                         url={zoteroOpenPdfUri(item, item.attachment.key)}
-                        onOpen={onOpen}
+                        onOpen={onOpenTracked}
                       />
                     )}
                     {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
@@ -305,6 +304,7 @@ export const View = ({
                         onAction={async () => {
                           try {
                             await open(attachmentFilePath);
+                            trackOpen();
                             closeMainWindow();
                           } catch {
                             await showHUD("Failed to open attachment");
@@ -312,18 +312,28 @@ export const View = ({
                         }}
                       />
                     )}
+                    {item.attachment?.key &&
+                      item.attachment.key !== `` &&
+                      attachmentFilePath &&
+                      isAbsolute(attachmentFilePath) && (
+                        <Action.ShowInFinder
+                          path={attachmentFilePath}
+                          title="Show PDF in Finder"
+                          onShow={() => trackOpen()}
+                        />
+                      )}
                     <Action.OpenInBrowser
                       icon={Icon.Link}
                       title="Open in Zotero"
                       url={zoteroSelectUri(item)}
-                      onOpen={onOpen}
+                      onOpen={onOpenTracked}
                     />
                     {getURL(item) !== "" && (
                       <Action.OpenInBrowser
                         title="Open Original Link"
                         url={getURL(item)}
                         shortcut={openExtLinkCommandShortcut}
-                        onOpen={onOpen}
+                        onOpen={onOpenTracked}
                       />
                     )}
 

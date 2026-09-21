@@ -129,6 +129,21 @@
       ]
     },
     {
+      "name": "thai",
+      "title": "Translate into Thai",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Thai using DeepL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "Text"
+        }
+      ]
+    },
+    {
       "name": "chinese",
       "title": "Translate into Chinese",
       "subtitle": "Deepcast",
@@ -662,6 +677,10 @@
         {
           "title": "Turkish",
           "value": "TR"
+        },
+        {
+          "title": "Thai",
+          "value": "TH"
         }
       ],
       "default": "EN-US"

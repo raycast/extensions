@@ -33,6 +33,9 @@ interface CreateTimeEntryFormParams {
   closeWindowOnSubmit?: boolean;
 }
 
+/** Upper bound for the custom back-date offset: one day, in minutes. */
+const MAX_START_OFFSET_MINUTES = 24 * 60;
+
 function CreateTimeEntryForm({
   revalidateRunningTimeEntry,
   revalidateTimeEntries,
@@ -63,10 +66,30 @@ function CreateTimeEntryForm({
   });
   const [selectedTags, setSelectedTags] = useState<string[]>(showTagsInForm ? initialValues?.tags || [] : []);
   const [billable, setBillable] = useState(initialValues?.billable || false);
+  const [startTimeOffset, setStartTimeOffset] = useState("0");
+  const [customOffset, setCustomOffset] = useState("");
+  const [customOffsetError, setCustomOffsetError] = useState<string | undefined>();
 
   const [taskSearch, setTaskSearch] = useState("");
 
+  // The custom offset is free text, so it has to be validated: a negative value would
+  // start the timer in the future, and an oversized one makes the Date invalid and
+  // toISOString() throw.
+  function resolveStartOffset() {
+    if (startTimeOffset !== "custom") return parseInt(startTimeOffset, 10);
+    const minutes = Number(customOffset);
+    if (!Number.isInteger(minutes) || minutes < 0 || minutes > MAX_START_OFFSET_MINUTES) {
+      setCustomOffsetError(`Enter a whole number of minutes between 0 and ${MAX_START_OFFSET_MINUTES}`);
+      return null;
+    }
+    setCustomOffsetError(undefined);
+    return minutes;
+  }
+
   async function handleSubmit(values: { description: string; billable?: boolean }) {
+    const startTimeOffset = resolveStartOffset();
+    if (startTimeOffset === null) return;
+
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
 
     if (!workspaceId) {
@@ -83,6 +106,7 @@ function CreateTimeEntryForm({
         workspaceId,
         tags: showTagsInForm ? selectedTags : [],
         taskId: showTasksInForm ? selectedTask?.id : undefined,
+        startTimeOffset,
       });
     } catch {
       await showToast(Toast.Style.Failure, "Failed to start time entry");
@@ -291,6 +315,28 @@ function CreateTimeEntryForm({
               <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
             ))}
         </Form.TagPicker>
+      )}
+
+      <Form.Dropdown id="startTimeOffset" title="Start Time" value={startTimeOffset} onChange={setStartTimeOffset}>
+        <Form.Dropdown.Item value="0" title="Now" icon={Icon.Clock} />
+        <Form.Dropdown.Item value="5" title="5 minutes ago" icon={Icon.Clock} />
+        <Form.Dropdown.Item value="10" title="10 minutes ago" icon={Icon.Clock} />
+        <Form.Dropdown.Item value="15" title="15 minutes ago" icon={Icon.Clock} />
+        <Form.Dropdown.Item value="custom" title="Custom..." icon={Icon.Clock} />
+      </Form.Dropdown>
+
+      {startTimeOffset === "custom" && (
+        <Form.TextField
+          id="customOffset"
+          title="Custom Offset (minutes)"
+          placeholder="e.g. 20"
+          value={customOffset}
+          error={customOffsetError}
+          onChange={(value) => {
+            setCustomOffset(value);
+            if (customOffsetError) setCustomOffsetError(undefined);
+          }}
+        />
       )}
 
       {(isWorkspacePremium || selectedProject?.billable) && (

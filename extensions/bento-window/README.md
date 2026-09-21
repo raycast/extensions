@@ -86,6 +86,24 @@ The grid the extension picks based on the number of windows of the target app:
 └────┴────┴────┘
 ```
 
+On a **portrait** display the same tables are transposed, so the tiles keep
+sensible proportions instead of turning into slivers — two windows stack rather
+than splitting the width, 6 becomes 3×2 instead of 2×3, and so on. Landscape
+screens are unaffected.
+
+```text
+2 windows — stacked      3 windows — small × 2 + wide
+┌─────────────┐          ┌──────┬──────┐
+│             │          │  1   │  2   │
+│      1      │          │      │      │
+│             │          ├──────┴──────┤
+├─────────────┤          │             │
+│             │          │      3      │
+│      2      │          │             │
+│             │          │             │
+└─────────────┘          └─────────────┘
+```
+
 ## Install
 
 Install from the [Raycast Store](https://www.raycast.com/Popo/bento-window), or search **Bento Window** in Raycast's Store command.
@@ -121,12 +139,13 @@ Raycast Settings → Extensions → **Bento Window**:
 - **Excluded app names** — comma-separated list of apps that are never tiled, even by **Auto Tile All**. Handy for media players, chat clients, or anything you want pinned in place.
 - **Gap** — pixels between tiles and screen edges. `0` (default) for flush tiles.
 
-On a multi-display setup the windows are tiled on the desktop they're already on, not moved to the built-in display.
+On a multi-display setup the desktop being tiled is the one your **pointer** is on — point at the screen you want arranged, press the key. Windows are never dragged over to another display.
 
 ## Requirements
 
 - macOS
-- Accessibility permission granted to Raycast (System Settings → Privacy & Security → Accessibility)
+- Accessibility permission granted to Raycast (System Settings → Privacy & Security → Accessibility). If it's missing, the first run shows a shortcut straight to that panel
+- **No Raycast Pro subscription needed** — window enumeration goes through CGWindowList and moves through the Accessibility API rather than the Pro-gated Window Management API
 
 ## License
 

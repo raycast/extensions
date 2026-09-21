@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
 
 import { formatResetTime, parseDate } from "../agents/format.ts";
+import { formatPercentDisplay, toDisplayPercent } from "../agents/percentage-display.ts";
 import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,
@@ -8,6 +9,7 @@ import {
   generatePieIcon,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   renderErrorOrNoData,
 } from "../agents/ui.tsx";
 import type { GrokError, GrokUsage } from "./types.ts";
@@ -30,8 +32,9 @@ export function formatGrokUsageText(usage: GrokUsage | null, error: GrokError | 
     text += `\nPlan: ${u.loginMethod}`;
   }
 
-  text += `\n\n${u.windowLabel}: ${formatPercent(u.percentageRemaining)}% remaining`;
-  text += `\n${generateAsciiBar(u.percentageRemaining)}`;
+  const mode = getPercentageDisplayMode();
+  text += `\n\n${u.windowLabel}: ${formatPercentDisplay(u.percentageRemaining, mode, formatPercent)}`;
+  text += `\n${generateAsciiBar(toDisplayPercent(u.percentageRemaining, mode))}`;
   text += `\nUsed: ${formatPercent(u.usedPercent)}%`;
   text += `\nResets In: ${formatReset(u.resetsAt)}`;
 
@@ -55,6 +58,7 @@ export function renderGrokDetail(usage: GrokUsage | null, error: GrokError | nul
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const u = usage as GrokUsage;
+  const mode = getPercentageDisplayMode();
 
   return (
     <List.Item.Detail.Metadata>
@@ -66,7 +70,7 @@ export function renderGrokDetail(usage: GrokUsage | null, error: GrokError | nul
       )}
       <List.Item.Detail.Metadata.Label
         title={u.windowLabel}
-        text={`${generateAsciiBar(u.percentageRemaining)} ${formatPercent(u.percentageRemaining)}% remaining`}
+        text={`${generateAsciiBar(toDisplayPercent(u.percentageRemaining, mode))} ${formatPercentDisplay(u.percentageRemaining, mode, formatPercent)}`}
       />
       <List.Item.Detail.Metadata.Label title="Used" text={`${formatPercent(u.usedPercent)}%`} />
       <List.Item.Detail.Metadata.Label title="Resets In" text={formatReset(u.resetsAt)} />
@@ -140,10 +144,11 @@ export function getGrokAccessory(usage: GrokUsage | null, error: GrokError | nul
     return getNoDataAccessory();
   }
 
+  const mode = getPercentageDisplayMode();
   const remaining = usage.percentageRemaining;
   return {
     icon: generatePieIcon(remaining),
-    text: `${formatPercent(remaining)}%`,
-    tooltip: `${usage.windowLabel}: ${formatPercent(remaining)}% remaining`,
+    text: `${formatPercent(toDisplayPercent(remaining, mode))}%`,
+    tooltip: `${usage.windowLabel}: ${formatPercentDisplay(remaining, mode, formatPercent)}`,
   };
 }

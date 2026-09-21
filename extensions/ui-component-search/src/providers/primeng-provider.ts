@@ -3,50 +3,39 @@ import { ProviderResult, UIComponent, UILibrary } from "../types";
 import { fetchWithFallback, slugToTitle as toDisplayName } from "./provider-helpers";
 
 /**
- * PrimeNG doesn't have a single components listing page.
- * We fetch the homepage and parse the embedded Angular app state
- * to extract the sidebar menu structure with all component routes.
+ * primeng.dev is client-rendered, so its component list is read from the
+ * showcase sidebar menu data (structured JSON) on GitHub instead.
  *
- * Fallback: on any network error, non-OK response, or unparseable markup,
+ * Fallback: on any network error, non-OK response, or unparseable data,
  * the bundled static list is used and the result is marked as fallback.
  */
 function fetchComponents(): Promise<ProviderResult> {
   return fetchWithFallback("primeng", scrape, buildFallback);
 }
 
+interface MenuNode {
+  name?: string;
+  routerLink?: string;
+  children?: MenuNode[];
+}
+
 async function scrape(): Promise<UIComponent[]> {
-  const res = await fetch(`${LIBRARY_URLS.primeng.base}/installation`);
+  const res = await fetch(LIBRARY_URLS.primeng.menu);
   if (!res.ok) {
     throw new Error(`Failed to fetch PrimeNG: ${res.statusText}`);
   }
-  const html = await res.text();
+  const menu = (await res.json()) as { data?: MenuNode[] };
 
-  // PrimeNG's Angular app embeds route data. Look for component links in the HTML.
-  // The sidebar contains links like href="/autocomplete", href="/accordion", etc.
-  const linkRegex = /routerLink="\/([a-z][a-z0-9-]*)"/gi;
+  // Only the "Components" top-level node holds actual component routes.
+  const components = menu.data?.find((node) => node.name === "Components");
   const slugs = new Set<string>();
-  let match;
-
-  while ((match = linkRegex.exec(html)) !== null) {
-    slugs.add(match[1].toLowerCase());
-  }
-
-  // Also try href patterns
-  const hrefRegex = /href="\/([a-z][a-z0-9-]*)"/gi;
-  while ((match = hrefRegex.exec(html)) !== null) {
-    const slug = match[1].toLowerCase();
-    // Filter out non-component pages
-    if (!NON_COMPONENT_SLUGS.has(slug)) {
-      slugs.add(slug);
-    }
-  }
+  collectSlugs(components?.children ?? [], slugs);
 
   if (slugs.size <= 20) {
     throw new Error("Could not parse component list from PrimeNG");
   }
 
   return Array.from(slugs)
-    .filter((slug) => !NON_COMPONENT_SLUGS.has(slug))
     .sort()
     .map((slug) => ({
       name: toDisplayName(slug),
@@ -54,6 +43,18 @@ async function scrape(): Promise<UIComponent[]> {
       url: `${LIBRARY_URLS.primeng.base}/${slug}`,
       library: "primeng" as const,
     }));
+}
+
+/** Walk the menu tree, collecting single-segment routerLink slugs. */
+function collectSlugs(nodes: MenuNode[], slugs: Set<string>): void {
+  for (const node of nodes) {
+    const link = node.routerLink;
+    if (link) {
+      const slug = link.replace(/^\//, "");
+      if (/^[a-z][a-z0-9-]*$/.test(slug)) slugs.add(slug);
+    }
+    if (node.children) collectSlugs(node.children, slugs);
+  }
 }
 
 function buildFallback(): UIComponent[] {
@@ -64,31 +65,6 @@ function buildFallback(): UIComponent[] {
     library: "primeng" as const,
   }));
 }
-
-/** Pages that are NOT components */
-const NON_COMPONENT_SLUGS = new Set([
-  "installation",
-  "configuration",
-  "playground",
-  "theming",
-  "colors",
-  "dark-mode",
-  "icons",
-  "csslayer",
-  "passthrough",
-  "locale",
-  "accessibility",
-  "support",
-  "lts",
-  "roadmap",
-  "guides",
-  "migration",
-  "templates",
-  "resources",
-  "team",
-  "contribution",
-  "changelog",
-]);
 
 /** Comprehensive static list of PrimeNG component slugs */
 const PRIMENG_COMPONENTS = [

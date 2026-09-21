@@ -1,5 +1,11 @@
 # Tmux Sessioner Changelog
 
+## [Save Tmux Sessions on demand] - 2026-09-16
+
+### Added
+
+- **Save Tmux Sessions** command: forces a `tmux-resurrect` save immediately (reading `@resurrect-save-script-path`), so you can be sure every session is persisted before shutting down without waiting for `tmux-continuum`'s next interval. To avoid corrupting the snapshot, it coordinates with continuum (marking a save via `@continuum-save-last-timestamp` so the auto-saver backs off) and waits for any in-progress save to finish before starting, then reports when the save completes.
+
 ## [Search Session Output] - 2026-08-22
 
 ### Added

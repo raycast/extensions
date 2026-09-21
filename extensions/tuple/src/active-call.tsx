@@ -1,24 +1,21 @@
 import { Clipboard, Color, Icon, MenuBarExtra, showHUD } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useTupleJson } from "./lib/hooks";
 import {
   addToCall,
+  getActiveCall,
   classifyError,
   getConnectPrompt,
   hangUpCall,
   muteCall,
-  startTranscription,
-  stopTranscription,
+  startCapture,
+  stopCapture,
   unmuteCall,
 } from "./lib/tuple";
-import { CallView, CallViewParticipant, Contact, TupleErrorKind } from "./lib/types";
+import { CallViewParticipant, Contact, TupleErrorKind } from "./lib/types";
 
 export default function ActiveCallMenuBar() {
-  // The roster comes from `tuple call current` (normalized, self already excluded); online
-  // contacts for "Add Person" come from `tuple contacts list --status online`, fetched only while
-  // in a call. Neither reads the full `tuple state` blob. `call current` exits non-zero when not
-  // in a call, which classifyError maps to NoActiveCall — a normal state, not a failure.
-  const call = useTupleJson<CallView>(["call", "current"]);
+  const call = usePromise(getActiveCall, [], { onError: () => {} });
   const callError = call.error ? classifyError(call.error) : undefined;
   const noActiveCall = callError?.kind === TupleErrorKind.NoActiveCall;
   const realError = callError && !noActiveCall ? callError : undefined;
@@ -69,14 +66,14 @@ export default function ActiveCallMenuBar() {
           onAction={() => runAction(activeCall.muted ? unmuteCall : muteCall, call.revalidate)}
         />
         <MenuBarExtra.Item
-          title={activeCall.transcribing ? "Stop Transcription" : "Start Transcription"}
+          title={activeCall.transcribing ? "Stop Capture" : "Start Capture"}
           icon={activeCall.transcribing ? Icon.Stop : Icon.SpeechBubble}
-          onAction={() => runAction(activeCall.transcribing ? stopTranscription : startTranscription, call.revalidate)}
+          onAction={() => runAction(activeCall.transcribing ? stopCapture : startCapture, call.revalidate)}
         />
         <AddPersonSubmenu contacts={onlineContacts} onChange={call.revalidate} />
         <MenuBarExtra.Item title="Copy AI Context" icon={Icon.Clipboard} onAction={copyCallContext} />
         <MenuBarExtra.Item
-          title="Hang Up"
+          title="Leave Call"
           icon={Icon.PhoneRinging}
           onAction={() => runAction(hangUpCall, call.revalidate)}
         />

@@ -1,12 +1,14 @@
 import { List } from "@raycast/api";
 
 import { formatResetTime } from "../agents/format.ts";
+import { formatPercentDisplay, toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
 import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
@@ -17,9 +19,9 @@ function getRemainingPercent(usedPercent: number): number {
   return Math.max(0, Math.min(100, 100 - usedPercent));
 }
 
-function formatWindowText(window: OpencodegoWindowUsage): string {
+function formatWindowText(window: OpencodegoWindowUsage, mode: PercentageDisplayMode): string {
   const percent = Math.round(getRemainingPercent(window.percent));
-  return `${generateAsciiBar(percent)} ${percent}% remaining`;
+  return `${generateAsciiBar(toDisplayPercent(percent, mode))} ${formatPercentDisplay(percent, mode)}`;
 }
 
 export function formatOpencodegoUsageText(usage: OpencodegoUsage | null, error: OpencodegoError | null): string {
@@ -27,6 +29,7 @@ export function formatOpencodegoUsageText(usage: OpencodegoUsage | null, error: 
   if (fallback !== null) return fallback;
   const u = usage as OpencodegoUsage;
 
+  const mode = getPercentageDisplayMode();
   let text = "OpenCode Go Usage";
 
   for (const [label, window] of Object.entries({
@@ -35,7 +38,7 @@ export function formatOpencodegoUsageText(usage: OpencodegoUsage | null, error: 
     "Monthly limit": u.monthly,
   }) as [string, OpencodegoWindowUsage][]) {
     text += `\n\n${label}`;
-    text += `\n${formatWindowText(window)}`;
+    text += `\n${formatWindowText(window, mode)}`;
     if (window.resetsAt) {
       text += `\nResets: ${formatResetTime(window.resetsAt)}`;
     }
@@ -49,6 +52,7 @@ export function renderOpencodegoDetail(usage: OpencodegoUsage | null, error: Ope
   if (fallback !== null) return fallback;
   const u = usage as OpencodegoUsage;
 
+  const mode = getPercentageDisplayMode();
   const windows = [
     { key: "rolling", label: "Rolling Limit", window: u.rolling },
     { key: "weekly", label: "Weekly Limit", window: u.weekly },
@@ -59,7 +63,7 @@ export function renderOpencodegoDetail(usage: OpencodegoUsage | null, error: Ope
 
   for (const [idx, { key, label, window }] of windows.entries()) {
     if (idx > 0) elements.push(<List.Item.Detail.Metadata.Separator key={`sep-${key}`} />);
-    elements.push(<List.Item.Detail.Metadata.Label key={key} title={label} text={formatWindowText(window)} />);
+    elements.push(<List.Item.Detail.Metadata.Label key={key} title={label} text={formatWindowText(window, mode)} />);
     if (window.resetsAt) {
       elements.push(
         <List.Item.Detail.Metadata.Label
@@ -91,16 +95,17 @@ export function getOpencodegoAccessory(
 
   if (!usage) return getNoDataAccessory();
 
+  const mode = getPercentageDisplayMode();
   const percent = Math.round(getRemainingPercent(usage.rolling.percent));
   const tooltipParts = [
-    `Rolling: ${Math.round(getRemainingPercent(usage.rolling.percent))}% remaining`,
-    `Weekly: ${Math.round(getRemainingPercent(usage.weekly.percent))}% remaining`,
-    `Monthly: ${Math.round(getRemainingPercent(usage.monthly.percent))}% remaining`,
+    `Rolling: ${formatPercentDisplay(Math.round(getRemainingPercent(usage.rolling.percent)), mode)}`,
+    `Weekly: ${formatPercentDisplay(Math.round(getRemainingPercent(usage.weekly.percent)), mode)}`,
+    `Monthly: ${formatPercentDisplay(Math.round(getRemainingPercent(usage.monthly.percent)), mode)}`,
   ];
 
   return {
     icon: generatePieIcon(percent),
-    text: `${percent}%`,
+    text: `${toDisplayPercent(percent, mode)}%`,
     tooltip: tooltipParts.join(" | "),
   };
 }

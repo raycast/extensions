@@ -235,6 +235,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "quantral",
+    title: "Quantral",
+    description:
+      "Stock sentiment scores (0-100) per company from the retail investor and market commentator sources Quantral tracks, plus top signals, monthly recaps and the mentions behind each score. Hosted remote server with OAuth sign-in; Quantral subscription required.",
+    icon: "https://app.quantral.com/mcp-icon.png?v=2",
+    homepage: "https://quantral.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.quantral.com/api/mcp"],
+    },
+  },
+  {
     name: "kagimcp",
     title: "Kagi Search",
     description: "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
@@ -314,6 +326,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         PERPLEXITY_API_KEY: "YOUR_API_KEY_HERE",
       },
+    },
+  },
+  {
+    name: "pixelesq",
+    title: "Pixelesq",
+    description:
+      "Build and manage your Pixelesq website from Raycast: create pages, edit sections, write content, fix SEO and read analytics, with every edit saved as a draft until you publish.",
+    icon: "https://mcp.pixelesq.app/icon.png",
+    homepage: "https://www.pixelesq.com/docs/integrations/claude",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.pixelesq.app/mcp"],
     },
   },
   {
@@ -420,6 +444,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "@shopify/dev-mcp@latest"],
+    },
+  },
+  {
+    name: "sitelemetry",
+    title: "Sitelemetry",
+    description:
+      "Authorized website audits for the sites you own or maintain: security posture, technical SEO, AI visibility (GEO/AEO), analytics integrations, WCAG 2.2 accessibility and performance, returning evidence-backed findings with fixes in nine languages. Hosted remote server with OAuth sign-in, no API key to paste.",
+    icon: "https://sitelemetry.com/favicon.svg",
+    homepage: "https://sitelemetry.com/mcp-guide",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://sitelemetry.com/mcp"],
     },
   },
   {
@@ -1280,6 +1316,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://vibeprospecting.explorium.ai/mcp"],
+    },
+  },
+  {
+    name: "empiriolabs",
+    title: "EmpirioLabs AI",
+    description:
+      "Run 180+ AI models, image, video and speech generation, web search and research with citations, batch jobs, GPU Cloud and hosted agents as tools. Remote Streamable HTTP server with OAuth 2.1 sign-in through mcp-remote; an EmpirioLabs API key works as a bearer token too.",
+    icon: "https://empiriolabs.ai/images/icon-dark-512.png",
+    homepage: "https://docs.empiriolabs.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.empiriolabs.ai/mcp"],
     },
   },
 ];

@@ -29,14 +29,15 @@ import {
 import { signOut } from "./lib/mcp";
 import { addDays, nextMonday, todayString, toDayString } from "./lib/date";
 import { reportError, runWithToast } from "./lib/errors";
-import { formatDuration, formatElapsed } from "./lib/time";
+import { elapsedSeconds, formatDuration, formatElapsed } from "./lib/time";
 import { taskWebUrl, workspaceSlug } from "./lib/urls";
 import { Task } from "./lib/types";
 import { EditTaskForm } from "./components/edit-task-form";
 import { AddSubtasksForm } from "./components/add-subtasks-form";
 import { SubtasksList } from "./components/subtasks-list";
 import { SetTimeForm } from "./components/set-time-form";
-import { openIntegration } from "./lib/open-integration";
+import { TaskDetail } from "./components/task-detail";
+import { openIntegration, serviceName } from "./lib/open-integration";
 
 // A dimmer, semi-transparent grey for the "nothing left to do" sun. Raycast
 // boosts low-contrast tints back up by default, which would undo the
@@ -49,17 +50,7 @@ const DONE_TINT = {
 
 /** Action label for a task's integration link, e.g. "Open in Trello". */
 function integrationLabel(service?: string): string {
-  const names: Record<string, string> = {
-    trello: "Trello",
-    github: "GitHub",
-    slack: "Slack",
-    gmail: "Gmail",
-    linear: "Linear",
-    clickup: "ClickUp",
-    todoist: "Todoist",
-    website: "Browser",
-  };
-  const name = service ? names[service] : undefined;
+  const name = serviceName(service);
   return name ? `Open in ${name}` : "Open Link";
 }
 
@@ -82,12 +73,11 @@ function accessories(task: Task, now: number): List.Item.Accessory[] {
     // Tracked total plus the live session, when the server reports its start.
     // Without a start we can only show the total — still green, to signal that
     // the timer is running.
-    const current = task.timerStart
-      ? Math.floor((now - Date.parse(task.timerStart)) / 1000)
-      : 0;
     items.push({
       tag: {
-        value: formatElapsed(task.trackedSeconds + current),
+        value: formatElapsed(
+          task.trackedSeconds + elapsedSeconds(task.timerStart, now),
+        ),
         color: Color.Green,
       },
       icon: { source: Icon.Stopwatch, tintColor: Color.Green },
@@ -132,7 +122,7 @@ export default function ViewToday() {
     { onError: () => undefined },
   );
 
-  const { showCompleted, workspaceUrl } =
+  const { showCompleted, showDetails, workspaceUrl } =
     getPreferenceValues<Preferences.ViewToday>();
   const workspace = workspaceSlug(workspaceUrl);
   // getTasksForDay already returns Sunsama's day order; just optionally hide
@@ -346,7 +336,19 @@ export default function ViewToday() {
             : { source: Icon.Circle, tintColor: Color.SecondaryText }
       }
       title={task.title}
-      accessories={accessories(task, now)}
+      // The pane carries everything the accessories do, and the row is too
+      // narrow for both once it's open.
+      accessories={showDetails ? undefined : accessories(task, now)}
+      detail={
+        showDetails && (
+          <TaskDetail
+            task={task}
+            // Only a ticking row gets the clock, so the others stay memoized.
+            now={task.timerStart ? now : 0}
+            sunsamaUrl={workspace ? taskWebUrl(workspace, task.id) : undefined}
+          />
+        )
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -363,11 +365,13 @@ export default function ViewToday() {
                 onAction={() => onStartTimer(task)}
               />
             )}
+            {/* Second in the panel, so Raycast gives it ⌘↩ itself. Setting
+                that shortcut explicitly is rejected as reserved (dev.log:
+                "reserved by Raycast and has been removed"). */}
             {!task.completed && (
               <Action
                 title="Mark as Completed"
                 icon={Icon.Check}
-                shortcut={xShortcut("enter")}
                 onAction={() => onComplete(task)}
               />
             )}
@@ -517,6 +521,7 @@ export default function ViewToday() {
   return (
     <List
       isLoading={isLoading || data === undefined}
+      isShowingDetail={showDetails}
       searchBarPlaceholder="Filter today's tasks"
       onSearchTextChange={setSearchText}
       filtering

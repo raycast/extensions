@@ -68,7 +68,7 @@ export async function playWordAudio(
 
   if (!audioPath || !fs.existsSync(audioPath)) {
     logTrace("AudioPlayer", `file not found: ${word}, fallback to TTS directly`);
-    await playTTS(word, fromLanguage, { truncate: true, signal });
+    await playTTS(word, fromLanguage, { signal });
     return;
   }
 
@@ -89,6 +89,6 @@ export async function playWordAudio(
   } catch (err) {
     if (signal?.aborted) return;
     logError("AudioPlayer", `play file failed: ${err}, fallback to TTS`);
-    await playTTS(word, fromLanguage, { truncate: true, signal });
+    await playTTS(word, fromLanguage, { signal });
   }
 }

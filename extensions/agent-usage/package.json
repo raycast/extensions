@@ -15,7 +15,8 @@
     "chingweih",
     "jalenzz",
     "Jakoss",
-    "laughing"
+    "laughing",
+    "ridemountainpig"
   ],
   "type": "module",
   "scripts": {
@@ -113,6 +114,14 @@
       "label": "Show Claude",
       "description": "Show Claude usage in the list",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "additionalClaudeHomes",
+      "type": "textfield",
+      "title": "Additional Claude Homes (Optional)",
+      "placeholder": "~/.claude-personal, ~/.claude-work",
+      "description": "Comma-separated CLAUDE_CONFIG_DIR directories to include in addition to the default Claude home",
       "required": false
     },
     {
@@ -312,6 +321,24 @@
       "title": "z.ai API Token (Optional)",
       "description": "Optional fallback token. Usually auto-detected from ZAI_API_KEY or GLM_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
       "required": false
+    },
+    {
+      "name": "percentageDisplayMode",
+      "type": "dropdown",
+      "title": "Percentage Display",
+      "description": "Show quota percentages as remaining (default) or used (100 − remaining). Warning colors stay based on quota remaining; currency amounts, credits, and balances are unaffected.",
+      "default": "remaining",
+      "required": false,
+      "data": [
+        {
+          "title": "Remaining",
+          "value": "remaining"
+        },
+        {
+          "title": "Used",
+          "value": "used"
+        }
+      ]
     },
     {
       "name": "cacheTtl",

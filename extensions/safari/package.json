@@ -21,6 +21,7 @@
     "niksite",
     "ojowwalker77",
     "gumadeiras",
+    "adrenalin",
     "jsonMartin"
   ],
   "pastContributors": [
@@ -181,10 +182,24 @@
       "mode": "no-view"
     },
     {
+      "name": "reopen-last-session",
+      "title": "Reopen Last Session",
+      "subtitle": "Safari",
+      "description": "Launch Safari and reopen all windows from the last session",
+      "mode": "no-view"
+    },
+    {
       "name": "new-window",
       "title": "New Window",
       "subtitle": "Safari",
       "description": "Open a new Safari window",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-private-window",
+      "title": "New Private Window",
+      "subtitle": "Safari",
+      "description": "Open a new Safari private window",
       "mode": "no-view"
     }
   ],

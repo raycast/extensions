@@ -1,11 +1,76 @@
-import { Cache, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Cache, LaunchType, LocalStorage, Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
+import { createHash } from "crypto";
 import uniqWith from "lodash.uniqwith";
 import { FetcherArgs, FetcherResponse, TimeEntry, Project, Task, User, Workspace } from "./types";
 import { showFailureToast } from "@raycast/utils";
 
 const cache = new Cache();
-const TIME_ENTRIES_CACHE_KEY = "clockify/timeEntries";
-const PROJECTS_CACHE_KEY = "clockify/projects";
+
+/**
+ * Cache keys are scoped to the configured account.
+ *
+ * `Cache` is never cleared, and `LocalStorage.clear()` only runs when a token is *rejected* —
+ * swapping to a different valid token clears nothing. With unscoped keys, one account's cached
+ * entries could therefore be read, and offered as things to click, while signed in as another. Since
+ * project ids are workspace-bound Clockify rejected the resulting request rather than writing to the
+ * wrong place, but it was still the previous account's data on screen.
+ *
+ * The scope is a truncated SHA-256 of the API key: derived synchronously, so the caches can still be
+ * read during render for an immediate first paint, and not reversible back to the key. Switching
+ * accounts moves to a different set of keys rather than clearing the old ones, so there is no
+ * invalidation step to forget.
+ *
+ * Resolved lazily rather than at module scope so that unreadable preferences degrade to a shared
+ * scope instead of preventing the command from loading at all.
+ */
+let accountScopeMemo: string | undefined;
+
+function accountScope(): string {
+  if (accountScopeMemo === undefined) {
+    let token = "";
+
+    try {
+      token = getPreferenceValues<Preferences>().token ?? "";
+    } catch {
+      // Preferences not readable yet; a shared scope beats failing to load.
+    }
+
+    accountScopeMemo = createHash("sha256").update(token).digest("hex").slice(0, 12);
+  }
+
+  return accountScopeMemo;
+}
+
+const timeEntriesCacheKey = () => `clockify/${accountScope()}/timeEntries`;
+const projectsCacheKey = () => `clockify/${accountScope()}/projects`;
+const activeEntryCacheKey = () => `clockify/${accountScope()}/activeEntry`;
+const tasksCacheKey = (projectId: string) => `clockify/${accountScope()}/project[${projectId}]`;
+
+/**
+ * Shows a toast, unless the command cannot show one.
+ *
+ * `showToast` throws "Toast API is not available when command is launched in background", and the
+ * menu-bar command is *always* launched in the background — its 10s interval, not a user opening it.
+ * Clicking one of its items does not change that. Because both stopCurrentTimer() and
+ * addNewTimeEntry() opened with a toast, the throw aborted them on their first line and the request
+ * was never sent: "Stop Timer" and the recent-timer restarts silently did nothing at all.
+ *
+ * So every toast in this file goes through here. Losing the toast is fine — in the menu bar the
+ * updated title is the feedback — but losing the API call is not.
+ */
+function notify(style: Toast.Style, title: string, message?: string): void {
+  if (environment.launchType === LaunchType.Background) return;
+
+  // Also swallow rejections: this is feedback, and it must never be able to abort its caller.
+  showToast(style, title, message).catch(() => undefined);
+}
+
+/** showFailureToast equivalent of notify(); see the note there on background launches. */
+export function notifyFailure(error: unknown, title: string): void {
+  if (environment.launchType === LaunchType.Background) return;
+
+  showFailureToast(error, { title });
+}
 
 // https://clockify.me/help/getting-started/data-regions
 const getApiUrl = (region: Preferences["region"]): string => {
@@ -49,7 +114,7 @@ export async function fetcher(
     } else {
       if (response.status === 401) {
         LocalStorage.clear();
-        showToast(Toast.Style.Failure, "Invalid API Key detected");
+        notify(Toast.Style.Failure, "Invalid API Key detected");
       }
 
       return { error: response.statusText };
@@ -122,7 +187,7 @@ export function validateToken(): boolean {
   // ever absent the throw happens during render and takes the whole command down rather than
   // showing the recoverable invalid-key state.
   if (!token || token.length !== 48) {
-    showToast(Toast.Style.Failure, "Invalid API Key detected");
+    notify(Toast.Style.Failure, "Invalid API Key detected");
     return false;
   }
 
@@ -204,7 +269,7 @@ export async function getTimeEntries({ onError }: { onError?: (state: boolean) =
       (a: TimeEntry, b: TimeEntry) =>
         a.projectId === b.projectId && a.taskId === b.taskId && a.description === b.description,
     );
-    cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(filteredEntries));
+    cache.set(timeEntriesCacheKey(), JSON.stringify(filteredEntries));
 
     return filteredEntries;
   } else {
@@ -213,7 +278,7 @@ export async function getTimeEntries({ onError }: { onError?: (state: boolean) =
 }
 
 export async function stopCurrentTimer(callback?: () => void): Promise<void> {
-  showToast(Toast.Style.Animated, "Stopping…");
+  notify(Toast.Style.Animated, "Stopping…");
 
   const { workspaceId, userId } = await resolveConfig();
 
@@ -223,11 +288,15 @@ export async function stopCurrentTimer(callback?: () => void): Promise<void> {
   });
 
   if (!error && data) {
-    showToast(Toast.Style.Success, "Timer stopped");
+    notify(Toast.Style.Success, "Timer stopped");
+
+    // Keep the active-timer cache in step, so the next menu-bar process doesn't paint a timer that
+    // has just been stopped.
+    cacheActiveTimeEntry(null);
 
     // Update the cache directly or call the callback to refetch
     try {
-      const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+      const entriesString = cache.get(timeEntriesCacheKey());
       if (entriesString) {
         const entries: TimeEntry[] = JSON.parse(entriesString as string);
         if (entries && entries.length > 0) {
@@ -235,7 +304,7 @@ export async function stopCurrentTimer(callback?: () => void): Promise<void> {
           const activeEntryIndex = entries.findIndex((entry) => !entry.timeInterval.end);
           if (activeEntryIndex !== -1) {
             entries[activeEntryIndex].timeInterval.end = new Date().toISOString();
-            cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(entries));
+            cache.set(timeEntriesCacheKey(), JSON.stringify(entries));
           }
         }
       }
@@ -248,13 +317,83 @@ export async function stopCurrentTimer(callback?: () => void): Promise<void> {
       callback();
     }
   } else {
-    showToast(Toast.Style.Failure, "No timer running");
+    notify(Toast.Style.Failure, "No timer running");
+  }
+}
+
+/**
+ * Fetches the running timer from Clockify rather than inferring it from the cache.
+ *
+ * `in-progress=true` is a real server-side filter, verified empirically — unlike the `projectId`
+ * filter on this same endpoint, which Clockify silently ignores. Hydrated it costs ~2.4KB against
+ * ~1.2MB for the 500-entry list, so it is cheap enough to run on every menu-bar invocation.
+ *
+ * The three return values are distinct on purpose:
+ *   - a TimeEntry — that timer is running
+ *   - null        — nothing is running, confirmed by the API (the endpoint returns `[]`)
+ *   - undefined   — could not tell, so callers should leave whatever they are showing alone
+ *                   instead of flashing "No Timer" on a transient network error.
+ *
+ * Deliberately does *not* write the cache. The answer is only true as of when the request was
+ * issued, and the caller may have changed the timer since — so persisting is the caller's decision,
+ * via cacheActiveTimeEntry(), once it knows the result has not been superseded.
+ */
+export async function fetchActiveTimeEntry(): Promise<TimeEntry | null | undefined> {
+  const { workspaceId, userId } = await resolveConfig();
+
+  const { data, error } = await fetcher(
+    `/workspaces/${workspaceId}/user/${userId}/time-entries?in-progress=true&hydrated=true`,
+  );
+
+  if (error || !Array.isArray(data)) return undefined;
+
+  // Don't take the filter purely on trust: only treat the entry as running if it really has no end.
+  const entry = (data as TimeEntry[])[0];
+  return entry && isInProgress(entry) ? entry : null;
+}
+
+/**
+ * Remembers what the API last said about the running timer.
+ *
+ * The menu-bar command is a fresh process every 10 seconds, so its first paint has to come from a
+ * cache. Deriving it from the deduplicated entries list cannot see a timer started outside this
+ * extension, which made the title read "No Timer" until the API answered ~200ms later — a visible
+ * flash on every single invocation. Storing the answer directly means the next process starts from
+ * what Clockify actually reported.
+ *
+ * `null` is stored explicitly, and is distinct from the key being absent: "confirmed nothing is
+ * running" must not be mistaken for "never asked".
+ */
+export function cacheActiveTimeEntry(entry: TimeEntry | null): void {
+  try {
+    cache.set(activeEntryCacheKey(), JSON.stringify(entry));
+  } catch (e) {
+    console.error("Error caching active time entry:", e);
+  }
+}
+
+/**
+ * Last known running timer, for an immediate first paint.
+ *
+ * Falls back to scanning the entries list when this has never been written, so a cold cache behaves
+ * as it did before rather than claiming nothing is running.
+ */
+export function getCachedActiveTimeEntry(): TimeEntry | null {
+  try {
+    const stored = cache.get(activeEntryCacheKey());
+    if (stored === undefined) return getCurrentlyActiveTimeEntry();
+
+    const entry = JSON.parse(stored) as TimeEntry | null;
+    return entry && isInProgress(entry) ? entry : null;
+  } catch (e) {
+    console.error("Error reading cached active time entry:", e);
+    return null;
   }
 }
 
 export function getCurrentlyActiveTimeEntry(): TimeEntry | null {
   try {
-    const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+    const entriesString = cache.get(timeEntriesCacheKey());
     if (!entriesString) {
       return null;
     }
@@ -276,7 +415,7 @@ export function getCurrentlyActiveTimeEntry(): TimeEntry | null {
 
 export function getAllTimeEntriesFromLocalStorage(): TimeEntry[] {
   try {
-    const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+    const entriesString = cache.get(timeEntriesCacheKey());
     if (!entriesString) {
       return [];
     }
@@ -359,7 +498,7 @@ export async function getProjects({ onError }: { onError?: (state: boolean) => v
   }
 
   if (data?.length) {
-    cache.set(PROJECTS_CACHE_KEY, JSON.stringify(data));
+    cache.set(projectsCacheKey(), JSON.stringify(data));
     return data;
   } else {
     return [];
@@ -383,7 +522,7 @@ async function findCachedProject(projectId: string): Promise<Project | undefined
     console.error("Error reading cached projects:", e);
   }
 
-  for (const source of [stored, cache.get(PROJECTS_CACHE_KEY)]) {
+  for (const source of [stored, cache.get(projectsCacheKey())]) {
     if (!source) continue;
 
     try {
@@ -422,11 +561,11 @@ export async function isProjectBillable(projectId: string): Promise<boolean | un
 
 export async function getTasksForProject(projectId: string): Promise<Task[]> {
   const { workspaceId } = await resolveConfig();
-  const cacheKey = `project[${projectId}]`;
+  const cacheKey = tasksCacheKey(projectId);
 
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/projects/${projectId}/tasks?page-size=1000`);
   if (error) {
-    showFailureToast(error, { title: "Could not fetch tasks" });
+    notifyFailure(error, "Could not fetch tasks");
     console.error("Error fetching tasks:", error);
     return [];
   }
@@ -446,7 +585,7 @@ export async function addNewTimeEntry(
   tagIds: string[] = [],
   startTime?: Date,
 ): Promise<TimeEntry | null> {
-  showToast(Toast.Style.Animated, "Starting…");
+  notify(Toast.Style.Animated, "Starting…");
 
   const { workspaceId } = await resolveConfig();
 
@@ -469,16 +608,19 @@ export async function addNewTimeEntry(
   });
 
   if (!error && data?.id) {
-    showToast(Toast.Style.Success, "Timer is running");
+    notify(Toast.Style.Success, "Timer is running");
+
+    // Keep the active-timer cache in step; see cacheActiveTimeEntry.
+    cacheActiveTimeEntry(data as TimeEntry);
 
     // Update the cache directly
     try {
-      const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
+      const entriesString = cache.get(timeEntriesCacheKey());
       if (entriesString) {
         const entries = JSON.parse(entriesString as string);
         // Add the new entry to the beginning of the array
         entries.unshift(data);
-        cache.set(TIME_ENTRIES_CACHE_KEY, JSON.stringify(entries));
+        cache.set(timeEntriesCacheKey(), JSON.stringify(entries));
       }
     } catch (e) {
       console.error("Error updating cache:", e);
@@ -488,7 +630,7 @@ export async function addNewTimeEntry(
   } else {
     // Surface the reason: this toast used to be the extension's only symptom for several distinct
     // failures, which made them very hard to tell apart.
-    showToast(Toast.Style.Failure, "Timer could not be started", error?.toString());
+    notify(Toast.Style.Failure, "Timer could not be started", error?.toString());
     return null;
   }
 }

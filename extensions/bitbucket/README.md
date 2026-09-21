@@ -52,6 +52,7 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
   - read:user:bitbucket
   - read:repository:bitbucket
   - read:pullrequest:bitbucket
+  - write:pullrequest:bitbucket (needed to approve, decline, or request changes on pull requests)
 - Start a bitbucket command and fill the required fields:
   - Workspace: You can see your workspaces [here](https://bitbucket.org/account/workspaces/), and use the slug. You can find it in the URL of your workspace: `https://bitbucket.org/{organization}/`
   - Account email

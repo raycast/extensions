@@ -39,7 +39,7 @@ The directory contains all source files, assets, and a few support files. Let's 
 
 Put all your source files into the `src` folder. We recommend using TypeScript as a programming language. Our API is fully typed, which helps you catch errors at compile time rather than runtime. `ts`, `tsx`, `js` and `jsx` are supported as file extensions. As a rule of thumb, use `tsx` or `jsx` for commands with a UI.
 
-An extension consists of at least an entry point file (e.g. `src/command.ts`) per command and a `package.json` manifest file holding metadata about the extension, its commands, and its tools. The format of the manifest file is very similar to [that of npm packages](https://docs.npmjs.com/cli/v7/configuring-npm/package-json). In addition to some of the standard properties, there are some [additional properties](./manifest.md), in particular, the `commands` properties which describes the entry points exposed by the extension.
+An extension consists of at least an entry point file (e.g. `src/command.ts`) per command and a `package.json` manifest file holding metadata about the extension, its commands and tools. The format of the manifest file is very similar to [that of npm packages](https://docs.npmjs.com/cli/v7/configuring-npm/package-json). In addition to some of the standard properties, there are some [additional properties](./manifest.md), in particular, the `commands` properties which describes the entry points exposed by the extension.
 
 Each command has a property `name` that maps to its main entry point file in the `src` folder. For example, a command with the name `create` in the `package.json` file, maps to the file `src/create{.ts,.tsx,.js,.jsx}`.
 
@@ -57,7 +57,7 @@ The optional **help.md** file contains Markdown instructions for configuring req
 
 ## AI Configuration
 
-The optional **ai.json** file contains additional `instructions` for the AI and `evals` to test your AI extension. Place it next to `package.json` to keep this configuration separate from the manifest. You can also use `ai.json5`, `ai.yaml`, or `ai.yml`; choose one format for your extension. See [AI File](../ai/learn-core-concepts-of-ai-extensions.md#ai-file) and [Write Evals for Your AI Extension](../ai/write-evals-for-your-ai-extension.md).
+The optional **ai.yaml** file contains AI configuration, including additional `instructions` and `evals` to test your AI extension. Place it next to `package.json` to keep this configuration separate from the manifest. You can also use `ai.json5`, `ai.yaml`, or `ai.yml`; choose one format for your extension. See [AI File](../ai/learn-core-concepts-of-ai-extensions.md#ai-file) and [Write Evals for Your AI Extension](../ai/write-evals-for-your-ai-extension.md).
 
 ## Metadata
 

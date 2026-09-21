@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
 
 import { formatDuration, formatResetTime, parseDate } from "../agents/format.ts";
+import { formatPercentDisplay, toDisplayPercent, type PercentageDisplayMode } from "../agents/percentage-display.ts";
 import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,
@@ -8,6 +9,7 @@ import {
   generatePieIcon,
   getLoadingAccessory,
   getNoDataAccessory,
+  getPercentageDisplayMode,
   renderErrorOrNoData,
 } from "../agents/ui.tsx";
 import type { ClinePassError, ClinePassLimit, ClinePassUsage } from "./types.ts";
@@ -34,35 +36,36 @@ function formatResetDate(resetsAt: string | undefined, maxResetSeconds: number):
   return `${absolute} (${formatResetTime(resetsAt)})`;
 }
 
-function formatLimitText(label: string, limit: ClinePassLimit): string {
-  return `${label}: ${limit.percentageRemaining}% remaining\n${generateAsciiBar(limit.percentageRemaining)}\nResets: ${formatResetDate(limit.resetsAt, limit.maxResetSeconds)}`;
+function formatLimitText(label: string, limit: ClinePassLimit, mode: PercentageDisplayMode): string {
+  return `${label}: ${formatPercentDisplay(limit.percentageRemaining, mode)}\n${generateAsciiBar(toDisplayPercent(limit.percentageRemaining, mode))}\nResets: ${formatResetDate(limit.resetsAt, limit.maxResetSeconds)}`;
 }
 
 export function formatClinePassUsageText(usage: ClinePassUsage | null, error: ClinePassError | null): string {
   const fallback = formatErrorOrNoData("ClinePass", usage, error);
   if (fallback !== null) return fallback;
   const current = usage as ClinePassUsage;
+  const mode = getPercentageDisplayMode();
   return [
     "ClinePass Usage",
     `Account: ${current.account}`,
     `User ID: ${current.userId}`,
     "",
-    formatLimitText("5h Limit", current.fiveHourLimit),
+    formatLimitText("5h Limit", current.fiveHourLimit, mode),
     "",
-    formatLimitText("Weekly Limit", current.weeklyLimit),
+    formatLimitText("Weekly Limit", current.weeklyLimit, mode),
     "",
-    formatLimitText("Monthly Limit", current.monthlyLimit),
+    formatLimitText("Monthly Limit", current.monthlyLimit, mode),
     "",
     `Credits: ${formatCredits(current.credits.balanceUsd)}`,
   ].join("\n");
 }
 
-function renderLimit(label: string, limit: ClinePassLimit): React.ReactNode {
+function renderLimit(label: string, limit: ClinePassLimit, mode: PercentageDisplayMode): React.ReactNode {
   return (
     <>
       <List.Item.Detail.Metadata.Label
         title={label}
-        text={`${generateAsciiBar(limit.percentageRemaining)} ${limit.percentageRemaining}% remaining`}
+        text={`${generateAsciiBar(toDisplayPercent(limit.percentageRemaining, mode))} ${formatPercentDisplay(limit.percentageRemaining, mode)}`}
       />
       <List.Item.Detail.Metadata.Label title="Resets" text={formatResetDate(limit.resetsAt, limit.maxResetSeconds)} />
     </>
@@ -73,16 +76,17 @@ export function renderClinePassDetail(usage: ClinePassUsage | null, error: Cline
   const fallback = renderErrorOrNoData(usage, error);
   if (fallback !== null) return fallback;
   const current = usage as ClinePassUsage;
+  const mode = getPercentageDisplayMode();
   return (
     <List.Item.Detail.Metadata>
       <List.Item.Detail.Metadata.Label title="Account" text={current.account} />
       <List.Item.Detail.Metadata.Label title="User ID" text={current.userId} />
       <List.Item.Detail.Metadata.Separator />
-      {renderLimit("5h Limit", current.fiveHourLimit)}
+      {renderLimit("5h Limit", current.fiveHourLimit, mode)}
       <List.Item.Detail.Metadata.Separator />
-      {renderLimit("Weekly Limit", current.weeklyLimit)}
+      {renderLimit("Weekly Limit", current.weeklyLimit, mode)}
       <List.Item.Detail.Metadata.Separator />
-      {renderLimit("Monthly Limit", current.monthlyLimit)}
+      {renderLimit("Monthly Limit", current.monthlyLimit, mode)}
       <List.Item.Detail.Metadata.Separator />
       <List.Item.Detail.Metadata.Label title="Credits" text={formatCredits(current.credits.balanceUsd)} />
     </List.Item.Detail.Metadata>
@@ -102,10 +106,11 @@ export function getClinePassAccessory(
     return { text: "Error", tooltip: error.message };
   }
   if (!usage) return getNoDataAccessory();
+  const mode = getPercentageDisplayMode();
   const remaining = usage.fiveHourLimit.percentageRemaining;
   return {
     icon: generatePieIcon(remaining),
-    text: `${remaining}%`,
-    tooltip: `5h: ${remaining}% | Weekly: ${usage.weeklyLimit.percentageRemaining}% | Monthly: ${usage.monthlyLimit.percentageRemaining}% | Credits: ${formatCredits(usage.credits.balanceUsd)}`,
+    text: `${toDisplayPercent(remaining, mode)}%`,
+    tooltip: `5h: ${toDisplayPercent(remaining, mode)}% | Weekly: ${toDisplayPercent(usage.weeklyLimit.percentageRemaining, mode)}% | Monthly: ${toDisplayPercent(usage.monthlyLimit.percentageRemaining, mode)}% | Credits: ${formatCredits(usage.credits.balanceUsd)}`,
   };
 }

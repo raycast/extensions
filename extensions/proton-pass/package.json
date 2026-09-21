@@ -108,6 +108,40 @@
       "required": false
     },
     {
+      "name": "cacheExpiration",
+      "type": "dropdown",
+      "title": "Cache Expiration",
+      "description": "How long cached metadata remains usable. Background Refresh can update it sooner.",
+      "default": "5",
+      "required": false,
+      "data": [
+        {
+          "title": "5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "1 hour",
+          "value": "60"
+        },
+        {
+          "title": "5 hours",
+          "value": "300"
+        },
+        {
+          "title": "1 day",
+          "value": "1440"
+        },
+        {
+          "title": "7 days",
+          "value": "10080"
+        },
+        {
+          "title": "30 days",
+          "value": "43200"
+        }
+      ]
+    },
+    {
       "name": "enableWebIntegration",
       "type": "checkbox",
       "title": "Web Integration",

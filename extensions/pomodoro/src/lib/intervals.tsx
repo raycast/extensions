@@ -1,5 +1,5 @@
 import { Cache, LaunchType, LocalStorage, getPreferenceValues, launchCommand } from "@raycast/api";
-import { FocusText, LongBreakText, ShortBreakText } from "./constants";
+import { IntervalTitles } from "./constants";
 import { enableFocusWhileFocused, setDND } from "./doNotDisturb";
 import { Interval, IntervalExecutor, IntervalType } from "./types";
 
@@ -8,8 +8,17 @@ const cache = new Cache();
 const CURRENT_INTERVAL_CACHE_KEY = "pomodoro-interval/1.1";
 const COMPLETED_POMODORO_COUNT_CACHE_KEY = "pomodoro-interval/completed-pomodoro-count";
 const POMODORO_INTERVAL_HISTORY = "pomodoro-interval/history";
+const LAST_INTERVAL_ID_CACHE_KEY = "pomodoro-interval/last-id";
 
 const currentTimestamp = () => Math.round(new Date().valueOf() / 1000);
+
+// Monotonic, so history upserts never overwrite an earlier entry even if two intervals start in the same millisecond.
+function nextIntervalId(): number {
+  const lastId = parseInt(cache.get(LAST_INTERVAL_ID_CACHE_KEY) ?? "0", 10);
+  const id = Math.max(Date.now(), lastId + 1);
+  cache.set(LAST_INTERVAL_ID_CACHE_KEY, id.toString());
+  return id;
+}
 
 export async function getIntervalHistory(): Promise<Interval[]> {
   const history = await LocalStorage.getItem(POMODORO_INTERVAL_HISTORY);
@@ -63,7 +72,7 @@ export function createInterval(type: IntervalType, isFreshStart?: boolean, custo
 
   const interval: Interval = {
     type,
-    id: completedCount,
+    id: nextIntervalId(),
     length: customDuration || intervalDurations[type],
     parts: [
       {
@@ -120,6 +129,29 @@ export function restartInterval() {
   }
 }
 
+export function getNextIntervalType(currentType?: IntervalType): IntervalType {
+  if (currentType === "short-break" || currentType === "long-break") {
+    return "focus";
+  }
+
+  const completedCount = getCompletedPomodoroCount();
+  const longBreakThreshold = parseInt(preferences.longBreakStartThreshold, 10);
+  return completedCount === longBreakThreshold ? "long-break" : "short-break";
+}
+
+export function skipInterval(): Interval | undefined {
+  const currentInterval = getCurrentInterval();
+  if (!currentInterval) {
+    return;
+  }
+
+  const interval = createInterval(getNextIntervalType(currentInterval.type), false);
+  if (currentInterval.type === "focus") {
+    setDND(false);
+  }
+  return interval;
+}
+
 export function getCurrentInterval(): Interval | undefined {
   const result = cache.get(CURRENT_INTERVAL_CACHE_KEY);
   if (result) {
@@ -159,37 +191,14 @@ export function getCompletedPomodoroCount(): number {
 
 export function getNextIntervalExecutor(): IntervalExecutor {
   const currentInterval = getCurrentInterval();
+  const nextType = getNextIntervalType(currentInterval?.type);
   resetInterval();
 
-  const completedCount = getCompletedPomodoroCount();
-  const longBreakThreshold = parseInt(preferences.longBreakStartThreshold, 10);
-  let executor: IntervalExecutor | undefined;
-  switch (currentInterval?.type) {
-    case "short-break":
-      executor = {
-        title: FocusText,
-        onStart: () => createInterval("focus", false),
-      };
-      break;
-    case "long-break":
-      executor = { title: FocusText, onStart: () => createInterval("focus") };
-      break;
-    default:
-      if (completedCount === longBreakThreshold) {
-        executor = {
-          title: LongBreakText,
-          onStart: () => createInterval("long-break"),
-        };
-      } else {
-        executor = {
-          title: ShortBreakText,
-          onStart: () => createInterval("short-break", false),
-        };
-      }
-      break;
-  }
-
-  return executor;
+  return {
+    title: IntervalTitles[nextType],
+    // Auto-advance keeps counting toward the long-break threshold; only an explicit fresh start resets the counter.
+    onStart: () => createInterval(nextType, false),
+  };
 }
 
 export const preferences = getPreferenceValues<Preferences>();

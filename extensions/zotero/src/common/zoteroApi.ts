@@ -5,9 +5,12 @@ import { USER_LIBRARY_NAME } from "./library";
 import type { CollectionRef } from "./collections";
 import { collectionId } from "./collections";
 import * as utils from "./utils";
+import { resolveHome } from "./paths";
+export { resolveHome };
 import { existsSync, readFileSync, rmSync } from "fs";
 import { execFileSync } from "child_process";
 import { rankResults } from "./search";
+import { loadInteractions } from "./interactions";
 import initSqlJs, { Database as SqlJsDatabase } from "sql.js";
 import path = require("path");
 
@@ -19,6 +22,7 @@ export interface Preferences {
   csl_style?: string;
   cache_period?: string;
   quote_pdf_path?: boolean;
+  order_by_opens?: boolean;
 }
 
 // citekey is populated (and thus searchable) when the user either exports
@@ -201,13 +205,6 @@ const CACHE_VERSION = 7;
 // into searching. The personal library is always searched; group libraries are
 // opt-in (default none) so a paper shared to a group no longer double-lists.
 const INCLUDED_GROUPS_KEY = "included_group_libraries";
-
-export function resolveHome(filepath: string): string {
-  if (filepath[0] === "~") {
-    return path.join(process.env.HOME, filepath.slice(1));
-  }
-  return filepath;
-}
 
 function stripNoteHtml(note?: string): string {
   if (!note) {
@@ -725,5 +722,6 @@ export const searchResources = async (q: string, collection?: string): Promise<R
     collections,
     libraries: [...allowedLibraries],
     limit: MAX_RENDER_RESULTS,
+    interactions: preferences.order_by_opens ? await loadInteractions() : undefined,
   });
 };

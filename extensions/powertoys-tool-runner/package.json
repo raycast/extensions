@@ -117,6 +117,14 @@
       "mode": "no-view",
       "subtitle": "PowerToys",
       "icon": "Light Switch.png"
+    },
+    {
+      "name": "keyboard-manager",
+      "title": "Keyboard Manager",
+      "description": "Launch PowerToys Keyboard Manager (new)",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Keyboard Manager.png"
     }
   ],
   "preferences": [

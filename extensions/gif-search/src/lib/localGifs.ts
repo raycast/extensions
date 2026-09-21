@@ -39,14 +39,23 @@ export async function remove(gif: IGif, service: ServiceName, type: LocalType) {
   return LocalStorage.setItem(getKey(service, type), JSON.stringify(Array.from(gifs)));
 }
 
-export async function getAllFavIds(): Promise<string[]> {
-  const allFavs = await getAll("favs");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return allFavs.flatMap(([_, ids]) => ids);
+/**
+ * Reads membership straight from storage, for decisions that must not use a value captured
+ * before an await — a copy started while a GIF was favorited would otherwise write a cache
+ * entry after the user removed it.
+ */
+export async function isSavedNow(gif: IGif, service: ServiceName, type: LocalType) {
+  return (await get(service, type)).includes(gif.id.toString());
 }
 
-export async function getAllRecentIds(): Promise<string[]> {
-  const allRecents = await getAll("recent");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return allRecents.flatMap(([_, ids]) => ids);
+/**
+ * Whether a GIF is saved under its own provider. IDs are only unique within a service, so a
+ * flattened membership test can report a GIF as saved because an unrelated provider happens to
+ * use the same ID — which would also authorize caching its bytes.
+ */
+export function isSaved(entries: [ServiceName, string[]][] | undefined, service: ServiceName | null, id: string) {
+  if (!entries || !service) {
+    return false;
+  }
+  return entries.some(([entryService, ids]) => entryService === service && ids.includes(id));
 }

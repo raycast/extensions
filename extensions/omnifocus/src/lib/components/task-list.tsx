@@ -29,6 +29,10 @@ function getAccessories(task: OmniFocusTask, isShowingDetail: TaskListProps["isS
     accessories.push({ tag: { value: new Date(task.deferDate), color: Color.SecondaryText }, tooltip: "Defer until" });
   }
 
+  if (task.plannedDate) {
+    accessories.push({ tag: { value: new Date(task.plannedDate), color: Color.Blue }, tooltip: "Planned" });
+  }
+
   if (task.dueDate) {
     accessories.push({ tag: { value: new Date(task.dueDate), color: Color.Orange }, tooltip: "Due" });
   }
@@ -93,6 +97,14 @@ export const TaskList: React.FunctionComponent<TaskListProps> = ({
                             title="Defer date"
                             text={t.deferDate ? new Date(t.deferDate).toLocaleDateString() : undefined}
                             icon={Icon.ArrowClockwise}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Planned date"
+                            text={{
+                              value: t.plannedDate ? new Date(t.plannedDate).toLocaleDateString() : "",
+                              color: Color.Blue,
+                            }}
+                            icon={Icon.Calendar}
                           />
                           <List.Item.Detail.Metadata.Label
                             title="Due date"

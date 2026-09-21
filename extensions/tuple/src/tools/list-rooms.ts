@@ -12,12 +12,8 @@ export default async function () {
   // need an unbounded dump that floods the model's context on large teams.
   const [rooms, personalRooms] = await Promise.all([listRooms(), listRooms("--kind", "personal", "--limit", "-1")]);
   const primaryRoom = primaryPersonalRoom(personalRooms);
-  const visiblePersonalRooms = rooms.filter((room) => room.kind === "personal");
-  if (primaryRoom && !visiblePersonalRooms.some((room) => room.slug === primaryRoom.slug)) {
-    visiblePersonalRooms.unshift(primaryRoom);
-  }
   return {
-    personal: visiblePersonalRooms.map((room) => describeRoom(room, room.slug === primaryRoom?.slug)),
+    personal: primaryRoom ? [describeRoom(primaryRoom, true)] : [],
     team: rooms.filter((room) => room.kind === "team").map((room) => describeRoom(room, false)),
   };
 }

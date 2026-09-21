@@ -94,13 +94,17 @@ export function resolveFavoriteTranslations(
  * snapshot. The same word with different from/to directions is a distinct entry.
  */
 export function buildFavoriteWord(info: QueryWordInfo, displaySections: readonly DisplaySection[]): FavoriteWord {
+  const favoriteSections = displaySections.map((section) => ({
+    ...section,
+    items: section.items.map((item) => ({ ...item, fromCache: undefined })),
+  }));
   return {
     word: info.word,
     fromLanguage: info.fromLanguage,
     toLanguage: info.toLanguage,
     isWord: info.isWord,
-    translations: resolveFavoriteTranslations({ displaySections }),
-    displaySections,
+    translations: resolveFavoriteTranslations({ displaySections: favoriteSections }),
+    displaySections: favoriteSections,
     createdAt: Date.now(),
   };
 }

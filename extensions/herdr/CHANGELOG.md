@@ -1,5 +1,11 @@
 # Changelog
 
+## [Session Selection and Switching] - 2026-09-13
+
+- Select the session every command controls from Manage Sessions. Attaching a session selects it, Dashboard and Manage Agents name the session in their search bar, and a stopped selected session is shown as stopped with actions to start it or choose another instead of falling back to the default session.
+- Attach a session in a new terminal window.
+- Switch to a session in place: the selected session's clients in the terminal are detached and the new session is attached where they were. WezTerm reuses their window; Terminal and iTerm2 open a new one. A new preference chooses whether Enter attaches alongside or switches.
+
 ## [Fix Agent Focus and Agent Names] - 2026-09-11
 
 - Switch to the agent's tab when focusing an agent. `agent focus` moves the server's focus but leaves the attached client drawing the tab it is already on, so the agent's pane never came into view. Workspaces and tabs were unaffected, because `workspace focus` and `tab focus` are what move the client.

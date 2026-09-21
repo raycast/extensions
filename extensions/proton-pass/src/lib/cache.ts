@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { Item, Vault } from "./types";
 
 const ITEMS_CACHE_KEY = "proton_pass_items_cache";
@@ -12,7 +12,12 @@ interface CachedData<T> {
 }
 
 function isCacheValid<T>(cached: CachedData<T>): boolean {
-  return Date.now() - cached.timestamp < CACHE_TTL_MS;
+  const { cacheExpiration } = getPreferenceValues<Preferences>();
+
+  const minutes = Number(cacheExpiration);
+  const ttlMs = Number.isFinite(minutes) && minutes > 0 ? minutes * 60 * 1000 : CACHE_TTL_MS;
+
+  return Date.now() - cached.timestamp < ttlMs;
 }
 
 async function getCache<T>(key: string): Promise<T | null> {

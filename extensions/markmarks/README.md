@@ -5,7 +5,7 @@ A Raycast extension that uses a markdown file as the persistence layer for your 
 ## Features
 
 - **Bookmarks** - Browse all your bookmarks organized by groups with website favicons
-- **New Bookmark** - Save the active tab from Safari, Chrome, Arc, Dia, or Zen
+- **New Bookmark** - Save the active tab from Safari, Chrome, Arc, Aside, Dia, or Zen
 - **Edit & Delete** - Modify or remove bookmarks directly from Raycast
 - **Move Between Groups** - Reorganize bookmarks by moving them to different groups
 - **Search** - Quick fuzzy search across all bookmarks by title, URL, description, or group
@@ -65,6 +65,7 @@ The "New Bookmark" command can capture the active tab from:
 - Safari
 - Google Chrome
 - Arc
+- Aside
 - Dia
 - Zen
 

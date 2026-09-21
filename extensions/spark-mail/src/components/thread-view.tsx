@@ -4,7 +4,6 @@ import {
   Detail,
   Icon,
   open,
-  showInFinder,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -152,11 +151,7 @@ export function ThreadView(props: { id: string; subject?: string }) {
                 ))
               )}
               {downloaded.length ? (
-                <Action
-                  title="Show Attachments in Finder"
-                  icon={Icon.Finder}
-                  onAction={() => showInFinder(downloaded[0].path as string)}
-                />
+                <Action.ShowInFinder path={downloaded[0].path as string} />
               ) : null}
             </ActionPanel.Section>
           ) : null}

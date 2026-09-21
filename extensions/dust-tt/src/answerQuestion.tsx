@@ -17,7 +17,7 @@ type DustDocument = {
   referenceCount: number;
 };
 
-type ConversationContext = {
+export type ConversationContext = {
   timezone: string;
   username: string;
   email: string | null;
@@ -47,7 +47,7 @@ const useConversationContext = () => {
   return { context, isLoading };
 };
 
-async function answerQuestion({
+export async function answerQuestion({
   question,
   dustApi,
   context,
@@ -67,7 +67,7 @@ async function answerQuestion({
   setDustDocuments: (documents: DustDocument[]) => void;
   agent?: AgentType;
   signal: AbortSignal;
-}) {
+}): Promise<string | undefined> {
   function removeCiteMention(message: string) {
     const regex = / ?:cite\[[a-zA-Z0-9, ]+\]/g;
     return message.replace(regex, "");
@@ -182,6 +182,8 @@ async function answerQuestion({
         return;
       }
 
+      let finalAnswer: string | undefined;
+
       try {
         // Stream SSE events directly using undici fetch + Node.js async iterable,
         // bypassing the Dust client's streamAgentAnswerEvents which uses
@@ -214,7 +216,7 @@ async function answerQuestion({
           title: "Thinking...",
         });
 
-        let streamError = false;
+        let done = false;
         const processEvent = (eventData: Record<string, unknown>) => {
           const event = eventData.data as Record<string, unknown> | undefined;
           if (!event || !event.type) return;
@@ -224,14 +226,16 @@ async function answerQuestion({
               const error = event.error as { code: string; message: string };
               console.error(`User message error: code: ${error.code} message: ${error.message}`);
               setDustAnswer(`**User message error** ${error.message}`);
-              streamError = true;
+              showToast({ style: Toast.Style.Failure, title: "User message error", message: error.message });
+              done = true;
               break;
             }
             case "agent_error": {
               const error = event.error as { code: string; message: string };
               console.error(`Agent message error: code: ${error.code} message: ${error.message}`);
               setDustAnswer(`**Dust API error** ${error.message}`);
-              streamError = true;
+              showToast({ style: Toast.Style.Failure, title: "Dust API error", message: error.message });
+              done = true;
               break;
             }
             case "agent_action_success": {
@@ -274,6 +278,8 @@ async function answerQuestion({
                 date: new Date(),
                 agent: agent.name,
               });
+              finalAnswer = answer;
+              done = true;
               break;
             }
             default:
@@ -294,8 +300,8 @@ async function answerQuestion({
 
         const decoder = new TextDecoder();
         for await (const chunk of res.body) {
-          if (streamError) break;
           parser.feed(decoder.decode(chunk as Buffer, { stream: true }));
+          if (done) break;
         }
       } catch (error) {
         const isAbort =
@@ -312,6 +318,8 @@ async function answerQuestion({
           setDustAnswer(`**Dust API error** ${error}`);
         }
       }
+
+      return finalAnswer;
     }
   }
 }
@@ -344,8 +352,7 @@ export const AskDustQuestion = withPickedWorkspace(
           abortController.abort();
         };
       }
-      // Note: context is intentionally omitted — it's a new object reference on every render
-      // and is guaranteed to be non-null when isLoadingContext is false.
+      // context is a new object reference every render, so it's intentionally omitted here.
     }, [question, isLoadingContext]);
 
     const dustAssistantUrl = `${dustApi.apiUrl()}/w/${dustApi.workspaceId()}/assistant`;

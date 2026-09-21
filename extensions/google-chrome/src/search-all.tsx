@@ -27,6 +27,8 @@ export default function Command() {
     data: bookmarkData,
     isLoading: isLoadingBookmark,
     revalidate: revalidateBookmark,
+    visitItem: visitBookmark,
+    resetRanking: resetBookmarkRanking,
   } = useBookmarkSearch(profile, searchText);
 
   const revalidate = (profile: string) => {
@@ -73,7 +75,16 @@ export default function Command() {
         {bookmarkData.length === 0 ? (
           <List.Item title="No bookmarks found" key={"empty bookmark list item"} />
         ) : (
-          bookmarkData.map((e) => <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} type="Bookmark" />)
+          bookmarkData.map((e) => (
+            <ChromeListItems.TabHistory
+              key={e.id}
+              entry={e}
+              profile={profile}
+              type="Bookmark"
+              onVisit={() => visitBookmark(e)}
+              onResetRanking={() => resetBookmarkRanking(e)}
+            />
+          ))
         )}
       </List.Section>
     </List>

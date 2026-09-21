@@ -16,12 +16,13 @@ const WINDOWS_NETSTAT_ARGS = ["-ano", "-p", "TCP"];
 
 let currentProcessesRequest: Promise<Process[]> | undefined;
 
-type ProcessDetails = Pick<ProcessInfo, "name" | "parentPid" | "path" | "parentPath" | "user" | "uid">;
+type ProcessDetails = Pick<ProcessInfo, "name" | "parentPid" | "path" | "parentPath" | "user" | "uid" | "commandLine">;
 type NamedPortRecord = ReturnType<typeof getNamedPorts>;
 
 export default class Process implements ProcessInfo {
   public path?: string;
   public parentPath?: string;
+  public commandLine?: string;
 
   private constructor(
     public readonly pid: number,
@@ -62,7 +63,7 @@ export default class Process implements ProcessInfo {
     };
   }
 
-  private static async getProcessDetails(pids: number[]) {
+  private static async getProcessDetails(pids: number[], options: { commandLine: boolean } = { commandLine: true }) {
     const uniquePids = Array.from(new Set(pids.filter((pid) => Number.isFinite(pid) && pid > 0)));
     const details = new Map<number, ProcessDetails>();
 
@@ -96,6 +97,13 @@ export default class Process implements ProcessInfo {
           name: path.basename(processPath),
         });
       }
+
+      if (options.commandLine) {
+        for (const [pid, commandLine] of await Process.getCommandLines(uniquePids)) {
+          const entry = details.get(pid);
+          if (entry !== undefined) entry.commandLine = commandLine;
+        }
+      }
     } catch {
       return details;
     }
@@ -107,6 +115,30 @@ export default class Process implements ProcessInfo {
     }
 
     return details;
+  }
+
+  /**
+   * Both `comm` and `command` can contain spaces, so they cannot share one whitespace-delimited
+   * `ps` line; the command line is read in a second call with the PID as its only other column.
+   */
+  private static async getCommandLines(pids: number[]) {
+    const commandLines = new Map<number, string>();
+
+    try {
+      const { stdout } = await runCommand("/bin/ps", ["-p", pids.join(","), "-o", "pid=", "-o", "command="], {
+        timeout: PS_TIMEOUT,
+      });
+
+      for (const line of stdout.split("\n")) {
+        const match = line.trim().match(/^(\d+)\s+(.+)$/);
+        if (match === null) continue;
+        commandLines.set(Number(match[1]), match[2]);
+      }
+    } catch {
+      // The command line is supplementary; the other details are still worth returning without it.
+    }
+
+    return commandLines;
   }
 
   private static async getWindowsProcessDetails(pids: number[]) {
@@ -133,7 +165,7 @@ export default class Process implements ProcessInfo {
     const processFilter = pids.map((pid) => `ProcessId = ${pid}`).join(" OR ");
     const script = [
       `Get-CimInstance Win32_Process -Filter "${processFilter}" -ErrorAction SilentlyContinue`,
-      "Select-Object ProcessId, ParentProcessId, Name, ExecutablePath",
+      "Select-Object ProcessId, ParentProcessId, Name, ExecutablePath, CommandLine",
       "ConvertTo-Json -Compress",
     ].join(" | ");
     const { stdout } = await runCommand("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
@@ -156,12 +188,14 @@ export default class Process implements ProcessInfo {
       const parentPid = Number(values.ParentProcessId);
       const processPath = typeof values.ExecutablePath === "string" ? values.ExecutablePath : undefined;
       const name = typeof values.Name === "string" ? values.Name : undefined;
+      const commandLine = typeof values.CommandLine === "string" ? values.CommandLine : undefined;
       if (!Number.isFinite(pid) || pid <= 0) continue;
 
       details.set(pid, {
         name,
         parentPid: Number.isFinite(parentPid) && parentPid > 0 ? parentPid : undefined,
         path: processPath,
+        commandLine,
       });
     }
 
@@ -258,7 +292,10 @@ export default class Process implements ProcessInfo {
       if (portInfo === undefined) continue;
 
       const values = valuesByPid.get(pid) ?? { pid, protocol: "TCP", internetProtocol: protocol, portInfo: [] };
-      values.portInfo?.push(portInfo);
+      // A dual-stack listener shows up once for tcp4 and once for tcp6 with the same address.
+      if (!values.portInfo?.some((existing) => existing.host === portInfo.host && existing.port === portInfo.port)) {
+        values.portInfo?.push(portInfo);
+      }
       valuesByPid.set(pid, values);
     }
 
@@ -347,6 +384,7 @@ export default class Process implements ProcessInfo {
       Array.from(processDetails.values()).flatMap((process) =>
         process.parentPid === undefined ? [] : [process.parentPid],
       ),
+      { commandLine: false },
     );
 
     for (const [pid, details] of processDetails) {
@@ -367,6 +405,7 @@ export default class Process implements ProcessInfo {
       );
 
       process.path = values.path ?? details?.path;
+      process.commandLine = details?.commandLine;
       process.parentPath =
         values.parentPath ?? details?.parentPath ?? processAndParentDetails.get(process.parentPid ?? 0)?.path;
 
