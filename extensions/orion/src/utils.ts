@@ -4,6 +4,7 @@ import { HistoryItem, Tab } from "src/types";
 import { join } from "path";
 import { Color, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { parse as parseTld } from "tldts";
 
 export function extractDomainName(urlString: string) {
   try {
@@ -205,9 +206,11 @@ export function isWebAddress(value: string): boolean {
     return hostname.split(".").every((part) => Number(part) <= 255);
   }
 
-  // This deliberately mirrors Arc's "hostname with a TLD" behavior while
-  // allowing modern TLD lengths and hyphenated labels.
-  return /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(hostname);
+  // Validate against the Public Suffix List rather than accepting any
+  // "label.2+ letters" shape - that pattern also matches file-like text such
+  // as `index.html`, `main.js`, or `file.txt`, which are not web addresses.
+  const { isIcann, isPrivate } = parseTld(hostname, { allowPrivateDomains: true });
+  return isIcann === true || isPrivate === true;
 }
 
 export function normalizeWebAddress(value: string): string {

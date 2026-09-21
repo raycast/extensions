@@ -109,7 +109,18 @@ type RankedHit = { hit: Hit; tier: number };
 // not conflate distinct destinations: scheme (http vs https) and a trailing
 // slash can each point to a genuinely different resource.
 function canonicalUrl(url: string): string {
-  return url.trim();
+  const trimmed = url.trim();
+  // The host is case-insensitive (https://Example.com and https://example.com
+  // are the same destination), but the rest of the URL - scheme, path, query,
+  // fragment - is left exactly as-is: those can be genuinely different
+  // resources (see the comment above `canonicalUrl`'s only caller group).
+  try {
+    const parsed = new URL(trimmed);
+    parsed.hostname = parsed.hostname.toLowerCase();
+    return parsed.toString();
+  } catch {
+    return trimmed;
+  }
 }
 
 function compareRankedHits(a: RankedHit, b: RankedHit): number {
@@ -130,7 +141,16 @@ function compareRankedHits(a: RankedHit, b: RankedHit): number {
 
   const aLastVisit = a.hit.kind === "url" ? (a.hit.lastVisitTime ?? "") : "";
   const bLastVisit = b.hit.kind === "url" ? (b.hit.lastVisitTime ?? "") : "";
-  if (aLastVisit !== bLastVisit) return bLastVisit.localeCompare(aLastVisit);
+  if (aLastVisit !== bLastVisit) {
+    // Compare the parsed instants, not the raw strings: this stays correct
+    // (and never throws) regardless of the exact timestamp format the data
+    // source hands back, unlike a string `.localeCompare()` that depends on
+    // both sides actually being strings in a lexicographically sortable shape.
+    const aTime = Date.parse(aLastVisit);
+    const bTime = Date.parse(bLastVisit);
+    if (!Number.isNaN(aTime) && !Number.isNaN(bTime)) return bTime - aTime;
+    return bLastVisit.localeCompare(aLastVisit);
+  }
   return a.hit.key.localeCompare(b.hit.key);
 }
 

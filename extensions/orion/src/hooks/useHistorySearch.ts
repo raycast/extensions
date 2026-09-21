@@ -1,8 +1,43 @@
+import { useMemo } from "react";
 import { getHistoryPath, splitSearchTerms } from "src/utils";
 import { HistoryItem } from "../types";
 import { useSQL } from "@raycast/utils";
 
 const LIMIT = 100;
+
+// Seconds between the Unix epoch (1970-01-01) and the Core Data/WebKit
+// reference date (2001-01-01).
+const CORE_DATA_EPOCH_OFFSET_SECONDS = 978307200;
+
+// Depending on the Orion version, history_items.LAST_VISIT_TIME comes back
+// either as an already-formatted local datetime string or as a raw Core
+// Data/WebKit epoch number (seconds since 2001-01-01). Passing the latter
+// straight to `new Date(...)` silently produces a bogus 1970-ish date, and
+// comparing it as a string elsewhere can throw when it turns out to be a
+// number at runtime despite its `string` type. Try parsing it as an ordinary
+// date first; only fall back to the epoch offset when that is implausible.
+function normalizeVisitTime(raw: string | number): Date {
+  const asDate = new Date(raw);
+  if (!Number.isNaN(asDate.getTime()) && asDate.getFullYear() > 1990) {
+    return asDate;
+  }
+
+  const numeric = typeof raw === "number" ? raw : Number(raw);
+  if (Number.isFinite(numeric)) {
+    return new Date((numeric + CORE_DATA_EPOCH_OFFSET_SECONDS) * 1000);
+  }
+
+  return new Date(0);
+}
+
+function toLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+type RawHistoryRow = Omit<HistoryItem, "lastVisitTime" | "lastVisitDate"> & { lastVisitTime: string | number };
 
 /** Escape a user term for safe interpolation into a SQLite LIKE pattern (with ESCAPE '\\'). */
 const escapeLikeTerm = (term: string) =>
@@ -27,7 +62,6 @@ const getHistoryQuery = (searchText?: string) => {
              TITLE as title,
              URL as url,
              LAST_VISIT_TIME as lastVisitTime,
-             DATE(LAST_VISIT_TIME) as lastVisitDate,
              COALESCE(VISIT_COUNT, 0) as visitCount
       FROM history_items
       ${whereClause ? `WHERE ${whereClause}` : ""}
@@ -40,7 +74,22 @@ const useHistorySearch = (selectedProfileId: string, searchText?: string) => {
   const historyPath = getHistoryPath(selectedProfileId);
 
   const query = getHistoryQuery(searchText);
-  return useSQL<HistoryItem>(historyPath, query);
+  const result = useSQL<RawHistoryRow>(historyPath, query);
+
+  // `DATE(LAST_VISIT_TIME)` used to compute `lastVisitDate` in SQL, but that
+  // is wrong whenever the column holds a raw epoch number rather than a date
+  // string (SQLite then reads it as a Julian day, not a Unix timestamp).
+  // Derive both fields here instead, from the same normalized instant.
+  const data = useMemo(
+    () =>
+      result.data?.map((row) => {
+        const visitedAt = normalizeVisitTime(row.lastVisitTime);
+        return { ...row, lastVisitTime: visitedAt.toISOString(), lastVisitDate: toLocalDateKey(visitedAt) };
+      }),
+    [result.data],
+  );
+
+  return { ...result, data };
 };
 
 export default useHistorySearch;
